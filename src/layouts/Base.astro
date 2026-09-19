@@ -45,7 +45,7 @@ const isCurrent = (href: string) => current === href || (href !== '/' && current
         {nav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
       </nav>
       <a class="appbtn" href="/app/">Åpne appen</a>
-      <p class="sidefoot"><a href="/om">Om</a><a href="/personvern">Personvern</a></p>
+      <p class="sidefoot"><a href="/forslag">Send inn</a><a href="/om">Om</a><a href="/personvern">Personvern</a></p>
     </aside>
 
     <div class="mobilebar">
@@ -60,6 +60,7 @@ const isCurrent = (href: string) => current === href || (href !== '/' && current
       <slot />
       <footer class="foot">
         <span>© {new Date().getFullYear()} {SITE_NAME}</span>
+        <a href="/forslag">Send inn en replikk</a>
         <a href="/om">Om siden</a>
         <a href="/personvern">Personvern</a>
         <a href="/app/">Appen</a>

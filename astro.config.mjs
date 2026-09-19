@@ -1,8 +1,10 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  // ← BYTT til ditt eget domene når du har kjøpt det (brukes til sitemap og canonical-lenker)
   site: 'https://banterdeck.com',
-  integrations: [sitemap()],
+  integrations: [sitemap({ filter: (p) => !p.includes('/admin') })],
+  // Statisk side, men med én serverfunksjon (/api/forslag) som kjører på Vercel.
+  adapter: vercel(),
 });

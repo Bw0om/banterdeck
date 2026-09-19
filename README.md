@@ -71,3 +71,25 @@ Søk om Google AdSense når siden har eget domene og litt innhold/trafikk. Når 
 ## Appen og felles-synk
 
 Appen på `/app/` fungerer som før: favoritter, egne tillegg, PIN-lås og synk-lenke. «Publiser til alle» skriver nå til `public/app/felles.json` i repoet – bruk `brukernavn/repo` som før. Etter publisering bygger Vercel siden på nytt, og alle får tilleggene.
+
+## Admin-panel: legg til innhold uten å kode
+
+Gå til `/admin` på siden din. Lim inn repo (`brukernavn/repo`) og GitHub-tokenen din – den lagres kun i din egen nettleser, aldri på serveren.
+
+**Fanen «Innhold»:** velg seksjon og gruppe, og legg til, endre eller slett oppføringer. Skjemaet tilpasser seg: replikk (kontekst/replikk/kommentar), ordbok (ord/betydning) eller drikkelek (navn/utstyr/spillere/regler – én linje per avsnitt, `b|` foran gir punkt).
+
+**Fanen «Forslag»:** viser innsendte forslag fra `/forslag`. «Godta» åpner forslaget i skjemaet og hopper til gruppa avsenderen valgte; «Avvis» legger det til side. Begge deler tar effekt når du trykker **Publiser endringer** – da lagres `content.json` til GitHub og forslagene lukkes. Vercel bygger automatisk, og alt er live etter ca. ett minutt.
+
+Skriver du «Grov» i kommentarfeltet, holdes replikken utenfor «Dagens replikk» på forsiden.
+
+## Forslagsskjemaet – oppsett i Vercel
+
+`/forslag` sender til en liten serverfunksjon som oppretter et GitHub-issue med merkelappen `forslag`. Den trenger to miljøvariabler:
+
+1. Vercel → prosjektet → **Settings → Environment Variables**
+2. Legg til:
+   - `GITHUB_TOKEN` – fine-grained token med **Issues: read & write** (og gjerne Contents: read & write) på repoet
+   - `GITHUB_REPO` – f.eks. `Bw0om/lommearsenal`
+3. Velg alle tre miljøene (Production, Preview, Development) → Save → **Redeploy**
+
+Denne tokenen ligger kun på serveren og er aldri synlig i nettleseren. Du får e-post fra GitHub for hvert nye issue.
