@@ -1,0 +1,86 @@
+---
+import '../styles/global.css';
+import { SITE_NAME, TAGLINE } from '../config';
+import { catSections, t } from '../lib/content';
+
+interface Props { title?: string; description?: string; }
+const { title, description = TAGLINE } = Astro.props;
+const fullTitle = title ? `${title} – ${SITE_NAME}` : `${SITE_NAME} – ${TAGLINE}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const nav = [
+  { href: '/', label: 'Forside' },
+  ...catSections.map((s) => ({ href: `/kategori/${s.id}`, label: `${s.emoji} ${t(s.title)}` })),
+  { href: '/drikkeleker', label: '🍺 Drikkeleker' },
+];
+const isCurrent = (href: string) => current === href || (href !== '/' && current.startsWith(href));
+---
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:locale" content="nb_NO" />
+  <meta name="theme-color" content="#141009" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
+  <slot name="head" />
+</head>
+<body>
+  <div class="shell">
+    <aside class="side">
+      <a class="brand" href="/">{SITE_NAME}</a>
+      <nav class="sidenav" aria-label="Kategorier">
+        {nav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
+      </nav>
+      <a class="appbtn" href="/app/">Åpne appen</a>
+      <p class="sidefoot"><a href="/om">Om</a><a href="/personvern">Personvern</a></p>
+    </aside>
+
+    <div class="mobilebar">
+      <a class="brand" href="/">{SITE_NAME}</a>
+      <a class="appbtn small" href="/app/">Åpne appen</a>
+    </div>
+    <nav class="mobilenav" aria-label="Kategorier">
+      {nav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
+    </nav>
+
+    <main class="main">
+      <slot />
+      <footer class="foot">
+        <span>© {new Date().getFullYear()} {SITE_NAME}</span>
+        <a href="/om">Om siden</a>
+        <a href="/personvern">Personvern</a>
+        <a href="/app/">Appen</a>
+      </footer>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status">Kopiert</div>
+  <script is:inline>
+    document.addEventListener('click', function (e) {
+      var c = e.target.closest('[data-copy]');
+      if (!c) return;
+      var text = c.getAttribute('data-copy');
+      var done = function () {
+        var el = document.getElementById('toast');
+        el.classList.add('show');
+        setTimeout(function () { el.classList.remove('show'); }, 1200);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(done);
+      else done();
+    });
+  </script>
+</body>
+</html>

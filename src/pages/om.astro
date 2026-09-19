@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import { totals } from '../lib/content';
+import { CONTACT_EMAIL } from '../config';
+---
+<Base title="Om Banterdeck" description="Hva Banterdeck er, hvem som lager det og hvordan du kan bidra.">
+  <h1>Om Banterdeck</h1>
+  <div class="prose">
+    <p class="lead">En kortstokk av frekke, men morsomme replikker – og lekene som hører festen til.</p>
+    <p>Alt begynte som en privat huskeliste: ting å si når noen kommer for sent, når kompisen drar tidlig fra festen, eller når du taper en diskusjon og trenger en nødutgang. Lista vokste, og nå ligger {totals.lines} replikker, {totals.words} slengord og {totals.games} drikkeleker her – klare til bruk.</p>
+    <h2>Frekk, men morsom</h2>
+    <p>Regelen for alt som ligger her er enkel: det skal være frekt nok til å bite, men morsomt nok til at mottakeren ler. Replikker merket «grov» er nettopp det – spar dem til folk som tåler det.</p>
+    <h2>Appen</h2>
+    <p>Alt innholdet finnes også som app: søk, favoritter, terning som trekker en tilfeldig replikk, og mulighet for å legge inn dine egne. Åpne <a href="/app/">appen</a> i Safari og velg «Legg til på Hjem-skjerm».</p>
+    <h2>Har du en bedre replikk?</h2>
+    <p>Send den gjerne til <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. De beste havner i stokken.</p>
+  </div>
+</Base>

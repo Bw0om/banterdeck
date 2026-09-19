@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro';
+import AgeGate from '../../components/AgeGate.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { spill, games, t } from '../../lib/content';
+const description = `Regler til ${games.length} drikkeleker: Ring of Fire, Fuck the Dealer, Bussruta, Veddeløpet, Opus, Thunderstruck og flere. Kortfattet og klart til festen.`;
+---
+<Base title="Drikkeleker med regler" description={description}>
+  <AgeGate />
+  <h1>🍺 Drikkeleker</h1>
+  <p class="lead">Klare regler til kveldens leker – med kortstokk, musikk, terninger eller helt uten utstyr.</p>
+
+  {spill.groups.map((g: any, i: number) => (
+    <section class="group">
+      <h3>{t(g.title)}</h3>
+      <div class="gamelist">
+        {g.items.map((it: any) => {
+          const game = games.find((x) => x.name === it.name);
+          return (
+            <a class="game" href={`/drikkeleker/${game.slug}`}>
+              <span class="gn">{t(it.name)}</span>
+              <span class="gm">🃏 {t(it.gear)}</span>
+              <span class="gm">👥 {it.pl} spillere</span>
+            </a>
+          );
+        })}
+      </div>
+      {i === 0 && <AdSlot />}
+    </section>
+  ))}
+</Base>

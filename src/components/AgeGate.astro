@@ -1,0 +1,26 @@
+---
+// Enkel 18+-sperre for drikkelek-sidene. Svaret huskes i nettleseren.
+---
+<div class="gate" id="gate" hidden>
+  <div class="gatebox" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <h2 id="gateTitle">Er du over 18?</h2>
+    <p>Drikkelekene er for voksne. Drikk med vett – og aldri kjør etterpå.</p>
+    <div class="row">
+      <button class="btn gold" id="gateYes">Ja, jeg er over 18</button>
+      <a class="btn ghost" href="/">Nei, ta meg tilbake</a>
+    </div>
+  </div>
+</div>
+<script is:inline>
+  (function () {
+    try { if (localStorage.getItem('la_age_ok') === '1') return; } catch (e) {}
+    var g = document.getElementById('gate');
+    g.hidden = false;
+    document.body.classList.add('gated');
+    document.getElementById('gateYes').addEventListener('click', function () {
+      try { localStorage.setItem('la_age_ok', '1'); } catch (e) {}
+      g.hidden = true;
+      document.body.classList.remove('gated');
+    });
+  })();
+</script>

@@ -1,0 +1,50 @@
+---
+import Base from '../../layouts/Base.astro';
+import AgeGate from '../../components/AgeGate.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { games, t } from '../../lib/content';
+
+export function getStaticPaths() {
+  return games.map((game) => ({ params: { slug: game.slug }, props: { game } }));
+}
+const { game } = Astro.props;
+const name = t(game.name);
+const rules: string[] = game.rules.no;
+// Regler er lagret som avsnitt; linjer med «b|» foran er punkter.
+const blocks: { type: 'p' | 'ul'; items: string[] }[] = [];
+for (const r of rules) {
+  if (r.startsWith('b|')) {
+    const last = blocks[blocks.length - 1];
+    if (last && last.type === 'ul') last.items.push(r.slice(2));
+    else blocks.push({ type: 'ul', items: [r.slice(2)] });
+  } else blocks.push({ type: 'p', items: [r] });
+}
+const description = `${name} – regler for drikkeleken. Utstyr: ${t(game.gear)}. ${game.pl} spillere. ${rules[0].replace(/^b\|/, '').slice(0, 110)}`;
+const copyText = name + '\n' + rules.map((r) => r.replace(/^b\|/, '• ')).join('\n');
+const others = games.filter((x) => x.slug !== game.slug);
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org', '@type': 'Article', headline: `${name} – regler`,
+  description, inLanguage: 'nb', about: 'Drikkelek', isFamilyFriendly: false,
+});
+---
+<Base title={`${name} – regler`} description={description}>
+  <Fragment slot="head"><script type="application/ld+json" set:html={jsonLd} /></Fragment>
+  <AgeGate />
+  <p class="small"><a href="/drikkeleker">‹ Alle drikkeleker</a></p>
+  <h1>{name}</h1>
+  <div class="meta"><span>🃏 {t(game.gear)}</span><span>👥 {game.pl} spillere</span><span>{game.groupTitle}</span></div>
+
+  <div class="rules">
+    {blocks.map((b) => b.type === 'p'
+      ? <p>{b.items[0]}</p>
+      : <ul>{b.items.map((x) => <li>{x}</li>)}</ul>)}
+  </div>
+  <p><button class="btn ghost" data-copy={copyText}>Kopier reglene</button></p>
+
+  <AdSlot />
+
+  <section class="more">
+    <h2>Flere drikkeleker</h2>
+    <ul>{others.map((x) => <li><a class="btn ghost" href={`/drikkeleker/${x.slug}`}>{t(x.name)}</a></li>)}</ul>
+  </section>
+</Base>

@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import { CONTACT_EMAIL, ADSENSE_CLIENT } from '../config';
+---
+<Base title="Personvern" description="Hvilke data Banterdeck lagrer, og hvordan.">
+  <h1>Personvern</h1>
+  <div class="prose">
+    <p class="lead">Kort versjon: siden har ingen brukerkontoer og samler ikke inn personopplysninger om deg.</p>
+    <h2>Lagring i nettleseren din</h2>
+    <p>Favoritter, egne replikker, språkvalg og svaret på alderssperren lagres kun i din egen nettleser (localStorage). Ingenting av dette sendes til oss. Du sletter det ved å tømme nettstedsdata i nettleseren.</p>
+    <h2>Skrifttyper</h2>
+    <p>Skriftene lastes fra Google Fonts. Google kan da se IP-adressen din når skriftene hentes.</p>
+    <h2>Annonser</h2>
+    {ADSENSE_CLIENT
+      ? <p>Siden viser annonser fra Google AdSense. Google og partnere kan bruke informasjonskapsler for å vise relevante annonser. Du kan justere dette i <a href="https://adssettings.google.com" rel="noopener">Googles annonseinnstillinger</a>. Ved første besøk får du velge om du godtar personlig tilpassede annonser.</p>
+      : <p>Siden viser for øyeblikket ingen annonser og bruker ingen sporingsinformasjonskapsler.</p>}
+    <h2>Statistikk</h2>
+    <p>Vi bruker ingen analyseverktøy som følger deg på tvers av nettsteder.</p>
+    <h2>Aldersgrense</h2>
+    <p>Innholdet om drikkeleker er ment for personer over 18 år. Drikk med vett.</p>
+    <h2>Kontakt</h2>
+    <p>Spørsmål om personvern? Skriv til <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+  </div>
+</Base>

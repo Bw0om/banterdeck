@@ -1,0 +1,9 @@
+---
+// Ett replikk-kort. Klikk kopierer replikken.
+const { it } = Astro.props;
+---
+<article class="card" data-copy={it.line} tabindex="0" title="Klikk for å kopiere">
+  {it.ctx && <p class="ctx">{it.ctx}</p>}
+  <p class="line">«{it.line}»</p>
+  {it.note && <p class="note">{it.note}</p>}
+</article>

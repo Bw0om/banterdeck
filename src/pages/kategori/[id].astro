@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import Card from '../../components/Card.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { catSections, t, countSection } from '../../lib/content';
+
+export function getStaticPaths() {
+  return catSections.map((s) => ({ params: { id: s.id }, props: { s } }));
+}
+const { s } = Astro.props;
+const isDict = s.id === 'ordbok';
+const titled = s.groups.filter((g: any) => g.title);
+const description = `${t(s.desc)} ${countSection(s)} ${isDict ? 'ord og uttrykk' : 'replikker'} – klikk for å kopiere.`;
+---
+<Base title={t(s.title)} description={description}>
+  <h1>{s.emoji} {t(s.title)}</h1>
+  <p class="lead">{t(s.desc)}</p>
+
+  {titled.length > 1 && (
+    <div class="chips">
+      {titled.map((g: any) => <a href={`#${g.id}`}>{t(g.title)}<b>{g.items.length}</b></a>)}
+    </div>
+  )}
+
+  {s.groups.map((g: any, i: number) => (
+    <section class="group" id={g.id}>
+      {g.title && <h3>{t(g.title)}<span class="group-count">{g.items.length}</span></h3>}
+      <div class="cards">
+        {isDict
+          ? g.items.map((it: any) => (
+              <article class="card" data-copy={`${it.word} – ${it.def}`} tabindex="0" title="Klikk for å kopiere">
+                <p class="word">{it.word}</p>
+                <p class="def">{it.def}</p>
+              </article>
+            ))
+          : g.items.map((it: any) => <Card it={it} />)}
+      </div>
+      {i === 0 && <AdSlot />}
+    </section>
+  ))}
+
+  <section class="more">
+    <h2>Andre situasjoner</h2>
+    <ul>
+      {catSections.filter((x) => x.id !== s.id).map((x) => <li><a class="btn ghost" href={`/kategori/${x.id}`}>{x.emoji} {t(x.title)}</a></li>)}
+      <li><a class="btn ghost" href="/drikkeleker">🍺 Drikkeleker</a></li>
+    </ul>
+  </section>
+</Base>

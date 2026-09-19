@@ -1,0 +1,64 @@
+---
+import Base from '../layouts/Base.astro';
+import AdSlot from '../components/AdSlot.astro';
+import { catSections, games, t, isCrude, countSection, totals } from '../lib/content';
+
+// Utvalg til «dagens replikk»: alle vanlige replikker som ikke er merket grove.
+const pool = catSections
+  .filter((s) => s.id !== 'ordbok')
+  .flatMap((s) => s.groups.flatMap((g: any) =>
+    g.items.filter((it: any) => it.line && !isCrude(it))
+      .map((it: any) => ({ l: it.line, c: it.ctx || '', k: `${s.emoji} ${t(s.title)}` }))
+  ));
+const first = pool[0];
+---
+<Base>
+  <section class="hero">
+    <h1>Aldri stå tom for svar igjen.</h1>
+    <p class="lead">{totals.lines} frekke replikker, {totals.words} slengord og {totals.games} drikkeleker – sortert etter situasjonen du står i.</p>
+
+    <p class="today-ctx" id="todayCtx">{first.c || 'Dagens replikk'}</p>
+    <p class="today" id="todayLine" data-copy={first.l}>«{first.l}»</p>
+    <p class="today-cat" id="todayCat">Dagens replikk fra {first.k}. Klikk for å kopiere.</p>
+
+    <div class="actions">
+      <a class="btn" href="/app/">Åpne appen</a>
+      <a class="btn ghost" href="/drikkeleker">Se drikkelekene</a>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ pool }}>
+    // Én ny replikk per dag, lik for alle – regnet ut fra datoen, ingen server.
+    var d = new Date();
+    var day = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+    var p = pool[day % pool.length];
+    document.getElementById('todayCtx').textContent = p.c || 'Dagens replikk';
+    var line = document.getElementById('todayLine');
+    line.textContent = '«' + p.l + '»';
+    line.setAttribute('data-copy', p.l);
+    document.getElementById('todayCat').textContent = 'Dagens replikk fra ' + p.k + '. Klikk for å kopiere.';
+  </script>
+
+  <h2>Velg situasjon</h2>
+  <div class="tiles">
+    {catSections.map((s) => (
+      <a class="tile" href={`/kategori/${s.id}`}>
+        <span class="em">{s.emoji}</span>
+        <span class="tn">{t(s.title)}</span>
+        <span class="tg">{t(s.desc)}</span>
+        <span class="tc">{countSection(s)} stk</span>
+      </a>
+    ))}
+    <a class="tile wide" href="/drikkeleker">
+      <span class="em">🍺</span>
+      <span><span class="tn">Drikkeleker</span><br /><span class="tg">Ring of Fire, Bussruta, Opus, Krig og flere – med regler.</span></span>
+      <span class="tc">{games.length} leker</span>
+    </a>
+  </div>
+
+  <AdSlot />
+
+  <h2>Ta arsenalet med deg</h2>
+  <p class="lead">Appen er gratis, virker uten nett og har søk, favoritter og en terning som trekker en tilfeldig replikk når du trenger den. Åpne den i Safari og velg «Legg til på Hjem-skjerm».</p>
+  <p style="margin-top:14px"><a class="btn gold" href="/app/">Åpne appen</a></p>
+</Base>
