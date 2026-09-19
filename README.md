@@ -93,3 +93,46 @@ Skriver du «Grov» i kommentarfeltet, holdes replikken utenfor «Dagens replikk
 3. Velg alle tre miljøene (Production, Preview, Development) → Save → **Redeploy**
 
 Denne tokenen ligger kun på serveren og er aldri synlig i nettleseren. Du får e-post fra GitHub for hvert nye issue.
+
+## Språk: engelsk i bunn, norsk på /no
+
+- Engelsk ligger på rota: `/`, `/categories/fest`, `/drinking-games/ring-of-fire`
+- Norsk ligger under `/no/`: `/no/`, `/no/categories/fest`, `/no/drinking-games/ring-of-fire`
+- Språkknappen i menyen bytter mellom *samme* side på det andre språket
+- Norske nettlesere får et lite banner nederst med tilbud om norsk – de tvinges ikke
+- `hreflang`-koder forteller Google at sidene hører sammen
+
+Teksten på selve sidene ligger i `src/lib/i18n.ts` (én blokk for `en`, én for `no`). Replikkene henter engelsk fra `en`-feltet i `content.json` og faller tilbake til norsk hvis oversettelsen mangler.
+
+Appen på `/app/` starter nå også på engelsk, med NO/SV/EN-knappen i toppen.
+
+## Kontoer (valgfritt – gratis via Supabase)
+
+Uten oppsett viser `/account` bare en melding om at kontoer ikke er slått på. Slik skrur du det på:
+
+1. Lag gratis konto på [supabase.com](https://supabase.com) → **New project**
+2. I prosjektet: **SQL Editor** → kjør denne:
+
+```sql
+create table public.decks (
+  user_id uuid primary key references auth.users on delete cascade,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz default now()
+);
+alter table public.decks enable row level security;
+create policy "egne rader" on public.decks
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+```
+
+3. **Project Settings → API**: kopier `Project URL` og `anon public`-nøkkelen
+4. **Authentication → URL Configuration**: legg til `https://banterdeck.com/account` og `https://banterdeck.com/no/account` under Redirect URLs
+5. I Vercel → **Settings → Environment Variables**:
+   - `PUBLIC_SUPABASE_URL` = prosjekt-URL-en
+   - `PUBLIC_SUPABASE_ANON_KEY` = anon-nøkkelen
+6. Redeploy
+
+Innlogging skjer med e-postlenke – ingen passord å glemme. `anon`-nøkkelen er ment å være offentlig; det er radsikkerheten (RLS) over som gjør at ingen ser andres data.
+
+## Enhetsgjenkjenning
+
+Et lite skript legger klasser på `<html>`: `is-ios`, `is-android`, `is-mobile`, `is-desktop`, `is-standalone`. CSS-klassene `.ios-only`, `.android-only`, `.desktop-only` og `.standalone-only` viser riktig installasjonsveiledning på forsiden – iPhone får Safari-stegene, Android får Chrome-stegene, PC får beskjed om å åpne siden på telefonen, og har du allerede installert appen, forsvinner hele seksjonen.

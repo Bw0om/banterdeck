@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../AdSlot.astro';
+import { catSections, games, t, tf, isCrude, countSection, totals } from '../../lib/content';
+import { ui, path, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+
+const pool = catSections
+  .filter((s) => s.id !== 'ordbok')
+  .flatMap((s) => s.groups.flatMap((g: any) =>
+    g.items.filter((it: any) => it.line && !isCrude(it))
+      .map((it: any) => ({ l: tf(it, 'line', lang), c: tf(it, 'ctx', lang), k: `${s.emoji} ${t(s.title, lang)}` }))
+  ));
+const first = pool[0];
+---
+<Base lang={lang}>
+  <section class="hero">
+    <h1>{L.heroTitle}</h1>
+    <p class="lead">{L.heroSub(totals.lines, totals.words, totals.games)}</p>
+
+    <p class="today-ctx" id="todayCtx">{first.c || L.todayLabel}</p>
+    <p class="today" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
+    <p class="today-cat" id="todayCat">{L.todayFrom(first.k)}</p>
+
+    <div class="actions">
+      <a class="btn" href="/app/">{L.openApp}</a>
+      <a class="btn ghost" href={path(lang, '/drinking-games')}>{L.seeGames}</a>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ pool, todayLabel: L.todayLabel, fromTpl: L.todayFrom('%s') }}>
+    var d = new Date();
+    var day = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+    var p = pool[day % pool.length];
+    document.getElementById('todayCtx').textContent = p.c || todayLabel;
+    var line = document.getElementById('todayLine');
+    line.textContent = '«' + p.l + '»';
+    line.setAttribute('data-copy', p.l);
+    document.getElementById('todayCat').textContent = fromTpl.replace('%s', p.k);
+  </script>
+
+  <h2>{L.pickSituation}</h2>
+  <div class="tiles">
+    {catSections.map((s) => (
+      <a class="tile" href={path(lang, `/categories/${s.id}`)}>
+        <span class="em">{s.emoji}</span>
+        <span class="tn">{t(s.title, lang)}</span>
+        <span class="tg">{t(s.desc, lang)}</span>
+        <span class="tc">{countSection(s)} {L.itemsLabel}</span>
+      </a>
+    ))}
+    <a class="tile wide" href={path(lang, '/drinking-games')}>
+      <span class="em">🍺</span>
+      <span><span class="tn">{L.gamesTitle}</span><br /><span class="tg">{L.gamesTeaser}</span></span>
+      <span class="tc">{games.length} {L.gamesLabel}</span>
+    </a>
+  </div>
+
+  <AdSlot />
+
+  <h2>{L.takeItWithYou}</h2>
+  <p class="lead">{L.takeItBody}</p>
+  <div class="device">
+    <p class="ios-only">📱 {L.iosSteps}</p>
+    <p class="android-only">📱 {L.androidSteps}</p>
+    <p class="desktop-only">💻 {L.desktopSteps}</p>
+    <p class="standalone-only">✓ {L.standalone}</p>
+  </div>
+  <p style="margin-top:14px"><a class="btn gold" href="/app/">{L.openApp}</a></p>
+</Base>

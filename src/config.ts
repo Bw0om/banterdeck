@@ -12,3 +12,8 @@ export const CONTACT_EMAIL = 'post@banterdeck.com';
 
 // GitHub-repoet som innholdet ligger i (brukes av /admin og av forslag-funksjonen).
 export const GITHUB_REPO = 'Bw0om/lommearsenal';
+
+// Supabase (gratis) for brukerkontoer. Settes som miljøvariabler i Vercel:
+// PUBLIC_SUPABASE_URL og PUBLIC_SUPABASE_ANON_KEY. Tomme = kontoer skrudd av.
+export const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || '';
+export const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';

@@ -11,15 +11,18 @@ import { sections } from '../lib/content';
   <!-- Innlogging -->
   <section id="login">
     <p class="lead">Lim inn GitHub-tokenen din for å redigere innholdet. Den lagres kun i denne nettleseren.</p>
-    <div class="form" style="max-width:520px">
-      <label>Repo
-        <input id="repoInput" placeholder="brukernavn/repo" />
-      </label>
-      <label>GitHub-token <span class="small">(fine-grained · Contents + Issues: read &amp; write)</span>
+    <div class="form">
+      <div class="field">
+        <label class="lab" for="repoInput">Repo</label>
+        <input id="repoInput" placeholder="brukernavn/repo" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label class="lab" for="tokenInput">GitHub-token</label>
         <input id="tokenInput" type="password" placeholder="github_pat_…" autocomplete="off" />
-      </label>
+        <p class="help">Fine-grained token med Contents og Issues: read &amp; write. Lagres kun i denne nettleseren.</p>
+      </div>
       <button class="btn gold" id="loginBtn">Logg inn</button>
-      <p id="loginMsg" class="small" role="status"></p>
+      <p id="loginMsg" class="formmsg" role="status" aria-live="polite"></p>
     </div>
   </section>
 
@@ -41,8 +44,8 @@ import { sections } from '../lib/content';
     <!-- Fane: innhold -->
     <div id="tab-innhold">
       <div class="pickrow">
-        <label>Seksjon <select id="secSel"></select></label>
-        <label>Gruppe <select id="grpSel"></select></label>
+        <div class="field"><label class="lab" for="secSel">Seksjon</label><select id="secSel"></select></div>
+        <div class="field"><label class="lab" for="grpSel">Gruppe</label><select id="grpSel"></select></div>
         <button class="btn gold" id="addBtn">+ Legg til</button>
       </div>
       <div id="list" class="cards"></div>
@@ -69,12 +72,6 @@ import { sections } from '../lib/content';
   </div>
 
   <style>
-    .form{display:flex;flex-direction:column;gap:12px;max-width:620px}
-    .form label{display:flex;flex-direction:column;gap:5px;font-family:var(--display);font-size:14px;font-weight:600;color:var(--muted)}
-    .form input,.form select,.form textarea{font-family:var(--serif);font-size:16px;color:var(--ink);background:var(--card);
-      border:1px solid var(--border2);border-radius:11px;padding:11px 12px;outline:none;width:100%}
-    .form input:focus,.form select:focus,.form textarea:focus{border-color:var(--accent)}
-    .form .hp{position:absolute;left:-9999px}
     .adminbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:18px 0 10px}
     .tabs{display:flex;gap:6px}
     .tab{font-family:var(--display);font-weight:600;font-size:14px;color:var(--muted);background:var(--card);
@@ -83,9 +80,7 @@ import { sections } from '../lib/content';
     .badge{color:var(--gold);font-weight:700}
     .barright{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .pickrow{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:16px 0 20px}
-    .pickrow label{display:flex;flex-direction:column;gap:5px;font-family:var(--display);font-size:13px;font-weight:600;color:var(--muted)}
-    .pickrow select{font-family:var(--serif);font-size:15px;color:var(--ink);background:var(--card);
-      border:1px solid var(--border2);border-radius:11px;padding:10px 12px;min-width:210px}
+    .pickrow .field{min-width:220px}
     .row{display:flex;gap:8px;margin-top:14px}
     .item{position:relative;padding-right:118px}
     .item .acts{position:absolute;top:12px;right:12px;display:flex;gap:6px}
@@ -98,9 +93,7 @@ import { sections } from '../lib/content';
       padding:22px 20px 28px;max-height:88vh;overflow-y:auto}
     .sheet h2{margin:0 0 4px}
     @media (min-width:700px){.overlay{align-items:center}.sheet{border-radius:20px}}
-    .fld{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;font-family:var(--display);font-size:13px;font-weight:600;color:var(--muted)}
-    .fld input,.fld textarea,.fld select{font-family:var(--serif);font-size:16px;color:var(--ink);background:var(--card);
-      border:1px solid var(--border2);border-radius:11px;padding:11px 12px;width:100%}
+    #fields .field{margin-bottom:14px}
     .sugmeta{font-family:var(--display);font-size:12.5px;color:var(--faint);margin-top:8px}
   </style>
 
@@ -133,7 +126,7 @@ import { sections } from '../lib/content';
     $('loginBtn').addEventListener('click', function () {
       gh.repo = $('repoInput').value.trim();
       gh.token = $('tokenInput').value.trim();
-      if (!gh.repo || !gh.token) { $('loginMsg').textContent = 'Fyll inn begge feltene.'; return; }
+      if (!gh.repo || !gh.token) { $('loginMsg').textContent = 'Fyll inn begge feltene.'; $('loginMsg').className = 'formmsg err'; return; }
       try { localStorage.setItem(KEY, JSON.stringify(gh)); } catch (e) {}
       start();
     });
@@ -153,7 +146,7 @@ import { sections } from '../lib/content';
     function b64decode(s) { return decodeURIComponent(escape(atob(s.replace(/\n/g, '')))); }
 
     async function start() {
-      $('loginMsg').textContent = 'Henter innhold…';
+      $('loginMsg').textContent = 'Henter innhold…'; $('loginMsg').className = 'formmsg';
       try {
         var r = await api('/contents/src/data/content.json?ref=main');
         if (r.status === 401 || r.status === 403) throw new Error('Tokenen ble avvist. Sjekk at den har Contents: read & write på dette repoet.');
@@ -162,7 +155,7 @@ import { sections } from '../lib/content';
         sha = j.sha;
         data = JSON.parse(b64decode(j.content));
       } catch (e) {
-        $('loginMsg').textContent = e.message;
+        $('loginMsg').textContent = e.message; $('loginMsg').className = 'formmsg err';
         return;
       }
       $('login').hidden = true;
@@ -239,17 +232,17 @@ import { sections } from '../lib/content';
       it = it || {};
       var f = function (label, id, val, ta, hint) {
         var input = ta
-          ? '<textarea id="' + id + '" rows="3">' + esc(val || '') + '</textarea>'
+          ? '<textarea id="' + id + '" rows="4">' + esc(val || '') + '</textarea>'
           : '<input id="' + id + '" value="' + esc(val || '') + '" />';
-        return '<label class="fld">' + label + (hint ? ' <span class="small">' + hint + '</span>' : '') + input + '</label>';
+        return '<div class="field"><label class="lab" for="' + id + '">' + label + (hint ? '<span class="opt">' + hint + '</span>' : '') + '</label>' + input + '</div>';
       };
       if (kind === 'dict') return f('Ord / uttrykk', 'f_word', it.word) + f('Betydning', 'f_def', it.def, true);
       if (kind === 'game') return f('Navn', 'f_name', no(it.name)) + f('Utstyr', 'f_gear', no(it.gear)) +
-        f('Spillere', 'f_pl', it.pl, false, '(f.eks. 3+)') +
-        f('Regler', 'f_rules', ((it.rules && it.rules.no) || []).join('\n'), true, '– én linje per avsnitt, «b|» foran gir punkt');
-      return f('Når / kontekst', 'f_ctx', it.ctx, false, '(valgfritt)') +
+        f('Spillere', 'f_pl', it.pl, false, 'f.eks. 3+') +
+        f('Regler', 'f_rules', ((it.rules && it.rules.no) || []).join('\n'), true, 'én linje per avsnitt · «b|» foran gir punkt');
+      return f('Når / kontekst', 'f_ctx', it.ctx, false, 'valgfritt') +
         f('Replikk', 'f_line', it.line, true) +
-        f('Kommentar', 'f_note', it.note, false, '(valgfritt – skriv «Grov» for å merke den)');
+        f('Kommentar', 'f_note', it.note, false, 'valgfritt · skriv «Grov» for å merke den');
     }
 
     function openEdit(i, sug) {

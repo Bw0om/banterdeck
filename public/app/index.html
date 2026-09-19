@@ -275,18 +275,18 @@ Da virker alt — og du kan legge den til på Hjem-skjermen som en app.
 <script>
 /* ================= STORAGE ================= */
 const KEY='lommearsenalet_v3';
-let store={custom:{},favs:[],lang:'no'};
+let store={custom:{},favs:[],lang:'en'};
 function loadStore(){
   try{
     const r=localStorage.getItem(KEY);
-    if(r){const o=JSON.parse(r);store={custom:o.custom||{},favs:o.favs||[],lang:o.lang||'no',unlocked:o.unlocked,gh:o.gh};return;}
+    if(r){const o=JSON.parse(r);store={custom:o.custom||{},favs:o.favs||[],lang:o.lang||'en',unlocked:o.unlocked,gh:o.gh};return;}
     const old=localStorage.getItem('lommearsenalet_custom_v2');
     if(old){store.custom=JSON.parse(old)||{};saveStore();}
-  }catch(e){store={custom:{},favs:[],lang:'no'};}
+  }catch(e){store={custom:{},favs:[],lang:'en'};}
 }
 function saveStore(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
 loadStore();
-let lang=store.lang||'no';
+let lang=store.lang||'en';
 
 /* REDIGERINGSLÅS: sett en PIN her (f.eks. '1234') for å kreve kode for å legge til/slette.
    Tom streng = ingen lås. NB: dette er enkel klientside-lås, ikke ekte sikkerhet. */
