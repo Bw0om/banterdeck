@@ -30,7 +30,7 @@ Du trenger ikke dette for å publisere – Vercel bygger for deg.
 
 **Cloudflare Pages** fungerer identisk hvis du foretrekker det.
 
-**GitHub Pages** går også: `.github/workflows/deploy.yml` ligger klar, men da må Settings → Pages → Source stå på «GitHub Actions».
+**GitHub Pages passer ikke lenger:** siden har en serverfunksjon (`/api/forslag`), og den kjører ikke på Pages. Bruk Vercel eller Cloudflare Pages. Har du en gammel workflow i `.github/workflows/`, slett den – ellers bygger den feil filer ved siden av.
 
 ## Eget domene
 

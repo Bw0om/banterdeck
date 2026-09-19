@@ -25,7 +25,8 @@ export const UI = {
     heroSub: (l: number, w: number, g: number) =>
       `${l} comebacks, ${w} slang expressions and ${g} drinking games — sorted by the situation you are in.`,
     todayLabel: 'Line of the day',
-    todayFrom: (cat: string) => `Line of the day from ${cat}. Click to copy.`,
+    todayPre: 'Line of the day from ',
+    todayPost: '. Click to copy.',
     seeGames: 'See the drinking games',
     pickSituation: 'Pick a situation',
     itemsLabel: 'items',
@@ -113,7 +114,8 @@ export const UI = {
     heroSub: (l: number, w: number, g: number) =>
       `${l} frekke replikker, ${w} slengord og ${g} drikkeleker – sortert etter situasjonen du står i.`,
     todayLabel: 'Dagens replikk',
-    todayFrom: (cat: string) => `Dagens replikk fra ${cat}. Klikk for å kopiere.`,
+    todayPre: 'Dagens replikk fra ',
+    todayPost: '. Klikk for å kopiere.',
     seeGames: 'Se drikkelekene',
     pickSituation: 'Velg situasjon',
     itemsLabel: 'stk',

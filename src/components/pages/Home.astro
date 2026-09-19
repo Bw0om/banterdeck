@@ -21,7 +21,7 @@ const first = pool[0];
 
     <p class="today-ctx" id="todayCtx">{first.c || L.todayLabel}</p>
     <p class="today" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
-    <p class="today-cat" id="todayCat">{L.todayFrom(first.k)}</p>
+    <p class="today-cat" id="todayCat">{L.todayPre}{first.k}{L.todayPost}</p>
 
     <div class="actions">
       <a class="btn" href="/app/">{L.openApp}</a>
@@ -29,7 +29,7 @@ const first = pool[0];
     </div>
   </section>
 
-  <script is:inline define:vars={{ pool, todayLabel: L.todayLabel, fromTpl: L.todayFrom('%s') }}>
+  <script is:inline define:vars={{ pool, todayLabel: L.todayLabel, pre: L.todayPre, post: L.todayPost }}>
     var d = new Date();
     var day = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
     var p = pool[day % pool.length];
@@ -37,7 +37,7 @@ const first = pool[0];
     var line = document.getElementById('todayLine');
     line.textContent = '«' + p.l + '»';
     line.setAttribute('data-copy', p.l);
-    document.getElementById('todayCat').textContent = fromTpl.replace('%s', p.k);
+    document.getElementById('todayCat').textContent = pre + p.k + post;
   </script>
 
   <h2>{L.pickSituation}</h2>
