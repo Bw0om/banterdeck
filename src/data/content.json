@@ -1,0 +1,3264 @@
+[
+ {
+  "id": "fest",
+  "emoji": "🍻",
+  "title": {
+   "no": "Fest & byen",
+   "sv": "Fest & krogen",
+   "en": "Party & town"
+  },
+  "desc": {
+   "no": "Vors, bar, byen.",
+   "sv": "Förfest, bar, krogen.",
+   "en": "Pre-drinks, bars, nights out."
+  },
+  "groups": [
+   {
+    "id": "ankomst",
+    "title": {
+     "no": "Ankomst",
+     "sv": "Ankomst",
+     "en": "Arrivals"
+    },
+    "items": [
+     {
+      "line": "Se hva katta dro inn her.",
+      "sv": {
+       "l": "Se vad katten släpade in."
+      },
+      "en": {
+       "l": "Look what the cat dragged in."
+      }
+     },
+     {
+      "line": "Slipper inn hvem som helst her, ja.",
+      "sv": {
+       "l": "De släpper visst in vem som helst här."
+      },
+      "en": {
+       "l": "They really let anyone in here."
+      }
+     },
+     {
+      "line": "Slå deg ned før jeg gjør det.",
+      "sv": {
+       "l": "Slå dig ner innan jag gör det."
+      },
+      "en": {
+       "l": "Take a seat before I do."
+      }
+     },
+     {
+      "line": "Og jeg som trodde vi hadde høy standard her.",
+      "sv": {
+       "l": "Och jag som trodde vi höll hög standard här."
+      },
+      "en": {
+       "l": "And here I thought we had standards."
+      }
+     },
+     {
+      "line": "Endelig kom forsterkningene.",
+      "sv": {
+       "l": "Äntligen kom förstärkningen."
+      },
+      "en": {
+       "l": "Reinforcements, at last."
+      }
+     },
+     {
+      "line": "Akkurat da jeg trodde festen ikke kunne bli bedre.",
+      "sv": {
+       "l": "Precis när jag trodde festen inte kunde bli bättre."
+      },
+      "en": {
+       "l": "Just when I thought this party could not get any better."
+      }
+     },
+     {
+      "line": "Akkurat da jeg trodde festen ikke kunne bli noe verre.",
+      "sv": {
+       "l": "Precis när jag trodde festen inte kunde bli sämre."
+      },
+      "en": {
+       "l": "Just when I thought this party could not get any worse."
+      }
+     },
+     {
+      "line": "Jeg må ha gått på feil fest, for her var det mye søppel.",
+      "sv": {
+       "l": "Jag måste ha gått på fel fest — här var det mycket skräp."
+      },
+      "en": {
+       "l": "I must be at the wrong party — the rubbish is everywhere."
+      }
+     },
+     {
+      "line": "Håper du er morsommere enn du ser ut.",
+      "sv": {
+       "l": "Hoppas du är roligare än du ser ut."
+      },
+      "en": {
+       "l": "I hope you are funnier than you look."
+      }
+     },
+     {
+      "line": "Trodde dette var en lukket fest, men ser ut som vi slipper inn hvem som helst her.",
+      "sv": {
+       "l": "Trodde det var en sluten fest, men vi släpper visst in vem som helst."
+      },
+      "en": {
+       "l": "Thought this was invite-only, but apparently we let anyone in."
+      }
+     },
+     {
+      "line": "Ble du kvotert inn?",
+      "sv": {
+       "l": "Blev du inkvoterad?"
+      },
+      "en": {
+       "l": "Did you get in on a quota?"
+      }
+     },
+     {
+      "line": "Endelig noen som gjør at jeg ser bedre ut.",
+      "sv": {
+       "l": "Äntligen någon som får mig att se bättre ut."
+      },
+      "en": {
+       "l": "Finally, someone who makes me look good."
+      }
+     },
+     {
+      "line": "Er temaet i dag «mistet veddemålet»?",
+      "sv": {
+       "l": "Är temat idag «förlorade vadet»?"
+      },
+      "en": {
+       "l": "Is tonight's theme “lost a bet”?"
+      }
+     },
+     {
+      "line": "Kan du sjonglere også?",
+      "sv": {
+       "l": "Kan du jonglera också?"
+      },
+      "en": {
+       "l": "Do you juggle as well?"
+      }
+     },
+     {
+      "line": "Vil du ha premie? Det krever mot å vise seg i det antrekket der.",
+      "sv": {
+       "l": "Vill du ha pris? Det krävs mod att visa sig i den outfiten."
+      },
+      "en": {
+       "l": "Want a medal? Takes courage to be seen in that outfit."
+      }
+     },
+     {
+      "line": "Nei, ser ut som om jeg ikke er den eneste som ble lurt hit.",
+      "sv": {
+       "l": "Ser ut som att jag inte är den enda som blev lurad hit."
+      },
+      "en": {
+       "l": "Looks like I am not the only one who got tricked into coming."
+      }
+     },
+     {
+      "line": "Nei, når jeg ba om en engel, mente jeg ikke en som nettopp falt fra himmelen fordi de ble sparket ut.",
+      "sv": {
+       "l": "När jag bad om en ängel menade jag inte en som just blev utsparkad ur himlen."
+      },
+      "en": {
+       "l": "When I asked for an angel, I did not mean one who just got kicked out of heaven."
+      }
+     },
+     {
+      "line": "Ooog der er vi på et sirkus.",
+      "sv": {
+       "l": "Ooch där blev det cirkus."
+      },
+      "en": {
+       "l": "Aaand now it is a circus."
+      }
+     },
+     {
+      "line": "Nei, nå har vi valgt kvantitet over kvalitet.",
+      "sv": {
+       "l": "Nu har vi valt kvantitet före kvalitet."
+      },
+      "en": {
+       "l": "Ah, quantity over quality tonight, I see."
+      }
+     },
+     {
+      "line": "Planlegger du å være her lenge?",
+      "sv": {
+       "l": "Planerar du att stanna länge?"
+      },
+      "en": {
+       "l": "Planning on staying long?"
+      }
+     },
+     {
+      "line": "Hvis dette tar en dårlig vending nå, så vet vi alle hvem vi kan takke.",
+      "sv": {
+       "l": "Om det här spårar ur nu vet vi alla vem vi kan tacka."
+      },
+      "en": {
+       "l": "If this goes downhill now, we all know who to thank."
+      }
+     },
+     {
+      "line": "Oj, pass på alt dere eier.",
+      "sv": {
+       "l": "Oj — håll koll på era ägodelar."
+      },
+      "en": {
+       "l": "Careful, everyone — watch your belongings."
+      }
+     },
+     {
+      "line": "Ørnen har landet.",
+      "sv": {
+       "l": "Örnen har landat."
+      },
+      "en": {
+       "l": "The eagle has landed."
+      }
+     },
+     {
+      "line": "Blir det festligere nå, så dauer jeg!",
+      "note": "Fleksnes — perfekt idet du ankommer.",
+      "sv": {
+       "l": "Blir det festligare nu så dör jag!",
+       "n": "Fleksnes — perfekt när du anländer."
+      },
+      "en": {
+       "l": "Any more fun than this and I will drop dead!",
+       "n": "Fleksnes — perfect as you arrive."
+      }
+     },
+     {
+      "ctx": "Til en du ikke har sett på lenge",
+      "line": "Jaså, du lever ennå?",
+      "sv": {
+       "c": "Till någon du inte sett på länge",
+       "l": "Jaså, du lever än?"
+      },
+      "en": {
+       "c": "To someone you have not seen in ages",
+       "l": "Oh, you are still alive?"
+      }
+     },
+     {
+      "ctx": "Til en du ikke har sett på lenge",
+      "line": "Ryktene om din død var visst sterkt overdrevet.",
+      "sv": {
+       "c": "Till någon du inte sett på länge",
+       "l": "Ryktena om din död var visst kraftigt överdrivna."
+      },
+      "en": {
+       "c": "To someone you have not seen in ages",
+       "l": "Reports of your death were greatly exaggerated."
+      }
+     },
+     {
+      "line": "Kom inn — vi trengte noen å skylde på.",
+      "sv": {
+       "l": "Kom in — vi behövde någon att skylla på."
+      },
+      "en": {
+       "l": "Come in — we needed someone to blame."
+      }
+     },
+     {
+      "line": "Du har ikke forandret deg. Dessverre.",
+      "sv": {
+       "l": "Du har inte förändrats. Tyvärr."
+      },
+      "en": {
+       "l": "You have not changed a bit. Unfortunately."
+      }
+     },
+     {
+      "line": "Sist jeg så deg var du mye yngre.",
+      "sv": {
+       "l": "Sist jag såg dig var du mycket yngre."
+      },
+      "en": {
+       "l": "Last time I saw you, you were much younger."
+      }
+     },
+     {
+      "line": "Ah, der kom underholdningen.",
+      "sv": {
+       "l": "Ah, där kom underhållningen."
+      },
+      "en": {
+       "l": "Ah, the entertainment has arrived."
+      }
+     },
+     {
+      "line": "Er det deg? Jeg syntes jeg luktet trøbbel.",
+      "sv": {
+       "l": "Är det du? Jag tyckte väl att det luktade trubbel."
+      },
+      "en": {
+       "l": "Is that you? I thought I smelled trouble."
+      }
+     },
+     {
+      "line": "Kom inn før naboene ser deg.",
+      "sv": {
+       "l": "Kom in innan grannarna ser dig."
+      },
+      "en": {
+       "l": "Get in before the neighbours see you."
+      }
+     },
+     {
+      "line": "Fint antrekk — var det mørkt da du kledde på deg?",
+      "sv": {
+       "l": "Snygg outfit — var det mörkt när du klädde på dig?"
+      },
+      "en": {
+       "l": "Nice outfit — did you get dressed in the dark?"
+      }
+     },
+     {
+      "line": "Godt du kom — vi holdt på å gå tom for problemer.",
+      "sv": {
+       "l": "Bra att du kom — vi höll på att få slut på problem."
+      },
+      "en": {
+       "l": "Good thing you came — we were running out of problems."
+      }
+     }
+    ]
+   },
+   {
+    "id": "skaaling",
+    "title": {
+     "no": "Skåling & drikking",
+     "sv": "Skålande & drickande",
+     "en": "Toasts & drinking"
+    },
+    "items": [
+     {
+      "line": "Endelig — vi ventet på en grunn til å drikke mer.",
+      "sv": {
+       "l": "Äntligen — vi väntade på en anledning att dricka mer."
+      },
+      "en": {
+       "l": "Finally — we were waiting for a reason to drink more."
+      }
+     },
+     {
+      "line": "Vel, 50 kroner er 50 kroner.",
+      "note": "Når noen sier at noe sykt har skjedd.",
+      "sv": {
+       "l": "Tja, 50 spänn är 50 spänn.",
+       "n": "När någon berättar något galet."
+      },
+      "en": {
+       "l": "Well, a fiver is a fiver.",
+       "n": "When someone tells you something mad just happened."
+      }
+     },
+     {
+      "line": "Du har ansvaret mens jeg er borte!",
+      "note": "Utnevn en «sjef» idet du går.",
+      "sv": {
+       "l": "Du har ansvaret medan jag är borta!",
+       "n": "Utse en «chef» när du går."
+      },
+      "en": {
+       "l": "You are in charge while I am gone!",
+       "n": "Appoint a “boss” as you leave."
+      }
+     },
+     {
+      "ctx": "Skål-visdom",
+      "line": "Jeg unngår som regel fristelser — med mindre jeg ikke kan motstå dem.",
+      "sv": {
+       "c": "Skålvisdom",
+       "l": "Jag undviker i regel frestelser — om jag inte kan motstå dem."
+      },
+      "en": {
+       "c": "Toast wisdom",
+       "l": "I generally avoid temptation — unless I cannot resist it."
+      }
+     },
+     {
+      "ctx": "Skål-visdom",
+      "line": "De som feirer mest, lever lengst. Statistisk bevist.",
+      "sv": {
+       "c": "Skålvisdom",
+       "l": "De som firar mest lever längst. Statistiskt bevisat."
+      },
+      "en": {
+       "c": "Toast wisdom",
+       "l": "Those who celebrate the most live the longest. Statistically proven."
+      }
+     },
+     {
+      "line": "Skål for leveren — den tar overtid i kveld.",
+      "sv": {
+       "l": "Skål för levern — den jobbar övertid ikväll."
+      },
+      "en": {
+       "l": "Here is to the liver — it is on overtime tonight."
+      }
+     },
+     {
+      "line": "Alkohol løser ingen problemer. Men det gjør jo ikke melk heller.",
+      "sv": {
+       "l": "Alkohol löser inga problem. Men det gör ju inte mjölk heller."
+      },
+      "en": {
+       "l": "Alcohol solves nothing. Then again, neither does milk."
+      }
+     },
+     {
+      "line": "Vi er her for en god tid, ikke en lang tid.",
+      "sv": {
+       "l": "Vi är här för en rolig tid, inte en lång tid."
+      },
+      "en": {
+       "l": "We are here for a good time, not a long time."
+      }
+     },
+     {
+      "line": "Én til, så er jeg morsom. Det er vitenskap.",
+      "sv": {
+       "l": "En till, så är jag rolig. Det är vetenskap."
+      },
+      "en": {
+       "l": "One more and I am funny. That is science."
+      }
+     },
+     {
+      "ctx": "Når noen sier du ikke bør drikke på tom mage",
+      "line": "Slapp av — jeg spiste i går.",
+      "sv": {
+       "c": "När någon säger att du inte bör dricka på tom mage",
+       "l": "Lugn — jag åt igår."
+      },
+      "en": {
+       "c": "When told not to drink on an empty stomach",
+       "l": "Relax — I ate yesterday."
+      }
+     },
+     {
+      "line": "Anni, amori e bicchieri di vino, nun se contano mai.",
+      "note": "«År, kjærester og glass med vin — det skal man aldri telle.» Italiensk skåltale.",
+      "sv": {
+       "n": "«År, kärlekar och glas vin — dem räknar man aldrig.» Italiensk skål."
+      },
+      "en": {
+       "n": "“Years, lovers and glasses of wine — never count them.” Italian toast."
+      }
+     },
+     {
+      "ctx": "Når en venn sier han ikke skal bli med ut",
+      "line": "Ja, men det er jo klart at jeg blir litt opprørt når du sier at du ikke skal bli med ut. Man blir jo bekymret om det skulle være sånn at du har gått og blitt avholdsmann. Det hadde jo vært forferdelig. En stor del av vennskapet vårt er jo bygget rundt det å styrte sprit sammen. Uten den delen — ja, da vet jeg faktisk ikke om vi har så mye til felles.",
+      "sv": {
+       "c": "När en vän säger att han inte följer med ut",
+       "l": "Klart att jag blir lite upprörd när du säger att du inte följer med ut. Man blir ju orolig att du gått och blivit nykterist. Det vore ju förfärligt. En stor del av vår vänskap bygger ju på att hälla i oss sprit ihop. Utan den delen — ja, då vet jag faktiskt inte om vi har så mycket gemensamt."
+      },
+      "en": {
+       "c": "When a mate says he is staying in",
+       "l": "Well, of course I am a bit upset when you say you are not coming out. One does worry you might have gone teetotal. That would be dreadful. A large part of our friendship is built on downing spirits together. Without that — honestly, I am not sure we have much in common."
+      }
+     }
+    ]
+   },
+   {
+    "id": "do",
+    "title": {
+     "no": "Do, bordet & avskjed",
+     "sv": "Toa, bordet & avsked",
+     "en": "Loo, table & goodbyes"
+    },
+    "items": [
+     {
+      "ctx": "Etter en kort dotur",
+      "line": "Godt å være tilbake — jeg har savnet dette stedet.",
+      "sv": {
+       "c": "Efter ett kort toabesök",
+       "l": "Skönt att vara tillbaka — jag har saknat det här stället."
+      },
+      "en": {
+       "c": "After a quick trip to the loo",
+       "l": "Good to be back — I missed this place."
+      }
+     },
+     {
+      "ctx": "Når noen reiser seg for å gå på do",
+      "line": "Husk å vaske hendene denne gangen.",
+      "sv": {
+       "c": "När någon reser sig för att gå på toa",
+       "l": "Kom ihåg att tvätta händerna den här gången."
+      },
+      "en": {
+       "c": "When someone gets up for the loo",
+       "l": "Make sure to wash your hands this time."
+      }
+     },
+     {
+      "ctx": "Når du drar fra festen",
+      "line": "Takk for meg — dere var et helt greit publikum.",
+      "sv": {
+       "c": "När du lämnar festen",
+       "l": "Tack för mig — ni var en helt okej publik."
+      },
+      "en": {
+       "c": "When leaving the party",
+       "l": "Thanks, everyone — you were an adequate audience."
+      }
+     },
+     {
+      "ctx": "Når du drar tidlig",
+      "line": "Jeg drar før jeg blir bedt om det.",
+      "sv": {
+       "c": "När du går tidigt",
+       "l": "Jag går innan jag blir ombedd."
+      },
+      "en": {
+       "c": "When leaving early",
+       "l": "I am leaving before I am asked to."
+      }
+     },
+     {
+      "ctx": "Til den som drar",
+      "line": "Hils hjem — og be dem hente deg.",
+      "sv": {
+       "c": "Till den som går",
+       "l": "Hälsa hem — och be dem hämta dig."
+      },
+      "en": {
+       "c": "To whoever is leaving",
+       "l": "Say hi to the family — and tell them to come collect you."
+      }
+     },
+     {
+      "ctx": "Når du går på do",
+      "line": "Ikke bli kjendiser mens jeg er borte.",
+      "sv": {
+       "c": "När du går på toa",
+       "l": "Bli inte kändisar medan jag är borta."
+      },
+      "en": {
+       "c": "As you head to the loo",
+       "l": "Do not become famous while I am gone."
+      }
+     },
+     {
+      "ctx": "Når du går i baren",
+      "line": "Hvis jeg ikke er tilbake om ti minutter — bestill én til meg.",
+      "sv": {
+       "c": "När du går till baren",
+       "l": "Om jag inte är tillbaka om tio minuter — beställ en till mig."
+      },
+      "en": {
+       "c": "Heading to the bar",
+       "l": "If I am not back in ten minutes — order me another."
+      }
+     },
+     {
+      "ctx": "Når du drar tidlig",
+      "line": "Jeg går før jeg begynner å danse. Det er for deres skyld.",
+      "sv": {
+       "c": "När du går tidigt",
+       "l": "Jag går innan jag börjar dansa. Det är för er skull."
+      },
+      "en": {
+       "c": "When leaving early",
+       "l": "I am leaving before I start dancing. It is for your own good."
+      }
+     },
+     {
+      "ctx": "Til den som drar",
+      "line": "Du sprer så mye glede… når du går.",
+      "sv": {
+       "c": "Till den som går",
+       "l": "Du sprider så mycket glädje… när du går."
+      },
+      "en": {
+       "c": "To whoever is leaving",
+       "l": "You bring so much joy… when you leave."
+      }
+     },
+     {
+      "ctx": "Til den som drar",
+      "line": "Du er som en sky — når du forsvinner, blir det en fin dag.",
+      "sv": {
+       "c": "Till den som går",
+       "l": "Du är som ett moln — när du försvinner blir det en fin dag."
+      },
+      "en": {
+       "c": "To whoever is leaving",
+       "l": "You are like a cloud — when you disappear, it turns into a lovely day."
+      }
+     },
+     {
+      "ctx": "Etter en høylytt fis",
+      "line": "Rett i nettet!",
+      "sv": {
+       "c": "Efter en högljudd fis",
+       "l": "Rakt i nät!"
+      },
+      "en": {
+       "c": "After a loud fart",
+       "l": "Nothing but net!"
+      }
+     },
+     {
+      "ctx": "Etter å ha trukket ned — helst på offentlig do",
+      "line": "God som ny!",
+      "sv": {
+       "c": "Efter att ha spolat — helst på offentlig toa",
+       "l": "Som ny!"
+      },
+      "en": {
+       "c": "After flushing — ideally in a public loo",
+       "l": "Good as new!"
+      }
+     },
+     {
+      "ctx": "Idet du drar",
+      "line": "Jeg ringer deg hvis du trenger meg.",
+      "sv": {
+       "c": "När du går",
+       "l": "Jag ringer dig om du behöver mig."
+      },
+      "en": {
+       "c": "As you leave",
+       "l": "I will call you if you need me."
+      }
+     },
+     {
+      "ctx": "Til en som drar altfor tidlig",
+      "line": "Kjør forsiktig, prinsesse Diana.",
+      "note": "Svært mørk. Kun til gjengen som tåler det.",
+      "sv": {
+       "c": "Till någon som går alldeles för tidigt",
+       "l": "Kör försiktigt, prinsessan Diana.",
+       "n": "Mycket mörk. Bara till gänget som tål det."
+      },
+      "en": {
+       "c": "To someone leaving far too early",
+       "l": "Have a safe drive, Princess Diana.",
+       "n": "Very dark. Only for the right crowd."
+      }
+     },
+     {
+      "ctx": "Til en som drar tidlig",
+      "line": "Håper det faller et piano i hodet på deg.",
+      "sv": {
+       "c": "Till någon som går tidigt",
+       "l": "Hoppas ett piano faller ner i huvudet på dig."
+      },
+      "en": {
+       "c": "To someone leaving early",
+       "l": "Hope a piano falls on your head."
+      }
+     },
+     {
+      "ctx": "Til en som drar tidlig",
+      "line": "Kan du holde denne?",
+      "note": "Rekk fram den ene hånda — og vis fingeren med den andre.",
+      "sv": {
+       "c": "Till någon som går tidigt",
+       "l": "Kan du hålla den här?",
+       "n": "Räck fram ena handen — och visa fingret med den andra."
+      },
+      "en": {
+       "c": "To someone leaving early",
+       "l": "Can you hold this?",
+       "n": "Offer one hand — and give them the finger with the other."
+      }
+     },
+     {
+      "ctx": "Til en som drar tidlig",
+      "line": "Vi likte egentlig aldri å henge med deg uansett.",
+      "sv": {
+       "c": "Till någon som går tidigt",
+       "l": "Vi gillade egentligen aldrig att hänga med dig ändå."
+      },
+      "en": {
+       "c": "To someone leaving early",
+       "l": "We never liked hanging out with you anyway."
+      }
+     }
+    ]
+   },
+   {
+    "id": "nach",
+    "title": {
+     "no": "Hjem fra byen",
+     "sv": "Hem från krogen",
+     "en": "Heading home"
+    },
+    "items": [
+     {
+      "ctx": "Fotball-innuendo",
+      "line": "Skal jeg sentre Ståle rett opp i Solbakken?",
+      "note": "Grov. Norsk fotballordspill.",
+      "sv": {
+       "c": "Fotbollsinnuendo",
+       "l": "Ska jag slå ett inlägg rakt upp i Solbakken?",
+       "n": "Grov. Norskt fotbollsordspel."
+      },
+      "en": {
+       "c": "Football innuendo",
+       "l": "Shall I whip a cross straight into your box?",
+       "n": "Crude. Norwegian football pun, rebuilt in English."
+      }
+     },
+     {
+      "line": "Håper du er våt i Nusa! Skal jeg Braute over deg?",
+      "note": "Grov. Braut = Erling Braut Haaland.",
+      "sv": {
+       "l": "Hoppas du är blöt i Nusa! Ska jag Brauta över dig?",
+       "n": "Grov. Braut = Erling Braut Haaland."
+      },
+      "en": {
+       "l": "Hope the pitch is wet — shall I Braut all over you?",
+       "n": "Crude. Braut = Erling Braut Haaland."
+      }
+     },
+     {
+      "ctx": "Når noen avviser deg",
+      "line": "Ikke sett meg på benken da — på tide at jeg blir bytta inn!",
+      "sv": {
+       "c": "När någon nobbar dig",
+       "l": "Sätt mig inte på bänken — dags att jag blir inbytt!"
+      },
+      "en": {
+       "c": "When someone turns you down",
+       "l": "Do not bench me now — it is about time I got subbed on!"
+      }
+     },
+     {
+      "line": "Kan do ro-naldoen mine?",
+      "note": "Grov. Sies med innlevelse.",
+      "sv": {
+       "l": "Kan du ro-naldon min?",
+       "n": "Grov."
+      },
+      "en": {
+       "l": "Fancy giving my Ron-aldo a go?",
+       "n": "Crude."
+      }
+     },
+     {
+      "ctx": "Ja eller nei?",
+      "line": "Neimar eller jamar?",
+      "sv": {
+       "c": "Ja eller nej?",
+       "l": "Nejmar eller jamar?"
+      },
+      "en": {
+       "c": "Yes or no?",
+       "l": "Neymar or Yaymar?"
+      }
+     },
+     {
+      "line": "Skulle gjerne smakt på kringla di i kveld.",
+      "note": "Grov.",
+      "sv": {
+       "l": "Skulle gärna smaka på din kringla ikväll.",
+       "n": "Grov."
+      },
+      "en": {
+       "l": "Would love a taste of your pretzel tonight.",
+       "n": "Crude."
+      }
+     },
+     {
+      "line": "Håper jeg kan våkne til kjøttkaker i brun saus i morgen tidlig — er du våken?",
+      "sv": {
+       "l": "Hoppas jag får vakna till köttbullar i brunsås imorgon bitti — är du vaken?"
+      },
+      "en": {
+       "l": "Hoping to wake up to meatballs and gravy tomorrow morning — you up?"
+      }
+     },
+     {
+      "line": "Har du lyst til at jeg skal hamre langemann opp i kjuttavika på deg?",
+      "note": "Meget grov. Kjuttaviga = Stavanger.",
+      "sv": {
+       "l": "Vill du att jag hamrar långemann upp i kjuttaviga på dig?",
+       "n": "Mycket grov."
+      },
+      "en": {
+       "l": "Fancy me hammering the tall man up your Kjuttavika?",
+       "n": "Very crude. Kjuttaviga = Stavanger reference."
+      }
+     },
+     {
+      "line": "Hadde vært deilig å kna litt på kjøttkakene dine i kveld.",
+      "note": "Grov.",
+      "sv": {
+       "l": "Hade varit skönt att knåda dina köttbullar ikväll.",
+       "n": "Grov."
+      },
+      "en": {
+       "l": "Would be lovely to knead your meatballs tonight.",
+       "n": "Crude."
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "jobb",
+  "emoji": "💼",
+  "title": {
+   "no": "På jobb",
+   "sv": "På jobbet",
+   "en": "At work"
+  },
+  "desc": {
+   "no": "Sene ankomster, møter og vage svar.",
+   "sv": "Sena ankomster, möten och vaga svar.",
+   "en": "Late arrivals, meetings and vague answers."
+  },
+  "groups": [
+   {
+    "id": "sen",
+    "title": {
+     "no": "Når noen kommer for sent",
+     "sv": "När någon kommer för sent",
+     "en": "When someone is late"
+    },
+    "items": [
+     {
+      "line": "Halv dag i dag?",
+      "sv": {
+       "l": "Halvdag idag?"
+      },
+      "en": {
+       "l": "Half day today?"
+      }
+     },
+     {
+      "line": "Gått over på deltid nå?",
+      "sv": {
+       "l": "Har du gått ner på deltid nu?"
+      },
+      "en": {
+       "l": "Gone part-time now, have we?"
+      }
+     },
+     {
+      "line": "Så fint at du kunne stikke innom!",
+      "sv": {
+       "l": "Vad kul att du kunde titta förbi!"
+      },
+      "en": {
+       "l": "So nice of you to pop in!"
+      }
+     },
+     {
+      "line": "Fleksitid, eller?",
+      "sv": {
+       "l": "Flextid, eller?"
+      },
+      "en": {
+       "l": "Flexi-time, is it?"
+      }
+     },
+     {
+      "line": "Trafikken igjen, ja?",
+      "sv": {
+       "l": "Trafiken igen, va?"
+      },
+      "en": {
+       "l": "Traffic again, was it?"
+      }
+     },
+     {
+      "line": "Vi holdt på å gi bort plassen din.",
+      "sv": {
+       "l": "Vi höll på att ge bort din plats."
+      },
+      "en": {
+       "l": "We were about to give away your desk."
+      }
+     },
+     {
+      "line": "Der er han — mannen, myten, forsinkelsen.",
+      "note": "Funker like godt med «hun — dama, myten…».",
+      "sv": {
+       "l": "Där är han — mannen, myten, förseningen.",
+       "n": "Funkar lika bra med «hon — kvinnan, myten…»."
+      },
+      "en": {
+       "l": "There he is — the man, the myth, the delay.",
+       "n": "Works just as well with “she — the woman, the myth…”."
+      }
+     },
+     {
+      "line": "Vi begynte uten deg. Håper det var greit.",
+      "sv": {
+       "l": "Vi började utan dig. Hoppas det var okej."
+      },
+      "en": {
+       "l": "We started without you. Hope that was alright."
+      }
+     },
+     {
+      "line": "Snooze-knappen vant igjen?",
+      "sv": {
+       "l": "Snooze-knappen vann igen?"
+      },
+      "en": {
+       "l": "The snooze button won again?"
+      }
+     },
+     {
+      "line": "Godt du rakk lunsjen.",
+      "sv": {
+       "l": "Skönt att du hann till lunchen."
+      },
+      "en": {
+       "l": "Glad you made it in time for lunch."
+      }
+     },
+     {
+      "ctx": "Når noen sier «halv dag?» til deg",
+      "line": "Slapp av — jeg tok den andre halvparten i går.",
+      "sv": {
+       "c": "När någon säger «halvdag?» till dig",
+       "l": "Lugn — jag tog andra halvan igår."
+      },
+      "en": {
+       "c": "When someone says “half day?” to you",
+       "l": "Relax — I did the other half yesterday."
+      }
+     },
+     {
+      "ctx": "Kl. 09.15",
+      "line": "God ettermiddag!",
+      "sv": {
+       "c": "Kl. 09.15",
+       "l": "God eftermiddag!"
+      },
+      "en": {
+       "c": "At 9:15 am",
+       "l": "Good afternoon!"
+      }
+     },
+     {
+      "line": "Vekkerklokka di har visst sagt opp.",
+      "sv": {
+       "l": "Din väckarklocka har visst sagt upp sig."
+      },
+      "en": {
+       "l": "Your alarm clock has apparently handed in its notice."
+      }
+     },
+     {
+      "line": "Du rakk akkurat pausen.",
+      "sv": {
+       "l": "Du hann precis till rasten."
+      },
+      "en": {
+       "l": "You made it just in time for the break."
+      }
+     },
+     {
+      "line": "Fint at du fant fram til slutt.",
+      "sv": {
+       "l": "Kul att du hittade hit till slut."
+      },
+      "en": {
+       "l": "Glad you found your way here eventually."
+      }
+     },
+     {
+      "line": "Skal jeg oppsummere det du gikk glipp av? Alt.",
+      "sv": {
+       "l": "Ska jag sammanfatta vad du missade? Allt."
+      },
+      "en": {
+       "l": "Want a summary of what you missed? Everything."
+      }
+     }
+    ]
+   },
+   {
+    "id": "kontor",
+    "title": {
+     "no": "Ellers på kontoret",
+     "sv": "Annars på kontoret",
+     "en": "Around the office"
+    },
+    "items": [
+     {
+      "ctx": "Når du snakker med en kollega — på jobb",
+      "line": "Beklager at jeg forstyrrer deg på jobb.",
+      "sv": {
+       "c": "När du pratar med en kollega — på jobbet",
+       "l": "Ursäkta att jag stör dig på jobbet."
+      },
+      "en": {
+       "c": "Talking to a colleague — at work",
+       "l": "Sorry to bother you at work."
+      }
+     },
+     {
+      "ctx": "Når noen spør hva du jobber med",
+      "line": "Det vil du ikke vite.",
+      "sv": {
+       "c": "När någon frågar vad du jobbar med",
+       "l": "Det vill du inte veta."
+      },
+      "en": {
+       "c": "When asked what you do for work",
+       "l": "You do not want to know."
+      }
+     },
+     {
+      "ctx": "Etter et unødvendig møte",
+      "line": "Dette møtet kunne vært en e-post.",
+      "sv": {
+       "c": "Efter ett onödigt möte",
+       "l": "Det här mötet kunde ha varit ett mejl."
+      },
+      "en": {
+       "c": "After a pointless meeting",
+       "l": "This meeting could have been an email."
+      }
+     },
+     {
+      "ctx": "Når noen spør om noe du ikke vet",
+      "line": "Vet ikke, jeg bare jobber her.",
+      "note": "Krydre med «det er over min lønn».",
+      "sv": {
+       "c": "När någon frågar om något du inte vet",
+       "l": "Vet inte, jag jobbar bara här.",
+       "n": "Krydda med «det är över min lönegrad»."
+      },
+      "en": {
+       "c": "When asked something you do not know",
+       "l": "No idea, I just work here.",
+       "n": "Spice it up with “that is above my pay grade”."
+      }
+     },
+     {
+      "ctx": "Når printeren streiker",
+      "line": "Den kjenner frykt.",
+      "sv": {
+       "c": "När skrivaren strejkar",
+       "l": "Den känner rädsla."
+      },
+      "en": {
+       "c": "When the printer acts up",
+       "l": "It can smell fear."
+      }
+     },
+     {
+      "ctx": "Når noen spør om du har det travelt",
+      "line": "Jeg har det travelt med å se travel ut.",
+      "sv": {
+       "c": "När någon frågar om du är upptagen",
+       "l": "Jag är upptagen med att se upptagen ut."
+      },
+      "en": {
+       "c": "When asked if you are busy",
+       "l": "I am busy looking busy."
+      }
+     },
+     {
+      "ctx": "Når noen foreslår enda et møte",
+      "line": "Kan vi ta det som en tanke i stedet?",
+      "sv": {
+       "c": "När någon föreslår ännu ett möte",
+       "l": "Kan vi ta det som en tanke istället?"
+      },
+      "en": {
+       "c": "When another meeting is suggested",
+       "l": "Could we have it as a thought instead?"
+      }
+     },
+     {
+      "ctx": "Når noen spør hvordan prosjektet går",
+      "line": "Det går. Retningen er uklar.",
+      "sv": {
+       "c": "När någon frågar hur projektet går",
+       "l": "Det går. Riktningen är oklar."
+      },
+      "en": {
+       "c": "When asked how the project is going",
+       "l": "It is moving. Direction unclear."
+      }
+     },
+     {
+      "ctx": "Når sjefen spør «har du to minutter?»",
+      "line": "Jeg har 120 sekunder. Bruk dem klokt.",
+      "sv": {
+       "c": "När chefen frågar «har du två minuter?»",
+       "l": "Jag har 120 sekunder. Använd dem klokt."
+      },
+      "en": {
+       "c": "When the boss asks “got two minutes?”",
+       "l": "I have 120 seconds. Use them wisely."
+      }
+     },
+     {
+      "ctx": "Når noen stiller deg et spørsmål",
+      "line": "Jeg er her for å jobbe, ikke for å bli trakassert.",
+      "sv": {
+       "c": "När någon ställer dig en fråga",
+       "l": "Jag är här för att jobba, inte för att bli trakasserad."
+      },
+      "en": {
+       "c": "When someone asks you a question",
+       "l": "I am here to work, not to be harassed."
+      }
+     },
+     {
+      "ctx": "Når noen ber deg gjøre noe som helst",
+      "line": "Jeg jobber ikke her.",
+      "sv": {
+       "c": "När någon ber dig göra vad som helst",
+       "l": "Jag jobbar inte här."
+      },
+      "en": {
+       "c": "When anyone asks you to do anything",
+       "l": "I do not work here."
+      }
+     },
+     {
+      "ctx": "Når noen spør hvordan presentasjonen gikk",
+      "line": "Husker ikke — jeg blacket ut.",
+      "sv": {
+       "c": "När någon frågar hur presentationen gick",
+       "l": "Minns inte — jag blackade."
+      },
+      "en": {
+       "c": "When asked how the presentation went",
+       "l": "No idea — I blacked out."
+      }
+     },
+     {
+      "ctx": "Når noen ber om hjelp",
+      "line": "Jeg er mer en idémann, jeg.",
+      "sv": {
+       "c": "När någon ber om hjälp",
+       "l": "Jag är mer en idékille."
+      },
+      "en": {
+       "c": "When someone asks for help",
+       "l": "I am more of an ideas guy."
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "gjeng",
+  "emoji": "👥",
+  "title": {
+   "no": "Med gjengen",
+   "sv": "Med gänget",
+   "en": "With the crew"
+  },
+  "desc": {
+   "no": "Erting og krangling blant venner.",
+   "sv": "Retas och bråka bland vänner.",
+   "en": "Teasing and bickering among friends."
+  },
+  "groups": [
+   {
+    "id": "erte",
+    "title": {
+     "no": "Erte & provosere",
+     "sv": "Retas & provocera",
+     "en": "Tease & provoke"
+    },
+    "items": [
+     {
+      "ctx": "Når noen klager på absolutt hva som helst",
+      "line": "Voksen mann, btw.",
+      "sv": {
+       "c": "När någon klagar på precis vad som helst",
+       "l": "Vuxen man, btw."
+      },
+      "en": {
+       "c": "When someone complains about literally anything",
+       "l": "Grown man, btw."
+      }
+     },
+     {
+      "ctx": "På noen på din egen alder eller eldre",
+      "line": "Begynn bare å kalle dem «lillebror».",
+      "sv": {
+       "c": "På någon i din egen ålder eller äldre",
+       "l": "Börja bara kalla dem «lillebror»."
+      },
+      "en": {
+       "c": "On someone your age or older",
+       "l": "Just start calling them “lil bro”."
+      }
+     },
+     {
+      "ctx": "Når noen sier noe negativt om seg selv",
+      "line": "Jeg skulle ikke si noe, men jeg er glad du gjorde det.",
+      "sv": {
+       "c": "När någon säger något negativt om sig själv",
+       "l": "Jag tänkte inte säga något, men jag är glad att du gjorde det."
+      },
+      "en": {
+       "c": "When someone says something negative about themselves",
+       "l": "I was not going to say anything, but I am glad you did."
+      }
+     },
+     {
+      "line": "Hvis du kunne endret én ting ved deg selv — bortsett fra det åpenbare — hva ville det vært?",
+      "sv": {
+       "l": "Om du kunde ändra en sak hos dig själv — förutom det uppenbara — vad skulle det vara?"
+      },
+      "en": {
+       "l": "If you could change one thing about yourself — other than the obvious — what would it be?"
+      }
+     },
+     {
+      "ctx": "Når de snakker i helt vanlig volum",
+      "line": "Det er ingen grunn til å rope.",
+      "sv": {
+       "c": "När de pratar i helt normal volym",
+       "l": "Det finns ingen anledning att skrika."
+      },
+      "en": {
+       "c": "When they speak at a normal volume",
+       "l": "There is no need to shout."
+      }
+     },
+     {
+      "line": "Du er ikke dum — du har bare uflaks når du tenker.",
+      "sv": {
+       "l": "Du är inte dum — du har bara otur när du tänker."
+      },
+      "en": {
+       "l": "You are not stupid — you just have bad luck when you think."
+      }
+     },
+     {
+      "line": "Alle kan ta feil, men du misbruker privilegiet.",
+      "sv": {
+       "l": "Alla kan ha fel, men du missbrukar privilegiet."
+      },
+      "en": {
+       "l": "Anyone can be wrong, but you abuse the privilege."
+      }
+     },
+     {
+      "ctx": "Når noen skryter eller overdriver",
+      "line": "Fortell mer — jeg elsker eventyr.",
+      "sv": {
+       "c": "När någon skryter eller överdriver",
+       "l": "Berätta mer — jag älskar sagor."
+      },
+      "en": {
+       "c": "When someone brags or exaggerates",
+       "l": "Do go on — I love fairy tales."
+      }
+     },
+     {
+      "ctx": "Når noen gjesper",
+      "line": "Ikke la meg kjede deg.",
+      "sv": {
+       "c": "När någon gäspar",
+       "l": "Låt mig inte tråka ut dig."
+      },
+      "en": {
+       "c": "When someone yawns",
+       "l": "Do not let me bore you."
+      }
+     },
+     {
+      "line": "Du burde kommet med bruksanvisning.",
+      "sv": {
+       "l": "Du borde ha kommit med bruksanvisning."
+      },
+      "en": {
+       "l": "You should have come with an instruction manual."
+      }
+     },
+     {
+      "ctx": "Når noen forteller samme historie igjen",
+      "line": "Den blir bedre for hver gang. Nesten.",
+      "sv": {
+       "c": "När någon berättar samma historia igen",
+       "l": "Den blir bättre för varje gång. Nästan."
+      },
+      "en": {
+       "c": "When someone tells the same story again",
+       "l": "It gets better every time. Almost."
+      }
+     },
+     {
+      "line": "Jeg er ikke sur — bare imponert over frekkheten.",
+      "sv": {
+       "l": "Jag är inte sur — bara imponerad av fräckheten."
+      },
+      "en": {
+       "l": "I am not angry — just impressed by the audacity."
+      }
+     },
+     {
+      "line": "Jeg dømmer deg ikke. Jeg studerer deg.",
+      "sv": {
+       "l": "Jag dömer dig inte. Jag studerar dig."
+      },
+      "en": {
+       "l": "I am not judging you. I am studying you."
+      }
+     },
+     {
+      "line": "Du har selvtilliten til en som ikke aner hva som foregår.",
+      "sv": {
+       "l": "Du har självförtroendet hos någon som inte har en aning om vad som pågår."
+      },
+      "en": {
+       "l": "You have the confidence of someone with no idea what is going on."
+      }
+     },
+     {
+      "ctx": "Til en som ser sliten ut",
+      "line": "Går det bra? Du ser ut som han i zombiefilmen som er bitt, men prøver å holde det hemmelig.",
+      "sv": {
+       "c": "Till någon som ser sliten ut",
+       "l": "Är du okej? Du ser ut som han i zombiefilmen som blivit biten men försöker dölja det."
+      },
+      "en": {
+       "c": "To someone looking rough",
+       "l": "You alright? You look like the guy in the zombie film who has been bitten but is keeping it quiet."
+      }
+     },
+     {
+      "line": "Dansen din burde kommet med advarselsmerking.",
+      "sv": {
+       "l": "Din dans borde komma med varningstext."
+      },
+      "en": {
+       "l": "Your dancing should come with a warning label."
+      }
+     },
+     {
+      "line": "Jeg skulle tatt deg skikkelig — men du klarte det jo fint selv.",
+      "sv": {
+       "l": "Jag skulle sågat dig — men du klarade det ju fint själv."
+      },
+      "en": {
+       "l": "I was going to roast you — but you did that yourself."
+      }
+     },
+     {
+      "line": "Du er levende bevis på at evolusjonen kan rygge.",
+      "sv": {
+       "l": "Du är levande bevis på att evolutionen kan backa."
+      },
+      "en": {
+       "l": "You are living proof that evolution can go in reverse."
+      }
+     },
+     {
+      "line": "Hvis dumskap kunne fly, hadde du hatt eget flyselskap.",
+      "sv": {
+       "l": "Om dumhet kunde flyga hade du haft ett eget flygbolag."
+      },
+      "en": {
+       "l": "If stupidity could fly, you would own an airline."
+      }
+     },
+     {
+      "ctx": "Når noen spør om noe åpenbart",
+      "line": "Google finnes, altså.",
+      "sv": {
+       "c": "När någon frågar något uppenbart",
+       "l": "Google finns, alltså."
+      },
+      "en": {
+       "c": "When someone asks something obvious",
+       "l": "Google does exist, you know."
+      }
+     },
+     {
+      "ctx": "Når noen er sur",
+      "line": "Hvem har tatt godteriet ditt?",
+      "sv": {
+       "c": "När någon är sur",
+       "l": "Vem har tagit ditt godis?"
+      },
+      "en": {
+       "c": "When someone is grumpy",
+       "l": "Who took your sweets?"
+      }
+     },
+     {
+      "ctx": "Når noen sier «bare én ting til»",
+      "line": "Historisk sett har det aldri vært bare én ting.",
+      "sv": {
+       "c": "När någon säger «bara en sak till»",
+       "l": "Historiskt sett har det aldrig varit bara en sak."
+      },
+      "en": {
+       "c": "When someone says “just one more thing”",
+       "l": "Historically, it has never been just one thing."
+      }
+     },
+     {
+      "ctx": "Når noen sier «stol på meg»",
+      "line": "Det var sånn det gikk galt sist.",
+      "sv": {
+       "c": "När någon säger «lita på mig»",
+       "l": "Det var så det gick fel sist."
+      },
+      "en": {
+       "c": "When someone says “trust me”",
+       "l": "That is exactly how it went wrong last time."
+      }
+     },
+     {
+      "ctx": "Når noen synger feil tekst",
+      "line": "Nesten. Ikke i nærheten — men nesten.",
+      "sv": {
+       "c": "När någon sjunger fel text",
+       "l": "Nästan. Inte i närheten — men nästan."
+      },
+      "en": {
+       "c": "When someone sings the wrong lyrics",
+       "l": "Close. Not even remotely — but close."
+      }
+     },
+     {
+      "ctx": "Etter en vits som ikke lander",
+      "line": "Var sirkuset fullt, eller ansetter de bare ikke?",
+      "sv": {
+       "c": "Efter ett skämt som inte landar",
+       "l": "Var cirkusen full, eller anställer de bara inte?"
+      },
+      "en": {
+       "c": "After a joke that does not land",
+       "l": "Was the circus full, or just not hiring?"
+      }
+     },
+     {
+      "ctx": "Når noen kaller deg noe stygt",
+      "line": "Det er det mora mi kaller meg også.",
+      "sv": {
+       "c": "När någon kallar dig något fult",
+       "l": "Det är vad morsan kallar mig också."
+      },
+      "en": {
+       "c": "When someone calls you a name",
+       "l": "That is what my mum calls me too."
+      }
+     },
+     {
+      "ctx": "Etter et middels forsøk på humor",
+      "line": "Ok — men ikke si opp dagjobben.",
+      "sv": {
+       "c": "Efter ett medelmåttigt skämtförsök",
+       "l": "Okej — men säg inte upp dig från dagjobbet."
+      },
+      "en": {
+       "c": "After a mediocre attempt at humour",
+       "l": "Okay — just do not quit your day job."
+      }
+     },
+     {
+      "line": "Du er nok den første jeg har møtt som faktisk har nådd sitt fulle potensial.",
+      "sv": {
+       "l": "Du är nog den första jag mött som faktiskt nått sin fulla potential."
+      },
+      "en": {
+       "l": "You are probably the first person I have met who has actually reached their full potential."
+      }
+     },
+     {
+      "line": "Stoler ikke på noe som lever etter å ha blødd i en uke.",
+      "note": "Grov, gammel vits.",
+      "sv": {
+       "l": "Litar inte på något som överlever en veckas blödning.",
+       "n": "Grov, gammal vits."
+      },
+      "en": {
+       "l": "Never trust anything that survives bleeding for a week.",
+       "n": "Crude old joke."
+      }
+     },
+     {
+      "line": "Du snakker mye dritt for en som er i cumshot-distanse!",
+      "note": "Grov. Spar til rett gjeng.",
+      "sv": {
+       "l": "Du snackar mycket skit för att vara inom cumshot-avstånd!",
+       "n": "Grov. Spara till rätt gäng."
+      },
+      "en": {
+       "l": "You talk a lot of rubbish for someone within cumshot distance!",
+       "n": "Crude. Save it for the right crowd."
+      }
+     },
+     {
+      "line": "Pass på før jeg two-stroker deg!",
+      "note": "Grov. Spar til rett gjeng.",
+      "sv": {
+       "l": "Akta dig innan jag two-strokar dig!",
+       "n": "Grov. Spara till rätt gäng."
+      },
+      "en": {
+       "l": "Watch it before I two-stroke you!",
+       "n": "Crude. Save it for the right crowd."
+      }
+     }
+    ]
+   },
+   {
+    "id": "krangel",
+    "title": {
+     "no": "Vinne en krangel",
+     "sv": "Vinna ett bråk",
+     "en": "Winning an argument"
+    },
+    "items": [
+     {
+      "ctx": "Når du begynner å tape en diskusjon",
+      "line": "Det holder aldri i retten.",
+      "sv": {
+       "c": "När du börjar förlora en diskussion",
+       "l": "Det håller aldrig i rätten."
+      },
+      "en": {
+       "c": "When you start losing an argument",
+       "l": "That will never hold up in court."
+      }
+     },
+     {
+      "ctx": "Når de sier noe som åpenbart er 100 % riktig",
+      "line": "La meg faktasjekke det kjapt.",
+      "sv": {
+       "c": "När de säger något som uppenbart är 100 % rätt",
+       "l": "Låt mig faktakolla det snabbt."
+      },
+      "en": {
+       "c": "When they say something obviously 100% correct",
+       "l": "Let me fact-check that real quick."
+      }
+     },
+     {
+      "line": "Jeg skulle gjerne vært enig med deg — men da hadde vi begge tatt feil.",
+      "sv": {
+       "l": "Jag skulle gärna hålla med dig — men då hade vi båda haft fel."
+      },
+      "en": {
+       "l": "I would agree with you — but then we would both be wrong."
+      }
+     },
+     {
+      "ctx": "Når noen avbryter deg",
+      "line": "Avbrøt midten av setningen min begynnelsen på din?",
+      "sv": {
+       "c": "När någon avbryter dig",
+       "l": "Avbröt mitten av min mening början på din?"
+      },
+      "en": {
+       "c": "When someone interrupts you",
+       "l": "Did the middle of my sentence interrupt the beginning of yours?"
+      }
+     },
+     {
+      "line": "Hva er forskjellen på uvitenhet og likegyldighet? Vet ikke, og bryr meg ikke.",
+      "sv": {
+       "l": "Vad är skillnaden mellan okunskap och likgiltighet? Vet inte, och bryr mig inte."
+      },
+      "en": {
+       "l": "What is the difference between ignorance and apathy? I do not know and I do not care."
+      }
+     },
+     {
+      "line": "Interessant teori. Feil, men interessant.",
+      "sv": {
+       "l": "Intressant teori. Fel, men intressant."
+      },
+      "en": {
+       "l": "Interesting theory. Wrong, but interesting."
+      }
+     },
+     {
+      "ctx": "Når noen slenger ut en «fakta»",
+      "line": "Kilde: du fant det på akkurat nå.",
+      "sv": {
+       "c": "När någon slänger ur sig ett «faktum»",
+       "l": "Källa: du hittade på det nyss."
+      },
+      "en": {
+       "c": "When someone drops a “fact”",
+       "l": "Source: you made it up just now."
+      }
+     },
+     {
+      "line": "Vi sier du vant, så slipper jeg å forklare.",
+      "sv": {
+       "l": "Vi säger att du vann, så slipper jag förklara."
+      },
+      "en": {
+       "l": "Let us say you won, so I do not have to explain."
+      }
+     },
+     {
+      "ctx": "Når du åpenbart tar feil",
+      "line": "Jeg testet bare om du fulgte med.",
+      "sv": {
+       "c": "När du uppenbart har fel",
+       "l": "Jag testade bara om du hängde med."
+      },
+      "en": {
+       "c": "When you are obviously wrong",
+       "l": "I was just checking if you were paying attention."
+      }
+     },
+     {
+      "ctx": "Når du gir deg i diskusjonen",
+      "line": "Greit — alt som hjelper deg å sove om natta.",
+      "sv": {
+       "c": "När du ger dig i diskussionen",
+       "l": "Visst — vad som än hjälper dig sova om natten."
+      },
+      "en": {
+       "c": "When you concede the argument",
+       "l": "Sure — whatever helps you sleep at night."
+      }
+     },
+     {
+      "ctx": "Etter den minste uenighet",
+      "line": "Du skjønner det ikke — og jeg forventet ærlig talt ikke det heller.",
+      "sv": {
+       "c": "Efter minsta oenighet",
+       "l": "Du fattar inte — och jag förväntade mig ärligt talat inte det heller."
+      },
+      "en": {
+       "c": "After the slightest disagreement",
+       "l": "You do not get it — but honestly, I would not expect you to."
+      }
+     }
+    ]
+   },
+   {
+    "id": "ragebait",
+    "title": {
+     "no": "Rage bait",
+     "sv": "Rage bait",
+     "en": "Rage bait"
+    },
+    "items": [
+     {
+      "ctx": "Som svar på hva som helst",
+      "line": "Ja — for deg.",
+      "sv": {
+       "c": "Som svar på vad som helst",
+       "l": "Ja — för dig."
+      },
+      "en": {
+       "c": "In response to anything",
+       "l": "Sure — for you."
+      }
+     },
+     {
+      "line": "Hvorfor står du sånn?",
+      "sv": {
+       "l": "Varför står du sådär?"
+      },
+      "en": {
+       "l": "Why are you standing like that?"
+      }
+     },
+     {
+      "line": "Stå oppreist når du snakker til meg.",
+      "note": "Hvis de retter seg opp: «flink gutt».",
+      "sv": {
+       "l": "Stå rak när du pratar med mig.",
+       "n": "Om de rättar till sig: «duktig pojke»."
+      },
+      "en": {
+       "l": "Stand up straight when you are talking to me.",
+       "n": "If they adjust: “good boy”."
+      }
+     },
+     {
+      "ctx": "Når jenter er i nærheten",
+      "line": "Hvorfor gjør du stemmen din dypere?",
+      "sv": {
+       "c": "När tjejer är i närheten",
+       "l": "Varför gör du rösten djupare?"
+      },
+      "en": {
+       "c": "When girls are around",
+       "l": "Why are you making your voice deeper?"
+      }
+     },
+     {
+      "line": "Du kommer ingen vei med å heve stemmen.",
+      "sv": {
+       "l": "Du kommer ingenstans med att höja rösten."
+      },
+      "en": {
+       "l": "Raising your voice will get you nowhere."
+      }
+     },
+     {
+      "line": "Jeg bryr meg ikke om hva folk sier om deg. Jeg liker deg.",
+      "sv": {
+       "l": "Jag bryr mig inte om vad folk säger om dig. Jag gillar dig."
+      },
+      "en": {
+       "l": "I do not care what people say about you. I like you."
+      }
+     },
+     {
+      "ctx": "Når noen fullfører settet på trening",
+      "line": "Å prøve er ikke for alle.",
+      "sv": {
+       "c": "När någon avslutar sitt set på gymmet",
+       "l": "Att försöka är inte för alla."
+      },
+      "en": {
+       "c": "When someone finishes their set at the gym",
+       "l": "Trying is not for everybody."
+      }
+     },
+     {
+      "ctx": "Når noen sliter med noe tungt",
+      "line": "Gir mening at det er tungt for deg.",
+      "sv": {
+       "c": "När någon kämpar med något tungt",
+       "l": "Rimligt att det känns tungt för dig."
+      },
+      "en": {
+       "c": "When someone struggles with something heavy",
+       "l": "Makes sense that would be heavy for you."
+      }
+     },
+     {
+      "ctx": "Til en liten prestasjon",
+      "line": "Det er ikke ingenting.",
+      "sv": {
+       "c": "Till en liten prestation",
+       "l": "Det är inte ingenting."
+      },
+      "en": {
+       "c": "To a modest achievement",
+       "l": "It is not nothing."
+      }
+     },
+     {
+      "line": "Hva jobber frisøren din med til daglig?",
+      "sv": {
+       "l": "Vad jobbar din frisör med egentligen?"
+      },
+      "en": {
+       "l": "What does your barber do for a living?"
+      }
+     },
+     {
+      "ctx": "Til absolutt alt",
+      "line": "Riktig.",
+      "sv": {
+       "c": "Till absolut allt",
+       "l": "Rätt."
+      },
+      "en": {
+       "c": "To absolutely anything",
+       "l": "Right."
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "overalt",
+  "emoji": "🎯",
+  "title": {
+   "no": "Funker overalt",
+   "sv": "Funkar överallt",
+   "en": "Works everywhere"
+  },
+  "desc": {
+   "no": "Tørre one-liners uten fast scene.",
+   "sv": "Torra one-liners utan given scen.",
+   "en": "Dry one-liners for any scene."
+  },
+  "groups": [
+   {
+    "id": "overalt_all",
+    "title": null,
+    "items": [
+     {
+      "ctx": "Når noen spør hvordan det går",
+      "line": "Bedre enn fortjent.",
+      "sv": {
+       "c": "När någon frågar hur det går",
+       "l": "Bättre än förtjänt."
+      },
+      "en": {
+       "c": "When asked how you are doing",
+       "l": "Better than I deserve."
+      }
+     },
+     {
+      "ctx": "Når noen spør hvor gammel du er",
+      "line": "Gammel nok til å vite bedre — ung nok til å gjøre det likevel.",
+      "sv": {
+       "c": "När någon frågar hur gammal du är",
+       "l": "Gammal nog att veta bättre — ung nog att göra det ändå."
+      },
+      "en": {
+       "c": "When asked your age",
+       "l": "Old enough to know better — young enough to do it anyway."
+      }
+     },
+     {
+      "ctx": "Når noen tar bilde av maten",
+      "line": "Skal du spise den eller adoptere den?",
+      "sv": {
+       "c": "När någon fotar maten",
+       "l": "Ska du äta den eller adoptera den?"
+      },
+      "en": {
+       "c": "When someone photographs their food",
+       "l": "Are you going to eat it or adopt it?"
+      }
+     },
+     {
+      "ctx": "Når du er litt sliten eller småsyk",
+      "line": "Platon er død. Einstein er død. Og jeg føler meg ikke helt i form, jeg heller.",
+      "sv": {
+       "c": "När du är lite sliten eller småsjuk",
+       "l": "Platon är död. Einstein är död. Och jag mår inte heller helt bra."
+      },
+      "en": {
+       "c": "When feeling a bit rough",
+       "l": "Plato is dead. Einstein is dead. And I am not feeling too well myself."
+      }
+     },
+     {
+      "ctx": "Livsvisdom",
+      "line": "Gå alltid i andres begravelser — ellers kommer de ikke i din.",
+      "sv": {
+       "c": "Livsvisdom",
+       "l": "Gå alltid på andras begravningar — annars kommer de inte på din."
+      },
+      "en": {
+       "c": "Life wisdom",
+       "l": "Always go to other people's funerals — otherwise they will not come to yours."
+      }
+     },
+     {
+      "ctx": "Livsvisdom",
+      "line": "Smil til verden, og du får en støvel i trynet. Smil igjen — vips, et helt par.",
+      "sv": {
+       "c": "Livsvisdom",
+       "l": "Le mot världen och du får en känga i ansiktet. Le igen — vips, ett helt par."
+      },
+      "en": {
+       "c": "Life wisdom",
+       "l": "Smile at the world and you get a boot in the face. Smile again — there is the pair."
+      }
+     },
+     {
+      "ctx": "Når noe går galt",
+      "line": "Det gikk akkurat som planlagt. Bare motsatt.",
+      "sv": {
+       "c": "När något går fel",
+       "l": "Det gick precis som planerat. Fast tvärtom."
+      },
+      "en": {
+       "c": "When something goes wrong",
+       "l": "It went exactly as planned. Just in reverse."
+      }
+     },
+     {
+      "ctx": "Når noe er totalt ødelagt",
+      "line": "Kanskje legge det i litt ris?",
+      "sv": {
+       "c": "När något är totalt förstört",
+       "l": "Kanske lägga det i lite ris?"
+      },
+      "en": {
+       "c": "When something is completely broken",
+       "l": "Maybe throw it in some rice?"
+      }
+     },
+     {
+      "ctx": "Hver gang du tar telefonen",
+      "line": "Dette er kapteinen som snakker.",
+      "sv": {
+       "c": "Varje gång du svarar i telefon",
+       "l": "Det här är kaptenen som talar."
+      },
+      "en": {
+       "c": "Every time you answer the phone",
+       "l": "This is your captain speaking."
+      }
+     },
+     {
+      "ctx": "Når noen bare sier navnet ditt",
+      "line": "Har ikke hørt det navnet på årevis…",
+      "sv": {
+       "c": "När någon bara säger ditt namn",
+       "l": "Har inte hört det namnet på flera år…"
+      },
+      "en": {
+       "c": "When someone just says your name",
+       "l": "Have not heard that name in years…"
+      }
+     },
+     {
+      "ctx": "Når noen påpeker at du er treg/sen",
+      "line": "Hør her — Roma ble ikke bygd på én dag.",
+      "sv": {
+       "c": "När någon påpekar att du är sen/långsam",
+       "l": "Hör här — Rom byggdes inte på en dag."
+      },
+      "en": {
+       "c": "When called out for being late/slow",
+       "l": "Look, Rome was not built in a day."
+      }
+     },
+     {
+      "ctx": "Når du beskriver noen som treg",
+      "line": "Jeg tror jeg står raskere enn de går.",
+      "sv": {
+       "c": "När du beskriver någon som långsam",
+       "l": "Jag tror jag står snabbare än de går."
+      },
+      "en": {
+       "c": "When describing someone as slow",
+       "l": "I think I stand faster than they walk."
+      }
+     },
+     {
+      "ctx": "Når noen snubler i ordene",
+      "line": "Kunne ikke sagt det bedre selv.",
+      "sv": {
+       "c": "När någon snubblar på orden",
+       "l": "Kunde inte ha sagt det bättre själv."
+      },
+      "en": {
+       "c": "When someone stumbles over their words",
+       "l": "Could not have said it better myself."
+      }
+     },
+     {
+      "ctx": "Når noen oppfører seg dårlig",
+      "line": "Oppfører du deg sånn når julenissen ser på?",
+      "sv": {
+       "c": "När någon beter sig illa",
+       "l": "Beter du dig så när tomten ser på?"
+      },
+      "en": {
+       "c": "When someone misbehaves",
+       "l": "You are acting like that when Santa is watching?"
+      }
+     },
+     {
+      "ctx": "Rett etter at en vits floppet",
+      "line": "Jeg er her hele natta.",
+      "sv": {
+       "c": "Direkt efter att ett skämt floppat",
+       "l": "Jag är här hela natten."
+      },
+      "en": {
+       "c": "Right after a joke flops",
+       "l": "I am here all night."
+      }
+     },
+     {
+      "ctx": "Et absurd faktum om deg selv",
+      "line": "Ble født veldig ung — kunne så vidt snakke og gå.",
+      "sv": {
+       "c": "Ett absurt faktum om dig själv",
+       "l": "Föddes väldigt ung — kunde knappt prata och gå."
+      },
+      "en": {
+       "c": "An absurd fact about yourself",
+       "l": "I was born very young — could barely walk or talk."
+      }
+     },
+     {
+      "ctx": "Når noen sier «vi må snakke»",
+      "line": "Kan du gi meg konklusjonen først?",
+      "sv": {
+       "c": "När någon säger «vi måste prata»",
+       "l": "Kan du ge mig slutsatsen först?"
+      },
+      "en": {
+       "c": "When someone says “we need to talk”",
+       "l": "Could I have the conclusion first?"
+      }
+     },
+     {
+      "ctx": "Når noen ber deg hjelpe med flytting",
+      "line": "Jeg har dessverre rygg.",
+      "sv": {
+       "c": "När någon ber dig hjälpa till att flytta",
+       "l": "Jag har tyvärr rygg."
+      },
+      "en": {
+       "c": "When asked to help someone move",
+       "l": "Sadly, I have a back."
+      }
+     },
+     {
+      "ctx": "Når noen ber deg roe deg ned",
+      "line": "Dette ER rolig.",
+      "sv": {
+       "c": "När någon ber dig lugna ner dig",
+       "l": "Det här ÄR lugnt."
+      },
+      "en": {
+       "c": "When told to calm down",
+       "l": "This IS calm."
+      }
+     },
+     {
+      "ctx": "Når noen ber om din ærlige mening",
+      "line": "Er du sikker? Sist gråt noen.",
+      "sv": {
+       "c": "När någon ber om din ärliga åsikt",
+       "l": "Är du säker? Förra gången grät någon."
+      },
+      "en": {
+       "c": "When asked for your honest opinion",
+       "l": "Are you sure? Last time, someone cried."
+      }
+     },
+     {
+      "ctx": "Når noen spør om planene dine",
+      "line": "Overleve. Resten er bonus.",
+      "sv": {
+       "c": "När någon frågar om dina planer",
+       "l": "Överleva. Resten är bonus."
+      },
+      "en": {
+       "c": "When asked about your plans",
+       "l": "Survive. The rest is a bonus."
+      }
+     },
+     {
+      "ctx": "Når noen sier du har forandret deg",
+      "line": "Takk. Det var meningen.",
+      "sv": {
+       "c": "När någon säger att du har förändrats",
+       "l": "Tack. Det var meningen."
+      },
+      "en": {
+       "c": "When told you have changed",
+       "l": "Thank you. That was the idea."
+      }
+     },
+     {
+      "ctx": "Når noen viser babybilder",
+      "line": "Den ser ut som en baby, ja.",
+      "sv": {
+       "c": "När någon visar bebisbilder",
+       "l": "Den ser ut som en bebis, ja."
+      },
+      "en": {
+       "c": "When shown baby photos",
+       "l": "Yep, that looks like a baby."
+      }
+     },
+     {
+      "ctx": "Når noen sier «gjett hva!»",
+      "line": "Nei. Fortell, eller la være.",
+      "sv": {
+       "c": "När någon säger «gissa vad!»",
+       "l": "Nej. Berätta, eller låt bli."
+      },
+      "en": {
+       "c": "When someone says “guess what!”",
+       "l": "No. Tell me or do not."
+      }
+     },
+     {
+      "ctx": "Når noen ringer og spør om du sov",
+      "line": "Ikke nå lenger.",
+      "sv": {
+       "c": "När någon ringer och frågar om du sov",
+       "l": "Inte nu längre."
+      },
+      "en": {
+       "c": "When someone calls and asks if you were asleep",
+       "l": "Not any more."
+      }
+     },
+     {
+      "ctx": "Når noen spør om du er opptatt i helgen",
+      "line": "Kommer an på hva du skal spørre om.",
+      "sv": {
+       "c": "När någon frågar om du är upptagen i helgen",
+       "l": "Beror på vad du tänker fråga om."
+      },
+      "en": {
+       "c": "When asked if you are busy this weekend",
+       "l": "Depends on what you are about to ask."
+      }
+     },
+     {
+      "line": "Hater du ikke folk som svarer på sine egne spørsmål? Jo, det gjør jeg.",
+      "sv": {
+       "l": "Hatar du inte folk som svarar på sina egna frågor? Jo, det gör jag."
+      },
+      "en": {
+       "l": "Do you not hate people who answer their own questions? I do."
+      }
+     },
+     {
+      "line": "Adam og Eva var de første som ignorerte vilkårene til Apple.",
+      "sv": {
+       "l": "Adam och Eva var de första som ignorerade Apples villkor."
+      },
+      "en": {
+       "l": "Adam and Eve were the first to ignore the Apple terms and conditions."
+      }
+     },
+     {
+      "ctx": "Når noen sier unnskyld for noe bagatellmessig",
+      "line": "Det bør du også være.",
+      "sv": {
+       "c": "När någon ber om ursäkt för något futtigt",
+       "l": "Det borde du också vara."
+      },
+      "en": {
+       "c": "When someone apologises for something trivial",
+       "l": "You should be."
+      }
+     },
+     {
+      "ctx": "Når noen nyser mer enn én gang",
+      "line": "Ja da, vi hørte deg!",
+      "sv": {
+       "c": "När någon nyser mer än en gång",
+       "l": "Jo då, vi hörde dig!"
+      },
+      "en": {
+       "c": "When someone sneezes more than once",
+       "l": "Alright, we heard you!"
+      }
+     },
+     {
+      "ctx": "Før en helt triviell oppgave",
+      "line": "Sett på musikken.",
+      "sv": {
+       "c": "Innan en helt trivial uppgift",
+       "l": "Dra igång musiken."
+      },
+      "en": {
+       "c": "Before a completely mundane task",
+       "l": "Cue the music."
+      }
+     },
+     {
+      "ctx": "Når noen ber deg om noe",
+      "line": "Vet ikke — kan jeg?",
+      "sv": {
+       "c": "När någon ber dig om något",
+       "l": "Vet inte — kan jag?"
+      },
+      "en": {
+       "c": "When someone asks you to do something",
+       "l": "I do not know — can I?"
+      }
+     },
+     {
+      "ctx": "Når noen søler drikken sin",
+      "line": "Du kunne bare sagt at du ikke likte den.",
+      "sv": {
+       "c": "När någon spiller ut sin dryck",
+       "l": "Du kunde bara ha sagt att du inte gillade den."
+      },
+      "en": {
+       "c": "When someone spills their drink",
+       "l": "You could have just said you did not like it."
+      }
+     },
+     {
+      "ctx": "Når vitsen din feiler",
+      "line": "Hei — jeg så i det minste potensialet.",
+      "sv": {
+       "c": "När ditt skämt floppar",
+       "l": "Hörru — jag såg i alla fall potentialen."
+      },
+      "en": {
+       "c": "When your joke fails",
+       "l": "Hey — at least I saw the potential."
+      }
+     },
+     {
+      "ctx": "Når ingen ler",
+      "line": "Det er bare et tallspill.",
+      "sv": {
+       "c": "När ingen skrattar",
+       "l": "Det är bara ett sifferspel."
+      },
+      "en": {
+       "c": "When nobody laughs",
+       "l": "It is just a numbers game."
+      }
+     },
+     {
+      "ctx": "Etter en dårlig vits",
+      "line": "Tøft publikum i kveld.",
+      "sv": {
+       "c": "Efter ett dåligt skämt",
+       "l": "Tuff publik ikväll."
+      },
+      "en": {
+       "c": "After a bad joke",
+       "l": "Tough crowd tonight."
+      }
+     },
+     {
+      "ctx": "Når noen tilbyr deg hva som helst",
+      "line": "Nei takk — jeg skal kjøre senere.",
+      "sv": {
+       "c": "När någon erbjuder dig vad som helst",
+       "l": "Nej tack — jag ska köra senare."
+      },
+      "en": {
+       "c": "When offered anything at all",
+       "l": "Nah — I have to drive later."
+      }
+     },
+     {
+      "ctx": "Når noen tilbyr deg noe som ikke kan spises",
+      "line": "Nei takk, jeg har nettopp spist.",
+      "sv": {
+       "c": "När någon erbjuder något oätbart",
+       "l": "Nej tack, jag har precis ätit."
+      },
+      "en": {
+       "c": "When offered something entirely inedible",
+       "l": "No thanks, I just ate."
+      }
+     },
+     {
+      "ctx": "Når noen spør hvordan du vet noe",
+      "line": "Leste det i en bok et sted.",
+      "sv": {
+       "c": "När någon frågar hur du vet något",
+       "l": "Läste det i en bok nånstans."
+      },
+      "en": {
+       "c": "When asked how you know something",
+       "l": "Read it in a book somewhere."
+      }
+     },
+     {
+      "ctx": "Når du setter bilen i revers",
+      "line": "Dette tar meg tilbake.",
+      "sv": {
+       "c": "När du lägger i backen",
+       "l": "Det här tar mig tillbaka."
+      },
+      "en": {
+       "c": "When you put the car in reverse",
+       "l": "This takes me back."
+      }
+     },
+     {
+      "ctx": "Til nesten hvilket som helst spørsmål",
+      "line": "Vanskelig å si uten å vite sikkert.",
+      "sv": {
+       "c": "Till nästan vilken fråga som helst",
+       "l": "Svårt att säga utan att veta säkert."
+      },
+      "en": {
+       "c": "To almost any question",
+       "l": "Hard to say without knowing for sure."
+      }
+     },
+     {
+      "ctx": "Når noen spør om de bør gjøre noe",
+      "line": "Man vet aldri før man vet.",
+      "sv": {
+       "c": "När någon frågar om de borde göra något",
+       "l": "Man vet aldrig förrän man vet."
+      },
+      "en": {
+       "c": "When asked whether they should do something",
+       "l": "You never know until you know."
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "spill",
+  "emoji": "🍺",
+  "title": {
+   "no": "Drikkeleker",
+   "sv": "Dryckeslekar",
+   "en": "Drinking games"
+  },
+  "desc": {
+   "no": "Regler for kveldens leker. Trykk på en lek for å åpne.",
+   "sv": "Regler för kvällens lekar. Tryck på en lek för att öppna.",
+   "en": "Rules for the night. Tap a game to open."
+  },
+  "groups": [
+   {
+    "id": "kort",
+    "title": {
+     "no": "Med kortstokk",
+     "sv": "Med kortlek",
+     "en": "With a deck of cards"
+    },
+    "type": "game",
+    "items": [
+     {
+      "name": {
+       "no": "Ring of Fire"
+      },
+      "gear": {
+       "no": "Kortstokk + kopp/flaske",
+       "sv": "Kortlek + kopp/flaska",
+       "en": "Deck of cards + cup/bottle"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Legg kortene i en tett sirkel rundt en kopp eller flaske. Trekk etter tur og gjør det kortet sier. Bryter du sirkelen, drikker du opp glasset ditt.",
+        "b|Ess — fossefall: alle drikker; du kan ikke stoppe før den før deg stopper.",
+        "b|2 — gi to slurker. 3 — ta tre selv.",
+        "b|4 — gulvet: sistemann som tar på gulvet, drikker.",
+        "b|5 — gutta drikker. 6 — jentene drikker.",
+        "b|7 — himmelen: sistemann med hånda i været, drikker.",
+        "b|8 — kompis: velg en som må drikke når du drikker.",
+        "b|9 — rim: si et ord; rundt bordet rimes det til noen feiler.",
+        "b|10 — kategori: velg tema; rundt bordet til noen står fast.",
+        "b|Knekt — tommelmester: legg tommelen på bordet når som helst; sistemann som følger etter, drikker.",
+        "b|Dame — spørsmålsrunde: still spørsmål videre; den som svarer, drikker.",
+        "b|Konge — lag en ny regel. Den som trekker siste konge, drikker koppen i midten."
+       ],
+       "sv": [
+        "Lägg korten i en tät cirkel runt en kopp eller flaska. Dra i tur och ordning och gör vad kortet säger. Bryter du cirkeln dricker du upp ditt glas.",
+        "b|Ess — vattenfall: alla dricker; du får inte sluta förrän den före dig slutar.",
+        "b|2 — ge två klunkar. 3 — ta tre själv.",
+        "b|4 — golvet: sist att röra golvet dricker.",
+        "b|5 — killarna dricker. 6 — tjejerna dricker.",
+        "b|7 — himlen: sist med handen i luften dricker.",
+        "b|8 — polare: välj någon som dricker när du dricker.",
+        "b|9 — rim: säg ett ord; rimma runt bordet tills någon misslyckas.",
+        "b|10 — kategori: välj tema; runt bordet tills någon fastnar.",
+        "b|Knekt — tummästare: lägg tummen på bordet när som helst; sist att följa efter dricker.",
+        "b|Dam — frågerunda: skicka frågor vidare; den som svarar dricker.",
+        "b|Kung — hitta på en ny regel. Den som drar sista kungen dricker koppen i mitten."
+       ],
+       "en": [
+        "Lay the cards in a tight circle around a cup or bottle. Take turns drawing and do what the card says. Break the circle and you finish your drink.",
+        "b|Ace — waterfall: everyone drinks; you cannot stop until the person before you stops.",
+        "b|2 — give two sips. 3 — take three yourself.",
+        "b|4 — floor: last to touch the floor drinks.",
+        "b|5 — guys drink. 6 — girls drink.",
+        "b|7 — heaven: last hand in the air drinks.",
+        "b|8 — mate: pick someone who drinks whenever you drink.",
+        "b|9 — rhyme: say a word; rhyme around the table until someone fails.",
+        "b|10 — categories: pick a topic; go around until someone is stuck.",
+        "b|Jack — thumb master: put your thumb on the table any time; last to follow drinks.",
+        "b|Queen — question round: keep asking questions; whoever answers drinks.",
+        "b|King — make a new rule. Whoever draws the last king downs the cup in the middle."
+       ]
+      }
+     },
+     {
+      "name": {
+       "no": "Fuck the Dealer"
+      },
+      "gear": {
+       "no": "Kortstokk",
+       "sv": "Kortlek",
+       "en": "Deck of cards"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Én er dealer med hele stokken. Spilleren til venstre gjetter verdien på det øverste kortet.",
+        "b|Riktig på første forsøk: dealeren drikker 5 slurker.",
+        "b|Feil: dealeren sier «høyere» eller «lavere», og spilleren gjetter én gang til. Riktig nå: dealeren drikker 2.",
+        "b|Feil igjen: spilleren drikker differansen mellom gjetningen og kortet.",
+        "Brukte kort legges synlig på bordet sortert etter verdi, så alle kan telle. Klarer dealeren tre spillere på rad uten treff, sendes stokken videre til nestemann."
+       ],
+       "sv": [
+        "En är dealer med hela leken. Spelaren till vänster gissar värdet på översta kortet.",
+        "b|Rätt på första försöket: dealern dricker 5 klunkar.",
+        "b|Fel: dealern säger «högre» eller «lägre», och spelaren gissar en gång till. Rätt nu: dealern dricker 2.",
+        "b|Fel igen: spelaren dricker differensen mellan gissningen och kortet.",
+        "Använda kort läggs synligt på bordet sorterade efter värde, så alla kan räkna. Klarar dealern tre spelare i rad utan träff skickas leken vidare."
+       ],
+       "en": [
+        "One player is the dealer with the whole deck. The player to the left guesses the value of the top card.",
+        "b|Right on the first try: the dealer drinks 5.",
+        "b|Wrong: the dealer says “higher” or “lower”, and the player guesses once more. Right now: the dealer drinks 2.",
+        "b|Wrong again: the player drinks the difference between the guess and the card.",
+        "Used cards are laid face-up, sorted by value, so everyone can count. If the dealer survives three players in a row, the deck passes on."
+       ]
+      }
+     },
+     {
+      "name": {
+       "no": "Bussruta",
+       "sv": "Bussen",
+       "en": "Ride the Bus"
+      },
+      "gear": {
+       "no": "Kortstokk",
+       "sv": "Kortlek",
+       "en": "Deck of cards"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Runde 1 — fire spørsmål til hver spiller, ett kort per svar: 1) Rød eller svart? 2) Over eller under ditt forrige kort? 3) Innenfor eller utenfor de to første? 4) Hvilken kortfarge (kløver/spar/hjerter/ruter)? Feil = drikk; riktig = del ut like mange.",
+        "Runde 2 — pyramiden: legg kort i en pyramide (5-4-3-2-1) og snu rad for rad. Har du kortet på hånda, legger du det på og deler ut slurker etter radnivå (nederst 1, øverst 5).",
+        "Runde 3 — bussen: den som sitter igjen med flest kort kjører bussen. Snu kort fra bunken: knekt = 1 slurk, dame = 2, konge = 3, ess = 4 — og nytt kort legges på. Du er i mål først når et avtalt antall kort er passert uten bildekort."
+       ],
+       "sv": [
+        "Runda 1 — fyra frågor till varje spelare, ett kort per svar: 1) Rött eller svart? 2) Över eller under ditt förra kort? 3) Innanför eller utanför de två första? 4) Vilken färg (klöver/spader/hjärter/ruter)? Fel = drick; rätt = dela ut lika många.",
+        "Runda 2 — pyramiden: lägg kort i en pyramid (5-4-3-2-1) och vänd rad för rad. Har du kortet på handen lägger du det och delar ut klunkar efter radnivå (nederst 1, överst 5).",
+        "Runda 3 — bussen: den med flest kort kvar åker buss. Vänd kort från leken: knekt = 1 klunk, dam = 2, kung = 3, ess = 4 — och ett nytt kort läggs på. Du är i mål först när ett avtalat antal kort passerat utan klädda kort."
+       ],
+       "en": [
+        "Round 1 — four questions per player, one card per answer: 1) Red or black? 2) Higher or lower than your last card? 3) Inside or outside the first two? 4) Which suit? Wrong = drink; right = give out the same.",
+        "Round 2 — the pyramid: lay cards in a pyramid (5-4-3-2-1) and flip row by row. Holding a matching card lets you play it and hand out sips by row level (bottom 1, top 5).",
+        "Round 3 — the bus: whoever has most cards left rides the bus. Flip cards off the deck: jack = 1 sip, queen = 2, king = 3, ace = 4 — and a new card replaces it. You are done once an agreed number of cards pass with no face card."
+       ]
+      }
+     },
+     {
+      "name": {
+       "no": "Veddeløpet",
+       "sv": "Hästkapplöpningen",
+       "en": "Horse Race"
+      },
+      "gear": {
+       "no": "Kortstokk",
+       "sv": "Kortlek",
+       "en": "Deck of cards"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "De fire essene er hester på startstreken. Legg 6–8 kort med bildesiden ned i en rekke som løpsbane.",
+        "Alle vedder et antall slurker på sin kortfarge før start.",
+        "Snu kort fra bunken ett og ett: essen i samme farge rykker fram ett hakk.",
+        "Variant: når alle hestene har passert et banekort, snus det — og den fargens hest rykker ett hakk tilbake.",
+        "Første hest i mål vinner: de som veddet riktig deler ut det dobbelte av innsatsen sin; alle andre drikker innsatsen selv."
+       ],
+       "sv": [
+        "De fyra essen är hästar på startlinjen. Lägg 6–8 kort med baksidan upp i en rad som bana.",
+        "Alla satsar ett antal klunkar på sin färg innan start.",
+        "Vänd kort från leken ett och ett: esset i samma färg flyttar fram ett steg.",
+        "Variant: när alla hästar passerat ett bankort vänds det — och den färgens häst backar ett steg.",
+        "Första häst i mål vinner: de som satsade rätt delar ut dubbla insatsen; alla andra dricker sin insats själva."
+       ],
+       "en": [
+        "The four aces are horses on the start line. Lay 6–8 cards face down in a row as the track.",
+        "Everyone bets a number of sips on a suit before the off.",
+        "Flip cards from the deck one by one: the ace of that suit moves up one step.",
+        "Variant: once all horses pass a track card, flip it — that suit's horse moves back one.",
+        "First horse home wins: correct backers give out double their stake; everyone else drinks their own."
+       ]
+      }
+     },
+     {
+      "name": {
+       "no": "Krig",
+       "sv": "Krig",
+       "en": "War"
+      },
+      "gear": {
+       "no": "Kortstokk",
+       "sv": "Kortlek",
+       "en": "Deck of cards"
+      },
+      "pl": "2",
+      "rules": {
+       "no": [
+        "Fjern jokerne og del stokken likt (26 kort hver), i hver sin bunke med bildesiden ned.",
+        "Snu det øverste kortet samtidig — høyest kort vinner begge (2 lavest, ess høyest). Vinnerkortene legges nederst i egen bunke.",
+        "Likt kort = krig: begge legger 3 kort med bildesiden ned og snur ett nytt. Høyest åpne kort vinner alle ti. Likt igjen = ny krig.",
+        "b|Straff: begge drikker 2 når en krig starter.",
+        "b|Taperen av en krig drikker 3.",
+        "b|Bonus: mister du kort til et bildekort, drikk 1.",
+        "Spillet varer til én sitter med hele stokken."
+       ],
+       "sv": [
+        "Ta bort jokrarna och dela leken lika (26 kort var), i varsin hög med baksidan upp.",
+        "Vänd översta kortet samtidigt — högst kort vinner båda (2 lägst, ess högst). Vinstkorten läggs underst i egna högen.",
+        "Lika kort = krig: båda lägger 3 kort med baksidan upp och vänder ett nytt. Högsta öppna kort vinner alla tio. Lika igen = nytt krig.",
+        "b|Straff: båda dricker 2 när ett krig startar.",
+        "b|Förloraren av ett krig dricker 3.",
+        "b|Bonus: förlorar du kort till ett klätt kort, drick 1.",
+        "Spelet pågår tills en sitter med hela leken."
+       ],
+       "en": [
+        "Remove the jokers and split the deck evenly (26 each), face down in front of each player.",
+        "Flip your top cards at the same time — highest wins both (2 low, ace high). Won cards go to the bottom of your pile.",
+        "A tie means war: both lay 3 cards face down and flip one more. Highest face-up card takes all ten. Tie again = new war.",
+        "b|Penalty: both drink 2 when a war starts.",
+        "b|The loser of a war drinks 3.",
+        "b|Bonus: lose a card to a face card, drink 1.",
+        "Play until one player holds the whole deck."
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "id": "musikk",
+    "title": {
+     "no": "Musikk & terninger",
+     "sv": "Musik & tärningar",
+     "en": "Music & dice"
+    },
+    "type": "game",
+    "items": [
+     {
+      "name": {
+       "no": "Opus"
+      },
+      "gear": {
+       "no": "Terning + sangen «Opus» (Eric Prydz)",
+       "sv": "Tärning + låten «Opus» (Eric Prydz)",
+       "en": "A die + the song “Opus” (Eric Prydz)"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Sett på «Opus» av Eric Prydz — hele 9-minutteren — og sitt i ring med én terning (to hvis dere er mange).",
+        "Trill til du får en sekser; da sendes terningen videre til nestemann. Ingen sekser = trill igjen.",
+        "Den som holder terningen når droppet kommer, må drikke opp glasset sitt.",
+        "Variant: fortsett hele sangen — hver gang bygget topper seg, drikker den som sitter med terningen."
+       ],
+       "sv": [
+        "Sätt på «Opus» av Eric Prydz — hela 9-minutersversionen — och sitt i ring med en tärning (två om ni är många).",
+        "Slå tills du får en sexa; då skickas tärningen vidare. Ingen sexa = slå igen.",
+        "Den som håller tärningen när droppet kommer får dricka upp sitt glas.",
+        "Variant: kör hela låten — varje gång bygget toppar dricker den som sitter med tärningen."
+       ],
+       "en": [
+        "Put on “Opus” by Eric Prydz — the full 9 minutes — and sit in a circle with one die (two if you are many).",
+        "Roll until you get a six; then pass the die on. No six = roll again.",
+        "Whoever holds the die when the drop hits finishes their drink.",
+        "Variant: play the whole track — every time the build peaks, the die-holder drinks."
+       ]
+      }
+     },
+     {
+      "name": {
+       "no": "Thunderstruck"
+      },
+      "gear": {
+       "no": "Sangen «Thunderstruck» (AC/DC)",
+       "sv": "Låten «Thunderstruck» (AC/DC)",
+       "en": "The song “Thunderstruck” (AC/DC)"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Sett på «Thunderstruck» med AC/DC og bestem rekkefølgen i ringen.",
+        "Ved første «Thunder» begynner første spiller å drikke — og drikker helt til neste «Thunder», da går turen videre.",
+        "Den som drikker når gitarsoloen starter, må drikke gjennom hele soloen. Lykke til."
+       ],
+       "sv": [
+        "Sätt på «Thunderstruck» med AC/DC och bestäm ordningen i ringen.",
+        "Vid första «Thunder» börjar första spelaren dricka — och dricker tills nästa «Thunder», då går turen vidare.",
+        "Den som dricker när gitarrsolot börjar får dricka genom hela solot. Lycka till."
+       ],
+       "en": [
+        "Put on “Thunderstruck” by AC/DC and set the order of the circle.",
+        "On the first “Thunder”, the first player starts drinking — and keeps going until the next “Thunder”, when it passes on.",
+        "Whoever is drinking when the guitar solo starts drinks through the whole solo. Good luck."
+       ]
+      }
+     },
+     {
+      "name": {
+       "no": "Tanken bak sangen",
+       "sv": "Tanken bakom låten",
+       "en": "The story behind the song"
+      },
+      "gear": {
+       "no": "Bare musikkanlegg",
+       "sv": "Bara en högtalare",
+       "en": "Just a speaker"
+      },
+      "pl": "2+",
+      "rules": {
+       "no": [
+        "Alle legger inn én sang i køen per kategori. Når alle har valgt, spilles sangene etter tur.",
+        "Etter hver sang forteller eieren hvorfor akkurat den ble valgt — historien eller følelsen bak.",
+        "Alle drikker når historien er god. Etter hver kategori får personen med dårligst historie 5 slurker.",
+        "b|Kategorier: favorittsangen din · en sang som har påvirket livet ditt · en sang med et minne knyttet til seg · sangen som gjør deg klar for byen."
+       ],
+       "sv": [
+        "Alla lägger in en låt i kön per kategori. När alla valt spelas låtarna i tur och ordning.",
+        "Efter varje låt berättar ägaren varför just den valdes — historien eller känslan bakom.",
+        "Alla dricker när historien är bra. Efter varje kategori får personen med sämst historia 5 klunkar.",
+        "b|Kategorier: din favoritlåt · en låt som påverkat ditt liv · en låt med ett minne · låten som gör dig redo för krogen."
+       ],
+       "en": [
+        "Everyone queues one song per category. Once all have picked, the songs play in turn.",
+        "After each song, its owner explains why they chose it — the story or the feeling behind it.",
+        "Everyone drinks when the story is good. After each category, the weakest story earns its owner 5 sips.",
+        "b|Categories: your favourite song · a song that shaped your life · a song tied to a memory · the song that gets you ready for a night out."
+       ]
+      }
+     },
+     {
+      "name": {
+       "no": "Drikke-yatzy",
+       "sv": "Dryckesyatzy",
+       "en": "Drinking Yahtzee"
+      },
+      "gear": {
+       "no": "Yatzy-sett",
+       "sv": "Yatzy-set",
+       "en": "Yahtzee set"
+      },
+      "pl": "2+",
+      "rules": {
+       "no": [
+        "Vanlige yatzyregler: opptil tre kast per tur, fyll ut de 13 feltene, flest poeng vinner. Så legges dette på:",
+        "b|Kast med en ener = drikk 2 slurker.",
+        "b|Fire like = drikk summen av terningene i slurker.",
+        "b|Yatzy = du bestemmer hvem som tar en shot (eventuelt resten av glasset).",
+        "b|Taperen til slutt drikker opp drikken sin eller tar en shot."
+       ],
+       "sv": [
+        "Vanliga yatzyregler: upp till tre kast per tur, fyll i de 13 fälten, flest poäng vinner. Sedan läggs detta på:",
+        "b|Kast med en etta = drick 2 klunkar.",
+        "b|Fyrtal = drick tärningarnas summa i klunkar.",
+        "b|Yatzy = du bestämmer vem som tar en shot (eller resten av glaset).",
+        "b|Förloraren dricker upp sin dryck eller tar en shot."
+       ],
+       "en": [
+        "Standard Yahtzee rules: up to three rolls per turn, fill the 13 boxes, most points wins. Then add:",
+        "b|Any roll showing a one = drink 2 sips.",
+        "b|Four of a kind = drink the dice total in sips.",
+        "b|Yahtzee = you pick who takes a shot (or downs their glass).",
+        "b|The overall loser finishes their drink or takes a shot."
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "id": "utenutstyr",
+    "title": {
+     "no": "Uten utstyr",
+     "sv": "Utan utrustning",
+     "en": "No equipment"
+    },
+    "type": "game",
+    "items": [
+     {
+      "name": {
+       "no": "Rask fakta",
+       "sv": "Snabba fakta",
+       "en": "Quick facts"
+      },
+      "gear": {
+       "no": "Bare glass",
+       "sv": "Bara glas",
+       "en": "Just your drinks"
+      },
+      "pl": "2",
+      "rules": {
+       "no": [
+        "Rask fakta går ut på å komme opp med fakta om motspilleren. Her gjelder det å kjenne motstanderen godt og tenke raskt.",
+        "Si en fakta om motstanderen innen 5 sekunder. Stemmer ikke påstanden, får du en prikk — av tre totalt.",
+        "Tre prikker = ta en shot. Fortsett til dere ikke kommer på mer fakta om hverandre."
+       ],
+       "sv": [
+        "Snabba fakta går ut på att komma på fakta om motspelaren. Här gäller det att känna motståndaren väl och tänka snabbt.",
+        "Säg ett faktum om motståndaren inom 5 sekunder. Stämmer inte påståendet får du en prick — av tre totalt.",
+        "Tre prickar = ta en shot. Fortsätt tills ni inte kommer på fler fakta om varandra."
+       ],
+       "en": [
+        "Quick facts is about firing off facts about your opponent. Know them well and think fast.",
+        "State a fact about your opponent within 5 seconds. If it is wrong, you get a strike — out of three.",
+        "Three strikes = take a shot. Keep going until you run out of facts about each other."
+       ]
+      }
+     },
+     {
+      "name": {
+       "no": "14 spørsmål",
+       "sv": "14 frågor",
+       "en": "14 questions"
+      },
+      "gear": {
+       "no": "Ingen",
+       "sv": "Ingen",
+       "en": "None"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Tell høyt etter tur fra 1 til 14 rundt ringen. Startregelen er alltid: du får ikke si tallet 7.",
+        "Klarer gruppen runden, lager personen som landet på 14 en ny regel — for et tall som ikke allerede har en.",
+        "b|Forslag: bytt 5 med 8 · bytt 5 med «hallo» · bytt 5 med å rekke opp en hånd.",
+        "Fortsett til alle tallene har en regel. Bryter noen en regel: 1 slurk til alle og 2 til synderen — og runden starter på nytt."
+       ],
+       "sv": [
+        "Räkna högt i tur och ordning från 1 till 14 runt ringen. Startregeln är alltid: du får inte säga siffran 7.",
+        "Klarar gruppen rundan skapar den som landade på 14 en ny regel — för en siffra som inte redan har en.",
+        "b|Förslag: byt 5 mot 8 · byt 5 mot «hallå» · byt 5 mot att räcka upp en hand.",
+        "Fortsätt tills alla siffror har en regel. Bryter någon en regel: 1 klunk till alla och 2 till syndaren — och rundan börjar om."
+       ],
+       "en": [
+        "Count out loud in turn from 1 to 14 around the circle. The starting rule is always: you cannot say the number 7.",
+        "If the group completes the round, whoever landed on 14 makes a new rule — for a number that does not already have one.",
+        "b|Ideas: swap 5 for 8 · swap 5 for “hello” · swap 5 for raising a hand.",
+        "Keep going until every number has a rule. Break a rule: everyone drinks 1 and the sinner drinks 2 — and the round restarts."
+       ]
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ordbok",
+  "emoji": "📖",
+  "title": {
+   "no": "Ordbok & uttrykk",
+   "sv": "Ordbok & uttryck",
+   "en": "Dictionary & expressions"
+  },
+  "desc": {
+   "no": "Slengord og uttrykk å kunne.",
+   "sv": "Norska slangord och uttryck att kunna.",
+   "en": "Norwegian slang worth knowing."
+  },
+  "groups": [
+   {
+    "id": "ordbok_all",
+    "title": null,
+    "type": "dict",
+    "items": [
+     {
+      "word": "bakutten",
+      "def": "Når du ikke har do tilgjengelig, men er skikkelig nødt.",
+      "sv": "När du inte har någon toa i närheten men verkligen måste.",
+      "en": "When there is no loo around but you desperately need one."
+     },
+     {
+      "word": "dollarnoia",
+      "def": "Panikken første gang du innser hvor høy valutakursen er.",
+      "sv": "Paniken första gången du inser hur hög växelkursen är.",
+      "en": "The panic when you first realise how bad the exchange rate is."
+     },
+     {
+      "word": "fyllemagi",
+      "def": "Når alt går knirkefritt selv om du ikke er helt deg selv.",
+      "sv": "När allt flyter på trots att du inte är helt dig själv.",
+      "en": "When everything somehow works out despite you being far from sober."
+     },
+     {
+      "word": "tullballtaktikk",
+      "def": "En strategi så dårlig gjennomtenkt at den nesten virker som en spøk.",
+      "sv": "En strategi så dåligt genomtänkt att den nästan verkar vara ett skämt.",
+      "en": "A strategy so poorly thought out it almost reads as a joke."
+     },
+     {
+      "word": "pizzaprat",
+      "def": "Når en samtale blir så tilfeldig og sirkulær at den minner om å velge pizzatopping klokka to om natta.",
+      "sv": "När ett samtal blir så slumpmässigt och cirkulärt att det påminner om att välja pizzatopping klockan två på natten.",
+      "en": "A conversation so random and circular it feels like picking pizza toppings at 2 am."
+     },
+     {
+      "word": "mobilmonster",
+      "def": "Noen så oppslukt av telefonen at de er helt frakoblet verden rundt seg.",
+      "sv": "Någon så uppslukad av mobilen att de är helt bortkopplade från världen omkring.",
+      "en": "Someone so absorbed in their phone they are fully disconnected from the world."
+     },
+     {
+      "word": "humororkan",
+      "def": "Når noen svinger fra superglad til superirritert på rekordtid.",
+      "sv": "När någon svänger från superglad till superirriterad på rekordtid.",
+      "en": "Someone who swings from delighted to furious in record time."
+     },
+     {
+      "word": "kaffeklovnen",
+      "def": "En som rett og slett ikke fungerer uten kaffe.",
+      "sv": "Någon som helt enkelt inte fungerar utan kaffe.",
+      "en": "Someone who simply does not function without coffee."
+     },
+     {
+      "word": "balansebussen",
+      "def": "Når du lever på medianen: litt opp og litt ned, ett hakk frem og ett tilbake.",
+      "sv": "När du lever på medianen: lite upp och lite ner, ett steg fram och ett tillbaka.",
+      "en": "Living on the median: a bit up, a bit down, one step forward and one back."
+     },
+     {
+      "word": "drikke i seg bøss",
+      "def": "Å drikke helt ukritisk — hva som helst.",
+      "sv": "Att dricka helt okritiskt — vad som helst.",
+      "en": "Drinking anything at all, completely indiscriminately."
+     },
+     {
+      "word": "ble helt Jan Teigen i baren",
+      "def": "Fingrene gikk løpsk i baren; veldig spandabel og dyr kveld.",
+      "sv": "Fingrarna sprang iväg i baren; väldigt generös och dyr kväll.",
+      "en": "Fingers ran wild at the bar; a very generous, very expensive night."
+     },
+     {
+      "word": "ekstra vann i mølla",
+      "def": "«Nå ble det litt mye» — noe som forsterker en heftig situasjon.",
+      "sv": "«Nu blev det lite mycket» — något som förstärker en redan intensiv situation.",
+      "en": "“That was a bit much” — something that amplifies an already wild situation."
+     },
+     {
+      "word": "helt ute å sykle",
+      "def": "Veldig klønete, eller helt på bærtur.",
+      "sv": "Väldigt klumpig, eller helt ute och cyklar.",
+      "en": "Completely off the mark — literally “out cycling”."
+     },
+     {
+      "word": "så lavt med på den darwinistiske lista",
+      "def": "Om noe/noen langt nede i rangstigen.",
+      "sv": "Om något/någon långt ner på rangordningen.",
+      "en": "About someone or something very low on the Darwinian list."
+     },
+     {
+      "word": "helt 911 på behovspyramiden",
+      "def": "Et akutt, presserende behov.",
+      "sv": "Ett akut, brådskande behov.",
+      "en": "An urgent, emergency-level need."
+     },
+     {
+      "word": "godt du er næringsvett!",
+      "def": "Tørr kommentar når noen er litt for full.",
+      "sv": "Torr kommentar när någon är lite för full.",
+      "en": "Dry remark for someone slightly too drunk (a pun on “common sense”)."
+     },
+     {
+      "word": "helt Texas",
+      "def": "Fullstendig kaos og ville tilstander.",
+      "sv": "Fullständigt kaos och vilda tillstånd.",
+      "en": "Total chaos — famously, Norwegians call it “completely Texas”."
+     },
+     {
+      "word": "på bærtur",
+      "def": "Helt på villspor; langt fra poenget.",
+      "sv": "Helt på villovägar; långt från poängen.",
+      "en": "Way off track — literally “out berry-picking”."
+     },
+     {
+      "word": "pling i bollen",
+      "def": "Tom i toppen; lite hjemme.",
+      "sv": "Tom i huvudet; inte mycket hemma.",
+      "en": "Empty upstairs; nobody home."
+     },
+     {
+      "word": "ikke den skarpeste kniven i skuffen",
+      "def": "Ikke den smarteste i rommet.",
+      "sv": "Inte den vassaste kniven i lådan.",
+      "en": "Not the sharpest knife in the drawer."
+     },
+     {
+      "word": "status quo",
+      "def": "Tilstanden slik den er nå; det rådende og uendrede.",
+      "sv": "Läget som det är nu; det rådande och oförändrade.",
+      "en": "The state of things as they are; the prevailing and unchanged."
+     },
+     {
+      "word": "å være bevandret",
+      "def": "Å være godt kjent i / belest om et tema.",
+      "sv": "Att vara väl bevandrad i / påläst om ett ämne.",
+      "en": "To be well-versed in a subject."
+     },
+     {
+      "word": "kokosbolle i motvind",
+      "def": "Om noe(n) som ser herjet ut — «håret ditt ser ut som en kokosbolle i motvind».",
+      "sv": "Om något/någon som ser härjad ut — «håret ser ut som en kokosboll i motvind».",
+      "en": "For anything dishevelled — “your hair looks like a chocolate teacake in a headwind”."
+     },
+     {
+      "word": "høy sigarføring",
+      "def": "Å leve stort og selvsikkert, gjerne litt over evne.",
+      "sv": "Att leva stort och självsäkert, gärna lite över sina tillgångar.",
+      "en": "Living large and confidently, often beyond one's means."
+     },
+     {
+      "word": "full som ei alke",
+      "def": "Svært beruset. Klassikeren.",
+      "sv": "Mycket berusad. Klassikern — «full som en alka».",
+      "en": "Extremely drunk — literally “drunk as an auk”."
+     },
+     {
+      "word": "harry",
+      "def": "Smakløst på en folkelig måte.",
+      "sv": "Smaklöst på ett folkligt sätt (jfr «harry» på svenska).",
+      "en": "Tacky in a distinctly down-market way."
+     },
+     {
+      "word": "snurt",
+      "def": "Lettere fornærmet; småsur.",
+      "sv": "Lätt förnärmad; smått sur.",
+      "en": "Mildly offended; a bit miffed."
+     },
+     {
+      "word": "bak mål",
+      "def": "Helt på jordet; fullstendig feil.",
+      "sv": "Helt uppåt väggarna; fullständigt fel.",
+      "en": "Completely wrong — literally “behind the goal”."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fleksnes",
+  "emoji": "📺",
+  "title": {
+   "no": "Fleksnes-sitater",
+   "sv": "Fleksnes-citat",
+   "en": "Fleksnes quotes"
+  },
+  "desc": {
+   "no": "Marve Almar Fleksnes. For ren kos.",
+   "sv": "Marve Almar Fleksnes. För rent nöjes skull.",
+   "en": "Marve Almar Fleksnes. Pure comfort."
+  },
+  "groups": [
+   {
+    "id": "staaende",
+    "title": {
+     "no": "Stående uttrykk",
+     "sv": "Stående uttryck",
+     "en": "Catchphrases"
+    },
+    "items": [
+     {
+      "line": "Dett var dett.",
+      "sv": {
+       "l": "Dett var dett.",
+       "n": "Norskt bevingat uttryck från serien."
+      },
+      "en": {
+       "l": "Well, that was that.",
+       "n": "His signature sign-off."
+      }
+     },
+     {
+      "line": "Jeg har mine metoder.",
+      "sv": {
+       "l": "Jag har mina metoder."
+      },
+      "en": {
+       "l": "I have my methods."
+      }
+     },
+     {
+      "line": "Litt her og litt der.",
+      "sv": {
+       "l": "Lite här och lite där."
+      },
+      "en": {
+       "l": "A bit here and a bit there."
+      }
+     }
+    ]
+   },
+   {
+    "id": "frekke",
+    "title": {
+     "no": "Frekke replikker",
+     "sv": "Fräcka repliker",
+     "en": "Cheeky lines"
+    },
+    "items": [
+     {
+      "line": "Honnørrabatt til han og humørrabatt til meg!",
+      "sv": {
+       "l": "Pensionärsrabatt till honom och humörrabatt till mig!"
+      },
+      "en": {
+       "l": "Senior discount for him and a mood discount for me!"
+      }
+     },
+     {
+      "line": "Det er ganske bra til å være så dårlig.",
+      "note": "…om været.",
+      "sv": {
+       "l": "Det är ganska bra till att vara så dåligt.",
+       "n": "…om vädret."
+      },
+      "en": {
+       "l": "Quite good, considering how bad it is.",
+       "n": "…about the weather."
+      }
+     },
+     {
+      "line": "Oransje buksedress? Da tar du deg nok ut til din fordel med din bakdel!",
+      "sv": {
+       "l": "Orange byxdress? Då tar du dig nog ut till din fördel med din bakdel!"
+      },
+      "en": {
+       "l": "An orange jumpsuit? Then your behind will surely show you at your best!"
+      }
+     },
+     {
+      "line": "Når du blir blodgiver, blir du vel med i en sånn blodklubb?",
+      "note": "Blodgiveren.",
+      "sv": {
+       "l": "När man blir blodgivare, går man väl med i en sån där blodklubb?",
+       "n": "Blodgivaren."
+      },
+      "en": {
+       "l": "When you become a blood donor, you join some sort of blood club, right?",
+       "n": "The Blood Donor."
+      }
+     },
+     {
+      "line": "Enkelt og greit — man setter inn litt blod, så tar man det ut igjen.",
+      "note": "Blodgiveren.",
+      "sv": {
+       "l": "Enkelt och lätt — man sätter in lite blod och tar ut det igen.",
+       "n": "Blodgivaren."
+      },
+      "en": {
+       "l": "Simple as that — you deposit a little blood, then you withdraw it again.",
+       "n": "The Blood Donor."
+      }
+     },
+     {
+      "ctx": "Om en uunngåelig forkjølelse",
+      "line": "Hvorfor ikke legge seg i senga og kose seg med den?",
+      "note": "Marve siterer «den gamle dikter Henrik Ibsen».",
+      "sv": {
+       "c": "Om en oundviklig förkylning",
+       "l": "Varför inte lägga sig i sängen och njuta av den?",
+       "n": "Marve citerar «den gamle diktaren Henrik Ibsen»."
+      },
+      "en": {
+       "c": "On an unavoidable cold",
+       "l": "Why not get into bed and enjoy it?",
+       "n": "Marve quoting “the old poet Henrik Ibsen”."
+      }
+     },
+     {
+      "ctx": "Gaveåpning",
+      "line": "Gratulerer med nye sokker! Er det ull eller nylon?",
+      "sv": {
+       "c": "Vid presentöppning",
+       "l": "Grattis till nya strumpor! Är det ull eller nylon?"
+      },
+      "en": {
+       "c": "Opening presents",
+       "l": "Congratulations on the new socks! Wool or nylon?"
+      }
+     },
+     {
+      "line": "Hvis nordmenn fastet mer, ville vi bli en fastere nasjon!",
+      "sv": {
+       "l": "Om norrmän fastade mer skulle vi bli en fastare nation!"
+      },
+      "en": {
+       "l": "If Norwegians fasted more, we would be a firmer nation!"
+      }
+     },
+     {
+      "line": "Du er et tragisk menneske.",
+      "sv": {
+       "l": "Du är en tragisk människa."
+      },
+      "en": {
+       "l": "You are a tragic human being."
+      }
+     },
+     {
+      "line": "Det låter besværende ut.",
+      "sv": {
+       "l": "Det låter besvärande."
+      },
+      "en": {
+       "l": "That does sound terribly burdensome."
+      }
+     },
+     {
+      "line": "Driver dere og forbrenner kalorier?",
+      "sv": {
+       "l": "Håller ni på och förbränner kalorier?"
+      },
+      "en": {
+       "l": "Are you lot burning calories over there?"
+      }
+     },
+     {
+      "line": "Jeg vil dø metta — lagret og mett i magen.",
+      "sv": {
+       "l": "Jag vill dö mätt — lagrad och mätt i magen."
+      },
+      "en": {
+       "l": "I want to die full — well-aged and with a full stomach."
+      }
+     }
+    ]
+   },
+   {
+    "id": "manus",
+    "title": {
+     "no": "Fra Galton & Simpson-manusene",
+     "sv": "Ur Galton & Simpson-manusen",
+     "en": "From the Galton & Simpson scripts"
+    },
+    "items": [
+     {
+      "ctx": "Blodgiveren — når legen vil ha en halvliter",
+      "line": "En halvliter? Det er jo nesten en hel arm!",
+      "note": "Den mest siterte linja i hele manuset («very nearly an armful»).",
+      "sv": {
+       "c": "Blodgivaren — när läkaren vill ha en halvliter",
+       "l": "En halvliter? Det är ju nästan en hel arm!",
+       "n": "Den mest citerade repliken i hela manuset."
+      },
+      "en": {
+       "c": "The Blood Donor — when the doctor wants a pint",
+       "l": "A pint? That is very nearly an armful!",
+       "n": "The most quoted line in the script — the original wording."
+      }
+     },
+     {
+      "ctx": "Blodgiveren — om blodtypen",
+      "line": "Rhesus? Er ikke det aper?",
+      "sv": {
+       "c": "Blodgivaren — om blodgruppen",
+       "l": "Rhesus? Är inte det apor?"
+      },
+      "en": {
+       "c": "The Blood Donor — on blood types",
+       "l": "Rhesus? They are monkeys, are they not?"
+      }
+     },
+     {
+      "ctx": "Blodgiveren — hvorfor han gir blod",
+      "line": "Det var enten det eller å melde seg inn i Unge Høyre.",
+      "sv": {
+       "c": "Blodgivaren — varför han ger blod",
+       "l": "Det var antingen det eller att gå med i Moderata ungdomsförbundet."
+      },
+      "en": {
+       "c": "The Blood Donor — why he gives blood",
+       "l": "It was either that or join the Young Conservatives."
+      }
+     },
+     {
+      "ctx": "Når du taper en diskusjon totalt",
+      "line": "Betyr Magna Carta ingenting for dere? Døde hun forgjeves?",
+      "note": "Fra jury-episoden — han tror Magna Carta er en dame.",
+      "sv": {
+       "c": "När du förlorar en diskussion totalt",
+       "l": "Betyder Magna Carta ingenting för er? Dog hon förgäves?",
+       "n": "Från jury-avsnittet — han tror Magna Carta är en dam."
+      },
+      "en": {
+       "c": "When losing an argument completely",
+       "l": "Does Magna Carta mean nothing to you? Did she die in vain?",
+       "n": "From the jury episode — he thinks Magna Carta is a woman."
+      }
+     },
+     {
+      "ctx": "Radioamatøren — om vennekretsen",
+      "line": "Venner over hele verden! …Ingen her i landet, men venner over hele verden.",
+      "sv": {
+       "c": "Radioamatören — om vänkretsen",
+       "l": "Vänner över hela världen! …Inga här i landet, men vänner över hela världen."
+      },
+      "en": {
+       "c": "The Radio Ham — on his circle of friends",
+       "l": "Friends all over the world! …None in this country, but friends all over the world."
+      }
+     },
+     {
+      "ctx": "Om dårlig saus",
+      "line": "Mors saus rørte i det minste på seg. Din bare ligger der og stivner.",
+      "sv": {
+       "c": "Om dålig sås",
+       "l": "Mors sås rörde åtminstone på sig. Din bara ligger där och stelnar."
+      },
+      "en": {
+       "c": "On bad gravy",
+       "l": "My mother's gravy at least used to move about. Yours just lies there and sets."
+      }
+     },
+     {
+      "ctx": "Når noen påpeker det åpenbare («det regner»)",
+      "line": "Jaså — så det er dét som gjør veien våt.",
+      "sv": {
+       "c": "När någon påpekar det uppenbara («det regnar»)",
+       "l": "Jaså — så det är dét som gör vägen våt."
+      },
+      "en": {
+       "c": "When someone states the obvious (“it is raining”)",
+       "l": "Ah — so that is what is making the road wet."
+      }
+     }
+    ]
+   },
+   {
+    "id": "wesenlund",
+    "title": {
+     "no": "Rolv Wesenlund",
+     "sv": "Rolv Wesenlund",
+     "en": "Rolv Wesenlund"
+    },
+    "items": [
+     {
+      "line": "Alt før 50 er en oppvarming.",
+      "sv": {
+       "l": "Allt före 50 är en uppvärmning."
+      },
+      "en": {
+       "l": "Everything before 50 is a warm-up."
+      }
+     },
+     {
+      "line": "Tro på Gud, men husk å låse bilen.",
+      "sv": {
+       "l": "Tro på Gud, men kom ihåg att låsa bilen."
+      },
+      "en": {
+       "l": "Trust in God, but remember to lock your car."
+      }
+     },
+     {
+      "line": "Det kommer ikke an på hva man spiser mellom jul og nyttår, men hva man spiser mellom nyttår og jul.",
+      "sv": {
+       "l": "Det beror inte på vad man äter mellan jul och nyår, utan vad man äter mellan nyår och jul."
+      },
+      "en": {
+       "l": "It is not what you eat between Christmas and New Year that matters, but what you eat between New Year and Christmas."
+      }
+     }
+    ]
+   }
+  ]
+ }
+]

@@ -1,0 +1,48 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../AdSlot.astro';
+import { dictSection, dictItems, tdef } from '../../lib/content';
+import { ui, path, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+const items = dictItems.slice().sort((a, b) => a.word.localeCompare(b.word, 'no'));
+---
+<Base title={L.dictTitle} description={L.dictLead} lang={lang}>
+  <p class="crumb"><a href={path(lang, '/')}>{L.breadcrumbHome}</a> › {L.dictTitle}</p>
+  <h1>📖 {L.dictTitle}</h1>
+  <p class="lead">{L.dictLead}</p>
+
+  <div class="dictfilter">
+    <input id="dictInput" type="search" autocomplete="off" placeholder={L.dictSearch} aria-label={L.dictSearch} />
+  </div>
+
+  <div class="cards" id="dictList">
+    {items.map((it) => (
+      <article class="card" data-copy={`${it.word} – ${tdef(it, lang)}`} data-word={`${it.word} ${tdef(it, lang)}`.toLowerCase()} tabindex="0" title={L.copyHint}>
+        <p class="word">{it.word}</p>
+        <p class="def">{tdef(it, lang)}</p>
+        <button class="starbtn" data-fav={`${it.word} – ${tdef(it, lang)}`}>☆</button>
+      </article>
+    ))}
+  </div>
+  <p class="small" id="dictNone" hidden>{L.noResults}</p>
+
+  <script is:inline>
+    (function () {
+      var inp = document.getElementById('dictInput'), list = document.getElementById('dictList'),
+          none = document.getElementById('dictNone');
+      inp.addEventListener('input', function () {
+        var q = inp.value.trim().toLowerCase();
+        var shown = 0;
+        list.querySelectorAll('[data-word]').forEach(function (c) {
+          var hit = !q || c.getAttribute('data-word').indexOf(q) !== -1;
+          c.classList.toggle('hide', !hit);
+          if (hit) shown++;
+        });
+        none.hidden = shown > 0;
+      });
+    })();
+  </script>
+
+  <AdSlot />
+</Base>

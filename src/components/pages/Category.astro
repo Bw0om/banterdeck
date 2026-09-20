@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+import Card from '../Card.astro';
+import AdSlot from '../AdSlot.astro';
+import { situationSections, t, countSection } from '../../lib/content';
+import { ui, path, type Lang } from '../../lib/i18n';
+const { s, lang = 'en' } = Astro.props as { s: any; lang?: Lang };
+const L = ui(lang);
+const titled = s.groups.filter((g: any) => g.title);
+const description = `${t(s.desc, lang)} ${countSection(s)} ${lang === 'no' ? 'replikker' : 'lines'}.`;
+---
+<Base title={t(s.title, lang)} description={description} lang={lang}>
+  <p class="crumb"><a href={path(lang, '/')}>{L.breadcrumbHome}</a> › {t(s.title, lang)}</p>
+  <h1>{s.emoji} {t(s.title, lang)}</h1>
+  <p class="lead">{t(s.desc, lang)}</p>
+
+  {titled.length > 1 && (
+    <div class="chips">
+      {titled.map((g: any) => <a href={`#${g.id}`}>{t(g.title, lang)}<b>{g.items.length}</b></a>)}
+    </div>
+  )}
+
+  {s.groups.map((g: any, i: number) => (
+    <section class="group" id={g.id}>
+      {g.title && <h3>{t(g.title, lang)}<span class="group-count">{g.items.length}</span></h3>}
+      <div class="cards">
+        {g.items.map((it: any) => <Card it={it} lang={lang} />)}
+      </div>
+      {i === 0 && <AdSlot />}
+    </section>
+  ))}
+
+  <section class="more">
+    <h2>{L.otherSituations}</h2>
+    <ul>
+      {situationSections.filter((x) => x.id !== s.id).map((x) => (
+        <li><a class="btn ghost" href={path(lang, `/categories/${x.id}`)}>{x.emoji} {t(x.title, lang)}</a></li>
+      ))}
+      <li><a class="btn ghost" href={path(lang, '/drinking-games')}>🍺 {L.gamesTitle}</a></li>
+    </ul>
+  </section>
+</Base>

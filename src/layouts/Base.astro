@@ -1,0 +1,180 @@
+---
+import '../styles/global.css';
+import { SITE_NAME } from '../config';
+import { situationSections, t } from '../lib/content';
+import { ui, path, otherLangPath, type Lang } from '../lib/i18n';
+import AgeGate from '../components/AgeGate.astro';
+import Tools from '../components/Tools.astro';
+
+interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; }
+const { title, description, lang = 'en', gate = false, noindex = false } = Astro.props;
+const L = ui(lang);
+const desc = description || L.tagline;
+const fullTitle = title ? `${title} – ${SITE_NAME}` : `${SITE_NAME} – ${L.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const altPath = otherLangPath(lang, Astro.url.pathname);
+const enHref = new URL(lang === 'en' ? Astro.url.pathname : altPath, Astro.site);
+const noHref = new URL(lang === 'no' ? Astro.url.pathname : altPath, Astro.site);
+const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const nav = [
+  { href: path(lang, '/'), label: L.nav.home },
+  { href: path(lang, '/situations'), label: `💬 ${L.linesTitle}` },
+  { href: path(lang, '/dictionary'), label: `📖 ${L.dictTitle}` },
+  { href: path(lang, '/drinking-games'), label: `🍺 ${L.nav.games}` },
+];
+const subNav = situationSections.map((s) => ({ href: path(lang, `/categories/${s.id}`), label: `${s.emoji} ${t(s.title, lang)}` }));
+const isCurrent = (href: string) => {
+  const h = href.replace(/\/$/, '') || '/';
+  return current === h || (h !== '/' && h !== '/no' && current.startsWith(h + '/'));
+};
+---
+<!doctype html>
+<html lang={L.htmlLang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{fullTitle}</title>
+  <meta name="description" content={desc} />
+  {noindex && <meta name="robots" content="noindex, nofollow" />}
+  <link rel="canonical" href={canonical} />
+  <link rel="alternate" hreflang="en" href={enHref} />
+  <link rel="alternate" hreflang="no" href={noHref} />
+  <link rel="alternate" hreflang="x-default" href={enHref} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={desc} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:locale" content={L.locale} />
+  <meta name="theme-color" content="#141009" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Banterdeck" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
+  <script is:inline>
+    /* Kjenner igjen enheten før siden tegnes, så innholdet kan tilpasses uten hopp. */
+    (function () {
+      var h = document.documentElement, ua = navigator.userAgent || '';
+      var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+      var android = /Android/.test(ua);
+      var coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+      var mobile = ios || android || (coarse && window.innerWidth < 900);
+      var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+      h.classList.add(mobile ? 'is-mobile' : 'is-desktop');
+      if (ios) h.classList.add('is-ios');
+      if (android) h.classList.add('is-android');
+      if (standalone) h.classList.add('is-standalone');
+    })();
+  </script>
+  <slot name="head" />
+</head>
+<body>
+  <a class="skip" href="#innhold">{lang === 'no' ? 'Hopp til innhold' : 'Skip to content'}</a>
+
+  <div class="shell">
+    <aside class="side">
+      <a class="brand" href={path(lang, '/')}>{SITE_NAME}</a>
+      <button class="searchbtn" data-search>🔍 {L.search}<kbd>⌘K</kbd></button>
+      <nav class="sidenav" aria-label={L.pickMode}>
+        {nav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
+        <span class="navsplit">{L.pickSituation}</span>
+        {subNav.map((n) => <a class="sub" href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
+      </nav>
+      <a class="appbtn" href={path(lang, '/favourites')}>★ {L.favourites}</a>
+      <a class="langlink" href={altPath} hreflang={lang === 'en' ? 'no' : 'en'}>🌐 {L.switchTo}</a>
+      <p class="sidefoot">
+        <a href={path(lang, '/suggest')}>{L.nav.suggest}</a>
+        <a href={path(lang, '/account')}>{L.nav.account}</a>
+        <a href={path(lang, '/about')}>{L.nav.about}</a>
+      </p>
+    </aside>
+
+    <div class="mobilebar">
+      <a class="brand" href={path(lang, '/')}>{SITE_NAME}</a>
+      <span class="mobilebar-right">
+        <button class="langlink compact" data-search aria-label={L.search}>🔍</button>
+        <a class="langlink compact" href={path(lang, '/favourites')} aria-label={L.favourites}>★</a>
+        <a class="langlink compact" href={altPath} hreflang={lang === 'en' ? 'no' : 'en'}>🌐 {lang === 'en' ? 'NO' : 'EN'}</a>
+      </span>
+    </div>
+    <nav class="mobilenav" aria-label={L.pickMode}>
+      {nav.concat(subNav).map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
+    </nav>
+
+    <main class="main" id="innhold">
+      <slot />
+      <footer class="foot">
+        <span>© {new Date().getFullYear()} {SITE_NAME}</span>
+        <a href={path(lang, '/suggest')}>{L.nav.suggest}</a>
+        <a href={path(lang, '/account')}>{L.nav.account}</a>
+        <a href={path(lang, '/about')}>{L.nav.about}</a>
+        <a href={path(lang, '/privacy')}>{L.nav.privacy}</a>
+        <a href={path(lang, '/favourites')}>{L.favourites}</a>
+        <a href={altPath}>{L.switchTo}</a>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Aldersspørringen ligger UTENFOR .main, ellers blir den uskarp sammen med innholdet. -->
+  {gate && <AgeGate lang={lang} />}
+  <Tools lang={lang} />
+
+  {lang === 'en' && (
+    <div class="langbanner" id="langbanner" hidden>
+      <span>{L.bannerNo}</span>
+      <a class="btn gold small" href={altPath}>{L.bannerGo}</a>
+      <button class="linkbtn" id="bannerClose" aria-label={L.bannerClose}>✕</button>
+    </div>
+  )}
+
+  <div id="toast" class="toast" role="status">{L.copied}</div>
+
+  <script is:inline>
+    (function () {
+      function flash(el) {
+        el.classList.add('copied');
+        setTimeout(function () { el.classList.remove('copied'); }, 1100);
+        var t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(function () { t.classList.remove('show'); }, 1200);
+      }
+      document.addEventListener('click', function (e) {
+        var c = e.target.closest('[data-copy]');
+        if (!c) return;
+        var text = c.getAttribute('data-copy');
+        if (navigator.clipboard && navigator.clipboard.writeText)
+          navigator.clipboard.writeText(text).then(function () { flash(c); }).catch(function () { flash(c); });
+        else flash(c);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        var c = e.target.closest && e.target.closest('[data-copy]');
+        if (c && c.tagName !== 'BUTTON') { e.preventDefault(); c.click(); }
+      });
+
+      /* Offline-støtte, så siden virker som appen gjorde. */
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+      }
+
+      /* Tilbyr norsk til norske nettlesere – uten å tvinge noe. */
+      var b = document.getElementById('langbanner');
+      if (b) {
+        var wantsNo = (navigator.languages || [navigator.language || '']).some(function (l) { return /^(nb|nn|no)/i.test(l); });
+        var off = false;
+        try { off = localStorage.getItem('bd_lang_banner') === '0'; } catch (e) {}
+        if (wantsNo && !off) b.hidden = false;
+        document.getElementById('bannerClose').addEventListener('click', function () {
+          b.hidden = true;
+          try { localStorage.setItem('bd_lang_banner', '0'); } catch (e) {}
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

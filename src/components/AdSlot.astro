@@ -1,0 +1,12 @@
+---
+// Viser en AdSense-annonse KUN når ADSENSE_CLIENT er fylt ut i src/config.ts.
+import { ADSENSE_CLIENT, ADSENSE_SLOT } from '../config';
+const src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
+---
+{ADSENSE_CLIENT && (
+  <div class="ad" aria-label="Annonse">
+    <script async is:inline src={src} crossorigin="anonymous"></script>
+    <ins class="adsbygoogle" style="display:block" data-ad-client={ADSENSE_CLIENT} data-ad-slot={ADSENSE_SLOT} data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script is:inline>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+)}
