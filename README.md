@@ -164,3 +164,4 @@ Ordboka er ikke lenger en kategori under replikker. Vil du legge til flere toppn
 ### Ikoner
 
 `public/icon-192.png` og `icon-512.png` er enkle plassholdere. Bytt dem gjerne med en ordentlig logo i samme størrelser – filnavnene må være like.
+
