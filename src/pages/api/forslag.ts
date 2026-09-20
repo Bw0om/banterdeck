@@ -19,9 +19,12 @@ export const POST: APIRoute = async ({ request }) => {
   const navn = String(d.navn || '').trim().slice(0, 60);
   if (line.length < 3 || line.length > 300) return json({ ok: false, error: 'Replikken må være 3–300 tegn' }, 400);
 
-  const token = import.meta.env.GITHUB_TOKEN;
-  const repo = import.meta.env.GITHUB_REPO;
-  if (!token || !repo) return json({ ok: false, error: 'Serveren mangler oppsett' }, 500);
+  // process.env leses ved kjøring på Vercel; import.meta.env er reserve for lokal kjøring.
+  const env: any = (typeof process !== 'undefined' && process.env) || {};
+  const token = env.GITHUB_TOKEN || import.meta.env.GITHUB_TOKEN;
+  const repo = env.GITHUB_REPO || import.meta.env.GITHUB_REPO;
+  if (!token) return json({ ok: false, error: 'GITHUB_TOKEN mangler i Vercel (Settings → Environment Variables)' }, 500);
+  if (!repo) return json({ ok: false, error: 'GITHUB_REPO mangler i Vercel (Settings → Environment Variables)' }, 500);
 
   const meta = JSON.stringify({ k: kategori, c: ctx, l: line, n: navn });
   const body = [
@@ -38,6 +41,10 @@ export const POST: APIRoute = async ({ request }) => {
     headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
     body: JSON.stringify({ title: `Forslag: ${line.slice(0, 60)}`, body, labels: ['forslag'] }),
   });
-  if (!r.ok) return json({ ok: false, error: 'Kunne ikke lagre forslaget' }, 502);
+  if (!r.ok) {
+    let detail = '';
+    try { detail = ((await r.json()) as any).message || ''; } catch {}
+    return json({ ok: false, error: `GitHub svarte ${r.status}. ${detail}`.trim() }, 502);
+  }
   return json({ ok: true });
 };

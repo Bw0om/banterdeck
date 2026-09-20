@@ -67,7 +67,7 @@ const grouped = catSections.filter((s) => s.id !== 'ordbok').map((s) => ({
           var r = await fetch('/api/forslag', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
           var j = await r.json();
           if (j.ok) { f.reset(); count.textContent = '0'; say(T.ok, 'ok'); }
-          else say(T.generic, 'err');
+          else say(j.error || T.generic, 'err');
         } catch (err) { say(T.network, 'err'); }
         btn.disabled = false;
       });

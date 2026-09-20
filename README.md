@@ -126,10 +126,12 @@ create policy "egne rader" on public.decks
 
 3. **Project Settings → API**: kopier `Project URL` og `anon public`-nøkkelen
 4. **Authentication → URL Configuration**: legg til `https://banterdeck.com/account` og `https://banterdeck.com/no/account` under Redirect URLs
-5. I Vercel → **Settings → Environment Variables**:
-   - `PUBLIC_SUPABASE_URL` = prosjekt-URL-en
-   - `PUBLIC_SUPABASE_ANON_KEY` = anon-nøkkelen
+5. I Vercel → **Settings → Environment Variables**: `SUPABASE_URL` og `SUPABASE_ANON_KEY`.
+   Bruker du Vercels Supabase-integrasjon, lages disse automatisk og du trenger ikke gjøre noe.
+   Koden godtar også `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` og `PUBLIC_`-variantene.
 6. Redeploy
+
+**Aldri** bruk `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_SECRET_KEY`, `SUPABASE_JWT_SECRET` eller `POSTGRES_*` her. De omgår radsikkerheten og gir full tilgang til databasen.
 
 Innlogging skjer med e-postlenke – ingen passord å glemme. `anon`-nøkkelen er ment å være offentlig; det er radsikkerheten (RLS) over som gjør at ingen ser andres data.
 

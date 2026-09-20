@@ -1,16 +1,27 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../../config';
+import { supabaseUrl, supabaseAnonKey, supabaseDebug } from '../../config';
 import { ui, type Lang } from '../../lib/i18n';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
+const SUPABASE_URL = supabaseUrl();
+const SUPABASE_ANON_KEY = supabaseAnonKey();
 const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+const dbg = configured ? null : supabaseDebug();
 ---
 <Base title={L.accountTitle} description={L.accountLead} lang={lang} noindex={true}>
   <h1>{L.accountTitle}</h1>
   <p class="lead">{L.accountLead}</p>
 
-  {!configured && <div class="notice"><p>{L.notConfigured}</p></div>}
+  {!configured && (
+    <div class="notice">
+      <p>{L.notConfigured}</p>
+      <p class="small" style="margin-top:10px">
+        Diagnose · kjører på server: {dbg.runtime} · variabler synlige: {dbg.antall} ·
+        Supabase-navn funnet: {dbg.funnet}
+      </p>
+    </div>
+  )}
 
   {configured && (
     <>
