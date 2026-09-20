@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin
-Sitemap: https://banterdeck.com/sitemap-index.xml
