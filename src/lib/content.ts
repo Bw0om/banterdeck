@@ -3,6 +3,11 @@ import type { Lang } from './i18n';
 
 export const sections: any[] = raw as any[];
 export const catSections = sections.filter((s) => s.id !== 'spill');
+/** Replikker sortert etter situasjon (alt unntatt ordbok og drikkeleker). */
+export const situationSections = sections.filter((s) => s.id !== 'spill' && s.id !== 'ordbok');
+/** Ordboka – egen toppnivå-seksjon. */
+export const dictSection = sections.find((s) => s.id === 'ordbok');
+export const dictItems: any[] = dictSection.groups.flatMap((g: any) => g.items);
 export const spill = sections.find((s) => s.id === 'spill');
 
 /** Tekst fra {no,sv,en}-objekter eller rene strenger, med norsk som reserve. */

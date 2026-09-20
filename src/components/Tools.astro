@@ -1,0 +1,174 @@
+---
+import { ui, path, type Lang } from '../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+---
+<button class="tool dice" id="diceBtn" aria-label={L.dice} title={L.dice}>🎲</button>
+
+<div class="overlay search" id="searchOverlay" hidden>
+  <div class="searchbox">
+    <div class="searchhead">
+      <input id="searchInput" type="search" autocomplete="off" placeholder={L.searchPh} aria-label={L.search} />
+      <button class="linkbtn" id="searchClose" aria-label={L.close}>✕</button>
+    </div>
+    <p class="small searchnote" id="searchNote">{L.searchHint}</p>
+    <div class="cards" id="searchResults"></div>
+  </div>
+</div>
+
+<div class="overlay" id="diceOverlay" hidden>
+  <div class="sheet">
+    <p class="deal-eyebrow">🎲 {L.dice}</p>
+    <div class="dealcard" id="dealCard"></div>
+    <div class="row">
+      <button class="btn" id="dealCopy">{L.copy}</button>
+      <button class="btn gold" id="dealAgain">{L.another}</button>
+      <button class="btn ghost" id="dealClose">{L.close}</button>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ T: {
+  hint: L.searchHint, none: L.noResults, results: L.results, copy: L.copy,
+  favAdd: L.favAdd, favRemove: L.favRemove, copied: L.copied },
+  LANG: lang, FAVPATH: path(lang, '/favourites') }}>
+(function () {
+  var FAVS = 'bd_favs', OLD = 'lommearsenalet_v3';
+  var data = null, favs = [];
+
+  /* ---------- favoritter, med overføring fra den gamle appen ---------- */
+  function load() { try { return JSON.parse(localStorage.getItem(FAVS) || '[]'); } catch (e) { return []; } }
+  function save() { try { localStorage.setItem(FAVS, JSON.stringify(favs)); } catch (e) {} }
+  favs = load();
+  (function migrate() {
+    try {
+      if (localStorage.getItem('bd_migrated') === '1') return;
+      var old = JSON.parse(localStorage.getItem(OLD) || 'null');
+      if (old) {
+        (old.favs || []).forEach(function (f) { if (favs.indexOf(f) === -1) favs.push(f); });
+        var mine = [];
+        try { mine = JSON.parse(localStorage.getItem('bd_mine') || '[]'); } catch (e) {}
+        Object.keys(old.custom || {}).forEach(function (k) {
+          (old.custom[k] || []).forEach(function (it) {
+            if (it && it.line && !mine.some(function (m) { return m.line === it.line; })) mine.push(it);
+          });
+        });
+        localStorage.setItem('bd_mine', JSON.stringify(mine));
+        save();
+      }
+      localStorage.setItem('bd_migrated', '1');
+    } catch (e) {}
+  })();
+
+  function isFav(t) { return favs.indexOf(t) !== -1; }
+  function paintStars(root) {
+    (root || document).querySelectorAll('[data-fav]').forEach(function (b) {
+      var on = isFav(b.getAttribute('data-fav'));
+      b.classList.toggle('on', on);
+      b.textContent = on ? '★' : '☆';
+      b.setAttribute('aria-label', on ? T.favRemove : T.favAdd);
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-fav]');
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var t = b.getAttribute('data-fav');
+    var i = favs.indexOf(t);
+    if (i === -1) favs.push(t); else favs.splice(i, 1);
+    save(); paintStars();
+    if (document.body.dataset.page === 'favourites') location.reload();
+  });
+  paintStars();
+
+  /* ---------- felles innhold ---------- */
+  function getData() {
+    if (data) return Promise.resolve(data);
+    return fetch('/content.json').then(function (r) { return r.json(); }).then(function (j) { data = j; return j; });
+  }
+  function pick(o) { return !o ? '' : (typeof o === 'string' ? o : (o[LANG] || o.no || '')); }
+  function tf(it, f) {
+    if (LANG !== 'no' && it[LANG]) { var k = { line: 'l', ctx: 'c', note: 'n' }[f]; if (it[LANG][k]) return it[LANG][k]; }
+    return it[f] || '';
+  }
+  function flat(d) {
+    var out = [];
+    d.forEach(function (s) {
+      s.groups.forEach(function (g) {
+        g.items.forEach(function (it) {
+          if (g.type === 'dict') out.push({ kind: 'dict', word: it.word, def: (LANG !== 'no' && typeof it[LANG] === 'string') ? it[LANG] : it.def, cat: s.emoji + ' ' + pick(s.title) });
+          else if (g.type === 'game') out.push({ kind: 'game', name: pick(it.name), cat: s.emoji + ' ' + pick(s.title) });
+          else out.push({ kind: 'line', line: tf(it, 'line'), ctx: tf(it, 'ctx'), note: tf(it, 'note'), cat: s.emoji + ' ' + pick(s.title) });
+        });
+      });
+    });
+    return out;
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function cardHTML(it) {
+    var copy = it.kind === 'dict' ? (it.word + ' – ' + it.def) : (it.kind === 'game' ? it.name : it.line);
+    var body = it.kind === 'dict'
+      ? '<p class="word">' + esc(it.word) + '</p><p class="def">' + esc(it.def) + '</p>'
+      : it.kind === 'game'
+        ? '<p class="word">🍺 ' + esc(it.name) + '</p>'
+        : (it.ctx ? '<p class="ctx">' + esc(it.ctx) + '</p>' : '') + '<p class="line">«' + esc(it.line) + '»</p>' +
+          (it.note ? '<p class="note">' + esc(it.note) + '</p>' : '');
+    return '<article class="card" data-copy="' + esc(copy) + '" tabindex="0">' +
+      '<p class="catlabel">' + esc(it.cat) + '</p>' + body +
+      '<button class="starbtn" data-fav="' + esc(copy) + '">☆</button></article>';
+  }
+
+  /* ---------- søk ---------- */
+  var so = document.getElementById('searchOverlay'), si = document.getElementById('searchInput'),
+      sr = document.getElementById('searchResults'), sn = document.getElementById('searchNote');
+  function openSearch() {
+    so.hidden = false; document.body.classList.add('noscroll');
+    getData().then(function () { setTimeout(function () { si.focus(); }, 60); });
+  }
+  function closeSearch() { so.hidden = true; document.body.classList.remove('noscroll'); }
+  document.addEventListener('click', function (e) { if (e.target.closest('[data-search]')) { e.preventDefault(); openSearch(); } });
+  document.getElementById('searchClose').addEventListener('click', closeSearch);
+  so.addEventListener('click', function (e) { if (e.target === so) closeSearch(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeSearch(); document.getElementById('diceOverlay').hidden = true; document.body.classList.remove('noscroll'); }
+    if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) { e.preventDefault(); openSearch(); }
+  });
+  var timer;
+  si.addEventListener('input', function () {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      var q = si.value.trim().toLowerCase();
+      if (q.length < 2) { sr.innerHTML = ''; sn.textContent = T.hint; return; }
+      getData().then(function (d) {
+        var hits = flat(d).filter(function (it) {
+          return JSON.stringify(it).toLowerCase().indexOf(q) !== -1;
+        }).slice(0, 60);
+        sn.textContent = hits.length ? hits.length + ' ' + T.results : T.none;
+        sr.innerHTML = hits.map(cardHTML).join('');
+        paintStars(sr);
+      });
+    }, 120);
+  });
+
+  /* ---------- terning ---------- */
+  var dov = document.getElementById('diceOverlay'), dc = document.getElementById('dealCard'), last = null;
+  function deal() {
+    getData().then(function (d) {
+      var pool = flat(d).filter(function (x) { return x.kind === 'line'; });
+      var p = pool[Math.floor(Math.random() * pool.length)];
+      var guard = 0;
+      while (last && p.line === last && pool.length > 1 && guard++ < 10) p = pool[Math.floor(Math.random() * pool.length)];
+      last = p.line;
+      dc.innerHTML = (p.ctx ? '<p class="ctx">' + esc(p.ctx) + '</p>' : '') +
+        '<p class="line">«' + esc(p.line) + '»</p>' + (p.note ? '<p class="note">' + esc(p.note) + '</p>' : '');
+      dc.setAttribute('data-copy', p.line);
+      dov.hidden = false; document.body.classList.add('noscroll');
+    });
+  }
+  document.getElementById('diceBtn').addEventListener('click', deal);
+  document.getElementById('dealAgain').addEventListener('click', deal);
+  document.getElementById('dealCopy').addEventListener('click', function () { dc.click(); });
+  document.getElementById('dealClose').addEventListener('click', function () { dov.hidden = true; document.body.classList.remove('noscroll'); });
+  dov.addEventListener('click', function (e) { if (e.target === dov) { dov.hidden = true; document.body.classList.remove('noscroll'); } });
+})();
+</script>

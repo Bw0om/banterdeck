@@ -1,8 +1,8 @@
 ---
 import Category from '../../../components/pages/Category.astro';
-import { catSections } from '../../../lib/content';
+import { situationSections } from '../../../lib/content';
 export function getStaticPaths() {
-  return catSections.map((s) => ({ params: { id: s.id }, props: { s } }));
+  return situationSections.map((s) => ({ params: { id: s.id }, props: { s } }));
 }
 const { s } = Astro.props;
 ---

@@ -138,3 +138,29 @@ Innlogging skjer med e-postlenke – ingen passord å glemme. `anon`-nøkkelen e
 ## Enhetsgjenkjenning
 
 Et lite skript legger klasser på `<html>`: `is-ios`, `is-android`, `is-mobile`, `is-desktop`, `is-standalone`. CSS-klassene `.ios-only`, `.android-only`, `.desktop-only` og `.standalone-only` viser riktig installasjonsveiledning på forsiden – iPhone får Safari-stegene, Android får Chrome-stegene, PC får beskjed om å åpne siden på telefonen, og har du allerede installert appen, forsvinner hele seksjonen.
+
+## Én ting, ikke to
+
+Appen og nettsiden er slått sammen. `/app/` sender nå videre til forsiden, og alt appen kunne finnes i selve siden:
+
+- **Søk** – knapp i menyen (⌘K / Ctrl+K på PC, forstørrelsesglass på mobil). Søker i replikker, ord og leker på valgt språk.
+- **Terning** – den runde knappen nede til høyre trekker en tilfeldig replikk.
+- **Favoritter** – stjerna på hvert kort, samlet på `/favourites`.
+- **Offline** – en service worker (`public/sw.js`) lagrer sidene du har besøkt.
+- **Installerbar** – `public/manifest.webmanifest` gjør at «Legg til på Hjem-skjerm» oppfører seg som en app.
+
+Favoritter og egne replikker fra den gamle appen overføres automatisk første gang noen åpner siden i samme nettleser.
+
+### Tre toppnivå
+
+Forsiden deler innholdet i tre, i stedet for én lang liste med kategorier:
+
+1. **Replikker** (`/situations`) → velg situasjon → kategorisiden
+2. **Ordbok** (`/dictionary`) → alfabetisk, med eget filterfelt
+3. **Drikkeleker** (`/drinking-games`) → regler per lek
+
+Ordboka er ikke lenger en kategori under replikker. Vil du legge til flere toppnivå senere (f.eks. «Annet»), lag en ny seksjon i `content.json` og et kort til i `src/components/pages/Home.astro`.
+
+### Ikoner
+
+`public/icon-192.png` og `icon-512.png` er enkle plassholdere. Bytt dem gjerne med en ordentlig logo i samme størrelser – filnavnene må være like.

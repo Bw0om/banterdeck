@@ -1,17 +1,15 @@
 ---
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../AdSlot.astro';
-import { catSections, games, t, tf, isCrude, countSection, totals } from '../../lib/content';
+import { situationSections, dictItems, games, t, tf, isCrude, totals } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 
-const pool = catSections
-  .filter((s) => s.id !== 'ordbok')
-  .flatMap((s) => s.groups.flatMap((g: any) =>
-    g.items.filter((it: any) => it.line && !isCrude(it))
-      .map((it: any) => ({ l: tf(it, 'line', lang), c: tf(it, 'ctx', lang), k: `${s.emoji} ${t(s.title, lang)}` }))
-  ));
+const pool = situationSections.flatMap((s) => s.groups.flatMap((g: any) =>
+  g.items.filter((it: any) => it.line && !isCrude(it))
+    .map((it: any) => ({ l: tf(it, 'line', lang), c: tf(it, 'ctx', lang), k: `${s.emoji} ${t(s.title, lang)}` }))
+));
 const first = pool[0];
 ---
 <Base lang={lang}>
@@ -22,11 +20,6 @@ const first = pool[0];
     <p class="today-ctx" id="todayCtx">{first.c || L.todayLabel}</p>
     <p class="today" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
     <p class="today-cat" id="todayCat">{L.todayPre}{first.k}{L.todayPost}</p>
-
-    <div class="actions">
-      <a class="btn" href="/app/">{L.openApp}</a>
-      <a class="btn ghost" href={path(lang, '/drinking-games')}>{L.seeGames}</a>
-    </div>
   </section>
 
   <script is:inline define:vars={{ pool, todayLabel: L.todayLabel, pre: L.todayPre, post: L.todayPost }}>
@@ -40,20 +33,28 @@ const first = pool[0];
     document.getElementById('todayCat').textContent = pre + p.k + post;
   </script>
 
-  <h2>{L.pickSituation}</h2>
-  <div class="tiles">
-    {catSections.map((s) => (
-      <a class="tile" href={path(lang, `/categories/${s.id}`)}>
-        <span class="em">{s.emoji}</span>
-        <span class="tn">{t(s.title, lang)}</span>
-        <span class="tg">{t(s.desc, lang)}</span>
-        <span class="tc">{countSection(s)} {L.itemsLabel}</span>
-      </a>
-    ))}
-    <a class="tile wide" href={path(lang, '/drinking-games')}>
+  <h2>{L.pickMode}</h2>
+  <div class="modes">
+    <a class="mode" href={path(lang, '/situations')}>
+      <span class="glow"></span>
+      <span class="em">💬</span>
+      <span class="mt">{L.linesTitle}</span>
+      <span class="ml">{L.linesLead}</span>
+      <span class="mc">{L.browseLines} · {totals.lines} {L.itemsLabel}</span>
+    </a>
+    <a class="mode" href={path(lang, '/dictionary')}>
+      <span class="glow"></span>
+      <span class="em">📖</span>
+      <span class="mt">{L.dictTitle}</span>
+      <span class="ml">{L.dictLead}</span>
+      <span class="mc">{L.browseDict} · {dictItems.length} {L.itemsLabel}</span>
+    </a>
+    <a class="mode" href={path(lang, '/drinking-games')}>
+      <span class="glow"></span>
       <span class="em">🍺</span>
-      <span><span class="tn">{L.gamesTitle}</span><br /><span class="tg">{L.gamesTeaser}</span></span>
-      <span class="tc">{games.length} {L.gamesLabel}</span>
+      <span class="mt">{L.gamesTitle}</span>
+      <span class="ml">{L.gamesTeaser}</span>
+      <span class="mc">{L.browseGames} · {games.length} {L.gamesLabel}</span>
     </a>
   </div>
 
@@ -67,5 +68,4 @@ const first = pool[0];
     <p class="desktop-only">💻 {L.desktopSteps}</p>
     <p class="standalone-only">✓ {L.standalone}</p>
   </div>
-  <p style="margin-top:14px"><a class="btn gold" href="/app/">{L.openApp}</a></p>
 </Base>

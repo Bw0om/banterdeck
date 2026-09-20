@@ -213,3 +213,52 @@ body.gated{overflow:hidden}
 .mini{font-family:var(--display);font-weight:600;font-size:12.5px;border:1px solid var(--border2);border-radius:9px;
   padding:6px 10px;background:var(--card2);color:var(--ink)}
 .mini.danger{color:var(--accent);border-color:rgba(255,106,77,.4)}
+
+/* ---------- verktøy: søk, terning, favoritter ---------- */
+.tool{position:fixed;z-index:80;width:56px;height:56px;border-radius:50%;border:1px solid rgba(244,183,64,.4);
+  background:linear-gradient(135deg,#2e2110,#241a0d);color:var(--ink);font-size:25px;display:grid;place-items:center;
+  box-shadow:0 8px 26px rgba(0,0,0,.5)}
+.tool:active{transform:scale(.93)}
+.tool.dice{right:18px;bottom:calc(env(safe-area-inset-bottom) + 18px)}
+.searchbtn{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:14px;
+  color:var(--muted);background:var(--card);border:1px solid var(--border-2,rgba(248,233,210,.18));border-radius:11px;
+  padding:10px 13px;width:100%;text-align:left}
+.searchbtn:hover{color:var(--ink);border-color:var(--border2);text-decoration:none}
+.searchbtn kbd{margin-left:auto;font-family:var(--display);font-size:11px;color:var(--faint);border:1px solid var(--border);
+  border-radius:6px;padding:2px 6px}
+.overlay.search{align-items:flex-start;justify-content:center;padding:6vh 16px 16px;overflow-y:auto}
+.overlay[hidden]{display:none}
+.searchbox{width:100%;max-width:680px;background:var(--bg2);border:1px solid var(--border2);border-radius:18px;padding:16px}
+.searchhead{display:flex;gap:10px;align-items:center}
+.searchhead input{flex:1;font-family:var(--serif);font-size:17px;color:var(--ink);background:var(--card);
+  border:1px solid var(--border2);border-radius:12px;padding:13px 14px;outline:none}
+.searchhead input:focus{border-color:var(--accent)}
+.searchnote{margin:10px 2px 12px}
+.overlay.search .cards{max-height:62vh;overflow-y:auto;max-width:none}
+body.noscroll{overflow:hidden}
+.starbtn{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;border:none;cursor:pointer;
+  font-size:15px;line-height:1;display:grid;place-items:center;background:rgba(244,183,64,.10);color:var(--faint)}
+.starbtn.on{background:rgba(244,183,64,.22);color:var(--gold)}
+.card{padding-right:50px}
+.card::after{right:46px}
+
+/* ---------- tre toppnivå ---------- */
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:8px}
+.mode{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:22px 20px;color:var(--ink);min-height:186px;position:relative;overflow:hidden}
+.mode:hover{text-decoration:none;background:var(--card2);border-color:var(--border2)}
+.mode .em{font-size:32px;line-height:1}
+.mode .mt{font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:-.02em}
+.mode .ml{font-size:14.5px;color:var(--muted);line-height:1.45}
+.mode .mc{margin-top:auto;font-family:var(--display);font-size:12.5px;font-weight:700;color:var(--gold);letter-spacing:.02em}
+.mode .glow{position:absolute;right:-34px;top:-34px;width:110px;height:110px;border-radius:50%;background:var(--accent);opacity:.08;filter:blur(8px)}
+
+/* ---------- ordbok ---------- */
+.dictfilter{margin:18px 0 22px;max-width:420px}
+.dictfilter input{width:100%;font-family:var(--serif);font-size:16.5px;color:var(--ink);background:var(--card);
+  border:1px solid var(--border2);border-radius:12px;padding:12px 14px;outline:none}
+.dictfilter input:focus{border-color:var(--accent)}
+.card.hide{display:none}
+.navsplit{font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);padding:14px 12px 6px}
+.sidenav a.sub{font-size:14px;padding-left:18px}
