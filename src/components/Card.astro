@@ -1,0 +1,15 @@
+---
+import { tf } from '../lib/content';
+import { ui, type Lang } from '../lib/i18n';
+const { it, lang = 'en' } = Astro.props as { it: any; lang?: Lang };
+const L = ui(lang);
+const line = tf(it, 'line', lang);
+const ctx = tf(it, 'ctx', lang);
+const note = tf(it, 'note', lang);
+---
+<article class="card" data-copy={line} tabindex="0" title={L.copyHint}>
+  {ctx && <p class="ctx">{ctx}</p>}
+  <p class="line">«{line}»</p>
+  {note && <p class="note">{note}</p>}
+  <button class="starbtn" data-fav={line}>☆</button>
+</article>

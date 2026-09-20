@@ -1,0 +1,377 @@
+---
+import Base from '../layouts/Base.astro';
+import { GITHUB_REPO } from '../config';
+import { sections } from '../lib/content';
+---
+<Base title="Admin">
+  <Fragment slot="head"><meta name="robots" content="noindex, nofollow" /></Fragment>
+
+  <h1>Admin</h1>
+
+  <!-- Innlogging -->
+  <section id="login">
+    <p class="lead">Lim inn GitHub-tokenen din for å redigere innholdet. Den lagres kun i denne nettleseren.</p>
+    <div class="form">
+      <div class="field">
+        <label class="lab" for="repoInput">Repo</label>
+        <input id="repoInput" placeholder="brukernavn/repo" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="field">
+        <label class="lab" for="tokenInput">GitHub-token</label>
+        <input id="tokenInput" type="password" placeholder="github_pat_…" autocomplete="off" />
+        <p class="help">Fine-grained token med Contents og Issues: read &amp; write. Lagres kun i denne nettleseren.</p>
+      </div>
+      <button class="btn gold" id="loginBtn">Logg inn</button>
+      <p id="loginMsg" class="formmsg" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- Panelet -->
+  <section id="panel" hidden>
+    <div class="adminbar">
+      <div class="tabs">
+        <button class="tab on" data-tab="innhold">Innhold</button>
+        <button class="tab" data-tab="forslag">Forslag <span id="sugCount" class="badge"></span></button>
+      </div>
+      <div class="barright">
+        <span id="dirty" class="small"></span>
+        <button class="btn" id="publishBtn">Publiser endringer</button>
+        <button class="btn ghost" id="logoutBtn">Logg ut</button>
+      </div>
+    </div>
+    <p id="status" class="small" role="status"></p>
+
+    <!-- Fane: innhold -->
+    <div id="tab-innhold">
+      <div class="pickrow">
+        <div class="field"><label class="lab" for="secSel">Seksjon</label><select id="secSel"></select></div>
+        <div class="field"><label class="lab" for="grpSel">Gruppe</label><select id="grpSel"></select></div>
+        <button class="btn gold" id="addBtn">+ Legg til</button>
+      </div>
+      <div id="list" class="cards"></div>
+    </div>
+
+    <!-- Fane: forslag -->
+    <div id="tab-forslag" hidden>
+      <p class="small">Forslag sendt inn via <a href="/forslag">/forslag</a>. «Godta» legger replikken i valgt gruppe og lukker forslaget når du publiserer.</p>
+      <div id="sugList" class="cards"></div>
+    </div>
+  </section>
+
+  <!-- Skjema for å legge til / redigere -->
+  <div class="overlay" id="editOverlay" hidden>
+    <div class="sheet">
+      <h2 id="editTitle">Legg til</h2>
+      <p class="small" id="editWhere"></p>
+      <div id="fields"></div>
+      <div class="row">
+        <button class="btn gold" id="saveBtn">Lagre</button>
+        <button class="btn ghost" id="cancelBtn">Avbryt</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .adminbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:18px 0 10px}
+    .tabs{display:flex;gap:6px}
+    .tab{font-family:var(--display);font-weight:600;font-size:14px;color:var(--muted);background:var(--card);
+      border:1px solid var(--border);border-radius:999px;padding:8px 15px}
+    .tab.on{color:var(--ink);background:var(--card2);border-color:var(--border2)}
+    .badge{color:var(--gold);font-weight:700}
+    .barright{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .pickrow{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:16px 0 20px}
+    .pickrow .field{min-width:220px}
+    .row{display:flex;gap:8px;margin-top:14px}
+    .item{position:relative;padding-right:118px}
+    .item .acts{position:absolute;top:12px;right:12px;display:flex;gap:6px}
+    .mini{font-family:var(--display);font-weight:600;font-size:12.5px;border:1px solid var(--border2);border-radius:9px;
+      padding:6px 10px;background:var(--card2);color:var(--ink)}
+    .mini.danger{color:var(--accent);border-color:rgba(255,106,77,.4)}
+    .overlay{position:fixed;inset:0;z-index:150;background:rgba(8,6,4,.78);display:flex;align-items:flex-end;justify-content:center}
+    .overlay[hidden]{display:none}
+    .sheet{background:var(--bg2);border:1px solid var(--border2);border-radius:20px 20px 0 0;width:100%;max-width:640px;
+      padding:22px 20px 28px;max-height:88vh;overflow-y:auto}
+    .sheet h2{margin:0 0 4px}
+    @media (min-width:700px){.overlay{align-items:center}.sheet{border-radius:20px}}
+    #fields .field{margin-bottom:14px}
+    .sugmeta{font-family:var(--display);font-size:12.5px;color:var(--faint);margin-top:8px}
+  </style>
+
+  <script is:inline define:vars={{ REPO_DEFAULT: GITHUB_REPO, BUILT: sections }}>
+  (function () {
+    var KEY = 'bd_admin';
+    var gh = { repo: '', token: '' };
+    var data = null;      // innholdet vi redigerer
+    var sha = null;       // sha til content.json
+    var sugs = [];        // forslag fra GitHub issues
+    var dirty = false;
+    var closeIssues = []; // forslag som skal lukkes ved publisering
+
+    var $ = function (id) { return document.getElementById(id); };
+    var status = function (t) { $('status').textContent = t || ''; };
+    var setDirty = function (v) {
+      dirty = v;
+      $('dirty').textContent = v ? '● Ikke publisert' : '';
+    };
+    window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+    /* ---------- innlogging ---------- */
+    try {
+      var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+      if (saved.token) gh = saved;
+    } catch (e) {}
+    $('repoInput').value = gh.repo || REPO_DEFAULT;
+    $('tokenInput').value = gh.token || '';
+
+    $('loginBtn').addEventListener('click', function () {
+      gh.repo = $('repoInput').value.trim();
+      gh.token = $('tokenInput').value.trim();
+      if (!gh.repo || !gh.token) { $('loginMsg').textContent = 'Fyll inn begge feltene.'; $('loginMsg').className = 'formmsg err'; return; }
+      try { localStorage.setItem(KEY, JSON.stringify(gh)); } catch (e) {}
+      start();
+    });
+    $('logoutBtn').addEventListener('click', function () {
+      if (dirty && !confirm('Du har upubliserte endringer. Logge ut likevel?')) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.reload();
+    });
+    if (gh.token) start();
+
+    function api(path, opts) {
+      opts = opts || {};
+      opts.headers = Object.assign({ Authorization: 'Bearer ' + gh.token, Accept: 'application/vnd.github+json' }, opts.headers || {});
+      return fetch('https://api.github.com/repos/' + gh.repo + path, opts);
+    }
+    function b64encode(s) { return btoa(unescape(encodeURIComponent(s))); }
+    function b64decode(s) { return decodeURIComponent(escape(atob(s.replace(/\n/g, '')))); }
+
+    async function start() {
+      $('loginMsg').textContent = 'Henter innhold…'; $('loginMsg').className = 'formmsg';
+      try {
+        var r = await api('/contents/src/data/content.json?ref=main');
+        if (r.status === 401 || r.status === 403) throw new Error('Tokenen ble avvist. Sjekk at den har Contents: read & write på dette repoet.');
+        if (!r.ok) throw new Error('Fant ikke src/data/content.json i ' + gh.repo);
+        var j = await r.json();
+        sha = j.sha;
+        data = JSON.parse(b64decode(j.content));
+      } catch (e) {
+        $('loginMsg').textContent = e.message; $('loginMsg').className = 'formmsg err';
+        return;
+      }
+      $('login').hidden = true;
+      $('panel').hidden = false;
+      buildSelects();
+      renderList();
+      loadSuggestions();
+    }
+
+    /* ---------- hjelpere ---------- */
+    var no = function (o) { return !o ? '' : (typeof o === 'string' ? o : (o.no || '')); };
+    var curSec = function () { return data[+$('secSel').value]; };
+    var curGrp = function () { return curSec().groups[+$('grpSel').value]; };
+    var kindOf = function (g) { return g.type === 'dict' ? 'dict' : (g.type === 'game' ? 'game' : 'line'); };
+
+    function buildSelects() {
+      $('secSel').innerHTML = data.map(function (s, i) { return '<option value="' + i + '">' + s.emoji + ' ' + no(s.title) + '</option>'; }).join('');
+      buildGroupSelect();
+    }
+    function buildGroupSelect() {
+      var s = curSec();
+      $('grpSel').innerHTML = s.groups.map(function (g, i) {
+        return '<option value="' + i + '">' + (no(g.title) || '(uten navn)') + ' (' + g.items.length + ')</option>';
+      }).join('');
+    }
+    $('secSel').addEventListener('change', function () { buildGroupSelect(); renderList(); });
+    $('grpSel').addEventListener('change', renderList);
+
+    document.querySelectorAll('.tab').forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        var t = b.dataset.tab;
+        $('tab-innhold').hidden = t !== 'innhold';
+        $('tab-forslag').hidden = t !== 'forslag';
+      });
+    });
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /* ---------- liste ---------- */
+    function renderList() {
+      var g = curGrp(), kind = kindOf(g);
+      if (!g.items.length) { $('list').innerHTML = '<p class="small">Ingen oppføringer i denne gruppa ennå.</p>'; return; }
+      $('list').innerHTML = g.items.map(function (it, i) {
+        var body;
+        if (kind === 'dict') body = '<p class="word">' + esc(it.word) + '</p><p class="def">' + esc(it.def) + '</p>';
+        else if (kind === 'game') body = '<p class="word">' + esc(no(it.name)) + '</p><p class="def small">' + esc(no(it.gear)) + ' · ' + esc(it.pl || '') + '</p>';
+        else body = (it.ctx ? '<p class="ctx">' + esc(it.ctx) + '</p>' : '') + '<p class="line">«' + esc(it.line) + '»</p>' + (it.note ? '<p class="note">' + esc(it.note) + '</p>' : '');
+        return '<article class="card item">' + body +
+          '<div class="acts"><button class="mini" data-edit="' + i + '">Endre</button>' +
+          '<button class="mini danger" data-del="' + i + '">Slett</button></div></article>';
+      }).join('');
+    }
+
+    $('list').addEventListener('click', function (e) {
+      var ed = e.target.closest('[data-edit]'), de = e.target.closest('[data-del]');
+      if (ed) openEdit(+ed.dataset.edit);
+      if (de) {
+        var g = curGrp(), i = +de.dataset.del;
+        var label = kindOf(g) === 'dict' ? g.items[i].word : (kindOf(g) === 'game' ? no(g.items[i].name) : g.items[i].line);
+        if (!confirm('Slette denne?\n\n' + label)) return;
+        g.items.splice(i, 1);
+        setDirty(true); buildGroupSelect(); renderList();
+      }
+    });
+
+    /* ---------- skjema ---------- */
+    var editIdx = -1, pendingSug = null;
+
+    function fieldsFor(kind, it) {
+      it = it || {};
+      var f = function (label, id, val, ta, hint) {
+        var input = ta
+          ? '<textarea id="' + id + '" rows="4">' + esc(val || '') + '</textarea>'
+          : '<input id="' + id + '" value="' + esc(val || '') + '" />';
+        return '<div class="field"><label class="lab" for="' + id + '">' + label + (hint ? '<span class="opt">' + hint + '</span>' : '') + '</label>' + input + '</div>';
+      };
+      if (kind === 'dict') return f('Ord / uttrykk', 'f_word', it.word) + f('Betydning', 'f_def', it.def, true);
+      if (kind === 'game') return f('Navn', 'f_name', no(it.name)) + f('Utstyr', 'f_gear', no(it.gear)) +
+        f('Spillere', 'f_pl', it.pl, false, 'f.eks. 3+') +
+        f('Regler', 'f_rules', ((it.rules && it.rules.no) || []).join('\n'), true, 'én linje per avsnitt · «b|» foran gir punkt');
+      return f('Når / kontekst', 'f_ctx', it.ctx, false, 'valgfritt') +
+        f('Replikk', 'f_line', it.line, true) +
+        f('Kommentar', 'f_note', it.note, false, 'valgfritt · skriv «Grov» for å merke den');
+    }
+
+    function openEdit(i, sug) {
+      var g = curGrp(), kind = kindOf(g);
+      editIdx = typeof i === 'number' ? i : -1;
+      pendingSug = sug || null;
+      $('editTitle').textContent = editIdx >= 0 ? 'Endre' : 'Legg til';
+      $('editWhere').textContent = no(curSec().title) + ' › ' + (no(g.title) || 'gruppe');
+      $('fields').innerHTML = fieldsFor(kind, editIdx >= 0 ? g.items[editIdx] : (sug ? { ctx: sug.c, line: sug.l } : null));
+      $('editOverlay').hidden = false;
+    }
+    $('cancelBtn').addEventListener('click', function () { $('editOverlay').hidden = true; pendingSug = null; });
+    $('addBtn').addEventListener('click', function () { openEdit(); });
+
+    $('saveBtn').addEventListener('click', function () {
+      var g = curGrp(), kind = kindOf(g), v = function (id) { var el = $(id); return el ? el.value.trim() : ''; };
+      var entry;
+      if (kind === 'dict') {
+        if (!v('f_word')) return alert('Skriv inn ordet.');
+        entry = { word: v('f_word'), def: v('f_def') };
+      } else if (kind === 'game') {
+        if (!v('f_name')) return alert('Skriv inn navnet.');
+        entry = { name: { no: v('f_name') }, gear: { no: v('f_gear') }, pl: v('f_pl'),
+                  rules: { no: v('f_rules').split('\n').map(function (x) { return x.trim(); }).filter(Boolean) } };
+      } else {
+        if (!v('f_line')) return alert('Skriv inn replikken.');
+        entry = { line: v('f_line') };
+        if (v('f_ctx')) entry.ctx = v('f_ctx');
+        if (v('f_note')) entry.note = v('f_note');
+      }
+      if (editIdx >= 0) {
+        // behold oversettelser som allerede finnes
+        var old = g.items[editIdx];
+        ['sv', 'en'].forEach(function (l) { if (old[l]) entry[l] = old[l]; });
+        g.items[editIdx] = entry;
+      } else {
+        g.items.push(entry);
+        if (pendingSug) { closeIssues.push(pendingSug.number); sugs = sugs.filter(function (x) { return x.number !== pendingSug.number; }); renderSugs(); }
+      }
+      pendingSug = null;
+      $('editOverlay').hidden = true;
+      setDirty(true); buildGroupSelect(); renderList();
+    });
+
+    /* ---------- forslag ---------- */
+    async function loadSuggestions() {
+      try {
+        var r = await api('/issues?state=open&labels=forslag&per_page=50');
+        if (!r.ok) return;
+        var list = await r.json();
+        sugs = list.map(function (is) {
+          var m = /<!--\s*(\{[\s\S]*?\})\s*-->/.exec(is.body || '');
+          var meta = {};
+          try { meta = m ? JSON.parse(m[1]) : {}; } catch (e) {}
+          return { number: is.number, url: is.html_url, when: (is.created_at || '').slice(0, 10),
+                   k: meta.k || '', c: meta.c || '', l: meta.l || is.title.replace(/^Forslag:\s*/, ''), n: meta.n || '' };
+        });
+        renderSugs();
+      } catch (e) {}
+    }
+    function renderSugs() {
+      $('sugCount').textContent = sugs.length ? '(' + sugs.length + ')' : '';
+      if (!sugs.length) { $('sugList').innerHTML = '<p class="small">Ingen nye forslag.</p>'; return; }
+      $('sugList').innerHTML = sugs.map(function (s, i) {
+        return '<article class="card item">' + (s.c ? '<p class="ctx">' + esc(s.c) + '</p>' : '') +
+          '<p class="line">«' + esc(s.l) + '»</p>' +
+          '<p class="sugmeta">' + esc(s.k || 'ingen kategori') + (s.n ? ' · fra ' + esc(s.n) : '') + ' · ' + esc(s.when) +
+          ' · <a href="' + esc(s.url) + '" target="_blank" rel="noopener">på GitHub</a></p>' +
+          '<div class="acts"><button class="mini" data-acc="' + i + '">Godta</button>' +
+          '<button class="mini danger" data-rej="' + i + '">Avvis</button></div></article>';
+      }).join('');
+    }
+    $('sugList').addEventListener('click', function (e) {
+      var a = e.target.closest('[data-acc]'), r = e.target.closest('[data-rej]');
+      if (a) {
+        var s = sugs[+a.dataset.acc];
+        // hopp til gruppa forslagsstilleren valgte, hvis den finnes
+        if (s.k && s.k.indexOf('.') > 0) {
+          var p = s.k.split('.');
+          var si = data.findIndex(function (x) { return x.id === p[0]; });
+          if (si >= 0) {
+            $('secSel').value = si; buildGroupSelect();
+            var gi = data[si].groups.findIndex(function (x) { return x.id === p[1]; });
+            if (gi >= 0) $('grpSel').value = gi;
+            renderList();
+          }
+        }
+        document.querySelector('.tab[data-tab=innhold]').click();
+        openEdit(null, s);
+      }
+      if (r) {
+        var s2 = sugs[+r.dataset.rej];
+        if (!confirm('Avvise dette forslaget?\n\n' + s2.l)) return;
+        closeIssues.push(s2.number);
+        sugs = sugs.filter(function (x) { return x.number !== s2.number; });
+        setDirty(true); renderSugs();
+      }
+    });
+
+    /* ---------- publisering ---------- */
+    $('publishBtn').addEventListener('click', async function () {
+      if (!dirty) { status('Ingen endringer å publisere.'); return; }
+      $('publishBtn').disabled = true;
+      status('Publiserer…');
+      try {
+        var body = JSON.stringify(data, null, 1);
+        var r = await api('/contents/src/data/content.json', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: 'Oppdaterer innhold via admin', content: b64encode(body), sha: sha, branch: 'main' }),
+        });
+        if (r.status === 409) throw new Error('Fila er endret av noen andre. Last siden på nytt og prøv igjen.');
+        if (!r.ok) throw new Error('Publisering feilet (' + r.status + ').');
+        var j = await r.json();
+        sha = j.content.sha;
+        for (var i = 0; i < closeIssues.length; i++) {
+          await api('/issues/' + closeIssues[i], {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ state: 'closed' }),
+          });
+        }
+        closeIssues = [];
+        setDirty(false);
+        status('Publisert ✓ Nettsiden bygges på nytt og er oppdatert om ca. ett minutt.');
+      } catch (e) {
+        status(e.message);
+      }
+      $('publishBtn').disabled = false;
+    });
+  })();
+  </script>
+</Base>

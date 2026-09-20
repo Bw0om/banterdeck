@@ -1,0 +1,194 @@
+---
+import Base from '../../layouts/Base.astro';
+import { supabaseUrl, supabaseAnonKey, supabaseDebug } from '../../config';
+import { ui, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+const SUPABASE_URL = supabaseUrl();
+const SUPABASE_ANON_KEY = supabaseAnonKey();
+const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+const dbg = configured ? null : supabaseDebug();
+---
+<Base title={L.accountTitle} description={L.accountLead} lang={lang} noindex={true}>
+  <h1>{L.accountTitle}</h1>
+  <p class="lead">{L.accountLead}</p>
+
+  {!configured && (
+    <div class="notice">
+      <p>{L.notConfigured}</p>
+      <p class="small" style="margin-top:10px">
+        Diagnose · kjører på server: {dbg.runtime} · variabler synlige: {dbg.antall} ·
+        Supabase-navn funnet: {dbg.funnet}
+      </p>
+    </div>
+  )}
+
+  {configured && (
+    <>
+      <section id="signin">
+        <form class="form" id="loginForm" novalidate>
+          <div class="field">
+            <label class="lab" for="email">{L.email}</label>
+            <input id="email" type="email" autocomplete="email" required placeholder="deg@example.com" />
+          </div>
+          <button class="btn gold" type="submit" id="linkBtn">{L.sendLink}</button>
+          <p id="loginMsg" class="formmsg" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section id="dash" hidden>
+        <div class="dashbar">
+          <p class="small"><span>{L.signedInAs}</span> <strong id="who"></strong></p>
+          <button class="btn ghost small" id="outBtn">{L.signOut}</button>
+        </div>
+        <p id="syncMsg" class="formmsg" role="status" aria-live="polite"></p>
+
+        <h2>{L.myLines}</h2>
+        <form class="form addform" id="addForm" novalidate>
+          <div class="field">
+            <label class="lab" for="aCtx">{L.fWhen}<span class="opt">{L.optional}</span></label>
+            <input id="aCtx" maxlength="120" placeholder={L.fWhenPh} />
+          </div>
+          <div class="field">
+            <label class="lab" for="aLine">{L.fLine}</label>
+            <textarea id="aLine" rows="2" maxlength="300" placeholder={L.fLinePh}></textarea>
+          </div>
+          <button class="btn gold" type="submit">{L.addLine}</button>
+        </form>
+        <div id="mine" class="cards"></div>
+      </section>
+
+      <script is:inline define:vars={{ URL_: SUPABASE_URL, KEY: SUPABASE_ANON_KEY, T: {
+        linkSent: L.linkSent, syncing: L.syncing, synced: L.synced, none: L.noLines,
+        del: L.delete, generic: L.errGeneric, copyHint: L.copyHint } }}>
+      (function () {
+        var TOKENS = 'bd_session', LOCAL = 'bd_mine';
+        var session = null, mine = [];
+        var $ = function (id) { return document.getElementById(id); };
+        function say(el, text, kind) { el.textContent = text; el.className = 'formmsg' + (kind ? ' ' + kind : ''); }
+        function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+        /* --- lagring --- */
+        function loadLocal() { try { return JSON.parse(localStorage.getItem(LOCAL) || '[]'); } catch (e) { return []; } }
+        function saveLocal() { try { localStorage.setItem(LOCAL, JSON.stringify(mine)); } catch (e) {} }
+        function loadSession() { try { return JSON.parse(localStorage.getItem(TOKENS) || 'null'); } catch (e) { return null; } }
+        function saveSession(s) { try { s ? localStorage.setItem(TOKENS, JSON.stringify(s)) : localStorage.removeItem(TOKENS); } catch (e) {} }
+
+        /* --- Supabase REST --- */
+        function sb(path, opts) {
+          opts = opts || {};
+          opts.headers = Object.assign({ apikey: KEY, 'Content-Type': 'application/json' }, opts.headers || {});
+          if (session && session.access_token) opts.headers.Authorization = 'Bearer ' + session.access_token;
+          return fetch(URL_ + path, opts);
+        }
+
+        /* --- innlogging via e-postlenke --- */
+        $('loginForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          var email = $('email').value.trim();
+          if (!email) return;
+          $('linkBtn').disabled = true;
+          try {
+            var r = await sb('/auth/v1/otp', {
+              method: 'POST',
+              body: JSON.stringify({ email: email, create_user: true, options: { email_redirect_to: location.href } }),
+            });
+            say($('loginMsg'), r.ok ? T.linkSent : T.generic, r.ok ? 'ok' : 'err');
+          } catch (err) { say($('loginMsg'), T.generic, 'err'); }
+          $('linkBtn').disabled = false;
+        });
+
+        /* --- fanger opp tokens fra e-postlenken --- */
+        (function catchHash() {
+          if (location.hash.indexOf('access_token') === -1) return;
+          var p = new URLSearchParams(location.hash.slice(1));
+          var s = { access_token: p.get('access_token'), refresh_token: p.get('refresh_token') };
+          if (s.access_token) { saveSession(s); session = s; }
+          history.replaceState(null, '', location.pathname);
+        })();
+
+        session = session || loadSession();
+
+        async function whoAmI() {
+          if (!session) return null;
+          var r = await sb('/auth/v1/user');
+          if (!r.ok) { saveSession(null); session = null; return null; }
+          return r.json();
+        }
+
+        /* --- synkronisering: én rad per bruker --- */
+        async function pull() {
+          var r = await sb('/rest/v1/decks?select=data');
+          if (!r.ok) return null;
+          var rows = await r.json();
+          return rows.length ? rows[0].data : null;
+        }
+        async function push() {
+          say($('syncMsg'), T.syncing);
+          var r = await sb('/rest/v1/decks', {
+            method: 'POST',
+            headers: { Prefer: 'resolution=merge-duplicates' },
+            body: JSON.stringify({ user_id: session.user_id, data: { lines: mine } }),
+          });
+          say($('syncMsg'), r.ok ? T.synced : T.generic, r.ok ? 'ok' : 'err');
+        }
+
+        function render() {
+          if (!mine.length) { $('mine').innerHTML = '<p class="small">' + T.none + '</p>'; return; }
+          $('mine').innerHTML = mine.map(function (it, i) {
+            return '<article class="card item" data-copy="' + esc(it.line) + '" tabindex="0" title="' + esc(T.copyHint) + '">' +
+              (it.ctx ? '<p class="ctx">' + esc(it.ctx) + '</p>' : '') +
+              '<p class="line">«' + esc(it.line) + '»</p>' +
+              '<div class="acts"><button class="mini danger" data-del="' + i + '">' + esc(T.del) + '</button></div></article>';
+          }).join('');
+        }
+
+        $('mine').addEventListener('click', function (e) {
+          var d = e.target.closest('[data-del]');
+          if (!d) return;
+          e.stopPropagation();
+          mine.splice(+d.dataset.del, 1);
+          saveLocal(); render(); if (session) push();
+        });
+
+        $('addForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var line = $('aLine').value.trim();
+          if (!line) return;
+          var entry = { line: line };
+          var ctx = $('aCtx').value.trim();
+          if (ctx) entry.ctx = ctx;
+          mine.push(entry);
+          $('aLine').value = ''; $('aCtx').value = '';
+          saveLocal(); render(); if (session) push();
+        });
+
+        (async function init() {
+          mine = loadLocal();
+          var user = await whoAmI();
+          if (!user) { render(); return; }
+          session.user_id = user.id;
+          $('signin').hidden = true;
+          $('dash').hidden = false;
+          $('who').textContent = user.email || '';
+          var remote = await pull();
+          if (remote && remote.lines) {
+            // slår sammen lokalt og skyen, uten duplikater
+            var seen = {};
+            mine.concat(remote.lines).forEach(function (it) { seen[JSON.stringify(it)] = it; });
+            mine = Object.keys(seen).map(function (k) { return seen[k]; });
+            saveLocal();
+          }
+          render();
+          await push();
+        })();
+
+        $('outBtn').addEventListener('click', function () {
+          saveSession(null);
+          location.reload();
+        });
+      })();
+      </script>
+    </>
+  )}
+</Base>
