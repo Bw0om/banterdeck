@@ -165,3 +165,11 @@ Ordboka er ikke lenger en kategori under replikker. Vil du legge til flere toppn
 
 `public/icon-192.png` og `icon-512.png` er enkle plassholdere. Bytt dem gjerne med en ordentlig logo i samme størrelser – filnavnene må være like.
 
+## Sømløshet
+
+- **Sideoverganger** – Astros ClientRouter bytter side uten hvitt blink. Verktøyene (søk, terning, favoritter) kobler seg på igjen automatisk ved hvert sidebytte via `astro:page-load`.
+- **Fanelinje nederst på mobil** – Hjem, Replikker, Ordbok, Drikkeleker, Favoritter. Samme mønster som en app; du er aldri mer enn ett trykk fra hoveddelene.
+- **Klebrig navigasjon** – gruppevelgeren på kategorisider og søkefeltet i ordboka følger med når du scroller.
+- **Toppmenyen på mobil** viser nå bare situasjonene, siden fanene dekker toppnivåene.
+
+Terningknappen flytter seg automatisk opp over fanelinja på mobil.

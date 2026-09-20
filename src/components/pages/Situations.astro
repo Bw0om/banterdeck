@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../AdSlot.astro';
+import { situationSections, t, countSection, totals } from '../../lib/content';
+import { ui, path, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+---
+<Base title={L.linesTitle} description={L.linesLead} lang={lang}>
+  <p class="crumb"><a href={path(lang, '/')}>{L.breadcrumbHome}</a> › {L.linesTitle}</p>
+  <h1>💬 {L.linesTitle}</h1>
+  <p class="lead">{L.linesLead}</p>
+
+  <div class="tiles" style="margin-top:22px">
+    {situationSections.map((s) => (
+      <a class="tile" href={path(lang, `/categories/${s.id}`)}>
+        <span class="em">{s.emoji}</span>
+        <span class="tn">{t(s.title, lang)}</span>
+        <span class="tg">{t(s.desc, lang)}</span>
+        <span class="tc">{countSection(s)} {L.itemsLabel}</span>
+      </a>
+    ))}
+  </div>
+
+  <AdSlot />
+</Base>

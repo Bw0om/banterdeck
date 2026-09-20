@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../AdSlot.astro';
+import { situationSections, dictItems, games, t, tf, isCrude, totals } from '../../lib/content';
+import { ui, path, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+
+const pool = situationSections.flatMap((s) => s.groups.flatMap((g: any) =>
+  g.items.filter((it: any) => it.line && !isCrude(it))
+    .map((it: any) => ({ l: tf(it, 'line', lang), c: tf(it, 'ctx', lang), k: `${s.emoji} ${t(s.title, lang)}` }))
+));
+const first = pool[0];
+---
+<Base lang={lang}>
+  <section class="hero">
+    <h1>{L.heroTitle}</h1>
+    <p class="lead">{L.heroSub(totals.lines, totals.words, totals.games)}</p>
+
+    <p class="today-ctx" id="todayCtx">{first.c || L.todayLabel}</p>
+    <p class="today" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
+    <p class="today-cat" id="todayCat">{L.todayPre}{first.k}{L.todayPost}</p>
+  </section>
+
+  <script is:inline define:vars={{ pool, todayLabel: L.todayLabel, pre: L.todayPre, post: L.todayPost }}>
+    var d = new Date();
+    var day = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+    var p = pool[day % pool.length];
+    document.getElementById('todayCtx').textContent = p.c || todayLabel;
+    var line = document.getElementById('todayLine');
+    line.textContent = '«' + p.l + '»';
+    line.setAttribute('data-copy', p.l);
+    document.getElementById('todayCat').textContent = pre + p.k + post;
+  </script>
+
+  <h2>{L.pickMode}</h2>
+  <div class="modes">
+    <a class="mode" href={path(lang, '/situations')}>
+      <span class="glow"></span>
+      <span class="em">💬</span>
+      <span class="mt">{L.linesTitle}</span>
+      <span class="ml">{L.linesLead}</span>
+      <span class="mc">{L.browseLines} · {totals.lines} {L.itemsLabel}</span>
+    </a>
+    <a class="mode" href={path(lang, '/dictionary')}>
+      <span class="glow"></span>
+      <span class="em">📖</span>
+      <span class="mt">{L.dictTitle}</span>
+      <span class="ml">{L.dictLead}</span>
+      <span class="mc">{L.browseDict} · {dictItems.length} {L.itemsLabel}</span>
+    </a>
+    <a class="mode" href={path(lang, '/drinking-games')}>
+      <span class="glow"></span>
+      <span class="em">🍺</span>
+      <span class="mt">{L.gamesTitle}</span>
+      <span class="ml">{L.gamesTeaser}</span>
+      <span class="mc">{L.browseGames} · {games.length} {L.gamesLabel}</span>
+    </a>
+  </div>
+
+  <AdSlot />
+
+  <h2>{L.takeItWithYou}</h2>
+  <p class="lead">{L.takeItBody}</p>
+  <div class="device">
+    <p class="ios-only">📱 {L.iosSteps}</p>
+    <p class="android-only">📱 {L.androidSteps}</p>
+    <p class="desktop-only">💻 {L.desktopSteps}</p>
+    <p class="standalone-only">✓ {L.standalone}</p>
+  </div>
+</Base>
