@@ -173,3 +173,32 @@ Ordboka er ikke lenger en kategori under replikker. Vil du legge til flere toppn
 - **Toppmenyen på mobil** viser nå bare situasjonene, siden fanene dekker toppnivåene.
 
 Terningknappen flytter seg automatisk opp over fanelinja på mobil.
+
+## Innhold som bare finnes på ett språk
+
+Noe lar seg ikke oversette – gamle norske ord som «slubberdegullion», og fornemme
+omskrivninger der hele poenget ligger i embetsmannsnorsken. Slikt innhold merkes
+i `content.json` med `only`:
+
+```json
+{ "id": "fornemt", "emoji": "🎩", "only": "no", "title": { "no": "Fornemt sagt" }, ... }
+```
+
+`only` kan stå på en **seksjon** eller en **gruppe**. Verdien er `"no"` eller `"en"`.
+Siden filtrerer automatisk overalt: forsiden, situasjonslista, ordboka, søket,
+terningen, tellingen av oppføringer – og selve sidene bygges ikke for språket de
+ikke hører hjemme i (`/categories/fornemt` finnes bare under `/no/`).
+
+Vil du merke noe som engelsk-only, sett `"only": "en"`. Utelater du feltet, vises
+innholdet på begge språk som før.
+
+### Nytt innhold i denne runden (kun norsk)
+
+- **🎩 Fornemt sagt** – «I stedet for å si …»: alkoholproblem, blakk, gambling,
+  brudd, jomfru, arbeidsledig, barn på vei, pluss løse vendinger
+- **📜 Sitater & ordtak** – Eggen, Solberg, Stoltenberg, Nansen, og norske ordtak
+  som ikke gir mening
+- **Ordboka** – ny gruppe «Gamle ord som bør gjøre comeback»: patron, kakadue,
+  portemonné, huttetu, slubberdegullion, sjarlatan, dilk, trehue, snurrepave,
+  ranglefant, lommelens, bonvivant, sutalaus, hurlumhei, hurramegrundt, pjåsk,
+  påseilet, lurk, knusbedårende, lystseilas, klabberas, pinglestrikk
