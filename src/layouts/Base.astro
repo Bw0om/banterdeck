@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { SITE_NAME } from '../config';
-import { situationSections, t } from '../lib/content';
+import { situationSectionsFor, dictSection, visible, t } from '../lib/content';
 import { ui, path, otherLangPath, type Lang } from '../lib/i18n';
 import AgeGate from '../components/AgeGate.astro';
 import Tools from '../components/Tools.astro';
@@ -18,13 +18,14 @@ const enHref = new URL(lang === 'en' ? Astro.url.pathname : altPath, Astro.site)
 const noHref = new URL(lang === 'no' ? Astro.url.pathname : altPath, Astro.site);
 const current = Astro.url.pathname.replace(/\/$/, '') || '/';
 
+const hasDict = visible(dictSection, lang);
 const nav = [
   { href: path(lang, '/'), label: L.nav.home },
   { href: path(lang, '/situations'), label: `💬 ${L.linesTitle}` },
-  { href: path(lang, '/dictionary'), label: `📖 ${L.dictTitle}` },
+  ...(hasDict ? [{ href: path(lang, '/dictionary'), label: `📖 ${L.dictTitle}` }] : []),
   { href: path(lang, '/drinking-games'), label: `🍺 ${L.nav.games}` },
 ];
-const subNav = situationSections.map((s) => ({ href: path(lang, `/categories/${s.id}`), label: `${s.emoji} ${t(s.title, lang)}` }));
+const subNav = situationSectionsFor(lang).map((s) => ({ href: path(lang, `/categories/${s.id}`), label: `${s.emoji} ${t(s.title, lang)}` }));
 const isCurrent = (href: string) => {
   const h = href.replace(/\/$/, '') || '/';
   return current === h || (h !== '/' && h !== '/no' && current.startsWith(h + '/'));
@@ -127,8 +128,10 @@ const isCurrent = (href: string) => {
       <span class="ti">🏠</span><span class="tl">{L.nav.home}</span></a>
     <a href={path(lang, '/situations')} aria-current={isCurrent(path(lang, '/situations')) || current.includes('/categories/') ? 'page' : undefined}>
       <span class="ti">💬</span><span class="tl">{L.linesTitle}</span></a>
-    <a href={path(lang, '/dictionary')} aria-current={isCurrent(path(lang, '/dictionary')) ? 'page' : undefined}>
-      <span class="ti">📖</span><span class="tl">{L.dictTitle}</span></a>
+    {hasDict && (
+      <a href={path(lang, '/dictionary')} aria-current={isCurrent(path(lang, '/dictionary')) ? 'page' : undefined}>
+        <span class="ti">📖</span><span class="tl">{L.dictTitle}</span></a>
+    )}
     <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
       <span class="ti">🍺</span><span class="tl">{L.nav.games}</span></a>
     <a href={path(lang, '/favourites')} aria-current={isCurrent(path(lang, '/favourites')) ? 'page' : undefined}>
