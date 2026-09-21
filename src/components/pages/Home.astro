@@ -1,13 +1,14 @@
 ---
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../AdSlot.astro';
-import { situationSectionsFor, dictItemsFor, langGroups, games, t, tf, isCrude, totalsFor } from '../../lib/content';
+import { situationSectionsFor, dictItemsFor, dictSection, visible, langGroups, games, t, tf, isCrude, totalsFor } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 
 const totals = totalsFor(lang);
 const dictItems = dictItemsFor(lang);
+const hasDict = visible(dictSection, lang);
 const pool = situationSectionsFor(lang).flatMap((s) => langGroups(s, lang).flatMap((g: any) =>
   g.items.filter((it: any) => it.line && !isCrude(it))
     .map((it: any) => ({ l: tf(it, 'line', lang), c: tf(it, 'ctx', lang), k: `${s.emoji} ${t(s.title, lang)}` }))
@@ -44,13 +45,15 @@ const first = pool[0];
       <span class="ml">{L.linesLead}</span>
       <span class="mc">{L.browseLines} · {totals.lines} {L.itemsLabel}</span>
     </a>
-    <a class="mode" href={path(lang, '/dictionary')}>
-      <span class="glow"></span>
-      <span class="em">📖</span>
-      <span class="mt">{L.dictTitle}</span>
-      <span class="ml">{L.dictLead}</span>
-      <span class="mc">{L.browseDict} · {dictItems.length} {L.itemsLabel}</span>
-    </a>
+    {hasDict && (
+      <a class="mode" href={path(lang, '/dictionary')}>
+        <span class="glow"></span>
+        <span class="em">📖</span>
+        <span class="mt">{L.dictTitle}</span>
+        <span class="ml">{L.dictLead}</span>
+        <span class="mc">{L.browseDict} · {dictItems.length} {L.itemsLabel}</span>
+      </a>
+    )}
     <a class="mode" href={path(lang, '/drinking-games')}>
       <span class="glow"></span>
       <span class="em">🍺</span>
