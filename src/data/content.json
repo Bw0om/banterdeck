@@ -3169,7 +3169,6 @@
    },
    {
     "id": "gamle",
-    "only": "no",
     "title": {
      "no": "Gamle ord som bør gjøre comeback"
     },
@@ -3265,7 +3264,8 @@
      }
     ]
    }
-  ]
+  ],
+  "only": "no"
  },
  {
   "id": "fleksnes",
