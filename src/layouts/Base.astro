@@ -218,6 +218,18 @@ const isCurrent = (href: string) => {
 
       /* Tilbyr norsk til norske nettlesere – uten å tvinge noe. Kjøres per side. */
       function page() {
+      /* Klebrige filtre får bakgrunn bare mens de er festet øverst. */
+      document.querySelectorAll('.sticky').forEach(function (el) {
+        if (el.dataset.stickyBound || !('IntersectionObserver' in window)) return;
+        el.dataset.stickyBound = '1';
+        var mark = document.createElement('div');
+        mark.style.cssText = 'height:1px;margin-bottom:-1px';
+        el.parentNode.insertBefore(mark, el);
+        var top = parseFloat(getComputedStyle(el).top) || 0;
+        new IntersectionObserver(function (e) {
+          el.classList.toggle('is-stuck', !e[0].isIntersecting);
+        }, { rootMargin: '-' + (top + 1) + 'px 0px 0px 0px' }).observe(mark);
+      });
       var b = document.getElementById('langbanner');
       if (b && !b.dataset.bound) {
         b.dataset.bound = '1';
