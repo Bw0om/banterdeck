@@ -100,7 +100,7 @@ const L = ui(lang);
         g.items.forEach(function (it) {
           if (g.type === 'dict') out.push({ kind: 'dict', word: it.word, def: (LANG !== 'no' && typeof it[LANG] === 'string') ? it[LANG] : it.def, cat: s.emoji + ' ' + pick(s.title) });
           else if (g.type === 'game') out.push({ kind: 'game', name: pick(it.name), cat: s.emoji + ' ' + pick(s.title) });
-          else out.push({ kind: 'line', line: tf(it, 'line'), ctx: tf(it, 'ctx'), note: tf(it, 'note'), cat: s.emoji + ' ' + pick(s.title) });
+          else out.push({ kind: 'line', line: tf(it, 'line'), ctx: tf(it, 'ctx'), note: tf(it, 'note'), tags: it._s || '', cat: s.emoji + ' ' + pick(s.title) });
         });
       });
     });
