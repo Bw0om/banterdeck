@@ -59,6 +59,15 @@ const isCurrent = (href: string) => {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
   <script is:inline>
+    /* Innloggingslenker fra Supabase kan lande på feil side – send dem til kontosiden. */
+    (function () {
+      var h = location.hash || '';
+      if ((h.indexOf('access_token=') !== -1 || h.indexOf('error_description=') !== -1)
+          && !/\/account\/?$/.test(location.pathname)) {
+        var acc = location.pathname.indexOf('/no/') === 0 || location.pathname === '/no' ? '/no/account' : '/account';
+        location.replace(acc + h);
+      }
+    })();
     /* Kjenner igjen enheten før siden tegnes, så innholdet kan tilpasses uten hopp. */
     (function () {
       var h = document.documentElement, ua = navigator.userAgent || '';
