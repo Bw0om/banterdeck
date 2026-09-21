@@ -1,9 +1,0 @@
----
-import Situation from '../../../components/pages/Situation.astro';
-import { situationsFor } from '../../../lib/content';
-export function getStaticPaths() {
-  return situationsFor('no').map((sit) => ({ params: { id: sit.id }, props: { sit } }));
-}
-const { sit } = Astro.props;
----
-<Situation sit={sit} lang="no" />
