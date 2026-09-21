@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../AdSlot.astro';
+import { spill, games, t } from '../../lib/content';
+import { ui, path, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+---
+<Base title={L.gamesTitle} description={L.gamesDesc(games.length)} lang={lang} gate={true}>
+  <p class="crumb"><a href={path(lang, '/')}>{L.breadcrumbHome}</a> › {L.gamesTitle}</p>
+  <h1>🍺 {L.gamesTitle}</h1>
+  <p class="lead">{L.gamesLead}</p>
+
+  {spill.groups.map((g: any, i: number) => (
+    <section class="group">
+      <h3>{t(g.title, lang)}</h3>
+      <div class="gamelist">
+        {g.items.map((it: any) => {
+          const game = games.find((x) => x.name === it.name);
+          return (
+            <a class="game" href={path(lang, `/drinking-games/${game.slug}`)}>
+              <span class="gn">{t(it.name, lang)}</span>
+              <span class="gm">🃏 {t(it.gear, lang)}</span>
+              <span class="gm">👥 {it.pl} {L.players}</span>
+            </a>
+          );
+        })}
+      </div>
+      {i === 0 && <AdSlot />}
+    </section>
+  ))}
+</Base>

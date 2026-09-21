@@ -1,0 +1,23 @@
+---
+import { tf, situationById, t } from '../lib/content';
+import { ui, path, type Lang } from '../lib/i18n';
+const { it, lang = 'en', from = '', hideSit = '' } =
+  Astro.props as { it: any; lang?: Lang; from?: string; hideSit?: string };
+const L = ui(lang);
+const line = tf(it, 'line', lang);
+const ctx = tf(it, 'ctx', lang);
+const note = tf(it, 'note', lang);
+const tags = (it.sit || []).filter((x: string) => x !== hideSit).map(situationById).filter(Boolean).slice(0, 2);
+---
+<article class="card" data-copy={line} tabindex="0" title={L.copyHint}>
+  {from && <p class="catlabel">{from}</p>}
+  {ctx && <p class="ctx">{ctx}</p>}
+  <p class="line">«{line}»</p>
+  {note && <p class="note">{note}</p>}
+  {tags.length > 0 && (
+    <p class="sittags">
+      {tags.map((x: any) => <a href={path(lang, `/situations/${x.id}`)}>{x.emoji} {t(x.title, lang)}</a>)}
+    </p>
+  )}
+  <button class="starbtn" data-fav={line}>☆</button>
+</article>
