@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ui, path, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+---
+<Base title={L.favourites} lang={lang} noindex={true}>
+  <p class="crumb"><a href={path(lang, '/')}>{L.breadcrumbHome}</a> › {L.favourites}</p>
+  <h1>★ {L.favourites}</h1>
+  <div class="cards" id="favList"></div>
+  <p class="lead" id="favEmpty" hidden>{L.favEmpty}</p>
+
+  <script is:inline define:vars={{ EMPTY: L.favEmpty, HINT: L.copyHint }}>
+    (function () {
+      document.body.dataset.page = 'favourites';
+      var favs = [];
+      try { favs = JSON.parse(localStorage.getItem('bd_favs') || '[]'); } catch (e) {}
+      var list = document.getElementById('favList');
+      if (!favs.length) { document.getElementById('favEmpty').hidden = false; return; }
+      function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+      list.innerHTML = favs.map(function (t) {
+        return '<article class="card" data-copy="' + esc(t) + '" tabindex="0" title="' + esc(HINT) + '">' +
+          '<p class="line">' + esc(t) + '</p>' +
+          '<button class="starbtn on" data-fav="' + esc(t) + '">★</button></article>';
+      }).join('');
+    })();
+  </script>
+</Base>
