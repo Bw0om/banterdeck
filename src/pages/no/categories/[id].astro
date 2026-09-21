@@ -1,9 +1,0 @@
----
-import Category from '../../../components/pages/Category.astro';
-import { situationSectionsFor } from '../../../lib/content';
-export function getStaticPaths() {
-  return situationSectionsFor('no').map((s) => ({ params: { id: s.id }, props: { s } }));
-}
-const { s } = Astro.props;
----
-<Category s={s} lang="no" />
