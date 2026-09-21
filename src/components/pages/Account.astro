@@ -60,7 +60,7 @@ const dbg = configured ? null : supabaseDebug();
 
       <script is:inline define:vars={{ URL_: SUPABASE_URL, KEY: SUPABASE_ANON_KEY, T: {
         linkSent: L.linkSent, syncing: L.syncing, synced: L.synced, none: L.noLines,
-        del: L.delete, generic: L.errGeneric, copyHint: L.copyHint } }}>
+        del: L.delete, generic: L.errGeneric, copyHint: L.copyHint, linkBad: L.linkBad } }}>
       (function () {
         var TOKENS = 'bd_session', LOCAL = 'bd_mine';
         var session = null, mine = [];
@@ -89,9 +89,10 @@ const dbg = configured ? null : supabaseDebug();
           if (!email) return;
           $('linkBtn').disabled = true;
           try {
-            var r = await sb('/auth/v1/otp', {
+            var back = location.origin + location.pathname;
+            var r = await sb('/auth/v1/otp?redirect_to=' + encodeURIComponent(back), {
               method: 'POST',
-              body: JSON.stringify({ email: email, create_user: true, options: { email_redirect_to: location.href } }),
+              body: JSON.stringify({ email: email, create_user: true }),
             });
             say($('loginMsg'), r.ok ? T.linkSent : T.generic, r.ok ? 'ok' : 'err');
           } catch (err) { say($('loginMsg'), T.generic, 'err'); }
@@ -100,6 +101,13 @@ const dbg = configured ? null : supabaseDebug();
 
         /* --- fanger opp tokens fra e-postlenken --- */
         (function catchHash() {
+          if (location.hash.indexOf('error') !== -1) {
+            var ep = new URLSearchParams(location.hash.slice(1));
+            var why = (ep.get('error_description') || ep.get('error') || '').replace(/\+/g, ' ');
+            say($('loginMsg'), T.linkBad + (why ? ' (' + why + ')' : ''), 'err');
+            history.replaceState(null, '', location.pathname);
+            return;
+          }
           if (location.hash.indexOf('access_token') === -1) return;
           var p = new URLSearchParams(location.hash.slice(1));
           var s = { access_token: p.get('access_token'), refresh_token: p.get('refresh_token') };
