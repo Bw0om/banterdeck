@@ -23,7 +23,9 @@ export const UI = {
     openApp: 'Open the app',
     heroTitle: 'Never be lost for words again.',
     heroSub: (l: number, w: number, g: number) =>
-      `${l} comebacks, ${w} slang expressions and ${g} drinking games — sorted by the situation you are in.`,
+      w > 0
+        ? `${l} comebacks, ${w} slang expressions and ${g} drinking games — sorted by the situation you are in.`
+        : `${l} comebacks and ${g} drinking games — sorted by the situation you are in.`,
     todayLabel: 'Line of the day',
     todayPre: 'Line of the day from ',
     todayPost: '. Click to copy.',
@@ -135,7 +137,9 @@ export const UI = {
     openApp: 'Åpne appen',
     heroTitle: 'Aldri stå tom for svar igjen.',
     heroSub: (l: number, w: number, g: number) =>
-      `${l} frekke replikker, ${w} slengord og ${g} drikkeleker – sortert etter situasjonen du står i.`,
+      w > 0
+        ? `${l} frekke replikker, ${w} slengord og ${g} drikkeleker – sortert etter situasjonen du står i.`
+        : `${l} frekke replikker og ${g} drikkeleker – sortert etter situasjonen du står i.`,
     todayLabel: 'Dagens replikk',
     todayPre: 'Dagens replikk fra ',
     todayPost: '. Klikk for å kopiere.',
