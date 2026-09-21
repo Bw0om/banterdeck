@@ -1,0 +1,13 @@
+---
+// Samlinger (Fornemt, Sitater, Fleksnes) har egne sider.
+// De gamle sted-kategoriene (Fest, Jobb, Gjengen, Overalt) er erstattet av situasjonene,
+// så adressene deres sender videre dit i stedet for å gi 404.
+import Category from '../../components/pages/Category.astro';
+import Redirect from '../../components/Redirect.astro';
+import { situationSectionsFor } from '../../lib/content';
+export function getStaticPaths() {
+  return situationSectionsFor('en').map((s) => ({ params: { id: s.id }, props: { s } }));
+}
+const { s } = Astro.props;
+---
+{s.kind === 'collection' ? <Category s={s} lang="en" /> : <Redirect to="/situations" />}

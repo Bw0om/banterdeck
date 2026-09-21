@@ -1,0 +1,12 @@
+---
+import Redirect from '../../components/Redirect.astro';
+import { sections } from '../../lib/content';
+export function getStaticPaths() {
+  return sections.filter((s) => s.id !== 'spill').map((s) => ({ params: { id: s.id } }));
+}
+const { id } = Astro.params;
+const collections = ['fornemt', 'sitater', 'fleksnes'];
+const to = id === 'ordbok' ? '/no/dictionary'
+  : collections.includes(id as string) ? `/no/categories/${id}` : '/no/situations';
+---
+<Redirect to={to} />
