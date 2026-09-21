@@ -75,6 +75,7 @@ export function isCrude(it: any): boolean {
 }
 
 export function countSection(s: any, lang: Lang = 'no'): number {
+  if (!visible(s, lang)) return 0;
   return langGroups(s, lang).reduce((n: number, g: any) => n + g.items.length, 0);
 }
 
