@@ -1,0 +1,76 @@
+---
+import Base from '../../layouts/Base.astro';
+import { catSections, t } from '../../lib/content';
+import { ui, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+const grouped = catSections.filter((s) => s.id !== 'ordbok').map((s) => ({
+  label: `${s.emoji} ${t(s.title, lang)}`,
+  options: s.groups.map((g: any) => ({ id: `${s.id}.${g.id}`, label: t(g.title, lang) || t(s.title, lang) })),
+}));
+---
+<Base title={L.suggestTitle} description={L.suggestLead} lang={lang}>
+  <h1>{L.suggestTitle}</h1>
+  <p class="lead">{L.suggestLead}</p>
+
+  <form id="f" class="form" novalidate>
+    <div class="field">
+      <label class="lab" for="kategori">{L.fSituation}</label>
+      <select id="kategori" name="kategori">
+        <option value="">{L.fPick}</option>
+        {grouped.map((grp) => (
+          <optgroup label={grp.label}>
+            {grp.options.map((o) => <option value={o.id}>{o.label}</option>)}
+          </optgroup>
+        ))}
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="lab" for="ctx">{L.fWhen}<span class="opt">{L.optional}</span></label>
+      <input id="ctx" name="ctx" maxlength="120" placeholder={L.fWhenPh} />
+      <p class="help">{L.fWhenHelp}</p>
+    </div>
+
+    <div class="field">
+      <label class="lab" for="line">{L.fLine}</label>
+      <textarea id="line" name="line" rows="3" maxlength="300" required placeholder={L.fLinePh}></textarea>
+      <p class="count"><span id="count">0</span>/300</p>
+    </div>
+
+    <div class="field">
+      <label class="lab" for="navn">{L.fName}<span class="opt">{L.optional}</span></label>
+      <input id="navn" name="navn" maxlength="60" placeholder={L.fNamePh} />
+    </div>
+
+    <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+    <button class="btn gold" type="submit" id="send">{L.send}</button>
+    <p id="msg" class="formmsg" role="status" aria-live="polite"></p>
+  </form>
+
+  <div class="notice"><p>{L.suggestNotice}</p></div>
+
+  <script is:inline define:vars={{ T: { sending: L.sending, ok: L.sentOk, short: L.errShort, generic: L.errGeneric, network: L.errNetwork } }}>
+    (function () {
+      var f = document.getElementById('f'), msg = document.getElementById('msg'),
+          btn = document.getElementById('send'), line = document.getElementById('line'),
+          count = document.getElementById('count');
+      line.addEventListener('input', function () { count.textContent = line.value.length; });
+      function say(text, kind) { msg.textContent = text; msg.className = 'formmsg' + (kind ? ' ' + kind : ''); }
+      f.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var d = Object.fromEntries(new FormData(f).entries());
+        if (!d.line || d.line.trim().length < 3) { say(T.short, 'err'); line.focus(); return; }
+        btn.disabled = true; say(T.sending);
+        try {
+          var r = await fetch('/api/forslag', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+          var j = await r.json();
+          if (j.ok) { f.reset(); count.textContent = '0'; say(T.ok, 'ok'); }
+          else say(j.error || T.generic, 'err');
+        } catch (err) { say(T.network, 'err'); }
+        btn.disabled = false;
+      });
+    })();
+  </script>
+</Base>
