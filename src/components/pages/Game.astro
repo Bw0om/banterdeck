@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../AdSlot.astro';
+import { games, t, trules } from '../../lib/content';
+import { ui, path, type Lang } from '../../lib/i18n';
+const { game, lang = 'en' } = Astro.props as { game: any; lang?: Lang };
+const L = ui(lang);
+const name = t(game.name, lang);
+const rules: string[] = trules(game, lang);
+
+const blocks: { type: 'p' | 'ul'; items: string[] }[] = [];
+for (const r of rules) {
+  if (r.startsWith('b|')) {
+    const last = blocks[blocks.length - 1];
+    if (last && last.type === 'ul') last.items.push(r.slice(2));
+    else blocks.push({ type: 'ul', items: [r.slice(2)] });
+  } else blocks.push({ type: 'p', items: [r] });
+}
+const description = `${name} – ${lang === 'no' ? 'regler for drikkeleken' : 'drinking game rules'}. ${t(game.gear, lang)}. ${game.pl} ${L.players}.`;
+const copyText = name + '\n' + rules.map((r) => r.replace(/^b\|/, '• ')).join('\n');
+const others = games.filter((x) => x.slug !== game.slug);
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org', '@type': 'Article', headline: `${name} – rules`,
+  description, inLanguage: lang === 'no' ? 'nb' : 'en', isFamilyFriendly: false,
+});
+---
+<Base title={`${name} – ${lang === 'no' ? 'regler' : 'rules'}`} description={description} lang={lang} gate={true}>
+  <Fragment slot="head"><script type="application/ld+json" set:html={jsonLd} /></Fragment>
+  <p class="crumb">
+    <a href={path(lang, '/')}>{L.breadcrumbHome}</a> ›
+    <a href={path(lang, '/drinking-games')}>{L.gamesTitle}</a> › {name}
+  </p>
+  <h1>{name}</h1>
+  <div class="meta">
+    <span>🃏 {t(game.gear, lang)}</span>
+    <span>👥 {game.pl} {L.players}</span>
+    <span>{t(game.group.title, lang)}</span>
+  </div>
+
+  <div class="rules">
+    {blocks.map((b) => b.type === 'p' ? <p>{b.items[0]}</p> : <ul>{b.items.map((x) => <li>{x}</li>)}</ul>)}
+  </div>
+  <p><button class="btn ghost" data-copy={copyText}>{L.copyRules}</button></p>
+
+  <AdSlot />
+
+  <section class="more">
+    <h2>{L.moreGames}</h2>
+    <ul>{others.map((x) => <li><a class="btn ghost" href={path(lang, `/drinking-games/${x.slug}`)}>{t(x.name, lang)}</a></li>)}</ul>
+  </section>
+</Base>

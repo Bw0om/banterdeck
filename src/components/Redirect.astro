@@ -1,0 +1,23 @@
+---
+// Viderekobler en gammel adresse til den nye. Brukes for stier som lå i eldre versjoner
+// av prosjektet – opplasting til GitHub kan ikke slette filer, men den kan overskrive dem.
+const { to } = Astro.props as { to: string };
+const target = new URL(to, Astro.site);
+---
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <title>Banterdeck</title>
+  <meta name="robots" content="noindex" />
+  <link rel="canonical" href={target} />
+  <meta http-equiv="refresh" content={`0; url=${to}`} />
+  <script is:inline define:vars={{ to }}>location.replace(to + location.hash);</script>
+  <style is:inline>
+    body{background:#141009;color:#f4ebdc;font-family:Georgia,serif;display:grid;place-items:center;
+      min-height:100vh;margin:0;text-align:center;padding:24px;line-height:1.6}
+    a{color:#f4b740}
+  </style>
+</head>
+<body><p>Siden har flyttet. <a href={to}>Gå videre til Banterdeck</a></p></body>
+</html>
