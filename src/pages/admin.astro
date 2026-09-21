@@ -355,7 +355,14 @@ import { sections } from '../lib/content';
           body: JSON.stringify({ message: 'Oppdaterer innhold via admin', content: b64encode(body), sha: sha, branch: 'main' }),
         });
         if (r.status === 409) throw new Error('Fila er endret av noen andre. Last siden på nytt og prøv igjen.');
-        if (!r.ok) throw new Error('Publisering feilet (' + r.status + ').');
+        if (!r.ok) {
+          var gm = '';
+          try { gm = (await r.json()).message || ''; } catch (e) {}
+          var hint = r.status === 403
+            ? ' Tokenen mangler skrivetilgang: GitHub → Settings → Developer settings → Fine-grained tokens → Edit → Contents: Read and write.'
+            : (r.status === 404 ? ' Sjekk at repo-feltet sier Bw0om/banterdeck.' : '');
+          throw new Error('Publisering feilet (' + r.status + '). ' + gm + hint);
+        }
         var j = await r.json();
         sha = j.content.sha;
         for (var i = 0; i < closeIssues.length; i++) {
