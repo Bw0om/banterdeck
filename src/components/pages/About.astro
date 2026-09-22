@@ -1,0 +1,38 @@
+---
+import Base from '../../layouts/Base.astro';
+import { totals } from '../../lib/content';
+import { CONTACT_EMAIL } from '../../config';
+import { ui, path, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const L = ui(lang);
+const no = lang === 'no';
+---
+<Base title={no ? 'Om Banterdeck' : 'About Banterdeck'} lang={lang}
+      description={no ? 'Hva Banterdeck er og hvordan du kan bidra.' : 'What Banterdeck is and how you can contribute.'}>
+  <h1>{no ? 'Om Banterdeck' : 'About Banterdeck'}</h1>
+  <div class="prose">
+    {no ? (
+      <>
+        <p class="lead">En kortstokk av frekke, men morsomme replikker – og lekene som hører festen til.</p>
+        <p>Alt begynte som en privat huskeliste: ting å si når noen kommer for sent, når kompisen drar tidlig fra festen, eller når du taper en diskusjon og trenger en nødutgang. Lista vokste, og nå ligger {totals.lines} replikker, {totals.words} slengord og {totals.games} drikkeleker her.</p>
+        <h2>Frekk, men morsom</h2>
+        <p>Regelen er enkel: frekt nok til å bite, morsomt nok til at mottakeren ler. Replikker merket «grov» er nettopp det – spar dem til folk som tåler det.</p>
+        <h2>Norsk og engelsk</h2>
+        <p>Siden finnes på engelsk og norsk, og appen i tillegg på svensk. Bytt språk med knappen i menyen.</p>
+        <h2>Har du en bedre replikk?</h2>
+        <p>Bruk <a href={path(lang, '/suggest')}>skjemaet for forslag</a> – eller send den til <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. De beste havner i stokken.</p>
+      </>
+    ) : (
+      <>
+        <p class="lead">A deck of cheeky but funny lines — and the games that belong at the party.</p>
+        <p>It started as a private list: things to say when someone turns up late, when a mate leaves the party early, or when you are losing an argument and need an exit. The list grew, and now it holds {totals.lines} lines, {totals.words} slang expressions and {totals.games} drinking games.</p>
+        <h2>Cheeky, but funny</h2>
+        <p>The rule is simple: sharp enough to bite, funny enough that the other person laughs. Lines marked “crude” are exactly that — save them for people who can take it.</p>
+        <h2>English and Norwegian</h2>
+        <p>The site comes in English and Norwegian, and the app adds Swedish. Switch languages from the menu. Much of this started in Norwegian, so a few lines carry their original flavour.</p>
+        <h2>Got a better line?</h2>
+        <p>Use the <a href={path(lang, '/suggest')}>submission form</a> — or send it to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. The best ones make it into the deck.</p>
+      </>
+    )}
+  </div>
+</Base>
