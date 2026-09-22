@@ -1,0 +1,39 @@
+---
+import Base from '../../../layouts/Base.astro';
+import GUIDER from '../../../data/guider.json';
+import { gamesFor, gameHref, t } from '../../../lib/content';
+import { path } from '../../../lib/i18n';
+export function getStaticPaths() {
+  return Object.entries(GUIDER as any).map(([id, g]) => ({ params: { id }, props: { g } }));
+}
+const { g } = Astro.props as { g: any };
+const alle = gamesFor('no');
+const valg = g.valg.map(([slug, hvorfor]: [string, string]) => {
+  const spill = alle.find((x: any) => x.slug === slug);
+  return { spill, hvorfor, href: gameHref(spill, (p) => path('no', p), 'no') };
+});
+---
+<Base title={g.tittel} description={g.lead} lang="no" gate={true}>
+  <p class="crumb"><a href="/no/">Forside</a> › <a href="/no/drinking-games">Drikkeleker</a> › {g.tittel}</p>
+  <h1>{g.tittel}</h1>
+  <p class="lead">{g.lead}</p>
+  {g.intro.map((p: string) => <p class="gtxt">{p}</p>)}
+
+  <ol class="guide">
+    {valg.map(({ spill, hvorfor, href }: any) => (
+      <li>
+        <a href={href}>
+          <span class="gn">{t(spill.name, 'no')}</span>
+          <span class="gw">{hvorfor}</span>
+          <span class="gm">{t(spill.gear, 'no')} · {spill.pl} spillere</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+
+  <p class="small">Drikking er alltid valgfritt – lekene funker like godt med brus.</p>
+  <p class="gactions">
+    <a class="btn gold" href="/no/finn-lek">Finn lek</a>
+    <a class="btn ghost" href="/no/drinking-games">Alle 51 lekene</a>
+  </p>
+</Base>
