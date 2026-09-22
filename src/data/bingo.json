@@ -1,0 +1,925 @@
+{
+ "eras": [
+  {
+   "id": "60",
+   "title": "60-tallet",
+   "spotify": "",
+   "songs": [
+    [
+     "The Beatles",
+     "Twist and Shout"
+    ],
+    [
+     "The Beatles",
+     "Hey Jude"
+    ],
+    [
+     "The Beatles",
+     "I Want to Hold Your Hand"
+    ],
+    [
+     "The Rolling Stones",
+     "(I Can't Get No) Satisfaction"
+    ],
+    [
+     "The Beach Boys",
+     "Good Vibrations"
+    ],
+    [
+     "The Beach Boys",
+     "Surfin' U.S.A."
+    ],
+    [
+     "The Kinks",
+     "You Really Got Me"
+    ],
+    [
+     "The Animals",
+     "The House of the Rising Sun"
+    ],
+    [
+     "Nancy Sinatra",
+     "These Boots Are Made for Walkin'"
+    ],
+    [
+     "The Monkees",
+     "I'm a Believer"
+    ],
+    [
+     "The Supremes",
+     "You Can't Hurry Love"
+    ],
+    [
+     "Aretha Franklin",
+     "Respect"
+    ],
+    [
+     "Otis Redding",
+     "(Sittin' On) The Dock of the Bay"
+    ],
+    [
+     "Marvin Gaye & Tammi Terrell",
+     "Ain't No Mountain High Enough"
+    ],
+    [
+     "The Troggs",
+     "Wild Thing"
+    ],
+    [
+     "Chubby Checker",
+     "The Twist"
+    ],
+    [
+     "Ben E. King",
+     "Stand by Me"
+    ],
+    [
+     "The Temptations",
+     "My Girl"
+    ],
+    [
+     "Martha and the Vandellas",
+     "Dancing in the Street"
+    ],
+    [
+     "The Doors",
+     "Light My Fire"
+    ],
+    [
+     "Jefferson Airplane",
+     "Somebody to Love"
+    ],
+    [
+     "Creedence Clearwater Revival",
+     "Proud Mary"
+    ],
+    [
+     "The Mamas & the Papas",
+     "California Dreamin'"
+    ],
+    [
+     "Simon & Garfunkel",
+     "Mrs. Robinson"
+    ],
+    [
+     "Tommy James and the Shondells",
+     "Mony Mony"
+    ],
+    [
+     "The Isley Brothers",
+     "Shout"
+    ],
+    [
+     "Frank Sinatra",
+     "Strangers in the Night"
+    ],
+    [
+     "Dusty Springfield",
+     "Son of a Preacher Man"
+    ],
+    [
+     "Elvis Presley",
+     "Suspicious Minds"
+    ],
+    [
+     "Van Morrison",
+     "Brown Eyed Girl"
+    ]
+   ]
+  },
+  {
+   "id": "70",
+   "title": "70-tallet",
+   "spotify": "",
+   "songs": [
+    [
+     "ABBA",
+     "Dancing Queen"
+    ],
+    [
+     "ABBA",
+     "Waterloo"
+    ],
+    [
+     "Queen",
+     "Bohemian Rhapsody"
+    ],
+    [
+     "Queen",
+     "Don't Stop Me Now"
+    ],
+    [
+     "Bee Gees",
+     "Stayin' Alive"
+    ],
+    [
+     "Gloria Gaynor",
+     "I Will Survive"
+    ],
+    [
+     "Village People",
+     "Y.M.C.A."
+    ],
+    [
+     "Boney M.",
+     "Rasputin"
+    ],
+    [
+     "Boney M.",
+     "Rivers of Babylon"
+    ],
+    [
+     "Earth, Wind & Fire",
+     "September"
+    ],
+    [
+     "Chic",
+     "Le Freak"
+    ],
+    [
+     "Donna Summer",
+     "Hot Stuff"
+    ],
+    [
+     "Elton John",
+     "Crocodile Rock"
+    ],
+    [
+     "Elton John & Kiki Dee",
+     "Don't Go Breaking My Heart"
+    ],
+    [
+     "Fleetwood Mac",
+     "Go Your Own Way"
+    ],
+    [
+     "Eagles",
+     "Hotel California"
+    ],
+    [
+     "Lynyrd Skynyrd",
+     "Sweet Home Alabama"
+    ],
+    [
+     "AC/DC",
+     "Highway to Hell"
+    ],
+    [
+     "Kiss",
+     "I Was Made for Lovin' You"
+    ],
+    [
+     "Blondie",
+     "Heart of Glass"
+    ],
+    [
+     "David Bowie",
+     "\"Heroes\""
+    ],
+    [
+     "Rod Stewart",
+     "Da Ya Think I'm Sexy?"
+    ],
+    [
+     "The Jackson 5",
+     "ABC"
+    ],
+    [
+     "Stevie Wonder",
+     "Superstition"
+    ],
+    [
+     "John Denver",
+     "Take Me Home, Country Roads"
+    ],
+    [
+     "Olivia Newton-John & John Travolta",
+     "You're the One That I Want"
+    ],
+    [
+     "Hot Chocolate",
+     "You Sexy Thing"
+    ],
+    [
+     "Dolly Parton",
+     "Jolene"
+    ],
+    [
+     "Bill Withers",
+     "Lovely Day"
+    ],
+    [
+     "Meat Loaf",
+     "Paradise by the Dashboard Light"
+    ]
+   ]
+  },
+  {
+   "id": "80",
+   "title": "80-tallet",
+   "spotify": "",
+   "songs": [
+    [
+     "Michael Jackson",
+     "Billie Jean"
+    ],
+    [
+     "Michael Jackson",
+     "Thriller"
+    ],
+    [
+     "Madonna",
+     "Like a Prayer"
+    ],
+    [
+     "Madonna",
+     "Material Girl"
+    ],
+    [
+     "Whitney Houston",
+     "I Wanna Dance with Somebody (Who Loves Me)"
+    ],
+    [
+     "Cyndi Lauper",
+     "Girls Just Want to Have Fun"
+    ],
+    [
+     "a-ha",
+     "Take On Me"
+    ],
+    [
+     "Bon Jovi",
+     "Livin' on a Prayer"
+    ],
+    [
+     "Journey",
+     "Don't Stop Believin'"
+    ],
+    [
+     "Europe",
+     "The Final Countdown"
+    ],
+    [
+     "Toto",
+     "Africa"
+    ],
+    [
+     "Wham!",
+     "Wake Me Up Before You Go-Go"
+    ],
+    [
+     "Queen",
+     "Another One Bites the Dust"
+    ],
+    [
+     "Survivor",
+     "Eye of the Tiger"
+    ],
+    [
+     "Rick Astley",
+     "Never Gonna Give You Up"
+    ],
+    [
+     "Dexys Midnight Runners",
+     "Come On Eileen"
+    ],
+    [
+     "Tears for Fears",
+     "Everybody Wants to Rule the World"
+    ],
+    [
+     "Guns N' Roses",
+     "Sweet Child o' Mine"
+    ],
+    [
+     "Bonnie Tyler",
+     "Total Eclipse of the Heart"
+    ],
+    [
+     "Kenny Loggins",
+     "Footloose"
+    ],
+    [
+     "Prince",
+     "Purple Rain"
+    ],
+    [
+     "Duran Duran",
+     "Hungry Like the Wolf"
+    ],
+    [
+     "Culture Club",
+     "Karma Chameleon"
+    ],
+    [
+     "Eurythmics",
+     "Sweet Dreams (Are Made of This)"
+    ],
+    [
+     "The Human League",
+     "Don't You Want Me"
+    ],
+    [
+     "Simple Minds",
+     "Don't You (Forget About Me)"
+    ],
+    [
+     "Kool & the Gang",
+     "Celebration"
+    ],
+    [
+     "Irene Cara",
+     "Flashdance... What a Feeling"
+    ],
+    [
+     "Joan Jett & the Blackhearts",
+     "I Love Rock 'n' Roll"
+    ],
+    [
+     "Katrina and the Waves",
+     "Walking on Sunshine"
+    ]
+   ]
+  },
+  {
+   "id": "90",
+   "title": "90-tallet",
+   "spotify": "",
+   "songs": [
+    [
+     "Spice Girls",
+     "Wannabe"
+    ],
+    [
+     "Backstreet Boys",
+     "I Want It That Way"
+    ],
+    [
+     "Britney Spears",
+     "...Baby One More Time"
+    ],
+    [
+     "Aqua",
+     "Barbie Girl"
+    ],
+    [
+     "Vengaboys",
+     "We Like to Party! (The Vengabus)"
+    ],
+    [
+     "Haddaway",
+     "What Is Love"
+    ],
+    [
+     "2 Unlimited",
+     "No Limit"
+    ],
+    [
+     "Eiffel 65",
+     "Blue (Da Ba Dee)"
+    ],
+    [
+     "Lou Bega",
+     "Mambo No. 5 (A Little Bit of...)"
+    ],
+    [
+     "Nirvana",
+     "Smells Like Teen Spirit"
+    ],
+    [
+     "Oasis",
+     "Wonderwall"
+    ],
+    [
+     "Blur",
+     "Song 2"
+    ],
+    [
+     "Coolio",
+     "Gangsta's Paradise"
+    ],
+    [
+     "TLC",
+     "No Scrubs"
+    ],
+    [
+     "Whitney Houston",
+     "I Will Always Love You"
+    ],
+    [
+     "Celine Dion",
+     "My Heart Will Go On"
+    ],
+    [
+     "Ricky Martin",
+     "Livin' la Vida Loca"
+    ],
+    [
+     "Los del Río",
+     "Macarena"
+    ],
+    [
+     "Chumbawamba",
+     "Tubthumping"
+    ],
+    [
+     "No Doubt",
+     "Don't Speak"
+    ],
+    [
+     "Hanson",
+     "MMMBop"
+    ],
+    [
+     "Mr. President",
+     "Coco Jamboo"
+    ],
+    [
+     "Snap!",
+     "Rhythm Is a Dancer"
+    ],
+    [
+     "Ace of Base",
+     "All That She Wants"
+    ],
+    [
+     "The Cardigans",
+     "Lovefool"
+    ],
+    [
+     "Robbie Williams",
+     "Angels"
+    ],
+    [
+     "Fugees",
+     "Killing Me Softly"
+    ],
+    [
+     "Will Smith",
+     "Gettin' Jiggy wit It"
+    ],
+    [
+     "Shania Twain",
+     "Man! I Feel Like a Woman!"
+    ],
+    [
+     "Dr. Alban",
+     "It's My Life"
+    ]
+   ]
+  },
+  {
+   "id": "2000",
+   "title": "2000-tallet",
+   "spotify": "",
+   "songs": [
+    [
+     "Eminem",
+     "The Real Slim Shady"
+    ],
+    [
+     "Eminem",
+     "Lose Yourself"
+    ],
+    [
+     "Beyoncé",
+     "Crazy in Love"
+    ],
+    [
+     "Britney Spears",
+     "Toxic"
+    ],
+    [
+     "OutKast",
+     "Hey Ya!"
+    ],
+    [
+     "The Killers",
+     "Mr. Brightside"
+    ],
+    [
+     "Shakira",
+     "Hips Don't Lie"
+    ],
+    [
+     "Rihanna",
+     "Umbrella"
+    ],
+    [
+     "Nelly",
+     "Hot in Herre"
+    ],
+    [
+     "50 Cent",
+     "In da Club"
+    ],
+    [
+     "Usher",
+     "Yeah!"
+    ],
+    [
+     "Black Eyed Peas",
+     "I Gotta Feeling"
+    ],
+    [
+     "Lady Gaga",
+     "Poker Face"
+    ],
+    [
+     "Lady Gaga",
+     "Just Dance"
+    ],
+    [
+     "Katy Perry",
+     "I Kissed a Girl"
+    ],
+    [
+     "Kelly Clarkson",
+     "Since U Been Gone"
+    ],
+    [
+     "Avril Lavigne",
+     "Complicated"
+    ],
+    [
+     "Justin Timberlake",
+     "SexyBack"
+    ],
+    [
+     "Nelly Furtado",
+     "Maneater"
+    ],
+    [
+     "Gwen Stefani",
+     "Hollaback Girl"
+    ],
+    [
+     "Kylie Minogue",
+     "Can't Get You Out of My Head"
+    ],
+    [
+     "Daft Punk",
+     "One More Time"
+    ],
+    [
+     "Basshunter",
+     "Boten Anna"
+    ],
+    [
+     "Las Ketchup",
+     "The Ketchup Song (Aserejé)"
+    ],
+    [
+     "Amy Winehouse",
+     "Rehab"
+    ],
+    [
+     "Gnarls Barkley",
+     "Crazy"
+    ],
+    [
+     "Kanye West",
+     "Gold Digger"
+    ],
+    [
+     "The White Stripes",
+     "Seven Nation Army"
+    ],
+    [
+     "Flo Rida",
+     "Low"
+    ],
+    [
+     "Akon",
+     "Smack That"
+    ]
+   ]
+  },
+  {
+   "id": "2010",
+   "title": "2010-tallet",
+   "spotify": "",
+   "songs": [
+    [
+     "Avicii",
+     "Wake Me Up"
+    ],
+    [
+     "Avicii",
+     "Levels"
+    ],
+    [
+     "Kygo",
+     "Firestone"
+    ],
+    [
+     "Pharrell Williams",
+     "Happy"
+    ],
+    [
+     "Mark Ronson ft. Bruno Mars",
+     "Uptown Funk"
+    ],
+    [
+     "LMFAO",
+     "Party Rock Anthem"
+    ],
+    [
+     "Carly Rae Jepsen",
+     "Call Me Maybe"
+    ],
+    [
+     "PSY",
+     "Gangnam Style"
+    ],
+    [
+     "Ylvis",
+     "The Fox (What Does the Fox Say?)"
+    ],
+    [
+     "Adele",
+     "Rolling in the Deep"
+    ],
+    [
+     "Ed Sheeran",
+     "Shape of You"
+    ],
+    [
+     "Luis Fonsi & Daddy Yankee",
+     "Despacito"
+    ],
+    [
+     "Justin Bieber",
+     "Sorry"
+    ],
+    [
+     "Taylor Swift",
+     "Shake It Off"
+    ],
+    [
+     "Katy Perry",
+     "Firework"
+    ],
+    [
+     "Rihanna",
+     "We Found Love"
+    ],
+    [
+     "David Guetta ft. Sia",
+     "Titanium"
+    ],
+    [
+     "Macklemore & Ryan Lewis",
+     "Thrift Shop"
+    ],
+    [
+     "Daft Punk",
+     "Get Lucky"
+    ],
+    [
+     "Swedish House Mafia",
+     "Don't You Worry Child"
+    ],
+    [
+     "Imagine Dragons",
+     "Radioactive"
+    ],
+    [
+     "Bruno Mars",
+     "Locked Out of Heaven"
+    ],
+    [
+     "Lady Gaga",
+     "Born This Way"
+    ],
+    [
+     "Calvin Harris",
+     "Summer"
+    ],
+    [
+     "Drake",
+     "Hotline Bling"
+    ],
+    [
+     "The Weeknd",
+     "Can't Feel My Face"
+    ],
+    [
+     "Dua Lipa",
+     "New Rules"
+    ],
+    [
+     "Lil Nas X",
+     "Old Town Road"
+    ],
+    [
+     "Billie Eilish",
+     "Bad Guy"
+    ],
+    [
+     "Icona Pop",
+     "I Love It"
+    ]
+   ]
+  },
+  {
+   "id": "norsk",
+   "title": "Norske låter",
+   "spotify": "",
+   "songs": [
+    [
+     "DDE",
+     "Vinsjan på kaia"
+    ],
+    [
+     "DDE",
+     "Rompa mi"
+    ],
+    [
+     "Postgirobygget",
+     "En solskinnsdag"
+    ],
+    [
+     "Åge Aleksandersen",
+     "Lys og varme"
+    ],
+    [
+     "Jahn Teigen",
+     "Mil etter mil"
+    ],
+    [
+     "Bobbysocks",
+     "La det swinge"
+    ],
+    [
+     "Alexander Rybak",
+     "Fairytale"
+    ],
+    [
+     "Kurt Nilsen",
+     "She's So High"
+    ],
+    [
+     "Kaizers Orchestra",
+     "Kontroll på kontinentet"
+    ],
+    [
+     "Kaizers Orchestra",
+     "Hjerteknuser"
+    ],
+    [
+     "Madcon",
+     "Beggin'"
+    ],
+    [
+     "Madcon",
+     "Glow"
+    ],
+    [
+     "TIX",
+     "Fallen Angel"
+    ],
+    [
+     "Keiino",
+     "Spirit in the Sky"
+    ],
+    [
+     "Karpe",
+     "Påfugl"
+    ],
+    [
+     "Staysman & Lazz",
+     "En godt stekt pannekake"
+    ],
+    [
+     "Wig Wam",
+     "In My Dreams"
+    ],
+    [
+     "Sigrid",
+     "Don't Kill My Vibe"
+    ],
+    [
+     "Astrid S",
+     "Hurts So Good"
+    ],
+    [
+     "Aurora",
+     "Runaway"
+    ],
+    [
+     "Nico & Vinz",
+     "Am I Wrong"
+    ],
+    [
+     "Marcus & Martinus",
+     "Elektrisk"
+    ],
+    [
+     "deLillos",
+     "Neste sommer"
+    ],
+    [
+     "Di Derre",
+     "Jenter & sånn"
+    ],
+    [
+     "Lillebjørn Nilsen",
+     "Tanta til Beate"
+    ],
+    [
+     "Bjørn Eidsvåg",
+     "Mysteriet deg"
+    ],
+    [
+     "Alan Walker",
+     "Faded"
+    ],
+    [
+     "Kygo & Selena Gomez",
+     "It Ain't Me"
+    ],
+    [
+     "Subwoolfer",
+     "Give That Wolf a Banana"
+    ],
+    [
+     "a-ha",
+     "The Sun Always Shines on T.V."
+    ]
+   ]
+  }
+ ],
+ "kvelden": [
+  "Noen søler",
+  "Noen nevner eksen",
+  "Noen setter på en 2000-tallslåt",
+  "Noen går ut for å snuse",
+  "Noen sovner",
+  "Noen snakker om jobb",
+  "Noen tar en selfie",
+  "Noen roper «skål!» uten grunn",
+  "Noen synger feil tekst",
+  "Noen bestiller mat",
+  "Noen gråter",
+  "Noen mister mobilen",
+  "Noen sier «bare én til»",
+  "Noen kommer for sent",
+  "Noen er på do i over ti minutter",
+  "Noen danser alene",
+  "Noen sier «jeg er ikke full»",
+  "Noen krangler om musikken",
+  "Noen ringer mamma",
+  "Naboen klager",
+  "Noen tar av seg skoene",
+  "Noen foreslår nachspiel",
+  "Noen sier «vi må gjøre dette oftere»",
+  "Noen spør om taxi",
+  "Noen tar en shot",
+  "Noen forteller samme historie to ganger",
+  "Noen søker opp en eks",
+  "Noen kysser",
+  "Noen spør «hvem sin drink er dette?»",
+  "Noen sier at de skal hjem tidlig"
+ ]
+}
