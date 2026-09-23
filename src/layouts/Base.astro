@@ -1,0 +1,274 @@
+---
+import '../styles/global.css';
+import { SITE_NAME } from '../config';
+import { collectionsFor, topSituationsFor, dictSection, visible, t } from '../lib/content';
+import { ui, path, otherLangPath, type Lang } from '../lib/i18n';
+import AgeGate from '../components/AgeGate.astro';
+import Tools from '../components/Tools.astro';
+import Icon from '../components/Icon.astro';
+import { ClientRouter } from 'astro:transitions';
+
+interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; }
+const { title, description, lang = 'en', gate = false, noindex = false } = Astro.props;
+const L = ui(lang);
+const desc = description || L.tagline;
+const fullTitle = title ? `${title} – ${SITE_NAME}` : `${SITE_NAME} – ${L.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const altPath = otherLangPath(lang, Astro.url.pathname);
+const enHref = new URL(lang === 'en' ? Astro.url.pathname : altPath, Astro.site);
+const noHref = new URL(lang === 'no' ? Astro.url.pathname : altPath, Astro.site);
+const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const hasDict = visible(dictSection, lang);
+const nav = [
+  { href: path(lang, '/'), label: L.nav.home, icon: 'hjem' },
+  { href: path(lang, '/situations'), label: L.linesTitle, icon: 'replikker' },
+  ...(hasDict ? [{ href: path(lang, '/ord'), label: L.ordTitle, icon: 'ordbok' },
+                 { href: path(lang, '/uttrykk'), label: L.uttrykkTitle, icon: 'uttrykk' }] : []),
+  { href: path(lang, '/drinking-games'), label: L.nav.games, icon: 'drikkeleker' },
+];
+const subNav = collectionsFor(lang).map((s) => ({ href: path(lang, `/categories/${s.id}`), label: t(s.title, lang) }));
+const quick = topSituationsFor(lang).map((x) => ({ href: path(lang, `/situations/${x.id}`), label: t(x.title, lang) }));
+const isCurrent = (href: string) => {
+  const h = href.replace(/\/$/, '') || '/';
+  return current === h || (h !== '/' && h !== '/no' && current.startsWith(h + '/'));
+};
+---
+<!doctype html>
+<html lang={L.htmlLang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{fullTitle}</title>
+  <meta name="description" content={desc} />
+  {noindex && <meta name="robots" content="noindex, nofollow" />}
+  <link rel="canonical" href={canonical} />
+  <link rel="alternate" hreflang="en" href={enHref} />
+  <link rel="alternate" hreflang="no" href={noHref} />
+  <link rel="alternate" hreflang="x-default" href={enHref} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={desc} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:locale" content={L.locale} />
+  <meta name="theme-color" content="#141009" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Banterdeck" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
+  <script is:inline>
+    /* Innloggingslenker fra Supabase kan lande på feil side – send dem til kontosiden. */
+    (function () {
+      var h = location.hash || '';
+      if ((h.indexOf('access_token=') !== -1 || h.indexOf('error_description=') !== -1)
+          && !/\/account\/?$/.test(location.pathname)) {
+        var acc = location.pathname.indexOf('/no/') === 0 || location.pathname === '/no' ? '/no/account' : '/account';
+        location.replace(acc + h);
+      }
+    })();
+    /* Kjenner igjen enheten før siden tegnes, så innholdet kan tilpasses uten hopp.
+       Sidenavigasjonen bytter ut merkene på <html> ved hvert klikk, så sjekken må kjøre på nytt da også. */
+    (function merkEnhet() {
+      document.addEventListener('astro:after-swap', merkEnhet);
+      var h = document.documentElement, ua = navigator.userAgent || '';
+      var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+      var android = /Android/.test(ua);
+      var coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+      var mobile = ios || android || (coarse && window.innerWidth < 900);
+      var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+      h.classList.add(mobile ? 'is-mobile' : 'is-desktop');
+      if (ios) h.classList.add('is-ios');
+      if (android) h.classList.add('is-android');
+      if (standalone) h.classList.add('is-standalone');
+    })();
+  </script>
+  <ClientRouter />
+  <slot name="head" />
+</head>
+<body>
+  <a class="skip" href="#innhold">{lang === 'no' ? 'Hopp til innhold' : 'Skip to content'}</a>
+
+  <div class="shell">
+    <aside class="side">
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="14 4 68 95" aria-hidden="true" focusable="false"><rect x="34" y="6" width="46" height="64" rx="7" fill="#ff6a4d"/><rect x="27" y="13" width="46" height="64" rx="7" fill="#c98f22"/><rect x="20" y="20" width="46" height="64" rx="7" fill="#f4b740"/><path d="M26.3 81 L16 97 L36.56 83 Z" fill="#f4b740"/><g fill="#141009"><path d="M-8.816 10.56V-10.56H-0.30400000000000027Q1.6479999999999997 -10.56 3.168 -10.208Q4.688000000000001 -9.856 5.760000000000001 -9.168Q6.832000000000001 -8.479999999999999 7.392000000000001 -7.4559999999999995Q7.952000000000002 -6.432 7.952000000000002 -5.055999999999999Q7.952000000000002 -3.776 7.424000000000001 -2.752Q6.896000000000001 -1.7279999999999998 5.728000000000001 -1.104Q4.5600000000000005 -0.4800000000000004 2.6720000000000006 -0.3200000000000003V-0.03200000000000003Q5.904 0.1280000000000001 7.359999999999999 1.4720000000000004Q8.815999999999999 2.8160000000000007 8.815999999999999 5.024Q8.815999999999999 6.880000000000001 7.856 8.096Q6.896000000000001 9.312000000000001 5.056000000000001 9.936Q3.216000000000001 10.56 0.49600000000000044 10.56ZM-3.6319999999999997 6.4H0.27200000000000024Q1.904 6.4 2.8 5.808Q3.6959999999999997 5.216 3.6959999999999997 4.128Q3.6959999999999997 2.912 2.6879999999999997 2.32Q1.6799999999999997 1.7279999999999998 -0.3360000000000003 1.7279999999999998H-3.6319999999999997ZM-3.6319999999999997 -1.7919999999999998H-0.8480000000000008Q0.9760000000000009 -1.7919999999999998 1.9360000000000008 -2.3999999999999995Q2.896000000000001 -3.007999999999999 2.896000000000001 -4.192Q2.896000000000001 -5.311999999999999 2.032 -5.872Q1.1679999999999993 -6.432 -0.5600000000000005 -6.432H-3.6319999999999997Z" transform="translate(43 52) rotate(0)"/></g></svg><span class="bt">{SITE_NAME}</span></a>
+      <button class="searchbtn" data-search><Icon name="sok" />{L.search}<kbd>⌘K</kbd></button>
+      <nav class="sidenav" aria-label={L.pickMode}>
+        {nav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}><Icon name={n.icon} />{n.label}</a>)}
+        <span class="navsplit">{L.collections}</span>
+        {subNav.map((n) => <a class="sub" href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
+      </nav>
+      <a class="appbtn" href={path(lang, '/favourites')}><Icon name="favoritt" />{L.favourites}</a>
+      <a class="langlink" href={altPath} hreflang={lang === 'en' ? 'no' : 'en'}>{L.switchTo}</a>
+      <p class="sidefoot">
+        <a href={path(lang, '/suggest')}>{L.nav.suggest}</a>
+        <a href={path(lang, '/account')}>{L.nav.account}</a>
+        <a href={path(lang, '/about')}>{L.nav.about}</a>
+      </p>
+    </aside>
+
+    <div class="topbars">
+    <div class="mobilebar">
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="14 4 68 95" aria-hidden="true" focusable="false"><rect x="34" y="6" width="46" height="64" rx="7" fill="#ff6a4d"/><rect x="27" y="13" width="46" height="64" rx="7" fill="#c98f22"/><rect x="20" y="20" width="46" height="64" rx="7" fill="#f4b740"/><path d="M26.3 81 L16 97 L36.56 83 Z" fill="#f4b740"/><g fill="#141009"><path d="M-8.816 10.56V-10.56H-0.30400000000000027Q1.6479999999999997 -10.56 3.168 -10.208Q4.688000000000001 -9.856 5.760000000000001 -9.168Q6.832000000000001 -8.479999999999999 7.392000000000001 -7.4559999999999995Q7.952000000000002 -6.432 7.952000000000002 -5.055999999999999Q7.952000000000002 -3.776 7.424000000000001 -2.752Q6.896000000000001 -1.7279999999999998 5.728000000000001 -1.104Q4.5600000000000005 -0.4800000000000004 2.6720000000000006 -0.3200000000000003V-0.03200000000000003Q5.904 0.1280000000000001 7.359999999999999 1.4720000000000004Q8.815999999999999 2.8160000000000007 8.815999999999999 5.024Q8.815999999999999 6.880000000000001 7.856 8.096Q6.896000000000001 9.312000000000001 5.056000000000001 9.936Q3.216000000000001 10.56 0.49600000000000044 10.56ZM-3.6319999999999997 6.4H0.27200000000000024Q1.904 6.4 2.8 5.808Q3.6959999999999997 5.216 3.6959999999999997 4.128Q3.6959999999999997 2.912 2.6879999999999997 2.32Q1.6799999999999997 1.7279999999999998 -0.3360000000000003 1.7279999999999998H-3.6319999999999997ZM-3.6319999999999997 -1.7919999999999998H-0.8480000000000008Q0.9760000000000009 -1.7919999999999998 1.9360000000000008 -2.3999999999999995Q2.896000000000001 -3.007999999999999 2.896000000000001 -4.192Q2.896000000000001 -5.311999999999999 2.032 -5.872Q1.1679999999999993 -6.432 -0.5600000000000005 -6.432H-3.6319999999999997Z" transform="translate(43 52) rotate(0)"/></g></svg><span class="bt">{SITE_NAME}</span></a>
+      <span class="mobilebar-right">
+        <button class="langlink compact" data-search aria-label={L.search}><Icon name="sok" size={19} /></button>
+        <a class="langlink compact" href={path(lang, '/favourites')} aria-label={L.favourites}><Icon name="favoritt" size={19} /></a>
+        <a class="langlink compact" href={altPath} hreflang={lang === 'en' ? 'no' : 'en'}>{lang === 'en' ? 'NO' : 'EN'}</a>
+      </span>
+    </div>
+    <nav class="mobilenav" aria-label={L.popular}>
+      {quick.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
+    </nav>
+    </div>
+
+    <main class="main" id="innhold">
+      <slot />
+      <footer class="foot">
+        <span>© {new Date().getFullYear()} {SITE_NAME}</span>
+        <a href={path(lang, '/suggest')}>{L.nav.suggest}</a>
+        <a href={path(lang, '/account')}>{L.nav.account}</a>
+        <a href={path(lang, '/about')}>{L.nav.about}</a>
+        <a href={path(lang, '/privacy')}>{L.nav.privacy}</a>
+        <a href={path(lang, '/favourites')}>{L.favourites}</a>
+        <a href={altPath}>{L.switchTo}</a>
+      </footer>
+    </main>
+  </div>
+
+  <nav class="tabbar" aria-label={L.pickMode}>
+    <a href={path(lang, '/')} aria-current={current === (lang === 'no' ? '/no' : '/') ? 'page' : undefined}>
+      <span class="ti"><Icon name="hjem" size={22} /></span><span class="tl">{L.nav.home}</span></a>
+    <a href={path(lang, '/situations')} aria-current={isCurrent(path(lang, '/situations')) || current.includes('/categories/') ? 'page' : undefined}>
+      <span class="ti"><Icon name="replikker" size={22} /></span><span class="tl">{L.linesTitle}</span></a>
+    {hasDict && (
+      <a href={path(lang, '/ord')} aria-current={isCurrent(path(lang, '/ord')) ? 'page' : undefined}>
+        <span class="ti"><Icon name="ordbok" size={22} /></span><span class="tl">{L.ordTitle}</span></a>
+    )}
+    {hasDict && (
+      <a href={path(lang, '/uttrykk')} aria-current={isCurrent(path(lang, '/uttrykk')) ? 'page' : undefined}>
+        <span class="ti"><Icon name="uttrykk" size={22} /></span><span class="tl">{L.uttrykkTitle}</span></a>
+    )}
+    <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
+      <span class="ti"><Icon name="drikkeleker" size={22} /></span><span class="tl">{L.nav.games}</span></a>
+    {!hasDict && (
+      <a href={path(lang, '/favourites')} aria-current={isCurrent(path(lang, '/favourites')) ? 'page' : undefined}>
+        <span class="ti"><Icon name="favoritt" size={22} /></span><span class="tl">{L.favourites}</span></a>
+    )}
+  </nav>
+
+  <!-- Aldersspørringen ligger UTENFOR .main, ellers blir den uskarp sammen med innholdet. -->
+  {gate && <AgeGate lang={lang} />}
+  <Tools lang={lang} />
+
+  {lang === 'en' && (
+    <div class="langbanner" id="langbanner" hidden>
+      <span>{L.bannerNo}</span>
+      <a class="btn gold small" href={altPath}>{L.bannerGo}</a>
+      <button class="linkbtn" id="bannerClose" aria-label={L.bannerClose}>✕</button>
+    </div>
+  )}
+
+  <div id="toast" class="toast" role="status">{L.copied}</div>
+
+  <script is:inline define:vars={{ SHARED: L.shared }}>
+    (function () {
+      /* Sideoverganger kjører dette på nytt ved hvert sidebytte.
+         Lyttere på document skal bare registreres én gang, ellers dobles de. */
+      if (window.__bdBase) { window.__bdBase.page(); return; }
+      function flash(el) {
+        el.classList.add('copied');
+        setTimeout(function () { el.classList.remove('copied'); }, 1100);
+        var t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(function () { t.classList.remove('show'); }, 1200);
+      }
+      /* Mobil: toppen glir opp når du blar nedover, og kommer tilbake når du blar opp. */
+      var sisteY = window.scrollY;
+      window.addEventListener('scroll', function () {
+        if (window.innerWidth >= 900) return;
+        var y = window.scrollY;
+        if (y < 120) document.body.classList.remove('bars-skjult');
+        else if (y > sisteY + 6) document.body.classList.add('bars-skjult');
+        else if (y < sisteY - 6) document.body.classList.remove('bars-skjult');
+        sisteY = y;
+      }, { passive: true });
+      document.addEventListener('astro:page-load', function () { document.body.classList.remove('bars-skjult'); });
+
+      function toast(msg) {
+        var t = document.getElementById('toast');
+        if (!t) return;
+        var old = t.textContent;
+        if (msg) t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(function () { t.classList.remove('show'); t.textContent = old; }, 1400);
+      }
+      document.addEventListener('click', function (e) {
+        var sb = e.target.closest('[data-share]');
+        if (!sb) return;
+        e.preventDefault(); e.stopPropagation();
+        var text = sb.getAttribute('data-share');
+        var msg = '«' + text + '»';
+        if (navigator.share) {
+          navigator.share({ text: msg + '\n— banterdeck.com' }).catch(function () {});
+        } else if (navigator.clipboard) {
+          navigator.clipboard.writeText(msg + '\n— banterdeck.com').then(function () { toast(SHARED); });
+        }
+      });
+      document.addEventListener('click', function (e) {
+        if (e.target.closest('a, .starbtn, .sharebtn')) return;
+        var c = e.target.closest('[data-copy]');
+        if (!c) return;
+        var text = c.getAttribute('data-copy');
+        if (navigator.clipboard && navigator.clipboard.writeText)
+          navigator.clipboard.writeText(text).then(function () { flash(c); }).catch(function () { flash(c); });
+        else flash(c);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        var c = e.target.closest && e.target.closest('[data-copy]');
+        if (c && c.tagName !== 'BUTTON') { e.preventDefault(); c.click(); }
+      });
+
+      /* Offline-støtte, så siden virker som appen gjorde. */
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+      }
+
+      /* Tilbyr norsk til norske nettlesere – uten å tvinge noe. Kjøres per side. */
+      function page() {
+      /* Klebrige filtre får bakgrunn bare mens de er festet øverst. */
+      document.querySelectorAll('.sticky').forEach(function (el) {
+        if (el.dataset.stickyBound || !('IntersectionObserver' in window)) return;
+        el.dataset.stickyBound = '1';
+        var mark = document.createElement('div');
+        mark.style.cssText = 'height:1px;margin-bottom:-1px';
+        el.parentNode.insertBefore(mark, el);
+        var top = parseFloat(getComputedStyle(el).top) || 0;
+        new IntersectionObserver(function (e) {
+          el.classList.toggle('is-stuck', !e[0].isIntersecting);
+        }, { rootMargin: '-' + (top + 1) + 'px 0px 0px 0px' }).observe(mark);
+      });
+      var b = document.getElementById('langbanner');
+      if (b && !b.dataset.bound) {
+        b.dataset.bound = '1';
+        var wantsNo = (navigator.languages || [navigator.language || '']).some(function (l) { return /^(nb|nn|no)/i.test(l); });
+        var off = false;
+        try { off = localStorage.getItem('bd_lang_banner') === '0'; } catch (e) {}
+        if (wantsNo && !off) b.hidden = false;
+        document.getElementById('bannerClose').addEventListener('click', function () {
+          b.hidden = true;
+          try { localStorage.setItem('bd_lang_banner', '0'); } catch (e) {}
+        });
+      }
+      }
+      window.__bdBase = { page: page };
+      page();
+    })();
+  </script>
+</body>
+</html>
