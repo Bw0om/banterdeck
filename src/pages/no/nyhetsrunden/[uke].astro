@@ -1,0 +1,9 @@
+---
+import Nyhetsrunden from '../../../components/pages/Nyhetsrunden.astro';
+import { runder, rundeId } from '../../../lib/nyhetsrunden';
+export function getStaticPaths() {
+  return runder.map((runde) => ({ params: { uke: rundeId(runde) }, props: { runde } }));
+}
+const { runde } = Astro.props;
+---
+<Nyhetsrunden runde={runde} />
