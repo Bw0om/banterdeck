@@ -1,0 +1,10 @@
+---
+import Game from '../../../components/pages/Game.astro';
+import { gamesFor, hrefFor } from '../../../lib/content';
+export function getStaticPaths() {
+  // Leker med egen side (href) trenger ingen regelside
+  return gamesFor('no').filter((g) => !hrefFor(g, 'no')).map((game) => ({ params: { slug: game.slug }, props: { game } }));
+}
+const { game } = Astro.props;
+---
+<Game game={game} lang="no" />

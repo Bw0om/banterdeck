@@ -1,0 +1,19 @@
+---
+import Situation from '../../components/pages/Situation.astro';
+import Redirect from '../../components/Redirect.astro';
+import { situationsFor, situationAliases } from '../../lib/content';
+export function getStaticPaths() {
+  const live = situationsFor('en');
+  const ids = new Set(live.map((x) => x.id));
+  const pages = live.map((sit) => ({ params: { id: sit.id }, props: { sit, to: null } }));
+  // Gamle adresser sender videre til den nye situasjonen – eller til oversikten
+  // hvis situasjonen ikke finnes på dette språket.
+  const aliases = Object.entries(situationAliases).map(([old, now]) => ({
+    params: { id: old },
+    props: { sit: null, to: ids.has(now) ? `/situations/${now}` : '/situations' },
+  }));
+  return [...pages, ...aliases];
+}
+const { sit, to } = Astro.props;
+---
+{to ? <Redirect to={to} /> : <Situation sit={sit} lang="en" />}

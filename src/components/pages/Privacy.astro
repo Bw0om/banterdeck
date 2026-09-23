@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import { CONTACT_EMAIL, ADSENSE_CLIENT, SUPABASE_URL } from '../../config';
+import { ui, type Lang } from '../../lib/i18n';
+const { lang = 'en' } = Astro.props as { lang?: Lang };
+const no = lang === 'no';
+const accounts = Boolean(SUPABASE_URL);
+---
+<Base title={no ? 'Personvern' : 'Privacy'} lang={lang}
+      description={no ? 'Hvilke data Banterdeck lagrer, og hvordan.' : 'What data Banterdeck stores, and how.'}>
+  <h1>{no ? 'Personvern' : 'Privacy'}</h1>
+  <div class="prose">
+    {no ? (
+      <>
+        <p class="lead">Kort versjon: du kan bruke hele siden uten å oppgi noe om deg selv.</p>
+        <h2>Lagring i nettleseren</h2>
+        <p>Favoritter, egne replikker, språkvalg og svaret på alderssperren lagres i din egen nettleser. Du sletter det ved å tømme nettstedsdata.</p>
+        {accounts && <><h2>Konto</h2><p>Oppretter du konto, lagres e-postadressen din og replikkene du selv legger inn, hos vår databaseleverandør (Supabase). Du kan når som helst slette dem ved å be om det på e-post.</p></>}
+        <h2>Skrifttyper</h2>
+        <p>Skriftene lastes fra Google Fonts, som da ser IP-adressen din.</p>
+        <h2>Annonser</h2>
+        {ADSENSE_CLIENT
+          ? <p>Siden viser annonser fra Google AdSense, som kan bruke informasjonskapsler. Juster dette i <a href="https://adssettings.google.com" rel="noopener">Googles annonseinnstillinger</a>.</p>
+          : <p>Siden viser ingen annonser og bruker ingen sporingsinformasjonskapsler.</p>}
+        <h2>Aldersgrense</h2>
+        <p>Innholdet om drikkeleker er ment for personer over 18 år.</p>
+        <h2>Kontakt</h2>
+        <p>Spørsmål? Skriv til <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+      </>
+    ) : (
+      <>
+        <p class="lead">Short version: you can use the whole site without telling us anything about yourself.</p>
+        <h2>Stored in your browser</h2>
+        <p>Favourites, your own lines, language choice and the age-gate answer are stored in your own browser. Clear your site data to remove them.</p>
+        {accounts && <><h2>Accounts</h2><p>If you create an account, your email address and the lines you add are stored with our database provider (Supabase). You can have them deleted at any time by asking us over email.</p></>}
+        <h2>Fonts</h2>
+        <p>Fonts load from Google Fonts, which sees your IP address when they are fetched.</p>
+        <h2>Advertising</h2>
+        {ADSENSE_CLIENT
+          ? <p>This site shows Google AdSense ads, which may use cookies. Adjust this in <a href="https://adssettings.google.com" rel="noopener">Google's ad settings</a>.</p>
+          : <p>This site shows no ads and uses no tracking cookies.</p>}
+        <h2>Age limit</h2>
+        <p>The drinking-games content is intended for people over 18.</p>
+        <h2>Contact</h2>
+        <p>Questions? Write to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+      </>
+    )}
+  </div>
+</Base>

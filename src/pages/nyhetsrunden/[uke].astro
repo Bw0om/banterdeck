@@ -1,0 +1,6 @@
+---
+import Redirect from '../../components/Redirect.astro';
+import { runder, rundeId } from '../../lib/nyhetsrunden';
+export function getStaticPaths() { return runder.map((r) => ({ params: { uke: rundeId(r) } })); }
+---
+<Redirect to="/drinking-games" />

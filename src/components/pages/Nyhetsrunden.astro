@@ -1,0 +1,85 @@
+---
+import Base from '../../layouts/Base.astro';
+import { runder, rundeId } from '../../lib/nyhetsrunden';
+const { runde, erSiste = false } = Astro.props as { runde: any; erSiste?: boolean };
+const andre = runder.filter((r) => rundeId(r) !== rundeId(runde));
+---
+<Base title={`Nyhetsrunden – uke ${runde.uke}`} lang="no" gate={true}
+      description={`Ukas nyheter som drikkelek. ${runde.ingress}`}>
+  <p class="crumb"><a href="/no/">Forside</a> › <a href="/no/drinking-games">Drikkeleker</a> › <a href="/no/nyhetsrunden">Nyhetsrunden</a>{!erSiste && <> › Uke {runde.uke}</>}</p>
+  <p class="nr-uke">{runde.aar} · uke {runde.uke}</p>
+  <h1>Nyhetsrunden</h1>
+  <p class="lead">{runde.ingress}</p>
+
+  <section class="gt nr" data-runde={rundeId(runde)}>
+    <div class="gt-body"></div>
+    <script is:inline data-astro-rerun define:vars={{ R: runde }}>
+    (function () {
+      var root = document.currentScript.closest('.nr');
+      var body = root.querySelector('.gt-body');
+      if (root.dataset.bound) return; root.dataset.bound = '1';
+      var TYPER = { valg:'Velg riktig', sant:'Sant eller tull?', tall:'Hvilket tall?', fritt:'Svar fritt' };
+      var nr = 0, S = R.sporsmal, rekkefolge = {};
+      // alternativene stokkes, så det riktige svaret ikke alltid står på samme plass
+      function alternativer(i){
+        if (!rekkefolge[i]){ var a = S[i].alt.slice();
+          for (var k=a.length-1;k>0;k--){ var j=Math.floor(Math.random()*(k+1)); var t=a[k]; a[k]=a[j]; a[j]=t; }
+          rekkefolge[i] = a; }
+        return rekkefolge[i];
+      }
+      function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+      function vis(html){
+        body.innerHTML = html;
+        var topp = window.innerWidth < 900 ? 130 : 24, y = root.getBoundingClientRect().top;
+        if (y < topp - 40 || y > window.innerHeight * 0.5) window.scrollTo({ top: window.scrollY + y - topp, behavior: 'smooth' });
+      }
+      function start(){
+        vis('<ul class="nr-regler">' +
+          '<li>Telefonen går rundt bordet. Les spørsmålet høyt for den som står for tur.</li>' +
+          '<li><b>Riktig:</b> del ut én slurk. <b>Feil:</b> drikk én.</li>' +
+          '<li><b>Står du over:</b> drikk én – og bordet kan stjele. Riktig gir to slurker å dele ut, feil gir to å drikke.</li>' +
+          '<li>På tallspørsmål er alt innenfor 10 prosent riktig.</li></ul>' +
+          '<button class="btn gold vp-big" data-a="start">Start runden · ' + S.length + ' spørsmål</button>');
+      }
+      function spm(visSvar){
+        var s = S[nr];
+        var alt = s.type === 'valg' ? '<ol class="nr-alt">' + alternativer(nr).map(function(a){
+              return '<li class="' + (visSvar && a === s.svar ? 'rett' : '') + '">' + esc(a) + '</li>'; }).join('') + '</ol>' : '';
+        vis('<p class="gt-count">' + (nr+1) + ' / ' + S.length + ' · ' + TYPER[s.type] + '</p>' +
+          '<p class="gt-text">' + esc(s.q) + '</p>' + alt +
+          (visSvar
+            ? '<div class="nr-svar"><p class="nr-fasit">' + esc(s.svar) + '</p>' + (s.info ? '<p>' + esc(s.info) + '</p>' : '') +
+              (s.url ? '<p class="small"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">Les saken hos ' + esc(s.kilde) + ' ↗</a></p>' : '') + '</div>' +
+              '<button class="btn gold vp-big" data-a="neste">' + (nr < S.length-1 ? 'Neste person' : 'Avslutt runden') + '</button>'
+            : '<button class="btn gold vp-big" data-a="svar">Vis svar</button>') +
+          '<div class="gt-row"><button class="btn ghost" data-a="tilbake"' + (nr===0 ? ' disabled' : '') + '>Tilbake</button></div>');
+      }
+      function slutt(){
+        vis('<div class="vp-center"><h2>Det var uka.</h2><p>Alle skåler for nyhetsbildet. Ny runde kommer torsdag.</p></div>' +
+          '<button class="btn gold vp-big" data-a="igjen">Ta runden på nytt</button>');
+      }
+      body.addEventListener('click', function(e){
+        var b = e.target.closest('button'); if (!b) return;
+        var a = b.dataset.a;
+        if (a === 'start' || a === 'igjen'){ nr = 0; rekkefolge = {}; spm(false); }
+        else if (a === 'svar') spm(true);
+        else if (a === 'neste'){ if (nr < S.length-1){ nr++; spm(false); } else slutt(); }
+        else if (a === 'tilbake' && nr > 0){ nr--; spm(false); }
+      });
+      start();
+    })();
+    </script>
+  </section>
+
+  {andre.length > 0 && (
+    <section class="more">
+      <h2>Tidligere uker</h2>
+      <ul class="nr-arkiv">
+        {andre.map((r) => (
+          <li><a href={`/no/nyhetsrunden/${rundeId(r)}`}><b>{r.aar} · uke {r.uke}</b><span>{r.ingress}</span></a></li>
+        ))}
+      </ul>
+    </section>
+  )}
+  <p class="small" style="margin-top:22px">Ny runde hver torsdag, laget fra ukas saker hos NRK, VG og TV 2.</p>
+</Base>
