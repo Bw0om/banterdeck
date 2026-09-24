@@ -7,203 +7,256 @@
    "songs": [
     [
      "The Beatles",
-     "Twist and Shout"
+     "Twist and Shout",
+     1963
     ],
     [
      "The Beatles",
-     "Hey Jude"
+     "Hey Jude",
+     1968
     ],
     [
      "The Beatles",
-     "I Want to Hold Your Hand"
+     "I Want to Hold Your Hand",
+     1963
     ],
     [
      "The Rolling Stones",
-     "(I Can't Get No) Satisfaction"
+     "(I Can't Get No) Satisfaction",
+     1965
     ],
     [
      "The Beach Boys",
-     "Good Vibrations"
+     "Good Vibrations",
+     1966
     ],
     [
      "The Beach Boys",
-     "Surfin' U.S.A."
+     "Surfin' U.S.A.",
+     1963
     ],
     [
      "The Kinks",
-     "You Really Got Me"
+     "You Really Got Me",
+     1964
     ],
     [
      "The Animals",
-     "The House of the Rising Sun"
+     "The House of the Rising Sun",
+     1964
     ],
     [
      "Nancy Sinatra",
-     "These Boots Are Made for Walkin'"
+     "These Boots Are Made for Walkin'",
+     1966
     ],
     [
      "The Monkees",
-     "I'm a Believer"
+     "I'm a Believer",
+     1966
     ],
     [
      "The Supremes",
-     "You Can't Hurry Love"
+     "You Can't Hurry Love",
+     1966
     ],
     [
      "Aretha Franklin",
-     "Respect"
+     "Respect",
+     1967
     ],
     [
      "Otis Redding",
-     "(Sittin' On) The Dock of the Bay"
+     "(Sittin' On) The Dock of the Bay",
+     1968
     ],
     [
      "Marvin Gaye & Tammi Terrell",
-     "Ain't No Mountain High Enough"
+     "Ain't No Mountain High Enough",
+     1967
     ],
     [
      "The Troggs",
-     "Wild Thing"
+     "Wild Thing",
+     1966
     ],
     [
      "Chubby Checker",
-     "The Twist"
+     "The Twist",
+     1960
     ],
     [
      "Ben E. King",
-     "Stand by Me"
+     "Stand by Me",
+     1961
     ],
     [
      "The Temptations",
-     "My Girl"
+     "My Girl",
+     1964,
+     "Kom helt på slutten av 1964, hit i 1965."
     ],
     [
      "Martha and the Vandellas",
-     "Dancing in the Street"
+     "Dancing in the Street",
+     1964
     ],
     [
      "The Doors",
-     "Light My Fire"
+     "Light My Fire",
+     1967
     ],
     [
      "Jefferson Airplane",
-     "Somebody to Love"
+     "Somebody to Love",
+     1967
     ],
     [
      "Creedence Clearwater Revival",
-     "Proud Mary"
+     "Proud Mary",
+     1969
     ],
     [
      "The Mamas & the Papas",
-     "California Dreamin'"
+     "California Dreamin'",
+     1965,
+     "Kom i desember 1965, hit i 1966."
     ],
     [
      "Simon & Garfunkel",
-     "Mrs. Robinson"
+     "Mrs. Robinson",
+     1968
     ],
     [
      "Tommy James and the Shondells",
-     "Mony Mony"
+     "Mony Mony",
+     1968
     ],
     [
-     "The Isley Brothers",
-     "Shout"
+     "The Beatles",
+     "She Loves You",
+     1963
     ],
     [
      "Frank Sinatra",
-     "Strangers in the Night"
+     "Strangers in the Night",
+     1966
     ],
     [
      "Dusty Springfield",
-     "Son of a Preacher Man"
+     "Son of a Preacher Man",
+     1968
     ],
     [
      "Elvis Presley",
-     "Suspicious Minds"
+     "Suspicious Minds",
+     1969
     ],
     [
      "Van Morrison",
-     "Brown Eyed Girl"
+     "Brown Eyed Girl",
+     1967
     ],
     [
      "The Beatles",
-     "Help!"
+     "Help!",
+     1965
     ],
     [
      "The Beatles",
-     "Come Together"
+     "Come Together",
+     1969
     ],
     [
      "The Rolling Stones",
-     "Paint It Black"
+     "Paint It Black",
+     1966
     ],
     [
      "The Rolling Stones",
-     "Jumpin' Jack Flash"
+     "Jumpin' Jack Flash",
+     1968
     ],
     [
      "The Who",
-     "My Generation"
+     "My Generation",
+     1965
     ],
     [
      "The Kinks",
-     "Waterloo Sunset"
+     "Waterloo Sunset",
+     1967
     ],
     [
      "The Jimi Hendrix Experience",
-     "All Along the Watchtower"
+     "All Along the Watchtower",
+     1968,
+     "Bob Dylans original kom året før."
     ],
     [
      "Big Brother and the Holding Company",
-     "Piece of My Heart"
+     "Piece of My Heart",
+     1968
     ],
     [
      "Sam Cooke",
-     "Twistin' the Night Away"
+     "Twistin' the Night Away",
+     1962
     ],
     [
      "Ray Charles",
-     "Hit the Road Jack"
+     "Hit the Road Jack",
+     1961
     ],
     [
      "Roy Orbison",
-     "Oh, Pretty Woman"
+     "Oh, Pretty Woman",
+     1964
     ],
     [
      "The Righteous Brothers",
-     "You've Lost That Lovin' Feelin'"
+     "You've Lost That Lovin' Feelin'",
+     1964
     ],
     [
      "The Ronettes",
-     "Be My Baby"
+     "Be My Baby",
+     1963
     ],
     [
      "Stevie Wonder",
-     "Uptight (Everything's Alright)"
+     "Uptight (Everything's Alright)",
+     1965
     ],
     [
      "Sonny & Cher",
-     "I Got You Babe"
+     "I Got You Babe",
+     1965
     ],
     [
      "Tom Jones",
-     "It's Not Unusual"
+     "It's Not Unusual",
+     1965
     ],
     [
      "The Hollies",
-     "Bus Stop"
+     "Bus Stop",
+     1966
     ],
     [
      "Procol Harum",
-     "A Whiter Shade of Pale"
+     "A Whiter Shade of Pale",
+     1967
     ],
     [
      "Scott McKenzie",
-     "San Francisco (Be Sure to Wear Flowers in Your Hair)"
+     "San Francisco (Be Sure to Wear Flowers in Your Hair)",
+     1967
     ],
     [
      "The Turtles",
-     "Happy Together"
+     "Happy Together",
+     1967
     ]
    ]
   },
@@ -214,203 +267,257 @@
    "songs": [
     [
      "ABBA",
-     "Dancing Queen"
+     "Dancing Queen",
+     1976
     ],
     [
      "ABBA",
-     "Waterloo"
+     "Waterloo",
+     1974
     ],
     [
      "Queen",
-     "Bohemian Rhapsody"
+     "Bohemian Rhapsody",
+     1975
     ],
     [
      "Queen",
-     "Don't Stop Me Now"
+     "Don't Stop Me Now",
+     1979,
+     "På albumet Jazz fra 1978, singel i 1979."
     ],
     [
      "Bee Gees",
-     "Stayin' Alive"
+     "Stayin' Alive",
+     1977
     ],
     [
      "Gloria Gaynor",
-     "I Will Survive"
+     "I Will Survive",
+     1978
     ],
     [
      "Village People",
-     "Y.M.C.A."
+     "Y.M.C.A.",
+     1978
     ],
     [
      "Boney M.",
-     "Rasputin"
+     "Rasputin",
+     1978
     ],
     [
      "Boney M.",
-     "Rivers of Babylon"
+     "Rivers of Babylon",
+     1978
     ],
     [
      "Earth, Wind & Fire",
-     "September"
+     "September",
+     1978
     ],
     [
      "Chic",
-     "Le Freak"
+     "Le Freak",
+     1978
     ],
     [
      "Donna Summer",
-     "Hot Stuff"
+     "Hot Stuff",
+     1979
     ],
     [
      "Elton John",
-     "Crocodile Rock"
+     "Crocodile Rock",
+     1972
     ],
     [
      "Elton John & Kiki Dee",
-     "Don't Go Breaking My Heart"
+     "Don't Go Breaking My Heart",
+     1976
     ],
     [
      "Fleetwood Mac",
-     "Go Your Own Way"
+     "Go Your Own Way",
+     1976,
+     "Singel i desember 1976, albumet Rumours i 1977."
     ],
     [
      "Eagles",
-     "Hotel California"
+     "Hotel California",
+     1976,
+     "Albumet kom i 1976, singelen i 1977."
     ],
     [
      "Lynyrd Skynyrd",
-     "Sweet Home Alabama"
+     "Sweet Home Alabama",
+     1974
     ],
     [
      "AC/DC",
-     "Highway to Hell"
+     "Highway to Hell",
+     1979
     ],
     [
      "Kiss",
-     "I Was Made for Lovin' You"
+     "I Was Made for Lovin' You",
+     1979
     ],
     [
      "Blondie",
-     "Heart of Glass"
+     "Heart of Glass",
+     1978,
+     "På albumet fra 1978, singel og hit i 1979."
     ],
     [
      "David Bowie",
-     "\"Heroes\""
+     "\"Heroes\"",
+     1977
     ],
     [
      "Rod Stewart",
-     "Da Ya Think I'm Sexy?"
+     "Da Ya Think I'm Sexy?",
+     1978
     ],
     [
      "The Jackson 5",
-     "ABC"
+     "ABC",
+     1970
     ],
     [
      "Stevie Wonder",
-     "Superstition"
+     "Superstition",
+     1972
     ],
     [
      "John Denver",
-     "Take Me Home, Country Roads"
+     "Take Me Home, Country Roads",
+     1971
     ],
     [
      "Olivia Newton-John & John Travolta",
-     "You're the One That I Want"
+     "You're the One That I Want",
+     1978
     ],
     [
      "Hot Chocolate",
-     "You Sexy Thing"
+     "You Sexy Thing",
+     1975
     ],
     [
      "Dolly Parton",
-     "Jolene"
+     "Jolene",
+     1973
     ],
     [
      "Bill Withers",
-     "Lovely Day"
+     "Lovely Day",
+     1977
     ],
     [
      "Meat Loaf",
-     "Paradise by the Dashboard Light"
+     "Paradise by the Dashboard Light",
+     1977
     ],
     [
      "ABBA",
-     "Mamma Mia"
+     "Mamma Mia",
+     1975
     ],
     [
      "ABBA",
-     "Gimme! Gimme! Gimme! (A Man After Midnight)"
+     "Gimme! Gimme! Gimme! (A Man After Midnight)",
+     1979
     ],
     [
      "Queen",
-     "We Will Rock You"
+     "We Will Rock You",
+     1977
     ],
     [
      "Bee Gees",
-     "Night Fever"
+     "Night Fever",
+     1977
     ],
     [
      "Sister Sledge",
-     "We Are Family"
+     "We Are Family",
+     1979
     ],
     [
      "The Jacksons",
-     "Blame It on the Boogie"
+     "Blame It on the Boogie",
+     1978
     ],
     [
      "Michael Jackson",
-     "Don't Stop 'Til You Get Enough"
+     "Don't Stop 'Til You Get Enough",
+     1979
     ],
     [
      "KC and the Sunshine Band",
-     "That's the Way (I Like It)"
+     "That's the Way (I Like It)",
+     1975
     ],
     [
      "Thin Lizzy",
-     "The Boys Are Back in Town"
+     "The Boys Are Back in Town",
+     1976
     ],
     [
      "The Rolling Stones",
-     "Brown Sugar"
+     "Brown Sugar",
+     1971
     ],
     [
      "Deep Purple",
-     "Smoke on the Water"
+     "Smoke on the Water",
+     1972
     ],
     [
      "Steve Miller Band",
-     "The Joker"
+     "The Joker",
+     1973
     ],
     [
      "The Knack",
-     "My Sharona"
+     "My Sharona",
+     1979
     ],
     [
      "Supertramp",
-     "The Logical Song"
+     "The Logical Song",
+     1979
     ],
     [
      "Electric Light Orchestra",
-     "Mr. Blue Sky"
+     "Mr. Blue Sky",
+     1977
     ],
     [
      "Toto",
-     "Hold the Line"
+     "Hold the Line",
+     1978
     ],
     [
      "Carl Douglas",
-     "Kung Fu Fighting"
+     "Kung Fu Fighting",
+     1974
     ],
     [
      "The Sugarhill Gang",
-     "Rapper's Delight"
+     "Rapper's Delight",
+     1979
     ],
     [
      "Baccara",
-     "Yes Sir, I Can Boogie"
+     "Yes Sir, I Can Boogie",
+     1977
     ],
     [
      "Anita Ward",
-     "Ring My Bell"
+     "Ring My Bell",
+     1979
     ]
    ]
   },
@@ -421,203 +528,261 @@
    "songs": [
     [
      "Michael Jackson",
-     "Billie Jean"
+     "Billie Jean",
+     1983,
+     "På albumet Thriller fra 1982, singel i 1983."
     ],
     [
      "Michael Jackson",
-     "Thriller"
+     "Thriller",
+     1982
     ],
     [
      "Madonna",
-     "Like a Prayer"
+     "Like a Prayer",
+     1989
     ],
     [
      "Madonna",
-     "Material Girl"
+     "Material Girl",
+     1985,
+     "På albumet fra 1984, singel i 1985."
     ],
     [
      "Whitney Houston",
-     "I Wanna Dance with Somebody (Who Loves Me)"
+     "I Wanna Dance with Somebody (Who Loves Me)",
+     1987
     ],
     [
      "Cyndi Lauper",
-     "Girls Just Want to Have Fun"
+     "Girls Just Want to Have Fun",
+     1983
     ],
     [
      "a-ha",
-     "Take On Me"
+     "Take On Me",
+     1985,
+     "Første versjon kom i 1984 – hitversjonen i 1985."
     ],
     [
      "Bon Jovi",
-     "Livin' on a Prayer"
+     "Livin' on a Prayer",
+     1986
     ],
     [
      "Journey",
-     "Don't Stop Believin'"
+     "Don't Stop Believin'",
+     1981
     ],
     [
      "Europe",
-     "The Final Countdown"
+     "The Final Countdown",
+     1986
     ],
     [
      "Toto",
-     "Africa"
+     "Africa",
+     1982
     ],
     [
      "Wham!",
-     "Wake Me Up Before You Go-Go"
+     "Wake Me Up Before You Go-Go",
+     1984
     ],
     [
      "Queen",
-     "Another One Bites the Dust"
+     "Another One Bites the Dust",
+     1980
     ],
     [
      "Survivor",
-     "Eye of the Tiger"
+     "Eye of the Tiger",
+     1982
     ],
     [
      "Rick Astley",
-     "Never Gonna Give You Up"
+     "Never Gonna Give You Up",
+     1987
     ],
     [
      "Dexys Midnight Runners",
-     "Come On Eileen"
+     "Come On Eileen",
+     1982
     ],
     [
      "Tears for Fears",
-     "Everybody Wants to Rule the World"
+     "Everybody Wants to Rule the World",
+     1985
     ],
     [
      "Guns N' Roses",
-     "Sweet Child o' Mine"
+     "Sweet Child o' Mine",
+     1987,
+     "På albumet fra 1987, hit i 1988."
     ],
     [
      "Bonnie Tyler",
-     "Total Eclipse of the Heart"
+     "Total Eclipse of the Heart",
+     1983
     ],
     [
      "Kenny Loggins",
-     "Footloose"
+     "Footloose",
+     1984
     ],
     [
      "Prince",
-     "Purple Rain"
+     "Purple Rain",
+     1984
     ],
     [
      "Duran Duran",
-     "Hungry Like the Wolf"
+     "Hungry Like the Wolf",
+     1982
     ],
     [
      "Culture Club",
-     "Karma Chameleon"
+     "Karma Chameleon",
+     1983
     ],
     [
      "Eurythmics",
-     "Sweet Dreams (Are Made of This)"
+     "Sweet Dreams (Are Made of This)",
+     1983
     ],
     [
      "The Human League",
-     "Don't You Want Me"
+     "Don't You Want Me",
+     1981
     ],
     [
      "Simple Minds",
-     "Don't You (Forget About Me)"
+     "Don't You (Forget About Me)",
+     1985
     ],
     [
      "Kool & the Gang",
-     "Celebration"
+     "Celebration",
+     1980
     ],
     [
      "Irene Cara",
-     "Flashdance... What a Feeling"
+     "Flashdance... What a Feeling",
+     1983
     ],
     [
      "Joan Jett & the Blackhearts",
-     "I Love Rock 'n' Roll"
+     "I Love Rock 'n' Roll",
+     1981,
+     "Hit i 1982."
     ],
     [
      "Katrina and the Waves",
-     "Walking on Sunshine"
+     "Walking on Sunshine",
+     1985,
+     "Første versjon kom i 1983."
     ],
     [
      "Michael Jackson",
-     "Beat It"
+     "Beat It",
+     1983
     ],
     [
      "Madonna",
-     "Holiday"
+     "Holiday",
+     1983
     ],
     [
      "Prince",
-     "Kiss"
+     "Kiss",
+     1986
     ],
     [
      "Whitney Houston",
-     "How Will I Know"
+     "How Will I Know",
+     1985
     ],
     [
      "George Michael",
-     "Faith"
+     "Faith",
+     1987
     ],
     [
      "Wham!",
-     "Club Tropicana"
+     "Club Tropicana",
+     1983
     ],
     [
      "Bon Jovi",
-     "You Give Love a Bad Name"
+     "You Give Love a Bad Name",
+     1986
     ],
     [
      "Van Halen",
-     "Jump"
+     "Jump",
+     1984
     ],
     [
      "Def Leppard",
-     "Pour Some Sugar on Me"
+     "Pour Some Sugar on Me",
+     1987
     ],
     [
      "Soft Cell",
-     "Tainted Love"
+     "Tainted Love",
+     1981
     ],
     [
      "Men at Work",
-     "Down Under"
+     "Down Under",
+     1981,
+     "Hit i resten av verden i 1982–83."
     ],
     [
      "Billy Idol",
-     "White Wedding"
+     "White Wedding",
+     1982
     ],
     [
      "The Bangles",
-     "Walk Like an Egyptian"
+     "Walk Like an Egyptian",
+     1986
     ],
     [
      "Salt-N-Pepa",
-     "Push It"
+     "Push It",
+     1987
     ],
     [
      "Run-DMC & Aerosmith",
-     "Walk This Way"
+     "Walk This Way",
+     1986,
+     "Aerosmiths original er fra 1975."
     ],
     [
      "Bruce Springsteen",
-     "Dancing in the Dark"
+     "Dancing in the Dark",
+     1984
     ],
     [
      "Phil Collins",
-     "In the Air Tonight"
+     "In the Air Tonight",
+     1981
     ],
     [
      "Roxette",
-     "The Look"
+     "The Look",
+     1989
     ],
     [
      "Kim Wilde",
-     "Kids in America"
+     "Kids in America",
+     1981
     ],
     [
      "Queen",
-     "I Want to Break Free"
+     "I Want to Break Free",
+     1984
     ]
    ]
   },
@@ -628,203 +793,259 @@
    "songs": [
     [
      "Spice Girls",
-     "Wannabe"
+     "Wannabe",
+     1996
     ],
     [
      "Backstreet Boys",
-     "I Want It That Way"
+     "I Want It That Way",
+     1999
     ],
     [
      "Britney Spears",
-     "...Baby One More Time"
+     "...Baby One More Time",
+     1998
     ],
     [
      "Aqua",
-     "Barbie Girl"
+     "Barbie Girl",
+     1997
     ],
     [
      "Vengaboys",
-     "We Like to Party! (The Vengabus)"
+     "We Like to Party! (The Vengabus)",
+     1998
     ],
     [
      "Haddaway",
-     "What Is Love"
+     "What Is Love",
+     1993
     ],
     [
      "2 Unlimited",
-     "No Limit"
+     "No Limit",
+     1993
     ],
     [
      "Eiffel 65",
-     "Blue (Da Ba Dee)"
+     "Blue (Da Ba Dee)",
+     1998,
+     "Hit i 1999."
     ],
     [
      "Lou Bega",
-     "Mambo No. 5 (A Little Bit of...)"
+     "Mambo No. 5 (A Little Bit of...)",
+     1999
     ],
     [
      "Nirvana",
-     "Smells Like Teen Spirit"
+     "Smells Like Teen Spirit",
+     1991
     ],
     [
      "Oasis",
-     "Wonderwall"
+     "Wonderwall",
+     1995
     ],
     [
      "Blur",
-     "Song 2"
+     "Song 2",
+     1997
     ],
     [
      "Coolio",
-     "Gangsta's Paradise"
+     "Gangsta's Paradise",
+     1995
     ],
     [
      "TLC",
-     "No Scrubs"
+     "No Scrubs",
+     1999
     ],
     [
      "Whitney Houston",
-     "I Will Always Love You"
+     "I Will Always Love You",
+     1992,
+     "Dolly Partons original er fra 1974."
     ],
     [
      "Celine Dion",
-     "My Heart Will Go On"
+     "My Heart Will Go On",
+     1997
     ],
     [
      "Ricky Martin",
-     "Livin' la Vida Loca"
+     "Livin' la Vida Loca",
+     1999
     ],
     [
      "Los del Río",
-     "Macarena"
+     "Macarena",
+     1995,
+     "Originalen kom i 1993, remiksen tok verden i 1995–96."
     ],
     [
      "Chumbawamba",
-     "Tubthumping"
+     "Tubthumping",
+     1997
     ],
     [
      "No Doubt",
-     "Don't Speak"
+     "Don't Speak",
+     1996
     ],
     [
      "Hanson",
-     "MMMBop"
+     "MMMBop",
+     1997
     ],
     [
      "Mr. President",
-     "Coco Jamboo"
+     "Coco Jamboo",
+     1996
     ],
     [
      "Snap!",
-     "Rhythm Is a Dancer"
+     "Rhythm Is a Dancer",
+     1992
     ],
     [
      "Ace of Base",
-     "All That She Wants"
+     "All That She Wants",
+     1992
     ],
     [
      "The Cardigans",
-     "Lovefool"
+     "Lovefool",
+     1996
     ],
     [
      "Robbie Williams",
-     "Angels"
+     "Angels",
+     1997
     ],
     [
      "Fugees",
-     "Killing Me Softly"
+     "Killing Me Softly",
+     1996
     ],
     [
      "Will Smith",
-     "Gettin' Jiggy wit It"
+     "Gettin' Jiggy wit It",
+     1998
     ],
     [
      "Shania Twain",
-     "Man! I Feel Like a Woman!"
+     "Man! I Feel Like a Woman!",
+     1999,
+     "På albumet fra 1997, singel i 1999."
     ],
     [
      "Dr. Alban",
-     "It's My Life"
+     "It's My Life",
+     1992
     ],
     [
      "Spice Girls",
-     "Spice Up Your Life"
+     "Spice Up Your Life",
+     1997
     ],
     [
      "Backstreet Boys",
-     "Everybody (Backstreet's Back)"
+     "Everybody (Backstreet's Back)",
+     1997
     ],
     [
      "Christina Aguilera",
-     "Genie in a Bottle"
+     "Genie in a Bottle",
+     1999
     ],
     [
      "Aqua",
-     "Doctor Jones"
+     "Doctor Jones",
+     1997
     ],
     [
      "Scooter",
-     "How Much Is the Fish?"
+     "How Much Is the Fish?",
+     1998
     ],
     [
      "Corona",
-     "The Rhythm of the Night"
+     "The Rhythm of the Night",
+     1993,
+     "Stor hit i resten av Europa i 1994."
     ],
     [
      "Culture Beat",
-     "Mr. Vain"
+     "Mr. Vain",
+     1993
     ],
     [
      "La Bouche",
-     "Be My Lover"
+     "Be My Lover",
+     1995
     ],
     [
      "Whigfield",
-     "Saturday Night"
+     "Saturday Night",
+     1994
     ],
     [
      "Real McCoy",
-     "Another Night"
+     "Another Night",
+     1994,
+     "Kom i Tyskland i 1993."
     ],
     [
      "Mariah Carey",
-     "Fantasy"
+     "Fantasy",
+     1995
     ],
     [
      "TLC",
-     "Waterfalls"
+     "Waterfalls",
+     1995
     ],
     [
      "Spin Doctors",
-     "Two Princes"
+     "Two Princes",
+     1993
     ],
     [
      "The Offspring",
-     "Pretty Fly (for a White Guy)"
+     "Pretty Fly (for a White Guy)",
+     1998
     ],
     [
      "Bloodhound Gang",
-     "The Bad Touch"
+     "The Bad Touch",
+     1999
     ],
     [
      "Smash Mouth",
-     "All Star"
+     "All Star",
+     1999
     ],
     [
      "Fatboy Slim",
-     "The Rockafeller Skank"
+     "The Rockafeller Skank",
+     1998
     ],
     [
      "The Prodigy",
-     "Firestarter"
+     "Firestarter",
+     1996
     ],
     [
      "Red Hot Chili Peppers",
-     "Californication"
+     "Californication",
+     1999
     ],
     [
      "Cher",
-     "Believe"
+     "Believe",
+     1998
     ]
    ]
   },
@@ -835,203 +1056,255 @@
    "songs": [
     [
      "Eminem",
-     "The Real Slim Shady"
+     "The Real Slim Shady",
+     2000
     ],
     [
      "Eminem",
-     "Lose Yourself"
+     "Lose Yourself",
+     2002
     ],
     [
      "Beyoncé",
-     "Crazy in Love"
+     "Crazy in Love",
+     2003
     ],
     [
      "Britney Spears",
-     "Toxic"
+     "Toxic",
+     2004
     ],
     [
      "OutKast",
-     "Hey Ya!"
+     "Hey Ya!",
+     2003
     ],
     [
      "The Killers",
-     "Mr. Brightside"
+     "Mr. Brightside",
+     2004,
+     "Første utgivelse kom i 2003."
     ],
     [
      "Shakira",
-     "Hips Don't Lie"
+     "Hips Don't Lie",
+     2006
     ],
     [
      "Rihanna",
-     "Umbrella"
+     "Umbrella",
+     2007
     ],
     [
      "Nelly",
-     "Hot in Herre"
+     "Hot in Herre",
+     2002
     ],
     [
      "50 Cent",
-     "In da Club"
+     "In da Club",
+     2003
     ],
     [
      "Usher",
-     "Yeah!"
+     "Yeah!",
+     2004
     ],
     [
      "Black Eyed Peas",
-     "I Gotta Feeling"
+     "I Gotta Feeling",
+     2009
     ],
     [
      "Lady Gaga",
-     "Poker Face"
+     "Poker Face",
+     2008
     ],
     [
      "Lady Gaga",
-     "Just Dance"
+     "Just Dance",
+     2008
     ],
     [
      "Katy Perry",
-     "I Kissed a Girl"
+     "I Kissed a Girl",
+     2008
     ],
     [
      "Kelly Clarkson",
-     "Since U Been Gone"
+     "Since U Been Gone",
+     2004
     ],
     [
      "Avril Lavigne",
-     "Complicated"
+     "Complicated",
+     2002
     ],
     [
      "Justin Timberlake",
-     "SexyBack"
+     "SexyBack",
+     2006
     ],
     [
      "Nelly Furtado",
-     "Maneater"
+     "Maneater",
+     2006
     ],
     [
      "Gwen Stefani",
-     "Hollaback Girl"
+     "Hollaback Girl",
+     2005
     ],
     [
      "Kylie Minogue",
-     "Can't Get You Out of My Head"
+     "Can't Get You Out of My Head",
+     2001
     ],
     [
      "Daft Punk",
-     "One More Time"
+     "One More Time",
+     2000
     ],
     [
      "Basshunter",
-     "Boten Anna"
+     "Boten Anna",
+     2006
     ],
     [
      "Las Ketchup",
-     "The Ketchup Song (Aserejé)"
+     "The Ketchup Song (Aserejé)",
+     2002
     ],
     [
      "Amy Winehouse",
-     "Rehab"
+     "Rehab",
+     2006
     ],
     [
      "Gnarls Barkley",
-     "Crazy"
+     "Crazy",
+     2006
     ],
     [
      "Kanye West",
-     "Gold Digger"
+     "Gold Digger",
+     2005
     ],
     [
      "The White Stripes",
-     "Seven Nation Army"
+     "Seven Nation Army",
+     2003
     ],
     [
      "Flo Rida",
-     "Low"
+     "Low",
+     2007
     ],
     [
      "Akon",
-     "Smack That"
+     "Smack That",
+     2006
     ],
     [
      "Beyoncé",
-     "Single Ladies (Put a Ring on It)"
+     "Single Ladies (Put a Ring on It)",
+     2008
     ],
     [
      "Destiny's Child",
-     "Survivor"
+     "Survivor",
+     2001
     ],
     [
      "Eminem",
-     "Without Me"
+     "Without Me",
+     2002
     ],
     [
      "Britney Spears",
-     "Oops!... I Did It Again"
+     "Oops!... I Did It Again",
+     2000
     ],
     [
      "Christina Aguilera, Lil' Kim, Mýa & Pink",
-     "Lady Marmalade"
+     "Lady Marmalade",
+     2001
     ],
     [
      "Pink",
-     "Get the Party Started"
+     "Get the Party Started",
+     2001
     ],
     [
      "Shakira",
-     "Whenever, Wherever"
+     "Whenever, Wherever",
+     2001
     ],
     [
      "Nelly ft. Kelly Rowland",
-     "Dilemma"
+     "Dilemma",
+     2002
     ],
     [
      "Sean Paul",
-     "Get Busy"
+     "Get Busy",
+     2003
     ],
     [
      "Missy Elliott",
-     "Get Ur Freak On"
+     "Get Ur Freak On",
+     2001
     ],
     [
      "Kanye West",
-     "Stronger"
+     "Stronger",
+     2007
     ],
     [
      "Fergie",
-     "Fergalicious"
+     "Fergalicious",
+     2006
     ],
     [
      "Timbaland",
-     "The Way I Are"
+     "The Way I Are",
+     2007
     ],
     [
      "The Pussycat Dolls",
-     "Don't Cha"
+     "Don't Cha",
+     2005
     ],
     [
      "Mika",
-     "Grace Kelly"
+     "Grace Kelly",
+     2007
     ],
     [
      "Sugababes",
-     "Push the Button"
+     "Push the Button",
+     2005
     ],
     [
      "Alcazar",
-     "Crying at the Discoteque"
+     "Crying at the Discoteque",
+     2000
     ],
     [
      "Linkin Park",
-     "In the End"
+     "In the End",
+     2001,
+     "På albumet Hybrid Theory fra 2000."
     ],
     [
      "Green Day",
-     "Boulevard of Broken Dreams"
+     "Boulevard of Broken Dreams",
+     2004
     ],
     [
      "Ciara ft. Missy Elliott",
-     "1, 2 Step"
+     "1, 2 Step",
+     2004
     ]
    ]
   },
@@ -1042,203 +1315,255 @@
    "songs": [
     [
      "Avicii",
-     "Wake Me Up"
+     "Wake Me Up",
+     2013
     ],
     [
      "Avicii",
-     "Levels"
+     "Levels",
+     2011
     ],
     [
      "Kygo",
-     "Firestone"
+     "Firestone",
+     2014
     ],
     [
      "Pharrell Williams",
-     "Happy"
+     "Happy",
+     2013
     ],
     [
      "Mark Ronson ft. Bruno Mars",
-     "Uptown Funk"
+     "Uptown Funk",
+     2014
     ],
     [
      "LMFAO",
-     "Party Rock Anthem"
+     "Party Rock Anthem",
+     2011
     ],
     [
      "Carly Rae Jepsen",
-     "Call Me Maybe"
+     "Call Me Maybe",
+     2012,
+     "Kom i Canada i 2011."
     ],
     [
      "PSY",
-     "Gangnam Style"
+     "Gangnam Style",
+     2012
     ],
     [
      "Ylvis",
-     "The Fox (What Does the Fox Say?)"
+     "The Fox (What Does the Fox Say?)",
+     2013
     ],
     [
      "Adele",
-     "Rolling in the Deep"
+     "Rolling in the Deep",
+     2010
     ],
     [
      "Ed Sheeran",
-     "Shape of You"
+     "Shape of You",
+     2017
     ],
     [
      "Luis Fonsi & Daddy Yankee",
-     "Despacito"
+     "Despacito",
+     2017
     ],
     [
      "Justin Bieber",
-     "Sorry"
+     "Sorry",
+     2015
     ],
     [
      "Taylor Swift",
-     "Shake It Off"
+     "Shake It Off",
+     2014
     ],
     [
      "Katy Perry",
-     "Firework"
+     "Firework",
+     2010
     ],
     [
      "Rihanna",
-     "We Found Love"
+     "We Found Love",
+     2011
     ],
     [
      "David Guetta ft. Sia",
-     "Titanium"
+     "Titanium",
+     2011
     ],
     [
      "Macklemore & Ryan Lewis",
-     "Thrift Shop"
+     "Thrift Shop",
+     2012
     ],
     [
      "Daft Punk",
-     "Get Lucky"
+     "Get Lucky",
+     2013
     ],
     [
      "Swedish House Mafia",
-     "Don't You Worry Child"
+     "Don't You Worry Child",
+     2012
     ],
     [
      "Imagine Dragons",
-     "Radioactive"
+     "Radioactive",
+     2012
     ],
     [
      "Bruno Mars",
-     "Locked Out of Heaven"
+     "Locked Out of Heaven",
+     2012
     ],
     [
      "Lady Gaga",
-     "Born This Way"
+     "Born This Way",
+     2011
     ],
     [
      "Calvin Harris",
-     "Summer"
+     "Summer",
+     2014
     ],
     [
      "Drake",
-     "Hotline Bling"
+     "Hotline Bling",
+     2015
     ],
     [
      "The Weeknd",
-     "Can't Feel My Face"
+     "Can't Feel My Face",
+     2015
     ],
     [
      "Dua Lipa",
-     "New Rules"
+     "New Rules",
+     2017
     ],
     [
      "Lil Nas X",
-     "Old Town Road"
+     "Old Town Road",
+     2019,
+     "Lagt ut i desember 2018."
     ],
     [
      "Billie Eilish",
-     "Bad Guy"
+     "Bad Guy",
+     2019
     ],
     [
      "Icona Pop",
-     "I Love It"
+     "I Love It",
+     2012
     ],
     [
      "Avicii",
-     "Hey Brother"
+     "Hey Brother",
+     2013
     ],
     [
      "Major Lazer & DJ Snake ft. MØ",
-     "Lean On"
+     "Lean On",
+     2015
     ],
     [
      "Justin Bieber",
-     "Baby"
+     "Baby",
+     2010
     ],
     [
      "Bruno Mars",
-     "Just the Way You Are"
+     "Just the Way You Are",
+     2010
     ],
     [
      "Rihanna",
-     "Only Girl (In the World)"
+     "Only Girl (In the World)",
+     2010
     ],
     [
      "Pitbull ft. Ne-Yo, Afrojack & Nayer",
-     "Give Me Everything"
+     "Give Me Everything",
+     2011
     ],
     [
      "Pitbull ft. Kesha",
-     "Timber"
+     "Timber",
+     2013
     ],
     [
      "Taio Cruz",
-     "Dynamite"
+     "Dynamite",
+     2010
     ],
     [
      "Gotye ft. Kimbra",
-     "Somebody That I Used to Know"
+     "Somebody That I Used to Know",
+     2011
     ],
     [
      "Macklemore & Ryan Lewis",
-     "Can't Hold Us"
+     "Can't Hold Us",
+     2012
     ],
     [
      "Ed Sheeran",
-     "Thinking Out Loud"
+     "Thinking Out Loud",
+     2014
     ],
     [
      "Maroon 5",
-     "Moves Like Jagger"
+     "Moves Like Jagger",
+     2011
     ],
     [
      "Sia",
-     "Cheap Thrills"
+     "Cheap Thrills",
+     2016
     ],
     [
      "The Chainsmokers ft. Halsey",
-     "Closer"
+     "Closer",
+     2016
     ],
     [
      "Clean Bandit ft. Jess Glynne",
-     "Rather Be"
+     "Rather Be",
+     2014
     ],
     [
      "Meghan Trainor",
-     "All About That Bass"
+     "All About That Bass",
+     2014
     ],
     [
      "Ariana Grande",
-     "Thank U, Next"
+     "Thank U, Next",
+     2018
     ],
     [
      "Post Malone & Swae Lee",
-     "Sunflower"
+     "Sunflower",
+     2018
     ],
     [
      "Camila Cabello",
-     "Havana"
+     "Havana",
+     2017
     ],
     [
      "Lady Gaga & Bradley Cooper",
-     "Shallow"
+     "Shallow",
+     2018
     ]
    ]
   },
@@ -1249,131 +1574,166 @@
    "songs": [
     [
      "The Weeknd",
-     "Blinding Lights"
+     "Blinding Lights",
+     2019,
+     "Kom i november 2019 – største hit i 2020."
     ],
     [
      "Dua Lipa",
-     "Levitating"
+     "Levitating",
+     2020
     ],
     [
      "Harry Styles",
-     "As It Was"
+     "As It Was",
+     2022
     ],
     [
      "Miley Cyrus",
-     "Flowers"
+     "Flowers",
+     2023
     ],
     [
      "Olivia Rodrigo",
-     "Drivers License"
+     "Drivers License",
+     2021
     ],
     [
      "Olivia Rodrigo",
-     "Good 4 U"
+     "Good 4 U",
+     2021
     ],
     [
      "Glass Animals",
-     "Heat Waves"
+     "Heat Waves",
+     2020,
+     "Største hit i 2021–22."
     ],
     [
      "Doja Cat",
-     "Say So"
+     "Say So",
+     2020
     ],
     [
      "Lil Nas X",
-     "Montero (Call Me by Your Name)"
+     "Montero (Call Me by Your Name)",
+     2021
     ],
     [
      "The Kid Laroi & Justin Bieber",
-     "Stay"
+     "Stay",
+     2021
     ],
     [
      "Ed Sheeran",
-     "Bad Habits"
+     "Bad Habits",
+     2021
     ],
     [
      "Måneskin",
-     "Beggin'"
+     "Beggin'",
+     2021,
+     "Spilt inn i 2017, slo gjennom i 2021."
     ],
     [
      "Taylor Swift",
-     "Anti-Hero"
+     "Anti-Hero",
+     2022
     ],
     [
      "Sabrina Carpenter",
-     "Espresso"
+     "Espresso",
+     2024
     ],
     [
      "Sabrina Carpenter",
-     "Please Please Please"
+     "Please Please Please",
+     2024
     ],
     [
      "Chappell Roan",
-     "Good Luck, Babe!"
+     "Good Luck, Babe!",
+     2024
     ],
     [
      "Beyoncé",
-     "Texas Hold 'Em"
+     "Texas Hold 'Em",
+     2024
     ],
     [
      "Beyoncé",
-     "Break My Soul"
+     "Break My Soul",
+     2022
     ],
     [
      "Kendrick Lamar",
-     "Not Like Us"
+     "Not Like Us",
+     2024
     ],
     [
      "Billie Eilish",
-     "Birds of a Feather"
+     "Birds of a Feather",
+     2024
     ],
     [
      "Lady Gaga & Bruno Mars",
-     "Die with a Smile"
+     "Die with a Smile",
+     2024
     ],
     [
      "Rosé & Bruno Mars",
-     "APT."
+     "APT.",
+     2024
     ],
     [
      "Tate McRae",
-     "Greedy"
+     "Greedy",
+     2023
     ],
     [
      "Doja Cat",
-     "Paint the Town Red"
+     "Paint the Town Red",
+     2023
     ],
     [
      "Loreen",
-     "Tattoo"
+     "Tattoo",
+     2023
     ],
     [
      "David Guetta & Bebe Rexha",
-     "I'm Good (Blue)"
+     "I'm Good (Blue)",
+     2022
     ],
     [
      "Jack Harlow",
-     "First Class"
+     "First Class",
+     2022
     ],
     [
      "Lizzo",
-     "About Damn Time"
+     "About Damn Time",
+     2022
     ],
     [
      "Bad Bunny",
-     "Tití Me Preguntó"
+     "Tití Me Preguntó",
+     2022
     ],
     [
      "Teddy Swims",
-     "Lose Control"
+     "Lose Control",
+     2023
     ],
     [
      "Benson Boone",
-     "Beautiful Things"
+     "Beautiful Things",
+     2024
     ],
     [
      "Gigi Perez",
-     "Sailor Song"
+     "Sailor Song",
+     2024
     ]
    ]
   },
@@ -1384,39 +1744,48 @@
    "songs": [
     [
      "DDE",
-     "Vinsjan på kaia"
+     "Vinsjan på kaia",
+     1993
     ],
     [
      "DDE",
-     "Rompa mi"
+     "Rompa mi",
+     1996
     ],
     [
      "Postgirobygget",
-     "En solskinnsdag"
+     "En solskinnsdag",
+     1995
     ],
     [
      "Åge Aleksandersen",
-     "Lys og varme"
+     "Lys og varme",
+     1984
     ],
     [
      "Jahn Teigen",
-     "Mil etter mil"
+     "Mil etter mil",
+     1978
     ],
     [
      "Bobbysocks",
-     "La det swinge"
+     "La det swinge",
+     1985
     ],
     [
      "Alexander Rybak",
-     "Fairytale"
+     "Fairytale",
+     2009
     ],
     [
      "Kurt Nilsen",
-     "She's So High"
+     "She's So High",
+     2003
     ],
     [
      "Kaizers Orchestra",
-     "Kontroll på kontinentet"
+     "Kontroll på kontinentet",
+     2001
     ],
     [
      "Kaizers Orchestra",
@@ -1424,59 +1793,73 @@
     ],
     [
      "Madcon",
-     "Beggin'"
+     "Beggin'",
+     2007
     ],
     [
      "Madcon",
-     "Glow"
+     "Glow",
+     2010
     ],
     [
      "TIX",
-     "Fallen Angel"
+     "Fallen Angel",
+     2021
     ],
     [
      "Keiino",
-     "Spirit in the Sky"
+     "Spirit in the Sky",
+     2019
     ],
     [
      "Karpe",
-     "Påfugl"
+     "Påfugl",
+     2012
     ],
     [
      "Staysman & Lazz",
-     "En godt stekt pannekake"
+     "En godt stekt pannekake",
+     2016
     ],
     [
      "Wig Wam",
-     "In My Dreams"
+     "In My Dreams",
+     2005
     ],
     [
      "Sigrid",
-     "Don't Kill My Vibe"
+     "Don't Kill My Vibe",
+     2017
     ],
     [
      "Astrid S",
-     "Hurts So Good"
+     "Hurts So Good",
+     2016
     ],
     [
      "Aurora",
-     "Runaway"
+     "Runaway",
+     2015
     ],
     [
      "Nico & Vinz",
-     "Am I Wrong"
+     "Am I Wrong",
+     2013
     ],
     [
      "Marcus & Martinus",
-     "Elektrisk"
+     "Elektrisk",
+     2015
     ],
     [
      "deLillos",
-     "Neste sommer"
+     "Neste sommer",
+     1993
     ],
     [
      "Di Derre",
-     "Jenter & sånn"
+     "Jenter & sånn",
+     1994
     ],
     [
      "Lillebjørn Nilsen",
@@ -1488,43 +1871,53 @@
     ],
     [
      "Alan Walker",
-     "Faded"
+     "Faded",
+     2015
     ],
     [
      "Kygo & Selena Gomez",
-     "It Ain't Me"
+     "It Ain't Me",
+     2017
     ],
     [
      "Subwoolfer",
-     "Give That Wolf a Banana"
+     "Give That Wolf a Banana",
+     2022
     ],
     [
      "a-ha",
-     "The Sun Always Shines on T.V."
+     "The Sun Always Shines on T.V.",
+     1985
     ],
     [
      "a-ha",
-     "Hunting High and Low"
+     "Hunting High and Low",
+     1985
     ],
     [
      "Kaizers Orchestra",
-     "Maestro"
+     "Maestro",
+     2005
     ],
     [
      "Madcon",
-     "Freaky Like Me"
+     "Freaky Like Me",
+     2010
     ],
     [
      "Kygo",
-     "Stole the Show"
+     "Stole the Show",
+     2015
     ],
     [
      "Alan Walker",
-     "Alone"
+     "Alone",
+     2016
     ],
     [
      "Sigrid",
-     "Strangers"
+     "Strangers",
+     2017
     ],
     [
      "Astrid S",
@@ -1532,51 +1925,63 @@
     ],
     [
      "Dagny",
-     "Backbeat"
+     "Backbeat",
+     2016
     ],
     [
      "Maria Mena",
-     "Just Hold Me"
+     "Just Hold Me",
+     2005
     ],
     [
      "Espen Lind",
-     "When Susannah Cries"
+     "When Susannah Cries",
+     1997
     ],
     [
      "Lene Marlin",
-     "Sitting Down Here"
+     "Sitting Down Here",
+     1999
     ],
     [
      "Röyksopp",
-     "Eple"
+     "Eple",
+     2001
     ],
     [
      "Datarock",
-     "Fa-Fa-Fa"
+     "Fa-Fa-Fa",
+     2005
     ],
     [
      "Donkeyboy",
-     "Ambitions"
+     "Ambitions",
+     2009
     ],
     [
      "Freddy Kalas",
-     "Pinne for landet"
+     "Pinne for landet",
+     2015
     ],
     [
      "Gabrielle",
-     "Ring meg"
+     "Ring meg",
+     2013
     ],
     [
      "Cezinando",
-     "Håper du har plass"
+     "Håper du har plass",
+     2017
     ],
     [
      "Åge Aleksandersen",
-     "Levva livet"
+     "Levva livet",
+     1984
     ],
     [
      "DDE",
-     "E6"
+     "E6",
+     1996
     ],
     [
      "Jahn Teigen",
@@ -1584,7 +1989,8 @@
     ],
     [
      "Bjørn Eidsvåg",
-     "Eg ser"
+     "Eg ser",
+     1983
     ],
     [
      "deLillos",

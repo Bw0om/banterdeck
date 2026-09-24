@@ -192,3 +192,106 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
     </script>
   </section>
 )}
+
+{deck && deck.kind === 'forraeder' && (
+  <section class="gt fr" data-gt="forraeder">
+    <h2>{deck.title}</h2>
+    <div class="gt-body"></div>
+    <script is:inline data-astro-rerun define:vars={{ D: deck }}>
+    (function () {
+      var root = document.currentScript.closest('.gt');
+      var body = root.querySelector('.gt-body');
+      if (root.dataset.bound) return; root.dataset.bound = '1';
+      var mode = 'snill', order = [], pos = 0, sann = true;
+      function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+      function stokk(){
+        order = D.items.filter(function(x){ return mode === '*' || x.m === mode; });
+        for (var i=order.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=order[i]; order[i]=order[j]; order[j]=t; }
+        pos = 0;
+      }
+      function valg(){
+        return '<div class="gt-modes">' + D.modes.concat([{v:'*',t:'Alle'}]).map(function(m){
+          return '<button class="gt-mode" data-m="'+m.v+'" aria-pressed="'+(m.v===mode)+'">'+esc(m.t)+'</button>'; }).join('') + '</div>';
+      }
+      function klar(){
+        body.innerHTML = valg() + '<div class="gt-card vp-center"><p class="gt-count">Kort ' + (pos+1) + ' av ' + order.length + '</p>' +
+          '<p class="gt-text">Gi telefonen til den som står for tur.</p><p class="small">Ikke la de andre se skjermen.</p></div>' +
+          '<button class="btn gold vp-big" data-a="hemmelig">Jeg er klar</button>';
+      }
+      function hemmelig(){
+        sann = Math.random() < 0.5;
+        body.innerHTML = '<div class="gt-card"><p class="gt-count">Bare for deg</p><p class="gt-text">' + esc(order[pos].t) + '</p>' +
+          '<p class="fr-ordre ' + (sann ? 'sann' : 'logn') + '">' + (sann ? 'Si sannheten' : 'Lyv') + '</p>' +
+          '<p class="small">' + (sann ? 'Fullfør setningen med noe som faktisk er sant.' : 'Dikt opp noe troverdig – og hold maska.') + '</p></div>' +
+          '<button class="btn gold vp-big" data-a="offentlig">Skjul og vis de andre</button>';
+      }
+      function offentlig(){
+        body.innerHTML = '<div class="gt-card"><p class="gt-count">Fortell</p><p class="gt-text">' + esc(order[pos].t) + '</p>' +
+          '<p class="small">Alle andre får stille ett spørsmål hver. Så stemmer dere på tre: sant eller løgn?</p></div>' +
+          '<button class="btn gold vp-big" data-a="avslor">Avslør</button>';
+      }
+      function avslor(){
+        body.innerHTML = '<div class="gt-card vp-center"><p class="gt-count">Svaret</p>' +
+          '<p class="fr-ordre ' + (sann ? 'sann' : 'logn') + '">' + (sann ? 'Det var sant' : 'Det var løgn') + '</p>' +
+          '<p>Stemte du feil: drikk to.<br>Gjettet alle riktig: fortelleren drikker tre.</p></div>' +
+          '<button class="btn gold vp-big" data-a="neste">Neste person</button>';
+      }
+      body.addEventListener('click', function(e){
+        var b = e.target.closest('button'); if (!b) return;
+        if (b.dataset.m){ mode = b.dataset.m; stokk(); return klar(); }
+        var a = b.dataset.a;
+        if (a === 'hemmelig') hemmelig();
+        else if (a === 'offentlig') offentlig();
+        else if (a === 'avslor') avslor();
+        else if (a === 'neste'){ pos++; if (pos >= order.length) stokk(); klar(); }
+      });
+      stokk(); klar();
+    })();
+    </script>
+  </section>
+)}
+
+{deck && deck.kind === 'aar' && (
+  <section class="gt" data-gt="aar">
+    <h2>{deck.title}</h2>
+    <div class="gt-body"></div>
+    <script is:inline data-astro-rerun define:vars={{ B: BINGO }}>
+    (function () {
+      var root = document.currentScript.closest('.gt');
+      var body = root.querySelector('.gt-body');
+      if (root.dataset.bound) return; root.dataset.bound = '1';
+      var VALG = B.eras.map(function(e){ return { v:e.id, t:e.title }; }).concat([{ v:'blandet', t:'Blandet' }]);
+      var valg = 'blandet', order = [], pos = 0;
+      function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+      function stokk(){
+        var eras = valg === 'blandet' ? B.eras : B.eras.filter(function(e){ return e.id === valg; }), sett = {};
+        order = [];
+        eras.forEach(function(e){ e.songs.forEach(function(s){
+          if (s.length > 2 && !sett[s[0]+s[1]]){ sett[s[0]+s[1]] = 1; order.push({ a:s[0], t:s[1], y:s[2], i:s[3] || '' }); } }); });
+        for (var i=order.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var x=order[i]; order[i]=order[j]; order[j]=x; }
+        pos = 0;
+      }
+      function tegn(vis){
+        var s = order[pos];
+        var spotify = 'https://open.spotify.com/search/' + encodeURIComponent(s.a + ' ' + s.t);
+        body.innerHTML = '<div class="gt-modes">' + VALG.map(function(m){
+            return '<button class="gt-mode" data-v="'+m.v+'" aria-pressed="'+(m.v===valg)+'">'+esc(m.t)+'</button>'; }).join('') + '</div>' +
+          '<div class="gt-card"><p class="gt-count">' + (pos+1) + ' / ' + order.length + '</p>' +
+          '<p class="gt-text">' + esc(s.t) + '</p><p class="aar-artist">' + esc(s.a) + '</p>' +
+          (vis ? '<p class="aar-aar">' + s.y + '</p>' + (s.i ? '<p class="small">' + esc(s.i) + '</p>' : '') : '') + '</div>' +
+          '<div class="gt-row"><a class="btn ghost" href="' + spotify + '" target="_blank" rel="noopener">Spill av på Spotify ↗</a></div>' +
+          (vis ? '<button class="btn gold vp-big" data-a="neste">Neste låt</button>'
+               : '<button class="btn gold vp-big" data-a="vis">Vis året</button>') +
+          '<p class="small aar-regel">Riktig år: del ut tre · ett år unna: del ut én · ellers én slurk per fem år du bommet, maks tre.</p>';
+      }
+      body.addEventListener('click', function(e){
+        var b = e.target.closest('button'); if (!b) return;
+        if (b.dataset.v){ valg = b.dataset.v; stokk(); return tegn(false); }
+        if (b.dataset.a === 'vis') tegn(true);
+        if (b.dataset.a === 'neste'){ pos++; if (pos >= order.length) stokk(); tegn(false); }
+      });
+      stokk(); tegn(false);
+    })();
+    </script>
+  </section>
+)}

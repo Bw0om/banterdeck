@@ -619,3 +619,13 @@ body:has(.nr) .tool.dice{display:none}
 .pop-lab{font-family:var(--display);font-weight:700;font-size:13px;color:var(--faint);margin:12px 0 8px}
 .pop .sitchip.pop-topp{border-color:rgba(244,183,64,.6)}
 .pop .sitchip.pop-topp .st::before{content:"1 ";color:var(--gold);font-weight:800}
+
+/* ---------- Forræder og Gjett året ---------- */
+.fr-ordre{font-family:var(--display);font-weight:800;font-size:clamp(30px,8vw,40px);margin:14px 0 6px}
+.fr-ordre.sann{color:#3ecf6e}
+.fr-ordre.logn{color:var(--accent)}
+.aar-artist{font-family:var(--display);font-weight:600;color:var(--muted);margin-top:6px}
+.aar-aar{font-family:var(--display);font-weight:800;font-size:56px;line-height:1;color:var(--gold);margin:16px 0 6px}
+.aar-regel{margin-top:12px}
+.gt-row a.btn{flex:1;text-align:center;padding:13px}
+.q-duell{font-family:var(--display);font-weight:800;font-size:28px;color:var(--accent);margin:4px 0 0}

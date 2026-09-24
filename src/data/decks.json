@@ -2458,5 +2458,225 @@
     "k": "Snusboksen"
    }
   ]
+ },
+ "forraeder": {
+  "kind": "forraeder",
+  "title": "Trekk et kort",
+  "modes": [
+   {
+    "v": "snill",
+    "t": "Snill"
+   },
+   {
+    "v": "droy",
+    "t": "Drøy"
+   }
+  ],
+  "items": [
+   {
+    "t": "Det rareste jeg har spist er …",
+    "m": "snill"
+   },
+   {
+    "t": "Den første jobben min var …",
+    "m": "snill"
+   },
+   {
+    "t": "En gang ble jeg kastet ut av …",
+    "m": "snill"
+   },
+   {
+    "t": "Den mest kjente personen jeg har møtt er …",
+    "m": "snill"
+   },
+   {
+    "t": "Da jeg var liten, trodde jeg at …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg har en gang vunnet …",
+    "m": "snill"
+   },
+   {
+    "t": "Det dummeste jeg har gjort for penger er …",
+    "m": "snill"
+   },
+   {
+    "t": "Min mest pinlige skade kom av at …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg var en gang på TV fordi …",
+    "m": "snill"
+   },
+   {
+    "t": "Et talent ingen vet om, er at jeg kan …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg er livredd for …",
+    "m": "snill"
+   },
+   {
+    "t": "Det første jeg kjøpte for egne penger var …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg har fått bot for …",
+    "m": "snill"
+   },
+   {
+    "t": "Den verste ferien jeg har hatt var …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg har en gang gått meg bort i …",
+    "m": "snill"
+   },
+   {
+    "t": "Det rareste jeg har funnet på gata er …",
+    "m": "snill"
+   },
+   {
+    "t": "Den mest spontane tingen jeg har gjort er …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg har en gang løyet meg inn på …",
+    "m": "snill"
+   },
+   {
+    "t": "Det dyreste jeg har mistet er …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg har sovnet på …",
+    "m": "snill"
+   },
+   {
+    "t": "Som tenåring drømte jeg om å bli …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg har autografen til …",
+    "m": "snill"
+   },
+   {
+    "t": "Min første konsert var …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg har en gang reddet …",
+    "m": "snill"
+   },
+   {
+    "t": "Det rareste kallenavnet jeg har hatt er …",
+    "m": "snill"
+   },
+   {
+    "t": "Den verste frisyren jeg har hatt var …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg har en gang ringt 113 fordi …",
+    "m": "snill"
+   },
+   {
+    "t": "Det lengste jeg har vært uten mobil er …",
+    "m": "snill"
+   },
+   {
+    "t": "Jeg har møtt kongen / dronningen fordi …",
+    "m": "snill"
+   },
+   {
+    "t": "Den rareste gaven jeg har fått er …",
+    "m": "snill"
+   },
+   {
+    "t": "Det villeste jeg har gjort i fylla er …",
+    "m": "droy"
+   },
+   {
+    "t": "Det kleineste stedet jeg har våknet er …",
+    "m": "droy"
+   },
+   {
+    "t": "Den verste daten min endte med at …",
+    "m": "droy"
+   },
+   {
+    "t": "Jeg har en gang blitt tatt i å …",
+    "m": "droy"
+   },
+   {
+    "t": "Jeg har sendt en melding til feil person som handlet om …",
+    "m": "droy"
+   },
+   {
+    "t": "Jeg har en gang løyet til en kjæreste om …",
+    "m": "droy"
+   },
+   {
+    "t": "Det mest pinlige som har skjedd meg i senga er …",
+    "m": "droy"
+   },
+   {
+    "t": "Jeg har forsvunnet fra en fest sammen med …",
+    "m": "droy"
+   },
+   {
+    "t": "Det rareste stedet jeg har hatt sex er …",
+    "m": "droy"
+   },
+   {
+    "t": "Jeg har ghostet noen fordi …",
+    "m": "droy"
+   },
+   {
+    "t": "Min første kjæreste var …",
+    "m": "droy"
+   },
+   {
+    "t": "Jeg har blitt kastet ut av et utested fordi …",
+    "m": "droy"
+   },
+   {
+    "t": "Den dårligste sjekkereplikken som faktisk virket på meg var …",
+    "m": "droy"
+   },
+   {
+    "t": "Jeg har en gang våknet ved siden av …",
+    "m": "droy"
+   },
+   {
+    "t": "Det dummeste jeg har sagt til en kjæreste er …",
+    "m": "droy"
+   },
+   {
+    "t": "Den frekkeste løgnen jeg har sluppet unna med er …",
+    "m": "droy"
+   },
+   {
+    "t": "Jeg har klint med noen fra …",
+    "m": "droy"
+   },
+   {
+    "t": "Det lengste jeg har vært på byen i ett strekk er …",
+    "m": "droy"
+   },
+   {
+    "t": "Jeg har en gang sneket meg ut av noens leilighet fordi …",
+    "m": "droy"
+   },
+   {
+    "t": "Den villeste nachen jeg har vært på, endte med …",
+    "m": "droy"
+   }
+  ]
+ },
+ "gjett-aret": {
+  "kind": "aar",
+  "title": "Gjett året"
  }
 }

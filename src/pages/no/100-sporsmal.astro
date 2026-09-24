@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import SPM from '../../data/sporsmal.json';
+import DUELLER from '../../data/dueller.json';
 ---
 <Base title="100 spørsmål" lang="no" gate={true}
       description="100 spørsmål på telefonen – velg blandet, gutta eller jentene, og snill, frekk eller drøy. Den som får snusboksen, drikker.">
@@ -13,7 +14,7 @@ import SPM from '../../data/sporsmal.json';
 
   <p class="small vp-note">Hopp over alt som blir for mye – det er ingen skam. Spørsmålene blir gradvis drøyere utover i leken.</p>
 
-  <script is:inline define:vars={{ SPM }}>
+  <script is:inline data-astro-rerun define:vars={{ SPM, DUELLER }}>
   (function () {
     var PUBLIKUM = [
       { v:'mix',    t:'Blandet',  d:'For alle' },
@@ -24,7 +25,7 @@ import SPM from '../../data/sporsmal.json';
       { v:'frekk', t:'Frekk', d:'Fylla, dating og pinligheter',   l:[1,2] },
       { v:'droy',  t:'Drøy',  d:'18+ – sex og hemmeligheter',     l:[2,3] }];
     var MAKS = 100, LAGRE = 'bd_100';
-    var root, valg = { a:'mix', n:'frekk', u:true, s:false }, liste = [], nr = 0;
+    var root, valg = { a:'mix', n:'frekk', u:true, s:false, d:true }, liste = [], nr = 0, OFTE = 7, skaalt = {};
     try { var g = JSON.parse(localStorage.getItem(LAGRE) || 'null'); if (g) valg = Object.assign(valg, g); } catch (e) {}
 
     function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -52,6 +53,7 @@ import SPM from '../../data/sporsmal.json';
         '<p class="q-lab">Hvem spiller?</p>'+seg('a', PUBLIKUM)+
         '<p class="q-lab">Hvor drøyt?</p>'+seg('n', NIVA)+
         '<label class="q-toggle"><input type="checkbox" id="hsU"'+(valg.u?' checked':'')+'> Med utfordringer</label>'+
+        '<label class="q-toggle"><input type="checkbox" id="hsD"'+(valg.d?' checked':'')+'> Dueller <span class="small">– innimellom utfordrer den som har snusboksen noen</span></label>'+
         '<label class="q-toggle"><input type="checkbox" id="hsS"'+(valg.s?' checked':'')+'> Splash <span class="small">– mottakeren drikker to, naboene én hver</span></label>'+
         '<p class="small q-count">Dere får <b>'+n+'</b> spørsmål.</p>'+
         '<button class="btn gold vp-big" data-a="start">Start</button></div>');
@@ -61,12 +63,28 @@ import SPM from '../../data/sporsmal.json';
       // tilfeldig utvalg, men sortert på nivå – så det blir gradvis drøyere
       liste = stokk(utvalg()).slice(0, MAKS).map(function(s,i){ return { s:s, r:Math.random() }; })
         .sort(function(a,b){ return a.s.l - b.s.l || a.r - b.r; }).map(function(x){ return x.s; });
-      nr = 0; vis1();
+      // duellkort stokkes inn med jevne mellomrom
+      if (valg.d){
+        var du = stokk(DUELLER), med = [], k = 0;
+        liste.forEach(function(s, i){ med.push(s); if ((i + 1) % OFTE === 0 && i < liste.length - 1) med.push({ duell: du[k++ % du.length] }); });
+        liste = med;
+      }
+      nr = 0; skaalt = {}; vis1();
     }
     function vis1(){
-      var s = liste[nr], total = liste.length;
+      var s = liste[nr];
+      if (s.duell){
+        return vis('<div class="vp-card"><p class="q-duell">Duell!</p>' +
+          '<p class="q-text">Den som har snusboksen, utfordrer noen:</p>' +
+          '<p class="q-chal"><b>Duell:</b> ' + esc(s.duell) + '</p><p class="small">Taperen drikker to.</p>' +
+          '<button class="btn gold vp-big" data-a="neste">Neste</button>' +
+          '<div class="q-row"><button class="btn ghost" data-a="tilbake">Tilbake</button>' +
+          '<button class="btn ghost" data-a="avslutt">Avslutt</button></div></div>');
+      }
+      var total = liste.filter(function(x){ return !x.duell; }).length;
+      var sporsmalNr = liste.slice(0, nr + 1).filter(function(x){ return !x.duell; }).length;
       vis('<div class="vp-card">'+
-        '<div class="vp-clock"><span>'+(nr+1)+' / '+total+'</span><div class="vp-bar"><i style="width:'+((nr+1)/total*100)+'%"></i></div></div>'+
+        '<div class="vp-clock"><span>'+sporsmalNr+' / '+total+'</span><div class="vp-bar"><i style="width:'+(sporsmalNr/total*100)+'%"></i></div></div>'+
         '<p class="q-text">'+esc(s.q)+'</p>'+
         (valg.u && s.c ? '<p class="q-chal"><b>Utfordring:</b> '+esc(s.c)+'</p>' : '')+
         (valg.s ? '<p class="small q-splash">Splash: mottakeren drikker to, naboene én hver.</p>' : '')+
@@ -77,7 +95,9 @@ import SPM from '../../data/sporsmal.json';
     function neste(){
       nr++;
       if (nr >= liste.length) return ferdig();
-      if (nr % 10 === 0) return skal();
+      // skål etter hvert tiende spørsmål – dueller teller ikke, og hver skål kommer bare én gang
+      var fullfort = liste.slice(0, nr).filter(function(x){ return !x.duell; }).length;
+      if (!liste[nr].duell && fullfort > 0 && fullfort % 10 === 0 && !skaalt[fullfort]){ skaalt[fullfort] = 1; return skal(); }
       vis1();
     }
     function skal(){
@@ -103,7 +123,7 @@ import SPM from '../../data/sporsmal.json';
       else if (a==='tilbake'){ if (nr>0){ nr--; vis1(); } }
       else if (a==='avslutt' || a==='oppsett') oppsett();
     }
-    function endring(e){ if (e.target.id === 'hsU') valg.u = e.target.checked; if (e.target.id === 'hsS') valg.s = e.target.checked; }
+    function endring(e){ if (e.target.id === 'hsU') valg.u = e.target.checked; if (e.target.id === 'hsS') valg.s = e.target.checked; if (e.target.id === 'hsD') valg.d = e.target.checked; }
     function init(){
       root = document.getElementById('hs');
       if (!root || root.dataset.bound) return;

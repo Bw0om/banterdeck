@@ -3973,6 +3973,44 @@
        "min": 3,
        "maks": 99
       }
+     },
+     {
+      "name": {
+       "no": "Gjett året",
+       "en": "Guess the Year"
+      },
+      "gear": {
+       "no": "Mobil og Spotify",
+       "en": "Phone and Spotify"
+      },
+      "pl": "2+",
+      "rules": {
+       "no": [
+        "Velg et tiår under – eller Blandet – og spill av låta på Spotify med knappen.",
+        "Alle gjetter året samtidig. Rop det ut eller skriv det ned.",
+        "b|Riktig år: del ut tre slurker.",
+        "b|Ett år unna: del ut én.",
+        "b|Ellers: drikk én slurk per fem år du bommet – maks tre.",
+        "Noen låter kom ut ett år og slo gjennom året etter. Da står begge årene i forklaringen."
+       ],
+       "en": [
+        "Play the song on Spotify, then everyone guesses the year at once.",
+        "b|Exact year: hand out three sips.",
+        "b|One year off: hand out one.",
+        "b|Otherwise: drink one sip per five years off – max three."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "prevors",
+        "bursdag"
+       ],
+       "utstyr": "musikk",
+       "tempo": "sosialt",
+       "min": 2,
+       "maks": 99
+      }
      }
     ]
    },
@@ -4687,6 +4725,45 @@
        "tempo": "sosialt",
        "min": 4,
        "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Forræder",
+       "en": "Traitor"
+      },
+      "gear": {
+       "no": "Én telefon",
+       "en": "One phone"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Telefonen går rundt. Den som står for tur, trekker et kort med en setning som skal fullføres – for eksempel «Den første jobben min var …».",
+        "Telefonen bestemmer i hemmelighet om du skal si sannheten eller lyve. Bare du ser det.",
+        "Fullfør setningen høyt og overbevisende. Alle andre får stille ett spørsmål hver.",
+        "På tre stemmer alle: sant eller løgn?",
+        "b|Stemte du feil: drikk to.",
+        "b|Gjettet alle riktig: fortelleren drikker tre."
+       ],
+       "en": [
+        "The phone goes round. Whoever's turn it is draws a card with a sentence to finish – like “My first job was …”.",
+        "The phone secretly decides whether you tell the truth or lie. Only you see it.",
+        "Finish the sentence out loud and convincingly. Everyone else gets one question each.",
+        "On three, everyone votes: truth or lie?",
+        "b|Voted wrong: drink two.",
+        "b|Everyone guessed right: the storyteller drinks three."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 4,
+       "maks": 12
       }
      }
     ]
