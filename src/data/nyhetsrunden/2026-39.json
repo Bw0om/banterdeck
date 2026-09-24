@@ -3,177 +3,325 @@
  "uke": 39,
  "publisert": "2026-09-24",
  "tittel": "Nyhetsrunden · uke 39",
- "ingress": "Gelius bytter NRK med Høyre, Trump starter egen YouTube-kanal og Silya finner fram saksa.",
+ "ingress": "Bombefly over Xi, dansker på supportercruise til Ullevaal og renta opp til 4,5 prosent.",
  "sporsmal": [
   {
    "type": "valg",
-   "q": "Dagsrevy-veteran Jon Gelius forlater NRK og blir Høyre-politiker. Hvor stiller han som ordførerkandidat?",
+   "q": "Norges Bank satte opp renta igjen torsdag. Hvor høy er styringsrenten nå?",
    "alt": [
-    "Kristiansand",
-    "Arendal",
-    "Grimstad",
-    "Tromsø"
+    "4,25 prosent",
+    "4,5 prosent",
+    "4,75 prosent",
+    "5 prosent"
    ],
-   "svar": "Arendal",
-   "info": "Han går til valg i hjembyen sin mot den sittende Ap-ordføreren.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/nyheter/i/RjMaqO/er-jon-gelius-hoeyres-redningsmann"
-  },
-  {
-   "type": "tall",
-   "q": "Etter en VG-avsløring om trosstøtte ville folk sjekke om de sto oppført i et trossamfunn. Hvor mange timer var Brønnøysundregistrenes nettside nede mandag?",
-   "svar": "10 timer",
-   "info": "Siden lå nede fra rundt klokka åtte om morgenen til klokka 18. Innenfor 10 prosent regnes som riktig.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/nyheter/i/AraXrr/nettside-krasjet-over-300-000-har-sjekket-om-de-er-medlem-i-et-trossamfunn"
+   "svar": "4,5 prosent",
+   "info": "Hevingen var på 0,25 prosentpoeng, og sentralbanken åpner for enda et hopp.",
+   "kilde": "E24",
+   "url": "https://e24.no/norsk-oekonomi/i/oEo1GW/norges-bank-hever-renten-til-4-5-prosent"
   },
   {
    "type": "valg",
-   "q": "En AI-agent fra OpenAI brøt seg inn i det australske helsevesenets statistikkportal. Hvordan fikk australske myndigheter vite om det?",
+   "q": "Trump tok imot Xi Jinping på Joint Base Andrews. Hva suste over hodene deres litt for tidlig og fikk Trump til å skvette?",
    "alt": [
-    "Gjennom et brev fra Sam Altman",
-    "Via en e-post til en offentlig adresse",
-    "Fra en journalist i en lokalavis",
-    "Da agenten selv la ut et innlegg på X"
+    "Et B-1 Lancer-bombefly",
+    "Et F-35 kampfly",
+    "Air Force One",
+    "En helikopterskvadron"
    ],
-   "svar": "Via en e-post til en offentlig adresse",
-   "info": "Innbruddet skjedde i juni, men beskjeden kom først 10. september.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/nyheter/i/QJv308/australias-statsminister-anthony-albanese-om-ai-hacking"
-  },
-  {
-   "type": "sant",
-   "q": "Sant eller tull: Sam Altman og Dario Amodei ba FNs sikkerhetsråd om å la AI-selskapene regulere seg selv i fred.",
-   "svar": "Tull",
-   "info": "De ba tvert imot myndighetene om sikkerhetsmekanismer, og Amodei advarte om at AI i verste fall kan true hele menneskeheten.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/nyheter/i/6qa8Kr/ai-toppene-ba-fn-redde-verden-fra-deres-egen-teknologi"
-  },
-  {
-   "type": "valg",
-   "q": "Etter å ha stengt CNN, MS Now og Politico ute fra Det hvite hus, startet Donald Trump sin egen TV-kanal. Hvor sendes den?",
-   "alt": [
-    "Truth Social",
-    "TikTok",
-    "YouTube",
-    "X"
-   ],
-   "svar": "YouTube",
-   "info": "Trump TV lover høydepunkter og kunngjøringer fra administrasjonen – men ingen egen journalistikk.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/rampelys/i/wroKq5/trump-svarer-med-egen-tv-i-opptrappet-mediestrid"
+   "svar": "Et B-1 Lancer-bombefly",
+   "info": "Sist en amerikansk president tok imot en utenlandsk leder på den flybasen, var Kennedy i 1962.",
+   "kilde": "Dagbladet",
+   "url": "https://www.dagbladet.no/nyheter/ikke-skjedd-pa-64-ar/85195572"
   },
   {
    "type": "fritt",
-   "q": "Hva heter Taylor Swifts nye singel, som slippes 25. september?",
-   "svar": "Patient Zero",
-   "info": "Hun hintet om tittelen ved å bytte ut bokstaven O med tallet 0 i Instagram-bioen.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/rampelys/i/bOl4Oe/taylor-swift-slipper-ny-laat"
+   "q": "Rundt 700 danske fans skulle til landskampen mot Norge på Ullevaal. Hvordan reiste de fra København?",
+   "svar": "Med båt (supportercruise)",
+   "info": "Båten gikk fra København onsdag ettermiddag og la til i Oslo torsdag formiddag.",
+   "kilde": "Dagbladet",
+   "url": "https://www.dagbladet.no/sport/fyllefest-pa-vei-til-oslo-i-natt/85193233"
   },
   {
-   "type": "valg",
-   "q": "Høyres distriktsfolk er i opprør mot partiledelsen. Hva handler striden om?",
-   "alt": [
-    "Bompenger i de store byene",
-    "Eiendomsskatt på hytter",
-    "Kommunesammenslåinger",
-    "Kutt i drivstoffavgiften"
-   ],
-   "svar": "Kutt i drivstoffavgiften",
-   "info": "Distriktspolitikerne vil gjeninnføre vårens avgiftskutt og har samlet seg i et nettverk kalt «Blått».",
-   "kilde": "VG",
-   "url": "https://www.vg.no/nyheter/i/AraQz5/hoeyre-i-opproer-distriktsnettverk-i-full-splid"
+   "type": "sant",
+   "q": "Sant eller tull: Turkish Airlines har lagt inn en fast bestilling på 150 Boeing-fly.",
+   "svar": "Tull",
+   "info": "Det er 100 faste bestillinger av 737 Max, pluss opsjon på 50 til.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/tyrkia-kjoper-150-fly-fra-usa/1677760"
   },
   {
    "type": "tall",
    "q": "Manchester United satte inntektsrekord, men hvor mange milliarder kroner skylder klubben fortsatt?",
    "svar": "14 milliarder kroner",
-   "info": "Gjelden er på over 14 milliarder, mens inntektene endte på rekordhøye 8,5 milliarder. Innenfor 10 prosent regnes som riktig.",
+   "info": "Gjelden er på over én milliard pund, mens inntektene endte på rekordhøye 8,5 milliarder kroner. Innenfor 10 prosent regnes som riktig.",
    "kilde": "VG",
    "url": "https://www.vg.no/sport/i/5paO81/manchester-united-gjelden-over-14-milliarder"
   },
   {
    "type": "sant",
-   "q": "Sant eller tull: Harald Eia tar over som programleder for «LOL» etter Linnéa Myhre.",
+   "q": "Sant eller tull: En amerikansk dommer har beordret at CNN, Politico og en tredje nyhetskanal skal få tilbake tilgangen til Pentagon.",
    "svar": "Tull",
-   "info": "Eia overtar etter Sigrid Bonde Tusvik, som ledet de tre forrige sesongene på Amazon Prime Video.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/rampelys/i/Bxabyv/harald-eia-tar-over-som-programleder-i-lol"
-  },
-  {
-   "type": "valg",
-   "q": "Byrådet i Oslo har foreslått navn på åtte nye bydeler. Hvilket av disse navnene er med på lista?",
-   "alt": [
-    "Akerselva",
-    "Frysja",
-    "Holmenkollen",
-    "Tøyen"
-   ],
-   "svar": "Frysja",
-   "info": "Over 2300 innbyggere, historielag og foreninger sendte inn forslag, og de nye bydelene skal etter planen være på plass 1. januar 2028.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/nyheter/i/xrodGQ/dette-vil-de-at-oslos-bydeler-skal-hete"
-  },
-  {
-   "type": "tall",
-   "q": "Norske tog viste fram de nye fjerntogene på en messe i Berlin. Hvor stor er kontraktsrammen med togprodusenten Stadler, i kroner?",
-   "svar": "10 milliarder kroner",
-   "info": "Det er bestilt 17 togsett, og Bergensbanen er først ut etter planen i 2028. Innenfor 10 prosent regnes som riktig.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/nyheter/i/aJR3m5/her-er-norges-nye-fjerntog"
-  },
-  {
-   "type": "sant",
-   "q": "Sant eller tull: Silya Nymoen har kuttet det lange, røde håret og har nå rundt ti centimeter igjen.",
-   "svar": "Tull",
-   "info": "Klippen var enda mer drastisk: Håret er nå to–tre centimeter langt over det hele.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/rampelys/i/5paRn1/silya-med-ny-look-er-jo-bare-haar"
-  },
-  {
-   "type": "valg",
-   "q": "Fem kjendiser leder hver sin lesegruppe i NRKs «Boktober». Hvilken bok har Linnéa Myhre valgt?",
-   "alt": [
-    "Fluenes herre",
-    "Pelsjegerliv",
-    "Verity",
-    "Fugletribunalet"
-   ],
-   "svar": "Verity",
-   "info": "Lesingen starter 1. oktober, og alle bøkene blir tilgjengelige som lydbok hos NRK Radio.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/rampelys/i/Gx7jlB/kjendiser-utfordrer-les-en-bok-paa-en-maaned"
+   "info": "Det gjaldt Det hvite hus – dommeren mente utestengingen trolig bryter med ytringsfriheten.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/dommer-trump-ma-gi-utkastede-medier-akkrediteringen-tilbake/1677841"
   },
   {
    "type": "fritt",
-   "q": "«Twilight»-stjernen Taylor Lautner har blitt pappa til en jente. Hva heter hun?",
-   "svar": "Lennon (kalles Lenny)",
-   "info": "Fullt navn er Lennon Taylor Lautner, og hun ble født 16. september.",
+   "q": "Hvilket fagforbund står bak streiken som har fått Vy til å innstille hundrevis av togavganger på Østlandet?",
+   "svar": "Norsk Lokomotivførerforbund",
+   "info": "Meklingen med arbeidsgiverorganisasjonen Spekter førte ikke fram.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10546108"
+  },
+  {
+   "type": "valg",
+   "q": "Norges Bank tror boligprisene stiger mindre enn ventet. Hvor stor vekst spår banken for i år?",
+   "alt": [
+    "2 prosent",
+    "3 prosent",
+    "4 prosent",
+    "5 prosent"
+   ],
+   "svar": "3 prosent",
+   "info": "I juni lå anslaget på 3,5 prosent.",
+   "kilde": "E24",
+   "url": "https://e24.no/norsk-oekonomi/i/xrob5X/norges-bank-spaar-lavere-boligprisvekst"
+  },
+  {
+   "type": "valg",
+   "q": "Lindsey Vonn gikk offentlig ut med ny kjæreste på Instagram. Hva driver han med?",
+   "alt": [
+    "Alpinist",
+    "Golfspiller",
+    "Ishockeyspiller",
+    "Tennisspiller"
+   ],
+   "svar": "Alpinist",
+   "info": "Franske Matthieu Bailet er 30 år og kjører utfor – Vonn har tidligere datet både en golfspiller og en hockeyspiller.",
+   "kilde": "Dagbladet",
+   "url": "https://www.dagbladet.no/sport/superstjerna-viser-fram-ny-flamme/85195548"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Nederland har bekreftet at landet trekker seg fra Eurovision i Burgas neste år.",
+   "svar": "Tull",
+   "info": "Etter en kompromissløsning i det nederlandske kringkastingssystemet blir landet med likevel.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10547076"
+  },
+  {
+   "type": "tall",
+   "q": "Hvor mange av Høyres lokallag har signert protesten mot partiledelsen i drivstoffsaken?",
+   "svar": "22",
+   "info": "Distriktspolitikerne vil ha tilbake avgiftskuttene fra våren, noe ledelsen ikke ønsker. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/AraQz5/hoeyre-i-opproer-distriktsnettverk-i-full-splid"
+  },
+  {
+   "type": "valg",
+   "q": "«Twilight»-stjernen Taylor Lautner har blitt far til en datter. Hva heter hun?",
+   "alt": [
+    "Luna",
+    "Lennon",
+    "Lola",
+    "Lily"
+   ],
+   "svar": "Lennon",
+   "info": "Hun går allerede under kallenavnet «Lenny».",
    "kilde": "VG",
    "url": "https://www.vg.no/rampelys/i/zOoQAq/twilight-stjernen-taylor-lautner-har-blitt-pappa"
   },
   {
    "type": "valg",
-   "q": "Ada Hegerbergs Lyon møtte sveitsiske Servette på bortebane i Champions League denne uka. Hvordan endte kampen?",
+   "q": "USA har invitert Vladimir Putin til G20-toppmøtet i desember. Hvor skal det holdes?",
    "alt": [
-    "4–1 til Lyon",
-    "8–0 til Lyon",
-    "2–2",
-    "5–0 til Lyon"
+    "New York",
+    "Miami",
+    "Washington D.C.",
+    "Los Angeles"
    ],
-   "svar": "8–0 til Lyon",
-   "info": "Hegerberg spilte de første 65 minuttene, men kom seg ikke på scoringslista.",
-   "kilde": "VG",
-   "url": "https://www.vg.no/sport/i/y5oKRr/droemmestart-i-champions-league-herlig-aa-se"
+   "svar": "Miami",
+   "info": "Det var utenriksminister Marco Rubio som kunngjorde invitasjonen.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10547365"
+  },
+  {
+   "type": "tall",
+   "q": "Hvor mange studenter jobbet gratis som «studentambassadører» under Oslo Business Forum?",
+   "svar": "200",
+   "info": "Arrangøren tok samtidig ut 11,4 millioner kroner i utbytte for fjoråret. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "E24",
+   "url": "https://e24.no/i/JOdBp6"
   },
   {
    "type": "sant",
-   "q": "Sant eller tull: Channing Tatum avviser at han står bak en hemmelig Instagram-konto som kommenterte eksen Zoë Kravitz og Harry Styles.",
-   "svar": "Sant",
-   "info": "Tatum påpekte at kontoen bare fulgte hans egen offisielle profil – ikke akkurat god kamuflasje.",
+   "q": "Sant eller tull: Channing Tatum har innrømmet at han sto bak en anonym Instagram-konto som hånet eksen Zoë Kravitz.",
+   "svar": "Tull",
+   "info": "Han avviste ryktet, kalte det svært morsomt og sier han bare har én konto.",
    "kilde": "VG",
    "url": "https://www.vg.no/rampelys/i/7paBbo/channing-tatum-avviser-rykter-om-hemmelig-instagram-konto"
+  },
+  {
+   "type": "valg",
+   "q": "Drivstoffavgiftene er tilbake. Hvor mye økte søkene etter brukte elbiler på Finn?",
+   "alt": [
+    "14 prosent",
+    "24 prosent",
+    "44 prosent",
+    "64 prosent"
+   ],
+   "svar": "44 prosent",
+   "info": "Med literpris rundt 30 kroner begynner stikkontakten å friste.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/dyrt-drivstoff-gir-okt-interesse-for-brukte-elbiler/1677870"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Fra 10. oktober kan hvem som helst få gratis omvisning på Stortinget på lørdager.",
+   "svar": "Sant",
+   "info": "Gratis, men du må bestille billett og gå gjennom sikkerhetskontroll.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10545838"
+  },
+  {
+   "type": "fritt",
+   "q": "Hvem tar over som programleder for «LOL: Den som ler sist» etter Sigrid Bonde Tusvik?",
+   "svar": "Harald Eia",
+   "info": "Den nye sesongen har Halloween-tema.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/Bxabyv/harald-eia-tar-over-som-programleder-i-lol"
+  },
+  {
+   "type": "valg",
+   "q": "Hva heter Taylor Swifts nye låt, som slippes fredag?",
+   "alt": [
+    "Ground Zero",
+    "Zero Hour",
+    "Patient Zero",
+    "Absolute Zero"
+   ],
+   "svar": "Patient Zero",
+   "info": "Fansen knakk koden da hun byttet ut o-er med nuller i Instagram-bioen.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/bOl4Oe/taylor-swift-slipper-ny-laat"
+  },
+  {
+   "type": "valg",
+   "q": "Forskere fra hvilken norsk by har funnet en ukjent norrøn kirke på Grønland?",
+   "alt": [
+    "Tromsø",
+    "Trondheim",
+    "Bergen",
+    "Oslo"
+   ],
+   "svar": "Bergen",
+   "info": "Et skjelett i en østvendt grav avslørte at det var en kirke – den første nye på over 60 år.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/skjelettfunn-bekrefter-ukjent-norron-kirke-pa-gronland/1677811"
+  },
+  {
+   "type": "tall",
+   "q": "Elgjakta starter fredag. Hvor mange elgjegere ventes ut i skogen?",
+   "svar": "60 000",
+   "info": "I fjor ble det skutt rundt 26 600 elg. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/norge/i/M70p05/fredag-starter-elgjakten-60000-elgjegere-ventes-ut-i-skogen"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Ståle Solbakken ba danske journalister om å skjerpe seg før landskampen mot Danmark.",
+   "svar": "Sant",
+   "info": "Han mente den danske pressen var svært defensiv.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/sport/solbakken-ut-mot-danske-journalister-dere-ma-skjerpe-dere/1677269"
+  },
+  {
+   "type": "valg",
+   "q": "Outlet Group steg kraftig i debuten på Oslo Børs. Hva selger kjedene deres?",
+   "alt": [
+    "Klær og sko",
+    "Sportsutstyr og leker",
+    "Møbler og interiør",
+    "Elektronikk og hvitevarer"
+   ],
+   "svar": "Sportsutstyr og leker",
+   "info": "Selskapet eier Sports Outlet og Kids Outlet.",
+   "kilde": "E24",
+   "url": "https://e24.no/boers-og-finans/i/lnobgy/sport-outlet-eieren-stiger-11-prosent-i-debuten-paa-oslo-boers"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Oslo innfører obligatoriske kartleggingsprøver for nye elever i videregående.",
+   "svar": "Tull",
+   "info": "Det er Akershus som innfører prøvene, med ekstra undervisning for dem med svakest ferdigheter.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/norge/i/M706wK/akershus-innfoerer-kartleggingsproever-for-nye-elever-i-videregaaende"
+  },
+  {
+   "type": "tall",
+   "q": "Hvor mange prosent av fagskolestudentene sier seg fornøyd med utdanningen i årets Studiebarometer?",
+   "svar": "79",
+   "info": "Over 10 000 studenter svarte på undersøkelsen. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/fire-av-fem-fagskolestudenter-er-fornoyde-med-utdanningen/1677867"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: En 13 år gammel kinesisk svømmer har tatt tre gull i Asialekene i Japan.",
+   "svar": "Sant",
+   "info": "Yu Zidi vant 400 meter medley, 200 meter fri og 200 meter medley i Nagoya.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10547064"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilket land får landeveis-VM i sykling for første gang, i 2032?",
+   "alt": [
+    "Kina",
+    "Brasil",
+    "India",
+    "Sør-Afrika"
+   ],
+   "svar": "India",
+   "info": "Byen blir Pune, og Nederland får mesterskapet i 2034.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/sport/sykkel-vm-til-india-for-forste-gang-nederland-far-mesterskapet-i-2034/1677860"
+  },
+  {
+   "type": "fritt",
+   "q": "Rosenborgs kvinnelag tapte 1–3 borte i Tsjekkia i Europacupen. Hvilket lag tapte de for?",
+   "svar": "Slovan Liberec",
+   "info": "Returkampen spilles i Trondheim.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/sport/rosenborg-smell-i-tsjekkia-tapte-1-3-for-slovan-liberec/1677551"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilken bok skal Sigrid Bonde Tusvik lede lesingen av i «Boktober»?",
+   "alt": [
+    "Verity",
+    "Fluenes herre",
+    "Pelsjegerliv",
+    "Fugletribunalet"
+   ],
+   "svar": "Fugletribunalet",
+   "info": "Fem kjendiser leder hver sin lesegruppe gjennom oktober – de gale alternativene er de andres bøker.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/Gx7jlB/kjendiser-utfordrer-les-en-bok-paa-en-maaned"
+  },
+  {
+   "type": "valg",
+   "q": "Caroline Graham Hansen scoret da Barcelona vant 5–1 i Champions League for kvinner. Hvem var motstander?",
+   "alt": [
+    "Chelsea",
+    "Lyon",
+    "Arsenal",
+    "Paris Saint-Germain"
+   ],
+   "svar": "Paris Saint-Germain",
+   "info": "Ewa Pajor scoret to av målene.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/sport/i/y5oKRr/droemmestart-i-champions-league-herlig-aa-se"
   }
  ]
 }
