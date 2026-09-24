@@ -3,177 +3,177 @@
  "uke": 39,
  "publisert": "2026-09-24",
  "tittel": "Nyhetsrunden · uke 39",
- "ingress": "Drakt til Mamdani, mugne dansker og et falskt jordskjelv i Karlsøy.",
+ "ingress": "Gelius bytter NRK med Høyre, Trump starter egen YouTube-kanal og Silya finner fram saksa.",
  "sporsmal": [
   {
    "type": "valg",
-   "q": "Statsminister Jonas Gahr Støre møtte New Yorks borgermester Zohran Mamdani tirsdag. Hva ga han ham?",
+   "q": "Dagsrevy-veteran Jon Gelius forlater NRK og blir Høyre-politiker. Hvor stiller han som ordførerkandidat?",
    "alt": [
-    "En landslagsdrakt med Ødegaard på ryggen",
-    "En brunost",
-    "En Marius-genser",
-    "En landslagsdrakt med Haaland på ryggen"
+    "Kristiansand",
+    "Arendal",
+    "Grimstad",
+    "Tromsø"
    ],
-   "svar": "En landslagsdrakt med Ødegaard på ryggen",
-   "info": "Ikke Haaland – Ødegaard.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/nyheter/store-ga-mamdani-odegaard-drakt-1.18033322"
-  },
-  {
-   "type": "valg",
-   "q": "Jon Gelius slutter i NRK. Hva vil han bli?",
-   "alt": [
-    "Ordfører i Arendal",
-    "Programleder i TV 2",
-    "Pressesjef i Høyre",
-    "Kulturminister"
-   ],
-   "svar": "Ordfører i Arendal",
-   "info": "Han stiller for Høyre i hjembyen sin.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/sorlandet/gelius-slutter-i-nrk-_-vil-bli-ordforer-i-arendal-1.18033898"
-  },
-  {
-   "type": "tall",
-   "q": "Fotballdommer Jan Kjell Johansen (83) dømte mandag sin aller siste kamp. Hvor mange kamper har han dømt?",
-   "svar": "5200",
-   "info": "Fordelt på 100 sesonger. Innenfor 10 prosent regnes som riktig.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/vestfoldogtelemark/jan-kjell-_83_-gir-seg-etter-100-sesonger_-_-et-siste-lofte-til-kona-1.18031185"
-  },
-  {
-   "type": "valg",
-   "q": "MDG vil forby jakt på et dyr i Kvinesdal – selv om det knapt er skutt ett eneste der på 20 år. Hvilket dyr?",
-   "alt": [
-    "Ekorn",
-    "Hare",
-    "Rype",
-    "Grevling"
-   ],
-   "svar": "Ekorn",
-   "info": "Saken omtales som kampen for «Nøtteliten».",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/sorlandet/vil-frede-ekornet_-_-en-utdatert-jakt-1.18032441"
-  },
-  {
-   "type": "sant",
-   "q": "Sant eller tull: Et jordskjelv med styrke 4 ble målt i Karlsøy onsdag – men det viste seg å være en feilregistrering.",
-   "svar": "Sant",
-   "info": "Det skjedde aldri.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/tromsogfinnmark/viste-seg-a-vaere-falsk-registrering-1.18034529"
-  },
-  {
-   "type": "valg",
-   "q": "Ståle Solbakken ble oppgitt over danske journalister. Hvordan beskrev han dem?",
-   "alt": [
-    "Tolv mugne menn",
-    "En gjeng sure gubber",
-    "Dansk presse på sitt verste",
-    "Tolv tørre danskebåter"
-   ],
-   "svar": "Tolv mugne menn",
-   "info": "Det var før landskampen mot Danmark.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/sport/stale-solbakken-og-martin-odegaard-moter-pressen-1.18034107"
-  },
-  {
-   "type": "tall",
-   "q": "Skreimuseet i Lofoten åpnet offisielt i helgen etter over 15 års arbeid. Omtrent hvor mye kostet det?",
-   "svar": "Over en halv milliard kroner",
-   "info": "Mer enn 500 millioner. Innenfor 10 prosent regnes som riktig.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/nordland/offisiell-opning-skrei-museet-i-lofoten-1.18029638"
-  },
-  {
-   "type": "valg",
-   "q": "Næringsministeren vil bruke nesten hundre millioner kroner på noe Norge mangler for å styrke beredskapen. Hva?",
-   "alt": [
-    "En nasjonal «superklokke» som deler presis tid",
-    "En beredskapssatellitt",
-    "Nye tyfoner i alle kommuner",
-    "Et nasjonalt nødnett for mobil"
-   ],
-   "svar": "En nasjonal «superklokke» som deler presis tid",
-   "info": "Norge har i dag ingen nasjonal klokke for presis tid.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/nordland/vil-bruke-nesten-hundre-millionar-pa-nasjonal-_superklokke_-1.18032700"
-  },
-  {
-   "type": "tall",
-   "q": "Madshus avvikler skiproduksjonen på Biri. Hvor mange år med skiproduksjon i Norge er dermed over?",
-   "svar": "120",
-   "info": "Innenfor 10 prosent regnes som riktig.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/innlandet/madshus-beslutter-avvikling-av-skiproduksjonen-pa-biri-1.18031357"
-  },
-  {
-   "type": "sant",
-   "q": "Sant eller tull: Oslo-byrådet vil innføre eiendomsskatt på hytter i budsjettet sitt.",
-   "svar": "Tull",
-   "info": "Tvert imot – byrådet vil fjerne eiendomsskatten.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/stor-oslo/byradet-fjerner-eiendomsskatten-i-oslo-budsjettet-for-2027-1.18033231"
-  },
-  {
-   "type": "fritt",
-   "q": "Kinesisk-tibetanske Fnu Nidunjianzan fikk et uvanlig fornavn da han skulle starte på skole i USA. Hva står «Fnu» egentlig for?",
-   "svar": "First name unknown",
-   "info": "Fornavnet ukjent – en forkortelse amerikanske myndigheter bruker.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/sport/fnu-nidunjianzan_heiter-eigentleg-ikkje-fnu-_-fekk-fornamnet-_first-name-unknown_-i-usa-1.18017260"
-  },
-  {
-   "type": "valg",
-   "q": "Hva heter Metas nye personlige AI-agent, som skal kunne handle på nett for deg?",
-   "alt": [
-    "Muse",
-    "Nova",
-    "Echo",
-    "Aria"
-   ],
-   "svar": "Muse",
-   "info": "",
+   "svar": "Arendal",
+   "info": "Han går til valg i hjembyen sin mot den sittende Ap-ordføreren.",
    "kilde": "VG",
-   "url": "https://www.vg.no/i/16aybq/metas-muse-vil-endre-netthandelen"
+   "url": "https://www.vg.no/nyheter/i/RjMaqO/er-jon-gelius-hoeyres-redningsmann"
   },
   {
-   "type": "sant",
-   "q": "Sant eller tull: NRK skal vise ski-VM i Falun til vinteren.",
-   "svar": "Tull",
-   "info": "Det er TV 2 som viser ski-VM i Falun.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/sport/slik-blir-vinteren-_-nrk-viser-vm-i-alpint-1.18033773"
+   "type": "tall",
+   "q": "Etter en VG-avsløring om trosstøtte ville folk sjekke om de sto oppført i et trossamfunn. Hvor mange timer var Brønnøysundregistrenes nettside nede mandag?",
+   "svar": "10 timer",
+   "info": "Siden lå nede fra rundt klokka åtte om morgenen til klokka 18. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/AraXrr/nettside-krasjet-over-300-000-har-sjekket-om-de-er-medlem-i-et-trossamfunn"
   },
   {
    "type": "valg",
-   "q": "Interessen for elbil gikk til himmels i september. Hvorfor?",
+   "q": "En AI-agent fra OpenAI brøt seg inn i det australske helsevesenets statistikkportal. Hvordan fikk australske myndigheter vite om det?",
    "alt": [
-    "Avgiftskuttet på bensin og diesel tok slutt, og prisene steg",
-    "Staten innførte ny elbilstøtte",
-    "Tesla halverte prisene",
-    "Alle bomringer ble gratis for elbil"
+    "Gjennom et brev fra Sam Altman",
+    "Via en e-post til en offentlig adresse",
+    "Fra en journalist i en lokalavis",
+    "Da agenten selv la ut et innlegg på X"
    ],
-   "svar": "Avgiftskuttet på bensin og diesel tok slutt, og prisene steg",
-   "info": "Kuttet gikk ut 1. september.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/rogaland/elbilinteressen-til-himmels-etter-prisokning-1.18030735"
-  },
-  {
-   "type": "fritt",
-   "q": "Google har fått en milliardbot for sporing av Android-brukere. Hvilken norsk organisasjon dokumenterte sporingen i en rapport i 2018?",
-   "svar": "Forbrukerrådet",
-   "info": "Det tok åtte år fra rapport til bot.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/arkiv/artikkel/google-far-gigantregning-for-personvernsbrudd-1.18028129"
+   "svar": "Via en e-post til en offentlig adresse",
+   "info": "Innbruddet skjedde i juni, men beskjeden kom først 10. september.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/QJv308/australias-statsminister-anthony-albanese-om-ai-hacking"
   },
   {
    "type": "sant",
-   "q": "Sant eller tull: Samme uke som det kom snø på Sognefjellet, varsler meteorologene at varmerekorder kan bli slått neste uke.",
+   "q": "Sant eller tull: Sam Altman og Dario Amodei ba FNs sikkerhetsråd om å la AI-selskapene regulere seg selv i fred.",
+   "svar": "Tull",
+   "info": "De ba tvert imot myndighetene om sikkerhetsmekanismer, og Amodei advarte om at AI i verste fall kan true hele menneskeheten.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/6qa8Kr/ai-toppene-ba-fn-redde-verden-fra-deres-egen-teknologi"
+  },
+  {
+   "type": "valg",
+   "q": "Etter å ha stengt CNN, MS Now og Politico ute fra Det hvite hus, startet Donald Trump sin egen TV-kanal. Hvor sendes den?",
+   "alt": [
+    "Truth Social",
+    "TikTok",
+    "YouTube",
+    "X"
+   ],
+   "svar": "YouTube",
+   "info": "Trump TV lover høydepunkter og kunngjøringer fra administrasjonen – men ingen egen journalistikk.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/wroKq5/trump-svarer-med-egen-tv-i-opptrappet-mediestrid"
+  },
+  {
+   "type": "fritt",
+   "q": "Hva heter Taylor Swifts nye singel, som slippes 25. september?",
+   "svar": "Patient Zero",
+   "info": "Hun hintet om tittelen ved å bytte ut bokstaven O med tallet 0 i Instagram-bioen.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/bOl4Oe/taylor-swift-slipper-ny-laat"
+  },
+  {
+   "type": "valg",
+   "q": "Høyres distriktsfolk er i opprør mot partiledelsen. Hva handler striden om?",
+   "alt": [
+    "Bompenger i de store byene",
+    "Eiendomsskatt på hytter",
+    "Kommunesammenslåinger",
+    "Kutt i drivstoffavgiften"
+   ],
+   "svar": "Kutt i drivstoffavgiften",
+   "info": "Distriktspolitikerne vil gjeninnføre vårens avgiftskutt og har samlet seg i et nettverk kalt «Blått».",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/AraQz5/hoeyre-i-opproer-distriktsnettverk-i-full-splid"
+  },
+  {
+   "type": "tall",
+   "q": "Manchester United satte inntektsrekord, men hvor mange milliarder kroner skylder klubben fortsatt?",
+   "svar": "14 milliarder kroner",
+   "info": "Gjelden er på over 14 milliarder, mens inntektene endte på rekordhøye 8,5 milliarder. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/sport/i/5paO81/manchester-united-gjelden-over-14-milliarder"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Harald Eia tar over som programleder for «LOL» etter Linnéa Myhre.",
+   "svar": "Tull",
+   "info": "Eia overtar etter Sigrid Bonde Tusvik, som ledet de tre forrige sesongene på Amazon Prime Video.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/Bxabyv/harald-eia-tar-over-som-programleder-i-lol"
+  },
+  {
+   "type": "valg",
+   "q": "Byrådet i Oslo har foreslått navn på åtte nye bydeler. Hvilket av disse navnene er med på lista?",
+   "alt": [
+    "Akerselva",
+    "Frysja",
+    "Holmenkollen",
+    "Tøyen"
+   ],
+   "svar": "Frysja",
+   "info": "Over 2300 innbyggere, historielag og foreninger sendte inn forslag, og de nye bydelene skal etter planen være på plass 1. januar 2028.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/xrodGQ/dette-vil-de-at-oslos-bydeler-skal-hete"
+  },
+  {
+   "type": "tall",
+   "q": "Norske tog viste fram de nye fjerntogene på en messe i Berlin. Hvor stor er kontraktsrammen med togprodusenten Stadler, i kroner?",
+   "svar": "10 milliarder kroner",
+   "info": "Det er bestilt 17 togsett, og Bergensbanen er først ut etter planen i 2028. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/aJR3m5/her-er-norges-nye-fjerntog"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Silya Nymoen har kuttet det lange, røde håret og har nå rundt ti centimeter igjen.",
+   "svar": "Tull",
+   "info": "Klippen var enda mer drastisk: Håret er nå to–tre centimeter langt over det hele.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/5paRn1/silya-med-ny-look-er-jo-bare-haar"
+  },
+  {
+   "type": "valg",
+   "q": "Fem kjendiser leder hver sin lesegruppe i NRKs «Boktober». Hvilken bok har Linnéa Myhre valgt?",
+   "alt": [
+    "Fluenes herre",
+    "Pelsjegerliv",
+    "Verity",
+    "Fugletribunalet"
+   ],
+   "svar": "Verity",
+   "info": "Lesingen starter 1. oktober, og alle bøkene blir tilgjengelige som lydbok hos NRK Radio.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/Gx7jlB/kjendiser-utfordrer-les-en-bok-paa-en-maaned"
+  },
+  {
+   "type": "fritt",
+   "q": "«Twilight»-stjernen Taylor Lautner har blitt pappa til en jente. Hva heter hun?",
+   "svar": "Lennon (kalles Lenny)",
+   "info": "Fullt navn er Lennon Taylor Lautner, og hun ble født 16. september.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/zOoQAq/twilight-stjernen-taylor-lautner-har-blitt-pappa"
+  },
+  {
+   "type": "valg",
+   "q": "Ada Hegerbergs Lyon møtte sveitsiske Servette på bortebane i Champions League denne uka. Hvordan endte kampen?",
+   "alt": [
+    "4–1 til Lyon",
+    "8–0 til Lyon",
+    "2–2",
+    "5–0 til Lyon"
+   ],
+   "svar": "8–0 til Lyon",
+   "info": "Hegerberg spilte de første 65 minuttene, men kom seg ikke på scoringslista.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/sport/i/y5oKRr/droemmestart-i-champions-league-herlig-aa-se"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Channing Tatum avviser at han står bak en hemmelig Instagram-konto som kommenterte eksen Zoë Kravitz og Harry Styles.",
    "svar": "Sant",
-   "info": "Varm luft fra Middelhavet er på vei.",
-   "kilde": "NRK",
-   "url": "https://www.nrk.no/mr/varmerekorden-i-molde-kan-bli-slatt-neste-veke---ventar-uvanleg-hoge-temperaturar-1.18034345"
+   "info": "Tatum påpekte at kontoen bare fulgte hans egen offisielle profil – ikke akkurat god kamuflasje.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/7paBbo/channing-tatum-avviser-rykter-om-hemmelig-instagram-konto"
   }
  ]
 }
