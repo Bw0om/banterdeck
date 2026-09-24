@@ -286,6 +286,18 @@ const isCurrent = (href: string) => {
         mb._filt = filt;
       }
       oppdaterRulling();
+      /* Tell anonymt at en lek eller situasjon ble åpnet – én gang per besøk. */
+      var sm = document.querySelector('[data-spilt]');
+      if (sm) {
+        var v = sm.getAttribute('data-spilt').split(':'), nk = 'bd_spilt_' + v.join('_');
+        try {
+          if (!sessionStorage.getItem(nk)) {
+            sessionStorage.setItem(nk, '1');
+            fetch('/api/spilt', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: v[0], ref: v[1] }), keepalive: true }).catch(function () {});
+          }
+        } catch (e) {}
+      }
       var b = document.getElementById('langbanner');
       if (b && !b.dataset.bound) {
         b.dataset.bound = '1';

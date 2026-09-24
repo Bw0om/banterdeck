@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../AdSlot.astro';
 import Icon from '../Icon.astro';
+import PopulaertNaa from '../PopulaertNaa.astro';
 import { spill, games, gamesFor, gameHref, langGroups, itemsOf, t } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
@@ -28,6 +29,8 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
       <a href="/no/leker/store-grupper">Store grupper</a>
     </p>
   )}
+
+  <PopulaertNaa lang={lang} vis="leker" />
 
   <div class="dictfilter sticky">
     <input id="gameInput" type="search" autocomplete="off" placeholder={searchPh} aria-label={searchPh} />

@@ -10,6 +10,7 @@ const andre = runder.filter((r) => rundeId(r) !== rundeId(runde));
   <p class="nr-uke">{runde.aar} · uke {runde.uke}</p>
   <h1>Nyhetsrunden</h1>
   <p class="lead">{runde.ingress}</p>
+  <span hidden data-spilt="lek:nyhetsrunden"></span>
 
   <section class="gt nr" data-runde={rundeId(runde)}>
     <div class="gt-body"></div>

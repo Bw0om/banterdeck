@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../AdSlot.astro';
 import Icon from '../Icon.astro';
+import PopulaertNaa from '../PopulaertNaa.astro';
 import { sisteRunde } from '../../lib/nyhetsrunden';
 import { situationSectionsFor, dictItemsFor, dictSection, visible, langGroups, itemsOf, games, t, tf, isCrude, totalsFor, topSituationsFor, situationById, gamesFor, dictCount } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
@@ -81,14 +82,7 @@ const first = pool[0];
     </a>
   </div>
 
-  <h2>{L.popular}</h2>
-  <div class="sitchips">
-    {topSituationsFor(lang).map((x) => (
-      <a class="sitchip" href={path(lang, `/situations/${x.id}`)}>
-        <span class="st">{t(x.title, lang)}</span><b>{x.count}</b>
-      </a>
-    ))}
-  </div>
+  <PopulaertNaa lang={lang} />
 
   <AdSlot />
 

@@ -1,0 +1,53 @@
+---
+/**
+ * «Populært nå»: det mest spilte de siste sju dagene, hentet fra /api/populaert.
+ * Viser et håndplukket utvalg til det finnes nok data, så boksen aldri står tom.
+ */
+import { gamesFor, gameHref, situationsFor, topSituationsFor, t } from '../lib/content';
+import { path, type Lang } from '../lib/i18n';
+const { lang = 'en', vis = 'begge' } = Astro.props as { lang?: Lang; vis?: 'begge' | 'leker' };
+const no = lang === 'no';
+const leker = Object.fromEntries(gamesFor(lang).map((g: any) => [g.slug, { n: t(g.name, lang), h: gameHref(g, (p) => path(lang, p), lang) }]));
+const situasjoner = Object.fromEntries(situationsFor(lang).map((s: any) => [s.id, { n: t(s.title, lang), h: path(lang, `/situations/${s.id}`) }]));
+const STANDARD = ['100-sporsmal', 'ring-of-fire', 'drikkehjulet', 'nasjonal-vorsprove', 'beer-pong', 'jeg-har-aldri', 'bussruta', 'pekeleken'];
+const lekStandard = STANDARD.filter((s) => leker[s]).slice(0, 6);
+const sitStandard = topSituationsFor(lang).map((s: any) => s.id).filter((id: string) => situasjoner[id]);
+---
+<section class="pop">
+  <h2>{no ? 'Populært nå' : 'Popular right now'}</h2>
+  <p class="small pop-sub">{no ? 'Det som spilles mest denne uka.' : 'What people play the most this week.'}</p>
+  <p class="pop-lab">{no ? 'Leker' : 'Games'}</p>
+  <div class="sitchips" data-pop="lek">
+    {lekStandard.map((s) => <a class="sitchip" href={leker[s].h}><span class="st">{leker[s].n}</span></a>)}
+  </div>
+  {vis === 'begge' && (
+    <>
+      <p class="pop-lab">{no ? 'Øyeblikk' : 'Moments'}</p>
+      <div class="sitchips" data-pop="situasjon">
+        {sitStandard.map((id: string) => <a class="sitchip" href={situasjoner[id].h}><span class="st">{situasjoner[id].n}</span></a>)}
+      </div>
+    </>
+  )}
+  <script type="application/json" data-pop-oppslag set:html={JSON.stringify({ lek: leker, situasjon: situasjoner })}></script>
+  <script is:inline data-astro-rerun>
+  (function () {
+    var root = document.currentScript.closest('.pop');
+    if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+    var oppslag = JSON.parse(root.querySelector('[data-pop-oppslag]').textContent);
+    function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+    fetch('/api/populaert').then(function (r) { return r.ok ? r.json() : []; }).then(function (rader) {
+      ['lek', 'situasjon'].forEach(function (type) {
+        var boks = root.querySelector('[data-pop="' + type + '"]');
+        if (!boks) return;
+        var liste = (rader || []).filter(function (x) { return x.type === type && oppslag[type][x.ref]; }).slice(0, type === 'lek' ? 6 : 8);
+        if (liste.length < 3) return;                    // for lite data ennå – behold utvalget
+        boks.innerHTML = liste.map(function (x, i) {
+          var o = oppslag[type][x.ref];
+          return '<a class="sitchip' + (i === 0 ? ' pop-topp' : '') + '" href="' + esc(o.h) + '"><span class="st">' + esc(o.n) + '</span></a>';
+        }).join('');
+        root.classList.add('pop-ekte');
+      });
+    }).catch(function () {});
+  })();
+  </script>
+</section>

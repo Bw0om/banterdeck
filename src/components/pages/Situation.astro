@@ -21,6 +21,7 @@ const description = lang === 'no'
     <a href={path(lang, '/situations')}>{L.linesTitle}</a> › {title}
   </p>
   <h1>{sit.emoji} {title}</h1>
+  <span hidden data-spilt={`situasjon:${sit.id}`}></span>
   <p class="lead">{rows.length} {L.itemsLabel} · {t(sit.theme.title, lang)}</p>
 
   <div class="cards" style="margin-top:22px">
