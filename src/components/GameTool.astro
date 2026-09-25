@@ -99,7 +99,7 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
       function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
       function pott(v){
         if (v === 'kvelden') return B.kvelden.map(function(t){ return { t:t }; });
-        var eras = v === 'blandet' ? B.eras : B.eras.filter(function(e){ return e.id === v; });
+        var eras = v === 'blandet' ? (B.blandet ? [B.blandet] : B.eras) : B.eras.filter(function(e){ return e.id === v; });
         var sett = {}, ut = [];
         eras.forEach(function(e){ e.songs.forEach(function(s){ var k=s[0]+'|'+s[1]; if (!sett[k]){ sett[k]=1; ut.push({ a:s[0], t:s[1] }); } }); });
         return ut;
@@ -120,13 +120,15 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
       }
       function liste(){
         if (valg === 'kvelden') return '';
-        var eras = valg === 'blandet' ? B.eras : B.eras.filter(function(e){ return e.id === valg; });
+        var eras = valg === 'blandet' ? (B.blandet ? [B.blandet] : B.eras) : B.eras.filter(function(e){ return e.id === valg; });
         return eras.map(function(e){
           var tekst = e.songs.map(function(s){ return s[0]+' – '+s[1]; }).join('\n');
           return '<details class="gt-list"><summary>Spilleliste: '+esc(e.title)+' ('+e.songs.length+' låter)</summary>' +
             '<ol>'+e.songs.map(function(s){ return '<li>'+esc(s[0])+' – '+esc(s[1])+'</li>'; }).join('')+'</ol>' +
             '<p class="gt-row"><button class="btn ghost" data-copy="'+esc(tekst)+'">Kopier listen</button>' +
-            (e.spotify ? '<a class="btn gold" href="'+esc(e.spotify)+'" target="_blank" rel="noopener">Åpne i Spotify ↗</a>' : '') + '</p></details>';
+            [].concat(e.spotify || []).map(function(u, i, a){
+              return '<a class="btn gold" href="'+esc(u)+'" target="_blank" rel="noopener">'+(a.length > 1 ? 'Spotify del '+(i+1) : 'Åpne i Spotify')+' ↗</a>';
+            }).join('') + '</p></details>';
         }).join('');
       }
       function tegn(melding){
