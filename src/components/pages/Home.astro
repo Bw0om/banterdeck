@@ -41,6 +41,13 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
   </a>
 
+  {no && (
+    <a class="h2-rom" href="/no/rom">
+      <span><b>Spill sammen fra hver sin telefon</b><small>Lag et rom og del koden</small></span>
+      <span class="kode" aria-hidden="true">ABCD</span>
+    </a>
+  )}
+
   <div class="h2-tiles">
     <button class="h2-tile" type="button" data-sveip>
       <span class="h2-quote" aria-hidden="true">«…»</span>

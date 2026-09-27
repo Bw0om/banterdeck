@@ -1,0 +1,285 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Spill sammen" description="Lag et rom og få med alle fra hver sin telefon. Samme kort på alle skjermer, hemmelige roller, stemming og bingo." lang="no" gate={true}>
+  <div id="rom" class="rom">
+    <noscript><p>Rommet trenger JavaScript.</p></noscript>
+  </div>
+
+  <script is:inline data-astro-rerun>
+  (function () {
+    var root = document.getElementById('rom');
+    if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+    if (window.__bdRomStopp) window.__bdRomStopp();
+
+    var kode = (new URLSearchParams(location.search).get('k') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+    var meg = null, tilstand = null, versjon = 0, timer = null, sisteNr = 0, opptatt = false, feilTeller = 0;
+    var ikon = {
+      del: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v7h14v-7"/></svg>',
+      krone: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>'
+    };
+
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function les(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+    function skriv(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function toast(t) {
+      var el = document.getElementById('toast'); if (!el) return;
+      el.textContent = t; el.classList.add('show');
+      clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, 2200);
+    }
+    function settAdresse(k) {
+      var u = location.pathname + (k ? '?k=' + k : '');
+      history.replaceState(history.state, '', u);
+    }
+
+    /* ---------- nettverk ---------- */
+    function api(metode, sti, body) {
+      var h = { 'Content-Type': 'application/json' };
+      if (meg && metode === 'GET') { h['x-spiller'] = meg.id; h['x-pollett'] = meg.pollett; }
+      return fetch(sti, { method: metode, headers: h, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' })
+        .then(function (r) {
+          if (r.status === 204) return null;
+          return r.json().then(function (d) { if (!r.ok) { var e = new Error(d.melding || 'Feil'); e.kode = d.feil; e.status = r.status; throw e; } return d; });
+        });
+    }
+    function gjor(h) {
+      if (!meg || opptatt) return;
+      opptatt = true;
+      h.id = meg.id; h.pollett = meg.pollett;
+      api('POST', '/api/rom/' + kode, h).then(function (d) { opptatt = false; ta(d); })
+        .catch(function (e) { opptatt = false; toast(e.message); if (e.kode === 'ikke-med') glemRom(); });
+    }
+    function hent() {
+      if (!kode || !meg) return;
+      api('GET', '/api/rom/' + kode + '?v=' + versjon).then(function (d) { feilTeller = 0; if (d) ta(d); planlegg(); })
+        .catch(function (e) {
+          if (e.kode === 'finnes-ikke') { glemRom(); toast(e.message); return; }
+          feilTeller++; planlegg();
+        });
+    }
+    function planlegg() {
+      clearTimeout(timer);
+      if (!document.getElementById('rom')) return;
+      var ms = document.hidden ? 6000 : Math.min(1500 + feilTeller * 1500, 8000);
+      timer = setTimeout(hent, ms);
+    }
+    function ta(d) {
+      if (!d) return;
+      if (d.versjon) versjon = d.versjon;
+      tilstand = d;
+      if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
+      if (d.meg === null && meg) { glemRom(); return; }
+      tegn();
+    }
+    function glemRom() {
+      if (kode) { try { localStorage.removeItem('bd_rom_' + kode); } catch (e) {} }
+      meg = null; tilstand = null; versjon = 0; clearTimeout(timer); tegnStart();
+    }
+    window.__bdRomStopp = function () { clearTimeout(timer); };
+    document.addEventListener('astro:before-swap', function stopp() { clearTimeout(timer); document.removeEventListener('astro:before-swap', stopp); }, { once: true });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && meg) hent(); });
+
+    /* ---------- start: lag eller bli med ---------- */
+    function tegnStart(melding) {
+      var navn = les('bd_mittnavn') || '';
+      root.innerHTML =
+        '<h1 class="rom-h1">Spill sammen</h1>' +
+        '<p class="lead">Én lager et rom, resten blir med med koden. Da ser alle det samme – eller sin egen hemmelighet – på hver sin telefon.</p>' +
+        (melding ? '<p class="rom-feil" role="alert">' + esc(melding) + '</p>' : '') +
+        '<div class="rom-start">' +
+          '<form class="rom-boks" id="blimedSkjema">' +
+            '<h2>Bli med</h2>' +
+            '<label for="romKode">Kode</label>' +
+            '<input id="romKode" class="rom-kodefelt" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="6" placeholder="ABCD" value="' + esc(kode) + '">' +
+            '<label for="romNavn1">Navnet ditt</label>' +
+            '<input id="romNavn1" maxlength="20" autocomplete="nickname" placeholder="F.eks. Jonas" value="' + esc(navn) + '">' +
+            '<button class="btn gold rom-knapp" type="submit">Bli med</button>' +
+          '</form>' +
+          '<form class="rom-boks lag" id="lagSkjema">' +
+            '<h2>Lag et rom</h2>' +
+            '<p class="small">Du blir vert og velger lekene.</p>' +
+            '<label for="romNavn2">Navnet ditt</label>' +
+            '<input id="romNavn2" maxlength="20" autocomplete="nickname" placeholder="F.eks. Maria" value="' + esc(navn) + '">' +
+            '<button class="btn rom-knapp" type="submit">Lag rom</button>' +
+          '</form>' +
+        '</div>';
+      document.getElementById('blimedSkjema').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var k = document.getElementById('romKode').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        var n = document.getElementById('romNavn1').value.trim();
+        if (k.length < 4) return toast('Skriv inn koden.');
+        if (!n) return toast('Skriv inn navnet ditt.');
+        skriv('bd_mittnavn', n);
+        api('POST', '/api/rom/' + k, { handling: 'bli-med', navn: n }).then(function (d) {
+          kode = k; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode); ta(d); planlegg();
+        }).catch(function (err) { tegnStart(err.message); });
+      });
+      document.getElementById('lagSkjema').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var n = document.getElementById('romNavn2').value.trim();
+        if (!n) return toast('Skriv inn navnet ditt.');
+        skriv('bd_mittnavn', n);
+        api('POST', '/api/rom', { navn: n }).then(function (d) {
+          kode = d.kode; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode);
+          versjon = 0; hent();
+        }).catch(function (err) { tegnStart(err.message); });
+      });
+    }
+
+    /* ---------- selve rommet ---------- */
+    function navn(id) { var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }); return p ? p.navn : '?'; }
+    function erVert() { return tilstand && meg && tilstand.vert === meg.id; }
+
+    function hode() {
+      var t = tilstand;
+      return '<div class="rom-hode">' +
+        '<div><span class="rom-etikett">Rom</span><b class="rom-kode">' + esc(kode) + '</b></div>' +
+        '<button class="rom-del" data-g="del" type="button">' + ikon.del + 'Inviter</button>' +
+      '</div>' +
+      '<div class="rom-spillere">' + t.spillere.map(function (p) {
+        return '<span class="' + (p.id === t.meg ? 'meg' : '') + '">' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) +
+          (p.slurker ? ' <small>' + p.slurker + '</small>' : '') +
+          (erVert() && p.id !== t.vert ? ' <button class="rom-fjern" data-g="fjern" data-id="' + p.id + '" aria-label="Fjern ' + esc(p.navn) + '">×</button>' : '') + '</span>';
+      }).join('') + '</div>';
+    }
+
+    function lobby() {
+      var t = tilstand;
+      if (!erVert()) {
+        return '<div class="rom-vent"><p class="rom-stor">Venter på at ' + esc(navn(t.vert)) + ' velger en lek …</p>' +
+          '<p class="small">' + t.spillere.length + ' med i rommet. Del koden <b>' + esc(kode) + '</b> med resten.</p></div>';
+      }
+      return '<h2 class="rom-h2">Velg en lek</h2>' +
+        '<div class="rom-leker">' + t.leker.map(function (l) {
+          var mod = l.moduser && l.moduser.length > 1 ? l.moduser : [];
+          return '<div class="rom-lek"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' +
+            '<div class="rom-mod">' + (mod.length
+              ? mod.map(function (m) { return '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') +
+                (l.type !== 'bingo' ? '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Alle</button>' : '')
+              : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
+            '</div></div>';
+        }).join('') + '</div>';
+    }
+
+    function kortSpill(s) {
+      var k = s.kort || {};
+      var rof = s.lek === 'ring-of-fire';
+      var kortHtml = rof
+        ? '<div class="rof-kort rom-rof' + (k.rod ? ' rod' : '') + '"><div class="rof-hj"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div>' +
+          '<div class="rof-midt"><b class="rof-regel">' + esc(k.regel) + '</b><span class="rof-tekst">' + esc(k.tekst) + '</span></div>' +
+          '<div class="rof-hj rof-hj2"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div></div>'
+        : '<div class="rom-kort">' + (k.k ? '<span class="sw-tag">' + esc(k.k) + '</span>' : '<span></span>') + '<p>' + esc(k.t) + '</p><span class="rom-teller">' + (s.pos + 1) + ' / ' + s.antall + '</span></div>';
+      return (rof && k.hvem ? '<div class="rof-tur"><span>Trekker</span><b>' + esc(k.hvem) + '</b></div>' : '') +
+        (rof ? '<p class="rom-status">' + (s.antall - s.pos - 1) + ' kort igjen · ' + (s.konger || 0) + ' konger</p>' : '') +
+        kortHtml +
+        '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">Neste kort</button>';
+    }
+
+    function mestSpill(s) {
+      var t = tilstand;
+      if (s.fase === 'resultat') {
+        var maks = s.resultat.length ? s.resultat[0].stemmer : 1;
+        return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+          '<ol class="rom-resultat">' + s.resultat.map(function (r) {
+            return '<li><span>' + esc(r.navn) + '</span><i style="width:' + Math.round(100 * r.stemmer / maks) + '%"></i><b>' + r.stemmer + ' ' + (r.stemmer === 1 ? 'slurk' : 'slurker') + '</b></li>';
+          }).join('') + '</ol>' +
+          '<button class="rom-stor-knapp" data-g="runde" type="button">Neste spørsmål</button>';
+      }
+      var stemt = s.harStemt.length, alle = t.spillere.length;
+      return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+        '<p class="small">Stem på hvem det passer best på. Hver stemme er én slurk.</p>' +
+        '<div class="rom-valg">' + t.spillere.map(function (p) {
+          return '<button type="button" data-g="stem" data-paa="' + p.id + '" aria-pressed="' + (s.minStemme === p.id) + '">' + esc(p.navn) + (p.id === t.meg ? ' (deg)' : '') + '</button>';
+        }).join('') + '</div>' +
+        '<p class="rom-status">' + stemt + ' av ' + alle + ' har stemt</p>' +
+        (erVert() ? '<button class="btn ghost" data-g="avslor" type="button">Vis resultat nå</button>' : '');
+    }
+
+    function forraederSpill(s) {
+      var t = tilstand, jeg = t.meg === s.aktiv, han = navn(s.aktiv);
+      if (s.fase === 'svar') {
+        if (jeg) return '<p class="rom-etikett">Din tur – bare du ser dette</p>' +
+          '<div class="rom-hemmelig ' + (s.hemmelig === 'lyv' ? 'lyv' : 'sann') + '"><b>' + (s.hemmelig === 'lyv' ? 'LYV!' : 'Si sannheten') + '</b></div>' +
+          '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+          '<p class="small">Fullfør setningen høyt. Hold masken.</p>' +
+          '<button class="rom-stor-knapp" data-g="svart" type="button">Jeg har svart</button>';
+        return '<p class="rom-etikett">' + esc(han) + ' fullfører</p><p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+          '<p class="rom-stor">Hør godt etter …</p>' +
+          (erVert() ? '<button class="btn ghost" data-g="svart" type="button">Gå til stemming</button>' : '');
+      }
+      if (s.fase === 'stem') {
+        if (jeg) return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p><p class="rom-stor">De andre stemmer nå …</p>' +
+          '<p class="rom-status">' + s.harStemt.length + ' av ' + (t.spillere.length - 1) + ' har stemt</p>';
+        return '<p class="rom-etikett">' + esc(han) + ' sa</p><p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+          '<div class="rom-valg to">' +
+            '<button type="button" data-g="stem" data-paa="sannhet" aria-pressed="' + (s.minStemme === 'sannhet') + '">Sannhet</button>' +
+            '<button type="button" data-g="stem" data-paa="lyv" aria-pressed="' + (s.minStemme === 'lyv') + '">Løgn</button>' +
+          '</div>' +
+          '<p class="rom-status">' + s.harStemt.length + ' av ' + (t.spillere.length - 1) + ' har stemt</p>' +
+          (erVert() ? '<button class="btn ghost" data-g="avslor" type="button">Avslør nå</button>' : '');
+      }
+      var r = s.resultat || {};
+      return '<p class="rom-etikett">Fasit</p>' +
+        '<div class="rom-hemmelig ' + (r.svar === 'lyv' ? 'lyv' : 'sann') + '"><b>' + esc(han) + ' ' + (r.svar === 'lyv' ? 'løy!' : 'sa sannheten!') + '</b></div>' +
+        (r.drikker && r.drikker.length
+          ? '<ul class="rom-drikker">' + r.drikker.map(function (x) { return '<li><b>' + esc(x.navn) + '</b> drikker ' + x.slurker + '</li>'; }).join('') + '</ul>'
+          : '<p class="rom-stor">Ingen drikker denne gangen.</p>') +
+        '<p class="small">Gjettet du feil: 2 slurker. Gjettet alle riktig: den som svarte drikker 3.</p>' +
+        '<button class="rom-stor-knapp" data-g="runde" type="button">Neste runde</button>';
+    }
+
+    function bingoSpill(s) {
+      var b = s.mittBrett || [], m = s.mineMerker || [];
+      return '<p class="rom-etikett">Ditt brett · ' + esc(s.tittel) + '</p>' +
+        '<div class="rom-bingo">' + b.map(function (x, i) {
+          return '<button type="button" data-g="merk" data-i="' + i + '" aria-pressed="' + !!m[i] + '"><b>' + esc(x[1]) + '</b><span>' + esc(x[0]) + '</span></button>';
+        }).join('') + '</div>' +
+        '<div class="gt-row">' + (s.spotify ? '<a class="btn gold" href="' + esc(s.spotify) + '" target="_blank" rel="noopener">Åpne spillelista ↗</a>' : '') +
+        '<button class="btn ghost" data-g="nytt-brett" type="button">Nytt brett</button></div>' +
+        (s.bingo && s.bingo.length ? '<p class="rom-status">BINGO: ' + s.bingo.map(function (id) { return esc(navn(id)); }).join(', ') + '</p>' : '') +
+        '<p class="small">Merk en låt når den spilles. Rekke: del ut to slurker. Fullt brett: alle andre drikker opp.</p>';
+    }
+
+    function tegn() {
+      if (!tilstand) return;
+      var s = tilstand.spill, innhold = '';
+      if (!s) innhold = lobby();
+      else {
+        innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' ? ' · ' + esc(s.modus) : '') + '</p>' +
+          (s.type === 'kort' ? kortSpill(s) : s.type === 'mest' ? mestSpill(s) : s.type === 'forraeder' ? forraederSpill(s) : bingoSpill(s)) + '</div>';
+      }
+      var vert = erVert() ? '<div class="rom-vert">' +
+        (s ? '<button class="btn ghost small" data-g="avslutt" type="button">Bytt lek</button>' : '') +
+        '<button class="btn ghost small" data-g="nullstill" type="button">Nullstill slurker</button></div>' : '';
+      var y = window.scrollY;
+      root.innerHTML = hode() + innhold + vert +
+        '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">Forlat rommet</button></p>';
+      window.scrollTo(0, y);
+    }
+
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-g]'); if (!b || !tilstand) return;
+      var g = b.dataset.g;
+      if (g === 'del') {
+        var url = location.origin + '/no/rom?k=' + kode;
+        var tekst = 'Bli med på Banterdeck! Kode: ' + kode;
+        if (navigator.share) navigator.share({ title: 'Banterdeck', text: tekst, url: url }).catch(function () {});
+        else if (navigator.clipboard) navigator.clipboard.writeText(tekst + '\n' + url).then(function () { toast('Lenken er kopiert'); });
+        return;
+      }
+      if (g === 'forlat') { glemRom(); settAdresse(''); kode = ''; tegnStart(); return; }
+      if (g === 'start') return gjor({ handling: 'start', lek: b.dataset.lek, modus: b.dataset.modus });
+      if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
+      if (g === 'stem') return gjor({ handling: 'stem', paa: b.dataset.paa });
+      if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
+      if (g === 'fjern') return gjor({ handling: 'fjern', id: b.dataset.id });
+      if (['avslutt', 'nullstill', 'svart', 'avslor', 'runde', 'nytt-brett'].indexOf(g) !== -1) return gjor({ handling: g });
+    });
+
+    /* ---------- oppstart ---------- */
+    if (kode) meg = les('bd_rom_' + kode);
+    if (kode && meg) { root.innerHTML = '<p class="rom-stor">Kobler til rom ' + esc(kode) + ' …</p>'; hent(); }
+    else tegnStart();
+  })();
+  </script>
+</Base>

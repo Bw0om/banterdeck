@@ -7,6 +7,7 @@ import { gamesFor, gameHref, t, trules } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { game, lang = 'en' } = Astro.props as { game: any; lang?: Lang };
 const L = ui(lang);
+const iRom = lang === 'no' && ['pekeleken','jeg-har-aldri','enten-eller','kategorier','nodt-eller-sannhet','rygg-mot-rygg','duoleken','50-50','ring-of-fire','forraeder','drikke-bingo'].includes(game.slug);
 const harVerktoy = lang === 'no' && (!!(DECKS as any)[game.slug] || game.slug === 'drikke-bingo');
 const name = t(game.name, lang);
 const rules: string[] = trules(game, lang);
@@ -40,7 +41,12 @@ const jsonLd = JSON.stringify({
     <div><small>{lang === 'no' ? 'Utstyr' : 'Gear'}</small><b>{t(game.gear, lang)}</b></div>
     <div><small>{lang === 'no' ? 'Type' : 'Type'}</small><b>{t(game.group.title, lang)}</b></div>
   </div>
-  {harVerktoy && <p class="startrow"><a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'} ↓</a></p>}
+  {(harVerktoy || iRom) && (
+    <p class="startrow">
+      {harVerktoy && <a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'} ↓</a>}
+      {iRom && <a class="btn ghost romlenke" href="/no/rom">Spill fra hver sin telefon</a>}
+    </p>
+  )}
 
   <div class="rules">
     {blocks.map((b) => b.type === 'p' ? <p>{b.items[0]}</p> : <ul>{b.items.map((x) => <li>{x}</li>)}</ul>)}
