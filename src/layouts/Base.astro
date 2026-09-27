@@ -61,7 +61,7 @@ const isCurrent = (href: string) => {
   <meta name="apple-mobile-web-app-title" content="Banterdeck" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
   <script is:inline>
     /* Innloggingslenker fra Supabase kan lande på feil side – send dem til kontosiden. */
     (function () {
@@ -278,8 +278,13 @@ const isCurrent = (href: string) => {
             knapp.setAttribute('aria-expanded', aapen ? 'true' : 'false');
           } else {
             mb.classList.remove('open');
-            window.scrollTo({ top: window.scrollY + filt.getBoundingClientRect().top - (tb ? tb.offsetHeight : 0) - 10, behavior: 'smooth' });
-            setTimeout(function () { if (inp) inp.focus({ preventScroll: true }); }, 350);
+            /* Et klistret filter oppgir sin fastlåste posisjon, så vi måler fra merket som står der det egentlig hører hjemme. */
+            var anker = filt._mark || (filt.closest('.sticky') || {})._mark || filt;
+            document.body.classList.remove('bars-skjult');
+            var maal = window.scrollY + anker.getBoundingClientRect().top - (tb ? tb.offsetHeight : 0) - 10;
+            /* Fokus må skje direkte i trykket, ellers åpner ikke telefonen tastaturet. */
+            if (inp) inp.focus({ preventScroll: true });
+            window.scrollTo({ top: Math.max(0, maal), behavior: 'smooth' });
           }
         });
         document.body.appendChild(mb);

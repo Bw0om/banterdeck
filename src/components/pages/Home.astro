@@ -3,14 +3,15 @@ import Base from '../../layouts/Base.astro';
 import AdSlot from '../AdSlot.astro';
 import Icon from '../Icon.astro';
 import PopulaertNaa from '../PopulaertNaa.astro';
+import Sveip from '../Sveip.astro';
 import { sisteRunde } from '../../lib/nyhetsrunden';
-import { situationSectionsFor, dictItemsFor, dictSection, visible, langGroups, itemsOf, games, t, tf, isCrude, totalsFor, topSituationsFor, situationById, gamesFor, dictCount } from '../../lib/content';
+import { situationSectionsFor, dictSection, visible, langGroups, itemsOf, t, tf, isCrude, totalsFor, topSituationsFor, situationById, gamesFor, dictCount } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
+const no = lang === 'no';
 
 const totals = totalsFor(lang);
-const dictItems = dictItemsFor(lang);
 const hasDict = visible(dictSection, lang);
 const pool = situationSectionsFor(lang).flatMap((s) => langGroups(s, lang).flatMap((g: any) =>
   itemsOf(g, lang).filter((it: any) => it.line && !isCrude(it))
@@ -21,66 +22,64 @@ const pool = situationSectionsFor(lang).flatMap((s) => langGroups(s, lang).flatM
     })
 ));
 const first = pool[0];
+const quick = topSituationsFor(lang).slice(0, 5);
+const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
 ---
 <Base lang={lang}>
-  <section class="hero">
-    <h1>{L.heroTitle}</h1>
-    <p class="lead">{L.heroSub(totals.lines, totals.words, totals.games)}</p>
-    {lang === 'no' && sisteRunde && (
-      <a class="nr-pille" href="/no/nyhetsrunden"><b>Ny</b> Nyhetsrunden · uke {sisteRunde.uke} <span aria-hidden="true">→</span></a>
-    )}
-
-    <p class="today-ctx" id="todayCtx">{first.c || L.todayLabel}</p>
-    <p class="today" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
-    <p class="today-cat" id="todayCat">{L.todayPre}{first.k}{L.todayPost}</p>
+  <section class="h2-hero">
+    <h1>{no ? <>Hva skjer<br />akkurat nå?</> : <>What's<br />happening?</>}</h1>
+    <p class="h2-sub">{L.heroSub(totals.lines, totals.words, totals.games)}</p>
+    <div class="h2-chips">
+      {quick.map((x, i) => <a class:list={['h2-chip', i === 0 && 'on']} href={path(lang, `/situations/${x.id}`)}>{t(x.title, lang)}</a>)}
+      <a class="h2-chip" href={path(lang, '/situations')}>{no ? 'Flere …' : 'More …'}</a>
+    </div>
   </section>
 
-  <script is:inline data-astro-rerun define:vars={{ pool, todayLabel: L.todayLabel, pre: L.todayPre, post: L.todayPost }}>
+  <p class="h2-label">{no ? 'Kvelden starter her' : 'The night starts here'}</p>
+  <a class="h2-start" href={path(lang, '/drinking-games')}>
+    <span><b>{no ? 'Start en drikkelek' : 'Start a drinking game'}</b><small>{gamesFor(lang).length} {no ? 'leker å velge mellom' : 'games to choose from'}</small></span>
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+  </a>
+
+  <div class="h2-tiles">
+    <button class="h2-tile" type="button" data-sveip>
+      <span class="h2-quote" aria-hidden="true">«…»</span>
+      <span><b>{no ? 'Sveip replikker' : 'Swipe lines'}</b><small>{totals.lines} {L.itemsLabel}</small></span>
+    </button>
+    {no && sisteRunde ? (
+      <a class="h2-tile" href="/no/nyhetsrunden">
+        <span class="h2-badge">Uke {sisteRunde.uke}</span>
+        <span><b>Nyhetsrunden</b><small>{(sisteRunde.sporsmal || []).length} spørsmål</small></span>
+      </a>
+    ) : (
+      <a class="h2-tile" href={path(lang, '/situations')}>
+        <span class="h2-badge">{no ? 'Alle' : 'All'}</span>
+        <span><b>{L.linesTitle}</b><small>{no ? 'Etter situasjon' : 'By situation'}</small></span>
+      </a>
+    )}
+  </div>
+
+  <div class="h2-row">
+    {hasDict && <a href={path(lang, '/ord')}><Icon name="ordbok" size={20} />{L.ordTitle}</a>}
+    {hasDict && <a href={path(lang, '/uttrykk')}><Icon name="uttrykk" size={20} />{L.uttrykkTitle}</a>}
+    <a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} />{no ? 'Lagret' : 'Saved'}</a>
+  </div>
+
+  <section class="h2-today">
+    <div class="h2-today-top"><span>{L.todayLabel}</span><span id="todayCat">{first.k}</span></div>
+    <p class="today" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
+    <p class="h2-today-hint">{no ? 'Trykk for å kopiere' : 'Tap to copy'}</p>
+  </section>
+
+  <script is:inline data-astro-rerun define:vars={{ pool }}>
     var d = new Date();
     var day = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
     var p = pool[day % pool.length];
-    document.getElementById('todayCtx').textContent = p.c || todayLabel;
     var line = document.getElementById('todayLine');
     line.textContent = '«' + p.l + '»';
     line.setAttribute('data-copy', p.l);
-    document.getElementById('todayCat').textContent = pre + p.k + post;
+    document.getElementById('todayCat').textContent = p.k;
   </script>
-
-  <h2>{L.pickMode}</h2>
-  <div class="modes">
-    <a class="mode" href={path(lang, '/situations')}>
-      <span class="glow"></span>
-      <span class="em"><Icon name="replikker" size={32} /></span>
-      <span class="mt">{L.linesTitle}</span>
-      <span class="ml">{L.linesLead}</span>
-      <span class="mc">{L.browseLines} · {totals.lines} {L.itemsLabel}</span>
-    </a>
-    {hasDict && (
-      <a class="mode" href={path(lang, '/ord')}>
-        <span class="glow"></span>
-        <span class="em"><Icon name="ordbok" size={32} /></span>
-        <span class="mt">{L.ordTitle}</span>
-        <span class="ml">{L.ordLead}</span>
-        <span class="mc">{L.browseDict} · {dictCount('ord', lang)} {L.itemsLabel}</span>
-      </a>
-    )}
-    {hasDict && (
-      <a class="mode" href={path(lang, '/uttrykk')}>
-        <span class="glow"></span>
-        <span class="em"><Icon name="uttrykk" size={32} /></span>
-        <span class="mt">{L.uttrykkTitle}</span>
-        <span class="ml">{L.uttrykkLead}</span>
-        <span class="mc">{L.browseDict} · {dictCount('uttrykk', lang)} {L.itemsLabel}</span>
-      </a>
-    )}
-    <a class="mode" href={path(lang, '/drinking-games')}>
-      <span class="glow"></span>
-      <span class="em"><Icon name="drikkeleker" size={32} /></span>
-      <span class="mt">{L.gamesTitle}</span>
-      <span class="ml">{L.gamesTeaser}</span>
-      <span class="mc">{L.browseGames} · {gamesFor(lang).length} {L.gamesLabel}</span>
-    </a>
-  </div>
 
   <PopulaertNaa lang={lang} />
 
@@ -89,9 +88,11 @@ const first = pool[0];
   <h2>{L.takeItWithYou}</h2>
   <p class="lead">{L.takeItBody}</p>
   <div class="device">
-    <p class="ios-only">📱 {L.iosSteps}</p>
-    <p class="android-only">📱 {L.androidSteps}</p>
-    <p class="desktop-only">💻 {L.desktopSteps}</p>
+    <p class="ios-only">{L.iosSteps}</p>
+    <p class="android-only">{L.androidSteps}</p>
+    <p class="desktop-only">{L.desktopSteps}</p>
     <p class="standalone-only">✓ {L.standalone}</p>
   </div>
+
+  <Sveip items={sveipItems} title={no ? 'Alle replikker' : 'All lines'} lang={lang} shuffle={true} />
 </Base>

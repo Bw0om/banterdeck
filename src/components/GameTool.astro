@@ -297,3 +297,97 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
     </script>
   </section>
 )}
+
+{deck && deck.kind === 'ringoffire' && (
+  <section class="gt rof" data-gt="ringoffire">
+    <h2>Spill med telefonen som kortstokk</h2>
+    <p class="small">Ingen kortstokk? Legg telefonen midt på bordet og trekk herfra. Skriv inn navnene, så sier den hvem som skal trekke.</p>
+    <label class="rof-lab" for="rofNavn">Spillere (skill med komma)</label>
+    <input class="rof-inp" id="rofNavn" type="text" autocomplete="off" placeholder="Jonas, Maria, Petter" />
+    <button class="btn gold rof-start" type="button" data-rof="start">Start spillmodus</button>
+
+    <div class="rof-full" hidden role="dialog" aria-modal="true" aria-label="Ring of Fire">
+      <div class="rof-top">
+        <button class="rof-x" data-rof="lukk" aria-label="Avslutt leken">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+        </button>
+        <div class="rof-status"><b>Ring of Fire</b><span class="rof-igjen"></span></div>
+        <span class="rof-x" aria-hidden="true"></span>
+      </div>
+      <div class="rof-tur"><span>Din tur</span><b class="rof-navn"></b></div>
+      <div class="rof-kort" aria-live="polite">
+        <div class="rof-hj rof-hj1"><b class="rof-v"></b><span class="rof-s"></span></div>
+        <div class="rof-midt"><b class="rof-regel"></b><span class="rof-tekst"></span></div>
+        <div class="rof-hj rof-hj2"><b class="rof-v"></b><span class="rof-s"></span></div>
+      </div>
+      <div class="rof-spillere"></div>
+      <button class="rof-trekk" data-rof="trekk">Trekk neste kort</button>
+    </div>
+
+    <script is:inline data-astro-rerun define:vars={{ D: deck }}>
+    (function () {
+      var root = document.currentScript.closest('.gt');
+      if (root.dataset.bound) return; root.dataset.bound = '1';
+      var full = root.querySelector('.rof-full'), inp = root.querySelector('.rof-inp');
+      var SORTER = [['♥', 1], ['♦', 1], ['♠', 0], ['♣', 0]];
+      var VERDIER = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+      var stokk = [], konger = 0, spillere = [], tur = -1, trukket = 0;
+      try { inp.value = localStorage.getItem('bd_spillere') || ''; } catch (e) {}
+      function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+      function nyStokk() {
+        stokk = [];
+        SORTER.forEach(function (s) { VERDIER.forEach(function (v) { stokk.push({ v: v, s: s[0], rod: s[1] }); }); });
+        for (var i = stokk.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var x = stokk[i]; stokk[i] = stokk[j]; stokk[j] = x; }
+        konger = 0; trukket = 0;
+      }
+      function status() {
+        root.querySelector('.rof-igjen').textContent = stokk.length + ' kort igjen · ' + konger + (konger === 1 ? ' konge' : ' konger') + ' trukket';
+      }
+      function visSpillere() {
+        root.querySelector('.rof-spillere').innerHTML = spillere.map(function (n, i) {
+          return '<span class="' + (i === tur ? 'on' : '') + '">' + esc(n) + '</span>';
+        }).join('');
+        var navn = root.querySelector('.rof-navn');
+        navn.textContent = spillere.length ? spillere[tur] : '';
+        root.querySelector('.rof-tur').hidden = !spillere.length;
+      }
+      function trekk() {
+        if (!stokk.length) nyStokk();
+        var k = stokk.pop(); trukket++;
+        if (spillere.length) tur = (tur + 1) % spillere.length;
+        var info = D.kort[k.v], navn = info[0], tekst = info[1];
+        if (k.v === 'K') {
+          konger++;
+          var slurker = D.konger[Math.min(konger, D.konger.length) - 1];
+          var nr = ['Første', 'Andre', 'Tredje', 'Fjerde'][konger - 1] || 'Neste';
+          navn = nr + ' konge';
+          tekst = 'Drikk ' + slurker + ' slurker.' + (konger === 4 ? ' Det var siste konge!' : '');
+        }
+        var kort = root.querySelector('.rof-kort');
+        kort.classList.toggle('rod', !!k.rod);
+        kort.querySelectorAll('.rof-v').forEach(function (e) { e.textContent = k.v === 'J' ? 'Kn' : (k.v === 'Q' ? 'D' : k.v); });
+        kort.querySelectorAll('.rof-s').forEach(function (e) { e.textContent = k.s; });
+        root.querySelector('.rof-regel').textContent = navn;
+        root.querySelector('.rof-tekst').textContent = tekst;
+        kort.classList.remove('flipp'); void kort.offsetWidth; kort.classList.add('flipp');
+        root.querySelector('.rof-trekk').textContent = stokk.length ? 'Trekk neste kort' : 'Stokk og start på nytt';
+        status(); visSpillere();
+      }
+      root.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-rof]'); if (!b) return;
+        var a = b.dataset.rof;
+        if (a === 'start') {
+          spillere = inp.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 20);
+          try { localStorage.setItem('bd_spillere', inp.value); } catch (err) {}
+          tur = -1; nyStokk();
+          full.hidden = false; document.body.classList.add('noscroll');
+          trekk();
+        }
+        if (a === 'trekk') trekk();
+        if (a === 'lukk') { full.hidden = true; document.body.classList.remove('noscroll'); }
+      });
+      full.addEventListener('keydown', function (e) { if (e.key === 'Escape') { full.hidden = true; document.body.classList.remove('noscroll'); } });
+    })();
+    </script>
+  </section>
+)}

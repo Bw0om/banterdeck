@@ -2678,5 +2678,69 @@
  "gjett-aret": {
   "kind": "aar",
   "title": "Gjett året"
+ },
+ "ring-of-fire": {
+  "kind": "ringoffire",
+  "title": "Spillmodus",
+  "kort": {
+   "A": [
+    "Fossefall",
+    "Alle begynner å drikke. Ingen kan stoppe før den før seg har stoppet."
+   ],
+   "2": [
+    "You",
+    "Pek ut en som drikker."
+   ],
+   "3": [
+    "Me",
+    "Du drikker selv."
+   ],
+   "4": [
+    "Whores",
+    "Alle jentene drikker."
+   ],
+   "5": [
+    "Thumb",
+    "Legg tommelen på bordkanten når du vil. Sistemann som følger etter, drikker."
+   ],
+   "6": [
+    "Dicks",
+    "Alle gutta drikker."
+   ],
+   "7": [
+    "Heaven",
+    "Alle rekker hånda i været. Sistemann drikker."
+   ],
+   "8": [
+    "Mate",
+    "Velg en kompis som drikker hver gang du drikker."
+   ],
+   "9": [
+    "Rhyme",
+    "Si et ord. Rundt bordet rimes det til noen står fast – den drikker."
+   ],
+   "10": [
+    "Category",
+    "Velg en kategori. Rundt bordet til noen står fast – den drikker."
+   ],
+   "J": [
+    "Rule",
+    "Lag en regel som gjelder resten av spillet."
+   ],
+   "Q": [
+    "Question master",
+    "Til neste dronning drikker alle som svarer på et spørsmål fra deg."
+   ],
+   "K": [
+    "Konge",
+    ""
+   ]
+  },
+  "konger": [
+   5,
+   10,
+   15,
+   20
+  ]
  }
 }

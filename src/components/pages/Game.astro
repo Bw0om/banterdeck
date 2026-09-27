@@ -2,10 +2,12 @@
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../AdSlot.astro';
 import GameTool from '../GameTool.astro';
+import DECKS from '../../data/decks.json';
 import { gamesFor, gameHref, t, trules } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { game, lang = 'en' } = Astro.props as { game: any; lang?: Lang };
 const L = ui(lang);
+const harVerktoy = lang === 'no' && (!!(DECKS as any)[game.slug] || game.slug === 'drikke-bingo');
 const name = t(game.name, lang);
 const rules: string[] = trules(game, lang);
 
@@ -33,11 +35,12 @@ const jsonLd = JSON.stringify({
     <a href={path(lang, '/drinking-games')}>{L.gamesTitle}</a> › {name}
   </p>
   <h1>{name}</h1>
-  <div class="meta">
-    <span>{t(game.gear, lang)}</span>
-    <span>{game.pl} {L.players}</span>
-    <span>{t(game.group.title, lang)}</span>
+  <div class="meta2">
+    <div><small>{lang === 'no' ? 'Spillere' : 'Players'}</small><b>{game.pl}</b></div>
+    <div><small>{lang === 'no' ? 'Utstyr' : 'Gear'}</small><b>{t(game.gear, lang)}</b></div>
+    <div><small>{lang === 'no' ? 'Type' : 'Type'}</small><b>{t(game.group.title, lang)}</b></div>
   </div>
+  {harVerktoy && <p class="startrow"><a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'} ↓</a></p>}
 
   <div class="rules">
     {blocks.map((b) => b.type === 'p' ? <p>{b.items[0]}</p> : <ul>{b.items.map((x) => <li>{x}</li>)}</ul>)}
@@ -47,7 +50,7 @@ const jsonLd = JSON.stringify({
     <button class="btn ghost" data-copy={copyText}>{L.copyRules}</button>
   </p>
 
-  <GameTool slug={game.slug} lang={lang} />
+  <div id="lekverktoy"><GameTool slug={game.slug} lang={lang} /></div>
   <span hidden data-spilt={`lek:${game.slug}`}></span>
 
   <AdSlot />

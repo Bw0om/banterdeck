@@ -629,3 +629,158 @@ body:has(.nr) .tool.dice{display:none}
 .aar-regel{margin-top:12px}
 .gt-row a.btn{flex:1;text-align:center;padding:13px}
 .q-duell{font-family:var(--display);font-weight:800;font-size:28px;color:var(--accent);margin:4px 0 0}
+
+/* =====================================================================
+   Runde 2 – app-utseendet. Figtree i alt som er grensesnitt,
+   Fraunces bare der replikkene står. Større, rundere flater.
+   ===================================================================== */
+:root{--sans:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;--r:20px;--ink2:#1a0f08}
+body{font-family:var(--sans);font-size:16px}
+p.lead{font-style:normal;font-size:16px}
+.card .line,.hero .today,.today,.dealcard .line,.sw-line,.gt-text{font-family:var(--serif)}
+.tile .tg,.field .help,.card .note{font-style:normal}
+.field input,.field select,.field textarea,.searchhead input,.dictfilter input,.sitfilter input{font-family:var(--sans)}
+.btn{border-radius:999px;padding:12px 20px}
+.card,.tile,.game,.mode,.sitchip{border-radius:20px}
+.chips a,.sitchip{font-family:var(--sans)}
+.crumb{font-family:var(--sans)}
+
+/* ---------- forside ---------- */
+.h2-hero{background:var(--gold);color:var(--ink2);border-radius:28px;padding:28px 22px 22px;display:flex;flex-direction:column;gap:14px}
+.h2-hero h1{font-size:clamp(44px,9vw,64px);line-height:.95;letter-spacing:-.035em;margin:0;color:var(--ink2)}
+.h2-sub{margin:0;font-size:15px;font-weight:500;color:#4a3514;max-width:44ch}
+.h2-chips{display:flex;flex-wrap:wrap;gap:8px}
+.h2-chip{height:40px;box-sizing:border-box;padding:0 16px;border-radius:20px;border:2px solid var(--ink2);color:var(--ink2);
+  font-weight:600;font-size:15px;display:inline-flex;align-items:center}
+.h2-chip.on,.h2-chip:hover{background:var(--ink2);color:var(--ink);text-decoration:none}
+.h2-label{margin:26px 0 10px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.h2-start{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:92px;box-sizing:border-box;padding:16px 20px;
+  border-radius:24px;background:var(--accent);color:var(--ink2)}
+.h2-start:hover{text-decoration:none;filter:brightness(1.05)}
+.h2-start b{display:block;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.02em;line-height:1.1}
+.h2-start small{display:block;font-size:14px;font-weight:600;margin-top:2px}
+.h2-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.h2-tile{min-height:132px;box-sizing:border-box;padding:16px;border-radius:24px;background:var(--card2);border:1px solid var(--border);
+  color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;font:inherit;cursor:pointer}
+.h2-tile:hover{text-decoration:none;border-color:var(--border2)}
+.h2-tile b{display:block;font-family:var(--display);font-weight:700;font-size:19px}
+.h2-tile small{display:block;font-size:13px;color:var(--muted)}
+.h2-quote{font-family:var(--serif);font-style:italic;font-size:30px;line-height:1;color:var(--gold)}
+.h2-badge{height:26px;padding:0 10px;border-radius:13px;background:var(--ink);color:var(--ink2);font-size:12px;font-weight:700;display:inline-flex;align-items:center}
+.h2-row{display:flex;gap:10px;margin-top:10px}
+.h2-row a{flex:1;min-height:56px;border-radius:18px;background:var(--card);border:1px solid var(--border);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:15px}
+.h2-row a:hover{text-decoration:none;border-color:var(--border2)}
+.h2-today{margin-top:26px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:18px 18px 16px}
+.h2-today-top{display:flex;justify-content:space-between;gap:10px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.h2-today-top span:last-child{color:var(--muted);letter-spacing:0;text-transform:none;font-weight:600}
+.h2-today .today{margin:10px 0 6px;font-style:italic;font-weight:500;font-size:clamp(22px,4vw,30px);line-height:1.25;cursor:copy}
+.h2-today .today.copied{color:var(--gold)}
+.h2-today-hint{margin:0;font-size:13px;color:var(--faint)}
+@media (max-width:899px){
+  .h2-hero{margin:-26px -18px 0;border-radius:0 0 32px 32px;padding:26px 20px 24px}
+}
+
+/* ---------- sveipemodus ---------- */
+.sw{position:fixed;inset:0;z-index:150;background:var(--bg);display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 8px) 0 calc(env(safe-area-inset-bottom) + 24px)}
+.sw[hidden]{display:none}
+.sw-top{display:flex;align-items:center;justify-content:space-between;padding:0 8px}
+.sw-x{width:44px;height:44px;border:0;background:none;color:var(--ink);display:grid;place-items:center;border-radius:22px}
+button.sw-x:hover{background:var(--card)}
+.sw-title{display:flex;flex-direction:column;align-items:center;min-width:0}
+.sw-title b{font-family:var(--display);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+.sw-count{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sw-bar{height:4px;margin:10px 20px 0;border-radius:2px;background:#3a2c1b;overflow:hidden}
+.sw-bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .25s}
+.sw-stack{position:relative;flex:1;margin:28px 24px 24px;min-height:300px;max-height:520px}
+.sw-card{position:absolute;inset:0;border-radius:30px}
+.sw-b2{background:#3a2c1b;transform:rotate(-5deg) translateY(10px)}
+.sw-b1{background:var(--accent);transform:rotate(3deg) translateY(4px)}
+.sw-front{background:var(--gold);color:var(--ink2);padding:26px 24px;box-sizing:border-box;display:flex;flex-direction:column;
+  justify-content:space-between;box-shadow:0 20px 50px rgba(0,0,0,.5);touch-action:pan-y;user-select:none;cursor:grab}
+.sw-front:focus-visible{outline:3px solid var(--ink);outline-offset:4px}
+.sw-tag{align-self:flex-start;min-height:28px;padding:0 12px;border-radius:14px;background:var(--ink2);color:var(--gold);font-size:12px;
+  font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:inline-flex;align-items:center}
+.sw-tag[hidden]{display:none}
+.sw-line{margin:0;font-style:italic;font-weight:600;font-size:clamp(26px,7.5vw,36px);line-height:1.15}
+.sw-hint{font-size:13px;font-weight:600;text-align:right}
+.sw-acts{display:flex;justify-content:center;align-items:center;gap:18px}
+.sw-round{width:60px;height:60px;border-radius:30px;border:0;background:var(--card);color:var(--ink);display:grid;place-items:center;position:static}
+.sw-round.starbtn{position:static;width:60px;height:60px;color:var(--gold);background:var(--card)}
+.sw-round.starbtn.on svg{fill:var(--gold)}
+.sw-copy{height:72px;padding:0 34px;border-radius:36px;border:0;background:var(--ink);color:var(--ink2);font-weight:800;font-size:18px}
+.sw-copy.copied{background:var(--gold)}
+.sw-open-row{margin:14px 0 4px}
+
+/* ---------- lek-sider ---------- */
+.meta2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 16px;max-width:680px}
+.meta2 div{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px 12px;min-width:0}
+.meta2 small{display:block;font-size:12px;color:var(--muted)}
+.meta2 b{display:block;font-size:15px;font-weight:700;overflow-wrap:anywhere}
+.startrow{margin:0 0 20px}
+.btn.start{background:var(--gold);color:var(--ink2);font-size:17px;padding:15px 26px}
+#lekverktoy{scroll-margin-top:110px}
+.rules ul{list-style:none;margin:0 0 16px;padding:0;background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}
+.rules li{margin:0;padding:12px 16px;border-top:1px solid var(--border)}
+.rules li:first-child{border-top:0}
+
+/* ---------- Ring of Fire i spillmodus ---------- */
+.rof-lab{display:block;font-size:14px;font-weight:600;margin:14px 0 6px}
+.rof-inp{width:100%;max-width:420px;font:500 16px var(--sans);color:var(--ink);background:var(--card);border:1px solid var(--border2);
+  border-radius:14px;padding:12px 14px;outline:none}
+.rof-inp:focus{border-color:var(--accent)}
+.rof-start{display:block;margin-top:12px;font-size:17px;padding:15px 26px}
+.rof-full{position:fixed;inset:0;z-index:150;background:#0d0a06;display:flex;flex-direction:column;align-items:center;
+  padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 24px);overflow-y:auto}
+.rof-full[hidden]{display:none}
+.rof-top{align-self:stretch;display:flex;justify-content:space-between;align-items:center}
+.rof-x{width:44px;height:44px;border-radius:22px;border:0;background:var(--card);color:var(--ink);display:grid;place-items:center}
+span.rof-x{background:none}
+.rof-status{display:flex;flex-direction:column;align-items:center}
+.rof-status b{font-family:var(--display);font-size:17px}
+.rof-igjen{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.rof-tur{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.rof-tur[hidden]{display:none}
+.rof-tur span{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.rof-tur b{font-family:var(--display);font-weight:800;font-size:30px;color:var(--gold);letter-spacing:-.02em}
+.rof-kort{margin-top:20px;width:min(250px,70vw);aspect-ratio:5/7;max-width:100%;border-radius:22px;background:var(--ink);color:var(--ink2);
+  box-sizing:border-box;padding:16px;display:flex;flex-direction:column;justify-content:space-between;transform:rotate(-2deg);
+  box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.rof-kort.rod .rof-hj{color:#c8321f}
+.rof-hj{display:flex;flex-direction:column;align-items:flex-start;line-height:1}
+.rof-hj b{font-family:var(--display);font-weight:800;font-size:32px}
+.rof-hj span{font-size:22px}
+.rof-hj2{align-self:flex-end;transform:rotate(180deg)}
+.rof-midt{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.rof-regel{font-family:var(--display);font-weight:800;font-size:clamp(24px,7vw,30px);letter-spacing:-.02em;line-height:1.05}
+.rof-tekst{font-size:15px;line-height:1.35;font-weight:500}
+.rof-kort.flipp{animation:rofflipp .28s ease}
+@keyframes rofflipp{from{transform:rotate(-2deg) translateY(24px) scale(.94);opacity:0}to{transform:rotate(-2deg);opacity:1}}
+.rof-spillere{margin-top:22px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:100%}
+.rof-spillere span{height:32px;padding:0 12px;border-radius:16px;background:var(--card);color:var(--muted);font-size:13px;font-weight:600;display:inline-flex;align-items:center}
+.rof-spillere span.on{background:var(--gold);color:var(--ink2)}
+.rof-trekk{margin-top:auto;align-self:stretch;min-height:64px;border:0;border-radius:32px;background:var(--accent);color:var(--ink2);
+  font-weight:800;font-size:19px;margin-top:24px}
+body:has(.rof-full:not([hidden])) .tool.dice{display:none}
+
+/* ---------- flytende meny nederst (mobil) ---------- */
+@media (max-width:899px){
+  .tabbar{display:flex;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom) + 12px);border-radius:32px;
+    border:1px solid var(--border2);background:rgba(34,26,16,.96);padding:7px;gap:2px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+  .tabbar a{flex:1 1 0;min-width:0;flex-direction:row;justify-content:center;height:48px;border-radius:24px;padding:0 10px;gap:6px;
+    font-family:var(--sans);font-size:13px;font-weight:700;color:var(--muted)}
+  .tabbar a[aria-current=page]{flex:3 1 0;background:var(--gold);color:var(--ink2)}
+  .tabbar .tl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .tabbar a[aria-current=page] .tl{position:static;width:auto;height:auto;clip:auto;overflow:hidden;text-overflow:ellipsis}
+  body{padding-bottom:calc(env(safe-area-inset-bottom) + 96px)}
+  .tool.dice{bottom:calc(env(safe-area-inset-bottom) + 92px)}
+  .langbanner{bottom:calc(env(safe-area-inset-bottom) + 92px)}
+  .meta2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .meta2 div:last-child{grid-column:1/-1}
+}
+@media (prefers-reduced-motion:reduce){.rof-kort.flipp{animation:none}.sw-bar i{transition:none}}
+
+/* Forsiden har egne situasjonsknapper, så snarveiene øverst blir dobbelt opp */
+@media (max-width:899px){body:has(.h2-hero) .mobilenav{display:none}}
+.sw:focus{outline:none}
