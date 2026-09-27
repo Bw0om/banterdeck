@@ -863,3 +863,99 @@ body:has(.rom-spill) .tool.dice,body:has(.rom-start) .tool.dice{display:none}
 @media (max-width:899px){body:has(#rom) .mobilenav{display:none}}
 body:has(#rom) .tool.dice{display:none}
 .romlenke{display:inline-flex;align-items:center;gap:8px;margin:0 0 18px 8px}
+
+/* ---------- digitale kort og terninger ---------- */
+.dl .dl-body{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;margin-top:8px}
+.kk{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:46px;height:64px;border-radius:9px;
+  background:var(--ink);color:#1a0f08;font-family:var(--display);box-shadow:0 3px 10px rgba(0,0,0,.35);flex-shrink:0;vertical-align:middle}
+.kk b{font-weight:800;font-size:18px;line-height:1}
+.kk i{font-style:normal;font-size:17px;line-height:1}
+.kk.rod{color:#c8321f}
+.kk.bak{background:repeating-linear-gradient(45deg,#c98f22 0 6px,#f4b740 6px 12px);border:3px solid var(--ink)}
+.kk.tom{background:transparent;border:2px dashed var(--border2);box-shadow:none}
+.kk.stor{width:150px;height:210px;border-radius:18px}
+.kk.stor b{font-size:58px}
+.kk.stor i{font-size:48px}
+.kk.stor.bak{border-width:6px}
+.kk.liten{width:30px;height:42px;border-radius:6px}
+.kk.liten b{font-size:12px}.kk.liten i{font-size:11px}
+.kk.mini{width:24px;height:34px;border-radius:5px;box-shadow:none}
+.kk.mini b{font-size:10px}.kk.mini i{font-size:9px}
+.kk.inn{animation:kkinn .28s ease}
+.kk.vinner{outline:3px solid var(--accent);outline-offset:2px}
+@keyframes kkinn{from{transform:translateY(18px) rotate(-4deg) scale(.92);opacity:0}to{transform:none;opacity:1}}
+.dl-bord{min-height:64px;display:flex;justify-content:center;gap:12px}
+.dl-melding{margin:0;font-weight:700;font-size:17px;max-width:40ch;min-height:1.4em}
+.dl-melding.dl-stor{font-family:var(--display);font-size:22px}
+.dl-hint{color:var(--gold)}
+.dl-info{margin:0;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dl-steg{margin:0;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.dl-sporsmal{margin:4px 0 0;font-family:var(--display);font-weight:800;font-size:24px}
+.dl-knapper{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.dl-knapper .btn{min-width:120px;font-size:17px;padding:14px 22px}
+.dl-verdier{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;width:100%;max-width:400px}
+.dl-verdier button{min-height:56px;border-radius:14px;border:1px solid var(--border2);background:var(--card);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.dl-verdier button b{font-family:var(--display);font-size:19px}
+.dl-verdier button small{font-size:10px;color:var(--muted)}
+.dl-verdier button:hover:not(:disabled){background:var(--gold);color:var(--ink2)}
+.dl-verdier button:disabled{opacity:.3}
+.dl-navn{display:grid;gap:6px;width:100%;max-width:360px;text-align:left}
+.dl-navn input{font:500 16px var(--sans);color:var(--ink);background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:11px 13px}
+.dl-krig{display:flex;justify-content:center;gap:18px;width:100%}
+.dl-krig > div{display:flex;flex-direction:column;align-items:center;gap:6px}
+.dl-spiller{margin:0;font-weight:700}
+.dl-bane{display:flex;flex-direction:column;gap:4px;width:100%;max-width:440px}
+.dl-rad{display:grid;grid-template-columns:repeat(var(--lengde),minmax(0,1fr));gap:3px}
+.dl-celle{height:46px;border-radius:7px;background:rgba(248,233,210,.07);display:flex;align-items:center;justify-content:center}
+.dl-celle.mal{background:rgba(244,183,64,.2);border:1px dashed var(--gold)}
+.dl-rad.banekort .dl-celle{background:none}
+.dl-hand{display:flex;gap:6px;justify-content:center}
+.dl-pyramide{display:flex;flex-direction:column;align-items:center;gap:4px}
+.dl-pyramide > div{display:flex;gap:4px}
+.dl-hender{display:flex;flex-direction:column;gap:6px;width:100%;max-width:420px}
+.dl-hender > div{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--card);border-radius:12px;padding:6px 10px}
+.dl-hender span{display:flex;gap:3px}
+.dl-buss{display:flex;gap:8px}
+.dl-buss i{width:16px;height:16px;border-radius:50%;background:var(--card2);border:2px solid var(--border2)}
+.dl-buss i.ok{background:var(--gold);border-color:var(--gold)}
+.dl-terninger{display:flex;justify-content:center;gap:14px;border:0;background:none;padding:6px;cursor:pointer}
+.dice{display:inline-grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);width:92px;height:92px;box-sizing:border-box;padding:14px;
+  border-radius:20px;background:var(--ink);box-shadow:0 8px 22px rgba(0,0,0,.45),inset 0 -4px 0 rgba(0,0,0,.12)}
+.dice i{display:block;margin:auto;width:15px;height:15px;border-radius:50%}
+.dice i.p{background:#1a0f08}
+.dice[data-n="1"] i.p,.dice[data-n="5"] i.p:nth-child(5){background:#c8321f}
+.dl-terninger.spinner .dice{animation:dlspinn .14s linear infinite}
+@keyframes dlspinn{0%{transform:rotate(-14deg) translateY(-3px)}50%{transform:rotate(12deg) translateY(2px)}100%{transform:rotate(-14deg) translateY(-3px)}}
+.dl-stortrykk .dice{width:140px;height:140px;padding:22px;border-radius:30px}
+.dl-stortrykk .dice i{width:22px;height:22px}
+.dl-sum{margin:0;font-family:var(--display);font-weight:800;font-size:56px;line-height:1;color:var(--gold);min-height:56px}
+.dl-holder{margin:0;font-family:var(--display);font-weight:800;font-size:34px;color:var(--gold)}
+.dl-romtips{margin-top:18px}
+@media (prefers-reduced-motion:reduce){.kk.inn{animation:none}.dl-terninger.spinner .dice{animation:none}}
+/* ---------- kortleker i rom ---------- */
+.rom-valg.fire{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rom-past{list-style:none;padding:0;margin:4px 0;display:flex;flex-direction:column;gap:6px;width:100%;max-width:420px}
+.rom-past li{background:var(--card);border-radius:14px;padding:10px 12px;font-size:15px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px}
+.rom-past em{color:var(--gold);font-style:normal;font-weight:700}
+.rom-gris-tavle{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;width:100%}
+.rom-gris-tavle span{background:var(--card);border-radius:14px;padding:6px 12px;font-size:14px;font-weight:600}
+.rom-gris-tavle span.tur{outline:2px solid var(--gold)}
+.rom-gris-tavle b{color:var(--accent);letter-spacing:.08em}
+.rom-gris-tavle em{color:var(--gold);font-style:normal;font-size:12px}
+.rom-gris-tavle small{color:var(--muted)}
+.dl-hand.gris button,.dl-hand.pres button{border:0;background:none;padding:0;border-radius:10px;transition:transform .12s}
+.dl-hand.gris button[aria-pressed=true],.dl-hand.pres button[aria-pressed=true]{transform:translateY(-10px);outline:3px solid var(--gold);outline-offset:2px}
+.dl-hand.gris .kk{width:64px;height:90px}.dl-hand.gris .kk b{font-size:24px}
+.dl-hand.pres{flex-wrap:wrap;max-width:100%}
+.dl-hand.pres button:disabled{opacity:.85}
+.rom-nese{width:100%;max-width:420px;min-height:92px;border:0;border-radius:24px;background:var(--card2);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.rom-nese b{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.04em}
+.rom-nese span{font-size:13px;color:var(--muted)}
+.rom-nese.blink{background:var(--accent);color:var(--ink2);animation:nese .6s ease-in-out infinite alternate}
+.rom-nese.blink span{color:var(--ink2)}
+.rom-nese[aria-pressed=true]{background:var(--gold);color:var(--ink2);animation:none}
+@keyframes nese{to{transform:scale(1.03)}}
+.dl-terninger.landet .dice{animation:land .45s ease}
+@keyframes land{0%{transform:rotate(-200deg) scale(.6)}70%{transform:rotate(15deg) scale(1.08)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.rom-nese.blink,.dl-terninger.landet .dice{animation:none}}
+@media (max-width:899px){.toast{bottom:calc(env(safe-area-inset-bottom) + 92px)}}

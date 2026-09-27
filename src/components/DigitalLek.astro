@@ -1,0 +1,425 @@
+---
+/**
+ * Digitale kortstokker og terninger, så lekene kan spilles uten fysiske ting.
+ * Alt kjører på én telefon. Leker som trenger skjulte hender (Pyramiden, President, Gris) ligger i rom.
+ */
+const { slug } = Astro.props as { slug: string };
+const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer', '21-med-terninger', 'opus'];
+const RomLeker = ['opus', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris'];
+const har = DIGITALE.includes(slug);
+const bareRom = ['pyramiden', 'president', 'gris'].includes(slug);
+---
+{(har || bareRom) && (
+<section class="gt dl" data-dl={slug}>
+  <h2>{bareRom ? 'Spill uten kortstokk' : (['terningen-bestemmer', '21-med-terninger', 'opus'].includes(slug) ? 'Telefonen er terningen' : 'Telefonen er kortstokken')}</h2>
+  {bareRom ? (
+    <>
+      <p>Her har hver spiller skjulte kort på hånda, så dere spiller fra hver deres telefon. Lag et rom, del koden og velg {slug === 'pyramiden' ? 'Pyramiden' : slug === 'president' ? 'President' : 'Gris'}.</p>
+      <p><a class="btn gold" href="/no/rom">Lag et rom</a></p>
+    </>
+  ) : <div class="dl-body"></div>}
+  {RomLeker.includes(slug) && !bareRom && <p class="small dl-romtips">Vil dere spille fra hver sin telefon? <a href="/no/rom">Lag et rom</a> og velg leken der.</p>}
+</section>
+)}
+
+{har && (
+<script is:inline data-astro-rerun>
+/* Felles hjelpere for kort og terninger – defineres én gang */
+if (!window.BDK) window.BDK = (function () {
+  function bland(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function stokk(utenEss) {
+    var s = [];
+    ['♥', '♦', '♠', '♣'].forEach(function (f) { for (var v = 2; v <= 14; v++) if (!(utenEss && v === 14)) s.push({ v: v, f: f }); });
+    return bland(s);
+  }
+  function vn(v) { return v <= 10 ? String(v) : ({ 11: 'Kn', 12: 'D', 13: 'K', 14: 'A' })[v]; }
+  function rod(k) { return k.f === '♥' || k.f === '♦'; }
+  function kort(k, kl) {
+    if (!k) return '<span class="kk tom ' + (kl || '') + '"></span>';
+    return '<span class="kk ' + (rod(k) ? 'rod ' : '') + (kl || '') + '"><b>' + vn(k.v) + '</b><i>' + k.f + '</i></span>';
+  }
+  function bakside(kl) { return '<span class="kk bak ' + (kl || '') + '"></span>'; }
+  var PRIKKER = { 1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
+  function terning(n) {
+    var s = '<span class="dice" data-n="' + n + '" aria-label="Terning viser ' + n + '">';
+    for (var i = 1; i <= 9; i++) s += '<i' + (PRIKKER[n].indexOf(i) !== -1 ? ' class="p"' : '') + '></i>';
+    return s + '</span>';
+  }
+  /* Spinner terningene i et lite øyeblikk før de lander */
+  function kast(el, antall, ferdig) {
+    var slutt = []; for (var i = 0; i < antall; i++) slutt.push(1 + Math.floor(Math.random() * 6));
+    var redusert = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var runder = redusert ? 0 : 9, r = 0;
+    el.classList.add('spinner');
+    (function steg() {
+      if (r < runder) {
+        el.innerHTML = slutt.map(function () { return terning(1 + Math.floor(Math.random() * 6)); }).join('');
+        r++; return setTimeout(steg, 55 + r * 8);
+      }
+      el.classList.remove('spinner');
+      el.innerHTML = slutt.map(terning).join('');
+      ferdig(slutt);
+    })();
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function navn(inp) { return inp.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 12); }
+  function husk(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function hent(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  return { bland: bland, stokk: stokk, vn: vn, kort: kort, bakside: bakside, terning: terning, kast: kast, esc: esc, navn: navn, husk: husk, hent: hent };
+})();
+</script>
+)}
+
+{slug === 'over-eller-under' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="over-eller-under"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var K = window.BDK, stokk, naa, bunke, melding;
+  function start() { stokk = K.stokk(); naa = stokk.pop(); bunke = 1; melding = 'Neste spiller: høyere eller lavere?'; tegn(); }
+  function tegn(sist) {
+    root.innerHTML = '<div class="dl-bord">' + K.kort(naa, 'stor' + (sist ? ' inn' : '')) + '</div>' +
+      '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
+      '<p class="dl-info">Bunken: <b>' + bunke + '</b> ' + (bunke === 1 ? 'kort' : 'kort') + ' · ' + stokk.length + ' igjen i stokken</p>' +
+      '<div class="dl-knapper"><button class="btn gold" data-v="over">Høyere ↑</button><button class="btn gold" data-v="under">Lavere ↓</button></div>' +
+      '<p class="small">Ess er høyest. Likt teller som feil.</p>';
+  }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-v]'); if (!b) return;
+    if (!stokk.length) { stokk = K.stokk(); }
+    var nytt = stokk.pop(), riktig = b.dataset.v === 'over' ? nytt.v > naa.v : nytt.v < naa.v;
+    if (riktig) { bunke++; melding = 'Riktig! Turen går videre.'; }
+    else { melding = 'Feil! Drikk ' + bunke + (bunke === 1 ? ' slurk.' : ' slurker.'); bunke = 1; }
+    naa = nytt; tegn(true);
+  });
+  start();
+})();
+</script>
+)}
+
+{slug === 'fuck-the-dealer' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="fuck-the-dealer"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var K = window.BDK, stokk, kortet, forsok, rad, brukt, melding, hint, avslort;
+  function start() { stokk = K.stokk(); brukt = {}; rad = 0; nyttKort(); melding = 'Spilleren til venstre for dealeren gjetter.'; tegn(); }
+  function nyttKort() { if (!stokk.length) { stokk = K.stokk(); brukt = {}; } kortet = stokk.pop(); forsok = 1; hint = ''; avslort = false; }
+  function tegn() {
+    var verdier = []; for (var v = 2; v <= 14; v++) verdier.push(v);
+    root.innerHTML = '<div class="dl-bord">' + (avslort ? K.kort(kortet, 'stor inn') : K.bakside('stor')) + '</div>' +
+      '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + (hint ? ' <b class="dl-hint">' + hint + '</b>' : '') + '</p>' +
+      (avslort
+        ? '<div class="dl-knapper"><button class="btn gold" data-a="neste">Neste spiller</button></div>'
+        : '<p class="dl-info">Gjett ' + (forsok === 1 ? 'verdien' : 'én gang til') + '</p><div class="dl-verdier">' + verdier.map(function (v) {
+            var n = brukt[v] || 0;
+            return '<button data-g="' + v + '"' + (n >= 4 ? ' disabled' : '') + '><b>' + K.vn(v) + '</b><small>' + (4 - n) + ' igjen</small></button>';
+          }).join('') + '</div>') +
+      '<p class="dl-info">Dealeren har klart <b>' + rad + '</b> av 3 på rad · ' + stokk.length + ' kort igjen</p>';
+  }
+  root.addEventListener('click', function (e) {
+    var g = e.target.closest('[data-g]'), a = e.target.closest('[data-a]');
+    if (a) { nyttKort(); melding = 'Neste spiller gjetter.'; return tegn(); }
+    if (!g) return;
+    var v = Number(g.dataset.g);
+    if (v === kortet.v) {
+      melding = forsok === 1 ? 'Rett på første! Dealeren drikker 5.' : 'Riktig! Dealeren drikker 2.';
+      rad = 0; avslort = true; brukt[kortet.v] = (brukt[kortet.v] || 0) + 1;
+    } else if (forsok === 1) {
+      forsok = 2; hint = kortet.v > v ? 'Høyere!' : 'Lavere!'; melding = 'Feil.';
+    } else {
+      var diff = Math.abs(kortet.v - v);
+      melding = 'Feil igjen – drikk ' + diff + (diff === 1 ? ' slurk.' : ' slurker.'); hint = '';
+      rad++; avslort = true; brukt[kortet.v] = (brukt[kortet.v] || 0) + 1;
+      if (rad >= 3) { melding += ' Dealeren har klart tre på rad – send telefonen til ny dealer.'; rad = 0; }
+    }
+    tegn();
+  });
+  start();
+})();
+</script>
+)}
+
+{slug === 'krig' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="krig"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var K = window.BDK, A, B, na = 'Spiller 1', nb = 'Spiller 2', vist = null, melding = '';
+  function oppsett() {
+    root.innerHTML = '<div class="dl-navn"><label for="krA">Spiller 1</label><input id="krA" maxlength="20" placeholder="Navn">' +
+      '<label for="krB">Spiller 2</label><input id="krB" maxlength="20" placeholder="Navn"></div>' +
+      '<button class="btn gold" data-a="start">Del ut</button>';
+  }
+  function start() {
+    var s = K.stokk(); A = s.slice(0, 26); B = s.slice(26); vist = null; melding = 'Trykk for å snu samtidig.';
+    tegn();
+  }
+  function tegn() {
+    root.innerHTML = '<div class="dl-krig">' +
+      '<div><p class="dl-spiller">' + K.esc(na) + '</p>' + (vist ? K.kort(vist.a, 'stor inn') : K.bakside('stor')) + '<p class="dl-info"><b>' + A.length + '</b> kort</p></div>' +
+      '<div><p class="dl-spiller">' + K.esc(nb) + '</p>' + (vist ? K.kort(vist.b, 'stor inn') : K.bakside('stor')) + '<p class="dl-info"><b>' + B.length + '</b> kort</p></div>' +
+      '</div><p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
+      (A.length && B.length ? '<div class="dl-knapper"><button class="btn gold" data-a="snu">Snu</button></div>'
+        : '<div class="dl-knapper"><button class="btn gold" data-a="start">Ny runde</button></div>');
+  }
+  function snu() {
+    var pott = [], meld = [], a, b, kriger = 0;
+    while (true) {
+      if (!A.length || !B.length) break;
+      a = A.shift(); b = B.shift(); pott.push(a, b);
+      if (a.v !== b.v) break;
+      kriger++; meld.push('KRIG! Begge drikker 2.');
+      for (var i = 0; i < 3 && A.length > 1; i++) pott.push(A.shift());
+      for (var j = 0; j < 3 && B.length > 1; j++) pott.push(B.shift());
+    }
+    vist = { a: a, b: b };
+    if (a && b && a.v !== b.v) {
+      var vinnerA = a.v > b.v, taper = vinnerA ? nb : na;
+      (vinnerA ? A : B).push.apply(vinnerA ? A : B, K.bland(pott));
+      if (kriger) meld.push(taper + ' tapte krigen – drikk 3.');
+      else if ((vinnerA ? a.v : b.v) >= 11) meld.push(taper + ' mistet et kort til et bildekort – drikk 1.');
+      else meld.push((vinnerA ? na : nb) + ' tar stikket.');
+    }
+    if (!A.length || !B.length) meld.push((A.length ? na : nb) + ' vant hele stokken!');
+    melding = meld.join(' ');
+    tegn();
+  }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-a]'); if (!b) return;
+    if (b.dataset.a === 'start') {
+      var ia = root.querySelector('#krA'), ib = root.querySelector('#krB');
+      if (ia) { na = ia.value.trim() || 'Spiller 1'; nb = ib.value.trim() || 'Spiller 2'; }
+      start();
+    }
+    if (b.dataset.a === 'snu') snu();
+  });
+  oppsett();
+})();
+</script>
+)}
+
+{slug === 'veddelopet' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="veddelopet"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var K = window.BDK, FARGER = ['♥', '♠', '♦', '♣'], LENGDE = 7;
+  var stokk, bane, snudd, pos, sist, vinner, auto = null, melding;
+  function start() {
+    stokk = K.stokk(true); bane = stokk.splice(0, LENGDE); snudd = []; pos = { '♥': 0, '♠': 0, '♦': 0, '♣': 0 };
+    sist = null; vinner = null; melding = 'Vedd slurker på en farge før start. Snu kort for å kjøre løpet.'; tegn();
+  }
+  function tegn() {
+    root.innerHTML = '<div class="dl-bane" style="--lengde:' + (LENGDE + 2) + '">' + FARGER.map(function (f) {
+      var celler = '';
+      for (var i = 0; i <= LENGDE + 1; i++) celler += '<span class="dl-celle' + (i === LENGDE + 1 ? ' mal' : '') + '">' + (pos[f] === i ? K.kort({ v: 14, f: f }, 'liten' + (vinner === f ? ' vinner' : '')) : '') + '</span>';
+      return '<div class="dl-rad">' + celler + '</div>';
+    }).join('') +
+    '<div class="dl-rad banekort"><span class="dl-celle"></span>' + bane.map(function (k, i) { return '<span class="dl-celle">' + (snudd[i] ? K.kort(k, 'liten') : K.bakside('liten')) + '</span>'; }).join('') + '<span class="dl-celle"></span></div>' +
+    '</div>' +
+    '<div class="dl-bord">' + (sist ? K.kort(sist, 'stor inn') : '') + '</div>' +
+    '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
+    '<div class="dl-knapper">' + (vinner ? '<button class="btn gold" data-a="start">Nytt løp</button>'
+      : '<button class="btn gold" data-a="snu">Snu kort</button><button class="btn ghost" data-a="auto">' + (auto ? 'Pause' : 'Kjør automatisk') + '</button>') + '</div>';
+  }
+  function snu() {
+    if (vinner) return;
+    if (!stokk.length) { stokk = K.stokk(true); }
+    sist = stokk.pop(); pos[sist.f]++;
+    melding = { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' }[sist.f] + ' rykker fram.';
+    // Når alle hestene har passert et banekort, snus det, og den fargen går ett tilbake
+    var minst = Math.min.apply(null, FARGER.map(function (f) { return pos[f]; }));
+    for (var i = 0; i < LENGDE; i++) if (!snudd[i] && minst >= i + 1) { snudd[i] = true; var f = bane[i].f; if (pos[f] > 0 && pos[f] <= LENGDE) { pos[f]--; melding += ' Banekortet er ' + K.vn(bane[i].v) + bane[i].f + ' – den hesten går ett tilbake.'; } }
+    FARGER.forEach(function (f) { if (pos[f] >= LENGDE + 1 && !vinner) vinner = f; });
+    if (vinner) { melding = ({ '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' })[vinner] + ' vant! Riktig veddemål: del ut det dobbelte. Alle andre drikker innsatsen.'; stopp(); }
+    tegn();
+  }
+  function stopp() { if (auto) { clearInterval(auto); auto = null; } }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-a]'); if (!b) return;
+    if (b.dataset.a === 'snu') snu();
+    if (b.dataset.a === 'start') start();
+    if (b.dataset.a === 'auto') { if (auto) stopp(); else auto = setInterval(snu, 850); tegn(); }
+  });
+  document.addEventListener('astro:before-swap', stopp, { once: true });
+  start();
+})();
+</script>
+)}
+
+{slug === 'bussruta' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="bussruta"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var K = window.BDK, spillere = [], stokk, fase, sp, steg, melding, pyr, pyrPos, buss, bussMaal = 5, bussRekke = 0, sist;
+  var SPORSMAL = ['Rød eller svart?', 'Over eller under forrige kort?', 'Innenfor eller utenfor de to første?', 'Hvilken kortfarge?'];
+  var VALG = [[['rod', 'Rød'], ['svart', 'Svart']], [['over', 'Over'], ['under', 'Under']], [['inn', 'Innenfor'], ['ut', 'Utenfor']], [['♥', '♥'], ['♦', '♦'], ['♠', '♠'], ['♣', '♣']]];
+  function oppsett() {
+    root.innerHTML = '<label class="rof-lab" for="brNavn">Spillere (skill med komma)</label><input class="rof-inp" id="brNavn" placeholder="Jonas, Maria, Petter" value="' + K.esc(K.hent('bd_spillere')) + '">' +
+      '<button class="btn gold rof-start" data-a="start">Start bussruta</button>';
+  }
+  function trekk() { if (!stokk.length) stokk = K.stokk(); return stokk.pop(); }
+  function tegnRunde1() {
+    var p = spillere[sp];
+    root.innerHTML = '<p class="dl-steg">Runde 1 av 3 · ' + K.esc(p.navn) + ' · spørsmål ' + (steg + 1) + ' av 4</p>' +
+      '<div class="dl-hand">' + p.hand.map(function (k) { return K.kort(k); }).join('') + K.bakside() + '</div>' +
+      (sist ? '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' : '') +
+      '<p class="dl-sporsmal">' + SPORSMAL[steg] + '</p>' +
+      '<div class="dl-knapper">' + VALG[steg].map(function (v) { return '<button class="btn gold" data-v="' + v[0] + '">' + v[1] + '</button>'; }).join('') + '</div>';
+  }
+  function svar(v) {
+    var p = spillere[sp], k = trekk(), h = p.hand, ok;
+    if (steg === 0) ok = (v === 'rod') === (k.f === '♥' || k.f === '♦');
+    if (steg === 1) ok = v === 'over' ? k.v > h[0].v : k.v < h[0].v;
+    if (steg === 2) { var lo = Math.min(h[0].v, h[1].v), hi = Math.max(h[0].v, h[1].v); var inn = k.v > lo && k.v < hi; ok = v === 'inn' ? inn : (k.v < lo || k.v > hi); }
+    if (steg === 3) ok = k.f === v;
+    h.push(k); sist = k;
+    var n = steg + 1;
+    melding = K.vn(k.v) + k.f + ' – ' + (ok ? 'riktig! Del ut ' + n + '.' : 'feil! Drikk ' + n + '.');
+    steg++;
+    if (steg === 4) { steg = 0; sp++; }
+    if (sp >= spillere.length) { fase = 2; pyr = []; for (var i = 0; i < 15; i++) pyr.push(trekk()); pyrPos = 0; melding = 'Alle har fire kort. Nå snus pyramiden, nedenfra og opp.'; return tegnRunde2(); }
+    tegnRunde1();
+  }
+  function rad(i) { return i < 5 ? 1 : i < 9 ? 2 : i < 12 ? 3 : i < 14 ? 4 : 5; }
+  function tegnRunde2() {
+    var rader = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
+    root.innerHTML = '<p class="dl-steg">Runde 2 av 3 · pyramiden</p><div class="dl-pyramide">' + rader.map(function (r) {
+      return '<div>' + r.map(function (i) { return i < pyrPos ? K.kort(pyr[i], 'liten') : K.bakside('liten'); }).join('') + '</div>';
+    }).join('') + '</div>' +
+      '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
+      '<div class="dl-hender">' + spillere.map(function (p) { return '<div><b>' + K.esc(p.navn) + '</b><span>' + p.hand.map(function (k) { return K.kort(k, 'mini'); }).join('') + '</span></div>'; }).join('') + '</div>' +
+      '<div class="dl-knapper"><button class="btn gold" data-a="' + (pyrPos < 15 ? 'pyr' : 'buss') + '">' + (pyrPos < 15 ? 'Snu neste' : 'Til bussen') + '</button></div>';
+  }
+  function snuPyr() {
+    var k = pyr[pyrPos], n = rad(pyrPos), treff = [];
+    spillere.forEach(function (p) {
+      var i = p.hand.findIndex(function (x) { return x.v === k.v; });
+      if (i !== -1) { p.hand.splice(i, 1); treff.push(p.navn); }
+    });
+    pyrPos++;
+    melding = K.vn(k.v) + k.f + ' (rad ' + n + ') – ' + (treff.length ? treff.join(', ') + ' legger på og deler ut ' + n + '.' : 'ingen har den.');
+    tegnRunde2();
+  }
+  function tilBuss() {
+    var maks = Math.max.apply(null, spillere.map(function (p) { return p.hand.length; }));
+    var kandidater = spillere.filter(function (p) { return p.hand.length === maks; });
+    buss = kandidater[Math.floor(Math.random() * kandidater.length)];
+    fase = 3; bussRekke = 0; stokk = K.stokk(); sist = null;
+    melding = buss.navn + ' har flest kort igjen (' + maks + ') og kjører bussen! Kom deg forbi ' + bussMaal + ' kort uten bildekort eller ess.';
+    tegnBuss();
+  }
+  function tegnBuss() {
+    var prikker = ''; for (var i = 0; i < bussMaal; i++) prikker += '<i' + (i < bussRekke ? ' class="ok"' : '') + '></i>';
+    root.innerHTML = '<p class="dl-steg">Runde 3 av 3 · bussen</p><div class="dl-bord">' + (sist ? K.kort(sist, 'stor inn') : K.bakside('stor')) + '</div>' +
+      '<div class="dl-buss">' + prikker + '</div><p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
+      '<div class="dl-knapper">' + (bussRekke >= bussMaal ? '<button class="btn gold" data-a="start">Ny runde</button>' : '<button class="btn gold" data-a="kjor">Snu kort</button>') + '</div>';
+  }
+  function kjor() {
+    sist = trekk();
+    var straff = { 11: 1, 12: 2, 13: 3, 14: 4 }[sist.v];
+    if (straff) { melding = K.vn(sist.v) + sist.f + ' – ' + buss.navn + ' drikker ' + straff + ' og starter på nytt.'; bussRekke = 0; }
+    else { bussRekke++; melding = K.vn(sist.v) + sist.f + ' – trygt! ' + (bussRekke >= bussMaal ? buss.navn + ' er i mål. Bussen er fri!' : (bussMaal - bussRekke) + ' igjen.'); }
+    tegnBuss();
+  }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-a],[data-v]'); if (!b) return;
+    if (b.dataset.v) return svar(b.dataset.v);
+    var a = b.dataset.a;
+    if (a === 'start') {
+      var inp = root.querySelector('#brNavn');
+      if (inp) { var ns = K.navn(inp); if (!ns.length) ns = ['Spiller 1', 'Spiller 2', 'Spiller 3']; K.husk('bd_spillere', inp.value); spillere = ns.map(function (n) { return { navn: n, hand: [] }; }); }
+      else spillere.forEach(function (p) { p.hand = []; });
+      stokk = K.stokk(); fase = 1; sp = 0; steg = 0; sist = null; melding = ''; tegnRunde1();
+    }
+    if (a === 'pyr') snuPyr();
+    if (a === 'buss') tilBuss();
+    if (a === 'kjor') kjor();
+  });
+  oppsett();
+})();
+</script>
+)}
+
+{slug === 'terningen-bestemmer' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="terningen-bestemmer"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var K = window.BDK;
+  var REGLER = { 1: 'Del ut én slurk.', 2: 'Ta én slurk selv.', 3: 'Pek på noen som drikker.', 4: 'Alle drikker!', 5: 'Lag en regel som gjelder resten av leken.', 6: 'Velg en utfordring til personen til venstre.' };
+  root.innerHTML = '<div class="dl-terninger">' + K.terning(6) + '</div><p class="dl-melding dl-stor" aria-live="polite">Trykk på terningen</p><div class="dl-knapper"><button class="btn gold" data-a="kast">Trill</button></div>';
+  var t = root.querySelector('.dl-terninger'), m = root.querySelector('.dl-melding'), opptatt = false;
+  function kast() { if (opptatt) return; opptatt = true; m.textContent = '…'; K.kast(t, 1, function (r) { m.textContent = r[0] + ' – ' + REGLER[r[0]]; opptatt = false; }); }
+  root.addEventListener('click', function (e) { if (e.target.closest('[data-a], .dl-terninger')) kast(); });
+})();
+</script>
+)}
+
+{slug === '21-med-terninger' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="21-med-terninger"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var K = window.BDK, sum = 0, ferdig = true, opptatt = false;
+  root.innerHTML = '<div class="dl-terninger"></div><p class="dl-sum" aria-live="polite"></p><p class="dl-melding"></p><div class="dl-knapper"></div>';
+  var t = root.querySelector('.dl-terninger'), s = root.querySelector('.dl-sum'), m = root.querySelector('.dl-melding'), kn = root.querySelector('.dl-knapper');
+  function knapper() {
+    kn.innerHTML = ferdig ? '<button class="btn gold" data-a="ny">Trill to terninger</button>'
+      : '<button class="btn gold" data-a="en">Trill én til</button><button class="btn ghost" data-a="stopp">Stopp på ' + sum + '</button>';
+  }
+  function kast(antall) {
+    if (opptatt) return; opptatt = true;
+    K.kast(t, antall, function (r) {
+      sum += r.reduce(function (a, b) { return a + b; }, 0);
+      s.textContent = sum;
+      if (sum > 21) { m.textContent = 'Over 21 – drikk med én gang!'; ferdig = true; }
+      else if (sum === 21) { m.textContent = 'Blank 21! Del ut tre.'; ferdig = true; }
+      else m.textContent = 'Trill én til, eller stopp.';
+      opptatt = false; knapper();
+    });
+  }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-a]'); if (!b) return;
+    if (b.dataset.a === 'ny') { sum = 0; ferdig = false; kast(2); }
+    if (b.dataset.a === 'en') kast(1);
+    if (b.dataset.a === 'stopp') { ferdig = true; m.textContent = 'Du stoppet på ' + sum + '. Send telefonen videre. Den som havner lengst unna 21, drikker.'; knapper(); }
+  });
+  t.innerHTML = K.terning(3) + K.terning(4); s.textContent = ''; m.textContent = 'Nærmest 21 uten å gå over.'; knapper();
+})();
+</script>
+)}
+
+{slug === 'opus' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="opus"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var K = window.BDK, spillere = [], tur = 0, opptatt = false, kast = 0;
+  function oppsett() {
+    root.innerHTML = '<p><a class="btn ghost" href="https://open.spotify.com/search/Opus%20Eric%20Prydz" target="_blank" rel="noopener">Åpne «Opus» i Spotify ↗</a></p>' +
+      '<label class="rof-lab" for="opNavn">Spillere i ringen (skill med komma)</label><input class="rof-inp" id="opNavn" placeholder="Jonas, Maria, Petter" value="' + K.esc(K.hent('bd_spillere')) + '">' +
+      '<button class="btn gold rof-start" data-a="start">Start – trykk samtidig som sangen</button>';
+  }
+  function tegn(tekst) {
+    root.innerHTML = '<p class="dl-steg">Terningen er hos</p><p class="dl-holder">' + K.esc(spillere[tur]) + '</p>' +
+      '<button class="dl-terninger dl-stortrykk" data-a="kast" aria-label="Trill terningen">' + K.terning(6) + '</button>' +
+      '<p class="dl-melding dl-stor" aria-live="polite">' + K.esc(tekst || 'Trill til du får en sekser!') + '</p>' +
+      '<p class="dl-info">' + kast + ' kast så langt</p>' +
+      '<div class="dl-knapper"><button class="btn" data-a="drop">Droppet kom!</button></div>';
+  }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-a]'); if (!b) return;
+    if (b.dataset.a === 'start') {
+      var inp = root.querySelector('#opNavn'); spillere = K.navn(inp); if (!spillere.length) spillere = ['Spiller 1', 'Spiller 2', 'Spiller 3', 'Spiller 4'];
+      K.husk('bd_spillere', inp.value); tur = 0; kast = 0; tegn();
+    }
+    if (b.dataset.a === 'kast' && !opptatt) {
+      opptatt = true; kast++;
+      var t = root.querySelector('.dl-terninger'), m = root.querySelector('.dl-melding');
+      K.kast(t, 1, function (r) {
+        opptatt = false;
+        if (r[0] === 6) { var fra = spillere[tur]; tur = (tur + 1) % spillere.length; tegn('SEKSER! ' + fra + ' sender terningen til ' + spillere[tur] + '.'); root.querySelector('.dl-terninger').innerHTML = K.terning(6); }
+        else { m.textContent = r[0] + ' – trill igjen!'; root.querySelector('.dl-info').textContent = kast + ' kast så langt'; }
+      });
+    }
+    if (b.dataset.a === 'drop') { root.querySelector('.dl-melding').textContent = spillere[tur] + ' holdt terningen da droppet kom – drikk opp!'; }
+  });
+  oppsett();
+})();
+</script>
+)}

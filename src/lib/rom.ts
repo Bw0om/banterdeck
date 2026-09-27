@@ -35,6 +35,7 @@ export function lekeliste() {
     { id: 'forraeder', navn: NAVN.forraeder, type: 'forraeder', moduser: D.forraeder.modes, om: 'Én får i hemmelighet beskjed om å lyve eller si sannheten. Resten stemmer.' },
     { id: 'bingo', navn: NAVN.bingo, type: 'bingo', moduser: B.eras.map((e: any) => ({ v: e.id, t: e.title })), om: 'Hver får sitt eget brett. Siden roper når noen får rekke eller bingo.' },
     { id: 'ring-of-fire', navn: NAVN['ring-of-fire'], type: 'kort', moduser: [], om: 'Telefonene er kortstokken. Alle ser samme kort.' },
+    ...ekstraLeker(),
     ...kort.map((k) => ({ ...k, om: 'Alle ser samme kort. Hvem som helst kan trekke neste.' })),
   ];
 }
@@ -89,6 +90,7 @@ export function visning(data: any, versjon: number, meg: any) {
       hemmelig: meg && meg.id === s.aktiv ? s.hemmelig : null,
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, drikker: s.drikker } : null,
     });
+    if (EKSTRA.includes(s.type)) Object.assign(spill, ekstraVisning(s, meg, data));
     if (s.type === 'bingo') Object.assign(spill, {
       era: s.era, tittel: s.tittel, spotify: s.spotify,
       mittBrett: meg && s.brett[meg.id] ? s.brett[meg.id].map((i: number) => s.sanger[i]) : null,
@@ -154,6 +156,7 @@ const LINJER: number[][] = (() => {
 function nyttBrett(s: any) { return stokk(s.sanger.map((_: any, i: number) => i)).slice(0, 16); }
 
 export function startSpill(data: any, lek: string, modus: string) {
+  if (EKSTRA.includes(lek)) return startEkstra(data, lek);
   const liste = lekeliste();
   const valgt = liste.find((x) => x.id === lek);
   if (!valgt) return { feil: 'ukjent-lek' };
@@ -189,6 +192,8 @@ export function startSpill(data: any, lek: string, modus: string) {
 export function handling(data: any, meg: any, h: any) {
   const s = data.spill;
   const erVert = meg.id === data.vert;
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
       if (!erVert) return { feil: 'bare-vert' };
@@ -315,3 +320,260 @@ export function finnSpiller(data: any, id: string, pollett: string) {
   return diff === 0 ? p : null;
 }
 export function gyldigKode(k: any) { return typeof k === 'string' && /^[A-Z0-9]{4,6}$/.test(k); }
+
+/* =====================================================================
+   Kort- og terningleker i rom: Opus, Over eller under, Veddeløpet,
+   Pyramiden, Gris og President. Skjulte hender vises bare til eieren.
+   ===================================================================== */
+export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president'];
+export function ekstraLeker() {
+  return [
+    { id: 'opus', navn: 'Opus', type: 'opus', moduser: [], om: 'Terningen går fra telefon til telefon. Trill til du får sekser, så sendes den videre.' },
+    { id: 'overunder', navn: 'Over eller under', type: 'overunder', moduser: [], om: 'Den som har tur gjetter på sin telefon. Feil = drikk hele bunken.' },
+    { id: 'veddelopet', navn: 'Veddeløpet', type: 'veddelopet', moduser: [], om: 'Alle vedder på sin telefon, så kjøres løpet.' },
+    { id: 'pyramiden', navn: 'Pyramiden', type: 'pyramiden', moduser: [], om: 'Fire skjulte kort hver. Bløff eller si sannheten – og utfordre de andre.' },
+    { id: 'gris', navn: 'Gris', type: 'gris', moduser: [], om: 'Send kort til venstre til noen har fire like. Sistemann på nesa drikker.' },
+    { id: 'president', navn: 'President', type: 'president', moduser: [], om: 'Bli kvitt kortene først. Toere er høyest og rydder bordet.' },
+  ];
+}
+function kortstokk52() { const s: any[] = []; ['♥', '♦', '♠', '♣'].forEach((f) => { for (let v = 2; v <= 14; v++) s.push({ v, f }); }); return stokk(s); }
+function vnavn(v: number) { return v <= 10 ? String(v) : ({ 11: 'Kn', 12: 'D', 13: 'K', 14: 'A' } as any)[v]; }
+function aktiveIder(data: any, alle = false) {
+  const ider = data.spillere.map((p: any) => p.id);
+  // I leker med kort på hånda sitter de som kom inn midt i en runde over til neste runde
+  const h = !alle && data.spill && data.spill.hender;
+  return h ? ider.filter((id: string) => h[id]) : ider;
+}
+
+export function startEkstra(data: any, lek: string): any {
+  const n = data.spillere.length, ider = aktiveIder(data, true);
+  if (lek === 'opus') {
+    data.spill = { type: 'opus', lek, navn: 'Opus', holder: ider[0], kast: null, antall: 0, nr: 0 };
+  } else if (lek === 'overunder') {
+    const st = kortstokk52();
+    data.spill = { type: 'overunder', lek, navn: 'Over eller under', stokk: st, kort: st.pop(), bunke: 1, tur: 0, sist: null };
+  } else if (lek === 'veddelopet') {
+    const st = kortstokk52().filter((k: any) => k.v !== 14);
+    data.spill = { type: 'veddelopet', lek, navn: 'Veddeløpet', fase: 'vedd', veddemaal: {}, stokk: st, bane: st.splice(0, 7), snudd: [], pos: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, sist: null, vinner: null };
+  } else if (lek === 'pyramiden') {
+    if (n < 2) return { feil: 'for-faa', melding: 'Pyramiden trenger minst to spillere.' };
+    const st = kortstokk52();
+    const hender: any = {}; ider.forEach((id: string) => { hender[id] = st.splice(0, 4); });
+    data.spill = { type: 'pyramiden', lek, navn: 'Pyramiden', hender, pyr: st.splice(0, 15), pos: 0, pastander: [] };
+  } else if (lek === 'gris') {
+    if (n < 3) return { feil: 'for-faa', melding: 'Gris trenger minst tre spillere.' };
+    data.spill = { type: 'gris', lek, navn: 'Gris', bokstaver: {} };
+    nyGrisRunde(data);
+  } else if (lek === 'president') {
+    if (n < 3) return { feil: 'for-faa', melding: 'President trenger minst tre spillere.' };
+    nyPresidentRunde(data, null);
+  } else return { feil: 'ukjent-lek' };
+  melde(data, `Nytt spill: ${data.spill.navn}`);
+  return { ok: true };
+}
+
+/* ---------- Gris ---------- */
+function nyGrisRunde(data: any) {
+  const s = data.spill, ider = aktiveIder(data, true);
+  const verdier = stokk([14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2]).slice(0, ider.length);
+  const kort: any[] = []; verdier.forEach((v) => ['♥', '♦', '♠', '♣'].forEach((f) => kort.push({ v, f })));
+  const bl = stokk(kort);
+  s.hender = {}; ider.forEach((id: string) => { s.hender[id] = bl.splice(0, 4); if (s.bokstaver[id] === undefined) s.bokstaver[id] = 0; });
+  s.valgt = {}; s.fase = 'send'; s.neser = []; s.runde = (s.runde || 0) + 1;
+}
+function fireLike(h: any[]) { return h.length === 4 && h.every((k) => k.v === h[0].v); }
+
+/* ---------- President ---------- */
+const RANG = (v: number) => (v === 2 ? 15 : v);
+function nyPresidentRunde(data: any, forrige: any) {
+  const ider = aktiveIder(data, true), st = kortstokk52();
+  const hender: any = {}; ider.forEach((id: string) => { hender[id] = []; });
+  st.forEach((k: any, i: number) => hender[ider[i % ider.length]].push(k));
+  ider.forEach((id: string) => hender[id].sort((a: any, b: any) => RANG(a.v) - RANG(b.v)));
+  data.spill = { type: 'president', lek: 'president', navn: 'President', hender, bord: [], bordAv: null, pass: [], tur: 0,
+    ferdige: [], titler: forrige || {}, runde: ((data.spill && data.spill.runde) || 0) + 1 };
+}
+function presTurVidere(data: any) {
+  const s = data.spill, ider = aktiveIder(data);
+  for (let i = 1; i <= ider.length; i++) {
+    const j = (s.tur + i) % ider.length;
+    if (!s.ferdige.includes(ider[j])) { s.tur = j; return; }
+  }
+}
+
+export function ekstraHandling(data: any, meg: any, h: any): any {
+  const s = data.spill; if (!s || !EKSTRA.includes(s.type)) return null;
+  const ider = aktiveIder(data);
+  const min = ider.indexOf(meg.id);
+  switch (s.type) {
+    case 'opus': {
+      if (h.handling === 'kast') {
+        if (meg.id !== s.holder) return { feil: 'ikke-din-tur', melding: 'Det er ikke du som har terningen.' };
+        s.kast = 1 + tilfeldig(6); s.antall++; s.nr++;
+        if (s.kast === 6) { const i = ider.indexOf(s.holder); s.holder = ider[(i + 1) % ider.length]; s.fra = meg.id; }
+        return { ok: true };
+      }
+      if (h.handling === 'drop') { giSlurker(data, s.holder, 5); melde(data, `Droppet! ${navnPaa(data, s.holder)} holdt terningen – drikk opp!`); return { ok: true }; }
+      return null;
+    }
+    case 'overunder': {
+      if (h.handling !== 'gjett') return null;
+      if (ider[s.tur % ider.length] !== meg.id) return { feil: 'ikke-din-tur', melding: 'Vent på tur.' };
+      if (!s.stokk.length) s.stokk = kortstokk52();
+      const nytt = s.stokk.pop(), riktig = h.paa === 'over' ? nytt.v > s.kort.v : nytt.v < s.kort.v;
+      s.sist = { fra: s.kort, til: nytt, riktig, hvem: meg.id, bunke: s.bunke };
+      if (riktig) s.bunke++;
+      else { giSlurker(data, meg.id, s.bunke); melde(data, `${meg.navn} bommet – drikk ${s.bunke}!`); s.bunke = 1; }
+      s.kort = nytt; s.tur = (s.tur + 1) % ider.length;
+      return { ok: true };
+    }
+    case 'veddelopet': {
+      if (h.handling === 'vedd' && s.fase === 'vedd') {
+        if (!['♥', '♠', '♦', '♣'].includes(h.farge)) return { feil: 'ukjent' };
+        s.veddemaal[meg.id] = { farge: h.farge, slurker: Math.max(1, Math.min(10, Number(h.slurker) || 2)) }; return { ok: true };
+      }
+      if (h.handling === 'lop' && s.fase === 'vedd') { s.fase = 'lop'; melde(data, 'Løpet er i gang!'); return { ok: true }; }
+      if (h.handling === 'snu' && s.fase === 'lop') {
+        if (!s.stokk.length) s.stokk = kortstokk52().filter((k: any) => k.v !== 14);
+        const k = s.stokk.pop(); s.sist = k; s.pos[k.f]++;
+        const minst = Math.min(...(['♥', '♠', '♦', '♣'] as const).map((f) => s.pos[f]));
+        for (let i = 0; i < 7; i++) if (!s.snudd[i] && minst >= i + 1) { s.snudd[i] = true; const f = s.bane[i].f; if (s.pos[f] > 0 && s.pos[f] <= 7) s.pos[f]--; }
+        const vinner = (['♥', '♠', '♦', '♣'] as const).find((f) => s.pos[f] >= 8);
+        if (vinner) {
+          s.vinner = vinner; s.fase = 'ferdig';
+          Object.entries(s.veddemaal).forEach(([id, v]: any) => { if (v.farge !== vinner) giSlurker(data, id, v.slurker); });
+          melde(data, `${({ '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' } as any)[vinner]} vant løpet!`);
+        }
+        return { ok: true };
+      }
+      if (h.handling === 'nytt') { return startEkstra(data, 'veddelopet'); }
+      return null;
+    }
+    case 'pyramiden': {
+      if (h.handling === 'snu') {
+        if (s.pos >= 15) return { ok: true };
+        // Påstander fra forrige kort som ikke ble utfordret, gjelder nå: kortet legges på
+        s.pastander.filter((p: any) => p.pos === s.pos - 1 && !p.avgjort).forEach((p: any) => {
+          const hand = s.hender[p.id]; const i = hand.findIndex((k: any) => k.v === s.pyr[p.pos].v);
+          if (i !== -1) hand.splice(i, 1); p.avgjort = 'godtatt';
+        });
+        s.pos++; return { ok: true };
+      }
+      if (h.handling === 'pastand') {
+        if (s.pos < 1) return { ok: true };
+        const pos = s.pos - 1;
+        if (s.pastander.some((p: any) => p.pos === pos && p.id === meg.id)) return { ok: true };
+        const rad = pos < 5 ? 1 : pos < 9 ? 2 : pos < 12 ? 3 : pos < 14 ? 4 : 5;
+        s.pastander.push({ id: meg.id, pos, rad, avgjort: null });
+        melde(data, `${meg.navn} sier de har ${vnavn(s.pyr[pos].v)} – deler ut ${rad}!`);
+        return { ok: true };
+      }
+      if (h.handling === 'utfordre') {
+        const p = s.pastander.find((x: any) => x.id === h.paa && x.pos === s.pos - 1 && !x.avgjort);
+        if (!p || p.id === meg.id) return { ok: true };
+        const hand = s.hender[p.id], i = hand.findIndex((k: any) => k.v === s.pyr[p.pos].v);
+        if (i !== -1) { hand.splice(i, 1); giSlurker(data, meg.id, p.rad * 2); p.avgjort = 'sant'; melde(data, `${navnPaa(data, p.id)} hadde kortet! ${meg.navn} drikker ${p.rad * 2}.`); }
+        else { giSlurker(data, p.id, p.rad * 2); p.avgjort = 'bløff'; melde(data, `${navnPaa(data, p.id)} bløffet! Drikk ${p.rad * 2}.`); }
+        return { ok: true };
+      }
+      if (h.handling === 'nytt') return startEkstra(data, 'pyramiden');
+      return null;
+    }
+    case 'gris': {
+      if (h.handling === 'velg' && s.fase === 'send') {
+        const i = Number(h.i); if (!(i >= 0 && i < 4)) return { feil: 'ukjent' };
+        s.valgt[meg.id] = i;
+        if (ider.every((id: string) => s.valgt[id] !== undefined)) {
+          const sendt = ider.map((id: string) => s.hender[id].splice(s.valgt[id], 1)[0]);
+          ider.forEach((id: string, j: number) => { s.hender[id].push(sendt[(j - 1 + ider.length) % ider.length]); });
+          s.valgt = {};
+        }
+        return { ok: true };
+      }
+      if (h.handling === 'nese') {
+        if (s.fase === 'ferdig' || s.neser.includes(meg.id)) return { ok: true };
+        if (s.fase === 'send') {
+          if (!fireLike(s.hender[meg.id])) {
+            s.bokstaver[meg.id]++; melde(data, `${meg.navn} tok seg på nesa for tidlig – får en bokstav!`);
+            if (s.bokstaver[meg.id] >= 4) { melde(data, `${meg.navn} er GRIS! Ta en shot.`); s.bokstaver[meg.id] = 0; }
+            return { ok: true };
+          }
+          s.fase = 'nese';
+        }
+        s.neser.push(meg.id);
+        if (s.neser.length >= ider.length - 1) {
+          const taper = ider.find((id: string) => !s.neser.includes(id));
+          s.bokstaver[taper]++;
+          const b = 'GRIS'.slice(0, s.bokstaver[taper]);
+          melde(data, `${navnPaa(data, taper)} var sist på nesa – ${b}!` + (s.bokstaver[taper] >= 4 ? ' Ta en shot!' : ''));
+          if (s.bokstaver[taper] >= 4) s.bokstaver[taper] = 0;
+          s.fase = 'ferdig'; s.taper = taper;
+        }
+        return { ok: true };
+      }
+      if (h.handling === 'nytt') { nyGrisRunde(data); return { ok: true }; }
+      return null;
+    }
+    case 'president': {
+      const turId = ider[s.tur];
+      if (h.handling === 'legg' || h.handling === 'pass') {
+        if (turId !== meg.id) return { feil: 'ikke-din-tur', melding: 'Vent på tur.' };
+        const hand = s.hender[meg.id];
+        if (h.handling === 'pass') {
+          if (!s.bord.length) return { feil: 'ugyldig', melding: 'Du starter – legg ut noe.' };
+          if (!s.pass.includes(meg.id)) s.pass.push(meg.id);
+        } else {
+          const valg: number[] = Array.isArray(h.kort) ? [...new Set(h.kort.map(Number))].filter((i: number) => i >= 0 && i < hand.length) as number[] : [];
+          if (!valg.length) return { feil: 'ugyldig', melding: 'Velg kort.' };
+          const kort = valg.map((i) => hand[i]);
+          if (!kort.every((k: any) => k.v === kort[0].v)) return { feil: 'ugyldig', melding: 'Kortene må være like.' };
+          if (s.bord.length && (kort.length !== s.bord.length || RANG(kort[0].v) <= RANG(s.bord[0].v))) return { feil: 'ugyldig', melding: `Legg ${s.bord.length} kort som er høyere.` };
+          s.hender[meg.id] = hand.filter((_: any, i: number) => !valg.includes(i));
+          s.bord = kort; s.bordAv = meg.id; s.pass = [];
+          if (!s.hender[meg.id].length) { s.ferdige.push(meg.id); melde(data, `${meg.navn} er tom for kort!`); }
+          if (kort[0].v === 2) { s.bord = []; s.pass = []; melde(data, `${meg.navn} la toer og rydder bordet.`);
+            if (s.hender[meg.id].length) return { ok: true }; }
+        }
+        const igjen = ider.filter((id: string) => !s.ferdige.includes(id));
+        if (igjen.length <= 1) {
+          if (igjen.length === 1) s.ferdige.push(igjen[0]);
+          const t: any = {}; t[s.ferdige[0]] = 'President'; t[s.ferdige[s.ferdige.length - 1]] = 'Rævkjører';
+          if (s.ferdige.length > 3) { t[s.ferdige[1]] = 'Visepresident'; t[s.ferdige[s.ferdige.length - 2]] = 'Viserævkjører'; }
+          s.titler = t; s.fase = 'ferdig';
+          melde(data, `${navnPaa(data, s.ferdige[0])} er President! ${navnPaa(data, s.ferdige[s.ferdige.length - 1])} er rævkjører.`);
+          return { ok: true };
+        }
+        // Har alle andre sagt pass siden siste legg? Da rydder den som la sist.
+        const maaSvare = igjen.filter((id: string) => id !== s.bordAv);
+        if (s.bord.length && maaSvare.every((id: string) => s.pass.includes(id))) {
+          s.bord = []; s.pass = [];
+          const idx = ider.indexOf(s.bordAv);
+          if (!s.ferdige.includes(s.bordAv)) { s.tur = idx; melde(data, `Ingen gikk over – ${navnPaa(data, s.bordAv)} starter på nytt.`); return { ok: true }; }
+          s.tur = idx;
+        }
+        presTurVidere(data);
+        return { ok: true };
+      }
+      if (h.handling === 'nytt') { nyPresidentRunde(data, s.titler); return { ok: true }; }
+      return null;
+    }
+  }
+  return null;
+}
+
+export function ekstraVisning(s: any, meg: any, data: any) {
+  const ider = aktiveIder(data);
+  if (s.type === 'opus') return { holder: s.holder, kast: s.kast, antall: s.antall, nr: s.nr, fra: s.fra || null };
+  if (s.type === 'overunder') return { kort: s.kort, bunke: s.bunke, tur: ider[s.tur % ider.length], sist: s.sist, igjen: s.stokk.length };
+  if (s.type === 'veddelopet') return { fase: s.fase, pos: s.pos, sist: s.sist, vinner: s.vinner, bane: s.bane.map((k: any, i: number) => (s.snudd[i] ? k : null)),
+    veddemaal: s.veddemaal, mittVeddemaal: meg ? s.veddemaal[meg.id] || null : null };
+  if (s.type === 'pyramiden') return { pos: s.pos, pyr: s.pyr.slice(0, s.pos), minHand: meg ? s.hender[meg.id] : null,
+    antall: Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h.length])),
+    pastander: s.pastander.filter((p: any) => p.pos === s.pos - 1).map((p: any) => ({ id: p.id, rad: p.rad, avgjort: p.avgjort })) };
+  if (s.type === 'gris') return { fase: s.fase, minHand: meg ? s.hender[meg.id] : null, harValgt: Object.keys(s.valgt), mittValg: meg ? s.valgt[meg.id] ?? null : null,
+    neser: s.neser, bokstaver: s.bokstaver, taper: s.taper || null, harFire: meg ? fireLike(s.hender[meg.id] || []) : false,
+    fasit: s.fase === 'ferdig' ? Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h])) : null };
+  if (s.type === 'president') return { fase: s.fase || 'spill', bord: s.bord, bordAv: s.bordAv, tur: ider[s.tur], pass: s.pass, ferdige: s.ferdige, titler: s.titler,
+    minHand: meg ? s.hender[meg.id] : null, antall: Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h.length])) };
+  return {};
+}

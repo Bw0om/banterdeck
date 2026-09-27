@@ -240,13 +240,112 @@ import Base from '../../layouts/Base.astro';
         '<p class="small">Merk en låt når den spilles. Rekke: del ut to slurker. Fullt brett: alle andre drikker opp.</p>';
     }
 
+
+    /* ---------- kort og terninger ---------- */
+    function vn(v) { return v <= 10 ? String(v) : ({ 11: 'Kn', 12: 'D', 13: 'K', 14: 'A' })[v]; }
+    function kk(k, kl, attr) {
+      if (!k) return '<span class="kk bak ' + (kl || '') + '"></span>';
+      var rod = k.f === '♥' || k.f === '♦';
+      return '<span class="kk ' + (rod ? 'rod ' : '') + (kl || '') + '"' + (attr || '') + '><b>' + vn(k.v) + '</b><i>' + k.f + '</i></span>';
+    }
+    var PRIKKER = { 1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
+    function terning(n) { var s = '<span class="dice" data-n="' + n + '">'; for (var i = 1; i <= 9; i++) s += '<i' + (PRIKKER[n].indexOf(i) !== -1 ? ' class="p"' : '') + '></i>'; return s + '</span>'; }
+    var sisteKastNr = 0, presValg = [];
+
+    function opusSpill(s) {
+      var jeg = s.holder === tilstand.meg;
+      var ny = s.nr !== sisteKastNr; sisteKastNr = s.nr;
+      return '<p><a class="btn ghost small" href="https://open.spotify.com/search/Opus%20Eric%20Prydz" target="_blank" rel="noopener">«Opus» i Spotify ↗</a></p>' +
+        '<p class="rom-etikett">Terningen er hos</p><p class="dl-holder">' + esc(navn(s.holder)) + (jeg ? ' (deg!)' : '') + '</p>' +
+        '<div class="dl-terninger' + (ny && s.kast ? ' landet' : '') + '">' + terning(s.kast || 6) + '</div>' +
+        '<p class="dl-melding dl-stor">' + (s.kast === 6 && s.fra ? 'SEKSER! ' + esc(navn(s.fra)) + ' sendte videre.' : s.kast ? s.kast + (jeg ? ' – trill igjen!' : '') : 'Start sangen og trill!') + '</p>' +
+        (jeg ? '<button class="rom-stor-knapp" data-g="kast" type="button">Trill</button>' : '<p class="small">Vent til terningen kommer til deg.</p>') +
+        '<p class="rom-status">' + s.antall + ' kast</p>' +
+        (erVert() ? '<button class="btn ghost" data-g="drop" type="button">Droppet kom!</button>' : '');
+    }
+    function overunderSpill(s) {
+      var jeg = s.tur === tilstand.meg, si = s.sist;
+      return '<p class="rom-etikett">' + (jeg ? 'Din tur' : esc(navn(s.tur)) + ' gjetter') + '</p>' +
+        '<div class="dl-bord">' + kk(s.kort, 'stor inn') + '</div>' +
+        (si ? '<p class="dl-melding">' + esc(navn(si.hvem)) + ': ' + vn(si.fra.v) + si.fra.f + ' → ' + vn(si.til.v) + si.til.f + ' – ' + (si.riktig ? 'riktig!' : 'feil, drakk ' + si.bunke + '.') + '</p>' : '') +
+        '<p class="rom-status">Bunken: ' + s.bunke + ' kort</p>' +
+        (jeg ? '<div class="rom-valg to"><button type="button" data-g="gjett" data-paa="over">Høyere ↑</button><button type="button" data-g="gjett" data-paa="under">Lavere ↓</button></div>' : '');
+    }
+    function veddelopetSpill(s) {
+      var F = ['♥', '♠', '♦', '♣'], NAVN = { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' };
+      var bane = '<div class="dl-bane" style="--lengde:9">' + F.map(function (f) {
+        var c = ''; for (var i = 0; i <= 8; i++) c += '<span class="dl-celle' + (i === 8 ? ' mal' : '') + '">' + (s.pos[f] === i ? kk({ v: 14, f: f }, 'liten' + (s.vinner === f ? ' vinner' : '')) : '') + '</span>';
+        return '<div class="dl-rad">' + c + '</div>';
+      }).join('') + '<div class="dl-rad banekort"><span class="dl-celle"></span>' + s.bane.map(function (k) { return '<span class="dl-celle">' + kk(k, 'liten') + '</span>'; }).join('') + '<span class="dl-celle"></span></div></div>';
+      var vedd = Object.keys(s.veddemaal).map(function (id) { var v = s.veddemaal[id]; return esc(navn(id)) + ': ' + v.farge + ' ' + v.slurker; }).join(' · ');
+      if (s.fase === 'vedd') {
+        var mv = s.mittVeddemaal || {};
+        return bane + '<p class="rom-etikett">Vedd på en hest</p>' +
+          '<div class="rom-valg fire">' + F.map(function (f) { return '<button type="button" data-g="vedd" data-farge="' + f + '" aria-pressed="' + (mv.farge === f) + '">' + f + ' ' + NAVN[f] + '</button>'; }).join('') + '</div>' +
+          '<label class="rof-lab" for="veddSl">Slurker du vedder</label><input class="rof-inp" id="veddSl" type="number" min="1" max="10" value="' + (mv.slurker || 2) + '">' +
+          '<p class="rom-status">' + (vedd || 'Ingen har veddet ennå') + '</p>' +
+          (erVert() ? '<button class="rom-stor-knapp" data-g="lop" type="button">Start løpet</button>' : '');
+      }
+      return bane + '<div class="dl-bord">' + (s.sist ? kk(s.sist, 'stor inn') : '') + '</div>' +
+        (s.vinner ? '<p class="dl-melding dl-stor">' + NAVN[s.vinner] + ' vant! Riktig veddemål: del ut det dobbelte.</p>' : '') +
+        '<p class="rom-status">' + vedd + '</p>' +
+        (s.fase === 'lop' ? '<button class="rom-stor-knapp" data-g="snu" type="button">Snu kort</button>' : '<button class="rom-stor-knapp" data-g="nytt" type="button">Nytt løp</button>');
+    }
+    function pyramidenSpill(s) {
+      var rader = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
+      var pyr = '<div class="dl-pyramide">' + rader.map(function (r) { return '<div>' + r.map(function (i) { return i < s.pos ? kk(s.pyr[i], 'liten' + (i === s.pos - 1 ? ' vinner' : '')) : kk(null, 'liten'); }).join('') + '</div>'; }).join('') + '</div>';
+      var siste = s.pos ? s.pyr[s.pos - 1] : null, rad = s.pos ? (s.pos - 1 < 5 ? 1 : s.pos - 1 < 9 ? 2 : s.pos - 1 < 12 ? 3 : s.pos - 1 < 14 ? 4 : 5) : 0;
+      var minPast = s.pastander.some(function (p) { return p.id === tilstand.meg; });
+      var past = s.pastander.map(function (p) {
+        return '<li><b>' + esc(navn(p.id)) + '</b> sier de har ' + (siste ? vn(siste.v) : '') + ' (del ut ' + p.rad + ')' +
+          (p.avgjort ? ' – <em>' + (p.avgjort === 'bløff' ? 'bløffet!' : p.avgjort === 'sant' ? 'hadde den!' : 'godtatt') + '</em>'
+            : (p.id !== tilstand.meg ? ' <button class="btn ghost small" type="button" data-g="utfordre" data-paa="' + p.id + '">Utfordre</button>' : '')) + '</li>';
+      }).join('');
+      return pyr + (siste ? '<p class="dl-melding">Snudd: ' + vn(siste.v) + siste.f + ' · rad ' + rad + '</p>' : '<p class="dl-melding">Snu første kort nederst til venstre.</p>') +
+        '<p class="rom-etikett">Din hånd – bare du ser den</p><div class="dl-hand">' + (s.minHand || []).map(function (k) { return kk(k); }).join('') + '</div>' +
+        (siste && !minPast ? '<button class="btn gold" data-g="pastand" type="button">Jeg har den! (eller bløffer …)</button>' : '') +
+        (past ? '<ul class="rom-past">' + past + '</ul>' : '') +
+        (s.pos < 15 ? '<button class="rom-stor-knapp" data-g="snu" type="button">Snu neste kort</button>' : '<p class="dl-melding dl-stor">Toppen er snudd – runden er ferdig!</p><button class="rom-stor-knapp" data-g="nytt" type="button">Ny runde</button>');
+    }
+    function grisSpill(s) {
+      var bok = function (id) { var n = s.bokstaver[id] || 0; return n ? 'GRIS'.slice(0, n) : '–'; };
+      var tavle = '<div class="rom-gris-tavle">' + tilstand.spillere.map(function (p) { return '<span>' + esc(p.navn) + ' <b>' + bok(p.id) + '</b></span>'; }).join('') + '</div>';
+      var nese = '<button class="rom-nese' + (s.fase === 'nese' ? ' blink' : '') + '" data-g="nese" type="button" aria-pressed="' + (s.neser.indexOf(tilstand.meg) !== -1) + '"><b>NESA!</b><span>Trykk når noen har fire like</span></button>';
+      if (s.fase === 'ferdig') {
+        return tavle + '<p class="dl-melding dl-stor">' + esc(navn(s.taper)) + ' var sist på nesa!</p>' +
+          '<div class="dl-hender">' + Object.keys(s.fasit || {}).map(function (id) { return '<div><b>' + esc(navn(id)) + '</b><span>' + s.fasit[id].map(function (k) { return kk(k, 'mini'); }).join('') + '</span></div>'; }).join('') + '</div>' +
+          '<button class="rom-stor-knapp" data-g="nytt" type="button">Ny runde</button>';
+      }
+      var hand = s.minHand || [];
+      return tavle + '<p class="rom-etikett">Din hånd – velg et kort å sende til venstre</p>' +
+        '<div class="dl-hand gris">' + hand.map(function (k, i) { return '<button type="button" data-g="velg" data-i="' + i + '" aria-pressed="' + (s.mittValg === i) + '">' + kk(k) + '</button>'; }).join('') + '</div>' +
+        '<p class="rom-status">' + s.harValgt.length + ' av ' + tilstand.spillere.length + ' har valgt' + (s.harFire ? ' · <b class="dl-hint">Du har fire like!</b>' : '') + '</p>' +
+        nese + '<p class="small">Tar du deg på nesa uten fire like, får du en bokstav.</p>';
+    }
+    function presidentSpill(s) {
+      var jeg = s.tur === tilstand.meg, hand = s.minHand || [];
+      presValg = presValg.filter(function (i) { return i < hand.length; });
+      var tavle = '<div class="rom-gris-tavle">' + tilstand.spillere.map(function (p) {
+        var t = s.titler && s.titler[p.id];
+        return '<span class="' + (p.id === s.tur ? 'tur' : '') + '">' + esc(p.navn) + ' <b>' + (s.antall[p.id] !== undefined ? s.antall[p.id] : '–') + '</b>' + (t ? ' <em>' + t + '</em>' : '') + (s.pass.indexOf(p.id) !== -1 ? ' <small>pass</small>' : '') + '</span>';
+      }).join('') + '</div>';
+      if (s.fase === 'ferdig') return tavle + '<p class="dl-melding dl-stor">Runden er over!</p><p class="small">Presidenten bestemmer når andre skal drikke. Rævkjøreren henter drikke og gir sitt beste kort til presidenten.</p>' +
+        '<button class="rom-stor-knapp" data-g="nytt" type="button">Ny runde</button>';
+      return tavle + '<p class="rom-etikett">På bordet' + (s.bordAv ? ' – lagt av ' + esc(navn(s.bordAv)) : '') + '</p>' +
+        '<div class="dl-bord">' + (s.bord.length ? s.bord.map(function (k) { return kk(k, 'inn'); }).join('') : '<span class="small">Tomt – ' + esc(navn(s.tur)) + ' starter</span>') + '</div>' +
+        '<p class="rom-etikett">' + (jeg ? 'Din tur – velg like kort' : 'Venter på ' + esc(navn(s.tur))) + '</p>' +
+        '<div class="dl-hand pres">' + hand.map(function (k, i) { return '<button type="button" data-g="pvelg" data-i="' + i + '" aria-pressed="' + (presValg.indexOf(i) !== -1) + '"' + (jeg ? '' : ' disabled') + '>' + kk(k, 'liten') + '</button>'; }).join('') + '</div>' +
+        (jeg ? '<div class="dl-knapper"><button class="btn gold" data-g="legg" type="button">Legg ut</button>' + (s.bord.length ? '<button class="btn ghost" data-g="pass" type="button">Pass</button>' : '') + '</div>' : '') +
+        '<p class="small">Toere er høyest og rydder bordet.</p>';
+    }
     function tegn() {
       if (!tilstand) return;
       var s = tilstand.spill, innhold = '';
       if (!s) innhold = lobby();
       else {
         innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' ? ' · ' + esc(s.modus) : '') + '</p>' +
-          (s.type === 'kort' ? kortSpill(s) : s.type === 'mest' ? mestSpill(s) : s.type === 'forraeder' ? forraederSpill(s) : bingoSpill(s)) + '</div>';
+          ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
+             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill }[s.type] || function () { return ''; })(s) + '</div>';
       }
       var vert = erVert() ? '<div class="rom-vert">' +
         (s ? '<button class="btn ghost small" data-g="avslutt" type="button">Bytt lek</button>' : '') +
@@ -273,6 +372,13 @@ import Base from '../../layouts/Base.astro';
       if (g === 'stem') return gjor({ handling: 'stem', paa: b.dataset.paa });
       if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
       if (g === 'fjern') return gjor({ handling: 'fjern', id: b.dataset.id });
+      if (g === 'gjett') return gjor({ handling: 'gjett', paa: b.dataset.paa });
+      if (g === 'vedd') { var sl = document.getElementById('veddSl'); return gjor({ handling: 'vedd', farge: b.dataset.farge, slurker: sl ? Number(sl.value) : 2 }); }
+      if (g === 'utfordre') return gjor({ handling: 'utfordre', paa: b.dataset.paa });
+      if (g === 'velg') return gjor({ handling: 'velg', i: Number(b.dataset.i) });
+      if (g === 'pvelg') { var i = Number(b.dataset.i), j = presValg.indexOf(i); if (j === -1) presValg.push(i); else presValg.splice(j, 1); b.setAttribute('aria-pressed', j === -1); return; }
+      if (g === 'legg') { var valgte = presValg.slice(); presValg = []; return gjor({ handling: 'legg', kort: valgte }); }
+      if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass'].indexOf(g) !== -1) return gjor({ handling: g });
       if (['avslutt', 'nullstill', 'svart', 'avslor', 'runde', 'nytt-brett'].indexOf(g) !== -1) return gjor({ handling: g });
     });
 
