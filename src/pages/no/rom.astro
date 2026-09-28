@@ -1,10 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
+import KortVelger from '../../components/KortVelger.astro';
 import { lekeliste } from '../../lib/rom';
 // Navnene på lekene, så «Spill fra hver sin telefon» fra en lekeside kan vise riktig lek før rommet finnes
 const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
 ---
 <Base title="Spill sammen" description="Lag et rom og få med alle fra hver sin telefon. Samme kort på alle skjermer, hemmelige roller, stemming og bingo." lang="no" gate={true} bilde="/og/rom.jpg">
+  <KortVelger />
   <div id="rom" class="rom">
     <noscript><p>Rommet trenger JavaScript.</p></noscript>
   </div>
@@ -507,6 +509,8 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         return '<p class="dl-melding dl-stor">Klar for Regelfabrikken?</p>' +
           '<p>Når klokka starter, har alle ' + s.sek + ' sekunder til å skrive så mange drikkekort de rekker på sin egen telefon.</p>' +
           '<p class="rom-status">' + tilstand.spillere.length + ' med i rommet: ' + tilstand.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' +
+          '<div class="rf-med"><button class="btn ghost" data-g="rf-velg" type="button">Ta med kort fra kortstokkene dine</button>' +
+          (s.mineMed ? '<span class="small">Du har tatt med <b>' + s.mineMed + '</b> kort – de blandes inn når det stokkes.</span>' : '<span class="small">Valgfritt. Bare du ser hvilke kort du tar med.</span>') + '</div>' +
           (erVert()
             ? '<p class="small">Vent til alle har blitt med. Del koden <b>' + esc(kode) + '</b>.</p><button class="rom-stor-knapp" data-g="startklokke" type="button">Start klokka</button>'
             : '<p class="rom-stor">Venter på at ' + esc(navn(tilstand.vert)) + ' starter klokka …</p>');
@@ -521,6 +525,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
           '<div class="rf-rad"><input id="rfInput" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="Skriv et kort …"' + (n > 0 ? '' : ' disabled') + '>' +
           '<button class="btn gold" type="submit">Legg til</button></div></form>' +
           '<ol class="rf-mine">' + s.mineKort.slice().reverse().map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
+          (s.mineMed ? '<p class="small">+ ' + s.mineMed + ' kort du tok med</p>' : '') +
           '<p class="rom-status">' + andre + '</p>' +
           (erVert() || n <= 0 ? '<button class="rom-stor-knapp" data-g="stokk" type="button">' + (n > 0 ? 'Stopp og stokk nå' : 'Stokk ' + s.totalt + ' kort') + '</button>' : '');
       }
@@ -528,7 +533,8 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">Trekk neste</button>' +
         '<div class="dl-knapper">' +
           (erVert() ? '<button class="btn ghost" data-g="nytt" type="button">' + (s.egen ? 'Stokk på nytt' : 'Ny skriverunde') + '</button>' : '') +
-          (!s.egen && s.alleKort ? '<button class="btn ghost" data-g="lagrestokk" type="button">Lagre som kortstokk</button>' : '') +
+          (!s.egen && s.alleKort ? '<button class="btn ghost" data-g="lagrestokk" type="button">Lagre alle kortene</button>' : '') +
+          (!s.egen && s.mineKort && s.mineKort.length ? '<button class="btn ghost" data-g="rf-lagre-mine" type="button">Lagre mine ' + s.mineKort.length + ' kort</button>' : '') +
         '</div>';
     }
 
@@ -698,6 +704,71 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       document.body.appendChild(m);
     }
 
+    /* ---------- kveldens oppsummering ---------- */
+    function kveldsTall() {
+      var l = (tilstand.spillere || []).slice(), t = {};
+      function maks(felt) { var m = l.slice().sort(function (a, b) { return (b[felt] || 0) - (a[felt] || 0); })[0]; return m && m[felt] ? m : null; }
+      t.sumSlurker = l.reduce(function (n, p) { return n + (p.slurker || 0); }, 0);
+      t.sumSendt = l.reduce(function (n, p) { return n + (p.sendt || 0); }, 0);
+      var leker = {}; (tilstand.historikk || []).forEach(function (n) { leker[n] = (leker[n] || 0) + 1; });
+      t.leker = Object.keys(leker).map(function (n) { return n + (leker[n] > 1 ? ' ×' + leker[n] : ''); });
+      t.minutter = Math.max(1, Math.round(((tilstand.ferdig || Date.now()) - (tilstand.laget || Date.now())) / 60000));
+      t.kaaring = [];
+      var torst = maks('slurker'); if (torst) t.kaaring.push({ ikon: '🏆', tittel: 'Kveldens tørstigste', navn: torst.navn, tall: torst.slurker + ' slurker' });
+      if (l.length >= 3 && t.sumSlurker) { var edru = l.slice().sort(function (a, b) { return (a.slurker || 0) - (b.slurker || 0); })[0]; t.kaaring.push({ ikon: '🧊', tittel: 'Mest edru', navn: edru.navn, tall: (edru.slurker || 0) + ' slurker' }); }
+      var gavmild = maks('sendt'); if (gavmild) t.kaaring.push({ ikon: '🎁', tittel: 'Mest gavmild', navn: gavmild.navn, tall: gavmild.sendt + ' 🍺 sendt' });
+      var mobbet = maks('mottatt'); if (mobbet) t.kaaring.push({ ikon: '🎯', tittel: 'Mest mobbet', navn: mobbet.navn, tall: mobbet.mottatt + ' 🍺 fått' });
+      var quiz = maks('quiz'); if (quiz) t.kaaring.push({ ikon: '🧠', tittel: 'Quizmester', navn: quiz.navn, tall: quiz.quiz + ' riktige' });
+      t.rangert = l.sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0); });
+      return t;
+    }
+    function oppsummering() {
+      var t = kveldsTall();
+      return '<div class="kveld-sum"><p class="rom-etikett">Kvelden er over</p><h2 class="rom-h2" style="margin-top:0">Kveldens oppsummering</h2>' +
+        '<div class="stat-tall"><div><b>' + t.sumSlurker + '</b><span>slurker til sammen</span></div><div><b>' + t.leker.length + '</b><span>leker spilt</span></div>' +
+        '<div><b>' + t.sumSendt + '</b><span>🍺 sendt</span></div><div><b>' + (t.minutter >= 60 ? Math.floor(t.minutter / 60) + 't ' + (t.minutter % 60) + 'm' : t.minutter + ' min') + '</b><span>i rommet</span></div></div>' +
+        (t.kaaring.length ? '<div class="rom-kaaring">' + t.kaaring.map(function (x) { return '<div><span>' + x.ikon + '</span><small>' + esc(x.tittel) + '</small><b>' + esc(x.navn) + ' · ' + esc(x.tall) + '</b></div>'; }).join('') + '</div>' : '') +
+        (t.leker.length ? '<p class="small">Dere spilte: ' + t.leker.map(esc).join(', ') + '</p>' : '') +
+        '<ol class="rom-resultat">' + t.rangert.map(function (p) { return '<li><span>' + esc(p.navn) + '</span><b>' + (p.slurker || 0) + '</b></li>'; }).join('') + '</ol>' +
+        '<div class="dl-knapper"><button class="btn gold" data-g="del-kveld" type="button">Del oppsummeringen</button>' +
+        (erVert() ? '<button class="btn ghost" data-g="fortsett-kvelden" type="button">Fortsett kvelden</button>' : '') + '</div></div>';
+    }
+    function delBilde(tegner, filnavn, tittel) {
+      var c = document.createElement('canvas'); c.width = 1080;
+      var hoyde = tegner(null); c.height = hoyde;
+      tegner(c.getContext('2d'));
+      c.toBlob(function (blob) {
+        if (!blob) return toast('Fikk ikke laget bildet.');
+        var fil = new File([blob], filnavn, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [fil] })) navigator.share({ files: [fil], title: tittel }).catch(function () {});
+        else { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filnavn; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000); }
+      }, 'image/png');
+    }
+    function delKveld() {
+      var t = kveldsTall(), W = 1080, font = '"Bricolage Grotesque", system-ui, sans-serif';
+      delBilde(function (g) {
+        var H = 520 + t.kaaring.length * 120 + Math.min(t.rangert.length, 8) * 70 + (t.leker.length ? 120 : 0);
+        if (!g) return H;
+        g.fillStyle = '#141009'; g.fillRect(0, 0, W, H);
+        g.fillStyle = '#f4b740'; g.font = '800 80px ' + font; g.fillText('Kveldens oppsummering', 70, 150);
+        g.fillStyle = '#b3a288'; g.font = '500 34px ' + font;
+        g.fillText(new Date().toLocaleDateString('nb-NO', { weekday: 'long', day: 'numeric', month: 'long' }) + ' · ' + t.leker.length + ' leker · ' + t.sumSlurker + ' slurker', 70, 210);
+        var y = 310;
+        t.kaaring.forEach(function (x) {
+          g.fillStyle = '#b3a288'; g.font = '500 32px ' + font; g.fillText(x.ikon + '  ' + x.tittel, 70, y);
+          g.fillStyle = '#f4ebdc'; g.font = '700 46px ' + font; g.fillText(x.navn + ' · ' + x.tall, 70, y + 54); y += 120;
+        });
+        y += 20; g.fillStyle = '#f4b740'; g.font = '700 36px ' + font; g.fillText('Slurketavla', 70, y); y += 60;
+        t.rangert.slice(0, 8).forEach(function (p, i) {
+          g.fillStyle = '#f4ebdc'; g.font = '600 38px ' + font; g.fillText((i + 1) + '. ' + p.navn.slice(0, 20), 70, y);
+          g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 70, y); g.textAlign = 'left'; y += 70;
+        });
+        if (t.leker.length) { g.fillStyle = '#8a7a64'; g.font = '500 30px ' + font; g.fillText(('Spilt: ' + t.leker.join(', ')).slice(0, 62), 70, y + 30); }
+        g.fillStyle = '#8a7a64'; g.font = '600 32px ' + font; g.fillText('banterdeck.com', 70, H - 60);
+        return H;
+      }, 'banterdeck-kveld.png', 'Kveldens oppsummering');
+    }
+
     /* ---------- poengtavla ---------- */
     var tavle = null;
     function rangert() {
@@ -779,7 +850,8 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       if (tavle && tilstand) tavle.innerHTML = tavleHtml();
       if (!tilstand) return;
       var s = tilstand.spill, innhold = '';
-      if (!s) innhold = lobby();
+      if (!s && tilstand.ferdig) innhold = oppsummering();
+      else if (!s) innhold = lobby();
       else {
         innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' ? ' · ' + esc(s.modus) : '') + '</p>' +
           ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
@@ -787,7 +859,8 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       }
       var vert = erVert() ? '<div class="rom-vert">' +
         (s ? '<button class="btn ghost small" data-g="avslutt" type="button">Bytt lek</button>' : '') +
-        '<button class="btn ghost small" data-g="nullstill" type="button">Nullstill slurker</button></div>' : '';
+        '<button class="btn ghost small" data-g="nullstill" type="button">Nullstill slurker</button>' +
+        (tilstand.ferdig ? '' : '<button class="btn ghost small" data-g="avslutt-kvelden" type="button">Avslutt kvelden</button>') + '</div>' : '';
       var tsLagret = [0, 1, 2].map(function (i) { var e = document.getElementById('tsR' + i); return e ? e.value : null; }), tsValgt = (document.querySelector('input[name=tsL]:checked') || {}).value;
       var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
       var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
@@ -848,6 +921,20 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         return gjor({ handling: 'start', lek: 'egen', navn: st.navn, kort: st.kort });
       }
       if (g === 'lagrestokk') return lagreSomStokk();
+      if (g === 'rf-velg') {
+        if (!window.BDVelgKort) return;
+        return window.BDVelgKort({ maks: 60 }).then(function (kort) {
+          if (kort.length) { gjorAlltid({ handling: 'rf-legg-til', kort: kort }); toast(kort.length + ' kort er lagt i bunken din'); }
+        });
+      }
+      if (g === 'rf-lagre-mine') {
+        var sp = tilstand.spill, d = new Date(), nv = 'Mine kort ' + d.getDate() + '.' + (d.getMonth() + 1) + '.';
+        return window.BDLagreKort(nv, sp.mineKort || []).then(function (r) {
+          toast(r === 'lagret' ? 'Kortene dine er lagret på kontoen ✓' : 'Kortene er lagt til side. Logg inn på Min stokk for å lagre dem.');
+        }).catch(function (e) { toast(e.message || 'Fikk ikke lagret.'); });
+      }
+      if (g === 'del-kveld') return delKveld();
+      if (g === 'avslutt-kvelden' || g === 'fortsett-kvelden') return gjor({ handling: g });
       if (g === 'velg-annen') { visAlle = true; if (erVert()) gjor({ handling: 'velg-annen' }); return tegn(); }
       if (g === 'reager') return gjorAlltid({ handling: 'reager', e: b.dataset.e });
       if (g === 'send-velg') return sendVelger();

@@ -9,6 +9,7 @@ const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', '
 const RomLeker = ['regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris', 'to-sannheter-og-en-logn', 'bussruta', 'drikke-yatzy'];
 const har = DIGITALE.includes(slug);
 import { romLenke } from '../lib/romlenke';
+import KortVelger from './KortVelger.astro';
 const romHref = romLenke(slug);
 const bareRom = ['pyramiden', 'president', 'gris'].includes(slug);
 ---
@@ -426,6 +427,7 @@ if (!window.BDK) window.BDK = (function () {
 </script>
 )}
 
+{slug === 'regelfabrikken' && <KortVelger />}
 {slug === 'regelfabrikken' && (
 <script is:inline data-astro-rerun>
 (function () {
@@ -434,8 +436,18 @@ if (!window.BDK) window.BDK = (function () {
   function oppsett() {
     root.innerHTML = '<p>Én telefon går rundt. Hver får like lang tid til å skrive så mange drikkekort som mulig. Så stokkes alt sammen.</p>' +
       '<div class="rom-mod">' + [45, 60, 90].map(function (n) { return '<button type="button" data-sek="' + n + '" aria-pressed="' + (n === sek) + '">' + n + ' sek</button>'; }).join('') + '</div>' +
-      '<button class="btn gold rof-start" data-a="klar">Første spiller: start</button>';
+      '<button class="btn gold rof-start" data-a="klar">Første spiller: start</button>' +
+      '<div class="rf-forbered"><p class="small">' + (kort.length ? '<b>' + kort.length + '</b> kort ligger allerede i bunken.' : 'Vil dere ha med kort fra før?') + '</p>' +
+      '<div class="dl-knapper"><button class="btn ghost" data-a="velg">Ta med lagrede kort</button><button class="btn ghost" data-a="forhand">Skriv kort på forhånd</button></div></div>';
   }
+  function forhand() {
+    root.innerHTML = '<p class="dl-melding">Skriv kort i ro og mak – ett per linje. Legg dem i bunken nå, eller lagre dem som kortstokk til senere.</p>' +
+      '<label class="rof-lab" for="rfFNavn">Navn på kortstokken</label><input class="rof-inp" id="rfFNavn" maxlength="40" value="Hyttetur-regler">' +
+      '<label class="rof-lab" for="rfFKort">Kort</label><textarea class="rof-inp rf-tekst" id="rfFKort" rows="8" placeholder="Alle med briller drikker\nDen siste som kom hit deler ut tre"></textarea>' +
+      '<div class="dl-knapper"><button class="btn gold" data-a="forhand-legg">Legg i bunken</button><button class="btn ghost" data-a="forhand-lagre">Lagre som kortstokk</button><button class="btn ghost" data-a="tilbake">Tilbake</button></div>' +
+      '<p class="dl-info" id="rfFMsg" role="status"></p>';
+  }
+  function forhandKort() { return root.querySelector('#rfFKort').value.split('\n').map(function (x) { return x.trim().slice(0, 140); }).filter(Boolean).slice(0, 300); }
   function klar() {
     root.innerHTML = '<p class="dl-steg">Spiller ' + (skriver + 1) + '</p><p class="dl-melding dl-stor">Klar? Du får ' + sek + ' sekunder.</p>' +
       '<p class="dl-info">' + kort.length + ' kort i bunken så langt</p>' +
@@ -494,6 +506,17 @@ if (!window.BDK) window.BDK = (function () {
     if (a === 'neste') { pos++; if (pos >= rekke.length) { rekke = K.bland(rekke); pos = 0; } vis(); }
     if (a === 'nytt') { kort = []; skriver = 0; oppsett(); }
     if (a === 'lagre') lagre();
+    if (a === 'tilbake') oppsett();
+    if (a === 'forhand') forhand();
+    if (a === 'velg' && window.BDVelgKort) window.BDVelgKort({ maks: 200 }).then(function (valgt) { valgt.forEach(function (x) { if (kort.indexOf(x) === -1) kort.push(x); }); oppsett(); });
+    if (a === 'forhand-legg') { var fk = forhandKort(); if (!fk.length) return; fk.forEach(function (x) { kort.push(x); }); oppsett(); }
+    if (a === 'forhand-lagre') {
+      var fk2 = forhandKort(), ut = root.querySelector('#rfFMsg'), nv = (root.querySelector('#rfFNavn').value.trim() || 'Mine kort').slice(0, 40);
+      if (!fk2.length) { ut.textContent = 'Skriv minst ett kort.'; return; }
+      window.BDLagreKort(nv, fk2).then(function (r) {
+        ut.innerHTML = r === 'lagret' ? 'Lagret ✓ Du finner den under <a href="/no/account">Min stokk</a> – og kan ta den med i neste runde.' : 'Lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre den.';
+      }).catch(function (e) { ut.textContent = e.message || 'Fikk ikke lagret.'; });
+    }
   });
   document.addEventListener('astro:before-swap', function () { clearInterval(klokke); }, { once: true });
   oppsett();

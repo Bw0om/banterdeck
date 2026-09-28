@@ -1,0 +1,61 @@
+---
+// Velg kort fra de lagrede kortstokkene dine: window.BDVelgKort({ maks }) → Promise med valgte kort ([] hvis avbrutt).
+---
+<script is:inline>
+(function () {
+  if (window.BDVelgKort) return;
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  window.BDVelgKort = function (opts) {
+    opts = opts || {};
+    var maks = opts.maks || 100, K = window.BDKonto;
+    return new Promise(function (ferdig) {
+      var m = document.createElement('div'); m.className = 'rom-tavle kv-velger'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'Velg kort');
+      m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>Ta med kort</h2><button class="linkbtn" data-v="lukk" type="button">Lukk</button></div><div class="kv-velger-body"><p class="small">Henter kortstokkene dine …</p></div></div>';
+      document.body.appendChild(m);
+      var body = m.querySelector('.kv-velger-body'), stokker = [];
+      function lukk(kort) { m.remove(); ferdig(kort || []); }
+      function valgte() { return Array.prototype.map.call(m.querySelectorAll('input[data-kort]:checked'), function (x) { return x.value; }); }
+      function tell() {
+        var n = valgte().length, b = m.querySelector('[data-v=ok]');
+        if (b) { b.textContent = n ? 'Legg til ' + n + ' kort' : 'Velg kort'; b.disabled = !n || n > maks; }
+        var i = m.querySelector('.kv-velger-info'); if (i) i.textContent = n > maks ? 'Du kan ta med maks ' + maks + ' kort.' : '';
+      }
+      m.addEventListener('click', function (e) {
+        if (e.target === m) return lukk();
+        var b = e.target.closest('[data-v]'); if (!b) return;
+        if (b.dataset.v === 'lukk') return lukk();
+        if (b.dataset.v === 'ok') return lukk(valgte().slice(0, maks));
+        if (b.dataset.v === 'alle') {
+          var boks = m.querySelectorAll('input[data-stokk="' + b.dataset.i + '"]'), paa = Array.prototype.some.call(boks, function (x) { return !x.checked; });
+          boks.forEach(function (x) { x.checked = paa; }); tell();
+        }
+      });
+      m.addEventListener('change', tell);
+      if (!K || !K.les()) {
+        body.innerHTML = '<p>Logg inn for å bruke kortstokkene dine. Du kan også lage en kortstokk på forhånd under «Min stokk».</p><p><a class="btn gold" href="/no/account">Logg inn eller lag konto</a></p>';
+        return;
+      }
+      K.stokker.liste().then(function (l) {
+        stokker = l || [];
+        if (!stokker.length) { body.innerHTML = '<p>Du har ingen lagrede kortstokker ennå.</p><p><a class="btn gold" href="/no/account">Lag en kortstokk</a></p>'; return; }
+        body.innerHTML = stokker.map(function (s, i) {
+          return '<details class="kv-stokk"' + (i === 0 ? ' open' : '') + '><summary><b>' + esc(s.navn) + '</b><span>' + (s.kort || []).length + ' kort</span></summary>' +
+            '<button class="mini" type="button" data-v="alle" data-i="' + i + '">Velg alle / ingen</button>' +
+            '<ul>' + (s.kort || []).map(function (k) { return '<li><label><input type="checkbox" data-kort data-stokk="' + i + '" value="' + esc(k) + '"> ' + esc(k) + '</label></li>'; }).join('') + '</ul></details>';
+        }).join('') + '<p class="small kv-velger-info" role="status"></p><button class="btn gold" type="button" data-v="ok" disabled>Velg kort</button>';
+      }).catch(function () { body.innerHTML = '<p class="rom-feil">Fikk ikke hentet kortstokkene.</p>'; });
+    });
+  };
+  /** Lagre kort som en ny kortstokk – på kontoen, eller til side til man logger inn. */
+  window.BDLagreKort = function (navn, kort) {
+    var K = window.BDKonto;
+    return (K ? K.bruker() : Promise.resolve(null)).then(function (u) {
+      if (!u) {
+        try { localStorage.setItem('bd_stokk_utkast', JSON.stringify({ navn: navn, kort: kort.slice(0, 300) })); } catch (e) {}
+        return 'utkast';
+      }
+      return K.stokker.lagre({ navn: navn, kort: kort }).then(function () { return 'lagret'; });
+    });
+  };
+})();
+</script>
