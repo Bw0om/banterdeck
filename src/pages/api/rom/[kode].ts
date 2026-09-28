@@ -60,6 +60,7 @@ export const POST: APIRoute = async ({ params, request }) => {
       if (!meg) return { feil: 'ikke-med' };
       return handling(data, meg, d);
     });
+    if (res.feil === 'fullt-gratis') await varsle(kode, 0);   // verten får se at noen prøvde å bli med
     if (res.feil) {
       const status = res.feil === 'finnes-ikke' ? 404 : res.feil === 'ikke-med' ? 403 : res.feil === 'opptatt' ? 409 : 400;
       return json({ feil: res.feil, melding: res.melding || MELDINGER[res.feil] || 'Det gikk ikke.' }, status);

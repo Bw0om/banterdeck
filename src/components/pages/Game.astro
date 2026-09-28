@@ -6,6 +6,7 @@ import GameTool from '../GameTool.astro';
 import DigitalLek from '../DigitalLek.astro';
 import DECKS from '../../data/decks.json';
 import { ROMLEK, romLenke } from '../../lib/romlenke';
+import { PLUSS_SLUGS } from '../../lib/plussleker';
 import { gamesFor, gameHref, t, trules } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { game, lang = 'en' } = Astro.props as { game: any; lang?: Lang };
@@ -14,6 +15,7 @@ const iRom = lang === 'no' && ['pekeleken','jeg-har-aldri','enten-eller','katego
 const DIGITAL = ['power-hour','snurr-flasken','drikke-yatzy','beer-pong','rask-fakta','to-sannheter-og-en-logn','jug','14-sporsmal','bossen-sier','over-eller-under','fuck-the-dealer','krig','veddelopet','bussruta','terningen-bestemmer','21-med-terninger','opus','regelfabrikken','pyramiden','president','gris'];
 const harVerktoy = lang === 'no' && (!!(DECKS as any)[game.slug] || game.slug === 'drikke-bingo' || DIGITAL.includes(game.slug));
 const name = t(game.name, lang);
+const plussLek = lang === 'no' && PLUSS_SLUGS.includes(game.slug);
 const rules: string[] = trules(game, lang);
 
 const blocks: { type: 'p' | 'ul'; items: string[] }[] = [];
@@ -59,7 +61,7 @@ const jsonLd = JSON.stringify([{
   </div>
   {(harVerktoy || iRom) && (
     <p class="startrow">
-      {harVerktoy && <a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'} ↓</a>}
+      {harVerktoy && <a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'}{plussLek ? ' ✨' : ''} ↓</a>}
       {iRom && <a class="btn ghost romlenke" href={romLenke(game.slug)}>Spill fra hver sin telefon</a>}
     </p>
   )}
@@ -72,7 +74,25 @@ const jsonLd = JSON.stringify([{
     <button class="btn ghost" data-copy={copyText}>{L.copyRules}</button>
   </p>
 
-  <div id="lekverktoy"><GameTool slug={game.slug} lang={lang} />{lang === 'no' && <DigitalLek slug={game.slug} />}</div>
+  <div id="lekverktoy" class:list={[plussLek && 'pluss-laast']} data-pluss={plussLek ? '1' : undefined}>
+    {plussLek && (
+      <div class="pluss-laas" id="plussLaas">
+        <p class="rom-etikett">✨ Pluss</p>
+        <p><b>Spill {name} på mobilen med Banterdeck Pluss.</b> Reglene over er gratis – med Pluss blir telefonen kortstokken, og i rom får alle være med.</p>
+        <div class="dl-knapper"><a class="btn gold" href="/no/pluss">Første kveld er gratis</a></div>
+      </div>
+    )}
+    <div class="lekverktoy-innhold"><GameTool slug={game.slug} lang={lang} />{lang === 'no' && <DigitalLek slug={game.slug} />}</div>
+  </div>
+  {plussLek && (
+    <script is:inline data-astro-rerun>
+    (function () {
+      var el = document.querySelector('[data-pluss="1"]'); if (!el || el.dataset.bound) return; el.dataset.bound = '1';
+      var K = window.BDKonto; if (!K || !K.les()) return;
+      K.api('/api/pluss/status').then(function (r) { return r.json(); }).then(function (d) { if (d.aktiv) el.classList.remove('pluss-laast'); }).catch(function () {});
+    })();
+    </script>
+  )}
   <span hidden data-spilt={`lek:${game.slug}`}></span>
 
   <AdSlot />

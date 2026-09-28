@@ -3,6 +3,7 @@
 import Base from '../../layouts/Base.astro';
 import { games, t } from '../../lib/content';
 import { romLenke } from '../../lib/romlenke';
+import { PLUSS_SLUGS } from '../../lib/plussleker';
 // fase: o = oppvarming, h = hoveddel, f = finale · min = minutter · vill: 1–3 · pl: minst antall
 // utstyr: '' = bare telefon, 'kopper' = kopper og bord, 'musikk' = høyttaler · rom: kan spilles i rom · bareRom: trenger flere telefoner
 const LEKER: Record<string, { fase: string; min: number; vill: number; pl: number; utstyr?: string; rom?: boolean; bareRom?: boolean; tips: string }> = {
@@ -37,7 +38,7 @@ const LEKER: Record<string, { fase: string; min: number; vill: number; pl: numbe
 const finnes = new Set(games.map((g: any) => g.slug));
 const DATA = Object.fromEntries(Object.entries(LEKER).filter(([s]) => finnes.has(s)).map(([s, v]) => {
   const g = games.find((x: any) => x.slug === s);
-  return [s, { ...v, navn: t(g.name, 'no'), romHref: romLenke(s) }];
+  return [s, { ...v, navn: t(g.name, 'no'), romHref: romLenke(s), pluss: PLUSS_SLUGS.includes(s) }];
 }));
 ---
 <Base title="Kveldsplan" description="Planlegg kvelden: få en rekkefølge av drikkeleker tilpasset gjengen, tiden og utstyret dere har." lang="no" gate={true} bilde="/og/drikkeleker.jpg">
@@ -130,7 +131,7 @@ const DATA = Object.fromEntries(Object.entries(LEKER).filter(([s]) => finnes.has
           var merke = i === 0 ? 'Oppvarming' : b.finale ? 'Finale' : 'Hoveddel';
           return '<li class="' + (i === aktiv ? 'aktiv' : i < aktiv ? 'ferdig' : '') + '">' +
             '<span class="kv-tid">' + (fra ? '+' + tid(fra) : 'Start') + '</span>' +
-            '<div class="kv-lek"><small>' + merke + ' · ' + b.min + ' min</small><b>' + esc(g.navn) + '</b><span>' + esc(g.tips) + '</span>' +
+            '<div class="kv-lek"><small>' + merke + ' · ' + b.min + ' min' + (g.pluss ? ' · ✨ Pluss' : '') + '</small><b>' + esc(g.navn) + '</b><span>' + esc(g.tips) + '</span>' +
             '<div class="kv-knapper"><a class="btn gold small" href="/no/drinking-games/' + b.slug + '/">Regler og verktøy</a>' +
             (g.rom && valg.rom ? '<a class="btn small" href="' + g.romHref + '">Åpne rom</a>' : '') +
             (i >= aktiv ? '<button class="mini" type="button" data-bytt="' + i + '">Bytt</button>' : '') + '</div></div></li>';

@@ -297,7 +297,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         return '<div class="rom-vent"><p class="rom-stor">Venter på at ' + esc(navn(t.vert)) + ' velger en lek …</p>' +
           '<p class="small">' + t.spillere.length + ' med i rommet. Del koden <b>' + esc(kode) + '</b> med resten.</p></div>';
       }
-      return qrBoks() + egneStokker() +
+      return plassInfo() + qrBoks() + egneStokker() +
         '<h2 class="rom-h2">Velg en lek</h2>' +
         '<div class="rom-leker">' + t.leker.filter(function (l) { return !l.pluss; }).map(function (l) {
           var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
@@ -312,18 +312,26 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
     function plussLeker() {
       var t = tilstand, l = (t.leker || []).filter(function (x) { return x.pluss; }); if (!l.length) return '';
       var aapen = !!t.pluss;
-      return '<h2 class="rom-h2">✨ Pluss-pakker</h2>' + (aapen ? '' : '<p class="small">Har verten Pluss, er pakkene åpne for alle i rommet. <a href="/no/pluss">Første kveld er gratis.</a></p>') +
+      return '<h2 class="rom-h2">✨ Med Pluss</h2>' + (aapen ? '' : '<p class="small">Har verten Pluss, er disse åpne for alle i rommet – og dere kan være opptil 16 telefoner. <a href="/no/pluss">Første kveld er gratis.</a></p>') +
         '<div class="rom-leker">' + l.map(function (x) {
           return '<div class="rom-lek pluss' + (aapen ? '' : ' laast') + '"><b>' + (aapen ? '' : '🔒 ') + esc(x.navn) + '</b><span>' + esc(x.om || '') + '</span>' +
             '<div class="rom-mod"><button type="button" data-g="start" data-lek="' + x.id + '" data-modus="*">' + (aapen ? 'Start' : 'Lås opp') + '</button></div></div>';
         }).join('') + '</div>';
+    }
+    /** Hvor mange gratisplasser som er brukt, og beskjed hvis noen ble stoppet i døra. */
+    function plassInfo() {
+      var t = tilstand; if (!erVert() || t.pluss || !t.gratisPlasser) return '';
+      var n = t.spillere.length, maks = t.gratisPlasser, nylig = t.fullForsok && (Date.now() + klokkeAvvik) - t.fullForsok < 10 * 60000;
+      if (nylig) return '<div class="rom-plass full"><b>Noen prøvde å bli med, men rommet er fullt.</b><span>Gratisversjonen har plass til ' + maks + ' telefoner. Med Pluss kan dere være opptil 16.</span><button class="btn gold small" data-g="pluss-tilbud" type="button">Lås opp rommet</button></div>';
+      if (n >= maks - 1) return '<p class="rom-plass">' + n + ' av ' + maks + ' gratis plasser er brukt. <button class="linkbtn" data-g="pluss-tilbud" type="button">Flere? Lås opp med Pluss</button></p>';
+      return '';
     }
     function visPlussTilbud() {
       if (document.querySelector('.pluss-tilbud')) return;
       var m = document.createElement('div'); m.className = 'rom-tavle pluss-tilbud'; m.setAttribute('role', 'dialog');
       var inne = window.BDKonto && window.BDKonto.les();
       m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>✨ Banterdeck Pluss</h2><button class="linkbtn" data-p="lukk" type="button">Lukk</button></div>' +
-        '<p>Pakkene krever Pluss hos <b>verten</b>. Da er de åpne for alle i rommet – gjestene trenger ikke betale.</p>' +
+        '<p>Med Pluss hos <b>verten</b> får hele rommet alle lekene og pakkene, og dere kan være opptil 16 telefoner. Gjestene trenger ikke betale.</p>' +
         '<p><b>Første kveld er gratis.</b> Etterpå 29 kr for en kveld eller 199 kr for et år.</p>' +
         '<div class="dl-knapper">' + (inne ? '<button class="btn gold" data-p="gratis" type="button">Prøv gratis i kveld</button>' : '<a class="btn gold" href="/no/account">Logg inn for å prøve gratis</a>') +
         '<a class="btn ghost" href="/no/pluss" target="_blank" rel="noopener">Se Pluss</a></div><p class="formmsg" role="status"></p></div>';
@@ -364,7 +372,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         ? '<p class="small">Velg variant for å starte:</p><div class="rom-mod stor">' + mod.map(function (m) { return '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') + '</div>'
         : '<button class="rom-stor-knapp" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(valgtMod || (mod[0] && l.type === 'nyhetsrunden' ? mod[0].v : '*')) + '" type="button">Start ' + esc(l.navn) + '</button>';
       return '<p class="rom-etikett">Dere skal spille</p><h2 class="rom-h2" style="margin-top:0">' + esc(l.navn) + '</h2>' +
-        qrBoks() + '<p class="rom-status">' + t.spillere.length + ' med i rommet</p>' + liste +
+        plassInfo() + qrBoks() + '<p class="rom-status">' + t.spillere.length + ' med i rommet</p>' + liste +
         '<p class="small">Start når alle har blitt med – ingen ser noe fra leken før du trykker.</p>' + startKnapper +
         '<p><button class="linkbtn" data-g="velg-annen" type="button">Velg en annen lek</button></p>';
     }
@@ -1056,7 +1064,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       var tsLagret = [0, 1, 2].map(function (i) { var e = document.getElementById('tsR' + i); return e ? e.value : null; }), tsValgt = (document.querySelector('input[name=tsL]:checked') || {}).value;
       var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
       var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
-      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">✨ Pluss i kveld – alle pakker er åpne</p>' : '') + reaksjonslinje() + innhold + vert +
+      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">✨ Pluss i kveld – alle leker er åpne, plass til 16</p>' : '') + reaksjonslinje() + innhold + vert +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">Forlat rommet</button> · <button type="button" class="feilknapp" data-feil>Noe galt?</button></p>';
       window.scrollTo(0, y);
       tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
@@ -1102,6 +1110,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       }
       if (g === 'tavle') return aapneTavle();
       if (g === 'hjul-aapne') return aapneHjul();
+      if (g === 'pluss-tilbud') return visPlussTilbud();
       if (g === 'hopp-over') return gjor({ handling: 'hopp-over' });
       if (g === 'qr') {
         var m = document.createElement('div'); m.className = 'rom-qrmodal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'QR-kode');

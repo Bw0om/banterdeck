@@ -1285,3 +1285,12 @@ body.stokk-aapen{overflow:hidden}
 .rom-lek.laast{opacity:.85}
 .rom-pluss{margin:0 0 8px;text-align:center;font-weight:700;color:var(--gold);font-size:14px}
 .konto-pluss{margin:4px 0 8px;font-size:14.5px}
+.rom-plass{font-size:14px;color:var(--muted);margin:0 0 10px}
+.rom-plass.full{display:flex;flex-direction:column;gap:6px;align-items:flex-start;background:rgba(255,106,77,.1);border:1px solid rgba(255,106,77,.45);border-radius:16px;padding:12px 14px;color:var(--ink)}
+.rom-plass.full span{color:var(--muted);font-size:14px}
+.pluss-laas{display:none;background:var(--card);border:1px solid var(--gold);border-radius:20px;padding:16px 18px;margin:12px 0}
+.pluss-laas p{margin:0 0 8px}
+.pluss-laast .pluss-laas{display:block}
+.pluss-laast .lekverktoy-innhold{display:none}
+.badges i.pluss{background:rgba(244,183,64,.18);color:var(--gold)}
+.favlek .badges i.pluss{background:var(--gold);color:#1a1208}

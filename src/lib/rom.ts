@@ -7,6 +7,7 @@ import { rpc, supabaseServer } from './spilt';
 import DECKS from '../data/decks.json';
 import BINGO from '../data/bingo.json';
 import PLUSSPAKKER from '../data/pluss.json';
+import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
 const D: any = DECKS;
@@ -14,7 +15,8 @@ const B: any = BINGO;
 /** Pluss-pakkene ligger bare på serveren – nettleseren får bare kortet som trekkes. */
 const P: any = PLUSSPAKKER;
 export const PAKKER = Object.keys(P).map((id) => ({ id: 'pakke-' + id, pakke: id, navn: P[id].navn, om: P[id].om, antall: P[id].items.length }));
-export function erPlussLek(lek: string) { return String(lek || '').startsWith('pakke-'); }
+export function erPlussLek(lek: string) { return String(lek || '').startsWith('pakke-') || PLUSS_ROM.includes(String(lek || '')); }
+function romHarPluss(data: any) { return !!(data.pluss && data.pluss.til > Date.now()); }
 export function pakkeKort(id: string) { return P[id] ? P[id].items : null; }
 
 export const MAKS_SPILLERE = 16;
@@ -36,6 +38,9 @@ const NAVN: Record<string, string> = {
   'ring-of-fire': 'Ring of Fire', 'forraeder': 'Forræder', 'mest': 'Mest sannsynlig', 'bingo': 'Drikke-bingo',
 };
 export function lekeliste() {
+  return lekelisteRa().map((l: any) => (PLUSS_ROM.includes(l.id) ? { ...l, pluss: true } : l));
+}
+function lekelisteRa() {
   const kort = KORTLEKER.filter((s) => D[s]).map((s) => ({ id: s, navn: NAVN[s], type: 'kort', moduser: D[s].modes || [] }));
   return [
     { id: 'mest', navn: NAVN.mest, type: 'mest', moduser: D.pekeleken.modes, om: 'Alle stemmer på hvem det passer best på. Hver stemme er én slurk.' },
@@ -61,9 +66,10 @@ export async function endreRom(kode: string, endring: (data: any) => any) {
     if (!rom) return { feil: 'finnes-ikke' as const };
     const data = structuredClone(rom.data);
     const svar = endring(data);
-    if (svar && svar.feil) return svar;
+    if (svar && svar.feil && !svar.lagre) return svar;
     const ny = await rpc('rom_lagre', { p_kode: kode, p_versjon: rom.versjon, p_data: data });
-    if (ny !== null && ny !== undefined) return { data, versjon: ny as number, svar };
+    // Noen feil skal likevel lagres (f.eks. at noen prøvde å bli med i et fullt rom, så verten ser det)
+    if (ny !== null && ny !== undefined) return svar && svar.feil ? svar : { data, versjon: ny as number, svar };
   }
   return { feil: 'opptatt' as const };
 }
@@ -112,7 +118,7 @@ export function visning(data: any, versjon: number, meg: any) {
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null,
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0 })),
-    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul || null, hjulListe: data.hjulListe || HJUL_STANDARD, pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, laget: data.laget, ferdig: data.ferdig || null, historikk: data.historikk || [],
+    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul || null, hjulListe: data.hjulListe || HJUL_STANDARD, pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: data.historikk || [],
   };
 }
 
@@ -285,6 +291,7 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!erVert) return { feil: 'bare-vert' };
       // Verten har Pluss (sjekket av API-ruta): lås opp rommet for kvelden
       if (h._plussTil > Date.now() && !(data.pluss && data.pluss.til > Date.now())) data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
+      if (h.lek !== 'egen' && erPlussLek(String(h.lek || '')) && !romHarPluss(data)) return { feil: 'pluss', melding: 'Denne leken krever Banterdeck Pluss hos verten.' };
       const r = h.lek === 'egen' ? startEgen(data, h.kort, h.navn) : startSpill(data, String(h.lek || ''), String(h.modus || '*'));
       if (!(r as any).feil && data.spill) { data.valgt = null; data.ferdig = null; data.historikk = (data.historikk || []).concat([data.spill.navn]).slice(-40); }
       return r;
@@ -303,7 +310,7 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!(h._plussTil > Date.now())) return { feil: 'pluss', melding: 'Kontoen din har ikke Pluss akkurat nå.' };
       const hadde = !!(data.pluss && data.pluss.til > Date.now());
       data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
-      if (!hadde) melde(data, '✨ Rommet har Pluss i kveld – alle pakker er låst opp!');
+      if (!hadde) melde(data, '✨ Rommet har Pluss i kveld – alle leker er låst opp!');
       return { ok: true };
     }
     case 'velg-annen': {
@@ -464,6 +471,10 @@ function avgjorForraeder(data: any) {
 /* ---------- inn i rommet ---------- */
 export function blimed(data: any, navn: string) {
   if (data.spillere.length >= MAKS_SPILLERE) return { feil: 'fullt' };
+  if (data.spillere.length >= GRATIS_PLASSER && !romHarPluss(data)) {
+    data.fullForsok = Date.now();
+    return { feil: 'fullt-gratis', melding: `Rommet er fullt – gratisversjonen har plass til ${GRATIS_PLASSER} telefoner. Be verten låse opp med Pluss, så kan dere bli opptil ${MAKS_SPILLERE}.`, lagre: true };
+  }
   let n = navn, i = 2;
   while (data.spillere.some((p: any) => p.navn.toLowerCase() === n.toLowerCase())) n = `${navn} ${i++}`;
   const p = { id: nyId(), navn: n, pollett: nyPollett(), slurker: 0 };

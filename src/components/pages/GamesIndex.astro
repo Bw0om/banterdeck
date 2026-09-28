@@ -11,6 +11,8 @@ const L = ui(lang);
 const groups = langGroups(spill, lang).map((g: any) => ({ ...g, list: itemsOf(g, lang) })).filter((g: any) => g.list.length);
 const hrefOf = (it: any) => gameHref(games.find((x) => x.name === it.name), (p) => path(lang, p), lang);
 const no = lang === 'no';
+import { PLUSS_SLUGS } from '../../lib/plussleker';
+const PL = new Set(PLUSS_SLUGS);
 const APP = new Set([...Object.keys(DECKS as any), 'over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer',
   '21-med-terninger', 'opus', 'regelfabrikken', 'power-hour', 'snurr-flasken', 'drikke-yatzy', 'beer-pong', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', '14-sporsmal', 'bossen-sier', 'drikke-bingo', 'gjett-aret', '100-sporsmal', 'nyhetsrunden', 'nasjonal-vorsprove']);
 const ROM = new Set(['pekeleken', 'jeg-har-aldri', 'enten-eller', 'kategorier', 'nodt-eller-sannhet', 'rygg-mot-rygg', 'duoleken', '50-50',
@@ -55,6 +57,7 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
             <span class="badges">
               {APP.has(g.slug) && <i>I appen</i>}
               {ROM.has(g.slug) && <i class="rom">Flere telefoner</i>}
+              {PL.has(g.slug) && <i class="pluss">✨ Pluss</i>}
             </span>
           </a>
         ))}
@@ -86,6 +89,7 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
               <span class="badges">
                 {APP.has(slugOf(it)) && <i>I appen</i>}
                 {ROM.has(slugOf(it)) && <i class="rom">Flere telefoner</i>}
+                {PL.has(slugOf(it)) && <i class="pluss">✨ Pluss</i>}
               </span>
             )}
           </a>
