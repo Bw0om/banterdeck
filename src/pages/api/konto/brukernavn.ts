@@ -1,4 +1,4 @@
-// For kontoer uten brukernavn (f.eks. laget med e-postlenke): velg ett.
+// Velg eller endre brukernavn. Serveren sjekker at navnet er ledig.
 import type { APIRoute } from 'astro';
 import { rpc } from '../../../lib/spilt';
 import { json, innloggetBruker, BRUKERNAVN } from '../../../lib/konto';
@@ -12,8 +12,14 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const bruker = await innloggetBruker(request);
     if (!bruker) return json({ feil: 'logg-inn', melding: 'Logg inn på nytt.' }, 401);
-    const ok = await rpc('sett_brukernavn', { p_user: bruker.id, p_brukernavn: brukernavn });
-    if (!ok) return json({ feil: 'opptatt', melding: 'Brukernavnet er tatt, eller du har allerede ett.' }, 409);
+    let ok: any;
+    try { ok = await rpc('endre_brukernavn', { p_user: bruker.id, p_brukernavn: brukernavn }); }
+    catch (e) {
+      // Før konto-brukernavn.sql er kjørt finnes bare den gamle funksjonen (kan kun velge første gang)
+      if (!/endre_brukernavn|PGRST202|404/.test((e as Error).message)) throw e;
+      ok = await rpc('sett_brukernavn', { p_user: bruker.id, p_brukernavn: brukernavn });
+    }
+    if (!ok) return json({ feil: 'opptatt', melding: 'Brukernavnet er tatt. Prøv et annet.' }, 409);
     return json({ ok: true, brukernavn });
   } catch (e) {
     console.warn('Brukernavn feilet:', (e as Error).message);

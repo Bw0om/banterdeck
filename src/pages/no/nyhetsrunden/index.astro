@@ -1,5 +1,14 @@
 ---
+// Kjøres på serveren, så ukas runde dukker opp av seg selv fredag kl. 12 uten ny opplasting.
 import Nyhetsrunden from '../../../components/pages/Nyhetsrunden.astro';
-import { sisteRunde } from '../../../lib/nyhetsrunden';
+import Kommer from '../../../components/pages/NyhetsrundenKommer.astro';
+import { sisteRunde, alleRunder, publiseringstid } from '../../../lib/nyhetsrunden';
+export const prerender = false;
+const naa = Date.now();
+const runde = sisteRunde(naa);
+const neste = alleRunder.find((r) => publiseringstid(r) > naa) || null;
+// Mellomlagres kort på Vercel, men aldri forbi publiseringstidspunktet til neste runde
+const maks = neste ? Math.max(5, Math.min(300, Math.floor((publiseringstid(neste) - naa) / 1000))) : 300;
+Astro.response.headers.set('Cache-Control', `public, max-age=0, s-maxage=${maks}, stale-while-revalidate=60`);
 ---
-<Nyhetsrunden runde={sisteRunde} erSiste={true} />
+{runde ? <Nyhetsrunden runde={runde} erSiste={true} neste={neste} /> : <Kommer neste={neste} />}

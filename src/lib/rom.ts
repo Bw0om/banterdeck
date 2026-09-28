@@ -192,7 +192,7 @@ export function startSpill(data: any, lek: string, modus: string) {
 export function handling(data: any, meg: any, h: any) {
   const s = data.spill;
   const erVert = meg.id === data.vert;
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -205,10 +205,20 @@ export function handling(data: any, meg: any, h: any) {
       data.spill = null; melde(data, 'Tilbake i lobbyen'); return { ok: true };
     }
     case 'fjern': {
-      if (!erVert || h.id === data.vert) return { feil: 'bare-vert' };
-      const p = data.spillere.find((x: any) => x.id === h.id); if (!p) return { ok: true };
-      data.spillere = data.spillere.filter((x: any) => x.id !== h.id);
+      const hvem = String(h.hvem || '');
+      if (!erVert || !hvem || hvem === data.vert) return { feil: 'bare-vert' };
+      const p = data.spillere.find((x: any) => x.id === hvem); if (!p) return { ok: true };
+      data.spillere = data.spillere.filter((x: any) => x.id !== hvem);
       melde(data, `${p.navn} ble fjernet`); return { ok: true };
+    }
+    case 'slurk': {
+      // Poengtavla: alle kan føre sine egne slurker, verten kan rette på alle
+      const hvem = String(h.hvem || meg.id);
+      if (hvem !== meg.id && !erVert) return { feil: 'bare-vert', melding: 'Bare verten kan endre andres slurker.' };
+      const p = data.spillere.find((x: any) => x.id === hvem); if (!p) return { ok: true };
+      const n = Number(h.n) === -1 ? -1 : 1;
+      p.slurker = Math.max(0, Math.min(999, (p.slurker || 0) + n));
+      return { ok: true };
     }
     case 'nullstill': {
       if (!erVert) return { feil: 'bare-vert' };

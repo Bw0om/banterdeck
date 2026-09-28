@@ -1,9 +1,13 @@
 ---
 import Nyhetsrunden from '../../../components/pages/Nyhetsrunden.astro';
-import { runder, rundeId } from '../../../lib/nyhetsrunden';
-export function getStaticPaths() {
-  return runder.map((runde) => ({ params: { uke: rundeId(runde) }, props: { runde } }));
-}
-const { runde } = Astro.props;
+import Kommer from '../../../components/pages/NyhetsrundenKommer.astro';
+import { alleRunder, rundeId, erPublisert, publiseringstid } from '../../../lib/nyhetsrunden';
+export const prerender = false;
+const naa = Date.now();
+const runde = alleRunder.find((r) => rundeId(r) === Astro.params.uke);
+if (!runde) return new Response(null, { status: 404 });
+const klar = erPublisert(runde, naa);
+const maks = klar ? 3600 : Math.max(5, Math.min(300, Math.floor((publiseringstid(runde) - naa) / 1000)));
+Astro.response.headers.set('Cache-Control', `public, max-age=0, s-maxage=${maks}, stale-while-revalidate=60`);
 ---
-<Nyhetsrunden runde={runde} />
+{klar ? <Nyhetsrunden runde={runde} /> : <Kommer neste={runde} />}
