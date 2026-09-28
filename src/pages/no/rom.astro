@@ -49,6 +49,12 @@ import Base from '../../layouts/Base.astro';
       api('POST', '/api/rom/' + kode, h).then(function (d) { opptatt = false; ta(d); })
         .catch(function (e) { opptatt = false; toast(e.message); if (e.kode === 'ikke-med') glemRom(); });
     }
+    var ko = Promise.resolve();
+    function gjorAlltid(h) {
+      if (!meg) return;
+      h.id = meg.id; h.pollett = meg.pollett;
+      ko = ko.then(function () { return api('POST', '/api/rom/' + kode, h).then(ta).catch(function (e) { toast(e.message); }); });
+    }
     function hent() {
       if (!kode || !meg) return;
       api('GET', '/api/rom/' + kode + '?v=' + versjon).then(function (d) { feilTeller = 0; if (d) ta(d); planlegg(); })
@@ -338,6 +344,38 @@ import Base from '../../layouts/Base.astro';
         (jeg ? '<div class="dl-knapper"><button class="btn gold" data-g="legg" type="button">Legg ut</button>' + (s.bord.length ? '<button class="btn ghost" data-g="pass" type="button">Pass</button>' : '') + '</div>' : '') +
         '<p class="small">Toere er høyest og rydder bordet.</p>';
     }
+
+    var rfOffset = 0, rfTimer = null;
+    function rfIgjen(s) { return Math.max(0, Math.ceil((s.frist - 3000 - (Date.now() + rfOffset)) / 1000)); }
+    function rfTikk() {
+      clearInterval(rfTimer);
+      rfTimer = setInterval(function () {
+        var s = tilstand && tilstand.spill, el = document.getElementById('rfTid');
+        if (!s || s.type !== 'regelfabrikken' || s.fase !== 'skriv' || !el) { clearInterval(rfTimer); return; }
+        var n = rfIgjen(s); el.textContent = n;
+        el.classList.toggle('snart', n <= 10);
+        if (n <= 0) { var inp = document.getElementById('rfInput'); if (inp) inp.disabled = true; var f = document.getElementById('rfTekst'); if (f) f.textContent = 'Tiden er ute!'; }
+      }, 250);
+    }
+    function regelfabrikkenSpill(s) {
+      rfOffset = s.naa - Date.now();
+      if (s.fase === 'skriv') {
+        var n = rfIgjen(s);
+        setTimeout(rfTikk, 0);
+        var andre = tilstand.spillere.map(function (p) { return esc(p.navn) + ' ' + (s.antall[p.id] || 0); }).join(' · ');
+        return '<div class="rf-tid" id="rfTid">' + n + '</div>' +
+          '<p class="dl-melding" id="rfTekst">' + (n > 0 ? 'Skriv så mange drikkekort du rekker!' : 'Tiden er ute!') + '</p>' +
+          '<form class="rf-skjema" id="rfSkjema"><label for="rfInput" class="small">F.eks. «Alle med hvite sokker drikker»</label>' +
+          '<div class="rf-rad"><input id="rfInput" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="Skriv et kort …"' + (n > 0 ? '' : ' disabled') + '>' +
+          '<button class="btn gold" type="submit">Legg til</button></div></form>' +
+          '<ol class="rf-mine">' + s.mineKort.slice().reverse().map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
+          '<p class="rom-status">' + andre + '</p>' +
+          (erVert() || n <= 0 ? '<button class="rom-stor-knapp" data-g="stokk" type="button">' + (n > 0 ? 'Stopp og stokk nå' : 'Stokk ' + s.totalt + ' kort') + '</button>' : '');
+      }
+      return '<div class="rom-kort rf-kort"><span class="sw-tag">Kort ' + (s.pos + 1) + ' av ' + s.totalt + '</span><p>' + esc(s.kortet) + '</p><span></span></div>' +
+        '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">Trekk neste</button>' +
+        (erVert() ? '<button class="btn ghost" data-g="nytt" type="button">Ny skriverunde</button>' : '');
+    }
     function tegn() {
       if (!tilstand) return;
       var s = tilstand.spill, innhold = '';
@@ -345,15 +383,24 @@ import Base from '../../layouts/Base.astro';
       else {
         innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' ? ' · ' + esc(s.modus) : '') + '</p>' +
           ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
-             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill }[s.type] || function () { return ''; })(s) + '</div>';
+             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill }[s.type] || function () { return ''; })(s) + '</div>';
       }
       var vert = erVert() ? '<div class="rom-vert">' +
         (s ? '<button class="btn ghost small" data-g="avslutt" type="button">Bytt lek</button>' : '') +
         '<button class="btn ghost small" data-g="nullstill" type="button">Nullstill slurker</button></div>' : '';
-      var y = window.scrollY;
+      var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
       root.innerHTML = hode() + innhold + vert +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">Forlat rommet</button></p>';
       window.scrollTo(0, y);
+      var ny = document.getElementById('rfInput');
+      if (ny && gVerdi !== null) { ny.value = gVerdi; if (gFokus) ny.focus({ preventScroll: true }); }
+      var sk = document.getElementById('rfSkjema');
+      if (sk) sk.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var i = document.getElementById('rfInput'), t = i.value.trim(); if (!t) return;
+        i.value = ''; i.focus({ preventScroll: true });
+        gjorAlltid({ handling: 'skriv', tekst: t });
+      });
     }
 
     root.addEventListener('click', function (e) {
@@ -378,7 +425,7 @@ import Base from '../../layouts/Base.astro';
       if (g === 'velg') return gjor({ handling: 'velg', i: Number(b.dataset.i) });
       if (g === 'pvelg') { var i = Number(b.dataset.i), j = presValg.indexOf(i); if (j === -1) presValg.push(i); else presValg.splice(j, 1); b.setAttribute('aria-pressed', j === -1); return; }
       if (g === 'legg') { var valgte = presValg.slice(); presValg = []; return gjor({ handling: 'legg', kort: valgte }); }
-      if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass'].indexOf(g) !== -1) return gjor({ handling: g });
+      if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass', 'stokk'].indexOf(g) !== -1) return gjor({ handling: g });
       if (['avslutt', 'nullstill', 'svart', 'avslor', 'runde', 'nytt-brett'].indexOf(g) !== -1) return gjor({ handling: g });
     });
 

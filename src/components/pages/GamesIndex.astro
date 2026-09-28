@@ -12,11 +12,11 @@ const groups = langGroups(spill, lang).map((g: any) => ({ ...g, list: itemsOf(g,
 const hrefOf = (it: any) => gameHref(games.find((x) => x.name === it.name), (p) => path(lang, p), lang);
 const no = lang === 'no';
 const APP = new Set([...Object.keys(DECKS as any), 'over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer',
-  '21-med-terninger', 'opus', 'drikke-bingo', 'gjett-aret', '100-sporsmal', 'nyhetsrunden', 'nasjonal-vorsprove']);
+  '21-med-terninger', 'opus', 'regelfabrikken', 'drikke-bingo', 'gjett-aret', '100-sporsmal', 'nyhetsrunden', 'nasjonal-vorsprove']);
 const ROM = new Set(['pekeleken', 'jeg-har-aldri', 'enten-eller', 'kategorier', 'nodt-eller-sannhet', 'rygg-mot-rygg', 'duoleken', '50-50',
-  'ring-of-fire', 'forraeder', 'drikke-bingo', 'opus', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris']);
+  'ring-of-fire', 'forraeder', 'drikke-bingo', 'regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris']);
 const slugOf = (it: any) => (games.find((x) => x.name === it.name) || {}).slug;
-const FAV = ['ring-of-fire', 'bussruta', 'pyramiden', 'forraeder', 'drikke-bingo', 'opus'];
+const FAV = ['ring-of-fire', 'regelfabrikken', 'pyramiden', 'forraeder', 'bussruta', 'drikke-bingo', 'opus', 'president'];
 const favs = no ? FAV.map((sl) => games.find((x) => x.slug === sl)).filter(Boolean) : [];
 const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search games or equipment…';
 ---

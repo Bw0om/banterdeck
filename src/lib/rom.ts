@@ -156,7 +156,7 @@ const LINJER: number[][] = (() => {
 function nyttBrett(s: any) { return stokk(s.sanger.map((_: any, i: number) => i)).slice(0, 16); }
 
 export function startSpill(data: any, lek: string, modus: string) {
-  if (EKSTRA.includes(lek)) return startEkstra(data, lek);
+  if (EKSTRA.includes(lek)) return startEkstra(data, lek, modus);
   const liste = lekeliste();
   const valgt = liste.find((x) => x.id === lek);
   if (!valgt) return { feil: 'ukjent-lek' };
@@ -325,10 +325,10 @@ export function gyldigKode(k: any) { return typeof k === 'string' && /^[A-Z0-9]{
    Kort- og terningleker i rom: Opus, Over eller under, Veddeløpet,
    Pyramiden, Gris og President. Skjulte hender vises bare til eieren.
    ===================================================================== */
-export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president'];
+export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken'];
 export function ekstraLeker() {
   return [
-    { id: 'opus', navn: 'Opus', type: 'opus', moduser: [], om: 'Terningen går fra telefon til telefon. Trill til du får sekser, så sendes den videre.' },
+    { id: 'regelfabrikken', navn: 'Regelfabrikken', type: 'regelfabrikken', moduser: [{ v: '45', t: '45 sek' }, { v: '60', t: '60 sek' }, { v: '90', t: '90 sek' }], om: 'Alle skriver så mange drikkekort de rekker på sin telefon. Så stokkes alt og trekkes.' },
     { id: 'overunder', navn: 'Over eller under', type: 'overunder', moduser: [], om: 'Den som har tur gjetter på sin telefon. Feil = drikk hele bunken.' },
     { id: 'veddelopet', navn: 'Veddeløpet', type: 'veddelopet', moduser: [], om: 'Alle vedder på sin telefon, så kjøres løpet.' },
     { id: 'pyramiden', navn: 'Pyramiden', type: 'pyramiden', moduser: [], om: 'Fire skjulte kort hver. Bløff eller si sannheten – og utfordre de andre.' },
@@ -345,9 +345,12 @@ function aktiveIder(data: any, alle = false) {
   return h ? ider.filter((id: string) => h[id]) : ider;
 }
 
-export function startEkstra(data: any, lek: string): any {
+export function startEkstra(data: any, lek: string, modus = ''): any {
   const n = data.spillere.length, ider = aktiveIder(data, true);
-  if (lek === 'opus') {
+  if (lek === 'regelfabrikken') {
+    const sek = [45, 60, 90].includes(Number(modus)) ? Number(modus) : 60;
+    data.spill = { type: 'regelfabrikken', lek, navn: 'Regelfabrikken', modus: sek + ' sek', fase: 'skriv', frist: Date.now() + sek * 1000 + 3000, sek, kort: {}, rekke: [], pos: 0 };
+  } else   if (lek === 'opus') {
     data.spill = { type: 'opus', lek, navn: 'Opus', holder: ider[0], kast: null, antall: 0, nr: 0 };
   } else if (lek === 'overunder') {
     const st = kortstokk52();
@@ -406,6 +409,34 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
   const ider = aktiveIder(data);
   const min = ider.indexOf(meg.id);
   switch (s.type) {
+    case 'regelfabrikken': {
+      if (h.handling === 'skriv') {
+        if (s.fase !== 'skriv') return { feil: 'for-sent', melding: 'Tiden er ute!' };
+        if (Date.now() > s.frist + 2000) return { feil: 'for-sent', melding: 'Tiden er ute!' };
+        const tekst = String(h.tekst || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 140);
+        if (!tekst) return { ok: true };
+        const mine = s.kort[meg.id] || (s.kort[meg.id] = []);
+        if (mine.length >= 40) return { feil: 'fullt', melding: 'Maks 40 kort hver.' };
+        mine.push(tekst); return { ok: true };
+      }
+      if (h.handling === 'stokk') {
+        if (s.fase !== 'skriv') return { ok: true };
+        if (Date.now() < s.frist - 3000 && meg.id !== data.vert) return { feil: 'bare-vert', melding: 'Vent til tiden er ute.' };
+        const alle: string[] = []; Object.values(s.kort).forEach((l: any) => l.forEach((t: string) => alle.push(t)));
+        if (!alle.length) return { feil: 'tom', melding: 'Ingen har skrevet noe ennå.' };
+        s.rekke = stokk(alle); s.pos = 0; s.fase = 'trekk';
+        melde(data, alle.length + ' kort er stokket. Trekk!');
+        return { ok: true };
+      }
+      if (h.handling === 'neste') {
+        if (s.fase !== 'trekk') return { ok: true };
+        if (typeof h.pos === 'number' && h.pos !== s.pos) return { ok: true };
+        s.pos++; if (s.pos >= s.rekke.length) { s.rekke = stokk(s.rekke); s.pos = 0; melde(data, 'Alle kortene er trukket – stokket på nytt.'); }
+        return { ok: true };
+      }
+      if (h.handling === 'nytt') return startEkstra(data, 'regelfabrikken', String(s.sek));
+      return null;
+    }
     case 'opus': {
       if (h.handling === 'kast') {
         if (meg.id !== s.holder) return { feil: 'ikke-din-tur', melding: 'Det er ikke du som har terningen.' };
@@ -563,6 +594,9 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
 
 export function ekstraVisning(s: any, meg: any, data: any) {
   const ider = aktiveIder(data);
+  if (s.type === 'regelfabrikken') return { fase: s.fase, frist: s.frist, naa: Date.now(), sek: s.sek,
+    mineKort: meg ? s.kort[meg.id] || [] : [], antall: Object.fromEntries(Object.entries(s.kort).map(([id, l]: any) => [id, l.length])),
+    kortet: s.fase === 'trekk' ? s.rekke[s.pos] : null, pos: s.pos, totalt: s.fase === 'trekk' ? s.rekke.length : Object.values(s.kort).reduce((n: number, l: any) => n + l.length, 0) };
   if (s.type === 'opus') return { holder: s.holder, kast: s.kast, antall: s.antall, nr: s.nr, fra: s.fra || null };
   if (s.type === 'overunder') return { kort: s.kort, bunke: s.bunke, tur: ider[s.tur % ider.length], sist: s.sist, igjen: s.stokk.length };
   if (s.type === 'veddelopet') return { fase: s.fase, pos: s.pos, sist: s.sist, vinner: s.vinner, bane: s.bane.map((k: any, i: number) => (s.snudd[i] ? k : null)),

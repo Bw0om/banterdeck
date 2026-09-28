@@ -3694,6 +3694,42 @@
      },
      {
       "name": {
+       "no": "Regelfabrikken"
+      },
+      "gear": {
+       "no": "Én telefon – eller én hver",
+       "en": "One phone – or one each",
+       "sv": "En telefon – eller en var"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Alle får like lang tid – for eksempel 60 sekunder – til å skrive så mange drikkekort som de rekker. Hvert kort sier hvem som drikker.",
+        "b|«Alle med hvite sokker drikker.»",
+        "b|«Den som sist var på do, deler ut tre.»",
+        "b|«Alle som har vært på Tinder denne uka, drikker to.»",
+        "Når tiden er ute, stokkes alle kortene sammen uten at noen ser hvem som skrev hva. Trekk ett og ett og gjør det kortet sier.",
+        "Jo mer spesifikt, jo bedre. Treffer kortet bare den som skrev det, drikker den dobbelt."
+       ],
+       "en": [
+        "Everyone gets the same amount of time – say 60 seconds – to write as many drinking cards as they can. Each card says who drinks.",
+        "b|“Everyone in white socks drinks.”",
+        "Shuffle all the cards together and draw them one by one."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "ingen",
+       "tempo": "sosialt",
+       "min": 3,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
        "no": "Jeg har aldri",
        "en": "Never have I ever"
       },

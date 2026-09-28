@@ -4,14 +4,14 @@
  * Alt kjører på én telefon. Leker som trenger skjulte hender (Pyramiden, President, Gris) ligger i rom.
  */
 const { slug } = Astro.props as { slug: string };
-const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer', '21-med-terninger', 'opus'];
-const RomLeker = ['opus', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris'];
+const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer', '21-med-terninger', 'opus', 'regelfabrikken'];
+const RomLeker = ['regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris'];
 const har = DIGITALE.includes(slug);
 const bareRom = ['pyramiden', 'president', 'gris'].includes(slug);
 ---
 {(har || bareRom) && (
 <section class="gt dl" data-dl={slug}>
-  <h2>{bareRom ? 'Spill uten kortstokk' : (['terningen-bestemmer', '21-med-terninger', 'opus'].includes(slug) ? 'Telefonen er terningen' : 'Telefonen er kortstokken')}</h2>
+  <h2>{bareRom ? 'Spill uten kortstokk' : (['terningen-bestemmer', '21-med-terninger', 'opus'].includes(slug) ? 'Telefonen er terningen' : slug === 'regelfabrikken' ? 'Skriv kortene' : 'Telefonen er kortstokken')}</h2>
   {bareRom ? (
     <>
       <p>Her har hver spiller skjulte kort på hånda, så dere spiller fra hver deres telefon. Lag et rom, del koden og velg {slug === 'pyramiden' ? 'Pyramiden' : slug === 'president' ? 'President' : 'Gris'}.</p>
@@ -389,36 +389,96 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="opus"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, spillere = [], tur = 0, opptatt = false, kast = 0;
-  function oppsett() {
-    root.innerHTML = '<p><a class="btn ghost" href="https://open.spotify.com/search/Opus%20Eric%20Prydz" target="_blank" rel="noopener">Åpne «Opus» i Spotify ↗</a></p>' +
-      '<label class="rof-lab" for="opNavn">Spillere i ringen (skill med komma)</label><input class="rof-inp" id="opNavn" placeholder="Jonas, Maria, Petter" value="' + K.esc(K.hent('bd_spillere')) + '">' +
-      '<button class="btn gold rof-start" data-a="start">Start – trykk samtidig som sangen</button>';
-  }
-  function tegn(tekst) {
-    root.innerHTML = '<p class="dl-steg">Terningen er hos</p><p class="dl-holder">' + K.esc(spillere[tur]) + '</p>' +
-      '<button class="dl-terninger dl-stortrykk" data-a="kast" aria-label="Trill terningen">' + K.terning(6) + '</button>' +
-      '<p class="dl-melding dl-stor" aria-live="polite">' + K.esc(tekst || 'Trill til du får en sekser!') + '</p>' +
-      '<p class="dl-info">' + kast + ' kast så langt</p>' +
-      '<div class="dl-knapper"><button class="btn" data-a="drop">Droppet kom!</button></div>';
-  }
+  var K = window.BDK, laas = null, opptatt = false;
+  root.innerHTML = '<p>Telefonen <b>er</b> terningen. Send selve mobilen rundt i ringen. Er dere mange, åpne siden på flere telefoner og send dem rundt samtidig.</p>' +
+    '<p><a class="btn ghost" href="https://open.spotify.com/search/Opus%20Eric%20Prydz" target="_blank" rel="noopener">Åpne «Opus» i Spotify ↗</a></p>' +
+    '<button class="btn gold rof-start" data-a="start">Gjør telefonen til terning</button>' +
+    '<div class="op-full" hidden role="dialog" aria-modal="true" aria-label="Opus-terning">' +
+      '<button class="op-lukk" data-a="lukk" aria-label="Lukk">×</button>' +
+      '<button class="op-flate" data-a="kast" aria-label="Trill terningen">' +
+        '<span class="dl-terninger">' + K.terning(6) + '</span>' +
+        '<b class="op-tekst">Trykk hvor som helst for å trille</b>' +
+      '</button>' +
+    '</div>';
+  var full = root.querySelector('.op-full'), flate = root.querySelector('.op-flate'), tekst = root.querySelector('.op-tekst'), t = root.querySelector('.dl-terninger');
+  function vaken() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (l) { laas = l; }).catch(function () {}); } catch (e) {} }
+  function lukk() { full.hidden = true; document.body.classList.remove('noscroll'); try { if (laas) laas.release(); } catch (e) {} laas = null; }
   root.addEventListener('click', function (e) {
     var b = e.target.closest('[data-a]'); if (!b) return;
-    if (b.dataset.a === 'start') {
-      var inp = root.querySelector('#opNavn'); spillere = K.navn(inp); if (!spillere.length) spillere = ['Spiller 1', 'Spiller 2', 'Spiller 3', 'Spiller 4'];
-      K.husk('bd_spillere', inp.value); tur = 0; kast = 0; tegn();
-    }
+    if (b.dataset.a === 'start') { full.hidden = false; document.body.classList.add('noscroll'); flate.classList.remove('sekser'); tekst.textContent = 'Trykk hvor som helst for å trille'; vaken(); }
+    if (b.dataset.a === 'lukk') { e.stopPropagation(); lukk(); }
     if (b.dataset.a === 'kast' && !opptatt) {
-      opptatt = true; kast++;
-      var t = root.querySelector('.dl-terninger'), m = root.querySelector('.dl-melding');
+      opptatt = true; flate.classList.remove('sekser'); tekst.textContent = '…';
       K.kast(t, 1, function (r) {
         opptatt = false;
-        if (r[0] === 6) { var fra = spillere[tur]; tur = (tur + 1) % spillere.length; tegn('SEKSER! ' + fra + ' sender terningen til ' + spillere[tur] + '.'); root.querySelector('.dl-terninger').innerHTML = K.terning(6); }
-        else { m.textContent = r[0] + ' – trill igjen!'; root.querySelector('.dl-info').textContent = kast + ' kast så langt'; }
+        if (r[0] === 6) {
+          flate.classList.add('sekser'); tekst.textContent = 'SEKSER! Send telefonen videre';
+          try { if (navigator.vibrate) navigator.vibrate([120, 60, 120]); } catch (e) {}
+        } else tekst.textContent = r[0] + ' – trill igjen!';
       });
     }
-    if (b.dataset.a === 'drop') { root.querySelector('.dl-melding').textContent = spillere[tur] + ' holdt terningen da droppet kom – drikk opp!'; }
   });
+  document.addEventListener('astro:before-swap', lukk, { once: true });
+})();
+</script>
+)}
+
+{slug === 'regelfabrikken' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="regelfabrikken"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var K = window.BDK, sek = 60, kort = [], skriver = 0, klokke = null, rekke = [], pos = 0;
+  function oppsett() {
+    root.innerHTML = '<p>Én telefon går rundt. Hver får like lang tid til å skrive så mange drikkekort som mulig. Så stokkes alt sammen.</p>' +
+      '<div class="rom-mod">' + [45, 60, 90].map(function (n) { return '<button type="button" data-sek="' + n + '" aria-pressed="' + (n === sek) + '">' + n + ' sek</button>'; }).join('') + '</div>' +
+      '<button class="btn gold rof-start" data-a="klar">Første spiller: start</button>';
+  }
+  function klar() {
+    root.innerHTML = '<p class="dl-steg">Spiller ' + (skriver + 1) + '</p><p class="dl-melding dl-stor">Klar? Du får ' + sek + ' sekunder.</p>' +
+      '<p class="dl-info">' + kort.length + ' kort i bunken så langt</p>' +
+      '<div class="dl-knapper"><button class="btn gold" data-a="skriv">Start klokka</button>' + (kort.length ? '<button class="btn ghost" data-a="spill">Alle har skrevet – stokk</button>' : '') + '</div>';
+  }
+  function skriv() {
+    var slutt = Date.now() + sek * 1000, mine = 0;
+    root.innerHTML = '<div class="rf-tid" id="rfTidS">' + sek + '</div>' +
+      '<form class="rf-skjema"><label for="rfSolo" class="small">F.eks. «Alle med hvite sokker drikker»</label>' +
+      '<div class="rf-rad"><input id="rfSolo" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="Skriv et kort …"><button class="btn gold" type="submit">Legg til</button></div></form>' +
+      '<p class="dl-info" id="rfAnt">0 kort</p>';
+    var inp = root.querySelector('#rfSolo'), tid = root.querySelector('#rfTidS'), ant = root.querySelector('#rfAnt');
+    inp.focus();
+    root.querySelector('form').addEventListener('submit', function (e) {
+      e.preventDefault(); var v = inp.value.trim(); if (!v || inp.disabled) return;
+      kort.push(v.slice(0, 140)); mine++; inp.value = ''; ant.textContent = mine + (mine === 1 ? ' kort' : ' kort'); inp.focus();
+    });
+    clearInterval(klokke);
+    klokke = setInterval(function () {
+      var n = Math.max(0, Math.ceil((slutt - Date.now()) / 1000));
+      tid.textContent = n; tid.classList.toggle('snart', n <= 10);
+      if (n <= 0) {
+        clearInterval(klokke); inp.disabled = true;
+        if (inp.value.trim()) { kort.push(inp.value.trim().slice(0, 140)); mine++; }
+        skriver++;
+        root.innerHTML = '<p class="dl-melding dl-stor">Tiden er ute! Du skrev ' + mine + ' kort.</p><p>Send telefonen videre uten å vise hva du skrev.</p>' +
+          '<div class="dl-knapper"><button class="btn gold" data-a="klar">Neste spiller</button><button class="btn ghost" data-a="spill">Alle har skrevet – stokk</button></div>';
+      }
+    }, 250);
+  }
+  function spill() { rekke = K.bland(kort); pos = 0; vis(); }
+  function vis() {
+    root.innerHTML = '<div class="rom-kort rf-kort"><span class="sw-tag">Kort ' + (pos + 1) + ' av ' + rekke.length + '</span><p>' + K.esc(rekke[pos]) + '</p><span></span></div>' +
+      '<div class="dl-knapper"><button class="btn gold" data-a="neste">Trekk neste</button><button class="btn ghost" data-a="nytt">Ny skriverunde</button></div>';
+  }
+  root.addEventListener('click', function (e) {
+    var sb = e.target.closest('[data-sek]'); if (sb) { sek = Number(sb.dataset.sek); return oppsett(); }
+    var b = e.target.closest('[data-a]'); if (!b) return;
+    var a = b.dataset.a;
+    if (a === 'klar') klar();
+    if (a === 'skriv') skriv();
+    if (a === 'spill') spill();
+    if (a === 'neste') { pos++; if (pos >= rekke.length) { rekke = K.bland(rekke); pos = 0; } vis(); }
+    if (a === 'nytt') { kort = []; skriver = 0; oppsett(); }
+  });
+  document.addEventListener('astro:before-swap', function () { clearInterval(klokke); }, { once: true });
   oppsett();
 })();
 </script>

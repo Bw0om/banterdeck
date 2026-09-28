@@ -978,3 +978,27 @@ body:has(#rom) .tool.dice{display:none}
 .gruppe-rolig .game{background:transparent;min-height:0;padding:12px 14px}
 .gruppe-rolig .game .gn{font-size:16px}
 .gruppe-rolig h3{color:var(--muted)}
+/* ---------- Opus: telefonen er terningen ---------- */
+.op-full{position:fixed;inset:0;z-index:160;background:#0d0a06}
+.op-full[hidden]{display:none}
+.op-flate{position:absolute;inset:0;width:100%;border:0;background:#0d0a06;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;
+  padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom);transition:background .2s}
+.op-flate .dice{width:min(56vw,240px);height:min(56vw,240px);padding:min(9vw,38px);border-radius:min(12vw,52px)}
+.op-flate .dice i{width:min(9vw,38px);height:min(9vw,38px)}
+.op-tekst{font-family:var(--display);font-weight:800;font-size:clamp(22px,6vw,34px);text-align:center;max-width:18ch}
+.op-flate.sekser{background:var(--gold);color:var(--ink2)}
+.op-lukk{position:absolute;z-index:2;top:calc(env(safe-area-inset-top) + 12px);right:12px;width:48px;height:48px;border-radius:24px;border:0;background:rgba(248,233,210,.12);color:var(--ink);font-size:28px;line-height:1}
+body:has(.op-full:not([hidden])) .tool.dice{display:none}
+/* ---------- Regelfabrikken ---------- */
+.rf-tid{font-family:var(--display);font-weight:800;font-size:72px;line-height:1;color:var(--gold);font-variant-numeric:tabular-nums}
+.rf-tid.snart{color:var(--accent)}
+.rf-skjema{width:100%;max-width:440px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.rf-rad{display:flex;gap:8px}
+.rf-rad input{flex:1;min-width:0;font:500 17px var(--sans);color:var(--ink);background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:13px 14px;outline:none}
+.rf-rad input:focus{border-color:var(--gold)}
+.rf-rad .btn{flex-shrink:0}
+.rf-mine{list-style:none;padding:0;margin:0;width:100%;max-width:440px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.rf-mine li{background:var(--card);border-radius:12px;padding:9px 12px;font-size:15px}
+.rf-kort p{font-size:clamp(24px,6.5vw,30px)}
+.rom-mod button[aria-pressed=true]{background:var(--gold);color:var(--ink2);border-color:var(--gold)}
+.op-full:has(.sekser) .op-lukk{background:rgba(26,15,8,.14);color:var(--ink2)}
