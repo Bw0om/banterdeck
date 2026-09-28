@@ -1,6 +1,7 @@
 // Serverfunksjon (kjører på Vercel): tar imot forslag fra /forslag og oppretter et GitHub-issue.
 // Trenger to miljøvariabler i Vercel: GITHUB_TOKEN (fine-grained, Issues: read & write) og GITHUB_REPO.
 import type { APIRoute } from 'astro';
+import { GITHUB_REPO } from '../../config';
 export const prerender = false;
 
 const json = (body: unknown, status = 200) =>
@@ -25,7 +26,7 @@ export const POST: APIRoute = async ({ request }) => {
   // process.env leses ved kjøring på Vercel; import.meta.env er reserve for lokal kjøring.
   const env: any = (typeof process !== 'undefined' && process.env) || {};
   const token = env.GITHUB_TOKEN || import.meta.env.GITHUB_TOKEN;
-  const repo = env.GITHUB_REPO || import.meta.env.GITHUB_REPO;
+  const repo = env.GITHUB_REPO || import.meta.env.GITHUB_REPO || GITHUB_REPO;
   if (!token) return json({ ok: false, error: 'GITHUB_TOKEN mangler i Vercel (Settings → Environment Variables)' }, 500);
   if (!repo) return json({ ok: false, error: 'GITHUB_REPO mangler i Vercel (Settings → Environment Variables)' }, 500);
 
@@ -59,7 +60,7 @@ async function foreslaLek(d: any) {
   if (regler.length < 30) return json({ ok: false, error: 'Skriv reglene litt mer utfyllende (minst 30 tegn).' }, 400);
   const env: any = (typeof process !== 'undefined' && process.env) || {};
   const token = env.GITHUB_TOKEN || import.meta.env.GITHUB_TOKEN;
-  const repo = env.GITHUB_REPO || import.meta.env.GITHUB_REPO;
+  const repo = env.GITHUB_REPO || import.meta.env.GITHUB_REPO || GITHUB_REPO;
   if (!token || !repo) return json({ ok: false, error: 'Forslag er ikke satt opp ennå.' }, 500);
   const meta = JSON.stringify({ t: 'lek', navn, pl, utstyr, regler, n: fra });
   const body = [

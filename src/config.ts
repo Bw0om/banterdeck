@@ -11,7 +11,7 @@ export const ADSENSE_SLOT = '';
 export const CONTACT_EMAIL = 'post@banterdeck.com';
 
 // GitHub-repoet som innholdet ligger i (brukes av /admin og av forslag-funksjonen).
-export const GITHUB_REPO = 'Bw0om/lommearsenal';
+export const GITHUB_REPO = 'Bw0om/banterdeck';
 
 // Supabase (valgfritt) for brukerkontoer.
 // Leses ved BYGGING, så vi kan bruke navnene Vercels Supabase-integrasjon lager selv —

@@ -323,9 +323,13 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
     /* ---------- forslag ---------- */
     async function loadSuggestions() {
       try {
-        var r = await api('/issues?state=open&labels=forslag&per_page=50');
-        if (!r.ok) return;
-        var list = await r.json();
+        // Henter alle åpne saker og plukker ut forslagene. Merket «forslag» kan mangle hvis tokenen
+        // ikke har lov til å sette merker, så tittelen brukes også.
+        var r = await api('/issues?state=open&per_page=100');
+        if (!r.ok) { $('sugList').innerHTML = '<p class="small">Fikk ikke hentet forslag fra ' + esc(gh.repo) + ' (GitHub svarte ' + r.status + '). Sjekk at tokenen har Issues: read &amp; write.</p>'; return; }
+        var list = (await r.json()).filter(function (is) {
+          return !is.pull_request && ((is.labels || []).some(function (l) { return l.name === 'forslag'; }) || /^Forslag( \(lek\))?:/.test(is.title || ''));
+        });
         sugs = list.map(function (is) {
           var m = /<!--\s*(\{[\s\S]*?\})\s*-->/.exec(is.body || '');
           var meta = {};
@@ -340,7 +344,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
     }
     function renderSugs() {
       $('sugCount').textContent = sugs.length ? '(' + sugs.length + ')' : '';
-      if (!sugs.length) { $('sugList').innerHTML = '<p class="small">Ingen nye forslag.</p>'; return; }
+      if (!sugs.length) { $('sugList').innerHTML = '<p class="small">Ingen nye forslag i ' + esc(gh.repo) + '. Kommer det ikke forslag hit, sjekk at GITHUB_REPO i Vercel er det samme repoet.</p>'; return; }
       $('sugList').innerHTML = sugs.map(function (s, i) {
         if (s.t === 'lek') return '<article class="card item"><p class="ctx">Ny drikkelek' + (s.pl ? ' · ' + esc(s.pl) + ' spillere' : '') + (s.utstyr ? ' · ' + esc(s.utstyr) : '') + '</p>' +
           '<p class="line"><b>' + esc(s.navn) + '</b></p><p class="small" style="white-space:pre-line">' + esc(s.regler) + '</p>' +
@@ -396,9 +400,11 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
     var feil = [];
     async function loadFeil() {
       try {
-        var r = await api('/issues?state=open&labels=feil&per_page=50');
+        var r = await api('/issues?state=open&per_page=100');
         if (!r.ok) return;
-        feil = (await r.json()).filter(function (is) { return !is.pull_request; });
+        feil = (await r.json()).filter(function (is) {
+          return !is.pull_request && ((is.labels || []).some(function (l) { return l.name === 'feil'; }) || /^Feil:/.test(is.title || ''));
+        });
         renderFeil();
       } catch (e) {}
     }

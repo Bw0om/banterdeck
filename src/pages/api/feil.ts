@@ -1,6 +1,7 @@
 // «Noe galt?»: lager et GitHub-issue med merket «feil», så du får beskjed på e-post fra GitHub.
 // Bruker samme GITHUB_TOKEN og GITHUB_REPO som forslagene. Ingen navn eller e-post samles inn.
 import type { APIRoute } from 'astro';
+import { GITHUB_REPO } from '../../config';
 import { json } from '../../lib/konto';
 export const prerender = false;
 
@@ -27,7 +28,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     `**Tid:** ${new Date().toISOString()}`,
   ].filter((x, i) => x !== '' || i < 2);
   const env: any = (typeof process !== 'undefined' && process.env) || {};
-  const token = env.GITHUB_TOKEN, repo = env.GITHUB_REPO;
+  const token = env.GITHUB_TOKEN, repo = env.GITHUB_REPO || GITHUB_REPO;
   if (!token || !repo) return json({ ok: false, error: 'Feilrapporter er ikke satt opp ennå.' }, 500);
   const r = await fetch(`https://api.github.com/repos/${repo}/issues`, {
     method: 'POST',
