@@ -127,6 +127,51 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       rt.stopp = true; rt.ok = false; clearInterval(rt.hb);
       if (rt.ws) { var w = rt.ws; rt.ws = null; try { w.close(); } catch (e) {} }
     }
+    /* ---------- lyd: små effekter laget i nettleseren (ingen lydfiler) ---------- */
+    var lyd = { ctx: null, paa: les('bd_lyd') !== false };
+    function lydCtx() {
+      if (!lyd.ctx) { try { lyd.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+      if (lyd.ctx.state === 'suspended') lyd.ctx.resume().catch(function () {});
+      return lyd.ctx;
+    }
+    // Telefoner krever et trykk før lyd kan spilles – lås opp ved første berøring
+    document.addEventListener('pointerdown', function () { if (lyd.paa) lydCtx(); }, { passive: true });
+    function tone(f, t0, varighet, type, volum, tilF) {
+      var c = lyd.ctx; if (!c) return;
+      var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+      if (tilF) o.frequency.exponentialRampToValueAtTime(tilF, t + varighet);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(volum || 0.2, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + varighet);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + varighet + 0.02);
+    }
+    function spillLyd(navn) {
+      if (!lyd.paa || !lydCtx()) return;
+      if (navn === 'tikk') tone(1800, 0, 0.03, 'square', 0.05);
+      if (navn === 'ding') { tone(880, 0, 0.35, 'triangle', 0.25); tone(1320, 0.12, 0.5, 'triangle', 0.2); }
+      if (navn === 'tur') { tone(660, 0, 0.14, 'sine', 0.2); tone(880, 0.13, 0.14, 'sine', 0.2); tone(1175, 0.26, 0.3, 'sine', 0.22); }
+      if (navn === 'slurk') { tone(320, 0, 0.12, 'sine', 0.3, 180); tone(300, 0.14, 0.12, 'sine', 0.3, 160); tone(280, 0.28, 0.16, 'sine', 0.3, 140); }
+      if (navn === 'pop') tone(600, 0, 0.08, 'sine', 0.12, 900);
+      if (navn === 'svar') { tone(523, 0, 0.12, 'triangle', 0.18); tone(784, 0.1, 0.25, 'triangle', 0.18); }
+    }
+    /** Tikk som går saktere og saktere mens hjulet spinner, og et pling når det stopper. */
+    function hjulLyd(ms) {
+      if (!lyd.paa || !lydCtx()) return;
+      var t = 0, steg = 45;
+      while (t < ms - 150) { tone(1700, t / 1000, 0.025, 'square', 0.04); t += steg; steg *= 1.075; }
+      setTimeout(function () { spillLyd('ding'); }, ms);
+    }
+    function erMinTur(t) {
+      var s = t && t.spill, m = t && t.meg; if (!s || !m) return false;
+      if (s.type === 'bussruta') return (s.fase === 1 && s.aktiv === m) || (s.fase === 3 && s.buss === m && s.bussRekke < s.maal);
+      if (s.type === 'yatzy') return !s.ferdig && s.aktiv === m;
+      if (s.type === 'overunder' || s.type === 'president') return s.tur === m;
+      if (s.type === 'opus') return s.holder === m;
+      if (s.type === 'tosannheter') return s.fase === 'skriv' && s.aktiv === m;
+      if (s.type === 'forraeder') return s.fase === 'svar' && s.aktiv === m;
+      return false;
+    }
+    var varMinTur = false, sisteFase = '';
+
     /* ---------- svarfrist: nedtelling på alle telefoner ---------- */
     var klokkeAvvik = 0, fristSendt = 0, fristTimer = null;
     function fristHtml(s, tekst) {
@@ -150,6 +195,10 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
     function ta(d) {
       if (!d) return;
       if (d.naa) klokkeAvvik = d.naa - Date.now();
+      var naaTur = erMinTur(d); if (naaTur && !varMinTur && tilstand) spillLyd('tur'); varMinTur = naaTur;
+      var fase = d.spill ? d.spill.type + ':' + (d.spill.fase || '') + ':' + (d.spill.i || 0) : '';
+      if (tilstand && d.spill && /nyhetsrunden:svar|mest:resultat|forraeder:avslort|tosannheter:avslort/.test(fase) && fase !== sisteFase) spillLyd('svar');
+      sisteFase = fase;
       if (d.versjon) versjon = d.versjon;
       tilstand = d;
       if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
@@ -675,7 +724,9 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         el.innerHTML = '<span>' + esc(r.e) + '</span>' + (r.til ? '<small>' + esc(navn(r.fra)) + ' → ' + esc(navn(r.til)) + '</small>' : '<small>' + esc(navn(r.fra)) + '</small>');
         document.body.appendChild(el);
         setTimeout(function () { el.remove(); }, 2600);
+        if (!(r.til && r.til === tilstand.meg) && r.fra !== tilstand.meg) spillLyd('pop');
         if (r.til && r.til === tilstand.meg) {
+          spillLyd('slurk');
           toast(navn(r.fra) + ' sendte deg en slurk 🍺');
           try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {}
         }
@@ -686,7 +737,8 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       var megS = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {};
       return '<div class="reak-linje" id="reakLinje">' + ['🍻', '😂', '🔥', '😱', '👏'].map(function (e) {
         return '<button type="button" data-g="reager" data-e="' + e + '" aria-label="Send ' + e + '">' + e + '</button>';
-      }).join('') + '<button type="button" class="reak-send" data-g="send-velg"' + (megS.gi ? '' : ' disabled') + ' aria-label="Send en slurk til noen">🍺 <b>' + (megS.gi || 0) + '</b></button></div>';
+      }).join('') + '<button type="button" data-g="lyd" aria-label="' + (lyd.paa ? 'Skru av lyd' : 'Skru på lyd') + '" aria-pressed="' + lyd.paa + '">' + (lyd.paa ? '🔊' : '🔇') + '</button>' +
+        '<button type="button" class="reak-send" data-g="send-velg"' + (megS.gi ? '' : ' disabled') + ' aria-label="Send en slurk til noen">🍺 <b>' + (megS.gi || 0) + '</b></button></div>';
     }
     function sendVelger() {
       var megS = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {};
@@ -788,6 +840,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       var res = tavleHjul.querySelector('.hjul-resultat'); res.textContent = navn(hj.hvem) + ' spinner …';
       settVinkel(0, hj.antall, false);
       requestAnimationFrame(function () { requestAnimationFrame(function () { settVinkel(hj.i, hj.antall, true, 5); }); });
+      hjulLyd(4000);
       setTimeout(function () {
         hjulSpinner = false;
         if (!tavleHjul) return;
@@ -838,7 +891,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       }, 'image/png');
     }
     function delKveld() {
-      var t = kveldsTall(), W = 1080, font = '"Bricolage Grotesque", system-ui, sans-serif';
+      var t = kveldsTall(), W = 1080, font = '"Bricolage Grotesque Variable", "Bricolage Grotesque", system-ui, sans-serif';
       delBilde(function (g) {
         var H = 520 + t.kaaring.length * 120 + Math.min(t.rangert.length, 8) * 70 + (t.leker.length ? 120 : 0);
         if (!g) return H;
@@ -907,7 +960,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
     function delTavle(knapp) {
       var l = rangert(), k = kaaring(), W = 1080, H = Math.max(1080, 420 + l.length * 96 + k.length * 110);
       var c = document.createElement('canvas'); c.width = W; c.height = H;
-      var g = c.getContext('2d'), font = '"Bricolage Grotesque", system-ui, sans-serif';
+      var g = c.getContext('2d'), font = '"Bricolage Grotesque Variable", "Bricolage Grotesque", system-ui, sans-serif';
       g.fillStyle = '#141009'; g.fillRect(0, 0, W, H);
       g.fillStyle = '#f4b740'; g.font = '800 84px ' + font; g.fillText('Kveldens tavle', 80, 160);
       g.fillStyle = '#b3a288'; g.font = '500 36px ' + font;
@@ -1034,6 +1087,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       if (g === 'del-kveld') return delKveld();
       if (g === 'avslutt-kvelden' || g === 'fortsett-kvelden') return gjor({ handling: g });
       if (g === 'velg-annen') { visAlle = true; if (erVert()) gjor({ handling: 'velg-annen' }); return tegn(); }
+      if (g === 'lyd') { lyd.paa = !lyd.paa; skriv('bd_lyd', lyd.paa); if (lyd.paa) { lydCtx(); spillLyd('pop'); } return tegn(); }
       if (g === 'reager') return gjorAlltid({ handling: 'reager', e: b.dataset.e });
       if (g === 'send-velg') return sendVelger();
       if (g === 'br-svar') return gjor({ handling: 'br-svar', v: b.dataset.v });

@@ -33,6 +33,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
       <div class="tabs">
         <button class="tab on" data-tab="innhold">Innhold</button>
         <button class="tab" data-tab="forslag">Forslag <span id="sugCount" class="badge"></span></button>
+        <button class="tab" data-tab="feil">Feil <span id="feilCount" class="badge"></span></button>
       </div>
       <div class="barright">
         <span id="dirty" class="small"></span>
@@ -56,6 +57,12 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
     <div id="tab-forslag" hidden>
       <p class="small">Forslag sendt inn via <a href="/forslag">/forslag</a>. «Godta» legger replikken i valgt gruppe og lukker forslaget når du publiserer.</p>
       <div id="sugList" class="cards"></div>
+    </div>
+
+    <!-- Fane: feilrapporter -->
+    <div id="tab-feil" hidden>
+      <p class="small">Meldinger fra «Noe galt?»-knappen. «Løst» lukker saken på GitHub med én gang.</p>
+      <div id="feilList" class="cards"></div>
     </div>
   </section>
 
@@ -169,6 +176,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
       buildSelects();
       renderList();
       loadSuggestions();
+      loadFeil();
     }
 
     /* ---------- hjelpere ---------- */
@@ -197,6 +205,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
         var t = b.dataset.tab;
         $('tab-innhold').hidden = t !== 'innhold';
         $('tab-forslag').hidden = t !== 'forslag';
+        $('tab-feil').hidden = t !== 'feil';
       });
     });
 
@@ -381,6 +390,41 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
         sugs = sugs.filter(function (x) { return x.number !== s2.number; });
         setDirty(true); renderSugs();
       }
+    });
+
+    /* ---------- feilrapporter ---------- */
+    var feil = [];
+    async function loadFeil() {
+      try {
+        var r = await api('/issues?state=open&labels=feil&per_page=50');
+        if (!r.ok) return;
+        feil = (await r.json()).filter(function (is) { return !is.pull_request; });
+        renderFeil();
+      } catch (e) {}
+    }
+    function renderFeil() {
+      $('feilCount').textContent = feil.length ? '(' + feil.length + ')' : '';
+      if (!feil.length) { $('feilList').innerHTML = '<p class="small">Ingen åpne feilrapporter. 🎉</p>'; return; }
+      $('feilList').innerHTML = feil.map(function (f, i) {
+        var deler = String(f.body || '').split('\n---\n'), tekst = deler[0], info = (deler[1] || '').replace(/\*\*/g, '');
+        return '<article class="card item"><p class="line" style="white-space:pre-line">' + esc(tekst) + '</p>' +
+          '<p class="sugmeta" style="white-space:pre-line">' + esc(info.trim()) + '</p>' +
+          '<p class="sugmeta">' + esc((f.created_at || '').slice(0, 16).replace('T', ' ')) + ' · <a href="' + esc(f.html_url) + '" target="_blank" rel="noopener">på GitHub</a></p>' +
+          '<div class="acts"><button class="mini" data-feilok="' + i + '">Løst</button><button class="mini danger" data-feilnei="' + i + '">Avvis</button></div></article>';
+      }).join('');
+    }
+    $('feilList').addEventListener('click', async function (e) {
+      var ok = e.target.closest('[data-feilok]'), nei = e.target.closest('[data-feilnei]'), b = ok || nei;
+      if (!b) return;
+      var f = feil[+(ok ? ok.dataset.feilok : nei.dataset.feilnei)];
+      b.disabled = true;
+      try {
+        var r = await api('/issues/' + f.number, { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ state: 'closed', state_reason: ok ? 'completed' : 'not_planned' }) });
+        if (!r.ok) throw new Error('GitHub svarte ' + r.status);
+        feil = feil.filter(function (x) { return x.number !== f.number; }); renderFeil();
+        status(ok ? 'Merket som løst ✓' : 'Avvist.');
+      } catch (err) { status(err.message); b.disabled = false; }
     });
 
     /* ---------- publisering ---------- */

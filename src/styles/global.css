@@ -1,10 +1,10 @@
 :root{
   --bg:#141009; --bg2:#1c1610; --card:#221a10; --card2:#2a1f12;
   --border:rgba(248,233,210,.10); --border2:rgba(248,233,210,.18);
-  --ink:#f4ebdc; --muted:#b3a288; --faint:#8a7a64;
+  --ink:#f4ebdc; --muted:#b3a288; --faint:#9c8b72;
   --accent:#ff6a4d; --gold:#f4b740;
-  --display:'Bricolage Grotesque',system-ui,sans-serif;
-  --serif:'Fraunces',Georgia,serif;
+  --display:'Bricolage Grotesque Variable','Bricolage Grotesque',system-ui,sans-serif;
+  --serif:'Fraunces Variable','Fraunces',Georgia,serif;
   --r:16px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -634,7 +634,7 @@ body:has(.nr) .tool.dice{display:none}
    Runde 2 – app-utseendet. Figtree i alt som er grensesnitt,
    Fraunces bare der replikkene står. Større, rundere flater.
    ===================================================================== */
-:root{--sans:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;--r:20px;--ink2:#1a0f08}
+:root{--sans:'Figtree Variable','Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;--r:20px;--ink2:#1a0f08}
 body{font-family:var(--sans);font-size:16px}
 p.lead{font-style:normal;font-size:16px}
 .card .line,.hero .today,.today,.dealcard .line,.sw-line,.gt-text{font-family:var(--serif)}
@@ -676,7 +676,7 @@ p.lead{font-style:normal;font-size:16px}
 .h2-today-top span:last-child{color:var(--muted);letter-spacing:0;text-transform:none;font-weight:600}
 .h2-today .today{margin:10px 0 6px;font-style:italic;font-weight:500;font-size:clamp(22px,4vw,30px);line-height:1.25;cursor:copy}
 .h2-today .today.copied{color:var(--gold)}
-.h2-today-hint{margin:0;font-size:13px;color:var(--faint)}
+.h2-today-hint{margin:0;font-size:13px;color:var(--muted)}
 @media (max-width:899px){
   .h2-hero{margin:-26px -18px 0;border-radius:0 0 32px 32px;padding:26px 20px 24px}
 }

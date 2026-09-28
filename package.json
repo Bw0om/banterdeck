@@ -11,6 +11,9 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.0.0",
     "@astrojs/vercel": "^8.2.11",
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
     "astro": "^5.0.0",
     "qrcode-generator": "^1.4.4",
     "web-push": "^3.6.7"

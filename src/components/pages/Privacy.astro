@@ -21,7 +21,7 @@ const accounts = Boolean(SUPABASE_URL);
         <h2>Spill sammen (rom)</h2>
         <p>Når du lager eller blir med i et rom, lagrer vi kallenavnet du skriver inn og hva som skjer i spillet, så alle telefonene ser det samme. Telefonen din husker en tilfeldig nøkkel for rommet, så du kommer inn igjen om du lukker siden. Rommet slettes automatisk etter ett døgn uten aktivitet.</p>
         <h2>Skrifttyper</h2>
-        <p>Skriftene lastes fra Google Fonts, som da ser IP-adressen din.</p>
+        <p>Skriftene ligger på vår egen server, så ingen tredjepart ser besøket ditt når de lastes.</p>
         <h2>Annonser</h2>
         {ADSENSE_CLIENT
           ? <p>Siden viser annonser fra Google AdSense, som kan bruke informasjonskapsler. Juster dette i <a href="https://adssettings.google.com" rel="noopener">Googles annonseinnstillinger</a>.</p>
@@ -38,7 +38,7 @@ const accounts = Boolean(SUPABASE_URL);
         <p>Favourites, your own lines, language choice and the age-gate answer are stored in your own browser. Clear your site data to remove them.</p>
         {accounts && <><h2>Accounts</h2><p>If you create an account, your email address, username, password (encrypted – we cannot see it), the lines you add and the card decks you save are stored with our database provider (Supabase). We also count anonymously how many rooms are made and which games are played in them – never who. You can delete your account and everything in it at any time under «My deck», or ask us over email.</p></>}
         <h2>Fonts</h2>
-        <p>Fonts load from Google Fonts, which sees your IP address when they are fetched.</p>
+        <p>Fonts are hosted on our own server, so no third party sees your visit when they load.</p>
         <h2>Advertising</h2>
         {ADSENSE_CLIENT
           ? <p>This site shows Google AdSense ads, which may use cookies. Adjust this in <a href="https://adssettings.google.com" rel="noopener">Google's ad settings</a>.</p>

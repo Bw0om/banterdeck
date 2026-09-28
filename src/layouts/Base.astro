@@ -1,4 +1,9 @@
 ---
+// Skriftene ligger på vår egen server: raskere (ingen ekstra tilkobling) og ingen deling av IP-adresser med Google
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/figtree';
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/fraunces/wght-italic.css';
 import '../styles/global.css';
 import { SITE_NAME } from '../config';
 import { collectionsFor, topSituationsFor, dictSection, visible, t } from '../lib/content';
@@ -68,9 +73,6 @@ const isCurrent = (href: string) => {
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Banterdeck" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
   <KontoKlient />
   <script is:inline>
     /* Innloggingslenker fra Supabase kan lande på feil side – send dem til kontosiden. */

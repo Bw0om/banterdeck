@@ -53,7 +53,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     <a class="h2-uke" id="ukensLek" href={`/no/drinking-games/${ukeBygg.slug}/`} data-leker={JSON.stringify(UKE)}>
       <span class="h2-badge">Ukens lek</span>
       <span><b>{ukeBygg.navn}</b><small>{ukeBygg.gruppe} · {ukeBygg.pl} spillere</small></span>
-      <img src={`/og/lek/${ukeBygg.slug}.jpg`} alt="" width="120" height="63" loading="lazy" />
+      <img src={`/og/liten/${ukeBygg.slug}.webp`} alt="" width="120" height="63" loading="lazy" decoding="async" />
     </a>
   )}
   {no && (
@@ -171,7 +171,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     a.href = '/no/drinking-games/' + x.slug + '/';
     a.querySelector('b').textContent = x.navn;
     a.querySelector('small').textContent = x.gruppe + ' · ' + x.pl + ' spillere';
-    a.querySelector('img').src = '/og/lek/' + x.slug + '.jpg';
+    a.querySelector('img').src = '/og/liten/' + x.slug + '.webp';
   })();
   </script>
 </Base>
