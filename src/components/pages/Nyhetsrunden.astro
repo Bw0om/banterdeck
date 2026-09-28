@@ -14,7 +14,7 @@ const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
   <h1>Nyhetsrunden</h1>
   <p class="lead">{runde.ingress}</p>
   {neste && <p class="nr-neste">Uke {neste.uke} slippes {nesteTid}.</p>}
-  <p><a class="btn ghost small" href="/no/rom">Spill fra hver sin telefon</a></p>
+  <p><a class="btn ghost small" href={`/no/rom?lek=nyhetsrunden&modus=${rundeId(runde)}`}>Spill fra hver sin telefon</a></p>
   <span hidden data-spilt="lek:nyhetsrunden"></span>
 
   <section class="gt nr" data-runde={rundeId(runde)}>

@@ -12,7 +12,7 @@ export const POST: APIRoute = async ({ request }) => {
   const navn = rensNavn(d.navn);
   if (!navn) return json({ feil: 'navn', melding: 'Skriv inn et navn.' }, 400);
   try {
-    const { kode, spiller } = await lagRom(navn);
+    const { kode, spiller } = await lagRom(navn, String(d.lek || '').slice(0, 30), String(d.modus || ''));
     await loggRom('lag', 'rom');
     return json({ kode, id: spiller.id, pollett: spiller.pollett, leker: lekeliste() });
   } catch (e) {

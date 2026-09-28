@@ -1,5 +1,8 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { lekeliste } from '../../lib/rom';
+// Navnene på lekene, så «Spill fra hver sin telefon» fra en lekeside kan vise riktig lek før rommet finnes
+const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
 ---
 <Base title="Spill sammen" description="Lag et rom og få med alle fra hver sin telefon. Samme kort på alle skjermer, hemmelige roller, stemming og bingo." lang="no" gate={true} bilde="/og/rom.jpg">
   <div id="rom" class="rom">
@@ -13,13 +16,15 @@ import Base from '../../layouts/Base.astro';
       return q.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
     };
   </script>
-  <script is:inline data-astro-rerun>
+  <script is:inline data-astro-rerun define:vars={{ LEKNAVN }}>
   (function () {
     var root = document.getElementById('rom');
     if (!root || root.dataset.bound) return; root.dataset.bound = '1';
     if (window.__bdRomStopp) window.__bdRomStopp();
 
     var kode = (new URLSearchParams(location.search).get('k') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+    var qs = new URLSearchParams(location.search);
+    var onsketLek = LEKNAVN[qs.get('lek') || ''] ? qs.get('lek') : '', onsketModus = (qs.get('modus') || '').slice(0, 20), visAlle = false;
     var meg = null, tilstand = null, versjon = 0, timer = null, sisteNr = 0, opptatt = false, feilTeller = 0;
     var ikon = {
       del: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v7h14v-7"/></svg>',
@@ -140,9 +145,10 @@ import Base from '../../layouts/Base.astro';
     /* ---------- start: lag eller bli med ---------- */
     function tegnStart(melding) {
       var navn = les('bd_mittnavn') || '';
+      var ln = onsketLek ? LEKNAVN[onsketLek] : '';
       root.innerHTML =
-        '<h1 class="rom-h1">Spill sammen</h1>' +
-        '<p class="lead">Én lager et rom, resten blir med med koden. Da ser alle det samme – eller sin egen hemmelighet – på hver sin telefon.</p>' +
+        '<h1 class="rom-h1">' + (ln ? esc(ln) + ' fra hver sin telefon' : 'Spill sammen') + '</h1>' +
+        '<p class="lead">' + (ln ? 'Lag et rom for ' + esc(ln) + '. Leken starter når alle har blitt med.' : 'Én lager et rom, resten blir med med koden. Da ser alle det samme – eller sin egen hemmelighet – på hver sin telefon.') + '</p>' +
         (melding ? '<p class="rom-feil" role="alert">' + esc(melding) + '</p>' : '') +
         '<div class="rom-start">' +
           '<form class="rom-boks" id="blimedSkjema">' +
@@ -154,11 +160,11 @@ import Base from '../../layouts/Base.astro';
             '<button class="btn gold rom-knapp" type="submit">Bli med</button>' +
           '</form>' +
           '<form class="rom-boks lag" id="lagSkjema">' +
-            '<h2>Lag et rom</h2>' +
-            '<p class="small">Du blir vert og velger lekene.</p>' +
+            '<h2>' + (ln ? 'Lag rom for ' + esc(ln) : 'Lag et rom') + '</h2>' +
+            '<p class="small">' + (ln ? 'Du blir vert og starter når alle er med.' : 'Du blir vert og velger lekene.') + '</p>' +
             '<label for="romNavn2">Navnet ditt</label>' +
             '<input id="romNavn2" maxlength="20" autocomplete="nickname" placeholder="F.eks. Maria" value="' + esc(navn) + '">' +
-            '<button class="btn rom-knapp" type="submit">Lag rom</button>' +
+            '<button class="btn ' + (ln ? 'gold ' : '') + 'rom-knapp" type="submit">Lag rom</button>' +
           '</form>' +
         '</div>';
       document.getElementById('blimedSkjema').addEventListener('submit', function (e) {
@@ -177,7 +183,7 @@ import Base from '../../layouts/Base.astro';
         var n = document.getElementById('romNavn2').value.trim();
         if (!n) return toast('Skriv inn navnet ditt.');
         skriv('bd_mittnavn', n);
-        api('POST', '/api/rom', { navn: n }).then(function (d) {
+        api('POST', '/api/rom', { navn: n, lek: onsketLek, modus: onsketModus }).then(function (d) {
           kode = d.kode; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode);
           versjon = 0; hent();
         }).catch(function (err) { tegnStart(err.message); });
@@ -210,6 +216,7 @@ import Base from '../../layouts/Base.astro';
     }
     function lobby() {
       var t = tilstand;
+      if (t.valgt && !visAlle) return valgtLobby();
       if (!erVert()) {
         return '<div class="rom-vent"><p class="rom-stor">Venter på at ' + esc(navn(t.vert)) + ' velger en lek …</p>' +
           '<p class="small">' + t.spillere.length + ' med i rommet. Del koden <b>' + esc(kode) + '</b> med resten.</p></div>';
@@ -225,6 +232,24 @@ import Base from '../../layouts/Base.astro';
               : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
             '</div></div>';
         }).join('') + '</div>';
+    }
+
+    /* ---------- venterom for en lek som er valgt på forhånd ---------- */
+    function valgtLobby() {
+      var t = tilstand, v = t.valgt, l = (t.leker || []).find(function (x) { return x.id === v.lek; }) || { navn: LEKNAVN[v.lek] || v.lek, moduser: [] };
+      var liste = '<ul class="rom-venter">' + t.spillere.map(function (p) { return '<li>' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) + '</li>'; }).join('') + '</ul>';
+      if (!erVert()) {
+        return '<div class="rom-vent"><p class="rom-etikett">Neste lek</p><p class="rom-stor">' + esc(l.navn) + '</p>' +
+          '<p>Venter på at ' + esc(navn(t.vert)) + ' starter når alle er med …</p>' + liste + '</div>';
+      }
+      var mod = l.moduser || [], valgtMod = mod.some(function (m) { return m.v === v.modus; }) ? v.modus : '';
+      var startKnapper = mod.length > 1 && !valgtMod
+        ? '<p class="small">Velg variant for å starte:</p><div class="rom-mod stor">' + mod.map(function (m) { return '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') + '</div>'
+        : '<button class="rom-stor-knapp" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(valgtMod || (mod[0] && l.type === 'nyhetsrunden' ? mod[0].v : '*')) + '" type="button">Start ' + esc(l.navn) + '</button>';
+      return '<p class="rom-etikett">Dere skal spille</p><h2 class="rom-h2" style="margin-top:0">' + esc(l.navn) + '</h2>' +
+        qrBoks() + '<p class="rom-status">' + t.spillere.length + ' med i rommet</p>' + liste +
+        '<p class="small">Start når alle har blitt med – ingen ser noe fra leken før du trykker.</p>' + startKnapper +
+        '<p><button class="linkbtn" data-g="velg-annen" type="button">Velg en annen lek</button></p>';
     }
 
     /* ---------- egne kortstokker fra kontoen ---------- */
@@ -572,6 +597,13 @@ import Base from '../../layouts/Base.astro';
     var TYPER = { valg: 'Velg riktig', sant: 'Sant eller tull?', tall: 'Hvilket tall?', fritt: 'Svar fritt' };
     function nyhetsrundenSpill(s) {
       var vert = erVert(), topp = '<p class="gt-count">Spørsmål ' + (s.i + 1) + ' av ' + s.antall + ' · ' + (TYPER[s.qtype] || '') + '</p>';
+      if (s.fase === 'klar') {
+        return '<p class="dl-melding dl-stor">Uke ' + s.uke + ' · ' + s.antall + ' spørsmål</p>' +
+          '<p>' + (vert ? 'Du leser spørsmålene høyt. De andre svarer på sin telefon – riktig gir én 🍺 å dele ut, feil er én slurk.' : esc(navn(tilstand.vert)) + ' leser spørsmålene høyt. Du svarer her på telefonen.') + '</p>' +
+          '<p class="rom-status">' + tilstand.spillere.length + ' med: ' + tilstand.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' +
+          (vert ? '<p class="small">Vent til alle er med. Del koden <b>' + esc(kode) + '</b>.</p><button class="rom-stor-knapp" data-g="nr-start" type="button">Første spørsmål</button>'
+                : '<p class="rom-stor">Venter på at ' + esc(navn(tilstand.vert)) + ' starter …</p>');
+      }
       if (s.fase === 'ferdig') {
         var l = s.tavle;
         return '<p class="dl-melding dl-stor">🏆 ' + esc(l[0] ? l[0].navn : '') + ' vant uke ' + s.uke + '!</p>' +
@@ -796,6 +828,7 @@ import Base from '../../layouts/Base.astro';
         return gjor({ handling: 'start', lek: 'egen', navn: st.navn, kort: st.kort });
       }
       if (g === 'lagrestokk') return lagreSomStokk();
+      if (g === 'velg-annen') { visAlle = true; if (erVert()) gjor({ handling: 'velg-annen' }); return tegn(); }
       if (g === 'reager') return gjorAlltid({ handling: 'reager', e: b.dataset.e });
       if (g === 'send-velg') return sendVelger();
       if (g === 'br-svar') return gjor({ handling: 'br-svar', v: b.dataset.v });
@@ -804,7 +837,7 @@ import Base from '../../layouts/Base.astro';
       if (g === 'yz-felt') return gjor({ handling: 'yz-felt', f: b.dataset.f });
       if (g === 'nr-svar') return gjorAlltid({ handling: 'nr-svar', v: b.dataset.v });
       if (g === 'nr-flipp') return gjor({ handling: 'nr-flipp', hvem: b.dataset.id });
-      if (['br-buss', 'br-kjor', 'yz-kast', 'nr-vis', 'nr-neste'].indexOf(g) !== -1) return gjor({ handling: g });
+      if (['br-buss', 'br-kjor', 'yz-kast', 'nr-vis', 'nr-neste', 'nr-start'].indexOf(g) !== -1) return gjor({ handling: g });
       if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
       if (g === 'stem') return gjor({ handling: 'stem', paa: b.dataset.paa });
       if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });

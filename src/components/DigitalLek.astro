@@ -8,6 +8,8 @@ const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', '
   'power-hour', 'snurr-flasken', 'drikke-yatzy', 'beer-pong', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', '14-sporsmal', 'bossen-sier'];
 const RomLeker = ['regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris', 'to-sannheter-og-en-logn', 'bussruta', 'drikke-yatzy'];
 const har = DIGITALE.includes(slug);
+import { romLenke } from '../lib/romlenke';
+const romHref = romLenke(slug);
 const bareRom = ['pyramiden', 'president', 'gris'].includes(slug);
 ---
 {(har || bareRom) && (
@@ -16,10 +18,10 @@ const bareRom = ['pyramiden', 'president', 'gris'].includes(slug);
   {bareRom ? (
     <>
       <p>Her har hver spiller skjulte kort på hånda, så dere spiller fra hver deres telefon. Lag et rom, del koden og velg {slug === 'pyramiden' ? 'Pyramiden' : slug === 'president' ? 'President' : 'Gris'}.</p>
-      <p><a class="btn gold" href="/no/rom">Lag et rom</a></p>
+      <p><a class="btn gold" href={romHref}>Lag et rom</a></p>
     </>
   ) : <div class="dl-body"></div>}
-  {RomLeker.includes(slug) && !bareRom && <p class="small dl-romtips">Vil dere spille fra hver sin telefon? <a href="/no/rom">Lag et rom</a> og velg leken der.</p>}
+  {RomLeker.includes(slug) && !bareRom && <p class="small dl-romtips">Vil dere spille fra hver sin telefon? <a href={romHref}>Lag et rom for leken</a>.</p>}
 </section>
 )}
 

@@ -1212,3 +1212,7 @@ body.stokk-aapen{overflow:hidden}
 .kv-klokke.over{color:var(--accent);font-size:15px}
 .lek-fra{margin:-6px 0 12px;color:var(--muted);font-size:14.5px}
 .lek-fra b{color:var(--gold)}
+.rom-venter{list-style:none;padding:0;margin:8px 0 14px;display:flex;flex-wrap:wrap;gap:6px}
+.rom-venter li{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border2);border-radius:999px;padding:7px 13px;font-weight:600;animation:inn .3s ease-out}
+@keyframes inn{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+.rom-mod.stor button{min-height:48px;font-size:15px}

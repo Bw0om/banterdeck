@@ -60,9 +60,12 @@ export async function endreRom(kode: string, endring: (data: any) => any) {
   }
   return { feil: 'opptatt' as const };
 }
-export async function lagRom(navn: string) {
+export async function lagRom(navn: string, lek = '', modus = '') {
   const vert = { id: nyId(), navn, pollett: nyPollett(), slurker: 0 };
-  const data = { laget: Date.now(), vert: vert.id, spillere: [vert], spill: null, hendelse: null, nr: 0 };
+  // Kommer man fra en lekeside, er leken valgt på forhånd – men den starter først når alle er med
+  const l = lek ? lekeliste().find((x: any) => x.id === lek) : null;
+  const valgt = l ? { lek: l.id, modus: String(modus || '').slice(0, 20) } : null;
+  const data = { laget: Date.now(), vert: vert.id, spillere: [vert], spill: null, hendelse: null, nr: 0, valgt };
   for (let i = 0; i < 6; i++) {
     const kode = nyKode();
     const ok = await rpc('rom_lag', { p_kode: kode, p_data: data });
@@ -102,7 +105,7 @@ export function visning(data: any, versjon: number, meg: any) {
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null,
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0, gi: p.gi || 0 })),
-    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [],
+    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null,
   };
 }
 
@@ -195,13 +198,19 @@ export function startSpill(data: any, lek: string, modus: string) {
 export function handling(data: any, meg: any, h: any) {
   const s = data.spill;
   const erVert = meg.id === data.vert;
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
       if (!erVert) return { feil: 'bare-vert' };
-      if (h.lek === 'egen') return startEgen(data, h.kort, h.navn);
-      return startSpill(data, String(h.lek || ''), String(h.modus || '*'));
+      if (h.lek === 'egen') { const r = startEgen(data, h.kort, h.navn); if (!(r as any).feil) data.valgt = null; return r; }
+      const r = startSpill(data, String(h.lek || ''), String(h.modus || '*'));
+      if (!(r as any).feil) data.valgt = null;
+      return r;
+    }
+    case 'velg-annen': {
+      if (!erVert) return { feil: 'bare-vert' };
+      data.valgt = null; return { ok: true };
     }
     case 'avslutt': {
       if (!erVert) return { feil: 'bare-vert' };
@@ -815,8 +824,7 @@ function startNye(data: any, lek: string, modus: string, ider: string[]): any {
     const runder = publiserteRunder();
     const r = runder.find((x: any) => rundeId(x) === modus) || runder[0];
     if (!r || !(r.sporsmal || []).length) return { feil: 'tom', melding: 'Ingen runde er ute ennå.' };
-    data.spill = { type: 'nyhetsrunden', lek, navn: 'Nyhetsrunden', modus: 'uke ' + r.uke, uke: r.uke, sporsmal: r.sporsmal, i: 0, riktige: {} };
-    nrNyttSpm(data.spill);
+    data.spill = { type: 'nyhetsrunden', lek, navn: 'Nyhetsrunden', modus: 'uke ' + r.uke, uke: r.uke, sporsmal: r.sporsmal, i: 0, riktige: {}, fase: 'klar', svar: {}, resultat: {}, alt: null };
     melde(data, `Nyhetsrunden uke ${r.uke} – ${r.sporsmal.length} spørsmål`); return { ok: true };
   }
   return { feil: 'ukjent-lek' };
@@ -918,7 +926,8 @@ function nyeHandling(data: any, meg: any, h: any): any {
       if (!v) { delete s.svar[meg.id]; return { ok: true }; }
       s.svar[meg.id] = v; return { ok: true };
     }
-    if (!erVert && ['nr-vis', 'nr-flipp', 'nr-neste', 'nytt'].includes(h.handling)) return { feil: 'bare-vert', melding: 'Verten styrer runden.' };
+    if (!erVert && ['nr-start', 'nr-vis', 'nr-flipp', 'nr-neste', 'nytt'].includes(h.handling)) return { feil: 'bare-vert', melding: 'Verten styrer runden.' };
+    if (h.handling === 'nr-start') { if (s.fase === 'klar') { nrNyttSpm(s); melde(data, 'Første spørsmål!'); } return { ok: true }; }
     if (h.handling === 'nr-vis') {
       if (s.fase !== 'spm') return { ok: true };
       s.fase = 'svar'; s.resultat = {};
@@ -956,12 +965,12 @@ function nyeVisning(s: any, meg: any, data: any) {
     blokker: s.blokker, summer: Object.fromEntries(s.ider.map((id: string) => [id, yzSum(s.blokker[id])])),
     mulige: s.kast ? Object.fromEntries(YZ_FELT.map((f) => [f, yzPoeng(f, s.terninger)])) : null };
   if (s.type === 'nyhetsrunden') {
-    const q = s.sporsmal[s.i], vert = meg && meg.id === data.vert, aapen = s.fase !== 'spm';
+    const q = s.sporsmal[s.i], vert = meg && meg.id === data.vert, aapen = s.fase === 'svar' || s.fase === 'ferdig';
     const liste = data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, riktige: s.riktige[p.id] || 0 })).sort((a: any, b: any) => b.riktige - a.riktige);
     return {
       fase: s.fase, i: s.i, antall: s.sporsmal.length, uke: s.uke, qtype: q.type, alt: s.alt,
       // Spørsmålet vises bare hos verten (som leser det høyt) til svaret er avslørt
-      q: vert || aapen ? q.q : null,
+      q: (vert && s.fase === 'spm') || aapen ? q.q : null,
       fasit: aapen ? q.svar : null, info: aapen ? q.info || '' : null, kilde: aapen ? q.kilde || '' : null, url: aapen ? q.url || '' : null,
       harSvart: Object.keys(s.svar), mittSvar: meg ? s.svar[meg.id] ?? null : null,
       svarene: aapen ? s.svar : null, resultat: aapen ? s.resultat : null, tavle: liste,

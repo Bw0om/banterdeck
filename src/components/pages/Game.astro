@@ -5,6 +5,7 @@ import AdSlot from '../AdSlot.astro';
 import GameTool from '../GameTool.astro';
 import DigitalLek from '../DigitalLek.astro';
 import DECKS from '../../data/decks.json';
+import { ROMLEK, romLenke } from '../../lib/romlenke';
 import { gamesFor, gameHref, t, trules } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { game, lang = 'en' } = Astro.props as { game: any; lang?: Lang };
@@ -59,7 +60,7 @@ const jsonLd = JSON.stringify([{
   {(harVerktoy || iRom) && (
     <p class="startrow">
       {harVerktoy && <a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'} ↓</a>}
-      {iRom && <a class="btn ghost romlenke" href="/no/rom">Spill fra hver sin telefon</a>}
+      {iRom && <a class="btn ghost romlenke" href={romLenke(game.slug)}>Spill fra hver sin telefon</a>}
     </p>
   )}
 
