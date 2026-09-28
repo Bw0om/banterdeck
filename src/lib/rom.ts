@@ -349,7 +349,7 @@ export function startEkstra(data: any, lek: string, modus = ''): any {
   const n = data.spillere.length, ider = aktiveIder(data, true);
   if (lek === 'regelfabrikken') {
     const sek = [45, 60, 90].includes(Number(modus)) ? Number(modus) : 60;
-    data.spill = { type: 'regelfabrikken', lek, navn: 'Regelfabrikken', modus: sek + ' sek', fase: 'skriv', frist: Date.now() + sek * 1000 + 3000, sek, kort: {}, rekke: [], pos: 0 };
+    data.spill = { type: 'regelfabrikken', lek, navn: 'Regelfabrikken', modus: sek + ' sek', fase: 'klar', frist: null, sek, kort: {}, rekke: [], pos: 0 };
   } else   if (lek === 'opus') {
     data.spill = { type: 'opus', lek, navn: 'Opus', holder: ider[0], kast: null, antall: 0, nr: 0 };
   } else if (lek === 'overunder') {
@@ -410,6 +410,13 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
   const min = ider.indexOf(meg.id);
   switch (s.type) {
     case 'regelfabrikken': {
+      if (h.handling === 'startklokke') {
+        if (s.fase !== 'klar') return { ok: true };
+        if (meg.id !== data.vert) return { feil: 'bare-vert', melding: 'Verten starter klokka.' };
+        s.fase = 'skriv'; s.frist = Date.now() + s.sek * 1000 + 3000;
+        melde(data, 'Klokka går – skriv!');
+        return { ok: true };
+      }
       if (h.handling === 'skriv') {
         if (s.fase !== 'skriv') return { feil: 'for-sent', melding: 'Tiden er ute!' };
         if (Date.now() > s.frist + 2000) return { feil: 'for-sent', melding: 'Tiden er ute!' };
