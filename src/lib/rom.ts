@@ -22,10 +22,10 @@ function nyPollett() { const a = new Uint8Array(18); crypto.getRandomValues(a); 
 export function rensNavn(n: any) { return String(n || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
 
 /* ---------- hvilke leker som finnes i rom ---------- */
-const KORTLEKER = ['pekeleken', 'jeg-har-aldri', 'enten-eller', 'kategorier', 'nodt-eller-sannhet', 'rygg-mot-rygg', 'duoleken', '50-50'];
+const KORTLEKER = ['pekeleken', 'jeg-har-aldri', '50-50', 'kategorier', 'tanken-bak-sangen', 'sannhet-eller-drikk', 'enten-eller', 'nodt-eller-sannhet', 'rygg-mot-rygg', 'duoleken'];
 const NAVN: Record<string, string> = {
   'pekeleken': 'Pekeleken', 'jeg-har-aldri': 'Jeg har aldri', 'enten-eller': 'Enten eller', 'kategorier': 'Kategorier',
-  'nodt-eller-sannhet': 'Nødt eller sannhet', 'rygg-mot-rygg': 'Rygg mot rygg', 'duoleken': 'Duoleken', '50-50': '50/50',
+  'nodt-eller-sannhet': 'Nødt eller sannhet', 'sannhet-eller-drikk': 'Sannhet eller drikk', 'tanken-bak-sangen': 'Tanken bak sangen', 'rygg-mot-rygg': 'Rygg mot rygg', 'duoleken': 'Duoleken', '50-50': '50/50',
   'ring-of-fire': 'Ring of Fire', 'forraeder': 'Forræder', 'mest': 'Mest sannsynlig', 'bingo': 'Drikke-bingo',
 };
 export function lekeliste() {
@@ -325,9 +325,10 @@ export function gyldigKode(k: any) { return typeof k === 'string' && /^[A-Z0-9]{
    Kort- og terningleker i rom: Opus, Over eller under, Veddeløpet,
    Pyramiden, Gris og President. Skjulte hender vises bare til eieren.
    ===================================================================== */
-export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken'];
+export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter'];
 export function ekstraLeker() {
   return [
+    { id: 'tosannheter', navn: 'To sannheter og en løgn', type: 'tosannheter', moduser: [], om: 'Én skriver tre påstander i hemmelighet. Resten stemmer på løgnen fra sin telefon.' },
     { id: 'regelfabrikken', navn: 'Regelfabrikken', type: 'regelfabrikken', moduser: [{ v: '45', t: '45 sek' }, { v: '60', t: '60 sek' }, { v: '90', t: '90 sek' }], om: 'Alle skriver så mange drikkekort de rekker på sin telefon. Så stokkes alt og trekkes.' },
     { id: 'overunder', navn: 'Over eller under', type: 'overunder', moduser: [], om: 'Den som har tur gjetter på sin telefon. Feil = drikk hele bunken.' },
     { id: 'veddelopet', navn: 'Veddeløpet', type: 'veddelopet', moduser: [], om: 'Alle vedder på sin telefon, så kjøres løpet.' },
@@ -347,7 +348,10 @@ function aktiveIder(data: any, alle = false) {
 
 export function startEkstra(data: any, lek: string, modus = ''): any {
   const n = data.spillere.length, ider = aktiveIder(data, true);
-  if (lek === 'regelfabrikken') {
+  if (lek === 'tosannheter') {
+    if (n < 2) return { feil: 'for-faa', melding: 'Trenger minst to spillere.' };
+    data.spill = { type: 'tosannheter', lek, navn: 'To sannheter og en løgn', aktiv: ider[0], fase: 'skriv', pastander: [], logn: -1, stemmer: {}, runde: 1 };
+  } else   if (lek === 'regelfabrikken') {
     const sek = [45, 60, 90].includes(Number(modus)) ? Number(modus) : 60;
     data.spill = { type: 'regelfabrikken', lek, navn: 'Regelfabrikken', modus: sek + ' sek', fase: 'klar', frist: null, sek, kort: {}, rekke: [], pos: 0 };
   } else   if (lek === 'opus') {
@@ -409,6 +413,31 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
   const ider = aktiveIder(data);
   const min = ider.indexOf(meg.id);
   switch (s.type) {
+    case 'tosannheter': {
+      if (h.handling === 'pastander') {
+        if (meg.id !== s.aktiv || s.fase !== 'skriv') return { ok: true };
+        const p = (Array.isArray(h.p) ? h.p : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 120));
+        const l = Number(h.logn);
+        if (p.length !== 3 || p.some((x: string) => !x) || !(l >= 0 && l < 3)) return { feil: 'ugyldig', melding: 'Skriv tre påstander og merk løgnen.' };
+        const rekkef = stokk([0, 1, 2]);
+        s.pastander = rekkef.map((i) => p[i]); s.logn = rekkef.indexOf(l); s.fase = 'stem'; s.stemmer = {};
+        melde(data, `${meg.navn} har skrevet – hvilken er løgnen?`); return { ok: true };
+      }
+      if (h.handling === 'stem') {
+        if (s.fase !== 'stem' || meg.id === s.aktiv) return { ok: true };
+        const v = Number(h.paa); if (!(v >= 0 && v < 3)) return { feil: 'ukjent' };
+        s.stemmer[meg.id] = v;
+        if (Object.keys(s.stemmer).length >= ider.length - 1) avgjorTo(data);
+        return { ok: true };
+      }
+      if (h.handling === 'avslor') { if (s.fase === 'stem') avgjorTo(data); return { ok: true }; }
+      if (h.handling === 'runde') {
+        if (s.fase !== 'avslort') return { ok: true };
+        s.aktiv = ider[(ider.indexOf(s.aktiv) + 1) % ider.length]; s.fase = 'skriv'; s.pastander = []; s.logn = -1; s.stemmer = {}; s.runde++;
+        return { ok: true };
+      }
+      return null;
+    }
     case 'regelfabrikken': {
       if (h.handling === 'startklokke') {
         if (s.fase !== 'klar') return { ok: true };
@@ -599,8 +628,16 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
   return null;
 }
 
+function avgjorTo(data: any) {
+  const s = data.spill; let riktige = 0; s.drikker = [];
+  Object.entries(s.stemmer).forEach(([id, v]: any) => { if (v === s.logn) riktige++; else { giSlurker(data, id, 1); s.drikker.push({ navn: navnPaa(data, id), slurker: 1 }); } });
+  if (riktige) { giSlurker(data, s.aktiv, riktige); s.drikker.push({ navn: navnPaa(data, s.aktiv), slurker: riktige }); }
+  s.fase = 'avslort'; melde(data, `Løgnen var: «${s.pastander[s.logn]}»`);
+}
 export function ekstraVisning(s: any, meg: any, data: any) {
   const ider = aktiveIder(data);
+  if (s.type === 'tosannheter') return { aktiv: s.aktiv, fase: s.fase, pastander: s.pastander, harStemt: Object.keys(s.stemmer),
+    minStemme: meg ? (s.stemmer[meg.id] ?? null) : null, logn: s.fase === 'avslort' ? s.logn : null, stemmer: s.fase === 'avslort' ? s.stemmer : null, drikker: s.fase === 'avslort' ? s.drikker : null };
   if (s.type === 'regelfabrikken') return { fase: s.fase, frist: s.frist, naa: Date.now(), sek: s.sek,
     mineKort: meg ? s.kort[meg.id] || [] : [], antall: Object.fromEntries(Object.entries(s.kort).map(([id, l]: any) => [id, l.length])),
     kortet: s.fase === 'trekk' ? s.rekke[s.pos] : null, pos: s.pos, totalt: s.fase === 'trekk' ? s.rekke.length : Object.values(s.kort).reduce((n: number, l: any) => n + l.length, 0) };

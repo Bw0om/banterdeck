@@ -2742,5 +2742,209 @@
    15,
    20
   ]
+ },
+ "sannhet-eller-drikk": {
+  "kind": "deck",
+  "title": "Trekk et spørsmål",
+  "modes": [
+   {
+    "v": "ss",
+    "t": "Snill"
+   },
+   {
+    "v": "sd",
+    "t": "Drøy"
+   }
+  ],
+  "items": [
+   {
+    "t": "Hva er det pinligste du har gjort foran en crush?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er den største løgnen du har fortalt foreldrene dine?",
+    "m": "ss"
+   },
+   {
+    "t": "Hvem i rommet ville du byttet liv med i én dag?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er den verste gaven du har fått – og av hvem?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er det dummeste du har brukt penger på?",
+    "m": "ss"
+   },
+   {
+    "t": "Hvilken kjendis har du vært forelsket i lengst?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er din mest irriterende vane?",
+    "m": "ss"
+   },
+   {
+    "t": "Hvem i gjengen ville overlevd lengst i en katastrofefilm?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er det kleineste du har sagt på en date?",
+    "m": "ss"
+   },
+   {
+    "t": "Hvilket talent later du som du har?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er det rareste du har googlet?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva angrer du mest på fra i fjor?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er body counten din?",
+    "m": "sd"
+   },
+   {
+    "t": "Hvem i rommet ville du helst kysset?",
+    "m": "sd"
+   },
+   {
+    "t": "Hva er det drøyeste stedet du har hatt sex?",
+    "m": "sd"
+   },
+   {
+    "t": "Har du vært utro?",
+    "m": "sd"
+   },
+   {
+    "t": "Hvem sendte du det siste nakenbildet til?",
+    "m": "sd"
+   },
+   {
+    "t": "Hva gikk galt med ditt dårligste ligg? Ingen navn.",
+    "m": "sd"
+   },
+   {
+    "t": "Hva tenner du på som du aldri har sagt høyt?",
+    "m": "sd"
+   },
+   {
+    "t": "Har du ligget med noen i gjengens omgangskrets?",
+    "m": "sd"
+   },
+   {
+    "t": "Hva er det villeste du har gjort i fylla?",
+    "m": "sd"
+   },
+   {
+    "t": "Hvem var den siste du tenkte på på den måten?",
+    "m": "sd"
+   },
+   {
+    "t": "Har du noen gang faket det?",
+    "m": "sd"
+   },
+   {
+    "t": "Hvilket ligg angrer du mest på?",
+    "m": "sd"
+   }
+  ]
+ },
+ "tanken-bak-sangen": {
+  "kind": "deck",
+  "title": "Trekk en kategori",
+  "modes": [
+   {
+    "v": "alle",
+    "t": "Alle"
+   }
+  ],
+  "items": [
+   {
+    "t": "Favorittsangen din",
+    "m": "alle"
+   },
+   {
+    "t": "En sang som har påvirket livet ditt",
+    "m": "alle"
+   },
+   {
+    "t": "En sang med et minne knyttet til seg",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen som gjør deg klar for byen",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen du skammer deg over at du elsker",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen fra din første fest",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen du vil ha i begravelsen din",
+    "m": "alle"
+   },
+   {
+    "t": "Den beste sangen å synge i dusjen",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen som minner deg om en eks",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen fra sommeren du aldri glemmer",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen du alltid skrur opp i bilen",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen du ville brukt som inngangsmusikk",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen du kan hver eneste tekstlinje til",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen som får deg til å gråte",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen fra ungdomsskolen",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen foreldrene dine spilte",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen du ville sunget på karaoke nå",
+    "m": "alle"
+   },
+   {
+    "t": "En sang som beskriver deg",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen du ville satt på nachspiel klokka fire",
+    "m": "alle"
+   },
+   {
+    "t": "En sang ingen andre her kjenner",
+    "m": "alle"
+   }
+  ]
  }
 }

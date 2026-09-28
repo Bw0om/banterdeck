@@ -384,6 +384,30 @@ import Base from '../../layouts/Base.astro';
         '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">Trekk neste</button>' +
         (erVert() ? '<button class="btn ghost" data-g="nytt" type="button">Ny skriverunde</button>' : '');
     }
+
+    function tosannheterSpill(s) {
+      var jeg = s.aktiv === tilstand.meg, han = esc(navn(s.aktiv));
+      if (s.fase === 'skriv') {
+        if (!jeg) return '<p class="rom-stor">' + han + ' skriver tre påstander …</p><p class="small">To er sanne, én er løgn. Gjør deg klar til å avsløre.</p>';
+        return '<p class="rom-etikett">Din tur – bare du ser dette</p><p>Skriv tre påstander om deg selv og merk løgnen.</p>' +
+          '<form id="tsSkjema" class="ts-skjema">' + [0, 1, 2].map(function (i) {
+            return '<div class="ts-rad"><input id="tsR' + i + '" maxlength="120" placeholder="Påstand ' + (i + 1) + '"><label><input type="radio" name="tsL" value="' + i + '"> Løgn</label></div>';
+          }).join('') + '<button class="rom-stor-knapp" type="submit">Send til de andre</button></form>';
+      }
+      var liste = '<div class="ts-valg">' + s.pastander.map(function (t, i) {
+        var kl = s.fase === 'avslort' ? (i === s.logn ? 'logn' : 'sann') : '';
+        var ant = s.stemmer ? Object.keys(s.stemmer).filter(function (k) { return s.stemmer[k] === i; }).length : 0;
+        var knapp = s.fase === 'stem' && !jeg;
+        return (knapp ? '<button type="button" data-g="stem" data-paa="' + i + '" aria-pressed="' + (s.minStemme === i) + '"' : '<div') + ' class="' + kl + '"><b>' + (i + 1) + '</b><span>' + esc(t) + '</span>' +
+          (s.fase === 'avslort' ? '<small>' + ant + ' stemmer</small>' : '') + (knapp ? '</button>' : '</div>');
+      }).join('') + '</div>';
+      if (s.fase === 'stem') return '<p class="rom-etikett">' + (jeg ? 'De andre stemmer' : 'Hvilken er ' + han + ' sin løgn?') + '</p>' + liste +
+        '<p class="rom-status">' + s.harStemt.length + ' av ' + (tilstand.spillere.length - 1) + ' har stemt</p>' +
+        (erVert() || jeg ? '<button class="btn ghost" data-g="avslor" type="button">Avslør nå</button>' : '');
+      return '<p class="rom-etikett">Fasit</p>' + liste +
+        (s.drikker && s.drikker.length ? '<ul class="rom-drikker">' + s.drikker.map(function (x) { return '<li><b>' + esc(x.navn) + '</b> drikker ' + x.slurker + '</li>'; }).join('') + '</ul>' : '') +
+        '<button class="rom-stor-knapp" data-g="runde" type="button">Neste spiller</button>';
+    }
     function tegn() {
       if (!tilstand) return;
       var s = tilstand.spill, innhold = '';
@@ -391,17 +415,28 @@ import Base from '../../layouts/Base.astro';
       else {
         innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' ? ' · ' + esc(s.modus) : '') + '</p>' +
           ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
-             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill }[s.type] || function () { return ''; })(s) + '</div>';
+             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill }[s.type] || function () { return ''; })(s) + '</div>';
       }
       var vert = erVert() ? '<div class="rom-vert">' +
         (s ? '<button class="btn ghost small" data-g="avslutt" type="button">Bytt lek</button>' : '') +
         '<button class="btn ghost small" data-g="nullstill" type="button">Nullstill slurker</button></div>' : '';
+      var tsLagret = [0, 1, 2].map(function (i) { var e = document.getElementById('tsR' + i); return e ? e.value : null; }), tsValgt = (document.querySelector('input[name=tsL]:checked') || {}).value;
       var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
       root.innerHTML = hode() + innhold + vert +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">Forlat rommet</button></p>';
       window.scrollTo(0, y);
+      tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
+      if (tsValgt !== undefined) { var r = document.querySelector('input[name=tsL][value="' + tsValgt + '"]'); if (r) r.checked = true; }
       var ny = document.getElementById('rfInput');
       if (ny && gVerdi !== null) { ny.value = gVerdi; if (gFokus) ny.focus({ preventScroll: true }); }
+      var ts = document.getElementById('tsSkjema');
+      if (ts) ts.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var p = [0, 1, 2].map(function (i) { return document.getElementById('tsR' + i).value.trim(); });
+        var l = ts.querySelector('input[name=tsL]:checked');
+        if (p.some(function (x) { return !x; }) || !l) return toast('Skriv tre påstander og merk løgnen.');
+        gjor({ handling: 'pastander', p: p, logn: Number(l.value) });
+      });
       var sk = document.getElementById('rfSkjema');
       if (sk) sk.addEventListener('submit', function (e) {
         e.preventDefault();
