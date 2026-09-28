@@ -217,11 +217,11 @@ import Base from '../../layouts/Base.astro';
       return qrBoks() + egneStokker() +
         '<h2 class="rom-h2">Velg en lek</h2>' +
         '<div class="rom-leker">' + t.leker.map(function (l) {
-          var mod = l.moduser && l.moduser.length > 1 ? l.moduser : [];
+          var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
           return '<div class="rom-lek"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' +
             '<div class="rom-mod">' + (mod.length
               ? mod.map(function (m) { return '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') +
-                (l.type !== 'bingo' ? '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Alle</button>' : '')
+                (l.type !== 'bingo' && l.type !== 'nyhetsrunden' ? '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Alle</button>' : '')
               : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
             '</div></div>';
         }).join('') + '</div>';
@@ -510,6 +510,143 @@ import Base from '../../layouts/Base.astro';
         (s.drikker && s.drikker.length ? '<ul class="rom-drikker">' + s.drikker.map(function (x) { return '<li><b>' + esc(x.navn) + '</b> drikker ' + x.slurker + '</li>'; }).join('') + '</ul>' : '') +
         '<button class="rom-stor-knapp" data-g="runde" type="button">Neste spiller</button>';
     }
+    /* ---------- Bussruta ---------- */
+    function bussrutaSpill(s) {
+      var jeg = s.aktiv === tilstand.meg;
+      var hender = '<div class="dl-hender">' + s.ider.map(function (id) {
+        return '<div class="' + (id === s.aktiv && s.fase === 1 ? 'aktiv' : '') + '"><b>' + esc(navn(id)) + '</b><span>' + (s.hender[id] || []).map(function (k) { return kk(k, 'mini'); }).join('') + '</span></div>';
+      }).join('') + '</div>';
+      var melding = s.melding ? '<p class="dl-melding" aria-live="polite">' + esc(s.melding) + '</p>' : '';
+      if (s.fase === 1) {
+        var VALG = [[['rod', 'Rød'], ['svart', 'Svart']], [['over', 'Over'], ['under', 'Under']], [['inn', 'Innenfor'], ['ut', 'Utenfor']], [['♥', '♥'], ['♦', '♦'], ['♠', '♠'], ['♣', '♣']]];
+        var hand = s.hender[s.aktiv] || [];
+        return '<p class="dl-steg">Runde 1 av 3 · spørsmål ' + (s.steg + 1) + ' av 4</p>' +
+          '<p class="rom-etikett">' + (jeg ? 'Din tur' : esc(navn(s.aktiv)) + ' svarer') + '</p>' +
+          '<div class="dl-hand">' + hand.map(function (k) { return kk(k); }).join('') + kk(null) + '</div>' + melding +
+          '<p class="dl-sporsmal">' + esc(s.sporsmal) + '</p>' +
+          (jeg || (erVert() && !tilstand.spillere.some(function (p) { return p.id === s.aktiv; }))
+            ? '<div class="rom-valg ' + (s.steg === 3 ? 'fire' : 'to') + '">' + VALG[s.steg].map(function (v) { return '<button type="button" data-g="br-svar" data-v="' + v[0] + '">' + v[1] + '</button>'; }).join('') + '</div>'
+            : '<p class="small">Vent på ' + esc(navn(s.aktiv)) + '.</p>') + hender;
+      }
+      if (s.fase === 2) {
+        var rader = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
+        return '<p class="dl-steg">Runde 2 av 3 · pyramiden</p><div class="dl-pyramide">' + rader.map(function (r) {
+          return '<div>' + r.map(function (i) { return i < s.pyrPos ? kk(s.pyr[i], 'liten') : kk(null, 'liten'); }).join('') + '</div>';
+        }).join('') + '</div>' + melding +
+          (s.pyrPos < 15 ? '<button class="rom-stor-knapp" data-g="br-snu" data-pos="' + s.pyrPos + '" type="button">Snu neste</button>' : '<button class="rom-stor-knapp" data-g="br-buss" type="button">Til bussen</button>') + hender;
+      }
+      var prikker = ''; for (var i = 0; i < s.maal; i++) prikker += '<i' + (i < s.bussRekke ? ' class="ok"' : '') + '></i>';
+      var sjafor = s.buss === tilstand.meg;
+      return '<p class="dl-steg">Runde 3 av 3 · bussen</p><p class="rom-etikett">' + (sjafor ? 'Du kjører bussen!' : esc(navn(s.buss)) + ' kjører bussen') + '</p>' +
+        '<div class="dl-bord">' + (s.sist ? kk(s.sist, 'stor inn') : kk(null, 'stor')) + '</div><div class="dl-buss">' + prikker + '</div>' + melding +
+        (s.bussRekke >= s.maal ? (erVert() ? '<button class="rom-stor-knapp" data-g="nytt" type="button">Ny runde</button>' : '')
+          : (sjafor || erVert() ? '<button class="rom-stor-knapp" data-g="br-kjor" type="button">Snu kort</button>' : '<p class="small">' + esc(navn(s.buss)) + ' snur kortene.</p>'));
+    }
+
+    /* ---------- Drikke-Yatzy ---------- */
+    var YZF = [['1', 'Enere'], ['2', 'Toere'], ['3', 'Treere'], ['4', 'Firere'], ['5', 'Femmere'], ['6', 'Seksere'], ['p', 'Ett par'], ['pp', 'To par'], ['3l', 'Tre like'], ['4l', 'Fire like'], ['ls', 'Liten straight'], ['ss', 'Stor straight'], ['hus', 'Hus'], ['sj', 'Sjanse'], ['y', 'Yatzy']];
+    var sisteYzNr = 0;
+    function yatzySpill(s) {
+      if (s.ferdig) {
+        return '<p class="dl-melding dl-stor">' + esc(s.ferdig[0].navn) + ' vant med ' + s.ferdig[0].sum + ' poeng!</p><ol class="rom-resultat">' +
+          s.ferdig.map(function (x) { return '<li><span>' + esc(x.navn) + '</span><b>' + x.sum + '</b></li>'; }).join('') + '</ol>' +
+          '<p class="dl-melding">' + esc(s.ferdig[s.ferdig.length - 1].navn) + ' tapte og drikker opp. Vinneren deler ut 5.</p>' +
+          (erVert() ? '<button class="rom-stor-knapp" data-g="nytt" type="button">Nytt spill</button>' : '');
+      }
+      var jeg = s.aktiv === tilstand.meg, nyttKast = s.nr !== sisteYzNr; sisteYzNr = s.nr;
+      var b = s.blokker[s.aktiv] || {};
+      return '<p class="rom-etikett">' + (jeg ? 'Din tur' : esc(navn(s.aktiv)) + ' sin tur') + ' · kast ' + s.kast + ' av 3</p>' +
+        '<div class="yz-terninger' + (nyttKast && s.kast ? ' landet' : '') + '">' + s.terninger.map(function (t, i) {
+          return '<button type="button" data-g="yz-hold" data-i="' + i + '" aria-pressed="' + !!s.hold[i] + '"' + (jeg && s.kast && s.kast < 3 ? '' : ' disabled') + ' aria-label="Hold terning ' + (i + 1) + '">' + terning(t) + '</button>';
+        }).join('') + '</div>' +
+        (s.melding ? '<p class="dl-melding" aria-live="polite">' + esc(s.melding) + '</p>' : '') +
+        (jeg ? '<button class="rom-stor-knapp" data-g="yz-kast" type="button"' + (s.kast >= 3 ? ' disabled' : '') + '>' + (s.kast ? 'Trill igjen' : 'Trill') + '</button>' : '') +
+        '<div class="yz-blokk">' + YZF.map(function (f) {
+          var v = b[f[0]], mulig = s.mulige && v == null ? s.mulige[f[0]] : null;
+          return '<button type="button" data-g="yz-felt" data-f="' + f[0] + '"' + (!jeg || v != null || !s.kast ? ' disabled' : '') + '><span>' + f[1] + '</span><b>' + (v != null ? v : (mulig != null ? '+' + mulig : '')) + '</b></button>';
+        }).join('') + '</div>' +
+        '<p class="dl-info">' + s.ider.map(function (id) { return esc(navn(id)) + ': ' + (s.summer[id] || 0); }).join(' · ') + '</p>';
+    }
+
+    /* ---------- Nyhetsrunden: verten leser, alle svarer ---------- */
+    var TYPER = { valg: 'Velg riktig', sant: 'Sant eller tull?', tall: 'Hvilket tall?', fritt: 'Svar fritt' };
+    function nyhetsrundenSpill(s) {
+      var vert = erVert(), topp = '<p class="gt-count">Spørsmål ' + (s.i + 1) + ' av ' + s.antall + ' · ' + (TYPER[s.qtype] || '') + '</p>';
+      if (s.fase === 'ferdig') {
+        var l = s.tavle;
+        return '<p class="dl-melding dl-stor">🏆 ' + esc(l[0] ? l[0].navn : '') + ' vant uke ' + s.uke + '!</p>' +
+          '<ol class="rom-resultat">' + l.map(function (x) { return '<li><span>' + esc(x.navn) + '</span><b>' + x.riktige + ' / ' + s.antall + '</b></li>'; }).join('') + '</ol>' +
+          (vert ? '<button class="rom-stor-knapp" data-g="nytt" type="button">Ta runden på nytt</button>' : '');
+      }
+      if (s.fase === 'spm') {
+        var mitt = s.mittSvar, input;
+        if (s.alt) input = '<div class="rom-valg ' + (s.alt.length === 2 ? 'to' : 'en') + '">' + s.alt.map(function (a) {
+          return '<button type="button" data-g="nr-svar" data-v="' + esc(a) + '" aria-pressed="' + (mitt === a) + '">' + esc(a) + '</button>'; }).join('') + '</div>';
+        else input = '<form class="rf-skjema" id="nrSkjema"><div class="rf-rad"><input id="nrInput" maxlength="80" autocomplete="off" enterkeyhint="send"' +
+          (s.qtype === 'tall' ? ' inputmode="decimal" placeholder="Skriv et tall"' : ' placeholder="Skriv svaret ditt"') + ' value="' + esc(mitt || '') + '">' +
+          '<button class="btn gold" type="submit">' + (mitt ? 'Endre' : 'Svar') + '</button></div></form>' + (mitt ? '<p class="small">Du svarte: <b>' + esc(mitt) + '</b></p>' : '');
+        return topp + (vert
+            ? '<div class="nr-opples"><span class="rom-etikett">Les høyt</span><p class="gt-text">' + esc(s.q) + '</p></div>'
+            : '<p class="rom-stor">Hør på ' + esc(navn(tilstand.vert)) + ' og svar her:</p>') + input +
+          '<p class="rom-status">' + s.harSvart.length + ' av ' + tilstand.spillere.length + ' har svart</p>' +
+          (vert ? '<button class="rom-stor-knapp" data-g="nr-vis" type="button">Vis svaret</button>' : '');
+      }
+      var rader = tilstand.spillere.map(function (p) {
+        var r = s.resultat[p.id], sv = s.svarene[p.id];
+        return '<li class="' + (r ? 'rett' : 'feil') + '"><span class="nr-hvem">' + esc(p.navn) + '</span><span class="nr-hva">' + (sv ? esc(sv) : '<i>ingen svar</i>') + '</span>' +
+          (vert ? '<button type="button" data-g="nr-flipp" data-id="' + p.id + '" aria-label="Endre vurdering for ' + esc(p.navn) + '">' + (r ? '✓' : '✗') + '</button>' : '<b>' + (r ? '✓' : '✗') + '</b>') + '</li>';
+      }).join('');
+      return topp + '<p class="gt-text">' + esc(s.q) + '</p><div class="nr-svar"><p class="nr-fasit">' + esc(s.fasit) + '</p>' + (s.info ? '<p>' + esc(s.info) + '</p>' : '') +
+        (s.url ? '<p class="small"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">Les saken hos ' + esc(s.kilde) + ' ↗</a></p>' : '') + '</div>' +
+        '<ul class="nr-rom-svar">' + rader + '</ul>' +
+        '<p class="small">Riktig: del ut én 🍺. Feil: drikk én.' + (vert ? ' Trykk ✓/✗ for å rette en vurdering.' : '') + '</p>' +
+        (vert ? '<button class="rom-stor-knapp" data-g="nr-neste" type="button">' + (s.i + 1 < s.antall ? 'Neste spørsmål' : 'Se hvem som vant') + '</button>' : '');
+    }
+
+    /* ---------- reaksjoner og «send en slurk» ---------- */
+    var sisteReak = -1;
+    function visReaksjoner(liste) {
+      if (!liste || !liste.length) { if (sisteReak < 0) sisteReak = 0; return; }
+      var nyeste = liste[liste.length - 1].nr;
+      if (sisteReak < 0) { sisteReak = nyeste; return; }   // ikke spill av gamle reaksjoner når man kommer inn
+      liste.forEach(function (r) {
+        if (r.nr <= sisteReak) return;
+        var el = document.createElement('div');
+        el.className = 'reak-fly' + (r.til ? ' send' : '');
+        el.style.left = (8 + Math.random() * 55) + '%';
+        el.innerHTML = '<span>' + esc(r.e) + '</span>' + (r.til ? '<small>' + esc(navn(r.fra)) + ' → ' + esc(navn(r.til)) + '</small>' : '<small>' + esc(navn(r.fra)) + '</small>');
+        document.body.appendChild(el);
+        setTimeout(function () { el.remove(); }, 2600);
+        if (r.til && r.til === tilstand.meg) {
+          toast(navn(r.fra) + ' sendte deg en slurk 🍺');
+          try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {}
+        }
+      });
+      sisteReak = nyeste;
+    }
+    function reaksjonslinje() {
+      var megS = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {};
+      return '<div class="reak-linje" id="reakLinje">' + ['🍻', '😂', '🔥', '😱', '👏'].map(function (e) {
+        return '<button type="button" data-g="reager" data-e="' + e + '" aria-label="Send ' + e + '">' + e + '</button>';
+      }).join('') + '<button type="button" class="reak-send" data-g="send-velg"' + (megS.gi ? '' : ' disabled') + ' aria-label="Send en slurk til noen">🍺 <b>' + (megS.gi || 0) + '</b></button></div>';
+    }
+    function sendVelger() {
+      var megS = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {};
+      if (!megS.gi) return toast('Du har ingen slurker å dele ut ennå. Vinn noe først!');
+      var m = document.createElement('div'); m.className = 'rom-tavle'; m.setAttribute('role', 'dialog');
+      m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>Send en slurk</h2><button class="linkbtn" data-s="lukk" type="button">Lukk</button></div>' +
+        '<p class="small">Du har <b>' + megS.gi + '</b> å dele ut – vunnet i spillene. Den du velger får én slurk på tavla.</p>' +
+        '<div class="rom-valg en">' + tilstand.spillere.filter(function (p) { return p.id !== tilstand.meg; }).map(function (p) {
+          return '<button type="button" data-s="til" data-id="' + p.id + '">' + esc(p.navn) + ' <small>(' + (p.slurker || 0) + ')</small></button>'; }).join('') + '</div></div>';
+      m.addEventListener('click', function (e) {
+        if (e.target === m) return m.remove();
+        var b = e.target.closest('[data-s]'); if (!b) return;
+        if (b.dataset.s === 'til') gjorAlltid({ handling: 'send', hvem: b.dataset.id });
+        m.remove();
+      });
+      document.body.appendChild(m);
+    }
+
     /* ---------- poengtavla ---------- */
     var tavle = null;
     function rangert() {
@@ -526,12 +663,12 @@ import Base from '../../layouts/Base.astro';
     function tavleHtml() {
       var l = rangert(), k = kaaring(), vert = erVert();
       return '<div class="rom-tavle-innhold" role="document"><div class="rom-tavle-topp"><h2>Poengtavla</h2><button class="linkbtn" data-t="lukk" type="button">Lukk</button></div>' +
-        '<p class="small">Før dine egne slurker med + og −. ' + (vert ? 'Som vert kan du rette på alle.' : 'Verten kan rette på alle.') + '</p>' +
+        '<p class="small">Mange leker fører slurkene selv. Før resten med + og −. ' + (vert ? 'Som vert kan du rette på alle.' : 'Verten kan rette på alle.') + ' 🍺 er slurker du har vunnet og kan sende til andre.</p>' +
         '<ol class="rom-tavle-liste">' + l.map(function (p, i) {
           var kan = vert || p.id === tilstand.meg;
           return '<li class="' + (p.id === tilstand.meg ? 'meg' : '') + '"><span class="rt-plass">' + (i + 1) + '</span><span class="rt-navn">' + esc(p.navn) + '</span>' +
             (kan ? '<button type="button" data-t="minus" data-id="' + p.id + '" aria-label="Én slurk mindre for ' + esc(p.navn) + '">−</button>' : '') +
-            '<b class="rt-tall">' + (p.slurker || 0) + '</b>' +
+            '<b class="rt-tall">' + (p.slurker || 0) + '</b>' + (p.gi ? '<span class="rt-gi" title="Slurker å dele ut">🍺' + p.gi + '</span>' : '') +
             (kan ? '<button type="button" data-t="pluss" data-id="' + p.id + '" aria-label="Én slurk til ' + esc(p.navn) + '">+</button>' : '') + '</li>';
         }).join('') + '</ol>' +
         (k.length ? '<div class="rom-kaaring">' + k.map(function (x) { return '<div><span>' + x.ikon + '</span><small>' + esc(x.tittel) + '</small><b>' + esc(x.navn) + (x.n !== null ? ' · ' + x.n : '') + '</b></div>'; }).join('') + '</div>' : '') +
@@ -595,18 +732,26 @@ import Base from '../../layouts/Base.astro';
       else {
         innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' ? ' · ' + esc(s.modus) : '') + '</p>' +
           ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
-             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill }[s.type] || function () { return ''; })(s) + '</div>';
+             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill }[s.type] || function () { return ''; })(s) + '</div>';
       }
       var vert = erVert() ? '<div class="rom-vert">' +
         (s ? '<button class="btn ghost small" data-g="avslutt" type="button">Bytt lek</button>' : '') +
         '<button class="btn ghost small" data-g="nullstill" type="button">Nullstill slurker</button></div>' : '';
       var tsLagret = [0, 1, 2].map(function (i) { var e = document.getElementById('tsR' + i); return e ? e.value : null; }), tsValgt = (document.querySelector('input[name=tsL]:checked') || {}).value;
       var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
-      root.innerHTML = hode() + innhold + vert +
+      var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
+      root.innerHTML = hode() + reaksjonslinje() + innhold + vert +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">Forlat rommet</button></p>';
       window.scrollTo(0, y);
       tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
       if (tsValgt !== undefined) { var r = document.querySelector('input[name=tsL][value="' + tsValgt + '"]'); if (r) r.checked = true; }
+      var nrNy = document.getElementById('nrInput');
+      if (nrNy && nrVerdi !== null) { nrNy.value = nrVerdi; if (nrFokus) nrNy.focus({ preventScroll: true }); }
+      var nrS = document.getElementById('nrSkjema');
+      if (nrS) nrS.addEventListener('submit', function (e) {
+        e.preventDefault(); var i = document.getElementById('nrInput'); gjorAlltid({ handling: 'nr-svar', v: i.value.trim() }); i.blur();
+      });
+      visReaksjoner(tilstand.reak);
       var ny = document.getElementById('rfInput');
       if (ny && gVerdi !== null) { ny.value = gVerdi; if (gFokus) ny.focus({ preventScroll: true }); }
       var ts = document.getElementById('tsSkjema');
@@ -651,6 +796,15 @@ import Base from '../../layouts/Base.astro';
         return gjor({ handling: 'start', lek: 'egen', navn: st.navn, kort: st.kort });
       }
       if (g === 'lagrestokk') return lagreSomStokk();
+      if (g === 'reager') return gjorAlltid({ handling: 'reager', e: b.dataset.e });
+      if (g === 'send-velg') return sendVelger();
+      if (g === 'br-svar') return gjor({ handling: 'br-svar', v: b.dataset.v });
+      if (g === 'br-snu') return gjor({ handling: 'br-snu', pos: Number(b.dataset.pos) });
+      if (g === 'yz-hold') return gjor({ handling: 'yz-hold', i: Number(b.dataset.i) });
+      if (g === 'yz-felt') return gjor({ handling: 'yz-felt', f: b.dataset.f });
+      if (g === 'nr-svar') return gjorAlltid({ handling: 'nr-svar', v: b.dataset.v });
+      if (g === 'nr-flipp') return gjor({ handling: 'nr-flipp', hvem: b.dataset.id });
+      if (['br-buss', 'br-kjor', 'yz-kast', 'nr-vis', 'nr-neste'].indexOf(g) !== -1) return gjor({ handling: g });
       if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
       if (g === 'stem') return gjor({ handling: 'stem', paa: b.dataset.paa });
       if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });

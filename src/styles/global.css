@@ -1151,3 +1151,64 @@ body.stokk-aapen{overflow:hidden}
 .installer > span{flex:1 1 200px;font-size:14.5px}
 .installer .linkbtn{text-decoration:none;color:var(--muted);font-size:16px;padding:4px 6px}
 .installer p{flex-basis:100%;margin:0}
+
+/* ---------- Rom: nye leker, reaksjoner ---------- */
+.rom-valg.en{grid-template-columns:1fr}
+.rom-valg.en button{text-align:left;padding:10px 16px}
+.dl-hender > div.aktiv{outline:2px solid var(--gold);border-radius:12px}
+.yz-terninger.landet .dice{animation:terningLand .45s ease-out}
+@keyframes terningLand{0%{transform:rotate(-200deg) scale(.6);opacity:.4}70%{transform:rotate(12deg) scale(1.08)}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.yz-terninger.landet .dice{animation:none}}
+.nr-opples{background:var(--card);border:1px solid var(--gold);border-radius:20px;padding:14px 16px;width:100%;max-width:420px;box-sizing:border-box}
+.nr-rom-svar{list-style:none;padding:0;margin:12px 0;width:100%;max-width:420px;display:flex;flex-direction:column;gap:6px}
+.nr-rom-svar li{display:grid;grid-template-columns:minmax(0,7em) 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 12px}
+.nr-rom-svar li.rett{border-color:rgba(120,200,120,.5)}
+.nr-rom-svar li.feil{border-color:rgba(255,106,77,.45)}
+.nr-hvem{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nr-hva{color:var(--muted);overflow-wrap:anywhere}
+.nr-rom-svar button{width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--card2);color:var(--ink);font-size:18px;font-weight:800;cursor:pointer}
+.nr-rom-svar li.rett b,.nr-rom-svar li.rett button{color:#8fd68f}
+.nr-rom-svar li.feil b,.nr-rom-svar li.feil button{color:var(--accent)}
+.rt-gi{font-size:13px;color:var(--gold);font-weight:700;margin-left:-2px}
+.reak-linje{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:4px auto 14px;padding:6px;background:rgba(28,22,16,.92);border:1px solid var(--border2);border-radius:999px;width:max-content;max-width:100%;backdrop-filter:blur(8px)}
+.reak-linje button{width:40px;height:40px;border-radius:50%;border:0;background:transparent;font-size:22px;cursor:pointer}
+.reak-linje button:active{transform:scale(.88)}
+.reak-linje .reak-send{width:auto;padding:0 14px;border-radius:999px;background:var(--gold);color:#1a1208;font-size:17px}
+.reak-linje .reak-send[disabled]{background:var(--card2);color:var(--faint);cursor:default}
+.reak-fly{position:fixed;bottom:150px;z-index:120;display:flex;flex-direction:column;align-items:center;pointer-events:none;animation:reakFly 2.5s ease-out forwards}
+.reak-fly span{font-size:44px;line-height:1}
+.reak-fly small{font-size:12px;font-weight:700;background:rgba(20,16,9,.85);color:var(--ink);padding:2px 8px;border-radius:999px;margin-top:2px;white-space:nowrap}
+.reak-fly.send span{font-size:56px}
+@keyframes reakFly{0%{transform:translateY(0) scale(.6);opacity:0}12%{opacity:1;transform:translateY(-30px) scale(1.1)}100%{transform:translateY(-420px) scale(1);opacity:0}}
+@media (prefers-reduced-motion:reduce){.reak-fly{animation:reakFade 2.5s forwards}@keyframes reakFade{0%,80%{opacity:1}100%{opacity:0}}}
+.nr-tur{font-family:var(--display);font-size:18px;margin:4px 0}
+.nr-dom{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.nr-dom .btn{flex:1 1 160px;min-height:52px}
+.nr-stilling{margin-top:12px}
+
+/* ---------- Kveldsplan ---------- */
+.kv-skjema{max-width:560px}
+.kv-valg{border:0;padding:0;margin:0 0 14px;display:flex;flex-wrap:wrap;gap:8px}
+.kv-valg legend{margin-bottom:8px;width:100%}
+.kv-valg label{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border2);border-radius:999px;padding:9px 14px;font-weight:600;font-size:14.5px;cursor:pointer}
+.kv-valg label:has(input:checked){background:var(--gold);color:#1a1208;border-color:var(--gold)}
+.kv-valg input{accent-color:#1a1208;margin:0}
+.kv-plan{margin-top:26px}
+.kv-topp{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.kv-liste{list-style:none;padding:0;margin:12px 0;display:flex;flex-direction:column;gap:10px}
+.kv-liste li{display:grid;grid-template-columns:4.6em 1fr;gap:10px}
+.kv-tid{font-family:var(--display);font-weight:700;color:var(--muted);font-size:14px;padding-top:16px;text-align:right}
+.kv-lek{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kv-lek small{color:var(--gold);font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+.kv-lek b{font-family:var(--display);font-size:19px}
+.kv-lek > span{color:var(--muted);font-size:14.5px}
+.kv-knapper{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
+.kv-liste li.aktiv .kv-lek{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.kv-liste li.ferdig{opacity:.5}
+.kv-styring{display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:sticky;bottom:calc(env(safe-area-inset-bottom) + 86px);background:rgba(20,16,9,.94);padding:10px 0;z-index:5}
+@media (min-width:900px){.kv-styring{bottom:0}}
+.kv-naa{display:flex;flex-direction:column;flex:1 1 180px}
+.kv-klokke{font-family:var(--display);font-weight:800;font-size:22px;color:var(--gold);font-variant-numeric:tabular-nums}
+.kv-klokke.over{color:var(--accent);font-size:15px}
+.lek-fra{margin:-6px 0 12px;color:var(--muted);font-size:14.5px}
+.lek-fra b{color:var(--gold)}

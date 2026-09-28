@@ -254,7 +254,8 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
         f('Kommentar', 'f_dnote', it.note, false, 'valgfritt · vises under betydningen') + sitBoxes(it);
       if (kind === 'game') return f('Navn', 'f_name', no(it.name)) + f('Utstyr', 'f_gear', no(it.gear)) +
         f('Spillere', 'f_pl', it.pl, false, 'f.eks. 3+') +
-        f('Regler', 'f_rules', ((it.rules && it.rules.no) || []).join('\n'), true, 'én linje per avsnitt · «b|» foran gir punkt');
+        f('Regler', 'f_rules', ((it.rules && it.rules.no) || []).join('\n'), true, 'én linje per avsnitt · «b|» foran gir punkt') +
+        f('Sendt inn av', 'f_fra', it.fra, false, 'valgfritt · vises på lekesiden');
       return f('Når / kontekst', 'f_ctx', it.ctx, false, 'valgfritt') +
         f('Replikk', 'f_line', it.line, true) +
         f('Kommentar', 'f_note', it.note, false, 'valgfritt · skriv «Grov» for å merke den') + sitBoxes(it);
@@ -266,7 +267,9 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
       pendingSug = sug || null;
       $('editTitle').textContent = editIdx >= 0 ? 'Endre' : 'Legg til';
       $('editWhere').textContent = no(curSec().title) + ' › ' + (no(g.title) || 'gruppe');
-      $('fields').innerHTML = fieldsFor(kind, editIdx >= 0 ? g.items[editIdx] : (sug ? { ctx: sug.c, line: sug.l } : null));
+      $('fields').innerHTML = fieldsFor(kind, editIdx >= 0 ? g.items[editIdx] : (sug ? (sug.t === 'lek'
+        ? { name: { no: sug.navn }, gear: { no: sug.utstyr }, pl: sug.pl, rules: { no: String(sug.regler || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean) }, fra: sug.n }
+        : { ctx: sug.c, line: sug.l }) : null));
       $('editOverlay').hidden = false;
     }
     $('cancelBtn').addEventListener('click', function () { $('editOverlay').hidden = true; pendingSug = null; });
@@ -285,6 +288,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
         if (!v('f_name')) return alert('Skriv inn navnet.');
         entry = { name: { no: v('f_name') }, gear: { no: v('f_gear') }, pl: v('f_pl'),
                   rules: { no: v('f_rules').split('\n').map(function (x) { return x.trim(); }).filter(Boolean) } };
+        if (v('f_fra')) entry.fra = v('f_fra');
       } else {
         if (!v('f_line')) return alert('Skriv inn replikken.');
         entry = { line: v('f_line') };
@@ -317,6 +321,8 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
           var m = /<!--\s*(\{[\s\S]*?\})\s*-->/.exec(is.body || '');
           var meta = {};
           try { meta = m ? JSON.parse(m[1]) : {}; } catch (e) {}
+          if (meta.t === 'lek') return { t: 'lek', number: is.number, url: is.html_url, when: (is.created_at || '').slice(0, 10),
+                   navn: meta.navn || is.title.replace(/^Forslag \(lek\):\s*/, ''), pl: meta.pl || '', utstyr: meta.utstyr || '', regler: meta.regler || '', n: meta.n || '', l: meta.navn || '' };
           return { number: is.number, url: is.html_url, when: (is.created_at || '').slice(0, 10),
                    k: meta.k || '', c: meta.c || '', l: meta.l || is.title.replace(/^Forslag:\s*/, ''), n: meta.n || '' };
         });
@@ -327,6 +333,10 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
       $('sugCount').textContent = sugs.length ? '(' + sugs.length + ')' : '';
       if (!sugs.length) { $('sugList').innerHTML = '<p class="small">Ingen nye forslag.</p>'; return; }
       $('sugList').innerHTML = sugs.map(function (s, i) {
+        if (s.t === 'lek') return '<article class="card item"><p class="ctx">Ny drikkelek' + (s.pl ? ' · ' + esc(s.pl) + ' spillere' : '') + (s.utstyr ? ' · ' + esc(s.utstyr) : '') + '</p>' +
+          '<p class="line"><b>' + esc(s.navn) + '</b></p><p class="small" style="white-space:pre-line">' + esc(s.regler) + '</p>' +
+          '<p class="sugmeta">' + (s.n ? 'fra ' + esc(s.n) + ' · ' : '') + esc(s.when) + ' · <a href="' + esc(s.url) + '" target="_blank" rel="noopener">på GitHub</a></p>' +
+          '<div class="acts"><button class="mini" data-acc="' + i + '">Godta</button><button class="mini danger" data-rej="' + i + '">Avvis</button></div></article>';
         return '<article class="card item">' + (s.c ? '<p class="ctx">' + esc(s.c) + '</p>' : '') +
           '<p class="line">«' + esc(s.l) + '»</p>' +
           '<p class="sugmeta">' + esc(s.k || 'ingen kategori') + (s.n ? ' · fra ' + esc(s.n) : '') + ' · ' + esc(s.when) +
@@ -339,6 +349,17 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
       var a = e.target.closest('[data-acc]'), r = e.target.closest('[data-rej]');
       if (a) {
         var s = sugs[+a.dataset.acc];
+        if (s.t === 'lek') {
+          // Innsendte leker samles i gruppa «Fra brukerne» under drikkeleker
+          var ssi = data.findIndex(function (x) { return x.id === 'spill'; });
+          if (ssi >= 0) {
+            var gg = data[ssi].groups, gix = gg.findIndex(function (x) { return x.id === 'innsendt'; });
+            if (gix < 0) { gg.push({ id: 'innsendt', title: { no: 'Fra brukerne', en: 'From our users' }, type: 'game', items: [] }); gix = gg.length - 1; }
+            $('secSel').value = ssi; buildGroupSelect(); $('grpSel').value = gix; renderList();
+          }
+          document.querySelector('.tab[data-tab=innhold]').click();
+          return openEdit(null, s);
+        }
         // hopp til gruppa forslagsstilleren valgte, hvis den finnes
         if (s.k && s.k.indexOf('.') > 0) {
           var p = s.k.split('.');

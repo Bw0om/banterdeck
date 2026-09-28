@@ -13,6 +13,9 @@ export const POST: APIRoute = async ({ request }) => {
   // Honeypot: feltet «website» skal alltid være tomt for mennesker.
   if (d.website) return json({ ok: true });
 
+  // Forslag til en ny drikkelek
+  if (d.type === 'lek') return foreslaLek(d);
+
   const line = String(d.line || '').trim();
   const ctx = String(d.ctx || '').trim().slice(0, 120);
   const kategori = String(d.kategori || '').trim().slice(0, 80);
@@ -48,3 +51,26 @@ export const POST: APIRoute = async ({ request }) => {
   }
   return json({ ok: true });
 };
+
+async function foreslaLek(d: any) {
+  const rens = (x: any, n: number) => String(x || '').replace(/[\u0000-\u0008\u000b-\u001f<>]/g, '').trim().slice(0, n);
+  const navn = rens(d.lekNavn, 60), pl = rens(d.pl, 12), utstyr = rens(d.utstyr, 120), regler = rens(d.regler, 3000), fra = rens(d.navn, 60);
+  if (navn.length < 2) return json({ ok: false, error: 'Gi leken et navn.' }, 400);
+  if (regler.length < 30) return json({ ok: false, error: 'Skriv reglene litt mer utfyllende (minst 30 tegn).' }, 400);
+  const env: any = (typeof process !== 'undefined' && process.env) || {};
+  const token = env.GITHUB_TOKEN || import.meta.env.GITHUB_TOKEN;
+  const repo = env.GITHUB_REPO || import.meta.env.GITHUB_REPO;
+  if (!token || !repo) return json({ ok: false, error: 'Forslag er ikke satt opp ennå.' }, 500);
+  const meta = JSON.stringify({ t: 'lek', navn, pl, utstyr, regler, n: fra });
+  const body = [
+    `**Ny drikkelek:** ${navn}`, pl ? `**Spillere:** ${pl}` : '', utstyr ? `**Utstyr:** ${utstyr}` : '',
+    '', '**Regler:**', regler, '', fra ? `**Fra:** ${fra}` : '', '', `<!-- ${meta.replace(/-->/g, '—>')} -->`,
+  ].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
+  const r = await fetch(`https://api.github.com/repos/${repo}/issues`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: `Forslag (lek): ${navn}`, body, labels: ['forslag'] }),
+  });
+  if (!r.ok) return json({ ok: false, error: `GitHub svarte ${r.status}.` }, 502);
+  return json({ ok: true });
+}

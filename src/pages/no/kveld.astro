@@ -1,0 +1,183 @@
+---
+// Kveldsoppsett: velg lengde, gjeng og utstyr – få en rekkefølge av leker med tid på hver.
+import Base from '../../layouts/Base.astro';
+import { games, t } from '../../lib/content';
+// fase: o = oppvarming, h = hoveddel, f = finale · min = minutter · vill: 1–3 · pl: minst antall
+// utstyr: '' = bare telefon, 'kopper' = kopper og bord, 'musikk' = høyttaler · rom: kan spilles i rom · bareRom: trenger flere telefoner
+const LEKER: Record<string, { fase: string; min: number; vill: number; pl: number; utstyr?: string; rom?: boolean; bareRom?: boolean; tips: string }> = {
+  'pekeleken': { fase: 'o', min: 15, vill: 1, pl: 4, rom: true, tips: 'Alle peker samtidig. Lett start, får praten i gang.' },
+  'jeg-har-aldri': { fase: 'o', min: 15, vill: 2, pl: 3, rom: true, tips: 'Klassikeren. Ta den rolige modusen først.' },
+  '50-50': { fase: 'o', min: 10, vill: 1, pl: 4, rom: true, tips: 'Halvparten drikker hver gang – ingen blir sittende alene.' },
+  'enten-eller': { fase: 'o', min: 10, vill: 1, pl: 4, rom: true, tips: 'Minoriteten drikker.' },
+  'to-sannheter-og-en-logn': { fase: 'o', min: 15, vill: 1, pl: 3, rom: true, tips: 'Perfekt når ikke alle kjenner hverandre.' },
+  'tanken-bak-sangen': { fase: 'o', min: 15, vill: 1, pl: 2, utstyr: 'musikk', rom: true, tips: 'Musikk i gang og historier på bordet.' },
+  'nyhetsrunden': { fase: 'o', min: 20, vill: 1, pl: 3, rom: true, tips: 'Ukas nyheter – verten leser, alle svarer på sin telefon.' },
+  'kategorier': { fase: 'h', min: 15, vill: 2, pl: 3, rom: true, tips: 'Den som ikke kommer på noe, drikker.' },
+  'ring-of-fire': { fase: 'h', min: 30, vill: 2, pl: 3, rom: true, tips: 'Kvelden kan godt bygges rundt denne.' },
+  'forraeder': { fase: 'h', min: 20, vill: 2, pl: 4, rom: true, bareRom: true, tips: 'Hemmelige roller på hver sin telefon.' },
+  'regelfabrikken': { fase: 'h', min: 25, vill: 2, pl: 3, rom: true, tips: 'Dere skriver kortene selv – blir bare bedre utover kvelden.' },
+  'drikke-bingo': { fase: 'h', min: 30, vill: 2, pl: 3, utstyr: 'musikk', rom: true, tips: 'Spilleliste på, hver sitt brett.' },
+  'veddelopet': { fase: 'h', min: 15, vill: 2, pl: 3, rom: true, tips: 'Kort og intenst. Alle vedder samtidig.' },
+  'bussruta': { fase: 'h', min: 25, vill: 3, pl: 3, rom: true, tips: 'Noen ender på bussen. Beste før finalen.' },
+  'drikke-yatzy': { fase: 'h', min: 30, vill: 2, pl: 2, rom: true, tips: 'Rolig tempo, men enere og fire like svir.' },
+  'pyramiden': { fase: 'h', min: 25, vill: 2, pl: 3, rom: true, bareRom: true, tips: 'Bløff med skjulte kort på telefonen.' },
+  'president': { fase: 'h', min: 30, vill: 2, pl: 4, rom: true, bareRom: true, tips: 'Titler som varer resten av kvelden.' },
+  'gris': { fase: 'h', min: 15, vill: 2, pl: 4, rom: true, bareRom: true, tips: 'Kaotisk og kjapp. Sistemann på nesa drikker.' },
+  'over-eller-under': { fase: 'h', min: 15, vill: 2, pl: 2, rom: true, tips: 'Enkel og rask mellom to større leker.' },
+  'fuck-the-dealer': { fase: 'h', min: 20, vill: 3, pl: 3, tips: 'Én telefon, dealeren styrer.' },
+  '21-med-terninger': { fase: 'h', min: 15, vill: 2, pl: 2, tips: 'Telefonen er terningen.' },
+  'beer-pong': { fase: 'h', min: 30, vill: 2, pl: 2, utstyr: 'kopper', tips: 'Rigg bordet mens noen spiller noe annet.' },
+  'flip-cup': { fase: 'f', min: 15, vill: 3, pl: 6, utstyr: 'kopper', tips: 'Lag mot lag – full fart.' },
+  'rage-cage': { fase: 'f', min: 20, vill: 3, pl: 6, utstyr: 'kopper', tips: 'For de som vil avslutte hardt.' },
+  'opus': { fase: 'f', min: 10, vill: 3, pl: 4, utstyr: 'musikk', tips: 'Send telefonen rundt og vent på droppet.' },
+  'thunderstruck': { fase: 'f', min: 5, vill: 3, pl: 3, utstyr: 'musikk', tips: 'Fem minutter kaos. Vannglass klart.' },
+  'power-hour': { fase: 'f', min: 60, vill: 3, pl: 1, utstyr: 'musikk', tips: 'Én slurk i minuttet i en time. Bare for de modige.' },
+};
+const finnes = new Set(games.map((g: any) => g.slug));
+const DATA = Object.fromEntries(Object.entries(LEKER).filter(([s]) => finnes.has(s)).map(([s, v]) => {
+  const g = games.find((x: any) => x.slug === s);
+  return [s, { ...v, navn: t(g.name, 'no') }];
+}));
+---
+<Base title="Kveldsplan" description="Planlegg kvelden: få en rekkefølge av drikkeleker tilpasset gjengen, tiden og utstyret dere har." lang="no" gate={true} bilde="/og/drikkeleker.jpg">
+  <h1>Kveldsplan</h1>
+  <p class="lead">Si hvor lenge dere har og hva dere har å spille med, så setter vi opp kvelden – fra oppvarming til finale.</p>
+
+  <form id="kvSkjema" class="form kv-skjema">
+    <fieldset class="kv-valg"><legend class="lab">Hvor lenge?</legend>
+      <label><input type="radio" name="tid" value="60"> 1 time</label>
+      <label><input type="radio" name="tid" value="120" checked> 2 timer</label>
+      <label><input type="radio" name="tid" value="180"> 3 timer+</label>
+    </fieldset>
+    <fieldset class="kv-valg"><legend class="lab">Hvor mange?</legend>
+      <label><input type="radio" name="pl" value="3"> 2–3</label>
+      <label><input type="radio" name="pl" value="5" checked> 4–6</label>
+      <label><input type="radio" name="pl" value="8"> 7+</label>
+    </fieldset>
+    <fieldset class="kv-valg"><legend class="lab">Stemning</legend>
+      <label><input type="radio" name="vill" value="1"> Rolig</label>
+      <label><input type="radio" name="vill" value="2" checked> Passe</label>
+      <label><input type="radio" name="vill" value="3"> Vill</label>
+    </fieldset>
+    <fieldset class="kv-valg"><legend class="lab">Dette har vi</legend>
+      <label><input type="checkbox" name="utstyr" value="musikk" checked> Høyttaler</label>
+      <label><input type="checkbox" name="utstyr" value="kopper"> Kopper og bord</label>
+      <label><input type="checkbox" name="rom" value="1" checked> Hver sin telefon</label>
+    </fieldset>
+    <button class="btn gold" type="submit">Lag kveldsplan</button>
+  </form>
+
+  <section id="kvPlan" class="kv-plan" hidden></section>
+
+  <script is:inline data-astro-rerun define:vars={{ DATA }}>
+  (function () {
+    var skjema = document.getElementById('kvSkjema'), ut = document.getElementById('kvPlan');
+    if (!skjema || skjema.dataset.bound) return; skjema.dataset.bound = '1';
+    var plan = null, valg = null, aktiv = -1, klokke = null;
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function bland(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+    function lagre() { try { localStorage.setItem('bd_kveld', JSON.stringify({ plan: plan, valg: valg, aktiv: aktiv, start: plan && plan.start })); } catch (e) {} }
+
+    function passer(slug, fase, brukt) {
+      var g = DATA[slug];
+      if (!g || g.fase !== fase || brukt.indexOf(slug) !== -1) return false;
+      if (g.pl > valg.pl) return false;
+      if (g.utstyr && valg.utstyr.indexOf(g.utstyr) === -1) return false;
+      if (g.bareRom && !valg.rom) return false;
+      if (valg.vill === 1 && g.vill === 3) return false;
+      if (valg.vill === 3 && g.vill === 1 && fase === 'h') return false;
+      if (slug === 'power-hour' && valg.tid < 180) return false;
+      return true;
+    }
+    function velg(fase, brukt, maksMin) {
+      var kand = Object.keys(DATA).filter(function (s) { return passer(s, fase, brukt) && DATA[s].min <= maksMin; });
+      // Villere kvelder foretrekker villere leker
+      kand = bland(kand).sort(function (a, b) { return Math.abs(DATA[a].vill - valg.vill) - Math.abs(DATA[b].vill - valg.vill); });
+      return kand[0] || null;
+    }
+    function lagPlan() {
+      var brukt = [], blokker = [], igjen = valg.tid;
+      var o = velg('o', brukt, 25); if (o) { brukt.push(o); blokker.push({ slug: o, min: DATA[o].min }); igjen -= DATA[o].min; }
+      var finaleTid = valg.tid >= 180 ? 60 : 20;
+      var f = velg('f', brukt, finaleTid) || velg('h', brukt, 25);
+      if (f) brukt.push(f);
+      igjen -= f ? DATA[f].min : 0;
+      var vakt = 0;
+      while (igjen >= 10 && vakt++ < 12) {
+        var h = velg('h', brukt, igjen);
+        if (!h) break;
+        brukt.push(h); blokker.push({ slug: h, min: DATA[h].min }); igjen -= DATA[h].min;
+      }
+      if (f) blokker.push({ slug: f, min: DATA[f].min, finale: true });
+      return { blokker: blokker, start: null };
+    }
+    function bytt(i) {
+      var b = plan.blokker[i], fase = b.finale ? 'f' : (i === 0 ? 'o' : 'h');
+      var brukt = plan.blokker.map(function (x) { return x.slug; });
+      var ny = velg(fase, brukt, b.min + 15) || velg('h', brukt, b.min + 15);
+      if (!ny) return;
+      plan.blokker[i] = { slug: ny, min: DATA[ny].min, finale: b.finale };
+      lagre(); tegn();
+    }
+    function tid(min) { return min >= 60 ? Math.floor(min / 60) + ' t' + (min % 60 ? ' ' + (min % 60) + ' min' : '') : min + ' min'; }
+    function tegn() {
+      ut.hidden = false;
+      var totalt = plan.blokker.reduce(function (n, b) { return n + b.min; }, 0), t0 = 0;
+      ut.innerHTML = '<div class="kv-topp"><h2>Kveldens plan</h2><span class="small">' + plan.blokker.length + ' leker · ca. ' + tid(totalt) + '</span></div>' +
+        '<ol class="kv-liste">' + plan.blokker.map(function (b, i) {
+          var g = DATA[b.slug], fra = t0; t0 += b.min;
+          var merke = i === 0 ? 'Oppvarming' : b.finale ? 'Finale' : 'Hoveddel';
+          return '<li class="' + (i === aktiv ? 'aktiv' : i < aktiv ? 'ferdig' : '') + '">' +
+            '<span class="kv-tid">' + (fra ? '+' + tid(fra) : 'Start') + '</span>' +
+            '<div class="kv-lek"><small>' + merke + ' · ' + b.min + ' min</small><b>' + esc(g.navn) + '</b><span>' + esc(g.tips) + '</span>' +
+            '<div class="kv-knapper"><a class="btn gold small" href="/no/drinking-games/' + b.slug + '/">Regler og verktøy</a>' +
+            (g.rom && valg.rom ? '<a class="btn small" href="/no/rom">Åpne rom</a>' : '') +
+            (i >= aktiv ? '<button class="mini" type="button" data-bytt="' + i + '">Bytt</button>' : '') + '</div></div></li>';
+        }).join('') + '</ol>' +
+        '<div class="kv-styring">' + (aktiv < 0
+          ? '<button class="btn gold" type="button" data-k="start">Start kvelden</button><button class="btn ghost" type="button" data-k="ny">Lag en ny</button>'
+          : aktiv < plan.blokker.length
+            ? '<div class="kv-naa"><span class="small">Nå: <b>' + esc(DATA[plan.blokker[aktiv].slug].navn) + '</b></span><span class="kv-klokke" id="kvKlokke"></span></div>' +
+              '<button class="btn gold" type="button" data-k="neste">' + (aktiv + 1 < plan.blokker.length ? 'Neste lek' : 'Ferdig for kvelden') + '</button>'
+            : '<p class="dl-melding dl-stor">Det var kvelden! Husk vann 💧</p><button class="btn ghost" type="button" data-k="ny">Lag en ny plan</button>') + '</div>';
+      oppdaterKlokke();
+    }
+    function oppdaterKlokke() {
+      clearInterval(klokke);
+      if (aktiv < 0 || aktiv >= plan.blokker.length || !plan.blokkStart) return;
+      var slutt = plan.blokkStart + plan.blokker[aktiv].min * 60000;
+      function tikk() {
+        var el = document.getElementById('kvKlokke'); if (!el) return clearInterval(klokke);
+        var ms = slutt - Date.now(), m = Math.floor(Math.abs(ms) / 60000), s = Math.floor(Math.abs(ms) % 60000 / 1000);
+        el.textContent = ms >= 0 ? m + ':' + String(s).padStart(2, '0') + ' igjen' : 'På overtid – bytt når dere vil';
+        el.classList.toggle('over', ms < 0);
+      }
+      tikk(); klokke = setInterval(tikk, 1000);
+    }
+    skjema.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var f = new FormData(skjema);
+      valg = { tid: +f.get('tid'), pl: +f.get('pl'), vill: +f.get('vill'), utstyr: f.getAll('utstyr'), rom: !!f.get('rom') };
+      plan = lagPlan(); aktiv = -1; lagre(); tegn();
+      ut.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    ut.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-bytt]'); if (b) return bytt(+b.dataset.bytt);
+      var k = e.target.closest('[data-k]'); if (!k) return;
+      if (k.dataset.k === 'start') { aktiv = 0; plan.blokkStart = Date.now(); }
+      if (k.dataset.k === 'neste') { aktiv++; plan.blokkStart = Date.now(); }
+      if (k.dataset.k === 'ny') { plan = lagPlan(); aktiv = -1; }
+      lagre(); tegn();
+    });
+    document.addEventListener('astro:before-swap', function () { clearInterval(klokke); }, { once: true });
+    // Fortsett en plan fra tidligere i kveld
+    try {
+      var lagret = JSON.parse(localStorage.getItem('bd_kveld') || 'null');
+      if (lagret && lagret.plan && lagret.plan.blokker && lagret.plan.blokker.every(function (b) { return DATA[b.slug]; }) &&
+          (lagret.aktiv < 0 || (lagret.plan.blokkStart && Date.now() - lagret.plan.blokkStart < 8 * 3600000))) {
+        plan = lagret.plan; valg = lagret.valg; aktiv = lagret.aktiv; tegn();
+      }
+    } catch (e) {}
+  })();
+  </script>
+</Base>
