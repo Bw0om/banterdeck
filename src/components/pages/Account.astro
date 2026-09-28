@@ -8,6 +8,40 @@ const SUPABASE_URL = supabaseUrl();
 const SUPABASE_ANON_KEY = supabaseAnonKey();
 const configured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 const dbg = configured ? null : supabaseDebug();
+const no = lang === 'no';
+const T = no ? {
+  tabLogin: 'Logg inn', tabNew: 'Ny konto', tabLink: 'E-postlenke',
+  userOrEmail: 'Brukernavn eller e-post', password: 'Passord', login: 'Logg inn', forgot: 'Glemt passordet?',
+  username: 'Brukernavn', usernameHelp: '3–20 tegn. Vises for deg, aldri for andre.', newPw: 'Passord (minst 8 tegn)', create: 'Lag konto',
+  linkLead: 'Vil du slippe passord? Få en innloggingslenke på e-post.',
+  forgotLead: 'Skriv e-postadressen din, så sender vi en lenke for å velge nytt passord.', sendReset: 'Send lenke', back: 'Tilbake',
+  resetSent: 'Sjekk innboksen – lenken er på vei.', confirmSent: 'Nesten ferdig! Sjekk innboksen og trykk på lenken for å bekrefte e-posten.',
+  choosePw: 'Velg nytt passord', savePw: 'Lagre passord', pwSaved: 'Passordet er endret ✓', pwShort: 'Passordet må være minst 8 tegn.',
+  fillAll: 'Fyll ut alle feltene.', setUser: 'Velg et brukernavn', setUserLead: 'Da kan du logge inn med brukernavn og passord neste gang.', save: 'Lagre',
+  setPw: 'Sett passord', setPwLead: 'Logget inn med lenke? Sett et passord, så kan du logge inn med brukernavnet ditt.',
+  decks: 'Mine kortstokker', decksLead: 'Lag egne drikkekort, og spill dem alene eller i et rom med vennene dine.',
+  newDeck: 'Ny kortstokk', deckName: 'Navn', deckCards: 'Kort – ett per linje', deckPh: 'Alle med hvite sokker drikker\nDen yngste deler ut tre slurker',
+  saveDeck: 'Lagre kortstokk', play: 'Spill', playRoom: 'Spill i rom', edit: 'Rediger', del: 'Slett', cancel: 'Avbryt', cards: 'kort',
+  noDecks: 'Ingen kortstokker ennå. Lag en her, eller lagre kortene etter en runde Regelfabrikken.',
+  draft: 'kort fra Regelfabrikken er ikke lagret ennå.', saveDraft: 'Lagre dem', delConfirm: 'Trykk igjen for å slette',
+  next: 'Neste kort', close: 'Lukk', of: 'av', saved: 'Lagret ✓', stats: 'Statistikk',
+} : {
+  tabLogin: 'Sign in', tabNew: 'New account', tabLink: 'Email link',
+  userOrEmail: 'Username or email', password: 'Password', login: 'Sign in', forgot: 'Forgot your password?',
+  username: 'Username', usernameHelp: '3–20 characters. Only shown to you.', newPw: 'Password (at least 8 characters)', create: 'Create account',
+  linkLead: 'Rather skip passwords? Get a sign-in link by email.',
+  forgotLead: 'Enter your email and we will send a link to choose a new password.', sendReset: 'Send link', back: 'Back',
+  resetSent: 'Check your inbox — the link is on its way.', confirmSent: 'Almost done! Check your inbox and tap the link to confirm your email.',
+  choosePw: 'Choose a new password', savePw: 'Save password', pwSaved: 'Password changed ✓', pwShort: 'The password must be at least 8 characters.',
+  fillAll: 'Fill in all the fields.', setUser: 'Pick a username', setUserLead: 'Then you can sign in with username and password next time.', save: 'Save',
+  setPw: 'Set a password', setPwLead: 'Signed in with a link? Set a password so you can sign in with your username.',
+  decks: 'My card decks', decksLead: 'Write your own drinking cards and play them alone or in a room with friends.',
+  newDeck: 'New deck', deckName: 'Name', deckCards: 'Cards – one per line', deckPh: 'Everyone in white socks drinks\nThe youngest hands out three sips',
+  saveDeck: 'Save deck', play: 'Play', playRoom: 'Play in a room', edit: 'Edit', del: 'Delete', cancel: 'Cancel', cards: 'cards',
+  noDecks: 'No decks yet. Make one here, or save the cards after a round of Rule Factory.',
+  draft: 'cards from Rule Factory are not saved yet.', saveDraft: 'Save them', delConfirm: 'Tap again to delete',
+  next: 'Next card', close: 'Close', of: 'of', saved: 'Saved ✓', stats: 'Statistics',
+};
 ---
 <Base title={L.accountTitle} description={L.accountLead} lang={lang} noindex={true}>
   <h1>{L.accountTitle}</h1>
@@ -25,23 +59,115 @@ const dbg = configured ? null : supabaseDebug();
 
   {configured && (
     <>
-      <section id="signin">
-        <form class="form" id="loginForm" novalidate>
+      <section id="signin" class="konto">
+        <div class="konto-faner" role="tablist">
+          <button type="button" role="tab" data-fane="inn" aria-selected="true">{T.tabLogin}</button>
+          <button type="button" role="tab" data-fane="ny" aria-selected="false">{T.tabNew}</button>
+          <button type="button" role="tab" data-fane="lenke" aria-selected="false">{T.tabLink}</button>
+        </div>
+
+        <form class="form" id="innForm" data-panel="inn" novalidate>
+          <div class="field">
+            <label class="lab" for="innNavn">{T.userOrEmail}</label>
+            <input id="innNavn" autocomplete="username" autocapitalize="none" spellcheck="false" required />
+          </div>
+          <div class="field">
+            <label class="lab" for="innPw">{T.password}</label>
+            <input id="innPw" type="password" autocomplete="current-password" required />
+          </div>
+          <button class="btn gold" type="submit">{T.login}</button>
+          <p><button type="button" class="linkbtn" data-fane="glemt">{T.forgot}</button></p>
+        </form>
+
+        <form class="form" id="nyForm" data-panel="ny" novalidate hidden>
+          <div class="field">
+            <label class="lab" for="nyEpost">{L.email}</label>
+            <input id="nyEpost" type="email" autocomplete="email" required placeholder="deg@example.com" />
+          </div>
+          <div class="field">
+            <label class="lab" for="nyNavn">{T.username}</label>
+            <input id="nyNavn" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" pattern="[A-Za-z0-9_.\-]{3,20}" required />
+            <p class="help">{T.usernameHelp}</p>
+          </div>
+          <div class="field">
+            <label class="lab" for="nyPw">{T.newPw}</label>
+            <input id="nyPw" type="password" autocomplete="new-password" minlength="8" required />
+          </div>
+          <button class="btn gold" type="submit">{T.create}</button>
+        </form>
+
+        <form class="form" id="loginForm" data-panel="lenke" novalidate hidden>
+          <p class="small">{T.linkLead}</p>
           <div class="field">
             <label class="lab" for="email">{L.email}</label>
             <input id="email" type="email" autocomplete="email" required placeholder="deg@example.com" />
           </div>
           <button class="btn gold" type="submit" id="linkBtn">{L.sendLink}</button>
-          <p id="loginMsg" class="formmsg" role="status" aria-live="polite"></p>
         </form>
+
+        <form class="form" id="glemtForm" data-panel="glemt" novalidate hidden>
+          <p class="small">{T.forgotLead}</p>
+          <div class="field">
+            <label class="lab" for="glemtEpost">{L.email}</label>
+            <input id="glemtEpost" type="email" autocomplete="email" required />
+          </div>
+          <button class="btn gold" type="submit">{T.sendReset}</button>
+          <p><button type="button" class="linkbtn" data-fane="inn">{T.back}</button></p>
+        </form>
+
+        <p id="loginMsg" class="formmsg" role="status" aria-live="polite"></p>
       </section>
 
       <section id="dash" hidden>
         <div class="dashbar">
           <p class="small"><span>{L.signedInAs}</span> <strong id="who"></strong></p>
-          <button class="btn ghost small" id="outBtn">{L.signOut}</button>
+          <span class="dashknapper">
+            <a class="btn ghost small" id="statLenke" href="/no/statistikk" hidden>{T.stats}</a>
+            <button class="btn ghost small" id="outBtn">{L.signOut}</button>
+          </span>
         </div>
         <p id="syncMsg" class="formmsg" role="status" aria-live="polite"></p>
+
+        <form class="form konto-boks" id="pwForm" hidden novalidate>
+          <h2 id="pwTittel">{T.setPw}</h2>
+          <p class="small" id="pwLead">{T.setPwLead}</p>
+          <div class="field">
+            <label class="lab" for="pwNy">{T.newPw}</label>
+            <input id="pwNy" type="password" autocomplete="new-password" minlength="8" />
+          </div>
+          <button class="btn gold" type="submit">{T.savePw}</button>
+        </form>
+
+        <form class="form konto-boks" id="navnForm" hidden novalidate>
+          <h2>{T.setUser}</h2>
+          <p class="small">{T.setUserLead}</p>
+          <div class="field">
+            <label class="lab" for="navnNy">{T.username}</label>
+            <input id="navnNy" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" />
+          </div>
+          <button class="btn gold" type="submit">{T.save}</button>
+        </form>
+
+        <h2>{T.decks}</h2>
+        <p class="small">{T.decksLead}</p>
+        <div id="utkast" class="konto-utkast" hidden></div>
+        <div id="stokker" class="stokk-liste"></div>
+        <button class="btn" type="button" id="nyStokk">+ {T.newDeck}</button>
+        <form class="form konto-boks" id="stokkForm" hidden novalidate>
+          <div class="field">
+            <label class="lab" for="stNavn">{T.deckName}</label>
+            <input id="stNavn" maxlength="40" />
+          </div>
+          <div class="field">
+            <label class="lab" for="stKort">{T.deckCards}</label>
+            <textarea id="stKort" rows="8" placeholder={T.deckPh}></textarea>
+            <p class="help" id="stAntall"></p>
+          </div>
+          <div class="dl-knapper">
+            <button class="btn gold" type="submit">{T.saveDeck}</button>
+            <button class="btn ghost" type="button" id="stAvbryt">{T.cancel}</button>
+          </div>
+        </form>
 
         <h2>{L.myLines}</h2>
         <form class="form addform" id="addForm" novalidate>
@@ -58,89 +184,207 @@ const dbg = configured ? null : supabaseDebug();
         <div id="mine" class="cards"></div>
       </section>
 
-      <script is:inline data-astro-rerun define:vars={{ URL_: SUPABASE_URL, KEY: SUPABASE_ANON_KEY, T: {
+      <div id="stokkSpill" class="stokk-spill" hidden role="dialog" aria-modal="true">
+        <p class="stokk-spill-navn" id="ssNavn"></p>
+        <div class="rom-kort rf-kort"><span class="sw-tag" id="ssTeller"></span><p id="ssKort"></p><span></span></div>
+        <button class="rom-stor-knapp" type="button" id="ssNeste">{T.next}</button>
+        <button class="btn ghost" type="button" id="ssLukk">{T.close}</button>
+      </div>
+
+      <script is:inline data-astro-rerun define:vars={{ LANG: lang, T: {
         linkSent: L.linkSent, syncing: L.syncing, synced: L.synced, none: L.noLines,
-        del: L.delete, generic: L.errGeneric, copyHint: L.copyHint, linkBad: L.linkBad } }}>
+        del: L.delete, generic: L.errGeneric, copyHint: L.copyHint, linkBad: L.linkBad, ...T } }}>
       (function () {
-        var TOKENS = 'bd_session', LOCAL = 'bd_mine';
-        var session = null, mine = [];
+        var root = document.getElementById('signin');
+        if (!root || root.dataset.bound || !window.BDKonto) return; root.dataset.bound = '1';
+        var K = window.BDKonto, LOCAL = 'bd_mine', UTKAST = 'bd_stokk_utkast';
+        var mine = [], bruker = null, stokker = [], redigerer = null, erGjenoppretting = false;
         var $ = function (id) { return document.getElementById(id); };
         function say(el, text, kind) { el.textContent = text; el.className = 'formmsg' + (kind ? ' ' + kind : ''); }
         function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+        function lesLS(k, d) { try { return JSON.parse(localStorage.getItem(k) || 'null') || d; } catch (e) { return d; } }
+        function skrivLS(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+        var msg = $('loginMsg');
 
-        /* --- lagring --- */
-        function loadLocal() { try { return JSON.parse(localStorage.getItem(LOCAL) || '[]'); } catch (e) { return []; } }
-        function saveLocal() { try { localStorage.setItem(LOCAL, JSON.stringify(mine)); } catch (e) {} }
-        function loadSession() { try { return JSON.parse(localStorage.getItem(TOKENS) || 'null'); } catch (e) { return null; } }
-        function saveSession(s) { try { s ? localStorage.setItem(TOKENS, JSON.stringify(s)) : localStorage.removeItem(TOKENS); } catch (e) {} }
-
-        /* --- Supabase REST --- */
-        function sb(path, opts) {
-          opts = opts || {};
-          opts.headers = Object.assign({ apikey: KEY, 'Content-Type': 'application/json' }, opts.headers || {});
-          if (session && session.access_token) opts.headers.Authorization = 'Bearer ' + session.access_token;
-          return fetch(URL_ + path, opts);
+        /* ---------- faner ---------- */
+        function fane(navn) {
+          root.querySelectorAll('[role=tab]').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.fane === navn); });
+          root.querySelectorAll('[data-panel]').forEach(function (p) { p.hidden = p.dataset.panel !== navn; });
+          say(msg, '');
         }
+        root.addEventListener('click', function (e) { var b = e.target.closest('[data-fane]'); if (b) fane(b.dataset.fane); });
 
-        /* --- innlogging via e-postlenke --- */
-        $('loginForm').addEventListener('submit', async function (e) {
+        function loggInnMed(d) {
+          K.lagre({ access_token: d.access_token, refresh_token: d.refresh_token });
+          start();
+        }
+        function feilFra(r) { return r.json().catch(function () { return {}; }).then(function (d) { return d.melding || T.generic; }); }
+
+        $('innForm').addEventListener('submit', function (e) {
           e.preventDefault();
-          var email = $('email').value.trim();
-          if (!email) return;
-          $('linkBtn').disabled = true;
-          try {
-            var back = location.origin + location.pathname;
-            var r = await sb('/auth/v1/otp?redirect_to=' + encodeURIComponent(back), {
-              method: 'POST',
-              body: JSON.stringify({ email: email, create_user: true }),
-            });
-            say($('loginMsg'), r.ok ? T.linkSent : T.generic, r.ok ? 'ok' : 'err');
-          } catch (err) { say($('loginMsg'), T.generic, 'err'); }
-          $('linkBtn').disabled = false;
+          var navn = $('innNavn').value.trim(), pw = $('innPw').value;
+          if (!navn || !pw) return say(msg, T.fillAll, 'err');
+          var knapp = this.querySelector('button[type=submit]'); knapp.disabled = true;
+          fetch('/api/konto/logginn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ navn: navn, passord: pw }) })
+            .then(function (r) { return r.ok ? r.json().then(loggInnMed) : feilFra(r).then(function (m) { say(msg, m, 'err'); }); })
+            .catch(function () { say(msg, T.generic, 'err'); })
+            .then(function () { knapp.disabled = false; });
         });
 
-        /* --- fanger opp tokens fra e-postlenken --- */
+        $('nyForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var epost = $('nyEpost').value.trim(), navn = $('nyNavn').value.trim(), pw = $('nyPw').value;
+          if (!epost || !navn || !pw) return say(msg, T.fillAll, 'err');
+          if (pw.length < 8) return say(msg, T.pwShort, 'err');
+          var knapp = this.querySelector('button[type=submit]'); knapp.disabled = true;
+          fetch('/api/konto/registrer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ epost: epost, brukernavn: navn, passord: pw }) })
+            .then(function (r) {
+              if (!r.ok) return feilFra(r).then(function (m) { say(msg, m, 'err'); });
+              return r.json().then(function (d) { if (d.access_token) loggInnMed(d); else { say(msg, T.confirmSent, 'ok'); $('nyForm').reset(); } });
+            })
+            .catch(function () { say(msg, T.generic, 'err'); })
+            .then(function () { knapp.disabled = false; });
+        });
+
+        $('loginForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var email = $('email').value.trim(); if (!email) return;
+          $('linkBtn').disabled = true;
+          var back = location.origin + location.pathname;
+          K.sb('/auth/v1/otp?redirect_to=' + encodeURIComponent(back), { method: 'POST', body: JSON.stringify({ email: email, create_user: true }) })
+            .then(function (r) { say(msg, r.ok ? T.linkSent : T.generic, r.ok ? 'ok' : 'err'); })
+            .catch(function () { say(msg, T.generic, 'err'); })
+            .then(function () { $('linkBtn').disabled = false; });
+        });
+
+        $('glemtForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var email = $('glemtEpost').value.trim(); if (!email) return;
+          var back = location.origin + location.pathname;
+          K.sb('/auth/v1/recover?redirect_to=' + encodeURIComponent(back), { method: 'POST', body: JSON.stringify({ email: email }) })
+            .then(function (r) { say(msg, r.ok ? T.resetSent : T.generic, r.ok ? 'ok' : 'err'); })
+            .catch(function () { say(msg, T.generic, 'err'); });
+        });
+
+        /* ---------- lenker fra e-post (innlogging, bekreftelse, nytt passord) ---------- */
         (function catchHash() {
-          if (location.hash.indexOf('error') !== -1) {
-            var ep = new URLSearchParams(location.hash.slice(1));
+          var h = location.hash || '';
+          if (h.indexOf('error') !== -1) {
+            var ep = new URLSearchParams(h.slice(1));
             var why = (ep.get('error_description') || ep.get('error') || '').replace(/\+/g, ' ');
-            say($('loginMsg'), T.linkBad + (why ? ' (' + why + ')' : ''), 'err');
+            say(msg, T.linkBad + (why ? ' (' + why + ')' : ''), 'err');
             history.replaceState(null, '', location.pathname);
             return;
           }
-          if (location.hash.indexOf('access_token') === -1) return;
-          var p = new URLSearchParams(location.hash.slice(1));
-          var s = { access_token: p.get('access_token'), refresh_token: p.get('refresh_token') };
-          if (s.access_token) { saveSession(s); session = s; }
+          if (h.indexOf('access_token') === -1) return;
+          var p = new URLSearchParams(h.slice(1));
+          if (p.get('access_token')) K.lagre({ access_token: p.get('access_token'), refresh_token: p.get('refresh_token') });
+          erGjenoppretting = p.get('type') === 'recovery';
           history.replaceState(null, '', location.pathname);
         })();
 
-        session = session || loadSession();
-
-        async function whoAmI() {
-          if (!session) return null;
-          var r = await sb('/auth/v1/user');
-          if (!r.ok) { saveSession(null); session = null; return null; }
-          return r.json();
-        }
-
-        /* --- synkronisering: én rad per bruker --- */
-        async function pull() {
-          var r = await sb('/rest/v1/decks?select=data');
-          if (!r.ok) return null;
-          var rows = await r.json();
-          return rows.length ? rows[0].data : null;
-        }
-        async function push() {
-          say($('syncMsg'), T.syncing);
-          var r = await sb('/rest/v1/decks', {
-            method: 'POST',
-            headers: { Prefer: 'resolution=merge-duplicates' },
-            body: JSON.stringify({ user_id: session.user_id, data: { lines: mine } }),
+        /* ---------- passord og brukernavn ---------- */
+        $('pwForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var pw = $('pwNy').value;
+          if (pw.length < 8) return say($('syncMsg'), T.pwShort, 'err');
+          K.sb('/auth/v1/user', { method: 'PUT', body: JSON.stringify({ password: pw }) }).then(function (r) {
+            if (!r.ok) return say($('syncMsg'), T.generic, 'err');
+            $('pwNy').value = ''; $('pwForm').hidden = true; say($('syncMsg'), T.pwSaved, 'ok');
           });
-          say($('syncMsg'), r.ok ? T.synced : T.generic, r.ok ? 'ok' : 'err');
-        }
+        });
+        $('navnForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var navn = $('navnNy').value.trim(); if (!navn) return;
+          K.api('/api/konto/brukernavn', { method: 'POST', body: JSON.stringify({ brukernavn: navn }) }).then(function (r) {
+            if (!r.ok) return feilFra(r).then(function (m) { say($('syncMsg'), m, 'err'); });
+            bruker.brukernavn = navn; $('navnForm').hidden = true; visHvem(); say($('syncMsg'), T.saved, 'ok');
+          });
+        });
 
+        /* ---------- kortstokker ---------- */
+        function tegnStokker() {
+          $('stokker').innerHTML = stokker.length ? stokker.map(function (s, i) {
+            return '<article class="stokk-kort"><div><b>' + esc(s.navn) + '</b><span>' + (s.kort || []).length + ' ' + esc(T.cards) + '</span></div>' +
+              '<div class="stokk-knapper">' +
+                '<button class="btn gold small" data-st="spill" data-i="' + i + '" type="button">' + esc(T.play) + '</button>' +
+                (LANG === 'no' ? '<button class="btn small" data-st="rom" data-i="' + i + '" type="button">' + esc(T.playRoom) + '</button>' : '') +
+                '<button class="mini" data-st="rediger" data-i="' + i + '" type="button">' + esc(T.edit) + '</button>' +
+                '<button class="mini danger" data-st="slett" data-i="' + i + '" type="button">' + esc(T.del) + '</button>' +
+              '</div></article>';
+          }).join('') : '<p class="small">' + esc(T.noDecks) + '</p>';
+          var u = lesLS(UTKAST, null);
+          $('utkast').hidden = !(u && u.kort && u.kort.length);
+          if (u && u.kort && u.kort.length) $('utkast').innerHTML = '<p><b>' + u.kort.length + '</b> ' + esc(T.draft) + '</p><button class="btn gold small" type="button" id="lagreUtkast">' + esc(T.saveDraft) + '</button>';
+        }
+        function hentStokker() {
+          return K.stokker.liste().then(function (l) { stokker = l; tegnStokker(); })
+            .catch(function (e) { say($('syncMsg'), e.message, 'err'); tegnStokker(); });
+        }
+        function aapneSkjema(s) {
+          redigerer = s || null;
+          $('stNavn').value = s ? s.navn : '';
+          $('stKort').value = s ? (s.kort || []).join('\n') : '';
+          $('stokkForm').hidden = false; $('nyStokk').hidden = true; tellKort();
+          $('stNavn').focus();
+        }
+        function lukkSkjema() { $('stokkForm').hidden = true; $('nyStokk').hidden = false; redigerer = null; }
+        function kortFraFelt() { return $('stKort').value.split('\n').map(function (t) { return t.trim(); }).filter(Boolean).slice(0, 300); }
+        function tellKort() { $('stAntall').textContent = kortFraFelt().length + ' / 300 ' + T.cards; }
+        $('stKort').addEventListener('input', tellKort);
+        $('nyStokk').addEventListener('click', function () { aapneSkjema(null); });
+        $('stAvbryt').addEventListener('click', lukkSkjema);
+        $('stokkForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var kort = kortFraFelt(), navn = $('stNavn').value.trim() || T.newDeck;
+          if (!kort.length) return say($('syncMsg'), T.fillAll, 'err');
+          K.stokker.lagre({ id: redigerer && redigerer.id, navn: navn, kort: kort }).then(function () {
+            lukkSkjema(); say($('syncMsg'), T.saved, 'ok'); return hentStokker();
+          }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
+        });
+        $('utkast').addEventListener('click', function (e) {
+          if (!e.target.closest('#lagreUtkast')) return;
+          var u = lesLS(UTKAST, null); if (!u) return;
+          K.stokker.lagre({ navn: u.navn || 'Regelfabrikken', kort: u.kort }).then(function () {
+            skrivLS(UTKAST, null); say($('syncMsg'), T.saved, 'ok'); return hentStokker();
+          }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
+        });
+        $('stokker').addEventListener('click', function (e) {
+          var b = e.target.closest('[data-st]'); if (!b) return;
+          var s = stokker[+b.dataset.i]; if (!s) return;
+          if (b.dataset.st === 'rediger') return aapneSkjema(s);
+          if (b.dataset.st === 'spill') return spill(s);
+          if (b.dataset.st === 'rom') { skrivLS('bd_stokk_rom', { id: s.id, navn: s.navn, kort: s.kort }); location.href = '/no/rom'; return; }
+          if (b.dataset.st === 'slett') {
+            if (b.dataset.sikker !== '1') { b.dataset.sikker = '1'; b.textContent = T.delConfirm; return; }
+            K.stokker.slett(s.id).then(hentStokker).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
+          }
+        });
+
+        /* ---------- spill en kortstokk alene: send telefonen rundt ---------- */
+        var rekke = [], pos = 0;
+        function stokk(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+        function visKort() { $('ssKort').textContent = rekke[pos]; $('ssTeller').textContent = (pos + 1) + ' ' + T.of + ' ' + rekke.length; }
+        function spill(s) {
+          rekke = stokk(s.kort || []); pos = 0; if (!rekke.length) return;
+          $('ssNavn').textContent = s.navn; visKort(); $('stokkSpill').hidden = false; document.body.classList.add('stokk-aapen');
+        }
+        $('ssNeste').addEventListener('click', function () { pos++; if (pos >= rekke.length) { rekke = stokk(rekke); pos = 0; } visKort(); });
+        $('ssLukk').addEventListener('click', function () { $('stokkSpill').hidden = true; document.body.classList.remove('stokk-aapen'); });
+
+        /* ---------- egne replikker (som før) ---------- */
+        function loadLocal() { return lesLS(LOCAL, []); }
+        function saveLocal() { skrivLS(LOCAL, mine); }
+        function pull() {
+          return K.sb('/rest/v1/decks?select=data').then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (rows) { return rows.length ? rows[0].data : null; }).catch(function () { return null; });
+        }
+        function push() {
+          if (!bruker) return;
+          say($('syncMsg'), T.syncing);
+          K.sb('/rest/v1/decks', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ user_id: bruker.id, data: { lines: mine } }) })
+            .then(function (r) { say($('syncMsg'), r.ok ? T.synced : T.generic, r.ok ? 'ok' : 'err'); });
+        }
         function render() {
           if (!mine.length) { $('mine').innerHTML = '<p class="small">' + T.none + '</p>'; return; }
           $('mine').innerHTML = mine.map(function (it, i) {
@@ -150,51 +394,45 @@ const dbg = configured ? null : supabaseDebug();
               '<div class="acts"><button class="mini danger" data-del="' + i + '">' + esc(T.del) + '</button></div></article>';
           }).join('');
         }
-
         $('mine').addEventListener('click', function (e) {
-          var d = e.target.closest('[data-del]');
-          if (!d) return;
-          e.stopPropagation();
-          mine.splice(+d.dataset.del, 1);
-          saveLocal(); render(); if (session) push();
+          var d = e.target.closest('[data-del]'); if (!d) return;
+          e.stopPropagation(); mine.splice(+d.dataset.del, 1); saveLocal(); render(); push();
         });
-
         $('addForm').addEventListener('submit', function (e) {
           e.preventDefault();
-          var line = $('aLine').value.trim();
-          if (!line) return;
-          var entry = { line: line };
-          var ctx = $('aCtx').value.trim();
-          if (ctx) entry.ctx = ctx;
-          mine.push(entry);
-          $('aLine').value = ''; $('aCtx').value = '';
-          saveLocal(); render(); if (session) push();
+          var line = $('aLine').value.trim(); if (!line) return;
+          var entry = { line: line }, ctx = $('aCtx').value.trim(); if (ctx) entry.ctx = ctx;
+          mine.push(entry); $('aLine').value = ''; $('aCtx').value = '';
+          saveLocal(); render(); push();
         });
 
-        (async function init() {
+        function visHvem() { $('who').textContent = bruker.brukernavn ? bruker.brukernavn + ' · ' + bruker.email : bruker.email; }
+
+        function start() {
           mine = loadLocal();
-          var user = await whoAmI();
-          if (!user) { render(); return; }
-          session.user_id = user.id;
-          $('signin').hidden = true;
-          $('dash').hidden = false;
-          $('who').textContent = user.email || '';
-          var remote = await pull();
-          if (remote && remote.lines) {
-            // slår sammen lokalt og skyen, uten duplikater
-            var seen = {};
-            mine.concat(remote.lines).forEach(function (it) { seen[JSON.stringify(it)] = it; });
-            mine = Object.keys(seen).map(function (k) { return seen[k]; });
-            saveLocal();
-          }
-          render();
-          await push();
-        })();
-
-        $('outBtn').addEventListener('click', function () {
-          saveSession(null);
-          location.reload();
-        });
+          K.bruker(true).then(function (u) {
+            bruker = u;
+            if (!u) { render(); return; }
+            $('signin').hidden = true; $('dash').hidden = false;
+            visHvem();
+            $('navnForm').hidden = !!u.brukernavn;
+            if (erGjenoppretting) { $('pwForm').hidden = false; $('pwTittel').textContent = T.choosePw; $('pwLead').hidden = true; $('pwNy').focus(); }
+            else if (!u.brukernavn) $('pwForm').hidden = false;
+            K.api('/api/statistikk?sjekk=1').then(function (r) { return r.ok ? r.json() : {}; }).then(function (d) { $('statLenke').hidden = !d.ok; }).catch(function () {});
+            hentStokker();
+            pull().then(function (remote) {
+              if (remote && remote.lines) {
+                var seen = {};
+                mine.concat(remote.lines).forEach(function (it) { seen[JSON.stringify(it)] = it; });
+                mine = Object.keys(seen).map(function (k) { return seen[k]; });
+                saveLocal();
+              }
+              render(); push();
+            });
+          });
+        }
+        $('outBtn').addEventListener('click', function () { K.loggUt(); location.reload(); });
+        start();
       })();
       </script>
     </>

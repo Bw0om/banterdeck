@@ -467,7 +467,20 @@ if (!window.BDK) window.BDK = (function () {
   function spill() { rekke = K.bland(kort); pos = 0; vis(); }
   function vis() {
     root.innerHTML = '<div class="rom-kort rf-kort"><span class="sw-tag">Kort ' + (pos + 1) + ' av ' + rekke.length + '</span><p>' + K.esc(rekke[pos]) + '</p><span></span></div>' +
-      '<div class="dl-knapper"><button class="btn gold" data-a="neste">Trekk neste</button><button class="btn ghost" data-a="nytt">Ny skriverunde</button></div>';
+      '<div class="dl-knapper"><button class="btn gold" data-a="neste">Trekk neste</button><button class="btn ghost" data-a="nytt">Ny skriverunde</button>' +
+      '<button class="btn ghost" data-a="lagre">Lagre som kortstokk</button></div><p class="dl-info" id="rfLagret" role="status"></p>';
+  }
+  function lagre() {
+    var d = new Date(), navn = 'Regelfabrikken ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', ut = root.querySelector('#rfLagret');
+    var KO = window.BDKonto;
+    (KO ? KO.bruker() : Promise.resolve(null)).then(function (u) {
+      if (!u) {
+        try { localStorage.setItem('bd_stokk_utkast', JSON.stringify({ navn: navn, kort: kort.slice(0, 300) })); } catch (e) {}
+        ut.innerHTML = 'Kortene er lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre dem.';
+        return;
+      }
+      return KO.stokker.lagre({ navn: navn, kort: kort }).then(function () { ut.innerHTML = 'Lagret ✓ Finn den under <a href="/no/account">Min stokk</a>.'; });
+    }).catch(function (e) { ut.textContent = e.message || 'Fikk ikke lagret.'; });
   }
   root.addEventListener('click', function (e) {
     var sb = e.target.closest('[data-sek]'); if (sb) { sek = Number(sb.dataset.sek); return oppsett(); }
@@ -478,6 +491,7 @@ if (!window.BDK) window.BDK = (function () {
     if (a === 'spill') spill();
     if (a === 'neste') { pos++; if (pos >= rekke.length) { rekke = K.bland(rekke); pos = 0; } vis(); }
     if (a === 'nytt') { kort = []; skriver = 0; oppsett(); }
+    if (a === 'lagre') lagre();
   });
   document.addEventListener('astro:before-swap', function () { clearInterval(klokke); }, { once: true });
   oppsett();

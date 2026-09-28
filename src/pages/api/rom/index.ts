@@ -1,6 +1,6 @@
 // Lager et nytt rom. Svarer med koden og en hemmelig pollett som bare denne telefonen får.
 import type { APIRoute } from 'astro';
-import { lagRom, rensNavn, lekeliste } from '../../../lib/rom';
+import { lagRom, rensNavn, lekeliste, loggRom } from '../../../lib/rom';
 export const prerender = false;
 
 const json = (d: any, status = 200) =>
@@ -13,6 +13,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!navn) return json({ feil: 'navn', melding: 'Skriv inn et navn.' }, 400);
   try {
     const { kode, spiller } = await lagRom(navn);
+    await loggRom('lag', 'rom');
     return json({ kode, id: spiller.id, pollett: spiller.pollett, leker: lekeliste() });
   } catch (e) {
     console.warn('Rom kunne ikke lages:', (e as Error).message);

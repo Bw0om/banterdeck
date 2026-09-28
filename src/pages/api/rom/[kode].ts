@@ -1,7 +1,7 @@
 // Ett rom: hente tilstanden (GET) eller gjøre noe i det (POST).
 // Telefonen identifiserer seg med spiller-id og pollett i egne felt, aldri i adressen.
 import type { APIRoute } from 'astro';
-import { hentRom, endreRom, visning, handling, blimed, finnSpiller, gyldigKode, rensNavn, lekeliste } from '../../../lib/rom';
+import { hentRom, endreRom, visning, handling, blimed, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom } from '../../../lib/rom';
 export const prerender = false;
 
 const json = (d: any, status = 200) =>
@@ -54,6 +54,11 @@ export const POST: APIRoute = async ({ params, request }) => {
       const status = res.feil === 'finnes-ikke' ? 404 : res.feil === 'ikke-med' ? 403 : res.feil === 'opptatt' ? 409 : 400;
       return json({ feil: res.feil, melding: res.melding || MELDINGER[res.feil] || 'Det gikk ikke.' }, status);
     }
+    // Si fra til de andre telefonene, og tell hvilke leker som startes (uten navn)
+    await Promise.all([
+      varsle(kode, res.versjon),
+      d.handling === 'start' && res.data.spill ? loggRom('lek', d.lek === 'egen' ? 'egen-kortstokk' : String(d.lek || '')) : null,
+    ]);
     const svar: any = { ...visning(res.data, res.versjon, meg), kode, leker: lekeliste() };
     if (ny) { svar.id = ny.id; svar.pollett = ny.pollett; }
     return json(svar);

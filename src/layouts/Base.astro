@@ -6,6 +6,7 @@ import { ui, path, otherLangPath, type Lang } from '../lib/i18n';
 import AgeGate from '../components/AgeGate.astro';
 import Tools from '../components/Tools.astro';
 import Icon from '../components/Icon.astro';
+import KontoKlient from '../components/KontoKlient.astro';
 import { ClientRouter } from 'astro:transitions';
 
 interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; }
@@ -62,6 +63,7 @@ const isCurrent = (href: string) => {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
+  <KontoKlient />
   <script is:inline>
     /* Innloggingslenker fra Supabase kan lande på feil side – send dem til kontosiden. */
     (function () {

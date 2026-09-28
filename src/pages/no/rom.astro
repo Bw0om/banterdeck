@@ -6,6 +6,13 @@ import Base from '../../layouts/Base.astro';
     <noscript><p>Rommet trenger JavaScript.</p></noscript>
   </div>
 
+  <script>
+    import qrcode from 'qrcode-generator';
+    (window as any).BDqr = function (tekst: string) {
+      const q = qrcode(0, 'M'); q.addData(tekst); q.make();
+      return q.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+    };
+  </script>
   <script is:inline data-astro-rerun>
   (function () {
     var root = document.getElementById('rom');
@@ -16,6 +23,7 @@ import Base from '../../layouts/Base.astro';
     var meg = null, tilstand = null, versjon = 0, timer = null, sisteNr = 0, opptatt = false, feilTeller = 0;
     var ikon = {
       del: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v7h14v-7"/></svg>',
+      qr: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>',
       krone: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>'
     };
 
@@ -55,19 +63,61 @@ import Base from '../../layouts/Base.astro';
       h.id = meg.id; h.pollett = meg.pollett;
       ko = ko.then(function () { return api('POST', '/api/rom/' + kode, h).then(ta).catch(function (e) { toast(e.message); }); });
     }
+    var henter = false, henteIgjen = false;
     function hent() {
       if (!kode || !meg) return;
-      api('GET', '/api/rom/' + kode + '?v=' + versjon).then(function (d) { feilTeller = 0; if (d) ta(d); planlegg(); })
+      if (henter) { henteIgjen = true; return; }
+      henter = true; clearTimeout(timer);
+      api('GET', '/api/rom/' + kode + '?v=' + versjon).then(function (d) { feilTeller = 0; if (d) ta(d); })
         .catch(function (e) {
           if (e.kode === 'finnes-ikke') { glemRom(); toast(e.message); return; }
-          feilTeller++; planlegg();
-        });
+          feilTeller++;
+        })
+        .then(function () { henter = false; if (henteIgjen && meg) { henteIgjen = false; hent(); } else planlegg(); });
     }
     function planlegg() {
       clearTimeout(timer);
-      if (!document.getElementById('rom')) return;
-      var ms = document.hidden ? 6000 : Math.min(1500 + feilTeller * 1500, 8000);
+      if (!document.getElementById('rom') || !meg) return;
+      // Med sanntid kommer endringene med én gang, så da sjekker vi bare av og til for sikkerhets skyld
+      var ms = document.hidden ? (rt.ok ? 20000 : 6000) : rt.ok ? 6000 : Math.min(1500 + feilTeller * 1500, 8000);
       timer = setTimeout(hent, ms);
+    }
+
+    /* ---------- sanntid: Supabase Realtime sier fra når rommet endres ---------- */
+    var rt = { ws: null, ok: false, hb: null, ref: 0, kode: '', stopp: false };
+    function rtSend(m) { try { rt.ws && rt.ws.readyState === 1 && rt.ws.send(JSON.stringify(m)); } catch (e) {} }
+    function rtKobl() {
+      var K = window.BDKonto;
+      if (!K || !K.cfg || !K.cfg.url || !K.cfg.anon || !kode || !meg || !window.WebSocket) return;
+      if (rt.ws && rt.kode === kode) return;
+      rtStopp(); rt.stopp = false; rt.kode = kode;
+      var emne = 'realtime:rom-' + kode, ws;
+      try { ws = new WebSocket(K.cfg.url.replace(/^http/, 'ws') + '/realtime/v1/websocket?apikey=' + encodeURIComponent(K.cfg.anon) + '&vsn=1.0.0'); } catch (e) { return; }
+      rt.ws = ws;
+      ws.onopen = function () {
+        var ref = String(++rt.ref);
+        rtSend({ topic: emne, event: 'phx_join', ref: ref, join_ref: ref, payload: { config: { broadcast: { ack: false, self: false }, presence: { key: '' }, postgres_changes: [], private: false }, access_token: K.cfg.anon } });
+        rt.hb = setInterval(function () { rtSend({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: String(++rt.ref) }); }, 25000);
+      };
+      ws.onmessage = function (e) {
+        var m; try { m = JSON.parse(e.data); } catch (x) { return; }
+        if (!m || m.topic !== emne) return;
+        if (m.event === 'phx_reply' && m.payload && m.payload.status === 'ok' && !rt.ok) { rt.ok = true; planlegg(); }
+        if (m.event === 'broadcast' && m.payload && m.payload.event === 'endret') {
+          var v = m.payload.payload && m.payload.payload.v;
+          if (!v || v > versjon) hent();
+        }
+      };
+      ws.onclose = function () {
+        clearInterval(rt.hb); if (rt.ws !== ws) return;
+        rt.ws = null; rt.ok = false; planlegg();
+        if (!rt.stopp) setTimeout(function () { if (!rt.stopp && meg && kode && document.getElementById('rom')) rtKobl(); }, 5000);
+      };
+      ws.onerror = function () { try { ws.close(); } catch (x) {} };
+    }
+    function rtStopp() {
+      rt.stopp = true; rt.ok = false; clearInterval(rt.hb);
+      if (rt.ws) { var w = rt.ws; rt.ws = null; try { w.close(); } catch (e) {} }
     }
     function ta(d) {
       if (!d) return;
@@ -75,14 +125,15 @@ import Base from '../../layouts/Base.astro';
       tilstand = d;
       if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
       if (d.meg === null && meg) { glemRom(); return; }
+      rtKobl();
       tegn();
     }
     function glemRom() {
       if (kode) { try { localStorage.removeItem('bd_rom_' + kode); } catch (e) {} }
-      meg = null; tilstand = null; versjon = 0; clearTimeout(timer); tegnStart();
+      meg = null; tilstand = null; versjon = 0; clearTimeout(timer); rtStopp(); tegnStart();
     }
-    window.__bdRomStopp = function () { clearTimeout(timer); };
-    document.addEventListener('astro:before-swap', function stopp() { clearTimeout(timer); document.removeEventListener('astro:before-swap', stopp); }, { once: true });
+    window.__bdRomStopp = function () { clearTimeout(timer); rtStopp(); };
+    document.addEventListener('astro:before-swap', function stopp() { clearTimeout(timer); rtStopp(); document.removeEventListener('astro:before-swap', stopp); }, { once: true });
     document.addEventListener('visibilitychange', function () { if (!document.hidden && meg) hent(); });
 
     /* ---------- start: lag eller bli med ---------- */
@@ -140,7 +191,7 @@ import Base from '../../layouts/Base.astro';
       var t = tilstand;
       return '<div class="rom-hode">' +
         '<div><span class="rom-etikett">Rom</span><b class="rom-kode">' + esc(kode) + '</b></div>' +
-        '<button class="rom-del" data-g="del" type="button">' + ikon.del + 'Inviter</button>' +
+        '<span class="rom-hodeknapper"><button class="rom-del" data-g="qr" type="button" aria-label="Vis QR-kode">' + ikon.qr + '</button><button class="rom-del" data-g="del" type="button">' + ikon.del + 'Inviter</button></span>' +
       '</div>' +
       '<div class="rom-spillere">' + t.spillere.map(function (p) {
         return '<span class="' + (p.id === t.meg ? 'meg' : '') + '">' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) +
@@ -149,13 +200,21 @@ import Base from '../../layouts/Base.astro';
       }).join('') + '</div>';
     }
 
+
+    function lenke() { return location.origin + '/no/rom?k=' + kode; }
+    function qrBoks(stor) {
+      var svg = window.BDqr ? window.BDqr(lenke()) : '';
+      return '<div class="rom-qr' + (stor ? ' stor' : '') + '">' + (svg ? '<div class="rom-qrbilde">' + svg + '</div>' : '') +
+        '<div><b>Scan for å bli med</b><span>Eller gå til banterdeck.com/no/rom og skriv <b>' + esc(kode) + '</b></span></div></div>';
+    }
     function lobby() {
       var t = tilstand;
       if (!erVert()) {
         return '<div class="rom-vent"><p class="rom-stor">Venter på at ' + esc(navn(t.vert)) + ' velger en lek …</p>' +
           '<p class="small">' + t.spillere.length + ' med i rommet. Del koden <b>' + esc(kode) + '</b> med resten.</p></div>';
       }
-      return '<h2 class="rom-h2">Velg en lek</h2>' +
+      return qrBoks() + egneStokker() +
+        '<h2 class="rom-h2">Velg en lek</h2>' +
         '<div class="rom-leker">' + t.leker.map(function (l) {
           var mod = l.moduser && l.moduser.length > 1 ? l.moduser : [];
           return '<div class="rom-lek"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' +
@@ -165,6 +224,45 @@ import Base from '../../layouts/Base.astro';
               : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
             '</div></div>';
         }).join('') + '</div>';
+    }
+
+    /* ---------- egne kortstokker fra kontoen ---------- */
+    var mineStokker = null, stokkerHentet = false;
+    function hentMineStokker() {
+      if (stokkerHentet || !window.BDKonto) return; stokkerHentet = true;
+      window.BDKonto.bruker().then(function (u) {
+        if (!u) { mineStokker = []; return; }
+        return window.BDKonto.stokker.liste().then(function (l) { mineStokker = l; });
+      }).catch(function () { mineStokker = []; }).then(function () { mineStokker = mineStokker || []; tegn(); });
+    }
+    function egneStokker() {
+      hentMineStokker();
+      var klar = les('bd_stokk_rom'), liste = (mineStokker || []).slice();
+      if (klar && klar.kort) liste = [klar].concat(liste.filter(function (x) { return x.id !== klar.id; }));
+      var logget = window.BDKonto && window.BDKonto.les();
+      if (!liste.length) return '<p class="small rom-egnetips">Egne drikkekort? Lag kortstokker på <a href="/no/account">Min stokk</a> og spill dem her.</p>';
+      return '<h2 class="rom-h2">Dine kortstokker</h2><div class="rom-leker">' + liste.map(function (x, i) {
+        return '<div class="rom-lek' + (klar && i === 0 ? ' klar' : '') + '"><b>' + esc(x.navn) + '</b><span>' + (x.kort || []).length + ' egne kort. Alle ser samme kort.</span>' +
+          '<div class="rom-mod"><button type="button" data-g="egen" data-i="' + i + '">Start</button></div></div>';
+      }).join('') + '</div>' + (logget ? '' : '<p class="small">Logg inn på <a href="/no/account">Min stokk</a> for å se alle kortstokkene dine.</p>');
+    }
+    function egenListe() {
+      var klar = les('bd_stokk_rom'), liste = (mineStokker || []).slice();
+      if (klar && klar.kort) liste = [klar].concat(liste.filter(function (x) { return x.id !== klar.id; }));
+      return liste;
+    }
+    function lagreSomStokk() {
+      var s = tilstand && tilstand.spill; if (!s || !s.alleKort || !s.alleKort.length) return;
+      var d = new Date(), navn = 'Regelfabrikken ' + d.getDate() + '.' + (d.getMonth() + 1) + '.';
+      var K = window.BDKonto;
+      (K ? K.bruker() : Promise.resolve(null)).then(function (u) {
+        if (!u) {
+          skriv('bd_stokk_utkast', { navn: navn, kort: s.alleKort });
+          toast('Kortene er lagt til side. Logg inn på Min stokk for å lagre dem.');
+          return;
+        }
+        return K.stokker.lagre({ navn: navn, kort: s.alleKort }).then(function () { toast('Lagret som kortstokk på kontoen din ✓'); stokkerHentet = false; mineStokker = null; });
+      }).catch(function (e) { toast(e.message || 'Fikk ikke lagret.'); });
     }
 
     function kortSpill(s) {
@@ -382,7 +480,10 @@ import Base from '../../layouts/Base.astro';
       }
       return '<div class="rom-kort rf-kort"><span class="sw-tag">Kort ' + (s.pos + 1) + ' av ' + s.totalt + '</span><p>' + esc(s.kortet) + '</p><span></span></div>' +
         '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">Trekk neste</button>' +
-        (erVert() ? '<button class="btn ghost" data-g="nytt" type="button">Ny skriverunde</button>' : '');
+        '<div class="dl-knapper">' +
+          (erVert() ? '<button class="btn ghost" data-g="nytt" type="button">' + (s.egen ? 'Stokk på nytt' : 'Ny skriverunde') + '</button>' : '') +
+          (!s.egen && s.alleKort ? '<button class="btn ghost" data-g="lagrestokk" type="button">Lagre som kortstokk</button>' : '') +
+        '</div>';
     }
 
     function tosannheterSpill(s) {
@@ -456,8 +557,20 @@ import Base from '../../layouts/Base.astro';
         else if (navigator.clipboard) navigator.clipboard.writeText(tekst + '\n' + url).then(function () { toast('Lenken er kopiert'); });
         return;
       }
+      if (g === 'qr') {
+        var m = document.createElement('div'); m.className = 'rom-qrmodal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'QR-kode');
+        m.innerHTML = qrBoks(true) + '<button class="btn gold" type="button">Lukk</button>';
+        m.addEventListener('click', function () { m.remove(); });
+        document.body.appendChild(m); return;
+      }
       if (g === 'forlat') { glemRom(); settAdresse(''); kode = ''; tegnStart(); return; }
       if (g === 'start') return gjor({ handling: 'start', lek: b.dataset.lek, modus: b.dataset.modus });
+      if (g === 'egen') {
+        var st = egenListe()[Number(b.dataset.i)]; if (!st) return;
+        var klar = les('bd_stokk_rom'); if (klar && klar.navn === st.navn) { try { localStorage.removeItem('bd_stokk_rom'); } catch (x) {} }
+        return gjor({ handling: 'start', lek: 'egen', navn: st.navn, kort: st.kort });
+      }
+      if (g === 'lagrestokk') return lagreSomStokk();
       if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
       if (g === 'stem') return gjor({ handling: 'stem', paa: b.dataset.paa });
       if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });

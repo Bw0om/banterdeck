@@ -1,0 +1,98 @@
+---
+// Statistikk for eieren. Siden er tom til en innlogget admin-konto henter tallene fra /api/statistikk.
+import Base from '../../layouts/Base.astro';
+import { games, allSituations, t } from '../../lib/content';
+import { lekeliste } from '../../lib/rom';
+const NAVN: Record<string, string> = {};
+games.forEach((g: any) => { NAVN['lek:' + g.slug] = t(g.name, 'no'); });
+allSituations.forEach((s: any) => { NAVN['situasjon:' + s.id] = (s.emoji ? s.emoji + ' ' : '') + t(s.title, 'no'); });
+lekeliste().forEach((l: any) => { NAVN['rom:' + l.id] = l.navn; });
+NAVN['rom:egen-kortstokk'] = 'Egen kortstokk';
+---
+<Base title="Statistikk" description="Hva som blir brukt på Banterdeck." lang="no" noindex={true}>
+  <h1>Statistikk</h1>
+  <div class="stat-valg" id="statValg" hidden>
+    <span class="small">Periode</span>
+    <div class="rom-mod">
+      <button type="button" data-dager="7" aria-pressed="false">7 dager</button>
+      <button type="button" data-dager="30" aria-pressed="true">30 dager</button>
+      <button type="button" data-dager="90" aria-pressed="false">90 dager</button>
+    </div>
+  </div>
+  <div id="stat" class="stat"><p class="small">Henter …</p></div>
+
+  <script is:inline data-astro-rerun define:vars={{ NAVN }}>
+  (function () {
+    var root = document.getElementById('stat');
+    if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+    var K = window.BDKonto, dager = 30;
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function tall(n) { return Number(n || 0).toLocaleString('nb-NO'); }
+    function sum(l) { return (l || []).reduce(function (a, x) { return a + (x.antall || 0); }, 0); }
+
+    /** Én søyle per dag, også dager uten aktivitet. */
+    function perDag(liste, tittel) {
+      var kart = {}; (liste || []).forEach(function (x) { kart[String(x.dag).slice(0, 10)] = x.antall; });
+      var dagerListe = [], d = new Date();
+      for (var i = dager - 1; i >= 0; i--) {
+        var x = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i);
+        var k = x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+        dagerListe.push({ k: k, dato: x.getDate() + '.' + (x.getMonth() + 1) + '.', n: kart[k] || 0 });
+      }
+      var maks = Math.max.apply(null, dagerListe.map(function (x) { return x.n; }).concat([1]));
+      return '<section class="stat-boks"><h2>' + esc(tittel) + '</h2>' +
+        '<div class="stat-soyler" role="img" aria-label="' + esc(tittel) + ' per dag">' + dagerListe.map(function (x) {
+          return '<div class="stat-soyle" title="' + esc(x.dato + ': ' + x.n) + '"><span style="height:' + Math.round((x.n / maks) * 100) + '%"></span></div>';
+        }).join('') + '</div>' +
+        '<div class="stat-akse"><span>' + dagerListe[0].dato + '</span><span>Topp: ' + tall(maks) + '</span><span>' + dagerListe[dagerListe.length - 1].dato + '</span></div></section>';
+    }
+    /** Liggende søyler for de mest brukte. */
+    function topp(liste, tittel, navnFor, n) {
+      liste = (liste || []).slice(0, n || 12);
+      if (!liste.length) return '<section class="stat-boks"><h2>' + esc(tittel) + '</h2><p class="small">Ingen data ennå.</p></section>';
+      var maks = liste[0].antall || 1;
+      return '<section class="stat-boks"><h2>' + esc(tittel) + '</h2><ol class="stat-topp">' + liste.map(function (x) {
+        return '<li><span class="stat-navn">' + esc(navnFor(x)) + '</span><span class="stat-bar"><i style="width:' + Math.max(2, Math.round(x.antall / maks * 100)) + '%"></i></span><b>' + tall(x.antall) + '</b></li>';
+      }).join('') + '</ol></section>';
+    }
+    function tegn(d) {
+      var leker = (d.spilt || []).filter(function (x) { return x.type === 'lek'; });
+      var sit = (d.spilt || []).filter(function (x) { return x.type === 'situasjon'; });
+      root.innerHTML =
+        '<div class="stat-tall">' +
+          '<div><b>' + tall(sum(d.perDag)) + '</b><span>åpnet lek eller situasjon</span></div>' +
+          '<div><b>' + tall(sum(d.romPerDag)) + '</b><span>rom laget</span></div>' +
+          '<div><b>' + tall(d.aktiveRom) + '</b><span>rom aktive siste time</span></div>' +
+          '<div><b>' + tall(d.kontoer) + '</b><span>kontoer</span></div>' +
+          '<div><b>' + tall(d.kortstokker) + '</b><span>lagrede kortstokker</span></div>' +
+        '</div>' +
+        '<div class="stat-rutenett">' +
+          perDag(d.perDag, 'Åpnet per dag') +
+          perDag(d.romPerDag, 'Rom per dag') +
+          topp(leker, 'Mest åpnede leker', function (x) { return NAVN['lek:' + x.ref] || x.ref; }) +
+          topp(d.romLeker, 'Mest spilt i rom', function (x) { return NAVN['rom:' + x.ref] || x.ref; }) +
+          topp(sit, 'Mest åpnede situasjoner', function (x) { return NAVN['situasjon:' + x.ref] || x.ref; }, 8) +
+        '</div>' +
+        '<p class="small">Tallene er anonyme: bare hva som ble brukt, aldri hvem. Rom og spill telles fra ' + (dager) + ' dager tilbake.</p>';
+    }
+    function hent() {
+      root.innerHTML = '<p class="small">Henter …</p>';
+      K.api('/api/statistikk?dager=' + dager).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (d) {
+          if (r.ok) { document.getElementById('statValg').hidden = false; return tegn(d); }
+          if (r.status === 401) return ikkeInne();
+          root.innerHTML = '<p class="rom-feil">' + esc(d.melding || 'Fikk ikke hentet statistikken.') + '</p>';
+        });
+      }).catch(function () { root.innerHTML = '<p class="rom-feil">Fikk ikke kontakt. Prøv igjen.</p>'; });
+    }
+    function ikkeInne() { root.innerHTML = '<p>Logg inn på <a href="/no/account">Min stokk</a> med admin-kontoen for å se statistikken.</p>'; }
+    document.getElementById('statValg').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-dager]'); if (!b) return;
+      dager = Number(b.dataset.dager);
+      this.querySelectorAll('[data-dager]').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+      hent();
+    });
+    if (!K || !K.les()) ikkeInne(); else hent();
+  })();
+  </script>
+</Base>

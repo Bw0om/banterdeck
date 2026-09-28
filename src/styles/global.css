@@ -1056,3 +1056,60 @@ body:has(.op-full:not([hidden])) .tool.dice{display:none}
 .boss-kort.lur{background:var(--card2);color:var(--ink)}
 .boss-kort.ny{animation:kkinn .3s ease}
 .boss-tekst{margin:0;font-family:var(--display);font-weight:800;font-size:clamp(24px,7vw,32px);line-height:1.15;text-align:center}
+/* ---------- QR-kode i rommet ---------- */
+.rom-hodeknapper{display:flex;gap:8px}
+.rom-hodeknapper .rom-del[data-g=qr]{padding:0 12px}
+.rom-qr{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:22px;padding:14px;margin:0 0 16px}
+.rom-qr b{display:block;font-family:var(--display);font-size:18px}
+.rom-qr span{font-size:14px;color:var(--muted)}
+.rom-qrbilde{flex-shrink:0;width:120px;height:120px;background:#fff;border-radius:14px;padding:6px;box-sizing:border-box}
+.rom-qrbilde svg{display:block;width:100%;height:100%}
+.rom-qrmodal{position:fixed;inset:0;z-index:170;background:rgba(8,6,4,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px}
+.rom-qr.stor{flex-direction:column;text-align:center;background:none;border:0}
+.rom-qr.stor .rom-qrbilde{width:min(78vw,340px);height:min(78vw,340px);padding:10px}
+.rom-qr.stor b{font-size:26px}
+
+/* ---------- Konto: faner, kortstokker ---------- */
+.konto-faner{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:999px;padding:4px;margin:6px 0 18px;max-width:460px}
+.konto-faner button{flex:1;border:0;background:none;color:var(--muted);font-family:var(--display);font-weight:700;font-size:14.5px;padding:10px 8px;border-radius:999px;cursor:pointer}
+.konto-faner button[aria-selected="true"]{background:var(--gold);color:#1a1208}
+.konto-boks{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px 18px;margin:14px 0}
+.konto-boks h2{margin-top:0}
+.dashknapper{display:flex;gap:8px;flex-wrap:wrap}
+.linkbtn{background:none;border:0;color:var(--gold);padding:0;font:inherit;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.stokk-liste{display:flex;flex-direction:column;gap:10px;margin:10px 0 14px}
+.stokk-kort{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.stokk-kort > div:first-child{display:flex;flex-direction:column;min-width:0}
+.stokk-kort b{font-family:var(--display);font-size:17px;overflow-wrap:anywhere}
+.stokk-kort span{font-size:13.5px;color:var(--muted)}
+.stokk-knapper{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.konto-utkast{background:rgba(244,183,64,.1);border:1px dashed var(--gold);border-radius:16px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:10px 0}
+.konto-utkast p{margin:0}
+.stokk-spill{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px 16px calc(24px + env(safe-area-inset-bottom))}
+.stokk-spill[hidden]{display:none}
+.stokk-spill-navn{font-family:var(--display);font-weight:700;color:var(--muted);margin:0}
+body.stokk-aapen{overflow:hidden}
+.rom-lek.klar{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.rom-egnetips{margin:4px 0 0}
+
+/* ---------- Statistikk ---------- */
+.stat-valg{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 16px}
+.stat-tall{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat-tall > div{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.stat-tall b{font-family:var(--display);font-size:30px;line-height:1.1;color:var(--gold)}
+.stat-tall span{font-size:13.5px;color:var(--muted)}
+.stat-rutenett{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:12px;margin-bottom:14px}
+.stat-boks{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:14px 16px;min-width:0}
+.stat-boks h2{font-size:17px;margin:0 0 12px}
+.stat-soyler{display:flex;align-items:flex-end;gap:2px;height:130px;border-bottom:1px solid var(--border2)}
+.stat-soyle{flex:1;height:100%;display:flex;align-items:flex-end;min-width:0}
+.stat-soyle span{display:block;width:100%;background:var(--gold);border-radius:4px 4px 0 0;min-height:1px}
+.stat-soyle:hover span{background:var(--accent)}
+.stat-akse{display:flex;justify-content:space-between;font-size:12px;color:var(--faint);margin-top:6px}
+.stat-topp{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.stat-topp li{display:grid;grid-template-columns:minmax(0,9.5em) 1fr auto;gap:10px;align-items:center;font-size:14px}
+.stat-navn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-bar{height:10px;background:var(--bg2);border-radius:5px;overflow:hidden}
+.stat-bar i{display:block;height:100%;background:var(--gold);border-radius:5px}
+.stat-topp b{font-variant-numeric:tabular-nums;min-width:2.5em;text-align:right}
+[hidden]{display:none !important}

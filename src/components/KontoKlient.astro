@@ -1,0 +1,107 @@
+---
+// Felles innlogging for hele siden: window.BDKonto.
+// Bruker bare den offentlige anon-nøkkelen. Radsikkerheten i databasen gjør at hver konto
+// bare ser sine egne rader. Innloggingen ligger i nettleseren under 'bd_session'.
+import { supabaseUrl, supabaseAnonKey } from '../config';
+const URL_ = supabaseUrl().replace(/\/$/, '');
+const KEY = supabaseAnonKey();
+---
+<script is:inline define:vars={{ URL_, KEY }}>
+(function () {
+  if (window.BDKonto) return;
+  var NOKKEL = 'bd_session';
+  function les() { try { return JSON.parse(localStorage.getItem(NOKKEL) || 'null'); } catch (e) { return null; } }
+  function lagre(s) {
+    try { s ? localStorage.setItem(NOKKEL, JSON.stringify(s)) : localStorage.removeItem(NOKKEL); } catch (e) {}
+    lyttere.forEach(function (f) { try { f(s); } catch (e) {} });
+  }
+  var lyttere = [], brukerLagret = null, oppfrisker = null;
+
+  function oppfrisk() {
+    var s = les();
+    if (!s || !s.refresh_token) return Promise.resolve(false);
+    if (oppfrisker) return oppfrisker;
+    oppfrisker = fetch(URL_ + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: s.refresh_token })
+    }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      oppfrisker = null;
+      if (!d || !d.access_token) { lagre(null); return false; }
+      lagre({ access_token: d.access_token, refresh_token: d.refresh_token });
+      return true;
+    }).catch(function () { oppfrisker = null; return false; });
+    return oppfrisker;
+  }
+
+  /** Supabase-kall med innloggingen. Prøver å fornye den én gang hvis den er utløpt. */
+  function sb(sti, opts, igjen) {
+    opts = Object.assign({}, opts || {});
+    var s = les();
+    opts.headers = Object.assign({ apikey: KEY, 'Content-Type': 'application/json' }, opts.headers || {});
+    if (s && s.access_token) opts.headers.Authorization = 'Bearer ' + s.access_token;
+    return fetch(URL_ + sti, opts).then(function (r) {
+      if (r.status === 401 && s && !igjen) return oppfrisk().then(function (ok) { return ok ? sb(sti, opts, true) : r; });
+      return r;
+    });
+  }
+  /** Kall til våre egne /api-ruter med innloggingen. */
+  function api(sti, opts, igjen) {
+    opts = Object.assign({}, opts || {});
+    var s = les();
+    opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+    if (s && s.access_token) opts.headers.Authorization = 'Bearer ' + s.access_token;
+    return fetch(sti, opts).then(function (r) {
+      if (r.status === 401 && s && !igjen) return oppfrisk().then(function (ok) { return ok ? api(sti, opts, true) : r; });
+      return r;
+    });
+  }
+
+  /** Hvem er logget inn? Gir { id, email, brukernavn } eller null. */
+  function bruker(tving) {
+    if (!URL_ || !KEY || !les()) return Promise.resolve(null);
+    if (brukerLagret && !tving) return brukerLagret;
+    brukerLagret = sb('/auth/v1/user').then(function (r) {
+      if (!r.ok) { if (r.status === 401 || r.status === 403) lagre(null); brukerLagret = null; return null; }
+      return r.json();
+    }).then(function (u) {
+      if (!u) return null;
+      return sb('/rest/v1/profiler?select=brukernavn&user_id=eq.' + u.id).then(function (r) { return r.ok ? r.json() : []; })
+        .catch(function () { return []; })
+        .then(function (rader) { return { id: u.id, email: u.email || '', brukernavn: (rader[0] && rader[0].brukernavn) || '' }; });
+    }).catch(function () { brukerLagret = null; return null; });
+    return brukerLagret;
+  }
+
+  /* ---------- lagrede kortstokker ---------- */
+  var stokker = {
+    liste: function () {
+      return sb('/rest/v1/kortstokker?select=id,navn,kort,oppdatert&order=oppdatert.desc').then(function (r) {
+        if (!r.ok) throw new Error('Fikk ikke hentet kortstokkene.'); return r.json();
+      });
+    },
+    lagre: function (st) {
+      var kropp = { navn: String(st.navn || 'Uten navn').slice(0, 40), kort: (st.kort || []).slice(0, 300).map(function (t) { return String(t).slice(0, 140); }), oppdatert: new Date().toISOString() };
+      var sti = '/rest/v1/kortstokker' + (st.id ? '?id=eq.' + encodeURIComponent(st.id) : '');
+      return sb(sti, { method: st.id ? 'PATCH' : 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify(kropp) })
+        .then(function (r) { if (!r.ok) throw new Error('Fikk ikke lagret kortstokken.'); return r.json(); })
+        .then(function (rader) { return rader[0]; });
+    },
+    slett: function (id) {
+      return sb('/rest/v1/kortstokker?id=eq.' + encodeURIComponent(id), { method: 'DELETE' }).then(function (r) { if (!r.ok) throw new Error('Fikk ikke slettet.'); });
+    }
+  };
+
+  window.BDKonto = {
+    klar: Boolean(URL_ && KEY),
+    cfg: { url: URL_, anon: KEY },
+    les: les, lagre: function (s) { brukerLagret = null; lagre(s); },
+    loggUt: function () {
+      var s = les();
+      if (s && s.access_token) sb('/auth/v1/logout', { method: 'POST' }).catch(function () {});
+      brukerLagret = null; lagre(null);
+    },
+    sb: sb, api: api, bruker: bruker, stokker: stokker,
+    naarEndret: function (f) { lyttere.push(f); }
+  };
+})();
+</script>

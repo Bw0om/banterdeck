@@ -3,7 +3,7 @@
  * All spillogikk kjører her på serveren. Nettleseren får bare det den skal se:
  * ingen polletter, og hemmeligheter bare til spilleren de gjelder.
  */
-import { rpc } from './spilt';
+import { rpc, supabaseServer } from './spilt';
 import DECKS from '../data/decks.json';
 import BINGO from '../data/bingo.json';
 
@@ -197,6 +197,7 @@ export function handling(data: any, meg: any, h: any) {
   switch (h.handling) {
     case 'start': {
       if (!erVert) return { feil: 'bare-vert' };
+      if (h.lek === 'egen') return startEgen(data, h.kort, h.navn);
       return startSpill(data, String(h.lek || ''), String(h.modus || '*'));
     }
     case 'avslutt': {
@@ -470,7 +471,10 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         s.pos++; if (s.pos >= s.rekke.length) { s.rekke = stokk(s.rekke); s.pos = 0; melde(data, 'Alle kortene er trukket – stokket på nytt.'); }
         return { ok: true };
       }
-      if (h.handling === 'nytt') return startEkstra(data, 'regelfabrikken', String(s.sek));
+      if (h.handling === 'nytt') {
+        if (s.egen) { s.rekke = stokk(s.rekke); s.pos = 0; melde(data, 'Stokket på nytt.'); return { ok: true }; }
+        return startEkstra(data, 'regelfabrikken', String(s.sek));
+      }
       return null;
     }
     case 'opus': {
@@ -640,7 +644,7 @@ export function ekstraVisning(s: any, meg: any, data: any) {
     minStemme: meg ? (s.stemmer[meg.id] ?? null) : null, logn: s.fase === 'avslort' ? s.logn : null, stemmer: s.fase === 'avslort' ? s.stemmer : null, drikker: s.fase === 'avslort' ? s.drikker : null };
   if (s.type === 'regelfabrikken') return { fase: s.fase, frist: s.frist, naa: Date.now(), sek: s.sek,
     mineKort: meg ? s.kort[meg.id] || [] : [], antall: Object.fromEntries(Object.entries(s.kort).map(([id, l]: any) => [id, l.length])),
-    kortet: s.fase === 'trekk' ? s.rekke[s.pos] : null, pos: s.pos, totalt: s.fase === 'trekk' ? s.rekke.length : Object.values(s.kort).reduce((n: number, l: any) => n + l.length, 0) };
+    kortet: s.fase === 'trekk' ? s.rekke[s.pos] : null, pos: s.pos, egen: !!s.egen, alleKort: s.fase === 'trekk' && meg ? s.rekke : null, totalt: s.fase === 'trekk' ? s.rekke.length : Object.values(s.kort).reduce((n: number, l: any) => n + l.length, 0) };
   if (s.type === 'opus') return { holder: s.holder, kast: s.kast, antall: s.antall, nr: s.nr, fra: s.fra || null };
   if (s.type === 'overunder') return { kort: s.kort, bunke: s.bunke, tur: ider[s.tur % ider.length], sist: s.sist, igjen: s.stokk.length };
   if (s.type === 'veddelopet') return { fase: s.fase, pos: s.pos, sist: s.sist, vinner: s.vinner, bane: s.bane.map((k: any, i: number) => (s.snudd[i] ? k : null)),
@@ -654,4 +658,40 @@ export function ekstraVisning(s: any, meg: any, data: any) {
   if (s.type === 'president') return { fase: s.fase || 'spill', bord: s.bord, bordAv: s.bordAv, tur: ider[s.tur], pass: s.pass, ferdige: s.ferdige, titler: s.titler,
     minHand: meg ? s.hender[meg.id] : null, antall: Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h.length])) };
   return {};
+}
+
+/* =====================================================================
+   Raskere rom: etter hver endring sendes et lite signal via Supabase
+   Realtime («rommet har versjon N»). Telefonene henter da med én gang.
+   Selve innholdet går aldri via signalet – bare versjonsnummeret.
+   ===================================================================== */
+export async function varsle(kode: string, versjon: number) {
+  const { url, nokkel } = supabaseServer();
+  if (!url || !nokkel) return;
+  try {
+    await fetch(url + '/realtime/v1/api/broadcast', {
+      method: 'POST',
+      headers: { apikey: nokkel, Authorization: 'Bearer ' + nokkel, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ topic: 'rom-' + kode, event: 'endret', payload: { v: versjon }, private: false }] }),
+      signal: AbortSignal.timeout(1500),
+    });
+  } catch { /* polling tar over */ }
+}
+/** Teller rom og leker per dag, uten navn. Feiler stille hvis tabellen ikke finnes ennå. */
+export async function loggRom(hva: 'lag' | 'lek', ref: string) {
+  try { await Promise.race([rpc('logg_rom', { p_hva: hva, p_ref: ref.slice(0, 40) }), new Promise((r) => setTimeout(r, 1500))]); } catch { /* ignorert */ }
+}
+
+/* ---------- egen kortstokk (lagret på kontoen) ---------- */
+export function rensKort(kort: any): string[] {
+  if (!Array.isArray(kort)) return [];
+  return kort.slice(0, 300).map((t) => String(t || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 140)).filter(Boolean);
+}
+export function startEgen(data: any, kort: any, navn: any) {
+  const liste = rensKort(kort);
+  if (!liste.length) return { feil: 'tom', melding: 'Kortstokken er tom.' };
+  const tittel = String(navn || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 40) || 'Egen kortstokk';
+  data.spill = { type: 'regelfabrikken', lek: 'regelfabrikken', navn: tittel, modus: '', fase: 'trekk', frist: null, sek: 60, kort: {}, rekke: stokk(liste), pos: 0, egen: true };
+  melde(data, `Nytt spill: ${tittel} (${liste.length} kort)`);
+  return { ok: true };
 }
