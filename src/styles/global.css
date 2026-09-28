@@ -1216,3 +1216,6 @@ body.stokk-aapen{overflow:hidden}
 .rom-venter li{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--border2);border-radius:999px;padding:7px 13px;font-weight:600;animation:inn .3s ease-out}
 @keyframes inn{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
 .rom-mod.stor button{min-height:48px;font-size:15px}
+.rom-frist{display:inline-flex;align-items:baseline;gap:6px;color:var(--muted);font-size:14px;margin:4px 0 8px}
+.rom-frist span{font-family:var(--display);font-weight:800;font-size:26px;color:var(--gold);font-variant-numeric:tabular-nums;min-width:2ch;text-align:right}
+.rom-frist.snart span{color:var(--accent)}

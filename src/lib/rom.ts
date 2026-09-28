@@ -79,7 +79,7 @@ export function visning(data: any, versjon: number, meg: any) {
   const s = data.spill;
   let spill: any = null;
   if (s) {
-    spill = { type: s.type, lek: s.lek, navn: s.navn, modus: s.modus, runde: s.runde };
+    spill = { type: s.type, lek: s.lek, navn: s.navn, modus: s.modus, runde: s.runde, frist: s.frist || null };
     if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger });
     if (s.type === 'mest') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase,
@@ -105,11 +105,20 @@ export function visning(data: any, versjon: number, meg: any) {
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null,
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0, gi: p.gi || 0 })),
-    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null,
+    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(),
   };
 }
 
 /* ---------- spillene ---------- */
+/* ---------- svarfrister: runden går ikke videre før alle har svart eller tiden er ute ---------- */
+const FRIST = { mest: 30, forraeder: 30, tosannheter: 45, veddelopet: 45, nrKort: 40, nrLang: 60 };
+function settFrist(s: any, sek: number) { s.frist = Date.now() + sek * 1000 + 1500; }
+function fristUte(s: any) { return !s.frist || Date.now() >= s.frist - 800; }
+/** Feilmelding når noen prøver å gå videre for tidlig. */
+function venter(s: any, mangler: number) {
+  const sek = Math.max(1, Math.ceil((s.frist - Date.now()) / 1000));
+  return { feil: 'vent', melding: `Venter på ${mangler} ${mangler === 1 ? 'svar' : 'svar'} – eller ${sek} sekunder til tiden er ute.` };
+}
 function melde(data: any, tekst: string) { data.nr = (data.nr || 0) + 1; data.hendelse = { nr: data.nr, tekst }; }
 function navnPaa(data: any, id: string) { const p = data.spillere.find((x: any) => x.id === id); return p ? p.navn : '?'; }
 function giSlurker(data: any, id: string, n: number) { const p = data.spillere.find((x: any) => x.id === id); if (p) p.slurker = Math.max(0, (p.slurker || 0) + n); }
@@ -144,6 +153,7 @@ function visKort(s: any, data: any) {
 function nyMestRunde(s: any) {
   if (!s.kø.length) s.kø = stokk(s.alle.slice());
   s.tekst = s.kø.pop(); s.fase = 'stem'; s.stemmer = {}; s.resultat = null; s.runde = (s.runde || 0) + 1;
+  settFrist(s, FRIST.mest);
 }
 function nyForraederRunde(s: any, data: any) {
   if (!s.kø.length) s.kø = stokk(s.alle.slice());
@@ -293,10 +303,25 @@ export function handling(data: any, meg: any, h: any) {
     case 'svart': {  // Forræder: den aktive har svart, nå kan resten stemme
       if (!s || s.type !== 'forraeder' || s.fase !== 'svar') return { ok: true };
       if (meg.id !== s.aktiv && !erVert) return { feil: 'ikke-din-tur' };
-      s.fase = 'stem'; return { ok: true };
+      s.fase = 'stem'; settFrist(s, FRIST.forraeder); return { ok: true };
     }
     case 'avslor': {
       if (!s) return { ok: true };
+      if (s.type === 'mest' && s.fase === 'stem') {
+        const mangler = data.spillere.length - Object.keys(s.stemmer).length;
+        if (mangler > 0 && !fristUte(s)) return venter(s, mangler);
+        avgjorMest(data);
+      }
+      if (s.type === 'forraeder' && s.fase === 'stem') {
+        const mangler = data.spillere.length - 1 - Object.keys(s.stemmer).length;
+        if (mangler > 0 && !fristUte(s)) return venter(s, mangler);
+        avgjorForraeder(data);
+      }
+      return { ok: true };
+    }
+    case 'tid-ute': {
+      // En telefon sier at klokka har gått ut. Serveren sjekker selv før den gjør noe.
+      if (!s || !fristUte(s)) return { ok: true };
       if (s.type === 'mest' && s.fase === 'stem') avgjorMest(data);
       if (s.type === 'forraeder' && s.fase === 'stem') avgjorForraeder(data);
       return { ok: true };
@@ -417,6 +442,7 @@ export function startEkstra(data: any, lek: string, modus = ''): any {
   } else if (lek === 'veddelopet') {
     const st = kortstokk52().filter((k: any) => k.v !== 14);
     data.spill = { type: 'veddelopet', lek, navn: 'Veddeløpet', fase: 'vedd', veddemaal: {}, stokk: st, bane: st.splice(0, 7), snudd: [], pos: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, sist: null, vinner: null };
+    settFrist(data.spill, FRIST.veddelopet);
   } else if (lek === 'pyramiden') {
     if (n < 2) return { feil: 'for-faa', melding: 'Pyramiden trenger minst to spillere.' };
     const st = kortstokk52();
@@ -476,7 +502,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         const l = Number(h.logn);
         if (p.length !== 3 || p.some((x: string) => !x) || !(l >= 0 && l < 3)) return { feil: 'ugyldig', melding: 'Skriv tre påstander og merk løgnen.' };
         const rekkef = stokk([0, 1, 2]);
-        s.pastander = rekkef.map((i) => p[i]); s.logn = rekkef.indexOf(l); s.fase = 'stem'; s.stemmer = {};
+        s.pastander = rekkef.map((i) => p[i]); s.logn = rekkef.indexOf(l); s.fase = 'stem'; s.stemmer = {}; settFrist(s, FRIST.tosannheter);
         melde(data, `${meg.navn} har skrevet – hvilken er løgnen?`); return { ok: true };
       }
       if (h.handling === 'stem') {
@@ -486,7 +512,12 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         if (Object.keys(s.stemmer).length >= ider.length - 1) avgjorTo(data);
         return { ok: true };
       }
-      if (h.handling === 'avslor') { if (s.fase === 'stem') avgjorTo(data); return { ok: true }; }
+      if (h.handling === 'avslor' || h.handling === 'tid-ute') {
+        if (s.fase !== 'stem') return { ok: true };
+        const mangler = ider.length - 1 - Object.keys(s.stemmer).length;
+        if (mangler > 0 && !fristUte(s)) return h.handling === 'tid-ute' ? { ok: true } : venter(s, mangler);
+        avgjorTo(data); return { ok: true };
+      }
       if (h.handling === 'runde') {
         if (s.fase !== 'avslort') return { ok: true };
         s.aktiv = ider[(ider.indexOf(s.aktiv) + 1) % ider.length]; s.fase = 'skriv'; s.pastander = []; s.logn = -1; s.stemmer = {}; s.runde++;
@@ -558,7 +589,12 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         if (!['♥', '♠', '♦', '♣'].includes(h.farge)) return { feil: 'ukjent' };
         s.veddemaal[meg.id] = { farge: h.farge, slurker: Math.max(1, Math.min(10, Number(h.slurker) || 2)) }; return { ok: true };
       }
-      if (h.handling === 'lop' && s.fase === 'vedd') { s.fase = 'lop'; melde(data, 'Løpet er i gang!'); return { ok: true }; }
+      if ((h.handling === 'lop' || h.handling === 'tid-ute') && s.fase === 'vedd') {
+        const mangler = data.spillere.length - Object.keys(s.veddemaal).length;
+        if (mangler > 0 && !fristUte(s)) return h.handling === 'tid-ute' ? { ok: true } : venter(s, mangler);
+        if (h.handling === 'tid-ute' && !Object.keys(s.veddemaal).length) return { ok: true };
+        s.fase = 'lop'; s.frist = null; melde(data, 'Løpet er i gang!'); return { ok: true };
+      }
       if (h.handling === 'snu' && s.fase === 'lop') {
         if (!s.stokk.length) s.stokk = kortstokk52().filter((k: any) => k.v !== 14);
         const k = s.stokk.pop(); s.sist = k; s.pos[k.f]++;
@@ -801,6 +837,14 @@ function nrNyttSpm(s: any) {
   const q = s.sporsmal[s.i];
   s.fase = 'spm'; s.svar = {}; s.resultat = {};
   s.alt = q.type === 'valg' ? stokk((q.alt || []).slice()) : q.type === 'sant' ? ['Sant', 'Tull'] : null;
+  settFrist(s, q.type === 'tall' || q.type === 'fritt' ? FRIST.nrLang : FRIST.nrKort);
+}
+function nrAvslor(data: any) {
+  const s = data.spill, q = s.sporsmal[s.i];
+  s.fase = 'svar'; s.resultat = {}; s.frist = null;
+  data.spillere.forEach((p: any) => { const r = nrRiktig(q, s.svar[p.id]); s.resultat[p.id] = r; nrBrukResultat(data, p.id, r, 1); });
+  const antall = Object.values(s.resultat).filter(Boolean).length;
+  melde(data, `Svaret er «${q.svar}» – ${antall} av ${data.spillere.length} hadde rett`);
 }
 function nrBrukResultat(data: any, id: string, riktig: boolean, fortegn: 1 | -1) {
   const s = data.spill;
@@ -924,17 +968,22 @@ function nyeHandling(data: any, meg: any, h: any): any {
       let v = String(h.v == null ? '' : h.v).replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 80);
       if (s.alt && !s.alt.includes(v)) return { feil: 'ukjent' };
       if (!v) { delete s.svar[meg.id]; return { ok: true }; }
-      s.svar[meg.id] = v; return { ok: true };
+      s.svar[meg.id] = v;
+      // Alle har svart: vis svaret med én gang
+      if (data.spillere.every((p: any) => s.svar[p.id] != null)) nrAvslor(data);
+      return { ok: true };
+    }
+    if (h.handling === 'tid-ute') {
+      if (s.fase === 'spm' && fristUte(s)) nrAvslor(data);
+      return { ok: true };
     }
     if (!erVert && ['nr-start', 'nr-vis', 'nr-flipp', 'nr-neste', 'nytt'].includes(h.handling)) return { feil: 'bare-vert', melding: 'Verten styrer runden.' };
     if (h.handling === 'nr-start') { if (s.fase === 'klar') { nrNyttSpm(s); melde(data, 'Første spørsmål!'); } return { ok: true }; }
     if (h.handling === 'nr-vis') {
       if (s.fase !== 'spm') return { ok: true };
-      s.fase = 'svar'; s.resultat = {};
-      data.spillere.forEach((p: any) => { const r = nrRiktig(q, s.svar[p.id]); s.resultat[p.id] = r; nrBrukResultat(data, p.id, r, 1); });
-      const antall = Object.values(s.resultat).filter(Boolean).length;
-      melde(data, `Svaret er «${q.svar}» – ${antall} av ${data.spillere.length} hadde rett`);
-      return { ok: true };
+      const mangler = data.spillere.filter((p: any) => s.svar[p.id] == null).length;
+      if (mangler > 0 && !fristUte(s)) return venter(s, mangler);
+      nrAvslor(data); return { ok: true };
     }
     if (h.handling === 'nr-flipp') {
       if (s.fase !== 'svar') return { ok: true };

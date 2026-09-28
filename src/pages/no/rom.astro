@@ -125,8 +125,29 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       rt.stopp = true; rt.ok = false; clearInterval(rt.hb);
       if (rt.ws) { var w = rt.ws; rt.ws = null; try { w.close(); } catch (e) {} }
     }
+    /* ---------- svarfrist: nedtelling på alle telefoner ---------- */
+    var klokkeAvvik = 0, fristSendt = 0, fristTimer = null;
+    function fristHtml(s, tekst) {
+      if (!s || !s.frist) return '';
+      return '<p class="rom-frist"><span data-frist="' + s.frist + '">' + Math.max(0, Math.ceil((s.frist - 1500 - (Date.now() + klokkeAvvik)) / 1000)) + '</span> ' + esc(tekst || 'sekunder igjen') + '</p>';
+    }
+    function fristTikk() {
+      clearInterval(fristTimer);
+      fristTimer = setInterval(function () {
+        var el = document.querySelector('[data-frist]');
+        if (!el) return;
+        var frist = Number(el.dataset.frist), igjen = Math.max(0, Math.ceil((frist - 1500 - (Date.now() + klokkeAvvik)) / 1000));
+        el.textContent = igjen; el.parentNode.classList.toggle('snart', igjen <= 10);
+        if (igjen <= 0 && fristSendt !== frist) {
+          fristSendt = frist;
+          // Klokka er ute: be serveren gå videre (den sjekker selv). Litt tilfeldig ventetid, så ikke alle sender samtidig.
+          setTimeout(function () { gjorAlltid({ handling: 'tid-ute' }); }, 300 + Math.random() * 900);
+        }
+      }, 250);
+    }
     function ta(d) {
       if (!d) return;
+      if (d.naa) klokkeAvvik = d.naa - Date.now();
       if (d.versjon) versjon = d.versjon;
       tilstand = d;
       if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
@@ -138,7 +159,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       if (kode) { try { localStorage.removeItem('bd_rom_' + kode); } catch (e) {} }
       meg = null; tilstand = null; versjon = 0; clearTimeout(timer); rtStopp(); lukkTavle(); tegnStart();
     }
-    window.__bdRomStopp = function () { clearTimeout(timer); rtStopp(); lukkTavle(); };
+    window.__bdRomStopp = function () { clearTimeout(timer); clearInterval(fristTimer); rtStopp(); lukkTavle(); };
     document.addEventListener('astro:before-swap', function stopp() { clearTimeout(timer); rtStopp(); lukkTavle(); document.removeEventListener('astro:before-swap', stopp); }, { once: true });
     document.addEventListener('visibilitychange', function () { if (!document.hidden && meg) hent(); });
 
@@ -321,8 +342,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         '<div class="rom-valg">' + t.spillere.map(function (p) {
           return '<button type="button" data-g="stem" data-paa="' + p.id + '" aria-pressed="' + (s.minStemme === p.id) + '">' + esc(p.navn) + (p.id === t.meg ? ' (deg)' : '') + '</button>';
         }).join('') + '</div>' +
-        '<p class="rom-status">' + stemt + ' av ' + alle + ' har stemt</p>' +
-        (erVert() ? '<button class="btn ghost" data-g="avslor" type="button">Vis resultat nå</button>' : '');
+        '<p class="rom-status">' + stemt + ' av ' + alle + ' har stemt</p>' + fristHtml(tilstand.spill, 'sekunder til resultatet vises');
     }
 
     function forraederSpill(s) {
@@ -339,14 +359,13 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       }
       if (s.fase === 'stem') {
         if (jeg) return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p><p class="rom-stor">De andre stemmer nå …</p>' +
-          '<p class="rom-status">' + s.harStemt.length + ' av ' + (t.spillere.length - 1) + ' har stemt</p>';
+          '<p class="rom-status">' + s.harStemt.length + ' av ' + (t.spillere.length - 1) + ' har stemt</p>' + fristHtml(tilstand.spill, 'sekunder til avsløringen');
         return '<p class="rom-etikett">' + esc(han) + ' sa</p><p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
           '<div class="rom-valg to">' +
             '<button type="button" data-g="stem" data-paa="sannhet" aria-pressed="' + (s.minStemme === 'sannhet') + '">Sannhet</button>' +
             '<button type="button" data-g="stem" data-paa="lyv" aria-pressed="' + (s.minStemme === 'lyv') + '">Løgn</button>' +
           '</div>' +
-          '<p class="rom-status">' + s.harStemt.length + ' av ' + (t.spillere.length - 1) + ' har stemt</p>' +
-          (erVert() ? '<button class="btn ghost" data-g="avslor" type="button">Avslør nå</button>' : '');
+          '<p class="rom-status">' + s.harStemt.length + ' av ' + (t.spillere.length - 1) + ' har stemt</p>' + fristHtml(tilstand.spill, 'sekunder til avsløringen');
       }
       var r = s.resultat || {};
       return '<p class="rom-etikett">Fasit</p>' +
@@ -413,8 +432,9 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         return bane + '<p class="rom-etikett">Vedd på en hest</p>' +
           '<div class="rom-valg fire">' + F.map(function (f) { return '<button type="button" data-g="vedd" data-farge="' + f + '" aria-pressed="' + (mv.farge === f) + '">' + f + ' ' + NAVN[f] + '</button>'; }).join('') + '</div>' +
           '<label class="rof-lab" for="veddSl">Slurker du vedder</label><input class="rof-inp" id="veddSl" type="number" min="1" max="10" value="' + (mv.slurker || 2) + '">' +
-          '<p class="rom-status">' + (vedd || 'Ingen har veddet ennå') + '</p>' +
-          (erVert() ? '<button class="rom-stor-knapp" data-g="lop" type="button">Start løpet</button>' : '');
+          '<p class="rom-status">' + (vedd || 'Ingen har veddet ennå') + '</p>' + fristHtml(tilstand.spill, 'sekunder til løpet starter') +
+          (erVert() ? (function () { var mangler = tilstand.spillere.length - Object.keys(s.veddemaal).length;
+            return '<button class="rom-stor-knapp" data-g="lop" type="button">' + (mangler > 0 ? 'Venter på ' + mangler + ' veddemål …' : 'Start løpet') + '</button>'; })() : '');
       }
       return bane + '<div class="dl-bord">' + (s.sist ? kk(s.sist, 'stor inn') : '') + '</div>' +
         (s.vinner ? '<p class="dl-melding dl-stor">' + NAVN[s.vinner] + ' vant! Riktig veddemål: del ut det dobbelte.</p>' : '') +
@@ -529,8 +549,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
           (s.fase === 'avslort' ? '<small>' + ant + ' stemmer</small>' : '') + (knapp ? '</button>' : '</div>');
       }).join('') + '</div>';
       if (s.fase === 'stem') return '<p class="rom-etikett">' + (jeg ? 'De andre stemmer' : 'Hvilken er ' + han + ' sin løgn?') + '</p>' + liste +
-        '<p class="rom-status">' + s.harStemt.length + ' av ' + (tilstand.spillere.length - 1) + ' har stemt</p>' +
-        (erVert() || jeg ? '<button class="btn ghost" data-g="avslor" type="button">Avslør nå</button>' : '');
+        '<p class="rom-status">' + s.harStemt.length + ' av ' + (tilstand.spillere.length - 1) + ' har stemt</p>' + fristHtml(tilstand.spill, 'sekunder til avsløringen');
       return '<p class="rom-etikett">Fasit</p>' + liste +
         (s.drikker && s.drikker.length ? '<ul class="rom-drikker">' + s.drikker.map(function (x) { return '<li><b>' + esc(x.navn) + '</b> drikker ' + x.slurker + '</li>'; }).join('') + '</ul>' : '') +
         '<button class="rom-stor-knapp" data-g="runde" type="button">Neste spiller</button>';
@@ -620,8 +639,8 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         return topp + (vert
             ? '<div class="nr-opples"><span class="rom-etikett">Les høyt</span><p class="gt-text">' + esc(s.q) + '</p></div>'
             : '<p class="rom-stor">Hør på ' + esc(navn(tilstand.vert)) + ' og svar her:</p>') + input +
-          '<p class="rom-status">' + s.harSvart.length + ' av ' + tilstand.spillere.length + ' har svart</p>' +
-          (vert ? '<button class="rom-stor-knapp" data-g="nr-vis" type="button">Vis svaret</button>' : '');
+          '<p class="rom-status">' + s.harSvart.length + ' av ' + tilstand.spillere.length + ' har svart</p>' + fristHtml(tilstand.spill, 'sekunder til svaret vises') +
+          (vert ? '<button class="rom-stor-knapp" data-g="nr-vis" type="button"' + (s.harSvart.length < tilstand.spillere.length ? ' data-vent="1"' : '') + '>' + (s.harSvart.length < tilstand.spillere.length ? 'Venter på ' + (tilstand.spillere.length - s.harSvart.length) + ' svar …' : 'Vis svaret') + '</button>' : '');
       }
       var rader = tilstand.spillere.map(function (p) {
         var r = s.resultat[p.id], sv = s.svarene[p.id];
@@ -784,6 +803,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         e.preventDefault(); var i = document.getElementById('nrInput'); gjorAlltid({ handling: 'nr-svar', v: i.value.trim() }); i.blur();
       });
       visReaksjoner(tilstand.reak);
+      if (document.querySelector('[data-frist]')) fristTikk(); else clearInterval(fristTimer);
       var ny = document.getElementById('rfInput');
       if (ny && gVerdi !== null) { ny.value = gVerdi; if (gFokus) ny.focus({ preventScroll: true }); }
       var ts = document.getElementById('tsSkjema');
