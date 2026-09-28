@@ -14,6 +14,7 @@ const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
   <h1>Nyhetsrunden</h1>
   <p class="lead">{runde.ingress}</p>
   {neste && <p class="nr-neste">Uke {neste.uke} slippes {nesteTid}.</p>}
+  <p><a class="btn ghost small" href="/no/rom">Spill fra hver sin telefon</a></p>
   <span hidden data-spilt="lek:nyhetsrunden"></span>
 
   <section class="gt nr" data-runde={rundeId(runde)}>
@@ -24,7 +25,7 @@ const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
       var body = root.querySelector('.gt-body');
       if (root.dataset.bound) return; root.dataset.bound = '1';
       var TYPER = { valg:'Velg riktig', sant:'Sant eller tull?', tall:'Hvilket tall?', fritt:'Svar fritt' };
-      var nr = 0, S = R.sporsmal, rekkefolge = {};
+      var nr = 0, S = R.sporsmal, rekkefolge = {}, folk = [], poeng = [], svarLogg = {};
       // alternativene stokkes, så det riktige svaret ikke alltid står på samme plass
       function alternativer(i){
         if (!rekkefolge[i]){ var a = S[i].alt.slice();
@@ -44,32 +45,65 @@ const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
           '<li><b>Riktig:</b> del ut én slurk. <b>Feil:</b> drikk én.</li>' +
           '<li><b>Står du over:</b> drikk én – og bordet kan stjele. Riktig gir to slurker å dele ut, feil gir to å drikke.</li>' +
           '<li>På tallspørsmål er alt innenfor 10 prosent riktig.</li></ul>' +
+          '<label class="rof-lab" for="nrFolk">Hvem er med? <span class="small">(valgfritt – da teller siden poengene)</span></label>' +
+          '<input class="rof-inp" id="nrFolk" placeholder="Jonas, Maria, Petter" value="' + esc(husk()) + '">' +
           '<button class="btn gold vp-big" data-a="start">Start runden · ' + S.length + ' spørsmål</button>');
       }
+      function husk(v){ try { if (v === undefined) return localStorage.getItem('bd_spillere') || ''; localStorage.setItem('bd_spillere', v); } catch (e) { return ''; } }
+      function hvem(){ return folk.length ? folk[nr % folk.length] : ''; }
       function spm(visSvar){
         var s = S[nr];
         var alt = s.type === 'valg' ? '<ol class="nr-alt">' + alternativer(nr).map(function(a){
               return '<li class="' + (visSvar && a === s.svar ? 'rett' : '') + '">' + esc(a) + '</li>'; }).join('') + '</ol>' : '';
         vis('<p class="gt-count">' + (nr+1) + ' / ' + S.length + ' · ' + TYPER[s.type] + '</p>' +
+          (folk.length ? '<p class="nr-tur">Til <b>' + esc(hvem()) + '</b></p>' : '') +
           '<p class="gt-text">' + esc(s.q) + '</p>' + alt +
           (visSvar
             ? '<div class="nr-svar"><p class="nr-fasit">' + esc(s.svar) + '</p>' + (s.info ? '<p>' + esc(s.info) + '</p>' : '') +
               (s.url ? '<p class="small"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">Les saken hos ' + esc(s.kilde) + ' ↗</a></p>' : '') + '</div>' +
-              '<button class="btn gold vp-big" data-a="neste">' + (nr < S.length-1 ? 'Neste person' : 'Avslutt runden') + '</button>'
+              (folk.length
+                ? '<div class="nr-dom"><button class="btn gold" data-a="rett">✓ ' + esc(hvem()) + ' hadde rett</button><button class="btn ghost" data-a="feil">✗ Feil</button></div>'
+                : '<button class="btn gold vp-big" data-a="neste">' + (nr < S.length-1 ? 'Neste person' : 'Avslutt runden') + '</button>')
             : '<button class="btn gold vp-big" data-a="svar">Vis svar</button>') +
           '<div class="gt-row"><button class="btn ghost" data-a="tilbake"' + (nr===0 ? ' disabled' : '') + '>Tilbake</button></div>');
       }
       function slutt(){
+        if (folk.length) {
+          var liste = folk.map(function (n, i) { return { n: n, p: poeng[i] }; }).sort(function (a, b) { return b.p - a.p; });
+          var topp = liste[0].p, vinnere = liste.filter(function (x) { return x.p === topp; }).map(function (x) { return x.n; });
+          vis('<div class="vp-center"><h2>🏆 ' + esc(vinnere.join(' og ')) + ' vant uka!</h2><p>Vinneren deler ut tre slurker. Sistemann skåler for nyhetsbildet.</p></div>' +
+            '<ol class="rom-resultat">' + liste.map(function (x) { return '<li><span>' + esc(x.n) + '</span><b>' + x.p + ' riktige</b></li>'; }).join('') + '</ol>' +
+            '<button class="btn gold vp-big" data-a="igjen">Ta runden på nytt</button>');
+          return;
+        }
         vis('<div class="vp-center"><h2>Det var uka.</h2><p>Alle skåler for nyhetsbildet. Ny runde kommer fredag kl. 12.</p></div>' +
           '<button class="btn gold vp-big" data-a="igjen">Ta runden på nytt</button>');
       }
       body.addEventListener('click', function(e){
         var b = e.target.closest('button'); if (!b) return;
         var a = b.dataset.a;
+        if (a === 'start'){
+          var inp = body.querySelector('#nrFolk'), v = inp ? inp.value : '';
+          folk = v.split(',').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 12);
+          if (folk.length) husk(v);
+          poeng = folk.map(function () { return 0; }); svarLogg = {};
+        }
+        if (a === 'igjen'){ poeng = folk.map(function () { return 0; }); svarLogg = {}; }
         if (a === 'start' || a === 'igjen'){ nr = 0; rekkefolge = {}; spm(false); }
+        else if (a === 'rett' || a === 'feil'){
+          var i = nr % folk.length;
+          if (svarLogg[nr] === true) poeng[i]--;              // rettet et tidligere svar
+          svarLogg[nr] = a === 'rett'; if (a === 'rett') poeng[i]++;
+          if (nr < S.length-1){ nr++; spm(false); } else slutt();
+        }
         else if (a === 'svar') spm(true);
         else if (a === 'neste'){ if (nr < S.length-1){ nr++; spm(false); } else slutt(); }
         else if (a === 'tilbake' && nr > 0){ nr--; spm(false); }
+        if (folk.length && !body.querySelector('.vp-center') && (a === 'svar' || a === 'rett' || a === 'feil' || a === 'tilbake')) {
+          var t = body.querySelector('.nr-stilling');
+          if (!t) { t = document.createElement('p'); t.className = 'nr-stilling small'; body.appendChild(t); }
+          t.textContent = folk.map(function (n, i) { return n + ' ' + poeng[i]; }).join(' · ');
+        }
       });
       start();
     })();

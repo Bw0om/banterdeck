@@ -13,6 +13,28 @@ const grouped = catSections.filter((s) => s.id !== 'ordbok').map((s) => ({
   <h1>{L.suggestTitle}</h1>
   <p class="lead">{L.suggestLead}</p>
 
+  {lang === 'no' && (
+    <div class="konto-faner" role="tablist" id="forslagFaner">
+      <button type="button" role="tab" aria-selected="true" data-type="replikk">Replikk</button>
+      <button type="button" role="tab" aria-selected="false" data-type="lek">Drikkelek</button>
+    </div>
+  )}
+
+  {lang === 'no' && (
+    <form id="fLek" class="form" novalidate hidden>
+      <p class="small">Har dere en lek som ikke står her? Send den inn – blir den godkjent, publiseres den med navnet ditt.</p>
+      <div class="field"><label class="lab" for="lekNavn">Navn på leken</label><input id="lekNavn" name="lekNavn" maxlength="60" required /></div>
+      <div class="field"><label class="lab" for="lekPl">Antall spillere<span class="opt">valgfritt</span></label><input id="lekPl" name="pl" maxlength="12" placeholder="F.eks. 4+" /></div>
+      <div class="field"><label class="lab" for="lekUtstyr">Utstyr<span class="opt">valgfritt</span></label><input id="lekUtstyr" name="utstyr" maxlength="120" placeholder="F.eks. kortstokk og kopper" /></div>
+      <div class="field"><label class="lab" for="lekRegler">Regler</label><textarea id="lekRegler" name="regler" rows="8" maxlength="3000" required placeholder="Forklar leken som du ville gjort for en ny i gjengen. Én linje per regel går fint."></textarea></div>
+      <div class="field"><label class="lab" for="lekFra">Navnet ditt<span class="opt">vises på leken hvis den publiseres</span></label><input id="lekFra" name="navn" maxlength="60" /></div>
+      <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <input type="hidden" name="type" value="lek" />
+      <button class="btn gold" type="submit">Send inn leken</button>
+      <p id="msgLek" class="formmsg" role="status" aria-live="polite"></p>
+    </form>
+  )}
+
   <form id="f" class="form" novalidate>
     <div class="field">
       <label class="lab" for="kategori">{L.fSituation}</label>
@@ -71,6 +93,32 @@ const grouped = catSections.filter((s) => s.id !== 'ordbok').map((s) => ({
         } catch (err) { say(T.network, 'err'); }
         btn.disabled = false;
       });
+
+      // Drikkelek-skjemaet (bare på norsk)
+      var faner = document.getElementById('forslagFaner'), fl = document.getElementById('fLek');
+      if (faner && fl) {
+        faner.addEventListener('click', function (e) {
+          var b = e.target.closest('[data-type]'); if (!b) return;
+          faner.querySelectorAll('[data-type]').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
+          fl.hidden = b.dataset.type !== 'lek'; f.hidden = b.dataset.type === 'lek';
+        });
+        if (location.hash === '#lek') faner.querySelector('[data-type=lek]').click();
+        var ml = document.getElementById('msgLek');
+        fl.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          var d = Object.fromEntries(new FormData(fl).entries()), knapp = fl.querySelector('button[type=submit]');
+          if (!d.lekNavn || d.lekNavn.trim().length < 2) { ml.textContent = 'Gi leken et navn.'; ml.className = 'formmsg err'; return; }
+          if (!d.regler || d.regler.trim().length < 30) { ml.textContent = 'Skriv reglene litt mer utfyllende.'; ml.className = 'formmsg err'; return; }
+          knapp.disabled = true; ml.textContent = T.sending; ml.className = 'formmsg';
+          try {
+            var r = await fetch('/api/forslag', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+            var j = await r.json();
+            if (j.ok) { fl.reset(); ml.textContent = 'Takk! Leken er sendt inn og blir sett på snart.'; ml.className = 'formmsg ok'; }
+            else { ml.textContent = j.error || T.generic; ml.className = 'formmsg err'; }
+          } catch (err) { ml.textContent = T.network; ml.className = 'formmsg err'; }
+          knapp.disabled = false;
+        });
+      }
     })();
   </script>
 </Base>

@@ -6,6 +6,7 @@
 import { rpc, supabaseServer } from './spilt';
 import DECKS from '../data/decks.json';
 import BINGO from '../data/bingo.json';
+import { publiserteRunder, rundeId } from './nyhetsrunden';
 
 const D: any = DECKS;
 const B: any = BINGO;
@@ -100,15 +101,17 @@ export function visning(data: any, versjon: number, meg: any) {
   }
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null,
-    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0 })),
-    spill, hendelse: data.hendelse, nr: data.nr,
+    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0, gi: p.gi || 0 })),
+    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [],
   };
 }
 
 /* ---------- spillene ---------- */
 function melde(data: any, tekst: string) { data.nr = (data.nr || 0) + 1; data.hendelse = { nr: data.nr, tekst }; }
 function navnPaa(data: any, id: string) { const p = data.spillere.find((x: any) => x.id === id); return p ? p.navn : '?'; }
-function giSlurker(data: any, id: string, n: number) { const p = data.spillere.find((x: any) => x.id === id); if (p) p.slurker = (p.slurker || 0) + n; }
+function giSlurker(data: any, id: string, n: number) { const p = data.spillere.find((x: any) => x.id === id); if (p) p.slurker = Math.max(0, (p.slurker || 0) + n); }
+/** Slurker spilleren har vunnet og kan sende til andre (🍺-knappen). */
+function giUtdeling(data: any, id: string, n: number) { const p = data.spillere.find((x: any) => x.id === id); if (p) p.gi = Math.max(0, Math.min(99, (p.gi || 0) + n)); }
 
 function kortstokkFor(lek: string, modus: string) {
   if (lek === 'ring-of-fire') {
@@ -192,7 +195,7 @@ export function startSpill(data: any, lek: string, modus: string) {
 export function handling(data: any, meg: any, h: any) {
   const s = data.spill;
   const erVert = meg.id === data.vert;
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -220,9 +223,28 @@ export function handling(data: any, meg: any, h: any) {
       p.slurker = Math.max(0, Math.min(999, (p.slurker || 0) + n));
       return { ok: true };
     }
+    case 'reager':
+    case 'send': {
+      const naa = Date.now();
+      if (meg.sistR && naa - meg.sistR < 900) return { feil: 'for-fort', melding: 'Rolig nå 😄' };
+      const reak: any = { fra: meg.id };
+      if (h.handling === 'reager') {
+        if (!REAKSJONER.includes(h.e)) return { feil: 'ukjent' };
+        reak.e = h.e;
+      } else {
+        const til = data.spillere.find((x: any) => x.id === h.hvem);
+        if (!til || til.id === meg.id) return { feil: 'ukjent' };
+        if (!(meg.gi > 0)) return { feil: 'tomt', melding: 'Du har ingen slurker å dele ut. Vinn noe først!' };
+        meg.gi--; til.slurker = (til.slurker || 0) + 1; reak.e = '🍺'; reak.til = til.id;
+      }
+      meg.sistR = naa;
+      data.reakNr = (data.reakNr || 0) + 1; reak.nr = data.reakNr;
+      data.reak = (data.reak || []).concat([reak]).slice(-12);
+      return { ok: true };
+    }
     case 'nullstill': {
       if (!erVert) return { feil: 'bare-vert' };
-      data.spillere.forEach((p: any) => { p.slurker = 0; }); melde(data, 'Slurketelleren er nullstilt'); return { ok: true };
+      data.spillere.forEach((p: any) => { p.slurker = 0; p.gi = 0; }); melde(data, 'Slurketelleren er nullstilt'); return { ok: true };
     }
     case 'neste': {
       if (!s || s.type !== 'kort') return { feil: 'feil-spill' };
@@ -232,6 +254,13 @@ export function handling(data: any, meg: any, h: any) {
       if (s.tur !== null) s.tur = (s.tur + 1) % Math.max(1, data.spillere.length);
       if (s.lek === 'ring-of-fire' && s.rekke[s.pos].v === 'K') s.konger++;
       s.kort = visKort(s, data);
+      if (s.lek === 'ring-of-fire' && s.tur !== null) {
+        // Poengtavla fylles av seg selv: konger og «3 Me» drikker, «2 You» gir en slurk å dele ut
+        const hvem = data.spillere[s.tur] && data.spillere[s.tur].id, v = s.rekke[s.pos].v;
+        if (hvem && v === 'K') giSlurker(data, hvem, D['ring-of-fire'].konger[Math.min(s.konger, 4) - 1] || 5);
+        if (hvem && v === '3') giSlurker(data, hvem, 1);
+        if (hvem && v === '2') giUtdeling(data, hvem, 1);
+      }
       return { ok: true };
     }
     case 'stem': {
@@ -278,7 +307,7 @@ export function handling(data: any, meg: any, h: any) {
       m[i] = !m[i];
       const etter = LINJER.filter((l) => l.every((k) => m[k])).length;
       if (m.every(Boolean) && !s.bingo.includes(meg.id)) { s.bingo.push(meg.id); melde(data, `BINGO for ${meg.navn}! Alle andre drikker opp.`); }
-      else if (etter > foer) { s.rekker.push(meg.id); melde(data, `${meg.navn} fikk rekke! Del ut to slurker.`); }
+      else if (etter > foer) { s.rekker.push(meg.id); giUtdeling(data, meg.id, 2); melde(data, `${meg.navn} fikk rekke! Del ut to slurker.`); }
       return { ok: true };
     }
     case 'nytt-brett': {
@@ -336,9 +365,14 @@ export function gyldigKode(k: any) { return typeof k === 'string' && /^[A-Z0-9]{
    Kort- og terningleker i rom: Opus, Over eller under, Veddeløpet,
    Pyramiden, Gris og President. Skjulte hender vises bare til eieren.
    ===================================================================== */
-export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter'];
+export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden'];
+export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '🫡'];
 export function ekstraLeker() {
+  const nr = publiserteRunder().slice(0, 6).map((r: any) => ({ v: rundeId(r), t: 'Uke ' + r.uke }));
   return [
+    ...(nr.length ? [{ id: 'nyhetsrunden', navn: 'Nyhetsrunden', type: 'nyhetsrunden', moduser: nr, om: 'Verten leser opp ukas spørsmål. Alle svarer på sin egen telefon – så ser dere hvem som bommet.' }] : []),
+    { id: 'bussruta', navn: 'Bussruta', type: 'bussruta', moduser: [], om: 'Fire spørsmål hver på egen telefon, så pyramiden – og taperen kjører bussen.' },
+    { id: 'yatzy', navn: 'Drikke-Yatzy', type: 'yatzy', moduser: [], om: 'Trill på din telefon når det er din tur. Alle ser terningene og blokka.' },
     { id: 'tosannheter', navn: 'To sannheter og en løgn', type: 'tosannheter', moduser: [], om: 'Én skriver tre påstander i hemmelighet. Resten stemmer på løgnen fra sin telefon.' },
     { id: 'regelfabrikken', navn: 'Regelfabrikken', type: 'regelfabrikken', moduser: [{ v: '45', t: '45 sek' }, { v: '60', t: '60 sek' }, { v: '90', t: '90 sek' }], om: 'Alle skriver så mange drikkekort de rekker på sin telefon. Så stokkes alt og trekkes.' },
     { id: 'overunder', navn: 'Over eller under', type: 'overunder', moduser: [], om: 'Den som har tur gjetter på sin telefon. Feil = drikk hele bunken.' },
@@ -359,6 +393,7 @@ function aktiveIder(data: any, alle = false) {
 
 export function startEkstra(data: any, lek: string, modus = ''): any {
   const n = data.spillere.length, ider = aktiveIder(data, true);
+  if (lek === 'bussruta' || lek === 'yatzy' || lek === 'nyhetsrunden') return startNye(data, lek, modus, ider);
   if (lek === 'tosannheter') {
     if (n < 2) return { feil: 'for-faa', melding: 'Trenger minst to spillere.' };
     data.spill = { type: 'tosannheter', lek, navn: 'To sannheter og en løgn', aktiv: ider[0], fase: 'skriv', pastander: [], logn: -1, stemmer: {}, runde: 1 };
@@ -421,6 +456,7 @@ function presTurVidere(data: any) {
 
 export function ekstraHandling(data: any, meg: any, h: any): any {
   const s = data.spill; if (!s || !EKSTRA.includes(s.type)) return null;
+  if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeHandling(data, meg, h);
   const ider = aktiveIder(data);
   const min = ider.indexOf(meg.id);
   switch (s.type) {
@@ -522,7 +558,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         const vinner = (['♥', '♠', '♦', '♣'] as const).find((f) => s.pos[f] >= 8);
         if (vinner) {
           s.vinner = vinner; s.fase = 'ferdig';
-          Object.entries(s.veddemaal).forEach(([id, v]: any) => { if (v.farge !== vinner) giSlurker(data, id, v.slurker); });
+          Object.entries(s.veddemaal).forEach(([id, v]: any) => { if (v.farge !== vinner) giSlurker(data, id, v.slurker); else giUtdeling(data, id, v.slurker * 2); });
           melde(data, `${({ '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' } as any)[vinner]} vant løpet!`);
         }
         return { ok: true };
@@ -649,6 +685,7 @@ function avgjorTo(data: any) {
   s.fase = 'avslort'; melde(data, `Løgnen var: «${s.pastander[s.logn]}»`);
 }
 export function ekstraVisning(s: any, meg: any, data: any) {
+  if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeVisning(s, meg, data);
   const ider = aktiveIder(data);
   if (s.type === 'tosannheter') return { aktiv: s.aktiv, fase: s.fase, pastander: s.pastander, harStemt: Object.keys(s.stemmer),
     minStemme: meg ? (s.stemmer[meg.id] ?? null) : null, logn: s.fase === 'avslort' ? s.logn : null, stemmer: s.fase === 'avslort' ? s.stemmer : null, drikker: s.fase === 'avslort' ? s.drikker : null };
@@ -704,4 +741,231 @@ export function startEgen(data: any, kort: any, navn: any) {
   data.spill = { type: 'regelfabrikken', lek: 'regelfabrikken', navn: tittel, modus: '', fase: 'trekk', frist: null, sek: 60, kort: {}, rekke: stokk(liste), pos: 0, egen: true };
   melde(data, `Nytt spill: ${tittel} (${liste.length} kort)`);
   return { ok: true };
+}
+
+
+/* =====================================================================
+   Bussruta, Drikke-Yatzy og Nyhetsrunden i rom.
+   Slurker føres automatisk på poengtavla: «drikk» → slurker, «del ut» → 🍺 å sende.
+   ===================================================================== */
+const BR_SPM = ['Rød eller svart?', 'Over eller under forrige kort?', 'Innenfor eller utenfor de to første?', 'Hvilken kortfarge?'];
+function brTrekk(s: any) { if (!s.stokk.length) s.stokk = kortstokk52(); return s.stokk.pop(); }
+function brRad(i: number) { return i < 5 ? 1 : i < 9 ? 2 : i < 12 ? 3 : i < 14 ? 4 : 5; }
+const YZ_FELT = ['1', '2', '3', '4', '5', '6', 'p', 'pp', '3l', '4l', 'ls', 'ss', 'hus', 'sj', 'y'];
+function yzTell(t: number[]) { const c = [0, 0, 0, 0, 0, 0, 0]; t.forEach((x) => c[x]++); return c; }
+function yzPoeng(f: string, t: number[]) {
+  const c = yzTell(t), sum = t.reduce((a, b) => a + b, 0);
+  if (/^[1-6]$/.test(f)) return c[+f] * +f;
+  const hoy = (n: number) => { for (let i = 6; i >= 1; i--) if (c[i] >= n) return i; return 0; };
+  if (f === 'p') return hoy(2) * 2;
+  if (f === 'pp') { const par: number[] = []; for (let i = 6; i >= 1; i--) if (c[i] >= 2) par.push(i); return par.length >= 2 ? (par[0] + par[1]) * 2 : 0; }
+  if (f === '3l') return hoy(3) * 3;
+  if (f === '4l') return hoy(4) * 4;
+  if (f === 'ls') return [1, 2, 3, 4, 5].every((x) => c[x] === 1) ? 15 : 0;
+  if (f === 'ss') return [2, 3, 4, 5, 6].every((x) => c[x] === 1) ? 20 : 0;
+  if (f === 'hus') { let tre = 0, to = 0; for (let i = 1; i <= 6; i++) { if (c[i] === 3) tre = i; if (c[i] === 2) to = i; } return tre && to ? sum : 0; }
+  if (f === 'sj') return sum;
+  if (f === 'y') return c.some((x) => x === 5) ? 50 : 0;
+  return 0;
+}
+function yzSum(b: any) { let ov = 0, sum = 0; YZ_FELT.forEach((f) => { const v = b[f]; if (v != null) { sum += v; if (/^[1-6]$/.test(f)) ov += v; } }); return sum + (ov >= 63 ? 50 : 0); }
+
+/** Tall fra tekst som «4,2 milliarder kroner» eller «12 000». */
+function lesTall(x: any): number {
+  let t = String(x == null ? '' : x).toLowerCase().replace(/ /g, ' ');
+  t = t.replace(/(\d)[\s.](?=\d{3}(\D|$))/g, '$1');
+  const m = /-?\d+(?:[.,]\d+)?/.exec(t); if (!m) return NaN;
+  let n = parseFloat(m[0].replace(',', '.'));
+  const rest = t.slice(m.index + m[0].length);
+  if (/^\s*(milliard|mrd)/.test(rest)) n *= 1e9; else if (/^\s*(million|mill\b|mill\.|mnok)/.test(rest)) n *= 1e6; else if (/^\s*tusen/.test(rest)) n *= 1e3;
+  return n;
+}
+function norm(x: any) { return String(x || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9æøå ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+function nrRiktig(q: any, svar: any): boolean {
+  if (svar == null || svar === '') return false;
+  if (q.type === 'valg' || q.type === 'sant') return String(svar) === String(q.svar);
+  if (q.type === 'tall') { const a = lesTall(q.svar), g = lesTall(svar); return isFinite(a) && isFinite(g) && Math.abs(g - a) <= Math.abs(a) * 0.1 + 1e-9; }
+  const a = norm(q.svar), g = norm(svar);
+  return !!g && (a === g || (g.length >= 3 && a.includes(g)) || (a.length >= 3 && g.includes(a)));
+}
+function nrNyttSpm(s: any) {
+  const q = s.sporsmal[s.i];
+  s.fase = 'spm'; s.svar = {}; s.resultat = {};
+  s.alt = q.type === 'valg' ? stokk((q.alt || []).slice()) : q.type === 'sant' ? ['Sant', 'Tull'] : null;
+}
+function nrBrukResultat(data: any, id: string, riktig: boolean, fortegn: 1 | -1) {
+  const s = data.spill;
+  if (riktig) { giUtdeling(data, id, fortegn); s.riktige[id] = Math.max(0, (s.riktige[id] || 0) + fortegn); }
+  else giSlurker(data, id, fortegn);
+}
+
+function startNye(data: any, lek: string, modus: string, ider: string[]): any {
+  if (lek === 'bussruta') {
+    if (ider.length < 2) return { feil: 'for-faa', melding: 'Bussruta trenger minst to spillere.' };
+    const hender: any = {}; ider.forEach((id) => { hender[id] = []; });
+    data.spill = { type: 'bussruta', lek, navn: 'Bussruta', ider: ider.slice(), fase: 1, tur: 0, steg: 0, hender, stokk: kortstokk52(), sist: null, melding: '', pyr: [], pyrPos: 0, buss: null, bussRekke: 0, maal: 5 };
+    melde(data, 'Nytt spill: Bussruta'); return { ok: true };
+  }
+  if (lek === 'yatzy') {
+    const blokker: any = {}; ider.forEach((id) => { blokker[id] = {}; });
+    data.spill = { type: 'yatzy', lek, navn: 'Drikke-Yatzy', ider: ider.slice(), tur: 0, terninger: [1, 2, 3, 4, 5], hold: [false, false, false, false, false], kast: 0, nr: 0, blokker, melding: '', ferdig: null };
+    melde(data, 'Nytt spill: Drikke-Yatzy'); return { ok: true };
+  }
+  if (lek === 'nyhetsrunden') {
+    const runder = publiserteRunder();
+    const r = runder.find((x: any) => rundeId(x) === modus) || runder[0];
+    if (!r || !(r.sporsmal || []).length) return { feil: 'tom', melding: 'Ingen runde er ute ennå.' };
+    data.spill = { type: 'nyhetsrunden', lek, navn: 'Nyhetsrunden', modus: 'uke ' + r.uke, uke: r.uke, sporsmal: r.sporsmal, i: 0, riktige: {} };
+    nrNyttSpm(data.spill);
+    melde(data, `Nyhetsrunden uke ${r.uke} – ${r.sporsmal.length} spørsmål`); return { ok: true };
+  }
+  return { feil: 'ukjent-lek' };
+}
+
+function nyeHandling(data: any, meg: any, h: any): any {
+  const s = data.spill, erVert = meg.id === data.vert;
+  if (s.type === 'bussruta') {
+    const aktiv = s.ider[s.tur];
+    if (h.handling === 'br-svar') {
+      if (s.fase !== 1) return { ok: true };
+      if (meg.id !== aktiv && !(erVert && !data.spillere.some((p: any) => p.id === aktiv))) return { feil: 'ikke-din-tur', melding: 'Det er ikke din tur.' };
+      const v = String(h.v || ''), k = brTrekk(s), hand = s.hender[aktiv];
+      let ok = false;
+      if (s.steg === 0) ok = (v === 'rod') === (k.f === '♥' || k.f === '♦');
+      if (s.steg === 1) ok = v === 'over' ? k.v > hand[0].v : k.v < hand[0].v;
+      if (s.steg === 2) { const lo = Math.min(hand[0].v, hand[1].v), hi = Math.max(hand[0].v, hand[1].v); ok = v === 'inn' ? (k.v > lo && k.v < hi) : (k.v < lo || k.v > hi); }
+      if (s.steg === 3) ok = k.f === v;
+      const n = s.steg + 1; hand.push(k); s.sist = k;
+      if (ok) giUtdeling(data, aktiv, n); else giSlurker(data, aktiv, n);
+      s.melding = `${navnPaa(data, aktiv)}: ${vnavn(k.v)}${k.f} – ${ok ? 'riktig! Del ut ' + n + '.' : 'feil! Drikk ' + n + '.'}`;
+      s.steg++;
+      if (s.steg === 4) { s.steg = 0; s.tur++; }
+      if (s.tur >= s.ider.length) { s.fase = 2; s.pyr = []; for (let i = 0; i < 15; i++) s.pyr.push(brTrekk(s)); s.pyrPos = 0; s.sist = null; melde(data, 'Alle har fire kort. Nå snus pyramiden!'); }
+      return { ok: true };
+    }
+    if (h.handling === 'br-snu') {
+      if (s.fase !== 2 || s.pyrPos >= 15) return { ok: true };
+      if (typeof h.pos === 'number' && h.pos !== s.pyrPos) return { ok: true };
+      const k = s.pyr[s.pyrPos], n = brRad(s.pyrPos), treff: string[] = [];
+      s.ider.forEach((id: string) => { const hand = s.hender[id], i = hand.findIndex((x: any) => x.v === k.v); if (i !== -1) { hand.splice(i, 1); treff.push(navnPaa(data, id)); giUtdeling(data, id, n); } });
+      s.pyrPos++;
+      s.melding = `${vnavn(k.v)}${k.f} (rad ${n}) – ${treff.length ? treff.join(', ') + ' legger på og deler ut ' + n + '.' : 'ingen har den.'}`;
+      return { ok: true };
+    }
+    if (h.handling === 'br-buss') {
+      if (s.fase !== 2 || s.pyrPos < 15) return { ok: true };
+      const maks = Math.max(...s.ider.map((id: string) => s.hender[id].length));
+      const kand = s.ider.filter((id: string) => s.hender[id].length === maks);
+      s.buss = kand[tilfeldig(kand.length)]; s.fase = 3; s.bussRekke = 0; s.stokk = kortstokk52(); s.sist = null;
+      s.melding = `${navnPaa(data, s.buss)} har flest kort igjen (${maks}) og kjører bussen! Kom deg forbi ${s.maal} kort uten bildekort eller ess.`;
+      melde(data, `${navnPaa(data, s.buss)} kjører bussen!`); return { ok: true };
+    }
+    if (h.handling === 'br-kjor') {
+      if (s.fase !== 3 || s.bussRekke >= s.maal) return { ok: true };
+      if (meg.id !== s.buss && !erVert) return { feil: 'ikke-din-tur', melding: 'Det er sjåføren som snur.' };
+      const k = brTrekk(s); s.sist = k;
+      const straff = ({ 11: 1, 12: 2, 13: 3, 14: 4 } as any)[k.v];
+      if (straff) { giSlurker(data, s.buss, straff); s.bussRekke = 0; s.melding = `${vnavn(k.v)}${k.f} – ${navnPaa(data, s.buss)} drikker ${straff} og starter på nytt.`; }
+      else { s.bussRekke++; s.melding = `${vnavn(k.v)}${k.f} – trygt! ${s.bussRekke >= s.maal ? navnPaa(data, s.buss) + ' er i mål. Bussen er fri!' : (s.maal - s.bussRekke) + ' igjen.'}`; if (s.bussRekke >= s.maal) melde(data, 'Bussen er i mål!'); }
+      return { ok: true };
+    }
+    if (h.handling === 'nytt') { if (!erVert) return { feil: 'bare-vert' }; return startNye(data, 'bussruta', '', aktiveIder(data, true)); }
+    return null;
+  }
+  if (s.type === 'yatzy') {
+    const aktiv = s.ider[s.tur], kanStyre = meg.id === aktiv || (erVert && !data.spillere.some((p: any) => p.id === aktiv));
+    if (h.handling === 'yz-kast') {
+      if (s.ferdig) return { ok: true };
+      if (!kanStyre) return { feil: 'ikke-din-tur', melding: 'Det er ikke din tur.' };
+      if (s.kast >= 3) return { ok: true };
+      s.terninger = s.terninger.map((t: number, i: number) => (s.hold[i] && s.kast ? t : 1 + tilfeldig(6)));
+      s.kast++; s.nr++;
+      const c = yzTell(s.terninger), deler: string[] = [];
+      if (c[1] > 0) { giSlurker(data, aktiv, 2); deler.push('Ener i kastet – drikk 2.'); }
+      if (c.some((x) => x === 5)) { giUtdeling(data, aktiv, 5); deler.push('YATZY! Del ut 5 – eller en shot.'); }
+      else if (c.some((x) => x >= 4)) { const sum = s.terninger.reduce((a: number, b: number) => a + b, 0); giSlurker(data, aktiv, sum); deler.push('Fire like – drikk ' + sum + ' slurker.'); }
+      s.melding = deler.join(' ') || (s.kast < 3 ? 'Hold og trill igjen, eller velg et felt.' : 'Velg et felt.');
+      return { ok: true };
+    }
+    if (h.handling === 'yz-hold') {
+      if (!kanStyre || !s.kast || s.kast >= 3) return { ok: true };
+      const i = Number(h.i); if (i >= 0 && i < 5) s.hold[i] = !s.hold[i];
+      return { ok: true };
+    }
+    if (h.handling === 'yz-felt') {
+      if (!kanStyre || !s.kast || s.ferdig) return { ok: true };
+      const f = String(h.f || ''), b = s.blokker[aktiv];
+      if (!YZ_FELT.includes(f) || b[f] != null) return { ok: true };
+      b[f] = yzPoeng(f, s.terninger);
+      s.tur = (s.tur + 1) % s.ider.length; s.kast = 0; s.hold = [false, false, false, false, false]; s.melding = '';
+      if (s.ider.every((id: string) => YZ_FELT.every((x) => s.blokker[id][x] != null))) {
+        const liste = s.ider.map((id: string) => ({ id, navn: navnPaa(data, id), sum: yzSum(s.blokker[id]) })).sort((a: any, c: any) => c.sum - a.sum);
+        s.ferdig = liste;
+        giUtdeling(data, liste[0].id, 5); giSlurker(data, liste[liste.length - 1].id, 5);
+        melde(data, `${liste[0].navn} vant Yatzy! ${liste[liste.length - 1].navn} drikker opp.`);
+      }
+      return { ok: true };
+    }
+    if (h.handling === 'nytt') { if (!erVert) return { feil: 'bare-vert' }; return startNye(data, 'yatzy', '', aktiveIder(data, true)); }
+    return null;
+  }
+  if (s.type === 'nyhetsrunden') {
+    const q = s.sporsmal[s.i];
+    if (h.handling === 'nr-svar') {
+      if (s.fase !== 'spm') return { feil: 'for-sent', melding: 'Svaret er allerede vist.' };
+      let v = String(h.v == null ? '' : h.v).replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 80);
+      if (s.alt && !s.alt.includes(v)) return { feil: 'ukjent' };
+      if (!v) { delete s.svar[meg.id]; return { ok: true }; }
+      s.svar[meg.id] = v; return { ok: true };
+    }
+    if (!erVert && ['nr-vis', 'nr-flipp', 'nr-neste', 'nytt'].includes(h.handling)) return { feil: 'bare-vert', melding: 'Verten styrer runden.' };
+    if (h.handling === 'nr-vis') {
+      if (s.fase !== 'spm') return { ok: true };
+      s.fase = 'svar'; s.resultat = {};
+      data.spillere.forEach((p: any) => { const r = nrRiktig(q, s.svar[p.id]); s.resultat[p.id] = r; nrBrukResultat(data, p.id, r, 1); });
+      const antall = Object.values(s.resultat).filter(Boolean).length;
+      melde(data, `Svaret er «${q.svar}» – ${antall} av ${data.spillere.length} hadde rett`);
+      return { ok: true };
+    }
+    if (h.handling === 'nr-flipp') {
+      if (s.fase !== 'svar') return { ok: true };
+      const id = String(h.hvem || ''); if (!(id in s.resultat)) return { ok: true };
+      nrBrukResultat(data, id, s.resultat[id], -1); s.resultat[id] = !s.resultat[id]; nrBrukResultat(data, id, s.resultat[id], 1);
+      return { ok: true };
+    }
+    if (h.handling === 'nr-neste') {
+      if (s.fase !== 'svar') return { ok: true };
+      if (s.i + 1 >= s.sporsmal.length) {
+        s.fase = 'ferdig';
+        const liste = data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, riktige: s.riktige[p.id] || 0 })).sort((a: any, b: any) => b.riktige - a.riktige);
+        if (liste[0]) melde(data, `${liste[0].navn} vant Nyhetsrunden med ${liste[0].riktige} riktige!`);
+        return { ok: true };
+      }
+      s.i++; nrNyttSpm(s); return { ok: true };
+    }
+    if (h.handling === 'nytt') { const r = publiserteRunder()[0]; return startNye(data, 'nyhetsrunden', r ? rundeId(r) : '', []); }
+    return null;
+  }
+  return null;
+}
+
+function nyeVisning(s: any, meg: any, data: any) {
+  if (s.type === 'bussruta') return { fase: s.fase, aktiv: s.ider[s.tur] || null, steg: s.steg, sporsmal: s.fase === 1 ? BR_SPM[s.steg] : null,
+    hender: s.hender, ider: s.ider, sist: s.sist, melding: s.melding, pyr: s.pyr.slice(0, s.pyrPos), pyrPos: s.pyrPos, buss: s.buss, bussRekke: s.bussRekke, maal: s.maal };
+  if (s.type === 'yatzy') return { aktiv: s.ider[s.tur], ider: s.ider, terninger: s.terninger, hold: s.hold, kast: s.kast, nr: s.nr, melding: s.melding, ferdig: s.ferdig,
+    blokker: s.blokker, summer: Object.fromEntries(s.ider.map((id: string) => [id, yzSum(s.blokker[id])])),
+    mulige: s.kast ? Object.fromEntries(YZ_FELT.map((f) => [f, yzPoeng(f, s.terninger)])) : null };
+  if (s.type === 'nyhetsrunden') {
+    const q = s.sporsmal[s.i], vert = meg && meg.id === data.vert, aapen = s.fase !== 'spm';
+    const liste = data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, riktige: s.riktige[p.id] || 0 })).sort((a: any, b: any) => b.riktige - a.riktige);
+    return {
+      fase: s.fase, i: s.i, antall: s.sporsmal.length, uke: s.uke, qtype: q.type, alt: s.alt,
+      // Spørsmålet vises bare hos verten (som leser det høyt) til svaret er avslørt
+      q: vert || aapen ? q.q : null,
+      fasit: aapen ? q.svar : null, info: aapen ? q.info || '' : null, kilde: aapen ? q.kilde || '' : null, url: aapen ? q.url || '' : null,
+      harSvart: Object.keys(s.svar), mittSvar: meg ? s.svar[meg.id] ?? null : null,
+      svarene: aapen ? s.svar : null, resultat: aapen ? s.resultat : null, tavle: liste,
+    };
+  }
+  return {};
 }
