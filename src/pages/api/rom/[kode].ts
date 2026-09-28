@@ -1,7 +1,9 @@
 // Ett rom: hente tilstanden (GET) eller gjøre noe i det (POST).
 // Telefonen identifiserer seg med spiller-id og pollett i egne felt, aldri i adressen.
 import type { APIRoute } from 'astro';
-import { hentRom, endreRom, visning, handling, blimed, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom } from '../../../lib/rom';
+import { hentRom, endreRom, visning, handling, blimed, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek } from '../../../lib/rom';
+import { innloggetBruker } from '../../../lib/konto';
+import { plussStatus } from '../../../lib/pluss';
 export const prerender = false;
 
 const json = (d: any, status = 200) =>
@@ -35,6 +37,14 @@ export const POST: APIRoute = async ({ params, request }) => {
   if (!gyldigKode(kode)) return json({ feil: 'finnes-ikke', melding: MELDINGER['finnes-ikke'] }, 404);
   let d: any;
   try { d = await request.json(); } catch { return json({ feil: 'ugyldig' }, 400); }
+  // Pluss sjekkes her på serveren – aldri på det nettleseren påstår
+  delete d._plussTil;
+  if (d.handling === 'pluss-aktiver' || (d.handling === 'start' && erPlussLek(d.lek))) {
+    try {
+      const u = await innloggetBruker(request);
+      if (u) { const st = await plussStatus(u.id); if (st.aktiv && st.til) d._plussTil = Date.parse(st.til); }
+    } catch { /* uten Pluss */ }
+  }
   try {
     let meg: any = null, ny: any = null;
     const res: any = await endreRom(kode, (data) => {

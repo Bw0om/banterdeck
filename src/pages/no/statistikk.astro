@@ -67,6 +67,9 @@ NAVN['rom:egen-kortstokk'] = 'Egen kortstokk';
           '<div><b>' + tall(d.kortstokker) + '</b><span>lagrede kortstokker</span></div>' +
           (d.delteStokker != null ? '<div><b>' + tall(d.delteStokker) + '</b><span>delte kortstokker</span></div>' : '') +
           (d.varsler != null ? '<div><b>' + tall(d.varsler) + '</b><span>har skrudd på Nyhetsrunde-varsel</span></div>' : '') +
+          (d.plussAktive != null ? '<div><b>' + tall(d.plussAktive) + '</b><span>har Pluss nå</span></div>' : '') +
+          (d.plussGratis != null ? '<div><b>' + tall(d.plussGratis) + '</b><span>har prøvd gratiskvelden</span></div>' : '') +
+          (d.salg != null ? '<div><b>' + tall(d.salg) + '</b><span>kjøp i perioden</span></div><div><b>' + tall(d.salgKr) + ' kr</b><span>omsetning i perioden</span></div>' : '') +
         '</div>' +
         '<div class="stat-rutenett">' +
           perDag(d.perDag, 'Åpnet per dag') +

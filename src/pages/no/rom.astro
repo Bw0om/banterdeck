@@ -52,6 +52,9 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
     function api(metode, sti, body) {
       var h = { 'Content-Type': 'application/json' };
       if (meg && metode === 'GET') { h['x-spiller'] = meg.id; h['x-pollett'] = meg.pollett; }
+      // Innlogget? Da kan serveren sjekke Pluss når verten starter en pakke
+      var sesjon = window.BDKonto && window.BDKonto.les();
+      if (metode === 'POST' && sesjon && sesjon.access_token) h.Authorization = 'Bearer ' + sesjon.access_token;
       return fetch(sti, { method: metode, headers: h, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' })
         .then(function (r) {
           if (r.status === 204) return null;
@@ -63,7 +66,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       opptatt = true;
       h.id = meg.id; h.pollett = meg.pollett;
       api('POST', '/api/rom/' + kode, h).then(function (d) { opptatt = false; ta(d); })
-        .catch(function (e) { opptatt = false; toast(e.message); if (e.kode === 'ikke-med') glemRom(); });
+        .catch(function (e) { opptatt = false; if (e.kode === 'pluss') return visPlussTilbud(); toast(e.message); if (e.kode === 'ikke-med') glemRom(); });
     }
     var ko = Promise.resolve();
     function gjorAlltid(h) {
@@ -296,7 +299,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       }
       return qrBoks() + egneStokker() +
         '<h2 class="rom-h2">Velg en lek</h2>' +
-        '<div class="rom-leker">' + t.leker.map(function (l) {
+        '<div class="rom-leker">' + t.leker.filter(function (l) { return !l.pluss; }).map(function (l) {
           var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
           return '<div class="rom-lek"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' +
             '<div class="rom-mod">' + (mod.length
@@ -304,7 +307,48 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
                 (l.type !== 'bingo' && l.type !== 'nyhetsrunden' ? '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Alle</button>' : '')
               : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
             '</div></div>';
+        }).join('') + '</div>' + plussLeker();
+    }
+    function plussLeker() {
+      var t = tilstand, l = (t.leker || []).filter(function (x) { return x.pluss; }); if (!l.length) return '';
+      var aapen = !!t.pluss;
+      return '<h2 class="rom-h2">✨ Pluss-pakker</h2>' + (aapen ? '' : '<p class="small">Har verten Pluss, er pakkene åpne for alle i rommet. <a href="/no/pluss">Første kveld er gratis.</a></p>') +
+        '<div class="rom-leker">' + l.map(function (x) {
+          return '<div class="rom-lek pluss' + (aapen ? '' : ' laast') + '"><b>' + (aapen ? '' : '🔒 ') + esc(x.navn) + '</b><span>' + esc(x.om || '') + '</span>' +
+            '<div class="rom-mod"><button type="button" data-g="start" data-lek="' + x.id + '" data-modus="*">' + (aapen ? 'Start' : 'Lås opp') + '</button></div></div>';
         }).join('') + '</div>';
+    }
+    function visPlussTilbud() {
+      if (document.querySelector('.pluss-tilbud')) return;
+      var m = document.createElement('div'); m.className = 'rom-tavle pluss-tilbud'; m.setAttribute('role', 'dialog');
+      var inne = window.BDKonto && window.BDKonto.les();
+      m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>✨ Banterdeck Pluss</h2><button class="linkbtn" data-p="lukk" type="button">Lukk</button></div>' +
+        '<p>Pakkene krever Pluss hos <b>verten</b>. Da er de åpne for alle i rommet – gjestene trenger ikke betale.</p>' +
+        '<p><b>Første kveld er gratis.</b> Etterpå 29 kr for en kveld eller 199 kr for et år.</p>' +
+        '<div class="dl-knapper">' + (inne ? '<button class="btn gold" data-p="gratis" type="button">Prøv gratis i kveld</button>' : '<a class="btn gold" href="/no/account">Logg inn for å prøve gratis</a>') +
+        '<a class="btn ghost" href="/no/pluss" target="_blank" rel="noopener">Se Pluss</a></div><p class="formmsg" role="status"></p></div>';
+      m.addEventListener('click', function (e) {
+        if (e.target === m || e.target.closest('[data-p=lukk]')) return m.remove();
+        var b = e.target.closest('[data-p=gratis]'); if (!b) return;
+        b.disabled = true;
+        window.BDKonto.api('/api/pluss/gratis', { method: 'POST' }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
+          var msg = m.querySelector('.formmsg');
+          if (!x.ok && x.d.feil !== 'brukt') { msg.textContent = x.d.melding || 'Det gikk ikke.'; msg.className = 'formmsg err'; b.disabled = false; return; }
+          if (x.d.feil === 'brukt') { msg.innerHTML = 'Gratiskvelden er brukt. <a href="/no/pluss">Kjøp et pass</a>.'; msg.className = 'formmsg err'; return; }
+          m.remove(); plussSjekket = false; aktiverPluss(true);
+        });
+      });
+      document.body.appendChild(m);
+    }
+    // Er verten logget inn med Pluss? Da låses rommet opp automatisk.
+    var plussSjekket = false;
+    function aktiverPluss(tving) {
+      if (plussSjekket || !erVert() || (tilstand && tilstand.pluss) || !window.BDKonto || !window.BDKonto.les()) return;
+      plussSjekket = true;
+      window.BDKonto.api('/api/pluss/status').then(function (r) { return r.json(); }).then(function (d) {
+        if (d.aktiv) gjorAlltid({ handling: 'pluss-aktiver' });
+        else if (tving) toast('Fant ikke Pluss på kontoen.');
+      }).catch(function () {});
     }
 
     /* ---------- venterom for en lek som er valgt på forhånd ---------- */
@@ -996,6 +1040,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       if (tavle && tilstand) tavle.innerHTML = tavleHtml();
       if (!tilstand) return;
       var s = tilstand.spill, innhold = '';
+      if (!s) aktiverPluss(false);
       if (!s && tilstand.ferdig) innhold = oppsummering();
       else if (!s) innhold = lobby();
       else {
@@ -1011,7 +1056,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       var tsLagret = [0, 1, 2].map(function (i) { var e = document.getElementById('tsR' + i); return e ? e.value : null; }), tsValgt = (document.querySelector('input[name=tsL]:checked') || {}).value;
       var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
       var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
-      root.innerHTML = hode() + reaksjonslinje() + innhold + vert +
+      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">✨ Pluss i kveld – alle pakker er åpne</p>' : '') + reaksjonslinje() + innhold + vert +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">Forlat rommet</button> · <button type="button" class="feilknapp" data-feil>Noe galt?</button></p>';
       window.scrollTo(0, y);
       tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });

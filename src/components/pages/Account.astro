@@ -135,6 +135,7 @@ const T = no ? {
           <button type="button" class="mini" id="endrePwBtn">{T.changePw}</button>
           <button type="button" class="mini danger" id="slettBtn">{T.deleteAcc}</button>
         </div>
+        <p id="plussLinje" class="konto-pluss" hidden></p>
         <p id="syncMsg" class="formmsg" role="status" aria-live="polite"></p>
 
         <form class="form konto-boks" id="pwForm" hidden novalidate>
@@ -472,6 +473,12 @@ const T = no ? {
             else if (!u.brukernavn) $('pwForm').hidden = false;
             K.api('/api/statistikk?sjekk=1').then(function (r) { return r.ok ? r.json() : {}; }).then(function (d) { $('statLenke').hidden = !d.ok; }).catch(function () {});
             hentStokker();
+            if (LANG === 'no') K.api('/api/pluss/status').then(function (r) { return r.json(); }).then(function (d) {
+              var el = $('plussLinje'); el.hidden = false;
+              el.innerHTML = d.aktiv
+                ? '✨ <b>Pluss</b> til ' + esc(new Date(d.til).toLocaleString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/no/pluss">Mer</a>'
+                : '✨ <a href="/no/pluss">' + (d.gratisBrukt ? 'Få Banterdeck Pluss' : 'Prøv Banterdeck Pluss gratis i kveld') + '</a>';
+            }).catch(function () {});
             try { sessionStorage.setItem('bd_favsynk', '1'); } catch (x) {}
             K.synkFav().catch(function () {}).then(pull).then(function (remote) {
               if (remote && remote.lines) {

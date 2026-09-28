@@ -6,10 +6,16 @@
 import { rpc, supabaseServer } from './spilt';
 import DECKS from '../data/decks.json';
 import BINGO from '../data/bingo.json';
+import PLUSSPAKKER from '../data/pluss.json';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
 const D: any = DECKS;
 const B: any = BINGO;
+/** Pluss-pakkene ligger bare på serveren – nettleseren får bare kortet som trekkes. */
+const P: any = PLUSSPAKKER;
+export const PAKKER = Object.keys(P).map((id) => ({ id: 'pakke-' + id, pakke: id, navn: P[id].navn, om: P[id].om, antall: P[id].items.length }));
+export function erPlussLek(lek: string) { return String(lek || '').startsWith('pakke-'); }
+export function pakkeKort(id: string) { return P[id] ? P[id].items : null; }
 
 export const MAKS_SPILLERE = 16;
 const KODETEGN = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -38,6 +44,7 @@ export function lekeliste() {
     { id: 'ring-of-fire', navn: NAVN['ring-of-fire'], type: 'kort', moduser: [], om: 'Telefonene er kortstokken. Alle ser samme kort.' },
     ...ekstraLeker(),
     ...kort.map((k) => ({ ...k, om: 'Alle ser samme kort. Hvem som helst kan trekke neste.' })),
+    ...PAKKER.map((p) => ({ id: p.id, navn: p.navn, type: 'kort', moduser: [], pluss: true, om: p.om + ' ' + p.antall + ' kort.' })),
   ];
 }
 
@@ -105,7 +112,7 @@ export function visning(data: any, versjon: number, meg: any) {
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null,
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0 })),
-    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul || null, hjulListe: data.hjulListe || HJUL_STANDARD, laget: data.laget, ferdig: data.ferdig || null, historikk: data.historikk || [],
+    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul || null, hjulListe: data.hjulListe || HJUL_STANDARD, pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, laget: data.laget, ferdig: data.ferdig || null, historikk: data.historikk || [],
   };
 }
 
@@ -133,9 +140,22 @@ function kortstokkFor(lek: string, modus: string) {
     sorter.forEach(([s, rod]) => verdier.forEach((v) => kort.push({ v, s, rod })));
     return stokk(kort);
   }
+  if (erPlussLek(lek)) {
+    const pk = P[lek.slice(6)];
+    return stokk(pk.items.map((x: any) => ({ t: x.t, k: x.k || '' })));
+  }
   const d = D[lek];
   const items = d.items.filter((x: any) => !modus || modus === '*' || (d.modes || []).length <= 1 || x.m === modus);
   return stokk(items.map((x: any) => ({ t: x.t, k: x.k || '' })));
+}
+/** Smakebiter: i rom uten Pluss dukker et par kort fra pakkene opp innimellom. */
+function medSmakebiter(rekke: any[]) {
+  const ut = rekke.slice(), ider = Object.keys(P);
+  for (let n = 0; n < 2 && ider.length; n++) {
+    const id = ider[tilfeldig(ider.length)], it = P[id].items[tilfeldig(P[id].items.length)];
+    ut.splice(8 + tilfeldig(Math.max(1, ut.length - 8)), 0, { t: it.t, k: '✨ Smakebit fra ' + P[id].navn + '-pakken', smak: true });
+  }
+  return ut;
 }
 function visKort(s: any, data: any) {
   const k = s.rekke[s.pos];
@@ -177,7 +197,10 @@ export function startSpill(data: any, lek: string, modus: string) {
   const valgt = liste.find((x) => x.id === lek);
   if (!valgt) return { feil: 'ukjent-lek' };
   if (valgt.type === 'kort') {
-    const rekke = kortstokkFor(lek, modus);
+    const plussRom = !!(data.pluss && data.pluss.til > Date.now());
+    if ((valgt as any).pluss && !plussRom) return { feil: 'pluss', melding: 'Denne pakken krever Banterdeck Pluss.' };
+    let rekke = kortstokkFor(lek, modus);
+    if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && rekke.length > 12) rekke = medSmakebiter(rekke);
     if (!rekke.length) return { feil: 'tom' };
     data.spill = { type: 'kort', lek, navn: valgt.navn, modus, rekke, pos: 0, tur: lek === 'ring-of-fire' ? 0 : null, konger: 0 };
     if (lek === 'ring-of-fire' && rekke[0].v === 'K') data.spill.konger = 1;
@@ -255,11 +278,13 @@ function handlingInne(data: any, meg: any, h: any) {
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
     data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
   }
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
       if (!erVert) return { feil: 'bare-vert' };
+      // Verten har Pluss (sjekket av API-ruta): lås opp rommet for kvelden
+      if (h._plussTil > Date.now() && !(data.pluss && data.pluss.til > Date.now())) data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
       const r = h.lek === 'egen' ? startEgen(data, h.kort, h.navn) : startSpill(data, String(h.lek || ''), String(h.modus || '*'));
       if (!(r as any).feil && data.spill) { data.valgt = null; data.ferdig = null; data.historikk = (data.historikk || []).concat([data.spill.navn]).slice(-40); }
       return r;
@@ -271,6 +296,15 @@ function handlingInne(data: any, meg: any, h: any) {
     case 'fortsett-kvelden': {
       if (!erVert) return { feil: 'bare-vert' };
       data.ferdig = null; return { ok: true };
+    }
+    case 'pluss-aktiver': {
+      // Serveren har allerede sjekket kontoen (h._plussTil settes bare av API-ruta)
+      if (!erVert) return { feil: 'bare-vert' };
+      if (!(h._plussTil > Date.now())) return { feil: 'pluss', melding: 'Kontoen din har ikke Pluss akkurat nå.' };
+      const hadde = !!(data.pluss && data.pluss.til > Date.now());
+      data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
+      if (!hadde) melde(data, '✨ Rommet har Pluss i kveld – alle pakker er låst opp!');
+      return { ok: true };
     }
     case 'velg-annen': {
       if (!erVert) return { feil: 'bare-vert' };

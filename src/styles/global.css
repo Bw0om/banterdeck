@@ -1261,3 +1261,27 @@ body.stokk-aapen{overflow:hidden}
 .hjul-innhold select{width:100%;box-sizing:border-box}
 @media (max-width:480px){.rom-hodeknapper .rom-del{padding:0 11px;font-size:18px}.rom-hode{padding:14px 14px}}
 @media (max-width:400px){.rom-kode{font-size:34px!important;letter-spacing:.04em}.rom-hodeknapper{gap:4px}.rom-hodeknapper .rom-del{padding:0 9px;height:40px}}
+
+/* ---------- Pluss ---------- */
+.pluss-hero h1{font-size:clamp(34px,8vw,52px);line-height:1.02;margin:6px 0 10px}
+.pluss-status{background:var(--card);border:1px solid var(--gold);border-radius:20px;padding:14px 16px;margin:16px 0}
+.pluss-status p{margin:0 0 8px}
+.pluss-fordeler{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;margin:18px 0}
+.pluss-fordeler div{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:3px}
+.pluss-fordeler span{font-size:26px}
+.pluss-fordeler b{font-family:var(--display);font-size:17px}
+.pluss-fordeler small{color:var(--muted);font-size:14px}
+.pluss-priser{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px;margin:22px 0}
+.pluss-pris{position:relative;background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:4px}
+.pluss-pris.beste{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.pluss-pris b{font-family:var(--display);font-size:20px}
+.pluss-kr{font-family:var(--display);font-weight:800;font-size:40px;color:var(--gold);line-height:1.1}
+.pluss-pris small{color:var(--muted);margin-bottom:10px}
+.pluss-merke{position:absolute;top:-11px;right:16px;background:var(--gold);color:#1a1208;font-weight:800;font-size:12px;padding:3px 10px;border-radius:999px}
+.pluss-samtykke{grid-column:1 / -1;display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--muted)}
+.pluss-samtykke input{margin-top:3px;accent-color:var(--gold);width:18px;height:18px;flex:none}
+.pluss-priser > .small,.pluss-priser > .formmsg{grid-column:1 / -1;margin:0}
+.rom-lek.pluss{border-color:rgba(244,183,64,.45)}
+.rom-lek.laast{opacity:.85}
+.rom-pluss{margin:0 0 8px;text-align:center;font-weight:700;color:var(--gold);font-size:14px}
+.konto-pluss{margin:4px 0 8px;font-size:14.5px}

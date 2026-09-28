@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+import { SELGER, CONTACT_EMAIL } from '../../config';
+const epost = SELGER.epost || CONTACT_EMAIL;
+---
+<Base title="Salgsvilkår" description="Salgsvilkår for Banterdeck Pluss." lang="no">
+  <h1>Salgsvilkår for Banterdeck Pluss</h1>
+  <p class="lead">Kort og ærlig: du betaler én gang, Pluss virker med en gang, og ingenting fornyes av seg selv.</p>
+
+  <h2>Selger</h2>
+  <p>
+    {SELGER.navn && <>{SELGER.navn}<br /></>}
+    Org.nr. {SELGER.orgnr}<br />
+    {SELGER.adresse && <>{SELGER.adresse}<br /></>}
+    E-post: <a href={`mailto:${epost}`}>{epost}</a>
+  </p>
+
+  <h2>Hva du kjøper</h2>
+  <ul>
+    <li><b>Kveldspass – 29 kr:</b> Banterdeck Pluss i 24 timer fra kjøpet.</li>
+    <li><b>Årspass – 199 kr:</b> Banterdeck Pluss i 365 dager fra kjøpet.</li>
+  </ul>
+  <p>Pluss gir tilgang til betalte kortpakker og låser dem opp for alle i rom der du er vert. Kjøper du et nytt pass mens du allerede har Pluss, legges tiden til. Prisene er oppgitt i norske kroner inkludert eventuell merverdiavgift.</p>
+
+  <h2>Betaling</h2>
+  <p>Du betaler med Vipps. Beløpet trekkes når betalingen er godkjent, og Pluss knyttes til kontoen du er logget inn med.</p>
+
+  <h2>Ingen automatisk fornyelse</h2>
+  <p>Passene er engangskjøp. Når tiden er ute, stopper Pluss av seg selv – du blir aldri trukket igjen uten å kjøpe på nytt.</p>
+
+  <h2>Levering og angrerett</h2>
+  <p>Pluss er digitalt innhold som leveres med en gang betalingen er godkjent. Før du betaler, samtykker du til at leveringen starter umiddelbart, og bekrefter at du da mister angreretten (angrerettloven § 22 bokstav n). Virker ikke Pluss som det skal, ta kontakt – da finner vi en løsning eller gir deg pengene tilbake.</p>
+
+  <h2>Alder</h2>
+  <p>Banterdeck og Pluss er for personer over 18 år.</p>
+
+  <h2>Personopplysninger</h2>
+  <p>Vi lagrer hvilken konto som har Pluss og hvilke kjøp som er gjort. Betalingsopplysninger håndteres av Vipps. Les mer i <a href="/no/privacy">personvernerklæringen</a>.</p>
+
+  <h2>Klager</h2>
+  <p>Ta kontakt på e-post hvis noe er galt. Kommer vi ikke til enighet, kan du klage til <a href="https://www.forbrukertilsynet.no" rel="noopener">Forbrukertilsynet</a> eller få hjelp av <a href="https://www.forbrukerradet.no" rel="noopener">Forbrukerrådet</a>.</p>
+</Base>

@@ -86,6 +86,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     {hasDict && <a href={path(lang, '/uttrykk')}><Icon name="uttrykk" size={20} />{L.uttrykkTitle}</a>}
     <a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} />{no ? 'Lagret' : 'Saved'}</a>
     {no && <a href="/no/kveld"><Icon name="drikkeleker" size={20} />Kveldsplan</a>}
+    {no && <a href="/no/pluss">✨ Pluss</a>}
   </div>
 
   <section class="h2-today">

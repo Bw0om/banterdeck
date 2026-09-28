@@ -132,6 +132,8 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
       if (saved.token) gh = saved;
+      // Repoet het tidligere lommearsenal – bytt til det nye navnet automatisk
+      if (gh.repo && /\/lommearsenal$/i.test(gh.repo)) { gh.repo = REPO_DEFAULT; localStorage.setItem(KEY, JSON.stringify(gh)); }
     } catch (e) {}
     $('repoInput').value = gh.repo || REPO_DEFAULT;
     $('tokenInput').value = gh.token || '';

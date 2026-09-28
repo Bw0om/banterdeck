@@ -54,3 +54,12 @@ export const supabaseDebug = () => {
     funnet: found.length ? found.join(', ') : '(ingen)',
   };
 };
+
+// Selgeren, slik det vises i salgsvilkårene (/no/vilkar). Vipps krever navn, adresse og kontaktinfo.
+// Fyll inn før du slår på betaling.
+export const SELGER = {
+  navn: '',            // f.eks. navnet på enkeltpersonforetaket ditt, slik det står i Brønnøysund
+  orgnr: '931976532',
+  adresse: '',         // gateadresse, postnummer og sted
+  epost: '',           // en e-postadresse du faktisk leser
+};
