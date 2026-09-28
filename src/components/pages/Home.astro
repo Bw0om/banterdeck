@@ -4,7 +4,9 @@ import AdSlot from '../AdSlot.astro';
 import Icon from '../Icon.astro';
 import PopulaertNaa from '../PopulaertNaa.astro';
 import Sveip from '../Sveip.astro';
-import { sisteRunde } from '../../lib/nyhetsrunden';
+import { rundeKort } from '../../lib/nyhetsrunden';
+const NR = rundeKort();
+const nrBygg = NR.find((r) => r.fra <= Date.now()) || NR[NR.length - 1];
 import { situationSectionsFor, dictSection, visible, langGroups, itemsOf, t, tf, isCrude, totalsFor, topSituationsFor, situationById, gamesFor, dictCount } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
@@ -26,6 +28,7 @@ const quick = topSituationsFor(lang).slice(0, 5);
 const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
 ---
 <Base lang={lang}>
+  <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Banterdeck', url: 'https://banterdeck.com/', inLanguage: lang === 'no' ? 'nb' : 'en' })} /></Fragment>
   <section class="h2-hero">
     <h1>{no ? <>Hva skjer<br />akkurat nå?</> : <>What's<br />happening?</>}</h1>
     <p class="h2-sub">{L.heroSub(totals.lines, totals.words, totals.games)}</p>
@@ -53,10 +56,10 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
       <span class="h2-quote" aria-hidden="true">«…»</span>
       <span><b>{no ? 'Sveip replikker' : 'Swipe lines'}</b><small>{totals.lines} {L.itemsLabel}</small></span>
     </button>
-    {no && sisteRunde ? (
-      <a class="h2-tile" href="/no/nyhetsrunden">
-        <span class="h2-badge">Uke {sisteRunde.uke}</span>
-        <span><b>Nyhetsrunden</b><small>{(sisteRunde.sporsmal || []).length} spørsmål</small></span>
+    {no && nrBygg ? (
+      <a class="h2-tile" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
+        <span class="h2-badge">Uke {nrBygg.uke}</span>
+        <span><b>Nyhetsrunden</b><small>{nrBygg.antall} spørsmål</small></span>
       </a>
     ) : (
       <a class="h2-tile" href={path(lang, '/situations')}>
@@ -102,4 +105,43 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   </div>
 
   <Sveip items={sveipItems} title={no ? 'Alle replikker' : 'All lines'} lang={lang} shuffle={true} />
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Forsiden bygges på forhånd – velg her hvilken uke som faktisk er ute nå (fredag kl. 12)
+    var f = document.getElementById('nrFlis'); if (!f) return;
+    var l = []; try { l = JSON.parse(f.dataset.runder || '[]'); } catch (e) {}
+    var naa = Date.now(), r = l.filter(function (x) { return x.fra <= naa; })[0];
+    if (!r) return;
+    f.querySelector('.h2-badge').textContent = 'Uke ' + r.uke;
+    f.querySelector('small').textContent = r.antall + ' spørsmål';
+  })();
+  </script>
+  <div class="installer" id="installer" hidden>
+    <span>{no ? 'Legg Banterdeck på hjemskjermen – åpner som en app og virker uten nett.' : 'Add Banterdeck to your home screen – opens like an app and works offline.'}</span>
+    <button type="button" class="btn gold small" id="installerKnapp">{no ? 'Legg til' : 'Add'}</button>
+    <button type="button" class="linkbtn" id="installerNei" aria-label={no ? 'Ikke nå' : 'Not now'}>✕</button>
+    <p class="small" id="installerIos" hidden>{no ? 'Trykk Del-knappen i Safari, og velg «Legg til på Hjem-skjerm».' : 'Tap the Share button in Safari and choose “Add to Home Screen”.'}</p>
+  </div>
+  <script is:inline data-astro-rerun>
+  (function () {
+    var el = document.getElementById('installer'); if (!el || el.dataset.bound) return; el.dataset.bound = '1';
+    var ua = navigator.userAgent || '', ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    var mobil = ios || /Android/i.test(ua);
+    var inne = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    var nei = false; try { nei = Number(localStorage.getItem('bd_installer_nei') || 0) > Date.now(); } catch (e) {}
+    if (inne || nei || !mobil) return;
+    var besok = 0; try { besok = Number(localStorage.getItem('bd_besok') || 0) + 1; localStorage.setItem('bd_besok', besok); } catch (e) {}
+    if (besok < 2) return;   // Ikke mas første gang
+    var hendelse = window.__bdInstall || null;
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); hendelse = e; });
+    el.hidden = false;
+    document.getElementById('installerKnapp').addEventListener('click', function () {
+      if (hendelse) { hendelse.prompt(); hendelse.userChoice.then(function () { el.hidden = true; }); return; }
+      document.getElementById('installerIos').hidden = false;
+    });
+    document.getElementById('installerNei').addEventListener('click', function () {
+      el.hidden = true; try { localStorage.setItem('bd_installer_nei', Date.now() + 30 * 86400000); } catch (e) {}
+    });
+  })();
+  </script>
 </Base>

@@ -1,0 +1,71 @@
+---
+// «Varsle meg» for Nyhetsrunden. Bruker web push: virker i Chrome/Android og Safari på Mac,
+// og på iPhone når Banterdeck er lagt til på hjemskjermen (iOS 16.4 eller nyere).
+---
+<section class="nr-varsel" id="nrVarsel">
+  <div class="nr-varsel-tekst">
+    <b>Få beskjed når ny runde er ute</b>
+    <span id="nrVarselInfo">Ett varsel i uka, fredag kl. 12. Ingen konto trengs.</span>
+  </div>
+  <button type="button" class="btn gold" id="nrVarselKnapp" hidden>Varsle meg</button>
+</section>
+<script is:inline data-astro-rerun>
+(function () {
+  var boks = document.getElementById('nrVarsel');
+  if (!boks || boks.dataset.bound) return; boks.dataset.bound = '1';
+  var knapp = document.getElementById('nrVarselKnapp'), info = document.getElementById('nrVarselInfo');
+  var ua = navigator.userAgent || '';
+  var ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var installert = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var stoette = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+  function tilNokkel(b64) {
+    var pad = '='.repeat((4 - b64.length % 4) % 4), s = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+    var u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u;
+  }
+  function tilstand(paa) {
+    knapp.hidden = false;
+    knapp.textContent = paa ? 'Skru av varsler' : 'Varsle meg';
+    knapp.className = paa ? 'btn ghost' : 'btn gold';
+    knapp.dataset.paa = paa ? '1' : '';
+    info.textContent = paa ? 'Varsler er på ✓ Du får beskjed når neste runde slippes.' : 'Ett varsel i uka, fredag kl. 12. Ingen konto trengs.';
+  }
+  if (!stoette) {
+    info.innerHTML = ios && !installert
+      ? 'På iPhone: trykk <b>Del</b> <span aria-hidden="true">⎋</span> → <b>Legg til på Hjem-skjerm</b>, åpne Banterdeck derfra og trykk «Varsle meg» her.'
+      : 'Nettleseren din støtter dessverre ikke varsler.';
+    return;
+  }
+  if (Notification.permission === 'denied') { info.textContent = 'Varsler er blokkert for banterdeck.com i innstillingene på telefonen.'; return; }
+  navigator.serviceWorker.register('/sw.js').catch(function () {});
+  navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); })
+    .then(function (sub) { tilstand(!!sub); }).catch(function () { tilstand(false); });
+
+  knapp.addEventListener('click', function () {
+    knapp.disabled = true;
+    var ferdig = function () { knapp.disabled = false; };
+    navigator.serviceWorker.ready.then(function (reg) {
+      if (knapp.dataset.paa) {
+        return reg.pushManager.getSubscription().then(function (sub) {
+          if (!sub) return tilstand(false);
+          var ep = sub.endpoint;
+          return sub.unsubscribe().then(function () {
+            fetch('/api/push/avslutt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: ep }) }).catch(function () {});
+            tilstand(false);
+          });
+        });
+      }
+      return Notification.requestPermission().then(function (svar) {
+        if (svar !== 'granted') { info.textContent = 'Du må tillate varsler for å få beskjed.'; return; }
+        return fetch('/api/push/nokkel').then(function (r) { return r.json(); }).then(function (d) {
+          if (!d.nokkel) throw new Error('Varsler er ikke satt opp ennå.');
+          return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: tilNokkel(d.nokkel) });
+        }).then(function (sub) {
+          return fetch('/api/push/abonner', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sub: sub.toJSON(), emne: 'nyhetsrunden' }) })
+            .then(function (r) { if (!r.ok) { sub.unsubscribe(); throw new Error('Fikk ikke skrudd på varsler. Prøv igjen.'); } tilstand(true); });
+        });
+      });
+    }).catch(function (e) { info.textContent = e.message || 'Fikk ikke skrudd på varsler.'; }).then(ferdig, ferdig);
+  });
+})();
+</script>

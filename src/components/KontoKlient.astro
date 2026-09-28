@@ -75,7 +75,7 @@ const KEY = supabaseAnonKey();
   /* ---------- lagrede kortstokker ---------- */
   var stokker = {
     liste: function () {
-      return sb('/rest/v1/kortstokker?select=id,navn,kort,oppdatert&order=oppdatert.desc').then(function (r) {
+      return sb('/rest/v1/kortstokker?select=id,navn,kort,oppdatert,delt&order=oppdatert.desc').then(function (r) {
         if (!r.ok) throw new Error('Fikk ikke hentet kortstokkene.'); return r.json();
       });
     },
@@ -86,10 +86,77 @@ const KEY = supabaseAnonKey();
         .then(function (r) { if (!r.ok) throw new Error('Fikk ikke lagret kortstokken.'); return r.json(); })
         .then(function (rader) { return rader[0]; });
     },
+    del: function (id, delt) {
+      return sb('/rest/v1/kortstokker?id=eq.' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify({ delt: !!delt }) })
+        .then(function (r) { if (!r.ok) throw new Error('Fikk ikke endret delingen.'); });
+    },
     slett: function (id) {
       return sb('/rest/v1/kortstokker?id=eq.' + encodeURIComponent(id), { method: 'DELETE' }).then(function (r) { if (!r.ok) throw new Error('Fikk ikke slettet.'); });
     }
   };
+
+  /* ---------- kontodata: én rad i «decks» med replikker og favoritter ---------- */
+  var data = {
+    hent: function () {
+      return sb('/rest/v1/decks?select=data').then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (rows) { return rows ? ((rows[0] && rows[0].data) || {}) : null; }).catch(function () { return null; });
+    },
+    /** Slår sammen endringene med det som ligger der fra før, så replikker og favoritter ikke overskriver hverandre. */
+    lagre: function (endring) {
+      // Én lagring av gangen, ellers kan to samtidige lagringer overskrive hverandre
+      var jobb = koe.then(function () { return lagreNaa(endring); });
+      koe = jobb.catch(function () {});
+      return jobb;
+    }
+  };
+  var koe = Promise.resolve();
+  function lagreNaa(endring) {
+      return bruker().then(function (u) {
+        if (!u) return false;
+        return data.hent().then(function (naa) {
+          if (naa === null) return false;
+          var ny = Object.assign({}, naa, endring);
+          return sb('/rest/v1/decks', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ user_id: u.id, data: ny }) })
+            .then(function (r) { return r.ok; });
+        });
+      }).catch(function () { return false; });
+  }
+
+  /* ---------- favoritter følger kontoen ----------
+     Nyeste endring vinner. Første gang på en ny enhet slås lokale og lagrede sammen. */
+  function lesLS(k, d) { try { var v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } }
+  function skrivLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  var synkTimer = null;
+  function synkFav(bareSend) {
+    if (!les()) return Promise.resolve(false);
+    var lokal = lesLS('bd_favs', []), tid = Number(lesLS('bd_favs_tid', 0)) || 0;
+    var sendt = function (ok) { if (ok) skrivLS('bd_favs_sendt', tid); return ok; };
+    if (bareSend && tid) return data.lagre({ favs: lokal, favTid: tid }).then(sendt);
+    return data.hent().then(function (d) {
+      if (!d) return false;
+      var fjern = d.favs || [], ft = Number(d.favTid) || 0;
+      if (!tid) {
+        var alle = lokal.slice(); fjern.forEach(function (f) { if (alle.indexOf(f) === -1) alle.push(f); });
+        var naa = Date.now(); skrivLS('bd_favs', alle); skrivLS('bd_favs_tid', naa);
+        if (alle.length !== lokal.length) document.dispatchEvent(new CustomEvent('bd:favs'));
+        return data.lagre({ favs: alle, favTid: naa });
+      }
+      if (ft > tid) { skrivLS('bd_favs', fjern); skrivLS('bd_favs_tid', ft); document.dispatchEvent(new CustomEvent('bd:favs')); return true; }
+      if (tid > ft) return data.lagre({ favs: lokal, favTid: tid }).then(sendt);
+      return true;
+    });
+  }
+  function favEndret() {
+    skrivLS('bd_favs_tid', Date.now());
+    clearTimeout(synkTimer); synkTimer = setTimeout(function () { synkFav(true); }, 800);
+  }
+  // Én gang per økt: hent favorittene fra kontoen. Endringer som ikke rakk å bli sendt, sendes nå.
+  try {
+    if (les()) {
+      if (!sessionStorage.getItem('bd_favsynk')) { sessionStorage.setItem('bd_favsynk', '1'); setTimeout(function () { synkFav(); }, 400); }
+      else if ((Number(lesLS('bd_favs_tid', 0)) || 0) > (Number(lesLS('bd_favs_sendt', 0)) || 0)) setTimeout(function () { synkFav(true); }, 400);
+    }
+  } catch (e) {}
 
   window.BDKonto = {
     klar: Boolean(URL_ && KEY),
@@ -99,8 +166,9 @@ const KEY = supabaseAnonKey();
       var s = les();
       if (s && s.access_token) sb('/auth/v1/logout', { method: 'POST' }).catch(function () {});
       brukerLagret = null; lagre(null);
+      try { sessionStorage.removeItem('bd_favsynk'); localStorage.removeItem('bd_favs_tid'); } catch (e) {}
     },
-    sb: sb, api: api, bruker: bruker, stokker: stokker,
+    sb: sb, api: api, bruker: bruker, stokker: stokker, data: data, synkFav: synkFav, favEndret: favEndret,
     naarEndret: function (f) { lyttere.push(f); }
   };
 })();

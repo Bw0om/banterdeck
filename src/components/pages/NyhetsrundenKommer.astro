@@ -1,0 +1,45 @@
+---
+// Vises før ukas runde er sluppet: nedtelling til fredag kl. 12 og «varsle meg».
+import Base from '../../layouts/Base.astro';
+import NyhetsVarsel from '../NyhetsVarsel.astro';
+import { publiserteRunder, publiseringstid, rundeId } from '../../lib/nyhetsrunden';
+const { neste } = Astro.props as { neste: any };
+const fra = neste ? publiseringstid(neste) : 0;
+const naar = neste ? new Intl.DateTimeFormat('nb-NO', { timeZone: 'Europe/Oslo', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(new Date(fra)) : '';
+const tidligere = publiserteRunder().slice(0, 6);
+---
+<Base title={neste ? `Nyhetsrunden – uke ${neste.uke}` : 'Nyhetsrunden'} lang="no" gate={true} bilde="/og/nyhetsrunden.jpg" description="Ukas nyheter som drikkelek. Ny runde hver fredag kl. 12.">
+  <p class="crumb"><a href="/no/">Forside</a> › <a href="/no/drinking-games">Drikkeleker</a> › Nyhetsrunden</p>
+  <h1>Nyhetsrunden</h1>
+  {neste ? (
+    <div class="nr-kommer" data-fra={fra}>
+      <p class="nr-uke">{neste.aar} · uke {neste.uke}</p>
+      <p class="dl-melding dl-stor">Slippes {naar}</p>
+      <p class="nr-nedtelling" id="nrNed" aria-live="off"></p>
+    </div>
+  ) : <p class="lead">Første runde kommer snart.</p>}
+  <NyhetsVarsel />
+  {tidligere.length > 0 && (
+    <section class="more">
+      <h2>Spill en tidligere uke</h2>
+      <ul class="nr-arkiv">
+        {tidligere.map((r) => <li><a href={`/no/nyhetsrunden/${rundeId(r)}`}><b>{r.aar} · uke {r.uke}</b><span>{r.ingress}</span></a></li>)}
+      </ul>
+    </section>
+  )}
+  <script is:inline data-astro-rerun>
+  (function () {
+    var el = document.querySelector('.nr-kommer'), ut = document.getElementById('nrNed');
+    if (!el || !ut || el.dataset.bound) return; el.dataset.bound = '1';
+    var fra = Number(el.dataset.fra), t = setInterval(tikk, 1000);
+    function tikk() {
+      var igjen = Math.max(0, fra - Date.now());
+      if (!document.body.contains(ut)) return clearInterval(t);
+      if (igjen <= 0) { clearInterval(t); ut.textContent = 'Den er ute nå!'; setTimeout(function () { location.reload(); }, 1500 + Math.random() * 3000); return; }
+      var s = Math.floor(igjen / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sek = s % 60;
+      ut.textContent = (d ? d + ' d ' : '') + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(sek).padStart(2, '0');
+    }
+    tikk();
+  })();
+  </script>
+</Base>

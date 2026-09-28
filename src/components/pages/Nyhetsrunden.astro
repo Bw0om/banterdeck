@@ -1,15 +1,19 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { runder, rundeId } from '../../lib/nyhetsrunden';
-const { runde, erSiste = false } = Astro.props as { runde: any; erSiste?: boolean };
-const andre = runder.filter((r) => rundeId(r) !== rundeId(runde));
+import { publiserteRunder, rundeId } from '../../lib/nyhetsrunden';
+import NyhetsVarsel from '../NyhetsVarsel.astro';
+const { runde, erSiste = false, neste = null } = Astro.props as { runde: any; erSiste?: boolean; neste?: any };
+import { publiseringstid } from '../../lib/nyhetsrunden';
+const nesteTid = neste ? new Intl.DateTimeFormat('nb-NO', { timeZone: 'Europe/Oslo', weekday: 'long', hour: '2-digit', minute: '2-digit' }).format(new Date(publiseringstid(neste))) : '';
+const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
 ---
-<Base title={`Nyhetsrunden – uke ${runde.uke}`} lang="no" gate={true}
+<Base title={`Nyhetsrunden – uke ${runde.uke}`} lang="no" gate={true} bilde="/og/nyhetsrunden.jpg"
       description={`Ukas nyheter som drikkelek. ${runde.ingress}`}>
   <p class="crumb"><a href="/no/">Forside</a> › <a href="/no/drinking-games">Drikkeleker</a> › <a href="/no/nyhetsrunden">Nyhetsrunden</a>{!erSiste && <> › Uke {runde.uke}</>}</p>
   <p class="nr-uke">{runde.aar} · uke {runde.uke}</p>
   <h1>Nyhetsrunden</h1>
   <p class="lead">{runde.ingress}</p>
+  {neste && <p class="nr-neste">Uke {neste.uke} slippes {nesteTid}.</p>}
   <span hidden data-spilt="lek:nyhetsrunden"></span>
 
   <section class="gt nr" data-runde={rundeId(runde)}>
@@ -56,7 +60,7 @@ const andre = runder.filter((r) => rundeId(r) !== rundeId(runde));
           '<div class="gt-row"><button class="btn ghost" data-a="tilbake"' + (nr===0 ? ' disabled' : '') + '>Tilbake</button></div>');
       }
       function slutt(){
-        vis('<div class="vp-center"><h2>Det var uka.</h2><p>Alle skåler for nyhetsbildet. Ny runde kommer torsdag.</p></div>' +
+        vis('<div class="vp-center"><h2>Det var uka.</h2><p>Alle skåler for nyhetsbildet. Ny runde kommer fredag kl. 12.</p></div>' +
           '<button class="btn gold vp-big" data-a="igjen">Ta runden på nytt</button>');
       }
       body.addEventListener('click', function(e){
@@ -72,6 +76,7 @@ const andre = runder.filter((r) => rundeId(r) !== rundeId(runde));
     </script>
   </section>
 
+  <NyhetsVarsel />
   {andre.length > 0 && (
     <section class="more">
       <h2>Tidligere uker</h2>
@@ -82,5 +87,5 @@ const andre = runder.filter((r) => rundeId(r) !== rundeId(runde));
       </ul>
     </section>
   )}
-  <p class="small" style="margin-top:22px">Ny runde hver torsdag, laget fra ukas saker hos NRK, VG og TV 2.</p>
+  <p class="small" style="margin-top:22px">Ny runde hver fredag kl. 12, laget fra ukas saker i norske nyhetsmedier.</p>
 </Base>

@@ -20,7 +20,7 @@ const FAV = ['ring-of-fire', 'regelfabrikken', 'pyramiden', 'forraeder', 'bussru
 const favs = no ? FAV.map((sl) => games.find((x) => x.slug === sl)).filter(Boolean) : [];
 const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search games or equipment…';
 ---
-<Base title={L.gamesTitle} description={L.gamesDesc(gamesFor(lang).length)} lang={lang} gate={true}>
+<Base title={L.gamesTitle} description={L.gamesDesc(gamesFor(lang).length)} lang={lang} gate={true} bilde="/og/drikkeleker.jpg">
   <p class="crumb"><a href={path(lang, '/')}>{L.breadcrumbHome}</a> › {L.gamesTitle}</p>
   <h1 class="withicon"><Icon name="drikkeleker" size={34} />{L.gamesTitle}</h1>
   <p class="lead">{L.gamesLead}</p>

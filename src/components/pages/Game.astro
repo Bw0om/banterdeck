@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import fs from 'node:fs';
 import AdSlot from '../AdSlot.astro';
 import GameTool from '../GameTool.astro';
 import DigitalLek from '../DigitalLek.astro';
@@ -26,12 +27,23 @@ const description = `${name} – ${lang === 'no' ? 'regler for drikkeleken' : 'd
 const copyText = name + '\n' + rules.map((r) => r.replace(/^b\|/, '• ')).join('\n');
 // Samme gruppe først – en liste over alle 38 blir bare støy
 const others = gamesFor(lang).filter((x) => x.slug !== game.slug && x.group.id === game.group.id);
-const jsonLd = JSON.stringify({
-  '@context': 'https://schema.org', '@type': 'Article', headline: `${name} – rules`,
+// Delingsbilde per lek (laget på forhånd i public/og/lek). Nye leker får standardbildet.
+const bilde = fs.existsSync(`public/og/lek/${game.slug}.jpg`) ? `/og/lek/${game.slug}.jpg` : '/og/drikkeleker.jpg';
+const side = new URL(Astro.url.pathname, Astro.site).toString();
+const jsonLd = JSON.stringify([{
+  '@context': 'https://schema.org', '@type': 'Article', headline: `${name} – ${lang === 'no' ? 'regler' : 'rules'}`,
   description, inLanguage: lang === 'no' ? 'nb' : 'en', isFamilyFriendly: false,
-});
+  image: new URL(bilde, Astro.site).toString(), mainEntityOfPage: side,
+  publisher: { '@type': 'Organization', name: 'Banterdeck', url: 'https://banterdeck.com' },
+}, {
+  '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+    { '@type': 'ListItem', position: 1, name: lang === 'no' ? 'Forside' : 'Home', item: new URL(path(lang, '/'), Astro.site).toString() },
+    { '@type': 'ListItem', position: 2, name: L.nav.games, item: new URL(path(lang, '/drinking-games'), Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name, item: side },
+  ],
+}]);
 ---
-<Base title={`${name} – ${lang === 'no' ? 'regler' : 'rules'}`} description={description} lang={lang} gate={true}>
+<Base title={`${name} – ${lang === 'no' ? 'regler' : 'rules'}`} description={description} lang={lang} gate={true} bilde={bilde}>
   <Fragment slot="head"><script type="application/ld+json" set:html={jsonLd} /></Fragment>
   <p class="crumb">
     <a href={path(lang, '/')}>{L.breadcrumbHome}</a> ›

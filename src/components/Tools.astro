@@ -79,6 +79,12 @@ const L = ui(lang);
     var i = favs.indexOf(t);
     if (i === -1) favs.push(t); else favs.splice(i, 1);
     save(); paintStars();
+    if (window.BDKonto && window.BDKonto.favEndret) window.BDKonto.favEndret();
+    if (document.body.dataset.page === 'favourites') location.reload();
+  });
+  // Favorittene kan komme inn fra kontoen etter at siden er tegnet
+  document.addEventListener('bd:favs', function () {
+    favs = load(); paintStars();
     if (document.body.dataset.page === 'favourites') location.reload();
   });
   paintStars();

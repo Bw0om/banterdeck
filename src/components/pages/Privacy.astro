@@ -15,7 +15,7 @@ const accounts = Boolean(SUPABASE_URL);
         <p class="lead">Kort versjon: du kan bruke hele siden uten å oppgi noe om deg selv.</p>
         <h2>Lagring i nettleseren</h2>
         <p>Favoritter, egne replikker, språkvalg og svaret på alderssperren lagres i din egen nettleser. Du sletter det ved å tømme nettstedsdata.</p>
-        {accounts && <><h2>Konto</h2><p>Oppretter du konto, lagres e-postadressen din, brukernavnet, passordet (kryptert – vi kan ikke se det), replikkene du selv legger inn og kortstokkene du lagrer, hos vår databaseleverandør (Supabase). Brukernavnet vises bare for deg selv. Vi teller også anonymt hvor mange rom som lages og hvilke leker som spilles i dem – aldri hvem. Du kan når som helst slette dem ved å be om det på e-post.</p></>}
+        {accounts && <><h2>Konto</h2><p>Oppretter du konto, lagres e-postadressen din, brukernavnet, passordet (kryptert – vi kan ikke se det), replikkene du selv legger inn og kortstokkene du lagrer, hos vår databaseleverandør (Supabase). Brukernavnet vises bare for deg selv. Vi teller også anonymt hvor mange rom som lages og hvilke leker som spilles i dem – aldri hvem. Du kan når som helst slette kontoen og alt som hører til den selv under «Min stokk», eller be om det på e-post.</p></>}
         <h2>Hva som er populært</h2>
         <p>Når du åpner en lek eller en situasjon, teller vi det anonymt, for å kunne vise hva som er populært. Vi lagrer bare hva som ble åpnet og hvilken dag – ingenting om deg, din enhet eller IP-adressen din.</p>
         <h2>Spill sammen (rom)</h2>
@@ -36,7 +36,7 @@ const accounts = Boolean(SUPABASE_URL);
         <p class="lead">Short version: you can use the whole site without telling us anything about yourself.</p>
         <h2>Stored in your browser</h2>
         <p>Favourites, your own lines, language choice and the age-gate answer are stored in your own browser. Clear your site data to remove them.</p>
-        {accounts && <><h2>Accounts</h2><p>If you create an account, your email address, username, password (encrypted – we cannot see it), the lines you add and the card decks you save are stored with our database provider (Supabase). We also count anonymously how many rooms are made and which games are played in them – never who. You can have them deleted at any time by asking us over email.</p></>}
+        {accounts && <><h2>Accounts</h2><p>If you create an account, your email address, username, password (encrypted – we cannot see it), the lines you add and the card decks you save are stored with our database provider (Supabase). We also count anonymously how many rooms are made and which games are played in them – never who. You can delete your account and everything in it at any time under «My deck», or ask us over email.</p></>}
         <h2>Fonts</h2>
         <p>Fonts load from Google Fonts, which sees your IP address when they are fetched.</p>
         <h2>Advertising</h2>

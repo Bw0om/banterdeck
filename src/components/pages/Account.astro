@@ -25,6 +25,8 @@ const T = no ? {
   noDecks: 'Ingen kortstokker ennå. Lag en her, eller lagre kortene etter en runde Regelfabrikken.',
   draft: 'kort fra Regelfabrikken er ikke lagret ennå.', saveDraft: 'Lagre dem', delConfirm: 'Trykk igjen for å slette',
   next: 'Neste kort', close: 'Lukk', of: 'av', saved: 'Lagret ✓', stats: 'Statistikk',
+  settings: 'Konto', share: 'Del', unshare: 'Slutt å dele', shared: 'delt', linkCopied: 'Lenken er kopiert – send den til hvem du vil.', unshared: 'Lenken virker ikke lenger.', changeUser: 'Endre brukernavn', changeUserLead: 'Du logger inn med det nye navnet fra nå av. Det gamle blir ledig for andre.', changePw: 'Endre passord', deleteAcc: 'Slett konto',
+  deleteLead: 'Sletter kontoen, brukernavnet, kortstokkene og replikkene dine for godt. Det kan ikke angres.', deleteType: 'Skriv SLETT for å bekrefte', deleteBtn: 'Slett kontoen min', deleted: 'Kontoen er slettet.',
 } : {
   tabLogin: 'Sign in', tabNew: 'New account', tabLink: 'Email link',
   userOrEmail: 'Username or email', password: 'Password', login: 'Sign in', forgot: 'Forgot your password?',
@@ -41,6 +43,8 @@ const T = no ? {
   noDecks: 'No decks yet. Make one here, or save the cards after a round of Rule Factory.',
   draft: 'cards from Rule Factory are not saved yet.', saveDraft: 'Save them', delConfirm: 'Tap again to delete',
   next: 'Next card', close: 'Close', of: 'of', saved: 'Saved ✓', stats: 'Statistics',
+  settings: 'Account', share: 'Share', unshare: 'Stop sharing', shared: 'shared', linkCopied: 'Link copied.', unshared: 'The link no longer works.', changeUser: 'Change username', changeUserLead: 'You sign in with the new name from now on. The old one becomes available to others.', changePw: 'Change password', deleteAcc: 'Delete account',
+  deleteLead: 'Deletes your account, username, decks and lines for good. This cannot be undone.', deleteType: 'Type DELETE to confirm', deleteBtn: 'Delete my account', deleted: 'Your account has been deleted.',
 };
 ---
 <Base title={L.accountTitle} description={L.accountLead} lang={lang} noindex={true}>
@@ -126,6 +130,11 @@ const T = no ? {
             <button class="btn ghost small" id="outBtn">{L.signOut}</button>
           </span>
         </div>
+        <div class="konto-valg">
+          <button type="button" class="mini" id="endreNavnBtn">{T.changeUser}</button>
+          <button type="button" class="mini" id="endrePwBtn">{T.changePw}</button>
+          <button type="button" class="mini danger" id="slettBtn">{T.deleteAcc}</button>
+        </div>
         <p id="syncMsg" class="formmsg" role="status" aria-live="polite"></p>
 
         <form class="form konto-boks" id="pwForm" hidden novalidate>
@@ -135,17 +144,27 @@ const T = no ? {
             <label class="lab" for="pwNy">{T.newPw}</label>
             <input id="pwNy" type="password" autocomplete="new-password" minlength="8" />
           </div>
-          <button class="btn gold" type="submit">{T.savePw}</button>
+          <div class="dl-knapper"><button class="btn gold" type="submit">{T.savePw}</button><button class="btn ghost" type="button" data-lukk="pwForm">{T.cancel}</button></div>
         </form>
 
         <form class="form konto-boks" id="navnForm" hidden novalidate>
-          <h2>{T.setUser}</h2>
-          <p class="small">{T.setUserLead}</p>
+          <h2 id="navnTittel">{T.setUser}</h2>
+          <p class="small" id="navnLead">{T.setUserLead}</p>
           <div class="field">
             <label class="lab" for="navnNy">{T.username}</label>
             <input id="navnNy" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" />
           </div>
-          <button class="btn gold" type="submit">{T.save}</button>
+          <div class="dl-knapper"><button class="btn gold" type="submit">{T.save}</button><button class="btn ghost" type="button" data-lukk="navnForm">{T.cancel}</button></div>
+        </form>
+
+        <form class="form konto-boks" id="slettForm" hidden novalidate>
+          <h2>{T.deleteAcc}</h2>
+          <p class="small">{T.deleteLead}</p>
+          <div class="field">
+            <label class="lab" for="slettOrd">{T.deleteType}</label>
+            <input id="slettOrd" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+          </div>
+          <div class="dl-knapper"><button class="btn danger" type="submit">{T.deleteBtn}</button><button class="btn ghost" type="button" data-lukk="slettForm">{T.cancel}</button></div>
         </form>
 
         <h2>{T.decks}</h2>
@@ -298,17 +317,19 @@ const T = no ? {
           var navn = $('navnNy').value.trim(); if (!navn) return;
           K.api('/api/konto/brukernavn', { method: 'POST', body: JSON.stringify({ brukernavn: navn }) }).then(function (r) {
             if (!r.ok) return feilFra(r).then(function (m) { say($('syncMsg'), m, 'err'); });
-            bruker.brukernavn = navn; $('navnForm').hidden = true; visHvem(); say($('syncMsg'), T.saved, 'ok');
+            bruker.brukernavn = navn; $('navnForm').hidden = true; $('navnNy').value = ''; visHvem(); say($('syncMsg'), T.saved, 'ok');
           });
         });
 
         /* ---------- kortstokker ---------- */
         function tegnStokker() {
           $('stokker').innerHTML = stokker.length ? stokker.map(function (s, i) {
-            return '<article class="stokk-kort"><div><b>' + esc(s.navn) + '</b><span>' + (s.kort || []).length + ' ' + esc(T.cards) + '</span></div>' +
+            return '<article class="stokk-kort"><div><b>' + esc(s.navn) + '</b><span>' + (s.kort || []).length + ' ' + esc(T.cards) + (s.delt ? ' · ' + esc(T.shared) : '') + '</span></div>' +
               '<div class="stokk-knapper">' +
                 '<button class="btn gold small" data-st="spill" data-i="' + i + '" type="button">' + esc(T.play) + '</button>' +
                 (LANG === 'no' ? '<button class="btn small" data-st="rom" data-i="' + i + '" type="button">' + esc(T.playRoom) + '</button>' : '') +
+                (LANG === 'no' ? '<button class="mini" data-st="del" data-i="' + i + '" type="button">' + esc(T.share) + '</button>' : '') +
+                (s.delt ? '<button class="mini" data-st="udel" data-i="' + i + '" type="button">' + esc(T.unshare) + '</button>' : '') +
                 '<button class="mini" data-st="rediger" data-i="' + i + '" type="button">' + esc(T.edit) + '</button>' +
                 '<button class="mini danger" data-st="slett" data-i="' + i + '" type="button">' + esc(T.del) + '</button>' +
               '</div></article>';
@@ -353,6 +374,16 @@ const T = no ? {
           var b = e.target.closest('[data-st]'); if (!b) return;
           var s = stokker[+b.dataset.i]; if (!s) return;
           if (b.dataset.st === 'rediger') return aapneSkjema(s);
+          if (b.dataset.st === 'del') {
+            var lenke = location.origin + '/no/kortstokk?s=' + s.id;
+            var dele = function () {
+              if (navigator.share) return navigator.share({ title: s.navn, text: 'Spill kortstokken «' + s.navn + '» på Banterdeck', url: lenke }).catch(function () {});
+              if (navigator.clipboard) navigator.clipboard.writeText(lenke).then(function () { say($('syncMsg'), T.linkCopied, 'ok'); });
+            };
+            if (s.delt) return dele();
+            return K.stokker.del(s.id, true).then(function () { s.delt = true; tegnStokker(); dele(); }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
+          }
+          if (b.dataset.st === 'udel') return K.stokker.del(s.id, false).then(function () { s.delt = false; tegnStokker(); say($('syncMsg'), T.unshared, 'ok'); }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
           if (b.dataset.st === 'spill') return spill(s);
           if (b.dataset.st === 'rom') { skrivLS('bd_stokk_rom', { id: s.id, navn: s.navn, kort: s.kort }); location.href = '/no/rom'; return; }
           if (b.dataset.st === 'slett') {
@@ -375,15 +406,11 @@ const T = no ? {
         /* ---------- egne replikker (som før) ---------- */
         function loadLocal() { return lesLS(LOCAL, []); }
         function saveLocal() { skrivLS(LOCAL, mine); }
-        function pull() {
-          return K.sb('/rest/v1/decks?select=data').then(function (r) { return r.ok ? r.json() : []; })
-            .then(function (rows) { return rows.length ? rows[0].data : null; }).catch(function () { return null; });
-        }
+        function pull() { return K.data.hent(); }
         function push() {
           if (!bruker) return;
           say($('syncMsg'), T.syncing);
-          K.sb('/rest/v1/decks', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ user_id: bruker.id, data: { lines: mine } }) })
-            .then(function (r) { say($('syncMsg'), r.ok ? T.synced : T.generic, r.ok ? 'ok' : 'err'); });
+          K.data.lagre({ lines: mine }).then(function (ok) { say($('syncMsg'), ok ? T.synced : T.generic, ok ? 'ok' : 'err'); });
         }
         function render() {
           if (!mine.length) { $('mine').innerHTML = '<p class="small">' + T.none + '</p>'; return; }
@@ -406,6 +433,31 @@ const T = no ? {
           saveLocal(); render(); push();
         });
 
+        $('dash').addEventListener('click', function (e) {
+          var l = e.target.closest('[data-lukk]'); if (l) { $(l.dataset.lukk).hidden = true; return; }
+        });
+        $('endreNavnBtn').addEventListener('click', function () {
+          $('navnTittel').textContent = bruker.brukernavn ? T.changeUser : T.setUser;
+          $('navnLead').textContent = bruker.brukernavn ? T.changeUserLead : T.setUserLead;
+          $('navnNy').value = bruker.brukernavn || '';
+          $('navnForm').hidden = false; $('navnNy').focus(); $('navnNy').select();
+        });
+        $('endrePwBtn').addEventListener('click', function () {
+          $('pwTittel').textContent = T.changePw; $('pwLead').hidden = true; $('pwForm').hidden = false; $('pwNy').focus();
+        });
+        $('slettBtn').addEventListener('click', function () { $('slettForm').hidden = false; $('slettOrd').focus(); });
+        $('slettForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var ord = $('slettOrd').value.trim().toUpperCase();
+          if (ord !== 'SLETT' && ord !== 'DELETE') return say($('syncMsg'), T.deleteType, 'err');
+          K.api('/api/konto/slett', { method: 'POST', body: JSON.stringify({ bekreft: true }) }).then(function (r) {
+            if (!r.ok) return feilFra(r).then(function (m) { say($('syncMsg'), m, 'err'); });
+            try { localStorage.removeItem(LOCAL); localStorage.removeItem(UTKAST); localStorage.removeItem('bd_stokk_rom'); } catch (x) {}
+            K.lagre(null);
+            $('dash').hidden = true; $('signin').hidden = false; say(msg, T.deleted, 'ok');
+          });
+        });
+
         function visHvem() { $('who').textContent = bruker.brukernavn ? bruker.brukernavn + ' · ' + bruker.email : bruker.email; }
 
         function start() {
@@ -420,7 +472,8 @@ const T = no ? {
             else if (!u.brukernavn) $('pwForm').hidden = false;
             K.api('/api/statistikk?sjekk=1').then(function (r) { return r.ok ? r.json() : {}; }).then(function (d) { $('statLenke').hidden = !d.ok; }).catch(function () {});
             hentStokker();
-            pull().then(function (remote) {
+            try { sessionStorage.setItem('bd_favsynk', '1'); } catch (x) {}
+            K.synkFav().catch(function () {}).then(pull).then(function (remote) {
               if (remote && remote.lines) {
                 var seen = {};
                 mine.concat(remote.lines).forEach(function (it) { seen[JSON.stringify(it)] = it; });
