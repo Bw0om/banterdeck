@@ -359,6 +359,14 @@ import Base from '../../layouts/Base.astro';
     }
     function regelfabrikkenSpill(s) {
       rfOffset = s.naa - Date.now();
+      if (s.fase === 'klar') {
+        return '<p class="dl-melding dl-stor">Klar for Regelfabrikken?</p>' +
+          '<p>Når klokka starter, har alle ' + s.sek + ' sekunder til å skrive så mange drikkekort de rekker på sin egen telefon.</p>' +
+          '<p class="rom-status">' + tilstand.spillere.length + ' med i rommet: ' + tilstand.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' +
+          (erVert()
+            ? '<p class="small">Vent til alle har blitt med. Del koden <b>' + esc(kode) + '</b>.</p><button class="rom-stor-knapp" data-g="startklokke" type="button">Start klokka</button>'
+            : '<p class="rom-stor">Venter på at ' + esc(navn(tilstand.vert)) + ' starter klokka …</p>');
+      }
       if (s.fase === 'skriv') {
         var n = rfIgjen(s);
         setTimeout(rfTikk, 0);
@@ -425,7 +433,7 @@ import Base from '../../layouts/Base.astro';
       if (g === 'velg') return gjor({ handling: 'velg', i: Number(b.dataset.i) });
       if (g === 'pvelg') { var i = Number(b.dataset.i), j = presValg.indexOf(i); if (j === -1) presValg.push(i); else presValg.splice(j, 1); b.setAttribute('aria-pressed', j === -1); return; }
       if (g === 'legg') { var valgte = presValg.slice(); presValg = []; return gjor({ handling: 'legg', kort: valgte }); }
-      if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass', 'stokk'].indexOf(g) !== -1) return gjor({ handling: g });
+      if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass', 'stokk', 'startklokke'].indexOf(g) !== -1) return gjor({ handling: g });
       if (['avslutt', 'nullstill', 'svart', 'avslor', 'runde', 'nytt-brett'].indexOf(g) !== -1) return gjor({ handling: g });
     });
 
