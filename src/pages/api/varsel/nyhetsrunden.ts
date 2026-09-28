@@ -6,6 +6,8 @@ import { rpc } from '../../../lib/spilt';
 import { json } from '../../../lib/konto';
 import { sendTilAlle, offentligNokkel } from '../../../lib/push';
 import { alleRunder, publiseringstid, rundeId } from '../../../lib/nyhetsrunden';
+import { ukensLek } from '../../../lib/ukenslek';
+import { games, t } from '../../../lib/content';
 export const prerender = false;
 
 const kjor: APIRoute = async () => {
@@ -21,7 +23,7 @@ const kjor: APIRoute = async () => {
     const antall = (runde.sporsmal || []).length;
     const r = await sendTilAlle('nyhetsrunden', {
       tittel: `Nyhetsrunden uke ${runde.uke} er ute 🍻`,
-      tekst: runde.ingress ? String(runde.ingress).slice(0, 140) : `${antall} spørsmål fra ukas nyheter. Send telefonen rundt!`,
+      tekst: (runde.ingress ? String(runde.ingress).slice(0, 110) : `${antall} spørsmål fra ukas nyheter.`) + ukensTekst(),
       url: '/no/nyhetsrunden',
     });
     await rpc('varsel_ferdig', { p_ref: ref, p_antall: r.sendt }).catch(() => null);
@@ -33,3 +35,8 @@ const kjor: APIRoute = async () => {
 };
 export const GET = kjor;
 export const POST = kjor;
+
+function ukensTekst() {
+  const g = games.find((x: any) => x.slug === ukensLek());
+  return g ? ` · Ukens lek: ${t(g.name, 'no')}` : '';
+}

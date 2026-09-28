@@ -159,7 +159,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
     }
     function glemRom() {
       if (kode) { try { localStorage.removeItem('bd_rom_' + kode); } catch (e) {} }
-      meg = null; tilstand = null; versjon = 0; clearTimeout(timer); rtStopp(); lukkTavle(); tegnStart();
+      meg = null; tilstand = null; versjon = 0; clearTimeout(timer); rtStopp(); lukkTavle(); lukkHjul(); tegnStart();
     }
     window.__bdRomStopp = function () { clearTimeout(timer); clearInterval(fristTimer); rtStopp(); lukkTavle(); };
     document.addEventListener('astro:before-swap', function stopp() { clearTimeout(timer); rtStopp(); lukkTavle(); document.removeEventListener('astro:before-swap', stopp); }, { once: true });
@@ -172,6 +172,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       root.innerHTML =
         '<h1 class="rom-h1">' + (ln ? esc(ln) + ' fra hver sin telefon' : 'Spill sammen') + '</h1>' +
         '<p class="lead">' + (ln ? 'Lag et rom for ' + esc(ln) + '. Leken starter når alle har blitt med.' : 'Én lager et rom, resten blir med med koden. Da ser alle det samme – eller sin egen hemmelighet – på hver sin telefon.') + '</p>' +
+        '<p class="small">Lag mot lag? La hvert lag bli med fra én telefon og bruk lagnavnet som navn.</p>' +
         (melding ? '<p class="rom-feil" role="alert">' + esc(melding) + '</p>' : '') +
         '<div class="rom-start">' +
           '<form class="rom-boks" id="blimedSkjema">' +
@@ -221,7 +222,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       var t = tilstand;
       return '<div class="rom-hode">' +
         '<div><span class="rom-etikett">Rom</span><b class="rom-kode">' + esc(kode) + '</b></div>' +
-        '<span class="rom-hodeknapper"><button class="rom-del" data-g="tavle" type="button" aria-label="Poengtavle">' + ikon.pokal + '</button><button class="rom-del" data-g="qr" type="button" aria-label="Vis QR-kode">' + ikon.qr + '</button><button class="rom-del" data-g="del" type="button">' + ikon.del + 'Inviter</button></span>' +
+        '<span class="rom-hodeknapper"><button class="rom-del" data-g="hjul-aapne" type="button" aria-label="Straffehjul">🎡</button><button class="rom-del" data-g="tavle" type="button" aria-label="Poengtavle">' + ikon.pokal + '</button><button class="rom-del" data-g="qr" type="button" aria-label="Vis QR-kode">' + ikon.qr + '</button><button class="rom-del" data-g="del" type="button" aria-label="Inviter">' + ikon.del + '<span class="rom-del-tekst">Inviter</span></button></span>' +
       '</div>' +
       '<div class="rom-spillere">' + t.spillere.map(function (p) {
         return '<span class="' + (p.id === t.meg ? 'meg' : '') + '">' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) +
@@ -704,6 +705,98 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       document.body.appendChild(m);
     }
 
+    /* ---------- «hopp over» når den som har tur har forsvunnet ---------- */
+    setInterval(function () {
+      var el = document.querySelector('.rom-hopp'); if (!el) return;
+      el.hidden = (Date.now() + klokkeAvvik) - Number(el.dataset.turstart) < 40000;
+    }, 1000);
+    window.__bdFeilKontekst = function () {
+      var t = tilstand || {}, sp = t.spill || {};
+      return { rom: kode, lek: sp.navn || (t.ferdig ? 'oppsummering' : 'lobby'), fase: String(sp.fase || sp.type || ''), versjon: versjon, vert: erVert(), spillere: (t.spillere || []).length };
+    };
+
+    /* ---------- straffehjulet ---------- */
+    var tavleHjul = null, sisteHjul = -1, hjulSpinner = false;
+    var HJULFARGER = ['#f4b740', '#ff6a4d', '#2a1f12', '#c98f22'];
+    function hjulSvg(liste) {
+      var n = liste.length, r = 150, seg = 360 / n, deler = '';
+      liste.forEach(function (tekst, i) {
+        var a0 = (i * seg - 90) * Math.PI / 180, a1 = ((i + 1) * seg - 90) * Math.PI / 180;
+        var x0 = 160 + r * Math.cos(a0), y0 = 160 + r * Math.sin(a0), x1 = 160 + r * Math.cos(a1), y1 = 160 + r * Math.sin(a1);
+        var farge = HJULFARGER[i % 4] === HJULFARGER[0] && i === n - 1 && n % 4 === 1 ? HJULFARGER[1] : HJULFARGER[i % 4];
+        var tekstFarge = farge === '#2a1f12' ? '#f4ebdc' : '#1a1208', midt = (i + 0.5) * seg;
+        var kort = tekst.length > 15 ? tekst.slice(0, 14) + '…' : tekst;
+        deler += '<path d="M160 160 L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + (seg > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + farge + '" stroke="#141009" stroke-width="2"/>' +
+          '<text x="160" y="160" transform="rotate(' + (midt - 90) + ' 160 160) translate(34 4)" fill="' + tekstFarge + '" font-size="' + (n > 8 ? 11.5 : 13.5) + '" font-weight="700">' + esc(kort) + '</text>';
+      });
+      return '<div class="hjul-ramme"><svg class="hjul" viewBox="0 0 320 320" aria-hidden="true"><g class="hjul-snurr">' + deler + '</g><circle cx="160" cy="160" r="22" fill="#141009" stroke="#f4b740" stroke-width="3"/></svg><span class="hjul-pil" aria-hidden="true"></span></div>';
+    }
+    function aapneHjul() {
+      if (tavleHjul) return;
+      tavleHjul = document.createElement('div'); tavleHjul.className = 'rom-tavle'; tavleHjul.setAttribute('role', 'dialog'); tavleHjul.setAttribute('aria-label', 'Straffehjul');
+      tavleHjul.addEventListener('click', function (e) {
+        if (e.target === tavleHjul) return lukkHjul();
+        var b = e.target.closest('[data-h]'); if (!b) return;
+        var h = b.dataset.h;
+        if (h === 'lukk') return lukkHjul();
+        if (h === 'spinn') { var sel = tavleHjul.querySelector('#hjulHvem'); return gjor({ handling: 'hjul', hvem: sel ? sel.value : '' }); }
+        if (h === 'rediger') { tavleHjul.querySelector('.hjul-rediger').hidden = false; return; }
+        if (h === 'lagre-liste') {
+          var l = tavleHjul.querySelector('#hjulListe').value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+          if (l.length < 2) return toast('Skriv minst to utfall.');
+          return gjor({ handling: 'hjul-liste', liste: l });
+        }
+        if (h === 'standard') return gjor({ handling: 'hjul-liste', liste: [] });
+      });
+      document.body.appendChild(tavleHjul);
+      tegnHjulModal(true);
+    }
+    function lukkHjul() { if (tavleHjul) { tavleHjul.remove(); tavleHjul = null; } }
+    function tegnHjulModal(ny) {
+      if (!tavleHjul || !tilstand || hjulSpinner) return;
+      var liste = tilstand.hjulListe || [], hj = tilstand.hjul, vert = erVert();
+      var red = tavleHjul.querySelector('.hjul-rediger'), redApen = red && !red.hidden, redTekst = redApen ? tavleHjul.querySelector('#hjulListe').value : null;
+      var gSel = tavleHjul.querySelector('#hjulHvem'), gHvem = gSel ? gSel.value : null;
+      tavleHjul.innerHTML = '<div class="rom-tavle-innhold hjul-innhold"><div class="rom-tavle-topp"><h2>Straffehjulet</h2><button class="linkbtn" data-h="lukk" type="button">Lukk</button></div>' +
+        hjulSvg(liste) +
+        '<p class="hjul-resultat" aria-live="polite">' + (hj && !ny ? '<b>' + esc(navn(hj.hvem)) + '</b>: ' + esc(hj.tekst) : 'Tapte du? Spinn hjulet – alle ser hvor det stopper.') + '</p>' +
+        (vert ? '<label class="rof-lab" for="hjulHvem">Hvem skal spinne?</label><select id="hjulHvem" class="rof-inp">' + tilstand.spillere.map(function (p) { return '<option value="' + p.id + '"' + (p.id === tilstand.meg ? ' selected' : '') + '>' + esc(p.navn) + '</option>'; }).join('') + '</select>' : '') +
+        '<button class="rom-stor-knapp" data-h="spinn" type="button">Spinn</button>' +
+        (vert ? '<p><button class="linkbtn" data-h="rediger" type="button">Endre utfallene</button></p><div class="hjul-rediger" hidden><label class="rof-lab" for="hjulListe">Ett utfall per linje (2–12). «Drikk 3», «Del ut 2», «Shot» og «Alle andre drikker 1» føres på tavla av seg selv.</label>' +
+          '<textarea id="hjulListe" class="rof-inp rf-tekst" rows="7">' + esc(liste.join('\n')) + '</textarea><div class="dl-knapper"><button class="btn gold" data-h="lagre-liste" type="button">Lagre hjulet</button><button class="btn ghost" data-h="standard" type="button">Tilbake til standard</button></div></div>' : '') +
+        '</div>';
+      if (redApen) { tavleHjul.querySelector('.hjul-rediger').hidden = false; tavleHjul.querySelector('#hjulListe').value = redTekst; }
+      var nSel = tavleHjul.querySelector('#hjulHvem'); if (nSel && gHvem) nSel.value = gHvem;
+      if (hj && !ny) settVinkel(hj.i, liste.length, false);
+    }
+    function settVinkel(i, n, animer, runder) {
+      var g = tavleHjul && tavleHjul.querySelector('.hjul-snurr'); if (!g) return;
+      var seg = 360 / n, maal = (runder || 0) * 360 + (360 - (i + 0.5) * seg);
+      g.style.transition = animer ? 'transform 4s cubic-bezier(.17,.67,.2,1)' : 'none';
+      g.style.transform = 'rotate(' + maal + 'deg)';
+    }
+    function sjekkHjul() {
+      var hj = tilstand && tilstand.hjul;
+      if (!hj) { if (sisteHjul < 0) sisteHjul = 0; return; }
+      if (sisteHjul < 0) { sisteHjul = hj.nr; return; }   // ikke spill av gamle spinn
+      if (hj.nr <= sisteHjul) return;
+      sisteHjul = hj.nr;
+      if ((Date.now() + klokkeAvvik) - hj.tid > 15000) return;
+      if (!tavleHjul) aapneHjul();
+      hjulSpinner = false; tegnHjulModal(true);
+      hjulSpinner = true;
+      var res = tavleHjul.querySelector('.hjul-resultat'); res.textContent = navn(hj.hvem) + ' spinner …';
+      settVinkel(0, hj.antall, false);
+      requestAnimationFrame(function () { requestAnimationFrame(function () { settVinkel(hj.i, hj.antall, true, 5); }); });
+      setTimeout(function () {
+        hjulSpinner = false;
+        if (!tavleHjul) return;
+        res.innerHTML = '<b>' + esc(navn(hj.hvem)) + '</b>: ' + esc(hj.tekst);
+        res.classList.add('landet');
+        if (hj.hvem === tilstand.meg) { try { navigator.vibrate && navigator.vibrate(120); } catch (e) {} }
+      }, 4100);
+    }
+
     /* ---------- kveldens oppsummering ---------- */
     function kveldsTall() {
       var l = (tilstand.spillere || []).slice(), t = {};
@@ -857,6 +950,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
           ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
              veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill }[s.type] || function () { return ''; })(s) + '</div>';
       }
+      if (s && s.turStart && erVert()) innhold += '<p class="rom-hopp" data-turstart="' + s.turStart + '" hidden><button class="btn ghost small" data-g="hopp-over" type="button">Hopp over den som har tur</button></p>';
       var vert = erVert() ? '<div class="rom-vert">' +
         (s ? '<button class="btn ghost small" data-g="avslutt" type="button">Bytt lek</button>' : '') +
         '<button class="btn ghost small" data-g="nullstill" type="button">Nullstill slurker</button>' +
@@ -865,7 +959,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
       var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
       root.innerHTML = hode() + reaksjonslinje() + innhold + vert +
-        '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">Forlat rommet</button></p>';
+        '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">Forlat rommet</button> · <button type="button" class="feilknapp" data-feil>Noe galt?</button></p>';
       window.scrollTo(0, y);
       tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
       if (tsValgt !== undefined) { var r = document.querySelector('input[name=tsL][value="' + tsValgt + '"]'); if (r) r.checked = true; }
@@ -876,6 +970,8 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         e.preventDefault(); var i = document.getElementById('nrInput'); gjorAlltid({ handling: 'nr-svar', v: i.value.trim() }); i.blur();
       });
       visReaksjoner(tilstand.reak);
+      sjekkHjul();
+      if (tavleHjul) tegnHjulModal(false);
       if (document.querySelector('[data-frist]')) fristTikk(); else clearInterval(fristTimer);
       var ny = document.getElementById('rfInput');
       if (ny && gVerdi !== null) { ny.value = gVerdi; if (gFokus) ny.focus({ preventScroll: true }); }
@@ -907,6 +1003,8 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         return;
       }
       if (g === 'tavle') return aapneTavle();
+      if (g === 'hjul-aapne') return aapneHjul();
+      if (g === 'hopp-over') return gjor({ handling: 'hopp-over' });
       if (g === 'qr') {
         var m = document.createElement('div'); m.className = 'rom-qrmodal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'QR-kode');
         m.innerHTML = qrBoks(true) + '<button class="btn gold" type="button">Lukk</button>';

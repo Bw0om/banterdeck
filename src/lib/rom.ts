@@ -79,7 +79,7 @@ export function visning(data: any, versjon: number, meg: any) {
   const s = data.spill;
   let spill: any = null;
   if (s) {
-    spill = { type: s.type, lek: s.lek, navn: s.navn, modus: s.modus, runde: s.runde, frist: s.frist || null };
+    spill = { type: s.type, lek: s.lek, navn: s.navn, modus: s.modus, runde: s.runde, frist: s.frist || null, turStart: s.turNokkel ? s.turStart || null : null };
     if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger });
     if (s.type === 'mest') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase,
@@ -105,7 +105,7 @@ export function visning(data: any, versjon: number, meg: any) {
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null,
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0 })),
-    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), laget: data.laget, ferdig: data.ferdig || null, historikk: data.historikk || [],
+    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul || null, hjulListe: data.hjulListe || HJUL_STANDARD, laget: data.laget, ferdig: data.ferdig || null, historikk: data.historikk || [],
   };
 }
 
@@ -205,9 +205,56 @@ export function startSpill(data: any, lek: string, modus: string) {
   return { ok: true };
 }
 
+/** Hvem har tur akkurat nå (for «hopp over»)? null når ingen enkeltperson holder spillet. */
+function turNokkel(s: any) {
+  if (!s) return null;
+  if (s.type === 'bussruta' && s.fase === 1) return 'b1:' + s.tur;
+  if (s.type === 'yatzy' && !s.ferdig) return 'y:' + s.tur;
+  if (s.type === 'overunder') return 'o:' + s.tur;
+  return null;
+}
+const HOPP_ETTER = 40000;
 export function handling(data: any, meg: any, h: any) {
+  const svar = handlingInne(data, meg, h);
+  const s = data.spill, n = turNokkel(s);
+  if (s && n !== s.turNokkel) { s.turNokkel = n; s.turStart = n ? Date.now() : null; }
+  return svar;
+}
+function hoppOver(data: any) {
+  const s = data.spill, ider = aktiveIder(data);
+  if (s.type === 'bussruta' && s.fase === 1) {
+    const hvem = s.ider[s.tur]; s.steg = 0; s.tur++;
+    s.melding = `${navnPaa(data, hvem)} ble hoppet over.`;
+    if (s.tur >= s.ider.length) { s.fase = 2; s.pyr = []; for (let i = 0; i < 15; i++) s.pyr.push(brTrekk(s)); s.pyrPos = 0; s.sist = null; }
+  } else if (s.type === 'yatzy') {
+    const hvem = s.ider[s.tur], b = s.blokker[hvem], f = YZ_FELT.find((x) => b[x] == null);
+    if (f) b[f] = 0;   // strøk et felt, så spillet fortsatt kan bli ferdig
+    s.tur = (s.tur + 1) % s.ider.length; s.kast = 0; s.hold = [false, false, false, false, false];
+    s.melding = `${navnPaa(data, hvem)} ble hoppet over (strøk ett felt).`;
+    if (s.ider.every((id: string) => YZ_FELT.every((x) => s.blokker[id][x] != null))) {
+      const liste = s.ider.map((id: string) => ({ id, navn: navnPaa(data, id), sum: yzSum(s.blokker[id]) })).sort((a: any, c: any) => c.sum - a.sum);
+      s.ferdig = liste;
+    }
+  } else if (s.type === 'overunder') {
+    s.tur = (s.tur + 1) % Math.max(1, ider.length);
+  }
+  melde(data, 'Hoppet over den som hadde tur');
+}
+function handlingInne(data: any, meg: any, h: any) {
   const s = data.spill;
   const erVert = meg.id === data.vert;
+  if (h.handling === 'hopp-over') {
+    if (!erVert) return { feil: 'bare-vert' };
+    if (!s || !s.turStart || !turNokkel(s)) return { ok: true };
+    if (Date.now() - s.turStart < HOPP_ETTER - 1000) return { feil: 'vent', melding: 'Gi dem litt tid til.' };
+    hoppOver(data); return { ok: true };
+  }
+  if (h.handling === 'hjul') return spinnHjul(data, meg, h, erVert);
+  if (h.handling === 'hjul-liste') {
+    if (!erVert) return { feil: 'bare-vert' };
+    const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
+    data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
+  }
   const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
@@ -1047,4 +1094,29 @@ function nyeVisning(s: any, meg: any, data: any) {
     };
   }
   return {};
+}
+
+
+/* =====================================================================
+   Straffehjulet: én spinner, alle ser hjulet stoppe samtidig.
+   Utfallet leses som tekst: «Drikk 3», «Del ut 2», «Shot», «Alle andre drikker 1».
+   ===================================================================== */
+export const HJUL_STANDARD = ['Drikk 1', 'Drikk 2', 'Drikk 3', 'Shot!', 'Del ut 2', 'Vannpause 💧', 'Trygg – ingenting skjer', 'Alle andre drikker 1', 'Velg en drikkepartner', 'Pinlig historie – eller drikk 4'];
+function hjulEffekt(data: any, hvem: string, tekst: string) {
+  const t = tekst.toLowerCase();
+  let m;
+  if ((m = /alle andre drikker (\d+)/.exec(t))) { data.spillere.forEach((p: any) => { if (p.id !== hvem) giSlurker(data, p.id, +m![1]); }); return; }
+  if ((m = /del ut (\d+)/.exec(t))) { giUtdeling(data, hvem, +m[1]); return; }
+  if (/shot/.test(t) && !/eller/.test(t)) { giSlurker(data, hvem, 5); return; }
+  if ((m = /^drikk (\d+)/.exec(t))) giSlurker(data, hvem, +m[1]);
+}
+function spinnHjul(data: any, meg: any, h: any, erVert: boolean) {
+  const naa = Date.now();
+  if (data.hjul && naa - data.hjul.tid < 7000) return { feil: 'for-fort', melding: 'Hjulet spinner allerede!' };
+  const hvem = h.hvem && erVert ? String(h.hvem) : meg.id;
+  if (!data.spillere.some((p: any) => p.id === hvem)) return { feil: 'ukjent' };
+  const liste = data.hjulListe || HJUL_STANDARD, i = tilfeldig(liste.length);
+  data.hjul = { nr: ((data.hjul && data.hjul.nr) || 0) + 1, fra: meg.id, hvem, i, tekst: liste[i], tid: naa, antall: liste.length };
+  hjulEffekt(data, hvem, liste[i]);
+  return { ok: true };
 }

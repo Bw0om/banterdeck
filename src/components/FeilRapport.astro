@@ -1,0 +1,40 @@
+---
+// «Noe galt?»: en liten rapport rett til eieren (GitHub-issue). Sider kan legge til ekstra
+// informasjon ved å sette window.__bdFeilKontekst = () => ({ ... }).
+const { lang = 'no' } = Astro.props as { lang?: string };
+const no = lang === 'no';
+---
+<script is:inline define:vars={{ NO: no }}>
+(function () {
+  if (window.__bdFeil) return; window.__bdFeil = true;
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-feil]'); if (!b) return;
+    e.preventDefault();
+    var m = document.createElement('div'); m.className = 'rom-tavle'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', NO ? 'Meld fra om feil' : 'Report a problem');
+    m.innerHTML = '<form class="rom-tavle-innhold feil-skjema"><div class="rom-tavle-topp"><h2>' + (NO ? 'Noe galt?' : 'Something wrong?') + '</h2><button class="linkbtn" type="button" data-f="lukk">' + (NO ? 'Lukk' : 'Close') + '</button></div>' +
+      '<p class="small">' + (NO ? 'Skriv kort hva du gjorde og hva som skjedde. Vi sender med hvilken side du er på – ikke navn eller e-post.' : 'Tell us briefly what you did and what happened. We include which page you are on – never your name or email.') + '</p>' +
+      '<textarea name="tekst" maxlength="1500" required placeholder="' + (NO ? 'F.eks. «Maria fikk ikke opp svaralternativene i Nyhetsrunden»' : 'E.g. “The next card did not show up”') + '"></textarea>' +
+      '<input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+      '<div class="dl-knapper"><button class="btn gold" type="submit">' + (NO ? 'Send' : 'Send') + '</button></div><p class="formmsg" role="status"></p></form>';
+    document.body.appendChild(m);
+    var f = m.querySelector('form'), msg = m.querySelector('.formmsg');
+    m.querySelector('textarea').focus();
+    m.addEventListener('click', function (ev) { if (ev.target === m || ev.target.closest('[data-f=lukk]')) m.remove(); });
+    f.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var tekst = f.tekst.value.trim(); if (tekst.length < 5) return;
+      var k = { side: location.pathname + location.search };
+      try { if (window.__bdFeilKontekst) Object.assign(k, window.__bdFeilKontekst()); } catch (x) {}
+      f.querySelector('button[type=submit]').disabled = true;
+      fetch('/api/feil', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tekst: tekst, kontekst: k, website: f.website.value }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.ok) { msg.className = 'formmsg ok'; msg.textContent = NO ? 'Takk! Det er sendt.' : 'Thanks! Sent.'; setTimeout(function () { m.remove(); }, 1400); }
+          else { msg.className = 'formmsg err'; msg.textContent = d.error || (NO ? 'Fikk ikke sendt.' : 'Could not send.'); f.querySelector('button[type=submit]').disabled = false; }
+        })
+        .catch(function () { msg.className = 'formmsg err'; msg.textContent = NO ? 'Ingen kontakt. Prøv igjen.' : 'No connection. Try again.'; f.querySelector('button[type=submit]').disabled = false; });
+    });
+  });
+})();
+</script>

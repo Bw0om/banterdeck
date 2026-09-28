@@ -5,7 +5,12 @@ import Icon from '../Icon.astro';
 import PopulaertNaa from '../PopulaertNaa.astro';
 import Sveip from '../Sveip.astro';
 import { rundeKort } from '../../lib/nyhetsrunden';
+import { UKENS_LEKER, ukensLek } from '../../lib/ukenslek';
+import { games as alleLeker } from '../../lib/content';
 const NR = rundeKort();
+const UKE = UKENS_LEKER.map((sl) => alleLeker.find((g: any) => g.slug === sl)).filter(Boolean)
+  .map((g: any) => ({ slug: g.slug, navn: t(g.name, 'no'), pl: g.pl, gruppe: t(g.group.title, 'no') }));
+const ukeBygg = UKE.find((x) => x.slug === ukensLek()) || UKE[0];
 const nrBygg = NR.find((r) => r.fra <= Date.now()) || NR[NR.length - 1];
 import { situationSectionsFor, dictSection, visible, langGroups, itemsOf, t, tf, isCrude, totalsFor, topSituationsFor, situationById, gamesFor, dictCount } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
@@ -44,6 +49,13 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
   </a>
 
+  {no && ukeBygg && (
+    <a class="h2-uke" id="ukensLek" href={`/no/drinking-games/${ukeBygg.slug}/`} data-leker={JSON.stringify(UKE)}>
+      <span class="h2-badge">Ukens lek</span>
+      <span><b>{ukeBygg.navn}</b><small>{ukeBygg.gruppe} · {ukeBygg.pl} spillere</small></span>
+      <img src={`/og/lek/${ukeBygg.slug}.jpg`} alt="" width="120" height="63" loading="lazy" />
+    </a>
+  )}
   {no && (
     <a class="h2-rom" href="/no/rom">
       <span><b>Spill sammen fra hver sin telefon</b><small>Lag et rom og del koden</small></span>
@@ -143,6 +155,23 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     document.getElementById('installerNei').addEventListener('click', function () {
       el.hidden = true; try { localStorage.setItem('bd_installer_nei', Date.now() + 30 * 86400000); } catch (e) {}
     });
+  })();
+  </script>
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Siden bygges sjelden – velg ukens lek i nettleseren, med samme regel som serveren
+    var a = document.getElementById('ukensLek'); if (!a) return;
+    var l = []; try { l = JSON.parse(a.dataset.leker || '[]'); } catch (e) {}
+    if (!l.length) return;
+    var o = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' }));
+    var t = new Date(Date.UTC(o.getFullYear(), o.getMonth(), o.getDate())); t.setUTCDate(t.getUTCDate() - (t.getUTCDay() + 6) % 7 + 3);
+    var aar = t.getUTCFullYear(), jan4 = new Date(Date.UTC(aar, 0, 4));
+    var uke = 1 + Math.round(((t - jan4) / 86400000 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7);
+    var x = l[(aar * 53 + uke) % l.length];
+    a.href = '/no/drinking-games/' + x.slug + '/';
+    a.querySelector('b').textContent = x.navn;
+    a.querySelector('small').textContent = x.gruppe + ' · ' + x.pl + ' spillere';
+    a.querySelector('img').src = '/og/lek/' + x.slug + '.jpg';
   })();
   </script>
 </Base>

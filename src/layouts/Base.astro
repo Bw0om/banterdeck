@@ -7,6 +7,7 @@ import AgeGate from '../components/AgeGate.astro';
 import Tools from '../components/Tools.astro';
 import Icon from '../components/Icon.astro';
 import KontoKlient from '../components/KontoKlient.astro';
+import FeilRapport from '../components/FeilRapport.astro';
 import { ClientRouter } from 'astro:transitions';
 
 interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; bilde?: string; }
@@ -145,7 +146,9 @@ const isCurrent = (href: string) => {
         <a href={path(lang, '/privacy')}>{L.nav.privacy}</a>
         <a href={path(lang, '/favourites')}>{L.favourites}</a>
         <a href={altPath}>{L.switchTo}</a>
+        <button type="button" class="feilknapp" data-feil>{lang === 'no' ? 'Noe galt?' : 'Something wrong?'}</button>
       </footer>
+      <FeilRapport lang={lang} />
     </main>
   </div>
 
