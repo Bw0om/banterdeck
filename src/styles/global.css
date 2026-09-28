@@ -959,3 +959,22 @@ body:has(#rom) .tool.dice{display:none}
 @keyframes land{0%{transform:rotate(-200deg) scale(.6)}70%{transform:rotate(15deg) scale(1.08)}100%{transform:none}}
 @media (prefers-reduced-motion:reduce){.rom-nese.blink,.dl-terninger.landet .dice{animation:none}}
 @media (max-width:899px){.toast{bottom:calc(env(safe-area-inset-bottom) + 92px)}}
+/* ---------- drikkeleker: favoritter og merker ---------- */
+.favleker{margin:6px 0 26px}
+.favleker h2{margin:10px 0 4px}
+.favgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.favlek{min-height:120px;box-sizing:border-box;padding:14px;border-radius:22px;background:var(--gold);color:var(--ink2);display:flex;flex-direction:column;gap:4px}
+.favlek:nth-child(2n){background:var(--accent)}
+.favlek:hover{text-decoration:none;filter:brightness(1.05)}
+.favlek b{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em;line-height:1.1}
+.favlek > span:not(.badges){font-size:13px;font-weight:600;opacity:.8}
+.favlek .badges{margin-top:auto}
+.favlek .badges i{background:var(--ink2);color:var(--ink)}
+.badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.badges i{font-style:normal;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:rgba(244,183,64,.16);color:var(--gold)}
+.badges i.rom{background:rgba(255,106,77,.16);color:var(--accent)}
+.favlek .badges i.rom{background:var(--ink2);color:var(--accent)}
+.gruppe-rolig .gamelist{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.gruppe-rolig .game{background:transparent;min-height:0;padding:12px 14px}
+.gruppe-rolig .game .gn{font-size:16px}
+.gruppe-rolig h3{color:var(--muted)}

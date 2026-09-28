@@ -5,10 +5,19 @@ import Icon from '../Icon.astro';
 import PopulaertNaa from '../PopulaertNaa.astro';
 import { spill, games, gamesFor, gameHref, langGroups, itemsOf, t } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
+import DECKS from '../../data/decks.json';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 const groups = langGroups(spill, lang).map((g: any) => ({ ...g, list: itemsOf(g, lang) })).filter((g: any) => g.list.length);
 const hrefOf = (it: any) => gameHref(games.find((x) => x.name === it.name), (p) => path(lang, p), lang);
+const no = lang === 'no';
+const APP = new Set([...Object.keys(DECKS as any), 'over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer',
+  '21-med-terninger', 'opus', 'drikke-bingo', 'gjett-aret', '100-sporsmal', 'nyhetsrunden', 'nasjonal-vorsprove']);
+const ROM = new Set(['pekeleken', 'jeg-har-aldri', 'enten-eller', 'kategorier', 'nodt-eller-sannhet', 'rygg-mot-rygg', 'duoleken', '50-50',
+  'ring-of-fire', 'forraeder', 'drikke-bingo', 'opus', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris']);
+const slugOf = (it: any) => (games.find((x) => x.name === it.name) || {}).slug;
+const FAV = ['ring-of-fire', 'bussruta', 'pyramiden', 'forraeder', 'drikke-bingo', 'opus'];
+const favs = no ? FAV.map((sl) => games.find((x) => x.slug === sl)).filter(Boolean) : [];
 const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search games or equipment…';
 ---
 <Base title={L.gamesTitle} description={L.gamesDesc(gamesFor(lang).length)} lang={lang} gate={true}>
@@ -31,6 +40,25 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
     </p>
   )}
 
+  {favs.length > 0 && (
+    <section class="favleker">
+      <h2>Spill rett på telefonen</h2>
+      <p class="small">Ingen kortstokk eller terning? Disse spiller dere rett i appen – flere av dem fra hver sin telefon.</p>
+      <div class="favgrid">
+        {favs.map((g: any) => (
+          <a class="favlek" href={gameHref(g, (p) => path(lang, p), lang)}>
+            <b>{t(g.name, lang)}</b>
+            <span>{t(g.gear, lang)}</span>
+            <span class="badges">
+              {APP.has(g.slug) && <i>I appen</i>}
+              {ROM.has(g.slug) && <i class="rom">Flere telefoner</i>}
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
   <PopulaertNaa lang={lang} vis="leker" />
 
   <div class="dictfilter sticky">
@@ -41,8 +69,9 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
   </div>
 
   {groups.map((g: any, i: number) => (
-    <section class="group dictgroup" id={g.id} data-ggroup>
+    <section class:list={['group dictgroup', g.id === 'blikjent' && 'gruppe-rolig']} id={g.id} data-ggroup>
       <h3>{t(g.title, lang)}<span class="group-count">{g.list.length}</span></h3>
+      {g.id === 'blikjent' && no && <p class="small">Roligere leker – fine når dere ikke kjenner hverandre så godt ennå.</p>}
       <div class="gamelist">
         {g.list.map((it: any) => (
           <a class="game" href={hrefOf(it)}
@@ -50,6 +79,12 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
             <span class="gn">{t(it.name, lang)}</span>
             <span class="gm">{t(it.gear, lang)}</span>
             <span class="gp">{it.pl} {L.players}</span>
+            {no && (APP.has(slugOf(it)) || ROM.has(slugOf(it))) && (
+              <span class="badges">
+                {APP.has(slugOf(it)) && <i>I appen</i>}
+                {ROM.has(slugOf(it)) && <i class="rom">Flere telefoner</i>}
+              </span>
+            )}
           </a>
         ))}
       </div>

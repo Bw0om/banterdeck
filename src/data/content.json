@@ -3613,155 +3613,107 @@
     ]
    },
    {
-    "id": "terninger",
+    "id": "sporsmal",
     "title": {
-     "no": "Terninger og hjul",
-     "en": "Dice and wheels"
+     "no": "Pek, stem og avslør",
+     "en": "Point, vote and expose"
     },
     "type": "game",
     "items": [
      {
       "name": {
-       "no": "Drikke-yatzy",
-       "sv": "Dryckesyatzy",
-       "en": "Drinking Yahtzee"
+       "no": "Pekeleken",
+       "en": "Most likely to"
       },
       "gear": {
-       "no": "Yatzy-sett",
-       "sv": "Yatzy-set",
-       "en": "Yahtzee set"
+       "no": "Ingen",
+       "en": "None"
       },
-      "pl": "2+",
+      "pl": "4+",
       "rules": {
        "no": [
-        "Vanlige yatzyregler: opptil tre kast per tur, fyll ut de 13 feltene, flest poeng vinner. Så legges dette på:",
-        "b|Kast med en ener = drikk 2 slurker.",
-        "b|Fire like = drikk summen av terningene i slurker.",
-        "b|Yatzy = du bestemmer hvem som tar en shot (eventuelt resten av glasset).",
-        "b|Taperen til slutt drikker opp drikken sin eller tar en shot."
-       ],
-       "sv": [
-        "Vanliga yatzyregler: upp till tre kast per tur, fyll i de 13 fälten, flest poäng vinner. Sedan läggs detta på:",
-        "b|Kast med en etta = drick 2 klunkar.",
-        "b|Fyrtal = drick tärningarnas summa i klunkar.",
-        "b|Yatzy = du bestämmer vem som tar en shot (eller resten av glaset).",
-        "b|Förloraren dricker upp sin dryck eller tar en shot."
+        "Én leser opp «Hvem er mest sannsynlig til å …» — for eksempel glemme bursdagen til sin egen mor.",
+        "På tre peker alle samtidig på den de mener passer best.",
+        "Du drikker én slurk for hver finger som peker på deg."
        ],
        "en": [
-        "Standard Yahtzee rules: up to three rolls per turn, fill the 13 boxes, most points wins. Then add:",
-        "b|Any roll showing a one = drink 2 sips.",
-        "b|Four of a kind = drink the dice total in sips.",
-        "b|Yahtzee = you pick who takes a shot (or downs their glass).",
-        "b|The overall loser finishes their drink or takes a shot."
+        "Someone reads out “Who is most likely to …” — for instance forget their own mum's birthday.",
+        "On three, everyone points at whoever fits best.",
+        "You drink one sip for every finger pointing at you."
        ]
       },
       "fit": {
        "nar": [
         "vors",
-        "rolig"
+        "nach"
        ],
-       "utstyr": "terning",
-       "tempo": "rolig",
-       "min": 2,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Terningen bestemmer",
-       "en": "The Die Decides"
-      },
-      "gear": {
-       "no": "Én terning",
-       "en": "One die"
-      },
-      "pl": "3+",
-      "rules": {
-       "no": [
-        "Trill etter tur. Hvert tall har sin regel:",
-        "b|1 — del ut én slurk.",
-        "b|2 — ta én slurk selv.",
-        "b|3 — pek på noen som drikker.",
-        "b|4 — alle drikker.",
-        "b|5 — lag en regel som gjelder resten av leken.",
-        "b|6 — velg en utfordring til personen til venstre.",
-        "Leken varer så lenge dere vil. Bytt gjerne ut reglene underveis."
-       ],
-       "en": [
-        "Take turns rolling. Each number has its rule:",
-        "b|1 — hand out one sip.",
-        "b|2 — take one sip yourself.",
-        "b|3 — point at someone to drink.",
-        "b|4 — everyone drinks.",
-        "b|5 — make a rule for the rest of the game.",
-        "b|6 — set a challenge for the person on your left.",
-        "Play as long as you like, and swap rules as you go."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "prevors",
-        "vors"
-       ],
-       "utstyr": "terning",
+       "utstyr": "ingen",
        "tempo": "sosialt",
-       "min": 3,
+       "min": 4,
        "maks": 99
       }
      },
      {
       "name": {
-       "no": "21 med terninger",
-       "en": "Dice 21"
-      },
-      "gear": {
-       "no": "To terninger",
-       "en": "Two dice"
-      },
-      "pl": "2+",
-      "rules": {
-       "no": [
-        "Trill to terninger og legg sammen. Du kan fortsette å trille én terning om gangen og legge til, eller stoppe.",
-        "Målet er å komme nærmest mulig 21 uten å gå over.",
-        "Går du over 21, drikker du med én gang. Den som havner lengst unna 21 når alle har stoppet, drikker også."
-       ],
-       "en": [
-        "Roll two dice and add them up. You can keep rolling one die at a time and adding, or stop.",
-        "The aim is to get as close to 21 as possible without going over.",
-        "Go over 21 and you drink straight away. Whoever ends furthest from 21 once everyone stops drinks too."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "to",
-        "vors"
-       ],
-       "utstyr": "terning",
-       "tempo": "rolig",
-       "min": 2,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Drikkehjulet",
-       "en": "The Drinking Wheel"
+       "no": "Forræder",
+       "en": "Traitor"
       },
       "gear": {
        "no": "Én telefon",
        "en": "One phone"
       },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Telefonen går rundt. Den som står for tur, trekker et kort med en setning som skal fullføres – for eksempel «Den første jobben min var …».",
+        "Telefonen bestemmer i hemmelighet om du skal si sannheten eller lyve. Bare du ser det.",
+        "Fullfør setningen høyt og overbevisende. Alle andre får stille ett spørsmål hver.",
+        "På tre stemmer alle: sant eller løgn?",
+        "b|Stemte du feil: drikk to.",
+        "b|Gjettet alle riktig: fortelleren drikker tre."
+       ],
+       "en": [
+        "The phone goes round. Whoever's turn it is draws a card with a sentence to finish – like “My first job was …”.",
+        "The phone secretly decides whether you tell the truth or lie. Only you see it.",
+        "Finish the sentence out loud and convincingly. Everyone else gets one question each.",
+        "On three, everyone votes: truth or lie?",
+        "b|Voted wrong: drink two.",
+        "b|Everyone guessed right: the storyteller drinks three."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 4,
+       "maks": 12
+      }
+     },
+     {
+      "name": {
+       "no": "Jeg har aldri",
+       "en": "Never have I ever"
+      },
+      "gear": {
+       "no": "Ingen",
+       "en": "None"
+      },
       "pl": "3+",
       "rules": {
        "no": [
-        "Send telefonen rundt bordet. Den som har den, snurrer hjulet under.",
-        "Gjør det hjulet lander på, og send telefonen videre til venstre.",
-        "Regler som lages underveis, gjelder resten av kvelden."
+        "Alle holder opp ti fingre.",
+        "Etter tur sier noen «Jeg har aldri …» og noe de aldri har gjort.",
+        "Alle som HAR gjort det, drikker og tar ned en finger. Den som først er tom for fingre, taper.",
+        "Start uskyldig. Det eskalerer av seg selv."
        ],
        "en": [
-        "Pass the phone around. Whoever holds it spins the wheel.",
-        "Do what it lands on, then pass the phone to the left.",
-        "Rules made along the way last the rest of the night."
+        "Everyone holds up ten fingers.",
+        "In turn, someone says “Never have I ever …” and something they have never done.",
+        "Everyone who HAS done it drinks and puts a finger down. First out of fingers loses.",
+        "Start innocent. It escalates on its own."
        ]
       },
       "fit": {
@@ -3770,9 +3722,114 @@
         "vors",
         "nach"
        ],
-       "utstyr": "mobil",
+       "utstyr": "ingen",
        "tempo": "sosialt",
        "min": 3,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "100 spørsmål",
+       "en": "100 questions"
+      },
+      "gear": {
+       "no": "En snusboks eller noe annet å kaste",
+       "en": "Something small to throw, like a lighter"
+      },
+      "pl": "5+",
+      "rules": {
+       "no": [
+        "Én leser opp et spørsmål, for eksempel «Hvem sovner først i kveld?».",
+        "Den som holder snusboksen, kaster den til den spørsmålet passer best på. Den som tar imot, drikker og kaster videre på neste spørsmål.",
+        "Splash: mottakeren drikker to, og begge naboene drikker én."
+       ],
+       "en": [
+        "Someone reads out a question, like “Who falls asleep first tonight?”.",
+        "Whoever holds the object throws it to the person it fits best. The catcher drinks and throws on the next question.",
+        "Splash: the catcher drinks two, and both neighbours drink one."
+       ]
+      },
+      "href": {
+       "no": "/no/100-sporsmal"
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 5,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "50/50",
+       "en": "50/50"
+      },
+      "gear": {
+       "no": "En snusboks eller noe annet å kaste",
+       "en": "Something small to throw"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Annenhver runde er «Jeg har aldri», annenhver er 100 spørsmål. Trekk kortene under.",
+        "«Jeg har aldri»: alle som HAR gjort det, drikker.",
+        "100 spørsmål: kast snusboksen til den det passer best på. Den som tar imot, drikker.",
+        "Velg nivå før dere starter – de to lekene holder samme tone."
+       ],
+       "en": [
+        "Every other round is “Never have I ever”, every other is 100 questions.",
+        "Never have I ever: everyone who HAS done it drinks.",
+        "100 questions: throw the object to whoever fits best. The catcher drinks."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 4,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Jug",
+       "en": "Jug"
+      },
+      "gear": {
+       "no": "Ett lite glass per spiller",
+       "en": "A small glass per player"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Én er vert og fyller et glass til hver. Alle glassene er like — bortsett fra ett, som smaker tydelig annerledes.",
+        "Verten deler ut glassene tilfeldig, og alle smaker samtidig. Den som fikk det rare glasset, må holde maska.",
+        "Diskuter hvem som reagerte mistenkelig, og pek samtidig på tre.",
+        "Tar flertallet feil, drikker alle som pekte feil. Tar dere riktig, drikker den som ble avslørt. Bytt vert hver runde."
+       ],
+       "en": [
+        "One player hosts and pours a glass for everyone. All the glasses are the same — except one, which tastes clearly different.",
+        "The host hands them out at random and everyone tastes at once. Whoever got the odd glass has to keep a straight face.",
+        "Discuss who reacted suspiciously, then point on three.",
+        "If the majority is wrong, everyone who pointed wrong drinks. If you're right, the unmasked player drinks. Rotate the host each round."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "bursdag"
+       ],
+       "utstyr": "annet",
+       "tempo": "sosialt",
+       "min": 4,
        "maks": 99
       }
      }
@@ -4015,6 +4072,172 @@
        "utstyr": "musikk",
        "tempo": "sosialt",
        "min": 2,
+       "maks": 99
+      }
+     }
+    ]
+   },
+   {
+    "id": "terninger",
+    "title": {
+     "no": "Terninger og hjul",
+     "en": "Dice and wheels"
+    },
+    "type": "game",
+    "items": [
+     {
+      "name": {
+       "no": "Drikke-yatzy",
+       "sv": "Dryckesyatzy",
+       "en": "Drinking Yahtzee"
+      },
+      "gear": {
+       "no": "Yatzy-sett",
+       "sv": "Yatzy-set",
+       "en": "Yahtzee set"
+      },
+      "pl": "2+",
+      "rules": {
+       "no": [
+        "Vanlige yatzyregler: opptil tre kast per tur, fyll ut de 13 feltene, flest poeng vinner. Så legges dette på:",
+        "b|Kast med en ener = drikk 2 slurker.",
+        "b|Fire like = drikk summen av terningene i slurker.",
+        "b|Yatzy = du bestemmer hvem som tar en shot (eventuelt resten av glasset).",
+        "b|Taperen til slutt drikker opp drikken sin eller tar en shot."
+       ],
+       "sv": [
+        "Vanliga yatzyregler: upp till tre kast per tur, fyll i de 13 fälten, flest poäng vinner. Sedan läggs detta på:",
+        "b|Kast med en etta = drick 2 klunkar.",
+        "b|Fyrtal = drick tärningarnas summa i klunkar.",
+        "b|Yatzy = du bestämmer vem som tar en shot (eller resten av glaset).",
+        "b|Förloraren dricker upp sin dryck eller tar en shot."
+       ],
+       "en": [
+        "Standard Yahtzee rules: up to three rolls per turn, fill the 13 boxes, most points wins. Then add:",
+        "b|Any roll showing a one = drink 2 sips.",
+        "b|Four of a kind = drink the dice total in sips.",
+        "b|Yahtzee = you pick who takes a shot (or downs their glass).",
+        "b|The overall loser finishes their drink or takes a shot."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "rolig"
+       ],
+       "utstyr": "terning",
+       "tempo": "rolig",
+       "min": 2,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Terningen bestemmer",
+       "en": "The Die Decides"
+      },
+      "gear": {
+       "no": "Én terning",
+       "en": "One die"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Trill etter tur. Hvert tall har sin regel:",
+        "b|1 — del ut én slurk.",
+        "b|2 — ta én slurk selv.",
+        "b|3 — pek på noen som drikker.",
+        "b|4 — alle drikker.",
+        "b|5 — lag en regel som gjelder resten av leken.",
+        "b|6 — velg en utfordring til personen til venstre.",
+        "Leken varer så lenge dere vil. Bytt gjerne ut reglene underveis."
+       ],
+       "en": [
+        "Take turns rolling. Each number has its rule:",
+        "b|1 — hand out one sip.",
+        "b|2 — take one sip yourself.",
+        "b|3 — point at someone to drink.",
+        "b|4 — everyone drinks.",
+        "b|5 — make a rule for the rest of the game.",
+        "b|6 — set a challenge for the person on your left.",
+        "Play as long as you like, and swap rules as you go."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "prevors",
+        "vors"
+       ],
+       "utstyr": "terning",
+       "tempo": "sosialt",
+       "min": 3,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "21 med terninger",
+       "en": "Dice 21"
+      },
+      "gear": {
+       "no": "To terninger",
+       "en": "Two dice"
+      },
+      "pl": "2+",
+      "rules": {
+       "no": [
+        "Trill to terninger og legg sammen. Du kan fortsette å trille én terning om gangen og legge til, eller stoppe.",
+        "Målet er å komme nærmest mulig 21 uten å gå over.",
+        "Går du over 21, drikker du med én gang. Den som havner lengst unna 21 når alle har stoppet, drikker også."
+       ],
+       "en": [
+        "Roll two dice and add them up. You can keep rolling one die at a time and adding, or stop.",
+        "The aim is to get as close to 21 as possible without going over.",
+        "Go over 21 and you drink straight away. Whoever ends furthest from 21 once everyone stops drinks too."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "to",
+        "vors"
+       ],
+       "utstyr": "terning",
+       "tempo": "rolig",
+       "min": 2,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Drikkehjulet",
+       "en": "The Drinking Wheel"
+      },
+      "gear": {
+       "no": "Én telefon",
+       "en": "One phone"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Send telefonen rundt bordet. Den som har den, snurrer hjulet under.",
+        "Gjør det hjulet lander på, og send telefonen videre til venstre.",
+        "Regler som lages underveis, gjelder resten av kvelden."
+       ],
+       "en": [
+        "Pass the phone around. Whoever holds it spins the wheel.",
+        "Do what it lands on, then pass the phone to the left.",
+        "Rules made along the way last the rest of the night."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "prevors",
+        "vors",
+        "nach"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 3,
        "maks": 99
       }
      }
@@ -4266,510 +4489,6 @@
        "tempo": "kaos",
        "min": 4,
        "maks": 99
-      }
-     }
-    ]
-   },
-   {
-    "id": "sporsmal",
-    "title": {
-     "no": "Spørsmål og bli kjent",
-     "en": "Questions and getting to know you"
-    },
-    "type": "game",
-    "items": [
-     {
-      "name": {
-       "no": "Jeg har aldri",
-       "en": "Never have I ever"
-      },
-      "gear": {
-       "no": "Ingen",
-       "en": "None"
-      },
-      "pl": "3+",
-      "rules": {
-       "no": [
-        "Alle holder opp ti fingre.",
-        "Etter tur sier noen «Jeg har aldri …» og noe de aldri har gjort.",
-        "Alle som HAR gjort det, drikker og tar ned en finger. Den som først er tom for fingre, taper.",
-        "Start uskyldig. Det eskalerer av seg selv."
-       ],
-       "en": [
-        "Everyone holds up ten fingers.",
-        "In turn, someone says “Never have I ever …” and something they have never done.",
-        "Everyone who HAS done it drinks and puts a finger down. First out of fingers loses.",
-        "Start innocent. It escalates on its own."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "prevors",
-        "vors",
-        "nach"
-       ],
-       "utstyr": "ingen",
-       "tempo": "sosialt",
-       "min": 3,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Pekeleken",
-       "en": "Most likely to"
-      },
-      "gear": {
-       "no": "Ingen",
-       "en": "None"
-      },
-      "pl": "4+",
-      "rules": {
-       "no": [
-        "Én leser opp «Hvem er mest sannsynlig til å …» — for eksempel glemme bursdagen til sin egen mor.",
-        "På tre peker alle samtidig på den de mener passer best.",
-        "Du drikker én slurk for hver finger som peker på deg."
-       ],
-       "en": [
-        "Someone reads out “Who is most likely to …” — for instance forget their own mum's birthday.",
-        "On three, everyone points at whoever fits best.",
-        "You drink one sip for every finger pointing at you."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "nach"
-       ],
-       "utstyr": "ingen",
-       "tempo": "sosialt",
-       "min": 4,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "To sannheter og en løgn",
-       "en": "Two truths and a lie"
-      },
-      "gear": {
-       "no": "Ingen",
-       "en": "None"
-      },
-      "pl": "3+",
-      "rules": {
-       "no": [
-        "Si tre ting om deg selv: to sanne og én løgn.",
-        "De andre gjetter hvilken som er løgnen.",
-        "Gjetter de feil, drikker de. Gjetter de riktig, drikker du."
-       ],
-       "en": [
-        "Say three things about yourself: two true, one lie.",
-        "The others guess which one is the lie.",
-        "If they guess wrong, they drink. If they guess right, you drink."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "prevors",
-        "rolig"
-       ],
-       "utstyr": "ingen",
-       "tempo": "rolig",
-       "min": 3,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Sannhet eller drikk",
-       "en": "Truth or drink"
-      },
-      "gear": {
-       "no": "Ingen",
-       "en": "None"
-      },
-      "pl": "2+",
-      "rules": {
-       "no": [
-        "Still et spørsmål til noen i gruppen.",
-        "Personen svarer helt ærlig — eller drikker i stedet.",
-        "Avtal gjerne at man bare kan hoppe over tre ganger på rad. Den fjerde må besvares."
-       ],
-       "en": [
-        "Ask someone in the group a question.",
-        "They answer completely honestly — or drink instead.",
-        "Agree that you can only skip three in a row. The fourth must be answered."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "to",
-        "nach",
-        "rolig"
-       ],
-       "utstyr": "ingen",
-       "tempo": "rolig",
-       "min": 2,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Rygg mot rygg",
-       "en": "Back to back"
-      },
-      "gear": {
-       "no": "To stoler",
-       "en": "Two chairs"
-      },
-      "pl": "4+",
-      "rules": {
-       "no": [
-        "To spillere sitter rygg mot rygg og kan ikke se hverandre.",
-        "Resten stiller spørsmål som «Hvem av dere er mest rotete?» eller «Hvem bruker lengst tid på badet?».",
-        "Begge rekker opp hånda hvis de mener det er seg selv. Er de uenige, drikker begge.",
-        "Bytt par etter noen spørsmål."
-       ],
-       "en": [
-        "Two players sit back to back so they can't see each other.",
-        "The rest ask questions like “Which of you is messier?” or “Who takes longest in the bathroom?”.",
-        "Both raise a hand if they think it's them. If they disagree, both drink.",
-        "Swap pairs after a few questions."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "nach"
-       ],
-       "utstyr": "annet",
-       "tempo": "sosialt",
-       "min": 4,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Rask fakta",
-       "sv": "Snabba fakta",
-       "en": "Quick facts"
-      },
-      "gear": {
-       "no": "Bare glass",
-       "sv": "Bara glas",
-       "en": "Just your drinks"
-      },
-      "pl": "2",
-      "rules": {
-       "no": [
-        "Rask fakta går ut på å komme opp med fakta om motspilleren. Her gjelder det å kjenne motstanderen godt og tenke raskt.",
-        "Si en fakta om motstanderen innen 5 sekunder. Stemmer ikke påstanden, får du en prikk — av tre totalt.",
-        "Tre prikker = ta en shot. Fortsett til dere ikke kommer på mer fakta om hverandre."
-       ],
-       "sv": [
-        "Snabba fakta går ut på att komma på fakta om motspelaren. Här gäller det att känna motståndaren väl och tänka snabbt.",
-        "Säg ett faktum om motståndaren inom 5 sekunder. Stämmer inte påståendet får du en prick — av tre totalt.",
-        "Tre prickar = ta en shot. Fortsätt tills ni inte kommer på fler fakta om varandra."
-       ],
-       "en": [
-        "Quick facts is about firing off facts about your opponent. Know them well and think fast.",
-        "State a fact about your opponent within 5 seconds. If it is wrong, you get a strike — out of three.",
-        "Three strikes = take a shot. Keep going until you run out of facts about each other."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "to",
-        "rolig"
-       ],
-       "utstyr": "ingen",
-       "tempo": "rolig",
-       "min": 2,
-       "maks": 2
-      }
-     },
-     {
-      "name": {
-       "no": "Jug",
-       "en": "Jug"
-      },
-      "gear": {
-       "no": "Ett lite glass per spiller",
-       "en": "A small glass per player"
-      },
-      "pl": "4+",
-      "rules": {
-       "no": [
-        "Én er vert og fyller et glass til hver. Alle glassene er like — bortsett fra ett, som smaker tydelig annerledes.",
-        "Verten deler ut glassene tilfeldig, og alle smaker samtidig. Den som fikk det rare glasset, må holde maska.",
-        "Diskuter hvem som reagerte mistenkelig, og pek samtidig på tre.",
-        "Tar flertallet feil, drikker alle som pekte feil. Tar dere riktig, drikker den som ble avslørt. Bytt vert hver runde."
-       ],
-       "en": [
-        "One player hosts and pours a glass for everyone. All the glasses are the same — except one, which tastes clearly different.",
-        "The host hands them out at random and everyone tastes at once. Whoever got the odd glass has to keep a straight face.",
-        "Discuss who reacted suspiciously, then point on three.",
-        "If the majority is wrong, everyone who pointed wrong drinks. If you're right, the unmasked player drinks. Rotate the host each round."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "bursdag"
-       ],
-       "utstyr": "annet",
-       "tempo": "sosialt",
-       "min": 4,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Snurr flasken",
-       "en": "Spin the bottle"
-      },
-      "gear": {
-       "no": "En flaske",
-       "en": "A bottle"
-      },
-      "pl": "4+",
-      "rules": {
-       "no": [
-        "Sitt i ring og snurr en flaske i midten.",
-        "Den flasken peker på, velger: svar på et spørsmål fra den som snurret, eller drikk.",
-        "Den som ble pekt på, snurrer neste gang."
-       ],
-       "en": [
-        "Sit in a circle and spin a bottle in the middle.",
-        "Whoever it points at chooses: answer a question from the spinner, or drink.",
-        "They spin next."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "nach",
-        "bursdag"
-       ],
-       "utstyr": "annet",
-       "tempo": "sosialt",
-       "min": 4,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "100 spørsmål",
-       "en": "100 questions"
-      },
-      "gear": {
-       "no": "En snusboks eller noe annet å kaste",
-       "en": "Something small to throw, like a lighter"
-      },
-      "pl": "5+",
-      "rules": {
-       "no": [
-        "Én leser opp et spørsmål, for eksempel «Hvem sovner først i kveld?».",
-        "Den som holder snusboksen, kaster den til den spørsmålet passer best på. Den som tar imot, drikker og kaster videre på neste spørsmål.",
-        "Splash: mottakeren drikker to, og begge naboene drikker én."
-       ],
-       "en": [
-        "Someone reads out a question, like “Who falls asleep first tonight?”.",
-        "Whoever holds the object throws it to the person it fits best. The catcher drinks and throws on the next question.",
-        "Splash: the catcher drinks two, and both neighbours drink one."
-       ]
-      },
-      "href": {
-       "no": "/no/100-sporsmal"
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "nach"
-       ],
-       "utstyr": "mobil",
-       "tempo": "sosialt",
-       "min": 5,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Enten eller",
-       "en": "Would you rather"
-      },
-      "gear": {
-       "no": "Ingen",
-       "en": "None"
-      },
-      "pl": "4+",
-      "rules": {
-       "no": [
-        "Én leser opp to valg: «Enten aldri drikke øl igjen, eller aldri drikke vin igjen?».",
-        "På tre peker alle til venstre for det første valget, eller til høyre for det andre.",
-        "Den siden som er i mindretall, drikker. Blir det likt, drikker alle.",
-        "Den som tapte flest ganger på rad, lager neste valg."
-       ],
-       "en": [
-        "Someone reads out two options: “Would you rather never drink beer again, or never drink wine again?”.",
-        "On three, everyone points left for the first option or right for the second.",
-        "The minority drinks. A tie means everyone drinks.",
-        "Whoever lost the most rounds in a row sets the next one."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "prevors",
-        "rolig",
-        "to"
-       ],
-       "utstyr": "ingen",
-       "tempo": "rolig",
-       "min": 4,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Nødt eller sannhet",
-       "en": "Truth or dare"
-      },
-      "gear": {
-       "no": "Ingen",
-       "en": "None"
-      },
-      "pl": "4+",
-      "rules": {
-       "no": [
-        "Etter tur velger du nødt eller sannhet, og personen til venstre gir deg et spørsmål eller en utfordring.",
-        "Sannhet: svar helt ærlig. Nødt: gjennomfør utfordringen.",
-        "Nekter du, drikker du tre slurker i stedet.",
-        "Hold det morsomt, ikke ekkelt – alle kan si stopp."
-       ],
-       "en": [
-        "In turn, pick truth or dare, and the person on your left gives you a question or a challenge.",
-        "Truth: answer honestly. Dare: do it.",
-        "Refuse and you drink three sips instead.",
-        "Keep it fun, not nasty – anyone can call a stop."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "nach",
-        "bursdag"
-       ],
-       "utstyr": "ingen",
-       "tempo": "kaos",
-       "min": 4,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Duoleken",
-       "en": "The Pair Game"
-      },
-      "gear": {
-       "no": "To snusbokser eller andre ting å kaste, merket 1 og 2",
-       "en": "Two small objects to throw, marked 1 and 2"
-      },
-      "pl": "5+",
-      "rules": {
-       "no": [
-        "Merk to snusbokser som nummer 1 og 2 – med tusj eller ulik snus.",
-        "Én leser opp et spørsmål som handler om to personer, for eksempel «Hvem kunne vært tvillinger?».",
-        "Den som har boks 1, kaster den til en person. Den som har boks 2, kaster sin til den som passer best sammen med den personen.",
-        "Begge som tok imot, drikker – og kaster videre på neste spørsmål."
-       ],
-       "en": [
-        "Mark two small objects as number 1 and 2.",
-        "Someone reads a question about two people, like “Who could be twins?”.",
-        "Whoever holds object 1 throws it to someone. Whoever holds object 2 throws theirs to the person who pairs best with them.",
-        "Both catchers drink – and throw on the next question."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "nach"
-       ],
-       "utstyr": "annet",
-       "tempo": "sosialt",
-       "min": 5,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "50/50",
-       "en": "50/50"
-      },
-      "gear": {
-       "no": "En snusboks eller noe annet å kaste",
-       "en": "Something small to throw"
-      },
-      "pl": "4+",
-      "rules": {
-       "no": [
-        "Annenhver runde er «Jeg har aldri», annenhver er 100 spørsmål. Trekk kortene under.",
-        "«Jeg har aldri»: alle som HAR gjort det, drikker.",
-        "100 spørsmål: kast snusboksen til den det passer best på. Den som tar imot, drikker.",
-        "Velg nivå før dere starter – de to lekene holder samme tone."
-       ],
-       "en": [
-        "Every other round is “Never have I ever”, every other is 100 questions.",
-        "Never have I ever: everyone who HAS done it drinks.",
-        "100 questions: throw the object to whoever fits best. The catcher drinks."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "nach"
-       ],
-       "utstyr": "mobil",
-       "tempo": "sosialt",
-       "min": 4,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Forræder",
-       "en": "Traitor"
-      },
-      "gear": {
-       "no": "Én telefon",
-       "en": "One phone"
-      },
-      "pl": "4+",
-      "rules": {
-       "no": [
-        "Telefonen går rundt. Den som står for tur, trekker et kort med en setning som skal fullføres – for eksempel «Den første jobben min var …».",
-        "Telefonen bestemmer i hemmelighet om du skal si sannheten eller lyve. Bare du ser det.",
-        "Fullfør setningen høyt og overbevisende. Alle andre får stille ett spørsmål hver.",
-        "På tre stemmer alle: sant eller løgn?",
-        "b|Stemte du feil: drikk to.",
-        "b|Gjettet alle riktig: fortelleren drikker tre."
-       ],
-       "en": [
-        "The phone goes round. Whoever's turn it is draws a card with a sentence to finish – like “My first job was …”.",
-        "The phone secretly decides whether you tell the truth or lie. Only you see it.",
-        "Finish the sentence out loud and convincingly. Everyone else gets one question each.",
-        "On three, everyone votes: truth or lie?",
-        "b|Voted wrong: drink two.",
-        "b|Everyone guessed right: the storyteller drinks three."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "nach"
-       ],
-       "utstyr": "mobil",
-       "tempo": "sosialt",
-       "min": 4,
-       "maks": 12
       }
      }
     ]
@@ -5295,6 +5014,297 @@
        "tempo": "rolig",
        "min": 2,
        "maks": 2
+      }
+     }
+    ]
+   },
+   {
+    "id": "blikjent",
+    "title": {
+     "no": "Bli kjent og andre",
+     "en": "Getting to know you & more"
+    },
+    "type": "game",
+    "items": [
+     {
+      "name": {
+       "no": "To sannheter og en løgn",
+       "en": "Two truths and a lie"
+      },
+      "gear": {
+       "no": "Ingen",
+       "en": "None"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Si tre ting om deg selv: to sanne og én løgn.",
+        "De andre gjetter hvilken som er løgnen.",
+        "Gjetter de feil, drikker de. Gjetter de riktig, drikker du."
+       ],
+       "en": [
+        "Say three things about yourself: two true, one lie.",
+        "The others guess which one is the lie.",
+        "If they guess wrong, they drink. If they guess right, you drink."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "prevors",
+        "rolig"
+       ],
+       "utstyr": "ingen",
+       "tempo": "rolig",
+       "min": 3,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Sannhet eller drikk",
+       "en": "Truth or drink"
+      },
+      "gear": {
+       "no": "Ingen",
+       "en": "None"
+      },
+      "pl": "2+",
+      "rules": {
+       "no": [
+        "Still et spørsmål til noen i gruppen.",
+        "Personen svarer helt ærlig — eller drikker i stedet.",
+        "Avtal gjerne at man bare kan hoppe over tre ganger på rad. Den fjerde må besvares."
+       ],
+       "en": [
+        "Ask someone in the group a question.",
+        "They answer completely honestly — or drink instead.",
+        "Agree that you can only skip three in a row. The fourth must be answered."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "to",
+        "nach",
+        "rolig"
+       ],
+       "utstyr": "ingen",
+       "tempo": "rolig",
+       "min": 2,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Rygg mot rygg",
+       "en": "Back to back"
+      },
+      "gear": {
+       "no": "To stoler",
+       "en": "Two chairs"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "To spillere sitter rygg mot rygg og kan ikke se hverandre.",
+        "Resten stiller spørsmål som «Hvem av dere er mest rotete?» eller «Hvem bruker lengst tid på badet?».",
+        "Begge rekker opp hånda hvis de mener det er seg selv. Er de uenige, drikker begge.",
+        "Bytt par etter noen spørsmål."
+       ],
+       "en": [
+        "Two players sit back to back so they can't see each other.",
+        "The rest ask questions like “Which of you is messier?” or “Who takes longest in the bathroom?”.",
+        "Both raise a hand if they think it's them. If they disagree, both drink.",
+        "Swap pairs after a few questions."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "annet",
+       "tempo": "sosialt",
+       "min": 4,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Rask fakta",
+       "sv": "Snabba fakta",
+       "en": "Quick facts"
+      },
+      "gear": {
+       "no": "Bare glass",
+       "sv": "Bara glas",
+       "en": "Just your drinks"
+      },
+      "pl": "2",
+      "rules": {
+       "no": [
+        "Rask fakta går ut på å komme opp med fakta om motspilleren. Her gjelder det å kjenne motstanderen godt og tenke raskt.",
+        "Si en fakta om motstanderen innen 5 sekunder. Stemmer ikke påstanden, får du en prikk — av tre totalt.",
+        "Tre prikker = ta en shot. Fortsett til dere ikke kommer på mer fakta om hverandre."
+       ],
+       "sv": [
+        "Snabba fakta går ut på att komma på fakta om motspelaren. Här gäller det att känna motståndaren väl och tänka snabbt.",
+        "Säg ett faktum om motståndaren inom 5 sekunder. Stämmer inte påståendet får du en prick — av tre totalt.",
+        "Tre prickar = ta en shot. Fortsätt tills ni inte kommer på fler fakta om varandra."
+       ],
+       "en": [
+        "Quick facts is about firing off facts about your opponent. Know them well and think fast.",
+        "State a fact about your opponent within 5 seconds. If it is wrong, you get a strike — out of three.",
+        "Three strikes = take a shot. Keep going until you run out of facts about each other."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "to",
+        "rolig"
+       ],
+       "utstyr": "ingen",
+       "tempo": "rolig",
+       "min": 2,
+       "maks": 2
+      }
+     },
+     {
+      "name": {
+       "no": "Snurr flasken",
+       "en": "Spin the bottle"
+      },
+      "gear": {
+       "no": "En flaske",
+       "en": "A bottle"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Sitt i ring og snurr en flaske i midten.",
+        "Den flasken peker på, velger: svar på et spørsmål fra den som snurret, eller drikk.",
+        "Den som ble pekt på, snurrer neste gang."
+       ],
+       "en": [
+        "Sit in a circle and spin a bottle in the middle.",
+        "Whoever it points at chooses: answer a question from the spinner, or drink.",
+        "They spin next."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "nach",
+        "bursdag"
+       ],
+       "utstyr": "annet",
+       "tempo": "sosialt",
+       "min": 4,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Enten eller",
+       "en": "Would you rather"
+      },
+      "gear": {
+       "no": "Ingen",
+       "en": "None"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Én leser opp to valg: «Enten aldri drikke øl igjen, eller aldri drikke vin igjen?».",
+        "På tre peker alle til venstre for det første valget, eller til høyre for det andre.",
+        "Den siden som er i mindretall, drikker. Blir det likt, drikker alle.",
+        "Den som tapte flest ganger på rad, lager neste valg."
+       ],
+       "en": [
+        "Someone reads out two options: “Would you rather never drink beer again, or never drink wine again?”.",
+        "On three, everyone points left for the first option or right for the second.",
+        "The minority drinks. A tie means everyone drinks.",
+        "Whoever lost the most rounds in a row sets the next one."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "prevors",
+        "rolig",
+        "to"
+       ],
+       "utstyr": "ingen",
+       "tempo": "rolig",
+       "min": 4,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Nødt eller sannhet",
+       "en": "Truth or dare"
+      },
+      "gear": {
+       "no": "Ingen",
+       "en": "None"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Etter tur velger du nødt eller sannhet, og personen til venstre gir deg et spørsmål eller en utfordring.",
+        "Sannhet: svar helt ærlig. Nødt: gjennomfør utfordringen.",
+        "Nekter du, drikker du tre slurker i stedet.",
+        "Hold det morsomt, ikke ekkelt – alle kan si stopp."
+       ],
+       "en": [
+        "In turn, pick truth or dare, and the person on your left gives you a question or a challenge.",
+        "Truth: answer honestly. Dare: do it.",
+        "Refuse and you drink three sips instead.",
+        "Keep it fun, not nasty – anyone can call a stop."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "nach",
+        "bursdag"
+       ],
+       "utstyr": "ingen",
+       "tempo": "kaos",
+       "min": 4,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Duoleken",
+       "en": "The Pair Game"
+      },
+      "gear": {
+       "no": "To snusbokser eller andre ting å kaste, merket 1 og 2",
+       "en": "Two small objects to throw, marked 1 and 2"
+      },
+      "pl": "5+",
+      "rules": {
+       "no": [
+        "Merk to snusbokser som nummer 1 og 2 – med tusj eller ulik snus.",
+        "Én leser opp et spørsmål som handler om to personer, for eksempel «Hvem kunne vært tvillinger?».",
+        "Den som har boks 1, kaster den til en person. Den som har boks 2, kaster sin til den som passer best sammen med den personen.",
+        "Begge som tok imot, drikker – og kaster videre på neste spørsmål."
+       ],
+       "en": [
+        "Mark two small objects as number 1 and 2.",
+        "Someone reads a question about two people, like “Who could be twins?”.",
+        "Whoever holds object 1 throws it to someone. Whoever holds object 2 throws theirs to the person who pairs best with them.",
+        "Both catchers drink – and throw on the next question."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "annet",
+       "tempo": "sosialt",
+       "min": 5,
+       "maks": 99
       }
      }
     ]
