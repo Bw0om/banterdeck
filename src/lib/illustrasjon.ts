@@ -13,4 +13,7 @@ export function motiv(g: any): string {
   if (!g) return 'kort';
   return UNNTAK[g.slug] || GRUPPE[g.group && g.group.id] || 'bobler';
 }
-export const illustrasjon = (g: any) => `/illustrasjoner/${motiv(g)}.svg`;
+import BANNERE from '../data/bannere.json';
+const EGNE = new Set<string>(BANNERE as string[]);
+/** Eget banner for leken (public/illustrasjoner/lek/<slug>.svg), ellers et felles motiv for gruppa. */
+export const illustrasjon = (g: any) => (g && EGNE.has(g.slug) ? `/illustrasjoner/lek/${g.slug}.svg` : `/illustrasjoner/${motiv(g)}.svg`);
