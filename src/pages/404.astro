@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Fant ikke siden" description="Siden finnes ikke." lang="no" noindex={true}>
+  <section class="ikke-funnet">
+    <h1>Her var det tomt i glasset 🥤</h1>
+    <p class="lead">Siden du lette etter finnes ikke (lenger). Kanskje lenken var feil, eller rommet er avsluttet.</p>
+    <div class="dl-knapper">
+      <a class="btn gold" href="/no/">Til forsiden</a>
+      <a class="btn ghost" href="/no/rom">Spill sammen</a>
+      <a class="btn ghost" href="/no/drinking-games">Drikkeleker</a>
+    </div>
+    <p class="small" lang="en">Page not found. <a href="/en">Go to the English home page</a>.</p>
+  </section>
+</Base>
+<style>
+  .ikke-funnet{padding:40px 0;display:flex;flex-direction:column;gap:16px}
+</style>

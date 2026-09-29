@@ -1,5 +1,5 @@
 :root{
-  --bg:#141009; --bg2:#1c1610; --card:var(--card); --card2:#2a1f12;
+  --bg:#141009; --bg2:#1c1610; --card:#221a10; --card2:#2a1f12;
   --border:rgb(var(--ink-rgb) / .10); --border2:rgb(var(--ink-rgb) / .18);
   --ink:#f4ebdc; --muted:#b3a288; --faint:#9c8b72;
   --accent:#ff6a4d; --gold:#f4b740;
@@ -1500,3 +1500,23 @@ html[data-laast] .utvikling{display:flex;position:fixed;inset:0;z-index:300;alig
 .del-epost{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .del-epost textarea,.del-epost input{width:100%;box-sizing:border-box;background:var(--card);color:var(--ink);border:1px solid var(--border2);border-radius:12px;padding:10px 12px;font:inherit;font-size:16px}
 .del-epost .btn{align-self:flex-start;margin-top:4px}
+
+/* ---------- Rom: raskere start ---------- */
+.rom-start.uten-kode .rom-boks.lag{order:-1}
+.rom-fortsett{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0 4px;padding:14px 18px;border-radius:18px;background:var(--gold);color:var(--ink2);text-decoration:none}
+.rom-fortsett:hover{text-decoration:none;filter:brightness(1.05)}
+.rom-fortsett b{display:block;font-family:var(--display);font-size:18px}
+.rom-fortsett small{font-size:13.5px}
+.rom-fortsett > span:last-child{font-size:24px;font-weight:800}
+.rom-fjern{min-width:32px;min-height:32px}
+.rom-forlat .linkbtn,.rom-forlat .feilknapp{padding:10px 6px}
+body:has(#rom) .toast{top:calc(env(safe-area-inset-top) + 70px);bottom:auto}
+
+/* ---------- forbedringer: lys modus, rom-snarvei ---------- */
+:root[data-theme="light"] .h2-badge{background:var(--ink);color:#fffdf8}
+:root[data-theme="light"] .h2-hero .h2-badge,:root[data-theme="light"] .h2-uke .h2-badge{background:var(--ink2);color:#fffdf8}
+.h2-rom.fortsett{border-color:var(--gold-t);box-shadow:0 0 0 2px rgb(244 183 64 / .25) inset}
+body:not(.humor) .tool.dice{display:none}
+.h2-row{flex-wrap:wrap}
+.h2-row a{white-space:nowrap;min-width:calc(50% - 5px);padding:0 10px}
+@media (min-width:560px){.h2-row a{min-width:0}}

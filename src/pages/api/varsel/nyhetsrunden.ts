@@ -11,8 +11,10 @@ import { ukensLek } from '../../../lib/ukenslek';
 import { games, t } from '../../../lib/content';
 export const prerender = false;
 
+// Opprydding av betalinger kjøres maks én gang i minuttet, så adressen ikke kan brukes til å hamre på Vipps
+let sisteRydd = 0;
 const kjor: APIRoute = async () => {
-  await ryddBetalinger();
+  if (Date.now() - sisteRydd > 60000) { sisteRydd = Date.now(); await ryddBetalinger(); }
   const naa = Date.now();
   // Bare runder sluppet de siste 48 timene – gamle uker gir aldri varsel
   const runde = alleRunder.find((r) => { const t = publiseringstid(r); return t <= naa && t > naa - 48 * 3600 * 1000; });

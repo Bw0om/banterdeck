@@ -9,7 +9,7 @@ const LEKER = gamesFor(lang).filter((g: any) => g.fit).map((g: any) => ({
   n: t(g.name, lang), h: gameHref(g, (p) => path(lang, p), lang),
   u: t(g.gear, lang), p: g.pl, f: g.fit,
 }));
-const antall = no ? '51' : String(gamesFor(lang).length);
+const antall = String(gamesFor(lang).length);
 ---
 <Base title={no ? 'Finn lek' : 'Find a game'} lang={lang} gate={true}
       description={no ? 'Fire spørsmål om kvelden, gjengen og hva dere har for hånden – så foreslår vi lekene som passer.' : "Four questions about the night, the crew and what you've got to hand – and we'll suggest the games that fit."}>
@@ -88,7 +88,7 @@ const antall = no ? '51' : String(gamesFor(lang).length);
             '<span class="fl-m">'+esc(x.l.u)+' · '+esc(x.l.p)+(EN ? ' players' : ' spillere')+'</span></a>'; }).join('') + '</div>'
           : (EN ? '<h2>No matches</h2><p>Try “doesn’t matter” for what you’ve got.</p>' : '<h2>Ingen treff</h2><p>Prøv «spiller ingen rolle» på utstyr.</p>')) +
         '<button class="btn gold vp-big" data-a="omigjen">' + (EN ? 'Start over' : 'Start på nytt') + '</button>' +
-        (EN ? '<a class="btn ghost" href="/drinking-games">See all ' + ANTALL + ' games</a>' : '<a class="btn ghost" href="/no/drinking-games">Se alle 51 lekene</a>') + '</div>');
+        (EN ? '<a class="btn ghost" href="/drinking-games">See all ' + ANTALL + ' games</a>' : '<a class="btn ghost" href="/no/drinking-games">Se alle ' + ANTALL + ' lekene</a>') + '</div>');
     }
     function klikk(e){
       var b = e.target.closest('button'); if (!b || !root.contains(b)) return;

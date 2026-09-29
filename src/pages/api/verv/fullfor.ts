@@ -16,7 +16,8 @@ export const POST: APIRoute = async ({ request }) => {
     if (!laget || Date.now() - laget > 30 * 864e5) return json({ feil: 'gammel', ferdig: true, melding: 'Vervinger gjelder bare nye kontoer.' }, 409);
     if (!u.email_confirmed_at && !u.confirmed_at) return json({ feil: 'bekreft', melding: 'Bekreft e-posten din først.' }, 409);
     const r = await rpc('verv_fullfor', { p_user: u.id, p_kode: kode });
-    if (!r || !r.ok) return json({ feil: (r && r.grunn) || 'nei', ferdig: true }, 409);
+    // «ikke-spilt»: kontoen har ikke spilt et rom med andre ennå – prøv igjen senere
+    if (!r || !r.ok) return json({ feil: (r && r.grunn) || 'nei', ferdig: !(r && r.grunn === 'ikke-spilt') }, 409);
     return json({ ok: true, ferdig: true });
   } catch (e) {
     console.warn('Verving kunne ikke fullføres:', (e as Error).message);

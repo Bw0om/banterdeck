@@ -52,5 +52,6 @@ export function adminEposter() {
 export async function adminBruker(request: Request) {
   const u = await innloggetBruker(request);
   if (!u) return null;
-  return adminEposter().includes(String(u.email || '').toLowerCase()) ? u : null;
+  // Må også ha bekreftet e-posten, så ingen kan registrere seg med en admin-adresse de ikke eier
+  return adminEposter().includes(String(u.email || '').toLowerCase()) && (u.email_confirmed_at || u.confirmed_at) ? u : null;
 }

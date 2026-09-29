@@ -1,6 +1,7 @@
 /* Mitt vors som app: virker uten nett for sider du har besøkt, og tar imot varsler. */
-const CACHE = 'mittvors-v1';
-const START = ['/', '/no/', '/content.json', '/no/drinking-games/', '/manifest.webmanifest', '/icon-192.png'];
+const CACHE = 'mittvors-v2';
+// Bare det aller nødvendigste på forhånd – resten lagres etter hvert som sidene besøkes
+const START = ['/no/', '/manifest.webmanifest', '/icon-192.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(START).catch(() => {})).then(() => self.skipWaiting()));
@@ -39,10 +40,11 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     fetch(req)
       .then((res) => {
-        if (res.ok) { const kopi = res.clone(); caches.open(CACHE).then((c) => c.put(req, kopi)).catch(() => {}); }
+        // Ikke lagre én kopi per romkode/søk – det fyller bare opp telefonen
+        if (res.ok && !url.search) { const kopi = res.clone(); caches.open(CACHE).then((c) => c.put(req, kopi)).catch(() => {}); }
         return res;
       })
-      .catch(() => caches.match(req).then((hit) => hit || caches.match(url.pathname.startsWith('/no') ? '/no/' : '/')))
+      .catch(() => caches.match(req).then((hit) => hit || caches.match(req, { ignoreSearch: true })).then((hit) => hit || caches.match('/no/')))
   );
 });
 

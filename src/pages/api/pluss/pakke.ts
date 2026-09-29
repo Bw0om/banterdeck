@@ -12,6 +12,7 @@ export const GET: APIRoute = async ({ request }) => {
   const u = await innloggetBruker(request).catch(() => null);
   const pluss = u ? await harPluss(u.id) : false;
   if (pluss) return json({ navn: info.navn, pluss: true, kort: kort.map((x: any) => ({ t: x.t, k: x.k || '' })) });
-  const smak = kort.slice().sort(() => Math.random() - 0.5).slice(0, 3).map((x: any) => ({ t: x.t, k: x.k || '' }));
+  // Faste smakebiter (de tre første), så pakken ikke kan hentes ut bit for bit
+  const smak = kort.slice(0, 3).map((x: any) => ({ t: x.t, k: x.k || '' }));
   return json({ navn: info.navn, pluss: false, kort: smak, antall: kort.length });
 };

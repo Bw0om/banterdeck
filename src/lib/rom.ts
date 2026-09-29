@@ -236,7 +236,8 @@ function kortL(x: any, e: any) {
 function medSmakebiter(rekke: any[]) {
   const ut = rekke.slice(), ider = Object.keys(P);
   for (let n = 0; n < 2 && ider.length; n++) {
-    const id = ider[tilfeldig(ider.length)], i = tilfeldig(P[id].items.length), it = P[id].items[i];
+    // Bare de fem første kortene i hver pakke brukes som smakebiter, så pakkene ikke lekker ut
+    const id = ider[tilfeldig(ider.length)], i = tilfeldig(Math.min(5, P[id].items.length)), it = P[id].items[i];
     const en = PE[id] && PE[id].items ? PE[id].items[i] : null, enNavn = (PE[id] && PE[id].navn) || P[id].navn;
     ut.splice(8 + tilfeldig(Math.max(1, ut.length - 8)), 0, { t: L(it.t, en && en.t), k: L('✨ Smakebit fra ' + P[id].navn + '-pakken', '✨ Sneak peek from the ' + enNavn + ' pack'), smak: true });
   }
@@ -431,6 +432,20 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!erVert || !hvem || hvem === data.vert) return { feil: 'bare-vert' };
       const p = data.spillere.find((x: any) => x.id === hvem); if (!p) return { ok: true };
       data.spillere = data.spillere.filter((x: any) => x.id !== hvem);
+      // Reparer leker der den som ble fjernet, holdt spillet
+      if (s && data.spillere.length) {
+        const forste = data.spillere[0].id;
+        if (s.type === 'opus' && s.holder === hvem) s.holder = forste;
+        if (s.type === 'tosannheter' && s.aktiv === hvem) Object.assign(s, { aktiv: forste, fase: 'skriv', pastander: [], stemmer: {}, logn: -1 });
+        if (s.type === 'forraeder' && s.aktiv === hvem) nyForraederRunde(s, data);
+        if (typeof s.tur === 'number' && Array.isArray(s.ider)) {
+          const i = s.ider.indexOf(hvem);
+          if (i !== -1 && s.type !== 'yatzy' && s.type !== 'bussruta') { s.ider.splice(i, 1); if (s.tur > i) s.tur--; }
+          if (s.tur >= s.ider.length) s.tur = 0;
+        }
+        if (s.type === 'president' || s.type === 'overunder') { const n = aktiveIder(data).length; if (s.tur >= n) s.tur = 0; }
+        if (s.hender && s.hender[hvem]) delete s.hender[hvem];
+      }
       melde(data, `${p.navn} ble fjernet`, `${p.navn} was removed`); return { ok: true };
     }
     case 'slurk': {
@@ -869,12 +884,13 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         if (s.pos >= 15) return { ok: true };
         // Påstander fra forrige kort som ikke ble utfordret, gjelder nå: kortet legges på
         s.pastander.filter((p: any) => p.pos === s.pos - 1 && !p.avgjort).forEach((p: any) => {
-          const hand = s.hender[p.id]; const i = hand.findIndex((k: any) => k.v === s.pyr[p.pos].v);
+          const hand = s.hender[p.id] || []; const i = hand.findIndex((k: any) => k.v === s.pyr[p.pos].v);
           if (i !== -1) hand.splice(i, 1); p.avgjort = 'godtatt';
         });
         s.pos++; return { ok: true };
       }
       if (h.handling === 'pastand') {
+        if (!s.hender[meg.id]) return { feil: 'ikke-med', melding: 'Du kom inn midt i runden – du er med fra neste.', en: 'You joined mid-round – you’re in from the next one.' };
         if (s.pos < 1) return { ok: true };
         const pos = s.pos - 1;
         if (s.pastander.some((p: any) => p.pos === pos && p.id === meg.id)) return { ok: true };
@@ -886,7 +902,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
       if (h.handling === 'utfordre') {
         const p = s.pastander.find((x: any) => x.id === h.paa && x.pos === s.pos - 1 && !x.avgjort);
         if (!p || p.id === meg.id) return { ok: true };
-        const hand = s.hender[p.id], i = hand.findIndex((k: any) => k.v === s.pyr[p.pos].v);
+        const hand = s.hender[p.id] || [], i = hand.findIndex((k: any) => k.v === s.pyr[p.pos].v);
         if (i !== -1) { hand.splice(i, 1); giSlurker(data, meg.id, p.rad * 2); p.avgjort = 'sant'; melde(data, `${navnPaa(data, p.id)} hadde kortet! ${meg.navn} drikker ${p.rad * 2}.`, `${navnPaa(data, p.id)} had the card! ${meg.navn} drinks ${p.rad * 2}.`); }
         else { giSlurker(data, p.id, p.rad * 2); p.avgjort = 'bløff'; melde(data, `${navnPaa(data, p.id)} bløffet! Drikk ${p.rad * 2}.`, `${navnPaa(data, p.id)} was bluffing! Drink ${p.rad * 2}.`); }
         return { ok: true };
@@ -895,6 +911,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
       return null;
     }
     case 'gris': {
+      if (s.hender && !s.hender[meg.id] && h.handling !== 'nytt') return { ok: true };  // kom inn midt i runden
       if (h.handling === 'velg' && s.fase === 'send') {
         const i = Number(h.i); if (!(i >= 0 && i < 4)) return { feil: 'ukjent' };
         s.valgt[meg.id] = i;

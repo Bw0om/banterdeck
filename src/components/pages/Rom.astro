@@ -43,7 +43,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     var onsketLek = LEKNAVN[qs.get('lek') || ''] ? qs.get('lek') : '', onsketModus = (qs.get('modus') || '').slice(0, 20), visAlle = false;
     // Kommer man fra en gjengside, telles rommet for den gjengen
     var onsketGjeng = /^[0-9a-f-]{36}$/i.test(qs.get('gjeng') || '') ? qs.get('gjeng') : '';
-    var vervSjekket = false;
+    var vervSjekket = false, sisteSkjerm = '';
     var meg = null, tilstand = null, versjon = 0, timer = null, sisteNr = 0, opptatt = false, feilTeller = 0;
     var ikon = {
       del: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v7h14v-7"/></svg>',
@@ -63,6 +63,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     function settAdresse(k) {
       var u = location.pathname + (k ? '?k=' + k : '');
       history.replaceState(history.state, '', u);
+      // Husk rommet, så «Spill sammen» og forsiden kan ta deg tilbake dit
+      if (k) skriv('bd_sist_rom', { k: k, t: Date.now() });
     }
 
     /* ---------- nettverk ---------- */
@@ -234,7 +236,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (d.alkoholfri) document.documentElement.dataset.alkoholfri = '1';
       else if (document.documentElement.dataset.alkoholfri) delete document.documentElement.dataset.alkoholfri;
       // Vervet av en venn? Første rom med minst to telefoner gir begge et kveldspass
-      if (!vervSjekket && (d.spillere || []).length >= 2 && window.BDVerv) { vervSjekket = true; window.BDVerv.fullfor(); }
+      if (!vervSjekket && d.spill && (d.spillere || []).length >= 2 && window.BDVerv) { vervSjekket = true; window.BDVerv.fullfor(); }
       if (onsketGjeng && meg && d.vert === d.meg && !d.gjeng) { var gid = onsketGjeng; onsketGjeng = ''; gjorAlltid({ handling: 'gjeng', gjengId: gid }); }
       rtKobl();
       tegn();
@@ -257,7 +259,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     }
     root.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-sprak]'); if (a) skriv('bd_romsprak', a.dataset.sprak); });
     function glemRom() {
-      if (kode) { try { localStorage.removeItem('bd_rom_' + kode); } catch (e) {} }
+      if (kode) { try { localStorage.removeItem('bd_rom_' + kode); var sr = les('bd_sist_rom'); if (sr && sr.k === kode) localStorage.removeItem('bd_sist_rom'); } catch (e) {} }
       meg = null; tilstand = null; versjon = 0; clearTimeout(timer); rtStopp(); lukkTavle(); lukkHjul();
       if (document.documentElement.dataset.alkoholfri) delete document.documentElement.dataset.alkoholfri;
       tegnStart();
@@ -265,8 +267,28 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     window.__bdRomStopp = function () { clearTimeout(timer); clearInterval(fristTimer); rtStopp(); lukkTavle(); };
     document.addEventListener('astro:before-swap', function stopp() { clearTimeout(timer); rtStopp(); lukkTavle(); document.removeEventListener('astro:before-swap', stopp); }, { once: true });
     document.addEventListener('visibilitychange', function () { if (!document.hidden && meg) hent(); });
+    if (window.__bdRomEsc) document.removeEventListener('keydown', window.__bdRomEsc);
+    window.__bdRomEsc = function (e) {
+      if (e.key !== 'Escape') return;
+      var pt = document.querySelector('.pluss-tilbud'); if (pt) return pt.remove();
+      if (tavleHjul) return lukkHjul();
+      if (tavle) return lukkTavle();
+    };
+    document.addEventListener('keydown', window.__bdRomEsc);
 
     /* ---------- start: lag eller bli med ---------- */
+    /** Er du allerede i et rom (lagret på denne telefonen)? Da vises en snarvei tilbake. */
+    function sistRom() {
+      var sr = les('bd_sist_rom'); if (!sr || !sr.k || kode === sr.k) return null;
+      if (Date.now() - (sr.t || 0) > 24 * 3600 * 1000 || !les('bd_rom_' + sr.k)) return null;
+      return sr.k;
+    }
+    function fortsettBanner() {
+      var k = sistRom(); if (!k) return '';
+      var ln = onsketLek ? LEKNAVN[onsketLek] : '';
+      return '<a class="rom-fortsett" href="' + esc(location.pathname + '?k=' + k) + '"><span><b>' + T('Du er i rom ', 'You’re in room ') + esc(k) + '</b><small>' +
+        (ln ? T('Gå tilbake og velg ' + esc(ln) + ' der', 'Go back and pick ' + esc(ln) + ' there') : T('Trykk for å gå tilbake til rommet', 'Tap to go back to the room')) + '</small></span><span aria-hidden="true">→</span></a>';
+    }
     function tegnStart(melding) {
       var navn = les('bd_mittnavn') || '';
       var ln = onsketLek ? LEKNAVN[onsketLek] : '';
@@ -276,7 +298,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         '<p class="small">' + T('Lag mot lag? La hvert lag bli med fra én telefon og bruk lagnavnet som navn.', 'Team vs team? Let each team join from one phone and use the team name as their name.') + '</p>' +
         '<p class="small">' + sprakLenke() + '</p>' +
         (melding ? '<p class="rom-feil" role="alert">' + esc(melding) + '</p>' : '') +
-        '<div class="rom-start">' +
+        fortsettBanner() +
+        '<div class="rom-start' + (kode ? ' med-kode' : ' uten-kode') + '">' +
           '<form class="rom-boks" id="blimedSkjema">' +
             '<h2>' + T('Bli med', 'Join') + '</h2>' +
             '<label for="romKode">' + T('Kode', 'Code') + '</label>' +
@@ -304,6 +327,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
           kode = k; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode); ta(d); planlegg();
         }).catch(function (err) { tegnStart(err.message); });
       });
+      // Kom man med en kode, er navnet det eneste som mangler
+      if (kode) { var nf = document.getElementById('romNavn1'); if (nf && !nf.value) setTimeout(function () { nf.focus(); }, 50); }
       document.getElementById('lagSkjema').addEventListener('submit', function (e) {
         e.preventDefault();
         var n = document.getElementById('romNavn2').value.trim();
@@ -408,10 +433,11 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + T('✨ Mitt vors Pluss', '✨ Mitt vors Plus') + '</h2><button class="linkbtn" data-p="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
         '<p>' + T('Med Pluss hos <b>verten</b> får hele rommet alle lekene og pakkene, og dere kan være opptil 16 telefoner. Gjestene trenger ikke betale.', 'When the <b>host</b> has Plus, the whole room gets every game and pack, and you can have up to 16 phones. Guests don\'t pay a thing.') + '</p>' +
         '<p>' + T('<b>Første kveld er gratis.</b> Etterpå 29 kr for en kveld eller 199 kr for et år.', '<b>Your first night is free.</b> After that it\'s NOK 29 for a night or NOK 199 for a year.') + '</p>' +
-        '<div class="dl-knapper">' + (inne ? '<button class="btn gold" data-p="gratis" type="button">' + T('Prøv gratis i kveld', 'Try it free tonight') + '</button>' : '<a class="btn gold" href="' + RUTE.konto + '">' + T('Logg inn for å prøve gratis', 'Log in to try it free') + '</a>') +
+        '<div class="dl-knapper">' + (inne ? '<button class="btn gold" data-p="gratis" type="button">' + T('Prøv gratis i kveld', 'Try it free tonight') + '</button>' : '<a class="btn gold" data-tilbake href="' + RUTE.konto + '">' + T('Logg inn for å prøve gratis', 'Log in to try it free') + '</a>') +
         '<a class="btn ghost" href="' + RUTE.pluss + '" target="_blank" rel="noopener">' + T('Se Pluss', 'See Plus') + '</a></div><p class="formmsg" role="status"></p></div>';
       m.addEventListener('click', function (e) {
         if (e.target === m || e.target.closest('[data-p=lukk]')) return m.remove();
+        if (e.target.closest('[data-tilbake]')) { try { sessionStorage.setItem('bd_etter_innlogging', location.pathname + location.search); } catch (x) {} return; }
         var b = e.target.closest('[data-p=gratis]'); if (!b) return;
         b.disabled = true;
         kontoApi('/api/pluss/gratis', { method: 'POST' }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
@@ -907,7 +933,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       return '<div class="reak-linje" id="reakLinje">' + ['🍻', '😂', '🔥', '😱', '👏'].map(function (e) {
         return '<button type="button" data-g="reager" data-e="' + e + '" aria-label="Send ' + e + '">' + e + '</button>';
       }).join('') + '<button type="button" data-g="lyd" aria-label="' + (lyd.paa ? T('Skru av lyd', 'Turn sound off') : T('Skru på lyd', 'Turn sound on')) + '" aria-pressed="' + lyd.paa + '">' + (lyd.paa ? '🔊' : '🔇') + '</button>' +
-        '<button type="button" class="reak-send" data-g="send-velg"' + (megS.gi ? '' : ' disabled') + ' aria-label="' + T('Send en slurk til noen', 'Send someone a sip') + '">🍺 <b>' + (megS.gi || 0) + '</b></button></div>';
+        (megS.gi ? '' : '<!-- ingen slurker å dele ut -->') + '<button type="button" class="reak-send" data-g="send-velg"' + (megS.gi ? '' : ' hidden') + ' aria-label="' + T('Send en slurk til noen', 'Send someone a sip') + '">🍺 <b>' + (megS.gi || 0) + '</b></button></div>';
     }
     function sendVelger() {
       var megS = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {};
@@ -1132,9 +1158,9 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         var x0 = 160 + r * Math.cos(a0), y0 = 160 + r * Math.sin(a0), x1 = 160 + r * Math.cos(a1), y1 = 160 + r * Math.sin(a1);
         var farge = HJULFARGER[i % 4] === HJULFARGER[0] && i === n - 1 && n % 4 === 1 ? HJULFARGER[1] : HJULFARGER[i % 4];
         var tekstFarge = farge === '#2a1f12' ? '#f4ebdc' : '#1a1208', midt = (i + 0.5) * seg;
-        var kort = tekst.length > 15 ? tekst.slice(0, 14) + '…' : tekst;
+        var kort = tekst.length > 18 ? tekst.slice(0, 17) + '…' : tekst, fs = Math.max(9, Math.min(n > 8 ? 11.5 : 13.5, 108 / (kort.length * 0.6)));
         deler += '<path d="M160 160 L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + (seg > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + farge + '" stroke="#141009" stroke-width="2"/>' +
-          '<text x="160" y="160" transform="rotate(' + (midt - 90) + ' 160 160) translate(34 4)" fill="' + tekstFarge + '" font-size="' + (n > 8 ? 11.5 : 13.5) + '" font-weight="700">' + esc(kort) + '</text>';
+          '<text x="160" y="160" transform="rotate(' + (midt - 90) + ' 160 160) translate(34 4)" fill="' + tekstFarge + '" font-size="' + fs.toFixed(1) + '" font-weight="700">' + esc(kort) + '</text>';
       });
       return '<div class="hjul-ramme"><svg class="hjul" viewBox="0 0 320 320" aria-hidden="true"><g class="hjul-snurr">' + deler + '</g><circle cx="160" cy="160" r="22" fill="#141009" stroke="#f4b740" stroke-width="3"/></svg><span class="hjul-pil" aria-hidden="true"></span></div>';
     }
@@ -1431,7 +1457,9 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var sosGammel = document.getElementById('sosInput'), sosVerdi = sosGammel ? sosGammel.value : null, sosFokus = sosGammel && document.activeElement === sosGammel;
       root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + oppdragKnapp() + reaksjonslinje() + innhold + vert +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
-      window.scrollTo(0, y);
+      // Nytt skjermbilde (lobby, ny lek, oppsummering): start øverst. Ellers: behold plassen.
+      var skjerm = s ? 'spill:' + s.type + ':' + (s.navn && s.navn.no ? s.navn.no : s.navn) : tilstand.ferdig ? 'ferdig' : 'lobby';
+      if (skjerm !== sisteSkjerm) { sisteSkjerm = skjerm; window.scrollTo(0, 0); } else window.scrollTo(0, y);
       tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
       if (tsValgt !== undefined) { var r = document.querySelector('input[name=tsL][value="' + tsValgt + '"]'); if (r) r.checked = true; }
       var nrNy = document.getElementById('nrInput');
@@ -1509,7 +1537,11 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         document.body.appendChild(m); return;
       }
       if (g === 'forlat') { glemRom(); settAdresse(''); kode = ''; tegnStart(); return; }
-      if (g === 'start') return gjor({ handling: 'start', lek: b.dataset.lek, modus: b.dataset.modus });
+      if (g === 'start') {
+        var lekInfo = (tilstand.leker || []).find(function (x) { return x.id === b.dataset.lek; });
+        if (lekInfo && lekInfo.pluss && !tilstand.pluss) return visPlussTilbud();
+        return gjor({ handling: 'start', lek: b.dataset.lek, modus: b.dataset.modus });
+      }
       if (g === 'egen') {
         var st = egenListe()[Number(b.dataset.i)]; if (!st) return;
         var klar = les('bd_stokk_rom'); if (klar && klar.navn === st.navn) { try { localStorage.removeItem('bd_stokk_rom'); } catch (x) {} }
@@ -1531,7 +1563,9 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (g === 'del-kveld') return delKveld();
       if (g === 'alkoholfri') return gjorAlltid({ handling: 'alkoholfri', paa: !tilstand.alkoholfri });
       if (g === 'gjeng-av') return gjorAlltid({ handling: 'gjeng', gjengId: '' });
+      if (g === 'avslutt-kvelden' && !confirm(T('Avslutte kvelden og vise oppsummeringen? Dere kan fortsette etterpå.', 'End the night and show the summary? You can continue afterwards.'))) return;
       if (g === 'avslutt-kvelden' || g === 'fortsett-kvelden') return gjor({ handling: g });
+      if (g === 'nullstill' && !confirm(T('Nullstille alle slurkene på tavla?', 'Reset all the sips on the scoreboard?'))) return;
       if (g === 'velg-annen') { visAlle = true; if (erVert()) gjor({ handling: 'velg-annen' }); return tegn(); }
       if (g === 'lyd') { lyd.paa = !lyd.paa; skriv('bd_lyd', lyd.paa); if (lyd.paa) { lydCtx(); spillLyd('pop'); } return tegn(); }
       if (g === 'reager') return gjorAlltid({ handling: 'reager', e: b.dataset.e });

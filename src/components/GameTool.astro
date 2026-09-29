@@ -13,7 +13,10 @@ const en = lang === 'en';
 const EN = en;
 const bingoData: any = en ? BINGO_EN : BINGO;
 const deck: any = lang === 'no' || en ? ((en ? DECKS_EN : DECKS) as any)[slug] : null;
-const bingo: any = (lang === 'no' || en) && slug === 'drikke-bingo' ? bingoData : null;
+const bingoFull: any = (lang === 'no' || en) && slug === 'drikke-bingo' ? bingoData : null;
+// «Blandet» er bare alle tiårene slått sammen – bygges i nettleseren i stedet for å sendes to ganger
+const bingo: any = bingoFull && { ...bingoFull, blandet: bingoFull.blandet && { title: bingoFull.blandet.title, spotify: bingoFull.blandet.spotify } };
+const aarData: any = { eras: bingoData.eras };
 ---
 {deck && deck.kind === 'deck' && (
   <section class="gt" data-gt="deck">
@@ -96,6 +99,7 @@ const bingo: any = (lang === 'no' || en) && slug === 'drikke-bingo' ? bingoData 
     <div class="gt-body"></div>
     <script is:inline data-astro-rerun define:vars={{ B: bingo, EN }}>
     (function () {
+      if (B.blandet && !B.blandet.songs) { var bs = {}; B.blandet.songs = []; B.eras.forEach(function (e) { e.songs.forEach(function (x) { var k = x[0] + '|' + x[1]; if (!bs[k]) { bs[k] = 1; B.blandet.songs.push(x); } }); }); }
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
       if (root.dataset.bound) return; root.dataset.bound = '1';
@@ -264,7 +268,7 @@ const bingo: any = (lang === 'no' || en) && slug === 'drikke-bingo' ? bingoData 
   <section class="gt" data-gt="aar">
     <h2>{deck.title}</h2>
     <div class="gt-body"></div>
-    <script is:inline data-astro-rerun define:vars={{ B: bingoData, EN }}>
+    <script is:inline data-astro-rerun define:vars={{ B: aarData, EN }}>
     (function () {
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
@@ -309,7 +313,7 @@ const bingo: any = (lang === 'no' || en) && slug === 'drikke-bingo' ? bingoData 
   <section class="gt rof" data-gt="ringoffire">
     <h2>{en ? 'Play with the phone as the deck' : 'Spill med telefonen som kortstokk'}</h2>
     <p class="small">{en ? "No deck of cards? Put the phone in the middle of the table and draw from here. Type in the names and it'll tell you whose turn it is to draw." : 'Ingen kortstokk? Legg telefonen midt på bordet og trekk herfra. Skriv inn navnene, så sier den hvem som skal trekke.'}</p>
-    <label class="rof-lab" for="rofNavn">{en ? 'Players (separate with commas)' : 'Spillere (skill med komma)'}</label>
+    <label class="rof-lab" for="rofNavn">{en ? 'Players (optional, separate with commas)' : 'Spillere (valgfritt, skill med komma)'}</label>
     <input class="rof-inp" id="rofNavn" type="text" autocomplete="off" placeholder={en ? 'Alex, Sam, Jamie' : 'Jonas, Maria, Petter'} />
     <button class="btn gold rof-start" type="button" data-rof="start">{en ? 'Start game mode' : 'Start spillmodus'}</button>
 

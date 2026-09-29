@@ -47,7 +47,10 @@ export const GET: APIRoute = async ({ params, request }) => {
     const meg = finnSpiller(rom.data, request.headers.get('x-spiller') || '', request.headers.get('x-pollett') || '');
     if (v && v === rom.versjon && meg) return new Response(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
     const lang: Sprak = meg ? rensLang(meg.lang) : qLang;
-    return json({ ...visning(rom.data, rom.versjon, meg, lang), kode, leker: lekeliste(lang) });
+    const vis: any = visning(rom.data, rom.versjon, meg, lang);
+    // Den som ikke er med i rommet, får bare se lobbyen – aldri hemmeligheter fra spillet (spionens sted, ord osv.)
+    if (!meg) return json({ versjon: vis.versjon, vert: vis.vert, meg: null, spillere: vis.spillere, spill: vis.spill ? { type: vis.spill.type, navn: vis.spill.navn } : null, lang, kode, leker: lekeliste(lang) });
+    return json({ ...vis, kode, leker: lekeliste(lang) });
   } catch (e) {
     console.warn('Rom kunne ikke hentes:', (e as Error).message);
     return json({ feil: 'server', melding: qLang === 'en' ? 'Lost connection. Retrying …' : 'Mistet kontakten. Prøver igjen …' }, 503);
@@ -107,6 +110,11 @@ export const POST: APIRoute = async ({ params, request }) => {
       varsle(kode, res.versjon),
       d.handling === 'start' && res.data.spill ? loggRom('lek', d.lek === 'egen' ? 'egen-kortstokk' : String(d.lek || '')) : null,
     ]);
+    // Verving: husk at en innlogget konto faktisk har spilt i et rom med andre (sjekkes før vervebelønning)
+    if ((d.handling === 'bli-med' || d.handling === 'start') && res.data.spillere.length >= 2 && request.headers.get('authorization')) {
+      try { const u = await innloggetBruker(request); if (u) await rpc('konto_rom_spilt', { p_user: u.id }); }
+      catch (e) { console.warn('Rom-spilt feilet:', (e as Error).message); }
+    }
     // Kvelden er over: lagre den i sesongtabellen til gjengen
     if (d.handling === 'avslutt-kvelden' && res.data.gjeng && res.data.spillere.length >= 2 && (res.data.historikk || []).length) {
       try { await rpc('gjeng_kveld_lagre', { p_gjeng: res.data.gjeng.id, p_rom: kode + '-' + res.data.laget, p_data: kveldForGjeng(res.data) }); }

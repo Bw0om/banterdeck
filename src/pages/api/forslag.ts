@@ -7,12 +7,20 @@ export const prerender = false;
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
-export const POST: APIRoute = async ({ request }) => {
+// Enkel sperre mot spam: ett forslag per 20 sekunder og maks 30 i timen per IP (per serverinstans)
+const siste = new Map<string, number[]>();
+export const POST: APIRoute = async ({ request, clientAddress }) => {
   let d: any;
   try { d = await request.json(); } catch { return json({ ok: false, error: 'Ugyldig forespørsel' }, 400); }
 
   // Honeypot: feltet «website» skal alltid være tomt for mennesker.
   if (d.website) return json({ ok: true });
+
+  const ip = String(clientAddress || request.headers.get('x-forwarded-for') || '?');
+  const naa = Date.now(), liste = (siste.get(ip) || []).filter((t) => naa - t < 3600000);
+  if ((liste.length && naa - liste[liste.length - 1] < 20000) || liste.length >= 30) return json({ ok: false, error: 'Vent litt før du sender en ny.' }, 429);
+  liste.push(naa); siste.set(ip, liste);
+  if (siste.size > 5000) siste.clear();
 
   // Forslag til en ny drikkelek
   if (d.type === 'lek') return foreslaLek(d);

@@ -154,7 +154,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     <p class="h2-today-hint">{no ? 'Trykk for å kopiere' : 'Tap to copy'}</p>
   </section>
 
-  <script is:inline data-astro-rerun define:vars={{ pool }}>
+  <script is:inline data-astro-rerun define:vars={{ pool: sveipItems }}>
     var d = new Date();
     var day = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
     var p = pool[day % pool.length];
@@ -215,6 +215,22 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     document.getElementById('installerNei').addEventListener('click', function () {
       el.hidden = true; try { localStorage.setItem('bd_installer_nei', Date.now() + 30 * 86400000); } catch (e) {}
     });
+  })();
+  </script>
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Er du allerede i et rom på denne telefonen? Da blir rom-knappen en snarvei tilbake.
+    var a = document.querySelector('.h2-rom'); if (!a) return;
+    try {
+      var sr = JSON.parse(localStorage.getItem('bd_sist_rom') || 'null');
+      if (!sr || !sr.k || Date.now() - (sr.t || 0) > 24 * 3600 * 1000 || !localStorage.getItem('bd_rom_' + sr.k)) return;
+      var en = /^en/.test(document.documentElement.lang || '');
+      a.href = (en ? '/room' : '/no/rom') + '?k=' + encodeURIComponent(sr.k);
+      a.classList.add('fortsett');
+      a.querySelector('b').textContent = en ? 'You’re in room ' + sr.k : 'Du er i rom ' + sr.k;
+      a.querySelector('small').textContent = en ? 'Tap to go back to the room' : 'Trykk for å gå tilbake til rommet';
+      a.querySelector('.kode').textContent = sr.k;
+    } catch (e) {}
   })();
   </script>
   <script is:inline data-astro-rerun>

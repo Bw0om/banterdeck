@@ -4,6 +4,8 @@ import '@fontsource-variable/bricolage-grotesque';
 import '@fontsource-variable/figtree';
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/fraunces/wght-italic.css';
+import fontOverskrift from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
+import fontTekst from '@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import { SITE_NAME, SELGER, UTVIKLING } from '../config';
 import { collectionsFor, topSituationsFor, dictSection, visible, t } from '../lib/content';
@@ -28,6 +30,8 @@ const altPath = otherLangPath(lang, Astro.url.pathname);
 const enHref = new URL(lang === 'en' ? Astro.url.pathname : altPath, Astro.site);
 const noHref = new URL(lang === 'no' ? Astro.url.pathname : altPath, Astro.site);
 const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+// Terningen (tilfeldig replikk) hører til humordelen – skjul den på vorssidene
+const erHumor = current === '/' || /^(\/no)?\/(situations|ord|uttrykk|dictionary|favourites|categories|kategori)(\/|$)/.test(current);
 
 const hasDict = visible(dictSection, lang);
 const nav = [
@@ -70,6 +74,8 @@ const isCurrent = (href: string) => {
 <html lang={L.htmlLang}>
 <head>
   <meta charset="utf-8" />
+  <link rel="preload" href={fontOverskrift} as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href={fontTekst} as="font" type="font/woff2" crossorigin />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{fullTitle}</title>
   <meta name="description" content={desc} />
@@ -167,7 +173,7 @@ const isCurrent = (href: string) => {
   <ClientRouter />
   <slot name="head" />
 </head>
-<body>
+<body class={erHumor ? 'humor' : undefined}>
   <a class="skip" href="#innhold">{lang === 'no' ? 'Hopp til innhold' : 'Skip to content'}</a>
 
   <div class="shell">
