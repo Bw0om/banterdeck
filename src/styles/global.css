@@ -1641,3 +1641,10 @@ body:not(.humor) .tool.dice{display:none}
 .prov-appen-leker img{width:84px;height:auto;border-radius:10px;flex:0 0 84px}
 .prov-appen-leker b{display:block;font-family:var(--display)}
 .prov-appen-leker small{color:var(--muted);font-size:13px}
+.h2-jul{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px;margin-top:10px;padding:14px 18px;border-radius:22px;background:linear-gradient(135deg,#1f5b43,#123a2b);color:#fdf6e8;border:1px solid rgba(244,183,64,.35)}
+.h2-jul[hidden]{display:none}
+.h2-jul:hover{text-decoration:none;filter:brightness(1.08)}
+.h2-jul .h2-badge{grid-column:1;justify-self:start;background:#f4b740;color:#1a1208}
+.h2-jul b{font-family:var(--display);font-size:19px;display:block}
+.h2-jul small{display:block;font-size:13px;opacity:.85}
+.h2-jul-ikon{grid-column:2;grid-row:1 / span 2;font-size:40px}

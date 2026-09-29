@@ -72,6 +72,19 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
       <img src={ukeBygg.bilde} alt="" width="120" height="63" loading="lazy" decoding="async" />
     </a>
   )}
+  <a class="h2-jul" id="julebord" href={no ? '/no/rom?lek=pakke-julebord' : '/room?lek=pakke-julebord'} hidden>
+    <span class="h2-badge">{no ? '🎄 Sesongen er her' : '🎄 It’s the season'}</span>
+    <span><b>{no ? 'Julebordpakken' : 'The Christmas party pack'}</b><small>{no ? '94 kort til julebordet – trygt med kolleger, men aldri kjedelig' : '94 cards for the office party – safe with coworkers, never boring'}</small></span>
+    <span class="h2-jul-ikon" aria-hidden="true">🎁</span>
+  </a>
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Julebordsesongen: 1. november til lille julaften (norsk tid)
+    var a = document.getElementById('julebord'); if (!a) return;
+    var o = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' })), m = o.getMonth(), d = o.getDate();
+    if (m === 10 || (m === 11 && d <= 23)) a.hidden = false;
+  })();
+  </script>
   <a class="h2-rom" href={no ? '/no/rom' : '/room'}>
     <span><b>{no ? 'Spill sammen fra hver sin telefon' : 'Play together from your own phones'}</b><small>{no ? 'Lag et rom og del koden' : 'Create a room and share the code'}</small></span>
     <span class="kode" aria-hidden="true">ABCD</span>
