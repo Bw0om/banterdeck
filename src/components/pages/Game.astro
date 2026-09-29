@@ -7,6 +7,7 @@ import DigitalLek from '../DigitalLek.astro';
 import DECKS from '../../data/decks.json';
 import { ROMLEK, romLenke } from '../../lib/romlenke';
 import { PLUSS_SLUGS } from '../../lib/plussleker';
+import { illustrasjon } from '../../lib/illustrasjon';
 import { gamesFor, gameHref, t, trules } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { game, lang = 'en' } = Astro.props as { game: any; lang?: Lang };
@@ -54,7 +55,7 @@ const jsonLd = JSON.stringify([{
     <a href={path(lang, '/')}>{L.breadcrumbHome}</a> ›
     <a href={path(lang, '/drinking-games')}>{L.gamesTitle}</a> › {name}
   </p>
-  <h1>{name}</h1>
+  <div class="lek-topp"><h1>{name}</h1><img class="lek-illu" src={illustrasjon(game)} alt="" width="240" height="126" decoding="async" /></div>
   {game.fra && <p class="lek-fra">{lang === 'no' ? 'Sendt inn av' : 'Submitted by'} <b>{game.fra}</b></p>}
   <div class="meta2">
     <div><small>{lang === 'no' ? 'Spillere' : 'Players'}</small><b>{game.pl}</b></div>

@@ -7,10 +7,11 @@ import Sveip from '../Sveip.astro';
 import { rundeKort } from '../../lib/nyhetsrunden';
 import { UKENS_LEKER, ukensLek } from '../../lib/ukenslek';
 import { games as alleLeker } from '../../lib/content';
+import { illustrasjon } from '../../lib/illustrasjon';
 const NR = rundeKort();
 const SPRAK = ((Astro.props as any).lang || 'en') as 'no' | 'en';
 const UKE = UKENS_LEKER.map((sl) => alleLeker.find((g: any) => g.slug === sl)).filter((g: any) => g && (SPRAK === 'no' || g.only !== 'no'))
-  .map((g: any) => ({ slug: g.slug, navn: t(g.name, SPRAK), pl: g.pl, gruppe: t(g.group.title, SPRAK) }));
+  .map((g: any) => ({ slug: g.slug, navn: t(g.name, SPRAK), pl: g.pl, gruppe: t(g.group.title, SPRAK), bilde: illustrasjon(g) }));
 const ukeBygg = UKE.find((x) => x.slug === ukensLek()) || UKE[0];
 const nrBygg = NR.find((r) => r.fra <= Date.now()) || NR[NR.length - 1];
 import { situationSectionsFor, dictSection, visible, langGroups, itemsOf, t, tf, isCrude, totalsFor, topSituationsFor, situationById, gamesFor, dictCount } from '../../lib/content';
@@ -68,7 +69,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     <a class="h2-uke" id="ukensLek" href={no ? `/no/drinking-games/${ukeBygg.slug}/` : `/drinking-games/${ukeBygg.slug}/`} data-leker={JSON.stringify(UKE)} data-base={no ? '/no/drinking-games/' : '/drinking-games/'}>
       <span class="h2-badge">{no ? 'Ukens lek' : 'Game of the week'}</span>
       <span><b>{ukeBygg.navn}</b><small>{ukeBygg.gruppe} · {ukeBygg.pl} {no ? 'spillere' : 'players'}</small></span>
-      <img src={`/og/liten/${ukeBygg.slug}.webp`} alt="" width="120" height="63" loading="lazy" decoding="async" />
+      <img src={ukeBygg.bilde} alt="" width="120" height="63" loading="lazy" decoding="async" />
     </a>
   )}
   <a class="h2-rom" href={no ? '/no/rom' : '/room'}>
@@ -230,7 +231,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     a.href = (a.dataset.base || '/no/drinking-games/') + x.slug + '/';
     a.querySelector('b').textContent = x.navn;
     a.querySelector('small').textContent = x.gruppe + ' · ' + x.pl + (a.dataset.base === '/drinking-games/' ? ' players' : ' spillere');
-    a.querySelector('img').src = '/og/liten/' + x.slug + '.webp';
+    a.querySelector('img').src = x.bilde;
   })();
   </script>
 </Base>

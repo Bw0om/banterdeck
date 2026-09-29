@@ -1451,3 +1451,9 @@ label.rom-gjeng select{background:var(--card);color:var(--ink);border:1px solid 
 .temaknapp{display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
 button.langlink{cursor:pointer}
 :root[data-theme="light"] .tool{background:var(--card);border-color:var(--border2);box-shadow:0 8px 20px rgba(60,40,10,.18)}
+
+/* ---------- Illustrasjoner for lekene ---------- */
+.lek-topp{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.lek-topp h1{min-width:0}
+.lek-illu{width:150px;height:auto;border-radius:16px;flex:none;display:block}
+@media (max-width:560px){.lek-illu{width:108px;border-radius:12px}}
