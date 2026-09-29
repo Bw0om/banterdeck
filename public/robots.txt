@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /admin
-Sitemap: https://mittvors.no/sitemap-index.xml
+Sitemap: https://www.mittvors.no/sitemap-index.xml

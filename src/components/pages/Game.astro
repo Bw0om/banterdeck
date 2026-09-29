@@ -45,7 +45,7 @@ const jsonLd = JSON.stringify([{
   '@context': 'https://schema.org', '@type': 'Article', headline: `${name} – ${lang === 'no' ? 'regler' : 'rules'}`,
   description, inLanguage: lang === 'no' ? 'nb' : 'en', isFamilyFriendly: false,
   image: new URL(bilde, Astro.site).toString(), mainEntityOfPage: side,
-  publisher: { '@type': 'Organization', name: 'Mitt vors', url: 'https://mittvors.no' },
+  publisher: { '@type': 'Organization', name: 'Mitt vors', url: 'https://www.mittvors.no' },
 }, {
   '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
     { '@type': 'ListItem', position: 1, name: lang === 'no' ? 'Forside' : 'Home', item: new URL(path(lang, '/'), Astro.site).toString() },

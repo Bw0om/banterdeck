@@ -3,7 +3,7 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  site: 'https://mittvors.no',
+  site: 'https://www.mittvors.no',
   integrations: [sitemap({
     filter: (p) => !p.includes('/admin') && !p.includes('/statistikk') && !p.includes('/kortstokk'),
     // Nyhetsrunden lages på serveren (slippes fredag kl. 12), så den legges til her

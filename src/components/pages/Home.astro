@@ -35,7 +35,7 @@ const quick = topSituationsFor(lang).slice(0, 5);
 const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
 ---
 <Base lang={lang}>
-  <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Mitt vors', url: 'https://mittvors.no/', inLanguage: lang === 'no' ? 'nb' : 'en' })} /></Fragment>
+  <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Mitt vors', url: 'https://www.mittvors.no/', inLanguage: lang === 'no' ? 'nb' : 'en' })} /></Fragment>
   <section class="h2-hero">
     <h1>{no ? <>Klar for<br />vors?</> : <>Ready to<br />pre-game?</>}</h1>
     <p class="h2-sub">{no ? `${totals.games} drikkeleker, rom der alle spiller fra sin egen telefon – og ny Nyhetsrunde hver fredag.` : `${totals.games} drinking games, rooms where everyone plays from their own phone – and a plan for the whole night.`}</p>
