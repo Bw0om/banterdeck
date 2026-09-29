@@ -140,6 +140,36 @@ const no = lang === 'no';
         ut.push({ i: '⚔️', t: EN ? 'Closest duel' : 'Jevneste duell', n: s[0].navn + (EN ? ' vs ' : ' mot ') + s[1].navn, v: EN ? 'only ' + (s[0].slurker - s[1].slurker) + ' sips apart' : 'bare ' + (s[0].slurker - s[1].slurker) + ' slurker skiller' });
       return ut;
     }
+
+    /* ---------- Gjengens lov: lovboka ---------- */
+    function lovbok() {
+      var L = G.lovbok; if (!L) return '';
+      var gjelder = L.lover.filter(function (x) { return x.status === 'gjelder' || x.status === 'anket'; });
+      var gamle = L.lover.filter(function (x) { return x.status !== 'gjelder' && x.status !== 'anket'; });
+      var STATUS = EN ? { opphevet: 'repealed', vetoet: 'vetoed' } : { opphevet: 'opphevet', vetoet: 'vetoet' };
+      function lov(x) {
+        return '<li class="lb-lov ' + x.status + (x.grunnlov ? ' grunnlov' : '') + '"><b>«' + esc(x.tekst) + '»</b><small>' + (x.grunnlov ? (EN ? '📜 Constitution · ' : '📜 Grunnlov · ') : '') +
+          esc(x.av) + (EN ? ' · night ' : ' · kveld ') + x.kveld + (x.ja != null ? ' · ' + x.ja + '–' + x.nei : '') +
+          (x.status === 'anket' ? (EN ? ' · ⚖️ appealed by ' : ' · ⚖️ anket av ') + esc(x.anketNavn) + (EN ? ' – trial next night' : ' – rettssak neste kveld') : '') +
+          (STATUS[x.status] ? ' · ' + STATUS[x.status] + (x.vetoNavn ? (EN ? ' by ' : ' av ') + esc(x.vetoNavn) : '') : '') + '</small>' +
+          (x.kanAnke || x.kanVeto ? '<span class="lb-knapper">' + (x.kanAnke ? '<button class="linkbtn" data-g="lov-anke" data-lov="' + esc(x.id) + '" type="button">' + (EN ? 'Appeal' : 'Anke') + '</button>' : '') +
+            (x.kanVeto ? '<button class="linkbtn" data-g="lov-veto" data-lov="' + esc(x.id) + '" type="button">' + (EN ? 'Veto' : 'Veto') + '</button>' : '') + '</span>' : '') + '</li>';
+      }
+      return '<section class="lovbok" id="lovboka"><h2 class="gj-h2">' + (EN ? '⚖️ The Crew’s Law' : '⚖️ Gjengens lov') + '</h2>' +
+        '<p class="small">' + (EN ? 'Season ' + L.sesong + ' · ' + L.kvelder + (L.kvelder === 1 ? ' night played' : ' nights played') : 'Sesong ' + L.sesong + ' · ' + L.kvelder + (L.kvelder === 1 ? ' kveld spilt' : ' kvelder spilt')) +
+          (G.medlem ? ' · ' + (L.harVeto ? (EN ? 'you still have your veto ✋' : 'du har fortsatt vetoen din ✋') : (EN ? 'your veto is used' : 'vetoen din er brukt')) : '') + '</p>' +
+        (L.titler.length ? '<div class="lb-titler">' + L.titler.map(function (t) { return '<span>🏷️ <b>' + esc(t.navn) + '</b> ' + esc(t.tittel) + '</span>'; }).join('') + '</div>' : '') +
+        '<h3>' + (EN ? 'Laws in force' : 'Lovene som gjelder') + '</h3>' +
+        (gjelder.length ? '<ol class="lb-lover">' + gjelder.map(lov).join('') + '</ol>' : '<p class="small">' + (EN ? 'No laws yet. Start a room for the crew and pick “The Crew’s Law” – the winner writes the first one.' : 'Ingen lover ennå. Start et rom for gjengen og velg «Gjengens lov» – vinneren skriver den første.') + '</p>') +
+        (G.medlem ? '<p class="small">' + (EN ? 'Weren’t there when a law was passed? You can appeal it until the next night – then it goes to trial. Everyone has one veto per season that stops a law immediately.' : 'Var du ikke med da en lov ble vedtatt? Du kan anke den frem til neste kveld – da blir det rettssak. Alle har ett veto per sesong som stopper en lov med en gang.') + '</p>' : '') +
+        '<h3>' + (EN ? 'Envelopes' : 'Konvoluttene') + '</h3><div class="lb-konv">' + L.konvolutter.map(function (k) {
+          return k.apnet ? '<div class="apen"><small>✉️ ' + k.nr + '</small><b>' + esc(k.tittel) + '</b><p>' + esc(k.tekst) + '</p></div>'
+            : '<div class="lukket"><small>🔒 ' + k.nr + '</small><p>' + esc(k.hint) + '</p></div>';
+        }).join('') + '</div>' +
+        (gamle.length ? '<details class="lb-gamle"><summary>' + (EN ? 'Repealed and vetoed laws' : 'Opphevede og vetoede lover') + ' (' + gamle.length + ')</summary><ol class="lb-lover">' + gamle.map(lov).join('') + '</ol></details>' : '') +
+        (L.logg.length ? '<details class="lb-logg"><summary>' + (EN ? 'History' : 'Historikken') + '</summary><ul>' + L.logg.map(function (x) { return '<li><small>' + dato(x.dato) + '</small> ' + esc(x.tekst) + '</li>'; }).join('') + '</ul></details>' : '') +
+        '</section>';
+    }
     function vis() {
       var aar = {}; (G.kvelder || []).forEach(function (k) { aar[new Date(k.dato).getFullYear()] = 1; });
       aar[new Date().getFullYear()] = 1;
@@ -160,6 +190,7 @@ const no = lang === 'no';
         '<div class="gj-knapper"><button class="btn gold" data-g="inviter" type="button">' + (EN ? 'Invite the crew' : 'Inviter gjengen') + '</button>' +
           (G.medlem ? '<a class="btn ghost" href="' + ROM + '?gjeng=' + encodeURIComponent(G.id) + '">' + (EN ? 'Start a room for the crew' : 'Start et rom for gjengen') + '</a>' : '') +
           (!G.medlem ? '<button class="btn ghost" data-g="bli-med" type="button">' + (G.innlogget ? (EN ? 'Join the crew' : 'Bli med i gjengen') : (EN ? 'Log in to join' : 'Logg inn for å bli med')) + '</button>' : '') + '</div>' +
+        lovbok() +
         '<div class="rom-mod gj-sesong" role="group" aria-label="' + (EN ? 'Season' : 'Sesong') + '">' + aarListe.map(function (a) { return '<button type="button" data-sesong="' + a + '" aria-pressed="' + (sesong === a) + '">' + a + '</button>'; }).join('') +
           '<button type="button" data-sesong="alle" aria-pressed="' + (sesong === 'alle') + '">' + (EN ? 'All' : 'Alle') + '</button></div>' +
         (kv.length ? '' : (EN
@@ -231,6 +262,14 @@ const no = lang === 'no';
       if (g === 'forlat') {
         if (!confirm(EN ? 'Leave ' + G.navn + '? The table stays for everyone else.' : 'Forlate ' + G.navn + '? Tabellen blir liggende for de andre.')) return;
         return kall('/api/gjeng', { handling: 'forlat', id: G.id }).then(function () { location.href = SIDE; });
+      }
+      if (g === 'lov-anke' || g === 'lov-veto') {
+        var mitt = ''; try { mitt = JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (x) {}
+        var navnInn = prompt(EN ? 'Your name in the crew' : 'Navnet ditt i gjengen', mitt); if (navnInn === null) return;
+        var grunn = '';
+        if (g === 'lov-anke') { grunn = prompt(EN ? 'Why? (optional – read out at the trial)' : 'Hvorfor? (valgfritt – leses opp i rettssaken)', ''); if (grunn === null) return; }
+        else if (!confirm(EN ? 'Use your veto? You only get one per season, and the law stops immediately.' : 'Bruke vetoen din? Du har bare én per sesong, og loven stoppes med en gang.')) return;
+        return kall('/api/gjeng', { handling: g, id: G.id, lov: b.dataset.lov, navn: navnInn, grunn: grunn }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
       }
       if (g === 'slett-kveld') {
         if (!confirm(EN ? 'Remove this night from the table?' : 'Fjerne denne kvelden fra tabellen?')) return;

@@ -2,6 +2,7 @@
 import type { APIRoute } from 'astro';
 import { rpc } from '../../../lib/spilt';
 import { json, innloggetBruker } from '../../../lib/konto';
+import { anke, veto } from '../../../lib/lov';
 export const prerender = false;
 
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -53,6 +54,21 @@ export const POST: APIRoute = async ({ request }) => {
         if (!UUID.test(id)) return json({ feil: 'ugyldig' }, 400);
         await rpc('gjeng_forlat', { p_user: u.id, p_id: id });
         return json({ ok: true });
+      }
+      case 'lov-anke':
+      case 'lov-veto': {
+        if (!UUID.test(id) || !/^[\w-]{3,60}$/.test(String(d.lov || ''))) return json({ feil: 'ugyldig' }, 400);
+        if (!(await rpc('gjeng_tilgang', { p_user: u.id, p_id: id }))) return json({ feil: 'medlem', melding: 'Bare medlemmer av gjengen kan gjøre dette.' }, 403);
+        const navn = rensNavn(d.navn).slice(0, 20) || 'Et medlem';
+        for (let i = 0; i < 4; i++) {
+          const cur = await rpc('gjeng_lov_hent', { p_gjeng: id });
+          if (!cur) return json({ feil: 'ukjent' }, 404);
+          const r: any = d.handling === 'lov-anke' ? anke(cur.lov, String(d.lov), u.id, navn, String(d.grunn || '')) : veto(cur.lov, String(d.lov), u.id, navn);
+          if (r.feil) return json({ feil: 'lov', melding: r.feil }, 409);
+          const v = await rpc('gjeng_lov_lagre', { p_gjeng: id, p_lov: r.lov, p_versjon: cur.versjon });
+          if (v !== null && v !== undefined) return json({ ok: true, nye: r.nye || [] });
+        }
+        return json({ feil: 'opptatt', melding: 'Noen andre endret lovboka samtidig. Prøv igjen.' }, 409);
       }
       case 'slett-kveld': {
         const kveld = Number(d.kveld);

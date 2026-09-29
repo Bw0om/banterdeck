@@ -374,7 +374,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         return '<div class="rom-vent"><p class="rom-stor">' + T('Venter på at ' + esc(navn(t.vert)) + ' velger en lek …', 'Waiting for ' + esc(navn(t.vert)) + ' to pick a game …') + '</p>' +
           '<p class="small">' + t.spillere.length + T(' med i rommet. Del koden <b>', ' in the room. Share the code <b>') + esc(kode) + T('</b> med resten.', '</b> with the others.') + '</p>' + romMerker() + '</div>';
       }
-      return plassInfo() + qrBoks() + romValg() + egneStokker() +
+      return plassInfo() + qrBoks() + romValg() + gjengBoks() + lovLobbyKort() + egneStokker() +
         '<h2 class="rom-h2">' + T('Velg en lek', 'Pick a game') + '</h2>' +
         lekeGrupper(t.leker.filter(function (l) { return !l.pluss; }), function (l) {
           var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
@@ -516,6 +516,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var t = tilstand, ut = '';
       if (t.alkoholfri) ut += '<p class="small">' + T('🥤 Alkoholfri kveld – straffepoeng i stedet for alkohol.', '🥤 Alcohol-free night – penalty points instead of drinks.') + '</p>';
       if (t.gjeng) ut += '<p class="small">' + T('🏆 Kvelden telles i sesongen til ', '🏆 Tonight counts toward the season for ') + '<a href="' + RUTE.gjeng + '?k=' + esc(t.gjeng.kode) + '" target="_blank" rel="noopener">' + esc(t.gjeng.navn) + '</a>.</p>';
+      ut += gjengBoks();
       return ut;
     }
 
@@ -951,6 +952,169 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       });
       document.body.appendChild(m);
     }
+
+    /* ---------- Gjengens lov ---------- */
+    var gjengSjekk = '', gjengSjekket = false;
+    /** Kobler denne telefonen til kontoen i gjengen (medlemmer kan stemme over lover). */
+    function sjekkGjengMedlem() {
+      var t = tilstand; if (!t || !t.gjeng || !meg || gjengSjekket) return;
+      var jeg = (t.spillere || []).find(function (p) { return p.id === t.meg; });
+      if (!jeg || jeg.medlem) return;
+      if (!(window.BDKonto && window.BDKonto.les())) { gjengSjekk = 'logg-inn'; return; }
+      gjengSjekket = true;
+      api('POST', '/api/rom/' + kode, { handling: 'gjeng-meg', id: meg.id, pollett: meg.pollett }).then(ta).catch(function (e) { gjengSjekk = e.kode || 'feil'; tegn(); });
+    }
+    function gjengBoks() {
+      var t = tilstand; if (!t.gjeng) return '';
+      var jeg = (t.spillere || []).find(function (p) { return p.id === t.meg; });
+      if (!jeg || jeg.medlem) return '';
+      if (gjengSjekk === 'logg-inn') return '<p class="lov-medlem">' + T('Logg inn for å stemme over gjengens lover. ', 'Log in to vote on the crew’s laws. ') + '<a href="' + RUTE.konto + '" data-lov-login>' + T('Logg inn', 'Log in') + '</a></p>';
+      if (gjengSjekk === 'ikke-medlem') return '<p class="lov-medlem">' + T('Du er ikke med i ', 'You’re not in ') + '<b>' + esc(t.gjeng.navn) + '</b>' + T(' ennå. ', ' yet. ') + '<button class="btn small gold" data-g="lov-bli" type="button">' + T('Bli med i gjengen', 'Join the crew') + '</button></p>';
+      return '';
+    }
+    function lovLobbyKort() {
+      var t = tilstand; if (!t.gjeng || !erVert()) return '';
+      return '<div class="lov-start"><p class="rom-etikett">' + T('Bare for gjenger', 'Crews only') + '</p><h2>' + T('⚖️ Gjengens lov', '⚖️ The Crew’s Law') + '</h2>' +
+        '<p>' + T('Korte runder der dere måler hvor godt dere kjenner hverandre. Vinneren skriver en <b>permanent lov</b> i lovboka til ' + esc(t.gjeng.navn) + ', taperen får en tittel – og forseglede konvolutter åpnes etter hvert.', 'Short rounds that test how well you know each other. The winner writes a <b>permanent law</b> in ' + esc(t.gjeng.navn) + '’s law book, the loser gets a title – and sealed envelopes open along the way.') + '</p>' +
+        '<div class="rom-mod">' + [4, 6, 8].map(function (n) { return '<button type="button" data-g="start" data-lek="lov" data-modus="' + n + '">' + n + T(' runder', ' rounds') + '</button>'; }).join('') + '</div>' +
+        '<p class="small"><a href="' + RUTE.gjeng + '?k=' + esc(t.gjeng.kode) + '#lovboka" target="_blank" rel="noopener">' + T('Se lovboka', 'See the law book') + '</a></p></div>';
+    }
+    function lovPoeng(s, fremhev) {
+      var l = tilstand.spillere.map(function (p) { return { id: p.id, navn: p.navn, p: (s.poeng || {})[p.id] || 0 }; }).sort(function (a, b) { return b.p - a.p; });
+      return '<ol class="lov-poeng">' + l.map(function (x) {
+        return '<li class="' + (x.id === fremhev ? 'fremhev' : '') + '"><span>' + (x.id === s.krone ? '👑 ' : '') + esc(x.navn) + '</span><b>' + x.p + '</b></li>';
+      }).join('') + '</ol>';
+    }
+    function lovLover(s) {
+      if (!s.lover || !s.lover.length) return '<p class="small">' + T('Lovboka er tom. Første lov skrives i kveld.', 'The law book is empty. The first law gets written tonight.') + '</p>';
+      return '<ol class="lov-liste">' + s.lover.map(function (x) {
+        return '<li><b>«' + esc(x.tekst) + '»</b><small>' + (x.grunnlov ? T('📜 Grunnlov · ', '📜 Constitution · ') : '') + esc(x.av) + (x.status === 'anket' ? T(' · anket av ', ' · appealed by ') + esc(x.anketNavn) : '') + '</small></li>';
+      }).join('') + '</ol>';
+    }
+    function stemmeStatus(harStemt, velgere) { return '<p class="rom-status">' + harStemt.length + T(' av ', ' of ') + velgere + T(' har stemt', ' have voted') + '</p>'; }
+    function nesteKnapp(tekst) { return erVert() ? '<button class="rom-stor-knapp" data-g="lov-neste" type="button">' + esc(tekst) + '</button>' : '<p class="small">' + T('Venter på verten …', 'Waiting for the host …') + '</p>'; }
+    function lovSpill(s) {
+      var n = tilstand.spillere.length, velgere = (s.medlemmer && s.medlemmer.length) ? s.medlemmer.length : n;
+      var topp = '<p class="lov-topp">' + T('Kveld ', 'Night ') + s.kveld + (s.rundeNr ? ' · ' + T('Runde ', 'Round ') + s.rundeNr + '/' + s.runder : '') + (s.dobbel ? ' · <b>' + T('DOBBEL POENG', 'DOUBLE POINTS') + '</b>' : '') + '</p>';
+      var ut = topp + gjengBoks();
+      if (s.fase === 'intro') {
+        return ut + '<h2 class="lov-h">' + T('Lovene som gjelder', 'The laws in force') + '</h2>' + lovLover(s) +
+          (s.titler && s.titler.length ? '<p class="lov-titler">' + s.titler.map(function (x) { return '🏷️ <b>' + esc(x.navn) + '</b> – ' + esc(x.tittel); }).join('<br>') + '</p>' : '') +
+          (s.krone ? '<p class="small">👑 ' + esc(navn(s.krone)) + T(' bærer kronen og starter på −2.', ' wears the crown and starts on −2.') + '</p>' : '') +
+          '<p class="small">' + T('Husk: lovene gjelder hele kvelden. Bryter noen en lov, drikker de.', 'Remember: the laws apply all night. Break one and you drink.') + '</p>' +
+          nesteKnappStart();
+      }
+      if (s.fase === 'rett' || s.fase === 'dom') {
+        var r = s.rett || {};
+        ut += '<p class="rom-etikett">' + T('⚖️ Rettssak', '⚖️ Trial') + '</p><p class="rom-sporsmal">«' + esc(r.tekst) + '»</p>' +
+          '<p class="small">' + T('Innført av ', 'Introduced by ') + '<b>' + esc(r.av) + '</b>. ' + esc(r.anketNavn) + T(' var ikke med og har anket.', ' wasn’t there and has appealed.') + (r.grunn ? ' ' + T('Begrunnelse: ', 'Reason: ') + '«' + esc(r.grunn) + '»' : '') + '</p>';
+        if (s.fase === 'rett') return ut + '<p>' + T('Den som anket og den som innførte loven får 30 sekunder hver. Så stemmer gjengen. <b>2/3 må stemme for å beholde loven.</b>', 'The appellant and the author get 30 seconds each. Then the crew votes. <b>2/3 must vote to keep the law.</b>') + '</p>' +
+          (s.kanStemme ? '<div class="rom-valg en"><button type="button" data-g="lov-rett" data-v="1" aria-pressed="' + (s.minStemme === true) + '">' + T('Behold loven', 'Keep the law') + '</button><button type="button" data-g="lov-rett" data-v="0" aria-pressed="' + (s.minStemme === false) + '">' + T('Opphev den', 'Repeal it') + '</button></div>' : '<p class="small">' + T('Bare medlemmer av gjengen stemmer.', 'Only crew members vote.') + '</p>') +
+          stemmeStatus(s.harStemt || [], velgere) + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+        var d = s.dom || {};
+        return ut + '<p class="dl-melding dl-stor">' + (d.beholdt ? T('Loven står! ⚖️', 'The law stands! ⚖️') : T('Loven er opphevet! 🗑️', 'The law is repealed! 🗑️')) + '</p><p>' + d.behold + T(' for å beholde, ', ' to keep, ') + d.opphev + T(' for å oppheve.', ' to repeal.') + '</p>' +
+          nesteKnapp(s.flereSaker ? T('Neste sak', 'Next case') : T('Start rundene', 'Start the rounds'));
+      }
+      if ((s.fase === 'runde' || s.fase === 'fasit') && s.r) return ut + lovRunde(s);
+      if (s.fase === 'resultat') {
+        return ut + '<p class="dl-melding dl-stor">🏆 ' + esc(navn(s.vinner)) + T(' vant kvelden!', ' won the night!') + '</p>' + lovPoeng(s, s.vinner) +
+          (s.taper ? '<p>' + esc(navn(s.taper)) + T(' kom sist og får en tittel til neste gang.', ' came last and gets a title until next time.') + '</p>' : '') +
+          nesteKnapp(T('Til lovforslaget', 'On to the proposal'));
+      }
+      if (s.fase === 'forslag') {
+        if (tilstand.meg !== s.vinner) return ut + '<p class="rom-stor">' + esc(navn(s.vinner)) + T(' skriver en ny lov …', ' is writing a new law …') + '</p><p class="small">' + T('Loven gjelder hver gang gjengen spiller – til den blir opphevet.', 'The law applies every time the crew plays – until it’s repealed.') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+        return ut + '<p class="rom-etikett">' + T('Du vant! Skriv en lov', 'You won! Write a law') + '</p>' +
+          '<p class="small">' + T('Den gjelder hver gang gjengen spiller. F.eks. «Alle skåler på dialekt», «Jonas må si "kjære venner" før han snakker».', 'It applies every time the crew plays. E.g. “Everyone toasts in an accent”, “Sam has to say “dear friends” before speaking”.') + '</p>' +
+          '<form class="rf-skjema" id="lovSkjema"><div class="rf-rad"><input id="lovInput" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="' + T('Den nye loven …', 'The new law …') + '"><button class="btn gold" type="submit">' + T('Foreslå', 'Propose') + '</button></div></form>' +
+          (s.kanOppheve && s.kanOppheve.length ? '<p class="rom-etikett">' + T('… eller opphev en lov', '… or repeal a law') + '</p><div class="rom-valg en">' + s.kanOppheve.map(function (x) { return '<button type="button" data-g="lov-opphev" data-id="' + esc(x.id) + '">🗑️ ' + esc(x.tekst) + '</button>'; }).join('') + '</div>' : '') +
+          fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+      }
+      if (s.fase === 'stem') {
+        var f = s.forslag || {};
+        return ut + '<p class="rom-etikett">' + (f.type === 'opphev' ? T('Forslag: oppheve loven', 'Proposal: repeal the law') : T('Lovforslag fra ', 'Proposal from ') + esc(navn(s.vinner))) + '</p><p class="rom-sporsmal">«' + esc(f.tekst) + '»</p>' +
+          (s.kanStemme ? '<div class="rom-valg en"><button type="button" data-g="lov-stem" data-v="1" aria-pressed="' + (s.minStemme === true) + '">' + T('👍 Ja', '👍 Yes') + '</button><button type="button" data-g="lov-stem" data-v="0" aria-pressed="' + (s.minStemme === false) + '">' + T('👎 Nei', '👎 No') + '</button></div>' : '<p class="small">' + T('Bare medlemmer av gjengen stemmer.', 'Only crew members vote.') + '</p>') +
+          stemmeStatus(s.harStemt || [], velgere) + '<p class="small">' + T('Flertallet bestemmer. Uavgjort = vedtatt.', 'Majority decides. A tie = passed.') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+      }
+      if (s.fase === 'vedtatt') {
+        var f2 = s.forslag || {}, rs = s.resultatStem || { ja: 0, nei: 0 };
+        if (s.utenForslag) return ut + '<p class="dl-melding dl-stor">' + T('Tiden gikk ut – ingen ny lov i kveld.', 'Time ran out – no new law tonight.') + '</p>' + nesteKnapp(T('Videre', 'Continue'));
+        return ut + '<p class="rom-sporsmal">«' + esc(f2.tekst) + '»</p>' +
+          (s.vetoAv ? '<p class="dl-melding dl-stor">✋ ' + esc(navn(s.vetoAv)) + T(' brukte vetoen sin!', ' used their veto!') + '</p><p class="small">' + T('Loven er stoppet. Vetoen er brukt opp for resten av sesongen.', 'The law is stopped. That veto is used up for the rest of the season.') + '</p>'
+            : '<p class="dl-melding dl-stor">' + (s.vedtatt ? (f2.type === 'opphev' ? T('Opphevet! 🗑️', 'Repealed! 🗑️') : T('Vedtatt! 📜', 'Passed! 📜')) : T('Nedstemt! 🙅', 'Voted down! 🙅')) + '</p><p>' + rs.ja + T(' ja, ', ' yes, ') + rs.nei + T(' nei', ' no') + '</p>') +
+          (s.kanVeto ? '<button class="btn ghost lov-veto" data-g="lov-veto" type="button">' + T('✋ Bruk vetoen min (én per sesong)', '✋ Use my veto (one per season)') + '</button>' : '') +
+          nesteKnapp(T('Videre', 'Continue'));
+      }
+      if (s.fase === 'tittel') {
+        if (tilstand.meg !== s.vinner) return ut + '<p class="rom-stor">' + esc(navn(s.vinner)) + T(' finner en tittel til ', ' is picking a title for ') + esc(navn(s.taper)) + ' …</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+        return ut + '<p class="rom-etikett">' + T('Gi ', 'Give ') + esc(navn(s.taper)) + T(' en tittel til neste gang', ' a title until next time') + '</p><div class="rom-valg en">' +
+          (s.tittelValg || []).map(function (x) { return '<button type="button" data-g="lov-tittel" data-t="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>' +
+          '<form class="rf-skjema" id="tittelSkjema"><div class="rf-rad"><input id="tittelInput" maxlength="40" autocomplete="off" placeholder="' + T('… eller skriv din egen', '… or write your own') + '"><button class="btn gold" type="submit">' + T('Gi tittel', 'Give title') + '</button></div></form>' +
+          fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+      }
+      if (s.fase === 'konvolutt') {
+        var k = s.konvolutt || {};
+        return ut + '<div class="lov-konvolutt"><span>✉️</span><small>' + T('Konvolutt ', 'Envelope ') + k.nr + '</small><h2>' + esc(k.tittel) + '</h2><p>' + esc(k.tekst) + '</p></div>' +
+          nesteKnapp(s.flereKonvolutter ? T('Åpne neste konvolutt', 'Open the next envelope') : T('Videre', 'Continue'));
+      }
+      if (s.fase === 'ferdig') {
+        return ut + '<p class="dl-melding dl-stor">' + T('Kvelden er skrevet inn i lovboka ⚖️', 'The night is written into the law book ⚖️') + '</p>' +
+          '<ul class="lov-oppsum">' + (s.hendelser || []).filter(function (h) { return h.type !== 'kveld'; }).map(function (h) {
+            if (h.type === 'lov') return '<li>📜 ' + T('Ny lov: ', 'New law: ') + '«' + esc(h.tekst) + '»</li>';
+            if (h.type === 'tittel') return '<li>🏷️ ' + esc(h.navn) + ': ' + esc(h.tittel) + '</li>';
+            if (h.type === 'veto') return '<li>✋ ' + esc(h.navn) + T(' brukte vetoen', ' used their veto') + '</li>';
+            if (h.type === 'avvist') return '<li>🙅 ' + T('Nedstemt: ', 'Voted down: ') + '«' + esc(h.tekst) + '»</li>';
+            if (h.type === 'opphev') return '<li>🗑️ ' + T('En lov ble opphevet', 'A law was repealed') + '</li>';
+            if (h.type === 'dom') return '<li>⚖️ ' + T('Rettssaken er avgjort', 'The trial is settled') + '</li>';
+            return '';
+          }).join('') + '</ul>' +
+          (s.lagret ? '' : '<p class="small">' + T('Lagrer i lovboka …', 'Saving to the law book …') + '</p>') +
+          '<p><a class="btn ghost" href="' + RUTE.gjeng + '?k=' + esc(tilstand.gjeng ? tilstand.gjeng.kode : '') + '#lovboka" target="_blank" rel="noopener">' + T('Se lovboka', 'See the law book') + '</a></p>' +
+          (erVert() ? '<button class="rom-stor-knapp" data-g="avslutt" type="button">' + T('Tilbake til lobbyen', 'Back to the lobby') + '</button>' : '');
+      }
+      return ut;
+    }
+    function nesteKnappStart() {
+      return erVert() ? '<button class="rom-stor-knapp" data-g="lov-start" type="button">' + T('Start kvelden', 'Start the night') + '</button>' : '<p class="small">' + T('Venter på at verten starter …', 'Waiting for the host to start …') + '</p>';
+    }
+    function lovRunde(s) {
+      var r = s.r, n = tilstand.spillere.length, f = r.fasit, meg0 = tilstand.meg;
+      var etikett = { tall: T('Gjengen i tall', 'The crew in numbers'), kjenner: T('Kjenner du gjengen?', 'Do you know the crew?'), samme: T('Samme tanke', 'Same thought'), mage: T('Magefølelsen', 'Gut feeling') }[r.type];
+      var ut = '<p class="rom-etikett">' + etikett + '</p><p class="rom-sporsmal">' + esc(r.q) + '</p>';
+      var status = '<p class="rom-status">' + r.harSvart.length + T(' av ', ' of ') + n + T(' har svart', ' have answered') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+      if (!f) {
+        if (r.type === 'tall') {
+          var ms = r.mittSvar;
+          return ut + '<p class="small">' + T('Svar ærlig – ingen får vite hva du svarte. Gjett så hvor mange av dere (' + n + ') som svarer ja.', 'Answer honestly – nobody will know what you said. Then guess how many of you (' + n + ') say yes.') + '</p>' +
+            '<div class="rom-valg en lov-ja"><button type="button" data-g="lov-ja" data-v="1" aria-pressed="' + (lovJa === true) + '">' + T('Ja', 'Yes') + '</button><button type="button" data-g="lov-ja" data-v="0" aria-pressed="' + (lovJa === false) + '">' + T('Nei', 'No') + '</button></div>' +
+            '<p class="rom-etikett">' + T('Hvor mange sier ja?', 'How many say yes?') + '</p><div class="lov-tall">' + Array.apply(null, Array(n + 1)).map(function (_, i) { return '<button type="button" data-g="lov-gjett" data-v="' + i + '" aria-pressed="' + (lovGjett === i) + '">' + i + '</button>'; }).join('') + '</div>' +
+            (ms ? '<p class="small">' + T('Sendt ✓ – du kan endre til alle har svart.', 'Sent ✓ – you can change it until everyone has answered.') + '</p>' : '') + status;
+        }
+        if (r.type === 'kjenner') {
+          var hoved = r.hoved === meg0;
+          return ut + (hoved ? '<p class="small">' + T('Du er hovedpersonen. Velg ærlig – de andre skal gjette hva du valgte.', 'You’re in the spotlight. Choose honestly – the others will guess what you picked.') + '</p>'
+            : '<p class="small">' + T('Hva velger <b>', 'What does <b>') + esc(navn(r.hoved)) + T('</b>? Gjett riktig for 1 poeng.', '</b> choose? Guess right for 1 point.') + '</p>') +
+            '<div class="rom-valg en"><button type="button" data-g="lov-v" data-v="0" aria-pressed="' + (r.mittSvar === 0) + '">' + esc(r.a) + '</button><button type="button" data-g="lov-v" data-v="1" aria-pressed="' + (r.mittSvar === 1) + '">' + esc(r.b) + '</button></div>' + status;
+        }
+        if (r.type === 'samme') return ut + '<p class="small">' + T('Skriv det du tror flest andre skriver. Poeng for hver du matcher, alene = drikk.', 'Write what you think most others will write. Points for every match, alone = drink.') + '</p>' +
+          (r.mittSvar ? '<p class="small">' + T('Du skrev: <b>', 'You wrote: <b>') + esc(r.mittSvar) + '</b></p>' : '') +
+          '<form class="rf-skjema" id="lovSvarSkjema"><div class="rf-rad"><input id="lovSvar" maxlength="40" autocomplete="off" enterkeyhint="send" placeholder="' + T('Ditt svar …', 'Your answer …') + '"><button class="btn gold" type="submit">' + (r.mittSvar ? T('Endre', 'Change') : 'Send') + '</button></div></form>' + status;
+        if (r.type === 'mage') return ut + '<p class="small">' + T('Gjett et tall', 'Guess a number') + (r.e ? ' (' + esc(r.e) + ')' : '') + T('. Nærmest får 3 poeng.', '. Closest gets 3 points.') + '</p>' +
+          (r.mittSvar != null ? '<p class="small">' + T('Du gjettet: <b>', 'You guessed: <b>') + esc(r.mittSvar) + '</b></p>' : '') +
+          '<form class="rf-skjema" id="lovSvarSkjema"><div class="rf-rad"><input id="lovSvar" inputmode="decimal" maxlength="12" autocomplete="off" enterkeyhint="send" placeholder="' + T('Ditt tall …', 'Your number …') + '"><button class="btn gold" type="submit">' + (r.mittSvar != null ? T('Endre', 'Change') : 'Send') + '</button></div></form>' + status;
+        return ut;
+      }
+      var poeng = f.poeng || {}, dr = f.drikker || [], slurk = f.slurker || 1;
+      var pTekst = Object.keys(poeng).length ? '<p>' + Object.keys(poeng).map(function (id) { return '<b>' + esc(navn(id)) + '</b> +' + poeng[id]; }).join(' · ') + '</p>' : '<p class="small">' + T('Ingen fikk poeng.', 'Nobody scored.') + '</p>';
+      var dTekst = dr.length ? '<p>🍺 ' + T('Drikk ', 'Drink ') + slurk + ': ' + hvem(dr) + '</p>' : '';
+      var fasit = '';
+      if (r.type === 'tall') fasit = '<p class="dl-melding dl-stor">' + f.antall + T(' av ', ' of ') + f.av + T(' sa ja', ' said yes') + '</p><p class="small">' + Object.keys(f.gjett || {}).map(function (id) { return esc(navn(id)) + ': ' + f.gjett[id]; }).join(' · ') + '</p>';
+      if (r.type === 'kjenner') fasit = f.valg == null ? '<p class="dl-melding">' + esc(navn(r.hoved)) + T(' svarte ikke!', ' didn’t answer!') + '</p>' : '<p class="dl-melding dl-stor">' + esc(navn(r.hoved)) + T(' valgte ', ' chose ') + esc(f.valg === 0 ? r.a : r.b) + '</p>';
+      if (r.type === 'samme') fasit = '<ul class="sm-grupper">' + (f.grupper || []).map(function (g) { return '<li class="' + (g.ider.length > 1 ? 'trygg' : 'alene') + '"><b>' + esc(g.t) + '</b><span>' + hvem(g.ider) + '</span></li>'; }).join('') + '</ul>';
+      if (r.type === 'mage') fasit = '<p class="dl-melding dl-stor">' + T('Svaret er ', 'The answer is ') + esc(String(f.fasit).replace('.', EN ? '.' : ',')) + (r.e ? ' ' + esc(r.e) : '') + '</p><p class="small">' + Object.keys(f.svar || {}).map(function (id) { return esc(navn(id)) + ': ' + esc(f.svar[id]); }).join(' · ') + '</p>';
+      return ut + fasit + pTekst + dTekst + lovPoeng(s) + nesteKnapp(s.rundeNr >= s.runder ? T('Se hvem som vant', 'See who won') : T('Neste runde', 'Next round'));
+    }
+    var lovJa = null, lovGjett = null, lovRundeNokkel = '';
+    function lovTallSend() { if (lovJa !== null && lovGjett !== null) gjorAlltid({ handling: 'lov-svar', ja: lovJa, gjett: lovGjett }); }
 
     /* ---------- sosiale leker ---------- */
     function skriveFelt(plass, knapp, maks) {
@@ -1434,6 +1598,13 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     function tegn() {
       if (tavle && tilstand) tavle.innerHTML = tavleHtml();
       if (!tilstand) return;
+      var lsp = tilstand.spill;
+      if (lsp && lsp.type === 'lov') {
+        var nk = lsp.fase + ':' + lsp.rundeNr;
+        if (nk !== lovRundeNokkel) { lovRundeNokkel = nk; lovJa = null; lovGjett = null; }
+        var ms0 = lsp.r && lsp.r.type === 'tall' && lsp.r.mittSvar;
+        if (ms0 && lovJa === null) { lovJa = ms0.ja; lovGjett = ms0.gjett; }
+      }
       var s = tilstand.spill, innhold = '';
       if (!s) aktiverPluss(false);
       if (!s && tilstand.ferdig) { innhold = oppsummering(); hentVervKode(); }
@@ -1441,7 +1612,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       else {
         innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' ? ' · ' + esc(s.modus) : '') + '</p>' +
           ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
-             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + '</div>';
+             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill, lov: lovSpill }[s.type] || function () { return ''; })(s) + '</div>';
         // Nyhetsrunden finnes bare på norsk
         if (EN && s.type === 'nyhetsrunden') innhold = innhold.replace('</p>', '</p><p class="small">🇳🇴 ' + T('', 'Questions are in Norwegian') + '</p>');
       }
@@ -1478,6 +1649,17 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         var hd = { hvemskrev: 'hs-skriv', bloff: 'bf-skriv', samme: 'sm-skriv', pannekort: 'pk-skriv' }[typ]; if (!hd) return;
         i.value = ''; i.blur(); gjorAlltid({ handling: hd, tekst: t });
       });
+      var lovS = document.getElementById('lovSkjema');
+      if (lovS) lovS.addEventListener('submit', function (e) { e.preventDefault(); var i = document.getElementById('lovInput'), t = i.value.trim(); if (!t) return; if (!confirm(T('Foreslå loven «' + t + '»?', 'Propose the law “' + t + '”?'))) return; gjor({ handling: 'lov-forslag', tekst: t }); });
+      var titS = document.getElementById('tittelSkjema');
+      if (titS) titS.addEventListener('submit', function (e) { e.preventDefault(); var t = document.getElementById('tittelInput').value.trim(); if (t) gjor({ handling: 'lov-tittel', tittel: t }); });
+      var lsS = document.getElementById('lovSvarSkjema');
+      if (lsS) lsS.addEventListener('submit', function (e) {
+        e.preventDefault(); var i = document.getElementById('lovSvar'), t = i.value.trim(); if (!t) return;
+        var r = tilstand.spill && tilstand.spill.r; i.value = ''; i.blur();
+        gjorAlltid(r && r.type === 'mage' ? { handling: 'lov-svar', tall: t } : { handling: 'lov-svar', tekst: t });
+      });
+      sjekkGjengMedlem();
       sjekkOppdrag();
       visReaksjoner(tilstand.reak);
       sjekkHjul();
@@ -1502,6 +1684,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       });
     }
 
+    root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-lov-login]')) { try { sessionStorage.setItem('bd_etter_innlogging', location.pathname + location.search); } catch (x) {} } });
     root.addEventListener('click', function (e) {
       var b = e.target.closest('[data-g]'); if (!b || !tilstand) return;
       var g = b.dataset.g;
@@ -1530,6 +1713,16 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       }
       if (['hs-neste', 'sp-til-stemming', 'pk-avslutt', 'sk-start'].indexOf(g) !== -1) return gjor({ handling: g });
       if (g === 'hopp-over') return gjor({ handling: 'hopp-over' });
+      if (g === 'lov-start' || g === 'lov-neste') return gjor({ handling: g });
+      if (g === 'lov-rett') return gjor({ handling: 'lov-rett-stem', behold: b.dataset.v === '1' });
+      if (g === 'lov-stem') return gjor({ handling: 'lov-stem', ja: b.dataset.v === '1' });
+      if (g === 'lov-veto') { if (!confirm(T('Bruke vetoen din? Du har bare én per sesong.', 'Use your veto? You only get one per season.'))) return; return gjor({ handling: 'lov-veto' }); }
+      if (g === 'lov-opphev') { if (!confirm(T('Foreslå å oppheve denne loven?', 'Propose repealing this law?'))) return; return gjor({ handling: 'lov-forslag', opphev: b.dataset.id }); }
+      if (g === 'lov-tittel') return gjor({ handling: 'lov-tittel', tittel: b.dataset.t });
+      if (g === 'lov-v') return gjorAlltid({ handling: 'lov-svar', v: Number(b.dataset.v) });
+      if (g === 'lov-ja') { lovJa = b.dataset.v === '1'; lovTallSend(); return tegn(); }
+      if (g === 'lov-gjett') { lovGjett = Number(b.dataset.v); lovTallSend(); return tegn(); }
+      if (g === 'lov-bli') { gjengSjekket = true; return api('POST', '/api/rom/' + kode, { handling: 'gjeng-meg', bli: true, id: meg.id, pollett: meg.pollett }).then(function (d) { gjengSjekk = ''; ta(d); toast(T('Velkommen i gjengen! 🤝', 'Welcome to the crew! 🤝')); }).catch(function (e) { toast(e.message); }); }
       if (g === 'qr') {
         var m = document.createElement('div'); m.className = 'rom-qrmodal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', T('QR-kode', 'QR code'));
         m.innerHTML = qrBoks(true) + '<button class="btn gold" type="button">' + T('Lukk', 'Close') + '</button>';

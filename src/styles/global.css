@@ -1543,3 +1543,52 @@ body:not(.humor) .tool.dice{display:none}
 .salg-sok input{flex:1;min-width:0}
 .salg-sok input{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:10px 14px;color:var(--ink);font:inherit;font-size:15px}
 .salg-vipps .dl-knapper{justify-content:flex-start}
+
+/* ---------- Gjengens lov ---------- */
+.lov-start{margin:16px 0;padding:18px;border-radius:22px;background:linear-gradient(135deg,rgba(244,183,64,.16),rgba(255,106,77,.12));border:1px solid rgba(244,183,64,.4)}
+.lov-start h2{margin:2px 0 6px;font-size:24px}
+.lov-start p{margin:6px 0}
+.lov-medlem{margin:10px 0;padding:10px 14px;border-radius:14px;background:rgb(var(--ink-rgb) / .06);font-size:15px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lov-topp{font-family:var(--sans);font-size:13px;color:var(--muted);margin:0 0 8px}
+.lov-topp b{color:var(--accent-t)}
+.lov-h{font-size:20px;margin:10px 0 6px}
+.lov-liste{margin:6px 0 12px;padding-left:22px;display:grid;gap:8px}
+.lov-liste li b{display:block;font-family:var(--display);font-size:17px}
+.lov-liste li small{color:var(--muted)}
+.lov-titler{font-size:15px;margin:8px 0}
+.lov-poeng{list-style:none;margin:12px 0;padding:0;display:grid;gap:4px;font-family:var(--sans)}
+.lov-poeng li{display:flex;justify-content:space-between;padding:6px 12px;border-radius:12px;background:rgb(var(--ink-rgb) / .05)}
+.lov-poeng li.fremhev{background:rgba(244,183,64,.2)}
+.lov-tall{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.lov-tall button,.lov-ja button{min-width:52px;min-height:52px;border-radius:14px;border:1px solid var(--border2);background:var(--card);color:var(--ink);font-family:var(--display);font-size:20px;font-weight:700;cursor:pointer}
+.lov-tall button[aria-pressed="true"],.lov-ja button[aria-pressed="true"]{background:var(--gold);color:#1a1208;border-color:var(--gold)}
+.lov-veto{margin:10px 0;width:100%}
+.lov-konvolutt{margin:14px 0;padding:24px 20px;border-radius:22px;text-align:center;background:linear-gradient(160deg,#f4ebdc,#e9d6b6);color:#1a1208;box-shadow:0 10px 30px rgba(0,0,0,.3);animation:lovKonv .6s ease-out}
+.lov-konvolutt span{font-size:44px;display:block}
+.lov-konvolutt small{font-family:var(--sans);letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#8a5b00}
+.lov-konvolutt h2{color:#1a1208;margin:6px 0}
+@keyframes lovKonv{from{transform:scale(.8) rotate(-4deg);opacity:0}to{transform:none;opacity:1}}
+.lov-oppsum{margin:8px 0 14px;padding-left:4px;list-style:none;display:grid;gap:6px}
+/* lovboka på gjengsiden */
+.lovbok{margin:20px 0;padding:18px;border-radius:22px;background:var(--card);border:1px solid var(--border)}
+.lovbok h3{font-size:17px;margin:16px 0 6px}
+.lb-titler{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.lb-titler span{padding:6px 12px;border-radius:12px;background:rgba(244,183,64,.15);font-size:14px}
+.lb-lover{padding-left:22px;display:grid;gap:10px;margin:6px 0}
+.lb-lov b{display:block;font-family:var(--display);font-size:17px}
+.lb-lov small{color:var(--muted);font-size:13px}
+.lb-lov.grunnlov b{color:var(--gold-t)}
+.lb-lov.opphevet b,.lb-lov.vetoet b{text-decoration:line-through;opacity:.6}
+.lb-knapper{display:flex;gap:14px;margin-top:2px}
+.lb-konv{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.lb-konv>div{padding:12px 14px;border-radius:16px;font-size:14px}
+.lb-konv .apen{background:linear-gradient(160deg,#f4ebdc,#e9d6b6);color:#1a1208}
+.lb-konv .apen p{color:#3a2a14;margin:4px 0 0}
+.lb-konv .lukket{background:rgb(var(--ink-rgb) / .05);border:1px dashed var(--border2);color:var(--muted)}
+.lb-konv small{font-family:var(--sans);font-weight:700}
+.lb-konv b{display:block;font-family:var(--display)}
+.lb-gamle,.lb-logg{margin-top:14px}
+.lb-logg ul{list-style:none;padding:0;display:grid;gap:6px;font-size:14px;margin-top:8px}
+.lb-logg small{color:var(--faint)}
+.lov-poeng{width:100%;max-width:440px;margin:12px auto}
+.lov-poeng li{gap:12px;text-align:left}

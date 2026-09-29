@@ -5,6 +5,7 @@ import { hentRom, endreRom, visning, handling, blimed, finnSpiller, gyldigKode, 
 import { rpc } from '../../../lib/spilt';
 import { innloggetBruker } from '../../../lib/konto';
 import { plussStatus } from '../../../lib/pluss';
+import { anvend } from '../../../lib/lov';
 export const prerender = false;
 
 const json = (d: any, status = 200) =>
@@ -67,15 +68,36 @@ export const POST: APIRoute = async ({ params, request }) => {
   // Språk før vi vet hvem spilleren er: body.lang (bli-med), ellers x-lang-headeren
   const bLang: Sprak = d.lang === 'en' || d.lang === 'no' ? d.lang : hLang;
   // Pluss sjekkes her på serveren – aldri på det nettleseren påstår
-  delete d._plussTil; delete d._gjeng;
+  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble;
   // Gjengen sjekkes også her: verten må være innlogget og med i gjengen
   if (d.handling === 'gjeng' && d.gjengId) {
     try {
       const u = await innloggetBruker(request);
       const g = u && /^[0-9a-f-]{36}$/i.test(String(d.gjengId)) ? await rpc('gjeng_tilgang', { p_user: u.id, p_id: String(d.gjengId) }) : null;
       if (!g) return json({ feil: 'gjeng', melding: bLang === 'en' ? 'Log in with an account that belongs to the crew.' : 'Logg inn med en konto som er med i gjengen.' }, 403);
-      d._gjeng = g;
+      d._gjeng = g; d._konto = u!.id;
     } catch { return json({ feil: 'server', melding: bLang === 'en' ? "Couldn't check the crew. Try again." : 'Fikk ikke sjekket gjengen. Prøv igjen.' }, 503); }
+  }
+  // Gjengens lov: koble spilleren til kontoen sin (bare medlemmer kan stemme over lover)
+  if (d.handling === 'gjeng-meg') {
+    try {
+      const u = await innloggetBruker(request);
+      if (!u) return json({ feil: 'logg-inn', melding: bLang === 'en' ? 'Log in to vote on laws.' : 'Logg inn for å stemme over lover.' }, 401);
+      const rom = await hentRom(kode);
+      const gj = rom && rom.data && rom.data.gjeng;
+      if (!gj) return json({ feil: 'gjeng', melding: bLang === 'en' ? 'The room isn’t linked to a crew.' : 'Rommet er ikke koblet til en gjeng.' }, 400);
+      let g = await rpc('gjeng_tilgang', { p_user: u.id, p_id: gj.id });
+      if (!g && d.bli === true) { const r = await rpc('gjeng_bli_med', { p_user: u.id, p_kode: gj.kode }); if (r && !r.feil) { g = r; d._ble = true; } }
+      if (!g) return json({ feil: 'ikke-medlem', melding: bLang === 'en' ? 'You’re not in the crew yet.' : 'Du er ikke med i gjengen ennå.' }, 403);
+      d._konto = u.id;
+    } catch { return json({ feil: 'server', melding: bLang === 'en' ? "Couldn't check the crew. Try again." : 'Fikk ikke sjekket gjengen. Prøv igjen.' }, 503); }
+  }
+  if (d.handling === 'start' && d.lek === 'lov') {
+    try {
+      const rom = await hentRom(kode);
+      const gj = rom && rom.data && rom.data.gjeng;
+      if (gj) d._lov = (await rpc('gjeng_lov_hent', { p_gjeng: gj.id })) || null;
+    } catch (e) { console.warn('Lovboka kunne ikke hentes:', (e as Error).message); }
   }
   if (d.handling === 'pluss-aktiver' || (d.handling === 'start' && erPlussLek(d.lek))) {
     try {
@@ -120,6 +142,11 @@ export const POST: APIRoute = async ({ params, request }) => {
       try { await rpc('gjeng_kveld_lagre', { p_gjeng: res.data.gjeng.id, p_rom: kode + '-' + res.data.laget, p_data: kveldForGjeng(res.data) }); }
       catch (e) { console.warn('Gjengkvelden ble ikke lagret:', (e as Error).message); }
     }
+    // Gjengens lov er ferdig: skriv kvelden inn i lovboka (trygt å prøve flere ganger)
+    const sp = res.data.spill;
+    if (sp && sp.type === 'lov' && (sp.fase === 'konvolutt' || sp.fase === 'ferdig') && !sp.lagret && res.data.gjeng) {
+      if (await lagreLovKveld(kode, res.data.gjeng.id, sp)) sp.lagret = true;
+    }
     const lang: Sprak = meg ? rensLang(meg.lang) : bLang;
     const svar: any = { ...visning(res.data, res.versjon, meg, lang), kode, leker: lekeliste(lang) };
     if (ny) { svar.id = ny.id; svar.pollett = ny.pollett; }
@@ -129,3 +156,20 @@ export const POST: APIRoute = async ({ params, request }) => {
     return json({ feil: 'server', melding: bLang === 'en' ? 'Lost connection. Try again.' : 'Mistet kontakten. Prøv igjen.' }, 503);
   }
 };
+
+/** Legger kvelden inn i lovboka til gjengen, og merker rommet som lagret. */
+async function lagreLovKveld(kode: string, gjengId: string, sp: any) {
+  try {
+    for (let i = 0; i < 4; i++) {
+      const cur = await rpc('gjeng_lov_hent', { p_gjeng: gjengId });
+      if (!cur) return false;
+      const { lov } = anvend(cur.lov, sp.hendelser || [], sp.kveldId);
+      const v = await rpc('gjeng_lov_lagre', { p_gjeng: gjengId, p_lov: lov, p_versjon: cur.versjon });
+      if (v !== null && v !== undefined) {
+        await endreRom(kode, (data) => { if (data.spill && data.spill.kveldId === sp.kveldId) data.spill.lagret = true; return { ok: true }; });
+        return true;
+      }
+    }
+  } catch (e) { console.warn('Lovboka ble ikke lagret:', (e as Error).message); }
+  return false;
+}

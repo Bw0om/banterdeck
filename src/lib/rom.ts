@@ -13,6 +13,7 @@ import BINGO_EN from '../data/bingo.en.json';
 import PLUSSPAKKER_EN from '../data/pluss.en.json';
 import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
+import { startLov, lovHandling, lovVisning } from './lov';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
 const D: any = DECKS;
@@ -184,7 +185,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
   const hd = data.hendelse;
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null, lang,
-    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
+    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, medlem: !!p.konto, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
@@ -376,7 +377,7 @@ function handlingInne(data: any, meg: any, h: any) {
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
     data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
   }
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -384,7 +385,7 @@ function handlingInne(data: any, meg: any, h: any) {
       // Verten har Pluss (sjekket av API-ruta): lås opp rommet for kvelden
       if (h._plussTil > Date.now() && !(data.pluss && data.pluss.til > Date.now())) data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
       if (h.lek !== 'egen' && erPlussLek(String(h.lek || '')) && !romHarPluss(data)) return feilL('pluss', 'Denne leken krever Mitt vors Pluss hos verten.', 'This game needs the host to have Mitt vors Plus.');
-      const r = h.lek === 'egen' ? startEgen(data, h.kort, h.navn) : startSpill(data, String(h.lek || ''), String(h.modus || '*'));
+      const r = h.lek === 'egen' ? startEgen(data, h.kort, h.navn) : h.lek === 'lov' ? startLov(data, h._lov, String(h.modus || '')) : startSpill(data, String(h.lek || ''), String(h.modus || '*'));
       if (!(r as any).feil && data.spill) { data.valgt = null; data.ferdig = null; data.historikk = (data.historikk || []).concat([data.spill.navn]).slice(-40); }
       return r;
     }
@@ -416,7 +417,18 @@ function handlingInne(data: any, meg: any, h: any) {
       // API-ruta har sjekket at verten er med i gjengen (h._gjeng settes bare der)
       if (!erVert) return { feil: 'bare-vert' };
       data.gjeng = h._gjeng && h._gjeng.id ? { id: h._gjeng.id, navn: h._gjeng.navn, kode: h._gjeng.kode } : null;
+      // Nytt valg av gjeng: medlemskap må sjekkes på nytt for alle (verten er sjekket nå)
+      data.spillere.forEach((p: any) => { delete p.konto; });
+      if (data.gjeng && h._konto) meg.konto = h._konto;
       if (data.gjeng) melde(data, `Kvelden telles i sesongen til ${data.gjeng.navn} 🏆`, `Tonight counts towards ${data.gjeng.navn}'s season 🏆`);
+      return { ok: true };
+    }
+    case 'gjeng-meg': {
+      // API-ruta har sjekket at kontoen er med i gjengen til rommet (h._konto settes bare der)
+      if (!data.gjeng || !h._konto) return { ok: true };
+      if (data.spillere.some((p: any) => p.konto === h._konto && p.id !== meg.id)) return feilL('konto', 'Kontoen din er allerede med i rommet på en annen telefon.', 'Your account is already in the room on another phone.');
+      const ny = !meg.konto; meg.konto = h._konto;
+      if (ny && h._ble) melde(data, `${meg.navn} ble med i gjengen ${data.gjeng.navn} 🤝`, `${meg.navn} joined the crew ${data.gjeng.navn} 🤝`);
       return { ok: true };
     }
     case 'velg-annen': {
@@ -632,7 +644,7 @@ export function gyldigKode(k: any) { return typeof k === 'string' && /^[A-Z0-9]{
    Pyramiden, Gris og President. Skjulte hender vises bare til eieren.
    ===================================================================== */
 export const SOS = ['hvemskrev', 'bloff', 'samme', 'spion', 'skal', 'pannekort'];
-export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
+export const EKSTRA = ['lov', 'opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
 export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '🫡'];
 type EkstraInfo = [id: string, navnNo: string, navnEn: string, omNo: string, omEn: string];
 const EKSTRA_INFO: EkstraInfo[] = [
@@ -749,6 +761,7 @@ function presTurVidere(data: any) {
 
 export function ekstraHandling(data: any, meg: any, h: any): any {
   const s = data.spill; if (!s || !EKSTRA.includes(s.type)) return null;
+  if (s.type === 'lov') return lovHandling(data, meg, h);
   if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeHandling(data, meg, h);
   if (SOS.includes(s.type)) return sosHandling(data, meg, h);
   const ider = aktiveIder(data);
@@ -1001,6 +1014,7 @@ function avgjorTo(data: any) {
   s.fase = 'avslort'; melde(data, `Løgnen var: «${s.pastander[s.logn]}»`, `The lie was: “${s.pastander[s.logn]}”`);
 }
 export function ekstraVisning(s: any, meg: any, data: any) {
+  if (s.type === 'lov') return lovVisning(s, meg, data);
   if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeVisning(s, meg, data);
   if (SOS.includes(s.type)) return sosVisning(s, meg, data);
   const ider = aktiveIder(data);

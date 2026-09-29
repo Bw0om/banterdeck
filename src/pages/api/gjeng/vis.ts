@@ -2,6 +2,7 @@
 import type { APIRoute } from 'astro';
 import { rpc } from '../../../lib/spilt';
 import { json, innloggetBruker } from '../../../lib/konto';
+import { visLov } from '../../../lib/lov';
 export const prerender = false;
 export const GET: APIRoute = async ({ request }) => {
   const kode = String(new URL(request.url).searchParams.get('k') || '').trim().toUpperCase();
@@ -16,7 +17,10 @@ export const GET: APIRoute = async ({ request }) => {
       eier = g.eier === u.id;
       medlem = eier || !!(await rpc('gjeng_tilgang', { p_user: u.id, p_id: g.id }));
     }
-    return json({ id: g.id, navn: g.navn, kode: g.kode, kvelder: g.kvelder || [], eier, medlem, innlogget: !!u });
+    // Lovboka (Gjengens lov) – uten konto-id-er. Finnes ikke tabellen ennå, vises den bare ikke.
+    let lovbok = null;
+    try { const l = await rpc('gjeng_lov_hent', { p_gjeng: g.id }); if (l) lovbok = visLov(l.lov, medlem && u ? u.id : null, /^en/.test(request.headers.get('x-lang') || '') ? 'en' : 'no'); } catch { /* ikke satt opp */ }
+    return json({ id: g.id, navn: g.navn, kode: g.kode, kvelder: g.kvelder || [], eier, medlem, innlogget: !!u, lovbok });
   } catch (e) {
     console.warn('Gjeng kunne ikke hentes:', (e as Error).message);
     return json({ feil: 'server', melding: 'Fikk ikke hentet gjengen akkurat nå.' }, 503);
