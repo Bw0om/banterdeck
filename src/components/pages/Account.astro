@@ -475,6 +475,8 @@ const T = no ? {
             hentStokker();
             if (LANG === 'no') K.api('/api/pluss/status').then(function (r) { return r.json(); }).then(function (d) {
               var el = $('plussLinje'); el.hidden = false;
+              var kode = null; try { kode = localStorage.getItem('bd_gavekode'); } catch (x) {}
+              if (kode) { el.innerHTML = '🎁 Du har en gavekode som venter – <a href="/no/pluss">aktiver den nå</a>'; return; }
               el.innerHTML = d.aktiv
                 ? '✨ <b>Pluss</b> til ' + esc(new Date(d.til).toLocaleString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/no/pluss">Mer</a>'
                 : '✨ <a href="/no/pluss">' + (d.gratisBrukt ? 'Få Banterdeck Pluss' : 'Prøv Banterdeck Pluss gratis i kveld') + '</a>';

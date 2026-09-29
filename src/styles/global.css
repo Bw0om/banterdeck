@@ -1294,3 +1294,40 @@ body.stokk-aapen{overflow:hidden}
 .pluss-laast .lekverktoy-innhold{display:none}
 .badges i.pluss{background:rgba(244,183,64,.18);color:var(--gold)}
 .favlek .badges i.pluss{background:var(--gold);color:#1a1208}
+
+/* ---------- Sosiale leker i rom ---------- */
+.bf-fasit,.sm-grupper{list-style:none;padding:0;margin:12px 0;width:100%;max-width:440px;display:flex;flex-direction:column;gap:8px}
+.bf-fasit li,.sm-grupper li{display:flex;flex-direction:column;gap:2px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 14px}
+.bf-fasit li.ekte,.sm-grupper li.trygg{border-color:rgba(120,200,120,.55)}
+.sm-grupper li.alene{border-color:rgba(255,106,77,.45)}
+.bf-fasit span,.sm-grupper span{color:var(--muted);font-size:14px}
+.bf-fasit small,.sm-grupper small{font-size:13px;color:var(--gold)}
+.sp-steder{width:100%;max-width:440px;margin:8px 0;color:var(--muted);font-size:14px}
+.sp-steder summary{cursor:pointer;color:var(--gold)}
+.pk-liste{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;width:100%;max-width:520px;margin:10px 0}
+.pk-kort{background:var(--gold);color:#1a1208;border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;min-height:92px}
+.pk-kort span{font-size:13px;font-weight:700;opacity:.75}
+.pk-kort b{font-family:var(--display);font-size:20px;line-height:1.1;overflow-wrap:anywhere}
+.pk-kort.meg{background:var(--card2);color:var(--ink);border:2px dashed var(--gold)}
+.pk-kort.gjettet{opacity:.55}
+.pk-kort .mini{align-self:flex-start;background:#1a1208;color:var(--gold);border-color:#1a1208}
+.skal-knapp{width:100%;max-width:440px;height:min(52vh,340px);border:0;border-radius:32px;background:var(--card2);color:var(--muted);font-family:var(--display);font-weight:800;font-size:40px;cursor:pointer;touch-action:manipulation;user-select:none}
+.skal-knapp.naa{background:var(--accent);color:#1a1208;font-size:64px;animation:skalPop .25s ease-out}
+.skal-knapp[disabled]{opacity:.7}
+@keyframes skalPop{from{transform:scale(.92)}to{transform:none}}
+.op-pille{display:block;margin:0 auto 10px;border:1px solid var(--gold);background:rgba(244,183,64,.1);color:var(--gold);font-weight:700;border-radius:999px;padding:8px 16px;cursor:pointer}
+.op-tekst{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1.3;background:var(--card);border-radius:16px;padding:14px 16px;margin:8px 0}
+.st-maaler{position:relative;width:100%;max-width:420px;height:22px;background:var(--card2);border-radius:11px;overflow:hidden;margin:10px 0}
+.st-maaler i{display:block;height:100%;width:0;background:var(--gold);transition:width .08s linear}
+.st-maaler i.hoy{background:var(--accent)}
+.st-maaler b{position:absolute;top:0;bottom:0;width:3px;background:var(--ink);left:50%}
+.dl.st-alarm{animation:stAlarm .3s 4 alternate}
+@keyframes stAlarm{from{background:transparent}to{background:rgba(255,106,77,.35)}}
+.rom-gruppe{width:100%;margin:8px 0;border:1px solid var(--border);border-radius:18px;background:rgba(34,26,16,.5)}
+.rom-gruppe > summary{list-style:none;cursor:pointer;padding:14px 16px;font-family:var(--display);font-weight:700;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+.rom-gruppe > summary::-webkit-details-marker{display:none}
+.rom-gruppe > summary::after{content:'▾';color:var(--muted);transition:transform .2s}
+.rom-gruppe[open] > summary::after{transform:rotate(180deg)}
+.rom-gruppe > summary small{color:var(--muted);font-weight:600;margin-left:auto;margin-right:10px}
+.rom-gruppe > .rom-leker,.rom-gruppe > p{padding:0 12px 12px;margin:0}
+.rom-gruppe.pluss{border-color:rgba(244,183,64,.45)}

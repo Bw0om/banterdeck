@@ -36,6 +36,12 @@ const pakker = PAKKER.map((p) => ({ id: p.pakke, navn: p.navn, om: p.om, antall:
     <p class="formmsg" id="kjopMsg" role="status" aria-live="polite"></p>
   </section>
 
+  <section class="pluss-kode konto-boks">
+    <h2>Har du en gavekode?</h2>
+    <form class="rf-rad" id="kodeSkjema"><input id="kodeInput" maxlength="24" autocomplete="off" autocapitalize="characters" placeholder="F.eks. BD-7K3P9Q" aria-label="Gavekode" /><button class="btn gold" type="submit">Bruk koden</button></form>
+    <p class="formmsg" id="kodeMsg" role="status"></p>
+  </section>
+
   <section class="pluss-pakker">
     <h2>Pakkene</h2>
     <div class="stokk-liste">
@@ -147,6 +153,24 @@ const pakker = PAKKER.map((p) => ({ id: p.pakke, navn: p.navn, om: p.om, antall:
       visKort();
     });
     $('ssLukk').addEventListener('click', function () { $('stokkSpill').hidden = true; document.body.classList.remove('stokk-aapen'); });
+
+    /* ---------- gavekode ---------- */
+    var kodeFra = qs.get('kode');
+    try { if (kodeFra) { localStorage.setItem('bd_gavekode', kodeFra); history.replaceState(null, '', location.pathname); } kodeFra = kodeFra || localStorage.getItem('bd_gavekode'); } catch (e) {}
+    if (kodeFra) $('kodeInput').value = kodeFra.toUpperCase();
+    function brukKode() {
+      var kode = $('kodeInput').value.trim(), m = $('kodeMsg'); if (!kode) return;
+      if (!K || !K.les()) { m.innerHTML = 'Koden er klar! <a href="/no/account">Logg inn eller lag en gratis konto</a> – så aktiveres den når du kommer tilbake hit.'; m.className = 'formmsg'; return; }
+      m.textContent = 'Sjekker koden …'; m.className = 'formmsg';
+      api('/api/pluss/kode', { method: 'POST', body: JSON.stringify({ kode: kode }) }).then(function (d) {
+        if (!d._ok) { m.textContent = d.melding || 'Koden virket ikke.'; m.className = 'formmsg err'; return; }
+        try { localStorage.removeItem('bd_gavekode'); } catch (e) {}
+        m.textContent = '🎁 Koden er brukt – du har fått Pluss i ' + (d.dager === 1 ? '1 dag' : d.dager + ' dager') + '!'; m.className = 'formmsg ok';
+        $('kodeInput').value = ''; hentStatus();
+      });
+    }
+    $('kodeSkjema').addEventListener('submit', function (e) { e.preventDefault(); brukKode(); });
+    if (kodeFra) brukKode();   // kom via lenke: aktiver med en gang (eller be om innlogging)
 
     hentStatus();
   })();

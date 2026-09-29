@@ -13,9 +13,9 @@ const hrefOf = (it: any) => gameHref(games.find((x) => x.name === it.name), (p) 
 const no = lang === 'no';
 import { PLUSS_SLUGS } from '../../lib/plussleker';
 const PL = new Set(PLUSS_SLUGS);
-const APP = new Set([...Object.keys(DECKS as any), 'over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer',
+const APP = new Set(['stilleleken', ...Object.keys(DECKS as any), 'over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer',
   '21-med-terninger', 'opus', 'regelfabrikken', 'power-hour', 'snurr-flasken', 'drikke-yatzy', 'beer-pong', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', '14-sporsmal', 'bossen-sier', 'drikke-bingo', 'gjett-aret', '100-sporsmal', 'nyhetsrunden', 'nasjonal-vorsprove']);
-const ROM = new Set(['pekeleken', 'jeg-har-aldri', 'enten-eller', 'kategorier', 'nodt-eller-sannhet', 'rygg-mot-rygg', 'duoleken', '50-50',
+const ROM = new Set(['hvem-skrev-det', 'bloffquizen', 'samme-svar', 'spionen', 'hvem-er-jeg', 'skal-refleksen', 'hemmelig-oppdrag', 'pekeleken', 'jeg-har-aldri', 'enten-eller', 'kategorier', 'nodt-eller-sannhet', 'rygg-mot-rygg', 'duoleken', '50-50',
   'ring-of-fire', 'forraeder', 'drikke-bingo', 'regelfabrikken', 'to-sannheter-og-en-logn', 'sannhet-eller-drikk', 'tanken-bak-sangen', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris']);
 const slugOf = (it: any) => (games.find((x) => x.name === it.name) || {}).slug;
 const FAV = ['ring-of-fire', 'regelfabrikken', 'pyramiden', 'forraeder', 'bussruta', 'drikke-bingo', 'opus', 'president'];

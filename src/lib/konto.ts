@@ -47,3 +47,10 @@ export function adminEposter() {
   const env: any = (typeof process !== 'undefined' && process.env) || {};
   return String(env.ADMIN_EPOSTER || '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
 }
+
+/** Innlogget konto med e-post i ADMIN_EPOSTER, ellers null. */
+export async function adminBruker(request: Request) {
+  const u = await innloggetBruker(request);
+  if (!u) return null;
+  return adminEposter().includes(String(u.email || '').toLowerCase()) ? u : null;
+}

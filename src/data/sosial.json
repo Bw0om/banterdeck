@@ -1,0 +1,366 @@
+{
+ "hvemskrev": [
+  "Den verste gaven du har fått",
+  "Noe du aldri har fortalt foreldrene dine",
+  "Det pinligste som har skjedd deg på fylla",
+  "Den rareste jobben du har hatt – eller kunne tenkt deg",
+  "En vane du skjuler for andre",
+  "Den dårligste daten du har vært på",
+  "Noe du tror på, men ikke tør si høyt",
+  "Den største løgnen du har sluppet unna med",
+  "Hva du ville gjort med en million kroner i morgen",
+  "Den første du hadde crush på",
+  "En sang du skammer deg over at du elsker",
+  "Det dummeste du har brukt penger på",
+  "Noe du har gjort som ingen i rommet vet om",
+  "Din verste ferieopplevelse",
+  "Den merkeligste drømmen du husker",
+  "Hva du egentlig tenkte første gang du møtte noen i rommet",
+  "En regel du brøt som barn",
+  "Den verste frisyren du har hatt",
+  "Noe du har googlet som du ikke vil at noen skal se",
+  "Hva som står på bucketlisten din",
+  "Din mest irrasjonelle frykt",
+  "Den kjendisen du ville byttet liv med for en dag",
+  "Det flaueste du har sagt til en sjef eller lærer",
+  "En matrett du nekter å spise",
+  "Hvorfor du egentlig kom i kveld",
+  "Det verste du har laget i et kjøkken",
+  "En gang du fikk skylden for noe du faktisk gjorde",
+  "Den teiteste grunnen til at du har grått",
+  "Noe du samlet på som barn",
+  "Et talent ingen vet at du har",
+  "Hva du ville vært kjent for om du ble kjendis",
+  "Den verste meldingen du har sendt til feil person",
+  "Din mest ubrukelige superkraft",
+  "Noe du har løyet om på en jobbsøknad eller CV",
+  "Stedet du sist sovnet der du ikke skulle",
+  "Den rareste tingen i hjemmet ditt akkurat nå",
+  "Hvilket dyr du ville vært – og hvorfor",
+  "En gang du var altfor full for anledningen",
+  "Noe du fortsatt er sur for fra barndommen",
+  "Hva du egentlig synes om jula"
+ ],
+ "bloff": [
+  {
+   "q": "Hva er Skottlands nasjonaldyr?",
+   "a": "Enhjørningen"
+  },
+  {
+   "q": "Hvor mange hjerter har en blekksprut?",
+   "a": "Tre"
+  },
+  {
+   "q": "Hva ble Coca-Cola opprinnelig solgt som?",
+   "a": "Medisin"
+  },
+  {
+   "q": "Hva kalles en flokk flamingoer på engelsk?",
+   "a": "A flamboyance"
+  },
+  {
+   "q": "Hvilket land har flest innsjøer i verden?",
+   "a": "Canada"
+  },
+  {
+   "q": "Hva het Google før det het Google?",
+   "a": "BackRub"
+  },
+  {
+   "q": "Hvor lenge varte den korteste krigen i historien?",
+   "a": "Rundt 38 minutter"
+  },
+  {
+   "q": "Hvilken farge har isbjørnens hud?",
+   "a": "Svart"
+  },
+  {
+   "q": "Hva kalles redselen for lange ord?",
+   "a": "Hippopotomonstrosesquippedaliofobi"
+  },
+  {
+   "q": "Hvilket land fant opp ostehøvelen?",
+   "a": "Norge"
+  },
+  {
+   "q": "Hva ble bindersen et symbol på i Norge under andre verdenskrig?",
+   "a": "Motstand mot okkupasjonen"
+  },
+  {
+   "q": "Hvilket dyr har firkantet bæsj?",
+   "a": "Vombaten"
+  },
+  {
+   "q": "Hva kalles plastbiten ytterst på en skolisse?",
+   "a": "Aglett"
+  },
+  {
+   "q": "Hvilket dyr står på Wales' flagg?",
+   "a": "En rød drage"
+  },
+  {
+   "q": "Hvilken fugl kan fly baklengs?",
+   "a": "Kolibrien"
+  },
+  {
+   "q": "Hvilken planet roterer motsatt vei av de fleste andre?",
+   "a": "Venus"
+  },
+  {
+   "q": "Hvor mange øyne har en honningbie?",
+   "a": "Fem"
+  },
+  {
+   "q": "Hva er verdens dyreste krydder?",
+   "a": "Safran"
+  },
+  {
+   "q": "Hvor mange bein har en hummer?",
+   "a": "Ti"
+  },
+  {
+   "q": "Hvilken amerikansk delstat har bare én stavelse i navnet?",
+   "a": "Maine"
+  },
+  {
+   "q": "Hvor kommer Tetris-melodien fra?",
+   "a": "En russisk folkesang"
+  },
+  {
+   "q": "Hvilket dyr kan ikke kaste opp?",
+   "a": "Hesten"
+  },
+  {
+   "q": "Hvor i kroppen sitter kroppens minste bein?",
+   "a": "I øret"
+  },
+  {
+   "q": "Hva betyr navnet LEGO?",
+   "a": "Lek godt (på dansk)"
+  },
+  {
+   "q": "Hvilket land har flest pyramider?",
+   "a": "Sudan"
+  },
+  {
+   "q": "Hvilken farge hadde gulrøtter før de ble oransje?",
+   "a": "Lilla"
+  },
+  {
+   "q": "Hvilket dyr har verdens sterkeste bitt?",
+   "a": "Saltvannskrokodillen"
+  },
+  {
+   "q": "Hva er Norges nasjonalinstrument?",
+   "a": "Hardingfela"
+  },
+  {
+   "q": "Hvilken by var Norges hovedstad før Oslo?",
+   "a": "Bergen"
+  },
+  {
+   "q": "Hvilket pattedyr legger egg?",
+   "a": "Nebbdyret"
+  },
+  {
+   "q": "Hvilket land har flest tidssoner (med alle territorier)?",
+   "a": "Frankrike"
+  },
+  {
+   "q": "Hva het den første sauen som ble klonet?",
+   "a": "Dolly"
+  },
+  {
+   "q": "Hvilken frukt er egentlig et bær: banan eller jordbær?",
+   "a": "Banan"
+  },
+  {
+   "q": "Hvilket dyr har blått blod?",
+   "a": "Blekkspruten"
+  },
+  {
+   "q": "Hvilket hav er verdens største?",
+   "a": "Stillehavet"
+  },
+  {
+   "q": "Hvilken bokstav finnes ikke i navnet til noen amerikansk delstat?",
+   "a": "Q"
+  },
+  {
+   "q": "Hvilken by får et juletre fra Oslo hvert år som takk for hjelpen under krigen?",
+   "a": "London"
+  },
+  {
+   "q": "Hvor mange tangenter har et vanlig piano?",
+   "a": "88"
+  }
+ ],
+ "samme": [
+  "Noe man finner i et kjøleskap",
+  "En kjent nordmann med skjegg",
+  "En pizzatopping",
+  "Et dyr i skogen",
+  "Noe man tar med på hyttetur",
+  "En by i Norge",
+  "En farge",
+  "Et klesplagg",
+  "En tegneseriefigur",
+  "Noe man sier når man skåler",
+  "En drink",
+  "En julesang",
+  "Et land i Europa",
+  "Noe som er gult",
+  "En sport",
+  "Et bilmerke",
+  "Noe man gjør på en søndag",
+  "En norsk TV-serie",
+  "En frukt",
+  "Et yrke",
+  "Noe man finner på et bad",
+  "Et ord for å være full",
+  "En kjendis alle kjenner",
+  "En supermarkedkjede",
+  "Et superhelt-navn",
+  "En ting i en veske",
+  "Et godteri",
+  "Noe man ikke bør si på første date",
+  "Et spill fra barndommen",
+  "En grunn til å komme for sent",
+  "Et reisemål i Syden",
+  "Noe som lukter vondt",
+  "En Disney-film",
+  "En emoji folk bruker for mye",
+  "En ting man glemmer hjemme",
+  "Et musikkinstrument",
+  "En tradisjonell norsk matrett",
+  "Et dyr på gården",
+  "Noe som er rundt",
+  "En app alle har",
+  "Et eventyr",
+  "Noe man kjøper på Vinmonopolet",
+  "En grunn til å dumpe noen",
+  "Noe man roper på fotballkamp",
+  "Et ord som rimer på «øl»",
+  "En ting med hjul",
+  "Et kallenavn på bestemor",
+  "En kjent norsk artist",
+  "Noe man finner i lommen etter en fest",
+  "Et ord man bare sier i Nord-Norge"
+ ],
+ "oppdrag": [
+  "Få {navn} til å si ordet «faktisk».",
+  "Få {navn} til å bytte plass med deg.",
+  "Få {navn} til å fortelle om sin første kjæreste.",
+  "Få {navn} til å skåle med deg tre ganger før neste lek.",
+  "Få {navn} til å synge minst én linje av en sang.",
+  "Få {navn} til å gi deg en high five.",
+  "Få {navn} til å si «jeg er enig med deg».",
+  "Få {navn} til å vise deg det siste bildet på telefonen sin.",
+  "Få {navn} til å le så hen må holde seg for munnen.",
+  "Få {navn} til å hente noe til deg.",
+  "Få {navn} til å si navnet på en kjendis.",
+  "Få {navn} til å stå på ett bein.",
+  "Få {navn} til å si «god helg» uten at det er naturlig.",
+  "Få {navn} til å fortelle hva hen jobber med – selv om du vet det.",
+  "Få {navn} til å smake på drinken din.",
+  "Få {navn} til å bruke ordet «liksom» to ganger.",
+  "Få {navn} til å gi deg et kompliment.",
+  "Få {navn} til å nevne et dyr.",
+  "Få {navn} til å gjøre en imitasjon av noen.",
+  "Få {navn} til å si «skål» før alle andre.",
+  "Få {navn} til å fortelle om en ferie.",
+  "Få {navn} til å klemme deg.",
+  "Få {navn} til å si hvilken måned hen har bursdag.",
+  "Få {navn} til å bruke et engelsk ord midt i en norsk setning.",
+  "Få {navn} til å spørre deg om noe.",
+  "Få {navn} til å peke på noe i rommet.",
+  "Få {navn} til å si ordet «banan».",
+  "Få {navn} til å vise deg en dansebevegelse.",
+  "Få {navn} til å si «nei» tre ganger på rad.",
+  "Få {navn} til å gjette alderen din.",
+  "Få {navn} til å fortelle en vits.",
+  "Få {navn} til å ta av seg noe – en ring, en jakke, en klokke.",
+  "Få {navn} til å fortelle hva hen spiste til middag i går.",
+  "Få {navn} til å bytte drikke med deg.",
+  "Få {navn} til å si «beklager».",
+  "Få {navn} til å nevne en by i utlandet.",
+  "Få {navn} til å fortelle om en gang hen var sjenert.",
+  "Få {navn} til å klappe i hendene.",
+  "Få {navn} til å le av noe du sier som ikke er morsomt.",
+  "Få {navn} til å si fullt navn."
+ ],
+ "steder": [
+  "Hytta på fjellet",
+  "Syden-charter",
+  "Russebussen",
+  "Julebordet",
+  "Legevakten",
+  "Vinmonopolet en fredag",
+  "Et fly til Alicante",
+  "Kinosalen",
+  "Studentkollektivet",
+  "En fotballkamp",
+  "Tannlegen",
+  "Treningssenteret",
+  "IKEA en lørdag",
+  "Et bryllup",
+  "Konfirmasjonen",
+  "Nachspielet",
+  "Bussen hjem",
+  "Festivalen",
+  "Campingplassen",
+  "Frisøren",
+  "Eksamenslokalet",
+  "Karaokebaren",
+  "Båten i skjærgården",
+  "Hurtigruten",
+  "Sykehuset",
+  "Svømmehallen",
+  "Skiheisen",
+  "Kebabsjappa klokka tre",
+  "Politistasjonen",
+  "Et første date"
+ ],
+ "ord": [
+  "Elvis",
+  "Kong Harald",
+  "Pingvin",
+  "Julenissen",
+  "Taco",
+  "Ola Nordmann",
+  "Brunost",
+  "Donald Duck",
+  "Hurtigruten",
+  "Batman",
+  "Snømann",
+  "Sjørøver",
+  "Astronaut",
+  "Dronning Maud",
+  "Mjølner",
+  "Harry Potter",
+  "Troll",
+  "Pølse i lompe",
+  "Gollum",
+  "Ronaldo",
+  "Hello Kitty",
+  "Kaptein Sabeltann",
+  "Beyoncé",
+  "Viking",
+  "Dinosaur",
+  "Shrek",
+  "Mario",
+  "Pippi Langstrømpe",
+  "Kjøttkake",
+  "Taylor Swift",
+  "Frosken",
+  "Spiderman",
+  "Karius",
+  "Bestemor",
+  "Einstein",
+  "Rudolf",
+  "Kamel",
+  "Isbjørn",
+  "Snoop Dogg",
+  "Nissen på låven"
+ ]
+}

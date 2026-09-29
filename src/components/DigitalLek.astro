@@ -5,7 +5,7 @@
  */
 const { slug } = Astro.props as { slug: string };
 const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer', '21-med-terninger', 'opus', 'regelfabrikken',
-  'power-hour', 'snurr-flasken', 'drikke-yatzy', 'beer-pong', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', '14-sporsmal', 'bossen-sier'];
+  'power-hour', 'snurr-flasken', 'drikke-yatzy', 'beer-pong', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', '14-sporsmal', 'bossen-sier', 'stilleleken'];
 const RomLeker = ['regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris', 'to-sannheter-og-en-logn', 'bussruta', 'drikke-yatzy'];
 const har = DIGITALE.includes(slug);
 import { romLenke } from '../lib/romlenke';
@@ -15,7 +15,7 @@ const bareRom = ['pyramiden', 'president', 'gris'].includes(slug);
 ---
 {(har || bareRom) && (
 <section class="gt dl" data-dl={slug}>
-  <h2>{bareRom ? 'Spill uten kortstokk' : (({ 'terningen-bestemmer': 'Telefonen er terningen', '21-med-terninger': 'Telefonen er terningen', 'opus': 'Telefonen er terningen', 'drikke-yatzy': 'Telefonen er terningene og blokka', 'regelfabrikken': 'Skriv kortene', 'power-hour': 'Klokka', 'snurr-flasken': 'Telefonen er flaska', 'beer-pong': 'Koppteller', 'rask-fakta': 'Fem sekunder', 'to-sannheter-og-en-logn': 'Skriv og avslør', 'jug': 'Vertens hemmelige trekk', '14-sporsmal': 'Regeltavla', 'bossen-sier': 'Boss-maskinen' } as any)[slug] || 'Telefonen er kortstokken')}</h2>
+  <h2>{bareRom ? 'Spill uten kortstokk' : (({ 'terningen-bestemmer': 'Telefonen er terningen', '21-med-terninger': 'Telefonen er terningen', 'opus': 'Telefonen er terningen', 'drikke-yatzy': 'Telefonen er terningene og blokka', 'regelfabrikken': 'Skriv kortene', 'power-hour': 'Klokka', 'snurr-flasken': 'Telefonen er flaska', 'beer-pong': 'Koppteller', 'rask-fakta': 'Fem sekunder', 'to-sannheter-og-en-logn': 'Skriv og avslør', 'jug': 'Vertens hemmelige trekk', '14-sporsmal': 'Regeltavla', 'bossen-sier': 'Boss-maskinen', 'stilleleken': 'Telefonen lytter' } as any)[slug] || 'Telefonen er kortstokken')}</h2>
   {bareRom ? (
     <>
       <p>Her har hver spiller skjulte kort på hånda, så dere spiller fra hver deres telefon. Lag et rom, del koden og velg {slug === 'pyramiden' ? 'Pyramiden' : slug === 'president' ? 'President' : 'Gris'}.</p>
@@ -519,6 +519,77 @@ if (!window.BDK) window.BDK = (function () {
     }
   });
   document.addEventListener('astro:before-swap', function () { clearInterval(klokke); }, { once: true });
+  oppsett();
+})();
+</script>
+)}
+
+{slug === 'stilleleken' && (
+<script is:inline data-astro-rerun>
+(function () {
+  var root = document.querySelector('[data-dl="stilleleken"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  var strom = null, ctx = null, analyser = null, buf = null, loop = null, slutt = 0, grunn = 0, over = 0, folsom = 2, aktiv = false;
+  var GRENSE = { 1: 22, 2: 14, 3: 8 };   // hvor mye over stillheten det skal til
+  function oppsett(melding) {
+    root.innerHTML = (melding ? '<p class="dl-melding dl-stor">' + melding + '</p>' : '') +
+      '<p>Legg telefonen midt på bordet. Én prøver å få de andre til å le – telefonen hører om noen lager lyd.</p>' +
+      '<p class="rof-lab">Følsomhet</p><div class="rom-mod">' + [[1, 'Lav'], [2, 'Middels'], [3, 'Høy']].map(function (x) {
+        return '<button type="button" data-f="' + x[0] + '" aria-pressed="' + (folsom === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>' +
+      '<button class="btn gold rof-start" data-a="start">Start 60 sekunder</button>' +
+      '<p class="small">Telefonen spør om lov til å bruke mikrofonen. Lyden lagres ikke og sendes ingen steder.</p>';
+  }
+  function stopp() {
+    aktiv = false; cancelAnimationFrame(loop);
+    if (strom) strom.getTracks().forEach(function (t) { t.stop(); }); strom = null;
+    if (ctx) { ctx.close().catch(function () {}); ctx = null; }
+  }
+  function niva() {
+    analyser.getFloatTimeDomainData(buf);
+    var sum = 0; for (var i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+    var rms = Math.sqrt(sum / buf.length);
+    return Math.max(0, Math.min(100, 20 * Math.log10(rms + 1e-8) + 100));   // ca. 0–100
+  }
+  function start() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return oppsett('Nettleseren din gir ikke tilgang til mikrofonen.');
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }).then(function (s) {
+      strom = s; ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var kilde = ctx.createMediaStreamSource(s); analyser = ctx.createAnalyser(); analyser.fftSize = 1024; buf = new Float32Array(analyser.fftSize); kilde.connect(analyser);
+      root.innerHTML = '<p class="dl-melding dl-stor" id="stTekst">Helt stille … måler rommet</p><div class="st-maaler"><i id="stNiva"></i><b id="stGrense"></b></div><div class="rf-tid" id="stTid">60</div>' +
+        '<div class="dl-knapper"><button class="btn ghost" data-a="avbryt">Avbryt</button></div>';
+      var t0 = performance.now(), maalinger = []; aktiv = true; over = 0;
+      (function kalibrer() {
+        if (!aktiv) return;
+        maalinger.push(niva());
+        if (performance.now() - t0 < 1500) { loop = requestAnimationFrame(kalibrer); return; }
+        maalinger.sort(function (a, b) { return a - b; }); grunn = maalinger[Math.floor(maalinger.length * 0.7)];
+        slutt = Date.now() + 60000; document.getElementById('stTekst').textContent = 'Klovnen kan begynne!';
+        document.getElementById('stGrense').style.left = Math.min(98, grunn + GRENSE[folsom]) + '%';
+        lytt();
+      })();
+    }).catch(function () { oppsett('Fikk ikke bruke mikrofonen. Sjekk at du har gitt tillatelse.'); });
+  }
+  function lytt() {
+    if (!aktiv) return;
+    var n = niva(), grense = grunn + GRENSE[folsom], igjen = Math.max(0, Math.ceil((slutt - Date.now()) / 1000));
+    var el = document.getElementById('stNiva'); if (el) { el.style.width = n + '%'; el.classList.toggle('hoy', n > grense); }
+    var tid = document.getElementById('stTid'); if (tid) { tid.textContent = igjen; tid.classList.toggle('snart', igjen <= 10); }
+    over = n > grense ? over + 1 : Math.max(0, over - 1);
+    if (over > 10) {   // ca. 0,2 sekunder over grensen
+      var sek = 60 - igjen; stopp();
+      try { navigator.vibrate && navigator.vibrate([200, 80, 200]); } catch (e) {}
+      root.closest('.dl').classList.add('st-alarm'); setTimeout(function () { var d = root.closest('.dl'); if (d) d.classList.remove('st-alarm'); }, 1200);
+      return oppsett('🚨 Noen lagde lyd etter ' + sek + ' sekunder! Den skyldige drikker to.');
+    }
+    if (igjen <= 0) { stopp(); return oppsett('🤫 Alle holdt seg i 60 sekunder! Klovnen drikker to.'); }
+    loop = requestAnimationFrame(lytt);
+  }
+  root.addEventListener('click', function (e) {
+    var f = e.target.closest('[data-f]'); if (f) { folsom = Number(f.dataset.f); return oppsett(); }
+    var b = e.target.closest('[data-a]'); if (!b) return;
+    if (b.dataset.a === 'start') start();
+    if (b.dataset.a === 'avbryt') { stopp(); oppsett(); }
+  });
+  document.addEventListener('astro:before-swap', stopp, { once: true });
   oppsett();
 })();
 </script>

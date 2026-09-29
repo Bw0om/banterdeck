@@ -34,6 +34,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
         <button class="tab on" data-tab="innhold">Innhold</button>
         <button class="tab" data-tab="forslag">Forslag <span id="sugCount" class="badge"></span></button>
         <button class="tab" data-tab="feil">Feil <span id="feilCount" class="badge"></span></button>
+        <button class="tab" data-tab="pluss">✨ Pluss</button>
       </div>
       <div class="barright">
         <span id="dirty" class="small"></span>
@@ -57,6 +58,33 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
     <div id="tab-forslag" hidden>
       <p class="small">Forslag sendt inn via <a href="/forslag">/forslag</a>. «Godta» legger replikken i valgt gruppe og lukker forslaget når du publiserer.</p>
       <div id="sugList" class="cards"></div>
+    </div>
+
+    <!-- Fane: gi Pluss -->
+    <div id="tab-pluss" hidden>
+      <div id="plussInnlogg" class="small" hidden>For å gi Pluss må du også være logget inn på <a href="/no/account">Min stokk</a> med admin-kontoen (e-posten i ADMIN_EPOSTER).</div>
+      <section class="konto-boks">
+        <h2>Gi Pluss til en konto</h2>
+        <div class="pickrow">
+          <div class="field"><label class="lab" for="plussSok">Brukernavn eller e-post</label><input id="plussSok" autocomplete="off" /></div>
+          <button class="btn" id="plussSokBtn" type="button">Finn</button>
+        </div>
+        <div id="plussTreff"></div>
+      </section>
+      <section class="konto-boks">
+        <h2>Gavekoder</h2>
+        <p class="small">Lag en kode du kan sende til hvem som helst. Mottakeren skriver den inn på Pluss-siden – eller trykker på lenken.</p>
+        <div class="pickrow">
+          <div class="field"><label class="lab" for="kodeDager">Hvor lenge</label>
+            <select id="kodeDager"><option value="1">1 dag</option><option value="7">1 uke</option><option value="30" selected>30 dager</option><option value="365">1 år</option></select></div>
+          <div class="field"><label class="lab" for="kodeMaks">Antall som kan bruke den</label><input id="kodeMaks" type="number" min="1" max="10000" value="1" /></div>
+          <div class="field"><label class="lab" for="kodeNavn">Egen kode <span class="opt">valgfritt</span></label><input id="kodeNavn" maxlength="24" placeholder="F.eks. JULEBORD24" /></div>
+          <div class="field"><label class="lab" for="kodeNotat">Notat <span class="opt">valgfritt</span></label><input id="kodeNotat" maxlength="80" placeholder="Hvem den er til" /></div>
+          <button class="btn gold" id="kodeLagBtn" type="button">Lag kode</button>
+        </div>
+        <p id="kodeMsg" class="formmsg" role="status"></p>
+        <div id="kodeListe" class="cards"></div>
+      </section>
     </div>
 
     <!-- Fane: feilrapporter -->
@@ -208,6 +236,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
         $('tab-innhold').hidden = t !== 'innhold';
         $('tab-forslag').hidden = t !== 'forslag';
         $('tab-feil').hidden = t !== 'feil';
+        $('tab-pluss').hidden = t !== 'pluss';
       });
     });
 
@@ -472,6 +501,71 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
       }
       $('publishBtn').disabled = false;
     });
+  })();
+  </script>
+  <script is:inline>
+  (function () {
+    var fane = document.getElementById('tab-pluss'); if (!fane || fane.dataset.bound) return; fane.dataset.bound = '1';
+    var K = window.BDKonto;
+    function $(x) { return document.getElementById(x); }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function dato(iso) { return iso ? new Date(iso).toLocaleString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–'; }
+    function api(sti, opts) {
+      if (!K || !K.les()) { $('plussInnlogg').hidden = false; return Promise.reject(new Error('Logg inn på Min stokk først.')); }
+      return K.api(sti, opts).then(function (r) { return r.json().then(function (d) { if (!r.ok) { if (r.status === 403) $('plussInnlogg').hidden = false; throw new Error(d.melding || 'Feil'); } return d; }); });
+    }
+    function sok() {
+      var q = $('plussSok').value.trim(); if (q.length < 3) return;
+      $('plussTreff').innerHTML = '<p class="small">Søker …</p>';
+      api('/api/admin/pluss?sok=' + encodeURIComponent(q)).then(function (d) {
+        if (!d.treff.length) { $('plussTreff').innerHTML = '<p class="small">Fant ingen konto med det brukernavnet eller den e-posten.</p>'; return; }
+        $('plussTreff').innerHTML = d.treff.map(function (u) {
+          var aktiv = u.til && new Date(u.til) > new Date();
+          return '<article class="card item"><p class="line"><b>' + esc(u.brukernavn || '(uten brukernavn)') + '</b> · ' + esc(u.epost) + '</p>' +
+            '<p class="sugmeta">' + (aktiv ? '✨ Pluss til ' + esc(dato(u.til)) : 'Har ikke Pluss nå') + '</p>' +
+            '<div class="acts">' + [[1, '1 dag'], [7, '1 uke'], [30, '30 dager'], [365, '1 år']].map(function (x) {
+              return '<button class="mini" data-gi="' + u.user_id + '" data-dager="' + x[0] + '">+ ' + x[1] + '</button>'; }).join('') + '</div></article>';
+        }).join('');
+      }).catch(function (e) { $('plussTreff').innerHTML = '<p class="small">' + esc(e.message) + '</p>'; });
+    }
+    $('plussSokBtn').addEventListener('click', sok);
+    $('plussSok').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); sok(); } });
+    $('plussTreff').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-gi]'); if (!b) return;
+      b.disabled = true;
+      api('/api/admin/pluss', { method: 'POST', body: JSON.stringify({ handling: 'gi', user_id: b.dataset.gi, dager: Number(b.dataset.dager) }) })
+        .then(function (d) { b.closest('article').querySelector('.sugmeta').textContent = '✨ Pluss til ' + dato(d.status.til); b.disabled = false; })
+        .catch(function (err) { alert(err.message); b.disabled = false; });
+    });
+    function lenke(kode) { return location.origin + '/no/pluss?kode=' + encodeURIComponent(kode); }
+    function hentKoder() {
+      api('/api/admin/pluss?koder=1').then(function (d) {
+        $('kodeListe').innerHTML = d.koder.length ? d.koder.map(function (k) {
+          var ute = k.utloper && new Date(k.utloper) < new Date(), brukt = k.brukt >= k.maks;
+          return '<article class="card item"><p class="line"><b>' + esc(k.kode) + '</b> · ' + k.dager + ' dager' + (k.notat ? ' · ' + esc(k.notat) : '') + '</p>' +
+            '<p class="sugmeta">Brukt ' + k.brukt + ' av ' + k.maks + (ute ? ' · utløpt' : k.utloper ? ' · gyldig til ' + esc(dato(k.utloper)) : '') + (brukt ? ' · brukt opp' : '') + '</p>' +
+            '<div class="acts"><button class="mini" data-kopier="' + esc(k.kode) + '">Kopier lenke</button><button class="mini danger" data-slett="' + esc(k.kode) + '">Slett</button></div></article>';
+        }).join('') : '<p class="small">Ingen gavekoder ennå.</p>';
+      }).catch(function () {});
+    }
+    $('kodeLagBtn').addEventListener('click', function () {
+      var b = this; b.disabled = true;
+      api('/api/admin/pluss', { method: 'POST', body: JSON.stringify({ handling: 'kode-lag', dager: Number($('kodeDager').value), maks: Number($('kodeMaks').value) || 1, kode: $('kodeNavn').value.trim(), notat: $('kodeNotat').value.trim() }) })
+        .then(function (d) {
+          var l = lenke(d.kode.kode);
+          $('kodeMsg').innerHTML = 'Laget <b>' + esc(d.kode.kode) + '</b> – lenke: <a href="' + esc(l) + '">' + esc(l) + '</a>'; $('kodeMsg').className = 'formmsg ok';
+          if (navigator.clipboard) navigator.clipboard.writeText(l).catch(function () {});
+          $('kodeNavn').value = ''; $('kodeNotat').value = ''; hentKoder();
+        })
+        .catch(function (err) { $('kodeMsg').textContent = err.message; $('kodeMsg').className = 'formmsg err'; })
+        .then(function () { b.disabled = false; });
+    });
+    $('kodeListe').addEventListener('click', function (e) {
+      var k = e.target.closest('[data-kopier]'), sl = e.target.closest('[data-slett]');
+      if (k) { var l = lenke(k.dataset.kopier); if (navigator.share) navigator.share({ title: 'Banterdeck Pluss', text: 'Her er Banterdeck Pluss til deg 🎁', url: l }).catch(function () {}); else if (navigator.clipboard) navigator.clipboard.writeText(l).then(function () { k.textContent = 'Kopiert ✓'; }); }
+      if (sl) { if (!confirm('Slette koden ' + sl.dataset.slett + '? Den slutter å virke.')) return; api('/api/admin/pluss', { method: 'POST', body: JSON.stringify({ handling: 'kode-slett', kode: sl.dataset.slett }) }).then(hentKoder); }
+    });
+    document.querySelector('.tab[data-tab=pluss]').addEventListener('click', function () { if (!fane.dataset.hentet) { fane.dataset.hentet = '1'; hentKoder(); } });
   })();
   </script>
 </Base>

@@ -3868,6 +3868,185 @@
        "min": 4,
        "maks": 99
       }
+     },
+     {
+      "name": {
+       "no": "Hvem skrev det?"
+      },
+      "gear": {
+       "no": "Én telefon hver"
+      },
+      "pl": "3+",
+      "only": "no",
+      "rules": {
+       "no": [
+        "Alle får samme spørsmål på telefonen, for eksempel «Den verste gaven du har fått» eller «Noe du aldri har fortalt foreldrene dine».",
+        "Alle skriver et svar anonymt. Når alle har svart, vises svarene ett og ett.",
+        "Alle gjetter hvem som skrev svaret – forfatteren holder masken.",
+        "b|Gjetter du feil: drikk én.",
+        "b|Gjetter ingen riktig: forfatteren deler ut to.",
+        "Lag et rom, så står alt på telefonene. Leken gir de beste historiene når dere kjenner hverandre litt."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nachspiel"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 3,
+       "maks": 16
+      }
+     },
+     {
+      "name": {
+       "no": "Bløffquizen"
+      },
+      "gear": {
+       "no": "Én telefon hver"
+      },
+      "pl": "3+",
+      "only": "no",
+      "rules": {
+       "no": [
+        "Telefonen stiller et sært spørsmål med et sant svar – for eksempel «Hva er Skottlands nasjonaldyr?».",
+        "Alle finner på et troverdig feil svar. Så vises alle svarene blandet med det ekte.",
+        "Alle stemmer på det de tror er sant.",
+        "b|Lurt av en løgn: drikk én.",
+        "b|Din løgn lurte noen: del ut én per person.",
+        "b|Fant det ekte svaret: del ut én.",
+        "Skriver du det riktige svaret ved et uhell, ber telefonen deg finne på en løgn i stedet."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nachspiel"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 3,
+       "maks": 16
+      }
+     },
+     {
+      "name": {
+       "no": "Samme svar"
+      },
+      "gear": {
+       "no": "Én telefon hver"
+      },
+      "pl": "3+",
+      "only": "no",
+      "rules": {
+       "no": [
+        "Telefonen gir en kategori, for eksempel «Noe man finner i et kjøleskap» eller «En kjent nordmann med skjegg».",
+        "Alle skriver ett svar i hemmelighet på 30 sekunder.",
+        "Svarene vises gruppert. Har minst én annen svart det samme som deg, går du fri.",
+        "b|Er du alene om svaret ditt – eller svarte ikke: drikk én.",
+        "Etterpå kommer diskusjonen om hvem som tenker sært."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "prevors",
+        "vors"
+       ],
+       "utstyr": "mobil",
+       "tempo": "raskt",
+       "min": 3,
+       "maks": 16
+      }
+     },
+     {
+      "name": {
+       "no": "Spionen"
+      },
+      "gear": {
+       "no": "Én telefon hver"
+      },
+      "pl": "3+",
+      "only": "no",
+      "rules": {
+       "no": [
+        "Alle får samme sted på telefonen – for eksempel «Hytta på fjellet» – bortsett fra én: spionen.",
+        "Dere stiller hverandre spørsmål på omgang uten å avsløre stedet. Spionen prøver å henge med og gjette hvor dere er.",
+        "Etter tre minutter – eller når verten vil – stemmer alle på hvem som er spionen.",
+        "b|Tar dere spionen, får hen én sjanse til å gjette stedet. Gjetter hen feil: spionen drikker tre.",
+        "b|Slipper spionen unna eller gjetter stedet: alle andre drikker to."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nachspiel"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 3,
+       "maks": 16
+      }
+     },
+     {
+      "name": {
+       "no": "Hemmelig oppdrag"
+      },
+      "gear": {
+       "no": "Én telefon hver"
+      },
+      "pl": "3+",
+      "only": "no",
+      "rules": {
+       "no": [
+        "Går i bakgrunnen hele kvelden, mens dere spiller andre leker. Verten slår det på i rommet.",
+        "Alle får et hemmelig oppdrag på telefonen, for eksempel «Få Maria til å si ordet 'faktisk'».",
+        "b|Klarer du oppdraget: trykk «Fullført». Den andre bekrefter – og du deler ut tre og får et nytt oppdrag.",
+        "b|Mistenker du noen: beskyld dem. Har de holdt på med oppdraget sitt, drikker de to. Tar du feil, drikker du én.",
+        "b|Vil du bytte oppdrag: drikk én.",
+        "Ikke vis oppdraget ditt til noen – og se opp for folk som plutselig vil bytte plass med deg."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nachspiel",
+        "fest"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 3,
+       "maks": 16
+      }
+     },
+     {
+      "name": {
+       "no": "Hvem er jeg?"
+      },
+      "gear": {
+       "no": "Én telefon hver"
+      },
+      "pl": "3+",
+      "only": "no",
+      "rules": {
+       "no": [
+        "Alle får tildelt én person å skrive et ord til – en kjendis, en figur eller en ting.",
+        "På telefonen ser du alles ord – bortsett fra ditt eget.",
+        "Still ja/nei-spørsmål på omgang for å finne ut hvem du er. Får du nei, går turen videre.",
+        "b|Gjetter du riktig, trykker en av de andre «Gjettet riktig». Først ut deler ut to.",
+        "b|Sistemann drikker tre."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nachspiel"
+       ],
+       "utstyr": "mobil",
+       "tempo": "sosialt",
+       "min": 3,
+       "maks": 16
+      }
      }
     ]
    },
@@ -4552,7 +4731,7 @@
       },
       "rules": {
        "no": [
-        "Ukas nyheter fra NRK, VG og TV 2 som drikkelek. Ny runde hver torsdag."
+        "Ukas nyheter fra norske nyhetsmedier som drikkelek. Ny runde hver fredag kl. 12 – spill den på én telefon eller fra hver sin i et rom."
        ]
       },
       "fit": {
@@ -4846,6 +5025,64 @@
        "tempo": "sosialt",
        "min": 4,
        "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Skål-refleksen"
+      },
+      "gear": {
+       "no": "Én telefon hver"
+      },
+      "pl": "2+",
+      "only": "no",
+      "rules": {
+       "no": [
+        "Alle ser på sin egen telefon. På et tilfeldig tidspunkt står det SKÅL!",
+        "b|Treigest til å trykke: drikk én.",
+        "b|Trykker du før det står SKÅL: drikk to.",
+        "b|Raskest: del ut én.",
+        "En runde tar ti sekunder – perfekt mellom to større leker."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nachspiel"
+       ],
+       "utstyr": "mobil",
+       "tempo": "raskt",
+       "min": 2,
+       "maks": 16
+      }
+     },
+     {
+      "name": {
+       "no": "Stilleleken"
+      },
+      "gear": {
+       "no": "Én telefon"
+      },
+      "pl": "3+",
+      "only": "no",
+      "rules": {
+       "no": [
+        "Legg telefonen midt på bordet. Den lytter i 60 sekunder og viser hvor mye lyd det er i rommet.",
+        "Alle må være helt stille – mens én person prøver å få de andre til å le, med grimaser, historier eller hva som helst.",
+        "b|Slår telefonen alarm: den som lagde lyd, drikker to.",
+        "b|Holder alle seg i 60 sekunder: klovnen drikker to.",
+        "Følsomheten kan justeres, så den tåler litt musikk i bakgrunnen."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nachspiel"
+       ],
+       "utstyr": "mobil",
+       "tempo": "raskt",
+       "min": 3,
+       "maks": 16
       }
      }
     ]

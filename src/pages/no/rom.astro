@@ -299,7 +299,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       }
       return plassInfo() + qrBoks() + egneStokker() +
         '<h2 class="rom-h2">Velg en lek</h2>' +
-        '<div class="rom-leker">' + t.leker.filter(function (l) { return !l.pluss; }).map(function (l) {
+        lekeGrupper(t.leker.filter(function (l) { return !l.pluss; }), function (l) {
           var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
           return '<div class="rom-lek"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' +
             '<div class="rom-mod">' + (mod.length
@@ -307,16 +307,37 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
                 (l.type !== 'bingo' && l.type !== 'nyhetsrunden' ? '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Alle</button>' : '')
               : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
             '</div></div>';
-        }).join('') + '</div>' + plussLeker();
+        }) + plussLeker();
+    }
+    /** Lekene i lobbyen sortert i grupper som kan åpnes og lukkes, så lista ikke blir uendelig lang. */
+    var GRUPPER = [
+      ['Snakk, stem og avslør', ['nyhetsrunden', 'hvemskrev', 'samme', 'spion', 'pannekort', 'mest', 'tosannheter', 'regelfabrikken']],
+      ['Kort og terninger', ['ring-of-fire', 'veddelopet', 'overunder', 'bingo']],
+      ['Raske runder', ['skal']],
+    ];
+    // Husk hvilke grupper verten har åpnet, siden lobbyen tegnes på nytt når noen blir med
+    var apneGrupper = {};
+    function erApen(n, standard) { return n in apneGrupper ? apneGrupper[n] : standard; }
+    root.addEventListener('toggle', function (e) { var d = e.target; if (d && d.dataset && d.dataset.gruppe) apneGrupper[d.dataset.gruppe] = d.open; }, true);
+    function lekeGrupper(leker, tegnLek) {
+      var brukt = {}, ut = '';
+      GRUPPER.forEach(function (g, i) {
+        var l = leker.filter(function (x) { return g[1].indexOf(x.id) !== -1; }); if (!l.length) return;
+        l.forEach(function (x) { brukt[x.id] = 1; });
+        ut += '<details class="rom-gruppe" data-gruppe="' + i + '"' + (erApen(String(i), i === 0) ? ' open' : '') + '><summary>' + esc(g[0]) + ' <small>' + l.length + '</small></summary><div class="rom-leker">' + l.map(tegnLek).join('') + '</div></details>';
+      });
+      var rest = leker.filter(function (x) { return !brukt[x.id]; });
+      if (rest.length) ut += '<details class="rom-gruppe" data-gruppe="rest"' + (erApen('rest', false) ? ' open' : '') + '><summary>Kortstokker med spørsmål <small>' + rest.length + '</small></summary><div class="rom-leker">' + rest.map(tegnLek).join('') + '</div></details>';
+      return ut;
     }
     function plussLeker() {
       var t = tilstand, l = (t.leker || []).filter(function (x) { return x.pluss; }); if (!l.length) return '';
       var aapen = !!t.pluss;
-      return '<h2 class="rom-h2">✨ Med Pluss</h2>' + (aapen ? '' : '<p class="small">Har verten Pluss, er disse åpne for alle i rommet – og dere kan være opptil 16 telefoner. <a href="/no/pluss">Første kveld er gratis.</a></p>') +
+      return '<details class="rom-gruppe pluss" data-gruppe="pluss"' + (erApen('pluss', aapen) ? ' open' : '') + '><summary>✨ Med Pluss <small>' + l.length + '</small></summary>' + (aapen ? '' : '<p class="small">Har verten Pluss, er disse åpne for alle i rommet – og dere kan være opptil 16 telefoner. <a href="/no/pluss">Første kveld er gratis.</a></p>') +
         '<div class="rom-leker">' + l.map(function (x) {
           return '<div class="rom-lek pluss' + (aapen ? '' : ' laast') + '"><b>' + (aapen ? '' : '🔒 ') + esc(x.navn) + '</b><span>' + esc(x.om || '') + '</span>' +
             '<div class="rom-mod"><button type="button" data-g="start" data-lek="' + x.id + '" data-modus="*">' + (aapen ? 'Start' : 'Lås opp') + '</button></div></div>';
-        }).join('') + '</div>';
+        }).join('') + '</div></details>';
     }
     /** Hvor mange gratisplasser som er brukt, og beskjed hvis noen ble stoppet i døra. */
     function plassInfo() {
@@ -809,6 +830,192 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       document.body.appendChild(m);
     }
 
+    /* ---------- sosiale leker ---------- */
+    function skriveFelt(plass, knapp, maks) {
+      return '<form class="rf-skjema" id="sosSkjema"><div class="rf-rad"><input id="sosInput" maxlength="' + (maks || 120) + '" autocomplete="off" enterkeyhint="send" placeholder="' + esc(plass) + '">' +
+        '<button class="btn gold" type="submit">' + esc(knapp) + '</button></div></form>';
+    }
+    function hvem(ider) { return (ider || []).map(function (id) { return esc(navn(id)); }).join(', '); }
+    function spillerKnapper(g, unntak, valgt) {
+      return '<div class="rom-valg">' + tilstand.spillere.filter(function (p) { return (unntak || []).indexOf(p.id) === -1; }).map(function (p) {
+        return '<button type="button" data-g="' + g + '" data-paa="' + p.id + '" aria-pressed="' + (valgt === p.id) + '">' + esc(p.navn) + '</button>';
+      }).join('') + '</div>';
+    }
+    function nyRundeKnapp(tekst) { return '<button class="rom-stor-knapp" data-g="runde" type="button">' + esc(tekst) + '</button>'; }
+
+    function hvemskrevSpill(s) {
+      var n = tilstand.spillere.length;
+      if (s.fase === 'skriv') return '<p class="rom-etikett">Svar anonymt</p><p class="rom-sporsmal">' + esc(s.oppgave) + '</p>' +
+        (s.mittSvar ? '<p class="small">Du skrev: <b>' + esc(s.mittSvar) + '</b> – du kan endre til alle har svart.</p>' : '<p class="small">Ingen får vite at det var deg – før de gjetter det.</p>') +
+        skriveFelt('Skriv svaret ditt …', s.mittSvar ? 'Endre' : 'Send', 160) +
+        '<p class="rom-status">' + s.harSkrevet.length + ' av ' + n + ' har svart</p>' + fristHtml(tilstand.spill, 'sekunder igjen');
+      if (s.fase === 'gjett' || s.fase === 'fasit') {
+        var kort = '<p class="gt-count">Svar ' + (s.i + 1) + ' av ' + s.antallSvar + '</p><div class="rom-kort rf-kort"><span class="sw-tag">' + esc(s.oppgave) + '</span><p>«' + esc(s.tekst) + '»</p><span></span></div>';
+        if (s.fase === 'gjett') return kort + (s.erMitt ? '<p class="rom-stor">Dette er ditt svar 🤫 Hold masken!</p>' :
+          '<p class="rom-etikett">Hvem skrev dette?</p>' + spillerKnapper('hs-stem', [tilstand.meg], s.minStemme)) +
+          '<p class="rom-status">' + s.harStemt.length + ' av ' + (n - 1) + ' har gjettet</p>' + fristHtml(tilstand.spill, 'sekunder igjen');
+        var riktige = Object.keys(s.stemmer || {}).filter(function (id) { return s.stemmer[id] === s.forfatter; });
+        var feil = Object.keys(s.stemmer || {}).filter(function (id) { return s.stemmer[id] !== s.forfatter; });
+        return kort + '<p class="dl-melding dl-stor">Det var ' + esc(navn(s.forfatter)) + '!</p>' +
+          (riktige.length ? '<p>🎯 Riktig: ' + hvem(riktige) + '</p>' : '<p>Ingen gjettet det – ' + esc(navn(s.forfatter)) + ' deler ut 2.</p>') +
+          (feil.length ? '<p>🍺 Feil (drikk 1): ' + hvem(feil) + '</p>' : '') +
+          (erVert() ? '<button class="rom-stor-knapp" data-g="hs-neste" type="button">' + (s.i + 1 < s.antallSvar ? 'Neste svar' : 'Ferdig med runden') + '</button>' : '');
+      }
+      return '<p class="dl-melding dl-stor">Alle svarene er avslørt!</p>' + (erVert() ? nyRundeKnapp('Nytt spørsmål') : '<p class="small">Venter på at verten tar et nytt spørsmål …</p>');
+    }
+
+    function bloffSpill(s) {
+      var n = tilstand.spillere.length;
+      var q = '<p class="rom-etikett">Bløffquizen</p><p class="rom-sporsmal">' + esc(s.q) + '</p>';
+      if (s.fase === 'skriv') return q + '<p class="small">Finn på et <b>troverdig feil svar</b>. Du får en 🍺 for hver du lurer.</p>' +
+        (s.mittSvar ? '<p class="small">Din løgn: <b>' + esc(s.mittSvar) + '</b></p>' : '') + skriveFelt('Din løgn …', s.mittSvar ? 'Endre' : 'Send', 80) +
+        '<p class="rom-status">' + s.harSkrevet.length + ' av ' + n + ' har skrevet</p>' + fristHtml(tilstand.spill, 'sekunder igjen');
+      if (s.fase === 'stem') return q + '<p class="rom-etikett">Hvilket svar er det ekte?</p><div class="rom-valg en">' + s.valg.map(function (v, i) {
+          return '<button type="button" data-g="bf-stem" data-i="' + i + '" aria-pressed="' + (s.minStemme === i) + '"' + (v.min ? ' disabled' : '') + '>' + esc(v.t) + (v.min ? ' <small>(din løgn)</small>' : '') + '</button>';
+        }).join('') + '</div><p class="rom-status">' + s.harStemt.length + ' av ' + n + ' har stemt</p>' + fristHtml(tilstand.spill, 'sekunder igjen');
+      return q + '<p class="dl-melding dl-stor">Svaret er: ' + esc(s.sant) + '</p><ul class="bf-fasit">' + s.valg.map(function (v, i) {
+          var velgere = Object.keys(s.stemmer || {}).filter(function (id) { return s.stemmer[id] === i; });
+          var ekte = v.av[0] === 'sant';
+          return '<li class="' + (ekte ? 'ekte' : '') + '"><b>' + esc(v.t) + '</b><span>' + (ekte ? '✓ Det ekte svaret' : 'Løgn fra ' + hvem(v.av)) + '</span>' +
+            (velgere.length ? '<small>' + (ekte ? 'Riktig: ' : 'Lurt: ') + hvem(velgere) + '</small>' : '') + '</li>';
+        }).join('') + '</ul><p class="small">Lurt = drikk 1. Løgneren deler ut 1 per person som ble lurt. Riktig = del ut 1.</p>' +
+        (erVert() ? nyRundeKnapp('Neste spørsmål') : '');
+    }
+
+    function sammeSpill(s) {
+      var n = tilstand.spillere.length;
+      if (s.fase === 'skriv') return '<p class="rom-etikett">Skriv ett svar – tenk som de andre</p><p class="rom-sporsmal">' + esc(s.oppgave) + '</p>' +
+        (s.mittSvar ? '<p class="small">Du skrev: <b>' + esc(s.mittSvar) + '</b></p>' : '') + skriveFelt('Ditt svar …', s.mittSvar ? 'Endre' : 'Send', 40) +
+        '<p class="rom-status">' + s.harSkrevet.length + ' av ' + n + ' har svart</p>' + fristHtml(tilstand.spill, 'sekunder igjen');
+      var med = {}; (s.grupper || []).forEach(function (g) { g.ider.forEach(function (id) { med[id] = 1; }); });
+      var uten = tilstand.spillere.filter(function (p) { return !med[p.id]; }).map(function (p) { return p.id; });
+      return '<p class="rom-sporsmal">' + esc(s.oppgave) + '</p><ul class="sm-grupper">' + (s.grupper || []).map(function (g) {
+          return '<li class="' + (g.ider.length > 1 ? 'trygg' : 'alene') + '"><b>' + esc(g.t) + '</b><span>' + hvem(g.ider) + '</span><small>' + (g.ider.length > 1 ? 'Trygge ✓' : 'Alene – drikk 1') + '</small></li>';
+        }).join('') + (uten.length ? '<li class="alene"><b>Ingen svar</b><span>' + hvem(uten) + '</span><small>Drikk 1</small></li>' : '') + '</ul>' +
+        (erVert() ? nyRundeKnapp('Nytt spørsmål') : '');
+    }
+
+    function spionSpill(s) {
+      var steder = '<details class="sp-steder"><summary>Alle mulige steder</summary><p>' + s.steder.map(esc).join(' · ') + '</p></details>';
+      var rolle = s.erSpion ? '<div class="rom-hemmelig lyv"><b>🕵️ Du er spionen</b></div><p>Finn ut hvor dere er uten å bli avslørt.</p>'
+                            : '<div class="rom-hemmelig sann"><b>' + esc(s.sted) + '</b></div><p>Én av dere er spionen og vet ikke stedet. Ikke vær for tydelig!</p>';
+      if (s.fase === 'sporsmal') return '<p class="rom-etikett">Bare du ser dette</p>' + rolle +
+        '<p class="small">' + esc(navn(s.start)) + ' stiller første spørsmål til hvem som helst. Den som svarer, spør videre.</p>' +
+        fristHtml(tilstand.spill, 'sekunder til stemming') + steder +
+        (erVert() ? '<button class="btn ghost" data-g="sp-til-stemming" type="button">Til stemming nå</button>' : '');
+      if (s.fase === 'stem') return '<p class="rom-etikett">Hvem er spionen?</p>' + spillerKnapper('sp-stem', [tilstand.meg], s.minStemme) +
+        '<p class="rom-status">' + s.harStemt.length + ' av ' + tilstand.spillere.length + ' har stemt</p>' + fristHtml(tilstand.spill, 'sekunder igjen');
+      if (s.fase === 'gjett') return s.erSpion
+        ? '<p class="dl-melding dl-stor">Du er avslørt! Gjett stedet for å vinne likevel:</p><div class="rom-valg">' + s.steder.map(function (x) { return '<button type="button" data-g="sp-gjett" data-sted="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>' + fristHtml(tilstand.spill, 'sekunder')
+        : '<p class="dl-melding dl-stor">' + esc(navn(s.spion)) + ' er spionen!</p><p class="rom-stor">Men hen får én sjanse til å gjette stedet …</p>' + fristHtml(tilstand.spill, 'sekunder');
+      var tekst = s.utfall === 'fanget' ? 'Spionen ' + esc(navn(s.spion)) + ' ble tatt! Spionen drikker 3.' :
+        s.utfall === 'spion-gjettet' ? esc(navn(s.spion)) + ' ble tatt, men gjettet stedet – spionen vinner! Alle andre drikker 2.' :
+        'Spionen ' + esc(navn(s.spion)) + ' slapp unna' + (s.feilMistenkt ? ' (dere tok ' + esc(navn(s.feilMistenkt)) + ')' : '') + '. Alle andre drikker 2.';
+      return '<p class="dl-melding dl-stor">' + tekst + '</p><p>Stedet var <b>' + esc(s.sted) + '</b>' + (s.spionGjett ? ' – spionen gjettet «' + esc(s.spionGjett) + '»' : '') + '.</p>' +
+        (erVert() ? nyRundeKnapp('Ny runde') : '');
+    }
+
+    function pannekortSpill(s) {
+      if (s.fase === 'skriv') {
+        var skrevet = s.harSkrevet.indexOf(tilstand.meg) !== -1;
+        return '<p class="rom-etikett">Hvem er jeg?</p><p>Skriv en person, figur eller ting til <b>' + esc(navn(s.mitMaal)) + '</b>. Hen ser ikke ordet sitt – alle andre gjør.</p>' +
+          (skrevet ? '<p class="small">✓ Sendt. Du kan endre til alle er klare.</p>' : '') + skriveFelt('F.eks. Kong Harald', skrevet ? 'Endre' : 'Send', 40) +
+          '<p class="rom-status">' + s.harSkrevet.length + ' av ' + tilstand.spillere.length + ' har skrevet</p>' + fristHtml(tilstand.spill, 'sekunder igjen');
+      }
+      var liste = '<div class="pk-liste">' + tilstand.spillere.map(function (p) {
+        var o = s.ord[p.id], meg = p.id === tilstand.meg, gjettet = s.gjettet.indexOf(p.id) !== -1;
+        return '<div class="pk-kort' + (meg ? ' meg' : '') + (gjettet ? ' gjettet' : '') + '"><span>' + esc(p.navn) + (meg ? ' (deg)' : '') + '</span>' +
+          '<b>' + (meg && s.fase !== 'ferdig' ? '???' : o ? esc(o.t) : '–') + '</b>' +
+          (gjettet ? '<small>✓ Gjettet</small>' : (!meg && s.fase === 'spill' ? '<button class="mini" data-g="pk-riktig" data-paa="' + p.id + '" type="button">Gjettet riktig</button>' : '')) + '</div>';
+      }).join('') + '</div>';
+      if (s.fase === 'spill') return '<p class="rom-etikett">Hvem er du?</p><p class="small">Still ja/nei-spørsmål på omgang. Nei = neste person. Når noen gjetter riktig, trykker en av de andre «Gjettet riktig». Først ut deler ut 2 – sistemann drikker 3.</p>' + liste +
+        (erVert() ? '<button class="btn ghost" data-g="pk-avslutt" type="button">Avslutt runden</button>' : '');
+      return '<p class="dl-melding dl-stor">' + (s.sist ? esc(navn(s.sist)) + ' ble sist – drikk 3!' : 'Runden er over!') + '</p>' + liste + (erVert() ? nyRundeKnapp('Ny runde') : '');
+    }
+
+    var skalVist = null, skalTid = null, skalTimer = null;
+    function skalSpill(s) {
+      if (s.fase === 'vent') {
+        if (skalTid !== s.tid) {   // ny runde: planlegg når SKÅL vises på denne telefonen
+          skalTid = s.tid; skalVist = null; clearTimeout(skalTimer);
+          var om = s.tid - (Date.now() + klokkeAvvik);
+          skalTimer = setTimeout(function () {
+            skalVist = performance.now();
+            var b = document.getElementById('skalKnapp'); if (b) { b.classList.add('naa'); b.textContent = 'SKÅL!'; }
+            try { navigator.vibrate && navigator.vibrate(80); } catch (e) {}
+          }, Math.max(0, om));
+        }
+        var trykket = s.harTrykket.indexOf(tilstand.meg) !== -1;
+        return '<button class="skal-knapp' + (skalVist ? ' naa' : '') + '" id="skalKnapp" data-g="sk-trykk" type="button"' + (trykket ? ' disabled' : '') + '>' +
+          (trykket ? 'Trykket!' : skalVist ? 'SKÅL!' : 'Vent …') + '</button>' +
+          '<p class="rom-status">' + s.harTrykket.length + ' av ' + tilstand.spillere.length + ' har trykket</p>';
+      }
+      if (s.fase === 'fasit' && s.resultat) {
+        var r = s.resultat;
+        return '<p class="dl-melding dl-stor">' + (r.treigest ? esc(navn(r.treigest)) + ' var treigest – drikk!' : 'Runden er over') + '</p>' +
+          '<ol class="rom-resultat">' + r.tider.map(function (x) { return '<li><span>' + esc(navn(x[0])) + '</span><b>' + x[1] + ' ms</b></li>'; }).join('') + '</ol>' +
+          (r.tidlig.length ? '<p>For tidlig (drikk 2): ' + hvem(r.tidlig) + '</p>' : '') +
+          (r.ikke.length ? '<p>Trykket ikke (drikk 1): ' + hvem(r.ikke) + '</p>' : '') +
+          '<button class="rom-stor-knapp" data-g="sk-start" type="button">Ny runde</button>';
+      }
+      return '<p class="dl-melding dl-stor">Klar?</p><p>Når det står <b>SKÅL!</b>, trykker alle så fort de kan. Treigest drikker. Trykker du for tidlig, drikker du dobbelt.</p>' +
+        '<button class="rom-stor-knapp" data-g="sk-start" type="button">Start</button>';
+    }
+
+    /* ---------- hemmelige oppdrag ---------- */
+    var opModal = null, opSettNokkel = '';
+    function oppdragKnapp() {
+      var o = tilstand.oppdrag; if (!o) return '';
+      return '<button class="op-pille" data-g="op-aapne" type="button">🕵️ Ditt hemmelige oppdrag</button>';
+    }
+    function aapneOppdrag() {
+      var o = tilstand.oppdrag; if (!o) return;
+      lukkOppdrag();
+      opModal = document.createElement('div'); opModal.className = 'rom-tavle'; opModal.setAttribute('role', 'dialog');
+      opModal.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>🕵️ Ditt oppdrag</h2><button class="linkbtn" data-o="lukk" type="button">Lukk</button></div>' +
+        (o.mitt ? '<p class="op-tekst">' + esc(o.mitt.t) + '</p>' : '<p>Du får et oppdrag straks.</p>') +
+        '<p class="small">Klarer du det, trykk «Fullført» – den andre må bekrefte. Da deler du ut 3. Ikke vis dette til noen!</p>' +
+        '<div class="dl-knapper"><button class="btn gold" data-o="fullfort" type="button"' + (o.venterPaaBekreftelse ? ' disabled' : '') + '>' + (o.venterPaaBekreftelse ? 'Venter på bekreftelse …' : 'Fullført!') + '</button>' +
+        '<button class="btn ghost" data-o="bytt" type="button">Bytt oppdrag (drikk 1)</button></div>' +
+        '<h3>Mistenker du noen?</h3><p class="small">Tror du noen holder på med sitt oppdrag? Treffer du, drikker de 2. Bommer du, drikker du 1.</p>' +
+        (o.minAnklage ? '<p class="small">Venter på svar på anklagen din …</p>' :
+          '<div class="rom-valg">' + tilstand.spillere.filter(function (p) { return p.id !== tilstand.meg; }).map(function (p) { return '<button type="button" data-o="beskyld" data-id="' + p.id + '">' + esc(p.navn) + '</button>'; }).join('') + '</div>') +
+        '</div>';
+      opModal.addEventListener('click', function (e) {
+        if (e.target === opModal) return lukkOppdrag();
+        var b = e.target.closest('[data-o]'); if (!b) return;
+        var a = b.dataset.o;
+        if (a === 'lukk') return lukkOppdrag();
+        if (a === 'fullfort') { gjorAlltid({ handling: 'op-fullfort' }); toast('Sendt – venter på at den andre bekrefter'); return lukkOppdrag(); }
+        if (a === 'bytt') { gjorAlltid({ handling: 'op-bytt' }); return lukkOppdrag(); }
+        if (a === 'beskyld') { gjorAlltid({ handling: 'op-beskyld', hvem: b.dataset.id }); toast('Anklagen er sendt 👀'); return lukkOppdrag(); }
+      });
+      document.body.appendChild(opModal);
+    }
+    function lukkOppdrag() { if (opModal) { opModal.remove(); opModal = null; } }
+    /** Spørsmål som må besvares: «stemmer det at hen fikk deg til …?» og anklager mot deg. */
+    function sjekkOppdrag() {
+      var o = tilstand && tilstand.oppdrag; if (!o) { lukkOppdrag(); return; }
+      var sporsmal = (o.bekreft || []).map(function (b) { return 'b:' + b.fra + ':' + b.t; }).concat((o.anklager || []).map(function (a) { return 'a:' + a.fra; }));
+      var nokkel = sporsmal[0] || '';
+      if (!nokkel || nokkel === opSettNokkel || document.querySelector('.op-sporsmal')) return;
+      opSettNokkel = nokkel;
+      var m = document.createElement('div'); m.className = 'rom-tavle op-sporsmal'; m.setAttribute('role', 'dialog');
+      if (nokkel[0] === 'b') {
+        var b = o.bekreft[0];
+        m.innerHTML = '<div class="rom-tavle-innhold"><h2>🕵️ Avslørt oppdrag</h2><p><b>' + esc(navn(b.fra)) + '</b> hadde oppdraget:</p><p class="op-tekst">' + esc(b.t) + '</p><p>Klarte hen det?</p>' +
+          '<div class="dl-knapper"><button class="btn gold" data-s="ja" type="button">Ja, jeg ble lurt</button><button class="btn ghost" data-s="nei" type="button">Nei</button></div></div>';
+        m.addEventListener('click', function (e) { var k = e.target.closest('[data-s]'); if (!k) return; gjorAlltid({ handling: 'op-bekreft', fra: b.fra, ja: k.dataset.s === 'ja' }); m.remove(); });
+      } else {
+        var a = o.anklager[0];
+        m.innerHTML = '<div class="rom-tavle-innhold"><h2>👀 Du er mistenkt!</h2><p><b>' + esc(navn(a.fra)) + '</b> tror du holder på med ditt hemmelige oppdrag.</p><p>Vær ærlig: har du prøvd på det?</p>' +
+          '<div class="dl-knapper"><button class="btn gold" data-s="tatt" type="button">Ja, tatt (drikk 2)</button><button class="btn ghost" data-s="nei" type="button">Nei, feil</button></div></div>';
+        m.addEventListener('click', function (e) { var k = e.target.closest('[data-s]'); if (!k) return; gjorAlltid({ handling: 'op-svar', fra: a.fra, tatt: k.dataset.s === 'tatt' }); m.remove(); });
+      }
+      document.body.appendChild(m);
+      spillLyd('tur');
+    }
+
     /* ---------- «hopp over» når den som har tur har forsvunnet ---------- */
     setInterval(function () {
       var el = document.querySelector('.rom-hopp'); if (!el) return;
@@ -1054,17 +1261,19 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       else {
         innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' ? ' · ' + esc(s.modus) : '') + '</p>' +
           ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
-             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill }[s.type] || function () { return ''; })(s) + '</div>';
+             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + '</div>';
       }
       if (s && s.turStart && erVert()) innhold += '<p class="rom-hopp" data-turstart="' + s.turStart + '" hidden><button class="btn ghost small" data-g="hopp-over" type="button">Hopp over den som har tur</button></p>';
       var vert = erVert() ? '<div class="rom-vert">' +
         (s ? '<button class="btn ghost small" data-g="avslutt" type="button">Bytt lek</button>' : '') +
         '<button class="btn ghost small" data-g="nullstill" type="button">Nullstill slurker</button>' +
-        (tilstand.ferdig ? '' : '<button class="btn ghost small" data-g="avslutt-kvelden" type="button">Avslutt kvelden</button>') + '</div>' : '';
+        (tilstand.ferdig ? '' : '<button class="btn ghost small" data-g="avslutt-kvelden" type="button">Avslutt kvelden</button>') +
+        (tilstand.oppdrag ? '<button class="btn ghost small" data-g="op-av" type="button">Stopp hemmelige oppdrag</button>' : '<button class="btn ghost small" data-g="op-paa" type="button">🕵️ Start hemmelige oppdrag ✨</button>') + '</div>' : '';
       var tsLagret = [0, 1, 2].map(function (i) { var e = document.getElementById('tsR' + i); return e ? e.value : null; }), tsValgt = (document.querySelector('input[name=tsL]:checked') || {}).value;
       var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
       var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
-      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">✨ Pluss i kveld – alle leker er åpne, plass til 16</p>' : '') + reaksjonslinje() + innhold + vert +
+      var sosGammel = document.getElementById('sosInput'), sosVerdi = sosGammel ? sosGammel.value : null, sosFokus = sosGammel && document.activeElement === sosGammel;
+      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">✨ Pluss i kveld – alle leker er åpne, plass til 16</p>' : '') + oppdragKnapp() + reaksjonslinje() + innhold + vert +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">Forlat rommet</button> · <button type="button" class="feilknapp" data-feil>Noe galt?</button></p>';
       window.scrollTo(0, y);
       tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
@@ -1075,6 +1284,17 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       if (nrS) nrS.addEventListener('submit', function (e) {
         e.preventDefault(); var i = document.getElementById('nrInput'); gjorAlltid({ handling: 'nr-svar', v: i.value.trim() }); i.blur();
       });
+      var sosNy = document.getElementById('sosInput');
+      if (sosNy && sosVerdi !== null) { sosNy.value = sosVerdi; if (sosFokus) sosNy.focus({ preventScroll: true }); }
+      var sosS = document.getElementById('sosSkjema');
+      if (sosS) sosS.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var i = document.getElementById('sosInput'), t = i.value.trim(); if (!t) return;
+        var typ = tilstand.spill && tilstand.spill.type;
+        var hd = { hvemskrev: 'hs-skriv', bloff: 'bf-skriv', samme: 'sm-skriv', pannekort: 'pk-skriv' }[typ]; if (!hd) return;
+        i.value = ''; i.blur(); gjorAlltid({ handling: hd, tekst: t });
+      });
+      sjekkOppdrag();
       visReaksjoner(tilstand.reak);
       sjekkHjul();
       if (tavleHjul) tegnHjulModal(false);
@@ -1111,6 +1331,19 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       if (g === 'tavle') return aapneTavle();
       if (g === 'hjul-aapne') return aapneHjul();
       if (g === 'pluss-tilbud') return visPlussTilbud();
+      if (g === 'op-aapne') return aapneOppdrag();
+      if (g === 'op-paa' || g === 'op-av') return gjor({ handling: g });
+      if (g === 'hs-stem') return gjor({ handling: 'hs-stem', hvem: b.dataset.paa });
+      if (g === 'sp-stem') return gjor({ handling: 'sp-stem', hvem: b.dataset.paa });
+      if (g === 'sp-gjett') return gjor({ handling: 'sp-gjett', sted: b.dataset.sted });
+      if (g === 'bf-stem') return gjor({ handling: 'bf-stem', i: Number(b.dataset.i) });
+      if (g === 'pk-riktig') return gjor({ handling: 'pk-riktig', hvem: b.dataset.paa });
+      if (g === 'sk-trykk') {
+        var tidlig = !skalVist, ms = skalVist ? Math.round(performance.now() - skalVist) : null;
+        b.disabled = true; b.textContent = tidlig ? 'For tidlig! 🍺🍺' : ms + ' ms';
+        return gjorAlltid({ handling: 'sk-trykk', tidlig: tidlig, ms: ms });
+      }
+      if (['hs-neste', 'sp-til-stemming', 'pk-avslutt', 'sk-start'].indexOf(g) !== -1) return gjor({ handling: g });
       if (g === 'hopp-over') return gjor({ handling: 'hopp-over' });
       if (g === 'qr') {
         var m = document.createElement('div'); m.className = 'rom-qrmodal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'QR-kode');

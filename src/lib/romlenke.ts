@@ -7,7 +7,8 @@ export const ROMLEK: Record<string, string> = {
   'drikke-bingo': 'bingo', 'ring-of-fire': 'ring-of-fire', 'pekeleken': 'pekeleken', 'jeg-har-aldri': 'jeg-har-aldri',
   'enten-eller': 'enten-eller', 'kategorier': 'kategorier', 'nodt-eller-sannhet': 'nodt-eller-sannhet',
   'rygg-mot-rygg': 'rygg-mot-rygg', 'duoleken': 'duoleken', '50-50': '50-50', 'sannhet-eller-drikk': 'sannhet-eller-drikk',
-  'tanken-bak-sangen': 'tanken-bak-sangen',
+  'tanken-bak-sangen': 'tanken-bak-sangen', 'hvem-skrev-det': 'hvemskrev', 'bloffquizen': 'bloff', 'samme-svar': 'samme',
+  'spionen': 'spion', 'hvem-er-jeg': 'pannekort', 'skal-refleksen': 'skal',
 };
 export function romLenke(slug: string, modus = '') {
   const lek = ROMLEK[slug];

@@ -7,6 +7,7 @@ import { rpc, supabaseServer } from './spilt';
 import DECKS from '../data/decks.json';
 import BINGO from '../data/bingo.json';
 import PLUSSPAKKER from '../data/pluss.json';
+import SOSIAL from '../data/sosial.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
@@ -118,7 +119,7 @@ export function visning(data: any, versjon: number, meg: any) {
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null,
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0 })),
-    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul || null, hjulListe: data.hjulListe || HJUL_STANDARD, pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: data.historikk || [],
+    spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul || null, hjulListe: data.hjulListe || HJUL_STANDARD, oppdrag: oppdragVisning(data, meg), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: data.historikk || [],
   };
 }
 
@@ -279,6 +280,7 @@ function handlingInne(data: any, meg: any, h: any) {
     hoppOver(data); return { ok: true };
   }
   if (h.handling === 'hjul') return spinnHjul(data, meg, h, erVert);
+  if (String(h.handling || '').startsWith('op-')) return oppdragHandling(data, meg, h, erVert);
   if (h.handling === 'hjul-liste') {
     if (!erVert) return { feil: 'bare-vert' };
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
@@ -481,6 +483,7 @@ export function blimed(data: any, navn: string) {
   data.spillere.push(p);
   const s = data.spill;
   if (s && s.type === 'bingo') { s.brett[p.id] = nyttBrett(s); s.merket[p.id] = Array(16).fill(false); }
+  if (data.oppdrag && data.oppdrag.paa) nyttOppdrag(data, p.id);
   melde(data, `${n} ble med`);
   return { spiller: p };
 }
@@ -499,12 +502,19 @@ export function gyldigKode(k: any) { return typeof k === 'string' && /^[A-Z0-9]{
    Kort- og terningleker i rom: Opus, Over eller under, Veddeløpet,
    Pyramiden, Gris og President. Skjulte hender vises bare til eieren.
    ===================================================================== */
-export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden'];
+export const SOS = ['hvemskrev', 'bloff', 'samme', 'spion', 'skal', 'pannekort'];
+export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
 export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '🫡'];
 export function ekstraLeker() {
   const nr = publiserteRunder().slice(0, 6).map((r: any) => ({ v: rundeId(r), t: 'Uke ' + r.uke }));
   return [
     ...(nr.length ? [{ id: 'nyhetsrunden', navn: 'Nyhetsrunden', type: 'nyhetsrunden', moduser: nr, om: 'Verten leser opp ukas spørsmål. Alle svarer på sin egen telefon – så ser dere hvem som bommet.' }] : []),
+    { id: 'hvemskrev', navn: 'Hvem skrev det?', type: 'hvemskrev', moduser: [], om: 'Alle svarer anonymt på samme spørsmål. Så gjetter dere hvem som skrev hva.' },
+    { id: 'bloff', navn: 'Bløffquizen', type: 'bloff', moduser: [], om: 'Finn på et troverdig feil svar. Lur de andre – og finn det ekte.' },
+    { id: 'samme', navn: 'Samme svar', type: 'samme', moduser: [], om: 'Alle skriver ett ord i hemmelighet. Unike svar drikker.' },
+    { id: 'spion', navn: 'Spionen', type: 'spion', moduser: [], om: 'Alle vet hvor dere er – bortsett fra spionen. Still spørsmål og avslør hen.' },
+    { id: 'pannekort', navn: 'Hvem er jeg?', type: 'pannekort', moduser: [], om: 'Skriv et ord til den du får tildelt. Du ser alles ord – bortsett fra ditt eget.' },
+    { id: 'skal', navn: 'Skål-refleksen', type: 'skal', moduser: [], om: 'Trykk når det står SKÅL! Treigest drikker. For tidlig drikker dobbelt.' },
     { id: 'bussruta', navn: 'Bussruta', type: 'bussruta', moduser: [], om: 'Fire spørsmål hver på egen telefon, så pyramiden – og taperen kjører bussen.' },
     { id: 'yatzy', navn: 'Drikke-Yatzy', type: 'yatzy', moduser: [], om: 'Trill på din telefon når det er din tur. Alle ser terningene og blokka.' },
     { id: 'tosannheter', navn: 'To sannheter og en løgn', type: 'tosannheter', moduser: [], om: 'Én skriver tre påstander i hemmelighet. Resten stemmer på løgnen fra sin telefon.' },
@@ -528,6 +538,7 @@ function aktiveIder(data: any, alle = false) {
 export function startEkstra(data: any, lek: string, modus = ''): any {
   const n = data.spillere.length, ider = aktiveIder(data, true);
   if (lek === 'bussruta' || lek === 'yatzy' || lek === 'nyhetsrunden') return startNye(data, lek, modus, ider);
+  if (SOS.includes(lek)) return startSos(data, lek, ider);
   if (lek === 'tosannheter') {
     if (n < 2) return { feil: 'for-faa', melding: 'Trenger minst to spillere.' };
     data.spill = { type: 'tosannheter', lek, navn: 'To sannheter og en løgn', aktiv: ider[0], fase: 'skriv', pastander: [], logn: -1, stemmer: {}, runde: 1 };
@@ -592,6 +603,7 @@ function presTurVidere(data: any) {
 export function ekstraHandling(data: any, meg: any, h: any): any {
   const s = data.spill; if (!s || !EKSTRA.includes(s.type)) return null;
   if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeHandling(data, meg, h);
+  if (SOS.includes(s.type)) return sosHandling(data, meg, h);
   const ider = aktiveIder(data);
   const min = ider.indexOf(meg.id);
   switch (s.type) {
@@ -840,6 +852,7 @@ function avgjorTo(data: any) {
 }
 export function ekstraVisning(s: any, meg: any, data: any) {
   if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeVisning(s, meg, data);
+  if (SOS.includes(s.type)) return sosVisning(s, meg, data);
   const ider = aktiveIder(data);
   if (s.type === 'tosannheter') return { aktiv: s.aktiv, fase: s.fase, pastander: s.pastander, harStemt: Object.keys(s.stemmer),
     minStemme: meg ? (s.stemmer[meg.id] ?? null) : null, logn: s.fase === 'avslort' ? s.logn : null, stemmer: s.fase === 'avslort' ? s.stemmer : null, drikker: s.fase === 'avslort' ? s.drikker : null };
@@ -1164,4 +1177,346 @@ function spinnHjul(data: any, meg: any, h: any, erVert: boolean) {
   data.hjul = { nr: ((data.hjul && data.hjul.nr) || 0) + 1, fra: meg.id, hvem, i, tekst: liste[i], tid: naa, antall: liste.length };
   hjulEffekt(data, hvem, liste[i]);
   return { ok: true };
+}
+
+
+/* =====================================================================
+   Sosiale leker: Hvem skrev det?, Bløffquizen, Samme svar, Spionen,
+   Hvem er jeg? og Skål-refleksen – pluss hemmelige oppdrag hele kvelden.
+   ===================================================================== */
+const S_: any = SOSIAL;
+const SFRIST = { skriv: 90, bloffSkriv: 60, stem: 30, samme: 30, sporsmal: 180, spionGjett: 30, pannekort: 75 };
+function rens(x: any, n = 120) { return String(x == null ? '' : x).replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, n); }
+function trekkFra(s: any, felt: string, liste: any[]) {
+  // Trekker uten å gjenta før lista er brukt opp
+  s.brukt = s.brukt || {}; const b: number[] = s.brukt[felt] || (s.brukt[felt] = []);
+  if (b.length >= liste.length) b.length = 0;
+  let i = tilfeldig(liste.length); let vakt = 0;
+  while (b.includes(i) && vakt++ < 200) i = tilfeldig(liste.length);
+  b.push(i); return liste[i];
+}
+function alleHar(data: any, obj: any, unntak: string[] = []) { return data.spillere.every((p: any) => unntak.includes(p.id) || obj[p.id] != null); }
+
+function startSos(data: any, lek: string, ider: string[]): any {
+  const n = data.spillere.length;
+  const trenger: any = { hvemskrev: 3, bloff: 3, samme: 3, spion: 3, pannekort: 3, skal: 2 };
+  if (n < trenger[lek]) return { feil: 'for-faa', melding: `Trenger minst ${trenger[lek]} spillere.` };
+  const gammel = data.spill && data.spill.type === lek ? data.spill.brukt : null;
+  const navn: any = { hvemskrev: 'Hvem skrev det?', bloff: 'Bløffquizen', samme: 'Samme svar', spion: 'Spionen', pannekort: 'Hvem er jeg?', skal: 'Skål-refleksen' };
+  const s: any = { type: lek, lek, navn: navn[lek], brukt: gammel || {}, runde: 1 };
+  data.spill = s;
+  sosNyRunde(data);
+  melde(data, `Nytt spill: ${navn[lek]}`);
+  return { ok: true };
+}
+function sosNyRunde(data: any) {
+  const s = data.spill, ider = data.spillere.map((p: any) => p.id);
+  s.frist = null;
+  if (s.type === 'hvemskrev') { s.fase = 'skriv'; s.oppgave = trekkFra(s, 'oppg', S_.hvemskrev); s.svar = {}; s.ko = []; s.i = 0; s.stemmer = {}; settFrist(s, SFRIST.skriv); }
+  if (s.type === 'bloff') { const q = trekkFra(s, 'q', S_.bloff); s.fase = 'skriv'; s.q = q.q; s.sant = q.a; s.falske = {}; s.valg = []; s.stemmer = {}; settFrist(s, SFRIST.bloffSkriv); }
+  if (s.type === 'samme') { s.fase = 'skriv'; s.oppgave = trekkFra(s, 'oppg', S_.samme); s.svar = {}; s.grupper = null; settFrist(s, SFRIST.samme); }
+  if (s.type === 'spion') {
+    s.fase = 'sporsmal'; s.sted = trekkFra(s, 'sted', S_.steder); s.spion = ider[tilfeldig(ider.length)];
+    s.start = ider[tilfeldig(ider.length)]; s.stemmer = {}; s.utfall = null; s.spionGjett = null; settFrist(s, SFRIST.sporsmal);
+  }
+  if (s.type === 'pannekort') {
+    const rekke = stokk(ider); s.tildelt = {}; rekke.forEach((id: string, i: number) => { s.tildelt[id] = rekke[(i + 1) % rekke.length]; });
+    s.fase = 'skriv'; s.ord = {}; s.gjettet = []; settFrist(s, SFRIST.pannekort);
+  }
+  if (s.type === 'skal') { s.fase = 'klar'; s.tid = null; s.trykk = {}; s.tidlig = []; s.resultat = null; }
+}
+function hsFasit(data: any) {
+  const s = data.spill, forfatter = s.ko[s.i];
+  const riktige = Object.keys(s.stemmer).filter((id) => s.stemmer[id] === forfatter);
+  Object.keys(s.stemmer).forEach((id) => { if (s.stemmer[id] !== forfatter) giSlurker(data, id, 1); });
+  if (!riktige.length && Object.keys(s.stemmer).length) giUtdeling(data, forfatter, 2);
+  s.fase = 'fasit'; s.frist = null;
+}
+function hsStartGjett(data: any) {
+  const s = data.spill; s.ko = stokk(Object.keys(s.svar)); s.i = 0; s.fase = 'gjett'; s.stemmer = {}; settFrist(s, SFRIST.stem);
+}
+function bfStartStem(data: any) {
+  const s = data.spill, grupper: any = {};
+  Object.entries(s.falske).forEach(([id, t]: any) => { const k = norm(t); (grupper[k] = grupper[k] || { t, av: [] }).av.push(id); });
+  s.valg = stokk([{ t: s.sant, av: ['sant'] }, ...Object.values(grupper)]);
+  s.fase = 'stem'; s.stemmer = {}; settFrist(s, SFRIST.stem);
+}
+function bfFasit(data: any) {
+  const s = data.spill;
+  Object.entries(s.stemmer).forEach(([id, i]: any) => {
+    const v = s.valg[i];
+    if (v.av[0] === 'sant') giUtdeling(data, id, 1);
+    else { giSlurker(data, id, 1); v.av.forEach((a: string) => giUtdeling(data, a, 1)); }
+  });
+  s.fase = 'fasit'; s.frist = null;
+}
+function smFasit(data: any) {
+  const s = data.spill, g: any = {};
+  Object.entries(s.svar).forEach(([id, t]: any) => { const k = norm(t); (g[k] = g[k] || { t, ider: [] }).ider.push(id); });
+  s.grupper = Object.values(g).sort((a: any, b: any) => b.ider.length - a.ider.length);
+  data.spillere.forEach((p: any) => { const gr = s.grupper.find((x: any) => x.ider.includes(p.id)); if (!gr || gr.ider.length < 2) giSlurker(data, p.id, 1); });
+  s.fase = 'fasit'; s.frist = null;
+}
+function spTelling(data: any) {
+  const s = data.spill, t: any = {};
+  Object.values(s.stemmer).forEach((id: any) => { t[id] = (t[id] || 0) + 1; });
+  const liste = Object.entries(t).sort((a: any, b: any) => b[1] - a[1]);
+  const topp = liste[0] && (!liste[1] || liste[1][1] < liste[0][1]) ? liste[0][0] : null;
+  if (topp === s.spion) { s.fase = 'gjett'; settFrist(s, SFRIST.spionGjett); melde(data, 'Spionen er avslørt! Men kan hen gjette stedet?'); }
+  else spSlutt(data, 'spion-vant', topp);
+}
+function spSlutt(data: any, utfall: string, feilMistenkt: string | null = null) {
+  const s = data.spill; s.fase = 'fasit'; s.frist = null; s.utfall = utfall; s.feilMistenkt = feilMistenkt;
+  if (utfall === 'fanget') { giSlurker(data, s.spion, 3); data.spillere.forEach((p: any) => { if (p.id !== s.spion) giUtdeling(data, p.id, 1); }); }
+  else { data.spillere.forEach((p: any) => { if (p.id !== s.spion) giSlurker(data, p.id, 2); }); giUtdeling(data, s.spion, 3); }
+  melde(data, utfall === 'fanget' ? `Spionen ${navnPaa(data, s.spion)} ble tatt!` : `Spionen ${navnPaa(data, s.spion)} vant!`);
+}
+function pkStartSpill(data: any) {
+  const s = data.spill;
+  Object.keys(s.tildelt).forEach((fra) => { const til = s.tildelt[fra]; if (!s.ord[til]) s.ord[til] = { t: trekkFra(s, 'ord', S_.ord), fra: null }; });
+  s.fase = 'spill'; s.frist = null;
+}
+function skalFasit(data: any) {
+  const s = data.spill, tider = Object.entries(s.trykk).sort((a: any, b: any) => a[1] - b[1]);
+  const deltakere = data.spillere.map((p: any) => p.id).filter((id: string) => !s.tidlig.includes(id));
+  const ikke = deltakere.filter((id: string) => s.trykk[id] == null);
+  ikke.forEach((id: string) => giSlurker(data, id, 1));
+  let treigest: string | null = null;
+  if (!ikke.length && tider.length) { treigest = tider[tider.length - 1][0] as string; giSlurker(data, treigest, 1); }
+  if (tider.length) giUtdeling(data, tider[0][0] as string, 1);
+  s.resultat = { tider, tidlig: s.tidlig, ikke, treigest, raskest: tider.length ? tider[0][0] : null };
+  s.fase = 'fasit'; s.frist = null;
+}
+
+function sosHandling(data: any, meg: any, h: any): any {
+  const s = data.spill, erVert = meg.id === data.vert, hd = h.handling;
+  if (hd === 'nytt' || hd === 'runde') {
+    if (!erVert && s.fase !== 'fasit' && s.fase !== 'ferdig') return { feil: 'bare-vert' };
+    s.runde++; sosNyRunde(data); return { ok: true };
+  }
+  if (s.type === 'hvemskrev') {
+    if (hd === 'hs-skriv') {
+      if (s.fase !== 'skriv') return { feil: 'for-sent', melding: 'Skrivetiden er ute.' };
+      const t = rens(h.tekst, 160); if (!t) return { ok: true };
+      s.svar[meg.id] = t;
+      if (alleHar(data, s.svar)) hsStartGjett(data);
+      return { ok: true };
+    }
+    if (hd === 'hs-stem') {
+      if (s.fase !== 'gjett' || s.ko[s.i] === meg.id) return { ok: true };
+      if (!data.spillere.some((p: any) => p.id === h.hvem) || h.hvem === meg.id) return { feil: 'ukjent' };
+      s.stemmer[meg.id] = h.hvem;
+      if (alleHar(data, s.stemmer, [s.ko[s.i]])) hsFasit(data);
+      return { ok: true };
+    }
+    if (hd === 'hs-neste') {
+      if (s.fase !== 'fasit') return { ok: true };
+      s.i++; if (s.i >= s.ko.length) { s.fase = 'ferdig'; return { ok: true }; }
+      s.fase = 'gjett'; s.stemmer = {}; settFrist(s, SFRIST.stem); return { ok: true };
+    }
+    if (hd === 'tid-ute' && fristUte(s)) {
+      if (s.fase === 'skriv') { if (Object.keys(s.svar).length >= 2) hsStartGjett(data); else settFrist(s, 30); }
+      else if (s.fase === 'gjett') hsFasit(data);
+      return { ok: true };
+    }
+    if (hd === 'avslor' && s.fase === 'skriv' && erVert) {
+      const mangler = data.spillere.filter((p: any) => s.svar[p.id] == null).length;
+      if (mangler && !fristUte(s)) return venter(s, mangler);
+    }
+    return { ok: true };
+  }
+  if (s.type === 'bloff') {
+    if (hd === 'bf-skriv') {
+      if (s.fase !== 'skriv') return { feil: 'for-sent', melding: 'Skrivetiden er ute.' };
+      const t = rens(h.tekst, 80); if (!t) return { ok: true };
+      if (norm(t) === norm(s.sant) || (norm(t).length > 3 && norm(s.sant).includes(norm(t)))) return { feil: 'for-riktig', melding: 'Det der er jo det riktige svaret! Finn på en løgn.' };
+      s.falske[meg.id] = t;
+      if (alleHar(data, s.falske)) bfStartStem(data);
+      return { ok: true };
+    }
+    if (hd === 'bf-stem') {
+      if (s.fase !== 'stem') return { ok: true };
+      const i = Number(h.i); const v = s.valg[i]; if (!v) return { feil: 'ukjent' };
+      if (v.av.includes(meg.id)) return { feil: 'egen', melding: 'Du kan ikke stemme på din egen løgn.' };
+      s.stemmer[meg.id] = i;
+      if (alleHar(data, s.stemmer)) bfFasit(data);
+      return { ok: true };
+    }
+    if (hd === 'tid-ute' && fristUte(s)) {
+      if (s.fase === 'skriv') { if (Object.keys(s.falske).length >= 1) bfStartStem(data); else settFrist(s, 30); }
+      else if (s.fase === 'stem') bfFasit(data);
+    }
+    return { ok: true };
+  }
+  if (s.type === 'samme') {
+    if (hd === 'sm-skriv') {
+      if (s.fase !== 'skriv') return { feil: 'for-sent', melding: 'Tiden er ute.' };
+      const t = rens(h.tekst, 40); if (!t) return { ok: true };
+      s.svar[meg.id] = t; if (alleHar(data, s.svar)) smFasit(data); return { ok: true };
+    }
+    if (hd === 'tid-ute' && fristUte(s) && s.fase === 'skriv') smFasit(data);
+    return { ok: true };
+  }
+  if (s.type === 'spion') {
+    if (hd === 'sp-til-stemming') {
+      if (s.fase !== 'sporsmal') return { ok: true };
+      if (!erVert) return { feil: 'bare-vert', melding: 'Verten sender dere til stemming.' };
+      s.fase = 'stem'; s.stemmer = {}; settFrist(s, SFRIST.stem); return { ok: true };
+    }
+    if (hd === 'sp-stem') {
+      if (s.fase !== 'stem') return { ok: true };
+      if (!data.spillere.some((p: any) => p.id === h.hvem) || h.hvem === meg.id) return { feil: 'ukjent' };
+      s.stemmer[meg.id] = h.hvem; if (alleHar(data, s.stemmer)) spTelling(data); return { ok: true };
+    }
+    if (hd === 'sp-gjett') {
+      if (s.fase !== 'gjett' || meg.id !== s.spion) return { ok: true };
+      const g = String(h.sted || ''); s.spionGjett = g;
+      spSlutt(data, g === s.sted ? 'spion-gjettet' : 'fanget'); return { ok: true };
+    }
+    if (hd === 'tid-ute' && fristUte(s)) {
+      if (s.fase === 'sporsmal') { s.fase = 'stem'; s.stemmer = {}; settFrist(s, SFRIST.stem); }
+      else if (s.fase === 'stem') spTelling(data);
+      else if (s.fase === 'gjett') spSlutt(data, 'fanget');
+    }
+    return { ok: true };
+  }
+  if (s.type === 'pannekort') {
+    if (hd === 'pk-skriv') {
+      if (s.fase !== 'skriv') return { feil: 'for-sent', melding: 'Ordene er allerede delt ut.' };
+      const t = rens(h.tekst, 40); if (!t) return { ok: true };
+      const til = s.tildelt[meg.id]; if (!til) return { ok: true };
+      s.ord[til] = { t, fra: meg.id };
+      if (Object.keys(s.tildelt).every((fra) => s.ord[s.tildelt[fra]])) pkStartSpill(data);
+      return { ok: true };
+    }
+    if (hd === 'pk-riktig') {
+      if (s.fase !== 'spill') return { ok: true };
+      const hvem = String(h.hvem || '');
+      if (hvem === meg.id) return { feil: 'ukjent', melding: 'Det er de andre som bekrefter at du gjettet riktig.' };
+      if (!s.ord[hvem] || s.gjettet.includes(hvem)) return { ok: true };
+      s.gjettet.push(hvem);
+      if (s.gjettet.length === 1) giUtdeling(data, hvem, 2);
+      melde(data, `${navnPaa(data, hvem)} gjettet «${s.ord[hvem].t}»!`);
+      const igjen = Object.keys(s.ord).filter((id) => !s.gjettet.includes(id) && data.spillere.some((p: any) => p.id === id));
+      if (igjen.length <= 1) { s.fase = 'ferdig'; if (igjen[0]) { giSlurker(data, igjen[0], 3); s.sist = igjen[0]; } }
+      return { ok: true };
+    }
+    if (hd === 'pk-avslutt') {
+      if (!erVert || s.fase !== 'spill') return { ok: true };
+      const igjen = Object.keys(s.ord).filter((id) => !s.gjettet.includes(id));
+      igjen.forEach((id) => giSlurker(data, id, 2)); s.fase = 'ferdig'; return { ok: true };
+    }
+    if (hd === 'tid-ute' && fristUte(s) && s.fase === 'skriv') pkStartSpill(data);
+    return { ok: true };
+  }
+  if (s.type === 'skal') {
+    if (hd === 'sk-start') {
+      if (s.fase === 'vent') return { ok: true };
+      s.fase = 'vent'; s.tid = Date.now() + 2500 + tilfeldig(5000); s.trykk = {}; s.tidlig = []; s.resultat = null; s.frist = s.tid + 6000;
+      return { ok: true };
+    }
+    if (hd === 'sk-trykk') {
+      if (s.fase !== 'vent' || s.trykk[meg.id] != null || s.tidlig.includes(meg.id)) return { ok: true };
+      // Telefonen måler selv reaksjonstiden (rettferdig uansett nett); serveren sjekker at den er rimelig
+      if (h.tidlig || Date.now() < s.tid - 400) { s.tidlig.push(meg.id); giSlurker(data, meg.id, 2); }
+      else s.trykk[meg.id] = Math.max(80, Math.min(6000, Math.round(Number(h.ms) || (Date.now() - s.tid))));
+      const ferdige = data.spillere.every((p: any) => s.trykk[p.id] != null || s.tidlig.includes(p.id));
+      if (ferdige) skalFasit(data);
+      return { ok: true };
+    }
+    if (hd === 'tid-ute' && s.fase === 'vent' && fristUte(s)) skalFasit(data);
+    return { ok: true };
+  }
+  return null;
+}
+
+function sosVisning(s: any, meg: any, data: any) {
+  const m = meg ? meg.id : null;
+  if (s.type === 'hvemskrev') return {
+    fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null,
+    i: s.i, antallSvar: s.ko.length || Object.keys(s.svar).length,
+    tekst: s.fase === 'gjett' || s.fase === 'fasit' ? s.svar[s.ko[s.i]] : null,
+    erMitt: (s.fase === 'gjett' || s.fase === 'fasit') && s.ko[s.i] === m,
+    harStemt: Object.keys(s.stemmer || {}), minStemme: m ? (s.stemmer || {})[m] || null : null,
+    forfatter: s.fase === 'fasit' ? s.ko[s.i] : null, stemmer: s.fase === 'fasit' ? s.stemmer : null,
+  };
+  if (s.type === 'bloff') return {
+    fase: s.fase, q: s.q, harSkrevet: Object.keys(s.falske), mittSvar: m ? s.falske[m] || null : null,
+    valg: s.fase === 'skriv' ? null : s.valg.map((v: any) => ({ t: v.t, min: v.av.includes(m), av: s.fase === 'fasit' ? v.av : null })),
+    harStemt: Object.keys(s.stemmer), minStemme: m ? s.stemmer[m] ?? null : null, stemmer: s.fase === 'fasit' ? s.stemmer : null,
+    sant: s.fase === 'fasit' ? s.sant : null,
+  };
+  if (s.type === 'samme') return { fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null, grupper: s.fase === 'fasit' ? s.grupper : null };
+  if (s.type === 'spion') {
+    const aapen = s.fase === 'fasit';
+    return { fase: s.fase, erSpion: m === s.spion, sted: m !== s.spion || aapen ? s.sted : null, steder: S_.steder, start: s.start,
+      harStemt: Object.keys(s.stemmer), minStemme: m ? s.stemmer[m] || null : null,
+      spion: aapen || s.fase === 'gjett' ? s.spion : null, stemmer: aapen ? s.stemmer : null, utfall: s.utfall, spionGjett: aapen ? s.spionGjett : null };
+  }
+  if (s.type === 'pannekort') {
+    const ord: any = {}; Object.entries(s.ord).forEach(([id, o]: any) => { if (id !== m || s.fase === 'ferdig') ord[id] = { t: o.t, fra: o.fra }; });
+    return { fase: s.fase, mitMaal: m ? s.tildelt[m] || null : null, harSkrevet: Object.keys(s.tildelt).filter((fra) => s.ord[s.tildelt[fra]]),
+      ord, gjettet: s.gjettet, sist: s.sist || null, mittOrdSkjult: !!(m && s.ord[m] && s.fase !== 'ferdig') };
+  }
+  if (s.type === 'skal') return { fase: s.fase, tid: s.tid, harTrykket: Object.keys(s.trykk || {}).concat(s.tidlig || []), resultat: s.resultat };
+  return {};
+}
+
+/* ---------- hemmelige oppdrag (går i bakgrunnen hele kvelden) ---------- */
+function nyttOppdrag(data: any, id: string) {
+  const o = data.oppdrag; const andre = data.spillere.filter((p: any) => p.id !== id);
+  if (!andre.length) return;
+  const maal = andre[tilfeldig(andre.length)];
+  const mal = trekkFra(o, 'op', S_.oppdrag);
+  o.per[id] = { t: mal.replace('{navn}', maal.navn), maal: maal.id, nr: ((o.per[id] && o.per[id].nr) || 0) + 1 };
+}
+function oppdragHandling(data: any, meg: any, h: any, erVert: boolean): any {
+  const hd = h.handling;
+  if (hd === 'op-paa') {
+    if (!erVert) return { feil: 'bare-vert' };
+    if (!romHarPluss(data)) return { feil: 'pluss', melding: 'Hemmelige oppdrag krever Pluss hos verten.' };
+    if (data.spillere.length < 3) return { feil: 'for-faa', melding: 'Trenger minst tre spillere.' };
+    data.oppdrag = { paa: true, per: {}, venter: [], anklager: [], brukt: {} };
+    data.spillere.forEach((p: any) => nyttOppdrag(data, p.id));
+    melde(data, '🕵️ Hemmelige oppdrag er i gang! Sjekk ditt oppdrag – ikke vis det til noen.'); return { ok: true };
+  }
+  const o = data.oppdrag; if (!o || !o.paa) return { ok: true };
+  if (hd === 'op-av') { if (!erVert) return { feil: 'bare-vert' }; o.paa = false; melde(data, 'Hemmelige oppdrag er avsluttet.'); return { ok: true }; }
+  const mitt = o.per[meg.id];
+  if (hd === 'op-fullfort') {
+    if (!mitt) return { ok: true };
+    if (o.venter.some((v: any) => v.fra === meg.id)) return { feil: 'venter', melding: 'Venter på at den andre bekrefter.' };
+    o.venter.push({ fra: meg.id, til: mitt.maal, t: mitt.t }); return { ok: true };
+  }
+  if (hd === 'op-bekreft') {
+    const i = o.venter.findIndex((v: any) => v.til === meg.id && v.fra === h.fra); if (i < 0) return { ok: true };
+    const v = o.venter.splice(i, 1)[0];
+    if (h.ja) { giUtdeling(data, v.fra, 3); melde(data, `🕵️ ${navnPaa(data, v.fra)} fullførte: «${v.t}»`); nyttOppdrag(data, v.fra); }
+    return { ok: true };
+  }
+  if (hd === 'op-bytt') { if (!mitt) return { ok: true }; giSlurker(data, meg.id, 1); nyttOppdrag(data, meg.id); return { ok: true }; }
+  if (hd === 'op-beskyld') {
+    const hvem = String(h.hvem || ''); if (hvem === meg.id || !o.per[hvem]) return { feil: 'ukjent' };
+    if (o.anklager.some((a: any) => a.fra === meg.id)) return { feil: 'venter', melding: 'Du har allerede en anklage som venter.' };
+    o.anklager.push({ fra: meg.id, til: hvem }); return { ok: true };
+  }
+  if (hd === 'op-svar') {
+    const i = o.anklager.findIndex((a: any) => a.til === meg.id && a.fra === h.fra); if (i < 0) return { ok: true };
+    const a = o.anklager.splice(i, 1)[0];
+    if (h.tatt) { giSlurker(data, meg.id, 2); melde(data, `🕵️ ${navnPaa(data, a.fra)} avslørte ${meg.navn}: «${o.per[meg.id].t}»`); nyttOppdrag(data, meg.id); }
+    else { giSlurker(data, a.fra, 1); melde(data, `🕵️ ${navnPaa(data, a.fra)} tok feil om ${meg.navn} – drikk!`); }
+    return { ok: true };
+  }
+  return { ok: true };
+}
+function oppdragVisning(data: any, meg: any) {
+  const o = data.oppdrag; if (!o || !o.paa) return null;
+  const m = meg ? meg.id : null;
+  return {
+    paa: true, mitt: m && o.per[m] ? { t: o.per[m].t, nr: o.per[m].nr } : null,
+    venterPaaBekreftelse: !!(m && o.venter.some((v: any) => v.fra === m)),
+    bekreft: m ? o.venter.filter((v: any) => v.til === m).map((v: any) => ({ fra: v.fra, t: v.t })) : [],
+    anklager: m ? o.anklager.filter((a: any) => a.til === m).map((a: any) => ({ fra: a.fra })) : [],
+    minAnklage: !!(m && o.anklager.some((a: any) => a.fra === m)),
+  };
 }
