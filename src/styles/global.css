@@ -1520,3 +1520,26 @@ body:not(.humor) .tool.dice{display:none}
 .h2-row{flex-wrap:wrap}
 .h2-row a{white-space:nowrap;min-width:calc(50% - 5px);padding:0 10px}
 @media (min-width:560px){.h2-row a{min-width:0}}
+
+/* ---------- salg (admin) ---------- */
+.salg .stat-boks{margin-top:14px}
+.salg-tabell-ramme{overflow-x:auto;margin:10px -4px 0}
+.salg-tabell{width:100%;border-collapse:collapse;font-size:14px;font-family:var(--sans)}
+.salg-tabell th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--border2);white-space:nowrap}
+.salg-tabell td{padding:8px;border-bottom:1px solid var(--border);vertical-align:top;white-space:nowrap}
+.salg-kunde span{display:block;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.salg-kunde small{color:var(--faint);font-size:11px}
+.salg-st{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:700;background:rgb(var(--ink-rgb) / .08)}
+.salg-st.ok{background:rgba(64,170,100,.18);color:#3aa35e}
+.salg-st.venter{background:rgba(244,183,64,.18);color:var(--gold-t)}
+.salg-st.av{background:rgba(255,106,77,.15);color:var(--accent-t)}
+.salg-st.ref{background:rgba(120,120,200,.18);color:#8a8ae0}
+.salg-vipps dl{display:grid;gap:8px;margin:8px 0 12px}
+.salg-vipps dl div{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:baseline}
+.salg-vipps dt{color:var(--muted);font-size:14px}
+.salg-vipps dd small{display:block;color:var(--faint);font-size:12px;margin-top:4px;word-break:break-all}
+@media (max-width:520px){.salg-vipps dl div{grid-template-columns:1fr;gap:2px}}
+.salg-sok{display:flex;gap:8px;margin-top:6px}
+.salg-sok input{flex:1;min-width:0}
+.salg-sok input{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:10px 14px;color:var(--ink);font:inherit;font-size:15px}
+.salg-vipps .dl-knapper{justify-content:flex-start}

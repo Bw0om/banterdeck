@@ -5,7 +5,7 @@ import type { APIRoute } from 'astro';
 import { rpc } from '../../../lib/spilt';
 import { json } from '../../../lib/konto';
 import { sendTilAlle, offentligNokkel } from '../../../lib/push';
-import { sjekkBetaling, vippsKlar } from '../../../lib/pluss';
+import { ryddBetalinger } from '../../../lib/pluss';
 import { alleRunder, publiseringstid, rundeId } from '../../../lib/nyhetsrunden';
 import { ukensLek } from '../../../lib/ukenslek';
 import { games, t } from '../../../lib/content';
@@ -46,10 +46,3 @@ function ukensTekst() {
 }
 
 /** Kjøp der noen lukket fanen før de kom tilbake fra Vipps: sjekk dem, så Pluss likevel kommer. */
-async function ryddBetalinger() {
-  if (!vippsKlar()) return;
-  try {
-    const apne: any[] = (await rpc('betalinger_apne', {})) || [];
-    for (const b of apne.slice(0, 20)) await sjekkBetaling(b.ref).catch(() => null);
-  } catch { /* tabellen finnes kanskje ikke ennå */ }
-}

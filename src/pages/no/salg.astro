@@ -1,0 +1,150 @@
+---
+// Salg for eieren: omsetning, kjøp, refusjon og Vipps-oppsett. Tom til en innlogget admin-konto henter tallene.
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Salg" description="Salg og Vipps for Mitt vors." lang="no" noindex={true}>
+  <h1>Salg</h1>
+  <p class="small"><a href="/no/statistikk">Statistikk</a> · <a href="/admin">Admin</a></p>
+  <div class="stat-valg" id="salgValg" hidden>
+    <span class="small">Periode</span>
+    <div class="rom-mod">
+      <button type="button" data-dager="7" aria-pressed="false">7 dager</button>
+      <button type="button" data-dager="30" aria-pressed="true">30 dager</button>
+      <button type="button" data-dager="365" aria-pressed="false">1 år</button>
+    </div>
+  </div>
+  <div id="salg" class="stat salg"><p class="small">Henter …</p></div>
+
+  <script is:inline data-astro-rerun>
+  (function () {
+    var root = document.getElementById('salg');
+    if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+    var K = window.BDKonto, dager = 30, data = null;
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function kr(ore) { return (Number(ore || 0) / 100).toLocaleString('nb-NO', { maximumFractionDigits: 0 }) + ' kr'; }
+    function tall(n) { return Number(n || 0).toLocaleString('nb-NO'); }
+    function dato(d) { var x = new Date(d); return !d || isNaN(x) ? '–' : x.toLocaleString('nb-NO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo' }); }
+    var STATUS = { fullfort: ['Betalt', 'ok'], startet: ['Venter', 'venter'], avbrutt: ['Avbrutt', 'av'], refundert: ['Refundert', 'ref'] };
+    var PRODUKT = { kveld: 'Kveldspass', aar: 'Årspass' };
+    function api(sti, opts) {
+      return K.api(sti, opts).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; d._status = r.status; return d; }); });
+    }
+
+    function perDag(liste) {
+      var kart = {}; (liste || []).forEach(function (x) { kart[String(x.dag).slice(0, 10)] = x.ore; });
+      var n = Math.min(dager, 60), rad = [], d = new Date();
+      for (var i = n - 1; i >= 0; i--) {
+        var x = new Date(d.getFullYear(), d.getMonth(), d.getDate() - i);
+        var k = x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+        rad.push({ dato: x.getDate() + '.' + (x.getMonth() + 1) + '.', ore: kart[k] || 0 });
+      }
+      var maks = Math.max.apply(null, rad.map(function (x) { return x.ore; }).concat([1]));
+      return '<section class="stat-boks"><h2>Omsetning per dag' + (dager > 60 ? ' (siste 60)' : '') + '</h2>' +
+        '<div class="stat-soyler" role="img" aria-label="Omsetning per dag">' + rad.map(function (x) {
+          return '<div class="stat-soyle" title="' + esc(x.dato + ': ' + kr(x.ore)) + '"><span style="height:' + Math.round(x.ore / maks * 100) + '%"></span></div>';
+        }).join('') + '</div><div class="stat-akse"><span>' + rad[0].dato + '</span><span>Topp: ' + kr(maks) + '</span><span>' + rad[rad.length - 1].dato + '</span></div></section>';
+    }
+    function rader(liste) {
+      if (!liste || !liste.length) return '<p class="small">Ingen kjøp ennå.</p>';
+      return '<div class="salg-tabell-ramme"><table class="salg-tabell"><thead><tr><th>Når</th><th>Hva</th><th>Beløp</th><th>Status</th><th>Kunde</th><th></th></tr></thead><tbody>' +
+        liste.map(function (b) {
+          var st = STATUS[b.status] || [b.status, ''];
+          var knapp = b.status === 'fullfort' ? '<button class="linkbtn" data-refunder="' + esc(b.ref) + '" data-belop="' + esc(kr(b.belop_ore)) + '" type="button">Refunder</button>'
+            : b.status === 'startet' ? '<button class="linkbtn" data-sjekk="' + esc(b.ref) + '" type="button">Sjekk</button>' : '';
+          return '<tr><td>' + esc(dato(b.fullfort || b.laget)) + '</td><td>' + esc(PRODUKT[b.produkt] || b.produkt) + '</td><td>' + kr(b.belop_ore) + '</td>' +
+            '<td><span class="salg-st ' + st[1] + '">' + st[0] + '</span></td>' +
+            '<td class="salg-kunde"><span>' + esc(b.epost || '–') + '</span><small>' + esc(b.ref) + '</small></td><td>' + knapp + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    function vippsBoks(v) {
+      if (!v) return '';
+      var w = v.webhook || {};
+      var miljo = v.miljo === 'test' ? '<b class="salg-st venter">Testmiljø</b> (VIPPS_TEST er på – ingen ekte penger)' : '<b class="salg-st ok">Produksjon</b>';
+      var varsel = !v.klar ? '–'
+        : w.registrert && w.hosVipps ? '<span class="salg-st ok">På</span> <small>' + esc(w.url) + '</small>'
+        : w.registrert ? '<span class="salg-st av">Lagret hos oss, men ikke funnet hos Vipps</span>'
+        : '<span class="salg-st av">Av</span> <small>Uten varsel kan kjøpere som lukker Vipps før de kommer tilbake, måtte vente på den daglige oppryddingen.</small>';
+      return '<section class="stat-boks salg-vipps"><h2>Vipps</h2>' +
+        '<dl><div><dt>Nøkler</dt><dd>' + (v.klar ? '<span class="salg-st ok">Lagt inn</span>' : '<span class="salg-st av">Mangler i Vercel</span>') + '</dd></div>' +
+        '<div><dt>Miljø</dt><dd>' + miljo + '</dd></div>' +
+        '<div><dt>Varsel ved betaling</dt><dd>' + varsel + '</dd></div></dl>' +
+        (v.klar ? '<div class="dl-knapper"><button class="btn small gold" data-v="webhook-registrer" type="button">' + (w.registrert ? 'Koble til på nytt' : 'Skru på varsel') + '</button>' +
+          (w.registrert ? '<button class="btn small ghost" data-v="webhook-fjern" type="button">Skru av</button>' : '') +
+          '<button class="btn small ghost" data-v="rydd" type="button">Sjekk ventende nå</button></div>' : '') +
+        '<p class="formmsg" id="vippsMsg" role="status"></p></section>';
+    }
+    function tegn(d) {
+      data = d;
+      var p = d.periode || {}, gratis = d.gratis || 0;
+      root.innerHTML =
+        '<div class="stat-tall">' +
+          '<div><b>' + kr(d.idag && d.idag.ore) + '</b><span>i dag (' + tall(d.idag && d.idag.antall) + ' kjøp)</span></div>' +
+          '<div><b>' + kr(p.ore) + '</b><span>i perioden (' + tall(p.antall) + ' kjøp)</span></div>' +
+          '<div><b>' + tall(p.kveld) + ' / ' + tall(p.aar) + '</b><span>kveldspass / årspass</span></div>' +
+          '<div><b>' + kr(d.totalt && d.totalt.ore) + '</b><span>totalt (' + tall(d.totalt && d.totalt.antall) + ' kjøp)</span></div>' +
+          '<div><b>' + tall(d.kjopere) + '</b><span>betalende kunder</span></div>' +
+          '<div><b>' + (gratis ? Math.round((d.kjopere || 0) / gratis * 100) : 0) + ' %</b><span>av ' + tall(gratis) + ' som prøvde gratis, har kjøpt</span></div>' +
+          (d.refundert && d.refundert.antall ? '<div><b>' + kr(d.refundert.ore) + '</b><span>refundert i perioden</span></div>' : '') +
+          '<div><b>' + tall(d.avbrutt) + '</b><span>avbrutt i Vipps i perioden</span></div>' +
+        '</div>' +
+        vippsBoks(d.vipps) +
+        perDag(d.perDag) +
+        '<section class="stat-boks"><h2>Kjøp</h2>' +
+          '<form class="salg-sok" id="salgSok"><input id="salgSokFelt" type="search" placeholder="Søk på e-post eller ordrenummer" autocomplete="off"><button class="btn small" type="submit">Søk</button></form>' +
+          '<div id="salgListe">' + rader(d.siste) + '</div>' +
+          '<p class="small">Refusjon sender pengene tilbake i Vipps og tar bort Pluss-tiden kjøpet ga. Kunden får pengene på kontoen etter noen dager.</p></section>';
+      document.getElementById('salgSok').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var q = document.getElementById('salgSokFelt').value.trim(), liste = document.getElementById('salgListe');
+        if (!q) { liste.innerHTML = rader(data.siste); return; }
+        liste.innerHTML = '<p class="small">Søker …</p>';
+        api('/api/admin/salg?sok=' + encodeURIComponent(q)).then(function (x) { liste.innerHTML = x._ok ? rader(x.treff) : '<p class="rom-feil">' + esc(x.melding || 'Søket feilet.') + '</p>'; });
+      });
+    }
+    function hent() {
+      api('/api/admin/salg?dager=' + dager).then(function (d) {
+        if (d._ok) { document.getElementById('salgValg').hidden = false; return tegn(d); }
+        if (d._status === 401 || d._status === 403) return ikkeInne();
+        root.innerHTML = '<p class="rom-feil">' + esc(d.melding || 'Fikk ikke hentet salget.') + '</p>';
+      }).catch(function () { root.innerHTML = '<p class="rom-feil">Fikk ikke kontakt. Prøv igjen.</p>'; });
+    }
+    function ikkeInne() { root.innerHTML = '<p>Logg inn på <a href="/no/account">Min stokk</a> med admin-kontoen for å se salget.</p>'; }
+
+    root.addEventListener('click', function (e) {
+      var r = e.target.closest('[data-refunder]');
+      if (r) {
+        if (!confirm('Refundere ' + r.dataset.belop + ' for ' + r.dataset.refunder + '?\n\nPengene sendes tilbake i Vipps, og Pluss-tiden fra kjøpet tas bort. Dette kan ikke angres.')) return;
+        r.disabled = true; r.textContent = 'Refunderer …';
+        api('/api/admin/salg', { method: 'POST', body: JSON.stringify({ handling: 'refunder', ref: r.dataset.refunder }) }).then(function (x) {
+          if (!x._ok) { r.disabled = false; r.textContent = 'Refunder'; alert(x.melding || 'Refusjonen feilet.'); return; }
+          hent();
+        });
+        return;
+      }
+      var s = e.target.closest('[data-sjekk]');
+      if (s) {
+        s.disabled = true; s.textContent = 'Sjekker …';
+        api('/api/admin/salg', { method: 'POST', body: JSON.stringify({ handling: 'sjekk', ref: s.dataset.sjekk }) }).then(function () { hent(); });
+        return;
+      }
+      var v = e.target.closest('[data-v]'); if (!v) return;
+      if (v.dataset.v === 'webhook-fjern' && !confirm('Skru av varsel fra Vipps?')) return;
+      var msg = document.getElementById('vippsMsg');
+      v.disabled = true; msg.className = 'formmsg'; msg.textContent = 'Jobber …';
+      api('/api/admin/salg', { method: 'POST', body: JSON.stringify({ handling: v.dataset.v }) }).then(function (x) {
+        v.disabled = false;
+        if (!x._ok) { msg.className = 'formmsg err'; msg.textContent = x.melding || 'Det gikk ikke.'; return; }
+        if (v.dataset.v === 'rydd') { msg.className = 'formmsg ok'; msg.textContent = x.fullfort ? x.fullfort + ' betaling(er) ble fullført.' : 'Ingen ventende betalinger var godkjent i Vipps.'; setTimeout(hent, 1200); return; }
+        hent();
+      });
+    });
+    document.getElementById('salgValg').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-dager]'); if (!b) return;
+      dager = Number(b.dataset.dager);
+      this.querySelectorAll('[data-dager]').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+      hent();
+    });
+    if (!K || !K.les()) ikkeInne(); else hent();
+  })();
+  </script>
+</Base>
