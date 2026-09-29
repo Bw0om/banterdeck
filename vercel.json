@@ -15,14 +15,7 @@
         }
       ],
       "destination": "/no/",
-      "permanent": false,
-      "missing": [
-        {
-          "type": "header",
-          "key": "accept-language",
-          "value": "^en.*"
-        }
-      ]
+      "permanent": false
     },
     {
       "source": "/:kode([A-Za-z0-9]{4})",

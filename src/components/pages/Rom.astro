@@ -37,14 +37,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     if (window.__bdRomStopp) window.__bdRomStopp();
 
     var kode = (new URLSearchParams(location.search).get('k') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
-    // Kommer man inn med QR-kode/lenke og nettleseren ikke er på et skandinavisk språk, passer den engelske siden bedre.
-    // Har man selv valgt språk med lenken i rommet, huskes det i bd_romsprak.
-    if (!EN && kode) {
-      var romSprak = les('bd_romsprak');
-      var sprakListe = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || '']).filter(Boolean);
-      var skandinavisk = sprakListe.some(function (l) { return /^(nb|nn|no|da|sv)(-|_|$)/i.test(String(l)); });
-      if (romSprak === 'en' || (!romSprak && sprakListe.length && !skandinavisk)) { location.replace('/room' + location.search); return; }
-    }
+    // Norsk først. Har man selv valgt engelsk med språklenken i rommet (bd_romsprak), huskes det.
+    if (!EN && kode && les('bd_romsprak') === 'en') { location.replace('/room' + location.search); return; }
     var qs = new URLSearchParams(location.search);
     var onsketLek = LEKNAVN[qs.get('lek') || ''] ? qs.get('lek') : '', onsketModus = (qs.get('modus') || '').slice(0, 20), visAlle = false;
     // Kommer man fra en gjengside, telles rommet for den gjengen
