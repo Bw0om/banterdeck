@@ -11,7 +11,7 @@
       "has": [
         {
           "type": "host",
-          "value": "mittvors\\.no"
+          "value": "(www\\.)?mittvors\\.no"
         }
       ],
       "destination": "/no/",
@@ -29,22 +29,11 @@
       "has": [
         {
           "type": "host",
-          "value": "mittvors\\.no"
+          "value": "(www\\.)?mittvors\\.no"
         }
       ],
       "destination": "/no/rom?k=:kode",
       "permanent": false
-    },
-    {
-      "source": "/:sti*",
-      "has": [
-        {
-          "type": "host",
-          "value": "www\\.mittvors\\.no"
-        }
-      ],
-      "destination": "https://mittvors.no/:sti*",
-      "permanent": true
     },
     {
       "source": "/:sti*",
