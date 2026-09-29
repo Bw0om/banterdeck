@@ -81,11 +81,36 @@ const isCurrent = (href: string) => {
   <meta name="description" content={desc} />
   {(noindex || UTVIKLING.paa) && <meta name="robots" content="noindex, nofollow" />}
   {UTVIKLING.paa && (
-    <script is:inline>
-      /* «Under utvikling»: skjul siden til riktig kode er skrevet inn (unntatt sidene Vipps må se) */
+    <script is:inline define:vars={{ KODE: UTVIKLING.kode }}>
+      /* «Under utvikling»: skjul siden til riktig kode er skrevet inn (unntatt sidene Vipps må se).
+         Tilgangen huskes i localStorage, sessionStorage OG en informasjonskapsel – noen nettlesere
+         (f.eks. Chrome på iPhone med blokkerte informasjonskapsler) nekter localStorage. */
       (function () {
         var APEN = /^\/(no\/)?(vilkar|terms|privacy|pluss|plus|kvittering|receipt)(\/|$)/;
-        function sperret(sti) { try { if (localStorage.getItem('mv_tilgang') === 'ja') return false; } catch (e) {} return !APEN.test(sti); }
+        window.mvSlippInn = function () {
+          window.__mvTilgang = true;
+          try { localStorage.setItem('mv_tilgang', 'ja'); } catch (e) {}
+          try { sessionStorage.setItem('mv_tilgang', 'ja'); } catch (e) {}
+          try { document.cookie = 'mv_tilgang=ja; path=/; max-age=31536000; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : ''); } catch (e) {}
+          delete document.documentElement.dataset.laast;
+        };
+        window.mvRiktigKode = function (v) { return String(v || '').normalize('NFKC').replace(/\D/g, '') === String(KODE); };
+        function harTilgang() {
+          if (window.__mvTilgang) return true;
+          try { if (localStorage.getItem('mv_tilgang') === 'ja') return true; } catch (e) {}
+          try { if (sessionStorage.getItem('mv_tilgang') === 'ja') return true; } catch (e) {}
+          try { if (/(^|;\s*)mv_tilgang=ja/.test(document.cookie)) return true; } catch (e) {}
+          return false;
+        }
+        // Lenke med koden (…?kode=1991) slipper deg rett inn
+        try {
+          var u = new URL(location.href);
+          if (u.searchParams.has('kode')) {
+            if (window.mvRiktigKode(u.searchParams.get('kode'))) window.mvSlippInn();
+            u.searchParams.delete('kode'); history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+          }
+        } catch (e) {}
+        function sperret(sti) { return !harTilgang() && !APEN.test(sti); }
         if (sperret(location.pathname)) document.documentElement.dataset.laast = '1';
         document.addEventListener('astro:before-swap', function (e) {
           if (sperret(new URL(e.to).pathname)) e.newDocument.documentElement.dataset.laast = '1';
@@ -257,22 +282,22 @@ const isCurrent = (href: string) => {
   <div id="toast" class="toast" role="status">{L.copied}</div>
   {UTVIKLING.paa && (
     <div id="utvikling" class="utvikling" role="dialog" aria-labelledby="utvTittel">
-      <form class="utv-boks" id="utvSkjema">
+      <form class="utv-boks" id="utvSkjema" novalidate>
         <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="30" fill="#ff6a4d"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g stroke="#f4ebdc" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg>
         <h1 id="utvTittel">mitt<span>vors</span></h1>
         <p>{lang === 'no' ? 'Vi legger siste hånd på vorset. Siden åpner snart!' : 'We’re putting the final touches on the party. Opening soon!'}</p>
         <label for="utvKode" class="small">{lang === 'no' ? 'Har du fått en kode?' : 'Got a code?'}</label>
-        <div class="utv-rad"><input id="utvKode" inputmode="numeric" autocomplete="off" maxlength="12" /><button class="btn gold" type="submit">{lang === 'no' ? 'Slipp meg inn' : 'Let me in'}</button></div>
+        <div class="utv-rad"><input id="utvKode" type="text" inputmode="numeric" autocomplete="one-time-code" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="12" /><button class="btn gold" type="submit">{lang === 'no' ? 'Slipp meg inn' : 'Let me in'}</button></div>
         <p class="utv-feil" id="utvFeil" hidden>{lang === 'no' ? 'Feil kode.' : 'Wrong code.'}</p>
         <p class="utv-fot small"><a href={lang === 'no' ? '/no/pluss' : '/plus'}>{lang === 'no' ? 'Priser' : 'Prices'}</a> · <a href={lang === 'no' ? '/no/vilkar' : '/terms'}>{lang === 'no' ? 'Salgsvilkår' : 'Terms of sale'}</a> · <a href={lang === 'no' ? '/no/privacy' : '/privacy'}>{lang === 'no' ? 'Personvern' : 'Privacy'}</a><br />{SELGER.navn} · Org.nr. {SELGER.orgnr} · {SELGER.adresse} · {SELGER.telefon} · {SELGER.epost}</p>
       </form>
-      <script is:inline define:vars={{ KODE: UTVIKLING.kode }}>
+      <script is:inline data-astro-rerun define:vars={{ KODE: UTVIKLING.kode }}>
         (function () {
           var f = document.getElementById('utvSkjema'); if (!f || f.dataset.bound) return; f.dataset.bound = '1';
           f.addEventListener('submit', function (e) {
             e.preventDefault();
-            var v = document.getElementById('utvKode').value.trim();
-            if (v === KODE) { try { localStorage.setItem('mv_tilgang', 'ja'); } catch (x) {} delete document.documentElement.dataset.laast; }
+            var v = document.getElementById('utvKode').value;
+            if (window.mvRiktigKode ? window.mvRiktigKode(v) : String(v).trim() === String(KODE)) { if (window.mvSlippInn) window.mvSlippInn(); else delete document.documentElement.dataset.laast; }
             else { document.getElementById('utvFeil').hidden = false; }
           });
         })();
