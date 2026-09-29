@@ -27,7 +27,7 @@ self.addEventListener('fetch', (e) => {
     }
     return;
   }
-  if (url.pathname.startsWith('/api/') || /\/(account|statistikk)\/?$/.test(url.pathname)) return;
+  if (url.pathname.startsWith('/api/') || /\/(account|statistikk|pluss-verktoy)\/?$/.test(url.pathname)) return;
 
   // Filer med versjonsnummer i navnet endres aldri: hurtiglager først
   if (url.pathname.startsWith('/_astro/')) {

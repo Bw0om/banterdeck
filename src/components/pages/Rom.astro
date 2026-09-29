@@ -443,7 +443,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         kontoApi('/api/pluss/gratis', { method: 'POST' }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
           var msg = m.querySelector('.formmsg');
           if (!x.ok && x.d.feil !== 'brukt') { msg.textContent = x.d.melding || T('Det gikk ikke.', 'That didn\'t work.'); msg.className = 'formmsg err'; b.disabled = false; return; }
-          if (x.d.feil === 'brukt') { msg.innerHTML = T('Gratiskvelden er brukt.', 'Your free night is used up.') + ' <a href="' + RUTE.pluss + '">' + T('Kjøp et pass', 'Buy a pass') + '</a>.'; msg.className = 'formmsg err'; return; }
+          if (x.d.feil === 'brukt') { msg.innerHTML = (x.d.melding ? esc(x.d.melding) : T('Gratiskvelden er brukt.', 'Your free night is used up.')) + ' <a href="' + RUTE.pluss + '">' + T('Kjøp et pass', 'Buy a pass') + '</a>.'; msg.className = 'formmsg err'; return; }
           m.remove(); plussSjekket = false; aktiverPluss(true);
         });
       });

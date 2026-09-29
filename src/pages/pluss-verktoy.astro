@@ -1,0 +1,27 @@
+---
+// Mobilverktøyet for Pluss-lekene leveres herfra – bare til innloggede med aktiv Pluss.
+// Lekesidene er statiske, så verktøyet ligger ikke i selve siden (da kunne hvem som helst bare fjernet låsen).
+import GameTool from '../components/GameTool.astro';
+import DigitalLek from '../components/DigitalLek.astro';
+import { PLUSS_SLUGS } from '../lib/plussleker';
+import { innloggetBruker } from '../lib/konto';
+import { plussStatus } from '../lib/pluss';
+export const prerender = false;
+
+const u = new URL(Astro.request.url);
+const slug = String(u.searchParams.get('slug') || '');
+const lang = u.searchParams.get('lang') === 'en' ? 'en' : 'no';
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex');
+let ok = false;
+if (PLUSS_SLUGS.includes(slug)) {
+  try {
+    const b = await innloggetBruker(Astro.request);
+    if (b) ok = (await plussStatus(b.id)).aktiv;
+  } catch (e) {
+    console.warn('Pluss-verktøy feilet:', (e as Error).message);
+  }
+}
+if (!ok) Astro.response.status = 403;
+---
+{ok && <GameTool slug={slug} lang={lang} />}{ok && <DigitalLek slug={slug} lang={lang} />}

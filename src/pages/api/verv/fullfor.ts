@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (!u.email_confirmed_at && !u.confirmed_at) return json({ feil: 'bekreft', melding: 'Bekreft e-posten din først.' }, 409);
     const r = await rpc('verv_fullfor', { p_user: u.id, p_kode: kode });
     // «ikke-spilt»: kontoen har ikke spilt et rom med andre ennå – prøv igjen senere
-    if (!r || !r.ok) return json({ feil: (r && r.grunn) || 'nei', ferdig: !(r && r.grunn === 'ikke-spilt') }, 409);
+    if (!r || !r.ok) return json({ feil: (r && r.grunn) || 'nei', ferdig: !(r && (r.grunn === 'ikke-spilt' || r.grunn === 'bekreft')) }, 409);
     return json({ ok: true, ferdig: true });
   } catch (e) {
     console.warn('Verving kunne ikke fullføres:', (e as Error).message);

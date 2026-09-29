@@ -76,7 +76,7 @@ export async function startBetaling(userId: string, produkt: string, returUrl: s
   });
   if (!r.ok || !r.data || !r.data.redirectUrl) {
     await rpc('betaling_avbryt', { p_ref: ref }).catch(() => null);
-    throw new Error('Vipps svarte ' + r.status);
+    throw new Error('Vipps svarte ' + r.status + ': ' + JSON.stringify(r.data || {}).slice(0, 400));
   }
   return { ref, url: r.data.redirectUrl as string };
 }
@@ -91,7 +91,7 @@ export async function sjekkBetaling(ref: string): Promise<'fullfort' | 'venter' 
   if (b.status === 'fullfort') { await sendKvittering(ref); return 'fullfort'; }
   if (b.status === 'avbrutt') return 'avbrutt';
   const r = await vipps('/epayment/v1/payments/' + encodeURIComponent(ref));
-  if (!r.ok || !r.data) return 'venter';
+  if (!r.ok || !r.data) { console.warn('Vipps-sjekk ' + ref + ' svarte ' + r.status + ': ' + JSON.stringify(r.data || {}).slice(0, 300)); return 'venter'; }
   const state = r.data.state, agg = r.data.aggregate || {};
   if (state === 'AUTHORIZED') {
     const tatt = agg.capturedAmount ? Number(agg.capturedAmount.value) : 0;
@@ -99,7 +99,7 @@ export async function sjekkBetaling(ref: string): Promise<'fullfort' | 'venter' 
       const c = await vipps('/epayment/v1/payments/' + encodeURIComponent(ref) + '/capture', {
         method: 'POST', idem: 'cap-' + ref, body: { modificationAmount: { currency: 'NOK', value: b.belop_ore } },
       });
-      if (!c.ok) return 'venter';
+      if (!c.ok) { console.warn('Vipps-capture ' + ref + ' svarte ' + c.status + ': ' + JSON.stringify(c.data || {}).slice(0, 300)); return 'venter'; }
     }
     await rpc('betaling_fullfor', { p_ref: ref });
     await sendKvittering(ref);

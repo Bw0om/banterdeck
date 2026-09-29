@@ -12,7 +12,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const u = await innloggetBruker(request);
     if (!u) return json({ feil: 'logg-inn', melding: 'Logg inn først, så Pluss havner på kontoen din.' }, 401);
-    const retur = new URL('/no/pluss', request.url).toString();
+    const retur = new URL(d.lang === 'en' ? '/plus' : '/no/pluss', request.url).toString();
     return json(await startBetaling(u.id, d.produkt, retur));
   } catch (e) {
     console.warn('Kjøp feilet:', (e as Error).message);

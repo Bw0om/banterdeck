@@ -94,14 +94,32 @@ const jsonLd = JSON.stringify([{
         <div class="dl-knapper"><a class="btn gold" href="/plus">Your first night is free</a></div>
       </div>
     )}
-    <div class="lekverktoy-innhold">{verktoySprak && <GameTool slug={game.slug} lang={lang} />}{verktoySprak && <DigitalLek slug={game.slug} lang={lang} />}</div>
+    {plussLek
+      ? <div class="lekverktoy-innhold" data-verktoy={game.slug} data-lang={lang}></div>
+      : <div class="lekverktoy-innhold">{verktoySprak && <GameTool slug={game.slug} lang={lang} />}{verktoySprak && <DigitalLek slug={game.slug} lang={lang} />}</div>}
   </div>
   {plussLek && (
     <script is:inline data-astro-rerun>
     (function () {
       var el = document.querySelector('[data-pluss="1"]'); if (!el || el.dataset.bound) return; el.dataset.bound = '1';
       var K = window.BDKonto; if (!K || !K.les()) return;
-      K.api('/api/pluss/status').then(function (r) { return r.json(); }).then(function (d) { if (d.aktiv) el.classList.remove('pluss-laast'); }).catch(function () {});
+      // Verktøyet hentes fra serveren, som sjekker Pluss først
+      var boks = el.querySelector('[data-verktoy]'); if (!boks) return;
+      K.api('/pluss-verktoy?slug=' + encodeURIComponent(boks.dataset.verktoy) + '&lang=' + boks.dataset.lang).then(function (r) {
+        if (!r.ok) return;
+        return r.text().then(function (html) {
+          var mal = document.createElement('template'); mal.innerHTML = html;
+          boks.appendChild(mal.content);
+          // Skript satt inn med innerHTML kjører ikke – lag dem på nytt, der de står, så document.currentScript stemmer
+          boks.querySelectorAll('script').forEach(function (gammel) {
+            var ny = document.createElement('script');
+            for (var i = 0; i < gammel.attributes.length; i++) ny.setAttribute(gammel.attributes[i].name, gammel.attributes[i].value);
+            ny.textContent = gammel.textContent;
+            gammel.parentNode.replaceChild(ny, gammel);
+          });
+          el.classList.remove('pluss-laast');
+        });
+      }).catch(function () {});
     })();
     </script>
   )}

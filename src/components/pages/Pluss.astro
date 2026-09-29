@@ -180,7 +180,7 @@ const romSti = no ? '/no/rom' : '/room';
       if (!K || !K.les()) { say(EN ? 'Log in first, so Plus ends up on your account.' : 'Logg inn først, så havner Pluss på kontoen din.', 'err'); return; }
       if (!$('samtykke').checked) { say(EN ? 'Tick the box to confirm that Plus starts right away.' : 'Kryss av for at Pluss starter med en gang.', 'err'); $('samtykke').focus(); return; }
       b.disabled = true; say(EN ? 'Sending you to Vipps …' : 'Sender deg til Vipps …');
-      api('/api/pluss/kjop', { method: 'POST', body: JSON.stringify({ produkt: b.dataset.kjop, samtykke: true }) }).then(function (d) {
+      api('/api/pluss/kjop', { method: 'POST', body: JSON.stringify({ produkt: b.dataset.kjop, samtykke: true, lang: EN ? 'en' : 'no' }) }).then(function (d) {
         if (!d._ok || !d.url) { say(d.melding || (EN ? 'Couldn’t start the payment.' : 'Fikk ikke startet betalingen.'), 'err'); b.disabled = false; return; }
         try { localStorage.setItem('bd_pluss_ref', d.ref); } catch (x) {}
         location.href = d.url;
