@@ -1,0 +1,121 @@
+---
+// Alkoholfri modus: slurker blir straffepoeng, «drikk» blir «ta straff».
+// Gjelder hele den norske siden når brukeren har skrudd det på (bd_alkoholfri=1),
+// og i et rom når verten har skrudd det på for alle (<html data-alkoholfri="1">).
+// Bare visningen endres – spillogikken og poengene er de samme.
+---
+<script is:inline>
+(function () {
+  if (window.BDTorr) return;
+  var TALL = '(\\d+|en|én|ett|to|tre|fire|fem|seks|sju|syv|åtte|ni|ti)';
+  var REGLER = [
+    [/🍺/g, '🥤'], [/🍻/g, '🎉'],
+    [/(^|[^\wæøåé])(en|én|1)\s+shot\b/gi, function (m, p) { return p + '5 straffepoeng'; }],
+    [/\bshots?\b/gi, '5 straffepoeng'],
+    [/\bdrikker (du|dere|han|hun|de|alle|den|vedkommende) opp( glasset \w+| glasset| drikken \w+| resten)?/gi, function (m, h) { return 'tar ' + h + ' 5 straffepoeng'; }],
+    [/\b(drikk|drikke) opp( glasset \w+| glasset| drikken \w+| resten)/gi, 'ta 5 straffepoeng'],
+    [/\bbegynner å drikke\b/gi, 'begynner å klappe'], [/\bslutte å drikke\b/gi, 'slutte å klappe'], [/\bstoppe å drikke\b/gi, 'stoppe å klappe'],
+    [/\bdrikker opp\b/gi, 'tar 5 straffepoeng'],
+    [/\bdrikke opp\b/gi, 'ta 5 straffepoeng'],
+    [/\bdrikk opp\b/gi, 'ta 5 straffepoeng'],
+    [/\bdrakk opp\b/gi, 'tok 5 straffepoeng'],
+    [/\bdrikker dobbelt\b/gi, 'får dobbelt straff'],
+    [/\bdrikke-/gi, 'Fest-'],
+    [/\bdrikkeleke/gi, 'festleke'], [/\bdrikkelek/gi, 'festlek'], [/\bdrikkekort/gi, 'festkort'], [/\bdrikkespill/gi, 'festspill'],
+    [/\bdrikkehjul/gi, 'straffehjul'], [/\bdrikkepartner/gi, 'straffepartner'],
+    [/(^|[^\wæøåé])(en|én)\s+slurk\b/gi, function (m, p) { return p + 'ett straffepoeng'; }],
+    [/\bslurkene\b/gi, 'straffepoengene'], [/\bslurken\b/gi, 'straffepoenget'], [/\bslurker\b/gi, 'straffepoeng'], [/\bslurk\b/gi, 'straffepoeng'],
+    [/\bslurke/gi, 'straffe'],
+    [/\bmest tørste?\b/gi, 'mest straffet'], [/\btørstigste\b/gi, 'mest straffede'],
+    [/\bmest edru\b/gi, 'minst straffet'], [/\bedruste\b/gi, 'minst straffede'],
+    [new RegExp('\\bdrikker\\s+' + TALL + '(?![\\wæøåé])(?!\\s+straff)', 'gi'), function (m, n) { return 'tar ' + ett(n) + ' straffepoeng'; }],
+    [new RegExp('\\bdrikke\\s+' + TALL + '(?![\\wæøåé])(?!\\s+straff)', 'gi'), function (m, n) { return 'ta ' + ett(n) + ' straffepoeng'; }],
+    [new RegExp('\\bdrikk\\s+' + TALL + '(?![\\wæøåé])(?!\\s+straff)', 'gi'), function (m, n) { return 'ta ' + ett(n) + ' straffepoeng'; }],
+    [/\bdrikker(?=\s+\d|\s+(to|tre|fire|fem|ett)\s+straff)/gi, 'tar'],
+    [/\bdrikk(?=\s+(\d|to|tre|fire|fem|ett)\S*\s+straff)/gi, 'ta'],
+    [/\bdrikke(?=\s+(\d|to|tre|fire|fem|ett)\S*\s+straff)/gi, 'ta'],
+    [/\bdrakk\b/gi, 'fikk straff'],
+    [/\bdrikker\b/gi, 'tar straff'], [/\bdrikke\b/gi, 'ta straff'], [/\bdrikk\b/gi, 'ta straff'],
+  ];
+  function ett(n) { return /^(en|én)$/i.test(n) ? 'ett' : n; }
+  function tekst(s) {
+    if (!s || !/drikk|drakk|slurk|shot|tørst|edru|🍺|🍻/i.test(s)) return s;
+    var ut = String(s);
+    REGLER.forEach(function (r) {
+      ut = ut.replace(r[0], function () {
+        var m = arguments[0], ny = typeof r[1] === 'function' ? r[1].apply(null, arguments) : r[1];
+        // Behold stor forbokstav
+        if (m && m[0] !== m[0].toLowerCase() && ny) ny = ny[0].toUpperCase() + ny.slice(1);
+        return ny;
+      });
+    });
+    return ut;
+  }
+  var original = new WeakMap(), satt = new WeakMap();
+  function hopp(node) {
+    var p = node.parentElement;
+    return !p || p.closest('script,style,textarea,input,code,[contenteditable],[data-ikke-torr]');
+  }
+  function aktiv() {
+    var h = document.documentElement;
+    if (!/^(no|nb|nn)/.test(h.lang || '')) return false;
+    if (h.dataset.alkoholfri === '1') return true;
+    if (h.dataset.alkoholfri === '0') return false;
+    try { return localStorage.getItem('bd_alkoholfri') === '1'; } catch (e) { return false; }
+  }
+  function node(n) {
+    if (n.nodeType !== 3 || hopp(n)) return;
+    if (satt.get(n) === n.nodeValue) return;           // det er vi som skrev teksten
+    var ny = tekst(n.nodeValue);
+    if (ny !== n.nodeValue) { original.set(n, n.nodeValue); n.nodeValue = ny; satt.set(n, ny); }
+  }
+  function tre(rot) {
+    if (!rot) return;
+    if (rot.nodeType === 3) return node(rot);
+    var w = document.createTreeWalker(rot, NodeFilter.SHOW_TEXT), n;
+    while ((n = w.nextNode())) node(n);
+  }
+  function tilbake(rot) {
+    var w = document.createTreeWalker(rot || document.body, NodeFilter.SHOW_TEXT), n;
+    while ((n = w.nextNode())) {
+      if (original.has(n) && satt.get(n) === n.nodeValue) { n.nodeValue = original.get(n); satt.delete(n); original.delete(n); }
+    }
+  }
+  var paa = false;
+  function oppdater() {
+    var skal = aktiv();
+    document.documentElement.classList.toggle('alkoholfri', skal);
+    if (skal) tre(document.body);
+    else if (paa) tilbake(document.body);
+    paa = skal;
+    document.querySelectorAll('[data-alkoholfri-bryter]').forEach(function (b) { b.setAttribute('aria-pressed', String(egen())); });
+  }
+  function egen() { try { return localStorage.getItem('bd_alkoholfri') === '1'; } catch (e) { return false; } }
+  var obs = new MutationObserver(function (liste) {
+    if (!paa) return;
+    liste.forEach(function (m) {
+      if (m.type === 'characterData') node(m.target);
+      else m.addedNodes.forEach(function (n) { tre(n); });
+    });
+  });
+  function start() {
+    obs.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
+    oppdater();
+  }
+  // Rommet skrur av og på via <html data-alkoholfri>
+  new MutationObserver(oppdater).observe(document.documentElement, { attributes: true, attributeFilter: ['data-alkoholfri', 'lang'] });
+  document.addEventListener('astro:after-swap', oppdater);
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-alkoholfri-bryter]'); if (!b) return;
+    BDTorr.sett(!egen());
+  });
+  window.BDTorr = {
+    tekst: function (s) { return aktiv() ? tekst(s) : s; },
+    alltid: tekst,
+    aktiv: aktiv,
+    egen: egen,
+    sett: function (v) { try { localStorage.setItem('bd_alkoholfri', v ? '1' : '0'); } catch (e) {} oppdater(); },
+  };
+  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+})();
+</script>

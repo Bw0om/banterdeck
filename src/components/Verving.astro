@@ -1,0 +1,99 @@
+---
+// Verving og deling, felles for hele den norske siden.
+// - ?v=KODE i adressen huskes, så vennen som vervet deg får et kveldspass når du har spilt ditt første rom.
+// - window.BDDel.lenke(url, tekst) åpner et lite delingsvalg: Snapchat/Instagram (via telefonens delingsmeny), Messenger, SMS og kopier.
+---
+<script is:inline>
+(function () {
+  if (window.BDDel) return;
+  /* ---------- husk vervekoden ---------- */
+  function fangKode() {
+    try {
+      var u = new URL(location.href), v = (u.searchParams.get('v') || '').toUpperCase();
+      if (!/^[A-Z0-9]{6}$/.test(v)) return;
+      if (!localStorage.getItem('bd_verv_ferdig')) localStorage.setItem('bd_verv', JSON.stringify({ k: v, t: Date.now() }));
+      u.searchParams.delete('v');
+      history.replaceState(history.state, '', u.pathname + (u.search || '') + u.hash);
+    } catch (e) {}
+  }
+  fangKode();
+  document.addEventListener('astro:after-swap', fangKode);
+
+  window.BDVerv = {
+    kode: function () {
+      try {
+        var x = JSON.parse(localStorage.getItem('bd_verv') || 'null');
+        return x && x.k && Date.now() - x.t < 60 * 864e5 ? x.k : null;
+      } catch (e) { return null; }
+    },
+    /** Kalles når man er innlogget og med i et rom med minst to telefoner. */
+    fullfor: function () {
+      var k = this.kode(), K = window.BDKonto;
+      if (!k || !K || !K.les || !K.les()) return;
+      try { if (localStorage.getItem('bd_verv_ferdig')) return; } catch (e) { return; }
+      K.api('/api/verv/fullfor', { method: 'POST', body: JSON.stringify({ kode: k }) }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (d) {
+          if (r.ok || d.ferdig) { try { localStorage.setItem('bd_verv_ferdig', '1'); localStorage.removeItem('bd_verv'); } catch (e) {} }
+          if (r.ok && d.ok && window.BDToast) window.BDToast('🎁 Du og vennen som vervet deg fikk et gratis kveldspass!');
+        });
+      }).catch(function () {});
+    },
+  };
+
+  /* ---------- delingsvalg ---------- */
+  var ark = null;
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function lukk() { if (ark) { ark.remove(); ark = null; } }
+  function kopier(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t);
+    var i = document.createElement('textarea'); i.value = t; document.body.appendChild(i); i.select();
+    try { document.execCommand('copy'); } catch (e) {} i.remove(); return Promise.resolve();
+  }
+  window.BDDel = {
+    /** Åpner delingsvalget for en lenke. fil (valgfri) er et bilde som deles via telefonens delingsmeny. */
+    lenke: function (url, tekst, opts) {
+      opts = opts || {};
+      lukk();
+      var hel = (tekst ? tekst + ' ' : '') + url;
+      var mobil = document.documentElement.classList.contains('is-mobile');
+      var kanDele = !!navigator.share;
+      ark = document.createElement('div'); ark.className = 'del-ark'; ark.setAttribute('role', 'dialog'); ark.setAttribute('aria-label', opts.tittel || 'Del');
+      ark.innerHTML = '<div class="del-ark-innhold">' +
+        '<div class="del-ark-topp"><h2>' + esc(opts.tittel || 'Del') + '</h2><button class="linkbtn" data-d="lukk" type="button">Lukk</button></div>' +
+        (opts.ingress ? '<p class="small">' + esc(opts.ingress) + '</p>' : '') +
+        '<div class="del-valg">' +
+          (opts.bilde ? '<button type="button" data-d="bilde"><span>📸</span>Snapchat / Instagram<small>Del bildet i story</small></button>' : '') +
+          (kanDele ? '<button type="button" data-d="dele"><span>📤</span>' + (opts.bilde ? 'Andre apper' : 'Snapchat, Instagram …') + '<small>Telefonens delingsmeny</small></button>' : '') +
+          (mobil ? '<a href="fb-messenger://share/?link=' + encodeURIComponent(url) + '"><span>💬</span>Messenger<small>Send lenken</small></a>' : '') +
+          '<a href="sms:?&body=' + encodeURIComponent(hel) + '"><span>✉️</span>SMS<small>Send lenken</small></a>' +
+          '<button type="button" data-d="kopier"><span>🔗</span>Kopier lenke<small>' + esc(url.replace(/^https?:\/\//, '').slice(0, 40)) + '</small></button>' +
+          (opts.bilde && !kanDele ? '<button type="button" data-d="last"><span>⬇️</span>Last ned bildet<small>Legg det ut selv</small></button>' : '') +
+        '</div></div>';
+      ark.addEventListener('click', function (e) {
+        if (e.target === ark) return lukk();
+        var b = e.target.closest('[data-d]'); if (!b) return;
+        var d = b.dataset.d;
+        if (d === 'lukk') return lukk();
+        if (d === 'kopier') return kopier(url).then(function () { b.querySelector('small').textContent = 'Kopiert! ✓'; });
+        if (d === 'dele') return navigator.share({ title: opts.tittel || 'Banterdeck', text: tekst || '', url: url }).catch(function () {});
+        if (d === 'bilde' || d === 'last') {
+          Promise.resolve(opts.bilde()).then(function (fil) {
+            if (!fil) return;
+            if (d === 'bilde' && navigator.canShare && navigator.canShare({ files: [fil] })) {
+              navigator.share({ files: [fil], title: opts.tittel || 'Banterdeck' }).catch(function () {});
+            } else {
+              var a = document.createElement('a'); a.href = URL.createObjectURL(fil); a.download = fil.name;
+              document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+            }
+          });
+        }
+      });
+      document.body.appendChild(ark);
+    },
+    lukk: lukk,
+    kopier: kopier,
+  };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') lukk(); });
+  document.addEventListener('astro:before-swap', lukk);
+})();
+</script>

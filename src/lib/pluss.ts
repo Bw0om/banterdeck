@@ -13,9 +13,9 @@ export function vippsKlar() { const e = env(); return !!(e.VIPPS_CLIENT_ID && e.
 function base() { const e = env(); return (e.VIPPS_BASE_URL || (e.VIPPS_TEST === '1' || e.VIPPS_TEST === 'true' ? 'https://apitest.vipps.no' : 'https://api.vipps.no')).replace(/\/$/, ''); }
 
 /* ---------- Pluss-status ---------- */
-export async function plussStatus(userId: string): Promise<{ aktiv: boolean; til: string | null; gratisBrukt: boolean }> {
+export async function plussStatus(userId: string): Promise<{ aktiv: boolean; til: string | null; gratisBrukt: boolean; kveldspass: number }> {
   const s = await rpc('pluss_status', { p_user: userId });
-  return { aktiv: !!(s && s.aktiv), til: (s && s.til) || null, gratisBrukt: !!(s && s.gratisBrukt) };
+  return { aktiv: !!(s && s.aktiv), til: (s && s.til) || null, gratisBrukt: !!(s && s.gratisBrukt), kveldspass: Number((s && s.kveldspass) || 0) };
 }
 export async function harPluss(userId: string) {
   try { return (await plussStatus(userId)).aktiv; } catch { return false; }

@@ -136,6 +136,15 @@ const T = no ? {
           <button type="button" class="mini danger" id="slettBtn">{T.deleteAcc}</button>
         </div>
         <p id="plussLinje" class="konto-pluss" hidden></p>
+        {no && (
+          <div class="konto-ekstra">
+            <a class="konto-kort" href="/no/gjeng"><span>👥</span><b>Gjengene dine</b><small id="gjengTall">Sesongtabell over flere kvelder</small></a>
+            <div class="konto-kort" id="vervKort"><span>🎁</span><b>Verv en venn</b>
+              <small id="vervTekst">Dere får et gratis kveldspass hver når vennen har spilt sitt første rom.</small>
+              <div class="dl-knapper"><button class="btn gold small" id="vervDel" type="button" disabled>Del vervelenken</button><button class="btn ghost small" id="vervBruk" type="button" hidden>Bruk et kveldspass</button></div>
+            </div>
+          </div>
+        )}
         <p id="syncMsg" class="formmsg" role="status" aria-live="polite"></p>
 
         <form class="form konto-boks" id="pwForm" hidden novalidate>
@@ -459,6 +468,42 @@ const T = no ? {
           });
         });
 
+        var verv = null;
+        function visVerv() {
+          K.api('/api/verv').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+            if (!d || !d.kode) return;
+            verv = d;
+            $('vervDel').disabled = false;
+            $('vervTekst').textContent = (d.antall ? 'Du har vervet ' + d.antall + (d.antall === 1 ? ' venn' : ' venner') + '. ' : 'Dere får et gratis kveldspass hver når vennen har spilt sitt første rom. ') +
+              (d.kveldspass ? 'Du har ' + d.kveldspass + ' kveldspass på lur.' : '');
+            $('vervBruk').hidden = !d.kveldspass;
+          }).catch(function () {});
+        }
+        function visGjenger() {
+          K.api('/api/gjeng').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+            if (!d || !d.gjenger) return;
+            var n = d.gjenger.length;
+            $('gjengTall').textContent = n ? n + (n === 1 ? ' gjeng: ' : ' gjenger: ') + d.gjenger.slice(0, 3).map(function (g) { return g.navn; }).join(', ') : 'Lag en gjeng og få sesongtabell over flere kvelder';
+          }).catch(function () {});
+        }
+        if ($('vervDel')) {
+          $('vervDel').addEventListener('click', function () {
+            if (!verv) return;
+            window.BDDel.lenke(location.origin + '/no/?v=' + verv.kode, 'Bli med på Banterdeck – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁', {
+              tittel: 'Verv en venn', ingress: 'Når vennen lager konto og spiller sitt første rom, får dere et kveldspass hver.',
+            });
+          });
+          $('vervBruk').addEventListener('click', function () {
+            var b = this; b.disabled = true;
+            K.api('/api/verv', { method: 'POST' }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
+              b.disabled = false;
+              if (!x.ok) return say($('syncMsg'), x.d.melding || 'Det gikk ikke.', 'err');
+              say($('syncMsg'), '✨ Pluss er på i 24 timer. God kveld!', 'ok');
+              setTimeout(function () { location.reload(); }, 900);
+            });
+          });
+        }
+
         function visHvem() { $('who').textContent = bruker.brukernavn ? bruker.brukernavn + ' · ' + bruker.email : bruker.email; }
 
         function start() {
@@ -481,6 +526,12 @@ const T = no ? {
                 ? '✨ <b>Pluss</b> til ' + esc(new Date(d.til).toLocaleString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/no/pluss">Mer</a>'
                 : '✨ <a href="/no/pluss">' + (d.gratisBrukt ? 'Få Banterdeck Pluss' : 'Prøv Banterdeck Pluss gratis i kveld') + '</a>';
             }).catch(function () {});
+            if (LANG === 'no') {
+              // Kom man hit for å logge inn fra en annen side (f.eks. en gjenglenke), gå tilbake dit
+              var tilbake = null; try { tilbake = sessionStorage.getItem('bd_etter_innlogging'); sessionStorage.removeItem('bd_etter_innlogging'); } catch (x) {}
+              if (tilbake && /^\/no\/[a-z0-9/?=&%-]*$/i.test(tilbake)) { location.href = tilbake; return; }
+              visVerv(); visGjenger();
+            }
             try { sessionStorage.setItem('bd_favsynk', '1'); } catch (x) {}
             K.synkFav().catch(function () {}).then(pull).then(function (remote) {
               if (remote && remote.lines) {

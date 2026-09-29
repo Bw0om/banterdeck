@@ -13,6 +13,8 @@ import Tools from '../components/Tools.astro';
 import Icon from '../components/Icon.astro';
 import KontoKlient from '../components/KontoKlient.astro';
 import FeilRapport from '../components/FeilRapport.astro';
+import Alkoholfri from '../components/Alkoholfri.astro';
+import Verving from '../components/Verving.astro';
 import { ClientRouter } from 'astro:transitions';
 
 interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; bilde?: string; }
@@ -74,6 +76,8 @@ const isCurrent = (href: string) => {
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Banterdeck" />
   <KontoKlient />
+  {lang === 'no' && <Alkoholfri />}
+  {lang === 'no' && <Verving />}
   <script is:inline>
     /* Innloggingslenker fra Supabase kan lande på feil side – send dem til kontosiden. */
     (function () {
@@ -213,14 +217,15 @@ const isCurrent = (href: string) => {
       }, { passive: true });
       document.addEventListener('astro:page-load', function () { document.body.classList.remove('bars-skjult'); });
 
-      function toast(msg) {
+      function toast(msg, ms) {
         var t = document.getElementById('toast');
         if (!t) return;
         var old = t.textContent;
         if (msg) t.textContent = msg;
         t.classList.add('show');
-        setTimeout(function () { t.classList.remove('show'); t.textContent = old; }, 1400);
+        setTimeout(function () { t.classList.remove('show'); t.textContent = old; }, ms || 1400);
       }
+      window.BDToast = function (m) { toast(m, 4500); };
       document.addEventListener('click', function (e) {
         var sb = e.target.closest('[data-share]');
         if (!sb) return;

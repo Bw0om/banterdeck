@@ -120,6 +120,7 @@ export function visning(data: any, versjon: number, meg: any) {
     versjon, vert: data.vert, meg: meg ? meg.id : null,
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0 })),
     spill, hendelse: data.hendelse, nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul || null, hjulListe: data.hjulListe || HJUL_STANDARD, oppdrag: oppdragVisning(data, meg), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: data.historikk || [],
+    alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode } : null,
   };
 }
 
@@ -286,7 +287,7 @@ function handlingInne(data: any, meg: any, h: any) {
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
     data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
   }
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -313,6 +314,19 @@ function handlingInne(data: any, meg: any, h: any) {
       const hadde = !!(data.pluss && data.pluss.til > Date.now());
       data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
       if (!hadde) melde(data, '✨ Rommet har Pluss i kveld – alle leker er låst opp!');
+      return { ok: true };
+    }
+    case 'alkoholfri': {
+      if (!erVert) return { feil: 'bare-vert' };
+      data.alkoholfri = !!h.paa;
+      melde(data, data.alkoholfri ? '🥤 Alkoholfri modus: slurker er straffepoeng i kveld' : 'Alkoholfri modus er skrudd av');
+      return { ok: true };
+    }
+    case 'gjeng': {
+      // API-ruta har sjekket at verten er med i gjengen (h._gjeng settes bare der)
+      if (!erVert) return { feil: 'bare-vert' };
+      data.gjeng = h._gjeng && h._gjeng.id ? { id: h._gjeng.id, navn: h._gjeng.navn, kode: h._gjeng.kode } : null;
+      if (data.gjeng) melde(data, `Kvelden telles i sesongen til ${data.gjeng.navn} 🏆`);
       return { ok: true };
     }
     case 'velg-annen': {
@@ -470,6 +484,16 @@ function avgjorForraeder(data: any) {
   melde(data, `${navnPaa(data, s.aktiv)} ${s.hemmelig === 'lyv' ? 'løy' : 'sa sannheten'}!`);
 }
 
+/** Kvelden slik den lagres i sesongtabellen til en gjeng: bare navn og tall. */
+export function kveldForGjeng(data: any) {
+  return {
+    spillere: data.spillere.map((p: any) => ({ navn: p.navn, slurker: p.slurker || 0, quiz: p.quiz || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0 })),
+    leker: (data.historikk || []).slice(-40),
+    minutter: Math.max(1, Math.round(((data.ferdig || Date.now()) - (data.laget || Date.now())) / 60000)),
+    alkoholfri: !!data.alkoholfri,
+  };
+}
+
 /* ---------- inn i rommet ---------- */
 export function blimed(data: any, navn: string) {
   if (data.spillere.length >= MAKS_SPILLERE) return { feil: 'fullt' };
@@ -506,7 +530,8 @@ export const SOS = ['hvemskrev', 'bloff', 'samme', 'spion', 'skal', 'pannekort']
 export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
 export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '🫡'];
 export function ekstraLeker() {
-  const nr = publiserteRunder().slice(0, 6).map((r: any) => ({ v: rundeId(r), t: 'Uke ' + r.uke }));
+  // Alle publiserte uker kan spilles i rom – de nyeste som knapper, resten fra arkivet
+  const nr = publiserteRunder().slice(0, 150).map((r: any) => ({ v: rundeId(r), t: 'Uke ' + r.uke + (r.aar !== new Date().getFullYear() ? ' ' + r.aar : '') }));
   return [
     ...(nr.length ? [{ id: 'nyhetsrunden', navn: 'Nyhetsrunden', type: 'nyhetsrunden', moduser: nr, om: 'Verten leser opp ukas spørsmål. Alle svarer på sin egen telefon – så ser dere hvem som bommet.' }] : []),
     { id: 'hvemskrev', navn: 'Hvem skrev det?', type: 'hvemskrev', moduser: [], om: 'Alle svarer anonymt på samme spørsmål. Så gjetter dere hvem som skrev hva.' },
@@ -994,7 +1019,7 @@ function startNye(data: any, lek: string, modus: string, ider: string[]): any {
     const runder = publiserteRunder();
     const r = runder.find((x: any) => rundeId(x) === modus) || runder[0];
     if (!r || !(r.sporsmal || []).length) return { feil: 'tom', melding: 'Ingen runde er ute ennå.' };
-    data.spill = { type: 'nyhetsrunden', lek, navn: 'Nyhetsrunden', modus: 'uke ' + r.uke, uke: r.uke, sporsmal: r.sporsmal, i: 0, riktige: {}, fase: 'klar', svar: {}, resultat: {}, alt: null };
+    data.spill = { type: 'nyhetsrunden', lek, navn: 'Nyhetsrunden', modus: 'uke ' + r.uke, uke: r.uke, rid: rundeId(r), sporsmal: r.sporsmal, i: 0, riktige: {}, fase: 'klar', svar: {}, resultat: {}, alt: null };
     melde(data, `Nyhetsrunden uke ${r.uke} – ${r.sporsmal.length} spørsmål`); return { ok: true };
   }
   return { feil: 'ukjent-lek' };
@@ -1143,7 +1168,7 @@ function nyeVisning(s: any, meg: any, data: any) {
     const q = s.sporsmal[s.i], vert = meg && meg.id === data.vert, aapen = s.fase === 'svar' || s.fase === 'ferdig';
     const liste = data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, riktige: s.riktige[p.id] || 0 })).sort((a: any, b: any) => b.riktige - a.riktige);
     return {
-      fase: s.fase, i: s.i, antall: s.sporsmal.length, uke: s.uke, qtype: q.type, alt: s.alt,
+      fase: s.fase, i: s.i, antall: s.sporsmal.length, uke: s.uke, rid: s.rid || null, qtype: q.type, alt: s.alt,
       // Spørsmålet vises bare hos verten (som leser det høyt) til svaret er avslørt
       q: (vert && s.fase === 'spm') || aapen ? q.q : null,
       fasit: aapen ? q.svar : null, info: aapen ? q.info || '' : null, kilde: aapen ? q.kilde || '' : null, url: aapen ? q.url || '' : null,

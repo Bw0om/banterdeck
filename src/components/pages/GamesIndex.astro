@@ -28,7 +28,7 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
   <p class="lead">{L.gamesLead}</p>
 
 
-  {lang === 'no' && <p class="small" style="margin:-6px 0 16px">Drikking er valgfritt – lekene funker like godt med brus.</p>}
+  {lang === 'no' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>🥤 Alkoholfri modus</button><span class="small" data-ikke-torr>Slurker blir straffepoeng – lekene funker like godt med brus.</span></p>}
 
   {lang === 'no' && (
     <p class="guidechips">

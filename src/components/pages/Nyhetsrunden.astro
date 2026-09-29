@@ -68,6 +68,8 @@ const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
           '<div class="gt-row"><button class="btn ghost" data-a="tilbake"' + (nr===0 ? ' disabled' : '') + '>Tilbake</button></div>');
       }
       function slutt(){
+        try { var sp = JSON.parse(localStorage.getItem('bd_nr_spilt') || '[]'); var id = root.dataset.runde;
+          if (sp.indexOf(id) === -1) { sp.push(id); localStorage.setItem('bd_nr_spilt', JSON.stringify(sp.slice(-300))); } } catch (e) {}
         if (folk.length) {
           var liste = folk.map(function (n, i) { return { n: n, p: poeng[i] }; }).sort(function (a, b) { return b.p - a.p; });
           var topp = liste[0].p, vinnere = liste.filter(function (x) { return x.p === topp; }).map(function (x) { return x.n; });
@@ -115,10 +117,11 @@ const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
     <section class="more">
       <h2>Tidligere uker</h2>
       <ul class="nr-arkiv">
-        {andre.map((r) => (
+        {andre.slice(0, 4).map((r) => (
           <li><a href={`/no/nyhetsrunden/${rundeId(r)}`}><b>{r.aar} · uke {r.uke}</b><span>{r.ingress}</span></a></li>
         ))}
       </ul>
+      <p><a class="btn ghost" href="/no/nyhetsrunden/arkiv">Hele arkivet · {andre.length + 1} uker</a></p>
     </section>
   )}
   <p class="small" style="margin-top:22px">Ny runde hver fredag kl. 12, laget fra ukas saker i norske nyhetsmedier.</p>

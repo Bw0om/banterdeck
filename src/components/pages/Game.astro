@@ -59,6 +59,7 @@ const jsonLd = JSON.stringify([{
     <div><small>{lang === 'no' ? 'Utstyr' : 'Gear'}</small><b>{t(game.gear, lang)}</b></div>
     <div><small>{lang === 'no' ? 'Type' : 'Type'}</small><b>{t(game.group.title, lang)}</b></div>
   </div>
+  {lang === 'no' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>🥤 Alkoholfri modus</button></p>}
   {(harVerktoy || iRom) && (
     <p class="startrow">
       {harVerktoy && <a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'}{plussLek ? ' ✨' : ''} ↓</a>}

@@ -1,7 +1,8 @@
 // Ett rom: hente tilstanden (GET) eller gjøre noe i det (POST).
 // Telefonen identifiserer seg med spiller-id og pollett i egne felt, aldri i adressen.
 import type { APIRoute } from 'astro';
-import { hentRom, endreRom, visning, handling, blimed, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek } from '../../../lib/rom';
+import { hentRom, endreRom, visning, handling, blimed, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng } from '../../../lib/rom';
+import { rpc } from '../../../lib/spilt';
 import { innloggetBruker } from '../../../lib/konto';
 import { plussStatus } from '../../../lib/pluss';
 export const prerender = false;
@@ -38,7 +39,16 @@ export const POST: APIRoute = async ({ params, request }) => {
   let d: any;
   try { d = await request.json(); } catch { return json({ feil: 'ugyldig' }, 400); }
   // Pluss sjekkes her på serveren – aldri på det nettleseren påstår
-  delete d._plussTil;
+  delete d._plussTil; delete d._gjeng;
+  // Gjengen sjekkes også her: verten må være innlogget og med i gjengen
+  if (d.handling === 'gjeng' && d.gjengId) {
+    try {
+      const u = await innloggetBruker(request);
+      const g = u && /^[0-9a-f-]{36}$/i.test(String(d.gjengId)) ? await rpc('gjeng_tilgang', { p_user: u.id, p_id: String(d.gjengId) }) : null;
+      if (!g) return json({ feil: 'gjeng', melding: 'Logg inn med en konto som er med i gjengen.' }, 403);
+      d._gjeng = g;
+    } catch { return json({ feil: 'server', melding: 'Fikk ikke sjekket gjengen. Prøv igjen.' }, 503); }
+  }
   if (d.handling === 'pluss-aktiver' || (d.handling === 'start' && erPlussLek(d.lek))) {
     try {
       const u = await innloggetBruker(request);
@@ -70,6 +80,11 @@ export const POST: APIRoute = async ({ params, request }) => {
       varsle(kode, res.versjon),
       d.handling === 'start' && res.data.spill ? loggRom('lek', d.lek === 'egen' ? 'egen-kortstokk' : String(d.lek || '')) : null,
     ]);
+    // Kvelden er over: lagre den i sesongtabellen til gjengen
+    if (d.handling === 'avslutt-kvelden' && res.data.gjeng && res.data.spillere.length >= 2 && (res.data.historikk || []).length) {
+      try { await rpc('gjeng_kveld_lagre', { p_gjeng: res.data.gjeng.id, p_rom: kode + '-' + res.data.laget, p_data: kveldForGjeng(res.data) }); }
+      catch (e) { console.warn('Gjengkvelden ble ikke lagret:', (e as Error).message); }
+    }
     const svar: any = { ...visning(res.data, res.versjon, meg), kode, leker: lekeliste() };
     if (ny) { svar.id = ny.id; svar.pollett = ny.pollett; }
     return json(svar);

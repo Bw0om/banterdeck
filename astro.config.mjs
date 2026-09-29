@@ -7,7 +7,7 @@ export default defineConfig({
   integrations: [sitemap({
     filter: (p) => !p.includes('/admin') && !p.includes('/statistikk') && !p.includes('/kortstokk'),
     // Nyhetsrunden lages på serveren (slippes fredag kl. 12), så den legges til her
-    customPages: ['https://banterdeck.com/no/nyhetsrunden'],
+    customPages: ['https://banterdeck.com/no/nyhetsrunden', 'https://banterdeck.com/no/nyhetsrunden/arkiv'],
   })],
   // Statisk side, men med én serverfunksjon (/api/forslag) som kjører på Vercel.
   adapter: vercel(),
