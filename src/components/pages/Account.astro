@@ -303,6 +303,30 @@ const T = no ? {
             .catch(function () { say(msg, T.generic, 'err'); });
         });
 
+        /* ---------- lenker fra e-post via mittvors.no (…?token_hash=…&type=…) ----------
+           E-postmalene peker hit i stedet for til Supabase, så lenken viser vår egen adresse. */
+        try { if (sessionStorage.getItem('bd_gjenoppretting') === '1') { erGjenoppretting = true; sessionStorage.removeItem('bd_gjenoppretting'); } } catch (x) {}
+        (function tokenHash() {
+          var q = new URLSearchParams(location.search), th = q.get('token_hash'), ty = q.get('type');
+          if (!th || !ty) return;
+          history.replaceState(null, '', location.pathname);
+          // Ulike Supabase-versjoner vil ha ulik type – prøv den fra lenken først, så «email»
+          var typer = [ty].concat(ty === 'signup' || ty === 'magiclink' || ty === 'invite' ? ['email'] : []);
+          say(msg, document.documentElement.lang === 'en' ? 'Checking the link …' : 'Sjekker lenken …', 'ok');
+          try { K.lagre(null); } catch (x) {}   // en gammel innlogging skal ikke blande seg inn
+          function prov(i) {
+            return fetch(K.cfg.url + '/auth/v1/verify', { method: 'POST', headers: { apikey: K.cfg.anon, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: typer[i], token_hash: th }) })
+              .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+              .then(function (d) { return (!d._ok || !d.access_token) && i + 1 < typer.length ? prov(i + 1) : d; });
+          }
+          prov(0).then(function (d) {
+            if (!d._ok || !d.access_token) { say(msg, T.linkBad + (d.msg || d.error_description ? ' (' + (d.msg || d.error_description) + ')' : ''), 'err'); return; }
+            K.lagre({ access_token: d.access_token, refresh_token: d.refresh_token });
+            try { if (ty === 'recovery') sessionStorage.setItem('bd_gjenoppretting', '1'); } catch (x) {}
+            location.replace(location.pathname);
+          }).catch(function () { say(msg, T.generic, 'err'); });
+        })();
+
         /* ---------- lenker fra e-post (innlogging, bekreftelse, nytt passord) ---------- */
         (function catchHash() {
           var h = location.hash || '';

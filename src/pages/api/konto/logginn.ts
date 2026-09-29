@@ -22,7 +22,14 @@ export const POST: APIRoute = async ({ request }) => {
     if (!r.ok) {
       if (r.status === 429) return json({ feil: 'grense', melding: 'For mange forsøk. Vent litt og prøv igjen.' }, 429);
       const m = String((r.data && (r.data.error_description || r.data.msg || r.data.error_code)) || '');
-      if (/confirm/i.test(m)) return json({ feil: 'bekreft', melding: 'Bekreft e-postadressen først – sjekk innboksen.' }, 401);
+      if (/confirm/i.test(m)) {
+        // Riktig passord, men e-posten er ikke bekreftet: send en ny bekreftelseslenke med én gang
+        const tilbake = new URL('/no/account', request.url).toString();
+        const ny = await auth('/resend?redirect_to=' + encodeURIComponent(tilbake), { method: 'POST', body: { type: 'signup', email: epost } }).catch(() => null);
+        return json({ feil: 'bekreft', melding: ny && ny.ok
+          ? 'E-posten din er ikke bekreftet ennå. Vi har sendt en ny lenke – sjekk innboksen (og søppelpost).'
+          : 'Bekreft e-postadressen først – sjekk innboksen. Vent et minutt før du prøver igjen hvis lenken ikke kom.' }, 401);
+      }
       return json(FEIL, 401);
     }
     return json({ access_token: r.data.access_token, refresh_token: r.data.refresh_token, expires_in: r.data.expires_in });

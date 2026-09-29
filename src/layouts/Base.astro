@@ -86,7 +86,7 @@ const isCurrent = (href: string) => {
          Tilgangen huskes i localStorage, sessionStorage OG en informasjonskapsel – noen nettlesere
          (f.eks. Chrome på iPhone med blokkerte informasjonskapsler) nekter localStorage. */
       (function () {
-        var APEN = /^\/(no\/)?(vilkar|terms|privacy|pluss|plus|kvittering|receipt)(\/|$)/;
+        var APEN = /^\/(no\/)?(vilkar|terms|privacy|pluss|plus|kvittering|receipt|account)(\/|$)/;
         window.mvSlippInn = function () {
           window.__mvTilgang = true;
           try { localStorage.setItem('mv_tilgang', 'ja'); } catch (e) {}
