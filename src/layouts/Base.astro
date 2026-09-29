@@ -136,7 +136,10 @@ const isCurrent = (href: string) => {
   <meta name="twitter:image" content={bildeUrl} />
   <meta name="theme-color" content="#141009" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="alternate icon" href="/favicon.ico" sizes="any" />
+  <!-- Ikonet på hjemskjermen (iPhone/iPad). ?v= tvinger telefonen til å hente det nye ikonet. -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
   <link rel="sitemap" href="/sitemap-index.xml" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
