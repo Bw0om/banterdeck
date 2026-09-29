@@ -520,6 +520,13 @@ const T = no ? {
           });
         }
 
+        /** Lenke til siste kvittering (lagret på denne enheten etter kjøp). */
+        function kvitteringer(el) {
+          var l = []; try { l = JSON.parse(localStorage.getItem('bd_kvitteringer') || '[]'); } catch (x) {}
+          if (!l.length) return;
+          el.innerHTML += ' · <a href="' + (LANG === 'no' ? '/no/kvittering?ref=' : '/receipt?ref=') + encodeURIComponent(l[0]) + '">' + (LANG === 'no' ? 'Kvittering' : 'Receipt') + '</a>';
+        }
+
         function visHvem() { $('who').textContent = bruker.brukernavn ? bruker.brukernavn + ' · ' + bruker.email : bruker.email; }
 
         function start() {
@@ -542,12 +549,14 @@ const T = no ? {
                 el.innerHTML = d.aktiv
                   ? '✨ <b>Plus</b> until ' + esc(new Date(d.til).toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/plus">More</a>'
                   : '✨ <a href="/plus">' + (d.gratisBrukt ? 'Get Mitt vors Plus' : 'Try Mitt vors Plus free tonight') + '</a>';
+                kvitteringer(el);
                 return;
               }
               if (kode) { el.innerHTML = '🎁 Du har en gavekode som venter – <a href="/no/pluss">aktiver den nå</a>'; return; }
               el.innerHTML = d.aktiv
                 ? '✨ <b>Pluss</b> til ' + esc(new Date(d.til).toLocaleString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/no/pluss">Mer</a>'
                 : '✨ <a href="/no/pluss">' + (d.gratisBrukt ? 'Få Mitt vors Pluss' : 'Prøv Mitt vors Pluss gratis i kveld') + '</a>';
+              kvitteringer(el);
             }).catch(function () {});
             {
               // Kom man hit for å logge inn fra en annen side (f.eks. en gjenglenke), gå tilbake dit

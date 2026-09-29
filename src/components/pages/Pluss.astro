@@ -70,6 +70,7 @@ const romSti = no ? '/no/rom' : '/room';
     <p class="small">{no ? 'Engangskjøp – ingenting fornyes av seg selv. Tiden legges til hvis du allerede har Pluss.' : 'One-off purchase – nothing renews automatically. The time is added on if you already have Plus.'}</p>
     {!no && <p class="small">Payment is by Vipps, the Norwegian mobile payment app – it requires a Norwegian Vipps account. Gift codes and free nights from referrals work for everyone.</p>}
     <p class="formmsg" id="kjopMsg" role="status" aria-live="polite"></p>
+    <p><a class="btn ghost" id="kvLenke" href="#" hidden>{no ? 'Se kvitteringen (lagre som PDF)' : 'See the receipt (save as PDF)'}</a></p>
   </section>
 
   <section class="pluss-kode konto-boks">
@@ -160,6 +161,9 @@ const romSti = no ? '/no/rom' : '/room';
         if (d.status === 'fullfort') {
           try { localStorage.removeItem('bd_pluss_ref'); } catch (e) {}
           say(EN ? 'Thanks! Plus is activated ✨' : 'Takk! Pluss er aktivert ✨', 'ok'); hentStatus();
+          // Kvitteringen (varig medium): vis lenken, og husk den på denne enheten
+          var kv = document.getElementById('kvLenke');
+          if (kv) { kv.href = (EN ? '/receipt?ref=' : '/no/kvittering?ref=') + encodeURIComponent(ref); kv.hidden = false; }
         } else if (d.status === 'avbrutt') {
           try { localStorage.removeItem('bd_pluss_ref'); } catch (e) {}
           say(EN ? 'The payment was cancelled. No money has been taken.' : 'Betalingen ble avbrutt. Ingen penger er trukket.', 'err');

@@ -58,8 +58,8 @@ export const supabaseDebug = () => {
 // Selgeren, slik det vises i salgsvilkårene (/no/vilkar). Vipps krever navn, adresse og kontaktinfo.
 // Fyll inn før du slår på betaling.
 export const SELGER = {
-  navn: '',            // f.eks. navnet på enkeltpersonforetaket ditt, slik det står i Brønnøysund
+  navn: 'Flaten Kapital (enkeltpersonforetak, Jonas Borgen Flaten)',
   orgnr: '931976532',
-  adresse: '',         // gateadresse, postnummer og sted
-  epost: '',           // en e-postadresse du faktisk leser
+  adresse: 'Skanseløkka 21, 1383 Asker',
+  epost: 'flatenkapital@gmail.com',
 };

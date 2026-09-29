@@ -1457,3 +1457,29 @@ button.langlink{cursor:pointer}
 .lek-topp h1{min-width:0}
 .lek-illu{width:150px;height:auto;border-radius:16px;flex:none;display:block}
 @media (max-width:560px){.lek-illu{width:108px;border-radius:12px}}
+
+/* ---------- Kvittering ---------- */
+.kv-ark{background:#fffdf8;color:#1d160c;border-radius:20px;padding:28px 26px;max-width:640px;font-family:var(--sans,system-ui);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.kv-ark a{color:#8a5b00}
+.kv-topp{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2px solid #1d160c;padding-bottom:14px;margin-bottom:16px}
+.kv-merke{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.04em;margin:0}
+.kv-merke span{color:#bb3b1d}
+.kv-topp h1{font-size:30px;margin:4px 0 0;color:#1d160c}
+.kv-ref{text-align:right;font-size:13px}
+.kv-ref small{display:block;color:#6f604b}
+.kv-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 18px}
+.kv-info dt{font-size:12.5px;color:#6f604b}
+.kv-info dd{margin:0;font-weight:600;word-break:break-word}
+.kv-tabell{width:100%;border-collapse:collapse;margin-bottom:16px}
+.kv-tabell th,.kv-tabell td{text-align:left;padding:8px 0;border-bottom:1px solid rgba(29,22,12,.15)}
+.kv-tabell th:last-child,.kv-tabell td:last-child{text-align:right;white-space:nowrap}
+.kv-tabell tfoot td{font-weight:800;border-bottom:0;font-size:17px}
+.kv-tekst{font-size:14px;line-height:1.5;margin:0 0 10px}
+.kv-selger{margin-top:18px;padding-top:14px;border-top:1px solid rgba(29,22,12,.15);font-size:13.5px;line-height:1.5}
+.kv-knapper{margin-top:16px}
+@media print{
+  .side,.topbars,.tabbar,.tool,.foot,.kv-knapper,#toast,.feilknapp,.langbanner,.installer{display:none!important}
+  body,body::before{background:#fff!important}
+  .main{padding:0!important;margin:0!important}
+  .kv-ark{box-shadow:none;max-width:none;padding:0}
+}

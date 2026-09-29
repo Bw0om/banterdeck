@@ -1,0 +1,59 @@
+---
+// Kvittering etter kjøp av Pluss: /no/kvittering?ref=… og /receipt?ref=…
+// Kan skrives ut eller lagres som PDF (varig medium), og viser samtykket til at angreretten faller bort.
+import Base from '../../layouts/Base.astro';
+import { SELGER, CONTACT_EMAIL } from '../../config';
+import type { Lang } from '../../lib/i18n';
+const { lang = 'no' } = Astro.props as { lang?: Lang };
+const EN = lang === 'en';
+const S = { navn: SELGER.navn, orgnr: SELGER.orgnr, adresse: SELGER.adresse, epost: SELGER.epost || CONTACT_EMAIL };
+---
+<Base title={EN ? 'Receipt' : 'Kvittering'} description={EN ? 'Receipt for Mitt vors Plus.' : 'Kvittering for Mitt vors Pluss.'} lang={lang} noindex={true}>
+  <div id="kv" class="kv"><p class="small">{EN ? 'Loading receipt …' : 'Henter kvitteringen …'}</p></div>
+
+  <script is:inline data-astro-rerun define:vars={{ S, EN }}>
+  (function () {
+    var root = document.getElementById('kv');
+    if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+    var K = window.BDKonto;
+    function T(no, en) { return EN ? en : no; }
+    function esc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function dato(d) { var x = new Date(d); if (!d || isNaN(x)) return '–'; return x.toLocaleString(EN ? 'en-GB' : 'nb-NO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo' }); }
+    var ref = new URLSearchParams(location.search).get('ref') || '';
+    if (!K || !K.les || !K.les()) {
+      root.innerHTML = '<p>' + T('Logg inn med kontoen som kjøpte for å se kvitteringen.', 'Log in with the account that made the purchase to see the receipt.') + '</p><p><a class="btn gold" href="' + T('/no/account', '/account') + '">' + T('Logg inn', 'Log in') + '</a></p>';
+      return;
+    }
+    K.api('/api/pluss/kvittering?ref=' + encodeURIComponent(ref), { headers: { 'x-lang': EN ? 'en' : 'no' } }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (d) {
+        if (!r.ok) { root.innerHTML = '<p class="rom-feil">' + esc(d.melding || T('Fant ikke kvitteringen.', 'Receipt not found.')) + '</p>'; return; }
+        var produkt = d.produkt === 'aar' ? T('Mitt vors Pluss – årspass (365 dager)', 'Mitt vors Plus – year pass (365 days)') : T('Mitt vors Pluss – kveldspass (24 timer)', 'Mitt vors Plus – night pass (24 hours)');
+        var kr = (d.belopOre / 100).toFixed(2).replace('.', EN ? '.' : ',');
+        root.innerHTML =
+          '<article class="kv-ark">' +
+            '<header class="kv-topp"><div><p class="kv-merke">mitt<span>vors</span></p><h1>' + T('Kvittering', 'Receipt') + '</h1></div>' +
+              '<div class="kv-ref"><small>' + T('Ordrenummer', 'Order number') + '</small><b>' + esc(d.ref) + '</b></div></header>' +
+            '<dl class="kv-info">' +
+              '<div><dt>' + T('Kjøpt', 'Purchased') + '</dt><dd>' + esc(dato(d.fullfort || d.laget)) + '</dd></div>' +
+              '<div><dt>' + T('Kunde', 'Customer') + '</dt><dd>' + esc(d.epost) + '</dd></div>' +
+              '<div><dt>' + T('Betalt med', 'Paid with') + '</dt><dd>Vipps</dd></div>' +
+            '</dl>' +
+            '<table class="kv-tabell"><thead><tr><th>' + T('Vare', 'Item') + '</th><th>' + T('Beløp', 'Amount') + '</th></tr></thead>' +
+              '<tbody><tr><td>' + esc(produkt) + '</td><td>' + kr + ' kr</td></tr></tbody>' +
+              '<tfoot><tr><td>' + T('Totalt betalt', 'Total paid') + '</td><td>' + kr + ' kr</td></tr></tfoot></table>' +
+            '<p class="kv-tekst">' + T(
+              'Pluss ble levert med en gang etter kjøpet. Før kjøpet samtykket du til at leveringen skulle starte umiddelbart, og bekreftet at angreretten dermed faller bort (angrerettloven § 22 bokstav n).',
+              'Plus was delivered immediately after purchase. Before buying, you agreed that delivery would start right away and confirmed that you thereby lose your right of withdrawal (Norwegian Cancellation Act § 22 (n)).') + '</p>' +
+            '<p class="kv-tekst">' + T('Pluss fornyes ikke automatisk. Se', 'Plus does not renew automatically. See the') + ' <a href="' + T('/no/vilkar', '/terms') + '">' + T('salgsvilkårene', 'terms of sale') + '</a>.</p>' +
+            '<footer class="kv-selger"><b>' + T('Selger', 'Seller') + '</b><br>' + esc(S.navn) + '<br>' + T('Org.nr.', 'Org. no.') + ' ' + esc(S.orgnr) + '<br>' + esc(S.adresse) + '<br>' + esc(S.epost) + '</footer>' +
+          '</article>' +
+          '<div class="dl-knapper kv-knapper"><button class="btn gold" type="button" id="kvSkriv">' + T('Lagre som PDF / skriv ut', 'Save as PDF / print') + '</button>' +
+          '<a class="btn ghost" href="' + T('/no/pluss', '/plus') + '">' + T('Tilbake til Pluss', 'Back to Plus') + '</a></div>' +
+          '<p class="small kv-knapper">' + T('Tips: velg «Lagre som PDF» i utskriftsvinduet for å ta vare på kvitteringen.', 'Tip: choose “Save as PDF” in the print dialog to keep the receipt.') + '</p>';
+        document.getElementById('kvSkriv').addEventListener('click', function () { window.print(); });
+        try { var l = JSON.parse(localStorage.getItem('bd_kvitteringer') || '[]'); if (l.indexOf(d.ref) === -1) { l.unshift(d.ref); localStorage.setItem('bd_kvitteringer', JSON.stringify(l.slice(0, 30))); } } catch (e) {}
+      });
+    }).catch(function () { root.innerHTML = '<p class="rom-feil">' + T('Fikk ikke kontakt. Prøv igjen.', 'Could not connect. Try again.') + '</p>'; });
+  })();
+  </script>
+</Base>
