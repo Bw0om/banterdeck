@@ -1592,3 +1592,52 @@ body:not(.humor) .tool.dice{display:none}
 .lb-logg small{color:var(--faint)}
 .lov-poeng{width:100%;max-width:440px;margin:12px auto}
 .lov-poeng li{gap:12px;text-align:left}
+
+/* ---------- drikkelekene: oversikt ---------- */
+.lk-snarveier{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px}
+.lk-filter{position:sticky;top:0;z-index:5;background:rgb(var(--bg-rgb) / .94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 0 8px;margin:0 0 10px;display:grid;gap:8px}
+.lk-filter input{width:100%;box-sizing:border-box;background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:12px 14px;color:var(--ink);font:inherit;font-size:16px}
+.lk-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.lk-chips::-webkit-scrollbar{display:none}
+.lk-chips button{flex:0 0 auto;min-height:38px;padding:0 14px;border-radius:19px;border:1px solid var(--border2);background:var(--card);color:var(--ink);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.lk-chips button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#1a1208}
+.lk-skille{flex:0 0 1px;background:var(--border2);margin:6px 2px}
+.lk-alkfri{margin:0}
+.lk-seksjon{margin:22px 0 30px}
+.lk-hode h2{margin:0 0 4px}
+.lk-hode .small{margin:0 0 12px}
+.lk-store{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.lk-kort{display:flex;flex-direction:column;border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--border);color:var(--ink);transition:transform .15s,border-color .15s}
+.lk-kort:hover{text-decoration:none;transform:translateY(-2px);border-color:rgba(244,183,64,.5)}
+.lk-kort img{width:100%;height:auto;aspect-ratio:240/126;object-fit:cover;display:block;background:var(--card2)}
+.lk-tekst{display:flex;flex-direction:column;gap:4px;padding:12px 14px 14px;min-width:0}
+.lk-tekst b{font-family:var(--display);font-size:18px;line-height:1.2}
+.lk-om{font-size:14px;color:var(--muted);line-height:1.4}
+.lk-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--sans);font-size:12.5px;color:var(--faint);font-weight:600;margin-top:auto;padding-top:4px}
+.lk-meta i{font-style:normal;padding:2px 8px;border-radius:10px;font-size:11.5px}
+.lk-meta i.pluss{background:rgba(244,183,64,.18);color:var(--gold-t)}
+.lk-meta i.gratis{background:rgba(64,170,100,.16);color:#3aa35e}
+.lk-mellom{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.lk-rad{display:flex;gap:12px;align-items:center;padding:10px;border-radius:18px;background:var(--card);border:1px solid var(--border);color:var(--ink)}
+.lk-rad:hover{text-decoration:none;border-color:var(--border2)}
+.lk-rad img{width:72px;height:72px;border-radius:14px;object-fit:cover;flex:0 0 72px;background:var(--card2)}
+.lk-rad .lk-tekst{padding:0}
+.lk-rad .lk-tekst b{font-size:16px}
+.lk-rad .lk-om{font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lk-sma{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.lk-liten{display:flex;flex-direction:column;padding:10px 14px;border-radius:14px;border:1px solid var(--border);color:var(--ink)}
+.lk-liten:hover{text-decoration:none;background:var(--card)}
+.lk-liten b{font-family:var(--display);font-size:15px}
+.lk-liten span{font-size:12.5px;color:var(--faint)}
+.lk-anledning{margin-top:10px}
+@media (max-width:520px){.lk-store{grid-template-columns:1fr 1fr;gap:10px}.lk-tekst b{font-size:16px}.lk-om{font-size:13px}.lk-kort .lk-om{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}}
+.lek-niva{display:inline-block;margin:6px 0 0;padding:4px 12px;border-radius:12px;font-family:var(--sans);font-size:13px;font-weight:700;background:rgb(var(--ink-rgb) / .07);color:var(--muted)}
+.lek-niva.rom{background:rgba(244,183,64,.18);color:var(--gold-t)}
+.prov-appen{margin:24px 0;padding:18px;border-radius:22px;background:linear-gradient(135deg,rgba(244,183,64,.14),rgba(255,106,77,.1));border:1px solid rgba(244,183,64,.35)}
+.prov-appen h2{margin:2px 0 12px;font-size:21px}
+.prov-appen-leker{display:grid;gap:10px;margin-bottom:14px}
+.prov-appen-leker a{display:flex;gap:12px;align-items:center;padding:10px;border-radius:16px;background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.prov-appen-leker a:hover{text-decoration:none;border-color:var(--border2)}
+.prov-appen-leker img{width:84px;height:auto;border-radius:10px;flex:0 0 84px}
+.prov-appen-leker b{display:block;font-family:var(--display)}
+.prov-appen-leker small{color:var(--muted);font-size:13px}

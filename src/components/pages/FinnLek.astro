@@ -1,4 +1,5 @@
 ---
+import { niva } from '../../lib/niva';
 // Finn lek: fire spørsmål, tre forslag. Felles for /no/finn-lek (lang="no") og /find-a-game (lang="en").
 import Base from '../../layouts/Base.astro';
 import { gamesFor, gameHref, t } from '../../lib/content';
@@ -7,7 +8,7 @@ const { lang = 'no' } = Astro.props as { lang?: Lang };
 const no = lang === 'no';
 const LEKER = gamesFor(lang).filter((g: any) => g.fit).map((g: any) => ({
   n: t(g.name, lang), h: gameHref(g, (p) => path(lang, p), lang),
-  u: t(g.gear, lang), p: g.pl, f: g.fit,
+  u: t(g.gear, lang), p: g.pl, f: g.fit, v: niva(g.slug),
 }));
 const antall = String(gamesFor(lang).length);
 ---
@@ -72,6 +73,8 @@ const antall = String(gamesFor(lang).length);
         if (l.f.nar.indexOf(svar.nar) !== -1) p += 3;
         if (ant === 2 && l.f.nar.indexOf('to') !== -1) p += 3;
         if (svar.tempo !== '*' && l.f.tempo === svar.tempo) p += 2;
+        // Leker som spilles i appen foretrekkes når de passer like godt
+        if (l.v === 'rom') p += 2; else if (l.v === 'app') p += 1;
         return { l: l, p: p + Math.random() };
       }).filter(Boolean).sort(function(a,b){ return b.p - a.p; }).slice(0, 3);
     }

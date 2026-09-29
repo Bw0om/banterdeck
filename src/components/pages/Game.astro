@@ -8,6 +8,7 @@ import DECKS from '../../data/decks.json';
 import { ROMLEK, romLenke } from '../../lib/romlenke';
 import { PLUSS_SLUGS } from '../../lib/plussleker';
 import { illustrasjon } from '../../lib/illustrasjon';
+import { niva, provIAppen, HOOK } from '../../lib/niva';
 import { gamesFor, gameHref, t, trules } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 const { game, lang = 'en' } = Astro.props as { game: any; lang?: Lang };
@@ -20,6 +21,10 @@ const harVerktoy = verktoySprak && (!!(DECKS as any)[game.slug] || game.slug ===
 const name = t(game.name, lang);
 const plussLek = verktoySprak && PLUSS_SLUGS.includes(game.slug);
 const rules: string[] = trules(game, lang);
+// Hvor mye appen betyr for leken – rene regelleker får forslag om en lek som spilles i appen
+const lekNiva = niva(game.slug);
+const forslag = lekNiva === 'regler' ? provIAppen(game, gamesFor(lang)) : [];
+const NIVA_TEKST: Record<string, [string, string]> = { rom: ['📱 Spilles fra hver sin telefon', '📱 Played from your own phones'], app: ['🃏 Telefonen er kortstokken', '🃏 The phone is the deck'], regler: ['📖 Bare regler', '📖 Just the rules'] };
 
 const blocks: { type: 'p' | 'ul'; items: string[] }[] = [];
 for (const r of rules) {
@@ -55,6 +60,7 @@ const jsonLd = JSON.stringify([{
     <a href={path(lang, '/')}>{L.breadcrumbHome}</a> ›
     <a href={path(lang, '/drinking-games')}>{L.gamesTitle}</a> › {name}
   </p>
+  <p class={`lek-niva ${lekNiva}`}>{NIVA_TEKST[lekNiva][lang === 'en' ? 1 : 0]}</p>
   <div class="lek-topp"><h1>{name}</h1><img class="lek-illu" src={illustrasjon(game)} alt="" width="240" height="126" decoding="async" /></div>
   {game.fra && <p class="lek-fra">{lang === 'no' ? 'Sendt inn av' : 'Submitted by'} <b>{game.fra}</b></p>}
   <div class="meta2">
@@ -78,6 +84,22 @@ const jsonLd = JSON.stringify([{
     {game.link && <a class="btn gold" href={game.link.href} target="_blank" rel="noopener">{game.link.label} ↗</a>}
     <button class="btn ghost" data-copy={copyText}>{L.copyRules}</button>
   </p>
+
+  {forslag.length > 0 && (
+    <aside class="prov-appen">
+      <p class="rom-etikett">{lang === 'en' ? 'Like this game?' : 'Liker dere denne?'}</p>
+      <h2>{lang === 'en' ? 'Try one you play from your own phones' : 'Prøv en dere spiller fra hver deres telefon'}</h2>
+      <div class="prov-appen-leker">
+        {forslag.map((x: any) => (
+          <a href={gameHref(x, (p) => path(lang, p), lang)}>
+            <img src={illustrasjon(x)} alt="" width="120" height="63" loading="lazy" decoding="async" />
+            <span><b>{t(x.name, lang)}</b><small>{HOOK[x.slug] ? HOOK[x.slug][lang === 'en' ? 1 : 0] : ''}</small></span>
+          </a>
+        ))}
+      </div>
+      <a class="btn gold" href={lang === 'en' ? '/room' : '/no/rom'}>{lang === 'en' ? 'Create a room – it’s free' : 'Lag et rom – det er gratis'}</a>
+    </aside>
+  )}
 
   <div id="lekverktoy" class:list={[plussLek && 'pluss-laast']} data-pluss={plussLek ? '1' : undefined}>
     {plussLek && lang !== 'en' && (
