@@ -62,4 +62,5 @@ export const SELGER = {
   orgnr: '931976532',
   adresse: 'Skanseløkka 21, 1383 Asker',
   epost: 'flatenkapital@gmail.com',
+  telefon: '911 96 359',
 };

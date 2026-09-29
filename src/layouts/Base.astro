@@ -5,7 +5,7 @@ import '@fontsource-variable/figtree';
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/fraunces/wght-italic.css';
 import '../styles/global.css';
-import { SITE_NAME } from '../config';
+import { SITE_NAME, SELGER } from '../config';
 import { collectionsFor, topSituationsFor, dictSection, visible, t } from '../lib/content';
 import { ui, path, otherLangPath, type Lang } from '../lib/i18n';
 import AgeGate from '../components/AgeGate.astro';
@@ -201,7 +201,9 @@ const isCurrent = (href: string) => {
         <a href={path(lang, '/privacy')}>{L.nav.privacy}</a>
         <a href={path(lang, '/favourites')}>{L.favourites}</a>
         <a href={altPath}>{L.switchTo}</a>
+        <a href={lang === 'no' ? '/no/vilkar' : '/terms'}>{lang === 'no' ? 'Salgsvilkår' : 'Terms of sale'}</a>
         <button type="button" class="feilknapp" data-feil>{lang === 'no' ? 'Noe galt?' : 'Something wrong?'}</button>
+        <span class="foot-firma">{SELGER.navn} · {lang === 'no' ? 'Org.nr.' : 'Org. no.'} {SELGER.orgnr} · {SELGER.adresse} · {lang === 'no' ? 'Tlf.' : 'Phone'} {SELGER.telefon} · {SELGER.epost}</span>
       </footer>
       <FeilRapport lang={lang} />
     </main>
