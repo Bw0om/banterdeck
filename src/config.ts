@@ -61,6 +61,11 @@ export const SELGER = {
   navn: 'Flaten Kapital (enkeltpersonforetak, Jonas Borgen Flaten)',
   orgnr: '931976532',
   adresse: 'Skanseløkka 21, 1383 Asker',
-  epost: 'flatenkapital@gmail.com',
+  epost: 'post@mittvors.no',
   telefon: '911 96 359',
 };
+
+// «Under utvikling»: sperrer siden bak en kode til alt er klart. Sett paa: false for å åpne siden.
+// Sperren er bare et skjermbilde, ikke ekte sikkerhet – koden står i sidens kildekode.
+// Vilkår, priser (Pluss), personvern og kvittering er alltid åpne, så Vipps kan se dem.
+export const UTVIKLING = { paa: true, kode: '1991' };

@@ -5,7 +5,7 @@ import '@fontsource-variable/figtree';
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/fraunces/wght-italic.css';
 import '../styles/global.css';
-import { SITE_NAME, SELGER } from '../config';
+import { SITE_NAME, SELGER, UTVIKLING } from '../config';
 import { collectionsFor, topSituationsFor, dictSection, visible, t } from '../lib/content';
 import { ui, path, otherLangPath, type Lang } from '../lib/i18n';
 import AgeGate from '../components/AgeGate.astro';
@@ -73,7 +73,21 @@ const isCurrent = (href: string) => {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{fullTitle}</title>
   <meta name="description" content={desc} />
-  {noindex && <meta name="robots" content="noindex, nofollow" />}
+  {(noindex || UTVIKLING.paa) && <meta name="robots" content="noindex, nofollow" />}
+  {UTVIKLING.paa && (
+    <script is:inline>
+      /* «Under utvikling»: skjul siden til riktig kode er skrevet inn (unntatt sidene Vipps må se) */
+      (function () {
+        var APEN = /^\/(no\/)?(vilkar|terms|privacy|pluss|plus|kvittering|receipt)(\/|$)/;
+        function sperret(sti) { try { if (localStorage.getItem('mv_tilgang') === 'ja') return false; } catch (e) {} return !APEN.test(sti); }
+        if (sperret(location.pathname)) document.documentElement.dataset.laast = '1';
+        document.addEventListener('astro:before-swap', function (e) {
+          if (sperret(new URL(e.to).pathname)) e.newDocument.documentElement.dataset.laast = '1';
+          else delete e.newDocument.documentElement.dataset.laast;
+        });
+      })();
+    </script>
+  )}
   <link rel="canonical" href={canonical} />
   <link rel="alternate" hreflang="en" href={enHref} />
   <link rel="alternate" hreflang="no" href={noHref} />
@@ -235,6 +249,30 @@ const isCurrent = (href: string) => {
   )}
 
   <div id="toast" class="toast" role="status">{L.copied}</div>
+  {UTVIKLING.paa && (
+    <div id="utvikling" class="utvikling" role="dialog" aria-labelledby="utvTittel">
+      <form class="utv-boks" id="utvSkjema">
+        <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="30" fill="#ff6a4d"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g stroke="#f4ebdc" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg>
+        <h1 id="utvTittel">mitt<span>vors</span></h1>
+        <p>{lang === 'no' ? 'Vi legger siste hånd på vorset. Siden åpner snart!' : 'We’re putting the final touches on the party. Opening soon!'}</p>
+        <label for="utvKode" class="small">{lang === 'no' ? 'Har du fått en kode?' : 'Got a code?'}</label>
+        <div class="utv-rad"><input id="utvKode" inputmode="numeric" autocomplete="off" maxlength="12" /><button class="btn gold" type="submit">{lang === 'no' ? 'Slipp meg inn' : 'Let me in'}</button></div>
+        <p class="utv-feil" id="utvFeil" hidden>{lang === 'no' ? 'Feil kode.' : 'Wrong code.'}</p>
+        <p class="utv-fot small"><a href={lang === 'no' ? '/no/pluss' : '/plus'}>{lang === 'no' ? 'Priser' : 'Prices'}</a> · <a href={lang === 'no' ? '/no/vilkar' : '/terms'}>{lang === 'no' ? 'Salgsvilkår' : 'Terms of sale'}</a> · <a href={lang === 'no' ? '/no/privacy' : '/privacy'}>{lang === 'no' ? 'Personvern' : 'Privacy'}</a><br />{SELGER.navn} · Org.nr. {SELGER.orgnr} · {SELGER.adresse} · {SELGER.telefon} · {SELGER.epost}</p>
+      </form>
+      <script is:inline define:vars={{ KODE: UTVIKLING.kode }}>
+        (function () {
+          var f = document.getElementById('utvSkjema'); if (!f || f.dataset.bound) return; f.dataset.bound = '1';
+          f.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var v = document.getElementById('utvKode').value.trim();
+            if (v === KODE) { try { localStorage.setItem('mv_tilgang', 'ja'); } catch (x) {} delete document.documentElement.dataset.laast; }
+            else { document.getElementById('utvFeil').hidden = false; }
+          });
+        })();
+      </script>
+    </div>
+  )}
 
   <script is:inline define:vars={{ SHARED: L.shared }}>
     (function () {

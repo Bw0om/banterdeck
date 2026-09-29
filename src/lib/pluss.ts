@@ -1,7 +1,8 @@
 // Mitt vors Pluss: hvem som har Pluss, og betaling med Vipps (ePayment-API-et).
 // Miljøvariabler i Vercel: VIPPS_CLIENT_ID, VIPPS_CLIENT_SECRET, VIPPS_SUBSCRIPTION_KEY, VIPPS_MSN,
 // og VIPPS_TEST=1 mens du tester mot Vipps sitt testmiljø.
-import { rpc } from './spilt';
+import { rpc, supabaseServer } from './spilt';
+import { epostKlar, sendEpost, kvitteringEpost } from './epost';
 
 export const PRODUKTER: Record<string, { navn: string; ore: number; beskrivelse: string }> = {
   kveld: { navn: 'Kveldspass', ore: 2900, beskrivelse: 'Mitt vors Pluss i 24 timer' },
@@ -87,7 +88,7 @@ export async function startBetaling(userId: string, produkt: string, returUrl: s
 export async function sjekkBetaling(ref: string): Promise<'fullfort' | 'venter' | 'avbrutt'> {
   const b = await rpc('betaling_hent', { p_ref: ref });
   if (!b) return 'avbrutt';
-  if (b.status === 'fullfort') return 'fullfort';
+  if (b.status === 'fullfort') { await sendKvittering(ref); return 'fullfort'; }
   if (b.status === 'avbrutt') return 'avbrutt';
   const r = await vipps('/epayment/v1/payments/' + encodeURIComponent(ref));
   if (!r.ok || !r.data) return 'venter';
@@ -101,6 +102,7 @@ export async function sjekkBetaling(ref: string): Promise<'fullfort' | 'venter' 
       if (!c.ok) return 'venter';
     }
     await rpc('betaling_fullfor', { p_ref: ref });
+    await sendKvittering(ref);
     return 'fullfort';
   }
   if (state === 'ABORTED' || state === 'EXPIRED' || state === 'TERMINATED') {
@@ -108,4 +110,33 @@ export async function sjekkBetaling(ref: string): Promise<'fullfort' | 'venter' 
     return 'avbrutt';
   }
   return 'venter';
+}
+
+/* ---------- kvittering på e-post ---------- */
+async function epostFor(userId: string): Promise<string> {
+  const { url, nokkel } = supabaseServer();
+  const r = await fetch(`${url}/auth/v1/admin/users/${encodeURIComponent(userId)}`, { headers: { apikey: nokkel, Authorization: `Bearer ${nokkel}` } });
+  if (!r.ok) return '';
+  const u: any = await r.json();
+  return (u && (u.email || (u.user && u.user.email))) || '';
+}
+/** Sender kvitteringen én gang per kjøp. Feiler sendingen, prøves det igjen neste gang betalingen sjekkes. */
+export async function sendKvittering(ref: string) {
+  if (!epostKlar()) return;
+  try {
+    const fikk = await rpc('betaling_kvittering_krev', { p_ref: ref });
+    if (fikk !== true) return;
+    try {
+      const b = await rpc('betaling_hent', { p_ref: ref });
+      const til = b && b.user_id ? await epostFor(b.user_id) : '';
+      if (!til) return;
+      const k = kvitteringEpost(b, 'https://www.mittvors.no/no/kvittering?ref=' + encodeURIComponent(ref));
+      await sendEpost(til, k.emne, k.html, k.tekst);
+    } catch (e) {
+      await rpc('betaling_kvittering_frigi', { p_ref: ref }).catch(() => null);
+      throw e;
+    }
+  } catch (e) {
+    console.warn('Kvittering på e-post feilet:', (e as Error).message);
+  }
 }
