@@ -24,7 +24,7 @@ import Base from '../../layouts/Base.astro';
     function feil(t) { return '<p class="rom-feil">' + esc(t) + '</p>'; }
     function lenke(g) { return location.origin + '/no/gjeng?k=' + g.kode; }
     function inviter(g) {
-      window.BDDel.lenke(lenke(g), 'Bli med i gjengen ' + g.navn + ' på Banterdeck – her er sesongtabellen vår 🏆', {
+      window.BDDel.lenke(lenke(g), 'Bli med i gjengen ' + g.navn + ' på Mitt vors – her er sesongtabellen vår 🏆', {
         tittel: 'Inviter til ' + g.navn, ingress: 'Alle med lenken ser tabellen. De som lager konto og blir med, kan også starte rom for gjengen.',
       });
     }

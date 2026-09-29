@@ -1,5 +1,120 @@
 {
   "crons": [
-    { "path": "/api/varsel/nyhetsrunden", "schedule": "10 11 * * 5" }
+    {
+      "path": "/api/varsel/nyhetsrunden",
+      "schedule": "10 11 * * 5"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "mittvors\\.no"
+        }
+      ],
+      "destination": "/no/",
+      "permanent": false
+    },
+    {
+      "source": "/:kode([A-Za-z0-9]{4})",
+      "has": [
+        {
+          "type": "host",
+          "value": "mittvors\\.no"
+        }
+      ],
+      "destination": "/no/rom?k=:kode",
+      "permanent": false
+    },
+    {
+      "source": "/:sti*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www\\.mittvors\\.no"
+        }
+      ],
+      "destination": "https://mittvors.no/:sti*",
+      "permanent": true
+    },
+    {
+      "source": "/:sti*",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?banterdeck\\.com"
+        }
+      ],
+      "destination": "https://mittvors.no/:sti*",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?drikkeleke\\.no"
+        }
+      ],
+      "destination": "https://mittvors.no/no/drinking-games",
+      "permanent": true
+    },
+    {
+      "source": "/:sti+",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?drikkeleke\\.no"
+        }
+      ],
+      "destination": "https://mittvors.no/:sti+",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?vorslek\\.no"
+        }
+      ],
+      "destination": "https://mittvors.no/no/drinking-games",
+      "permanent": true
+    },
+    {
+      "source": "/:sti+",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?vorslek\\.no"
+        }
+      ],
+      "destination": "https://mittvors.no/:sti+",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?chugge\\.no"
+        }
+      ],
+      "destination": "https://mittvors.no/no/drinking-games",
+      "permanent": true
+    },
+    {
+      "source": "/:sti+",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?chugge\\.no"
+        }
+      ],
+      "destination": "https://mittvors.no/:sti+",
+      "permanent": true
+    }
   ]
 }

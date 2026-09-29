@@ -1,13 +1,13 @@
 {
-  "name": "Banterdeck",
-  "short_name": "Banterdeck",
-  "description": "Comebacks, slang and drinking games - ready when you need them.",
-  "start_url": "/",
+  "name": "Mitt vors",
+  "short_name": "Mitt vors",
+  "description": "Drikkeleker og vorsmoro – alle spiller fra sin egen telefon.",
+  "start_url": "/no/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#141009",
   "theme_color": "#141009",
-  "lang": "en",
+  "lang": "nb",
   "icons": [
     {
       "src": "/icon-192.png",

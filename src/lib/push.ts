@@ -15,7 +15,7 @@ export function gyldigAbonnement(sub: any) {
 export async function sendTilAlle(emne: string, melding: { tittel: string; tekst: string; url: string }) {
   const e = env();
   if (!e.VAPID_PUBLIC_KEY || !e.VAPID_PRIVATE_KEY) throw new Error('VAPID-nøklene mangler');
-  webpush.setVapidDetails(e.VAPID_SUBJECT || 'mailto:post@banterdeck.com', e.VAPID_PUBLIC_KEY, e.VAPID_PRIVATE_KEY);
+  webpush.setVapidDetails(e.VAPID_SUBJECT || 'mailto:post@mittvors.no', e.VAPID_PUBLIC_KEY, e.VAPID_PRIVATE_KEY);
   const mottakere: any[] = (await rpc('push_mottakere', { p_emne: emne })) || [];
   const data = JSON.stringify({ title: melding.tittel, body: melding.tekst, url: melding.url });
   let sendt = 0;

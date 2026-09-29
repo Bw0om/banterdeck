@@ -1,12 +1,12 @@
 ---
-// Banterdeck Pluss: hva man får, prøv gratis, kjøp med Vipps, og spill pakkene.
+// Mitt vors Pluss: hva man får, prøv gratis, kjøp med Vipps, og spill pakkene.
 import Base from '../../layouts/Base.astro';
 import { PAKKER } from '../../lib/rom';
 const pakker = PAKKER.map((p) => ({ id: p.pakke, navn: p.navn, om: p.om, antall: p.antall }));
 ---
-<Base title="Banterdeck Pluss" description="Verten betaler – alle i rommet spiller med. Kveldspass 29 kr, årspass 199 kr. Første kveld er gratis." lang="no" gate={true} bilde="/og/rom.jpg">
+<Base title="Mitt vors Pluss" description="Verten betaler – alle i rommet spiller med. Kveldspass 29 kr, årspass 199 kr. Første kveld er gratis." lang="no" gate={true} bilde="/og/rom.jpg">
   <section class="pluss-hero">
-    <p class="rom-etikett">Banterdeck Pluss</p>
+    <p class="rom-etikett">Mitt vors Pluss</p>
     <h1>Verten betaler.<br />Alle spiller med.</h1>
     <p class="lead">Når du har Pluss og lager et rom, låses alle pakkene opp for alle som blir med – uansett om de har Pluss selv.</p>
   </section>

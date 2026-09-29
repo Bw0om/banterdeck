@@ -18,7 +18,7 @@ import Verving from '../components/Verving.astro';
 import { ClientRouter } from 'astro:transitions';
 
 interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; bilde?: string; }
-const { title, description, lang = 'en', gate = false, noindex = false, bilde = '/og/banterdeck.jpg' } = Astro.props;
+const { title, description, lang = 'en', gate = false, noindex = false, bilde = '/og/mittvors.jpg' } = Astro.props;
 const bildeUrl = new URL(bilde, Astro.site);
 const L = ui(lang);
 const desc = description || L.tagline;
@@ -37,8 +37,23 @@ const nav = [
                  { href: path(lang, '/uttrykk'), label: L.uttrykkTitle, icon: 'uttrykk' }] : []),
   { href: path(lang, '/drinking-games'), label: L.nav.games, icon: 'drikkeleker' },
 ];
+// Mitt vors: vorsdelen først, humoren (replikker, ordbok, uttrykk) ved siden
+const humorNav: typeof nav = [];
+if (lang === 'no') {
+  humorNav.push(...nav.filter((n) => ['replikker', 'ordbok', 'uttrykk'].includes(n.icon)));
+  nav.length = 0;
+  nav.push(
+    { href: '/no/', label: 'Forside', icon: 'hjem' },
+    { href: '/no/drinking-games', label: 'Drikkeleker', icon: 'drikkeleker' },
+    { href: '/no/rom', label: 'Spill sammen', icon: 'terning' },
+    { href: '/no/nyhetsrunden', label: 'Nyhetsrunden', icon: 'nyhet' },
+  );
+}
 const subNav = collectionsFor(lang).map((s) => ({ href: path(lang, `/categories/${s.id}`), label: t(s.title, lang) }));
-const quick = topSituationsFor(lang).map((x) => ({ href: path(lang, `/situations/${x.id}`), label: t(x.title, lang) }));
+const quick = lang === 'no'
+  ? [{ href: '/no/rom', label: 'Spill sammen' }, { href: '/no/drinking-games', label: 'Drikkeleker' }, { href: '/no/nyhetsrunden', label: 'Nyhetsrunden' },
+     { href: '/no/kveld', label: 'Kveldsplan' }, { href: '/no/finn-lek', label: 'Finn lek' }, { href: '/no/gjeng', label: 'Gjengen' }, { href: '/no/situations', label: 'Replikker' }]
+  : topSituationsFor(lang).map((x) => ({ href: path(lang, `/situations/${x.id}`), label: t(x.title, lang) }));
 const isCurrent = (href: string) => {
   const h = href.replace(/\/$/, '') || '/';
   return current === h || (h !== '/' && h !== '/no' && current.startsWith(h + '/'));
@@ -61,7 +76,7 @@ const isCurrent = (href: string) => {
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonical} />
   <meta property="og:locale" content={L.locale} />
-  <meta property="og:site_name" content="Banterdeck" />
+  <meta property="og:site_name" content="Mitt vors" />
   <meta property="og:image" content={bildeUrl} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -74,7 +89,31 @@ const isCurrent = (href: string) => {
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Banterdeck" />
+  <meta name="apple-mobile-web-app-title" content="Mitt vors" />
+  <script is:inline>
+    /* Lys eller mørk modus: settes før siden tegnes, og på nytt ved hvert sidebytte */
+    (function () {
+      function tema() { try { return localStorage.getItem('bd_tema') === 'lys' ? 'light' : 'dark'; } catch (e) { return 'dark'; } }
+      function sett(doc) {
+        var t = tema(); doc.documentElement.dataset.theme = t;
+        var m = doc.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#f7f1e6' : '#141009');
+      }
+      sett(document);
+      document.addEventListener('astro:before-swap', function (e) { sett(e.newDocument); });
+      window.BDTema = {
+        hent: tema,
+        bytt: function () {
+          var ny = tema() === 'light' ? 'mork' : 'lys';
+          try { localStorage.setItem('bd_tema', ny); } catch (e) {}
+          sett(document);
+        },
+      };
+      document.addEventListener('click', function (e) {
+        var b = e.target.closest && e.target.closest('[data-tema]'); if (!b) return;
+        window.BDTema.bytt();
+      });
+    })();
+  </script>
   <KontoKlient />
   {lang === 'no' && <Alkoholfri />}
   {lang === 'no' && <Verving />}
@@ -112,14 +151,16 @@ const isCurrent = (href: string) => {
 
   <div class="shell">
     <aside class="side">
-      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="14 4 68 95" aria-hidden="true" focusable="false"><rect x="34" y="6" width="46" height="64" rx="7" fill="#ff6a4d"/><rect x="27" y="13" width="46" height="64" rx="7" fill="#c98f22"/><rect x="20" y="20" width="46" height="64" rx="7" fill="#f4b740"/><path d="M26.3 81 L16 97 L36.56 83 Z" fill="#f4b740"/><g fill="#141009"><path d="M-8.816 10.56V-10.56H-0.30400000000000027Q1.6479999999999997 -10.56 3.168 -10.208Q4.688000000000001 -9.856 5.760000000000001 -9.168Q6.832000000000001 -8.479999999999999 7.392000000000001 -7.4559999999999995Q7.952000000000002 -6.432 7.952000000000002 -5.055999999999999Q7.952000000000002 -3.776 7.424000000000001 -2.752Q6.896000000000001 -1.7279999999999998 5.728000000000001 -1.104Q4.5600000000000005 -0.4800000000000004 2.6720000000000006 -0.3200000000000003V-0.03200000000000003Q5.904 0.1280000000000001 7.359999999999999 1.4720000000000004Q8.815999999999999 2.8160000000000007 8.815999999999999 5.024Q8.815999999999999 6.880000000000001 7.856 8.096Q6.896000000000001 9.312000000000001 5.056000000000001 9.936Q3.216000000000001 10.56 0.49600000000000044 10.56ZM-3.6319999999999997 6.4H0.27200000000000024Q1.904 6.4 2.8 5.808Q3.6959999999999997 5.216 3.6959999999999997 4.128Q3.6959999999999997 2.912 2.6879999999999997 2.32Q1.6799999999999997 1.7279999999999998 -0.3360000000000003 1.7279999999999998H-3.6319999999999997ZM-3.6319999999999997 -1.7919999999999998H-0.8480000000000008Q0.9760000000000009 -1.7919999999999998 1.9360000000000008 -2.3999999999999995Q2.896000000000001 -3.007999999999999 2.896000000000001 -4.192Q2.896000000000001 -5.311999999999999 2.032 -5.872Q1.1679999999999993 -6.432 -0.5600000000000005 -6.432H-3.6319999999999997Z" transform="translate(43 52) rotate(0)"/></g></svg><span class="bt">{SITE_NAME}</span></a>
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#ff6a4d"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g stroke="#f4ebdc" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
       <button class="searchbtn" data-search><Icon name="sok" />{L.search}<kbd>⌘K</kbd></button>
       <nav class="sidenav" aria-label={L.pickMode}>
         {nav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}><Icon name={n.icon} />{n.label}</a>)}
         <span class="navsplit">{L.collections}</span>
+        {humorNav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}><Icon name={n.icon} />{n.label}</a>)}
         {subNav.map((n) => <a class="sub" href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
       </nav>
       <a class="appbtn" href={path(lang, '/favourites')}><Icon name="favoritt" />{L.favourites}</a>
+      <button class="langlink temaknapp" type="button" data-tema aria-label={lang === 'no' ? 'Bytt mellom lys og mørk modus' : 'Switch light or dark mode'}><svg class="tema-sol" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg><svg class="tema-maane" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg><span class="tema-sol">{lang === 'no' ? 'Lys modus' : 'Light mode'}</span><span class="tema-maane">{lang === 'no' ? 'Mørk modus' : 'Dark mode'}</span></button>
       <a class="langlink" href={altPath} hreflang={lang === 'en' ? 'no' : 'en'}>{L.switchTo}</a>
       <p class="sidefoot">
         <a href={path(lang, '/suggest')}>{L.nav.suggest}</a>
@@ -130,10 +171,11 @@ const isCurrent = (href: string) => {
 
     <div class="topbars">
     <div class="mobilebar">
-      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="14 4 68 95" aria-hidden="true" focusable="false"><rect x="34" y="6" width="46" height="64" rx="7" fill="#ff6a4d"/><rect x="27" y="13" width="46" height="64" rx="7" fill="#c98f22"/><rect x="20" y="20" width="46" height="64" rx="7" fill="#f4b740"/><path d="M26.3 81 L16 97 L36.56 83 Z" fill="#f4b740"/><g fill="#141009"><path d="M-8.816 10.56V-10.56H-0.30400000000000027Q1.6479999999999997 -10.56 3.168 -10.208Q4.688000000000001 -9.856 5.760000000000001 -9.168Q6.832000000000001 -8.479999999999999 7.392000000000001 -7.4559999999999995Q7.952000000000002 -6.432 7.952000000000002 -5.055999999999999Q7.952000000000002 -3.776 7.424000000000001 -2.752Q6.896000000000001 -1.7279999999999998 5.728000000000001 -1.104Q4.5600000000000005 -0.4800000000000004 2.6720000000000006 -0.3200000000000003V-0.03200000000000003Q5.904 0.1280000000000001 7.359999999999999 1.4720000000000004Q8.815999999999999 2.8160000000000007 8.815999999999999 5.024Q8.815999999999999 6.880000000000001 7.856 8.096Q6.896000000000001 9.312000000000001 5.056000000000001 9.936Q3.216000000000001 10.56 0.49600000000000044 10.56ZM-3.6319999999999997 6.4H0.27200000000000024Q1.904 6.4 2.8 5.808Q3.6959999999999997 5.216 3.6959999999999997 4.128Q3.6959999999999997 2.912 2.6879999999999997 2.32Q1.6799999999999997 1.7279999999999998 -0.3360000000000003 1.7279999999999998H-3.6319999999999997ZM-3.6319999999999997 -1.7919999999999998H-0.8480000000000008Q0.9760000000000009 -1.7919999999999998 1.9360000000000008 -2.3999999999999995Q2.896000000000001 -3.007999999999999 2.896000000000001 -4.192Q2.896000000000001 -5.311999999999999 2.032 -5.872Q1.1679999999999993 -6.432 -0.5600000000000005 -6.432H-3.6319999999999997Z" transform="translate(43 52) rotate(0)"/></g></svg><span class="bt">{SITE_NAME}</span></a>
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#ff6a4d"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g stroke="#f4ebdc" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
       <span class="mobilebar-right">
         <button class="langlink compact" data-search aria-label={L.search}><Icon name="sok" size={19} /></button>
         <a class="langlink compact" href={path(lang, '/favourites')} aria-label={L.favourites}><Icon name="favoritt" size={19} /></a>
+        <button class="langlink compact" type="button" data-tema aria-label={lang === 'no' ? 'Bytt mellom lys og mørk modus' : 'Switch light or dark mode'}><svg class="tema-sol" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg><svg class="tema-maane" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button>
         <a class="langlink compact" href={altPath} hreflang={lang === 'en' ? 'no' : 'en'}>{lang === 'en' ? 'NO' : 'EN'}</a>
       </span>
     </div>
@@ -158,26 +200,41 @@ const isCurrent = (href: string) => {
     </main>
   </div>
 
-  <nav class="tabbar" aria-label={L.pickMode}>
-    <a href={path(lang, '/')} aria-current={current === (lang === 'no' ? '/no' : '/') ? 'page' : undefined}>
-      <span class="ti"><Icon name="hjem" size={22} /></span><span class="tl">{L.nav.home}</span></a>
-    <a href={path(lang, '/situations')} aria-current={isCurrent(path(lang, '/situations')) || current.includes('/categories/') ? 'page' : undefined}>
-      <span class="ti"><Icon name="replikker" size={22} /></span><span class="tl">{L.linesTitle}</span></a>
-    {hasDict && (
-      <a href={path(lang, '/ord')} aria-current={isCurrent(path(lang, '/ord')) ? 'page' : undefined}>
-        <span class="ti"><Icon name="ordbok" size={22} /></span><span class="tl">{L.ordTitle}</span></a>
-    )}
-    {hasDict && (
-      <a href={path(lang, '/uttrykk')} aria-current={isCurrent(path(lang, '/uttrykk')) ? 'page' : undefined}>
-        <span class="ti"><Icon name="uttrykk" size={22} /></span><span class="tl">{L.uttrykkTitle}</span></a>
-    )}
-    <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
-      <span class="ti"><Icon name="drikkeleker" size={22} /></span><span class="tl">{L.nav.games}</span></a>
-    {!hasDict && (
-      <a href={path(lang, '/favourites')} aria-current={isCurrent(path(lang, '/favourites')) ? 'page' : undefined}>
-        <span class="ti"><Icon name="favoritt" size={22} /></span><span class="tl">{L.favourites}</span></a>
-    )}
+  {lang === 'no' ? (
+  <nav class="tabbar" aria-label="Hovedmeny">
+    <a href="/no/" aria-current={current === '/no' ? 'page' : undefined}>
+      <span class="ti"><Icon name="hjem" size={22} /></span><span class="tl">Forside</span></a>
+    <a href="/no/drinking-games" aria-current={isCurrent('/no/drinking-games') ? 'page' : undefined}>
+      <span class="ti"><Icon name="drikkeleker" size={22} /></span><span class="tl">Leker</span></a>
+    <a href="/no/rom" aria-current={isCurrent('/no/rom') ? 'page' : undefined}>
+      <span class="ti"><Icon name="terning" size={22} /></span><span class="tl">Spill sammen</span></a>
+    <a href="/no/nyhetsrunden" aria-current={isCurrent('/no/nyhetsrunden') ? 'page' : undefined}>
+      <span class="ti"><Icon name="nyhet" size={22} /></span><span class="tl">Nyheter</span></a>
+    <a href="/no/situations" aria-current={isCurrent('/no/situations') || current.includes('/categories/') || isCurrent('/no/ord') || isCurrent('/no/uttrykk') ? 'page' : undefined}>
+      <span class="ti"><Icon name="replikker" size={22} /></span><span class="tl">Humor</span></a>
   </nav>
+  ) : (
+  <nav class="tabbar" aria-label={L.pickMode}>
+      <a href={path(lang, '/')} aria-current={current === (lang === 'no' ? '/no' : '/') ? 'page' : undefined}>
+        <span class="ti"><Icon name="hjem" size={22} /></span><span class="tl">{L.nav.home}</span></a>
+      <a href={path(lang, '/situations')} aria-current={isCurrent(path(lang, '/situations')) || current.includes('/categories/') ? 'page' : undefined}>
+        <span class="ti"><Icon name="replikker" size={22} /></span><span class="tl">{L.linesTitle}</span></a>
+      {hasDict && (
+        <a href={path(lang, '/ord')} aria-current={isCurrent(path(lang, '/ord')) ? 'page' : undefined}>
+          <span class="ti"><Icon name="ordbok" size={22} /></span><span class="tl">{L.ordTitle}</span></a>
+      )}
+      {hasDict && (
+        <a href={path(lang, '/uttrykk')} aria-current={isCurrent(path(lang, '/uttrykk')) ? 'page' : undefined}>
+          <span class="ti"><Icon name="uttrykk" size={22} /></span><span class="tl">{L.uttrykkTitle}</span></a>
+      )}
+      <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
+        <span class="ti"><Icon name="drikkeleker" size={22} /></span><span class="tl">{L.nav.games}</span></a>
+      {!hasDict && (
+        <a href={path(lang, '/favourites')} aria-current={isCurrent(path(lang, '/favourites')) ? 'page' : undefined}>
+          <span class="ti"><Icon name="favoritt" size={22} /></span><span class="tl">{L.favourites}</span></a>
+      )}
+    </nav>
+  )}
 
   <!-- Aldersspørringen ligger UTENFOR .main, ellers blir den uskarp sammen med innholdet. -->
   {gate && <AgeGate lang={lang} />}
@@ -233,9 +290,9 @@ const isCurrent = (href: string) => {
         var text = sb.getAttribute('data-share');
         var msg = '«' + text + '»';
         if (navigator.share) {
-          navigator.share({ text: msg + '\n— banterdeck.com' }).catch(function () {});
+          navigator.share({ text: msg + '\n— mittvors.no' }).catch(function () {});
         } else if (navigator.clipboard) {
-          navigator.clipboard.writeText(msg + '\n— banterdeck.com').then(function () { toast(SHARED); });
+          navigator.clipboard.writeText(msg + '\n— mittvors.no').then(function () { toast(SHARED); });
         }
       });
       document.addEventListener('click', function (e) {

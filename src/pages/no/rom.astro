@@ -295,11 +295,13 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
     }
 
 
-    function lenke() { return location.origin + '/no/rom?k=' + kode; }
+    // På mittvors.no holder det med mittvors.no/KODE (kortere lenke og enklere QR-kode)
+    var kortDomene = /(^|\.)mittvors\.no$/.test(location.hostname);
+    function lenke() { return kortDomene ? 'https://mittvors.no/' + kode : location.origin + '/no/rom?k=' + kode; }
     function qrBoks(stor) {
       var svg = window.BDqr ? window.BDqr(lenke()) : '';
       return '<div class="rom-qr' + (stor ? ' stor' : '') + '">' + (svg ? '<div class="rom-qrbilde">' + svg + '</div>' : '') +
-        '<div><b>Scan for å bli med</b><span>Eller gå til banterdeck.com/no/rom og skriv <b>' + esc(kode) + '</b></span></div></div>';
+        '<div><b>Scan for å bli med</b><span>' + (kortDomene ? 'Eller gå til <b>mittvors.no/' + esc(kode) + '</b>' : 'Eller gå til ' + esc(location.host) + '/no/rom og skriv <b>' + esc(kode) + '</b>') + '</span></div></div>';
     }
     function lobby() {
       var t = tilstand;
@@ -364,7 +366,7 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       if (document.querySelector('.pluss-tilbud')) return;
       var m = document.createElement('div'); m.className = 'rom-tavle pluss-tilbud'; m.setAttribute('role', 'dialog');
       var inne = window.BDKonto && window.BDKonto.les();
-      m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>✨ Banterdeck Pluss</h2><button class="linkbtn" data-p="lukk" type="button">Lukk</button></div>' +
+      m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>✨ Mitt vors Pluss</h2><button class="linkbtn" data-p="lukk" type="button">Lukk</button></div>' +
         '<p>Med Pluss hos <b>verten</b> får hele rommet alle lekene og pakkene, og dere kan være opptil 16 telefoner. Gjestene trenger ikke betale.</p>' +
         '<p><b>Første kveld er gratis.</b> Etterpå 29 kr for en kveld eller 199 kr for et år.</p>' +
         '<div class="dl-knapper">' + (inne ? '<button class="btn gold" data-p="gratis" type="button">Prøv gratis i kveld</button>' : '<a class="btn gold" href="/no/account">Logg inn for å prøve gratis</a>') +
@@ -1211,14 +1213,22 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       var g = medT(c.getContext('2d'));
       var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#2a1f12'); bg.addColorStop(0.45, '#141009'); bg.addColorStop(1, '#0d0a06');
       g.fillStyle = bg; g.fillRect(0, 0, W, H);
-      // pynt: tre kort i hjørnet
-      [['#ff6a4d', 860, 70, 0.28], ['#c98f22', 800, 110, 0.14], ['#f4b740', 740, 150, 0]].forEach(function (k) {
-        g.save(); g.translate(k[1] + 110, k[2] + 150); g.rotate(k[3]); g.fillStyle = k[0]; g.globalAlpha = 0.9;
-        g.beginPath(); if (g.roundRect) g.roundRect(-110, -150, 220, 300, 22); else g.rect(-110, -150, 220, 300); g.fill(); g.restore();
-      });
-      g.globalAlpha = 1;
+      // logoen (flisen med to kopper) i hjørnet
+      (function () {
+        g.save(); g.translate(905, 190); g.rotate(0.1); g.scale(2.3, 2.3); g.translate(-50, -50);
+        g.fillStyle = '#ff6a4d'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
+        [[45.5, -24], [54.5, 24]].forEach(function (k) {
+          g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180);
+          g.fillStyle = '#141009'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z'));
+          g.fillStyle = '#f4ebdc'; g.fillRect(-12.5, -41, 25, 6); g.restore();
+        });
+        g.strokeStyle = '#f4ebdc'; g.lineWidth = 5; g.lineCap = 'round';
+        g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
+        g.restore();
+      })();
       function sentrert(x, y, stil, farge) { g.font = stil; g.fillStyle = farge; g.fillText(x, 80, y); }
-      sentrert('BANTERDECK', 150, '800 34px ' + font, '#f4b740');
+      g.font = '800 44px ' + font; g.fillStyle = '#f4ebdc'; g.fillText('mitt', 80, 150);
+      var bredde = g.measureText('mitt').width; g.fillStyle = '#ff6a4d'; g.fillText('vors', 80 + bredde, 150);
       g.font = '800 104px ' + font; g.fillStyle = '#f4ebdc';
       g.fillText('Kveldens', 80, 330); g.fillText('oppsummering', 80, 440);
       var dag = new Date(tilstand.ferdig || Date.now()).toLocaleDateString('nb-NO', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -1258,15 +1268,15 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       }
       g.fillStyle = '#f4b740'; g.fillRect(80, H - 170, W - 160, 4);
       g.fillStyle = '#f4ebdc'; g.font = '700 44px ' + font; g.fillText('Spill med oss neste gang', 80, H - 95);
-      g.fillStyle = '#b3a288'; g.font = '600 38px ' + font; g.fillText('banterdeck.com', 80, H - 45);
+      g.fillStyle = '#b3a288'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
       return new Promise(function (ok) {
-        c.toBlob(function (blob) { ok(blob ? new File([blob], 'banterdeck-kveld.png', { type: 'image/png' }) : null); }, 'image/png');
+        c.toBlob(function (blob) { ok(blob ? new File([blob], 'mittvors-kveld.png', { type: 'image/png' }) : null); }, 'image/png');
       });
     }
     function delKveld() {
       var url = tilstand.gjeng ? location.origin + '/no/gjeng?k=' + tilstand.gjeng.kode : location.origin + '/no/' + (vervKode ? '?v=' + vervKode : '');
       var t = kveldsTall();
-      var tekst = T(t.kaaring[0] ? t.kaaring[0].tittel + ': ' + t.kaaring[0].navn + ' 🏆 ' : '') + 'Kveldens oppsummering fra Banterdeck –';
+      var tekst = T(t.kaaring[0] ? t.kaaring[0].tittel + ': ' + t.kaaring[0].navn + ' 🏆 ' : '') + 'Kveldens oppsummering fra Mitt vors –';
       window.BDDel.lenke(url, tekst, { tittel: 'Del kvelden', ingress: 'Bildet passer rett i storyen på Snapchat og Instagram. Lenken kan sendes på Messenger eller SMS.', bilde: storyBilde });
     }
 
@@ -1334,14 +1344,14 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
         g.fillStyle = '#b3a288'; g.font = '500 32px ' + font; g.fillText(x.ikon + '  ' + x.tittel, 80, y);
         g.fillStyle = '#f4ebdc'; g.font = '700 44px ' + font; g.fillText(x.navn + (x.n !== null ? ' · ' + x.n : ''), 80, y + 52); y += 110;
       });
-      g.fillStyle = '#8a7a64'; g.font = '600 32px ' + font; g.fillText('banterdeck.com', 80, H - 70);
+      g.fillStyle = '#8a7a64'; g.font = '600 32px ' + font; g.fillText('mittvors.no', 80, H - 70);
       c.toBlob(function (blob) {
         if (!blob) return toast('Fikk ikke laget bildet.');
-        var fil = new File([blob], 'banterdeck-tavle.png', { type: 'image/png' });
+        var fil = new File([blob], 'mittvors-tavle.png', { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [fil] })) {
-          navigator.share({ files: [fil], title: 'Kveldens tavle', text: 'Kveldens tavle fra Banterdeck' }).catch(function () {});
+          navigator.share({ files: [fil], title: 'Kveldens tavle', text: 'Kveldens tavle fra Mitt vors' }).catch(function () {});
         } else {
-          var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'banterdeck-tavle.png';
+          var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mittvors-tavle.png';
           document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
         }
       }, 'image/png');
@@ -1419,8 +1429,8 @@ const LEKNAVN = Object.fromEntries(lekeliste().map((l: any) => [l.id, l.navn]));
       var g = b.dataset.g;
       if (g === 'del') {
         var url = location.origin + '/no/rom?k=' + kode;
-        var tekst = 'Bli med på Banterdeck! Kode: ' + kode;
-        if (navigator.share) navigator.share({ title: 'Banterdeck', text: tekst, url: url }).catch(function () {});
+        var tekst = 'Bli med på Mitt vors! Kode: ' + kode;
+        if (navigator.share) navigator.share({ title: 'Mitt vors', text: tekst, url: url }).catch(function () {});
         else if (navigator.clipboard) navigator.clipboard.writeText(tekst + '\n' + url).then(function () { toast('Lenken er kopiert'); });
         return;
       }

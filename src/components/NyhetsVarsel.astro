@@ -1,6 +1,6 @@
 ---
 // «Varsle meg» for Nyhetsrunden. Bruker web push: virker i Chrome/Android og Safari på Mac,
-// og på iPhone når Banterdeck er lagt til på hjemskjermen (iOS 16.4 eller nyere).
+// og på iPhone når Mitt vors er lagt til på hjemskjermen (iOS 16.4 eller nyere).
 ---
 <section class="nr-varsel" id="nrVarsel">
   <div class="nr-varsel-tekst">
@@ -32,11 +32,11 @@
   }
   if (!stoette) {
     info.innerHTML = ios && !installert
-      ? 'På iPhone: trykk <b>Del</b> <span aria-hidden="true">⎋</span> → <b>Legg til på Hjem-skjerm</b>, åpne Banterdeck derfra og trykk «Varsle meg» her.'
+      ? 'På iPhone: trykk <b>Del</b> <span aria-hidden="true">⎋</span> → <b>Legg til på Hjem-skjerm</b>, åpne Mitt vors derfra og trykk «Varsle meg» her.'
       : 'Nettleseren din støtter dessverre ikke varsler.';
     return;
   }
-  if (Notification.permission === 'denied') { info.textContent = 'Varsler er blokkert for banterdeck.com i innstillingene på telefonen.'; return; }
+  if (Notification.permission === 'denied') { info.textContent = 'Varsler er blokkert for mittvors.no i innstillingene på telefonen.'; return; }
   navigator.serviceWorker.register('/sw.js').catch(function () {});
   navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); })
     .then(function (sub) { tilstand(!!sub); }).catch(function () { tilstand(false); });

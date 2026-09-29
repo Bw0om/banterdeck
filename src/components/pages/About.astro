@@ -7,9 +7,9 @@ const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 const no = lang === 'no';
 ---
-<Base title={no ? 'Om Banterdeck' : 'About Banterdeck'} lang={lang}
-      description={no ? 'Hva Banterdeck er og hvordan du kan bidra.' : 'What Banterdeck is and how you can contribute.'}>
-  <h1>{no ? 'Om Banterdeck' : 'About Banterdeck'}</h1>
+<Base title={no ? 'Om Mitt vors' : 'About Mitt vors'} lang={lang}
+      description={no ? 'Hva Mitt vors er og hvordan du kan bidra.' : 'What Mitt vors is and how you can contribute.'}>
+  <h1>{no ? 'Om Mitt vors' : 'About Mitt vors'}</h1>
   <div class="prose">
     {no ? (
       <>

@@ -387,7 +387,7 @@ const T = no ? {
           if (b.dataset.st === 'del') {
             var lenke = location.origin + '/no/kortstokk?s=' + s.id;
             var dele = function () {
-              if (navigator.share) return navigator.share({ title: s.navn, text: 'Spill kortstokken «' + s.navn + '» på Banterdeck', url: lenke }).catch(function () {});
+              if (navigator.share) return navigator.share({ title: s.navn, text: 'Spill kortstokken «' + s.navn + '» på Mitt vors', url: lenke }).catch(function () {});
               if (navigator.clipboard) navigator.clipboard.writeText(lenke).then(function () { say($('syncMsg'), T.linkCopied, 'ok'); });
             };
             if (s.delt) return dele();
@@ -489,7 +489,7 @@ const T = no ? {
         if ($('vervDel')) {
           $('vervDel').addEventListener('click', function () {
             if (!verv) return;
-            window.BDDel.lenke(location.origin + '/no/?v=' + verv.kode, 'Bli med på Banterdeck – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁', {
+            window.BDDel.lenke(location.origin + '/no/?v=' + verv.kode, 'Bli med på Mitt vors – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁', {
               tittel: 'Verv en venn', ingress: 'Når vennen lager konto og spiller sitt første rom, får dere et kveldspass hver.',
             });
           });
@@ -524,7 +524,7 @@ const T = no ? {
               if (kode) { el.innerHTML = '🎁 Du har en gavekode som venter – <a href="/no/pluss">aktiver den nå</a>'; return; }
               el.innerHTML = d.aktiv
                 ? '✨ <b>Pluss</b> til ' + esc(new Date(d.til).toLocaleString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/no/pluss">Mer</a>'
-                : '✨ <a href="/no/pluss">' + (d.gratisBrukt ? 'Få Banterdeck Pluss' : 'Prøv Banterdeck Pluss gratis i kveld') + '</a>';
+                : '✨ <a href="/no/pluss">' + (d.gratisBrukt ? 'Få Mitt vors Pluss' : 'Prøv Mitt vors Pluss gratis i kveld') + '</a>';
             }).catch(function () {});
             if (LANG === 'no') {
               // Kom man hit for å logge inn fra en annen side (f.eks. en gjenglenke), gå tilbake dit

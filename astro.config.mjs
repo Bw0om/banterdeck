@@ -3,11 +3,11 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
 export default defineConfig({
-  site: 'https://banterdeck.com',
+  site: 'https://mittvors.no',
   integrations: [sitemap({
     filter: (p) => !p.includes('/admin') && !p.includes('/statistikk') && !p.includes('/kortstokk'),
     // Nyhetsrunden lages på serveren (slippes fredag kl. 12), så den legges til her
-    customPages: ['https://banterdeck.com/no/nyhetsrunden', 'https://banterdeck.com/no/nyhetsrunden/arkiv'],
+    customPages: ['https://mittvors.no/no/nyhetsrunden', 'https://mittvors.no/no/nyhetsrunden/arkiv'],
   })],
   // Statisk side, men med én serverfunksjon (/api/forslag) som kjører på Vercel.
   adapter: vercel(),

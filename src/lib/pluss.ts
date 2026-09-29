@@ -1,11 +1,11 @@
-// Banterdeck Pluss: hvem som har Pluss, og betaling med Vipps (ePayment-API-et).
+// Mitt vors Pluss: hvem som har Pluss, og betaling med Vipps (ePayment-API-et).
 // Miljøvariabler i Vercel: VIPPS_CLIENT_ID, VIPPS_CLIENT_SECRET, VIPPS_SUBSCRIPTION_KEY, VIPPS_MSN,
 // og VIPPS_TEST=1 mens du tester mot Vipps sitt testmiljø.
 import { rpc } from './spilt';
 
 export const PRODUKTER: Record<string, { navn: string; ore: number; beskrivelse: string }> = {
-  kveld: { navn: 'Kveldspass', ore: 2900, beskrivelse: 'Banterdeck Pluss i 24 timer' },
-  aar: { navn: 'Årspass', ore: 19900, beskrivelse: 'Banterdeck Pluss i ett år' },
+  kveld: { navn: 'Kveldspass', ore: 2900, beskrivelse: 'Mitt vors Pluss i 24 timer' },
+  aar: { navn: 'Årspass', ore: 19900, beskrivelse: 'Mitt vors Pluss i ett år' },
 };
 
 function env(): any { return (typeof process !== 'undefined' && process.env) || {}; }
@@ -42,8 +42,8 @@ async function vipps(sti: string, init: { method?: string; body?: any; idem?: st
     'Ocp-Apim-Subscription-Key': e.VIPPS_SUBSCRIPTION_KEY,
     'Merchant-Serial-Number': e.VIPPS_MSN,
     'Content-Type': 'application/json',
-    'Vipps-System-Name': 'banterdeck', 'Vipps-System-Version': '1.0',
-    'Vipps-System-Plugin-Name': 'banterdeck-web', 'Vipps-System-Plugin-Version': '1.0',
+    'Vipps-System-Name': 'mittvors', 'Vipps-System-Version': '1.0',
+    'Vipps-System-Plugin-Name': 'mittvors-web', 'Vipps-System-Plugin-Version': '1.0',
   };
   if (init.idem) h['Idempotency-Key'] = init.idem;
   const r = await fetch(base() + sti, { method: init.method || 'GET', headers: h, body: init.body ? JSON.stringify(init.body) : undefined });

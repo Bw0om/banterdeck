@@ -206,7 +206,7 @@ export function startSpill(data: any, lek: string, modus: string) {
   if (!valgt) return { feil: 'ukjent-lek' };
   if (valgt.type === 'kort') {
     const plussRom = !!(data.pluss && data.pluss.til > Date.now());
-    if ((valgt as any).pluss && !plussRom) return { feil: 'pluss', melding: 'Denne pakken krever Banterdeck Pluss.' };
+    if ((valgt as any).pluss && !plussRom) return { feil: 'pluss', melding: 'Denne pakken krever Mitt vors Pluss.' };
     let rekke = kortstokkFor(lek, modus);
     if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && rekke.length > 12) rekke = medSmakebiter(rekke);
     if (!rekke.length) return { feil: 'tom' };
@@ -294,7 +294,7 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!erVert) return { feil: 'bare-vert' };
       // Verten har Pluss (sjekket av API-ruta): lås opp rommet for kvelden
       if (h._plussTil > Date.now() && !(data.pluss && data.pluss.til > Date.now())) data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
-      if (h.lek !== 'egen' && erPlussLek(String(h.lek || '')) && !romHarPluss(data)) return { feil: 'pluss', melding: 'Denne leken krever Banterdeck Pluss hos verten.' };
+      if (h.lek !== 'egen' && erPlussLek(String(h.lek || '')) && !romHarPluss(data)) return { feil: 'pluss', melding: 'Denne leken krever Mitt vors Pluss hos verten.' };
       const r = h.lek === 'egen' ? startEgen(data, h.kort, h.navn) : startSpill(data, String(h.lek || ''), String(h.modus || '*'));
       if (!(r as any).feil && data.spill) { data.valgt = null; data.ferdig = null; data.historikk = (data.historikk || []).concat([data.spill.navn]).slice(-40); }
       return r;

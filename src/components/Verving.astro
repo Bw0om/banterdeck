@@ -75,12 +75,12 @@
         var d = b.dataset.d;
         if (d === 'lukk') return lukk();
         if (d === 'kopier') return kopier(url).then(function () { b.querySelector('small').textContent = 'Kopiert! ✓'; });
-        if (d === 'dele') return navigator.share({ title: opts.tittel || 'Banterdeck', text: tekst || '', url: url }).catch(function () {});
+        if (d === 'dele') return navigator.share({ title: opts.tittel || 'Mitt vors', text: tekst || '', url: url }).catch(function () {});
         if (d === 'bilde' || d === 'last') {
           Promise.resolve(opts.bilde()).then(function (fil) {
             if (!fil) return;
             if (d === 'bilde' && navigator.canShare && navigator.canShare({ files: [fil] })) {
-              navigator.share({ files: [fil], title: opts.tittel || 'Banterdeck' }).catch(function () {});
+              navigator.share({ files: [fil], title: opts.tittel || 'Mitt vors' }).catch(function () {});
             } else {
               var a = document.createElement('a'); a.href = URL.createObjectURL(fil); a.download = fil.name;
               document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);

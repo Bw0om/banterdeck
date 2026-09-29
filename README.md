@@ -1,4 +1,4 @@
-# Banterdeck – nettsiden
+# Mitt vors – nettsiden
 
 Statisk nettside bygget med [Astro](https://astro.build). Gratis å hoste. Alt innhold ligger i én fil du redigerer selv.
 
@@ -125,7 +125,7 @@ create policy "egne rader" on public.decks
 ```
 
 3. **Project Settings → API**: kopier `Project URL` og `anon public`-nøkkelen
-4. **Authentication → URL Configuration**: legg til `https://banterdeck.com/account` og `https://banterdeck.com/no/account` under Redirect URLs
+4. **Authentication → URL Configuration**: legg til `https://mittvors.no/account` og `https://mittvors.no/no/account` under Redirect URLs
 5. I Vercel → **Settings → Environment Variables**: `SUPABASE_URL` og `SUPABASE_ANON_KEY`.
    Bruker du Vercels Supabase-integrasjon, lages disse automatisk og du trenger ikke gjøre noe.
    Koden godtar også `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` og `PUBLIC_`-variantene.

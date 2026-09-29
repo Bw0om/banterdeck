@@ -33,13 +33,25 @@ const quick = topSituationsFor(lang).slice(0, 5);
 const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
 ---
 <Base lang={lang}>
-  <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Banterdeck', url: 'https://banterdeck.com/', inLanguage: lang === 'no' ? 'nb' : 'en' })} /></Fragment>
+  <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Mitt vors', url: 'https://mittvors.no/', inLanguage: lang === 'no' ? 'nb' : 'en' })} /></Fragment>
   <section class="h2-hero">
-    <h1>{no ? <>Hva skjer<br />akkurat nå?</> : <>What's<br />happening?</>}</h1>
-    <p class="h2-sub">{L.heroSub(totals.lines, totals.words, totals.games)}</p>
+    <h1>{no ? <>Klar for<br />vors?</> : <>What's<br />happening?</>}</h1>
+    <p class="h2-sub">{no ? `${totals.games} drikkeleker, rom der alle spiller fra sin egen telefon – og ny Nyhetsrunde hver fredag.` : L.heroSub(totals.lines, totals.words, totals.games)}</p>
     <div class="h2-chips">
-      {quick.map((x, i) => <a class:list={['h2-chip', i === 0 && 'on']} href={path(lang, `/situations/${x.id}`)}>{t(x.title, lang)}</a>)}
-      <a class="h2-chip" href={path(lang, '/situations')}>{no ? 'Flere …' : 'More …'}</a>
+      {no ? (
+        <>
+          <a class="h2-chip on" href="/no/rom">Spill sammen</a>
+          <a class="h2-chip" href="/no/finn-lek">Finn lek</a>
+          <a class="h2-chip" href="/no/kveld">Kveldsplan</a>
+          <a class="h2-chip" href="/no/nyhetsrunden">Nyhetsrunden</a>
+          <a class="h2-chip" href="/no/gjeng">Gjengen</a>
+        </>
+      ) : (
+        <>
+          {quick.map((x, i) => <a class:list={['h2-chip', i === 0 && 'on']} href={path(lang, `/situations/${x.id}`)}>{t(x.title, lang)}</a>)}
+          <a class="h2-chip" href={path(lang, '/situations')}>More …</a>
+        </>
+      )}
     </div>
   </section>
 
@@ -63,32 +75,75 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     </a>
   )}
 
-  <div class="h2-tiles">
-    <button class="h2-tile" type="button" data-sveip>
-      <span class="h2-quote" aria-hidden="true">«…»</span>
-      <span><b>{no ? 'Sveip replikker' : 'Swipe lines'}</b><small>{totals.lines} {L.itemsLabel}</small></span>
-    </button>
-    {no && nrBygg ? (
-      <a class="h2-tile" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
-        <span class="h2-badge">Uke {nrBygg.uke}</span>
-        <span><b>Nyhetsrunden</b><small>{nrBygg.antall} spørsmål</small></span>
-      </a>
-    ) : (
-      <a class="h2-tile" href={path(lang, '/situations')}>
-        <span class="h2-badge">{no ? 'Alle' : 'All'}</span>
-        <span><b>{L.linesTitle}</b><small>{no ? 'Etter situasjon' : 'By situation'}</small></span>
-      </a>
-    )}
-  </div>
+  {no ? (
+    <>
+      {nrBygg && (
+        <div class="h2-tiles">
+          <a class="h2-tile" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
+            <span class="h2-badge">Uke {nrBygg.uke}</span>
+            <span><b>Nyhetsrunden</b><small>{nrBygg.antall} spørsmål</small></span>
+          </a>
+          <a class="h2-tile" href="/no/kveld">
+            <span class="h2-badge">Plan</span>
+            <span><b>Kveldsplan</b><small>Leker fra vors til nachspiel</small></span>
+          </a>
+        </div>
+      )}
+      <div class="h2-row">
+        <a href="/no/gjeng">👥 Gjengen</a>
+        <a href="/no/pluss">✨ Pluss</a>
+        <a href="/no/nyhetsrunden/arkiv">📰 Arkivet</a>
+        <a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} />Lagret</a>
+      </div>
 
-  <div class="h2-row">
-    {hasDict && <a href={path(lang, '/ord')}><Icon name="ordbok" size={20} />{L.ordTitle}</a>}
-    {hasDict && <a href={path(lang, '/uttrykk')}><Icon name="uttrykk" size={20} />{L.uttrykkTitle}</a>}
-    <a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} />{no ? 'Lagret' : 'Saved'}</a>
-    {no && <a href="/no/kveld"><Icon name="drikkeleker" size={20} />Kveldsplan</a>}
-    {no && <a href="/no/gjeng">👥 Gjengen</a>}
-    {no && <a href="/no/pluss">✨ Pluss</a>}
-  </div>
+      <p class="h2-label">Humor ved siden</p>
+      <div class="h2-tiles">
+        <button class="h2-tile" type="button" data-sveip>
+          <span class="h2-quote" aria-hidden="true">«…»</span>
+          <span><b>Sveip replikker</b><small>{totals.lines} {L.itemsLabel}</small></span>
+        </button>
+        <a class="h2-tile" href={path(lang, '/situations')}>
+          <span class="h2-badge">Alle</span>
+          <span><b>{L.linesTitle}</b><small>Etter situasjon</small></span>
+        </a>
+      </div>
+      {hasDict && (
+        <div class="h2-row">
+          <a href={path(lang, '/ord')}><Icon name="ordbok" size={20} />{L.ordTitle}</a>
+          <a href={path(lang, '/uttrykk')}><Icon name="uttrykk" size={20} />{L.uttrykkTitle}</a>
+        </div>
+      )}
+    </>
+  ) : (
+    <>
+    <div class="h2-tiles">
+      <button class="h2-tile" type="button" data-sveip>
+        <span class="h2-quote" aria-hidden="true">«…»</span>
+        <span><b>{no ? 'Sveip replikker' : 'Swipe lines'}</b><small>{totals.lines} {L.itemsLabel}</small></span>
+      </button>
+      {no && nrBygg ? (
+        <a class="h2-tile" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
+          <span class="h2-badge">Uke {nrBygg.uke}</span>
+          <span><b>Nyhetsrunden</b><small>{nrBygg.antall} spørsmål</small></span>
+        </a>
+      ) : (
+        <a class="h2-tile" href={path(lang, '/situations')}>
+          <span class="h2-badge">{no ? 'Alle' : 'All'}</span>
+          <span><b>{L.linesTitle}</b><small>{no ? 'Etter situasjon' : 'By situation'}</small></span>
+        </a>
+      )}
+    </div>
+
+    <div class="h2-row">
+      {hasDict && <a href={path(lang, '/ord')}><Icon name="ordbok" size={20} />{L.ordTitle}</a>}
+      {hasDict && <a href={path(lang, '/uttrykk')}><Icon name="uttrykk" size={20} />{L.uttrykkTitle}</a>}
+      <a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} />{no ? 'Lagret' : 'Saved'}</a>
+      {no && <a href="/no/kveld"><Icon name="drikkeleker" size={20} />Kveldsplan</a>}
+      {no && <a href="/no/gjeng">👥 Gjengen</a>}
+      {no && <a href="/no/pluss">✨ Pluss</a>}
+    </div>
+    </>
+  )}
 
   <section class="h2-today">
     <div class="h2-today-top"><span>{L.todayLabel}</span><span id="todayCat">{first.k}</span></div>
@@ -132,7 +187,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   })();
   </script>
   <div class="installer" id="installer" hidden>
-    <span>{no ? 'Legg Banterdeck på hjemskjermen – åpner som en app og virker uten nett.' : 'Add Banterdeck to your home screen – opens like an app and works offline.'}</span>
+    <span>{no ? 'Legg Mitt vors på hjemskjermen – åpner som en app og virker uten nett.' : 'Add Mitt vors to your home screen – opens like an app and works offline.'}</span>
     <button type="button" class="btn gold small" id="installerKnapp">{no ? 'Legg til' : 'Add'}</button>
     <button type="button" class="linkbtn" id="installerNei" aria-label={no ? 'Ikke nå' : 'Not now'}>✕</button>
     <p class="small" id="installerIos" hidden>{no ? 'Trykk Del-knappen i Safari, og velg «Legg til på Hjem-skjerm».' : 'Tap the Share button in Safari and choose “Add to Home Screen”.'}</p>

@@ -27,7 +27,7 @@ Vercel bygger automatisk. Ferdig etter ca. ett minutt.
 ▶ src/pages/favourites.astro
 ```
 
-Er de der, kjører den nye koden. Test så `banterdeck.com/situations`.
+Er de der, kjører den nye koden. Test så `mittvors.no/situations`.
 
 ## Gamle adresser
 

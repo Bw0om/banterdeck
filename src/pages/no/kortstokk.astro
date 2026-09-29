@@ -2,7 +2,7 @@
 // Delt kortstokk: /no/kortstokk?s=ID. Hvem som helst med lenken kan spille den eller lagre en kopi.
 import Base from '../../layouts/Base.astro';
 ---
-<Base title="Delt kortstokk" description="Egne drikkekort laget på Banterdeck. Spill dem alene, i et rom, eller lagre en kopi." lang="no" gate={true} noindex={true}>
+<Base title="Delt kortstokk" description="Egne drikkekort laget på Mitt vors. Spill dem alene, i et rom, eller lagre en kopi." lang="no" gate={true} noindex={true}>
   <div id="delt" class="delt"><p class="small">Henter kortstokken …</p></div>
   <div id="stokkSpill" class="stokk-spill" hidden role="dialog" aria-modal="true">
     <p class="stokk-spill-navn" id="ssNavn"></p>
@@ -23,7 +23,7 @@ import Base from '../../layouts/Base.astro';
     fetch('/api/stokk/' + id).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.melding); return d; }); })
       .then(function (d) {
         st = d;
-        document.title = d.navn + ' – delt kortstokk – Banterdeck';
+        document.title = d.navn + ' – delt kortstokk – Mitt vors';
         var smak = stokk(d.kort).slice(0, 3);
         root.innerHTML = '<p class="rom-etikett">Delt kortstokk</p><h1>' + esc(d.navn) + '</h1>' +
           '<p class="lead">' + d.kort.length + ' egne drikkekort. Spill dem alene med én telefon, eller i et rom der alle ser samme kort.</p>' +
