@@ -5,7 +5,7 @@ export const DEFAULT_LANG: Lang = 'en';
 /** Legger på /no foran stien for norsk. Engelsk ligger på rota. */
 export function path(lang: Lang, p: string): string {
   const clean = p === '/' ? '/' : p.replace(/\/$/, '');
-  return lang === 'no' ? (clean === '/' ? '/no/' : '/no' + clean) : clean === '/' ? '/' : clean;
+  return lang === 'no' ? (clean === '/' ? '/no/' : '/no' + clean) : clean === '/' ? '/en' : clean;
 }
 
 /** Samme side på det andre språket. */
@@ -21,9 +21,10 @@ export function otherLangPath(lang: Lang, pathname: string): string {
     const par = NAVNEPAR.find(([no]) => stripped === no);
     if (par) return par[1];
     // Norske sider uten engelsk utgave → engelsk forside
-    if (/^\/(nyhetsrunden|statistikk|leker|vorsproven)(\/|$)/.test(stripped)) return '/';
-    return stripped;
+    if (/^\/(nyhetsrunden|statistikk|leker|vorsproven)(\/|$)/.test(stripped)) return '/en';
+    return stripped === '/' ? '/en' : stripped;
   }
+  if (clean === '/en') return '/no/';
   const par = NAVNEPAR.find(([, en]) => clean === en);
   if (par) return '/no' + par[0];
   return path('no', clean);

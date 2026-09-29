@@ -49,7 +49,7 @@ if (lang === 'no') {
   );
 } else {
   nav.push(
-    { href: '/', label: 'Home', icon: 'hjem' },
+    { href: '/en', label: 'Home', icon: 'hjem' },
     { href: '/drinking-games', label: 'Drinking games', icon: 'drikkeleker' },
     { href: '/room', label: 'Play together', icon: 'terning' },
     { href: '/plan', label: 'Plan the night', icon: 'nyhet' },
@@ -208,7 +208,7 @@ const isCurrent = (href: string) => {
   </div>
 
   <nav class="tabbar" aria-label={lang === 'no' ? 'Hovedmeny' : 'Main menu'}>
-    <a href={path(lang, '/')} aria-current={current === (lang === 'no' ? '/no' : '/') ? 'page' : undefined}>
+    <a href={path(lang, '/')} aria-current={current === (lang === 'no' ? '/no' : '/en') || (lang !== 'no' && current === '/') ? 'page' : undefined}>
       <span class="ti"><Icon name="hjem" size={22} /></span><span class="tl">{lang === 'no' ? 'Forside' : 'Home'}</span></a>
     <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
       <span class="ti"><Icon name="drikkeleker" size={22} /></span><span class="tl">{lang === 'no' ? 'Leker' : 'Games'}</span></a>

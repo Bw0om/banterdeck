@@ -15,7 +15,7 @@ const antall = no ? '51' : String(gamesFor(lang).length);
       description={no ? 'Fire spørsmål om kvelden, gjengen og hva dere har for hånden – så foreslår vi lekene som passer.' : "Four questions about the night, the crew and what you've got to hand – and we'll suggest the games that fit."}>
   {no
     ? <p class="crumb"><a href="/no/">Forside</a> › <a href="/no/drinking-games">Drikkeleker</a> › Finn lek</p>
-    : <p class="crumb"><a href="/">Home</a> › <a href="/drinking-games">Drinking games</a> › Find a game</p>}
+    : <p class="crumb"><a href="/en">Home</a> › <a href="/drinking-games">Drinking games</a> › Find a game</p>}
   <h1>{no ? 'Finn lek' : 'Find a game'}</h1>
   <p class="lead">{no ? `Fire spørsmål, så foreslår vi tre leker av de ${antall} vi har.` : `Four questions, and we'll suggest three games out of the ${antall} we've got.`}</p>
   <div id="fl" class="vp"></div>

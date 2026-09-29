@@ -30,7 +30,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     function T(no, en) { return EN ? en : no; }
     var LOKALE = EN ? 'en-GB' : 'nb-NO';
     var RUTE = EN
-      ? { rom: '/room', pluss: '/plus', gjeng: '/crew', konto: '/account', leker: '/drinking-games', hjem: '/' }
+      ? { rom: '/room', pluss: '/plus', gjeng: '/crew', konto: '/account', leker: '/drinking-games', hjem: '/en' }
       : { rom: '/no/rom', pluss: '/no/pluss', gjeng: '/no/gjeng', konto: '/no/account', leker: '/no/drinking-games', hjem: '/no/' };
     var root = document.getElementById('rom');
     if (!root || root.dataset.bound) return; root.dataset.bound = '1';
