@@ -8,8 +8,9 @@ import { rundeKort } from '../../lib/nyhetsrunden';
 import { UKENS_LEKER, ukensLek } from '../../lib/ukenslek';
 import { games as alleLeker } from '../../lib/content';
 const NR = rundeKort();
-const UKE = UKENS_LEKER.map((sl) => alleLeker.find((g: any) => g.slug === sl)).filter(Boolean)
-  .map((g: any) => ({ slug: g.slug, navn: t(g.name, 'no'), pl: g.pl, gruppe: t(g.group.title, 'no') }));
+const SPRAK = ((Astro.props as any).lang || 'en') as 'no' | 'en';
+const UKE = UKENS_LEKER.map((sl) => alleLeker.find((g: any) => g.slug === sl)).filter((g: any) => g && (SPRAK === 'no' || g.only !== 'no'))
+  .map((g: any) => ({ slug: g.slug, navn: t(g.name, SPRAK), pl: g.pl, gruppe: t(g.group.title, SPRAK) }));
 const ukeBygg = UKE.find((x) => x.slug === ukensLek()) || UKE[0];
 const nrBygg = NR.find((r) => r.fra <= Date.now()) || NR[NR.length - 1];
 import { situationSectionsFor, dictSection, visible, langGroups, itemsOf, t, tf, isCrude, totalsFor, topSituationsFor, situationById, gamesFor, dictCount } from '../../lib/content';
@@ -35,8 +36,8 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
 <Base lang={lang}>
   <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Mitt vors', url: 'https://mittvors.no/', inLanguage: lang === 'no' ? 'nb' : 'en' })} /></Fragment>
   <section class="h2-hero">
-    <h1>{no ? <>Klar for<br />vors?</> : <>What's<br />happening?</>}</h1>
-    <p class="h2-sub">{no ? `${totals.games} drikkeleker, rom der alle spiller fra sin egen telefon – og ny Nyhetsrunde hver fredag.` : L.heroSub(totals.lines, totals.words, totals.games)}</p>
+    <h1>{no ? <>Klar for<br />vors?</> : <>Ready to<br />pre-game?</>}</h1>
+    <p class="h2-sub">{no ? `${totals.games} drikkeleker, rom der alle spiller fra sin egen telefon – og ny Nyhetsrunde hver fredag.` : `${totals.games} drinking games, rooms where everyone plays from their own phone – and a plan for the whole night.`}</p>
     <div class="h2-chips">
       {no ? (
         <>
@@ -48,8 +49,10 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
         </>
       ) : (
         <>
-          {quick.map((x, i) => <a class:list={['h2-chip', i === 0 && 'on']} href={path(lang, `/situations/${x.id}`)}>{t(x.title, lang)}</a>)}
-          <a class="h2-chip" href={path(lang, '/situations')}>More …</a>
+          <a class="h2-chip on" href="/room">Play together</a>
+          <a class="h2-chip" href="/find-a-game">Find a game</a>
+          <a class="h2-chip" href="/plan">Plan the night</a>
+          <a class="h2-chip" href="/crew">Your crew</a>
         </>
       )}
     </div>
@@ -61,19 +64,17 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
   </a>
 
-  {no && ukeBygg && (
-    <a class="h2-uke" id="ukensLek" href={`/no/drinking-games/${ukeBygg.slug}/`} data-leker={JSON.stringify(UKE)}>
-      <span class="h2-badge">Ukens lek</span>
-      <span><b>{ukeBygg.navn}</b><small>{ukeBygg.gruppe} · {ukeBygg.pl} spillere</small></span>
+  {ukeBygg && (
+    <a class="h2-uke" id="ukensLek" href={no ? `/no/drinking-games/${ukeBygg.slug}/` : `/drinking-games/${ukeBygg.slug}/`} data-leker={JSON.stringify(UKE)} data-base={no ? '/no/drinking-games/' : '/drinking-games/'}>
+      <span class="h2-badge">{no ? 'Ukens lek' : 'Game of the week'}</span>
+      <span><b>{ukeBygg.navn}</b><small>{ukeBygg.gruppe} · {ukeBygg.pl} {no ? 'spillere' : 'players'}</small></span>
       <img src={`/og/liten/${ukeBygg.slug}.webp`} alt="" width="120" height="63" loading="lazy" decoding="async" />
     </a>
   )}
-  {no && (
-    <a class="h2-rom" href="/no/rom">
-      <span><b>Spill sammen fra hver sin telefon</b><small>Lag et rom og del koden</small></span>
-      <span class="kode" aria-hidden="true">ABCD</span>
-    </a>
-  )}
+  <a class="h2-rom" href={no ? '/no/rom' : '/room'}>
+    <span><b>{no ? 'Spill sammen fra hver sin telefon' : 'Play together from your own phones'}</b><small>{no ? 'Lag et rom og del koden' : 'Create a room and share the code'}</small></span>
+    <span class="kode" aria-hidden="true">ABCD</span>
+  </a>
 
   {no ? (
     <>
@@ -116,32 +117,33 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     </>
   ) : (
     <>
-    <div class="h2-tiles">
-      <button class="h2-tile" type="button" data-sveip>
-        <span class="h2-quote" aria-hidden="true">«…»</span>
-        <span><b>{no ? 'Sveip replikker' : 'Swipe lines'}</b><small>{totals.lines} {L.itemsLabel}</small></span>
-      </button>
-      {no && nrBygg ? (
-        <a class="h2-tile" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
-          <span class="h2-badge">Uke {nrBygg.uke}</span>
-          <span><b>Nyhetsrunden</b><small>{nrBygg.antall} spørsmål</small></span>
+      <div class="h2-tiles">
+        <a class="h2-tile" href="/plan">
+          <span class="h2-badge">Plan</span>
+          <span><b>Plan the night</b><small>Games from pre-drinks to afterparty</small></span>
         </a>
-      ) : (
-        <a class="h2-tile" href={path(lang, '/situations')}>
-          <span class="h2-badge">{no ? 'Alle' : 'All'}</span>
-          <span><b>{L.linesTitle}</b><small>{no ? 'Etter situasjon' : 'By situation'}</small></span>
+        <a class="h2-tile" href="/find-a-game">
+          <span class="h2-badge">Quiz</span>
+          <span><b>Find a game</b><small>Three questions, the right game</small></span>
         </a>
-      )}
-    </div>
+      </div>
+      <div class="h2-row">
+        <a href="/crew">👥 Your crew</a>
+        <a href="/plus">✨ Plus</a>
+        <a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} />Saved</a>
+      </div>
 
-    <div class="h2-row">
-      {hasDict && <a href={path(lang, '/ord')}><Icon name="ordbok" size={20} />{L.ordTitle}</a>}
-      {hasDict && <a href={path(lang, '/uttrykk')}><Icon name="uttrykk" size={20} />{L.uttrykkTitle}</a>}
-      <a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} />{no ? 'Lagret' : 'Saved'}</a>
-      {no && <a href="/no/kveld"><Icon name="drikkeleker" size={20} />Kveldsplan</a>}
-      {no && <a href="/no/gjeng">👥 Gjengen</a>}
-      {no && <a href="/no/pluss">✨ Pluss</a>}
-    </div>
+      <p class="h2-label">Humour on the side</p>
+      <div class="h2-tiles">
+        <button class="h2-tile" type="button" data-sveip>
+          <span class="h2-quote" aria-hidden="true">«…»</span>
+          <span><b>Swipe lines</b><small>{totals.lines} {L.itemsLabel}</small></span>
+        </button>
+        <a class="h2-tile" href={path(lang, '/situations')}>
+          <span class="h2-badge">All</span>
+          <span><b>{L.linesTitle}</b><small>By situation</small></span>
+        </a>
+      </div>
     </>
   )}
 
@@ -225,9 +227,9 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     var aar = t.getUTCFullYear(), jan4 = new Date(Date.UTC(aar, 0, 4));
     var uke = 1 + Math.round(((t - jan4) / 86400000 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7);
     var x = l[(aar * 53 + uke) % l.length];
-    a.href = '/no/drinking-games/' + x.slug + '/';
+    a.href = (a.dataset.base || '/no/drinking-games/') + x.slug + '/';
     a.querySelector('b').textContent = x.navn;
-    a.querySelector('small').textContent = x.gruppe + ' · ' + x.pl + ' spillere';
+    a.querySelector('small').textContent = x.gruppe + ' · ' + x.pl + (a.dataset.base === '/drinking-games/' ? ' players' : ' spillere');
     a.querySelector('img').src = '/og/liten/' + x.slug + '.webp';
   })();
   </script>

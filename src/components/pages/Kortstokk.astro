@@ -1,0 +1,64 @@
+---
+// Delt kortstokk: /no/kortstokk?s=ID (norsk) og /deck?s=ID (engelsk).
+// Hvem som helst med lenken kan spille den eller lagre en kopi.
+import Base from '../../layouts/Base.astro';
+import type { Lang } from '../../lib/i18n';
+const { lang = 'no' } = Astro.props as { lang?: Lang };
+const no = lang === 'no';
+---
+<Base title={no ? 'Delt kortstokk' : 'Shared deck'} description={no ? 'Egne drikkekort laget på Mitt vors. Spill dem alene, i et rom, eller lagre en kopi.' : 'Custom drinking cards made on Mitt vors. Play them on one phone, in a room, or save a copy.'} lang={lang} gate={true} noindex={true}>
+  <div id="delt" class="delt"><p class="small">{no ? 'Henter kortstokken …' : 'Loading the deck …'}</p></div>
+  <div id="stokkSpill" class="stokk-spill" hidden role="dialog" aria-modal="true">
+    <p class="stokk-spill-navn" id="ssNavn"></p>
+    <div class="rom-kort rf-kort"><span class="sw-tag" id="ssTeller"></span><p id="ssKort"></p><span></span></div>
+    <button class="rom-stor-knapp" type="button" id="ssNeste">{no ? 'Neste kort' : 'Next card'}</button>
+    <button class="btn ghost" type="button" id="ssLukk">{no ? 'Lukk' : 'Close'}</button>
+  </div>
+  <script is:inline data-astro-rerun define:vars={{ LANG: lang }}>
+  (function () {
+    var root = document.getElementById('delt');
+    if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+    var EN = LANG === 'en', KONTO = EN ? '/account' : '/no/account', ROM = EN ? '/room' : '/no/rom';
+    var id = new URLSearchParams(location.search).get('s') || '', st = null, rekke = [], pos = 0;
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function $(x) { return document.getElementById(x); }
+    function stokk(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    function visKort() { $('ssKort').textContent = rekke[pos]; $('ssTeller').textContent = (pos + 1) + (EN ? ' of ' : ' av ') + rekke.length; }
+    var tittel = EN ? 'Shared deck' : 'Delt kortstokk';
+    if (!/^[0-9a-f-]{36}$/i.test(id)) { root.innerHTML = '<h1>' + tittel + '</h1><p class="rom-feil">' + (EN ? 'The link is missing or broken.' : 'Lenken mangler eller er ødelagt.') + '</p>'; return; }
+    fetch('/api/stokk/' + id, EN ? { headers: { 'x-lang': 'en' } } : undefined).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.melding); return d; }); })
+      .then(function (d) {
+        st = d;
+        document.title = d.navn + (EN ? ' – shared deck – Mitt vors' : ' – delt kortstokk – Mitt vors');
+        var smak = stokk(d.kort).slice(0, 3);
+        root.innerHTML = '<p class="rom-etikett">' + tittel + '</p><h1>' + esc(d.navn) + '</h1>' +
+          '<p class="lead">' + d.kort.length + (EN
+            ? ' custom drinking cards. Play them on one phone, or in a room where everyone sees the same card.'
+            : ' egne drikkekort. Spill dem alene med én telefon, eller i et rom der alle ser samme kort.') + '</p>' +
+          '<ul class="delt-smak">' + smak.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
+          '<div class="dl-knapper"><button class="btn gold" data-d="spill" type="button">' + (EN ? 'Play now' : 'Spill nå') + '</button>' +
+          '<button class="btn" data-d="rom" type="button">' + (EN ? 'Play in a room' : 'Spill i rom') + '</button>' +
+          '<button class="btn ghost" data-d="kopi" type="button">' + (EN ? 'Save a copy' : 'Lagre en kopi') + '</button></div><p class="formmsg" id="deltMsg" role="status"></p>';
+      })
+      .catch(function (e) { root.innerHTML = '<h1>' + tittel + '</h1><p class="rom-feil">' + esc(e.message || (EN ? 'Couldn’t find the deck.' : 'Fant ikke kortstokken.')) + '</p>'; });
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-d]'); if (!b || !st) return;
+      var a = b.dataset.d;
+      if (a === 'spill') { rekke = stokk(st.kort); pos = 0; $('ssNavn').textContent = st.navn; visKort(); $('stokkSpill').hidden = false; document.body.classList.add('stokk-aapen'); }
+      if (a === 'rom') { try { localStorage.setItem('bd_stokk_rom', JSON.stringify({ id: 'delt-' + id, navn: st.navn, kort: st.kort })); } catch (x) {} location.href = ROM; }
+      if (a === 'kopi') {
+        var K = window.BDKonto, msg = $('deltMsg');
+        (K ? K.bruker() : Promise.resolve(null)).then(function (u) {
+          if (!u) {
+            try { localStorage.setItem('bd_stokk_utkast', JSON.stringify({ navn: st.navn, kort: st.kort })); } catch (x) {}
+            msg.innerHTML = EN ? 'Set aside. <a href="' + KONTO + '">Log in or create an account</a> to save it.' : 'Lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre den.'; return;
+          }
+          return K.stokker.lagre({ navn: st.navn, kort: st.kort }).then(function () { msg.innerHTML = EN ? 'Saved ✓ Find it under <a href="' + KONTO + '">My deck</a>.' : 'Lagret ✓ Finn den under <a href="/no/account">Min stokk</a>.'; msg.className = 'formmsg ok'; });
+        }).catch(function (err) { msg.textContent = err.message || (EN ? 'Couldn’t save it.' : 'Fikk ikke lagret.'); });
+      }
+    });
+    $('ssNeste').addEventListener('click', function () { pos++; if (pos >= rekke.length) { rekke = stokk(rekke); pos = 0; } visKort(); });
+    $('ssLukk').addEventListener('click', function () { $('stokkSpill').hidden = true; document.body.classList.remove('stokk-aapen'); });
+  })();
+  </script>
+</Base>

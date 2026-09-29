@@ -10,7 +10,9 @@ export const ROMLEK: Record<string, string> = {
   'tanken-bak-sangen': 'tanken-bak-sangen', 'hvem-skrev-det': 'hvemskrev', 'bloffquizen': 'bloff', 'samme-svar': 'samme',
   'spionen': 'spion', 'hvem-er-jeg': 'pannekort', 'skal-refleksen': 'skal',
 };
-export function romLenke(slug: string, modus = '') {
+/** Lenke til rommet med leken valgt. Norsk: /no/rom, engelsk: /room – samme spørreparametre. */
+export function romLenke(slug: string, modus = '', lang: string = 'no') {
   const lek = ROMLEK[slug];
-  return lek ? `/no/rom?lek=${encodeURIComponent(lek)}${modus ? '&modus=' + encodeURIComponent(modus) : ''}` : '/no/rom';
+  const base = lang === 'en' ? '/room' : '/no/rom';
+  return lek ? `${base}?lek=${encodeURIComponent(lek)}${modus ? '&modus=' + encodeURIComponent(modus) : ''}` : base;
 }

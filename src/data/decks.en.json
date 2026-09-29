@@ -1,0 +1,2950 @@
+{
+ "pekeleken": {
+  "kind": "deck",
+  "title": "Draw a statement",
+  "modes": [
+   {
+    "v": "snill",
+    "t": "Mild"
+   },
+   {
+    "v": "frekk",
+    "t": "Cheeky"
+   },
+   {
+    "v": "droy",
+    "t": "Wild"
+   }
+  ],
+  "items": [
+   {
+    "t": "Who's most likely to end up on TV by accident?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to get rich off an idea nobody else understands?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to be the first in the group to get married?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to move abroad on a whim?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to win Celebrity Big Brother?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to forget their passport at the airport?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to have kids first?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to start a podcast nobody listens to?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to call their mum to ask how to boil an egg?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to go viral on TikTok?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to get lost in their own city?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to end up on a reality show?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to write an autobiography before 40?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to buy a holiday cabin before an apartment?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to have the most cats at 60?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to get fired for telling the truth?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to become mayor of their hometown?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to make friends with a stranger on the tram?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to get into a fight with a self-checkout?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to survive longest in a zombie apocalypse?",
+    "m": "snill"
+   },
+   {
+    "t": "Who's most likely to make out with someone tonight?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to text their ex before midnight?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to get kicked out of the bar tonight?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to fall asleep at the afterparty?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to throw up before midnight?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to lose their phone tonight?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to dance on the table tonight?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to end up at the wrong afterparty?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to call someone they really shouldn't tonight?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to send a drunk Snap to their boss?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to forget where they live?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to get married in Vegas after one night?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to fall in love with the bartender?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to lie about where they were this weekend?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to fight over the last slice of pizza?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to cry before the night is over?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to start a drunk political argument?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to wake up next to someone whose name they can't remember?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to steal a glass from the bar?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to go home with someone just to skip the taxi queue?",
+    "m": "frekk"
+   },
+   {
+    "t": "Who's most likely to hook up with someone tonight?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to sleep with an ex this year?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to have an affair with their boss?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to hook up with someone in this group?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to send a nude tonight?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to end up in a threesome?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to get caught in the act tonight?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to sleep with someone on the first date?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to have the highest body count this year?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to have a secret friend with benefits?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to start an OnlyFans if the money was good enough?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to hook up with someone from work?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to end up in bed with a reality star?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to get noise complaints from the neighbours?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to send a dirty text to the wrong person tonight?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to date two people from the same friend group?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to hook up at the cabin while others sleep in the next room?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to fall for a one-night stand?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to have sex in a bar?",
+    "m": "droy"
+   },
+   {
+    "t": "Who's most likely to sleep with someone to make their ex jealous?",
+    "m": "droy"
+   }
+  ]
+ },
+ "jeg-har-aldri": {
+  "kind": "deck",
+  "title": "Draw a statement",
+  "modes": [
+   {
+    "v": "snill",
+    "t": "Mild"
+   },
+   {
+    "v": "frekk",
+    "t": "Cheeky"
+   },
+   {
+    "v": "droy",
+    "t": "Wild"
+   }
+  ],
+  "items": [
+   {
+    "t": "Never have I ever gone to the cinema alone.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever fallen asleep at a party.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever googled myself.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever lied about my age.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever sung karaoke.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever fallen off my bike in front of someone.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever texted the wrong person.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever eaten something off the floor.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever been refused entry to a bar.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever called my mum on a night out.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever got a speeding ticket.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever pretended to get a joke.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever taken the wrong bus.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever forgotten the name of someone I just met.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever shoplifted as a kid.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever been late for work because I was hungover.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever worn the same socks two days in a row.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever cried at a movie.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever faked being sick to get out of something.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever taken a selfie on the toilet.",
+    "m": "snill"
+   },
+   {
+    "t": "Never have I ever thrown up in a taxi.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever kissed someone I met the same night.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever drunk-texted my ex.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever woken up with no idea how I got home.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever been kicked out of a bar.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever ghosted someone.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever stalked an ex on Instagram.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever lied about how much I drank.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever kissed someone in this group.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever snuck out of someone's flat in the morning.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever fallen asleep on the toilet in a bar.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever called someone at four in the morning.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever drunk at work.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever dated two people at the same time.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever said “I love you” while drunk.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever peed outside in the city.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever gone on a date with someone from a dating app.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever stolen a glass from a bar.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever dumped someone over text.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever shown up to work still drunk.",
+    "m": "frekk"
+   },
+   {
+    "t": "Never have I ever had sex in a public place.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever sent a nude.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever had a one-night stand.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever slept with an ex.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever had sex on a first date.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever cheated.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever had sex in a car.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever faked an orgasm.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever slept with someone from work.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever had a threesome.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever been caught in the act.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever slept with someone without knowing their name.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever had sex at my parents' house.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever filmed myself in bed.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever slept with someone in this group's wider circle.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever had a friend with benefits.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever bought a sex toy.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever had sex on a plane, train or boat.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever slept with someone to make someone else jealous.",
+    "m": "droy"
+   },
+   {
+    "t": "Never have I ever had sex in a bar.",
+    "m": "droy"
+   }
+  ]
+ },
+ "enten-eller": {
+  "kind": "deck",
+  "title": "Draw a dilemma",
+  "modes": [
+   {
+    "v": "snill",
+    "t": "Mild"
+   },
+   {
+    "v": "droy",
+    "t": "Wild"
+   }
+  ],
+  "items": [
+   {
+    "t": "Never drink beer again – or never drink wine again?",
+    "m": "snill"
+   },
+   {
+    "t": "Only be able to whisper – or only be able to shout?",
+    "m": "snill"
+   },
+   {
+    "t": "A week at a cabin with your boss – or a week with your mother-in-law?",
+    "m": "snill"
+   },
+   {
+    "t": "Always be ten minutes late – or always be an hour early?",
+    "m": "snill"
+   },
+   {
+    "t": "Lose your phone – or lose your wallet?",
+    "m": "snill"
+   },
+   {
+    "t": "Eat only pizza for the rest of your life – or never eat pizza again?",
+    "m": "snill"
+   },
+   {
+    "t": "Be known as the funny one – or the hot one?",
+    "m": "snill"
+   },
+   {
+    "t": "Sing everything you say – or dance every time you hear music?",
+    "m": "snill"
+   },
+   {
+    "t": "Live without music – or without movies?",
+    "m": "snill"
+   },
+   {
+    "t": "Win the lottery – or find true love?",
+    "m": "snill"
+   },
+   {
+    "t": "Be able to turn invisible – or be able to fly?",
+    "m": "snill"
+   },
+   {
+    "t": "A tiny bedsit in central Oslo – or a mansion in the Arctic?",
+    "m": "snill"
+   },
+   {
+    "t": "Always have gravel in your shoe – or always have wet socks?",
+    "m": "snill"
+   },
+   {
+    "t": "Speak every language – or talk to animals?",
+    "m": "snill"
+   },
+   {
+    "t": "Fight one duck-sized horse – or a hundred horse-sized ducks?",
+    "m": "snill"
+   },
+   {
+    "t": "Stranded on a desert island with your boss – or with your ex?",
+    "m": "snill"
+   },
+   {
+    "t": "Wear a bunad (Norwegian folk costume) every day – or gym clothes to every wedding?",
+    "m": "snill"
+   },
+   {
+    "t": "Listen to one artist for the rest of your life – or never hear music again?",
+    "m": "snill"
+   },
+   {
+    "t": "Always take the night bus home – or always pay 80 euros for a taxi?",
+    "m": "snill"
+   },
+   {
+    "t": "Be hungover every Sunday – or never be able to drink on a Friday?",
+    "m": "snill"
+   },
+   {
+    "t": "Sleep with your ex again – or with your best friend's ex?",
+    "m": "droy"
+   },
+   {
+    "t": "Your parents read all your messages – or your boss sees your search history?",
+    "m": "droy"
+   },
+   {
+    "t": "Never have sex again – or never drink alcohol again?",
+    "m": "droy"
+   },
+   {
+    "t": "Get caught in the act by your parents – or by your grandparents?",
+    "m": "droy"
+   },
+   {
+    "t": "Loved but bad in bed – or amazing in bed but you don't like them?",
+    "m": "droy"
+   },
+   {
+    "t": "The group sees your nudes – or reads your diary?",
+    "m": "droy"
+   },
+   {
+    "t": "Kiss the person on your left – or drink a shot of soy sauce?",
+    "m": "droy"
+   },
+   {
+    "t": "Post the last photo in your camera roll – or resend the last text you sent your mum?",
+    "m": "droy"
+   },
+   {
+    "t": "Hook up with someone from work – or someone from the group?",
+    "m": "droy"
+   },
+   {
+    "t": "Only have sex in the dark – or always with the lights on?",
+    "m": "droy"
+   },
+   {
+    "t": "Send a nude to the wrong person – or have your sex history read out at your wedding?",
+    "m": "droy"
+   },
+   {
+    "t": "Get dumped over Snapchat – or in front of your whole family?",
+    "m": "droy"
+   },
+   {
+    "t": "Sex in a car – or sex in a tent?",
+    "m": "droy"
+   },
+   {
+    "t": "Your ex dates your best friend – or you date your best friend's ex?",
+    "m": "droy"
+   },
+   {
+    "t": "Never kiss again – or never have sex again?",
+    "m": "droy"
+   },
+   {
+    "t": "Wake up next to a stranger – or next to your ex?",
+    "m": "droy"
+   },
+   {
+    "t": "Go home with the first person who asks tonight – or go home alone for the next three months?",
+    "m": "droy"
+   },
+   {
+    "t": "Reveal your body count – or show the group your search history?",
+    "m": "droy"
+   },
+   {
+    "t": "Your parents follow you on Tinder – or your boss follows you on Instagram?",
+    "m": "droy"
+   },
+   {
+    "t": "Your partner reads all your messages from tonight – or sees all the photos?",
+    "m": "droy"
+   }
+  ]
+ },
+ "kategorier": {
+  "kind": "deck",
+  "title": "Draw a category",
+  "modes": [
+   {
+    "v": "alle",
+    "t": "All"
+   }
+  ],
+  "items": [
+   {
+    "t": "Beer brands",
+    "m": "alle"
+   },
+   {
+    "t": "Football clubs",
+    "m": "alle"
+   },
+   {
+    "t": "Car brands",
+    "m": "alle"
+   },
+   {
+    "t": "Countries in Africa",
+    "m": "alle"
+   },
+   {
+    "t": "European capitals",
+    "m": "alle"
+   },
+   {
+    "t": "Pizza toppings",
+    "m": "alle"
+   },
+   {
+    "t": "Musicians and singers",
+    "m": "alle"
+   },
+   {
+    "t": "Disney characters",
+    "m": "alle"
+   },
+   {
+    "t": "Things in a fridge",
+    "m": "alle"
+   },
+   {
+    "t": "Towns in Norway",
+    "m": "alle"
+   },
+   {
+    "t": "Cocktails",
+    "m": "alle"
+   },
+   {
+    "t": "Types of cheese",
+    "m": "alle"
+   },
+   {
+    "t": "Superheroes",
+    "m": "alle"
+   },
+   {
+    "t": "Things in a bathroom",
+    "m": "alle"
+   },
+   {
+    "t": "TV shows from the 2000s",
+    "m": "alle"
+   },
+   {
+    "t": "Snacks",
+    "m": "alle"
+   },
+   {
+    "t": "Footballers",
+    "m": "alle"
+   },
+   {
+    "t": "Clothing brands",
+    "m": "alle"
+   },
+   {
+    "t": "Fruit",
+    "m": "alle"
+   },
+   {
+    "t": "Things you bring to a cabin trip",
+    "m": "alle"
+   },
+   {
+    "t": "Olympic sports",
+    "m": "alle"
+   },
+   {
+    "t": "Words for being drunk",
+    "m": "alle"
+   },
+   {
+    "t": "Celebrities",
+    "m": "alle"
+   },
+   {
+    "t": "Dog breeds",
+    "m": "alle"
+   },
+   {
+    "t": "Instruments",
+    "m": "alle"
+   },
+   {
+    "t": "Things that are red",
+    "m": "alle"
+   },
+   {
+    "t": "Apps on your phone",
+    "m": "alle"
+   },
+   {
+    "t": "Excuses for being late",
+    "m": "alle"
+   },
+   {
+    "t": "Things people say on a first date",
+    "m": "alle"
+   },
+   {
+    "t": "Things you never say to your in-laws",
+    "m": "alle"
+   },
+   {
+    "t": "Eurovision songs",
+    "m": "alle"
+   },
+   {
+    "t": "Board games",
+    "m": "alle"
+   },
+   {
+    "t": "Harry Potter characters",
+    "m": "alle"
+   },
+   {
+    "t": "Cities in Europe",
+    "m": "alle"
+   },
+   {
+    "t": "Video games",
+    "m": "alle"
+   },
+   {
+    "t": "Slang words",
+    "m": "alle"
+   },
+   {
+    "t": "Things you find at an afterparty",
+    "m": "alle"
+   },
+   {
+    "t": "Excuses for skipping work",
+    "m": "alle"
+   },
+   {
+    "t": "Drinking games",
+    "m": "alle"
+   },
+   {
+    "t": "Things that smell bad",
+    "m": "alle"
+   }
+  ]
+ },
+ "nodt-eller-sannhet": {
+  "kind": "deck",
+  "title": "Draw a truth or a dare",
+  "modes": [
+   {
+    "v": "ss",
+    "t": "Truth"
+   },
+   {
+    "v": "sd",
+    "t": "Truth – wild"
+   },
+   {
+    "v": "ns",
+    "t": "Dare"
+   },
+   {
+    "v": "nd",
+    "t": "Dare – wild"
+   }
+  ],
+  "items": [
+   {
+    "t": "What's the most embarrassing thing you've done in front of a crush?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the biggest lie you've told your parents?",
+    "m": "ss"
+   },
+   {
+    "t": "Who in this room would you swap lives with for a day?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the worst gift you've ever received – and who gave it?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the dumbest thing you've ever spent money on?",
+    "m": "ss"
+   },
+   {
+    "t": "Which celebrity have you had a crush on the longest?",
+    "m": "ss"
+   },
+   {
+    "t": "What's your most annoying habit?",
+    "m": "ss"
+   },
+   {
+    "t": "Who in the group would survive longest in a disaster movie?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the most awkward thing you've said on a date?",
+    "m": "ss"
+   },
+   {
+    "t": "What talent do you pretend to have?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the weirdest thing you've ever googled?",
+    "m": "ss"
+   },
+   {
+    "t": "What do you regret most from last year?",
+    "m": "ss"
+   },
+   {
+    "t": "What's your body count?",
+    "m": "sd"
+   },
+   {
+    "t": "Who in this room would you most like to kiss?",
+    "m": "sd"
+   },
+   {
+    "t": "What's the wildest place you've had sex?",
+    "m": "sd"
+   },
+   {
+    "t": "Have you ever cheated?",
+    "m": "sd"
+   },
+   {
+    "t": "Who did you send your last nude to?",
+    "m": "sd"
+   },
+   {
+    "t": "What went wrong with your worst hookup? No names.",
+    "m": "sd"
+   },
+   {
+    "t": "What turns you on that you've never said out loud?",
+    "m": "sd"
+   },
+   {
+    "t": "Have you slept with someone in the group's wider circle?",
+    "m": "sd"
+   },
+   {
+    "t": "What's the wildest thing you've done while drunk?",
+    "m": "sd"
+   },
+   {
+    "t": "Who was the last person you thought about in that way?",
+    "m": "sd"
+   },
+   {
+    "t": "Have you ever faked it?",
+    "m": "sd"
+   },
+   {
+    "t": "Which hookup do you regret the most?",
+    "m": "sd"
+   },
+   {
+    "t": "Sing the chorus of a song of your choice – no music.",
+    "m": "ns"
+   },
+   {
+    "t": "Speak in a different accent for the rest of the round.",
+    "m": "ns"
+   },
+   {
+    "t": "Do your best impression of someone in the room.",
+    "m": "ns"
+   },
+   {
+    "t": "Show the last five photos in your camera roll.",
+    "m": "ns"
+   },
+   {
+    "t": "Do ten squats while making a toast.",
+    "m": "ns"
+   },
+   {
+    "t": "Call a friend and sing “Happy Birthday” to them.",
+    "m": "ns"
+   },
+   {
+    "t": "Talk like a news anchor for the next three rounds.",
+    "m": "ns"
+   },
+   {
+    "t": "Let the group read the last message you sent your mum.",
+    "m": "ns"
+   },
+   {
+    "t": "Dance with no music for 20 seconds.",
+    "m": "ns"
+   },
+   {
+    "t": "Tell a joke. If nobody laughs: two sips.",
+    "m": "ns"
+   },
+   {
+    "t": "Swap one item of clothing with the person on your left.",
+    "m": "ns"
+   },
+   {
+    "t": "Say the alphabet backwards. Mess up: drink.",
+    "m": "ns"
+   },
+   {
+    "t": "Give the person on your left a kiss on the cheek.",
+    "m": "nd"
+   },
+   {
+    "t": "Whisper something flirty to the person on your right.",
+    "m": "nd"
+   },
+   {
+    "t": "Let the group read the last three messages in your most-used chat.",
+    "m": "nd"
+   },
+   {
+    "t": "Text “what are you up to tonight?” to the last person you dated.",
+    "m": "nd"
+   },
+   {
+    "t": "Take off one item of clothing for the rest of the round.",
+    "m": "nd"
+   },
+   {
+    "t": "Sit on someone's lap for the rest of the round – if they say yes.",
+    "m": "nd"
+   },
+   {
+    "t": "Show the last person you searched for on Instagram.",
+    "m": "nd"
+   },
+   {
+    "t": "Take a sip without using your hands.",
+    "m": "nd"
+   },
+   {
+    "t": "Describe your best hookup in three words.",
+    "m": "nd"
+   },
+   {
+    "t": "Do a sexy dance for the person you think is the hottest in the room.",
+    "m": "nd"
+   },
+   {
+    "t": "Let someone send one emoji to a contact of their choice from your phone.",
+    "m": "nd"
+   },
+   {
+    "t": "Ask the person on your right if you can give them a ten-second lap dance. If they say no: drink three.",
+    "m": "nd"
+   }
+  ]
+ },
+ "rygg-mot-rygg": {
+  "kind": "deck",
+  "title": "Draw a question",
+  "modes": [
+   {
+    "v": "alle",
+    "t": "All"
+   }
+  ],
+  "items": [
+   {
+    "t": "Which of you is messier?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you spends longer in the bathroom?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is more jealous?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you has more exes?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is worse at reversing a car?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you has more money in the bank?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is more romantic?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you gets drunk faster?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is the better liar?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is better in bed?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you has worse taste in music?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is better at arguing?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you gives up first in an argument?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you loves their mum more?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is the better dancer?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you sleeps in longer at weekends?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you would survive longer on a desert island?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you has more nudes on their phone?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is more spoiled?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you takes more selfies?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you would get married first?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you gets more nervous on a first date?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you would forget the other's birthday?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you uses more snus (Scandi lip tobacco)?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you eats more when drunk?",
+    "m": "alle"
+   }
+  ]
+ },
+ "fotballkamp": {
+  "kind": "rules",
+  "title": "Tonight's rules",
+  "draw": 6,
+  "items": [
+   "Goal: fans of the team that conceded drink three.",
+   "Own goal: everyone drinks – and fans of the team that scored it drink two extra.",
+   "Yellow card: fans of the team that got it drink one.",
+   "Red card: five sips for the fans.",
+   "Penalty given: everyone drinks one. Miss: the shooter's fans drink three.",
+   "VAR check: everyone drinks one while waiting.",
+   "Offside: fans of the offside team drink one.",
+   "Post or crossbar: everyone drinks one.",
+   "Keeper saves a penalty: the keeper's fans hand out three.",
+   "A player rolls around on the ground for more than ten seconds: everyone drinks.",
+   "The commentator says “of all time”: everyone drinks.",
+   "The commentator mispronounces a name: whoever spots it hands out two.",
+   "Substitution: fans of the team making the sub drink one.",
+   "Close-up of the manager chewing gum: drink one.",
+   "A player kisses the badge on their shirt: their fans drink two.",
+   "Corner: fans of the team that gets it hand out one.",
+   "Free kick in shooting range: everyone drinks one.",
+   "Goal from a free kick: everyone finishes their drink.",
+   "Hat-trick: everyone finishes their drink and toasts the scorer.",
+   "The captain argues with the ref: their fans drink one.",
+   "The crowd sings loud enough to hear on TV: everyone drinks one.",
+   "The ball goes into the crowd: whoever's sitting closest to the TV drinks.",
+   "A goal is disallowed: the fans who celebrated drink two.",
+   "More than five minutes of stoppage time: everyone drinks one.",
+   "Half-time: whoever supports the team that's losing fetches drinks for everyone.",
+   "Someone in the room celebrates before the ball goes in: they drink two.",
+   "Someone in the room says “I'd have scored that”: drink one.",
+   "Someone in the room yells at the ref: drink one.",
+   "The keeper goes up for a corner: everyone drinks.",
+   "A shot goes way over the bar: the shooter's fans drink one.",
+   "Close-up of a celebrity in the stands: everyone drinks.",
+   "The commentator mentions Haaland: everyone drinks.",
+   "Level at half-time: everyone toasts.",
+   "The match ends 0–0: everyone finishes their drink.",
+   "Your team wins: hand out five sips."
+  ]
+ },
+ "eurovision": {
+  "kind": "rules",
+  "title": "Tonight's rules",
+  "draw": 6,
+  "items": [
+   "Key change: everyone drinks.",
+   "Wind machine: everyone drinks.",
+   "Pyrotechnics: everyone drinks one.",
+   "A song in a language nobody understands: everyone drinks.",
+   "A country sings in English even though they have their own language: drink one.",
+   "The host makes a joke that falls flat: everyone drinks.",
+   "Someone dances in folk costume: everyone drinks one.",
+   "A performer is wearing more glitter than fabric: drink one.",
+   "The song is about love: whoever picked that country drinks one.",
+   "“Europe, start voting now!”: everyone toasts.",
+   "A performer has been in the contest before: drink one.",
+   "Last year's winner shows up: drink one.",
+   "The camera shows someone in the audience crying: drink one.",
+   "Animal or mascot on stage: everyone drinks.",
+   "Someone plays an instrument you clearly can't hear: drink one.",
+   "The performer lifts the mic stand: drink one.",
+   "The performer goes down into the audience: everyone drinks.",
+   "“Douze points” to your country: hand out two.",
+   "“Nul points” to your country: finish your drink.",
+   "Norway gets points: everyone toasts.",
+   "Norway gets zero points: everyone drinks – and remembers Jahn Teigen (Norway's legendary nul points).",
+   "Sweden gives Norway points: everyone toasts.",
+   "Norway gives Sweden twelve points: everyone drinks, bitterly.",
+   "A country gives twelve points to its neighbour: drink one.",
+   "The points reading drags on: everyone drinks.",
+   "Someone says “Good evening Europe!” in a thick accent: drink one.",
+   "Falsetto: drink one.",
+   "Someone in the room sings along to a song they claim not to know: that person drinks.",
+   "Someone in the room says “this is just politics”: drink one.",
+   "Costume change mid-song: everyone drinks.",
+   "The performer lies down on stage: everyone drinks.",
+   "Wind machine and key change in the same song: everyone finishes their drink.",
+   "The hosts change outfits: drink one.",
+   "The song is in more than one language: drink one.",
+   "Your song wins: hand out five sips."
+  ]
+ },
+ "duoleken": {
+  "kind": "deck",
+  "title": "Draw a question",
+  "modes": [
+   {
+    "v": "snill",
+    "t": "Mild"
+   },
+   {
+    "v": "droy",
+    "t": "Wild"
+   }
+  ],
+  "items": [
+   {
+    "t": "Who could be twins?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would win Survivor together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would start a band together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would survive longest on a desert island together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would be the best travel buddies?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would open a restaurant together – and go bankrupt?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would be the worst roommates?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would win Dancing with the Stars?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would argue the most on a long road trip?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would be the best pub quiz team?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would get kicked out of IKEA together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who could be a comedy duo?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would rob a bank – and get caught immediately?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would get lost in the mountains together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would start a podcast nobody listens to?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would open a bar together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would survive a zombie apocalypse together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would be the most annoying neighbours?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would win a reality show as a couple?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would be late to their own party together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would be the hottest couple?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would make out at an afterparty?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would have the best hookup?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would get caught in the act together?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would send each other the dirtiest messages?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would have a secret affair?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would end up in bed after one drink too many?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would be the most awkward couple on a first date?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would make the perfect friends with benefits?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would disappear together on a night out and come back with messy hair?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would win Ex on the Beach as a couple?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would take a weekend in Vegas and come home married?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would dance the closest on the dance floor?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would have sex at the cabin?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would be the most jealous couple?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would break up over Snapchat?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would share a bed on the weekend trip?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would do the walk of shame together?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would kiss for a tenner?",
+    "m": "droy"
+   },
+   {
+    "t": "Who would be the worst exes for each other?",
+    "m": "droy"
+   }
+  ]
+ },
+ "drikkehjulet": {
+  "kind": "wheel",
+  "title": "Spin the wheel",
+  "items": [
+   {
+    "t": "Drink 2",
+    "d": "Take two sips."
+   },
+   {
+    "t": "Hand out 3",
+    "d": "Split three sips between whoever you like."
+   },
+   {
+    "t": "Everyone",
+    "d": "The whole table takes a sip.",
+    "r": "Everyone drinks"
+   },
+   {
+    "t": "Left",
+    "d": "The person on your left drinks two."
+   },
+   {
+    "t": "Right",
+    "d": "The person on your right drinks two."
+   },
+   {
+    "t": "New rule",
+    "d": "Make a rule that lasts for the rest of the night."
+   },
+   {
+    "t": "Category",
+    "d": "Pick a category. Take turns naming something – whoever gets stuck drinks."
+   },
+   {
+    "t": "Never",
+    "d": "Say something you've never done. Everyone who has done it drinks.",
+    "r": "Never have I ever"
+   },
+   {
+    "t": "Point",
+    "d": "Say “Who's most likely to …”. On three, everyone points – one sip per finger.",
+    "r": "Most likely to"
+   },
+   {
+    "t": "Waterfall",
+    "d": "Everyone starts drinking at the same time. You can't stop until the person on your right has stopped."
+   },
+   {
+    "t": "Cheers",
+    "d": "Pick someone to toast with. You both drink."
+   },
+   {
+    "t": "Free",
+    "d": "You got away with it. Pass the phone on.",
+    "r": "Free round"
+   },
+   {
+    "t": "Eye colour",
+    "d": "Everyone with the same eye colour as you drinks."
+   },
+   {
+    "t": "Siblings",
+    "d": "Everyone drinks one sip per sibling they have."
+   },
+   {
+    "t": "Single",
+    "d": "Everyone who's single drinks two."
+   },
+   {
+    "t": "Colour",
+    "d": "Everyone wearing a top the same colour as yours drinks.",
+    "r": "Same colour"
+   },
+   {
+    "t": "Youngest",
+    "d": "The youngest person in the room drinks two. The oldest picks who goes next."
+   },
+   {
+    "t": "Accent",
+    "d": "Everyone who speaks with a regional accent or dialect drinks. Live in Oslo (or the capital)? Drink double."
+   }
+  ]
+ },
+ "50-50": {
+  "kind": "deck",
+  "alt": true,
+  "title": "Draw the next round",
+  "modes": [
+   {
+    "v": "snill",
+    "t": "Mild"
+   },
+   {
+    "v": "frekk",
+    "t": "Cheeky"
+   },
+   {
+    "v": "droy",
+    "t": "Wild"
+   }
+  ],
+  "items": [
+   {
+    "t": "Never have I ever gone to the cinema alone.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever fallen asleep at a party.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever googled myself.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever lied about my age.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever sung karaoke.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever fallen off my bike in front of someone.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever texted the wrong person.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever eaten something off the floor.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever been refused entry to a bar.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever called my mum on a night out.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever got a speeding ticket.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever pretended to get a joke.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever taken the wrong bus.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever forgotten the name of someone I just met.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever shoplifted as a kid.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever been late for work because I was hungover.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever worn the same socks two days in a row.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever cried at a movie.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever faked being sick to get out of something.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever taken a selfie on the toilet.",
+    "m": "snill",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever thrown up in a taxi.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever kissed someone I met the same night.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever drunk-texted my ex.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever woken up with no idea how I got home.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever been kicked out of a bar.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever ghosted someone.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever stalked an ex on Instagram.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever lied about how much I drank.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever kissed someone in this group.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever snuck out of someone's flat in the morning.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever fallen asleep on the toilet in a bar.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever called someone at four in the morning.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever drunk at work.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever dated two people at the same time.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever said “I love you” while drunk.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever peed outside in the city.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever gone on a date with someone from a dating app.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever stolen a glass from a bar.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever dumped someone over text.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever shown up to work still drunk.",
+    "m": "frekk",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever had sex in a public place.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever sent a nude.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever had a one-night stand.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever slept with an ex.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever had sex on a first date.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever cheated.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever had sex in a car.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever faked an orgasm.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever slept with someone from work.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever had a threesome.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever been caught in the act.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever slept with someone without knowing their name.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever had sex at my parents' house.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever filmed myself in bed.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever slept with someone in this group's wider circle.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever had a friend with benefits.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever bought a sex toy.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever had sex on a plane, train or boat.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever slept with someone to make someone else jealous.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Never have I ever had sex in a bar.",
+    "m": "droy",
+    "k": "Never have I ever"
+   },
+   {
+    "t": "Who's most likely to be late to their own wedding?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would survive longest in a zombie apocalypse?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who's falling asleep first tonight?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most unread messages right now?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would win Survivor?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who could live on pizza for the rest of their life?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who still calls their mum when something breaks?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most questionable taste in music?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would become famous first?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who could forget their own name on a name tag?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who laughs loudest at their own jokes?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who took the longest to pick an outfit tonight?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who gets lost even with Google Maps on?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would get fired first from a summer job?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most photos of food on their phone?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would lose an argument to a seven-year-old?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who gets the grumpiest when they lose at board games?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who could survive a week without their phone?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who talks the most in their sleep?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would be the first one kicked out of the Big Brother house?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who tells stories the most dramatically?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who buys the most stuff online they don't need?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would win an eating contest?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who sings the loudest in the shower?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most half-finished projects at home?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would be the worst roommate?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who says “just one more” and never means it?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would do best alone on a desert island?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who gets scared the easiest?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most pointless talent?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who cries at adverts?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would make a good politician?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who's the slowest at replying to messages?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would win a dance battle?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has spent the most money on something completely pointless?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who's first to run out of a haunted house?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would be the best TV host?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has said “bye” and then walked off in the same direction as the person they said it to?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most embarrassing photos in their camera roll?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would be the first to get caught dodging the fare on the tram?",
+    "m": "snill",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has thrown up in the most unfortunate place?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has woken up with half a kebab in their bed?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has texted “miss you” to an ex at 3 a.m.?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the worst drunk party trick in the group?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has exaggerated how many people they've slept with?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has made out with someone without knowing their name?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would do a body shot off someone in this room?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has been kicked out of a taxi?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most shameful search history?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has stalked a date so deep they found their mum on Facebook?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would sleep with a celebrity even if they had a partner?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has kissed two people from the same group on the same night?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has afterparty photos they never want to see again?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has peed somewhere they absolutely shouldn't have?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has been dumped over Snapchat?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has checked out a mate's partner?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the worst pulling record in the group?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would be up for strip poker tonight?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has sent a dirty message in the wrong group chat?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has been caught by their parents with someone in their room?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who's most likely to get refused entry tonight?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has blamed being drunk for something they meant completely sober?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has an ex that everyone in the group hates?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has called an ex and cried?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would make out with someone in the room for a tenner?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most hookups they deny?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most cringe dating app bio?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has hit on a bartender – and got free drinks?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has gone on a date just to get invited to a party?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has a screenshot of someone in this group they shouldn't have?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would dare read out their last message to their ex?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has walked home from a night out with their shoes in their hand?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who gets the most flirty after three drinks?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most people they hide from on a night out?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has woken up with new contacts in their phone and zero clue?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has shown up to work or school still drunk?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has kissed someone of the same sex?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has tried snus while drunk and regretted it?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has gone to bed fully clothed and woken up with one shoe?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has said “I'm not drunk” while clearly slurring?",
+    "m": "frekk",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the highest body count in the room?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had sex in a public place?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has slept with someone to avoid the night bus home?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had sex in their parents' bed?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had a threesome – or seriously considered one?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has faked an orgasm?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who's most likely to hook up with someone tonight?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has slept with someone in this room?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has sent a nude before the first date?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had sex at work?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has been caught in the middle of the act?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has disappeared from a party with someone and come back before anyone noticed?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most surprising turn-on?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has slept with an ex after the breakup?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had sex with someone whose name they never found out?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has dated someone just for the sex?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who could have a friend with benefits in this group?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has cheated?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had sex in a car?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has the most nudes on their phone right now?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has said the wrong name in bed?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has slept with someone they met the same night?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had sex with their roommate on the other side of the wall?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has a drunk story they've never told anyone?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has kicked someone out before breakfast?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has done something in bed they'd never tell their parents?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had sex on a plane, a train or a boat?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would join an orgy if nobody ever found out?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has gone the longest since their last hookup?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has filmed themselves in bed?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has slept with someone from the gym?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has slept with someone just to make an ex jealous?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had sex at the cabin with others in the next room?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has taken someone home in under ten minutes?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has done it in a bar toilet?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had a “just one night” that turned into several months?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has got the wildest messages tonight?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has done the walk of shame in broad daylight?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who would say yes to a reality show where people hook up on TV?",
+    "m": "droy",
+    "k": "Snus tin"
+   },
+   {
+    "t": "Who has had sex on a first date?",
+    "m": "droy",
+    "k": "Snus tin"
+   }
+  ]
+ },
+ "forraeder": {
+  "kind": "forraeder",
+  "title": "Draw a card",
+  "modes": [
+   {
+    "v": "snill",
+    "t": "Mild"
+   },
+   {
+    "v": "droy",
+    "t": "Wild"
+   }
+  ],
+  "items": [
+   {
+    "t": "The weirdest thing I've ever eaten is …",
+    "m": "snill"
+   },
+   {
+    "t": "My first job was …",
+    "m": "snill"
+   },
+   {
+    "t": "I once got kicked out of …",
+    "m": "snill"
+   },
+   {
+    "t": "The most famous person I've ever met is …",
+    "m": "snill"
+   },
+   {
+    "t": "When I was little, I thought that …",
+    "m": "snill"
+   },
+   {
+    "t": "I once won …",
+    "m": "snill"
+   },
+   {
+    "t": "The dumbest thing I've done for money is …",
+    "m": "snill"
+   },
+   {
+    "t": "My most embarrassing injury happened because …",
+    "m": "snill"
+   },
+   {
+    "t": "I was once on TV because …",
+    "m": "snill"
+   },
+   {
+    "t": "A talent nobody knows about is that I can …",
+    "m": "snill"
+   },
+   {
+    "t": "I'm terrified of …",
+    "m": "snill"
+   },
+   {
+    "t": "The first thing I bought with my own money was …",
+    "m": "snill"
+   },
+   {
+    "t": "I've been fined for …",
+    "m": "snill"
+   },
+   {
+    "t": "The worst holiday I've ever had was …",
+    "m": "snill"
+   },
+   {
+    "t": "I once got lost in …",
+    "m": "snill"
+   },
+   {
+    "t": "The weirdest thing I've found on the street is …",
+    "m": "snill"
+   },
+   {
+    "t": "The most spontaneous thing I've ever done is …",
+    "m": "snill"
+   },
+   {
+    "t": "I once lied my way into …",
+    "m": "snill"
+   },
+   {
+    "t": "The most expensive thing I've lost is …",
+    "m": "snill"
+   },
+   {
+    "t": "I've fallen asleep on …",
+    "m": "snill"
+   },
+   {
+    "t": "As a teenager, I dreamed of becoming …",
+    "m": "snill"
+   },
+   {
+    "t": "I have an autograph from …",
+    "m": "snill"
+   },
+   {
+    "t": "My first concert was …",
+    "m": "snill"
+   },
+   {
+    "t": "I once saved …",
+    "m": "snill"
+   },
+   {
+    "t": "The weirdest nickname I've had is …",
+    "m": "snill"
+   },
+   {
+    "t": "The worst haircut I've had was …",
+    "m": "snill"
+   },
+   {
+    "t": "I once called an ambulance because …",
+    "m": "snill"
+   },
+   {
+    "t": "The longest I've gone without my phone is …",
+    "m": "snill"
+   },
+   {
+    "t": "I've met royalty because …",
+    "m": "snill"
+   },
+   {
+    "t": "The weirdest gift I've ever received is …",
+    "m": "snill"
+   },
+   {
+    "t": "The wildest thing I've done while drunk is …",
+    "m": "droy"
+   },
+   {
+    "t": "The most awkward place I've woken up is …",
+    "m": "droy"
+   },
+   {
+    "t": "My worst date ended with …",
+    "m": "droy"
+   },
+   {
+    "t": "I once got caught …",
+    "m": "droy"
+   },
+   {
+    "t": "I once sent a text to the wrong person about …",
+    "m": "droy"
+   },
+   {
+    "t": "I once lied to a partner about …",
+    "m": "droy"
+   },
+   {
+    "t": "The most embarrassing thing that's happened to me in bed is …",
+    "m": "droy"
+   },
+   {
+    "t": "I've disappeared from a party with …",
+    "m": "droy"
+   },
+   {
+    "t": "The weirdest place I've had sex is …",
+    "m": "droy"
+   },
+   {
+    "t": "I ghosted someone because …",
+    "m": "droy"
+   },
+   {
+    "t": "My first boyfriend/girlfriend was …",
+    "m": "droy"
+   },
+   {
+    "t": "I got kicked out of a bar because …",
+    "m": "droy"
+   },
+   {
+    "t": "The worst pick-up line that actually worked on me was …",
+    "m": "droy"
+   },
+   {
+    "t": "I once woke up next to …",
+    "m": "droy"
+   },
+   {
+    "t": "The dumbest thing I've said to a partner is …",
+    "m": "droy"
+   },
+   {
+    "t": "The boldest lie I've got away with is …",
+    "m": "droy"
+   },
+   {
+    "t": "I've made out with someone from …",
+    "m": "droy"
+   },
+   {
+    "t": "The longest I've been out partying in one go is …",
+    "m": "droy"
+   },
+   {
+    "t": "I once snuck out of someone's flat because …",
+    "m": "droy"
+   },
+   {
+    "t": "The wildest afterparty I've been to ended with …",
+    "m": "droy"
+   }
+  ]
+ },
+ "gjett-aret": {
+  "kind": "aar",
+  "title": "Guess the year"
+ },
+ "ring-of-fire": {
+  "kind": "ringoffire",
+  "title": "Game mode",
+  "kort": {
+   "A": [
+    "Waterfall",
+    "Everyone starts drinking. Nobody can stop until the person before them has stopped."
+   ],
+   "2": [
+    "You",
+    "Point at someone who drinks."
+   ],
+   "3": [
+    "Me",
+    "You drink yourself."
+   ],
+   "4": [
+    "Whores",
+    "All the girls drink."
+   ],
+   "5": [
+    "Thumb",
+    "Put your thumb on the edge of the table whenever you like. The last person to follow drinks."
+   ],
+   "6": [
+    "Dicks",
+    "All the guys drink."
+   ],
+   "7": [
+    "Heaven",
+    "Everyone raises a hand in the air. Last one drinks."
+   ],
+   "8": [
+    "Mate",
+    "Pick a mate who drinks every time you drink."
+   ],
+   "9": [
+    "Rhyme",
+    "Say a word. Go round the table rhyming until someone gets stuck – they drink."
+   ],
+   "10": [
+    "Category",
+    "Pick a category. Go round the table until someone gets stuck – they drink."
+   ],
+   "J": [
+    "Rule",
+    "Make a rule that applies for the rest of the game."
+   ],
+   "Q": [
+    "Question master",
+    "Until the next queen, anyone who answers a question from you drinks."
+   ],
+   "K": [
+    "King",
+    ""
+   ]
+  },
+  "konger": [
+   5,
+   10,
+   15,
+   20
+  ]
+ },
+ "sannhet-eller-drikk": {
+  "kind": "deck",
+  "title": "Draw a question",
+  "modes": [
+   {
+    "v": "ss",
+    "t": "Mild"
+   },
+   {
+    "v": "sd",
+    "t": "Wild"
+   }
+  ],
+  "items": [
+   {
+    "t": "What's the most embarrassing thing you've done in front of a crush?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the biggest lie you've told your parents?",
+    "m": "ss"
+   },
+   {
+    "t": "Who in this room would you swap lives with for a day?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the worst gift you've ever received – and who gave it?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the dumbest thing you've ever spent money on?",
+    "m": "ss"
+   },
+   {
+    "t": "Which celebrity have you had a crush on the longest?",
+    "m": "ss"
+   },
+   {
+    "t": "What's your most annoying habit?",
+    "m": "ss"
+   },
+   {
+    "t": "Who in the group would survive longest in a disaster movie?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the most awkward thing you've said on a date?",
+    "m": "ss"
+   },
+   {
+    "t": "What talent do you pretend to have?",
+    "m": "ss"
+   },
+   {
+    "t": "What's the weirdest thing you've ever googled?",
+    "m": "ss"
+   },
+   {
+    "t": "What do you regret most from last year?",
+    "m": "ss"
+   },
+   {
+    "t": "What's your body count?",
+    "m": "sd"
+   },
+   {
+    "t": "Who in this room would you most like to kiss?",
+    "m": "sd"
+   },
+   {
+    "t": "What's the wildest place you've had sex?",
+    "m": "sd"
+   },
+   {
+    "t": "Have you ever cheated?",
+    "m": "sd"
+   },
+   {
+    "t": "Who did you send your last nude to?",
+    "m": "sd"
+   },
+   {
+    "t": "What went wrong with your worst hookup? No names.",
+    "m": "sd"
+   },
+   {
+    "t": "What turns you on that you've never said out loud?",
+    "m": "sd"
+   },
+   {
+    "t": "Have you slept with someone in the group's wider circle?",
+    "m": "sd"
+   },
+   {
+    "t": "What's the wildest thing you've done while drunk?",
+    "m": "sd"
+   },
+   {
+    "t": "Who was the last person you thought about in that way?",
+    "m": "sd"
+   },
+   {
+    "t": "Have you ever faked it?",
+    "m": "sd"
+   },
+   {
+    "t": "Which hookup do you regret the most?",
+    "m": "sd"
+   }
+  ]
+ },
+ "tanken-bak-sangen": {
+  "kind": "deck",
+  "title": "Draw a category",
+  "modes": [
+   {
+    "v": "alle",
+    "t": "All"
+   }
+  ],
+  "items": [
+   {
+    "t": "Your favourite song",
+    "m": "alle"
+   },
+   {
+    "t": "A song that has shaped your life",
+    "m": "alle"
+   },
+   {
+    "t": "A song with a memory attached to it",
+    "m": "alle"
+   },
+   {
+    "t": "The song that gets you ready for a night out",
+    "m": "alle"
+   },
+   {
+    "t": "The song you're ashamed to love",
+    "m": "alle"
+   },
+   {
+    "t": "The song from your first party",
+    "m": "alle"
+   },
+   {
+    "t": "The song you want played at your funeral",
+    "m": "alle"
+   },
+   {
+    "t": "The best song to sing in the shower",
+    "m": "alle"
+   },
+   {
+    "t": "The song that reminds you of an ex",
+    "m": "alle"
+   },
+   {
+    "t": "The song from the summer you'll never forget",
+    "m": "alle"
+   },
+   {
+    "t": "The song you always turn up in the car",
+    "m": "alle"
+   },
+   {
+    "t": "The song you'd use as your walk-out music",
+    "m": "alle"
+   },
+   {
+    "t": "The song you know every single lyric to",
+    "m": "alle"
+   },
+   {
+    "t": "The song that makes you cry",
+    "m": "alle"
+   },
+   {
+    "t": "The song from middle school",
+    "m": "alle"
+   },
+   {
+    "t": "The song your parents used to play",
+    "m": "alle"
+   },
+   {
+    "t": "The song you'd sing at karaoke right now",
+    "m": "alle"
+   },
+   {
+    "t": "A song that describes you",
+    "m": "alle"
+   },
+   {
+    "t": "The song you'd put on at an afterparty at 4 a.m.",
+    "m": "alle"
+   },
+   {
+    "t": "A song nobody else here knows",
+    "m": "alle"
+   }
+  ]
+ }
+}

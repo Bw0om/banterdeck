@@ -1,0 +1,92 @@
+---
+// Salgsvilkår for Mitt vors Pluss. Felles for /no/vilkar (lang="no") og /terms (lang="en").
+import Base from '../../layouts/Base.astro';
+import { SELGER, CONTACT_EMAIL } from '../../config';
+import type { Lang } from '../../lib/i18n';
+const { lang = 'no' } = Astro.props as { lang?: Lang };
+const no = lang === 'no';
+const epost = SELGER.epost || CONTACT_EMAIL;
+---
+{no ? (
+<Base title="Salgsvilkår" description="Salgsvilkår for Mitt vors Pluss." lang="no">
+  <h1>Salgsvilkår for Mitt vors Pluss</h1>
+  <p class="lead">Kort og ærlig: du betaler én gang, Pluss virker med en gang, og ingenting fornyes av seg selv.</p>
+
+  <h2>Selger</h2>
+  <p>
+    {SELGER.navn && <>{SELGER.navn}<br /></>}
+    Org.nr. {SELGER.orgnr}<br />
+    {SELGER.adresse && <>{SELGER.adresse}<br /></>}
+    E-post: <a href={`mailto:${epost}`}>{epost}</a>
+  </p>
+
+  <h2>Hva du kjøper</h2>
+  <ul>
+    <li><b>Kveldspass – 29 kr:</b> Mitt vors Pluss i 24 timer fra kjøpet.</li>
+    <li><b>Årspass – 199 kr:</b> Mitt vors Pluss i 365 dager fra kjøpet.</li>
+  </ul>
+  <p>Pluss gir tilgang til betalte kortpakker og låser dem opp for alle i rom der du er vert. Kjøper du et nytt pass mens du allerede har Pluss, legges tiden til. Prisene er oppgitt i norske kroner inkludert eventuell merverdiavgift.</p>
+
+  <h2>Betaling</h2>
+  <p>Du betaler med Vipps. Beløpet trekkes når betalingen er godkjent, og Pluss knyttes til kontoen du er logget inn med.</p>
+
+  <h2>Ingen automatisk fornyelse</h2>
+  <p>Passene er engangskjøp. Når tiden er ute, stopper Pluss av seg selv – du blir aldri trukket igjen uten å kjøpe på nytt.</p>
+
+  <h2>Levering og angrerett</h2>
+  <p>Pluss er digitalt innhold som leveres med en gang betalingen er godkjent. Før du betaler, samtykker du til at leveringen starter umiddelbart, og bekrefter at du da mister angreretten (angrerettloven § 22 bokstav n). Virker ikke Pluss som det skal, ta kontakt – da finner vi en løsning eller gir deg pengene tilbake.</p>
+
+  <h2>Gavekoder og verving</h2>
+  <p>Gavekoder og kveldspass fra verving gir Pluss uten betaling og har ingen kontantverdi. En konto kan bare bli vervet én gang, bare de første 30 dagene etter at den ble laget, og hver konto kan få belønning for maks 20 vervinger per år. Misbruk, som å lage kontoer for å verve seg selv, kan føre til at passene fjernes.</p>
+
+  <h2>Alder</h2>
+  <p>Mitt vors og Pluss er for personer over 18 år.</p>
+
+  <h2>Personopplysninger</h2>
+  <p>Vi lagrer hvilken konto som har Pluss og hvilke kjøp som er gjort. Betalingsopplysninger håndteres av Vipps. Les mer i <a href="/no/privacy">personvernerklæringen</a>.</p>
+
+  <h2>Klager</h2>
+  <p>Ta kontakt på e-post hvis noe er galt. Kommer vi ikke til enighet, kan du klage til <a href="https://www.forbrukertilsynet.no" rel="noopener">Forbrukertilsynet</a> eller få hjelp av <a href="https://www.forbrukerradet.no" rel="noopener">Forbrukerrådet</a>.</p>
+</Base>
+) : (
+<Base title="Terms of sale" description="Terms of sale for Mitt vors Plus." lang="en">
+  <h1>Terms of sale for Mitt vors Plus</h1>
+  <p class="lead">Short and honest: you pay once, Plus works straight away, and nothing renews by itself.</p>
+
+  <h2>Seller</h2>
+  <p>
+    {SELGER.navn && <>{SELGER.navn}<br /></>}
+    Org. no. {SELGER.orgnr} (Norway)<br />
+    {SELGER.adresse && <>{SELGER.adresse}<br /></>}
+    Email: <a href={`mailto:${epost}`}>{epost}</a>
+  </p>
+
+  <h2>What you buy</h2>
+  <ul>
+    <li><b>Night pass – 29 NOK:</b> Mitt vors Plus for 24 hours from purchase.</li>
+    <li><b>Year pass – 199 NOK:</b> Mitt vors Plus for 365 days from purchase.</li>
+  </ul>
+  <p>Plus gives access to paid card packs and unlocks them for everyone in rooms where you are the host. If you buy a new pass while you already have Plus, the time is added on. Prices are in Norwegian kroner (NOK), including any VAT.</p>
+
+  <h2>Payment</h2>
+  <p>You pay with Vipps, the Norwegian mobile payment app, which requires a Norwegian Vipps account. The amount is charged when the payment is approved, and Plus is linked to the account you are logged in with.</p>
+
+  <h2>No automatic renewal</h2>
+  <p>The passes are one-off purchases. When the time runs out, Plus stops by itself – you will never be charged again unless you buy a new pass.</p>
+
+  <h2>Delivery and right of withdrawal</h2>
+  <p>Plus is digital content delivered as soon as the payment is approved. Before you pay, you agree that delivery starts immediately and confirm that you thereby lose your right of withdrawal (Norwegian Cancellation Act, section 22 (n)). If Plus doesn’t work as it should, get in touch – we’ll find a solution or give you your money back.</p>
+
+  <h2>Gift codes and referrals</h2>
+  <p>Gift codes and night passes from referrals give Plus without payment and have no cash value. An account can only be referred once, and only within the first 30 days after it was created, and each account can be rewarded for at most 20 referrals per year. Abuse, such as creating accounts to refer yourself, may lead to the passes being removed.</p>
+
+  <h2>Age</h2>
+  <p>Mitt vors and Plus are for people over 18.</p>
+
+  <h2>Personal data</h2>
+  <p>We store which account has Plus and which purchases have been made. Payment details are handled by Vipps. Read more in the <a href="/privacy">privacy policy</a>.</p>
+
+  <h2>Complaints</h2>
+  <p>Get in touch by email if something is wrong. If we can’t reach an agreement, you can complain to the <a href="https://www.forbrukertilsynet.no" rel="noopener">Norwegian Consumer Authority (Forbrukertilsynet)</a> or get help from the <a href="https://www.forbrukerradet.no" rel="noopener">Norwegian Consumer Council (Forbrukerrådet)</a>.</p>
+</Base>
+)}

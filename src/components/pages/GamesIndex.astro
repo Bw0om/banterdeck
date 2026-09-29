@@ -19,7 +19,9 @@ const ROM = new Set(['hvem-skrev-det', 'bloffquizen', 'samme-svar', 'spionen', '
   'ring-of-fire', 'forraeder', 'drikke-bingo', 'regelfabrikken', 'to-sannheter-og-en-logn', 'sannhet-eller-drikk', 'tanken-bak-sangen', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris']);
 const slugOf = (it: any) => (games.find((x) => x.name === it.name) || {}).slug;
 const FAV = ['ring-of-fire', 'regelfabrikken', 'pyramiden', 'forraeder', 'bussruta', 'drikke-bingo', 'opus', 'president'];
-const favs = no ? FAV.map((sl) => games.find((x) => x.slug === sl)).filter(Boolean) : [];
+const synlige = gamesFor(lang);
+const favs = FAV.map((sl) => synlige.find((x: any) => x.slug === sl)).filter(Boolean);
+const B = no ? { app: 'I appen', rom: 'Flere telefoner', pluss: '✨ Pluss' } : { app: 'In the app', rom: 'Multiple phones', pluss: '✨ Plus' };
 const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search games or equipment…';
 ---
 <Base title={L.gamesTitle} description={L.gamesDesc(gamesFor(lang).length)} lang={lang} gate={true} bilde="/og/drikkeleker.jpg">
@@ -29,6 +31,7 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
 
 
   {lang === 'no' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>🥤 Alkoholfri modus</button><span class="small" data-ikke-torr>Slurker blir straffepoeng – lekene funker like godt med brus.</span></p>}
+  {lang === 'en' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>🥤 Alcohol-free mode</button><span class="small" data-ikke-torr>Sips become penalty points – the games work just as well with soda.</span></p>}
 
   {lang === 'no' && (
     <p class="guidechips">
@@ -44,20 +47,29 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
       <a href="/no/leker/store-grupper">Store grupper</a>
     </p>
   )}
+  {lang === 'en' && (
+    <p class="guidechips">
+      <a class="btn gold" href="/find-a-game">Find a game</a>
+      <a class="btn" href="/room">Play together in a room</a>
+      <a class="btn" href="/plan">Plan the night</a>
+      <a class="btn" href="/plus">✨ Plus packs</a>
+      <a href="/suggest">Submit a game</a>
+    </p>
+  )}
 
   {favs.length > 0 && (
     <section class="favleker">
-      <h2>Spill rett på telefonen</h2>
-      <p class="small">Ingen kortstokk eller terning? Disse spiller dere rett i appen – flere av dem fra hver sin telefon.</p>
+      <h2>{no ? 'Spill rett på telefonen' : 'Play right on your phone'}</h2>
+      <p class="small">{no ? 'Ingen kortstokk eller terning? Disse spiller dere rett i appen – flere av dem fra hver sin telefon.' : 'No deck of cards or dice? Play these right in the app – several of them from your own phones.'}</p>
       <div class="favgrid">
         {favs.map((g: any) => (
           <a class="favlek" href={gameHref(g, (p) => path(lang, p), lang)}>
             <b>{t(g.name, lang)}</b>
             <span>{t(g.gear, lang)}</span>
             <span class="badges">
-              {APP.has(g.slug) && <i>I appen</i>}
-              {ROM.has(g.slug) && <i class="rom">Flere telefoner</i>}
-              {PL.has(g.slug) && <i class="pluss">✨ Pluss</i>}
+              {APP.has(g.slug) && <i>{B.app}</i>}
+              {ROM.has(g.slug) && <i class="rom">{B.rom}</i>}
+              {PL.has(g.slug) && <i class="pluss">{B.pluss}</i>}
             </span>
           </a>
         ))}
@@ -77,7 +89,7 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
   {groups.map((g: any, i: number) => (
     <section class:list={['group dictgroup', g.id === 'blikjent' && 'gruppe-rolig']} id={g.id} data-ggroup>
       <h3>{t(g.title, lang)}<span class="group-count">{g.list.length}</span></h3>
-      {g.id === 'blikjent' && no && <p class="small">Roligere leker – fine når dere ikke kjenner hverandre så godt ennå.</p>}
+      {g.id === 'blikjent' && <p class="small">{no ? 'Roligere leker – fine når dere ikke kjenner hverandre så godt ennå.' : "Calmer games – good for when you don't know each other that well yet."}</p>}
       <div class="gamelist">
         {g.list.map((it: any) => (
           <a class="game" href={hrefOf(it)}
@@ -85,11 +97,11 @@ const searchPh = lang === 'no' ? 'Søk etter lek eller utstyr …' : 'Search gam
             <span class="gn">{t(it.name, lang)}</span>
             <span class="gm">{t(it.gear, lang)}</span>
             <span class="gp">{it.pl} {L.players}</span>
-            {no && (APP.has(slugOf(it)) || ROM.has(slugOf(it))) && (
+            {(APP.has(slugOf(it)) || ROM.has(slugOf(it))) && (
               <span class="badges">
-                {APP.has(slugOf(it)) && <i>I appen</i>}
-                {ROM.has(slugOf(it)) && <i class="rom">Flere telefoner</i>}
-                {PL.has(slugOf(it)) && <i class="pluss">✨ Pluss</i>}
+                {APP.has(slugOf(it)) && <i>{B.app}</i>}
+                {ROM.has(slugOf(it)) && <i class="rom">{B.rom}</i>}
+                {PL.has(slugOf(it)) && <i class="pluss">{B.pluss}</i>}
               </span>
             )}
           </a>

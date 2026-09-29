@@ -136,12 +136,20 @@ const T = no ? {
           <button type="button" class="mini danger" id="slettBtn">{T.deleteAcc}</button>
         </div>
         <p id="plussLinje" class="konto-pluss" hidden></p>
-        {no && (
+        {no ? (
           <div class="konto-ekstra">
             <a class="konto-kort" href="/no/gjeng"><span>👥</span><b>Gjengene dine</b><small id="gjengTall">Sesongtabell over flere kvelder</small></a>
             <div class="konto-kort" id="vervKort"><span>🎁</span><b>Verv en venn</b>
               <small id="vervTekst">Dere får et gratis kveldspass hver når vennen har spilt sitt første rom.</small>
               <div class="dl-knapper"><button class="btn gold small" id="vervDel" type="button" disabled>Del vervelenken</button><button class="btn ghost small" id="vervBruk" type="button" hidden>Bruk et kveldspass</button></div>
+            </div>
+          </div>
+        ) : (
+          <div class="konto-ekstra">
+            <a class="konto-kort" href="/crew"><span>👥</span><b>Your crews</b><small id="gjengTall">A season table across many nights</small></a>
+            <div class="konto-kort" id="vervKort"><span>🎁</span><b>Refer a friend</b>
+              <small id="vervTekst">You each get a free night pass once your friend has played their first room.</small>
+              <div class="dl-knapper"><button class="btn gold small" id="vervDel" type="button" disabled>Share your referral link</button><button class="btn ghost small" id="vervBruk" type="button" hidden>Use a night pass</button></div>
             </div>
           </div>
         )}
@@ -337,8 +345,8 @@ const T = no ? {
             return '<article class="stokk-kort"><div><b>' + esc(s.navn) + '</b><span>' + (s.kort || []).length + ' ' + esc(T.cards) + (s.delt ? ' · ' + esc(T.shared) : '') + '</span></div>' +
               '<div class="stokk-knapper">' +
                 '<button class="btn gold small" data-st="spill" data-i="' + i + '" type="button">' + esc(T.play) + '</button>' +
-                (LANG === 'no' ? '<button class="btn small" data-st="rom" data-i="' + i + '" type="button">' + esc(T.playRoom) + '</button>' : '') +
-                (LANG === 'no' ? '<button class="mini" data-st="del" data-i="' + i + '" type="button">' + esc(T.share) + '</button>' : '') +
+                '<button class="btn small" data-st="rom" data-i="' + i + '" type="button">' + esc(T.playRoom) + '</button>' +
+                '<button class="mini" data-st="del" data-i="' + i + '" type="button">' + esc(T.share) + '</button>' +
                 (s.delt ? '<button class="mini" data-st="udel" data-i="' + i + '" type="button">' + esc(T.unshare) + '</button>' : '') +
                 '<button class="mini" data-st="rediger" data-i="' + i + '" type="button">' + esc(T.edit) + '</button>' +
                 '<button class="mini danger" data-st="slett" data-i="' + i + '" type="button">' + esc(T.del) + '</button>' +
@@ -385,9 +393,9 @@ const T = no ? {
           var s = stokker[+b.dataset.i]; if (!s) return;
           if (b.dataset.st === 'rediger') return aapneSkjema(s);
           if (b.dataset.st === 'del') {
-            var lenke = location.origin + '/no/kortstokk?s=' + s.id;
+            var lenke = location.origin + (LANG === 'no' ? '/no/kortstokk?s=' : '/deck?s=') + s.id;
             var dele = function () {
-              if (navigator.share) return navigator.share({ title: s.navn, text: 'Spill kortstokken «' + s.navn + '» på Mitt vors', url: lenke }).catch(function () {});
+              if (navigator.share) return navigator.share({ title: s.navn, text: LANG === 'no' ? 'Spill kortstokken «' + s.navn + '» på Mitt vors' : 'Play the deck “' + s.navn + '” on Mitt vors', url: lenke }).catch(function () {});
               if (navigator.clipboard) navigator.clipboard.writeText(lenke).then(function () { say($('syncMsg'), T.linkCopied, 'ok'); });
             };
             if (s.delt) return dele();
@@ -395,7 +403,7 @@ const T = no ? {
           }
           if (b.dataset.st === 'udel') return K.stokker.del(s.id, false).then(function () { s.delt = false; tegnStokker(); say($('syncMsg'), T.unshared, 'ok'); }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
           if (b.dataset.st === 'spill') return spill(s);
-          if (b.dataset.st === 'rom') { skrivLS('bd_stokk_rom', { id: s.id, navn: s.navn, kort: s.kort }); location.href = '/no/rom'; return; }
+          if (b.dataset.st === 'rom') { skrivLS('bd_stokk_rom', { id: s.id, navn: s.navn, kort: s.kort }); location.href = LANG === 'no' ? '/no/rom' : '/room'; return; }
           if (b.dataset.st === 'slett') {
             if (b.dataset.sikker !== '1') { b.dataset.sikker = '1'; b.textContent = T.delConfirm; return; }
             K.stokker.slett(s.id).then(hentStokker).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
@@ -468,37 +476,45 @@ const T = no ? {
           });
         });
 
-        var verv = null;
+        var verv = null, EN = LANG === 'en', EN_HODE = EN ? { headers: { 'x-lang': 'en' } } : undefined;
         function visVerv() {
-          K.api('/api/verv').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+          K.api('/api/verv', EN_HODE).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
             if (!d || !d.kode) return;
             verv = d;
             $('vervDel').disabled = false;
-            $('vervTekst').textContent = (d.antall ? 'Du har vervet ' + d.antall + (d.antall === 1 ? ' venn' : ' venner') + '. ' : 'Dere får et gratis kveldspass hver når vennen har spilt sitt første rom. ') +
-              (d.kveldspass ? 'Du har ' + d.kveldspass + ' kveldspass på lur.' : '');
+            $('vervTekst').textContent = EN
+              ? (d.antall ? 'You\u2019ve referred ' + d.antall + (d.antall === 1 ? ' friend' : ' friends') + '. ' : 'You each get a free night pass once your friend has played their first room. ') +
+                (d.kveldspass ? 'You have ' + d.kveldspass + (d.kveldspass === 1 ? ' night pass' : ' night passes') + ' saved up.' : '')
+              : (d.antall ? 'Du har vervet ' + d.antall + (d.antall === 1 ? ' venn' : ' venner') + '. ' : 'Dere får et gratis kveldspass hver når vennen har spilt sitt første rom. ') +
+                (d.kveldspass ? 'Du har ' + d.kveldspass + ' kveldspass på lur.' : '');
             $('vervBruk').hidden = !d.kveldspass;
           }).catch(function () {});
         }
         function visGjenger() {
-          K.api('/api/gjeng').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+          K.api('/api/gjeng', EN_HODE).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
             if (!d || !d.gjenger) return;
-            var n = d.gjenger.length;
-            $('gjengTall').textContent = n ? n + (n === 1 ? ' gjeng: ' : ' gjenger: ') + d.gjenger.slice(0, 3).map(function (g) { return g.navn; }).join(', ') : 'Lag en gjeng og få sesongtabell over flere kvelder';
+            var n = d.gjenger.length, navn = d.gjenger.slice(0, 3).map(function (g) { return g.navn; }).join(', ');
+            $('gjengTall').textContent = EN
+              ? (n ? n + (n === 1 ? ' crew: ' : ' crews: ') + navn : 'Create a crew and get a season table across many nights')
+              : (n ? n + (n === 1 ? ' gjeng: ' : ' gjenger: ') + navn : 'Lag en gjeng og få sesongtabell over flere kvelder');
           }).catch(function () {});
         }
         if ($('vervDel')) {
           $('vervDel').addEventListener('click', function () {
             if (!verv) return;
+            if (EN) return window.BDDel.lenke(location.origin + '/?v=' + verv.kode, 'Join me on Mitt vors – drinking games where everyone plays from their own phone. Use my link and we both get a free night of Plus 🎁', {
+              tittel: 'Refer a friend', ingress: 'When your friend creates an account and plays their first room, you each get a night pass.',
+            });
             window.BDDel.lenke(location.origin + '/no/?v=' + verv.kode, 'Bli med på Mitt vors – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁', {
               tittel: 'Verv en venn', ingress: 'Når vennen lager konto og spiller sitt første rom, får dere et kveldspass hver.',
             });
           });
           $('vervBruk').addEventListener('click', function () {
             var b = this; b.disabled = true;
-            K.api('/api/verv', { method: 'POST' }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
+            K.api('/api/verv', Object.assign({ method: 'POST' }, EN_HODE || {})).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
               b.disabled = false;
-              if (!x.ok) return say($('syncMsg'), x.d.melding || 'Det gikk ikke.', 'err');
-              say($('syncMsg'), '✨ Pluss er på i 24 timer. God kveld!', 'ok');
+              if (!x.ok) return say($('syncMsg'), x.d.melding || (EN ? 'That didn\u2019t work.' : 'Det gikk ikke.'), 'err');
+              say($('syncMsg'), EN ? '✨ Plus is on for 24 hours. Have a great night!' : '✨ Pluss er på i 24 timer. God kveld!', 'ok');
               setTimeout(function () { location.reload(); }, 900);
             });
           });
@@ -518,18 +534,25 @@ const T = no ? {
             else if (!u.brukernavn) $('pwForm').hidden = false;
             K.api('/api/statistikk?sjekk=1').then(function (r) { return r.ok ? r.json() : {}; }).then(function (d) { $('statLenke').hidden = !d.ok; }).catch(function () {});
             hentStokker();
-            if (LANG === 'no') K.api('/api/pluss/status').then(function (r) { return r.json(); }).then(function (d) {
+            K.api('/api/pluss/status', EN_HODE).then(function (r) { return r.json(); }).then(function (d) {
               var el = $('plussLinje'); el.hidden = false;
               var kode = null; try { kode = localStorage.getItem('bd_gavekode'); } catch (x) {}
+              if (EN) {
+                if (kode) { el.innerHTML = '🎁 You have a gift code waiting – <a href="/plus">activate it now</a>'; return; }
+                el.innerHTML = d.aktiv
+                  ? '✨ <b>Plus</b> until ' + esc(new Date(d.til).toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/plus">More</a>'
+                  : '✨ <a href="/plus">' + (d.gratisBrukt ? 'Get Mitt vors Plus' : 'Try Mitt vors Plus free tonight') + '</a>';
+                return;
+              }
               if (kode) { el.innerHTML = '🎁 Du har en gavekode som venter – <a href="/no/pluss">aktiver den nå</a>'; return; }
               el.innerHTML = d.aktiv
                 ? '✨ <b>Pluss</b> til ' + esc(new Date(d.til).toLocaleString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/no/pluss">Mer</a>'
                 : '✨ <a href="/no/pluss">' + (d.gratisBrukt ? 'Få Mitt vors Pluss' : 'Prøv Mitt vors Pluss gratis i kveld') + '</a>';
             }).catch(function () {});
-            if (LANG === 'no') {
+            {
               // Kom man hit for å logge inn fra en annen side (f.eks. en gjenglenke), gå tilbake dit
               var tilbake = null; try { tilbake = sessionStorage.getItem('bd_etter_innlogging'); sessionStorage.removeItem('bd_etter_innlogging'); } catch (x) {}
-              if (tilbake && /^\/no\/[a-z0-9/?=&%-]*$/i.test(tilbake)) { location.href = tilbake; return; }
+              if (tilbake && (EN ? /^\/(?!no\/|\/)[a-z0-9/?=&%-]*$/i : /^\/no\/[a-z0-9/?=&%-]*$/i).test(tilbake)) { location.href = tilbake; return; }
               visVerv(); visGjenger();
             }
             try { sessionStorage.setItem('bd_favsynk', '1'); } catch (x) {}

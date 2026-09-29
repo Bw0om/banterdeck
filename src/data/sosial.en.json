@@ -1,0 +1,366 @@
+{
+ "hvemskrev": [
+  "The worst present you've ever gotten",
+  "Something you've never told your parents",
+  "The most embarrassing thing that's happened to you while drunk",
+  "The weirdest job you've had – or would want",
+  "A habit you hide from other people",
+  "The worst date you've ever been on",
+  "Something you believe in but don't dare say out loud",
+  "The biggest lie you've gotten away with",
+  "What you'd do with a million bucks tomorrow",
+  "Your first ever crush",
+  "A song you're ashamed to love",
+  "The dumbest thing you've spent money on",
+  "Something you've done that no one in this room knows about",
+  "Your worst holiday experience",
+  "The strangest dream you remember",
+  "What you really thought the first time you met someone in this room",
+  "A rule you broke as a kid",
+  "The worst haircut you've ever had",
+  "Something you've googled that you don't want anyone to see",
+  "What's on your bucket list",
+  "Your most irrational fear",
+  "The celebrity you'd swap lives with for a day",
+  "The most embarrassing thing you've said to a boss or teacher",
+  "A food you refuse to eat",
+  "Why you actually came tonight",
+  "The worst thing you've ever made in a kitchen",
+  "A time you got blamed for something you actually did",
+  "The silliest reason you've ever cried",
+  "Something you collected as a kid",
+  "A talent nobody knows you have",
+  "What you'd be famous for if you became a celebrity",
+  "The worst text you've sent to the wrong person",
+  "Your most useless superpower",
+  "Something you've lied about on a job application or CV",
+  "The last place you fell asleep where you really shouldn't have",
+  "The weirdest thing in your home right now",
+  "What animal you'd be – and why",
+  "A time you were way too drunk for the occasion",
+  "Something from your childhood you're still bitter about",
+  "What you really think about Christmas"
+ ],
+ "bloff": [
+  {
+   "q": "What is Scotland's national animal?",
+   "a": "The unicorn"
+  },
+  {
+   "q": "How many hearts does an octopus have?",
+   "a": "Three"
+  },
+  {
+   "q": "What was Coca-Cola originally sold as?",
+   "a": "Medicine"
+  },
+  {
+   "q": "What is a group of flamingos called?",
+   "a": "A flamboyance"
+  },
+  {
+   "q": "Which country has the most lakes in the world?",
+   "a": "Canada"
+  },
+  {
+   "q": "What was Google called before it was called Google?",
+   "a": "BackRub"
+  },
+  {
+   "q": "How long did the shortest war in history last?",
+   "a": "About 38 minutes"
+  },
+  {
+   "q": "What colour is a polar bear's skin?",
+   "a": "Black"
+  },
+  {
+   "q": "What is the fear of long words called?",
+   "a": "Hippopotomonstrosesquippedaliophobia"
+  },
+  {
+   "q": "Which country invented the cheese slicer?",
+   "a": "Norway"
+  },
+  {
+   "q": "During World War II, what did Norwegians wear paper clips as a symbol of?",
+   "a": "Resistance against the Nazi occupation"
+  },
+  {
+   "q": "Which animal has cube-shaped poop?",
+   "a": "The wombat"
+  },
+  {
+   "q": "What is the plastic tip at the end of a shoelace called?",
+   "a": "An aglet"
+  },
+  {
+   "q": "What animal is on the flag of Wales?",
+   "a": "A red dragon"
+  },
+  {
+   "q": "Which bird can fly backwards?",
+   "a": "The hummingbird"
+  },
+  {
+   "q": "Which planet spins the opposite way to most of the others?",
+   "a": "Venus"
+  },
+  {
+   "q": "How many eyes does a honeybee have?",
+   "a": "Five"
+  },
+  {
+   "q": "What is the world's most expensive spice?",
+   "a": "Saffron"
+  },
+  {
+   "q": "How many legs does a lobster have?",
+   "a": "Ten"
+  },
+  {
+   "q": "Which US state has only one syllable in its name?",
+   "a": "Maine"
+  },
+  {
+   "q": "Where does the Tetris theme come from?",
+   "a": "A Russian folk song"
+  },
+  {
+   "q": "Which animal can't throw up?",
+   "a": "The horse"
+  },
+  {
+   "q": "Where in the body is the smallest bone?",
+   "a": "In the ear"
+  },
+  {
+   "q": "What does the name LEGO mean?",
+   "a": "“Play well” (from the Danish “leg godt”)"
+  },
+  {
+   "q": "Which country has the most pyramids?",
+   "a": "Sudan"
+  },
+  {
+   "q": "What colour were carrots before they were orange?",
+   "a": "Purple"
+  },
+  {
+   "q": "Which animal has the strongest bite in the world?",
+   "a": "The saltwater crocodile"
+  },
+  {
+   "q": "What is Norway's national instrument?",
+   "a": "The Hardanger fiddle"
+  },
+  {
+   "q": "Which city was Norway's capital before Oslo?",
+   "a": "Bergen"
+  },
+  {
+   "q": "Which mammal lays eggs?",
+   "a": "The platypus"
+  },
+  {
+   "q": "Which country has the most time zones (counting all its territories)?",
+   "a": "France"
+  },
+  {
+   "q": "What was the name of the first cloned sheep?",
+   "a": "Dolly"
+  },
+  {
+   "q": "Which fruit is actually a berry: the banana or the strawberry?",
+   "a": "The banana"
+  },
+  {
+   "q": "Which animal has blue blood?",
+   "a": "The octopus"
+  },
+  {
+   "q": "What is the largest ocean in the world?",
+   "a": "The Pacific Ocean"
+  },
+  {
+   "q": "Which letter doesn't appear in the name of any US state?",
+   "a": "Q"
+  },
+  {
+   "q": "Which city gets a Christmas tree from Oslo every year as thanks for its help during WWII?",
+   "a": "London"
+  },
+  {
+   "q": "How many keys does a standard piano have?",
+   "a": "88"
+  }
+ ],
+ "samme": [
+  "Something you find in a fridge",
+  "A famous person with a beard",
+  "A pizza topping",
+  "A forest animal",
+  "Something you pack for a cabin trip",
+  "A capital city",
+  "A colour",
+  "An item of clothing",
+  "A cartoon character",
+  "Something people say when they toast",
+  "A cocktail",
+  "A Christmas song",
+  "A country in Europe",
+  "Something yellow",
+  "A sport",
+  "A car brand",
+  "Something you do on a Sunday",
+  "A Netflix series",
+  "A fruit",
+  "A job",
+  "Something you find in a bathroom",
+  "A word for being drunk",
+  "A celebrity everyone knows",
+  "A supermarket chain",
+  "A superhero name",
+  "Something in a handbag",
+  "A type of candy",
+  "Something you shouldn't say on a first date",
+  "A childhood game",
+  "An excuse for being late",
+  "A beach holiday destination",
+  "Something that smells bad",
+  "A Disney movie",
+  "An emoji people overuse",
+  "Something you always forget at home",
+  "A musical instrument",
+  "A traditional Christmas food",
+  "A farm animal",
+  "Something round",
+  "An app everyone has",
+  "A fairy tale",
+  "Something you buy at the liquor store",
+  "A reason to dump someone",
+  "Something people shout at a football match",
+  "A word that rhymes with “beer”",
+  "Something with wheels",
+  "A nickname for grandma",
+  "A famous singer",
+  "Something you find in your pocket after a party",
+  "A British slang word"
+ ],
+ "oppdrag": [
+  "Get {navn} to say the word “actually”.",
+  "Get {navn} to swap seats with you.",
+  "Get {navn} to tell you about their first partner.",
+  "Get {navn} to cheers with you three times before the next game.",
+  "Get {navn} to sing at least one line of a song.",
+  "Get {navn} to give you a high five.",
+  "Get {navn} to say “I agree with you”.",
+  "Get {navn} to show you the last photo on their phone.",
+  "Get {navn} to laugh so hard they have to cover their mouth.",
+  "Get {navn} to fetch something for you.",
+  "Get {navn} to say the name of a celebrity.",
+  "Get {navn} to stand on one leg.",
+  "Get {navn} to say “have a nice weekend” when it makes no sense.",
+  "Get {navn} to tell you what they do for work – even though you already know.",
+  "Get {navn} to taste your drink.",
+  "Get {navn} to use the word “literally” twice.",
+  "Get {navn} to give you a compliment.",
+  "Get {navn} to mention an animal.",
+  "Get {navn} to do an impression of someone.",
+  "Get {navn} to say “cheers” before everyone else.",
+  "Get {navn} to tell you about a holiday.",
+  "Get {navn} to hug you.",
+  "Get {navn} to tell you which month their birthday is in.",
+  "Get {navn} to use a word from another language in the middle of a sentence.",
+  "Get {navn} to ask you a question.",
+  "Get {navn} to point at something in the room.",
+  "Get {navn} to say the word “banana”.",
+  "Get {navn} to show you a dance move.",
+  "Get {navn} to say “no” three times in a row.",
+  "Get {navn} to guess your age.",
+  "Get {navn} to tell a joke.",
+  "Get {navn} to take something off – a ring, a jacket, a watch.",
+  "Get {navn} to tell you what they had for dinner yesterday.",
+  "Get {navn} to swap drinks with you.",
+  "Get {navn} to say “sorry”.",
+  "Get {navn} to name a city abroad.",
+  "Get {navn} to tell you about a time they were shy.",
+  "Get {navn} to clap their hands.",
+  "Get {navn} to laugh at something you say that isn't funny.",
+  "Get {navn} to say their full name."
+ ],
+ "steder": [
+  "Mountain cabin",
+  "Package holiday in the sun",
+  "Graduation party bus",
+  "The office Christmas party",
+  "The ER",
+  "The liquor store on a Friday",
+  "A flight to Alicante",
+  "The cinema",
+  "Student flatshare",
+  "A football match",
+  "The dentist",
+  "The gym",
+  "IKEA on a Saturday",
+  "A wedding",
+  "A confirmation party",
+  "The afterparty",
+  "The last bus home",
+  "A music festival",
+  "The campsite",
+  "The hairdresser",
+  "The exam hall",
+  "The karaoke bar",
+  "A boat in the archipelago",
+  "A coastal cruise ship",
+  "The hospital",
+  "The swimming pool",
+  "The ski lift",
+  "The kebab shop at 3 a.m.",
+  "The police station",
+  "A first date"
+ ],
+ "ord": [
+  "Elvis",
+  "King Harald of Norway",
+  "Penguin",
+  "Santa Claus",
+  "Taco",
+  "Average Joe",
+  "Swiss cheese",
+  "Donald Duck",
+  "Cruise ship",
+  "Batman",
+  "Snowman",
+  "Pirate",
+  "Astronaut",
+  "Queen Elizabeth II",
+  "Thor's hammer",
+  "Harry Potter",
+  "Troll",
+  "Hot dog",
+  "Gollum",
+  "Ronaldo",
+  "Hello Kitty",
+  "Captain Jack Sparrow",
+  "Beyoncé",
+  "Viking",
+  "Dinosaur",
+  "Shrek",
+  "Mario",
+  "Pippi Longstocking",
+  "Meatball",
+  "Taylor Swift",
+  "Kermit the Frog",
+  "Spider-Man",
+  "Tooth Fairy",
+  "Grandma",
+  "Einstein",
+  "Rudolph the Red-Nosed Reindeer",
+  "Camel",
+  "Polar bear",
+  "Snoop Dogg",
+  "Christmas elf"
+ ]
+}

@@ -5,20 +5,22 @@
 (function () {
   if (window.BDVelgKort) return;
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // Språket leses ved hvert kall – sidenavigasjonen bytter <html lang> mellom norsk og engelsk.
+  function T(no, en) { return document.documentElement.lang === 'en' ? en : no; }
   window.BDVelgKort = function (opts) {
     opts = opts || {};
-    var maks = opts.maks || 100, K = window.BDKonto;
+    var maks = opts.maks || 100, K = window.BDKonto, KONTO = T('/no/account', '/account');
     return new Promise(function (ferdig) {
-      var m = document.createElement('div'); m.className = 'rom-tavle kv-velger'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'Velg kort');
-      m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>Ta med kort</h2><button class="linkbtn" data-v="lukk" type="button">Lukk</button></div><div class="kv-velger-body"><p class="small">Henter kortstokkene dine …</p></div></div>';
+      var m = document.createElement('div'); m.className = 'rom-tavle kv-velger'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', T('Velg kort', 'Pick cards'));
+      m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + T('Ta med kort', 'Bring cards') + '</h2><button class="linkbtn" data-v="lukk" type="button">' + T('Lukk', 'Close') + '</button></div><div class="kv-velger-body"><p class="small">' + T('Henter kortstokkene dine …', 'Fetching your decks …') + '</p></div></div>';
       document.body.appendChild(m);
       var body = m.querySelector('.kv-velger-body'), stokker = [];
       function lukk(kort) { m.remove(); ferdig(kort || []); }
       function valgte() { return Array.prototype.map.call(m.querySelectorAll('input[data-kort]:checked'), function (x) { return x.value; }); }
       function tell() {
         var n = valgte().length, b = m.querySelector('[data-v=ok]');
-        if (b) { b.textContent = n ? 'Legg til ' + n + ' kort' : 'Velg kort'; b.disabled = !n || n > maks; }
-        var i = m.querySelector('.kv-velger-info'); if (i) i.textContent = n > maks ? 'Du kan ta med maks ' + maks + ' kort.' : '';
+        if (b) { b.textContent = n ? T('Legg til ' + n + ' kort', 'Add ' + n + (n === 1 ? ' card' : ' cards')) : T('Velg kort', 'Pick cards'); b.disabled = !n || n > maks; }
+        var i = m.querySelector('.kv-velger-info'); if (i) i.textContent = n > maks ? T('Du kan ta med maks ' + maks + ' kort.', 'You can bring up to ' + maks + ' cards.') : '';
       }
       m.addEventListener('click', function (e) {
         if (e.target === m) return lukk();
@@ -32,18 +34,18 @@
       });
       m.addEventListener('change', tell);
       if (!K || !K.les()) {
-        body.innerHTML = '<p>Logg inn for å bruke kortstokkene dine. Du kan også lage en kortstokk på forhånd under «Min stokk».</p><p><a class="btn gold" href="/no/account">Logg inn eller lag konto</a></p>';
+        body.innerHTML = T('<p>Logg inn for å bruke kortstokkene dine. Du kan også lage en kortstokk på forhånd under «Min stokk».</p>', '<p>Log in to use your decks. You can also make a deck in advance under “My deck”.</p>') + '<p><a class="btn gold" href="' + KONTO + '">' + T('Logg inn eller lag konto', 'Log in or create an account') + '</a></p>';
         return;
       }
       K.stokker.liste().then(function (l) {
         stokker = l || [];
-        if (!stokker.length) { body.innerHTML = '<p>Du har ingen lagrede kortstokker ennå.</p><p><a class="btn gold" href="/no/account">Lag en kortstokk</a></p>'; return; }
+        if (!stokker.length) { body.innerHTML = '<p>' + T('Du har ingen lagrede kortstokker ennå.', "You don't have any saved decks yet.") + '</p><p><a class="btn gold" href="' + KONTO + '">' + T('Lag en kortstokk', 'Make a deck') + '</a></p>'; return; }
         body.innerHTML = stokker.map(function (s, i) {
-          return '<details class="kv-stokk"' + (i === 0 ? ' open' : '') + '><summary><b>' + esc(s.navn) + '</b><span>' + (s.kort || []).length + ' kort</span></summary>' +
-            '<button class="mini" type="button" data-v="alle" data-i="' + i + '">Velg alle / ingen</button>' +
+          return '<details class="kv-stokk"' + (i === 0 ? ' open' : '') + '><summary><b>' + esc(s.navn) + '</b><span>' + (s.kort || []).length + T(' kort', ' cards') + '</span></summary>' +
+            '<button class="mini" type="button" data-v="alle" data-i="' + i + '">' + T('Velg alle / ingen', 'Select all / none') + '</button>' +
             '<ul>' + (s.kort || []).map(function (k) { return '<li><label><input type="checkbox" data-kort data-stokk="' + i + '" value="' + esc(k) + '"> ' + esc(k) + '</label></li>'; }).join('') + '</ul></details>';
-        }).join('') + '<p class="small kv-velger-info" role="status"></p><button class="btn gold" type="button" data-v="ok" disabled>Velg kort</button>';
-      }).catch(function () { body.innerHTML = '<p class="rom-feil">Fikk ikke hentet kortstokkene.</p>'; });
+        }).join('') + '<p class="small kv-velger-info" role="status"></p><button class="btn gold" type="button" data-v="ok" disabled>' + T('Velg kort', 'Pick cards') + '</button>';
+      }).catch(function () { body.innerHTML = '<p class="rom-feil">' + T('Fikk ikke hentet kortstokkene.', "Couldn't fetch your decks.") + '</p>'; });
     });
   };
   /** Lagre kort som en ny kortstokk – på kontoen, eller til side til man logger inn. */

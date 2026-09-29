@@ -9,16 +9,31 @@ export function path(lang: Lang, p: string): string {
 }
 
 /** Samme side på det andre språket. */
+// Sider med ulike navn på norsk og engelsk (norsk sti uten /no → engelsk sti)
+const NAVNEPAR: [string, string][] = [
+  ['/rom', '/room'], ['/pluss', '/plus'], ['/gjeng', '/crew'], ['/kveld', '/plan'],
+  ['/finn-lek', '/find-a-game'], ['/vilkar', '/terms'], ['/kortstokk', '/deck'],
+];
 export function otherLangPath(lang: Lang, pathname: string): string {
-  const stripped = pathname.replace(/^\/no(?=\/|$)/, '') || '/';
-  return lang === 'no' ? (stripped === '' ? '/' : stripped) : path('no', stripped);
+  const clean = pathname.replace(/\/$/, '') || '/';
+  if (lang === 'no') {
+    const stripped = clean.replace(/^\/no(?=\/|$)/, '') || '/';
+    const par = NAVNEPAR.find(([no]) => stripped === no);
+    if (par) return par[1];
+    // Norske sider uten engelsk utgave → engelsk forside
+    if (/^\/(nyhetsrunden|statistikk|leker|vorsproven)(\/|$)/.test(stripped)) return '/';
+    return stripped;
+  }
+  const par = NAVNEPAR.find(([, en]) => clean === en);
+  if (par) return '/no' + par[0];
+  return path('no', clean);
 }
 
 export const UI = {
   en: {
     locale: 'en',
     htmlLang: 'en',
-    tagline: 'Comebacks, slang and drinking games — ready when you need them.',
+    tagline: 'Drinking games and pre-party fun – everyone plays from their own phone.',
     nav: { home: 'Home', games: 'Drinking games', suggest: 'Submit', about: 'About', privacy: 'Privacy', account: 'My deck' },
     openApp: 'Open the app',
     heroTitle: 'Never be lost for words again.',
@@ -34,9 +49,9 @@ export const UI = {
     itemsLabel: 'items',
     gamesLabel: 'games',
     gamesTeaser: 'Ring of Fire, Ride the Bus, Opus, War and more — with the rules.',
-    takeItWithYou: 'Take the deck with you',
+    takeItWithYou: 'Put the party on your home screen',
     takeItBody:
-      'The app is free, works offline and has search, favourites and a die that deals you a random line when you need one.',
+      'The app is free, opens straight into the games and keeps the rules available offline.',
     copy: 'Copy',
     copied: 'Copied',
     copyHint: 'Click to copy',
@@ -138,7 +153,7 @@ export const UI = {
     related: 'Similar situations',
     allSituations: 'All situations',
     fromCat: 'from',
-    collections: 'Collections',
+    collections: 'Humour on the side',
     fitsExpr: 'Expressions that fit',
     fitsExprLead: 'Words and phrases to drop into exactly this moment.',
     fitsIn: 'Fits when',

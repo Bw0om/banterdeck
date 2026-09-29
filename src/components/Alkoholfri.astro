@@ -37,11 +37,36 @@
     [/\bdrakk\b/gi, 'fikk straff'],
     [/\bdrikker\b/gi, 'tar straff'], [/\bdrikke\b/gi, 'ta straff'], [/\bdrikk\b/gi, 'ta straff'],
   ];
+  // Engelsk: sips → penalty points, drink → take a penalty
+  var N_EN = '(\\d+|one|two|three|four|five|six|seven|eight|nine|ten)';
+  var REGLER_EN = [
+    [/🍺/g, '🥤'], [/🍻/g, '🎉'],
+    [/(^|[^\w])(a|one|1)\s+shot\b/gi, function (m, p) { return p + '5 penalty points'; }],
+    [/\bshots?\b/gi, '5 penalty points'],
+    [/\bfinish(es)? (your|their|his|her|the) (drink|glass)\b/gi, function (m, e) { return 'take' + (e ? 's' : '') + ' 5 penalty points'; }],
+    [/\bdrinks? double\b/gi, 'gets a double penalty'],
+    [/\bdrinking games\b/gi, 'party games'], [/\bdrinking game\b/gi, 'party game'], [/\bdrinking wheel\b/gi, 'penalty wheel'],
+    [/\bdrinking (bingo|yahtzee|buddy|partner)\b/gi, function (m, x) { return 'party ' + x; }],
+    [/\b(a|one) sip\b/gi, 'one penalty point'], [/\bsips\b/gi, 'penalty points'], [/\bsip\b/gi, 'penalty point'],
+    [new RegExp('\\bdrinks\\s+' + N_EN + '\\b(?!\\s+penalty)', 'gi'), function (m, n) { return 'takes ' + n + ' penalty points'; }],
+    [new RegExp('\\bdrink\\s+' + N_EN + '\\b(?!\\s+penalty)', 'gi'), function (m, n) { return 'take ' + n + ' penalty points'; }],
+    [/\bdrinks(?=\s+(\d|one|two|three|four|five)\S*\s+penalty)/gi, 'takes'], [/\bdrink(?=\s+(\d|one|two|three|four|five)\S*\s+penalty)/gi, 'take'],
+    [/\b(starts?|stop|stops) (to )?drink(ing)?\b/gi, function (m, v, to) { return v + ' ' + (to || '') + (m.slice(-3) === 'ing' ? 'clapping' : 'clap'); }],
+    [/\bthirstiest\b/gi, 'most penalised'], [/\bmost sober\b/gi, 'least penalised'],
+    // «drink» som verb (ikke «your drink», «a drink»)
+    [/(\b(?:your|their|his|her|a|the|my|of|no)\s+)?\b(drinks|drink)\b/gi, function (m, foran, v) {
+      if (foran) return m;
+      return v.toLowerCase() === 'drinks' ? 'takes a penalty' : 'take a penalty';
+    }],
+    [/\b(1|one) penalty points\b/gi, function (m, n) { return n + ' penalty point'; }],
+  ];
   function ett(n) { return /^(en|én)$/i.test(n) ? 'ett' : n; }
+  function erEngelsk() { return /^en/.test(document.documentElement.lang || ''); }
   function tekst(s) {
-    if (!s || !/drikk|drakk|slurk|shot|tørst|edru|🍺|🍻/i.test(s)) return s;
+    var en = erEngelsk();
+    if (!s || !(en ? /drink|sip|shot|thirst|sober|🍺|🍻/i : /drikk|drakk|slurk|shot|tørst|edru|🍺|🍻/i).test(s)) return s;
     var ut = String(s);
-    REGLER.forEach(function (r) {
+    (en ? REGLER_EN : REGLER).forEach(function (r) {
       ut = ut.replace(r[0], function () {
         var m = arguments[0], ny = typeof r[1] === 'function' ? r[1].apply(null, arguments) : r[1];
         // Behold stor forbokstav
@@ -58,7 +83,7 @@
   }
   function aktiv() {
     var h = document.documentElement;
-    if (!/^(no|nb|nn)/.test(h.lang || '')) return false;
+    if (!/^(no|nb|nn|en)/.test(h.lang || '')) return false;
     if (h.dataset.alkoholfri === '1') return true;
     if (h.dataset.alkoholfri === '0') return false;
     try { return localStorage.getItem('bd_alkoholfri') === '1'; } catch (e) { return false; }

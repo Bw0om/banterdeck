@@ -1,0 +1,232 @@
+---
+// Mitt vors Pluss: hva man får, prøv gratis, kjøp med Vipps, og spill pakkene.
+// Felles for /no/pluss (lang="no") og /plus (lang="en").
+import Base from '../../layouts/Base.astro';
+import { PAKKER } from '../../lib/rom';
+import type { Lang } from '../../lib/i18n';
+const { lang = 'no' } = Astro.props as { lang?: Lang };
+const no = lang === 'no';
+// Pakkenavn og -beskrivelse på engelsk (kortene selv hentes fra serveren).
+const PAKKE_EN: Record<string, { navn: string; om: string }> = {
+  julebord: { navn: 'Office Party', om: 'For the office Christmas party and end-of-year drinks. Safe to play with colleagues – but never boring.' },
+  vill: { navn: 'Wild', om: 'For the crew who know each other well and can take almost anything. 18+.' },
+};
+const pakker = PAKKER.map((p) => ({
+  id: p.pakke,
+  navn: no ? p.navn : (PAKKE_EN[p.pakke]?.navn || p.navn),
+  om: no ? p.om : (PAKKE_EN[p.pakke]?.om || p.om),
+  antall: p.antall,
+}));
+const romSti = no ? '/no/rom' : '/room';
+---
+<Base title={no ? 'Mitt vors Pluss' : 'Mitt vors Plus'} description={no ? 'Verten betaler – alle i rommet spiller med. Kveldspass 29 kr, årspass 199 kr. Første kveld er gratis.' : 'The host pays – everyone in the room plays. Night pass 29 NOK, year pass 199 NOK. Your first night is free.'} lang={lang} gate={true} bilde="/og/rom.jpg">
+  {no ? (
+    <section class="pluss-hero">
+      <p class="rom-etikett">Mitt vors Pluss</p>
+      <h1>Verten betaler.<br />Alle spiller med.</h1>
+      <p class="lead">Når du har Pluss og lager et rom, låses alle pakkene opp for alle som blir med – uansett om de har Pluss selv.</p>
+    </section>
+  ) : (
+    <section class="pluss-hero">
+      <p class="rom-etikett">Mitt vors Plus</p>
+      <h1>The host pays.<br />Everyone plays.</h1>
+      <p class="lead">When you have Plus and create a room, every pack is unlocked for everyone who joins – whether they have Plus or not.</p>
+    </section>
+  )}
+
+  <div id="plussStatus" class="pluss-status" hidden></div>
+
+  {no ? (
+    <section class="pluss-fordeler">
+      <div><span>🎄</span><b>Julebord-pakken</b><small>46 kort som funker med kolleger – uten å bli kjedelig.</small></div>
+      <div><span>🔥</span><b>Vill-pakken</b><small>46 kort for gjengen som tåler det meste. 18+.</small></div>
+      <div><span>📱</span><b>Opptil 16 telefoner</b><small>Gratis rom har plass til 4. Med Pluss kan hele festen være med – og ingen andre trenger å betale.</small></div>
+      <div><span>🃏</span><b>Flere leker på mobilen</b><small>Bussruta, Drikke-Yatzy, Pyramiden, President, Gris og Forræder – alene eller i rom.</small></div>
+      <div><span>✨</span><b>Flere pakker kommer</b><small>Nye pakker legges til Pluss etter hvert – uten ekstra kostnad.</small></div>
+    </section>
+  ) : (
+    <section class="pluss-fordeler">
+      <div><span>🎄</span><b>The Office Party pack</b><small>46 cards that work with colleagues – without getting boring.</small></div>
+      <div><span>🔥</span><b>The Wild pack</b><small>46 cards for the crew who can take almost anything. 18+.</small></div>
+      <div><span>📱</span><b>Up to 16 phones</b><small>Free rooms fit 4. With Plus the whole party can join – and nobody else has to pay.</small></div>
+      <div><span>🃏</span><b>More games on your phone</b><small>Ride the Bus, Drinking Yahtzee, The Pyramid, President, Pig and Traitor – on your own or in a room.</small></div>
+      <div><span>✨</span><b>More packs on the way</b><small>New packs are added to Plus over time – at no extra cost.</small></div>
+    </section>
+  )}
+
+  <section class="pluss-priser" id="priser">
+    <article class="pluss-pris">
+      <b>{no ? 'Kveldspass' : 'Night pass'}</b><span class="pluss-kr">{no ? '29 kr' : '29 NOK'}</span><small>{no ? '24 timer. Perfekt til én fest.' : '24 hours. Perfect for one party.'}</small>
+      <button class="btn gold" type="button" data-kjop="kveld">{no ? 'Kjøp med Vipps' : 'Buy with Vipps'}</button>
+    </article>
+    <article class="pluss-pris beste">
+      <span class="pluss-merke">{no ? 'Best verdi' : 'Best value'}</span>
+      <b>{no ? 'Årspass' : 'Year pass'}</b><span class="pluss-kr">{no ? '199 kr' : '199 NOK'}</span><small>{no ? 'Et helt år – billigere enn 7 kvelder.' : 'A whole year – cheaper than 7 nights.'}</small>
+      <button class="btn gold" type="button" data-kjop="aar">{no ? 'Kjøp med Vipps' : 'Buy with Vipps'}</button>
+    </article>
+    {no
+      ? <label class="pluss-samtykke"><input type="checkbox" id="samtykke"><span>Jeg vil at Pluss starter med en gang, og forstår at angreretten da faller bort. Jeg har lest <a href="/no/vilkar">salgsvilkårene</a>.</span></label>
+      : <label class="pluss-samtykke"><input type="checkbox" id="samtykke"><span>I want Plus to start right away, and I understand that I then lose my right of withdrawal. I have read the <a href="/terms">terms of sale</a>.</span></label>}
+    <p class="small">{no ? 'Engangskjøp – ingenting fornyes av seg selv. Tiden legges til hvis du allerede har Pluss.' : 'One-off purchase – nothing renews automatically. The time is added on if you already have Plus.'}</p>
+    {!no && <p class="small">Payment is by Vipps, the Norwegian mobile payment app – it requires a Norwegian Vipps account. Gift codes and free nights from referrals work for everyone.</p>}
+    <p class="formmsg" id="kjopMsg" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="pluss-kode konto-boks">
+    <h2>{no ? 'Har du en gavekode?' : 'Got a gift code?'}</h2>
+    <form class="rf-rad" id="kodeSkjema"><input id="kodeInput" maxlength="24" autocomplete="off" autocapitalize="characters" placeholder={no ? 'F.eks. BD-7K3P9Q' : 'E.g. BD-7K3P9Q'} aria-label={no ? 'Gavekode' : 'Gift code'} /><button class="btn gold" type="submit">{no ? 'Bruk koden' : 'Use the code'}</button></form>
+    <p class="formmsg" id="kodeMsg" role="status"></p>
+  </section>
+
+  <section class="pluss-kode konto-boks">
+    <h2>{no ? '🎁 Gratis kvelder: verv en venn' : '🎁 Free nights: refer a friend'}</h2>
+    <p>{no ? 'Del lenken din. Når vennen lager konto og spiller sitt første rom, får dere et kveldspass hver – som du bruker når du vil.' : 'Share your link. When your friend creates an account and plays their first room, you both get a night pass – to use whenever you like.'}</p>
+    <p><a class="btn ghost" href={no ? '/no/account' : '/account'}>{no ? 'Hent vervelenken på Min stokk' : 'Get your referral link in My deck'}</a></p>
+  </section>
+
+  <section class="pluss-pakker">
+    <h2>{no ? 'Pakkene' : 'The packs'}</h2>
+    <div class="stokk-liste">
+      {pakker.map((p) => (
+        <article class="stokk-kort">
+          <div><b>{p.navn}</b><span>{p.antall} {no ? 'kort' : 'cards'} · {p.om}</span></div>
+          <div class="stokk-knapper">
+            <button class="btn gold small" type="button" data-spill={p.id}>{no ? 'Spill nå' : 'Play now'}</button>
+            <a class="btn small" href={`${romSti}?lek=pakke-${p.id}`}>{no ? 'Spill i rom' : 'Play in a room'}</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <div id="stokkSpill" class="stokk-spill" hidden role="dialog" aria-modal="true">
+    <p class="stokk-spill-navn" id="ssNavn"></p>
+    <div class="rom-kort rf-kort"><span class="sw-tag" id="ssTeller"></span><p id="ssKort"></p><span></span></div>
+    <button class="rom-stor-knapp" type="button" id="ssNeste">{no ? 'Neste kort' : 'Next card'}</button>
+    <p class="small" id="ssSmak" hidden>{no ? 'Dette er smakebiter. Med Pluss får du hele pakken.' : 'This is a taster. With Plus you get the whole pack.'}</p>
+    <button class="btn ghost" type="button" id="ssLukk">{no ? 'Lukk' : 'Close'}</button>
+  </div>
+
+  <script is:inline data-astro-rerun define:vars={{ LANG: lang, PAKKENAVN: Object.fromEntries(pakker.map((p) => [p.id, p.navn])) }}>
+  (function () {
+    var st = document.getElementById('plussStatus');
+    if (!st || st.dataset.bound) return; st.dataset.bound = '1';
+    var EN = LANG === 'en', KONTO = EN ? '/account' : '/no/account', ROM = EN ? '/room' : '/no/rom';
+    var K = window.BDKonto, status = null, msg = document.getElementById('kjopMsg');
+    function $(x) { return document.getElementById(x); }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function say(t, kind) { msg.textContent = t; msg.className = 'formmsg' + (kind ? ' ' + kind : ''); }
+    function dato(iso) { var d = new Date(iso), langt = d - Date.now() > 60 * 86400000; return d.toLocaleString(EN ? 'en-GB' : 'nb-NO', langt ? { day: 'numeric', month: 'long', year: 'numeric' } : { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }); }
+    function api(sti, opts) {
+      if (EN) { opts = Object.assign({}, opts || {}); opts.headers = Object.assign({}, opts.headers || {}, { 'x-lang': 'en' }); }
+      return (K ? K.api(sti, opts) : fetch(sti, opts)).then(function (r) { return r.json().then(function (d) { d._ok = r.ok; d._status = r.status; return d; }); });
+    }
+
+    function tegnStatus() {
+      st.hidden = false;
+      if (!K || !K.les() || !status || !status.innlogget) {
+        st.innerHTML = EN
+          ? '<p><b>Your first night is free.</b> Create a free account or log in, and you can try Plus for 24 hours.</p><a class="btn gold" href="' + KONTO + '">Log in or create an account</a>'
+          : '<p><b>Første kveld er gratis.</b> Lag en gratis konto eller logg inn, så kan du prøve Pluss i 24 timer.</p><a class="btn gold" href="/no/account">Logg inn eller lag konto</a>';
+        return;
+      }
+      if (status.aktiv) {
+        st.innerHTML = EN
+          ? '<p>✨ <b>You have Plus</b> until ' + esc(dato(status.til)) + '.</p><p class="small">Create a room – every pack is unlocked for everyone who joins.</p><a class="btn gold" href="' + ROM + '">Create a room</a>'
+          : '<p>✨ <b>Du har Pluss</b> til ' + esc(dato(status.til)) + '.</p><p class="small">Lag et rom – alle pakkene er låst opp for alle som blir med.</p><a class="btn gold" href="/no/rom">Lag et rom</a>';
+        return;
+      }
+      st.innerHTML = status.gratisBrukt
+        ? (EN ? '<p>You’ve used your free night. Buy a pass below to unlock it again.</p>' : '<p>Du har brukt gratiskvelden din. Kjøp et pass under for å låse opp igjen.</p>')
+        : (EN
+          ? '<p><b>Your first night is free.</b> Try Plus for 24 hours – no payment, nothing renews.</p><button class="btn gold" type="button" id="gratisKnapp">Try it free tonight</button>'
+          : '<p><b>Første kveld er gratis.</b> Prøv Pluss i 24 timer – ingen betaling, ingenting fornyes.</p><button class="btn gold" type="button" id="gratisKnapp">Prøv gratis i kveld</button>');
+      var g = $('gratisKnapp');
+      if (g) g.addEventListener('click', function () {
+        g.disabled = true;
+        api('/api/pluss/gratis', { method: 'POST' }).then(function (d) {
+          if (!d._ok) { say(d.melding || (EN ? 'That didn’t work.' : 'Det gikk ikke.'), 'err'); g.disabled = false; return; }
+          status = Object.assign({ innlogget: true }, d); tegnStatus(); say(EN ? 'Your free night has started! ✨' : 'Gratiskvelden er i gang! ✨', 'ok');
+        });
+      });
+    }
+    function hentStatus() {
+      return api('/api/pluss/status').then(function (d) { status = d; tegnStatus(); }).catch(function () { status = null; tegnStatus(); });
+    }
+
+    // Tilbake fra Vipps: sjekk betalingen til den er godkjent
+    function sjekk(ref, forsok) {
+      api('/api/pluss/sjekk', { method: 'POST', body: JSON.stringify({ ref: ref }) }).then(function (d) {
+        if (d.status === 'fullfort') {
+          try { localStorage.removeItem('bd_pluss_ref'); } catch (e) {}
+          say(EN ? 'Thanks! Plus is activated ✨' : 'Takk! Pluss er aktivert ✨', 'ok'); hentStatus();
+        } else if (d.status === 'avbrutt') {
+          try { localStorage.removeItem('bd_pluss_ref'); } catch (e) {}
+          say(EN ? 'The payment was cancelled. No money has been taken.' : 'Betalingen ble avbrutt. Ingen penger er trukket.', 'err');
+        } else if (forsok < 15) { say(EN ? 'Waiting for confirmation from Vipps …' : 'Venter på bekreftelse fra Vipps …'); setTimeout(function () { sjekk(ref, forsok + 1); }, 2000); }
+        else say(EN ? 'Vipps hasn’t confirmed yet. Plus will turn on by itself as soon as the payment is approved.' : 'Vipps har ikke bekreftet ennå. Pluss kommer av seg selv så snart betalingen er godkjent.', '');
+      }).catch(function () { if (forsok < 15) setTimeout(function () { sjekk(ref, forsok + 1); }, 2500); });
+    }
+    var qs = new URLSearchParams(location.search), ref = qs.get('ref');
+    try { ref = ref || localStorage.getItem('bd_pluss_ref'); } catch (e) {}
+    if (ref) { if (qs.get('ref')) history.replaceState(null, '', location.pathname); sjekk(ref, 0); }
+
+    document.querySelector('.pluss-priser').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-kjop]'); if (!b) return;
+      if (!K || !K.les()) { say(EN ? 'Log in first, so Plus ends up on your account.' : 'Logg inn først, så havner Pluss på kontoen din.', 'err'); return; }
+      if (!$('samtykke').checked) { say(EN ? 'Tick the box to confirm that Plus starts right away.' : 'Kryss av for at Pluss starter med en gang.', 'err'); $('samtykke').focus(); return; }
+      b.disabled = true; say(EN ? 'Sending you to Vipps …' : 'Sender deg til Vipps …');
+      api('/api/pluss/kjop', { method: 'POST', body: JSON.stringify({ produkt: b.dataset.kjop, samtykke: true }) }).then(function (d) {
+        if (!d._ok || !d.url) { say(d.melding || (EN ? 'Couldn’t start the payment.' : 'Fikk ikke startet betalingen.'), 'err'); b.disabled = false; return; }
+        try { localStorage.setItem('bd_pluss_ref', d.ref); } catch (x) {}
+        location.href = d.url;
+      }).catch(function () { say(EN ? 'No connection. Try again.' : 'Ingen kontakt. Prøv igjen.', 'err'); b.disabled = false; });
+    });
+
+    /* ---------- spill en pakke på én telefon ---------- */
+    var rekke = [], pos = 0;
+    function visKort() { $('ssKort').textContent = rekke[pos].t; $('ssTeller').textContent = (rekke[pos].k || '') + ' · ' + (pos + 1) + (EN ? ' of ' : ' av ') + rekke.length; }
+    document.querySelector('.pluss-pakker').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-spill]'); if (!b) return;
+      api('/api/pluss/pakke?id=' + encodeURIComponent(b.dataset.spill)).then(function (d) {
+        if (!d.kort) return;
+        rekke = d.kort.slice().sort(function () { return Math.random() - 0.5; }); pos = 0;
+        $('ssNavn').textContent = (EN ? (PAKKENAVN[b.dataset.spill] || d.navn) : d.navn) + (d.pluss ? '' : (EN ? ' – taster' : ' – smakebiter'));
+        $('ssSmak').hidden = !!d.pluss;
+        visKort(); $('stokkSpill').hidden = false; document.body.classList.add('stokk-aapen');
+      });
+    });
+    $('ssNeste').addEventListener('click', function () {
+      pos++;
+      if (pos >= rekke.length) {
+        if (!$('ssSmak').hidden) { $('stokkSpill').hidden = true; document.body.classList.remove('stokk-aapen'); location.hash = 'priser'; return; }
+        rekke = rekke.sort(function () { return Math.random() - 0.5; }); pos = 0;
+      }
+      visKort();
+    });
+    $('ssLukk').addEventListener('click', function () { $('stokkSpill').hidden = true; document.body.classList.remove('stokk-aapen'); });
+
+    /* ---------- gavekode ---------- */
+    var kodeFra = qs.get('kode');
+    try { if (kodeFra) { localStorage.setItem('bd_gavekode', kodeFra); history.replaceState(null, '', location.pathname); } kodeFra = kodeFra || localStorage.getItem('bd_gavekode'); } catch (e) {}
+    if (kodeFra) $('kodeInput').value = kodeFra.toUpperCase();
+    function brukKode() {
+      var kode = $('kodeInput').value.trim(), m = $('kodeMsg'); if (!kode) return;
+      if (!K || !K.les()) { m.innerHTML = EN ? 'Your code is ready! <a href="' + KONTO + '">Log in or create a free account</a> – and it’ll be activated when you come back here.' : 'Koden er klar! <a href="/no/account">Logg inn eller lag en gratis konto</a> – så aktiveres den når du kommer tilbake hit.'; m.className = 'formmsg'; return; }
+      m.textContent = EN ? 'Checking the code …' : 'Sjekker koden …'; m.className = 'formmsg';
+      api('/api/pluss/kode', { method: 'POST', body: JSON.stringify({ kode: kode }) }).then(function (d) {
+        if (!d._ok) { m.textContent = d.melding || (EN ? 'The code didn’t work.' : 'Koden virket ikke.'); m.className = 'formmsg err'; return; }
+        try { localStorage.removeItem('bd_gavekode'); } catch (e) {}
+        m.textContent = EN
+          ? '🎁 Code redeemed – you’ve got Plus for ' + (d.dager === 1 ? '1 day' : d.dager + ' days') + '!'
+          : '🎁 Koden er brukt – du har fått Pluss i ' + (d.dager === 1 ? '1 dag' : d.dager + ' dager') + '!'; m.className = 'formmsg ok';
+        $('kodeInput').value = ''; hentStatus();
+      });
+    }
+    $('kodeSkjema').addEventListener('submit', function (e) { e.preventDefault(); brukKode(); });
+    if (kodeFra) brukKode();   // kom via lenke: aktiver med en gang (eller be om innlogging)
+
+    hentStatus();
+  })();
+  </script>
+</Base>

@@ -1,0 +1,243 @@
+---
+// Faste gjenger: poeng som samles over flere kvelder, med sesongtabell og kåringer.
+// /no/gjeng viser gjengene dine, /no/gjeng?k=KODE viser én gjeng (alle med lenken kan se tabellen).
+// Engelsk: /crew og /crew?k=KODE.
+import Base from '../../layouts/Base.astro';
+import type { Lang } from '../../lib/i18n';
+const { lang = 'no' } = Astro.props as { lang?: Lang };
+const no = lang === 'no';
+---
+<Base title={no ? 'Gjengen' : 'The crew'} description={no ? 'Samle poengene fra kveld til kveld: sesongtabell, kåringer og rivalisering for vennegjengen.' : 'Keep score from night to night: a season table, awards and rivalries for your group of friends.'} lang={lang} noindex={true} bilde="/og/drikkeleker.jpg">
+  <div id="gjeng" class="gjeng"><p class="small">{no ? 'Henter …' : 'Loading …'}</p></div>
+
+  <script is:inline data-astro-rerun define:vars={{ LANG: lang }}>
+  (function () {
+    var root = document.getElementById('gjeng');
+    if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+    var EN = LANG === 'en';
+    var SIDE = EN ? '/crew' : '/no/gjeng', KONTO = EN ? '/account' : '/no/account', ROM = EN ? '/room' : '/no/rom';
+    var K = window.BDKonto;
+    var kode = (new URL(location.href).searchParams.get('k') || '').toUpperCase();
+    var G = null, sesong = String(new Date().getFullYear()), sorter = 'slurker';
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function dato(d) { return new Date(d).toLocaleDateString(EN ? 'en-GB' : 'nb-NO', { weekday: 'short', day: 'numeric', month: 'short', year: new Date(d).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' }); }
+    function desimal(x) { return EN ? x.toFixed(1) : x.toFixed(1).replace('.', ','); }
+    function innlogget() { return !!(K && K.les && K.les()); }
+    function hode() { return EN ? { 'x-lang': 'en' } : undefined; }
+    function kall(sti, body) {
+      var opts = body ? { method: 'POST', body: JSON.stringify(body) } : {};
+      if (EN) opts.headers = hode();
+      return K.api(sti, opts).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; d._status = r.status; return d; });
+      });
+    }
+    function feil(t) { return '<p class="rom-feil">' + esc(t) + '</p>'; }
+    function lenke(g) { return location.origin + SIDE + '?k=' + g.kode; }
+    function inviter(g) {
+      if (EN) return window.BDDel.lenke(lenke(g), 'Join the crew ' + g.navn + ' on Mitt vors – here’s our season table 🏆', {
+        tittel: 'Invite to ' + g.navn, ingress: 'Anyone with the link can see the table. Those who create an account and join can also start rooms for the crew.',
+      });
+      window.BDDel.lenke(lenke(g), 'Bli med i gjengen ' + g.navn + ' på Mitt vors – her er sesongtabellen vår 🏆', {
+        tittel: 'Inviter til ' + g.navn, ingress: 'Alle med lenken ser tabellen. De som lager konto og blir med, kan også starte rom for gjengen.',
+      });
+    }
+
+    /* ---------- mine gjenger ---------- */
+    function mine() {
+      if (!innlogget()) {
+        root.innerHTML = EN
+          ? '<h1>Regular crews</h1><p class="lead">Keep score from night to night. Who’s the thirstiest of the year? Who wins the quiz most often?</p>' +
+            forklaring() +
+            '<p><a class="btn gold" href="' + KONTO + '">Log in or create a free account</a></p>' +
+            '<p class="small">Got a crew link? Open it – you can see the table without an account.</p>'
+          : '<h1>Faste gjenger</h1><p class="lead">Samle poengene fra kveld til kveld. Hvem er årets tørstigste? Hvem vinner quizen oftest?</p>' +
+            forklaring() +
+            '<p><a class="btn gold" href="/no/account">Logg inn eller lag gratis konto</a></p>' +
+            '<p class="small">Har du fått en gjenglenke? Åpne den – tabellen kan ses uten konto.</p>';
+        return;
+      }
+      var tittel = EN ? 'Your crews' : 'Gjengene dine';
+      root.innerHTML = '<h1>' + tittel + '</h1><p class="small">' + (EN ? 'Loading …' : 'Henter …') + '</p>';
+      kall('/api/gjeng').then(function (d) {
+        if (!d._ok) { root.innerHTML = '<h1>' + tittel + '</h1>' + feil(d.melding || (EN ? 'Couldn’t load your crews.' : 'Fikk ikke hentet gjengene.')); return; }
+        var l = d.gjenger || [];
+        root.innerHTML = '<h1>' + tittel + '</h1><p class="lead">' + (EN ? 'Points that add up over many nights – with a season table and awards.' : 'Poeng som samles over flere kvelder – med sesongtabell og kåringer.') + '</p>' +
+          (l.length ? '<ul class="gj-liste">' + l.map(function (g) {
+            return '<li><a href="' + SIDE + '?k=' + g.kode + '"><b>' + esc(g.navn) + '</b><span>' + g.kvelder + ' ' + (EN ? (g.kvelder === 1 ? 'night' : 'nights') : (g.kvelder === 1 ? 'kveld' : 'kvelder')) +
+              (g.sist ? (EN ? ' · last ' : ' · sist ') + dato(g.sist) : '') + (g.eier ? (EN ? ' · you own it' : ' · du eier') : '') + '</span></a></li>';
+          }).join('') + '</ul>' : forklaring()) +
+          (EN
+            ? '<form class="form gj-skjema" id="gjLag"><label class="lab" for="gjNavn">Create a new crew</label>' +
+              '<div class="gj-rad"><input id="gjNavn" maxlength="40" placeholder="E.g. The Usual Suspects" required><button class="btn gold" type="submit">Create crew</button></div></form>' +
+              '<form class="form gj-skjema" id="gjBli"><label class="lab" for="gjKode">Got a crew code?</label>' +
+              '<div class="gj-rad"><input id="gjKode" maxlength="8" placeholder="8 characters" autocapitalize="characters" required><button class="btn ghost" type="submit">Join</button></div></form>'
+            : '<form class="form gj-skjema" id="gjLag"><label class="lab" for="gjNavn">Lag en ny gjeng</label>' +
+              '<div class="gj-rad"><input id="gjNavn" maxlength="40" placeholder="F.eks. Gutta på tur" required><button class="btn gold" type="submit">Lag gjeng</button></div></form>' +
+              '<form class="form gj-skjema" id="gjBli"><label class="lab" for="gjKode">Har du en gjengkode?</label>' +
+              '<div class="gj-rad"><input id="gjKode" maxlength="8" placeholder="8 tegn" autocapitalize="characters" required><button class="btn ghost" type="submit">Bli med</button></div></form>') +
+          '<p id="gjMld"></p>';
+        root.querySelector('#gjLag').addEventListener('submit', function (e) {
+          e.preventDefault();
+          kall('/api/gjeng', { handling: 'lag', navn: root.querySelector('#gjNavn').value }).then(function (d) {
+            if (!d._ok) return (root.querySelector('#gjMld').innerHTML = feil(d.melding || (EN ? 'That didn’t work.' : 'Det gikk ikke.')));
+            location.href = SIDE + '?k=' + d.gjeng.kode + '&ny=1';
+          });
+        });
+        root.querySelector('#gjBli').addEventListener('submit', function (e) {
+          e.preventDefault();
+          kall('/api/gjeng', { handling: 'bli-med', kode: root.querySelector('#gjKode').value.replace(/\s/g, '').toUpperCase() }).then(function (d) {
+            if (!d._ok) return (root.querySelector('#gjMld').innerHTML = feil(d.melding || (EN ? 'Couldn’t find that crew.' : 'Fant ikke gjengen.')));
+            location.href = SIDE + '?k=' + d.gjeng.kode;
+          });
+        });
+      });
+    }
+    function forklaring() {
+      if (EN) return '<ol class="gj-slik"><li><b>Create the crew</b> and share the link with your friends.</li>' +
+        '<li><b>Start a room</b> and pick the crew in the lobby.</li>' +
+        '<li><b>End the night</b> – and sips, quiz points and awards go into the season table.</li></ol>';
+      return '<ol class="gj-slik"><li><b>Lag gjengen</b> og del lenken med vennene dine.</li>' +
+        '<li><b>Start et rom</b> og velg gjengen i lobbyen.</li>' +
+        '<li><b>Avslutt kvelden</b> – så havner slurker, quizpoeng og kåringer i sesongtabellen.</li></ol>';
+    }
+
+    /* ---------- én gjeng ---------- */
+    function nokkel(n) { return String(n || '').trim().toLowerCase(); }
+    function kvelderI(s) { return (G.kvelder || []).filter(function (k) { return s === 'alle' || String(new Date(k.dato).getFullYear()) === s; }); }
+    function tabell(kvelder) {
+      var folk = {};
+      kvelder.slice().reverse().forEach(function (k) {
+        var sp = (k.data && k.data.spillere) || [];
+        var topp = Math.max.apply(null, sp.map(function (p) { return p.slurker || 0; }).concat([0]));
+        var toppQ = Math.max.apply(null, sp.map(function (p) { return p.quiz || 0; }).concat([0]));
+        sp.forEach(function (p) {
+          var n = nokkel(p.navn); if (!n) return;
+          var f = folk[n] || (folk[n] = { navn: p.navn, kvelder: 0, slurker: 0, quiz: 0, sendt: 0, mottatt: 0, seire: 0, quizseire: 0, form: [] });
+          f.navn = p.navn; f.kvelder++; f.slurker += p.slurker || 0; f.quiz += p.quiz || 0; f.sendt += p.sendt || 0; f.mottatt += p.mottatt || 0;
+          if (topp > 0 && (p.slurker || 0) === topp) f.seire++;
+          if (toppQ > 0 && (p.quiz || 0) === toppQ) f.quizseire++;
+          f.form.push(p.slurker || 0);
+        });
+      });
+      return Object.keys(folk).map(function (k) { var f = folk[k]; f.snitt = f.kvelder ? f.slurker / f.kvelder : 0; return f; });
+    }
+    function kaaringer(l, kvelder) {
+      function topp(felt, min) {
+        var x = l.filter(function (p) { return p[felt] > 0 && p.kvelder >= (min || 1); }).sort(function (a, b) { return b[felt] - a[felt]; });
+        return x[0] || null;
+      }
+      var ut = [], t;
+      if ((t = topp('slurker'))) ut.push({ i: '🏆', t: EN ? 'Thirstiest of the season' : 'Sesongens tørstigste', n: t.navn, v: t.slurker + (EN ? ' sips' : ' slurker') });
+      if ((t = topp('seire'))) ut.push({ i: '👑', t: EN ? 'Most nights as thirstiest' : 'Flest kvelder som tørstigst', n: t.navn, v: t.seire + '×' });
+      if ((t = topp('snitt', Math.min(3, kvelder.length)))) ut.push({ i: '📈', t: EN ? 'Highest average' : 'Høyest snitt', n: t.navn, v: desimal(t.snitt) + (EN ? ' sips per night' : ' slurker per kveld') });
+      if ((t = topp('quiz'))) ut.push({ i: '🧠', t: EN ? 'Quiz master' : 'Quizmester', n: t.navn, v: t.quiz + (EN ? ' correct' : ' riktige') });
+      if ((t = topp('sendt'))) ut.push({ i: '🎁', t: EN ? 'Most generous' : 'Mest gavmild', n: t.navn, v: t.sendt + (EN ? ' 🍺 sent' : ' 🍺 sendt') });
+      if ((t = topp('mottatt'))) ut.push({ i: '🎯', t: EN ? 'Most picked on' : 'Mest mobbet', n: t.navn, v: t.mottatt + (EN ? ' 🍺 received' : ' 🍺 fått') });
+      if ((t = topp('kvelder')) && kvelder.length >= 2) ut.push({ i: '🫡', t: EN ? 'Most loyal' : 'Mest trofast', n: t.navn, v: t.kvelder + (EN ? ' of ' : ' av ') + kvelder.length + (EN ? ' nights' : ' kvelder') });
+      // Rivalene: de to på topp i slurker, hvis det er jevnt
+      var s = l.slice().sort(function (a, b) { return b.slurker - a.slurker; });
+      if (s.length >= 2 && s[0].slurker > 0 && s[0].slurker - s[1].slurker <= Math.max(3, s[0].slurker * 0.1))
+        ut.push({ i: '⚔️', t: EN ? 'Closest duel' : 'Jevneste duell', n: s[0].navn + (EN ? ' vs ' : ' mot ') + s[1].navn, v: EN ? 'only ' + (s[0].slurker - s[1].slurker) + ' sips apart' : 'bare ' + (s[0].slurker - s[1].slurker) + ' slurker skiller' });
+      return ut;
+    }
+    function vis() {
+      var aar = {}; (G.kvelder || []).forEach(function (k) { aar[new Date(k.dato).getFullYear()] = 1; });
+      aar[new Date().getFullYear()] = 1;
+      var aarListe = Object.keys(aar).sort().reverse();
+      var kv = kvelderI(sesong), l = tabell(kv);
+      var sortFn = { slurker: function (a, b) { return b.slurker - a.slurker; }, snitt: function (a, b) { return b.snitt - a.snitt; }, seire: function (a, b) { return b.seire - a.seire || b.slurker - a.slurker; }, quiz: function (a, b) { return b.quiz - a.quiz; }, kvelder: function (a, b) { return b.kvelder - a.kvelder; } }[sorter];
+      l.sort(sortFn);
+      var sumSlurker = l.reduce(function (n, p) { return n + p.slurker; }, 0), leker = {};
+      kv.forEach(function (k) { ((k.data && k.data.leker) || []).forEach(function (x) { leker[x] = (leker[x] || 0) + 1; }); });
+      var favoritt = Object.keys(leker).sort(function (a, b) { return leker[b] - leker[a]; })[0];
+      var ny = /[?&]ny=1/.test(location.search);
+      root.innerHTML =
+        '<p class="crumb"><a href="' + SIDE + '">' + (EN ? 'Your crews' : 'Gjengene dine') + '</a> › ' + esc(G.navn) + '</p>' +
+        '<h1 class="gj-tittel">' + esc(G.navn) + '</h1>' +
+        (ny ? (EN
+          ? '<div class="gj-ny"><b>The crew is ready! 🎉</b><p>Share the link with the crew. Next time you play: create a room, pick <b>' + esc(G.navn) + '</b> in the lobby, and tap “End the night” at the end.</p></div>'
+          : '<div class="gj-ny"><b>Gjengen er klar! 🎉</b><p>Del lenken med gjengen. Neste gang dere spiller: lag et rom, velg <b>' + esc(G.navn) + '</b> i lobbyen, og trykk «Avslutt kvelden» til slutt.</p></div>') : '') +
+        '<div class="gj-knapper"><button class="btn gold" data-g="inviter" type="button">' + (EN ? 'Invite the crew' : 'Inviter gjengen') + '</button>' +
+          (G.medlem ? '<a class="btn ghost" href="' + ROM + '?gjeng=' + encodeURIComponent(G.id) + '">' + (EN ? 'Start a room for the crew' : 'Start et rom for gjengen') + '</a>' : '') +
+          (!G.medlem ? '<button class="btn ghost" data-g="bli-med" type="button">' + (G.innlogget ? (EN ? 'Join the crew' : 'Bli med i gjengen') : (EN ? 'Log in to join' : 'Logg inn for å bli med')) + '</button>' : '') + '</div>' +
+        '<div class="rom-mod gj-sesong" role="group" aria-label="' + (EN ? 'Season' : 'Sesong') + '">' + aarListe.map(function (a) { return '<button type="button" data-sesong="' + a + '" aria-pressed="' + (sesong === a) + '">' + a + '</button>'; }).join('') +
+          '<button type="button" data-sesong="alle" aria-pressed="' + (sesong === 'alle') + '">' + (EN ? 'All' : 'Alle') + '</button></div>' +
+        (kv.length ? '' : (EN
+          ? '<p class="gj-tom">No nights in ' + (sesong === 'alle' ? 'the table' : sesong) + ' yet. Start a room, pick the crew in the lobby and tap “End the night” when you’re done.</p>'
+          : '<p class="gj-tom">Ingen kvelder i ' + (sesong === 'alle' ? 'tabellen' : sesong) + ' ennå. Start et rom, velg gjengen i lobbyen og trykk «Avslutt kvelden» når dere er ferdige.</p>')) +
+        (kv.length ? '<div class="stat-tall"><div><b>' + kv.length + '</b><span>' + (EN ? (kv.length === 1 ? 'night' : 'nights') : (kv.length === 1 ? 'kveld' : 'kvelder')) + '</span></div><div><b>' + sumSlurker + '</b><span>' + (EN ? 'sips in total' : 'slurker til sammen') + '</span></div>' +
+          '<div><b>' + l.length + '</b><span>' + (EN ? 'in the table' : 'med i tabellen') + '</span></div>' + (favoritt ? '<div><b class="gj-fav">' + esc(favoritt) + '</b><span>' + (EN ? 'most played' : 'mest spilt') + '</span></div>' : '') + '</div>' : '') +
+        (kv.length ? '<h2 class="gj-h2">' + (EN ? 'Awards' : 'Kåringer') + '</h2><div class="rom-kaaring gj-kaaring">' + kaaringer(l, kv).map(function (x) {
+          return '<div><span>' + x.i + '</span><small>' + esc(x.t) + '</small><b>' + esc(x.n) + ' · ' + esc(x.v) + '</b></div>'; }).join('') + '</div>' : '') +
+        (kv.length ? '<h2 class="gj-h2">' + (EN ? 'Season table' : 'Sesongtabellen') + '</h2><div class="gj-tabell-wrap"><table class="gj-tabell"><thead><tr><th>#</th><th>' + (EN ? 'Name' : 'Navn') + '</th>' +
+          (EN ? [['kvelder', 'Nights'], ['slurker', 'Sips'], ['snitt', 'Avg'], ['seire', '🏆'], ['quiz', 'Quiz']] : [['kvelder', 'Kvelder'], ['slurker', 'Slurker'], ['snitt', 'Snitt'], ['seire', '🏆'], ['quiz', 'Quiz']]).map(function (c) {
+            return '<th><button type="button" data-sort="' + c[0] + '" aria-pressed="' + (sorter === c[0]) + '">' + c[1] + '</button></th>'; }).join('') +
+          '</tr></thead><tbody>' + l.map(function (p, i) {
+            return '<tr><td>' + (i + 1) + '</td><td class="gj-navn">' + esc(p.navn) + formPil(p.form) + '</td><td>' + p.kvelder + '</td><td><b>' + p.slurker + '</b></td><td>' + desimal(p.snitt) + '</td><td>' + p.seire + '</td><td>' + p.quiz + '</td></tr>';
+          }).join('') + '</tbody></table></div><p class="small">' + (EN
+            ? '🏆 = number of nights as the thirstiest of the night. Names are merged regardless of upper and lower case – use the same name every time.'
+            : '🏆 = antall kvelder som kveldens tørstigste. Navn slås sammen uansett store og små bokstaver – bruk samme navn hver gang.') + '</p>' : '') +
+        (kv.length ? '<h2 class="gj-h2">' + (EN ? 'The nights' : 'Kveldene') + '</h2><ul class="gj-kvelder">' + kv.map(function (k) {
+          var sp = ((k.data && k.data.spillere) || []).slice().sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0); });
+          return '<li><div><b>' + dato(k.dato) + '</b><span>' + sp.length + (EN ? ' players · ' : ' med · ') + ((k.data && k.data.leker) || []).length + (EN ? ' games' : ' leker') + (k.data && k.data.alkoholfri ? (EN ? ' · 🥤 alcohol-free' : ' · 🥤 alkoholfri') : '') + '</span></div>' +
+            '<p>' + (sp[0] && sp[0].slurker ? '🏆 ' + esc(sp[0].navn) + ' (' + sp[0].slurker + ')' : '') + (sp.length ? ' · ' + sp.slice(1, 6).map(function (p) { return esc(p.navn) + ' ' + (p.slurker || 0); }).join(', ') : '') + '</p>' +
+            (G.eier ? '<button class="linkbtn" data-g="slett-kveld" data-id="' + k.id + '" type="button">' + (EN ? 'Remove from the table' : 'Fjern fra tabellen') + '</button>' : '') + '</li>';
+        }).join('') + '</ul>' : '') +
+        '<div class="gj-eier">' +
+          (G.eier ? '<button class="linkbtn" data-g="endre" type="button">' + (EN ? 'Rename' : 'Endre navn') + '</button> · <button class="linkbtn" data-g="slett" type="button">' + (EN ? 'Delete the crew' : 'Slett gjengen') + '</button>'
+                  : G.medlem ? '<button class="linkbtn" data-g="forlat" type="button">' + (EN ? 'Leave the crew' : 'Forlat gjengen') + '</button>' : '') +
+          '<span class="small">' + (EN ? 'Crew code: ' : 'Gjengkode: ') + '<b>' + esc(G.kode) + '</b></span></div><p id="gjMld"></p>';
+    }
+    function formPil(f) {
+      if (!f || f.length < 2) return '';
+      var siste = f[f.length - 1], snitt = f.slice(0, -1).reduce(function (a, b) { return a + b; }, 0) / (f.length - 1);
+      if (siste > snitt * 1.3 && siste - snitt >= 2) return ' <span class="gj-form opp" title="' + (EN ? 'More than usual last time' : 'Mer enn vanlig sist') + '">▲</span>';
+      if (siste < snitt * 0.7 && snitt - siste >= 2) return ' <span class="gj-form ned" title="' + (EN ? 'Less than usual last time' : 'Mindre enn vanlig sist') + '">▼</span>';
+      return '';
+    }
+    function hent() {
+      root.innerHTML = '<p class="small">' + (EN ? 'Loading the crew …' : 'Henter gjengen …') + '</p>';
+      var sti = '/api/gjeng/vis?k=' + encodeURIComponent(kode), o = EN ? { headers: hode() } : undefined;
+      (innlogget() ? K.api(sti, o) : fetch(sti, o)).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (d) {
+          if (!r.ok) { root.innerHTML = EN
+            ? '<h1>The crew</h1>' + feil(d.melding || 'Couldn’t find that crew.') + '<p><a href="' + SIDE + '">To your crews</a></p>'
+            : '<h1>Gjengen</h1>' + feil(d.melding || 'Fant ikke gjengen.') + '<p><a href="/no/gjeng">Til gjengene dine</a></p>'; return; }
+          G = d;
+          if (!G.kvelder.some(function (k) { return String(new Date(k.dato).getFullYear()) === sesong; }) && G.kvelder.length) sesong = String(new Date(G.kvelder[0].dato).getFullYear());
+          vis();
+        });
+      }).catch(function () { root.innerHTML = feil(EN ? 'Couldn’t connect. Try again.' : 'Fikk ikke kontakt. Prøv igjen.'); });
+    }
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-g],[data-sesong],[data-sort]'); if (!b || !G) return;
+      if (b.dataset.sesong) { sesong = b.dataset.sesong; return vis(); }
+      if (b.dataset.sort) { sorter = b.dataset.sort; return vis(); }
+      var g = b.dataset.g, mld = function (t) { var m = root.querySelector('#gjMld'); if (m) m.innerHTML = feil(t); };
+      var ikke = EN ? 'That didn’t work.' : 'Det gikk ikke.';
+      if (g === 'inviter') return inviter(G);
+      if (g === 'bli-med') {
+        if (!G.innlogget) { try { sessionStorage.setItem('bd_etter_innlogging', location.pathname + location.search); } catch (x) {} location.href = KONTO; return; }
+        return kall('/api/gjeng', { handling: 'bli-med', kode: G.kode }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
+      }
+      if (g === 'endre') {
+        var n = prompt(EN ? 'New name for the crew' : 'Nytt navn på gjengen', G.navn); if (!n || !n.trim()) return;
+        return kall('/api/gjeng', { handling: 'endre', id: G.id, navn: n }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
+      }
+      if (g === 'slett') {
+        if (!confirm(EN ? 'Delete ' + G.navn + ' and the whole season table? This can’t be undone.' : 'Slette ' + G.navn + ' og hele sesongtabellen? Dette kan ikke angres.')) return;
+        return kall('/api/gjeng', { handling: 'slett', id: G.id }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); location.href = SIDE; });
+      }
+      if (g === 'forlat') {
+        if (!confirm(EN ? 'Leave ' + G.navn + '? The table stays for everyone else.' : 'Forlate ' + G.navn + '? Tabellen blir liggende for de andre.')) return;
+        return kall('/api/gjeng', { handling: 'forlat', id: G.id }).then(function () { location.href = SIDE; });
+      }
+      if (g === 'slett-kveld') {
+        if (!confirm(EN ? 'Remove this night from the table?' : 'Fjerne denne kvelden fra tabellen?')) return;
+        return kall('/api/gjeng', { handling: 'slett-kveld', id: G.id, kveld: Number(b.dataset.id) }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
+      }
+    });
+    if (kode) hent(); else mine();
+  })();
+  </script>
+</Base>

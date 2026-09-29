@@ -1,24 +1,30 @@
 ---
 /**
  * Interaktivt verktøy på en lekside: trekk-kort, kveldens regler eller bingobrett.
- * Innholdet ligger i src/data/decks.json og src/data/bingo.json. Kun på norsk foreløpig.
+ * Innholdet ligger i src/data/decks.json og src/data/bingo.json (engelsk: decks.en.json og bingo.en.json –
+ * samme rekkefølge og koder, bare oversatt tekst).
  */
 import DECKS from '../data/decks.json';
 import BINGO from '../data/bingo.json';
+import DECKS_EN from '../data/decks.en.json';
+import BINGO_EN from '../data/bingo.en.json';
 const { slug, lang = 'en' } = Astro.props as { slug: string; lang?: string };
-const deck: any = lang === 'no' ? (DECKS as any)[slug] : null;
-const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
+const en = lang === 'en';
+const EN = en;
+const bingoData: any = en ? BINGO_EN : BINGO;
+const deck: any = lang === 'no' || en ? ((en ? DECKS_EN : DECKS) as any)[slug] : null;
+const bingo: any = (lang === 'no' || en) && slug === 'drikke-bingo' ? bingoData : null;
 ---
 {deck && deck.kind === 'deck' && (
   <section class="gt" data-gt="deck">
     <h2>{deck.title}</h2>
     <div class="gt-body"></div>
-    <script is:inline data-astro-rerun define:vars={{ D: deck }}>
+    <script is:inline data-astro-rerun define:vars={{ D: deck, EN }}>
     (function () {
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
       if (root.dataset.bound) return; root.dataset.bound = '1';
-      var modes = D.modes.length > 1 ? D.modes.concat([{ v: '*', t: 'Alle' }]) : D.modes;
+      var modes = D.modes.length > 1 ? D.modes.concat([{ v: '*', t: EN ? 'All' : 'Alle' }]) : D.modes;
       var mode = modes[0].v, order = [], pos = 0;
       function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
       function stokk(){
@@ -38,8 +44,8 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
           (modes.length > 1 ? '<div class="gt-modes">' + modes.map(function(m){
             return '<button class="gt-mode" data-m="'+m.v+'" aria-pressed="'+(m.v===mode)+'">'+esc(m.t)+'</button>'; }).join('') + '</div>' : '') +
           '<div class="gt-card"><p class="gt-count">'+(pos+1)+' / '+order.length+(x.k ? ' · <span class="gt-kind">'+esc(x.k)+'</span>' : '')+'</p><p class="gt-text">'+esc(x.t)+'</p></div>' +
-          '<div class="gt-row"><button class="btn ghost" data-a="tilbake"'+(pos===0?' disabled':'')+'>Tilbake</button>' +
-          '<button class="btn gold" data-a="neste">'+(pos === order.length-1 ? 'Stokk på nytt' : 'Neste')+'</button></div>';
+          '<div class="gt-row"><button class="btn ghost" data-a="tilbake"'+(pos===0?' disabled':'')+'>'+(EN ? 'Back' : 'Tilbake')+'</button>' +
+          '<button class="btn gold" data-a="neste">'+(pos === order.length-1 ? (EN ? 'Shuffle again' : 'Stokk på nytt') : (EN ? 'Next' : 'Neste'))+'</button></div>';
       }
       body.addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b) return;
@@ -56,9 +62,9 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
 {deck && deck.kind === 'rules' && (
   <section class="gt" data-gt="rules">
     <h2>{deck.title}</h2>
-    <p class="small">Trykk på en regel for å bytte den ut.</p>
+    <p class="small">{en ? 'Tap a rule to swap it out.' : 'Trykk på en regel for å bytte den ut.'}</p>
     <div class="gt-body"></div>
-    <script is:inline data-astro-rerun define:vars={{ D: deck }}>
+    <script is:inline data-astro-rerun define:vars={{ D: deck, EN }}>
     (function () {
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
@@ -70,7 +76,7 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
       function tegn(){
         body.innerHTML = '<ol class="gt-rules">' + valgt.map(function(i,k){
           return '<li><button class="gt-rule" data-k="'+k+'">'+esc(D.items[i])+'<span aria-hidden="true">↻</span></button></li>'; }).join('') + '</ol>' +
-          '<button class="btn gold vp-big" data-a="alle">Trekk nye regler</button>';
+          '<button class="btn gold vp-big" data-a="alle">'+(EN ? 'Draw new rules' : 'Trekk nye regler')+'</button>';
       }
       body.addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b) return;
@@ -85,16 +91,16 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
 
 {bingo && (
   <section class="gt" data-gt="bingo">
-    <h2>Lag ditt bingobrett</h2>
-    <p class="small">Alle lager sitt eget brett på egen mobil – brettene blir forskjellige.</p>
+    <h2>{en ? 'Make your bingo card' : 'Lag ditt bingobrett'}</h2>
+    <p class="small">{en ? 'Everyone makes their own card on their own phone – no two cards are the same.' : 'Alle lager sitt eget brett på egen mobil – brettene blir forskjellige.'}</p>
     <div class="gt-body"></div>
-    <script is:inline data-astro-rerun define:vars={{ B: bingo }}>
+    <script is:inline data-astro-rerun define:vars={{ B: bingo, EN }}>
     (function () {
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
       if (root.dataset.bound) return; root.dataset.bound = '1';
       var VALG = B.eras.map(function(e){ return { v:e.id, t:e.title }; })
-        .concat([{ v:'blandet', t:'Blandet' }, { v:'kvelden', t:'Kvelden' }]);
+        .concat([{ v:'blandet', t: EN ? 'Mixed' : 'Blandet' }, { v:'kvelden', t: EN ? 'The night' : 'Kvelden' }]);
       var valg = '80', brett = [], merket = {}, meldt = {};
       function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
       function pott(v){
@@ -116,18 +122,18 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
         var nye = 0;
         LINJER.forEach(function(l,i){ if (!meldt[i] && l.every(function(k){ return merket[k]; })){ meldt[i]=1; nye++; } });
         var fullt = Object.keys(merket).length === 16;
-        return fullt ? 'BINGO! Alle andre drikker opp.' : (nye ? 'Rekke! Del ut to slurker.' : '');
+        return fullt ? (EN ? 'BINGO! Everyone else finishes their drink.' : 'BINGO! Alle andre drikker opp.') : (nye ? (EN ? 'Line! Hand out two sips.' : 'Rekke! Del ut to slurker.') : '');
       }
       function liste(){
         if (valg === 'kvelden') return '';
         var eras = valg === 'blandet' ? (B.blandet ? [B.blandet] : B.eras) : B.eras.filter(function(e){ return e.id === valg; });
         return eras.map(function(e){
           var tekst = e.songs.map(function(s){ return s[0]+' – '+s[1]; }).join('\n');
-          return '<details class="gt-list"><summary>Spilleliste: '+esc(e.title)+' ('+e.songs.length+' låter)</summary>' +
+          return '<details class="gt-list"><summary>'+(EN ? 'Playlist: ' : 'Spilleliste: ')+esc(e.title)+' ('+e.songs.length+(EN ? ' songs)' : ' låter)')+'</summary>' +
             '<ol>'+e.songs.map(function(s){ return '<li>'+esc(s[0])+' – '+esc(s[1])+'</li>'; }).join('')+'</ol>' +
-            '<p class="gt-row"><button class="btn ghost" data-copy="'+esc(tekst)+'">Kopier listen</button>' +
+            '<p class="gt-row"><button class="btn ghost" data-copy="'+esc(tekst)+'">'+(EN ? 'Copy the list' : 'Kopier listen')+'</button>' +
             [].concat(e.spotify || []).map(function(u, i, a){
-              return '<a class="btn gold" href="'+esc(u)+'" target="_blank" rel="noopener">'+(a.length > 1 ? 'Spotify del '+(i+1) : 'Åpne i Spotify')+' ↗</a>';
+              return '<a class="btn gold" href="'+esc(u)+'" target="_blank" rel="noopener">'+(a.length > 1 ? (EN ? 'Spotify part ' : 'Spotify del ')+(i+1) : (EN ? 'Open in Spotify' : 'Åpne i Spotify'))+' ↗</a>';
             }).join('') + '</p></details>';
         }).join('');
       }
@@ -138,7 +144,7 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
           '<div class="gt-bingo">' + brett.map(function(s,k){
             return '<button class="gt-cell'+(merket[k]?' on':'')+'" data-c="'+k+'"><b>'+esc(s.t)+'</b>'+(s.a?'<span>'+esc(s.a)+'</span>':'')+'</button>'; }).join('') + '</div>' +
           '<p class="gt-msg" role="status">'+(melding||'&nbsp;')+'</p>' +
-          '<button class="btn gold vp-big" data-a="nytt">Nytt brett</button>' + liste();
+          '<button class="btn gold vp-big" data-a="nytt">'+(EN ? 'New card' : 'Nytt brett')+'</button>' + liste();
       }
       body.addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b) return;
@@ -156,7 +162,7 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
   <section class="gt" data-gt="wheel">
     <h2>{deck.title}</h2>
     <div class="gt-body"></div>
-    <script is:inline data-astro-rerun define:vars={{ D: deck }}>
+    <script is:inline data-astro-rerun define:vars={{ D: deck, EN }}>
     (function () {
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
@@ -176,10 +182,10 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
       }).join('');
       body.innerHTML =
         '<div class="gt-wheel"><svg class="gt-pointer" viewBox="0 0 20 16" aria-hidden="true"><path d="M0 0 H20 L10 16 Z" fill="#f4ebdc"/></svg>' +
-        '<svg class="gt-disc" viewBox="-100 -100 200 200" role="img" aria-label="Drikkehjul"><g class="gt-rot">'+deler+'</g>' +
+        '<svg class="gt-disc" viewBox="-100 -100 200 200" role="img" aria-label="'+(EN ? 'Drinking wheel' : 'Drikkehjul')+'"><g class="gt-rot">'+deler+'</g>' +
         '<circle r="14" fill="#141009" stroke="#f4b740" stroke-width="2"/></svg></div>' +
         '<p class="gt-result" role="status">&nbsp;</p><p class="gt-desc small">&nbsp;</p>' +
-        '<button class="btn gold vp-big" data-a="snurr">Snurr</button>';
+        '<button class="btn gold vp-big" data-a="snurr">'+(EN ? 'Spin' : 'Snurr')+'</button>';
       var rot = body.querySelector('.gt-rot'), res = body.querySelector('.gt-result'), desc = body.querySelector('.gt-desc');
       body.querySelector('[data-a=snurr]').addEventListener('click', function(){
         if (snurrer) return; snurrer = true;
@@ -199,7 +205,7 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
   <section class="gt fr" data-gt="forraeder">
     <h2>{deck.title}</h2>
     <div class="gt-body"></div>
-    <script is:inline data-astro-rerun define:vars={{ D: deck }}>
+    <script is:inline data-astro-rerun define:vars={{ D: deck, EN }}>
     (function () {
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
@@ -212,31 +218,32 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
         pos = 0;
       }
       function valg(){
-        return '<div class="gt-modes">' + D.modes.concat([{v:'*',t:'Alle'}]).map(function(m){
+        return '<div class="gt-modes">' + D.modes.concat([{v:'*',t: EN ? 'All' : 'Alle'}]).map(function(m){
           return '<button class="gt-mode" data-m="'+m.v+'" aria-pressed="'+(m.v===mode)+'">'+esc(m.t)+'</button>'; }).join('') + '</div>';
       }
       function klar(){
-        body.innerHTML = valg() + '<div class="gt-card vp-center"><p class="gt-count">Kort ' + (pos+1) + ' av ' + order.length + '</p>' +
-          '<p class="gt-text">Gi telefonen til den som står for tur.</p><p class="small">Ikke la de andre se skjermen.</p></div>' +
-          '<button class="btn gold vp-big" data-a="hemmelig">Jeg er klar</button>';
+        body.innerHTML = valg() + '<div class="gt-card vp-center"><p class="gt-count">' + (EN ? 'Card ' : 'Kort ') + (pos+1) + (EN ? ' of ' : ' av ') + order.length + '</p>' +
+          (EN ? '<p class="gt-text">Hand the phone to whoever\'s turn it is.</p><p class="small">Don\'t let the others see the screen.</p></div>'
+              : '<p class="gt-text">Gi telefonen til den som står for tur.</p><p class="small">Ikke la de andre se skjermen.</p></div>') +
+          '<button class="btn gold vp-big" data-a="hemmelig">' + (EN ? 'I\'m ready' : 'Jeg er klar') + '</button>';
       }
       function hemmelig(){
         sann = Math.random() < 0.5;
-        body.innerHTML = '<div class="gt-card"><p class="gt-count">Bare for deg</p><p class="gt-text">' + esc(order[pos].t) + '</p>' +
-          '<p class="fr-ordre ' + (sann ? 'sann' : 'logn') + '">' + (sann ? 'Si sannheten' : 'Lyv') + '</p>' +
-          '<p class="small">' + (sann ? 'Fullfør setningen med noe som faktisk er sant.' : 'Dikt opp noe troverdig – og hold maska.') + '</p></div>' +
-          '<button class="btn gold vp-big" data-a="offentlig">Skjul og vis de andre</button>';
+        body.innerHTML = '<div class="gt-card"><p class="gt-count">' + (EN ? 'Just for you' : 'Bare for deg') + '</p><p class="gt-text">' + esc(order[pos].t) + '</p>' +
+          '<p class="fr-ordre ' + (sann ? 'sann' : 'logn') + '">' + (sann ? (EN ? 'Tell the truth' : 'Si sannheten') : (EN ? 'Lie' : 'Lyv')) + '</p>' +
+          '<p class="small">' + (sann ? (EN ? 'Finish the sentence with something that\'s actually true.' : 'Fullfør setningen med noe som faktisk er sant.') : (EN ? 'Make up something believable – and keep a straight face.' : 'Dikt opp noe troverdig – og hold maska.')) + '</p></div>' +
+          '<button class="btn gold vp-big" data-a="offentlig">' + (EN ? 'Hide it and show the others' : 'Skjul og vis de andre') + '</button>';
       }
       function offentlig(){
-        body.innerHTML = '<div class="gt-card"><p class="gt-count">Fortell</p><p class="gt-text">' + esc(order[pos].t) + '</p>' +
-          '<p class="small">Alle andre får stille ett spørsmål hver. Så stemmer dere på tre: sant eller løgn?</p></div>' +
-          '<button class="btn gold vp-big" data-a="avslor">Avslør</button>';
+        body.innerHTML = '<div class="gt-card"><p class="gt-count">' + (EN ? 'Tell' : 'Fortell') + '</p><p class="gt-text">' + esc(order[pos].t) + '</p>' +
+          '<p class="small">' + (EN ? 'Everyone else gets to ask one question each. Then vote on three: truth or lie?' : 'Alle andre får stille ett spørsmål hver. Så stemmer dere på tre: sant eller løgn?') + '</p></div>' +
+          '<button class="btn gold vp-big" data-a="avslor">' + (EN ? 'Reveal' : 'Avslør') + '</button>';
       }
       function avslor(){
-        body.innerHTML = '<div class="gt-card vp-center"><p class="gt-count">Svaret</p>' +
-          '<p class="fr-ordre ' + (sann ? 'sann' : 'logn') + '">' + (sann ? 'Det var sant' : 'Det var løgn') + '</p>' +
-          '<p>Stemte du feil: drikk to.<br>Gjettet alle riktig: fortelleren drikker tre.</p></div>' +
-          '<button class="btn gold vp-big" data-a="neste">Neste person</button>';
+        body.innerHTML = '<div class="gt-card vp-center"><p class="gt-count">' + (EN ? 'The answer' : 'Svaret') + '</p>' +
+          '<p class="fr-ordre ' + (sann ? 'sann' : 'logn') + '">' + (sann ? (EN ? 'It was true' : 'Det var sant') : (EN ? 'It was a lie' : 'Det var løgn')) + '</p>' +
+          (EN ? '<p>Voted wrong: drink two.<br>Everyone guessed right: the storyteller drinks three.</p></div>' : '<p>Stemte du feil: drikk to.<br>Gjettet alle riktig: fortelleren drikker tre.</p></div>') +
+          '<button class="btn gold vp-big" data-a="neste">' + (EN ? 'Next person' : 'Neste person') + '</button>';
       }
       body.addEventListener('click', function(e){
         var b = e.target.closest('button'); if (!b) return;
@@ -257,12 +264,12 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
   <section class="gt" data-gt="aar">
     <h2>{deck.title}</h2>
     <div class="gt-body"></div>
-    <script is:inline data-astro-rerun define:vars={{ B: BINGO }}>
+    <script is:inline data-astro-rerun define:vars={{ B: bingoData, EN }}>
     (function () {
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
       if (root.dataset.bound) return; root.dataset.bound = '1';
-      var VALG = B.eras.map(function(e){ return { v:e.id, t:e.title }; }).concat([{ v:'blandet', t:'Blandet' }]);
+      var VALG = B.eras.map(function(e){ return { v:e.id, t:e.title }; }).concat([{ v:'blandet', t: EN ? 'Mixed' : 'Blandet' }]);
       var valg = 'blandet', order = [], pos = 0;
       function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
       function stokk(){
@@ -281,10 +288,10 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
           '<div class="gt-card"><p class="gt-count">' + (pos+1) + ' / ' + order.length + '</p>' +
           '<p class="gt-text">' + esc(s.t) + '</p><p class="aar-artist">' + esc(s.a) + '</p>' +
           (vis ? '<p class="aar-aar">' + s.y + '</p>' + (s.i ? '<p class="small">' + esc(s.i) + '</p>' : '') : '') + '</div>' +
-          '<div class="gt-row"><a class="btn ghost" href="' + spotify + '" target="_blank" rel="noopener">Spill av på Spotify ↗</a></div>' +
-          (vis ? '<button class="btn gold vp-big" data-a="neste">Neste låt</button>'
-               : '<button class="btn gold vp-big" data-a="vis">Vis året</button>') +
-          '<p class="small aar-regel">Riktig år: del ut tre · ett år unna: del ut én · ellers én slurk per fem år du bommet, maks tre.</p>';
+          '<div class="gt-row"><a class="btn ghost" href="' + spotify + '" target="_blank" rel="noopener">' + (EN ? 'Play on Spotify' : 'Spill av på Spotify') + ' ↗</a></div>' +
+          (vis ? '<button class="btn gold vp-big" data-a="neste">' + (EN ? 'Next song' : 'Neste låt') + '</button>'
+               : '<button class="btn gold vp-big" data-a="vis">' + (EN ? 'Show the year' : 'Vis året') + '</button>') +
+          '<p class="small aar-regel">' + (EN ? 'Right year: hand out three · one year off: hand out one · otherwise one sip for every five years you were off, max three.' : 'Riktig år: del ut tre · ett år unna: del ut én · ellers én slurk per fem år du bommet, maks tre.') + '</p>';
       }
       body.addEventListener('click', function(e){
         var b = e.target.closest('button'); if (!b) return;
@@ -300,31 +307,31 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
 
 {deck && deck.kind === 'ringoffire' && (
   <section class="gt rof" data-gt="ringoffire">
-    <h2>Spill med telefonen som kortstokk</h2>
-    <p class="small">Ingen kortstokk? Legg telefonen midt på bordet og trekk herfra. Skriv inn navnene, så sier den hvem som skal trekke.</p>
-    <label class="rof-lab" for="rofNavn">Spillere (skill med komma)</label>
-    <input class="rof-inp" id="rofNavn" type="text" autocomplete="off" placeholder="Jonas, Maria, Petter" />
-    <button class="btn gold rof-start" type="button" data-rof="start">Start spillmodus</button>
+    <h2>{en ? 'Play with the phone as the deck' : 'Spill med telefonen som kortstokk'}</h2>
+    <p class="small">{en ? "No deck of cards? Put the phone in the middle of the table and draw from here. Type in the names and it'll tell you whose turn it is to draw." : 'Ingen kortstokk? Legg telefonen midt på bordet og trekk herfra. Skriv inn navnene, så sier den hvem som skal trekke.'}</p>
+    <label class="rof-lab" for="rofNavn">{en ? 'Players (separate with commas)' : 'Spillere (skill med komma)'}</label>
+    <input class="rof-inp" id="rofNavn" type="text" autocomplete="off" placeholder={en ? 'Alex, Sam, Jamie' : 'Jonas, Maria, Petter'} />
+    <button class="btn gold rof-start" type="button" data-rof="start">{en ? 'Start game mode' : 'Start spillmodus'}</button>
 
     <div class="rof-full" hidden role="dialog" aria-modal="true" aria-label="Ring of Fire">
       <div class="rof-top">
-        <button class="rof-x" data-rof="lukk" aria-label="Avslutt leken">
+        <button class="rof-x" data-rof="lukk" aria-label={en ? 'End the game' : 'Avslutt leken'}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
         </button>
         <div class="rof-status"><b>Ring of Fire</b><span class="rof-igjen"></span></div>
         <span class="rof-x" aria-hidden="true"></span>
       </div>
-      <div class="rof-tur"><span>Din tur</span><b class="rof-navn"></b></div>
+      <div class="rof-tur"><span>{en ? 'Your turn' : 'Din tur'}</span><b class="rof-navn"></b></div>
       <div class="rof-kort" aria-live="polite">
         <div class="rof-hj rof-hj1"><b class="rof-v"></b><span class="rof-s"></span></div>
         <div class="rof-midt"><b class="rof-regel"></b><span class="rof-tekst"></span></div>
         <div class="rof-hj rof-hj2"><b class="rof-v"></b><span class="rof-s"></span></div>
       </div>
       <div class="rof-spillere"></div>
-      <button class="rof-trekk" data-rof="trekk">Trekk neste kort</button>
+      <button class="rof-trekk" data-rof="trekk">{en ? 'Draw the next card' : 'Trekk neste kort'}</button>
     </div>
 
-    <script is:inline data-astro-rerun define:vars={{ D: deck }}>
+    <script is:inline data-astro-rerun define:vars={{ D: deck, EN }}>
     (function () {
       var root = document.currentScript.closest('.gt');
       if (root.dataset.bound) return; root.dataset.bound = '1';
@@ -341,7 +348,9 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
         konger = 0; trukket = 0;
       }
       function status() {
-        root.querySelector('.rof-igjen').textContent = stokk.length + ' kort igjen · ' + konger + (konger === 1 ? ' konge' : ' konger') + ' trukket';
+        root.querySelector('.rof-igjen').textContent = EN
+          ? stokk.length + ' cards left · ' + konger + (konger === 1 ? ' king' : ' kings') + ' drawn'
+          : stokk.length + ' kort igjen · ' + konger + (konger === 1 ? ' konge' : ' konger') + ' trukket';
       }
       function visSpillere() {
         root.querySelector('.rof-spillere').innerHTML = spillere.map(function (n, i) {
@@ -359,18 +368,18 @@ const bingo: any = lang === 'no' && slug === 'drikke-bingo' ? BINGO : null;
         if (k.v === 'K') {
           konger++;
           var slurker = D.konger[Math.min(konger, D.konger.length) - 1];
-          var nr = ['Første', 'Andre', 'Tredje', 'Fjerde'][konger - 1] || 'Neste';
-          navn = nr + ' konge';
-          tekst = 'Drikk ' + slurker + ' slurker.' + (konger === 4 ? ' Det var siste konge!' : '');
+          var nr = (EN ? ['First', 'Second', 'Third', 'Fourth'] : ['Første', 'Andre', 'Tredje', 'Fjerde'])[konger - 1] || (EN ? 'Next' : 'Neste');
+          navn = nr + (EN ? ' king' : ' konge');
+          tekst = (EN ? 'Drink ' : 'Drikk ') + slurker + (EN ? ' sips.' : ' slurker.') + (konger === 4 ? (EN ? ' That was the last king!' : ' Det var siste konge!') : '');
         }
         var kort = root.querySelector('.rof-kort');
         kort.classList.toggle('rod', !!k.rod);
-        kort.querySelectorAll('.rof-v').forEach(function (e) { e.textContent = k.v === 'J' ? 'Kn' : (k.v === 'Q' ? 'D' : k.v); });
+        kort.querySelectorAll('.rof-v').forEach(function (e) { e.textContent = EN ? k.v : (k.v === 'J' ? 'Kn' : (k.v === 'Q' ? 'D' : k.v)); });
         kort.querySelectorAll('.rof-s').forEach(function (e) { e.textContent = k.s; });
         root.querySelector('.rof-regel').textContent = navn;
         root.querySelector('.rof-tekst').textContent = tekst;
         kort.classList.remove('flipp'); void kort.offsetWidth; kort.classList.add('flipp');
-        root.querySelector('.rof-trekk').textContent = stokk.length ? 'Trekk neste kort' : 'Stokk og start på nytt';
+        root.querySelector('.rof-trekk').textContent = stokk.length ? (EN ? 'Draw the next card' : 'Trekk neste kort') : (EN ? 'Shuffle and start over' : 'Stokk og start på nytt');
         status(); visSpillere();
       }
       root.addEventListener('click', function (e) {

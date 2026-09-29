@@ -3,26 +3,41 @@
  * Digitale kortstokker og terninger, så lekene kan spilles uten fysiske ting.
  * Alt kjører på én telefon. Leker som trenger skjulte hender (Pyramiden, President, Gris) ligger i rom.
  */
-const { slug } = Astro.props as { slug: string };
+const { slug, lang = 'no' } = Astro.props as { slug: string; lang?: string };
+const en = lang === 'en';
 const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer', '21-med-terninger', 'opus', 'regelfabrikken',
   'power-hour', 'snurr-flasken', 'drikke-yatzy', 'beer-pong', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', '14-sporsmal', 'bossen-sier', 'stilleleken'];
 const RomLeker = ['regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris', 'to-sannheter-og-en-logn', 'bussruta', 'drikke-yatzy'];
 const har = DIGITALE.includes(slug);
 import { romLenke } from '../lib/romlenke';
 import KortVelger from './KortVelger.astro';
-const romHref = romLenke(slug);
+import { games, t } from '../lib/content';
+const romHref = romLenke(slug, '', en ? 'en' : 'no');
 const bareRom = ['pyramiden', 'president', 'gris'].includes(slug);
+const OVERSKRIFT_NO: Record<string, string> = { 'terningen-bestemmer': 'Telefonen er terningen', '21-med-terninger': 'Telefonen er terningen', 'opus': 'Telefonen er terningen', 'drikke-yatzy': 'Telefonen er terningene og blokka', 'regelfabrikken': 'Skriv kortene', 'power-hour': 'Klokka', 'snurr-flasken': 'Telefonen er flaska', 'beer-pong': 'Koppteller', 'rask-fakta': 'Fem sekunder', 'to-sannheter-og-en-logn': 'Skriv og avslør', 'jug': 'Vertens hemmelige trekk', '14-sporsmal': 'Regeltavla', 'bossen-sier': 'Boss-maskinen', 'stilleleken': 'Telefonen lytter' };
+const OVERSKRIFT_EN: Record<string, string> = { 'terningen-bestemmer': 'The phone is the die', '21-med-terninger': 'The phone is the dice', 'opus': 'The phone is the die', 'drikke-yatzy': 'The phone is the dice and the scorecard', 'regelfabrikken': 'Write the cards', 'power-hour': 'The clock', 'snurr-flasken': 'The phone is the bottle', 'beer-pong': 'Cup counter', 'rask-fakta': 'Five seconds', 'to-sannheter-og-en-logn': 'Write and reveal', 'jug': "The host's secret draw", '14-sporsmal': 'The rule board', 'bossen-sier': 'The boss machine', 'stilleleken': 'The phone is listening' };
+const overskrift = bareRom ? (en ? 'Play without a deck of cards' : 'Spill uten kortstokk') : ((en ? OVERSKRIFT_EN : OVERSKRIFT_NO)[slug] || (en ? 'The phone is the deck' : 'Telefonen er kortstokken'));
+const romNavn = en ? t((games.find((g) => g.slug === slug) || {}).name, 'en') : (slug === 'pyramiden' ? 'Pyramiden' : slug === 'president' ? 'President' : 'Gris');
 ---
 {(har || bareRom) && (
 <section class="gt dl" data-dl={slug}>
-  <h2>{bareRom ? 'Spill uten kortstokk' : (({ 'terningen-bestemmer': 'Telefonen er terningen', '21-med-terninger': 'Telefonen er terningen', 'opus': 'Telefonen er terningen', 'drikke-yatzy': 'Telefonen er terningene og blokka', 'regelfabrikken': 'Skriv kortene', 'power-hour': 'Klokka', 'snurr-flasken': 'Telefonen er flaska', 'beer-pong': 'Koppteller', 'rask-fakta': 'Fem sekunder', 'to-sannheter-og-en-logn': 'Skriv og avslør', 'jug': 'Vertens hemmelige trekk', '14-sporsmal': 'Regeltavla', 'bossen-sier': 'Boss-maskinen', 'stilleleken': 'Telefonen lytter' } as any)[slug] || 'Telefonen er kortstokken')}</h2>
+  <h2>{overskrift}</h2>
   {bareRom ? (
-    <>
-      <p>Her har hver spiller skjulte kort på hånda, så dere spiller fra hver deres telefon. Lag et rom, del koden og velg {slug === 'pyramiden' ? 'Pyramiden' : slug === 'president' ? 'President' : 'Gris'}.</p>
-      <p><a class="btn gold" href={romHref}>Lag et rom</a></p>
-    </>
+    en ? (
+      <>
+        <p>In this one everyone has hidden cards in their hand, so you each play from your own phone. Create a room, share the code and pick {romNavn}.</p>
+        <p><a class="btn gold" href={romHref}>Create a room</a></p>
+      </>
+    ) : (
+      <>
+        <p>Her har hver spiller skjulte kort på hånda, så dere spiller fra hver deres telefon. Lag et rom, del koden og velg {romNavn}.</p>
+        <p><a class="btn gold" href={romHref}>Lag et rom</a></p>
+      </>
+    )
   ) : <div class="dl-body"></div>}
-  {RomLeker.includes(slug) && !bareRom && <p class="small dl-romtips">Vil dere spille fra hver sin telefon? <a href={romHref}>Lag et rom for leken</a>.</p>}
+  {RomLeker.includes(slug) && !bareRom && (en
+    ? <p class="small dl-romtips">Want to play from your own phones? <a href={romHref}>Create a room for this game</a>.</p>
+    : <p class="small dl-romtips">Vil dere spille fra hver sin telefon? <a href={romHref}>Lag et rom for leken</a>.</p>)}
 </section>
 )}
 
@@ -36,7 +51,9 @@ if (!window.BDK) window.BDK = (function () {
     ['♥', '♦', '♠', '♣'].forEach(function (f) { for (var v = 2; v <= 14; v++) if (!(utenEss && v === 14)) s.push({ v: v, f: f }); });
     return bland(s);
   }
-  function vn(v) { return v <= 10 ? String(v) : ({ 11: 'Kn', 12: 'D', 13: 'K', 14: 'A' })[v]; }
+  function erEn() { return document.documentElement.lang === 'en'; }
+  function T(no, en) { return erEn() ? en : no; }
+  function vn(v) { return v <= 10 ? String(v) : (erEn() ? { 11: 'J', 12: 'Q', 13: 'K', 14: 'A' } : { 11: 'Kn', 12: 'D', 13: 'K', 14: 'A' })[v]; }
   function rod(k) { return k.f === '♥' || k.f === '♦'; }
   function kort(k, kl) {
     if (!k) return '<span class="kk tom ' + (kl || '') + '"></span>';
@@ -45,7 +62,7 @@ if (!window.BDK) window.BDK = (function () {
   function bakside(kl) { return '<span class="kk bak ' + (kl || '') + '"></span>'; }
   var PRIKKER = { 1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
   function terning(n) {
-    var s = '<span class="dice" data-n="' + n + '" aria-label="Terning viser ' + n + '">';
+    var s = '<span class="dice" data-n="' + n + '" aria-label="' + T('Terning viser ', 'Die showing ') + n + '">';
     for (var i = 1; i <= 9; i++) s += '<i' + (PRIKKER[n].indexOf(i) !== -1 ? ' class="p"' : '') + '></i>';
     return s + '</span>';
   }
@@ -69,7 +86,7 @@ if (!window.BDK) window.BDK = (function () {
   function navn(inp) { return inp.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 12); }
   function husk(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function hent(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
-  return { bland: bland, stokk: stokk, vn: vn, kort: kort, bakside: bakside, terning: terning, kast: kast, esc: esc, navn: navn, husk: husk, hent: hent };
+  return { T: T, bland: bland, stokk: stokk, vn: vn, kort: kort, bakside: bakside, terning: terning, kast: kast, esc: esc, navn: navn, husk: husk, hent: hent };
 })();
 </script>
 )}
@@ -78,21 +95,21 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="over-eller-under"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, stokk, naa, bunke, melding;
-  function start() { stokk = K.stokk(); naa = stokk.pop(); bunke = 1; melding = 'Neste spiller: høyere eller lavere?'; tegn(); }
+  var K = window.BDK, T = K.T, stokk, naa, bunke, melding;
+  function start() { stokk = K.stokk(); naa = stokk.pop(); bunke = 1; melding = T('Neste spiller: høyere eller lavere?', 'Next player: higher or lower?'); tegn(); }
   function tegn(sist) {
     root.innerHTML = '<div class="dl-bord">' + K.kort(naa, 'stor' + (sist ? ' inn' : '')) + '</div>' +
       '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
-      '<p class="dl-info">Bunken: <b>' + bunke + '</b> ' + (bunke === 1 ? 'kort' : 'kort') + ' · ' + stokk.length + ' igjen i stokken</p>' +
-      '<div class="dl-knapper"><button class="btn gold" data-v="over">Høyere ↑</button><button class="btn gold" data-v="under">Lavere ↓</button></div>' +
-      '<p class="small">Ess er høyest. Likt teller som feil.</p>';
+      '<p class="dl-info">' + T('Bunken', 'Pile') + ': <b>' + bunke + '</b> ' + (bunke === 1 ? T('kort', 'card') : T('kort', 'cards')) + ' · ' + stokk.length + T(' igjen i stokken', ' left in the deck') + '</p>' +
+      '<div class="dl-knapper"><button class="btn gold" data-v="over">' + T('Høyere', 'Higher') + ' ↑</button><button class="btn gold" data-v="under">' + T('Lavere', 'Lower') + ' ↓</button></div>' +
+      '<p class="small">' + T('Ess er høyest. Likt teller som feil.', 'Aces are high. A tie counts as wrong.') + '</p>';
   }
   root.addEventListener('click', function (e) {
     var b = e.target.closest('[data-v]'); if (!b) return;
     if (!stokk.length) { stokk = K.stokk(); }
     var nytt = stokk.pop(), riktig = b.dataset.v === 'over' ? nytt.v > naa.v : nytt.v < naa.v;
-    if (riktig) { bunke++; melding = 'Riktig! Turen går videre.'; }
-    else { melding = 'Feil! Drikk ' + bunke + (bunke === 1 ? ' slurk.' : ' slurker.'); bunke = 1; }
+    if (riktig) { bunke++; melding = T('Riktig! Turen går videre.', 'Correct! Pass it on.'); }
+    else { melding = T('Feil! Drikk ', 'Wrong! Drink ') + bunke + (bunke === 1 ? T(' slurk.', ' sip.') : T(' slurker.', ' sips.')); bunke = 1; }
     naa = nytt; tegn(true);
   });
   start();
@@ -104,36 +121,36 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="fuck-the-dealer"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, stokk, kortet, forsok, rad, brukt, melding, hint, avslort;
-  function start() { stokk = K.stokk(); brukt = {}; rad = 0; nyttKort(); melding = 'Spilleren til venstre for dealeren gjetter.'; tegn(); }
+  var K = window.BDK, T = K.T, stokk, kortet, forsok, rad, brukt, melding, hint, avslort;
+  function start() { stokk = K.stokk(); brukt = {}; rad = 0; nyttKort(); melding = T('Spilleren til venstre for dealeren gjetter.', "The player on the dealer's left guesses."); tegn(); }
   function nyttKort() { if (!stokk.length) { stokk = K.stokk(); brukt = {}; } kortet = stokk.pop(); forsok = 1; hint = ''; avslort = false; }
   function tegn() {
     var verdier = []; for (var v = 2; v <= 14; v++) verdier.push(v);
     root.innerHTML = '<div class="dl-bord">' + (avslort ? K.kort(kortet, 'stor inn') : K.bakside('stor')) + '</div>' +
       '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + (hint ? ' <b class="dl-hint">' + hint + '</b>' : '') + '</p>' +
       (avslort
-        ? '<div class="dl-knapper"><button class="btn gold" data-a="neste">Neste spiller</button></div>'
-        : '<p class="dl-info">Gjett ' + (forsok === 1 ? 'verdien' : 'én gang til') + '</p><div class="dl-verdier">' + verdier.map(function (v) {
+        ? '<div class="dl-knapper"><button class="btn gold" data-a="neste">' + T('Neste spiller', 'Next player') + '</button></div>'
+        : '<p class="dl-info">' + (forsok === 1 ? T('Gjett verdien', 'Guess the value') : T('Gjett én gang til', 'Guess one more time')) + '</p><div class="dl-verdier">' + verdier.map(function (v) {
             var n = brukt[v] || 0;
-            return '<button data-g="' + v + '"' + (n >= 4 ? ' disabled' : '') + '><b>' + K.vn(v) + '</b><small>' + (4 - n) + ' igjen</small></button>';
+            return '<button data-g="' + v + '"' + (n >= 4 ? ' disabled' : '') + '><b>' + K.vn(v) + '</b><small>' + (4 - n) + T(' igjen', ' left') + '</small></button>';
           }).join('') + '</div>') +
-      '<p class="dl-info">Dealeren har klart <b>' + rad + '</b> av 3 på rad · ' + stokk.length + ' kort igjen</p>';
+      '<p class="dl-info">' + T('Dealeren har klart <b>', 'The dealer has survived <b>') + rad + T('</b> av 3 på rad · ', '</b> of 3 in a row · ') + stokk.length + T(' kort igjen', ' cards left') + '</p>';
   }
   root.addEventListener('click', function (e) {
     var g = e.target.closest('[data-g]'), a = e.target.closest('[data-a]');
-    if (a) { nyttKort(); melding = 'Neste spiller gjetter.'; return tegn(); }
+    if (a) { nyttKort(); melding = T('Neste spiller gjetter.', 'Next player guesses.'); return tegn(); }
     if (!g) return;
     var v = Number(g.dataset.g);
     if (v === kortet.v) {
-      melding = forsok === 1 ? 'Rett på første! Dealeren drikker 5.' : 'Riktig! Dealeren drikker 2.';
+      melding = forsok === 1 ? T('Rett på første! Dealeren drikker 5.', 'First try! The dealer drinks 5.') : T('Riktig! Dealeren drikker 2.', 'Correct! The dealer drinks 2.');
       rad = 0; avslort = true; brukt[kortet.v] = (brukt[kortet.v] || 0) + 1;
     } else if (forsok === 1) {
-      forsok = 2; hint = kortet.v > v ? 'Høyere!' : 'Lavere!'; melding = 'Feil.';
+      forsok = 2; hint = kortet.v > v ? T('Høyere!', 'Higher!') : T('Lavere!', 'Lower!'); melding = T('Feil.', 'Wrong.');
     } else {
       var diff = Math.abs(kortet.v - v);
-      melding = 'Feil igjen – drikk ' + diff + (diff === 1 ? ' slurk.' : ' slurker.'); hint = '';
+      melding = T('Feil igjen – drikk ', 'Wrong again – drink ') + diff + (diff === 1 ? T(' slurk.', ' sip.') : T(' slurker.', ' sips.')); hint = '';
       rad++; avslort = true; brukt[kortet.v] = (brukt[kortet.v] || 0) + 1;
-      if (rad >= 3) { melding += ' Dealeren har klart tre på rad – send telefonen til ny dealer.'; rad = 0; }
+      if (rad >= 3) { melding += T(' Dealeren har klart tre på rad – send telefonen til ny dealer.', ' The dealer survived three in a row – pass the phone to a new dealer.'); rad = 0; }
     }
     tegn();
   });
@@ -146,23 +163,23 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="krig"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, A, B, na = 'Spiller 1', nb = 'Spiller 2', vist = null, melding = '';
+  var K = window.BDK, T = K.T, A, B, na = T('Spiller 1', 'Player 1'), nb = T('Spiller 2', 'Player 2'), vist = null, melding = '';
   function oppsett() {
-    root.innerHTML = '<div class="dl-navn"><label for="krA">Spiller 1</label><input id="krA" maxlength="20" placeholder="Navn">' +
-      '<label for="krB">Spiller 2</label><input id="krB" maxlength="20" placeholder="Navn"></div>' +
-      '<button class="btn gold" data-a="start">Del ut</button>';
+    root.innerHTML = '<div class="dl-navn"><label for="krA">' + T('Spiller 1', 'Player 1') + '</label><input id="krA" maxlength="20" placeholder="' + T('Navn', 'Name') + '">' +
+      '<label for="krB">' + T('Spiller 2', 'Player 2') + '</label><input id="krB" maxlength="20" placeholder="' + T('Navn', 'Name') + '"></div>' +
+      '<button class="btn gold" data-a="start">' + T('Del ut', 'Deal') + '</button>';
   }
   function start() {
-    var s = K.stokk(); A = s.slice(0, 26); B = s.slice(26); vist = null; melding = 'Trykk for å snu samtidig.';
+    var s = K.stokk(); A = s.slice(0, 26); B = s.slice(26); vist = null; melding = T('Trykk for å snu samtidig.', 'Tap to flip at the same time.');
     tegn();
   }
   function tegn() {
     root.innerHTML = '<div class="dl-krig">' +
-      '<div><p class="dl-spiller">' + K.esc(na) + '</p>' + (vist ? K.kort(vist.a, 'stor inn') : K.bakside('stor')) + '<p class="dl-info"><b>' + A.length + '</b> kort</p></div>' +
-      '<div><p class="dl-spiller">' + K.esc(nb) + '</p>' + (vist ? K.kort(vist.b, 'stor inn') : K.bakside('stor')) + '<p class="dl-info"><b>' + B.length + '</b> kort</p></div>' +
+      '<div><p class="dl-spiller">' + K.esc(na) + '</p>' + (vist ? K.kort(vist.a, 'stor inn') : K.bakside('stor')) + '<p class="dl-info"><b>' + A.length + '</b> ' + T('kort', 'cards') + '</p></div>' +
+      '<div><p class="dl-spiller">' + K.esc(nb) + '</p>' + (vist ? K.kort(vist.b, 'stor inn') : K.bakside('stor')) + '<p class="dl-info"><b>' + B.length + '</b> ' + T('kort', 'cards') + '</p></div>' +
       '</div><p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
-      (A.length && B.length ? '<div class="dl-knapper"><button class="btn gold" data-a="snu">Snu</button></div>'
-        : '<div class="dl-knapper"><button class="btn gold" data-a="start">Ny runde</button></div>');
+      (A.length && B.length ? '<div class="dl-knapper"><button class="btn gold" data-a="snu">' + T('Snu', 'Flip') + '</button></div>'
+        : '<div class="dl-knapper"><button class="btn gold" data-a="start">' + T('Ny runde', 'New round') + '</button></div>');
   }
   function snu() {
     var pott = [], meld = [], a, b, kriger = 0;
@@ -170,7 +187,7 @@ if (!window.BDK) window.BDK = (function () {
       if (!A.length || !B.length) break;
       a = A.shift(); b = B.shift(); pott.push(a, b);
       if (a.v !== b.v) break;
-      kriger++; meld.push('KRIG! Begge drikker 2.');
+      kriger++; meld.push(T('KRIG! Begge drikker 2.', 'WAR! Both drink 2.'));
       for (var i = 0; i < 3 && A.length > 1; i++) pott.push(A.shift());
       for (var j = 0; j < 3 && B.length > 1; j++) pott.push(B.shift());
     }
@@ -178,11 +195,11 @@ if (!window.BDK) window.BDK = (function () {
     if (a && b && a.v !== b.v) {
       var vinnerA = a.v > b.v, taper = vinnerA ? nb : na;
       (vinnerA ? A : B).push.apply(vinnerA ? A : B, K.bland(pott));
-      if (kriger) meld.push(taper + ' tapte krigen – drikk 3.');
-      else if ((vinnerA ? a.v : b.v) >= 11) meld.push(taper + ' mistet et kort til et bildekort – drikk 1.');
-      else meld.push((vinnerA ? na : nb) + ' tar stikket.');
+      if (kriger) meld.push(taper + T(' tapte krigen – drikk 3.', ' lost the war – drink 3.'));
+      else if ((vinnerA ? a.v : b.v) >= 11) meld.push(taper + T(' mistet et kort til et bildekort – drikk 1.', ' lost a card to a face card – drink 1.'));
+      else meld.push((vinnerA ? na : nb) + T(' tar stikket.', ' takes the trick.'));
     }
-    if (!A.length || !B.length) meld.push((A.length ? na : nb) + ' vant hele stokken!');
+    if (!A.length || !B.length) meld.push((A.length ? na : nb) + T(' vant hele stokken!', ' won the whole deck!'));
     melding = meld.join(' ');
     tegn();
   }
@@ -190,7 +207,7 @@ if (!window.BDK) window.BDK = (function () {
     var b = e.target.closest('[data-a]'); if (!b) return;
     if (b.dataset.a === 'start') {
       var ia = root.querySelector('#krA'), ib = root.querySelector('#krB');
-      if (ia) { na = ia.value.trim() || 'Spiller 1'; nb = ib.value.trim() || 'Spiller 2'; }
+      if (ia) { na = ia.value.trim() || T('Spiller 1', 'Player 1'); nb = ib.value.trim() || T('Spiller 2', 'Player 2'); }
       start();
     }
     if (b.dataset.a === 'snu') snu();
@@ -204,11 +221,12 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="veddelopet"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, FARGER = ['♥', '♠', '♦', '♣'], LENGDE = 7;
+  var K = window.BDK, T = K.T, FARGER = ['♥', '♠', '♦', '♣'], LENGDE = 7;
+  var FNAVN = T({ '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' }, { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' });
   var stokk, bane, snudd, pos, sist, vinner, auto = null, melding;
   function start() {
     stokk = K.stokk(true); bane = stokk.splice(0, LENGDE); snudd = []; pos = { '♥': 0, '♠': 0, '♦': 0, '♣': 0 };
-    sist = null; vinner = null; melding = 'Vedd slurker på en farge før start. Snu kort for å kjøre løpet.'; tegn();
+    sist = null; vinner = null; melding = T('Vedd slurker på en farge før start. Snu kort for å kjøre løpet.', 'Bet sips on a suit before the start. Flip cards to run the race.'); tegn();
   }
   function tegn() {
     root.innerHTML = '<div class="dl-bane" style="--lengde:' + (LENGDE + 2) + '">' + FARGER.map(function (f) {
@@ -220,19 +238,19 @@ if (!window.BDK) window.BDK = (function () {
     '</div>' +
     '<div class="dl-bord">' + (sist ? K.kort(sist, 'stor inn') : '') + '</div>' +
     '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
-    '<div class="dl-knapper">' + (vinner ? '<button class="btn gold" data-a="start">Nytt løp</button>'
-      : '<button class="btn gold" data-a="snu">Snu kort</button><button class="btn ghost" data-a="auto">' + (auto ? 'Pause' : 'Kjør automatisk') + '</button>') + '</div>';
+    '<div class="dl-knapper">' + (vinner ? '<button class="btn gold" data-a="start">' + T('Nytt løp', 'New race') + '</button>'
+      : '<button class="btn gold" data-a="snu">' + T('Snu kort', 'Flip card') + '</button><button class="btn ghost" data-a="auto">' + (auto ? 'Pause' : T('Kjør automatisk', 'Auto-play')) + '</button>') + '</div>';
   }
   function snu() {
     if (vinner) return;
     if (!stokk.length) { stokk = K.stokk(true); }
     sist = stokk.pop(); pos[sist.f]++;
-    melding = { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' }[sist.f] + ' rykker fram.';
+    melding = FNAVN[sist.f] + T(' rykker fram.', ' moves forward.');
     // Når alle hestene har passert et banekort, snus det, og den fargen går ett tilbake
     var minst = Math.min.apply(null, FARGER.map(function (f) { return pos[f]; }));
-    for (var i = 0; i < LENGDE; i++) if (!snudd[i] && minst >= i + 1) { snudd[i] = true; var f = bane[i].f; if (pos[f] > 0 && pos[f] <= LENGDE) { pos[f]--; melding += ' Banekortet er ' + K.vn(bane[i].v) + bane[i].f + ' – den hesten går ett tilbake.'; } }
+    for (var i = 0; i < LENGDE; i++) if (!snudd[i] && minst >= i + 1) { snudd[i] = true; var f = bane[i].f; if (pos[f] > 0 && pos[f] <= LENGDE) { pos[f]--; melding += T(' Banekortet er ', ' The track card is ') + K.vn(bane[i].v) + bane[i].f + T(' – den hesten går ett tilbake.', ' – that horse goes back one.'); } }
     FARGER.forEach(function (f) { if (pos[f] >= LENGDE + 1 && !vinner) vinner = f; });
-    if (vinner) { melding = ({ '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' })[vinner] + ' vant! Riktig veddemål: del ut det dobbelte. Alle andre drikker innsatsen.'; stopp(); }
+    if (vinner) { melding = FNAVN[vinner] + T(' vant! Riktig veddemål: del ut det dobbelte. Alle andre drikker innsatsen.', ' won! Right bet: hand out double. Everyone else drinks what they bet.'); stopp(); }
     tegn();
   }
   function stopp() { if (auto) { clearInterval(auto); auto = null; } }
@@ -252,17 +270,18 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="bussruta"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, spillere = [], stokk, fase, sp, steg, melding, pyr, pyrPos, buss, bussMaal = 5, bussRekke = 0, sist;
-  var SPORSMAL = ['Rød eller svart?', 'Over eller under forrige kort?', 'Innenfor eller utenfor de to første?', 'Hvilken kortfarge?'];
-  var VALG = [[['rod', 'Rød'], ['svart', 'Svart']], [['over', 'Over'], ['under', 'Under']], [['inn', 'Innenfor'], ['ut', 'Utenfor']], [['♥', '♥'], ['♦', '♦'], ['♠', '♠'], ['♣', '♣']]];
+  var K = window.BDK, T = K.T, spillere = [], stokk, fase, sp, steg, melding, pyr, pyrPos, buss, bussMaal = 5, bussRekke = 0, sist;
+  var SPORSMAL = T(['Rød eller svart?', 'Over eller under forrige kort?', 'Innenfor eller utenfor de to første?', 'Hvilken kortfarge?'],
+    ['Red or black?', 'Higher or lower than the last card?', 'Between or outside the first two?', 'Which suit?']);
+  var VALG = [[['rod', T('Rød', 'Red')], ['svart', T('Svart', 'Black')]], [['over', T('Over', 'Higher')], ['under', T('Under', 'Lower')]], [['inn', T('Innenfor', 'Between')], ['ut', T('Utenfor', 'Outside')]], [['♥', '♥'], ['♦', '♦'], ['♠', '♠'], ['♣', '♣']]];
   function oppsett() {
-    root.innerHTML = '<label class="rof-lab" for="brNavn">Spillere (skill med komma)</label><input class="rof-inp" id="brNavn" placeholder="Jonas, Maria, Petter" value="' + K.esc(K.hent('bd_spillere')) + '">' +
-      '<button class="btn gold rof-start" data-a="start">Start bussruta</button>';
+    root.innerHTML = '<label class="rof-lab" for="brNavn">' + T('Spillere (skill med komma)', 'Players (separate with commas)') + '</label><input class="rof-inp" id="brNavn" placeholder="' + T('Jonas, Maria, Petter', 'Alex, Sam, Jamie') + '" value="' + K.esc(K.hent('bd_spillere')) + '">' +
+      '<button class="btn gold rof-start" data-a="start">' + T('Start bussruta', 'Start Ride the Bus') + '</button>';
   }
   function trekk() { if (!stokk.length) stokk = K.stokk(); return stokk.pop(); }
   function tegnRunde1() {
     var p = spillere[sp];
-    root.innerHTML = '<p class="dl-steg">Runde 1 av 3 · ' + K.esc(p.navn) + ' · spørsmål ' + (steg + 1) + ' av 4</p>' +
+    root.innerHTML = '<p class="dl-steg">' + T('Runde 1 av 3 · ', 'Round 1 of 3 · ') + K.esc(p.navn) + T(' · spørsmål ', ' · question ') + (steg + 1) + T(' av 4', ' of 4') + '</p>' +
       '<div class="dl-hand">' + p.hand.map(function (k) { return K.kort(k); }).join('') + K.bakside() + '</div>' +
       (sist ? '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' : '') +
       '<p class="dl-sporsmal">' + SPORSMAL[steg] + '</p>' +
@@ -276,21 +295,21 @@ if (!window.BDK) window.BDK = (function () {
     if (steg === 3) ok = k.f === v;
     h.push(k); sist = k;
     var n = steg + 1;
-    melding = K.vn(k.v) + k.f + ' – ' + (ok ? 'riktig! Del ut ' + n + '.' : 'feil! Drikk ' + n + '.');
+    melding = K.vn(k.v) + k.f + ' – ' + (ok ? T('riktig! Del ut ', 'correct! Hand out ') + n + '.' : T('feil! Drikk ', 'wrong! Drink ') + n + '.');
     steg++;
     if (steg === 4) { steg = 0; sp++; }
-    if (sp >= spillere.length) { fase = 2; pyr = []; for (var i = 0; i < 15; i++) pyr.push(trekk()); pyrPos = 0; melding = 'Alle har fire kort. Nå snus pyramiden, nedenfra og opp.'; return tegnRunde2(); }
+    if (sp >= spillere.length) { fase = 2; pyr = []; for (var i = 0; i < 15; i++) pyr.push(trekk()); pyrPos = 0; melding = T('Alle har fire kort. Nå snus pyramiden, nedenfra og opp.', 'Everyone has four cards. Now the pyramid gets flipped, from the bottom up.'); return tegnRunde2(); }
     tegnRunde1();
   }
   function rad(i) { return i < 5 ? 1 : i < 9 ? 2 : i < 12 ? 3 : i < 14 ? 4 : 5; }
   function tegnRunde2() {
     var rader = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
-    root.innerHTML = '<p class="dl-steg">Runde 2 av 3 · pyramiden</p><div class="dl-pyramide">' + rader.map(function (r) {
+    root.innerHTML = '<p class="dl-steg">' + T('Runde 2 av 3 · pyramiden', 'Round 2 of 3 · the pyramid') + '</p><div class="dl-pyramide">' + rader.map(function (r) {
       return '<div>' + r.map(function (i) { return i < pyrPos ? K.kort(pyr[i], 'liten') : K.bakside('liten'); }).join('') + '</div>';
     }).join('') + '</div>' +
       '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
       '<div class="dl-hender">' + spillere.map(function (p) { return '<div><b>' + K.esc(p.navn) + '</b><span>' + p.hand.map(function (k) { return K.kort(k, 'mini'); }).join('') + '</span></div>'; }).join('') + '</div>' +
-      '<div class="dl-knapper"><button class="btn gold" data-a="' + (pyrPos < 15 ? 'pyr' : 'buss') + '">' + (pyrPos < 15 ? 'Snu neste' : 'Til bussen') + '</button></div>';
+      '<div class="dl-knapper"><button class="btn gold" data-a="' + (pyrPos < 15 ? 'pyr' : 'buss') + '">' + (pyrPos < 15 ? T('Snu neste', 'Flip next') : T('Til bussen', 'To the bus')) + '</button></div>';
   }
   function snuPyr() {
     var k = pyr[pyrPos], n = rad(pyrPos), treff = [];
@@ -299,7 +318,7 @@ if (!window.BDK) window.BDK = (function () {
       if (i !== -1) { p.hand.splice(i, 1); treff.push(p.navn); }
     });
     pyrPos++;
-    melding = K.vn(k.v) + k.f + ' (rad ' + n + ') – ' + (treff.length ? treff.join(', ') + ' legger på og deler ut ' + n + '.' : 'ingen har den.');
+    melding = K.vn(k.v) + k.f + T(' (rad ', ' (row ') + n + ') – ' + (treff.length ? treff.join(', ') + T(' legger på og deler ut ', ' play it and hand out ') + n + '.' : T('ingen har den.', 'nobody has it.'));
     tegnRunde2();
   }
   function tilBuss() {
@@ -307,20 +326,20 @@ if (!window.BDK) window.BDK = (function () {
     var kandidater = spillere.filter(function (p) { return p.hand.length === maks; });
     buss = kandidater[Math.floor(Math.random() * kandidater.length)];
     fase = 3; bussRekke = 0; stokk = K.stokk(); sist = null;
-    melding = buss.navn + ' har flest kort igjen (' + maks + ') og kjører bussen! Kom deg forbi ' + bussMaal + ' kort uten bildekort eller ess.';
+    melding = buss.navn + T(' har flest kort igjen (', ' has the most cards left (') + maks + T(') og kjører bussen! Kom deg forbi ', ') and rides the bus! Get past ') + bussMaal + T(' kort uten bildekort eller ess.', ' cards without a face card or an ace.');
     tegnBuss();
   }
   function tegnBuss() {
     var prikker = ''; for (var i = 0; i < bussMaal; i++) prikker += '<i' + (i < bussRekke ? ' class="ok"' : '') + '></i>';
-    root.innerHTML = '<p class="dl-steg">Runde 3 av 3 · bussen</p><div class="dl-bord">' + (sist ? K.kort(sist, 'stor inn') : K.bakside('stor')) + '</div>' +
+    root.innerHTML = '<p class="dl-steg">' + T('Runde 3 av 3 · bussen', 'Round 3 of 3 · the bus') + '</p><div class="dl-bord">' + (sist ? K.kort(sist, 'stor inn') : K.bakside('stor')) + '</div>' +
       '<div class="dl-buss">' + prikker + '</div><p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
-      '<div class="dl-knapper">' + (bussRekke >= bussMaal ? '<button class="btn gold" data-a="start">Ny runde</button>' : '<button class="btn gold" data-a="kjor">Snu kort</button>') + '</div>';
+      '<div class="dl-knapper">' + (bussRekke >= bussMaal ? '<button class="btn gold" data-a="start">' + T('Ny runde', 'New round') + '</button>' : '<button class="btn gold" data-a="kjor">' + T('Snu kort', 'Flip card') + '</button>') + '</div>';
   }
   function kjor() {
     sist = trekk();
     var straff = { 11: 1, 12: 2, 13: 3, 14: 4 }[sist.v];
-    if (straff) { melding = K.vn(sist.v) + sist.f + ' – ' + buss.navn + ' drikker ' + straff + ' og starter på nytt.'; bussRekke = 0; }
-    else { bussRekke++; melding = K.vn(sist.v) + sist.f + ' – trygt! ' + (bussRekke >= bussMaal ? buss.navn + ' er i mål. Bussen er fri!' : (bussMaal - bussRekke) + ' igjen.'); }
+    if (straff) { melding = K.vn(sist.v) + sist.f + ' – ' + buss.navn + T(' drikker ', ' drinks ') + straff + T(' og starter på nytt.', ' and starts over.'); bussRekke = 0; }
+    else { bussRekke++; melding = K.vn(sist.v) + sist.f + T(' – trygt! ', ' – safe! ') + (bussRekke >= bussMaal ? buss.navn + T(' er i mål. Bussen er fri!', ' made it. Off the bus!') : (bussMaal - bussRekke) + T(' igjen.', ' to go.')); }
     tegnBuss();
   }
   root.addEventListener('click', function (e) {
@@ -329,7 +348,7 @@ if (!window.BDK) window.BDK = (function () {
     var a = b.dataset.a;
     if (a === 'start') {
       var inp = root.querySelector('#brNavn');
-      if (inp) { var ns = K.navn(inp); if (!ns.length) ns = ['Spiller 1', 'Spiller 2', 'Spiller 3']; K.husk('bd_spillere', inp.value); spillere = ns.map(function (n) { return { navn: n, hand: [] }; }); }
+      if (inp) { var ns = K.navn(inp); if (!ns.length) ns = T(['Spiller 1', 'Spiller 2', 'Spiller 3'], ['Player 1', 'Player 2', 'Player 3']); K.husk('bd_spillere', inp.value); spillere = ns.map(function (n) { return { navn: n, hand: [] }; }); }
       else spillere.forEach(function (p) { p.hand = []; });
       stokk = K.stokk(); fase = 1; sp = 0; steg = 0; sist = null; melding = ''; tegnRunde1();
     }
@@ -346,9 +365,10 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="terningen-bestemmer"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK;
-  var REGLER = { 1: 'Del ut én slurk.', 2: 'Ta én slurk selv.', 3: 'Pek på noen som drikker.', 4: 'Alle drikker!', 5: 'Lag en regel som gjelder resten av leken.', 6: 'Velg en utfordring til personen til venstre.' };
-  root.innerHTML = '<div class="dl-terninger">' + K.terning(6) + '</div><p class="dl-melding dl-stor" aria-live="polite">Trykk på terningen</p><div class="dl-knapper"><button class="btn gold" data-a="kast">Trill</button></div>';
+  var K = window.BDK, T = K.T;
+  var REGLER = T({ 1: 'Del ut én slurk.', 2: 'Ta én slurk selv.', 3: 'Pek på noen som drikker.', 4: 'Alle drikker!', 5: 'Lag en regel som gjelder resten av leken.', 6: 'Velg en utfordring til personen til venstre.' },
+    { 1: 'Hand out one sip.', 2: 'Take one sip yourself.', 3: 'Point at someone who drinks.', 4: 'Everyone drinks!', 5: 'Make a rule that lasts for the rest of the game.', 6: 'Pick a challenge for the person on your left.' });
+  root.innerHTML = '<div class="dl-terninger">' + K.terning(6) + '</div><p class="dl-melding dl-stor" aria-live="polite">' + T('Trykk på terningen', 'Tap the die') + '</p><div class="dl-knapper"><button class="btn gold" data-a="kast">' + T('Trill', 'Roll') + '</button></div>';
   var t = root.querySelector('.dl-terninger'), m = root.querySelector('.dl-melding'), opptatt = false;
   function kast() { if (opptatt) return; opptatt = true; m.textContent = '…'; K.kast(t, 1, function (r) { m.textContent = r[0] + ' – ' + REGLER[r[0]]; opptatt = false; }); }
   root.addEventListener('click', function (e) { if (e.target.closest('[data-a], .dl-terninger')) kast(); });
@@ -360,21 +380,21 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="21-med-terninger"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, sum = 0, ferdig = true, opptatt = false;
+  var K = window.BDK, T = K.T, sum = 0, ferdig = true, opptatt = false;
   root.innerHTML = '<div class="dl-terninger"></div><p class="dl-sum" aria-live="polite"></p><p class="dl-melding"></p><div class="dl-knapper"></div>';
   var t = root.querySelector('.dl-terninger'), s = root.querySelector('.dl-sum'), m = root.querySelector('.dl-melding'), kn = root.querySelector('.dl-knapper');
   function knapper() {
-    kn.innerHTML = ferdig ? '<button class="btn gold" data-a="ny">Trill to terninger</button>'
-      : '<button class="btn gold" data-a="en">Trill én til</button><button class="btn ghost" data-a="stopp">Stopp på ' + sum + '</button>';
+    kn.innerHTML = ferdig ? '<button class="btn gold" data-a="ny">' + T('Trill to terninger', 'Roll two dice') + '</button>'
+      : '<button class="btn gold" data-a="en">' + T('Trill én til', 'Roll one more') + '</button><button class="btn ghost" data-a="stopp">' + T('Stopp på ', 'Stop at ') + sum + '</button>';
   }
   function kast(antall) {
     if (opptatt) return; opptatt = true;
     K.kast(t, antall, function (r) {
       sum += r.reduce(function (a, b) { return a + b; }, 0);
       s.textContent = sum;
-      if (sum > 21) { m.textContent = 'Over 21 – drikk med én gang!'; ferdig = true; }
-      else if (sum === 21) { m.textContent = 'Blank 21! Del ut tre.'; ferdig = true; }
-      else m.textContent = 'Trill én til, eller stopp.';
+      if (sum > 21) { m.textContent = T('Over 21 – drikk med én gang!', 'Over 21 – drink right away!'); ferdig = true; }
+      else if (sum === 21) { m.textContent = T('Blank 21! Del ut tre.', 'Exactly 21! Hand out three.'); ferdig = true; }
+      else m.textContent = T('Trill én til, eller stopp.', 'Roll one more, or stop.');
       opptatt = false; knapper();
     });
   }
@@ -382,9 +402,9 @@ if (!window.BDK) window.BDK = (function () {
     var b = e.target.closest('[data-a]'); if (!b) return;
     if (b.dataset.a === 'ny') { sum = 0; ferdig = false; kast(2); }
     if (b.dataset.a === 'en') kast(1);
-    if (b.dataset.a === 'stopp') { ferdig = true; m.textContent = 'Du stoppet på ' + sum + '. Send telefonen videre. Den som havner lengst unna 21, drikker.'; knapper(); }
+    if (b.dataset.a === 'stopp') { ferdig = true; m.textContent = T('Du stoppet på ', 'You stopped at ') + sum + T('. Send telefonen videre. Den som havner lengst unna 21, drikker.', '. Pass the phone on. Whoever ends up furthest from 21 drinks.'); knapper(); }
   });
-  t.innerHTML = K.terning(3) + K.terning(4); s.textContent = ''; m.textContent = 'Nærmest 21 uten å gå over.'; knapper();
+  t.innerHTML = K.terning(3) + K.terning(4); s.textContent = ''; m.textContent = T('Nærmest 21 uten å gå over.', 'Closest to 21 without going over.'); knapper();
 })();
 </script>
 )}
@@ -393,15 +413,16 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="opus"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, laas = null, opptatt = false;
-  root.innerHTML = '<p>Telefonen <b>er</b> terningen. Send selve mobilen rundt i ringen. Er dere mange, åpne siden på flere telefoner og send dem rundt samtidig.</p>' +
-    '<p><a class="btn ghost" href="https://open.spotify.com/search/Opus%20Eric%20Prydz" target="_blank" rel="noopener">Åpne «Opus» i Spotify ↗</a></p>' +
-    '<button class="btn gold rof-start" data-a="start">Gjør telefonen til terning</button>' +
-    '<div class="op-full" hidden role="dialog" aria-modal="true" aria-label="Opus-terning">' +
-      '<button class="op-lukk" data-a="lukk" aria-label="Lukk">×</button>' +
-      '<button class="op-flate" data-a="kast" aria-label="Trill terningen">' +
+  var K = window.BDK, T = K.T, laas = null, opptatt = false;
+  root.innerHTML = T('<p>Telefonen <b>er</b> terningen. Send selve mobilen rundt i ringen. Er dere mange, åpne siden på flere telefoner og send dem rundt samtidig.</p>',
+      '<p>The phone <b>is</b> the die. Pass the phone itself around the circle. If there are lots of you, open this page on a few phones and pass them all around at once.</p>') +
+    '<p><a class="btn ghost" href="https://open.spotify.com/search/Opus%20Eric%20Prydz" target="_blank" rel="noopener">' + T('Åpne «Opus» i Spotify', 'Open “Opus” in Spotify') + ' ↗</a></p>' +
+    '<button class="btn gold rof-start" data-a="start">' + T('Gjør telefonen til terning', 'Turn the phone into a die') + '</button>' +
+    '<div class="op-full" hidden role="dialog" aria-modal="true" aria-label="' + T('Opus-terning', 'Opus die') + '">' +
+      '<button class="op-lukk" data-a="lukk" aria-label="' + T('Lukk', 'Close') + '">×</button>' +
+      '<button class="op-flate" data-a="kast" aria-label="' + T('Trill terningen', 'Roll the die') + '">' +
         '<span class="dl-terninger">' + K.terning(6) + '</span>' +
-        '<b class="op-tekst">Trykk hvor som helst for å trille</b>' +
+        '<b class="op-tekst">' + T('Trykk hvor som helst for å trille', 'Tap anywhere to roll') + '</b>' +
       '</button>' +
     '</div>';
   var full = root.querySelector('.op-full'), flate = root.querySelector('.op-flate'), tekst = root.querySelector('.op-tekst'), t = root.querySelector('.dl-terninger');
@@ -409,16 +430,16 @@ if (!window.BDK) window.BDK = (function () {
   function lukk() { full.hidden = true; document.body.classList.remove('noscroll'); try { if (laas) laas.release(); } catch (e) {} laas = null; }
   root.addEventListener('click', function (e) {
     var b = e.target.closest('[data-a]'); if (!b) return;
-    if (b.dataset.a === 'start') { full.hidden = false; document.body.classList.add('noscroll'); flate.classList.remove('sekser'); tekst.textContent = 'Trykk hvor som helst for å trille'; vaken(); }
+    if (b.dataset.a === 'start') { full.hidden = false; document.body.classList.add('noscroll'); flate.classList.remove('sekser'); tekst.textContent = T('Trykk hvor som helst for å trille', 'Tap anywhere to roll'); vaken(); }
     if (b.dataset.a === 'lukk') { e.stopPropagation(); lukk(); }
     if (b.dataset.a === 'kast' && !opptatt) {
       opptatt = true; flate.classList.remove('sekser'); tekst.textContent = '…';
       K.kast(t, 1, function (r) {
         opptatt = false;
         if (r[0] === 6) {
-          flate.classList.add('sekser'); tekst.textContent = 'SEKSER! Send telefonen videre';
+          flate.classList.add('sekser'); tekst.textContent = T('SEKSER! Send telefonen videre', 'SIX! Pass the phone on');
           try { if (navigator.vibrate) navigator.vibrate([120, 60, 120]); } catch (e) {}
-        } else tekst.textContent = r[0] + ' – trill igjen!';
+        } else tekst.textContent = r[0] + T(' – trill igjen!', ' – roll again!');
       });
     }
   });
@@ -432,38 +453,38 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="regelfabrikken"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, sek = 60, kort = [], skriver = 0, klokke = null, rekke = [], pos = 0;
+  var K = window.BDK, T = K.T, sek = 60, kort = [], skriver = 0, klokke = null, rekke = [], pos = 0;
   function oppsett() {
-    root.innerHTML = '<p>Én telefon går rundt. Hver får like lang tid til å skrive så mange drikkekort som mulig. Så stokkes alt sammen.</p>' +
-      '<div class="rom-mod">' + [45, 60, 90].map(function (n) { return '<button type="button" data-sek="' + n + '" aria-pressed="' + (n === sek) + '">' + n + ' sek</button>'; }).join('') + '</div>' +
-      '<button class="btn gold rof-start" data-a="klar">Første spiller: start</button>' +
-      '<div class="rf-forbered"><p class="small">' + (kort.length ? '<b>' + kort.length + '</b> kort ligger allerede i bunken.' : 'Vil dere ha med kort fra før?') + '</p>' +
-      '<div class="dl-knapper"><button class="btn ghost" data-a="velg">Ta med lagrede kort</button><button class="btn ghost" data-a="forhand">Skriv kort på forhånd</button></div></div>';
+    root.innerHTML = '<p>' + T('Én telefon går rundt. Hver får like lang tid til å skrive så mange drikkekort som mulig. Så stokkes alt sammen.', 'One phone goes around. Everyone gets the same amount of time to write as many drinking cards as they can. Then it all gets shuffled together.') + '</p>' +
+      '<div class="rom-mod">' + [45, 60, 90].map(function (n) { return '<button type="button" data-sek="' + n + '" aria-pressed="' + (n === sek) + '">' + n + T(' sek', ' sec') + '</button>'; }).join('') + '</div>' +
+      '<button class="btn gold rof-start" data-a="klar">' + T('Første spiller: start', 'First player: start') + '</button>' +
+      '<div class="rf-forbered"><p class="small">' + (kort.length ? '<b>' + kort.length + '</b>' + T(' kort ligger allerede i bunken.', ' cards are already in the pile.') : T('Vil dere ha med kort fra før?', 'Want to bring in cards you already have?')) + '</p>' +
+      '<div class="dl-knapper"><button class="btn ghost" data-a="velg">' + T('Ta med lagrede kort', 'Add saved cards') + '</button><button class="btn ghost" data-a="forhand">' + T('Skriv kort på forhånd', 'Write cards in advance') + '</button></div></div>';
   }
   function forhand() {
-    root.innerHTML = '<p class="dl-melding">Skriv kort i ro og mak – ett per linje. Legg dem i bunken nå, eller lagre dem som kortstokk til senere.</p>' +
-      '<label class="rof-lab" for="rfFNavn">Navn på kortstokken</label><input class="rof-inp" id="rfFNavn" maxlength="40" value="Hyttetur-regler">' +
-      '<label class="rof-lab" for="rfFKort">Kort</label><textarea class="rof-inp rf-tekst" id="rfFKort" rows="8" placeholder="Alle med briller drikker\nDen siste som kom hit deler ut tre"></textarea>' +
-      '<div class="dl-knapper"><button class="btn gold" data-a="forhand-legg">Legg i bunken</button><button class="btn ghost" data-a="forhand-lagre">Lagre som kortstokk</button><button class="btn ghost" data-a="tilbake">Tilbake</button></div>' +
+    root.innerHTML = '<p class="dl-melding">' + T('Skriv kort i ro og mak – ett per linje. Legg dem i bunken nå, eller lagre dem som kortstokk til senere.', 'Write cards at your own pace – one per line. Add them to the pile now, or save them as a deck for later.') + '</p>' +
+      '<label class="rof-lab" for="rfFNavn">' + T('Navn på kortstokken', 'Deck name') + '</label><input class="rof-inp" id="rfFNavn" maxlength="40" value="' + T('Hyttetur-regler', 'Cabin trip rules') + '">' +
+      '<label class="rof-lab" for="rfFKort">' + T('Kort', 'Cards') + '</label><textarea class="rof-inp rf-tekst" id="rfFKort" rows="8" placeholder="' + T('Alle med briller drikker\nDen siste som kom hit deler ut tre', 'Everyone wearing glasses drinks\nThe last person to arrive hands out three') + '"></textarea>' +
+      '<div class="dl-knapper"><button class="btn gold" data-a="forhand-legg">' + T('Legg i bunken', 'Add to the pile') + '</button><button class="btn ghost" data-a="forhand-lagre">' + T('Lagre som kortstokk', 'Save as a deck') + '</button><button class="btn ghost" data-a="tilbake">' + T('Tilbake', 'Back') + '</button></div>' +
       '<p class="dl-info" id="rfFMsg" role="status"></p>';
   }
   function forhandKort() { return root.querySelector('#rfFKort').value.split('\n').map(function (x) { return x.trim().slice(0, 140); }).filter(Boolean).slice(0, 300); }
   function klar() {
-    root.innerHTML = '<p class="dl-steg">Spiller ' + (skriver + 1) + '</p><p class="dl-melding dl-stor">Klar? Du får ' + sek + ' sekunder.</p>' +
-      '<p class="dl-info">' + kort.length + ' kort i bunken så langt</p>' +
-      '<div class="dl-knapper"><button class="btn gold" data-a="skriv">Start klokka</button>' + (kort.length ? '<button class="btn ghost" data-a="spill">Alle har skrevet – stokk</button>' : '') + '</div>';
+    root.innerHTML = '<p class="dl-steg">' + T('Spiller ', 'Player ') + (skriver + 1) + '</p><p class="dl-melding dl-stor">' + T('Klar? Du får ', 'Ready? You get ') + sek + T(' sekunder.', ' seconds.') + '</p>' +
+      '<p class="dl-info">' + kort.length + T(' kort i bunken så langt', ' cards in the pile so far') + '</p>' +
+      '<div class="dl-knapper"><button class="btn gold" data-a="skriv">' + T('Start klokka', 'Start the clock') + '</button>' + (kort.length ? '<button class="btn ghost" data-a="spill">' + T('Alle har skrevet – stokk', "Everyone's done – shuffle") + '</button>' : '') + '</div>';
   }
   function skriv() {
     var slutt = Date.now() + sek * 1000, mine = 0;
     root.innerHTML = '<div class="rf-tid" id="rfTidS">' + sek + '</div>' +
-      '<form class="rf-skjema"><label for="rfSolo" class="small">F.eks. «Alle med hvite sokker drikker»</label>' +
-      '<div class="rf-rad"><input id="rfSolo" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="Skriv et kort …"><button class="btn gold" type="submit">Legg til</button></div></form>' +
-      '<p class="dl-info" id="rfAnt">0 kort</p>';
+      '<form class="rf-skjema"><label for="rfSolo" class="small">' + T('F.eks. «Alle med hvite sokker drikker»', 'E.g. “Everyone wearing white socks drinks”') + '</label>' +
+      '<div class="rf-rad"><input id="rfSolo" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="' + T('Skriv et kort …', 'Write a card …') + '"><button class="btn gold" type="submit">' + T('Legg til', 'Add') + '</button></div></form>' +
+      '<p class="dl-info" id="rfAnt">' + T('0 kort', '0 cards') + '</p>';
     var inp = root.querySelector('#rfSolo'), tid = root.querySelector('#rfTidS'), ant = root.querySelector('#rfAnt');
     inp.focus();
     root.querySelector('form').addEventListener('submit', function (e) {
       e.preventDefault(); var v = inp.value.trim(); if (!v || inp.disabled) return;
-      kort.push(v.slice(0, 140)); mine++; inp.value = ''; ant.textContent = mine + (mine === 1 ? ' kort' : ' kort'); inp.focus();
+      kort.push(v.slice(0, 140)); mine++; inp.value = ''; ant.textContent = mine + (mine === 1 ? T(' kort', ' card') : T(' kort', ' cards')); inp.focus();
     });
     clearInterval(klokke);
     klokke = setInterval(function () {
@@ -473,28 +494,28 @@ if (!window.BDK) window.BDK = (function () {
         clearInterval(klokke); inp.disabled = true;
         if (inp.value.trim()) { kort.push(inp.value.trim().slice(0, 140)); mine++; }
         skriver++;
-        root.innerHTML = '<p class="dl-melding dl-stor">Tiden er ute! Du skrev ' + mine + ' kort.</p><p>Send telefonen videre uten å vise hva du skrev.</p>' +
-          '<div class="dl-knapper"><button class="btn gold" data-a="klar">Neste spiller</button><button class="btn ghost" data-a="spill">Alle har skrevet – stokk</button></div>';
+        root.innerHTML = '<p class="dl-melding dl-stor">' + T('Tiden er ute! Du skrev ', "Time's up! You wrote ") + mine + (mine === 1 ? T(' kort.', ' card.') : T(' kort.', ' cards.')) + '</p><p>' + T('Send telefonen videre uten å vise hva du skrev.', 'Pass the phone on without showing what you wrote.') + '</p>' +
+          '<div class="dl-knapper"><button class="btn gold" data-a="klar">' + T('Neste spiller', 'Next player') + '</button><button class="btn ghost" data-a="spill">' + T('Alle har skrevet – stokk', "Everyone's done – shuffle") + '</button></div>';
       }
     }, 250);
   }
   function spill() { rekke = K.bland(kort); pos = 0; vis(); }
   function vis() {
-    root.innerHTML = '<div class="rom-kort rf-kort"><span class="sw-tag">Kort ' + (pos + 1) + ' av ' + rekke.length + '</span><p>' + K.esc(rekke[pos]) + '</p><span></span></div>' +
-      '<div class="dl-knapper"><button class="btn gold" data-a="neste">Trekk neste</button><button class="btn ghost" data-a="nytt">Ny skriverunde</button>' +
-      '<button class="btn ghost" data-a="lagre">Lagre som kortstokk</button></div><p class="dl-info" id="rfLagret" role="status"></p>';
+    root.innerHTML = '<div class="rom-kort rf-kort"><span class="sw-tag">' + T('Kort ', 'Card ') + (pos + 1) + T(' av ', ' of ') + rekke.length + '</span><p>' + K.esc(rekke[pos]) + '</p><span></span></div>' +
+      '<div class="dl-knapper"><button class="btn gold" data-a="neste">' + T('Trekk neste', 'Draw next') + '</button><button class="btn ghost" data-a="nytt">' + T('Ny skriverunde', 'New writing round') + '</button>' +
+      '<button class="btn ghost" data-a="lagre">' + T('Lagre som kortstokk', 'Save as a deck') + '</button></div><p class="dl-info" id="rfLagret" role="status"></p>';
   }
   function lagre() {
-    var d = new Date(), navn = 'Regelfabrikken ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', ut = root.querySelector('#rfLagret');
+    var d = new Date(), navn = T('Regelfabrikken ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'Regelfabrikken ' + d.getDate() + '/' + (d.getMonth() + 1)), ut = root.querySelector('#rfLagret');
     var KO = window.BDKonto;
     (KO ? KO.bruker() : Promise.resolve(null)).then(function (u) {
       if (!u) {
         try { localStorage.setItem('bd_stokk_utkast', JSON.stringify({ navn: navn, kort: kort.slice(0, 300) })); } catch (e) {}
-        ut.innerHTML = 'Kortene er lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre dem.';
+        ut.innerHTML = T('Kortene er lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre dem.', 'The cards have been set aside. <a href="/account">Log in or create an account</a> to save them.');
         return;
       }
-      return KO.stokker.lagre({ navn: navn, kort: kort }).then(function () { ut.innerHTML = 'Lagret ✓ Finn den under <a href="/no/account">Min stokk</a>.'; });
-    }).catch(function (e) { ut.textContent = e.message || 'Fikk ikke lagret.'; });
+      return KO.stokker.lagre({ navn: navn, kort: kort }).then(function () { ut.innerHTML = T('Lagret ✓ Finn den under <a href="/no/account">Min stokk</a>.', 'Saved ✓ Find it under <a href="/account">My deck</a>.'); });
+    }).catch(function (e) { ut.textContent = e.message || T('Fikk ikke lagret.', "Couldn't save."); });
   }
   root.addEventListener('click', function (e) {
     var sb = e.target.closest('[data-sek]'); if (sb) { sek = Number(sb.dataset.sek); return oppsett(); }
@@ -511,11 +532,11 @@ if (!window.BDK) window.BDK = (function () {
     if (a === 'velg' && window.BDVelgKort) window.BDVelgKort({ maks: 200 }).then(function (valgt) { valgt.forEach(function (x) { if (kort.indexOf(x) === -1) kort.push(x); }); oppsett(); });
     if (a === 'forhand-legg') { var fk = forhandKort(); if (!fk.length) return; fk.forEach(function (x) { kort.push(x); }); oppsett(); }
     if (a === 'forhand-lagre') {
-      var fk2 = forhandKort(), ut = root.querySelector('#rfFMsg'), nv = (root.querySelector('#rfFNavn').value.trim() || 'Mine kort').slice(0, 40);
-      if (!fk2.length) { ut.textContent = 'Skriv minst ett kort.'; return; }
+      var fk2 = forhandKort(), ut = root.querySelector('#rfFMsg'), nv = (root.querySelector('#rfFNavn').value.trim() || T('Mine kort', 'My cards')).slice(0, 40);
+      if (!fk2.length) { ut.textContent = T('Skriv minst ett kort.', 'Write at least one card.'); return; }
       window.BDLagreKort(nv, fk2).then(function (r) {
-        ut.innerHTML = r === 'lagret' ? 'Lagret ✓ Du finner den under <a href="/no/account">Min stokk</a> – og kan ta den med i neste runde.' : 'Lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre den.';
-      }).catch(function (e) { ut.textContent = e.message || 'Fikk ikke lagret.'; });
+        ut.innerHTML = r === 'lagret' ? T('Lagret ✓ Du finner den under <a href="/no/account">Min stokk</a> – og kan ta den med i neste runde.', 'Saved ✓ You\'ll find it under <a href="/account">My deck</a> – and can bring it into the next round.') : T('Lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre den.', 'Set aside. <a href="/account">Log in or create an account</a> to save it.');
+      }).catch(function (e) { ut.textContent = e.message || T('Fikk ikke lagret.', "Couldn't save."); });
     }
   });
   document.addEventListener('astro:before-swap', function () { clearInterval(klokke); }, { once: true });
@@ -530,13 +551,14 @@ if (!window.BDK) window.BDK = (function () {
   var root = document.querySelector('[data-dl="stilleleken"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
   var strom = null, ctx = null, analyser = null, buf = null, loop = null, slutt = 0, grunn = 0, over = 0, folsom = 2, aktiv = false;
   var GRENSE = { 1: 22, 2: 14, 3: 8 };   // hvor mye over stillheten det skal til
+  var T = window.BDK.T;
   function oppsett(melding) {
     root.innerHTML = (melding ? '<p class="dl-melding dl-stor">' + melding + '</p>' : '') +
-      '<p>Legg telefonen midt på bordet. Én prøver å få de andre til å le – telefonen hører om noen lager lyd.</p>' +
-      '<p class="rof-lab">Følsomhet</p><div class="rom-mod">' + [[1, 'Lav'], [2, 'Middels'], [3, 'Høy']].map(function (x) {
+      '<p>' + T('Legg telefonen midt på bordet. Én prøver å få de andre til å le – telefonen hører om noen lager lyd.', 'Put the phone in the middle of the table. One person tries to make the others laugh – the phone hears if anyone makes a sound.') + '</p>' +
+      '<p class="rof-lab">' + T('Følsomhet', 'Sensitivity') + '</p><div class="rom-mod">' + [[1, T('Lav', 'Low')], [2, T('Middels', 'Medium')], [3, T('Høy', 'High')]].map(function (x) {
         return '<button type="button" data-f="' + x[0] + '" aria-pressed="' + (folsom === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>' +
-      '<button class="btn gold rof-start" data-a="start">Start 60 sekunder</button>' +
-      '<p class="small">Telefonen spør om lov til å bruke mikrofonen. Lyden lagres ikke og sendes ingen steder.</p>';
+      '<button class="btn gold rof-start" data-a="start">' + T('Start 60 sekunder', 'Start 60 seconds') + '</button>' +
+      '<p class="small">' + T('Telefonen spør om lov til å bruke mikrofonen. Lyden lagres ikke og sendes ingen steder.', "The phone will ask for permission to use the microphone. The sound isn't recorded or sent anywhere.") + '</p>';
   }
   function stopp() {
     aktiv = false; cancelAnimationFrame(loop);
@@ -550,23 +572,23 @@ if (!window.BDK) window.BDK = (function () {
     return Math.max(0, Math.min(100, 20 * Math.log10(rms + 1e-8) + 100));   // ca. 0–100
   }
   function start() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return oppsett('Nettleseren din gir ikke tilgang til mikrofonen.');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return oppsett(T('Nettleseren din gir ikke tilgang til mikrofonen.', "Your browser doesn't allow access to the microphone."));
     navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }).then(function (s) {
       strom = s; ctx = new (window.AudioContext || window.webkitAudioContext)();
       var kilde = ctx.createMediaStreamSource(s); analyser = ctx.createAnalyser(); analyser.fftSize = 1024; buf = new Float32Array(analyser.fftSize); kilde.connect(analyser);
-      root.innerHTML = '<p class="dl-melding dl-stor" id="stTekst">Helt stille … måler rommet</p><div class="st-maaler"><i id="stNiva"></i><b id="stGrense"></b></div><div class="rf-tid" id="stTid">60</div>' +
-        '<div class="dl-knapper"><button class="btn ghost" data-a="avbryt">Avbryt</button></div>';
+      root.innerHTML = '<p class="dl-melding dl-stor" id="stTekst">' + T('Helt stille … måler rommet', 'Dead quiet … measuring the room') + '</p><div class="st-maaler"><i id="stNiva"></i><b id="stGrense"></b></div><div class="rf-tid" id="stTid">60</div>' +
+        '<div class="dl-knapper"><button class="btn ghost" data-a="avbryt">' + T('Avbryt', 'Cancel') + '</button></div>';
       var t0 = performance.now(), maalinger = []; aktiv = true; over = 0;
       (function kalibrer() {
         if (!aktiv) return;
         maalinger.push(niva());
         if (performance.now() - t0 < 1500) { loop = requestAnimationFrame(kalibrer); return; }
         maalinger.sort(function (a, b) { return a - b; }); grunn = maalinger[Math.floor(maalinger.length * 0.7)];
-        slutt = Date.now() + 60000; document.getElementById('stTekst').textContent = 'Klovnen kan begynne!';
+        slutt = Date.now() + 60000; document.getElementById('stTekst').textContent = T('Klovnen kan begynne!', 'Clown, you can start!');
         document.getElementById('stGrense').style.left = Math.min(98, grunn + GRENSE[folsom]) + '%';
         lytt();
       })();
-    }).catch(function () { oppsett('Fikk ikke bruke mikrofonen. Sjekk at du har gitt tillatelse.'); });
+    }).catch(function () { oppsett(T('Fikk ikke bruke mikrofonen. Sjekk at du har gitt tillatelse.', "Couldn't use the microphone. Check that you've given permission.")); });
   }
   function lytt() {
     if (!aktiv) return;
@@ -578,9 +600,9 @@ if (!window.BDK) window.BDK = (function () {
       var sek = 60 - igjen; stopp();
       try { navigator.vibrate && navigator.vibrate([200, 80, 200]); } catch (e) {}
       root.closest('.dl').classList.add('st-alarm'); setTimeout(function () { var d = root.closest('.dl'); if (d) d.classList.remove('st-alarm'); }, 1200);
-      return oppsett('🚨 Noen lagde lyd etter ' + sek + ' sekunder! Den skyldige drikker to.');
+      return oppsett(T('🚨 Noen lagde lyd etter ', '🚨 Someone made a sound after ') + sek + T(' sekunder! Den skyldige drikker to.', ' seconds! The guilty one drinks two.'));
     }
-    if (igjen <= 0) { stopp(); return oppsett('🤫 Alle holdt seg i 60 sekunder! Klovnen drikker to.'); }
+    if (igjen <= 0) { stopp(); return oppsett(T('🤫 Alle holdt seg i 60 sekunder! Klovnen drikker to.', '🤫 Everyone kept it together for 60 seconds! The clown drinks two.')); }
     loop = requestAnimationFrame(lytt);
   }
   root.addEventListener('click', function (e) {
@@ -599,7 +621,7 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="power-hour"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, totalt = 60, start = null, pauseVed = null, tikk = null, laas = null, lyd = null, sistMin = 0;
+  var K = window.BDK, T = K.T, totalt = 60, start = null, pauseVed = null, tikk = null, laas = null, lyd = null, sistMin = 0;
   function pip() {
     try {
       lyd = lyd || new (window.AudioContext || window.webkitAudioContext)();
@@ -611,25 +633,25 @@ if (!window.BDK) window.BDK = (function () {
     try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
   }
   function oppsett() {
-    root.innerHTML = '<div class="rom-mod">' + [[30, 'Halv time'], [60, 'Power hour'], [100, 'Centurion (100)']].map(function (x) {
+    root.innerHTML = '<div class="rom-mod">' + [[30, T('Halv time', 'Half hour')], [60, 'Power hour'], [100, 'Centurion (100)']].map(function (x) {
       return '<button type="button" data-min="' + x[0] + '" aria-pressed="' + (x[0] === totalt) + '">' + x[1] + '</button>'; }).join('') + '</div>' +
-      '<p class="small">Telefonen piper og vibrerer hvert minutt. Hold den på bordet med lyden på.</p>' +
-      '<button class="btn gold rof-start" data-a="start">Start ' + totalt + ' minutter</button>';
+      '<p class="small">' + T('Telefonen piper og vibrerer hvert minutt. Hold den på bordet med lyden på.', 'The phone beeps and vibrates every minute. Keep it on the table with the sound on.') + '</p>' +
+      '<button class="btn gold rof-start" data-a="start">Start ' + totalt + T(' minutter', ' minutes') + '</button>';
   }
   function tegn() {
     var gaatt = (pauseVed || Date.now()) - start, min = Math.floor(gaatt / 60000), sek = 60 - Math.floor((gaatt % 60000) / 1000);
-    if (min >= totalt) { stopp(); root.innerHTML = '<p class="ph-tall">' + totalt + '</p><p class="dl-melding dl-stor">Ferdig! Dere klarte ' + totalt + ' minutter.</p><button class="btn gold" data-a="ny">Ny runde</button>'; return; }
+    if (min >= totalt) { stopp(); root.innerHTML = '<p class="ph-tall">' + totalt + '</p><p class="dl-melding dl-stor">' + T('Ferdig! Dere klarte ', 'Done! You made it through ') + totalt + T(' minutter.', ' minutes.') + '</p><button class="btn gold" data-a="ny">' + T('Ny runde', 'New round') + '</button>'; return; }
     if (min > sistMin) { sistMin = min; pip(); var f = root.querySelector('.ph'); if (f) { f.classList.remove('skal'); void f.offsetWidth; f.classList.add('skal'); } }
     var el = root.querySelector('.ph');
     if (!el) {
-      root.innerHTML = '<div class="ph"><span class="dl-steg">Minutt</span><p class="ph-tall"></p><p class="ph-neste"></p></div>' +
-        '<div class="dl-bar"><i></i></div><div class="dl-knapper"><button class="btn ghost" data-a="pause"></button><button class="btn ghost" data-a="avslutt">Avslutt</button></div>';
+      root.innerHTML = '<div class="ph"><span class="dl-steg">' + T('Minutt', 'Minute') + '</span><p class="ph-tall"></p><p class="ph-neste"></p></div>' +
+        '<div class="dl-bar"><i></i></div><div class="dl-knapper"><button class="btn ghost" data-a="pause"></button><button class="btn ghost" data-a="avslutt">' + T('Avslutt', 'End') + '</button></div>';
       el = root.querySelector('.ph');
     }
     root.querySelector('.ph-tall').textContent = (min + 1) + ' / ' + totalt;
-    root.querySelector('.ph-neste').textContent = min === 0 && gaatt < 3000 ? 'Første slurk nå – SKÅL!' : 'Neste slurk om ' + sek + ' sek';
+    root.querySelector('.ph-neste').textContent = min === 0 && gaatt < 3000 ? T('Første slurk nå – SKÅL!', 'First sip now – CHEERS!') : T('Neste slurk om ', 'Next sip in ') + sek + T(' sek', ' sec');
     root.querySelector('.dl-bar i').style.width = (100 * gaatt / (totalt * 60000)) + '%';
-    root.querySelector('[data-a="pause"]').textContent = pauseVed ? 'Fortsett' : 'Pause';
+    root.querySelector('[data-a="pause"]').textContent = pauseVed ? T('Fortsett', 'Resume') : 'Pause';
   }
   function stopp() { clearInterval(tikk); tikk = null; try { if (laas) laas.release(); } catch (e) {} laas = null; }
   root.addEventListener('click', function (e) {
@@ -650,12 +672,12 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="snurr-flasken"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var vinkel = 0, opptatt = false;
-  root.innerHTML = '<p class="small">Legg telefonen flatt midt i ringen og trykk på flaska.</p>' +
-    '<button class="sf" data-a="snurr" aria-label="Snurr flaska"><svg class="sf-flaske" viewBox="0 0 100 300" aria-hidden="true">' +
+  var vinkel = 0, opptatt = false, T = window.BDK.T;
+  root.innerHTML = '<p class="small">' + T('Legg telefonen flatt midt i ringen og trykk på flaska.', 'Lay the phone flat in the middle of the circle and tap the bottle.') + '</p>' +
+    '<button class="sf" data-a="snurr" aria-label="' + T('Snurr flaska', 'Spin the bottle') + '"><svg class="sf-flaske" viewBox="0 0 100 300" aria-hidden="true">' +
     '<rect x="41" y="4" width="18" height="14" rx="3" fill="#c98f22"/><path d="M42 18h16v48c0 10 20 22 20 44v170c0 14-8 18-28 18s-28-4-28-18V110c0-22 20-34 20-44z" fill="#3f7a3a"/>' +
     '<rect x="26" y="150" width="48" height="60" rx="6" fill="#f4ebdc"/><text x="50" y="186" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="15" fill="#1a0f08">BD</text></svg></button>' +
-    '<p class="dl-melding" aria-live="polite">Trykk for å snurre</p>';
+    '<p class="dl-melding" aria-live="polite">' + T('Trykk for å snurre', 'Tap to spin') + '</p>';
   var fl = root.querySelector('.sf-flaske'), m = root.querySelector('.dl-melding');
   root.addEventListener('click', function (e) {
     if (!e.target.closest('[data-a="snurr"]') || opptatt) return;
@@ -664,7 +686,7 @@ if (!window.BDK) window.BDK = (function () {
     var redusert = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     fl.style.transition = redusert ? 'none' : 'transform 3.2s cubic-bezier(.12,.72,.18,1)';
     fl.style.transform = 'rotate(' + vinkel + 'deg)';
-    setTimeout(function () { opptatt = false; m.textContent = 'Den korken peker mot: svar på et spørsmål fra den som snurret – eller drikk!'; }, redusert ? 50 : 3300);
+    setTimeout(function () { opptatt = false; m.textContent = T('Den korken peker mot: svar på et spørsmål fra den som snurret – eller drikk!', 'Whoever the cap points at: answer a question from the spinner – or drink!'); }, redusert ? 50 : 3300);
   });
 })();
 </script>
@@ -674,9 +696,11 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="drikke-yatzy"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, spillere = [], tur = 0, terninger = [1, 2, 3, 4, 5], hold = [false, false, false, false, false], kast = 0, opptatt = false, melding = '';
-  var FELT = [['1', 'Enere'], ['2', 'Toere'], ['3', 'Treere'], ['4', 'Firere'], ['5', 'Femmere'], ['6', 'Seksere'], ['p', 'Ett par'], ['pp', 'To par'], ['3l', 'Tre like'], ['4l', 'Fire like'],
-    ['ls', 'Liten straight'], ['ss', 'Stor straight'], ['hus', 'Hus'], ['sj', 'Sjanse'], ['y', 'Yatzy']];
+  var K = window.BDK, T = K.T, spillere = [], tur = 0, terninger = [1, 2, 3, 4, 5], hold = [false, false, false, false, false], kast = 0, opptatt = false, melding = '';
+  var FELT = T([['1', 'Enere'], ['2', 'Toere'], ['3', 'Treere'], ['4', 'Firere'], ['5', 'Femmere'], ['6', 'Seksere'], ['p', 'Ett par'], ['pp', 'To par'], ['3l', 'Tre like'], ['4l', 'Fire like'],
+    ['ls', 'Liten straight'], ['ss', 'Stor straight'], ['hus', 'Hus'], ['sj', 'Sjanse'], ['y', 'Yatzy']],
+    [['1', 'Ones'], ['2', 'Twos'], ['3', 'Threes'], ['4', 'Fours'], ['5', 'Fives'], ['6', 'Sixes'], ['p', 'One pair'], ['pp', 'Two pairs'], ['3l', 'Three of a kind'], ['4l', 'Four of a kind'],
+    ['ls', 'Small straight'], ['ss', 'Large straight'], ['hus', 'Full house'], ['sj', 'Chance'], ['y', 'Yahtzee']]);
   function tell(t) { var c = [0, 0, 0, 0, 0, 0, 0]; t.forEach(function (x) { c[x]++; }); return c; }
   function poeng(f, t) {
     var c = tell(t), sum = t.reduce(function (a, b) { return a + b; }, 0), i;
@@ -693,22 +717,22 @@ if (!window.BDK) window.BDK = (function () {
   }
   function total(p) { var ov = 0, sum = 0; FELT.forEach(function (f) { var v = p.blokk[f[0]]; if (v != null) { sum += v; if (/^[1-6]$/.test(f[0])) ov += v; } }); return { sum: sum + (ov >= 63 ? 50 : 0), ov: ov }; }
   function oppsett() {
-    root.innerHTML = '<label class="rof-lab" for="yzNavn">Spillere (skill med komma)</label><input class="rof-inp" id="yzNavn" placeholder="Jonas, Maria" value="' + K.esc(K.hent('bd_spillere')) + '">' +
-      '<button class="btn gold rof-start" data-a="start">Start drikke-yatzy</button>';
+    root.innerHTML = '<label class="rof-lab" for="yzNavn">' + T('Spillere (skill med komma)', 'Players (separate with commas)') + '</label><input class="rof-inp" id="yzNavn" placeholder="' + T('Jonas, Maria', 'Alex, Sam') + '" value="' + K.esc(K.hent('bd_spillere')) + '">' +
+      '<button class="btn gold rof-start" data-a="start">' + T('Start drikke-yatzy', 'Start Drinking Yahtzee') + '</button>';
   }
   function tegn() {
     var p = spillere[tur], ferdig = spillere.every(function (x) { return FELT.every(function (f) { return x.blokk[f[0]] != null; }); });
     if (ferdig) {
       var liste = spillere.map(function (x) { return { n: x.navn, s: total(x).sum }; }).sort(function (a, b) { return b.s - a.s; });
-      root.innerHTML = '<p class="dl-melding dl-stor">' + K.esc(liste[0].n) + ' vant med ' + liste[0].s + ' poeng!</p><ol class="rom-resultat">' + liste.map(function (x) { return '<li><span>' + K.esc(x.n) + '</span><b>' + x.s + '</b></li>'; }).join('') + '</ol>' +
-        '<p class="dl-melding">' + K.esc(liste[liste.length - 1].n) + ' tapte – drikk opp eller ta en shot!</p><button class="btn gold" data-a="ny">Nytt spill</button>';
+      root.innerHTML = '<p class="dl-melding dl-stor">' + K.esc(liste[0].n) + T(' vant med ', ' won with ') + liste[0].s + T(' poeng!', ' points!') + '</p><ol class="rom-resultat">' + liste.map(function (x) { return '<li><span>' + K.esc(x.n) + '</span><b>' + x.s + '</b></li>'; }).join('') + '</ol>' +
+        '<p class="dl-melding">' + K.esc(liste[liste.length - 1].n) + T(' tapte – drikk opp eller ta en shot!', ' lost – finish your drink or take a shot!') + '</p><button class="btn gold" data-a="ny">' + T('Nytt spill', 'New game') + '</button>';
       return;
     }
-    root.innerHTML = '<p class="dl-steg">' + K.esc(p.navn) + ' sin tur · kast ' + kast + ' av 3</p>' +
-      '<div class="yz-terninger">' + terninger.map(function (t, i) { return '<button type="button" data-h="' + i + '" aria-pressed="' + hold[i] + '" aria-label="Hold terning ' + (i + 1) + '">' + K.terning(t) + '</button>'; }).join('') + '</div>' +
-      '<p class="small">' + (kast ? 'Trykk på terninger du vil holde.' : 'Trill for å starte turen.') + '</p>' +
+    root.innerHTML = '<p class="dl-steg">' + K.esc(p.navn) + T(' sin tur · kast ', "'s turn · roll ") + kast + T(' av 3', ' of 3') + '</p>' +
+      '<div class="yz-terninger">' + terninger.map(function (t, i) { return '<button type="button" data-h="' + i + '" aria-pressed="' + hold[i] + '" aria-label="' + T('Hold terning ', 'Hold die ') + (i + 1) + '">' + K.terning(t) + '</button>'; }).join('') + '</div>' +
+      '<p class="small">' + (kast ? T('Trykk på terninger du vil holde.', 'Tap the dice you want to hold.') : T('Trill for å starte turen.', 'Roll to start your turn.')) + '</p>' +
       '<p class="dl-melding" aria-live="polite">' + K.esc(melding) + '</p>' +
-      '<div class="dl-knapper"><button class="btn gold" data-a="kast"' + (kast >= 3 ? ' disabled' : '') + '>' + (kast ? 'Trill igjen' : 'Trill') + '</button></div>' +
+      '<div class="dl-knapper"><button class="btn gold" data-a="kast"' + (kast >= 3 ? ' disabled' : '') + '>' + (kast ? T('Trill igjen', 'Roll again') : T('Trill', 'Roll')) + '</button></div>' +
       '<div class="yz-blokk">' + FELT.map(function (f) {
         var v = p.blokk[f[0]], mulig = kast && v == null ? poeng(f[0], terninger) : null;
         return '<button type="button" data-f="' + f[0] + '"' + (v != null || !kast ? ' disabled' : '') + '><span>' + f[1] + '</span><b>' + (v != null ? v : (mulig != null ? '+' + mulig : '')) + '</b></button>';
@@ -726,10 +750,10 @@ if (!window.BDK) window.BDK = (function () {
       if (++r >= 8) {
         clearInterval(anim); kast++; opptatt = false;
         var c = tell(terninger), deler = [];
-        if (c[1] > 0) deler.push('Ener i kastet – drikk 2.');
-        if (c.some(function (x) { return x === 5; })) deler.push('YATZY! Du bestemmer hvem som tar en shot.');
-        else if (c.some(function (x) { return x >= 4; })) deler.push('Fire like – drikk ' + terninger.reduce(function (a, b) { return a + b; }, 0) + ' slurker.');
-        melding = deler.join(' ') || (kast < 3 ? 'Hold og trill igjen, eller velg et felt.' : 'Velg et felt.');
+        if (c[1] > 0) deler.push(T('Ener i kastet – drikk 2.', 'A one in the roll – drink 2.'));
+        if (c.some(function (x) { return x === 5; })) deler.push(T('YATZY! Du bestemmer hvem som tar en shot.', 'YAHTZEE! You pick who takes a shot.'));
+        else if (c.some(function (x) { return x >= 4; })) deler.push(T('Fire like – drikk ', 'Four of a kind – drink ') + terninger.reduce(function (a, b) { return a + b; }, 0) + T(' slurker.', ' sips.'));
+        melding = deler.join(' ') || (kast < 3 ? T('Hold og trill igjen, eller velg et felt.', 'Hold and roll again, or pick a box.') : T('Velg et felt.', 'Pick a box.'));
         tegn();
       }
     }, 70);
@@ -741,7 +765,7 @@ if (!window.BDK) window.BDK = (function () {
       tur = (tur + 1) % spillere.length; kast = 0; hold = [false, false, false, false, false]; melding = ''; return tegn();
     }
     var b = e.target.closest('[data-a]'); if (!b) return;
-    if (b.dataset.a === 'start') { var inp = root.querySelector('#yzNavn'); var ns = K.navn(inp); if (!ns.length) ns = ['Spiller 1', 'Spiller 2']; K.husk('bd_spillere', inp.value); spillere = ns.map(function (n) { return { navn: n, blokk: {} }; }); tur = 0; kast = 0; tegn(); }
+    if (b.dataset.a === 'start') { var inp = root.querySelector('#yzNavn'); var ns = K.navn(inp); if (!ns.length) ns = T(['Spiller 1', 'Spiller 2'], ['Player 1', 'Player 2']); K.husk('bd_spillere', inp.value); spillere = ns.map(function (n) { return { navn: n, blokk: {} }; }); tur = 0; kast = 0; tegn(); }
     if (b.dataset.a === 'kast') trill();
     if (b.dataset.a === 'ny') oppsett();
   });
@@ -754,33 +778,33 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="beer-pong"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, antall = 10, lag = [];
+  var K = window.BDK, T = K.T, antall = 10, lag = [];
   var RADER = { 6: [3, 2, 1], 10: [4, 3, 2, 1] };
   function oppsett() {
-    root.innerHTML = '<div class="rom-mod">' + [6, 10].map(function (n) { return '<button type="button" data-n="' + n + '" aria-pressed="' + (n === antall) + '">' + n + ' kopper</button>'; }).join('') + '</div>' +
-      '<div class="dl-navn"><label for="bpA">Lag 1</label><input id="bpA" maxlength="20" placeholder="Lagnavn"><label for="bpB">Lag 2</label><input id="bpB" maxlength="20" placeholder="Lagnavn"></div>' +
-      '<button class="btn gold" data-a="start">Start kampen</button>';
+    root.innerHTML = '<div class="rom-mod">' + [6, 10].map(function (n) { return '<button type="button" data-n="' + n + '" aria-pressed="' + (n === antall) + '">' + n + T(' kopper', ' cups') + '</button>'; }).join('') + '</div>' +
+      '<div class="dl-navn"><label for="bpA">' + T('Lag 1', 'Team 1') + '</label><input id="bpA" maxlength="20" placeholder="' + T('Lagnavn', 'Team name') + '"><label for="bpB">' + T('Lag 2', 'Team 2') + '</label><input id="bpB" maxlength="20" placeholder="' + T('Lagnavn', 'Team name') + '"></div>' +
+      '<button class="btn gold" data-a="start">' + T('Start kampen', 'Start the match') + '</button>';
   }
   function stativ(l, li) {
     var i = 0;
     return '<div class="bp-stativ">' + RADER[antall].map(function (n) {
-      var s = '<div>'; for (var k = 0; k < n; k++, i++) s += '<button type="button" data-l="' + li + '" data-k="' + i + '" aria-pressed="' + !!l.truffet[i] + '" aria-label="Kopp ' + (i + 1) + '"></button>'; return s + '</div>';
+      var s = '<div>'; for (var k = 0; k < n; k++, i++) s += '<button type="button" data-l="' + li + '" data-k="' + i + '" aria-pressed="' + !!l.truffet[i] + '" aria-label="' + T('Kopp ', 'Cup ') + (i + 1) + '"></button>'; return s + '</div>';
     }).join('') + '</div>';
   }
   function tegn(melding) {
     var igjen = lag.map(function (l) { return antall - Object.keys(l.truffet).length; });
     var vinner = igjen[0] === 0 ? 1 : igjen[1] === 0 ? 0 : -1;
-    root.innerHTML = lag.map(function (l, li) { return '<div class="bp-lag"><p class="dl-spiller">' + K.esc(l.navn) + ' · ' + igjen[li] + ' kopper igjen</p>' + stativ(l, li) + '</div>'; }).join('<p class="bp-mot">mot</p>') +
-      '<p class="dl-melding" aria-live="polite">' + K.esc(vinner >= 0 ? lag[vinner].navn + ' vant! Taperne får ett siste forsøk på å redde seg.' : (melding || 'Trykk på en kopp når den blir truffet.')) + '</p>' +
-      '<div class="dl-knapper"><button class="btn ghost" data-a="angre">Angre</button><button class="btn ghost" data-a="ny">Ny kamp</button></div>';
+    root.innerHTML = lag.map(function (l, li) { return '<div class="bp-lag"><p class="dl-spiller">' + K.esc(l.navn) + ' · ' + igjen[li] + T(' kopper igjen', ' cups left') + '</p>' + stativ(l, li) + '</div>'; }).join('<p class="bp-mot">' + T('mot', 'vs') + '</p>') +
+      '<p class="dl-melding" aria-live="polite">' + K.esc(vinner >= 0 ? lag[vinner].navn + T(' vant! Taperne får ett siste forsøk på å redde seg.', ' won! The losers get one last shot at redemption.') : (melding || T('Trykk på en kopp når den blir truffet.', 'Tap a cup when it gets hit.'))) + '</p>' +
+      '<div class="dl-knapper"><button class="btn ghost" data-a="angre">' + T('Angre', 'Undo') + '</button><button class="btn ghost" data-a="ny">' + T('Ny kamp', 'New match') + '</button></div>';
   }
   var logg = [];
   root.addEventListener('click', function (e) {
     var n = e.target.closest('[data-n]'); if (n) { antall = +n.dataset.n; return oppsett(); }
     var k = e.target.closest('[data-k]');
-    if (k) { var l = lag[+k.dataset.l], i = +k.dataset.k; if (l.truffet[i]) { delete l.truffet[i]; } else { l.truffet[i] = true; logg.push([+k.dataset.l, i]); } return tegn(l.navn + ' drikker koppen!'); }
+    if (k) { var l = lag[+k.dataset.l], i = +k.dataset.k; if (l.truffet[i]) { delete l.truffet[i]; } else { l.truffet[i] = true; logg.push([+k.dataset.l, i]); } return tegn(l.navn + T(' drikker koppen!', ' drinks the cup!')); }
     var b = e.target.closest('[data-a]'); if (!b) return;
-    if (b.dataset.a === 'start') { lag = [{ navn: root.querySelector('#bpA').value.trim() || 'Lag 1', truffet: {} }, { navn: root.querySelector('#bpB').value.trim() || 'Lag 2', truffet: {} }]; logg = []; tegn(); }
+    if (b.dataset.a === 'start') { lag = [{ navn: root.querySelector('#bpA').value.trim() || T('Lag 1', 'Team 1'), truffet: {} }, { navn: root.querySelector('#bpB').value.trim() || T('Lag 2', 'Team 2'), truffet: {} }]; logg = []; tegn(); }
     if (b.dataset.a === 'angre') { var s = logg.pop(); if (s) delete lag[s[0]].truffet[s[1]]; tegn(); }
     if (b.dataset.a === 'ny') oppsett();
   });
@@ -793,25 +817,25 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="rask-fakta"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, navn = ['Spiller 1', 'Spiller 2'], prikker = [0, 0], tur = 0, klokke = null;
+  var K = window.BDK, T = K.T, navn = T(['Spiller 1', 'Spiller 2'], ['Player 1', 'Player 2']), prikker = [0, 0], tur = 0, klokke = null;
   function oppsett() {
-    root.innerHTML = '<div class="dl-navn"><label for="rfA">Spiller 1</label><input id="rfA" maxlength="20" placeholder="Navn"><label for="rfB">Spiller 2</label><input id="rfB" maxlength="20" placeholder="Navn"></div><button class="btn gold" data-a="start">Start</button>';
+    root.innerHTML = '<div class="dl-navn"><label for="rfA">' + T('Spiller 1', 'Player 1') + '</label><input id="rfA" maxlength="20" placeholder="' + T('Navn', 'Name') + '"><label for="rfB">' + T('Spiller 2', 'Player 2') + '</label><input id="rfB" maxlength="20" placeholder="' + T('Navn', 'Name') + '"></div><button class="btn gold" data-a="start">Start</button>';
   }
   function tegn(tekst) {
-    root.innerHTML = '<p class="dl-steg">' + K.esc(navn[tur]) + ' sin tur</p><div class="rf-tid" id="rkTid">5</div>' +
-      '<p class="dl-melding" aria-live="polite">' + K.esc(tekst || 'Si en fakta om ' + navn[1 - tur] + ' innen 5 sekunder!') + '</p>' +
-      '<div class="dl-knapper"><button class="btn gold" data-a="go">Start 5 sek</button><button class="btn ghost" data-a="ok">Stemte</button><button class="btn ghost" data-a="feil">Feil / for sent</button></div>' +
+    root.innerHTML = '<p class="dl-steg">' + K.esc(navn[tur]) + T(' sin tur', "'s turn") + '</p><div class="rf-tid" id="rkTid">5</div>' +
+      '<p class="dl-melding" aria-live="polite">' + K.esc(tekst || T('Si en fakta om ', 'Say a fact about ') + navn[1 - tur] + T(' innen 5 sekunder!', ' within 5 seconds!')) + '</p>' +
+      '<div class="dl-knapper"><button class="btn gold" data-a="go">' + T('Start 5 sek', 'Start 5 sec') + '</button><button class="btn ghost" data-a="ok">' + T('Stemte', 'Correct') + '</button><button class="btn ghost" data-a="feil">' + T('Feil / for sent', 'Wrong / too slow') + '</button></div>' +
       '<div class="rk-prikker">' + [0, 1].map(function (i) { return '<div><b>' + K.esc(navn[i]) + '</b><span>' + '●'.repeat(prikker[i]) + '○'.repeat(3 - prikker[i]) + '</span></div>'; }).join('') + '</div>';
   }
   root.addEventListener('click', function (e) {
     var b = e.target.closest('[data-a]'); if (!b) return; var a = b.dataset.a;
-    if (a === 'start') { navn = [root.querySelector('#rfA').value.trim() || 'Spiller 1', root.querySelector('#rfB').value.trim() || 'Spiller 2']; prikker = [0, 0]; tur = 0; tegn(); }
+    if (a === 'start') { navn = [root.querySelector('#rfA').value.trim() || T('Spiller 1', 'Player 1'), root.querySelector('#rfB').value.trim() || T('Spiller 2', 'Player 2')]; prikker = [0, 0]; tur = 0; tegn(); }
     if (a === 'go') { clearInterval(klokke); var slutt = Date.now() + 5000, el = root.querySelector('#rkTid');
       klokke = setInterval(function () { var n = Math.max(0, Math.ceil((slutt - Date.now()) / 1000)); el.textContent = n; el.classList.toggle('snart', n <= 2); if (!n) { clearInterval(klokke); try { if (navigator.vibrate) navigator.vibrate(300); } catch (err) {} } }, 100); }
     if (a === 'ok') { clearInterval(klokke); tur = 1 - tur; tegn(); }
     if (a === 'feil') { clearInterval(klokke); prikker[tur]++;
-      if (prikker[tur] >= 3) { var t = navn[tur] + ' har tre prikker – ta en shot!'; prikker[tur] = 0; tur = 1 - tur; return tegn(t); }
-      var tx = navn[tur] + ' får en prikk.'; tur = 1 - tur; tegn(tx); }
+      if (prikker[tur] >= 3) { var t = navn[tur] + T(' har tre prikker – ta en shot!', ' has three strikes – take a shot!'); prikker[tur] = 0; tur = 1 - tur; return tegn(t); }
+      var tx = navn[tur] + T(' får en prikk.', ' gets a strike.'); tur = 1 - tur; tegn(tx); }
   });
   document.addEventListener('astro:before-swap', function () { clearInterval(klokke); }, { once: true });
   oppsett();
@@ -823,23 +847,23 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="to-sannheter-og-en-logn"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, rekke = [], logn = -1;
+  var K = window.BDK, T = K.T, rekke = [], logn = -1;
   function skriv() {
-    root.innerHTML = '<p>Skriv tre påstander om deg selv, og merk hvilken som er løgnen. Så viser du telefonen til de andre.</p>' +
-      [0, 1, 2].map(function (i) { return '<div class="ts-rad"><input id="ts' + i + '" maxlength="120" placeholder="Påstand ' + (i + 1) + '"><label><input type="radio" name="tsLogn" value="' + i + '"> Løgn</label></div>'; }).join('') +
-      '<button class="btn gold" data-a="vis">Stokk og vis de andre</button>';
+    root.innerHTML = '<p>' + T('Skriv tre påstander om deg selv, og merk hvilken som er løgnen. Så viser du telefonen til de andre.', 'Write three statements about yourself and mark which one is the lie. Then show the phone to the others.') + '</p>' +
+      [0, 1, 2].map(function (i) { return '<div class="ts-rad"><input id="ts' + i + '" maxlength="120" placeholder="' + T('Påstand ', 'Statement ') + (i + 1) + '"><label><input type="radio" name="tsLogn" value="' + i + '"> ' + T('Løgn', 'Lie') + '</label></div>'; }).join('') +
+      '<button class="btn gold" data-a="vis">' + T('Stokk og vis de andre', 'Shuffle and show the others') + '</button>';
   }
   function vis() {
     var p = [0, 1, 2].map(function (i) { return root.querySelector('#ts' + i).value.trim(); });
     var valgt = root.querySelector('input[name=tsLogn]:checked');
-    if (p.some(function (x) { return !x; }) || !valgt) return K.esc && (root.querySelector('.ts-feil') || root.insertAdjacentHTML('beforeend', '<p class="ts-feil dl-melding">Fyll inn alle tre og merk løgnen.</p>'));
+    if (p.some(function (x) { return !x; }) || !valgt) return K.esc && (root.querySelector('.ts-feil') || root.insertAdjacentHTML('beforeend', '<p class="ts-feil dl-melding">' + T('Fyll inn alle tre og merk løgnen.', 'Fill in all three and mark the lie.') + '</p>'));
     var idx = K.bland([0, 1, 2]); rekke = idx.map(function (i) { return p[i]; }); logn = idx.indexOf(+valgt.value);
-    root.innerHTML = '<p class="dl-melding dl-stor">Hvilken er løgnen?</p><div class="ts-valg">' + rekke.map(function (t, i) { return '<div><b>' + (i + 1) + '</b><span>' + K.esc(t) + '</span></div>'; }).join('') + '</div>' +
-      '<p class="small">Diskuter og pek – så trykker den som skrev.</p><button class="btn gold" data-a="fasit">Vis fasit</button>';
+    root.innerHTML = '<p class="dl-melding dl-stor">' + T('Hvilken er løgnen?', 'Which one is the lie?') + '</p><div class="ts-valg">' + rekke.map(function (t, i) { return '<div><b>' + (i + 1) + '</b><span>' + K.esc(t) + '</span></div>'; }).join('') + '</div>' +
+      '<p class="small">' + T('Diskuter og pek – så trykker den som skrev.', 'Discuss and point – then the writer taps.') + '</p><button class="btn gold" data-a="fasit">' + T('Vis fasit', 'Reveal the answer') + '</button>';
   }
   function fasit() {
     root.querySelectorAll('.ts-valg > div').forEach(function (d, i) { d.classList.add(i === logn ? 'logn' : 'sann'); });
-    root.querySelector('[data-a="fasit"]').outerHTML = '<p class="dl-melding">Løgnen var nr. ' + (logn + 1) + '. Gjettet dere feil, drikker dere. Gjettet dere riktig, drikker den som skrev.</p><button class="btn gold" data-a="ny">Neste spiller</button>';
+    root.querySelector('[data-a="fasit"]').outerHTML = '<p class="dl-melding">' + T('Løgnen var nr. ', 'The lie was number ') + (logn + 1) + T('. Gjettet dere feil, drikker dere. Gjettet dere riktig, drikker den som skrev.', '. Guessed wrong? You drink. Guessed right? The writer drinks.') + '</p><button class="btn gold" data-a="ny">' + T('Neste spiller', 'Next player') + '</button>';
   }
   root.addEventListener('click', function (e) {
     var b = e.target.closest('[data-a]'); if (!b) return;
@@ -854,17 +878,17 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="jug"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var n = 5;
+  var n = 5, T = window.BDK.T;
   function oppsett() {
-    root.innerHTML = '<p>Verten nummererer glassene i hemmelighet. Telefonen bestemmer hvilket glass som blir det rare, så ikke engang verten velger selv.</p>' +
-      '<label class="rof-lab" for="jugN">Antall glass</label><input class="rof-inp" id="jugN" type="number" min="3" max="20" value="' + n + '">' +
-      '<button class="btn gold rof-start" data-a="trekk">Trekk det rare glasset</button>';
+    root.innerHTML = '<p>' + T('Verten nummererer glassene i hemmelighet. Telefonen bestemmer hvilket glass som blir det rare, så ikke engang verten velger selv.', 'The host secretly numbers the glasses. The phone decides which glass is the odd one out, so not even the host gets to choose.') + '</p>' +
+      '<label class="rof-lab" for="jugN">' + T('Antall glass', 'Number of glasses') + '</label><input class="rof-inp" id="jugN" type="number" min="3" max="20" value="' + n + '">' +
+      '<button class="btn gold rof-start" data-a="trekk">' + T('Trekk det rare glasset', 'Draw the odd glass') + '</button>';
   }
   root.addEventListener('click', function (e) {
     var b = e.target.closest('[data-a]'); if (!b) return;
     if (b.dataset.a === 'trekk') { n = Math.max(3, Math.min(20, +root.querySelector('#jugN').value || 5)); var x = 1 + Math.floor(Math.random() * n);
-      root.innerHTML = '<p class="small">Bare verten ser dette.</p><p class="ph-tall">Glass ' + x + '</p><p class="dl-melding">Fyll glass nummer ' + x + ' med det som smaker annerledes.</p><button class="btn ghost" data-a="skjul">Skjul og start runden</button>'; }
-    if (b.dataset.a === 'skjul') { root.innerHTML = '<p class="dl-melding dl-stor">Del ut glassene og smak samtidig!</p><p>Diskuter og pek samtidig på tre. Tar flertallet feil, drikker alle som pekte feil. Tar dere riktig, drikker den som ble avslørt.</p><button class="btn gold" data-a="ny">Ny runde med ny vert</button>'; }
+      root.innerHTML = '<p class="small">' + T('Bare verten ser dette.', 'Only the host should see this.') + '</p><p class="ph-tall">Glass ' + x + '</p><p class="dl-melding">' + T('Fyll glass nummer ', 'Fill glass number ') + x + T(' med det som smaker annerledes.', ' with the one that tastes different.') + '</p><button class="btn ghost" data-a="skjul">' + T('Skjul og start runden', 'Hide and start the round') + '</button>'; }
+    if (b.dataset.a === 'skjul') { root.innerHTML = '<p class="dl-melding dl-stor">' + T('Del ut glassene og smak samtidig!', 'Hand out the glasses and taste at the same time!') + '</p><p>' + T('Diskuter og pek samtidig på tre. Tar flertallet feil, drikker alle som pekte feil. Tar dere riktig, drikker den som ble avslørt.', 'Talk it over, then everyone points on three. If the majority is wrong, everyone who pointed wrong drinks. If you get it right, the one you caught drinks.') + '</p><button class="btn gold" data-a="ny">' + T('Ny runde med ny vert', 'New round with a new host') + '</button>'; }
     if (b.dataset.a === 'ny') oppsett();
   });
   oppsett();
@@ -876,14 +900,14 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="14-sporsmal"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, regler = { 7: 'Ikke si 7' };
+  var K = window.BDK, T = K.T, regler = { 7: T('Ikke si 7', "Don't say 7") };
   try { regler = JSON.parse(localStorage.getItem('bd_14') || 'null') || regler; } catch (e) {}
   function lagre() { try { localStorage.setItem('bd_14', JSON.stringify(regler)); } catch (e) {} }
   function tegn() {
     var ruter = ''; for (var i = 1; i <= 14; i++) ruter += '<button type="button" class="' + (regler[i] ? 'har' : '') + '" data-t="' + i + '"><b>' + i + '</b><span>' + K.esc(regler[i] || '') + '</span></button>';
-    root.innerHTML = '<div class="ft-tavle">' + ruter + '</div><p class="small">Trykk på et tall for å gi det en regel. Tavla huskes på denne telefonen.</p>' +
-      '<div class="ft-skjema" hidden><label class="rof-lab" for="ftInp">Regel for <b class="ft-nr"></b></label><div class="rf-rad"><input id="ftInp" maxlength="40" placeholder="F.eks. bytt med «hallo»"><button class="btn gold" data-a="lagre">Lagre</button></div><button class="btn ghost small" data-a="fjern">Fjern regelen</button></div>' +
-      '<button class="btn ghost" data-a="nullstill">Nullstill tavla</button>';
+    root.innerHTML = '<div class="ft-tavle">' + ruter + '</div><p class="small">' + T('Trykk på et tall for å gi det en regel. Tavla huskes på denne telefonen.', 'Tap a number to give it a rule. The board is saved on this phone.') + '</p>' +
+      '<div class="ft-skjema" hidden><label class="rof-lab" for="ftInp">' + T('Regel for ', 'Rule for ') + '<b class="ft-nr"></b></label><div class="rf-rad"><input id="ftInp" maxlength="40" placeholder="' + T('F.eks. bytt med «hallo»', 'E.g. replace it with “hello”') + '"><button class="btn gold" data-a="lagre">' + T('Lagre', 'Save') + '</button></div><button class="btn ghost small" data-a="fjern">' + T('Fjern regelen', 'Remove the rule') + '</button></div>' +
+      '<button class="btn ghost" data-a="nullstill">' + T('Nullstill tavla', 'Reset the board') + '</button>';
   }
   var valgt = null;
   root.addEventListener('click', function (e) {
@@ -892,7 +916,7 @@ if (!window.BDK) window.BDK = (function () {
     var b = e.target.closest('[data-a]'); if (!b) return;
     if (b.dataset.a === 'lagre' && valgt) { var v = root.querySelector('#ftInp').value.trim(); if (v) regler[valgt] = v.slice(0, 40); lagre(); tegn(); }
     if (b.dataset.a === 'fjern' && valgt) { delete regler[valgt]; lagre(); tegn(); }
-    if (b.dataset.a === 'nullstill') { regler = { 7: 'Ikke si 7' }; lagre(); tegn(); }
+    if (b.dataset.a === 'nullstill') { regler = { 7: T('Ikke si 7', "Don't say 7") }; lagre(); tegn(); }
   });
   tegn();
 })();
@@ -903,23 +927,24 @@ if (!window.BDK) window.BDK = (function () {
 <script is:inline data-astro-rerun>
 (function () {
   var root = document.querySelector('[data-dl="bossen-sier"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, KOM = ["Ta deg på nesa", "Reis deg opp", "Klapp tre ganger", "Pek på den som sist var på do", "Hold hånda i været", "Bytt plass med personen til venstre", "Ta på gulvet", "Lukk øynene", "Gi en high five til noen", "Snu deg rundt", "Legg tommelen på bordet", "Si navnet ditt baklengs", "Ta deg på hodet", "Stå på ett bein", "Lag en kattelyd", "Vink til noen", "Syng første linje av en julesang", "Si «skål» på et annet språk"];
+  var K = window.BDK, T = K.T, KOM = ["Ta deg på nesa", "Reis deg opp", "Klapp tre ganger", "Pek på den som sist var på do", "Hold hånda i været", "Bytt plass med personen til venstre", "Ta på gulvet", "Lukk øynene", "Gi en high five til noen", "Snu deg rundt", "Legg tommelen på bordet", "Si navnet ditt baklengs", "Ta deg på hodet", "Stå på ett bein", "Lag en kattelyd", "Vink til noen", "Syng første linje av en julesang", "Si «skål» på et annet språk"];
+  if (T(0, 1)) KOM = ["Touch your nose", "Stand up", "Clap three times", "Point at whoever last went to the loo", "Put your hand in the air", "Swap seats with the person on your left", "Touch the floor", "Close your eyes", "High-five someone", "Turn around", "Put your thumb on the table", "Say your name backwards", "Touch your head", "Stand on one leg", "Make a cat noise", "Wave at someone", "Sing the first line of a Christmas song", "Say “cheers” in another language"];
   var auto = null;
-  root.innerHTML = '<p class="small">La telefonen være boss. Den roper kommandoer – bare de som starter med «Bossen sier» skal følges. Sistemann eller den som gjør feil, drikker.</p>' +
-    '<div class="boss-kort"><p class="boss-tekst">Klar?</p></div>' +
-    '<div class="dl-knapper"><button class="btn gold" data-a="neste">Ny kommando</button><button class="btn ghost" data-a="auto">Automatisk</button></div>';
+  root.innerHTML = '<p class="small">' + T('La telefonen være boss. Den roper kommandoer – bare de som starter med «Bossen sier» skal følges. Sistemann eller den som gjør feil, drikker.', 'Let the phone be the boss. It shouts out commands – only follow the ones that start with “Boss says”. The last one to do it, or anyone who gets it wrong, drinks.') + '</p>' +
+    '<div class="boss-kort"><p class="boss-tekst">' + T('Klar?', 'Ready?') + '</p></div>' +
+    '<div class="dl-knapper"><button class="btn gold" data-a="neste">' + T('Ny kommando', 'New command') + '</button><button class="btn ghost" data-a="auto">' + T('Automatisk', 'Auto') + '</button></div>';
   var el = root.querySelector('.boss-tekst'), kort = root.querySelector('.boss-kort');
   function neste() {
     var ekte = Math.random() < 0.7, k = KOM[Math.floor(Math.random() * KOM.length)];
-    el.textContent = (ekte ? 'Bossen sier: ' : '') + k + '!';
+    el.textContent = (ekte ? T('Bossen sier: ', 'Boss says: ') : '') + k + '!';
     kort.classList.toggle('lur', !ekte); kort.classList.remove('ny'); void kort.offsetWidth; kort.classList.add('ny');
   }
-  function stopp() { clearTimeout(auto); auto = null; var b = root.querySelector('[data-a="auto"]'); if (b) b.textContent = 'Automatisk'; }
+  function stopp() { clearTimeout(auto); auto = null; var b = root.querySelector('[data-a="auto"]'); if (b) b.textContent = T('Automatisk', 'Auto'); }
   function loop() { neste(); auto = setTimeout(loop, 5000 + Math.random() * 7000); }
   root.addEventListener('click', function (e) {
     var b = e.target.closest('[data-a]'); if (!b) return;
     if (b.dataset.a === 'neste') neste();
-    if (b.dataset.a === 'auto') { if (auto) stopp(); else { loop(); b.textContent = 'Stopp'; } }
+    if (b.dataset.a === 'auto') { if (auto) stopp(); else { loop(); b.textContent = T('Stopp', 'Stop'); } }
   });
   document.addEventListener('astro:before-swap', stopp, { once: true });
 })();

@@ -38,22 +38,29 @@ const nav = [
   { href: path(lang, '/drinking-games'), label: L.nav.games, icon: 'drikkeleker' },
 ];
 // Mitt vors: vorsdelen først, humoren (replikker, ordbok, uttrykk) ved siden
-const humorNav: typeof nav = [];
+const humorNav: typeof nav = nav.filter((n) => ['replikker', 'ordbok', 'uttrykk'].includes(n.icon));
+nav.length = 0;
 if (lang === 'no') {
-  humorNav.push(...nav.filter((n) => ['replikker', 'ordbok', 'uttrykk'].includes(n.icon)));
-  nav.length = 0;
   nav.push(
     { href: '/no/', label: 'Forside', icon: 'hjem' },
     { href: '/no/drinking-games', label: 'Drikkeleker', icon: 'drikkeleker' },
     { href: '/no/rom', label: 'Spill sammen', icon: 'terning' },
     { href: '/no/nyhetsrunden', label: 'Nyhetsrunden', icon: 'nyhet' },
   );
+} else {
+  nav.push(
+    { href: '/', label: 'Home', icon: 'hjem' },
+    { href: '/drinking-games', label: 'Drinking games', icon: 'drikkeleker' },
+    { href: '/room', label: 'Play together', icon: 'terning' },
+    { href: '/plan', label: 'Plan the night', icon: 'nyhet' },
+  );
 }
 const subNav = collectionsFor(lang).map((s) => ({ href: path(lang, `/categories/${s.id}`), label: t(s.title, lang) }));
 const quick = lang === 'no'
   ? [{ href: '/no/rom', label: 'Spill sammen' }, { href: '/no/drinking-games', label: 'Drikkeleker' }, { href: '/no/nyhetsrunden', label: 'Nyhetsrunden' },
      { href: '/no/kveld', label: 'Kveldsplan' }, { href: '/no/finn-lek', label: 'Finn lek' }, { href: '/no/gjeng', label: 'Gjengen' }, { href: '/no/situations', label: 'Replikker' }]
-  : topSituationsFor(lang).map((x) => ({ href: path(lang, `/situations/${x.id}`), label: t(x.title, lang) }));
+  : [{ href: '/room', label: 'Play together' }, { href: '/drinking-games', label: 'Drinking games' }, { href: '/plan', label: 'Plan the night' },
+     { href: '/find-a-game', label: 'Find a game' }, { href: '/crew', label: 'Your crew' }, { href: '/situations', label: 'Comebacks' }];
 const isCurrent = (href: string) => {
   const h = href.replace(/\/$/, '') || '/';
   return current === h || (h !== '/' && h !== '/no' && current.startsWith(h + '/'));
@@ -115,8 +122,8 @@ const isCurrent = (href: string) => {
     })();
   </script>
   <KontoKlient />
-  {lang === 'no' && <Alkoholfri />}
-  {lang === 'no' && <Verving />}
+  <Alkoholfri />
+  <Verving />
   <script is:inline>
     /* Innloggingslenker fra Supabase kan lande på feil side – send dem til kontosiden. */
     (function () {
@@ -200,41 +207,18 @@ const isCurrent = (href: string) => {
     </main>
   </div>
 
-  {lang === 'no' ? (
-  <nav class="tabbar" aria-label="Hovedmeny">
-    <a href="/no/" aria-current={current === '/no' ? 'page' : undefined}>
-      <span class="ti"><Icon name="hjem" size={22} /></span><span class="tl">Forside</span></a>
-    <a href="/no/drinking-games" aria-current={isCurrent('/no/drinking-games') ? 'page' : undefined}>
-      <span class="ti"><Icon name="drikkeleker" size={22} /></span><span class="tl">Leker</span></a>
-    <a href="/no/rom" aria-current={isCurrent('/no/rom') ? 'page' : undefined}>
-      <span class="ti"><Icon name="terning" size={22} /></span><span class="tl">Spill sammen</span></a>
-    <a href="/no/nyhetsrunden" aria-current={isCurrent('/no/nyhetsrunden') ? 'page' : undefined}>
-      <span class="ti"><Icon name="nyhet" size={22} /></span><span class="tl">Nyheter</span></a>
-    <a href="/no/situations" aria-current={isCurrent('/no/situations') || current.includes('/categories/') || isCurrent('/no/ord') || isCurrent('/no/uttrykk') ? 'page' : undefined}>
-      <span class="ti"><Icon name="replikker" size={22} /></span><span class="tl">Humor</span></a>
+  <nav class="tabbar" aria-label={lang === 'no' ? 'Hovedmeny' : 'Main menu'}>
+    <a href={path(lang, '/')} aria-current={current === (lang === 'no' ? '/no' : '/') ? 'page' : undefined}>
+      <span class="ti"><Icon name="hjem" size={22} /></span><span class="tl">{lang === 'no' ? 'Forside' : 'Home'}</span></a>
+    <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
+      <span class="ti"><Icon name="drikkeleker" size={22} /></span><span class="tl">{lang === 'no' ? 'Leker' : 'Games'}</span></a>
+    <a href={lang === 'no' ? '/no/rom' : '/room'} aria-current={isCurrent(lang === 'no' ? '/no/rom' : '/room') ? 'page' : undefined}>
+      <span class="ti"><Icon name="terning" size={22} /></span><span class="tl">{lang === 'no' ? 'Spill sammen' : 'Play together'}</span></a>
+    <a href={lang === 'no' ? '/no/nyhetsrunden' : '/plan'} aria-current={isCurrent(lang === 'no' ? '/no/nyhetsrunden' : '/plan') ? 'page' : undefined}>
+      <span class="ti"><Icon name="nyhet" size={22} /></span><span class="tl">{lang === 'no' ? 'Nyheter' : 'Plan'}</span></a>
+    <a href={path(lang, '/situations')} aria-current={isCurrent(path(lang, '/situations')) || current.includes('/categories/') || isCurrent(path(lang, '/ord')) || isCurrent(path(lang, '/uttrykk')) ? 'page' : undefined}>
+      <span class="ti"><Icon name="replikker" size={22} /></span><span class="tl">{lang === 'no' ? 'Humor' : 'Humour'}</span></a>
   </nav>
-  ) : (
-  <nav class="tabbar" aria-label={L.pickMode}>
-      <a href={path(lang, '/')} aria-current={current === (lang === 'no' ? '/no' : '/') ? 'page' : undefined}>
-        <span class="ti"><Icon name="hjem" size={22} /></span><span class="tl">{L.nav.home}</span></a>
-      <a href={path(lang, '/situations')} aria-current={isCurrent(path(lang, '/situations')) || current.includes('/categories/') ? 'page' : undefined}>
-        <span class="ti"><Icon name="replikker" size={22} /></span><span class="tl">{L.linesTitle}</span></a>
-      {hasDict && (
-        <a href={path(lang, '/ord')} aria-current={isCurrent(path(lang, '/ord')) ? 'page' : undefined}>
-          <span class="ti"><Icon name="ordbok" size={22} /></span><span class="tl">{L.ordTitle}</span></a>
-      )}
-      {hasDict && (
-        <a href={path(lang, '/uttrykk')} aria-current={isCurrent(path(lang, '/uttrykk')) ? 'page' : undefined}>
-          <span class="ti"><Icon name="uttrykk" size={22} /></span><span class="tl">{L.uttrykkTitle}</span></a>
-      )}
-      <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
-        <span class="ti"><Icon name="drikkeleker" size={22} /></span><span class="tl">{L.nav.games}</span></a>
-      {!hasDict && (
-        <a href={path(lang, '/favourites')} aria-current={isCurrent(path(lang, '/favourites')) ? 'page' : undefined}>
-          <span class="ti"><Icon name="favoritt" size={22} /></span><span class="tl">{L.favourites}</span></a>
-      )}
-    </nav>
-  )}
 
   <!-- Aldersspørringen ligger UTENFOR .main, ellers blir den uskarp sammen med innholdet. -->
   {gate && <AgeGate lang={lang} />}
