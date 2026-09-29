@@ -692,6 +692,66 @@
    {
     "t": "Partneren leser alle meldingene fra i kveld – eller ser alle bildene?",
     "m": "droy"
+   },
+   {
+    "t": "Sommer på hytta – eller sommer i Syden?",
+    "m": "snill"
+   },
+   {
+    "t": "Aldri bruke sosiale medier igjen – eller aldri se en film igjen?",
+    "m": "snill"
+   },
+   {
+    "t": "Være fem år yngre – eller ti millioner rikere?",
+    "m": "snill"
+   },
+   {
+    "t": "Ha en pause-knapp – eller en spol-tilbake-knapp i livet?",
+    "m": "snill"
+   },
+   {
+    "t": "Bo i en by uten butikker – eller en by uten restauranter?",
+    "m": "snill"
+   },
+   {
+    "t": "Alltid si hva du tenker – eller aldri si noe igjen?",
+    "m": "snill"
+   },
+   {
+    "t": "Være den smarteste i rommet – eller den morsomste?",
+    "m": "snill"
+   },
+   {
+    "t": "Gå på skøyter til jobben – eller ski til jobben hele året?",
+    "m": "snill"
+   },
+   {
+    "t": "Ha egen temamusikk som spiller når du går inn i et rom – eller en egen fotograf som følger deg?",
+    "m": "snill"
+   },
+   {
+    "t": "Miste smaken – eller miste luktesansen?",
+    "m": "snill"
+   },
+   {
+    "t": "Bare kunne se på NRK – eller bare kunne høre på P4?",
+    "m": "snill"
+   },
+   {
+    "t": "Aldri få se snø igjen – eller aldri få kjenne sol på huden igjen?",
+    "m": "snill"
+   },
+   {
+    "t": "Være verdens beste danser – eller verdens beste sanger?",
+    "m": "snill"
+   },
+   {
+    "t": "Ha perfekt hukommelse – eller kunne glemme hva du vil?",
+    "m": "snill"
+   },
+   {
+    "t": "Tilbringe en natt i IKEA – eller en natt på et museum?",
+    "m": "snill"
    }
   ]
  },
@@ -863,6 +923,126 @@
    },
    {
     "t": "Ting som lukter vondt",
+    "m": "alle"
+   },
+   {
+    "t": "Ting man tar med på stranda",
+    "m": "alle"
+   },
+   {
+    "t": "Norske TV-programmer",
+    "m": "alle"
+   },
+   {
+    "t": "Ting som er runde",
+    "m": "alle"
+   },
+   {
+    "t": "Bakeverk",
+    "m": "alle"
+   },
+   {
+    "t": "Ting i en IKEA",
+    "m": "alle"
+   },
+   {
+    "t": "Land i Asia",
+    "m": "alle"
+   },
+   {
+    "t": "Kjente par",
+    "m": "alle"
+   },
+   {
+    "t": "Ting du finner i en skolesekk",
+    "m": "alle"
+   },
+   {
+    "t": "Sjokolademerker",
+    "m": "alle"
+   },
+   {
+    "t": "Filmer med tall i tittelen",
+    "m": "alle"
+   },
+   {
+    "t": "Yrker",
+    "m": "alle"
+   },
+   {
+    "t": "Ting som flyr",
+    "m": "alle"
+   },
+   {
+    "t": "Grønnsaker",
+    "m": "alle"
+   },
+   {
+    "t": "Ting du gjør på 17. mai",
+    "m": "alle"
+   },
+   {
+    "t": "Dyr i Afrika",
+    "m": "alle"
+   },
+   {
+    "t": "Kjente youtubere og influensere",
+    "m": "alle"
+   },
+   {
+    "t": "Ting som går i stykker",
+    "m": "alle"
+   },
+   {
+    "t": "Julesanger",
+    "m": "alle"
+   },
+   {
+    "t": "Fjell i Norge",
+    "m": "alle"
+   },
+   {
+    "t": "Ting på en bursdagsfest",
+    "m": "alle"
+   },
+   {
+    "t": "Ting som er kalde",
+    "m": "alle"
+   },
+   {
+    "t": "Bilmerker fra Tyskland",
+    "m": "alle"
+   },
+   {
+    "t": "Kroppsdeler",
+    "m": "alle"
+   },
+   {
+    "t": "Ting i et førstehjelpsskrin",
+    "m": "alle"
+   },
+   {
+    "t": "Sporter med ball",
+    "m": "alle"
+   },
+   {
+    "t": "Norske matretter",
+    "m": "alle"
+   },
+   {
+    "t": "Ting man kan si til en baby",
+    "m": "alle"
+   },
+   {
+    "t": "Sminkeprodukter",
+    "m": "alle"
+   },
+   {
+    "t": "Kjente rappere",
+    "m": "alle"
+   },
+   {
+    "t": "Ting som lyder høyt",
     "m": "alle"
    }
   ]
@@ -1192,6 +1372,90 @@
    {
     "t": "Hvem av dere spiser mest når de er full?",
     "m": "alle"
+   },
+   {
+    "t": "Hvem av dere er mest sta?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere er dårligst til å holde på en hemmelighet?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere sovner først på fest?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere har mest konkurranseinstinkt?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere er best til å lage mat?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere bruker mest penger på tull?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere er mest dramatisk når de er syke?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere kommer oftest for sent?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere ville overlevd lengst i villmarka?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere har dårligst retningssans?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere sier unnskyld først etter en krangel?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere er mest avhengig av telefonen?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere ler høyest?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere ville blitt kjent først?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere er mest nysgjerrig?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere ville glemt bursdagen til den andre?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere er mest kresen i mat?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere er mest morgengretten?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere synger høyest i bilen?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere ville brukt en million kroner raskest?",
+    "m": "alle"
+   },
+   {
+    "t": "Hvem av dere er best til å gi råd?",
+    "m": "alle"
    }
   ]
  },
@@ -1452,6 +1716,66 @@
    {
     "t": "Hvem hadde vært de verste eksene for hverandre?",
     "m": "droy"
+   },
+   {
+    "t": "Hvem hadde startet et TikTok-dansepar?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde tapt alt på et kasino sammen?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde vunnet 71° nord?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde startet en sekt ved et uhell?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde blitt de beste foreldrene sammen?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde åpnet et bryggeri sammen?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde tatt feil fly sammen?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde laget den dårligste middagen sammen?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde vært de beste detektivene?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde startet et politisk parti?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde syklet Norge på langs sammen?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde vunnet Melodi Grand Prix?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde havnet i arresten etter russetida?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde vært de mest uenige lagkameratene?",
+    "m": "snill"
+   },
+   {
+    "t": "Hvem hadde vært de beste til å planlegge et bryllup?",
+    "m": "snill"
    }
   ]
  },
@@ -2852,6 +3176,102 @@
    {
     "t": "Hvilket ligg angrer du mest på?",
     "m": "sd"
+   },
+   {
+    "t": "Hva er den rareste vanen din?",
+    "m": "ss"
+   },
+   {
+    "t": "Hvem i rommet kjente du minst for et år siden?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er det dummeste du har kjøpt?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva var ditt første inntrykk av personen til venstre?",
+    "m": "ss"
+   },
+   {
+    "t": "Hvilken app bruker du mest tid på – vis skjermtiden!",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er den beste unnskyldningen du har brukt for å slippe noe?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er det siste du googlet?",
+    "m": "ss"
+   },
+   {
+    "t": "Hvilken kjendis har du sagt at du ligner på?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er det flaueste i søkehistorikken din?",
+    "m": "ss"
+   },
+   {
+    "t": "Hvem her ville du ringt hvis du havnet i trøbbel klokka tre om natta?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er noe du later som du liker, men egentlig ikke gjør?",
+    "m": "ss"
+   },
+   {
+    "t": "Hva er det beste komplimentet du har fått?",
+    "m": "ss"
+   },
+   {
+    "t": "Hvem her ville du minst hatt som romkamerat?",
+    "m": "sd"
+   },
+   {
+    "t": "Hva er den verste daten du har vært på?",
+    "m": "sd"
+   },
+   {
+    "t": "Har du noen gang likt kjæresten til en venn?",
+    "m": "sd"
+   },
+   {
+    "t": "Hva er det frekkeste du har sagt om noen her – bak ryggen deres?",
+    "m": "sd"
+   },
+   {
+    "t": "Hvilken eks ville du aldri gått tilbake til – og hvorfor?",
+    "m": "sd"
+   },
+   {
+    "t": "Hva er den største hemmeligheten du har holdt for foreldrene dine?",
+    "m": "sd"
+   },
+   {
+    "t": "Hvem her har du stalket mest på sosiale medier?",
+    "m": "sd"
+   },
+   {
+    "t": "Hva er det dummeste du har gjort i fylla?",
+    "m": "sd"
+   },
+   {
+    "t": "Har du noen gang dumpet noen over melding?",
+    "m": "sd"
+   },
+   {
+    "t": "Hvem her tror du har flest hemmeligheter?",
+    "m": "sd"
+   },
+   {
+    "t": "Hva er den mest pinlige meldingen du har sendt til feil person?",
+    "m": "sd"
+   },
+   {
+    "t": "Hvis du måtte kysse noen her, hvem ville det vært?",
+    "m": "sd"
    }
   ]
  },
@@ -2943,6 +3363,86 @@
    },
    {
     "t": "En sang ingen andre her kjenner",
+    "m": "alle"
+   },
+   {
+    "t": "En sang du skammer deg litt over å like",
+    "m": "alle"
+   },
+   {
+    "t": "En sang som minner deg om sommeren",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen du ville spilt i ditt eget bryllup",
+    "m": "alle"
+   },
+   {
+    "t": "En sang som minner deg om noen i rommet",
+    "m": "alle"
+   },
+   {
+    "t": "Den beste sangen fra da du var tretten",
+    "m": "alle"
+   },
+   {
+    "t": "En sang du kan hele teksten til",
+    "m": "alle"
+   },
+   {
+    "t": "En sang som får deg til å gråte",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen du ville hatt som inngangsmusikk",
+    "m": "alle"
+   },
+   {
+    "t": "En norsk sang alle bør kunne",
+    "m": "alle"
+   },
+   {
+    "t": "En sang som passer perfekt til en biltur",
+    "m": "alle"
+   },
+   {
+    "t": "En sang du hørte på repeat etter et brudd",
+    "m": "alle"
+   },
+   {
+    "t": "En sang foreldrene dine alltid spilte",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen som får deg på dansegulvet",
+    "m": "alle"
+   },
+   {
+    "t": "En sang som beskriver livet ditt akkurat nå",
+    "m": "alle"
+   },
+   {
+    "t": "En sang du ville spilt for å vinne tilbake en eks",
+    "m": "alle"
+   },
+   {
+    "t": "En sang som minner deg om en fest",
+    "m": "alle"
+   },
+   {
+    "t": "En sang du tror ingen andre her kjenner",
+    "m": "alle"
+   },
+   {
+    "t": "Den beste julesangen",
+    "m": "alle"
+   },
+   {
+    "t": "En sang som får deg i godt humør uansett",
+    "m": "alle"
+   },
+   {
+    "t": "Sangen som skal spilles i begravelsen din",
     "m": "alle"
    }
   ]

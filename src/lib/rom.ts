@@ -212,7 +212,22 @@ function giSlurker(data: any, id: string, n: number) { const p = data.spillere.f
 /** Slurker spilleren har vunnet og kan sende til andre (🍺-knappen). */
 function giUtdeling(data: any, id: string, n: number) { const p = data.spillere.find((x: any) => x.id === id); if (p) p.gi = Math.max(0, Math.min(99, (p.gi || 0) + n)); }
 
-function kortstokkFor(lek: string, modus: string) {
+/** Kort id for et kort (fra den norske teksten) – brukes til å huske hva telefonen har sett før. */
+export function kortId(k: any) {
+  const t = String(k && k.t && typeof k.t === 'object' ? k.t.no : (k && k.t) || '');
+  let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+/** Kort dere ikke har sett før kommer først – de dere har sett, havner (stokket) bakerst. */
+function usetteForst(rekke: any[], sett?: Set<string> | null) {
+  if (!sett || !sett.size) return rekke;
+  const nye = rekke.filter((k) => !sett.has(kortId(k))), gamle = rekke.filter((k) => sett.has(kortId(k)));
+  return nye.concat(gamle);
+}
+function kortstokkFor(lek: string, modus: string, sett?: Set<string> | null) {
+  return lek === 'ring-of-fire' ? kortstokkRa(lek, modus) : usetteForst(kortstokkRa(lek, modus), sett);
+}
+function kortstokkRa(lek: string, modus: string) {
   if (lek === 'ring-of-fire') {
     const sorter = [['♥', 1], ['♦', 1], ['♠', 0], ['♣', 0]] as const;
     const verdier = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -247,7 +262,7 @@ function medSmakebiter(rekke: any[]) {
 const KONGE_NR: [string, string][] = [['Første', 'First'], ['Andre', 'Second'], ['Tredje', 'Third'], ['Fjerde', 'Fourth']];
 function visKort(s: any, data: any) {
   const k = s.rekke[s.pos];
-  if (s.lek !== 'ring-of-fire') return { t: k.t, k: k.k };
+  if (s.lek !== 'ring-of-fire') return { t: k.t, k: k.k, id: k.smak ? null : kortId(k) };
   const info = D['ring-of-fire'].kort[k.v], infoEn = (DE['ring-of-fire'] && DE['ring-of-fire'].kort && DE['ring-of-fire'].kort[k.v]) || info;
   let regel: any = L(info[0], infoEn[0]), tekst: any = L(info[1], infoEn[1]);
   if (k.v === 'K') {
@@ -280,7 +295,7 @@ const LINJER: number[][] = (() => {
 })();
 function nyttBrett(s: any) { return stokk(s.sanger.map((_: any, i: number) => i)).slice(0, 16); }
 
-export function startSpill(data: any, lek: string, modus: string) {
+export function startSpill(data: any, lek: string, modus: string, sett?: Set<string> | null) {
   if (EKSTRA.includes(lek)) return startEkstra(data, lek, modus);
   const liste = lekeliste('no');
   const valgt = liste.find((x) => x.id === lek);
@@ -295,7 +310,7 @@ export function startSpill(data: any, lek: string, modus: string) {
   if (valgt.type === 'kort') {
     const plussRom = !!(data.pluss && data.pluss.til > Date.now());
     if ((valgt as any).pluss && !plussRom) return feilL('pluss', 'Denne pakken krever Mitt vors Pluss.', 'This pack needs Mitt vors Plus.');
-    let rekke = kortstokkFor(lek, modus);
+    let rekke = kortstokkFor(lek, modus, sett);
     if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && rekke.length > 12) rekke = medSmakebiter(rekke);
     if (!rekke.length) return { feil: 'tom' };
     data.spill = { type: 'kort', lek, navn, modus, rekke, pos: 0, tur: lek === 'ring-of-fire' ? 0 : null, konger: 0 };
@@ -385,7 +400,7 @@ function handlingInne(data: any, meg: any, h: any) {
       // Verten har Pluss (sjekket av API-ruta): lås opp rommet for kvelden
       if (h._plussTil > Date.now() && !(data.pluss && data.pluss.til > Date.now())) data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
       if (h.lek !== 'egen' && erPlussLek(String(h.lek || '')) && !romHarPluss(data)) return feilL('pluss', 'Denne leken krever Mitt vors Pluss hos verten.', 'This game needs the host to have Mitt vors Plus.');
-      const r = h.lek === 'egen' ? startEgen(data, h.kort, h.navn) : h.lek === 'lov' ? startLov(data, h._lov, String(h.modus || '')) : startSpill(data, String(h.lek || ''), String(h.modus || '*'));
+      const r = h.lek === 'egen' ? startEgen(data, h.kort, h.navn) : h.lek === 'lov' ? startLov(data, h._lov, String(h.modus || '')) : startSpill(data, String(h.lek || ''), String(h.modus || '*'), new Set((Array.isArray(h.sett) ? h.sett : []).slice(0, 2000).filter((x: any) => typeof x === 'string' && /^[0-9a-z]{1,8}$/.test(x))));
       if (!(r as any).feil && data.spill) { data.valgt = null; data.ferdig = null; data.historikk = (data.historikk || []).concat([data.spill.navn]).slice(-40); }
       return r;
     }

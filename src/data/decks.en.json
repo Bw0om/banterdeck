@@ -692,6 +692,66 @@
    {
     "t": "Your partner reads all your messages from tonight – or sees all the photos?",
     "m": "droy"
+   },
+   {
+    "t": "Summer at the cabin – or a sun holiday abroad?",
+    "m": "snill"
+   },
+   {
+    "t": "Never use social media again – or never watch a film again?",
+    "m": "snill"
+   },
+   {
+    "t": "Be five years younger – or ten million richer?",
+    "m": "snill"
+   },
+   {
+    "t": "Have a pause button – or a rewind button for life?",
+    "m": "snill"
+   },
+   {
+    "t": "Live in a town without shops – or without restaurants?",
+    "m": "snill"
+   },
+   {
+    "t": "Always say what you think – or never speak again?",
+    "m": "snill"
+   },
+   {
+    "t": "Be the smartest in the room – or the funniest?",
+    "m": "snill"
+   },
+   {
+    "t": "Skate to work – or ski to work all year?",
+    "m": "snill"
+   },
+   {
+    "t": "Have theme music when you enter a room – or your own personal photographer?",
+    "m": "snill"
+   },
+   {
+    "t": "Lose your sense of taste – or your sense of smell?",
+    "m": "snill"
+   },
+   {
+    "t": "Only watch one TV channel – or only listen to one radio station?",
+    "m": "snill"
+   },
+   {
+    "t": "Never see snow again – or never feel sunshine again?",
+    "m": "snill"
+   },
+   {
+    "t": "Be the world’s best dancer – or the world’s best singer?",
+    "m": "snill"
+   },
+   {
+    "t": "Have a perfect memory – or be able to forget whatever you want?",
+    "m": "snill"
+   },
+   {
+    "t": "Spend a night in IKEA – or a night in a museum?",
+    "m": "snill"
    }
   ]
  },
@@ -863,6 +923,126 @@
    },
    {
     "t": "Things that smell bad",
+    "m": "alle"
+   },
+   {
+    "t": "Things you bring to the beach",
+    "m": "alle"
+   },
+   {
+    "t": "Norwegian TV shows",
+    "m": "alle"
+   },
+   {
+    "t": "Things that are round",
+    "m": "alle"
+   },
+   {
+    "t": "Baked goods",
+    "m": "alle"
+   },
+   {
+    "t": "Things in an IKEA",
+    "m": "alle"
+   },
+   {
+    "t": "Countries in Asia",
+    "m": "alle"
+   },
+   {
+    "t": "Famous couples",
+    "m": "alle"
+   },
+   {
+    "t": "Things in a school bag",
+    "m": "alle"
+   },
+   {
+    "t": "Chocolate brands",
+    "m": "alle"
+   },
+   {
+    "t": "Films with a number in the title",
+    "m": "alle"
+   },
+   {
+    "t": "Jobs",
+    "m": "alle"
+   },
+   {
+    "t": "Things that fly",
+    "m": "alle"
+   },
+   {
+    "t": "Vegetables",
+    "m": "alle"
+   },
+   {
+    "t": "Things you do on May 17th",
+    "m": "alle"
+   },
+   {
+    "t": "Animals in Africa",
+    "m": "alle"
+   },
+   {
+    "t": "Famous YouTubers and influencers",
+    "m": "alle"
+   },
+   {
+    "t": "Things that break",
+    "m": "alle"
+   },
+   {
+    "t": "Christmas songs",
+    "m": "alle"
+   },
+   {
+    "t": "Mountains in Norway",
+    "m": "alle"
+   },
+   {
+    "t": "Things at a birthday party",
+    "m": "alle"
+   },
+   {
+    "t": "Things that are cold",
+    "m": "alle"
+   },
+   {
+    "t": "German car brands",
+    "m": "alle"
+   },
+   {
+    "t": "Body parts",
+    "m": "alle"
+   },
+   {
+    "t": "Things in a first aid kit",
+    "m": "alle"
+   },
+   {
+    "t": "Sports with a ball",
+    "m": "alle"
+   },
+   {
+    "t": "Norwegian dishes",
+    "m": "alle"
+   },
+   {
+    "t": "Things you say to a baby",
+    "m": "alle"
+   },
+   {
+    "t": "Makeup products",
+    "m": "alle"
+   },
+   {
+    "t": "Famous rappers",
+    "m": "alle"
+   },
+   {
+    "t": "Things that are loud",
     "m": "alle"
    }
   ]
@@ -1192,6 +1372,90 @@
    {
     "t": "Which of you eats more when drunk?",
     "m": "alle"
+   },
+   {
+    "t": "Which of you is more stubborn?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is worse at keeping a secret?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you falls asleep first at a party?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is more competitive?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is the better cook?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you spends more money on nonsense?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is more dramatic when ill?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is late more often?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you would survive longer in the wild?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you has the worse sense of direction?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you apologises first after an argument?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is more addicted to their phone?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you laughs louder?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you would become famous first?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is nosier?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you would forget the other’s birthday?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is the pickier eater?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you is grumpier in the morning?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you sings louder in the car?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you would spend a million fastest?",
+    "m": "alle"
+   },
+   {
+    "t": "Which of you gives better advice?",
+    "m": "alle"
    }
   ]
  },
@@ -1452,6 +1716,66 @@
    {
     "t": "Who would be the worst exes for each other?",
     "m": "droy"
+   },
+   {
+    "t": "Who would start a TikTok dance duo?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would lose everything at a casino together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would win a survival reality show together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would accidentally start a cult?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would make the best parents together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would open a brewery together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would get on the wrong plane together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would cook the worst dinner together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would be the best detectives?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would start a political party?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would cycle the length of the country together?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would win a national song contest?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would end up in a cell after a wild graduation party?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would be the most argumentative teammates?",
+    "m": "snill"
+   },
+   {
+    "t": "Who would be best at planning a wedding?",
+    "m": "snill"
    }
   ]
  },
@@ -2852,6 +3176,102 @@
    {
     "t": "Which hookup do you regret the most?",
     "m": "sd"
+   },
+   {
+    "t": "What’s your weirdest habit?",
+    "m": "ss"
+   },
+   {
+    "t": "Who in the room did you know least a year ago?",
+    "m": "ss"
+   },
+   {
+    "t": "What’s the dumbest thing you’ve ever bought?",
+    "m": "ss"
+   },
+   {
+    "t": "What was your first impression of the person on your left?",
+    "m": "ss"
+   },
+   {
+    "t": "Which app do you spend the most time on – show your screen time!",
+    "m": "ss"
+   },
+   {
+    "t": "What’s the best excuse you’ve used to get out of something?",
+    "m": "ss"
+   },
+   {
+    "t": "What’s the last thing you googled?",
+    "m": "ss"
+   },
+   {
+    "t": "Which celebrity have you claimed to look like?",
+    "m": "ss"
+   },
+   {
+    "t": "What’s the most embarrassing thing in your search history?",
+    "m": "ss"
+   },
+   {
+    "t": "Who here would you call if you got into trouble at 3 a.m.?",
+    "m": "ss"
+   },
+   {
+    "t": "What’s something you pretend to like but actually don’t?",
+    "m": "ss"
+   },
+   {
+    "t": "What’s the best compliment you’ve ever received?",
+    "m": "ss"
+   },
+   {
+    "t": "Who here would you least want as a roommate?",
+    "m": "sd"
+   },
+   {
+    "t": "What’s the worst date you’ve ever been on?",
+    "m": "sd"
+   },
+   {
+    "t": "Have you ever had a crush on a friend’s partner?",
+    "m": "sd"
+   },
+   {
+    "t": "What’s the rudest thing you’ve said about someone here behind their back?",
+    "m": "sd"
+   },
+   {
+    "t": "Which ex would you never go back to – and why?",
+    "m": "sd"
+   },
+   {
+    "t": "What’s the biggest secret you’ve kept from your parents?",
+    "m": "sd"
+   },
+   {
+    "t": "Who here have you stalked the most on social media?",
+    "m": "sd"
+   },
+   {
+    "t": "What’s the dumbest thing you’ve done drunk?",
+    "m": "sd"
+   },
+   {
+    "t": "Have you ever dumped someone by text?",
+    "m": "sd"
+   },
+   {
+    "t": "Who here do you think has the most secrets?",
+    "m": "sd"
+   },
+   {
+    "t": "What’s the most embarrassing message you’ve sent to the wrong person?",
+    "m": "sd"
+   },
+   {
+    "t": "If you had to kiss someone here, who would it be?",
+    "m": "sd"
    }
   ]
  },
@@ -2943,6 +3363,86 @@
    },
    {
     "t": "A song nobody else here knows",
+    "m": "alle"
+   },
+   {
+    "t": "A song you’re a bit ashamed to like",
+    "m": "alle"
+   },
+   {
+    "t": "A song that reminds you of summer",
+    "m": "alle"
+   },
+   {
+    "t": "The song you’d play at your own wedding",
+    "m": "alle"
+   },
+   {
+    "t": "A song that reminds you of someone in the room",
+    "m": "alle"
+   },
+   {
+    "t": "The best song from when you were thirteen",
+    "m": "alle"
+   },
+   {
+    "t": "A song you know every word of",
+    "m": "alle"
+   },
+   {
+    "t": "A song that makes you cry",
+    "m": "alle"
+   },
+   {
+    "t": "The song you’d have as your entrance music",
+    "m": "alle"
+   },
+   {
+    "t": "A Norwegian song everyone should know",
+    "m": "alle"
+   },
+   {
+    "t": "A song that’s perfect for a road trip",
+    "m": "alle"
+   },
+   {
+    "t": "A song you had on repeat after a break-up",
+    "m": "alle"
+   },
+   {
+    "t": "A song your parents always played",
+    "m": "alle"
+   },
+   {
+    "t": "The song that gets you on the dance floor",
+    "m": "alle"
+   },
+   {
+    "t": "A song that describes your life right now",
+    "m": "alle"
+   },
+   {
+    "t": "A song you’d play to win back an ex",
+    "m": "alle"
+   },
+   {
+    "t": "A song that reminds you of a party",
+    "m": "alle"
+   },
+   {
+    "t": "A song you think nobody else here knows",
+    "m": "alle"
+   },
+   {
+    "t": "The best Christmas song",
+    "m": "alle"
+   },
+   {
+    "t": "A song that puts you in a good mood no matter what",
+    "m": "alle"
+   },
+   {
+    "t": "The song to be played at your funeral",
     "m": "alle"
    }
   ]

@@ -86,10 +86,20 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       opts.headers = Object.assign({ 'x-lang': LANG }, opts.headers || {});
       return window.BDKonto.api(sti, opts);
     }
+    /* ---------- husk hvilke kort denne telefonen har sett, så neste kveld gir nye kort først ---------- */
+    function settListe() { try { var x = JSON.parse(localStorage.getItem('bd_sett') || '{}'); return x && typeof x === 'object' ? x : {}; } catch (e) { return {}; } }
+    function merkSett(lek, id) {
+      if (!lek || !id) return;
+      var x = settListe(), l = x[lek] || (x[lek] = []);
+      if (l.indexOf(id) !== -1) return;
+      l.push(id); if (l.length > 1500) l.splice(0, l.length - 1500);
+      try { localStorage.setItem('bd_sett', JSON.stringify(x)); } catch (e) {}
+    }
     function gjor(h) {
       if (!meg || opptatt) return;
       opptatt = true;
       h.id = meg.id; h.pollett = meg.pollett;
+      if (h.handling === 'start' && h.lek) h.sett = (settListe()[h.lek] || []).slice(-1500);
       api('POST', '/api/rom/' + kode, h).then(function (d) { opptatt = false; ta(d); })
         .catch(function (e) { opptatt = false; if (e.kode === 'pluss') return visPlussTilbud(); toast(e.message); if (e.kode === 'ikke-med') glemRom(); });
     }
@@ -561,6 +571,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
 
     function kortSpill(s) {
       var k = s.kort || {};
+      if (k.id) merkSett(s.lek, k.id);
       var rof = s.lek === 'ring-of-fire';
       var kortHtml = rof
         ? '<div class="rof-kort rom-rof' + (k.rod ? ' rod' : '') + '"><div class="rof-hj"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div>' +
@@ -1068,7 +1079,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
             return '';
           }).join('') + '</ul>' +
           (s.lagret ? '' : '<p class="small">' + T('Lagrer i lovboka …', 'Saving to the law book …') + '</p>') +
-          '<p><a class="btn ghost" href="' + RUTE.gjeng + '?k=' + esc(tilstand.gjeng ? tilstand.gjeng.kode : '') + '#lovboka" target="_blank" rel="noopener">' + T('Se lovboka', 'See the law book') + '</a></p>' +
+          '<div class="dl-knapper"><button class="btn gold" data-g="lov-del" type="button">' + T('📸 Del i story', '📸 Share to story') + '</button><a class="btn ghost" href="' + RUTE.gjeng + '?k=' + esc(tilstand.gjeng ? tilstand.gjeng.kode : '') + '#lovboka" target="_blank" rel="noopener">' + T('Se lovboka', 'See the law book') + '</a></div>' +
           (erVert() ? '<button class="rom-stor-knapp" data-g="avslutt" type="button">' + T('Tilbake til lobbyen', 'Back to the lobby') + '</button>' : '');
       }
       return ut;
@@ -1502,6 +1513,74 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         c.toBlob(function (blob) { ok(blob ? new File([blob], 'mittvors-kveld.png', { type: 'image/png' }) : null); }, 'image/png');
       });
     }
+
+    /** Gjengens lov som story-bilde (1080×1920): den nye loven, tittelen og konvolutten. */
+    function lovStoryBilde() {
+      var sp = tilstand.spill || {}, h = sp.hendelser || [], W = 1080, H = 1920, font = '"Bricolage Grotesque Variable", "Bricolage Grotesque", system-ui, sans-serif';
+      var c = document.createElement('canvas'); c.width = W; c.height = H;
+      var g = medT(c.getContext('2d'));
+      var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#3a2a14'); bg.addColorStop(0.5, '#141009'); bg.addColorStop(1, '#0d0a06');
+      g.fillStyle = bg; g.fillRect(0, 0, W, H);
+      g.font = '800 44px ' + font; g.fillStyle = '#f4ebdc'; g.fillText('mitt', 80, 150);
+      var b = g.measureText('mitt').width; g.fillStyle = '#ff6a4d'; g.fillText('vors', 80 + b, 150);
+      function linjer(tekst, stil, maks) {
+        g.font = stil; var ut = [], l = '';
+        String(tekst).split(' ').forEach(function (w) { var p = l ? l + ' ' + w : w; if (g.measureText(p).width > maks && l) { ut.push(l); l = w; } else l = p; });
+        if (l) ut.push(l); return ut;
+      }
+      g.fillStyle = '#b3a288'; g.font = '600 40px ' + font; g.fillText('⚖️ ' + T('Gjengens lov', 'The Crew’s Law') + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 80, 300);
+      g.fillStyle = '#f4ebdc'; g.font = '800 64px ' + font; g.fillText(T('Kveld ', 'Night ') + (sp.kveld || 1), 80, 380);
+      var y = 520, lov = h.filter(function (x) { return x.type === 'lov'; })[0];
+      var boks = function (hoyde, farge) { g.fillStyle = farge; g.beginPath(); if (g.roundRect) g.roundRect(80, y, W - 160, hoyde, 36); else g.rect(80, y, W - 160, hoyde); g.fill(); };
+      if (lov) {
+        var l = linjer('«' + lov.tekst + '»', '800 72px ' + font, W - 260), hh = 200 + l.length * 88;
+        boks(hh, '#f4ebdc');
+        g.fillStyle = '#8a5b00'; g.font = '700 36px ' + font; g.fillText('📜 ' + T('NY LOV', 'NEW LAW'), 130, y + 90);
+        g.fillStyle = '#1a1208'; g.font = '800 72px ' + font; l.forEach(function (x, i) { g.fillText(x, 130, y + 190 + i * 88); });
+        y += hh + 50;
+      } else {
+        g.fillStyle = '#f4ebdc'; g.font = '800 60px ' + font; g.fillText(T('Ingen ny lov i kveld 🙅', 'No new law tonight 🙅'), 80, y + 60); y += 140;
+      }
+      h.forEach(function (x) {
+        if (y > 1600) return;
+        var ikon = '', tekst = '';
+        if (x.type === 'tittel') { ikon = '🏷️'; tekst = x.navn + ': ' + x.tittel; }
+        else if (x.type === 'veto') { ikon = '✋'; tekst = x.navn + T(' brukte vetoen', ' used their veto'); }
+        else if (x.type === 'avvist') { ikon = '🙅'; tekst = T('Nedstemt: ', 'Voted down: ') + x.tekst; }
+        else if (x.type === 'opphev') { ikon = '🗑️'; tekst = T('En lov ble opphevet', 'A law was repealed'); }
+        else if (x.type === 'dom') { ikon = '⚖️'; tekst = T('Rettssaken er avgjort', 'The trial is settled'); }
+        else return;
+        g.fillStyle = 'rgba(248,233,210,.07)'; g.beginPath(); if (g.roundRect) g.roundRect(80, y, W - 160, 120, 26); else g.rect(80, y, W - 160, 120); g.fill();
+        g.font = '60px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; g.fillStyle = '#fff'; g.fillText(ikon, 110, y + 82);
+        g.fillStyle = '#f4ebdc'; g.font = '700 44px ' + font; g.fillText(linjer(tekst, '700 44px ' + font, W - 330)[0], 200, y + 76);
+        y += 140;
+      });
+      if (sp.vinner && y < 1650) { g.fillStyle = '#f4b740'; g.font = '700 48px ' + font; g.fillText('🏆 ' + navn(sp.vinner) + T(' vant kvelden', ' won the night'), 80, y + 60); }
+      y += 120;
+      if (y < 1380) {
+        // Logoen (flisen) fyller tomrommet nederst
+        var cy = Math.min(1500, y + (1700 - y) / 2), sk = Math.min(4.2, (1700 - y) / 130);
+        g.save(); g.translate(W / 2, cy); g.rotate(-0.08); g.scale(sk, sk); g.translate(-50, -50);
+        g.fillStyle = '#ff6a4d'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
+        [[45.5, -24], [54.5, 24]].forEach(function (k) { g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180); g.fillStyle = '#141009'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z')); g.fillStyle = '#f4ebdc'; g.fillRect(-12.5, -41, 25, 6); g.restore(); });
+        g.strokeStyle = '#f4ebdc'; g.lineWidth = 5; g.lineCap = 'round'; g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
+        g.restore();
+      }
+      g.fillStyle = '#f4b740'; g.fillRect(80, H - 170, W - 160, 4);
+      g.fillStyle = '#f4ebdc'; g.font = '700 44px ' + font; g.fillText(T('Hvilke lover har din gjeng?', 'What laws does your crew have?'), 80, H - 95);
+      g.fillStyle = '#b3a288'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
+      return new Promise(function (ok) { c.toBlob(function (bl) { ok(bl ? new File([bl], 'mittvors-lov.png', { type: 'image/png' }) : null); }, 'image/png'); });
+    }
+    function delLov() {
+      var sp = tilstand.spill || {}, lov = (sp.hendelser || []).filter(function (x) { return x.type === 'lov'; })[0];
+      var url = location.origin + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
+      var tekst = lov ? T('📜 Ny lov i ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'gjengen') + ': «' + lov.tekst + '»', '📜 New law in ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'the crew') + ': “' + lov.tekst + '”') : T('Gjengens lov på Mitt vors ⚖️', 'The Crew’s Law on Mitt vors ⚖️');
+      hentVervKode();
+      if (window.BDDel) return window.BDDel.lenke(url, tekst, { tittel: T('Del kvelden', 'Share the night'), bilde: lovStoryBilde });
+      lovStoryBilde().then(function (fil) {
+        if (fil && navigator.canShare && navigator.canShare({ files: [fil] })) navigator.share({ files: [fil], text: tekst + ' ' + url }).catch(function () {});
+      });
+    }
     function delKveld() {
       var url = tilstand.gjeng ? location.origin + RUTE.gjeng + '?k=' + tilstand.gjeng.kode : location.origin + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
       var t = kveldsTall();
@@ -1714,6 +1793,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (['hs-neste', 'sp-til-stemming', 'pk-avslutt', 'sk-start'].indexOf(g) !== -1) return gjor({ handling: g });
       if (g === 'hopp-over') return gjor({ handling: 'hopp-over' });
       if (g === 'lov-start' || g === 'lov-neste') return gjor({ handling: g });
+      if (g === 'lov-del') return delLov();
       if (g === 'lov-rett') return gjor({ handling: 'lov-rett-stem', behold: b.dataset.v === '1' });
       if (g === 'lov-stem') return gjor({ handling: 'lov-stem', ja: b.dataset.v === '1' });
       if (g === 'lov-veto') { if (!confirm(T('Bruke vetoen din? Du har bare én per sesong.', 'Use your veto? You only get one per season.'))) return; return gjor({ handling: 'lov-veto' }); }
