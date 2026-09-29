@@ -1497,3 +1497,6 @@ html[data-laast] .utvikling{display:flex;position:fixed;inset:0;z-index:300;alig
 .utv-rad input{flex:1;min-width:0;text-align:center;font-size:20px;letter-spacing:.2em;padding:12px;border-radius:12px;border:1px solid var(--border2);background:var(--card);color:var(--ink)}
 .utv-feil{color:var(--accent-t)!important;font-weight:600}
 .utv-fot{margin-top:18px!important;line-height:1.7}
+.del-epost{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.del-epost textarea,.del-epost input{width:100%;box-sizing:border-box;background:var(--card);color:var(--ink);border:1px solid var(--border2);border-radius:12px;padding:10px 12px;font:inherit;font-size:16px}
+.del-epost .btn{align-self:flex-start;margin-top:4px}

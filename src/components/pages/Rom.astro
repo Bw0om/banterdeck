@@ -1480,6 +1480,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (g === 'del') {
         var url = location.origin + RUTE.rom + '?k=' + kode;
         var tekst = T('Bli med på Mitt vors! Kode: ', 'Join me on Mitt vors! Code: ') + kode;
+        if (window.BDDel) return window.BDDel.lenke(url, tekst, { tittel: T('Inviter til rommet', 'Invite to the room'), ingress: T('Romkode: ', 'Room code: ') + kode });
         if (navigator.share) navigator.share({ title: 'Mitt vors', text: tekst, url: url }).catch(function () {});
         else if (navigator.clipboard) navigator.clipboard.writeText(tekst + '\n' + url).then(function () { toast(T('Lenken er kopiert', 'Link copied')); });
         return;
