@@ -36,10 +36,11 @@ function slurkPris(data: any, id: string, n: number) {
 function varePris(data: any, vare: 'immun' | 'poeng') { return rund10(BUTIKK[vare] * prisfaktor(data)); }
 export const START_KR = 1000, UTBETALING = 100, NOTERING = 200, HONORAR = 2, BOT_SKYLDIG = 300, BOT_FALSK = 200;
 const STARTKURS = 10, STEG = 6, MAKSKURS = 95;
-// Markedet: hver kveld trekkes et tilfeldig utvalg fra hele lista (over 160 aksjer).
-// Gratis: 12 aksjer. Med Pluss: 24. Hver spiller ser sitt eget utvalg, så ikke alle jakter på det samme.
-const MARKED_GRATIS = { hvem: 8, janei: 4 }, MARKED_PLUSS = { hvem: 16, janei: 8 };
-const MIN_SYNLIG = 4;                    // hver spiller ser minst så mange aksjer
+// Markedet: hver kveld trekkes en pott fra hele lista. Hver spiller har sin egen hånd – se «markedet» under.
+export const POTT_GRATIS = 40, POTT_PLUSS = 100;   // aksjer i potten per kveld
+export const HAND = 6;                              // aksjer hver spiller har på hånda samtidig
+export const BYTT_GRATIS = 3, BYTT_GRATIS_PLUSS = 8, BYTT_PRIS = 20;   // gratis bytter per kveld, deretter 20 kr
+export const MELDEBONUS = 20;                       // til den som melder noe som blir bekreftet
 const FRIST_MELDING = 90, FRIST_FORSVAR = 60, FRIST_DOM = 45;
 
 /* ---------- aksjene ---------- */
@@ -160,6 +161,76 @@ export const HVEM: Tekst[] = [
   T('Hvem bestiller taxi – og avbestiller den?', 'Who orders a taxi – and then cancels it?'),
   T('Hvem finner et teppe eller en pute og gjør seg komfortabel?', 'Who grabs a blanket or pillow and gets comfy?'),
   T('Hvem er sist til å gå?', 'Who’s the last to leave?'),
+  T('Hvem drikker opp først?', 'Who finishes their drink first?'),
+  T('Hvem blander noe i glasset som ikke hører hjemme der?', 'Who mixes something into their glass that doesn’t belong?'),
+  T('Hvem åpner en flaske på en kreativ måte?', 'Who opens a bottle in a creative way?'),
+  T('Hvem sier «jeg drikker ikke i kveld» – og gjør det likevel?', 'Who says “I’m not drinking tonight” – and does anyway?'),
+  T('Hvem må ha sugerør?', 'Who needs a straw?'),
+  T('Hvem skåler med noen som ikke har noe i glasset?', 'Who toasts with someone whose glass is empty?'),
+  T('Hvem forklarer hvordan man lager den perfekte drinken?', 'Who explains how to make the perfect drink?'),
+  T('Hvem glemmer drinken sin i et annet rom?', 'Who leaves their drink in another room?'),
+  T('Hvem blir bartender for alle andre?', 'Who becomes everyone’s bartender?'),
+  T('Hvem drikker av feil glass – og innser det for sent?', 'Who drinks from the wrong glass – and realises too late?'),
+  T('Hvem setter på en låt fra ungdomsskolen?', 'Who puts on a song from middle school?'),
+  T('Hvem synger med i mikrofon av en flaske eller fjernkontroll?', 'Who sings into a bottle or remote like a mic?'),
+  T('Hvem skrur ned musikken for å fortelle noe?', 'Who turns the music down to tell a story?'),
+  T('Hvem sier «hvem er det som synger dette?»', 'Who asks “who sings this?”'),
+  T('Hvem sniker inn en låt fra sin egen spilleliste?', 'Who sneaks in a song from their own playlist?'),
+  T('Hvem danser alene midt i rommet?', 'Who dances alone in the middle of the room?'),
+  T('Hvem hopper over en låt noen andre satte på?', 'Who skips a song someone else put on?'),
+  T('Hvem vil høre på en julelåt uansett årstid?', 'Who wants a Christmas song whatever the season?'),
+  T('Hvem rapper et helt vers?', 'Who raps a whole verse?'),
+  T('Hvem åpner kjøleskapet uten å spørre?', 'Who opens the fridge without asking?'),
+  T('Hvem dropper fingrene i dipen?', 'Who dips their fingers in the dip?'),
+  T('Hvem snakker om en kebab eller pizza de spiste en gang?', 'Who talks about a kebab or pizza they once had?'),
+  T('Hvem deler snacks med alle uten at noen spurte?', 'Who hands out snacks without anyone asking?'),
+  T('Hvem smaker på noe og sier «den var rar»?', 'Who tastes something and says “that’s weird”?'),
+  T('Hvem spiser noe rett fra kjelen eller posen?', 'Who eats straight from the pot or bag?'),
+  T('Hvem vil lage mat midt på natta?', 'Who wants to cook in the middle of the night?'),
+  T('Hvem viser fram en meme?', 'Who shows everyone a meme?'),
+  T('Hvem svarer en melding mens noen snakker til dem?', 'Who answers a text while someone is talking to them?'),
+  T('Hvem filmer noe «til Snapen»?', 'Who films something “for Snap”?'),
+  T('Hvem viser bilder fra en ferie?', 'Who shows holiday photos?'),
+  T('Hvem legger telefonen på feil sted og leter etter den?', 'Who puts their phone down and has to search for it?'),
+  T('Hvem ser på klokka på telefonen hele tiden?', 'Who keeps checking the time on their phone?'),
+  T('Hvem tar skjermbilde av noe i gruppechatten?', 'Who screenshots something from the group chat?'),
+  T('Hvem bruker Shazam på en låt?', 'Who uses Shazam on a song?'),
+  T('Hvem lar telefonen ringe uten å svare?', 'Who lets their phone ring without answering?'),
+  T('Hvem viser fram et gammelt bilde av noen i gjengen?', 'Who shows an old photo of someone in the group?'),
+  T('Hvem velter noe?', 'Who knocks something over?'),
+  T('Hvem går inn i feil rom?', 'Who walks into the wrong room?'),
+  T('Hvem setter seg på noe de ikke burde?', 'Who sits on something they shouldn’t?'),
+  T('Hvem mister balansen?', 'Who loses their balance?'),
+  T('Hvem sklir på gulvet?', 'Who slips on the floor?'),
+  T('Hvem låser seg ute – eller inne?', 'Who gets locked out – or in?'),
+  T('Hvem slår på feil lysbryter?', 'Who flips the wrong light switch?'),
+  T('Hvem mister noe ned i et glass?', 'Who drops something into a glass?'),
+  T('Hvem sier «ærlig talt» først?', 'Who says “honestly” first?'),
+  T('Hvem snakker om boligprisene?', 'Who talks about house prices?'),
+  T('Hvem forteller om en pinlig opplevelse?', 'Who tells an embarrassing story?'),
+  T('Hvem spør alle om hva de skal i sommer?', 'Who asks everyone about their summer plans?'),
+  T('Hvem starter en diskusjon om hvem som er best av to kjendiser?', 'Who starts a debate about which of two celebs is best?'),
+  T('Hvem sier «jeg sa jo det»?', 'Who says “told you so”?'),
+  T('Hvem snakker om trening i mer enn fem minutter?', 'Who talks about working out for more than five minutes?'),
+  T('Hvem roser verten?', 'Who compliments the host?'),
+  T('Hvem spør «hvem kommer?» for tredje gang?', 'Who asks “who’s coming?” for the third time?'),
+  T('Hvem snakker om noe de har lest på nettet?', 'Who brings up something they read online?'),
+  T('Hvem bruker ordet «liksom» tre ganger i én setning?', 'Who says “like” three times in one sentence?'),
+  T('Hvem forteller om en app de er helt hekta på?', 'Who talks about an app they’re hooked on?'),
+  T('Hvem forteller hva de egentlig syns om noe?', 'Who says what they really think about something?'),
+  T('Hvem snakker om en sportskamp?', 'Who talks about a sports match?'),
+  T('Hvem spør et veldig personlig spørsmål?', 'Who asks a very personal question?'),
+  T('Hvem kommer sist?', 'Who arrives last?'),
+  T('Hvem gjør klar et gruppebilde?', 'Who sets up a group photo?'),
+  T('Hvem prøver å rydde litt?', 'Who tries to tidy up a bit?'),
+  T('Hvem henter noe fra butikken i løpet av kvelden?', 'Who runs to the shop during the evening?'),
+  T('Hvem bytter plass flest ganger?', 'Who changes seats the most?'),
+  T('Hvem låner noe av verten?', 'Who borrows something from the host?'),
+  T('Hvem går ut for å trekke frisk luft?', 'Who steps out for fresh air?'),
+  T('Hvem blir sittende i sofaen hele kvelden?', 'Who stays on the sofa all night?'),
+  T('Hvem sier «vi drar om ti minutter»?', 'Who says “we’re leaving in ten minutes”?'),
+  T('Hvem tar av seg et klesplagg fordi det er for varmt?', 'Who takes off a layer because it’s too warm?'),
+  T('Hvem sjekker hvor lang køen er på utestedet?', 'Who checks how long the queue is at the club?'),
 ];
 export const JANEI: Tekst[] = [
   T('Blir det nachspiel i kveld?', 'Will there be an afterparty tonight?'),
@@ -210,6 +281,30 @@ export const JANEI: Tekst[] = [
   T('Er noen fortsatt våkne klokka 03?', 'Will anyone still be awake at 3 am?'),
   T('Kommer det en overraskelsesgjest?', 'Will a surprise guest show up?'),
   T('Blir det kø for å komme inn et sted?', 'Will there be a queue to get in somewhere?'),
+  T('Blir noen bedt om å drikke vann?', 'Will someone be told to drink water?'),
+  T('Blir det laget en bolle eller punsj?', 'Will someone make a punch or bowl?'),
+  T('Blir det tatt en shot samtidig av alle?', 'Will everyone take a shot at the same time?'),
+  T('Blir det karaoke i kveld?', 'Will there be karaoke tonight?'),
+  T('Blir det spilt en låt fra en Disney-film?', 'Will a Disney song be played?'),
+  T('Blir det spilt en låt to ganger på rad?', 'Will a song be played twice in a row?'),
+  T('Blir det bestilt eller kjøpt nattmat?', 'Will someone order or buy late-night food?'),
+  T('Går snacksen tom før vi drar?', 'Will the snacks run out before we leave?'),
+  T('Blir det tatt en video som havner på sosiale medier?', 'Will a video end up on social media?'),
+  T('Blir det ringt til noen på høyttaler?', 'Will someone be called on speaker?'),
+  T('Knuser eller mister noen telefonen i gulvet?', 'Will someone drop or crack their phone?'),
+  T('Blir det knust et glass?', 'Will a glass get broken?'),
+  T('Går brannalarmen eller en alarm?', 'Will a fire alarm or other alarm go off?'),
+  T('Blir noen låst ute på balkongen?', 'Will someone get locked out on the balcony?'),
+  T('Faller noen av en stol?', 'Will someone fall off a chair?'),
+  T('Blir det en diskusjon om noe helt absurd?', 'Will there be a debate about something totally absurd?'),
+  T('Blir det nevnt en eks med navn?', 'Will an ex be mentioned by name?'),
+  T('Blir det lagt en plan for en tur sammen?', 'Will the group plan a trip together?'),
+  T('Kommer taxien før planlagt?', 'Will the taxi arrive earlier than planned?'),
+  T('Er det noen som skifter klær i løpet av kvelden?', 'Will someone change clothes during the evening?'),
+  T('Blir det lagt ut et gruppebilde i kveld?', 'Will a group photo be posted tonight?'),
+  T('Blir vorset flyttet til et annet sted?', 'Will the pre-game move somewhere else?'),
+  T('Går noen på feil buss, trikk eller taxi?', 'Will someone take the wrong bus, tram or taxi?'),
+  T('Blir det lagt planer for neste helg?', 'Will plans be made for next weekend?'),
 ];
 
 /* ---------- kurs: hvert utfall er sin egen aksje ---------- */
@@ -247,8 +342,8 @@ export const KATEGORIER = [
   { id: 'kvelden', no: '🌙 Kvelden og veien videre', en: '🌙 The night and what’s next' },
 ];
 /** Kategorien til hver aksje, i samme rekkefølge som HVEM og JANEI. */
-export const HVEM_KAT = ["drikke", "drikke", "mat", "kvelden", "kvelden", "musikk", "prat", "mobil", "kvelden", "mobil", "kaos", "mobil", "musikk", "prat", "prat", "mat", "prat", "musikk", "kvelden", "mobil", "prat", "prat", "kvelden", "prat", "prat", "prat", "musikk", "mobil", "kvelden", "kvelden", "prat", "prat", "kaos", "drikke", "prat", "musikk", "mat", "prat", "prat", "musikk", "kvelden", "prat", "kvelden", "kaos", "prat", "kaos", "prat", "drikke", "kvelden", "drikke", "prat", "prat", "prat", "mat", "mobil", "kvelden", "kvelden", "mobil", "prat", "prat", "drikke", "drikke", "drikke", "drikke", "drikke", "drikke", "drikke", "musikk", "musikk", "musikk", "musikk", "musikk", "musikk", "mat", "mat", "mat", "mat", "mat", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "kaos", "kaos", "kaos", "kaos", "kaos", "kaos", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden"];
-export const JANEI_KAT = ["kvelden", "mat", "kaos", "kaos", "musikk", "kaos", "kvelden", "kvelden", "musikk", "mobil", "musikk", "prat", "kvelden", "kvelden", "mobil", "musikk", "drikke", "drikke", "kvelden", "drikke", "musikk", "musikk", "musikk", "musikk", "kaos", "kaos", "kaos", "kaos", "mat", "mat", "mobil", "mobil", "mobil", "mobil", "prat", "prat", "prat", "prat", "drikke", "drikke", "drikke", "drikke", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden"];
+export const HVEM_KAT = ["drikke", "drikke", "mat", "kvelden", "kvelden", "musikk", "prat", "mobil", "kvelden", "mobil", "kaos", "mobil", "musikk", "prat", "prat", "mat", "prat", "musikk", "kvelden", "mobil", "prat", "prat", "kvelden", "prat", "prat", "prat", "musikk", "mobil", "kvelden", "kvelden", "prat", "prat", "kaos", "drikke", "prat", "musikk", "mat", "prat", "prat", "musikk", "kvelden", "prat", "kvelden", "kaos", "prat", "kaos", "prat", "drikke", "kvelden", "drikke", "prat", "prat", "prat", "mat", "mobil", "kvelden", "kvelden", "mobil", "prat", "prat", "drikke", "drikke", "drikke", "drikke", "drikke", "drikke", "drikke", "musikk", "musikk", "musikk", "musikk", "musikk", "musikk", "mat", "mat", "mat", "mat", "mat", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "kaos", "kaos", "kaos", "kaos", "kaos", "kaos", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "drikke", "drikke", "drikke", "drikke", "drikke", "drikke", "drikke", "drikke", "drikke", "drikke", "musikk", "musikk", "musikk", "musikk", "musikk", "musikk", "musikk", "musikk", "musikk", "mat", "mat", "mat", "mat", "mat", "mat", "mat", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "mobil", "kaos", "kaos", "kaos", "kaos", "kaos", "kaos", "kaos", "kaos", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "prat", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden"];
+export const JANEI_KAT = ["kvelden", "mat", "kaos", "kaos", "musikk", "kaos", "kvelden", "kvelden", "musikk", "mobil", "musikk", "prat", "kvelden", "kvelden", "mobil", "musikk", "drikke", "drikke", "kvelden", "drikke", "musikk", "musikk", "musikk", "musikk", "kaos", "kaos", "kaos", "kaos", "mat", "mat", "mobil", "mobil", "mobil", "mobil", "prat", "prat", "prat", "prat", "drikke", "drikke", "drikke", "drikke", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "drikke", "drikke", "drikke", "musikk", "musikk", "musikk", "mat", "mat", "mobil", "mobil", "mobil", "kaos", "kaos", "kaos", "kaos", "prat", "prat", "prat", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden", "kvelden"];
 
 /* Statistikk (anonym): hvilke aksjer som blir vist, kjøpt, meldt og faktisk skjer. Samles per handling og sendes av API-ruta. */
 let STAT: any[] = [];
@@ -311,53 +406,85 @@ function oppgjor(data: any, a: any, vinner: string | null) {
 
 /* ---------- markedet ---------- */
 const bland = <X,>(xs: X[]) => { const a = xs.slice(); for (let i = a.length - 1; i > 0; i--) { const j = tilfeldig(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-/** Trekker nye aksjer (ingen dobbelt samme kveld), med stengetider spredt utover kvelden, og fordeler dem på spillerne. */
-function leggUtAksjer(data: any, mal: { hvem: number; janei: number }) {
-  const b = data.bors, brukt = new Set(b.aksjer.map((a: any) => a.nokkel).filter(Boolean));
-  const ok = (k: string) => !b.kat || b.kat.includes(k);
-  const har = { hvem: b.aksjer.filter((a: any) => !a.av && a.type === 'hvem').length, janei: b.aksjer.filter((a: any) => !a.av && a.type === 'janei').length };
-  const trekk = (type: 'hvem' | 'janei', antall: number) => {
-    const liste = type === 'hvem' ? HVEM : JANEI, kat = type === 'hvem' ? HVEM_KAT : JANEI_KAT, pre = type === 'hvem' ? 'h' : 'j';
-    const ledig = (i: number) => !brukt.has(pre + i);
-    // Først fra kategoriene verten valgte, så fra resten hvis det ikke er nok
-    return bland(liste.map((_, i) => i).filter((i) => ledig(i) && ok(kat[i]))).concat(bland(liste.map((_, i) => i).filter((i) => ledig(i) && !ok(kat[i])))).slice(0, Math.max(0, antall));
-  };
-  const nye: [string, number][] = bland(trekk('hvem', mal.hvem - har.hvem).map((i) => ['hvem', i] as [string, number]).concat(trekk('janei', mal.janei - har.janei).map((i) => ['janei', i] as [string, number])));
-  const time = 3600 * 1000, tider = [time, null, 2 * time, null, 3 * time];
-  const lagd: any[] = [];
-  nye.forEach(([type, idx], i) => {
-    const t = tider[i % tider.length], liste = type === 'hvem' ? HVEM : JANEI;
-    const a = lagAksje(data, type as any, liste[idx], null, t ? Date.now() + t : null);
-    a.nokkel = (type === 'hvem' ? 'h' : 'j') + idx; a.kat = (type === 'hvem' ? HVEM_KAT : JANEI_KAT)[idx];
-    statFor(a, { vist: 1 });
-    lagd.push(a);
-  });
-  fordel(data, lagd);
-  return lagd.length;
-}
 /**
- * Hvem ser hvilke aksjer: hver aksje vises for rundt 60 % av spillerne (alle, når dere er tre eller færre),
- * og alle ser minst MIN_SYNLIG. Da jakter ikke hele rommet på det samme – og du vet ikke hvem andre som har samme aksje.
+ * Slik fungerer markedet:
+ *  - Hver kveld trekkes en pott med aksjer fra hele lista (gratis 40, Pluss 100). Aksjene lages først når noen får dem.
+ *  - Hver spiller har sin egen hånd på HAND aksjer, trukket tilfeldig. Halvparten av gangene får du en aksje
+ *    som noen andre allerede har (så det blir et marked), ellers en helt ny fra potten.
+ *  - Du ser bare hånden din (og aksjer du eier). Ingen vet hvem som har de samme – eller aksjen om dem.
+ *  - Stenger eller avgjøres en aksje, får du en ny. Liker du ikke en, kan du bytte den.
  */
-function fordel(data: any, aksjer: any[]) {
-  const ider = data.spillere.map((p: any) => p.id), n = ider.length;
-  const k = n <= 3 ? n : Math.max(2, Math.ceil(n * 0.6));
-  aksjer.forEach((a) => { a.synlig = bland(ider).slice(0, k); });
-  ider.forEach((id: string) => sikreMin(data, id));
+function potStr(b: any) { return b.fri ? POTT_PLUSS : POTT_GRATIS; }
+function fyllPott(b: any) {
+  const brukt = new Set<string>(b.aksjer.map((a: any) => a.nokkel).filter(Boolean).concat(b.pott || []));
+  const ok = (k: string) => !b.kat || b.kat.includes(k);
+  const allerede = brukt.size, mangler = potStr(b) - allerede; if (mangler <= 0) return 0;
+  const nokler = (liste: any[], kat: string[], pre: string) => liste.map((_, i) => i).filter((i) => !brukt.has(pre + i)).map((i) => ({ k: pre + i, ok: ok(kat[i]) }));
+  const hv = nokler(HVEM, HVEM_KAT, 'h'), jn = nokler(JANEI, JANEI_KAT, 'j');
+  // Rundt 70 % hvem-aksjer og 30 % ja/nei. Kategoriene verten valgte trekkes først.
+  const ta = (xs: any[], n: number) => bland(xs.filter((x) => x.ok)).concat(bland(xs.filter((x) => !x.ok))).slice(0, Math.max(0, n)).map((x) => x.k);
+  const nJ = Math.round(mangler * 0.3), nye = bland(ta(hv, mangler - nJ).concat(ta(jn, nJ)));
+  b.pott = (b.pott || []).concat(nye);
+  return nye.length;
 }
-function sikreMin(data: any, id: string) {
-  const apne = data.bors.aksjer.filter((a: any) => !a.av && Array.isArray(a.synlig) && ['apen', 'stengt'].includes(a.status));
-  let ser = apne.filter((a: any) => a.synlig.includes(id)).length;
-  bland(apne.filter((a: any) => !a.synlig.includes(id))).forEach((a: any) => { if (ser < MIN_SYNLIG) { a.synlig.push(id); ser++; } });
+function fraPotten(data: any) {
+  const b = data.bors, k = (b.pott || []).shift(); if (!k) return null;
+  const type = k[0] === 'h' ? 'hvem' : 'janei', idx = Number(k.slice(1)), liste = type === 'hvem' ? HVEM : JANEI;
+  if (!liste[idx]) return null;
+  const time = 3600 * 1000, tider = [time, 1.5 * time, 2 * time, 3 * time, null, null];
+  const t = tider[tilfeldig(tider.length)];
+  const a = lagAksje(data, type as any, liste[idx], null, t ? Date.now() + t : null);
+  a.nokkel = k; a.kat = (type === 'hvem' ? HVEM_KAT : JANEI_KAT)[idx];
+  statFor(a, { vist: 1 });
+  return a;
 }
-function kanSe(a: any, id: string | null) { return !id || a.av || !Array.isArray(a.synlig) || a.synlig.includes(id); }
-/** Pluss aktivert etter at børsen startet: fyll opp til det store markedet. */
+const erApen = (a: any) => a.status === 'apen' && !a.av && !(a.stenger && Date.now() >= a.stenger);
+/** Fyll opp hånda til en spiller. */
+function del(data: any, id: string) {
+  const b = data.bors; if (!b || !b.paa) return;
+  b.hand = b.hand || {}; b.sett = b.sett || {}; b.kastet = b.kastet || {};
+  const kastet = new Set(b.kastet[id] || []);
+  let hand: string[] = (b.hand[id] || []).filter((aid: string) => { const a = finn(b, aid); return a && erApen(a); });
+  let vakt = 0;
+  while (hand.length < HAND && vakt++ < 40) {
+    // Hvor mange som har hver åpne aksje på hånda
+    const seere: Record<string, number> = {};
+    Object.values(b.hand).forEach((h: any) => (h || []).forEach((aid: string) => { seere[aid] = (seere[aid] || 0) + 1; }));
+    const andres = b.aksjer.filter((a: any) => erApen(a) && !hand.includes(a.id) && !kastet.has(a.id) && !(b.sett[id] || []).includes(a.id));
+    let a: any = null;
+    // Halvparten av gangene: en aksje andre allerede har (de med færrest seere først), så det blir handel i den
+    if (andres.length && (tilfeldig(2) === 0 || !(b.pott || []).length)) {
+      const min = Math.min(...andres.map((x: any) => seere[x.id] || 0));
+      const kand = andres.filter((x: any) => (seere[x.id] || 0) <= min + 1);
+      a = kand[tilfeldig(kand.length)];
+    }
+    if (!a) a = fraPotten(data);
+    if (!a) break;
+    hand.push(a.id);
+    const s = b.sett[id] || (b.sett[id] = []); if (!s.includes(a.id)) s.push(a.id);
+  }
+  b.hand[id] = hand;
+}
+function delAlle(data: any) { const b = data.bors; if (!b || !b.paa) return; data.spillere.forEach((p: any) => del(data, p.id)); }
+/**
+ * Kan spilleren se aksjen? Egne aksjer ser alle, aksjer du eier ser du alltid. Åpne aksjer: bare dem på hånda di.
+ * Stengte og avgjorte: dem du har hatt på hånda. Meldte aksjer avsløres for alle (alle stemmer).
+ */
+function kanSe(b: any, a: any, id: string | null) {
+  if (!id || a.av || !a.nokkel) return true;
+  if (a.hold[id]) return true;
+  if (!b.hand) return !Array.isArray(a.synlig) || a.synlig.includes(id) || !['apen', 'stengt'].includes(a.status);   // rom startet før hånd-systemet
+  if (erApen(a)) return !!(b.hand && (b.hand[id] || []).includes(a.id));
+  if (a.status === 'meldt' || a.meldtT) return true;
+  return !!(b.sett && (b.sett[id] || []).includes(a.id) && !((b.kastet && b.kastet[id]) || []).includes(a.id));
+}
+/** Pluss aktivert etter at børsen startet: potten vokser til 100. */
 export function borsTilPluss(data: any) {
   const b = data.bors; if (!b || !b.paa || b.fri) return;
   b.fri = true;
-  STAT = STAT || [];
-  const n = leggUtAksjer(data, MARKED_PLUSS);
-  if (n) melde(data, `✨ Pluss! ${n} nye aksjer er lagt ut på børsen.`, `✨ Plus! ${n} new shares are now on the Exchange.`);
+  const n = fyllPott(b);
+  delAlle(data);
+  if (n) melde(data, `✨ Pluss! ${n} nye aksjer er lagt i potten – og du får flere gratis bytter.`, `✨ Plus! ${n} new shares added to the pot – and you get more free swaps.`);
 }
 
 /* ---------- start / slutt ---------- */
@@ -368,7 +495,8 @@ export function startBors(data: any, fri: boolean, fokus = false, kat: string[] 
   data.spillere.forEach((p: any) => saldo(b, p.id));
   const valgte = (kat || []).filter((k) => KATEGORIER.some((x) => x.id === k));
   b.kat = valgte.length && valgte.length < KATEGORIER.length ? valgte : null;
-  leggUtAksjer(data, fri ? MARKED_PLUSS : MARKED_GRATIS);
+  b.pott = []; b.hand = {}; b.sett = {}; b.kastet = {}; b.bytt = {};
+  fyllPott(b); delAlle(data);
   melde(data, '📈 Vorsbørsen har åpnet! Alle har 1000 vorskroner – kjøp tidlig, det lønner seg.', '📈 The Pre-game Exchange is open! Everyone has 1,000 coins – buy early, it pays off.');
   return { ok: true };
 }
@@ -413,6 +541,8 @@ function vurderMelding(data: any, a: any, tvunget = false) {
   const godkjent = !vitneNei && andre >= 1 && ja > nei;
   if (godkjent) {
     oppgjor(data, a, m.utfall);
+    // Den som fulgte med og meldte, får en liten bonus (ikke hvis det handlet om en selv)
+    if (m.av && m.av !== m.utfall && data.spillere.some((p: any) => p.id === m.av)) flytt(data.bors, m.av, MELDEBONUS, 'Meldebonus: ' + kortQ(qNo(a)), 'Reporter bonus: ' + kortQ(qEn(a)));
     melde(data, `✅ Bekreftet: ${a.type === 'hvem' ? navn(data, m.utfall) : 'Ja'} – hver aksje betaler 100 kr!`, `✅ Confirmed: ${a.type === 'hvem' ? navn(data, m.utfall) : 'Yes'} – each share pays 100!`);
   } else {
     a.status = m.forrige || 'apen'; a.melding = null; if (data.bors.bilder) delete data.bors.bilder[a.id];
@@ -445,10 +575,8 @@ export function nySpillerIBors(data: any, id: string) {
   const b = data.bors; if (!b || !b.paa) return;
   b.aksjer.forEach((a: any) => {
     if (a.type === 'hvem' && !a.utfall.includes(id) && ['apen', 'stengt', 'venter'].includes(a.status)) { a.utfall.push(id); a.qs.push(0); }
-    // Den nye får se rundt 60 % av aksjene, som alle andre
-    if (Array.isArray(a.synlig) && !a.synlig.includes(id) && tilfeldig(10) < 6) a.synlig.push(id);
   });
-  sikreMin(data, id);
+  del(data, id);   // den nye får sin egen hånd
 }
 /** Startsaldo fra gjengens lommebok (medlemmer tar med seg formuen sin inn i kvelden). */
 export function settStart(data: any, start: Record<string, number>) {
@@ -520,6 +648,7 @@ function dom(data: any, s: any) {
 export function borsHandling(data: any, meg: any, h: any, erVert: boolean): any {
   STAT = []; EGNE = [];
   const r = borsHandlingInne(data, meg, h, erVert);
+  if (data.bors && data.bors.paa && data.bors.pott) delAlle(data);   // stengte/avgjorte aksjer byttes ut med nye
   if (STAT.length && r && typeof r === 'object' && !r.feil) r.stat = STAT;
   if (EGNE.length && r && typeof r === 'object' && !r.feil) r.egne = EGNE;
   STAT = []; EGNE = [];
@@ -560,7 +689,7 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
     const a = finn(b, h.aksje); if (!a) return { feil: 'ugyldig' };
     if (a.stenger && Date.now() >= a.stenger && a.status === 'apen') a.status = 'stengt';
     if (a.laast && !b.fri) return { feil: 'pluss', melding: 'Denne aksjen krever Pluss hos verten.', en: 'This share needs the host to have Plus.' };
-    if (!kanSe(a, meg.id)) return { feil: 'ugyldig', melding: 'Denne aksjen er ikke i ditt utvalg.', en: 'This share isn’t in your selection.' };
+    if (!kanSe(b, a, meg.id)) return { feil: 'ugyldig', melding: 'Denne aksjen er ikke på hånda di.', en: 'This share isn’t in your hand.' };
     if (!handelApen(b, a)) return { feil: 'stengt', melding: a.status === 'meldt' ? 'Aksjen er låst – noen har meldt at det skjedde.' : 'Aksjen er stengt for handel.', en: a.status === 'meldt' ? 'The share is locked – someone reported that it happened.' : 'This share is closed for trading.' };
     const i = a.utfall.indexOf(String(h.utfall)); if (i === -1) return { feil: 'ugyldig' };
     const n = Math.round(Number(h.n) || 0) > 0 ? 1 : -1;
@@ -584,6 +713,19 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
     hold.kost = Math.max(0, hold.kost + kr);
     if (honorar) flytt(b, a.av, honorar, 'Honorar fra aksjen din', 'Fee from your share');
     a.handler.push({ id: meg.id, u: a.utfall[i], n, kr, t: Date.now() });
+    return { ok: true };
+  }
+  if (hd === 'bs-bytt') {
+    const hand = (b.hand && b.hand[meg.id]) || [];
+    if (!hand.includes(String(h.aksje))) return { feil: 'ugyldig', melding: 'Den aksjen er ikke på hånda di.', en: 'That share isn’t in your hand.' };
+    b.bytt = b.bytt || {}; const brukt = b.bytt[meg.id] || 0, gratis = b.fri ? BYTT_GRATIS_PLUSS : BYTT_GRATIS;
+    const pris = brukt < gratis ? 0 : BYTT_PRIS;
+    if (pris && saldo(b, meg.id) < pris) return { feil: 'penger', melding: 'Du har ikke nok vorskroner til å bytte.', en: 'You don’t have enough coins to swap.' };
+    if (pris) flytt(b, meg.id, -pris, 'Byttet en aksje', 'Swapped a share');
+    b.bytt[meg.id] = brukt + 1;
+    b.hand[meg.id] = hand.filter((x: string) => x !== String(h.aksje));
+    (b.kastet[meg.id] = b.kastet[meg.id] || []).push(String(h.aksje));
+    del(data, meg.id);
     return { ok: true };
   }
   if (hd === 'bs-gi') {
@@ -642,6 +784,7 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
   if (hd === 'bs-meld') {
     const a = finn(b, h.aksje); if (!a || (a.status !== 'apen' && a.status !== 'stengt')) return { feil: 'stengt', melding: 'Aksjen kan ikke meldes nå.', en: 'This share can’t be reported now.' };
     if (a.laast && !b.fri) return { feil: 'pluss', melding: 'Denne aksjen krever Pluss hos verten.', en: 'This share needs the host to have Plus.' };
+    if (!kanSe(b, a, meg.id)) return { feil: 'ugyldig', melding: 'Denne aksjen er ikke på hånda di.', en: 'This share isn’t in your hand.' };
     const utfall = a.type === 'janei' ? 'ja' : String(h.utfall || '');
     if (!a.utfall.includes(utfall)) return { feil: 'ugyldig' };
     const vitne = h.vitne && data.spillere.some((p: any) => p.id === h.vitne && p.id !== meg.id) ? String(h.vitne) : null;
@@ -716,11 +859,11 @@ export function borsVisning(data: any, meg: any) {
   const m = meg ? meg.id : null;
   const aksjer = b.aksjer.filter((a: any) => a.status !== 'avvist' && (a.status !== 'venter' || m === data.vert || m === a.av) &&
     // Åpne aksjer vises bare for dem som har dem i sitt utvalg (eller eier noe i dem). Meldte og avgjorte ser alle.
-    (!['apen', 'stengt'].includes(a.status) || kanSe(a, m) || (m && a.hold[m]))).map((a: any) => {
+    kanSe(b, a, m)).map((a: any) => {
     const hold = m ? a.hold[m] : null;
     const status = a.status === 'apen' && a.stenger && Date.now() >= a.stenger ? 'stengt' : a.status;
     return {
-      id: a.id, type: a.type, q: a.q, kat: a.av ? 'egen' : a.kat || null, status, av: a.av, egen: !!a.av, stenger: a.stenger, laast: !!a.laast && !b.fri,
+      id: a.id, type: a.type, q: a.q, kat: a.av ? 'egen' : a.kat || null, iHand: !!(m && b.hand && (b.hand[m] || []).includes(a.id)), status, av: a.av, egen: !!a.av, stenger: a.stenger, laast: !!a.laast && !b.fri,
       utfall: a.utfall.map((u: string, i: number) => { const sb = selgbar(hold, u), mine = hold ? hold.n[u] || 0 : 0; const gamle = Math.max(0, mine - ((hold && hold.tider && hold.tider[u]) || []).length);
         // Din egen rad i en hvem-aksje er skjult: du skal ikke vite at du er favoritten (og unngå å gjøre det)
         if (a.type === 'hvem' && u === m && ['apen', 'stengt'].includes(a.status)) return { u, skjult: true, kurs: null, odds: null, selg: 0, solgt: null, mine: 0, klare: 0, selgOm: 0 };
@@ -747,12 +890,14 @@ export function borsVisning(data: any, meg: any) {
     paa: b.paa, fri: !!b.fri, fokus: !!b.fokus, laaste: b.fri ? 0 : b.aksjer.filter((a: any) => a.laast && ['apen', 'stengt'].includes(a.status)).length,
     saldo: m ? saldo(b, m) : null, formue: m ? Math.round(saldo(b, m) + verdi(m)) : null,
     tavle: data.spillere.map((p: any) => ({ id: p.id, kr: Math.round(saldo(b, p.id) + verdi(p.id)) })).sort((x: any, y: any) => y.kr - x.kr),
+    hand: b.hand && m ? { str: HAND, gratis: Math.max(0, (b.fri ? BYTT_GRATIS_PLUSS : BYTT_GRATIS) - ((b.bytt && b.bytt[m]) || 0)), pris: BYTT_PRIS,
+      pott: potStr(b), igjen: (b.pott || []).length } : null,
     aksjer, saker, harNotert: m ? !!b.noterte[m] : false, slutt: b.slutt || null,
     mineGaver: m ? (b.overforinger || []).filter((o: any) => o.fra === m || o.til === m).map((o: any) => ({ fra: o.fra, til: o.til, kr: o.kr })) : [],
     bev: m ? (b.bev || []).filter((x: any) => x.id === m).slice(-6).map((x: any) => ({ n: x.n, kr: x.kr, t: { no: x.no, en: x.en } })) : [],
     kategorier: KATEGORIER.map((k) => ({ id: k.id, t: { no: k.no, en: k.en } })), valgteKat: b.kat || null,
     butikk: { ...BUTIKK, slurkPriser: m ? Object.fromEntries([1, 2, 3, 5].map((n) => [n, slurkPris(data, m, n)])) : {}, prisPoeng: varePris(data, 'poeng'), faktor: Math.round(prisfaktor(data) * 10) / 10, immun: m ? ((data.spillere.find((p: any) => p.id === m) || {}).immun || 0) : 0, poengKjopt: !!(m && b.poengKjopt && b.poengKjopt[m]), maksImmun: BUTIKK.maksImmun, prisImmun: varePris(data, 'immun') },
     startKr: m && b.startKr && b.startKr[m] != null ? b.startKr[m] : null,
-    priser: { hovedrolle: HOVEDROLLE, kurtasje: KURTASJE, laas: LAAS_MIN, notering: NOTERING, honorar: HONORAR, utbetaling: UTBETALING, start: STARTKURS, maks: MAKSKURS },
+    priser: { meldebonus: MELDEBONUS, hovedrolle: HOVEDROLLE, kurtasje: KURTASJE, laas: LAAS_MIN, notering: NOTERING, honorar: HONORAR, utbetaling: UTBETALING, start: STARTKURS, maks: MAKSKURS },
   };
 }

@@ -1798,6 +1798,7 @@ body:not(.humor) .tool.dice{display:none}
 .bs-mine{color:var(--gold-t);font-weight:700}
 .bs-kompakt.ferdig .bs-kompakt-hoyre{color:var(--ink)}
 .bs-anmeldknapp{margin:0 14px 12px}
+.bs-kompakt-knapper{display:flex;gap:8px;flex-wrap:wrap;margin:0 14px 12px}.bs-kompakt-knapper .bs-anmeldknapp{margin:0}.bs-byttknapp{opacity:.85}.bs-hand{margin:4px 0 8px;opacity:.85}
 .bs-kompakt .bs-anmeld{margin:0 14px 14px}
 .bs-apen{margin:8px 0}
 .bs-apen .bs-aksje{margin-bottom:4px}

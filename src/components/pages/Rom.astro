@@ -1503,8 +1503,11 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         (mine.length ? '<span class="bs-mine">' + T('Du: ', 'You: ') + mine.map(function (x) { return x.mine + '× ' + esc(utfallNavn(a, x.u)); }).join(', ') + '</span>' : '');
       var kanMelde = (a.status === 'apen' || a.status === 'stengt') && !a.laast && tilstand.bors.paa;
       var anmeld = kanMelde ? '<button class="btn small ghost bs-anmeldknapp" data-b="meld-rask" data-a="' + a.id + '" type="button">📣 ' + T('Det skjedde!', 'It happened!') + '</button>' : (a.status === 'avgjort' && tilstand.bors.paa && a.vinnere && a.vinnere.length) ? '<button class="btn small ghost bs-anmeldknapp" data-b="anmeld-aapne" data-a="' + a.id + '" type="button">🚨 ' + T('Anmeld', 'Report') + '</button>' : '';
+      // Bytt: aksjer på hånda du ikke eier noe i kan byttes mot en ny fra potten
+      var hd = tilstand.bors.hand;
+      var bytt = a.iHand && a.status === 'apen' && !mine.length && hd && tilstand.bors.paa ? '<button class="btn small ghost bs-byttknapp" data-b="bytt" data-a="' + a.id + '" type="button" title="' + T('Bytt mot en ny aksje', 'Swap for a new share') + '">🔄 ' + (hd.gratis ? T('Bytt', 'Swap') : T('Bytt · ', 'Swap · ') + kr(hd.pris)) + '</button>' : '';
       return '<div class="bs-kompakt' + (a.status === 'avgjort' || a.status === 'ugyldig' ? ' ferdig' : '') + '"><button type="button" class="bs-kompakt-knapp" data-b="aksje-aapne" data-a="' + a.id + '">' +
-        '<span class="bs-kompakt-q">' + esc(a.q) + '</span><span class="bs-kompakt-meta">' + venstre + '</span><span class="bs-kompakt-hoyre">' + hoyre + '</span></button>' + anmeld +
+        '<span class="bs-kompakt-q">' + esc(a.q) + '</span><span class="bs-kompakt-meta">' + venstre + '</span><span class="bs-kompakt-hoyre">' + hoyre + '</span></button>' + (anmeld || bytt ? '<div class="bs-kompakt-knapper">' + anmeld + bytt + '</div>' : '') +
         (borsAnmeld === a.id ? anmeldSkjema(a) : '') + '</div>';
     }
     /** Hvorfor det ikke går an å anmelde noen for denne aksjen. */
@@ -1599,8 +1602,9 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
          T('Prisen stiger for hver som kjøper – det lønner seg å være tidlig ute.', 'The price rises with every purchase – it pays to be early.'),
          T('Selge: du må ha eid aksjen i 10 minutter, og 25 % går til kurtasje.', 'Selling: you must hold the share for 10 minutes, and 25% goes in fees.'),
          T('Kursen på deg selv er skjult. Blir det deg, får du 30 kr i hovedrollebonus.', 'Your own price is hidden. If it’s you, you get a 30 starring bonus.'),
-         T('Du ser ditt eget utvalg av aksjene – de andre har et annet. Hvem som har de samme som deg, er hemmelig.', 'You see your own selection of shares – the others have a different one. Who shares yours is secret.'),
-         T('Skjer det? Trykk «📣 Det skjedde!» – aksjen låses og de andre stemmer.', 'Did it happen? Tap “📣 It happened!” – the share locks and the others vote.'),
+         T('Du har din egen hånd på 6 aksjer, trukket tilfeldig fra kveldens pott (40 aksjer, 100 med Pluss). Ingen vet hvem som har de samme – eller aksjen om dem.', 'You have your own hand of 6 shares, drawn at random from tonight’s pot (40 shares, 100 with Plus). Nobody knows who holds the same ones – or the one about them.'),
+         T('Liker du ikke en aksje? Trykk «🔄 Bytt». De første byttene er gratis, så koster det 20 kr. Stenger eller avgjøres en aksje, får du en ny.', 'Don’t like a share? Tap “🔄 Swap”. The first swaps are free, then it costs 20. When a share closes or settles, you get a new one.'),
+         T('Skjer det? Trykk «📣 Det skjedde!» – aksjen avsløres for alle, låses, og de andre stemmer. Blir det bekreftet, får du 20 kr i meldebonus – også om du ikke eide noe i den.', 'Did it happen? Tap “📣 It happened!” – the share is revealed to everyone, locks and the others vote. If confirmed, you get a 20 reporter bonus – even if you didn’t own any.'),
          T('Innsidehandel: har en vinner fikset det sammen med noen, kan hen anmeldes under «Avgjort». Skyldig mister hele gevinsten, får 300 kr i bot og 5 slurker.', 'Insider trading: if a winner set it up with someone, report them under “Settled”. Guilty loses the whole payout, gets a 300 fine and 5 sips.')].map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></details>';
       ut += reglerHtml;
       if (trenger.length) ut += '<p class="rom-etikett">🔔 ' + T('Trenger deg nå', 'Needs you now') + '</p>' + trenger.map(borsAksjeHtml).join('');
@@ -1613,7 +1617,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         '<p class="small">' + (borsFilter === 'mine' ? T('Du eier ingen aksjer ennå. Trykk på en aksje under «Åpne» for å kjøpe.', 'You don’t own any shares yet. Tap a share under “Open” to buy.') : borsFilter === 'ferdige' ? T('Ingen aksjer er avgjort ennå.', 'No shares settled yet.') : T('Ingen åpne aksjer akkurat nå.', 'No open shares right now.')) + '</p>';
       if (borsFilter === 'apne') {
         if (b.laaste) ut += '<p class="small bs-pluss">' + b.laaste + T(' aksjer er låst i gratisbørsen. ', ' shares are locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp alle med Pluss', 'Unlock all with Plus') + '</button></p>';
-        else if (!b.fri) ut += '<p class="small bs-pluss">' + T('Gratisbørsen har 12 aksjer i kveld. ', 'The free exchange has 12 shares tonight. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Med Pluss blir det 24', 'Plus gives you 24') + '</button></p>';
+        if (b.hand) ut += '<p class="small bs-hand">🃏 ' + T('Din hånd: ' + b.hand.str + ' aksjer · ' + (b.hand.gratis ? b.hand.gratis + ' gratis bytter igjen' : 'bytte koster ' + kr(b.hand.pris)) + ' · ' + b.hand.igjen + ' ukjente aksjer i potten', 'Your hand: ' + b.hand.str + ' shares · ' + (b.hand.gratis ? b.hand.gratis + ' free swaps left' : 'swaps cost ' + kr(b.hand.pris)) + ' · ' + b.hand.igjen + ' unseen shares in the pot') + '</p>';
+        if (!b.fri && !b.laaste) ut += '<p class="small bs-pluss">' + T('Gratisbørsen har 40 aksjer i potten i kveld. ', 'The free exchange has 40 shares in the pot tonight. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Med Pluss blir det 100 – og flere gratis bytter', 'Plus makes it 100 – and more free swaps') + '</button></p>';
         if (!b.harNotert) ut += '<details class="bs-noter"><summary>' + T('🧾 Noter en egen aksje (200 kr)', '🧾 List your own share (200)') + '</summary><p class="small">' + T('Én per person per kveld. Du får 2 kr for hvert kjøp andre gjør i den, men kan ikke handle i den selv. Verten godkjenner.', 'One per person per night. You get 2 for every purchase others make in it, but can’t trade in it yourself. The host approves.') + '</p>' +
           '<div class="rom-mod"><label><input type="radio" name="bsType" value="hvem" checked> ' + T('Hvem …?', 'Who …?') + '</label> <label><input type="radio" name="bsType" value="janei"> ' + T('Ja/nei', 'Yes/no') + '</label></div>' +
           '<input id="bsNyTekst" maxlength="100" placeholder="' + T('F.eks. «Hvem ringer mamma før midnatt?»', 'E.g. “Who calls their mum before midnight?”') + '"><button class="btn small gold" data-b="noter" type="button">' + T('Noter (200 kr)', 'List (200)') + '</button></details>';
@@ -1679,6 +1684,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (a === 'filter') { borsFilter = b.dataset.f; borsApen = null; borsMeld = null; borsAnmeld = null; return tegnBorsOmrade(true); }
       if (a === 'meld-rask') { borsApen = b.dataset.a; borsMeld = b.dataset.a; borsFilter = borsFilter === 'ferdige' ? 'apne' : borsFilter; tegnBorsOmrade(true); borsLas = !borsModal; return; }
       if (a === 'aksje-aapne') { borsApen = borsApen === b.dataset.a ? null : b.dataset.a; borsMeld = null; return tegnBorsOmrade(true); }
+      if (a === 'bytt') { if (borsApen === b.dataset.a) borsApen = null; return gjorAlltid({ handling: 'bs-bytt', aksje: b.dataset.a }); }
       if (a === 'kjop') return gjorAlltid({ handling: 'bs-handel', aksje: b.dataset.a, utfall: b.dataset.u, n: 1 });
       if (a === 'selg') return gjorAlltid({ handling: 'bs-handel', aksje: b.dataset.a, utfall: b.dataset.u, n: -1 });
       if (a === 'meld-aapne') { borsMeld = b.dataset.a; tegnBorsOmrade(true); borsLas = !borsModal; return; }
