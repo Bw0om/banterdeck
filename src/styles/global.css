@@ -1713,3 +1713,57 @@ body:not(.humor) .tool.dice{display:none}
 @keyframes bsPenger { 0% { opacity: 0; transform: translate(-50%, 20px) scale(.7); } 12% { opacity: 1; transform: translate(-50%, 0) scale(1.08); } 22% { transform: translate(-50%, 0) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -90px) scale(.95); } }
 @keyframes bsPengerRist { 0% { opacity: 0; transform: translate(-50%, 0) scale(.7); } 10% { opacity: 1; transform: translate(-50%, 0) scale(1.1); } 14% { transform: translate(calc(-50% - 8px), 0); } 18% { transform: translate(calc(-50% + 8px), 0); } 22% { transform: translate(calc(-50% - 5px), 0); } 26% { transform: translate(-50%, 0) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, 70px); } }
 @media (prefers-reduced-motion: reduce) { .bs-penger, .bs-penger.ned.stor { animation: bsPengerRolig 2.5s linear forwards; } @keyframes bsPengerRolig { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }
+.aksjestat tr.dod td { opacity: .6; }
+.aksjestat .rom-mod { margin: .5rem 0; flex-wrap: wrap; }
+
+/* ---------- Gjengkveld ---------- */
+.gk-venter{margin:8px 0;display:grid;gap:8px}
+.gk-venter-rad{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-radius:16px;background:rgba(255,106,77,.14);border:1px solid var(--accent-t);animation:bsPuls 1.6s ease-in-out infinite}
+.gk-venter-knapper{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.gk-regler{margin:12px 0;padding:12px 16px;border-radius:18px;background:linear-gradient(135deg,rgba(244,183,64,.14),rgba(255,106,77,.08));border:1px solid rgba(244,183,64,.35)}
+.gk-regler summary{cursor:pointer;font-family:var(--display);font-weight:800;font-size:17px}
+.gk-regler summary small{font-weight:600;color:var(--muted);font-size:13px;margin-left:4px}
+.gk-regler ol{margin:10px 0 4px;padding-left:22px;display:grid;gap:6px}
+.gk-regler li b{display:block;line-height:1.3}
+.gk-regler li small{color:var(--muted)}
+.gk-regler.tom{font-size:14px;color:var(--muted)}
+.gk-poeng{margin:12px 0}
+.gk-stilling{list-style:none;margin:6px 0;padding:0;display:grid;gap:4px;max-width:440px}
+.gk-stilling li{display:flex;justify-content:space-between;padding:7px 12px;border-radius:12px;background:rgb(var(--ink-rgb) / .05)}
+.gk-stilling li.meg{background:rgba(244,183,64,.2)}
+.gk-sporsmal{margin:8px 0 12px;padding:12px 14px;border-radius:16px;background:rgba(63,184,169,.12);border:1px solid rgba(63,184,169,.4)}
+.gk-sporsmal p{margin:0 0 8px}
+.gk-plan{margin:8px 0 14px}
+.gk-vinner{margin:0 0 18px;padding:22px 18px;border-radius:24px;text-align:center;background:linear-gradient(160deg,rgba(244,183,64,.22),rgba(255,106,77,.12));border:1px solid rgba(244,183,64,.45)}
+.gk-vinner h2{margin:4px 0 2px;font-size:28px}
+.gk-krone{font-size:52px;margin:0;line-height:1;animation:gkHopp 1.2s ease-out}
+.gk-regel{font-family:var(--display);font-weight:800;font-size:24px;line-height:1.25;margin:6px 0 10px}
+.gk-regel.strek{text-decoration:line-through;opacity:.7}
+.gk-vinner .rf-skjema{margin:8px auto;max-width:520px}
+.gk-vinner .rom-valg{margin:6px auto;max-width:520px}
+@keyframes gkHopp{0%{transform:scale(.3) rotate(-20deg);opacity:0}60%{transform:scale(1.2) rotate(6deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+.rom-venter{text-align:center;padding:30px 0}
+.rom-vent-prikker{display:flex;justify-content:center;gap:10px;margin:22px 0}
+.rom-vent-prikker span{width:12px;height:12px;border-radius:50%;background:var(--gold);animation:gkPrikk 1.2s ease-in-out infinite}
+.rom-vent-prikker span:nth-child(2){animation-delay:.2s}.rom-vent-prikker span:nth-child(3){animation-delay:.4s}
+@keyframes gkPrikk{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-6px)}}
+.bs-kat{flex-wrap:wrap}
+/* Gjengsiden: kvelden som pågår og lovboka */
+.gj-kveld{margin:16px 0;padding:18px;border-radius:22px;background:linear-gradient(135deg,rgba(63,184,169,.18),rgba(244,183,64,.12));border:1px solid rgba(63,184,169,.5)}
+.gj-kveld h2{margin:2px 0 6px;font-size:22px}
+.gj-start{margin:16px 0;padding:16px;border-radius:20px;background:var(--card);border:1px solid var(--border2)}
+.gj-start .rom-valg{flex-wrap:wrap}
+.gj-start label.gj-lek{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid var(--border2);cursor:pointer;font-weight:600;font-size:14px;margin:3px}
+.gj-start label.gj-lek:has(input:checked){background:rgba(244,183,64,.22);border-color:var(--gold-t)}
+.gj-start label.gj-lek input{accent-color:var(--gold)}
+.lb-regel{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.lb-regel .lb-stem{white-space:nowrap}
+.lb-rekorder{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:10px 0}
+.lb-rekorder div{padding:12px;border-radius:14px;background:rgb(var(--ink-rgb) / .05)}
+.lb-rekorder small{display:block;color:var(--muted)}
+.lb-valg{margin:12px 0;padding:14px;border-radius:18px;background:rgba(244,183,64,.14);border:1px solid rgba(244,183,64,.4)}
+.gj-start > summary{display:inline-flex;list-style:none}
+.gj-start > summary::-webkit-details-marker{display:none}
+.gj-start .lab{display:block;margin:12px 0 4px}
+.gj-start input#gjKveldNavn,.gj-kveld input#gjKveldNavn{display:block;width:100%;max-width:320px}
+.gj-start input#gjKveldNavn,.gj-kveld input#gjKveldNavn{box-sizing:border-box;padding:11px 14px;border-radius:12px;background:var(--bg2);color:var(--ink);border:1px solid var(--border2);font:inherit;font-size:16px}

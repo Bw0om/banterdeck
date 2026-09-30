@@ -31,3 +31,18 @@ export async function sendTilAlle(emne: string, melding: { tittel: string; tekst
   }
   return { mottakere: mottakere.length, sendt };
 }
+
+/** Varsler medlemmene i en gjeng som har skrudd på gjengvarsler (ikke den som startet kvelden). */
+export async function sendTilGjeng(gjengId: string, utenom: string, melding: { tittel: string; tekst: string; url: string }) {
+  const e = env();
+  if (!e.VAPID_PUBLIC_KEY || !e.VAPID_PRIVATE_KEY) return { mottakere: 0, sendt: 0 };
+  webpush.setVapidDetails(e.VAPID_SUBJECT || 'mailto:post@mittvors.no', e.VAPID_PUBLIC_KEY, e.VAPID_PRIVATE_KEY);
+  const mottakere: any[] = (await rpc('gjeng_varsel_mottakere', { p_gjeng: gjengId, p_utenom: utenom })) || [];
+  const data = JSON.stringify({ title: melding.tittel, body: melding.tekst, url: melding.url });
+  let sendt = 0;
+  await Promise.all(mottakere.slice(0, 200).map(async (m) => {
+    try { await webpush.sendNotification({ endpoint: m.endpoint, keys: m.nokler }, data, { TTL: 60 * 60 * 3, urgency: 'high' }); sendt++; }
+    catch (err: any) { if (err && (err.statusCode === 404 || err.statusCode === 410)) await rpc('gjeng_varsel_fjern', { p_gjeng: gjengId, p_endpoint: m.endpoint }).catch(() => null); }
+  }));
+  return { mottakere: mottakere.length, sendt };
+}

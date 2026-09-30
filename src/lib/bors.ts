@@ -121,6 +121,24 @@ function navn(data: any, id: string) { const p = data.spillere.find((x: any) => 
 function melde(data: any, no: string, en: string) { data.nr = (data.nr || 0) + 1; data.hendelse = { nr: data.nr, tekst: no, en }; }
 function frist(sek: number) { return Date.now() + sek * 1000 + 1500; }
 const ute = (f: number) => !f || Date.now() >= f - 800;
+/** Kategoriene aksjene er delt inn i. Verten kan velge hvilke som er med når børsen startes. */
+export const KATEGORIER = [
+  { id: 'drikke', no: '🍻 Drikke og skål', en: '🍻 Drinks and toasts' },
+  { id: 'musikk', no: '🎶 Musikk og dans', en: '🎶 Music and dancing' },
+  { id: 'mat', no: '🍕 Mat og snacks', en: '🍕 Food and snacks' },
+  { id: 'mobil', no: '📱 Mobil og bilder', en: '📱 Phones and photos' },
+  { id: 'kaos', no: '💥 Kaos og uhell', en: '💥 Chaos and accidents' },
+  { id: 'prat', no: '💬 Prat og klassikere', en: '💬 Chat and classics' },
+  { id: 'kvelden', no: '🌙 Kvelden og veien videre', en: '🌙 The night and what’s next' },
+];
+/** Kategorien til hver aksje, i samme rekkefølge som HVEM og JANEI. */
+export const HVEM_KAT = ["drikke", "drikke", "mat", "kvelden", "kvelden", "musikk", "prat", "mobil", "kvelden", "mobil", "kaos", "mobil", "musikk", "prat", "prat", "mat", "prat", "musikk", "kvelden", "mobil", "prat", "prat", "kvelden", "prat", "prat", "prat", "musikk", "mobil", "kvelden", "kvelden", "prat", "prat", "kaos", "drikke", "prat", "musikk", "mat", "prat", "prat", "musikk", "kvelden", "prat", "kvelden", "kaos", "prat", "kaos", "prat", "drikke", "kvelden", "drikke", "prat", "prat", "prat", "mat", "mobil", "kvelden", "kvelden", "mobil", "prat", "prat"];
+export const JANEI_KAT = ["kvelden", "mat", "kaos", "kaos", "musikk", "kaos", "kvelden", "kvelden", "musikk", "mobil", "musikk", "prat", "kvelden", "kvelden", "mobil", "musikk", "drikke", "drikke", "kvelden", "drikke"];
+
+/* Statistikk (anonym): hvilke aksjer som blir vist, kjøpt, meldt og faktisk skjer. Samles per handling og sendes av API-ruta. */
+let STAT: any[] = [];
+function statFor(a: any, felt: any) { if (a && a.nokkel) STAT.push({ n: a.nokkel, q: qNo(a), kat: a.kat || null, type: a.type, ...felt }); }
+
 function trekk(b: any, felt: string, liste: any[]) {
   b.brukt = b.brukt || {}; const u: number[] = b.brukt[felt] || (b.brukt[felt] = []);
   if (u.length >= liste.length) u.length = 0;
@@ -169,21 +187,39 @@ function oppgjor(data: any, a: any, vinner: string | null) {
   });
   if (b.bilder) delete b.bilder[a.id];
   a.melding = null;
+  const kjop = a.handler.filter((h: any) => h.n > 0), skjedde = a.status === 'avgjort' && (a.type === 'hvem' || vinner === 'ja');
+  statFor(a, { kjop: kjop.length, kjopere: new Set(kjop.map((h: any) => h.id)).size, skjedde: skjedde ? 1 : 0,
+    vinnere: skjedde ? Object.values(a.hold).filter((h: any) => (h.n[vinner as string] || 0) > 0).length : 0 });
 }
 
 /* ---------- start / slutt ---------- */
-export function startBors(data: any, fri: boolean, fokus = false) {
+export function startBors(data: any, fri: boolean, fokus = false, kat: string[] | null = null) {
   if (data.spillere.length < 3) return { feil: 'for-faa', melding: 'Vorsbørsen trenger minst tre spillere.', en: 'The Exchange needs at least three players.' };
   data.bors = { paa: true, start: Date.now(), saldo: {}, aksjer: [], saker: [], bilder: {}, noterte: {}, overforinger: [], fri: !!fri, fokus: !!fokus, brukt: {} };
   const b = data.bors;
   data.spillere.forEach((p: any) => saldo(b, p.id));
   // Blandet rekkefølge, og stengetider spredt utover kvelden: 1, 2 eller 3 timer – eller åpen hele kvelden
   const time = 3600 * 1000, tider = [time, null, 2 * time, null, 3 * time];
-  const liste: [string, any][] = [];
-  for (let i = 0; i < ANTALL_HVEM; i++) liste.push(['hvem', trekk(b, 'hvem', HVEM)]);
-  for (let i = 0; i < ANTALL_JANEI; i++) liste.push(['janei', trekk(b, 'janei', JANEI)]);
+  const liste: [string, number][] = [];
+  const valgte = (kat || []).filter((k) => KATEGORIER.some((x) => x.id === k));
+  b.kat = valgte.length && valgte.length < KATEGORIER.length ? valgte : null;
+  const ok = (k: string) => !b.kat || b.kat.includes(k);
+  const bland = <X,>(xs: X[]) => { const a = xs.slice(); for (let i = a.length - 1; i > 0; i--) { const j = tilfeldig(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const hv = bland(HVEM.map((_, i) => i).filter((i) => ok(HVEM_KAT[i]))), jn = bland(JANEI.map((_, i) => i).filter((i) => ok(JANEI_KAT[i])));
+  const valg: [string, number][] = hv.slice(0, ANTALL_HVEM).map((i) => ['hvem', i] as [string, number]).concat(jn.slice(0, ANTALL_JANEI).map((i) => ['janei', i] as [string, number]));
+  const mal = ANTALL_HVEM + ANTALL_JANEI;
+  // For få i kategoriene som er valgt? Fyll på fra de samme kategoriene, og til slutt fra resten
+  hv.slice(ANTALL_HVEM).concat([]).forEach((i) => { if (valg.length < mal) valg.push(['hvem', i]); });
+  jn.slice(ANTALL_JANEI).forEach((i) => { if (valg.length < mal) valg.push(['janei', i]); });
+  if (valg.length < 8) bland(HVEM.map((_, i) => i).filter((i) => !ok(HVEM_KAT[i]))).forEach((i) => { if (valg.length < 8) valg.push(['hvem', i]); });
+  valg.forEach(([type, i]) => liste.push([type, i]));
   for (let i = liste.length - 1; i > 0; i--) { const j = tilfeldig(i + 1); [liste[i], liste[j]] = [liste[j], liste[i]]; }
-  liste.forEach(([type, q], i) => { const t = tider[i % tider.length]; lagAksje(data, type as any, q, null, t ? Date.now() + t : null); });
+  liste.forEach(([type, idx], i) => {
+    const t = tider[i % tider.length], liste2 = type === 'hvem' ? HVEM : JANEI;
+    const a = lagAksje(data, type as any, liste2[idx], null, t ? Date.now() + t : null);
+    a.nokkel = (type === 'hvem' ? 'h' : 'j') + idx; a.kat = (type === 'hvem' ? HVEM_KAT : JANEI_KAT)[idx];
+    statFor(a, { vist: 1 });
+  });
   melde(data, '📈 Vorsbørsen har åpnet! Alle har 1000 vorskroner – kjøp tidlig, det lønner seg.', '📈 The Pre-game Exchange is open! Everyone has 1,000 coins – buy early, it pays off.');
   return { ok: true };
 }
@@ -262,11 +298,18 @@ function dom(data: any, s: any) {
 
 /* ---------- handlinger ---------- */
 export function borsHandling(data: any, meg: any, h: any, erVert: boolean): any {
+  STAT = [];
+  const r = borsHandlingInne(data, meg, h, erVert);
+  if (STAT.length && r && typeof r === 'object' && !r.feil) r.stat = STAT;
+  STAT = [];
+  return r;
+}
+function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
   const hd = String(h.handling || '');
   if (hd === 'bs-start') {
     if (!erVert) return { feil: 'bare-vert' };
     if (data.bors && data.bors.paa) return { ok: true };
-    return startBors(data, !!h._borsFri, !!h.fokus);
+    return startBors(data, !!h._borsFri, !!h.fokus, Array.isArray(h.kat) ? h.kat.map(String).slice(0, 10) : null);
   }
   const b = data.bors;
   if (!b) return { ok: true };
@@ -328,6 +371,7 @@ export function borsHandling(data: any, meg: any, h: any, erVert: boolean): any 
     let bilde: string | null = null;
     if (typeof h.bilde === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(h.bilde) && h.bilde.length < 160000) bilde = h.bilde;
     a.melding = { av: meg.id, utfall, vitne, subjekt: a.type === 'hvem' ? utfall : null, stemmer: { [meg.id]: 'ja' }, frist: frist(FRIST_MELDING), bilde: !!bilde, t: Date.now(), forrige: a.status };
+    statFor(a, { meldt: 1 });
     a.status = 'meldt';   // låst: ingen kan kjøpe eller selge mens det stemmes
     if (bilde) { b.bilder = b.bilder || {}; b.bilder[a.id] = bilde; }
     melde(data, `📣 ${meg.navn} melder: ${a.type === 'hvem' ? navn(data, utfall) + ' – ' : ''}${a.q.no || a.q} Aksjen er låst – stem nå!`, `📣 ${meg.navn} reports: ${a.type === 'hvem' ? navn(data, utfall) + ' – ' : ''}${a.q.en || a.q} The share is locked – vote now!`);
@@ -394,7 +438,7 @@ export function borsVisning(data: any, meg: any) {
     const hold = m ? a.hold[m] : null;
     const status = a.status === 'apen' && a.stenger && Date.now() >= a.stenger ? 'stengt' : a.status;
     return {
-      id: a.id, type: a.type, q: a.q, status, av: a.av, egen: !!a.av, stenger: a.stenger, laast: !!a.laast && !b.fri,
+      id: a.id, type: a.type, q: a.q, kat: a.av ? 'egen' : a.kat || null, status, av: a.av, egen: !!a.av, stenger: a.stenger, laast: !!a.laast && !b.fri,
       utfall: a.utfall.map((u: string, i: number) => ({ u, kurs: kurs(a.qs[i]), selg: salgskurs(a.qs[i]), solgt: a.qs[i], mine: hold ? hold.n[u] || 0 : 0 })),
       vinner: a.vinner, fikk: hold ? hold.fikk || 0 : 0, kost: hold ? hold.kost || 0 : 0,
       vinnere: a.status === 'avgjort' ? vinnere(a).filter((id: string) => id !== m) : [],
@@ -420,6 +464,7 @@ export function borsVisning(data: any, meg: any) {
     aksjer, saker, harNotert: m ? !!b.noterte[m] : false, slutt: b.slutt || null,
     mineGaver: m ? (b.overforinger || []).filter((o: any) => o.fra === m || o.til === m).map((o: any) => ({ fra: o.fra, til: o.til, kr: o.kr })) : [],
     bev: m ? (b.bev || []).filter((x: any) => x.id === m).slice(-6).map((x: any) => ({ n: x.n, kr: x.kr, t: { no: x.no, en: x.en } })) : [],
+    kategorier: KATEGORIER.map((k) => ({ id: k.id, t: { no: k.no, en: k.en } })), valgteKat: b.kat || null,
     priser: { notering: NOTERING, honorar: HONORAR, utbetaling: UTBETALING, start: STARTKURS, maks: MAKSKURS },
   };
 }

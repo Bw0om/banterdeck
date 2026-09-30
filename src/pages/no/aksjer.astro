@@ -1,0 +1,56 @@
+---
+// Statistikk for Vorsbørsen: hvilke aksjer blir kjøpt, og hvilke skjer? Bare for admin.
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Aksjene" description="Statistikk for aksjene i Vorsbørsen." lang="no" noindex={true}>
+  <h1>Aksjene i Vorsbørsen</h1>
+  <p class="small"><a href="/no/statistikk">Statistikk</a> · <a href="/no/salg">Salg</a> · <a href="/admin">Admin</a></p>
+  <p class="small">Anonymt: bare hvor ofte hver aksje er vist, kjøpt, meldt og faktisk skjedde. <b>Treff</b> = andel av avgjorte aksjer som skjedde. <b>Kjøpt per visning</b> viser hvor fristende aksjen er.</p>
+  <div id="aksjer" class="stat aksjestat"><p class="small">Henter …</p></div>
+
+  <script is:inline data-astro-rerun>
+  (function () {
+    var root = document.getElementById('aksjer');
+    if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+    var K = window.BDKonto, data = null, sorter = 'vist', kat = '';
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function pst(a, b) { return b ? Math.round(100 * a / b) + ' %' : '–'; }
+    function tegn() {
+      var navn = {}; data.kategorier.forEach(function (k) { navn[k.id] = k.navn; });
+      var l = data.aksjer.filter(function (a) { return !kat || a.kat === kat; });
+      var fn = {
+        vist: function (a, b) { return b.vist - a.vist; },
+        kjop: function (a, b) { return (b.kjop / (b.vist || 1)) - (a.kjop / (a.vist || 1)); },
+        treff: function (a, b) { return (b.skjedde / (b.avgjort || 1)) - (a.skjedde / (a.avgjort || 1)) || b.avgjort - a.avgjort; },
+        dod: function (a, b) { return (a.kjop / (a.vist || 1)) - (b.kjop / (b.vist || 1)) || b.vist - a.vist; },
+      }[sorter];
+      l.sort(fn);
+      // Sum per kategori
+      var sum = {}; data.aksjer.forEach(function (a) { var s = sum[a.kat] || (sum[a.kat] = { n: 0, vist: 0, kjop: 0, avgjort: 0, skjedde: 0 }); s.n++; s.vist += a.vist; s.kjop += a.kjop; s.avgjort += a.avgjort; s.skjedde += a.skjedde; });
+      root.innerHTML =
+        '<h2>Per kategori</h2><div class="gj-tabell-wrap"><table class="gj-tabell"><thead><tr><th>Kategori</th><th>Aksjer</th><th>Vist</th><th>Kjøp per visning</th><th>Treff</th></tr></thead><tbody>' +
+        data.kategorier.map(function (k) { var s = sum[k.id] || { n: 0, vist: 0, kjop: 0, avgjort: 0, skjedde: 0 };
+          return '<tr><td>' + esc(k.navn) + '</td><td>' + s.n + '</td><td>' + s.vist + '</td><td>' + (s.vist ? (s.kjop / s.vist).toFixed(1).replace('.', ',') : '–') + '</td><td>' + pst(s.skjedde, s.avgjort) + '</td></tr>'; }).join('') +
+        '</tbody></table></div>' +
+        '<h2>Alle aksjene</h2>' +
+        '<div class="rom-mod"><button type="button" data-kat="" aria-pressed="' + (!kat) + '">Alle</button>' + data.kategorier.map(function (k) { return '<button type="button" data-kat="' + k.id + '" aria-pressed="' + (kat === k.id) + '">' + esc(k.navn) + '</button>'; }).join('') + '</div>' +
+        '<div class="rom-mod"><span class="small">Sorter:</span> ' + [['vist', 'Mest vist'], ['kjop', 'Mest kjøpt'], ['treff', 'Skjer oftest'], ['dod', 'Minst brukt']].map(function (s) { return '<button type="button" data-sort="' + s[0] + '" aria-pressed="' + (sorter === s[0]) + '">' + s[1] + '</button>'; }).join('') + '</div>' +
+        '<div class="gj-tabell-wrap"><table class="gj-tabell"><thead><tr><th>Aksje</th><th>Vist</th><th>Kjøpere</th><th>Kjøp</th><th>Meldt</th><th>Skjedde</th><th>Vinnere</th></tr></thead><tbody>' +
+        l.map(function (a) {
+          var dod = a.vist >= 5 && a.kjop === 0;
+          return '<tr' + (dod ? ' class="dod"' : '') + '><td><b>' + esc(a.q) + '</b><br><small>' + (a.type === 'hvem' ? 'Hvem' : 'Ja/nei') + ' · ' + esc(navn[a.kat] || a.kat) + (dod ? ' · 💤 ingen kjøper' : '') + '</small></td><td>' + a.vist + '</td><td>' + a.kjopere + '</td><td>' + a.kjop + '</td><td>' + a.meldt + '</td><td>' + a.skjedde + ' / ' + a.avgjort + ' <small>(' + pst(a.skjedde, a.avgjort) + ')</small></td><td>' + a.vinnere + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-kat],[data-sort]'); if (!b || !data) return;
+      if (b.dataset.sort) sorter = b.dataset.sort; else kat = b.dataset.kat;
+      tegn();
+    });
+    if (!K || !K.les || !K.les()) { root.innerHTML = '<p>Logg inn med admin-kontoen først. <a href="/no/account">Logg inn</a></p>'; return; }
+    K.api('/api/admin/aksjer').then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
+      if (!x.ok) { root.innerHTML = '<p class="rom-feil">' + esc(x.d.melding || 'Ingen tilgang.') + '</p>'; return; }
+      data = x.d; tegn();
+    }).catch(function () { root.innerHTML = '<p class="rom-feil">Fikk ikke kontakt.</p>'; });
+  })();
+  </script>
+</Base>

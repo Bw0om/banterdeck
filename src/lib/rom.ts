@@ -13,7 +13,8 @@ import BINGO_EN from '../data/bingo.en.json';
 import PLUSSPAKKER_EN from '../data/pluss.en.json';
 import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
-import { startLov, lovHandling, lovVisning } from './lov';
+import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } from './kveld';
+import { MAKS_REGEL } from './lovbok';
 import { borsHandling, borsVisning } from './bors';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
@@ -186,12 +187,15 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
   const hd = data.hendelse;
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null, lang,
-    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, medlem: !!p.konto, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
+    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, medlem: !!p.konto, invitert: !!p.invitert, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
     hjulListe: data.hjulListe || (lang === 'en' ? HJUL_STANDARD_EN : HJUL_STANDARD), oppdrag: lok(oppdragVisning(data, meg), lang), bors: lok(borsVisning(data, meg), lang), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: lok(data.historikk || [], lang),
-    alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode } : null,
+    alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode, kveld: !!data.gjengKveld, regler: data.gjeng.regler || [] } : null,
+    kveld: lok(kveldVisning(data), lang), plan: data.plan || null,
+    // Gjester som venter på å bli sluppet inn: bare verten og medlemmene ser dem
+    venter: meg && (meg.id === data.vert || meg.konto) ? (data.venter || []).map((v: any) => ({ id: v.id, navn: v.navn })) : [],
   };
 }
 
@@ -399,7 +403,7 @@ function handlingInne(data: any, meg: any, h: any) {
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
     data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
   }
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -407,13 +411,21 @@ function handlingInne(data: any, meg: any, h: any) {
       // Verten har Pluss (sjekket av API-ruta): lås opp rommet for kvelden
       if (h._plussTil > Date.now() && !(data.pluss && data.pluss.til > Date.now())) data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
       if (h.lek !== 'egen' && erPlussLek(String(h.lek || '')) && !romHarPluss(data)) return feilL('pluss', 'Denne leken krever Mitt vors Pluss hos verten.', 'This game needs the host to have Mitt vors Plus.');
-      const r = h.lek === 'egen' ? startEgen(data, h.kort, h.navn) : h.lek === 'lov' ? startLov(data, h._lov, String(h.modus || '')) : startSpill(data, String(h.lek || ''), String(h.modus || '*'), new Set((Array.isArray(h.sett) ? h.sett : []).slice(0, 2000).filter((x: any) => typeof x === 'string' && /^[0-9a-z]{1,8}$/.test(x))));
-      if (!(r as any).feil && data.spill) { data.valgt = null; data.ferdig = null; data.historikk = (data.historikk || []).concat([data.spill.navn]).slice(-40); }
+      if (h.lek === 'lov') return feilL('ukjent-lek', 'Gjengens lov er ikke lenger et eget spill – vinneren av kvelden velger regel.', 'The Crew’s Law is no longer a separate game – the winner of the night picks a rule.');
+      const forrige = data.spill;
+      if (forrige) lekFerdig(data);
+      const r = h.lek === 'egen' ? startEgen(data, h.kort, h.navn) : startSpill(data, String(h.lek || ''), String(h.modus || '*'), new Set((Array.isArray(h.sett) ? h.sett : []).slice(0, 2000).filter((x: any) => typeof x === 'string' && /^[0-9a-z]{1,8}$/.test(x))));
+      if (!(r as any).feil && data.spill) { data.valgt = null; data.ferdig = null; data.historikk = (data.historikk || []).concat([data.spill.navn]).slice(-40); lekStartet(data); }
       return r;
     }
     case 'avslutt-kvelden': {
       if (!erVert) return { feil: 'bare-vert' };
-      data.spill = null; data.valgt = null; data.ferdig = Date.now(); melde(data, 'Kvelden er over – her er oppsummeringen!', "The night is over – here's the recap!"); return { ok: true };
+      if (data.spill) lekFerdig(data);
+      data.spill = null; data.valgt = null; data.ferdig = Date.now();
+      const vinner = kaarVinner(data);
+      if (vinner) melde(data, `🏆 ${navnPaa(data, vinner)} vant kvelden!` + (data.gjeng ? ' Nå får hen velge en regel til lovboka.' : ''), `🏆 ${navnPaa(data, vinner)} won the night!` + (data.gjeng ? ' Now they get to pick a rule for the law book.' : ''));
+      else melde(data, 'Kvelden er over – her er oppsummeringen!', "The night is over – here's the recap!");
+      return { ok: true };
     }
     case 'fortsett-kvelden': {
       if (!erVert) return { feil: 'bare-vert' };
@@ -438,7 +450,7 @@ function handlingInne(data: any, meg: any, h: any) {
     case 'gjeng': {
       // API-ruta har sjekket at verten er med i gjengen (h._gjeng settes bare der)
       if (!erVert) return { feil: 'bare-vert' };
-      data.gjeng = h._gjeng && h._gjeng.id ? { id: h._gjeng.id, navn: h._gjeng.navn, kode: h._gjeng.kode } : null;
+      data.gjeng = h._gjeng && h._gjeng.id ? { id: h._gjeng.id, navn: h._gjeng.navn, kode: h._gjeng.kode, regler: Array.isArray(h._regler) ? h._regler : [] } : null;
       // Nytt valg av gjeng: medlemskap må sjekkes på nytt for alle (verten er sjekket nå)
       data.spillere.forEach((p: any) => { delete p.konto; });
       if (data.gjeng && h._konto) meg.konto = h._konto;
@@ -453,12 +465,47 @@ function handlingInne(data: any, meg: any, h: any) {
       if (ny && h._ble) melde(data, `${meg.navn} ble med i gjengen ${data.gjeng.navn} 🤝`, `${meg.navn} joined the crew ${data.gjeng.navn} 🤝`);
       return { ok: true };
     }
+    case 'kv-vinner': {
+      if (!erVert) return { feil: 'bare-vert' };
+      return velgVinner(data, h.hvem ? String(h.hvem) : null);
+    }
+    case 'lov-valg': {
+      // Kveldens vinner velger regel. API-ruta skriver valget inn i lovboka etterpå.
+      const k = kveld(data);
+      if (!data.gjeng || !data.ferdig || k.vinner !== meg.id) return feilL('ikke-vinner', 'Bare kveldens vinner kan velge regel.', 'Only the winner of the night can pick a rule.');
+      if (k.lovValg) return { ok: true };
+      const type = ['ny', 'opphev', 'ingen'].includes(h.type) ? h.type : '';
+      if (!type) return { feil: 'ukjent' };
+      const tekst = String(h.tekst || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, MAKS_REGEL);
+      if (type === 'ny' && tekst.length < 4) return feilL('kort', 'Skriv hele regelen.', 'Write the whole rule.');
+      const regel = type === 'opphev' ? (data.gjeng.regler || []).find((x: any) => x.id === h.regel) : null;
+      if (type === 'opphev' && !regel) return feilL('ukjent', 'Fant ikke regelen.', 'Couldn’t find that rule.');
+      k.lovValg = { type, tekst: type === 'ny' ? tekst : regel ? regel.tekst : '', regel: regel ? regel.id : null, navn: meg.navn, lagret: false };
+      melde(data, type === 'ny' ? `📜 ${meg.navn} innfører regelen «${tekst}»` : type === 'opphev' ? `🗑️ ${meg.navn} opphever regelen «${regel.tekst}»` : `🤷 ${meg.navn} lar lovboka være som den er`,
+        type === 'ny' ? `📜 ${meg.navn} introduces the rule “${tekst}”` : type === 'opphev' ? `🗑️ ${meg.navn} repeals the rule “${regel.tekst}”` : `🤷 ${meg.navn} leaves the law book as it is`);
+      return { ok: true };
+    }
+    case 'slipp-inn':
+    case 'avvis-inn': {
+      // Verten eller et medlem av gjengen slipper inn (eller avviser) en som venter
+      if (!erVert && !meg.konto) return feilL('bare-medlem', 'Bare verten og medlemmer av gjengen kan slippe inn folk.', 'Only the host and crew members can let people in.');
+      const i = (data.venter || []).findIndex((v: any) => v.id === h.hvem);
+      if (i === -1) return { ok: true };
+      const v = data.venter.splice(i, 1)[0];
+      if (h.handling === 'avvis-inn') return { ok: true };
+      const r: any = leggTil(data, v, v.navn);
+      if (r.feil) { data.venter.splice(i, 0, v); return r; }
+      if (h.som === 'medlem') r.spiller.invitert = true;
+      melde(data, `${r.spiller.navn} ble sluppet inn av ${meg.navn}` + (h.som === 'medlem' ? ' – og er invitert inn i gjengen' : ''), `${r.spiller.navn} was let in by ${meg.navn}` + (h.som === 'medlem' ? ' – and invited to join the crew' : ''));
+      return { ok: true };
+    }
     case 'velg-annen': {
       if (!erVert) return { feil: 'bare-vert' };
       data.valgt = null; return { ok: true };
     }
     case 'avslutt': {
       if (!erVert) return { feil: 'bare-vert' };
+      if (data.spill) lekFerdig(data);
       data.spill = null; melde(data, 'Tilbake i lobbyen', 'Back in the lobby'); return { ok: true };
     }
     case 'fjern': {
@@ -633,7 +680,22 @@ export function kveldForGjeng(data: any) {
 }
 
 /* ---------- inn i rommet ---------- */
+/** Gjengkveld: den som ikke er medlem, venter på at verten eller et medlem slipper hen inn. */
+export function venteInn(data: any, navn: string, lang: Lang | string = 'no') {
+  data.venter = (data.venter || []).filter((v: any) => Date.now() - v.t < 6 * 3600 * 1000).slice(-9);
+  const v = { id: nyId(), navn, pollett: nyPollett(), lang: rensLang(lang), t: Date.now() };
+  data.venter.push(v);
+  melde(data, `🚪 ${navn} vil bli med – slipp inn?`, `🚪 ${navn} wants to join – let them in?`);
+  return { spiller: v };
+}
+export function finnVenter(data: any, id: string, pollett: string) {
+  const v = (data.venter || []).find((x: any) => x.id === id);
+  return v && v.pollett === pollett ? v : null;
+}
 export function blimed(data: any, navn: string, lang: Lang | string = 'no') {
+  return leggTil(data, { id: nyId(), pollett: nyPollett(), lang: rensLang(lang) }, navn);
+}
+function leggTil(data: any, fra: { id: string; pollett: string; lang: string }, navn: string) {
   if (data.spillere.length >= MAKS_SPILLERE) return { feil: 'fullt' };
   if (data.spillere.length >= GRATIS_PLASSER && !romHarPluss(data)) {
     data.fullForsok = Date.now();
@@ -642,7 +704,7 @@ export function blimed(data: any, navn: string, lang: Lang | string = 'no') {
   }
   let n = navn, i = 2;
   while (data.spillere.some((p: any) => p.navn.toLowerCase() === n.toLowerCase())) n = `${navn} ${i++}`;
-  const p = { id: nyId(), navn: n, pollett: nyPollett(), slurker: 0, lang: rensLang(lang) };
+  const p: any = { id: fra.id, navn: n, pollett: fra.pollett, slurker: 0, lang: rensLang(fra.lang) };
   data.spillere.push(p);
   const s = data.spill;
   if (s && s.type === 'bingo') { s.brett[p.id] = nyttBrett(s); s.merket[p.id] = Array(16).fill(false); }
@@ -666,7 +728,7 @@ export function gyldigKode(k: any) { return typeof k === 'string' && /^[A-Z0-9]{
    Pyramiden, Gris og President. Skjulte hender vises bare til eieren.
    ===================================================================== */
 export const SOS = ['hvemskrev', 'bloff', 'samme', 'spion', 'skal', 'pannekort'];
-export const EKSTRA = ['lov', 'opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
+export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
 export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '🫡'];
 type EkstraInfo = [id: string, navnNo: string, navnEn: string, omNo: string, omEn: string];
 const EKSTRA_INFO: EkstraInfo[] = [
@@ -783,7 +845,6 @@ function presTurVidere(data: any) {
 
 export function ekstraHandling(data: any, meg: any, h: any): any {
   const s = data.spill; if (!s || !EKSTRA.includes(s.type)) return null;
-  if (s.type === 'lov') return lovHandling(data, meg, h);
   if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeHandling(data, meg, h);
   if (SOS.includes(s.type)) return sosHandling(data, meg, h);
   const ider = aktiveIder(data);
@@ -1036,7 +1097,6 @@ function avgjorTo(data: any) {
   s.fase = 'avslort'; melde(data, `Løgnen var: «${s.pastander[s.logn]}»`, `The lie was: “${s.pastander[s.logn]}”`);
 }
 export function ekstraVisning(s: any, meg: any, data: any) {
-  if (s.type === 'lov') return lovVisning(s, meg, data);
   if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeVisning(s, meg, data);
   if (SOS.includes(s.type)) return sosVisning(s, meg, data);
   const ider = aktiveIder(data);

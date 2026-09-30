@@ -1,11 +1,11 @@
 // Ett rom: hente tilstanden (GET) eller gjøre noe i det (POST).
 // Telefonen identifiserer seg med spiller-id og pollett i egne felt, aldri i adressen.
 import type { APIRoute } from 'astro';
-import { hentRom, endreRom, visning, handling, blimed, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
+import { hentRom, endreRom, visning, handling, blimed, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
 import { rpc } from '../../../lib/spilt';
 import { innloggetBruker } from '../../../lib/konto';
 import { plussStatus } from '../../../lib/pluss';
-import { anvend } from '../../../lib/lov';
+import { kveldInn, vinnerValg, reglerForRom } from '../../../lib/lovbok';
 export const prerender = false;
 
 const json = (d: any, status = 200) =>
@@ -46,6 +46,11 @@ export const GET: APIRoute = async ({ params, request }) => {
     if (!rom) return json({ feil: 'finnes-ikke', melding: melding('finnes-ikke', qLang) }, 404);
     const v = Number(new URL(request.url).searchParams.get('v') || 0);
     const meg = finnSpiller(rom.data, request.headers.get('x-spiller') || '', request.headers.get('x-pollett') || '');
+    // Venter på å bli sluppet inn i en gjengkveld: vis bare venterommet
+    if (!meg) {
+      const vt = finnVenter(rom.data, request.headers.get('x-spiller') || '', request.headers.get('x-pollett') || '');
+      if (vt) return json(venterSvar(rom.data, rom.versjon, vt, kode));
+    }
     if (v && v === rom.versjon && meg) return new Response(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
     const lang: Sprak = meg ? rensLang(meg.lang) : qLang;
     const vis: any = visning(rom.data, rom.versjon, meg, lang);
@@ -68,7 +73,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   // Språk før vi vet hvem spilleren er: body.lang (bli-med), ellers x-lang-headeren
   const bLang: Sprak = d.lang === 'en' || d.lang === 'no' ? d.lang : hLang;
   // Pluss sjekkes her på serveren – aldri på det nettleseren påstår
-  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble; delete d._borsFri;
+  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble; delete d._borsFri; delete d._venter; delete d._medlem; delete d._regler;
   // Gjengen sjekkes også her: verten må være innlogget og med i gjengen
   if (d.handling === 'gjeng' && d.gjengId) {
     try {
@@ -76,9 +81,22 @@ export const POST: APIRoute = async ({ params, request }) => {
       const g = u && /^[0-9a-f-]{36}$/i.test(String(d.gjengId)) ? await rpc('gjeng_tilgang', { p_user: u.id, p_id: String(d.gjengId) }) : null;
       if (!g) return json({ feil: 'gjeng', melding: bLang === 'en' ? 'Log in with an account that belongs to the crew.' : 'Logg inn med en konto som er med i gjengen.' }, 403);
       d._gjeng = g; d._konto = u!.id;
+      try { const l = await rpc('gjeng_lov_hent', { p_gjeng: g.id }); d._regler = l ? reglerForRom(l.lov) : []; } catch { d._regler = []; }
     } catch { return json({ feil: 'server', melding: bLang === 'en' ? "Couldn't check the crew. Try again." : 'Fikk ikke sjekket gjengen. Prøv igjen.' }, 503); }
   }
-  // Gjengens lov: koble spilleren til kontoen sin (bare medlemmer kan stemme over lover)
+  // Gjengkveld: medlemmer kommer rett inn, alle andre venter på å bli sluppet inn
+  if (d.handling === 'bli-med') {
+    try {
+      const rom = await hentRom(kode);
+      const gj = rom && rom.data && rom.data.gjengKveld && rom.data.gjeng;
+      if (gj) {
+        const u = await innloggetBruker(request).catch(() => null);
+        const g = u ? await rpc('gjeng_tilgang', { p_user: u.id, p_id: gj.id }) : null;
+        if (g && u) { d._medlem = true; d._konto = u.id; } else d._venter = true;
+      }
+    } catch { /* vanlig rom */ }
+  }
+  // Koble spilleren til kontoen sin i gjengen (og bli medlem hvis man er invitert)
   if (d.handling === 'gjeng-meg') {
     try {
       const u = await innloggetBruker(request);
@@ -87,25 +105,12 @@ export const POST: APIRoute = async ({ params, request }) => {
       const gj = rom && rom.data && rom.data.gjeng;
       if (!gj) return json({ feil: 'gjeng', melding: bLang === 'en' ? 'The room isn’t linked to a crew.' : 'Rommet er ikke koblet til en gjeng.' }, 400);
       let g = await rpc('gjeng_tilgang', { p_user: u.id, p_id: gj.id });
-      if (!g && d.bli === true) { const r = await rpc('gjeng_bli_med', { p_user: u.id, p_kode: gj.kode }); if (r && !r.feil) { g = r; d._ble = true; } }
+      // Bli medlem krever invitasjon (sluppet inn «som medlem») – eller at du er verten
+      const jeg = finnSpiller(rom.data, String(d.id || ''), String(d.pollett || ''));
+      if (!g && d.bli === true && jeg && (jeg.invitert || rom.data.vert === jeg.id)) { const r = await rpc('gjeng_bli_med', { p_user: u.id, p_kode: gj.kode }); if (r && !r.feil) { g = r; d._ble = true; } }
       if (!g) return json({ feil: 'ikke-medlem', melding: bLang === 'en' ? 'You’re not in the crew yet.' : 'Du er ikke med i gjengen ennå.' }, 403);
       d._konto = u.id;
     } catch { return json({ feil: 'server', melding: bLang === 'en' ? "Couldn't check the crew. Try again." : 'Fikk ikke sjekket gjengen. Prøv igjen.' }, 503); }
-  }
-  // Vorsbørsen: gjenger som har åpnet konvolutt 6 får hele børsen gratis
-  if (d.handling === 'bs-start' || d.handling === 'bs-lasopp') {
-    try {
-      const rom = await hentRom(kode);
-      const gj = rom && rom.data && rom.data.gjeng;
-      if (gj) { const l = await rpc('gjeng_lov_hent', { p_gjeng: gj.id }); if (l && l.lov && Array.isArray(l.lov.konvolutter) && l.lov.konvolutter.some((k: any) => k.id === 'k6')) d._borsFri = true; }
-    } catch { /* uten opplåsing */ }
-  }
-  if (d.handling === 'start' && d.lek === 'lov') {
-    try {
-      const rom = await hentRom(kode);
-      const gj = rom && rom.data && rom.data.gjeng;
-      if (gj) d._lov = (await rpc('gjeng_lov_hent', { p_gjeng: gj.id })) || null;
-    } catch (e) { console.warn('Lovboka kunne ikke hentes:', (e as Error).message); }
   }
   if (d.handling === 'pluss-aktiver' || (d.handling === 'start' && erPlussLek(d.lek))) {
     try {
@@ -114,12 +119,17 @@ export const POST: APIRoute = async ({ params, request }) => {
     } catch { /* uten Pluss */ }
   }
   try {
-    let meg: any = null, ny: any = null;
+    let meg: any = null, ny: any = null, vent: any = null;
     const res: any = await endreRom(kode, (data) => {
       if (d.handling === 'bli-med') {
         const navn = rensNavn(d.navn);
         if (!navn) return { feil: 'navn', melding: 'Skriv inn et navn.', en: 'Enter a name.' };
+        if (d._venter) { const v: any = venteInn(data, navn, bLang); vent = v.spiller; return { ok: true }; }
+        // Medlem som allerede er i rommet (f.eks. på en annen telefon): samme plass igjen
+        const fra = d._konto ? data.spillere.find((p: any) => p.konto === d._konto) : null;
+        if (fra) { meg = fra; ny = fra; return { ok: true }; }
         const r: any = blimed(data, navn, bLang);
+        if (!r.feil && d._konto) r.spiller.konto = d._konto;
         if (r.feil) return r;
         meg = r.spiller; ny = r.spiller;
         return { ok: true };
@@ -128,7 +138,8 @@ export const POST: APIRoute = async ({ params, request }) => {
       if (!meg) return { feil: 'ikke-med' };
       return handling(data, meg, d);
     });
-    if (res.feil === 'fullt-gratis') await varsle(kode, 0);   // verten får se at noen prøvde å bli med
+    if (res.feil === 'fullt-gratis') await varsle(kode, 0);
+    if (vent && !res.feil) { await varsle(kode, res.versjon); return json(venterSvar(res.data, res.versjon, vent, kode)); }   // verten får se at noen prøvde å bli med
     if (res.feil) {
       const status = res.feil === 'finnes-ikke' ? 404 : res.feil === 'ikke-med' ? 403 : res.feil === 'opptatt' ? 409 : 400;
       // Feilen vises på språket til den som trykket (bli-med: body.lang / x-lang)
@@ -150,10 +161,16 @@ export const POST: APIRoute = async ({ params, request }) => {
       try { await rpc('gjeng_kveld_lagre', { p_gjeng: res.data.gjeng.id, p_rom: kode + '-' + res.data.laget, p_data: kveldForGjeng(res.data) }); }
       catch (e) { console.warn('Gjengkvelden ble ikke lagret:', (e as Error).message); }
     }
-    // Gjengens lov er ferdig: skriv kvelden inn i lovboka (trygt å prøve flere ganger)
-    const sp = res.data.spill;
-    if (sp && sp.type === 'lov' && (sp.fase === 'konvolutt' || sp.fase === 'ferdig') && !sp.lagret && res.data.gjeng) {
-      if (await lagreLovKveld(kode, res.data.gjeng.id, sp)) sp.lagret = true;
+    // Gjengkveld over: tell kvelden i lovboka (kveldens vinner får velge regel) og frigjør gjengen
+    if (d.handling === 'avslutt-kvelden' && res.data.gjeng) await gjengKveldSlutt(res.data, kode);
+    // Kveldens vinner har valgt regel: skriv den inn i lovboka
+    if (d.handling === 'lov-valg' && res.data.gjeng && res.data.kveld && res.data.kveld.lovValg && !res.data.kveld.lovValg.lagret) {
+      const ok = await lagreLovValg(res.data, kode);
+      if (ok) { const r2: any = await endreRom(kode, (data) => { if (data.kveld && data.kveld.lovValg) data.kveld.lovValg.lagret = true; if (data.gjeng) data.gjeng.regler = ok; return { ok: true }; }); if (!r2.feil) { res.data = r2.data; res.versjon = r2.versjon; await varsle(kode, r2.versjon); } }
+    }
+    // Vorsbørsen: anonym statistikk over hvilke aksjer som blir kjøpt og skjer
+    if (res.svar && Array.isArray(res.svar.stat) && res.svar.stat.length) {
+      try { await rpc('bors_stat_logg', { p_rader: res.svar.stat }); } catch (e) { console.warn('Børsstatistikk feilet:', (e as Error).message); }
     }
     const lang: Sprak = meg ? rensLang(meg.lang) : bLang;
     const svar: any = { ...visning(res.data, res.versjon, meg, lang), kode, leker: lekeliste(lang) };
@@ -165,19 +182,49 @@ export const POST: APIRoute = async ({ params, request }) => {
   }
 };
 
-/** Legger kvelden inn i lovboka til gjengen, og merker rommet som lagret. */
-async function lagreLovKveld(kode: string, gjengId: string, sp: any) {
+/** Venterommet: bare navnet ditt, gjengen og verten – ingenting fra spillet. */
+function venterSvar(data: any, versjon: number, v: any, kode: string) {
+  const vert = data.spillere.find((p: any) => p.id === data.vert);
+  return { venter: true, versjon, meg: v.id, id: v.id, pollett: v.pollett, navn: v.navn, kode, lang: rensLang(v.lang), naa: Date.now(),
+    gjeng: data.gjeng ? { navn: data.gjeng.navn } : null, vertNavn: vert ? vert.navn : '', spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn })) };
+}
+const kveldId = (data: any, kode: string) => kode + '-' + data.laget;
+
+/** Leser og lagrer lovboka med versjonssjekk, så to telefoner ikke overskriver hverandre. */
+async function endreBok(gjengId: string, endring: (bok: any) => any) {
+  for (let i = 0; i < 4; i++) {
+    const cur = await rpc('gjeng_lov_hent', { p_gjeng: gjengId });
+    if (!cur) return null;
+    const ny = endring(cur.lov);
+    if (!ny) return null;
+    const v = await rpc('gjeng_lov_lagre', { p_gjeng: gjengId, p_lov: ny, p_versjon: cur.versjon });
+    if (v !== null && v !== undefined) return ny;
+  }
+  return null;
+}
+
+async function gjengKveldSlutt(data: any, kode: string) {
+  const k = data.kveld || {};
+  const p = k.vinner ? data.spillere.find((x: any) => x.id === k.vinner) : null;
+  const bk = data.bors && data.bors.slutt && data.bors.slutt.konge ? data.spillere.find((x: any) => x.id === data.bors.slutt.konge) : null;
   try {
-    for (let i = 0; i < 4; i++) {
-      const cur = await rpc('gjeng_lov_hent', { p_gjeng: gjengId });
-      if (!cur) return false;
-      const { lov } = anvend(cur.lov, sp.hendelser || [], sp.kveldId);
-      const v = await rpc('gjeng_lov_lagre', { p_gjeng: gjengId, p_lov: lov, p_versjon: cur.versjon });
-      if (v !== null && v !== undefined) {
-        await endreRom(kode, (data) => { if (data.spill && data.spill.kveldId === sp.kveldId) data.spill.lagret = true; return { ok: true }; });
-        return true;
-      }
-    }
-  } catch (e) { console.warn('Lovboka ble ikke lagret:', (e as Error).message); }
-  return false;
+    await endreBok(data.gjeng.id, (bok) => kveldInn(bok, kveldId(data, kode), {
+      vinner: p ? { navn: p.navn, konto: p.konto || null } : null, borskonge: bk ? { navn: bk.navn, konto: bk.konto || null } : null,
+    }));
+  } catch (e) { console.warn('Lovboka ble ikke oppdatert:', (e as Error).message); }
+  try { if (data.gjengKveld) await rpc('gjeng_kveld_aktiv_sett', { p_gjeng: data.gjeng.id, p_rom: null }); } catch { /* ikke satt opp */ }
+}
+
+/** Skriver vinnerens valg inn i lovboka. Gir de nye reglene for rommet, eller null. */
+async function lagreLovValg(data: any, kode: string) {
+  const k = data.kveld, v = k.lovValg, p = data.spillere.find((x: any) => x.id === k.vinner);
+  const bk = data.bors && data.bors.slutt && data.bors.slutt.konge ? data.spillere.find((x: any) => x.id === data.bors.slutt.konge) : null;
+  try {
+    const bok = await endreBok(data.gjeng.id, (b0) => {
+      const b1 = kveldInn(b0, kveldId(data, kode), { vinner: p ? { navn: p.navn, konto: p.konto || null } : null, borskonge: bk ? { navn: bk.navn, konto: bk.konto || null } : null });
+      const r: any = vinnerValg(b1, kveldId(data, kode), { navn: v.navn, fraRom: true }, { type: v.type, tekst: v.tekst, regel: v.regel });
+      return r.bok || null;
+    });
+    return bok ? reglerForRom(bok) : null;
+  } catch (e) { console.warn('Regelen ble ikke lagret:', (e as Error).message); return null; }
 }

@@ -4,13 +4,19 @@
 // Engelsk: /crew og /crew?k=KODE.
 import Base from '../../layouts/Base.astro';
 import type { Lang } from '../../lib/i18n';
+import { lekeliste } from '../../lib/rom';
 const { lang = 'no' } = Astro.props as { lang?: Lang };
 const no = lang === 'no';
+// Lekene verten kan velge når kvelden startes fra gjengen (spilles fra hver sin telefon)
+const UTVALG = ['spion', 'hvemskrev', 'bloff', 'samme', 'pannekort', 'mest', 'forraeder', 'tosannheter', 'nyhetsrunden', 'skal', 'bussruta', 'yatzy', 'president', 'pyramiden', 'regelfabrikken', 'veddelopet', 'overunder', 'ring-of-fire', 'bingo'];
+const alle = lekeliste(lang);
+const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '📈 The Exchange (all night)' }]
+  .concat(UTVALG.map((id) => alle.find((x: any) => x.id === id)).filter(Boolean).map((x: any) => ({ id: x.id, navn: x.navn })));
 ---
 <Base title={no ? 'Gjengen' : 'The crew'} description={no ? 'Samle poengene fra kveld til kveld: sesongtabell, kåringer og rivalisering for vennegjengen.' : 'Keep score from night to night: a season table, awards and rivalries for your group of friends.'} lang={lang} noindex={true} bilde="/og/drikkeleker.jpg">
   <div id="gjeng" class="gjeng"><p class="small">{no ? 'Henter …' : 'Loading …'}</p></div>
 
-  <script is:inline data-astro-rerun define:vars={{ LANG: lang }}>
+  <script is:inline data-astro-rerun define:vars={{ LANG: lang, LEKER }}>
   (function () {
     var root = document.getElementById('gjeng');
     if (!root || root.dataset.bound) return; root.dataset.bound = '1';
@@ -94,11 +100,11 @@ const no = lang === 'no';
     }
     function forklaring() {
       if (EN) return '<ol class="gj-slik"><li><b>Create the crew</b> and share the link with your friends.</li>' +
-        '<li><b>Start a room</b> and pick the crew in the lobby.</li>' +
-        '<li><b>End the night</b> – and sips, quiz points and awards go into the season table.</li></ol>';
+        '<li><b>Start the night</b> from the crew page and pick the games – everyone gets a notification and joins without a code.</li>' +
+        '<li><b>The winner of the night</b> writes a rule in the crew’s law book – and the season table keeps score.</li></ol>';
       return '<ol class="gj-slik"><li><b>Lag gjengen</b> og del lenken med vennene dine.</li>' +
-        '<li><b>Start et rom</b> og velg gjengen i lobbyen.</li>' +
-        '<li><b>Avslutt kvelden</b> – så havner slurker, quizpoeng og kåringer i sesongtabellen.</li></ol>';
+        '<li><b>Start kvelden</b> fra gjengsiden og velg lekene – alle får varsel og blir med uten kode.</li>' +
+        '<li><b>Kveldens vinner</b> skriver en regel i gjengens lovbok – og sesongtabellen fører regnskap.</li></ol>';
     }
 
     /* ---------- én gjeng ---------- */
@@ -144,31 +150,60 @@ const no = lang === 'no';
     /* ---------- Gjengens lov: lovboka ---------- */
     function lovbok() {
       var L = G.lovbok; if (!L) return '';
-      var gjelder = L.lover.filter(function (x) { return x.status === 'gjelder' || x.status === 'anket'; });
-      var gamle = L.lover.filter(function (x) { return x.status !== 'gjelder' && x.status !== 'anket'; });
-      var STATUS = EN ? { opphevet: 'repealed', vetoet: 'vetoed' } : { opphevet: 'opphevet', vetoet: 'vetoet' };
-      function lov(x) {
-        return '<li class="lb-lov ' + x.status + (x.grunnlov ? ' grunnlov' : '') + '"><b>«' + esc(x.tekst) + '»</b><small>' + (x.grunnlov ? (EN ? '📜 Constitution · ' : '📜 Grunnlov · ') : '') +
-          esc(x.av) + (EN ? ' · night ' : ' · kveld ') + x.kveld + (x.ja != null ? ' · ' + x.ja + '–' + x.nei : '') +
-          (x.status === 'anket' ? (EN ? ' · ⚖️ appealed by ' : ' · ⚖️ anket av ') + esc(x.anketNavn) + (EN ? ' – trial next night' : ' – rettssak neste kveld') : '') +
-          (STATUS[x.status] ? ' · ' + STATUS[x.status] + (x.vetoNavn ? (EN ? ' by ' : ' av ') + esc(x.vetoNavn) : '') : '') + '</small>' +
-          (x.kanAnke || x.kanVeto ? '<span class="lb-knapper">' + (x.kanAnke ? '<button class="linkbtn" data-g="lov-anke" data-lov="' + esc(x.id) + '" type="button">' + (EN ? 'Appeal' : 'Anke') + '</button>' : '') +
-            (x.kanVeto ? '<button class="linkbtn" data-g="lov-veto" data-lov="' + esc(x.id) + '" type="button">' + (EN ? 'Veto' : 'Veto') + '</button>' : '') + '</span>' : '') + '</li>';
+      function regel(x, aktiv) {
+        return '<li class="lb-lov"><div class="lb-regel"><div><b>«' + esc(x.tekst) + '»</b><small>' + esc(x.av) + (x.kveld ? (EN ? ' · night ' : ' · kveld ') + x.kveld : '') +
+          (!aktiv ? ' · ' + (x.hvordan === 'flertall' ? (EN ? 'voted out by the crew' : 'stemt bort av gjengen') : x.fjernetAv ? (EN ? 'repealed by ' : 'opphevet av ') + esc(x.fjernetAv) : (EN ? 'repealed' : 'opphevet')) : '') + '</small></div>' +
+          (aktiv && G.medlem ? '<button class="linkbtn lb-stem" data-g="lov-stem" data-regel="' + esc(x.id) + '" type="button" aria-pressed="' + x.harStemt + '">' + (x.harStemt ? (EN ? '✓ Voted to remove' : '✓ Stemt for å fjerne') : (EN ? 'Vote to remove' : 'Stem for å fjerne')) + (x.stemmer ? ' (' + x.stemmer + '/' + x.trengs + ')' : '') + '</button>' : '') + '</div></li>';
       }
+      var r = L.rekorder || {};
+      function rekord(ikon, tittel, liste, enhet) {
+        if (!liste || !liste.length) return '';
+        return '<div><small>' + ikon + ' ' + tittel + '</small><b>' + esc(liste[0].navn) + '</b> · ' + liste[0].n + ' ' + (Array.isArray(enhet) ? enhet[liste[0].n === 1 ? 0 : 1] : enhet) +
+          (liste.length > 1 ? '<br><small>' + liste.slice(1, 3).map(function (x) { return esc(x.navn) + ' ' + x.n; }).join(', ') + '</small>' : '') + '</div>';
+      }
+      var v = L.ventende;
       return '<section class="lovbok" id="lovboka"><h2 class="gj-h2">' + (EN ? '⚖️ The Crew’s Law' : '⚖️ Gjengens lov') + '</h2>' +
-        '<p class="small">' + (EN ? 'Season ' + L.sesong + ' · ' + L.kvelder + (L.kvelder === 1 ? ' night played' : ' nights played') : 'Sesong ' + L.sesong + ' · ' + L.kvelder + (L.kvelder === 1 ? ' kveld spilt' : ' kvelder spilt')) +
-          (G.medlem ? ' · ' + (L.harVeto ? (EN ? 'you still have your veto ✋' : 'du har fortsatt vetoen din ✋') : (EN ? 'your veto is used' : 'vetoen din er brukt')) : '') + '</p>' +
-        (L.titler.length ? '<div class="lb-titler">' + L.titler.map(function (t) { return '<span>🏷️ <b>' + esc(t.navn) + '</b> ' + esc(t.tittel) + '</span>'; }).join('') + '</div>' : '') +
-        '<h3>' + (EN ? 'Laws in force' : 'Lovene som gjelder') + '</h3>' +
-        (gjelder.length ? '<ol class="lb-lover">' + gjelder.map(lov).join('') + '</ol>' : '<p class="small">' + (EN ? 'No laws yet. Start a room for the crew and pick “The Crew’s Law” – the winner writes the first one.' : 'Ingen lover ennå. Start et rom for gjengen og velg «Gjengens lov» – vinneren skriver den første.') + '</p>') +
-        (G.medlem ? '<p class="small">' + (EN ? 'Weren’t there when a law was passed? You can appeal it until the next night – then it goes to trial. Everyone has one veto per season that stops a law immediately.' : 'Var du ikke med da en lov ble vedtatt? Du kan anke den frem til neste kveld – da blir det rettssak. Alle har ett veto per sesong som stopper en lov med en gang.') + '</p>' : '') +
-        '<h3>' + (EN ? 'Envelopes' : 'Konvoluttene') + '</h3><div class="lb-konv">' + L.konvolutter.map(function (k) {
-          return k.apnet ? '<div class="apen"><small>✉️ ' + k.nr + '</small><b>' + esc(k.tittel) + '</b><p>' + esc(k.tekst) + '</p></div>'
-            : '<div class="lukket"><small>🔒 ' + k.nr + '</small><p>' + esc(k.hint) + '</p></div>';
-        }).join('') + '</div>' +
-        (gamle.length ? '<details class="lb-gamle"><summary>' + (EN ? 'Repealed and vetoed laws' : 'Opphevede og vetoede lover') + ' (' + gamle.length + ')</summary><ol class="lb-lover">' + gamle.map(lov).join('') + '</ol></details>' : '') +
+        '<p class="small">' + (EN ? 'The winner of each night introduces a rule – or repeals one. A rule applies until a later winner repeals it, or a majority of the crew votes it out.' : 'Kveldens vinner innfører en regel – eller opphever en. Regelen gjelder til en senere vinner opphever den, eller et flertall i gjengen stemmer den bort.') +
+          ' · ' + L.kvelder + (EN ? (L.kvelder === 1 ? ' night' : ' nights') : (L.kvelder === 1 ? ' kveld' : ' kvelder')) + '</p>' +
+        (v ? (v.minTur
+          ? '<div class="lb-valg"><b>' + (EN ? '🏆 You won the last night! Pick your rule' : '🏆 Du vant forrige kveld! Velg regelen din') + '</b>' +
+            '<form class="gj-skjema" id="lbValg"><div class="gj-rad"><input id="lbTekst" maxlength="140" placeholder="' + (EN ? 'The new rule …' : 'Den nye regelen …') + '"><button class="btn gold" type="submit">' + (EN ? 'Introduce' : 'Innfør') + '</button></div></form>' +
+            (L.aktive.length ? '<p class="small">' + (EN ? '… or repeal one:' : '… eller opphev en:') + '</p><div class="rom-valg en">' + L.aktive.map(function (x) { return '<button type="button" data-g="lov-opphev" data-regel="' + esc(x.id) + '">🗑️ ' + esc(x.tekst) + '</button>'; }).join('') + '</div>' : '') + '</div>'
+          : '<p class="lb-valg">⏳ ' + esc(v.navn) + (EN ? ' won the last night and hasn’t picked a rule yet.' : ' vant forrige kveld og har ikke valgt regel ennå.') + '</p>') : '') +
+        '<h3>' + (EN ? 'Rules in force' : 'Reglene som gjelder') + ' <small>(' + L.aktive.length + ')</small></h3>' +
+        (L.aktive.length ? '<ol class="lb-lover">' + L.aktive.map(function (x) { return regel(x, true); }).join('') + '</ol>' : '<p class="small">' + (EN ? 'No rules yet. Start a night – the winner writes the first one.' : 'Ingen regler ennå. Start en kveld – vinneren skriver den første.') + '</p>') +
+        ((r.seire && r.seire.length) || (r.borskonge && r.borskonge.length) || (r.regler && r.regler.length) ? '<h3>' + (EN ? 'Records' : 'Rekorder') + '</h3><div class="lb-rekorder">' +
+          rekord('🏆', EN ? 'Most nights won' : 'Flest kveldsseiere', r.seire, EN ? ['win', 'wins'] : ['seier', 'seire']) +
+          rekord('👑', EN ? 'Market King most often' : 'Børskonge flest ganger', r.borskonge, '×') +
+          rekord('📜', EN ? 'Most rules in force' : 'Flest regler som gjelder', r.regler, EN ? ['rule', 'rules'] : ['regel', 'regler']) + '</div>' : '') +
+        (L.fjernet.length ? '<details class="lb-gamle"><summary>' + (EN ? 'Repealed rules' : 'Opphevede regler') + ' (' + L.fjernet.length + ')</summary><ol class="lb-lover">' + L.fjernet.map(function (x) { return regel(x, false); }).join('') + '</ol></details>' : '') +
         (L.logg.length ? '<details class="lb-logg"><summary>' + (EN ? 'History' : 'Historikken') + '</summary><ul>' + L.logg.map(function (x) { return '<li><small>' + dato(x.dato) + '</small> ' + esc(x.tekst) + '</li>'; }).join('') + '</ul></details>' : '') +
         '</section>';
+    }
+    /* ---------- kvelden: start, bli med, varsler ---------- */
+    var STANDARD = ['spion', 'hvemskrev', 'bloff', 'bors'];
+    function mittNavn() { try { return JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (x) { return ''; } }
+    function kveldBoks() {
+      if (!G.medlem) return '';
+      var k = G.kveld;
+      if (k) return '<div class="gj-kveld"><p class="rom-etikett">' + (EN ? 'Happening now' : 'Pågår nå') + '</p><h2>🎉 ' + (EN ? esc(k.vert) + ' has started the night' : esc(k.vert) + ' har startet kvelden') + '</h2>' +
+        '<p class="small">' + k.antall + (EN ? ' in the room' : ' med i rommet') + (k.plan && k.plan.length ? ' · ' + k.plan.map(function (id) { var l = LEKER.find(function (x) { return x.id === id; }); return esc(l ? l.navn : id); }).join(', ') : '') + '</p>' +
+        (k.erMed ? '' : '<label class="lab" for="gjKveldNavn">' + (EN ? 'Your name tonight' : 'Navnet ditt i kveld') + '</label><input id="gjKveldNavn" maxlength="20" value="' + esc(mittNavn()) + '">') +
+        '<p><button class="btn gold" data-g="bli-kveld" type="button">' + (k.erMed ? (EN ? 'Back to the night' : 'Tilbake til kvelden') : (EN ? 'Join the night' : 'Bli med i kvelden')) + '</button></p></div>';
+      return '<details class="gj-start"' + (/[?&]ny=1/.test(location.search) ? ' open' : '') + '><summary class="btn gold">' + (EN ? '🎲 Start the night' : '🎲 Start kvelden') + '</summary>' +
+        '<p class="small">' + (EN ? 'Pick the games. The crew gets a notification and joins straight from here – no code needed. Guests can join with the link and are let in by you or another member.' : 'Velg lekene. Gjengen får varsel og blir med rett herfra – uten kode. Gjester kan bli med på lenken og slippes inn av deg eller et annet medlem.') + '</p>' +
+        '<label class="lab" for="gjKveldNavn">' + (EN ? 'Your name tonight' : 'Navnet ditt i kveld') + '</label><input id="gjKveldNavn" maxlength="20" value="' + esc(mittNavn()) + '">' +
+        '<p class="lab">' + (EN ? 'Games' : 'Leker') + '</p><div>' + LEKER.map(function (l) { return '<label class="gj-lek"><input type="checkbox" name="gjLek" value="' + esc(l.id) + '"' + (STANDARD.indexOf(l.id) !== -1 ? ' checked' : '') + '> ' + esc(l.navn) + '</label>'; }).join('') + '</div>' +
+        '<p><button class="btn gold" data-g="start-kveld" type="button">' + (EN ? 'Start and notify the crew' : 'Start og varsle gjengen') + '</button></p></details>';
+    }
+    function varselBoks() {
+      if (!G.medlem || !('serviceWorker' in navigator) || !('PushManager' in window)) return '';
+      return '<p class="small gj-varsel"><button class="linkbtn" data-g="varsel" type="button">' + (localStorage.getItem('bd_gjvarsel_' + G.id) ? (EN ? '🔔 Notifications on – turn off' : '🔔 Varsler er på – skru av') : (EN ? '🔔 Notify me when the crew starts a night' : '🔔 Varsle meg når gjengen starter kveld')) + '</button></p>';
+    }
+    function tilNokkel(b64) { var p = '='.repeat((4 - b64.length % 4) % 4), r = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')), a = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) a[i] = r.charCodeAt(i); return a; }
+    function gaaTilRom(d) {
+      try { localStorage.setItem('bd_rom_' + d.kode, JSON.stringify({ id: d.id, pollett: d.pollett })); localStorage.setItem('bd_sist_rom', JSON.stringify({ k: d.kode, t: Date.now() })); } catch (x) {}
+      location.href = ROM + '?k=' + d.kode;
     }
     function vis() {
       var aar = {}; (G.kvelder || []).forEach(function (k) { aar[new Date(k.dato).getFullYear()] = 1; });
@@ -185,11 +220,12 @@ const no = lang === 'no';
         '<p class="crumb"><a href="' + SIDE + '">' + (EN ? 'Your crews' : 'Gjengene dine') + '</a> › ' + esc(G.navn) + '</p>' +
         '<h1 class="gj-tittel">' + esc(G.navn) + '</h1>' +
         (ny ? (EN
-          ? '<div class="gj-ny"><b>The crew is ready! 🎉</b><p>Share the link with the crew. Next time you play: create a room, pick <b>' + esc(G.navn) + '</b> in the lobby, and tap “End the night” at the end.</p></div>'
-          : '<div class="gj-ny"><b>Gjengen er klar! 🎉</b><p>Del lenken med gjengen. Neste gang dere spiller: lag et rom, velg <b>' + esc(G.navn) + '</b> i lobbyen, og trykk «Avslutt kvelden» til slutt.</p></div>') : '') +
+          ? '<div class="gj-ny"><b>The crew is ready! 🎉</b><p>Share the link with the crew. When you play: tap “Start the night” here – everyone gets a notification and joins without a code.</p></div>'
+          : '<div class="gj-ny"><b>Gjengen er klar! 🎉</b><p>Del lenken med gjengen. Når dere skal spille: trykk «Start kvelden» her – alle får varsel og blir med uten kode.</p></div>') : '') +
         '<div class="gj-knapper"><button class="btn gold" data-g="inviter" type="button">' + (EN ? 'Invite the crew' : 'Inviter gjengen') + '</button>' +
-          (G.medlem ? '<a class="btn ghost" href="' + ROM + '?gjeng=' + encodeURIComponent(G.id) + '">' + (EN ? 'Start a room for the crew' : 'Start et rom for gjengen') + '</a>' : '') +
+
           (!G.medlem ? '<button class="btn ghost" data-g="bli-med" type="button">' + (G.innlogget ? (EN ? 'Join the crew' : 'Bli med i gjengen') : (EN ? 'Log in to join' : 'Logg inn for å bli med')) + '</button>' : '') + '</div>' +
+        kveldBoks() + varselBoks() +
         lovbok() +
         '<div class="rom-mod gj-sesong" role="group" aria-label="' + (EN ? 'Season' : 'Sesong') + '">' + aarListe.map(function (a) { return '<button type="button" data-sesong="' + a + '" aria-pressed="' + (sesong === a) + '">' + a + '</button>'; }).join('') +
           '<button type="button" data-sesong="alle" aria-pressed="' + (sesong === 'alle') + '">' + (EN ? 'All' : 'Alle') + '</button></div>' +
@@ -263,6 +299,42 @@ const no = lang === 'no';
         if (!confirm(EN ? 'Leave ' + G.navn + '? The table stays for everyone else.' : 'Forlate ' + G.navn + '? Tabellen blir liggende for de andre.')) return;
         return kall('/api/gjeng', { handling: 'forlat', id: G.id }).then(function () { location.href = SIDE; });
       }
+      if (g === 'start-kveld' || g === 'bli-kveld') {
+        var nf = root.querySelector('#gjKveldNavn'), nv = nf ? nf.value.trim() : mittNavn();
+        if (!nv) { if (nf) nf.focus(); return mld(EN ? 'Enter your name.' : 'Skriv inn navnet ditt.'); }
+        try { localStorage.setItem('bd_mittnavn', JSON.stringify(nv)); } catch (x) {}
+        var leker = Array.prototype.map.call(root.querySelectorAll('input[name=gjLek]:checked'), function (x) { return x.value; });
+        if (g === 'start-kveld' && !leker.length) return mld(EN ? 'Pick at least one game.' : 'Velg minst én lek.');
+        b.disabled = true;
+        return kall('/api/gjeng', { handling: g, id: G.id, navn: nv, leker: leker }).then(function (d) { b.disabled = false; if (!d._ok) return mld(d.melding || ikke); gaaTilRom(d); });
+      }
+      if (g === 'lov-stem') return kall('/api/gjeng', { handling: 'lov-stem', id: G.id, regel: b.dataset.regel }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
+      if (g === 'lov-opphev') {
+        if (!confirm(EN ? 'Repeal this rule?' : 'Oppheve denne regelen?')) return;
+        return kall('/api/gjeng', { handling: 'lov-valg', id: G.id, kveld: G.lovbok.ventende.kveldId, type: 'opphev', regel: b.dataset.regel }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
+      }
+      if (g === 'varsel') {
+        var paa = !!localStorage.getItem('bd_gjvarsel_' + G.id);
+        b.disabled = true;
+        return navigator.serviceWorker.register('/sw.js').then(function () { return navigator.serviceWorker.ready; }).then(function (reg) {
+          if (paa) return reg.pushManager.getSubscription().then(function (sub) {
+            localStorage.removeItem('bd_gjvarsel_' + G.id);
+            return kall('/api/gjeng', { handling: 'varsel', id: G.id, paa: false, endpoint: sub ? sub.endpoint : '' });
+          });
+          return Notification.requestPermission().then(function (svar) {
+            if (svar !== 'granted') throw new Error(EN ? 'You need to allow notifications.' : 'Du må tillate varsler.');
+            return reg.pushManager.getSubscription().then(function (sub) {
+              if (sub) return sub;
+              return fetch('/api/push/nokkel').then(function (r) { return r.json(); }).then(function (x) {
+                if (!x.nokkel) throw new Error(EN ? 'Notifications aren’t set up yet.' : 'Varsler er ikke satt opp ennå.');
+                return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: tilNokkel(x.nokkel) });
+              });
+            }).then(function (sub) {
+              return kall('/api/gjeng', { handling: 'varsel', id: G.id, sub: sub.toJSON() }).then(function (d) { if (!d._ok) throw new Error(d.melding || ikke); localStorage.setItem('bd_gjvarsel_' + G.id, '1'); });
+            });
+          });
+        }).then(function () { vis(); }, function (e) { b.disabled = false; mld(e.message || ikke); });
+      }
       if (g === 'lov-anke' || g === 'lov-veto') {
         var mitt = ''; try { mitt = JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (x) {}
         var navnInn = prompt(EN ? 'Your name in the crew' : 'Navnet ditt i gjengen', mitt); if (navnInn === null) return;
@@ -276,6 +348,15 @@ const no = lang === 'no';
         return kall('/api/gjeng', { handling: 'slett-kveld', id: G.id, kveld: Number(b.dataset.id) }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
       }
     });
+    root.addEventListener('submit', function (e) {
+      if (!e.target || e.target.id !== 'lbValg' || !G || !G.lovbok || !G.lovbok.ventende) return;
+      e.preventDefault();
+      var tx = root.querySelector('#lbTekst').value.trim();
+      if (tx.length < 4) return;
+      kall('/api/gjeng', { handling: 'lov-valg', id: G.id, kveld: G.lovbok.ventende.kveldId, type: 'ny', tekst: tx }).then(function (d) { if (!d._ok) { var m = root.querySelector('#gjMld'); if (m) m.innerHTML = feil(d.melding || ''); return; } hent(); });
+    });
+    // Kommer man tilbake til siden (f.eks. fra et varsel), hentes kvelden på nytt
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && kode && G && document.getElementById('gjeng') === root) hent(); });
     if (kode) hent(); else mine();
   })();
   </script>
