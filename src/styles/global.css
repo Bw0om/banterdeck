@@ -1821,3 +1821,84 @@ body:not(.humor) .tool.dice{display:none}
 .bs-hurtig .rom-valg{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px}
 .bs-hurtig .rom-valg button{flex:1 1 auto;min-width:0;justify-content:center;text-align:center}
 .bs-hvorfor{margin:-2px 4px 10px;font-size:12px}
+
+/* ---------- Rom: lettere å forstå for nye ---------- */
+.rom-hodeknapper{gap:6px!important;align-items:flex-start}
+.rom-hk{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;padding:0;color:var(--ink2);cursor:pointer;min-width:42px}
+.rom-hk-ikon{width:42px;height:42px;border-radius:50%;background:var(--ink2);color:var(--gold);display:grid;place-items:center;font-size:19px;line-height:1}
+.rom-hk-tekst{font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.01em;line-height:1}
+.rom-hk:active .rom-hk-ikon{transform:scale(.92)}
+@media (max-width:400px){.rom-hk{min-width:38px}.rom-hk-ikon{width:38px;height:38px;font-size:17px}}
+.reak-hint{text-align:center;margin:2px auto 4px;max-width:360px}
+.rom-steg{display:flex;align-items:center;gap:10px;margin-top:22px}
+.rom-steg span{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--ink2);font-size:15px;font-weight:800;flex:none}
+.rom-antall{margin:-6px 0 14px}
+.rom-nivahint{margin:12px 0 8px}
+.rom-lek.for-fa{opacity:.6}
+.rom-lek.for-fa p{margin:4px 0 0}
+.rom-anbefalt{display:grid;gap:8px;margin:0 0 6px}
+.rom-anbefalt-lek{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;text-align:left;padding:14px 16px;border-radius:18px;border:1px solid rgba(244,183,64,.5);background:linear-gradient(135deg,rgba(244,183,64,.16),rgba(255,106,77,.08));color:var(--ink);font:inherit;cursor:pointer}
+.rom-anbefalt-lek b{font-family:var(--display);font-size:18px}
+.rom-anbefalt-lek span{grid-column:1;font-size:13.5px;color:var(--muted);line-height:1.35}
+.rom-anbefalt-lek i{grid-column:2;grid-row:1 / span 2;font-style:normal;width:40px;height:40px;border-radius:50%;background:var(--gold);color:var(--ink2);display:grid;place-items:center;font-size:15px}
+.rom-intro{margin:12px 0 16px;padding:16px 18px;border-radius:20px;background:linear-gradient(135deg,rgba(63,184,169,.16),rgba(244,183,64,.1));border:1px solid rgba(63,184,169,.45)}
+.rom-intro ol{list-style:none;margin:8px 0 10px;padding:0;display:grid;gap:10px;counter-reset:steg}
+.rom-intro li{position:relative;padding-left:38px;counter-increment:steg}
+.rom-intro li::before{content:counter(steg);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:800;font-size:14px}
+.rom-intro li.ok::before{content:'✓';background:#3fb8a9;color:#0d0a06}
+.rom-intro li > b{display:block}
+.rom-intro li span{display:block;font-size:14px;color:var(--muted);line-height:1.4}
+.rom-regler{margin:6px auto 12px;max-width:520px;padding:10px 14px;border-radius:16px;background:rgb(var(--ink-rgb) / .05);border:1px solid var(--border);text-align:left}
+.rom-regler summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--muted)}
+.rom-regler[open] summary{color:var(--ink)}
+.rom-regler ol{margin:8px 0 2px;padding-left:20px;display:grid;gap:6px;font-size:14.5px;line-height:1.4}
+.rom-vert{display:block!important}
+.rom-vert-rask{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px}
+.rom-verktoy{border-radius:18px;background:var(--card);border:1px solid var(--border);padding:4px 6px}
+.rom-verktoy summary{cursor:pointer;padding:10px 10px;font-weight:700;color:var(--muted)}
+.rom-verktoy[open] summary{color:var(--ink)}
+.rom-verktoy-rad{display:grid;grid-template-columns:34px 1fr;gap:0 10px;width:100%;text-align:left;padding:10px 10px;border:0;border-top:1px solid var(--border);background:none;color:var(--ink);font:inherit;cursor:pointer}
+.rom-verktoy-rad span{grid-row:1 / span 2;font-size:22px;line-height:34px;text-align:center}
+.rom-verktoy-rad b{font-family:var(--display);font-size:15.5px}
+.rom-verktoy-rad small{font-size:13px;color:var(--muted);line-height:1.35}
+.rom-verktoy-rad:hover{background:rgb(var(--ink-rgb) / .04)}
+.rom-boks.skjult-lag{display:none}
+.rom-annet{margin:10px 0 0;text-align:center}
+.rom-slik{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 6px;padding:0;counter-reset:slik}
+.rom-slik li{counter-increment:slik;padding:12px 10px;border-radius:16px;background:var(--card);border:1px solid var(--border);text-align:center}
+.rom-slik li::before{content:counter(slik);display:grid;place-items:center;width:26px;height:26px;margin:0 auto 6px;border-radius:50%;background:var(--gold);color:var(--ink2);font-weight:800;font-size:14px}
+.rom-slik b{display:block;font-family:var(--display);font-size:14.5px;line-height:1.2}
+.rom-slik span{display:block;font-size:12px;color:var(--muted);line-height:1.3;margin-top:3px}
+.rom-intro li > b{display:block;font-family:var(--display);font-size:16px}
+.rom-intro li span b{display:inline;font-family:inherit;font-size:inherit}
+/* Forsiden: tydelig hva man gjør først */
+.h2-cta{display:grid;gap:12px;margin-top:4px}
+.h2-hoved{display:flex;align-items:center;justify-content:center;gap:10px;min-height:60px;border-radius:20px;background:var(--ink2);color:#f4ebdc;font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:-.01em;text-decoration:none}
+.h2-hoved:hover{text-decoration:none;filter:brightness(1.15)}
+.h2-kode{display:grid;gap:6px}
+.h2-kode label{font-weight:700;font-size:14px;color:var(--ink2)}
+.h2-kode-rad{display:flex;gap:8px}
+.h2-kode input{flex:1;min-width:0;height:54px;box-sizing:border-box;border-radius:16px;border:2px solid var(--ink2);background:rgba(255,253,248,.55);color:var(--ink2);font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.2em;text-align:center;text-transform:uppercase;padding:0 10px}
+.h2-kode input::placeholder{color:rgba(29,22,12,.35)}
+.h2-kode button{height:54px;padding:0 20px;border-radius:16px;border:2px solid var(--ink2);background:transparent;color:var(--ink2);font-family:var(--display);font-weight:800;font-size:17px;cursor:pointer}
+.h2-kode button:hover{background:var(--ink2);color:#f4ebdc}
+.h2-slik{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px;padding:0;counter-reset:h2slik}
+.h2-slik[hidden]{display:none}
+.h2-slik li{counter-increment:h2slik;padding:12px 8px;border-radius:16px;background:var(--card);border:1px solid var(--border);text-align:center}
+.h2-slik li::before{content:counter(h2slik);display:grid;place-items:center;width:26px;height:26px;margin:0 auto 6px;border-radius:50%;background:var(--gold);color:var(--ink2);font-weight:800;font-size:14px}
+.h2-slik b{display:block;font-family:var(--display);font-size:14px;line-height:1.2}
+.h2-slik span{display:block;font-size:12px;color:var(--muted);line-height:1.3;margin-top:3px}
+.h2-rom[hidden]{display:none}
+/* Menyen nederst: tekst under alle ikonene, så nye skjønner hva knappene gjør */
+@media (max-width:899px){
+  .tabbar{padding:6px}
+  .tabbar a{flex:1 1 0!important;flex-direction:column;height:54px;gap:2px;padding:0 2px;border-radius:22px;font-size:10.5px;letter-spacing:0}
+  .tabbar .tl{position:static!important;width:auto!important;height:auto!important;clip:auto!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  .tabbar .ti{height:22px}
+  body{padding-bottom:calc(env(safe-area-inset-bottom) + 100px)}
+}
+.h2-kode input{width:auto!important}
+.h2-kode-rad button{flex:none}
+.h2-cta,.h2-cta > *,.h2-kode-rad{min-width:0}
+.h2-kode input{flex:1 1 0}
+.bs-regler{margin:2px 0 10px!important}

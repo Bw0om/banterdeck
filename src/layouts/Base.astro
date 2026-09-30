@@ -263,7 +263,7 @@ const isCurrent = (href: string) => {
     <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
       <span class="ti"><Icon name="drikkeleker" size={22} /></span><span class="tl">{lang === 'no' ? 'Leker' : 'Games'}</span></a>
     <a href={lang === 'no' ? '/no/rom' : '/room'} aria-current={isCurrent(lang === 'no' ? '/no/rom' : '/room') ? 'page' : undefined}>
-      <span class="ti"><Icon name="terning" size={22} /></span><span class="tl">{lang === 'no' ? 'Spill sammen' : 'Play together'}</span></a>
+      <span class="ti"><Icon name="terning" size={22} /></span><span class="tl">{lang === 'no' ? 'Spill sammen' : 'Play'}</span></a>
     <a href={lang === 'no' ? '/no/nyhetsrunden' : '/plan'} aria-current={isCurrent(lang === 'no' ? '/no/nyhetsrunden' : '/plan') ? 'page' : undefined}>
       <span class="ti"><Icon name="nyhet" size={22} /></span><span class="tl">{lang === 'no' ? 'Nyheter' : 'Plan'}</span></a>
     <a href={path(lang, '/situations')} aria-current={isCurrent(path(lang, '/situations')) || current.includes('/categories/') || isCurrent(path(lang, '/ord')) || isCurrent(path(lang, '/uttrykk')) ? 'page' : undefined}>
