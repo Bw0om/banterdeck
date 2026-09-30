@@ -99,6 +99,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (!meg || opptatt) return;
       opptatt = true;
       h.id = meg.id; h.pollett = meg.pollett;
+      if (h.handling === 'slurk') egenSlurkT = Date.now();
       if (h.handling === 'start' && h.lek) h.sett = (settListe()[h.lek] || []).slice(-1500);
       api('POST', '/api/rom/' + kode, h).then(function (d) { opptatt = false; ta(d); })
         .catch(function (e) { opptatt = false; if (e.kode === 'pluss') return visPlussTilbud(); toast(e.message); if (e.kode === 'ikke-med') glemRom(); });
@@ -107,6 +108,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     function gjorAlltid(h) {
       if (!meg) return;
       h.id = meg.id; h.pollett = meg.pollett;
+      if (h.handling === 'slurk') egenSlurkT = Date.now();
       ko = ko.then(function () { return api('POST', '/api/rom/' + kode, h).then(ta).catch(function (e) { toast(e.message); }); });
     }
     var henter = false, henteIgjen = false;
@@ -168,28 +170,93 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     /* ---------- lyd: små effekter laget i nettleseren (ingen lydfiler) ---------- */
     var lyd = { ctx: null, paa: les('bd_lyd') !== false };
     function lydCtx() {
-      if (!lyd.ctx) { try { lyd.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+      if (!lyd.ctx) {
+        try { lyd.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+        // Alt går gjennom en kompressor og en forsterker: høyere og jevnere, så lydene høres over musikken
+        try {
+          var k = lyd.ctx.createDynamicsCompressor(); k.threshold.value = -18; k.knee.value = 8; k.ratio.value = 6; k.attack.value = 0.002; k.release.value = 0.2;
+          var g = lyd.ctx.createGain(); g.gain.value = 2.2; k.connect(g); g.connect(lyd.ctx.destination); lyd.ut = k;
+        } catch (e) { lyd.ut = lyd.ctx.destination; }
+      }
       if (lyd.ctx.state === 'suspended') lyd.ctx.resume().catch(function () {});
       return lyd.ctx;
     }
     // Telefoner krever et trykk før lyd kan spilles – lås opp ved første berøring
     document.addEventListener('pointerdown', function () { if (lyd.paa) lydCtx(); }, { passive: true });
-    function tone(f, t0, varighet, type, volum, tilF) {
+    function tone(f, t0, varighet, type, volum, tilF, vibrato) {
       var c = lyd.ctx; if (!c) return;
       var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
       o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
       if (tilF) o.frequency.exponentialRampToValueAtTime(tilF, t + varighet);
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(volum || 0.2, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + varighet);
-      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + varighet + 0.02);
+      if (vibrato) { var l = c.createOscillator(), lg = c.createGain(); l.frequency.value = vibrato; lg.gain.value = f * 0.025; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t + varighet + 0.05); }
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(volum || 0.2, t + 0.012); g.gain.setValueAtTime(volum || 0.2, t + Math.max(0.013, varighet * 0.6)); g.gain.exponentialRampToValueAtTime(0.0001, t + varighet);
+      o.connect(g); g.connect(lyd.ut || c.destination); o.start(t); o.stop(t + varighet + 0.02);
+    }
+    /** Støy (klirr, kortstokk, trommeslag) – filtrert rundt en frekvens. */
+    function stoy(t0, varighet, volum, frekvens, filtertype) {
+      var c = lyd.ctx; if (!c) return;
+      var n = Math.max(1, Math.floor(c.sampleRate * varighet)), buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
+      for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+      var src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(), t = c.currentTime + t0;
+      src.buffer = buf; f.type = filtertype || 'bandpass'; f.frequency.value = frekvens || 3000; g.gain.value = volum || 0.3;
+      src.connect(f); f.connect(g); g.connect(lyd.ut || c.destination); src.start(t);
+    }
+    /** Lufthorn: flere skurrende toner litt ved siden av hverandre – skjærer gjennom musikk. */
+    function horn(t0, varighet) {
+      [466, 470, 587, 592, 698].forEach(function (f) { tone(f * 0.97, t0, varighet, 'sawtooth', 0.06, f); });
     }
     function spillLyd(navn) {
       if (!lyd.paa || !lydCtx()) return;
       if (navn === 'tikk') tone(1800, 0, 0.03, 'square', 0.05);
       if (navn === 'ding') { tone(880, 0, 0.35, 'triangle', 0.25); tone(1320, 0.12, 0.5, 'triangle', 0.2); }
-      if (navn === 'tur') { tone(660, 0, 0.14, 'sine', 0.2); tone(880, 0.13, 0.14, 'sine', 0.2); tone(1175, 0.26, 0.3, 'sine', 0.22); }
-      if (navn === 'slurk') { tone(320, 0, 0.12, 'sine', 0.3, 180); tone(300, 0.14, 0.12, 'sine', 0.3, 160); tone(280, 0.28, 0.16, 'sine', 0.3, 140); }
-      if (navn === 'pop') tone(600, 0, 0.08, 'sine', 0.12, 900);
+      // Din tur: tre lyse toner og en høy «pling» på slutten
+      if (navn === 'tur') { tone(784, 0, 0.12, 'square', 0.09); tone(1047, 0.11, 0.12, 'square', 0.09); tone(1568, 0.22, 0.35, 'triangle', 0.25); tone(2093, 0.22, 0.35, 'sine', 0.12); }
+      // Du må drikke: to lufthorn-støt og så «glugg glugg»
+      if (navn === 'slurk') {
+        horn(0, 0.28); horn(0.36, 0.6);
+        [1.05, 1.25, 1.45].forEach(function (t) { tone(260, t, 0.13, 'sine', 0.35, 780); });
+      }
+      if (navn === 'pop') tone(600, 0, 0.08, 'sine', 0.14, 900);
       if (navn === 'svar') { tone(523, 0, 0.12, 'triangle', 0.18); tone(784, 0.1, 0.25, 'triangle', 0.18); }
+      // Kassaapparat: klikk + to lyse bjeller
+      if (navn === 'kaching') { stoy(0, 0.06, 0.4, 5000, 'highpass'); tone(2093, 0.05, 0.25, 'triangle', 0.22); tone(2637, 0.13, 0.6, 'triangle', 0.22); tone(3136, 0.13, 0.6, 'sine', 0.08); }
+      if (navn === 'mynt') { tone(1760, 0, 0.07, 'square', 0.06); tone(2637, 0.06, 0.2, 'triangle', 0.14); }
+      // Tap: trist trombone «womp womp womp wooomp»
+      if (navn === 'womp') { tone(311, 0, 0.28, 'sawtooth', 0.09); tone(294, 0.3, 0.28, 'sawtooth', 0.09); tone(277, 0.6, 0.28, 'sawtooth', 0.09); tone(262, 0.9, 0.9, 'sawtooth', 0.09, 247, 6); }
+      // Dramatisk «dun dun DUNN» når noe blir meldt
+      if (navn === 'dundun') { stoy(0, 0.25, 0.5, 120, 'lowpass'); tone(196, 0, 0.3, 'sawtooth', 0.1); tone(185, 0.35, 0.3, 'sawtooth', 0.1); stoy(0.7, 0.5, 0.6, 100, 'lowpass'); tone(156, 0.7, 1.1, 'sawtooth', 0.12, 150, 5); }
+      // Seier: fanfare
+      if (navn === 'fanfare') { [523, 659, 784].forEach(function (f, i) { tone(f, i * 0.13, 0.14, 'square', 0.08); }); tone(1047, 0.42, 0.7, 'square', 0.09, null, 6); tone(1319, 0.42, 0.7, 'triangle', 0.12); tone(784, 0.42, 0.7, 'triangle', 0.1); }
+      // Kortstokk som stokkes
+      if (navn === 'bytt') { for (var i = 0; i < 5; i++) stoy(i * 0.045, 0.04, 0.35, 2500 + i * 300); tone(900, 0.25, 0.1, 'triangle', 0.1, 1400); }
+    }
+    /** Stor beskjed over hele skjermen når du må drikke – synes og høres selv med musikk på. */
+    var drikkEl = null, drikkN = 0, drikkTimer = null, egenSlurkT = 0;
+    function drikkAlarm(n) {
+      drikkN = drikkEl ? drikkN + n : n;
+      var fri = tilstand && tilstand.alkoholfri;
+      if (!drikkEl) { drikkEl = document.createElement('div'); drikkEl.className = 'drikk-alarm'; drikkEl.setAttribute('role', 'alert'); drikkEl.addEventListener('click', function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }); document.body.appendChild(drikkEl); spillLyd('slurk'); }
+      drikkEl.innerHTML = '<b>' + (fri ? '⚠️ ' + T('STRAFFEPOENG!', 'PENALTY!') : '🍺 ' + T('DRIKK!', 'DRINK!')) + '</b><span>' + drikkN + ' ' + (fri ? T(drikkN === 1 ? 'straffepoeng' : 'straffepoeng', drikkN === 1 ? 'point' : 'points') : T(drikkN === 1 ? 'slurk' : 'slurker', drikkN === 1 ? 'sip' : 'sips')) + '</span><small>' + T('Trykk for å lukke', 'Tap to close') + '</small>';
+      try { navigator.vibrate && navigator.vibrate([300, 120, 300, 120, 500]); } catch (e) {}
+      clearTimeout(drikkTimer); drikkTimer = setTimeout(function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }, 3200);
+    }
+    function sjekkSlurker(gammel, ny) {
+      if (!gammel || !ny || !ny.meg) return;
+      var f = (gammel.spillere || []).find(function (p) { return p.id === ny.meg; }), e = (ny.spillere || []).find(function (p) { return p.id === ny.meg; });
+      if (!f || !e) return;
+      var diff = (e.slurker || 0) - (f.slurker || 0);
+      if (diff > 0 && diff < 60 && Date.now() - egenSlurkT > 2500) drikkAlarm(diff);   // ikke når du fører dine egne slurker
+    }
+    /** Lyd når en aksje blir meldt, og fanfare når kvelden eller børsen kårer en vinner. */
+    var meldtSett = null, vinnerSett = null;
+    function sjekkHendelser(d) {
+      var b = d && d.bors, ider = {};
+      (b ? b.aksjer : []).forEach(function (a) { if (a.status === 'meldt') ider[a.id] = 1; });
+      if (meldtSett && Object.keys(ider).some(function (id) { return !meldtSett[id]; })) spillLyd('dundun');
+      meldtSett = ider;
+      var v = (d.kveld && d.kveld.vinner) || (b && b.slutt && b.slutt.konge) || '';
+      if (vinnerSett !== null && v && v !== vinnerSett) spillLyd('fanfare');
+      vinnerSett = v;
     }
     /** Tikk som går saktere og saktere mens hjulet spinner, og et pling når det stopper. */
     function hjulLyd(ms) {
@@ -242,6 +309,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (tilstand && d.spill && /nyhetsrunden:svar|mest:resultat|forraeder:avslort|tosannheter:avslort/.test(fase) && fase !== sisteFase) spillLyd('svar');
       sisteFase = fase;
       if (d.versjon) versjon = d.versjon;
+      sjekkSlurker(tilstand, d);
+      try { sjekkHendelser(d); } catch (x) {}
       tilstand = d;
       sjekkSprak(d);
       if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
@@ -1154,9 +1223,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         setTimeout(function () { el.remove(); }, 2600);
         if (!(r.til && r.til === tilstand.meg) && r.fra !== tilstand.meg) spillLyd('pop');
         if (r.til && r.til === tilstand.meg) {
-          spillLyd('slurk');
-          toast(navn(r.fra) + T(' sendte deg en slurk 🍺', ' sent you a sip 🍺'));
-          try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {}
+          toast(navn(r.fra) + T(' sendte deg en slurk 🍺', ' sent you a sip 🍺'));   // lyd og DRIKK-varsel kommer fra slurketelleren
         }
       });
       sisteReak = nyeste;
@@ -1356,11 +1423,11 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       el.innerHTML = '<b>' + (pluss ? '+' : '−') + Math.abs(e.kr).toLocaleString(LOKALE) + T(' kr', ' 🪙') + (stor ? (pluss ? ' 💰' : ' 💸') : '') + '</b><span>' + esc(e.t || '') + '</span>';
       document.body.appendChild(el);
       if (stor && navigator.vibrate) try { navigator.vibrate(pluss ? [40, 60, 40] : 120); } catch (x) {}
-      if (stor && pluss) try { spillLyd('svar'); } catch (x) {}
+      try { spillLyd(pluss ? (stor ? 'kaching' : 'mynt') : (stor ? 'womp' : '')); } catch (x) {}
       setTimeout(function () { el.remove(); }, 2600);
     }
     var borsReglerApen = false; window.__bdBsRegler = function (v) { borsReglerApen = v; };
-    var borsModal = null, borsFane = 'aksjer', borsMeld = null, borsAnmeld = null, borsTikkSendt = 0, borsFilter = 'apne', borsApen = null;
+    var borsBytt = null, borsModal = null, borsFane = 'aksjer', borsMeld = null, borsAnmeld = null, borsTikkSendt = 0, borsFilter = 'apne', borsApen = null;
     function kr(n) { return Math.round(n).toLocaleString(LOKALE) + T(' kr', ' 🪙'); }
     function borsTrengerMeg() {
       var b = tilstand && tilstand.bors; if (!b || !b.paa) return '';
@@ -1505,7 +1572,13 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var anmeld = kanMelde ? '<button class="btn small ghost bs-anmeldknapp" data-b="meld-rask" data-a="' + a.id + '" type="button">📣 ' + T('Det skjedde!', 'It happened!') + '</button>' : (a.status === 'avgjort' && tilstand.bors.paa && a.vinnere && a.vinnere.length) ? '<button class="btn small ghost bs-anmeldknapp" data-b="anmeld-aapne" data-a="' + a.id + '" type="button">🚨 ' + T('Anmeld', 'Report') + '</button>' : '';
       // Bytt: aksjer på hånda du ikke eier noe i kan byttes mot en ny fra potten
       var hd = tilstand.bors.hand;
-      var bytt = a.iHand && a.status === 'apen' && !mine.length && hd && tilstand.bors.paa ? '<button class="btn small ghost bs-byttknapp" data-b="bytt" data-a="' + a.id + '" type="button" title="' + T('Bytt mot en ny aksje', 'Swap for a new share') + '">🔄 ' + (hd.gratis ? T('Bytt', 'Swap') : T('Bytt · ', 'Swap · ') + kr(hd.pris)) + '</button>' : '';
+      var bytt = '';
+      if (a.iHand && a.status === 'apen' && !mine.length && hd && tilstand.bors.paa) {
+        var sl = tilstand.alkoholfri ? T('1 straffepoeng', '1 penalty point') : T('1 slurk 🍺', '1 sip 🍺');
+        bytt = borsBytt === a.id
+          ? '<span class="bs-byttvalg">' + T('Bytt for:', 'Swap for:') + ' <button class="btn small gold" data-b="bytt-ok" data-med="kr" data-a="' + a.id + '" type="button">' + kr(hd.pris) + '</button><button class="btn small gold" data-b="bytt-ok" data-med="slurk" data-a="' + a.id + '" type="button">' + sl + '</button><button class="linkbtn" data-b="bytt" data-a="' + a.id + '" type="button">' + T('Avbryt', 'Cancel') + '</button></span>'
+          : '<button class="btn small ghost bs-byttknapp" data-b="bytt" data-a="' + a.id + '" type="button" title="' + T('Bytt mot en ny aksje', 'Swap for a new share') + '">🔄 ' + T('Bytt', 'Swap') + '</button>';
+      }
       return '<div class="bs-kompakt' + (a.status === 'avgjort' || a.status === 'ugyldig' ? ' ferdig' : '') + '"><button type="button" class="bs-kompakt-knapp" data-b="aksje-aapne" data-a="' + a.id + '">' +
         '<span class="bs-kompakt-q">' + esc(a.q) + '</span><span class="bs-kompakt-meta">' + venstre + '</span><span class="bs-kompakt-hoyre">' + hoyre + '</span></button>' + (anmeld || bytt ? '<div class="bs-kompakt-knapper">' + anmeld + bytt + '</div>' : '') +
         (borsAnmeld === a.id ? anmeldSkjema(a) : '') + '</div>';
@@ -1603,7 +1676,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
          T('Selge: du må ha eid aksjen i 10 minutter, og 25 % går til kurtasje.', 'Selling: you must hold the share for 10 minutes, and 25% goes in fees.'),
          T('Kursen på deg selv er skjult. Blir det deg, får du 30 kr i hovedrollebonus.', 'Your own price is hidden. If it’s you, you get a 30 starring bonus.'),
          T('Du har din egen hånd på 6 aksjer, trukket tilfeldig fra kveldens pott (40 aksjer, 100 med Pluss). Ingen vet hvem som har de samme – eller aksjen om dem.', 'You have your own hand of 6 shares, drawn at random from tonight’s pot (40 shares, 100 with Plus). Nobody knows who holds the same ones – or the one about them.'),
-         T('Liker du ikke en aksje? Trykk «🔄 Bytt». De første byttene er gratis, så koster det 20 kr. Stenger eller avgjøres en aksje, får du en ny.', 'Don’t like a share? Tap “🔄 Swap”. The first swaps are free, then it costs 20. When a share closes or settles, you get a new one.'),
+         T('Liker du ikke en aksje? Trykk «🔄 Bytt» – det koster 25 kr eller én slurk, du velger. Stenger eller avgjøres en aksje, får du en ny gratis.', 'Don’t like a share? Tap “🔄 Swap” – it costs 25 or one sip, your choice. When a share closes or settles, you get a new one for free.'),
          T('Skjer det? Trykk «📣 Det skjedde!» – aksjen avsløres for alle, låses, og de andre stemmer. Blir det bekreftet, får du 20 kr i meldebonus – også om du ikke eide noe i den.', 'Did it happen? Tap “📣 It happened!” – the share is revealed to everyone, locks and the others vote. If confirmed, you get a 20 reporter bonus – even if you didn’t own any.'),
          T('Innsidehandel: har en vinner fikset det sammen med noen, kan hen anmeldes under «Avgjort». Skyldig mister hele gevinsten, får 300 kr i bot og 5 slurker.', 'Insider trading: if a winner set it up with someone, report them under “Settled”. Guilty loses the whole payout, gets a 300 fine and 5 sips.')].map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></details>';
       ut += reglerHtml;
@@ -1617,8 +1690,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         '<p class="small">' + (borsFilter === 'mine' ? T('Du eier ingen aksjer ennå. Trykk på en aksje under «Åpne» for å kjøpe.', 'You don’t own any shares yet. Tap a share under “Open” to buy.') : borsFilter === 'ferdige' ? T('Ingen aksjer er avgjort ennå.', 'No shares settled yet.') : T('Ingen åpne aksjer akkurat nå.', 'No open shares right now.')) + '</p>';
       if (borsFilter === 'apne') {
         if (b.laaste) ut += '<p class="small bs-pluss">' + b.laaste + T(' aksjer er låst i gratisbørsen. ', ' shares are locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp alle med Pluss', 'Unlock all with Plus') + '</button></p>';
-        if (b.hand) ut += '<p class="small bs-hand">🃏 ' + T('Din hånd: ' + b.hand.str + ' aksjer · ' + (b.hand.gratis ? b.hand.gratis + ' gratis bytter igjen' : 'bytte koster ' + kr(b.hand.pris)) + ' · ' + b.hand.igjen + ' ukjente aksjer i potten', 'Your hand: ' + b.hand.str + ' shares · ' + (b.hand.gratis ? b.hand.gratis + ' free swaps left' : 'swaps cost ' + kr(b.hand.pris)) + ' · ' + b.hand.igjen + ' unseen shares in the pot') + '</p>';
-        if (!b.fri && !b.laaste) ut += '<p class="small bs-pluss">' + T('Gratisbørsen har 40 aksjer i potten i kveld. ', 'The free exchange has 40 shares in the pot tonight. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Med Pluss blir det 100 – og flere gratis bytter', 'Plus makes it 100 – and more free swaps') + '</button></p>';
+        if (b.hand) ut += '<p class="small bs-hand">🃏 ' + T('Din hånd: ' + b.hand.str + ' aksjer · ' + 'bytte koster ' + kr(b.hand.pris) + ' eller en slurk' + ' · ' + b.hand.igjen + ' ukjente aksjer i potten', 'Your hand: ' + b.hand.str + ' shares · ' + 'a swap costs ' + kr(b.hand.pris) + ' or a sip' + ' · ' + b.hand.igjen + ' unseen shares in the pot') + '</p>';
+        if (!b.fri && !b.laaste) ut += '<p class="small bs-pluss">' + T('Gratisbørsen har 40 aksjer i potten i kveld. ', 'The free exchange has 40 shares in the pot tonight. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Med Pluss blir det 100', 'Plus makes it 100') + '</button></p>';
         if (!b.harNotert) ut += '<details class="bs-noter"><summary>' + T('🧾 Noter en egen aksje (200 kr)', '🧾 List your own share (200)') + '</summary><p class="small">' + T('Én per person per kveld. Du får 2 kr for hvert kjøp andre gjør i den, men kan ikke handle i den selv. Verten godkjenner.', 'One per person per night. You get 2 for every purchase others make in it, but can’t trade in it yourself. The host approves.') + '</p>' +
           '<div class="rom-mod"><label><input type="radio" name="bsType" value="hvem" checked> ' + T('Hvem …?', 'Who …?') + '</label> <label><input type="radio" name="bsType" value="janei"> ' + T('Ja/nei', 'Yes/no') + '</label></div>' +
           '<input id="bsNyTekst" maxlength="100" placeholder="' + T('F.eks. «Hvem ringer mamma før midnatt?»', 'E.g. “Who calls their mum before midnight?”') + '"><button class="btn small gold" data-b="noter" type="button">' + T('Noter (200 kr)', 'List (200)') + '</button></details>';
@@ -1684,7 +1757,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (a === 'filter') { borsFilter = b.dataset.f; borsApen = null; borsMeld = null; borsAnmeld = null; return tegnBorsOmrade(true); }
       if (a === 'meld-rask') { borsApen = b.dataset.a; borsMeld = b.dataset.a; borsFilter = borsFilter === 'ferdige' ? 'apne' : borsFilter; tegnBorsOmrade(true); borsLas = !borsModal; return; }
       if (a === 'aksje-aapne') { borsApen = borsApen === b.dataset.a ? null : b.dataset.a; borsMeld = null; return tegnBorsOmrade(true); }
-      if (a === 'bytt') { if (borsApen === b.dataset.a) borsApen = null; return gjorAlltid({ handling: 'bs-bytt', aksje: b.dataset.a }); }
+      if (a === 'bytt') { borsBytt = borsBytt === b.dataset.a ? null : b.dataset.a; return tegnBorsOmrade(true); }
+      if (a === 'bytt-ok') { borsBytt = null; if (borsApen === b.dataset.a) borsApen = null; spillLyd('bytt'); return gjorAlltid({ handling: 'bs-bytt', aksje: b.dataset.a, med: b.dataset.med }); }
       if (a === 'kjop') return gjorAlltid({ handling: 'bs-handel', aksje: b.dataset.a, utfall: b.dataset.u, n: 1 });
       if (a === 'selg') return gjorAlltid({ handling: 'bs-handel', aksje: b.dataset.a, utfall: b.dataset.u, n: -1 });
       if (a === 'meld-aapne') { borsMeld = b.dataset.a; tegnBorsOmrade(true); borsLas = !borsModal; return; }
@@ -2341,7 +2415,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (g === 'avslutt-kvelden' || g === 'fortsett-kvelden') return gjor({ handling: g });
       if (g === 'nullstill' && !confirm(T('Nullstille alle slurkene på tavla?', 'Reset all the sips on the scoreboard?'))) return;
       if (g === 'velg-annen') { visAlle = true; if (erVert()) gjor({ handling: 'velg-annen' }); return tegn(); }
-      if (g === 'lyd') { lyd.paa = !lyd.paa; skriv('bd_lyd', lyd.paa); if (lyd.paa) { lydCtx(); spillLyd('pop'); } return tegn(); }
+      if (g === 'lyd') { lyd.paa = !lyd.paa; skriv('bd_lyd', lyd.paa); if (lyd.paa) { lydCtx(); spillLyd('tur'); } return tegn(); }
       if (g === 'reager') { if (!les('bd_intro_reak')) { skriv('bd_intro_reak', 1); var hh = document.querySelector('.reak-hint'); if (hh) hh.remove(); } return gjorAlltid({ handling: 'reager', e: b.dataset.e }); }
       if (g === 'intro-lukk') { skriv(b.dataset.k, 1); return tegn(); }
       if (g === 'send-velg') return sendVelger();

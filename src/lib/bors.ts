@@ -39,7 +39,7 @@ const STARTKURS = 10, STEG = 6, MAKSKURS = 95;
 // Markedet: hver kveld trekkes en pott fra hele lista. Hver spiller har sin egen hånd – se «markedet» under.
 export const POTT_GRATIS = 40, POTT_PLUSS = 100;   // aksjer i potten per kveld
 export const HAND = 6;                              // aksjer hver spiller har på hånda samtidig
-export const BYTT_GRATIS = 3, BYTT_GRATIS_PLUSS = 8, BYTT_PRIS = 20;   // gratis bytter per kveld, deretter 20 kr
+export const BYTT_PRIS = 25, BYTT_SLURK = 1;   // et bytte koster enten 25 kr eller én slurk
 export const MELDEBONUS = 20;                       // til den som melder noe som blir bekreftet
 const FRIST_MELDING = 90, FRIST_FORSVAR = 60, FRIST_DOM = 45;
 
@@ -484,7 +484,7 @@ export function borsTilPluss(data: any) {
   b.fri = true;
   const n = fyllPott(b);
   delAlle(data);
-  if (n) melde(data, `✨ Pluss! ${n} nye aksjer er lagt i potten – og du får flere gratis bytter.`, `✨ Plus! ${n} new shares added to the pot – and you get more free swaps.`);
+  if (n) melde(data, `✨ Pluss! ${n} nye aksjer er lagt i potten.`, `✨ Plus! ${n} new shares added to the pot.`);
 }
 
 /* ---------- start / slutt ---------- */
@@ -718,11 +718,17 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
   if (hd === 'bs-bytt') {
     const hand = (b.hand && b.hand[meg.id]) || [];
     if (!hand.includes(String(h.aksje))) return { feil: 'ugyldig', melding: 'Den aksjen er ikke på hånda di.', en: 'That share isn’t in your hand.' };
-    b.bytt = b.bytt || {}; const brukt = b.bytt[meg.id] || 0, gratis = b.fri ? BYTT_GRATIS_PLUSS : BYTT_GRATIS;
-    const pris = brukt < gratis ? 0 : BYTT_PRIS;
-    if (pris && saldo(b, meg.id) < pris) return { feil: 'penger', melding: 'Du har ikke nok vorskroner til å bytte.', en: 'You don’t have enough coins to swap.' };
-    if (pris) flytt(b, meg.id, -pris, 'Byttet en aksje', 'Swapped a share');
-    b.bytt[meg.id] = brukt + 1;
+    const a = finn(b, h.aksje);
+    if (a && a.hold[meg.id] && Object.values(a.hold[meg.id].n).some((x: any) => x > 0)) return { feil: 'ugyldig', melding: 'Du kan ikke bytte en aksje du eier.', en: 'You can’t swap a share you own.' };
+    // Et bytte koster alltid noe: vorskroner eller en slurk
+    if (h.med === 'slurk') {
+      straffSlurker(data, meg.id, BYTT_SLURK);
+      melde(data, `🔄 ${meg.navn} byttet en aksje – og tok en slurk for det 🍺`, `🔄 ${meg.navn} swapped a share – and took a sip for it 🍺`);
+    } else {
+      if (saldo(b, meg.id) < BYTT_PRIS) return { feil: 'penger', melding: 'Du har ikke nok vorskroner – bytt med en slurk i stedet.', en: 'Not enough coins – swap for a sip instead.' };
+      flytt(b, meg.id, -BYTT_PRIS, 'Byttet en aksje', 'Swapped a share');
+    }
+    b.bytt = b.bytt || {}; b.bytt[meg.id] = (b.bytt[meg.id] || 0) + 1;
     b.hand[meg.id] = hand.filter((x: string) => x !== String(h.aksje));
     (b.kastet[meg.id] = b.kastet[meg.id] || []).push(String(h.aksje));
     del(data, meg.id);
@@ -890,7 +896,7 @@ export function borsVisning(data: any, meg: any) {
     paa: b.paa, fri: !!b.fri, fokus: !!b.fokus, laaste: b.fri ? 0 : b.aksjer.filter((a: any) => a.laast && ['apen', 'stengt'].includes(a.status)).length,
     saldo: m ? saldo(b, m) : null, formue: m ? Math.round(saldo(b, m) + verdi(m)) : null,
     tavle: data.spillere.map((p: any) => ({ id: p.id, kr: Math.round(saldo(b, p.id) + verdi(p.id)) })).sort((x: any, y: any) => y.kr - x.kr),
-    hand: b.hand && m ? { str: HAND, gratis: Math.max(0, (b.fri ? BYTT_GRATIS_PLUSS : BYTT_GRATIS) - ((b.bytt && b.bytt[m]) || 0)), pris: BYTT_PRIS,
+    hand: b.hand && m ? { str: HAND, pris: BYTT_PRIS, slurk: BYTT_SLURK,
       pott: potStr(b), igjen: (b.pott || []).length } : null,
     aksjer, saker, harNotert: m ? !!b.noterte[m] : false, slutt: b.slutt || null,
     mineGaver: m ? (b.overforinger || []).filter((o: any) => o.fra === m || o.til === m).map((o: any) => ({ fra: o.fra, til: o.til, kr: o.kr })) : [],

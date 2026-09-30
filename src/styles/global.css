@@ -1903,3 +1903,13 @@ body:not(.humor) .tool.dice{display:none}
 .h2-cta,.h2-cta > *,.h2-kode-rad{min-width:0}
 .h2-kode input{flex:1 1 0}
 .bs-regler{margin:2px 0 10px!important}
+/* DRIKK!-varsel: over hele skjermen, blinker og rister – synes selv i et mørkt rom med musikk */
+.drikk-alarm{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:rgba(255,184,0,.93);color:#1a1200;text-align:center;cursor:pointer;animation:drikkInn .35s cubic-bezier(.2,1.6,.4,1),drikkBlink .5s steps(1) 4 .35s}
+.drikk-alarm b{font-size:clamp(56px,18vw,120px);line-height:1;font-weight:900;letter-spacing:-.02em;animation:drikkRist .12s linear 8}
+.drikk-alarm span{font-size:clamp(28px,8vw,48px);font-weight:800}
+.drikk-alarm small{margin-top:18px;font-size:14px;opacity:.7}
+@keyframes drikkInn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes drikkBlink{0%{background:rgba(255,184,0,.93)}50%{background:rgba(255,80,40,.93)}}
+@keyframes drikkRist{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-6px) rotate(-2deg)}75%{transform:translateX(6px) rotate(2deg)}}
+.bs-byttvalg{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px}
+@media (prefers-reduced-motion: reduce){.drikk-alarm,.drikk-alarm b{animation:none}}
