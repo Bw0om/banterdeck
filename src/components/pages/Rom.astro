@@ -405,15 +405,43 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         (siste ? '<p class="small">' + T('Sist: ', 'Last: ') + esc(siste.navn) + ' – ' + siste.plass.map(function (g, i) { return g.map(function (id) { return esc(navn(id)); }).join(' & ') + ' ' + [3, 2, 1][i]; }).join(', ') + '</p>' : '') + '</div>';
     }
     /** Planen verten valgte da kvelden ble startet fra gjengen. */
+    function planLek(id) {
+      var l = (tilstand.leker || []).find(function (x) { return x.id === id; }); if (!l) return null;
+      return { id: l.id, navn: l.navn, modus: l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*', pluss: !!l.pluss };
+    }
+    /** Neste lek i planen: den første som ikke er spilt ennå (etter den som spilles nå). */
+    function nestePlan() {
+      var t = tilstand; if (!t.plan || !t.plan.length) return null;
+      var leker = t.plan.filter(function (id) { return id !== 'bors'; }).map(planLek).filter(Boolean);
+      if (!leker.length) return null;
+      var spilt = (t.historikk || []).map(String), naa = t.spill ? String(t.spill.navn) : '';
+      var ikke = leker.filter(function (l) { return spilt.indexOf(l.navn) === -1 && l.navn !== naa; });
+      if (ikke.length) return ikke[0];
+      // Alt er spilt: start runden på nytt, men ikke samme lek som nå
+      return leker.find(function (l) { return l.navn !== naa; }) || null;
+    }
+    /** Start neste lek i planen – og Vorsbørsen i bakgrunnen første gang, hvis den er med i planen. */
+    function startPlan() {
+      var t = tilstand, l = nestePlan();
+      if (t.plan && t.plan.indexOf('bors') !== -1 && !t.bors) {
+        if (t.spillere.length >= 3) gjorAlltid({ handling: 'bs-start', fokus: !l });
+        else toast(T('Vorsbørsen starter når dere er minst tre.', 'The Exchange starts once there are at least three of you.'));
+      }
+      if (!l) return;
+      if (l.pluss && !t.pluss) return visPlussTilbud();
+      gjorAlltid({ handling: 'start', lek: l.id, modus: l.modus, sett: (settListe()[l.id] || []).slice(-1500) });
+    }
     function planBoks() {
       var t = tilstand; if (!erVert() || !t.plan || !t.plan.length) return '';
-      var spilt = (t.historikk || []).map(String);
-      return '<div class="gk-plan"><p class="rom-etikett">' + T('Kveldens plan', 'Tonight’s plan') + '</p><div class="rom-valg">' + t.plan.map(function (id) {
-        if (id === 'bors') return t.bors ? '' : '<button type="button" data-g="bs-start">📈 ' + T('Vorsbørsen', 'The Exchange') + '</button>';
-        var l = (t.leker || []).find(function (x) { return x.id === id; }); if (!l) return '';
-        var mod = l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*';
-        return '<button type="button" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(mod) + '">' + (spilt.indexOf(l.navn) !== -1 ? '✓ ' : '') + esc(l.navn) + '</button>';
-      }).join('') + '</div></div>';
+      var spilt = (t.historikk || []).map(String), neste = nestePlan(), forste = !spilt.length && !t.bors;
+      return '<div class="gk-plan"><p class="rom-etikett">' + T('Kveldens plan', 'Tonight’s plan') + '</p>' +
+        '<button class="rom-stor-knapp gk-planstart" data-g="plan-start" type="button">' + (forste ? '▶ ' + T('Start kvelden', 'Start the night') : '⏭ ' + T('Neste lek', 'Next game')) +
+          (neste ? '<small>' + esc(neste.navn) + (forste && t.plan.indexOf('bors') !== -1 ? T(' + Vorsbørsen i bakgrunnen', ' + the Exchange in the background') : '') + '</small>' : (t.plan.indexOf('bors') !== -1 ? '<small>' + T('Vorsbørsen', 'The Exchange') + '</small>' : '')) + '</button>' +
+        '<p class="small">' + T('Eller velg fritt fra planen:', 'Or pick freely from the plan:') + '</p><div class="rom-valg">' + t.plan.map(function (id) {
+          if (id === 'bors') return t.bors ? '' : '<button type="button" data-g="bs-start">📈 ' + T('Vorsbørsen', 'The Exchange') + '</button>';
+          var l = planLek(id); if (!l) return '';
+          return '<button type="button" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(l.modus) + '">' + (spilt.indexOf(l.navn) !== -1 ? '✓ ' : '') + esc(l.navn) + '</button>';
+        }).join('') + '</div></div>';
     }
     /** Slutten av kvelden: kveldens vinner – og i en gjeng: vinneren velger regel. */
     function kveldVinnerBoks() {
@@ -470,7 +498,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var t = tilstand;
       if (t.valgt && !visAlle) return valgtLobby();
       if (!erVert()) {
-        return '<div class="rom-vent"><p class="rom-stor">' + T('Venter på at ' + esc(navn(t.vert)) + ' velger en lek …', 'Waiting for ' + esc(navn(t.vert)) + ' to pick a game …') + '</p>' +
+        return '<div class="rom-vent"><p class="rom-stor">' + (t.plan && t.plan.length ? T('Venter på at ' + esc(navn(t.vert)) + ' starter kvelden …', 'Waiting for ' + esc(navn(t.vert)) + ' to start the night …') : T('Venter på at ' + esc(navn(t.vert)) + ' velger en lek …', 'Waiting for ' + esc(navn(t.vert)) + ' to pick a game …')) + '</p>' +
           '<p class="small">' + t.spillere.length + T(' med i rommet. Del koden <b>', ' in the room. Share the code <b>') + esc(kode) + T('</b> med resten.', '</b> with the others.') + '</p>' + romMerker() + '</div>' + gjengBoks() + kveldKort() + reglerKort();
       }
       var borsFull = t.bors && t.bors.paa && !t.bors.fokus ? '<p><button class="btn ghost" data-g="bs-fokus" type="button">' + T('📈 Gjør Vorsbørsen til hovedspill', '📈 Make the Exchange the main game') + '</button></p>' : '';
@@ -1901,6 +1929,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       }
       if (s && s.turStart && erVert()) innhold += '<p class="rom-hopp" data-turstart="' + s.turStart + '" hidden><button class="btn ghost small" data-g="hopp-over" type="button">' + T('Hopp over den som har tur', 'Skip whoever\'s turn it is') + '</button></p>';
       var vert = erVert() ? '<div class="rom-vert">' +
+        (s && tilstand.plan && nestePlan() ? '<button class="btn gold small" data-g="plan-start" type="button">⏭ ' + T('Neste: ', 'Next: ') + esc(nestePlan().navn) + '</button>' : '') +
         (s ? '<button class="btn ghost small" data-g="avslutt" type="button">' + T('Bytt lek', 'Switch game') + '</button>' : '') +
         '<button class="btn ghost small" data-g="nullstill" type="button">' + T('Nullstill slurker', 'Reset sips') + '</button>' +
         (tilstand.ferdig ? '' : '<button class="btn ghost small" data-g="avslutt-kvelden" type="button">' + T('Avslutt kvelden', 'End the night') + '</button>') +
@@ -2017,6 +2046,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (g === 'lov-del') return delLov();
       if (g === 'lov-opphev') { if (!confirm(T('Oppheve denne regelen?', 'Repeal this rule?'))) return; return gjor({ handling: 'lov-valg', type: 'opphev', regel: b.dataset.id }); }
       if (g === 'lov-ingen') { if (!confirm(T('La lovboka være som den er?', 'Leave the law book as it is?'))) return; return gjor({ handling: 'lov-valg', type: 'ingen' }); }
+      if (g === 'plan-start') return startPlan();
       if (g === 'kv-vinner') return gjor({ handling: 'kv-vinner', hvem: b.dataset.id || null });
       if (g === 'slipp-inn' || g === 'avvis-inn') return gjor({ handling: g, hvem: b.dataset.id, som: b.dataset.som || 'gjest' });
       if (g === 'lov-bli') { gjengSjekket = true; return api('POST', '/api/rom/' + kode, { handling: 'gjeng-meg', bli: true, id: meg.id, pollett: meg.pollett }).then(function (d) { gjengSjekk = ''; ta(d); toast(T('Velkommen i gjengen! 🤝', 'Welcome to the crew! 🤝')); }).catch(function (e) { toast(e.message); }); }
