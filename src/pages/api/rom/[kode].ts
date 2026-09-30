@@ -68,7 +68,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   // Språk før vi vet hvem spilleren er: body.lang (bli-med), ellers x-lang-headeren
   const bLang: Sprak = d.lang === 'en' || d.lang === 'no' ? d.lang : hLang;
   // Pluss sjekkes her på serveren – aldri på det nettleseren påstår
-  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble;
+  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble; delete d._borsFri;
   // Gjengen sjekkes også her: verten må være innlogget og med i gjengen
   if (d.handling === 'gjeng' && d.gjengId) {
     try {
@@ -91,6 +91,14 @@ export const POST: APIRoute = async ({ params, request }) => {
       if (!g) return json({ feil: 'ikke-medlem', melding: bLang === 'en' ? 'You’re not in the crew yet.' : 'Du er ikke med i gjengen ennå.' }, 403);
       d._konto = u.id;
     } catch { return json({ feil: 'server', melding: bLang === 'en' ? "Couldn't check the crew. Try again." : 'Fikk ikke sjekket gjengen. Prøv igjen.' }, 503); }
+  }
+  // Vorsbørsen: gjenger som har åpnet konvolutt 6 får hele børsen gratis
+  if (d.handling === 'bs-start' || d.handling === 'bs-lasopp') {
+    try {
+      const rom = await hentRom(kode);
+      const gj = rom && rom.data && rom.data.gjeng;
+      if (gj) { const l = await rpc('gjeng_lov_hent', { p_gjeng: gj.id }); if (l && l.lov && Array.isArray(l.lov.konvolutter) && l.lov.konvolutter.some((k: any) => k.id === 'k6')) d._borsFri = true; }
+    } catch { /* uten opplåsing */ }
   }
   if (d.handling === 'start' && d.lek === 'lov') {
     try {

@@ -14,6 +14,7 @@ import PLUSSPAKKER_EN from '../data/pluss.en.json';
 import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
 import { startLov, lovHandling, lovVisning } from './lov';
+import { borsHandling, borsVisning } from './bors';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
 const D: any = DECKS;
@@ -189,7 +190,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
-    hjulListe: data.hjulListe || (lang === 'en' ? HJUL_STANDARD_EN : HJUL_STANDARD), oppdrag: lok(oppdragVisning(data, meg), lang), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: lok(data.historikk || [], lang),
+    hjulListe: data.hjulListe || (lang === 'en' ? HJUL_STANDARD_EN : HJUL_STANDARD), oppdrag: lok(oppdragVisning(data, meg), lang), bors: lok(borsVisning(data, meg), lang), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: lok(data.historikk || [], lang),
     alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode } : null,
   };
 }
@@ -387,6 +388,12 @@ function handlingInne(data: any, meg: any, h: any) {
   // Bytt språk for denne spilleren ('no' | 'en'). 'lang' godtas også som alias.
   if (h.handling === 'sprak' || h.handling === 'lang') { meg.lang = rensLang(h.lang); return { ok: true }; }
   if (String(h.handling || '').startsWith('op-')) return oppdragHandling(data, meg, h, erVert);
+  if (String(h.handling || '').startsWith('bs-')) {
+    // Pluss i rommet låser opp hele børsen (også om den ble aktivert etter at børsen startet)
+    const r = borsHandling(data, meg, { ...h, _borsFri: h._borsFri || romHarPluss(data) }, erVert);
+    if (data.bors && romHarPluss(data)) data.bors.fri = true;
+    return r;
+  }
   if (h.handling === 'hjul-liste') {
     if (!erVert) return { feil: 'bare-vert' };
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
