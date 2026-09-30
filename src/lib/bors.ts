@@ -1,23 +1,24 @@
 /**
- * Vorsbørsen – et aksjemarked på vennene dine som går i bakgrunnen hele kvelden.
+ * Vorsbørsen – et aksjemarked på vennene dine som går hele kvelden.
  *
- * - Alle starter med 1000 vorskroner. En vinnende aksje betaler 100 kr.
- * - Kursen settes automatisk (LMSR): jo flere som kjøper et utfall, jo dyrere blir det.
- * - «Det skjedde!»: den som melder kan legge ved bilde og/eller et vitne. Så stemmer de andre.
- * - Innsidehandel: du kan ikke kjøpe aksjer i deg selv. Samarbeid anmeldes til Børstilsynet,
- *   der handelsloggen åpnes og de som ikke er involvert stemmer (2/3 = skyldig).
+ * - Alle starter med 1000 vorskroner. Skjer det aksjen spør om, betaler hver aksje 100 kr.
+ * - Hvert utfall (hvert navn, eller ja/nei) er sin egen aksje: kursen starter på 10 kr og stiger for
+ *   hvert kjøp (maks 95). Den som kjøper tidlig, tjener mest.
+ * - Alle aksjene ligger ute fra start. Noen stenger for handel etter én, to eller tre timer, resten er åpne hele kvelden.
+ * - «Det skjedde!» låser aksjen med en gang. Den som melder kan legge ved bilde og/eller vitne, så stemmer de andre.
+ * - Innsidehandel: du kan ikke kjøpe aksjer i deg selv. Bare de som vant på en aksje kan anmeldes.
+ *   Børstilsynet viser handelsloggen og alle pengeoverføringer – en «gave» fra vinneren til den aksjen
+ *   handlet om, er et tydelig tegn på bestikkelse.
  * - Egne aksjer: én per spiller per kveld, koster 200 kr å notere, verten godkjenner.
- *   Den som noterte får 2 kr i meglerhonorar per kjøp andre gjør.
  */
 type Lang = 'no' | 'en';
 type Tekst = { no: string; en: string };
 const T = (no: string, en: string): Tekst => ({ no, en });
 
 export const START_KR = 1000, UTBETALING = 100, NOTERING = 200, HONORAR = 2, BOT_SKYLDIG = 300, BOT_FALSK = 200;
-const B = 6;                         // likviditet: lavere = kursen flytter seg mer per kjøp
-const GRATIS_AKSJER = 3;             // uten Pluss (eller opplåst gjeng): så mange aksjer per kveld
-const INTERVALL = 20 * 60 * 1000;    // ny aksje fra telefonen cirka hvert 20. minutt
-const MAKS_APNE = 6;
+const STARTKURS = 10, STEG = 6, MAKSKURS = 95;
+const GRATIS_AKSJER = 4;                 // uten Pluss (eller opplåst gjeng): så mange av aksjene er åpne
+const ANTALL_HVEM = 9, ANTALL_JANEI = 5;  // så mange aksjer legges ut ved start
 const FRIST_MELDING = 90, FRIST_FORSVAR = 60, FRIST_DOM = 45;
 
 /* ---------- aksjene ---------- */
@@ -106,11 +107,11 @@ export const JANEI: Tekst[] = [
   T('Blir det spilt en ny drikkelek i kveld?', 'Will a new drinking game be played tonight?'),
 ];
 
-/* ---------- kurs (LMSR) ---------- */
-function kostnad(q: number[]) { const m = Math.max(...q); return B * (m / B + Math.log(q.reduce((s, x) => s + Math.exp((x - m) / B), 0))); }
-function kurser(q: number[]) { const m = Math.max(...q), e = q.map((x) => Math.exp((x - m) / B)), s = e.reduce((a, b) => a + b, 0); return e.map((x) => x / s); }
-/** Hva det koster (i kr) å kjøpe n aksjer (negativt n = selge) i utfall i. */
-function pris(q: number[], i: number, n: number) { const q2 = q.slice(); q2[i] += n; return Math.round(UTBETALING * (kostnad(q2) - kostnad(q))); }
+/* ---------- kurs: hvert utfall er sin egen aksje ---------- */
+/** Prisen på neste aksje når n allerede er solgt. */
+const kurs = (n: number) => Math.min(MAKSKURS, STARTKURS + STEG * Math.max(0, n));
+/** Hva du får for én aksje hvis du selger nå (prisen på den siste som ble kjøpt). */
+const salgskurs = (n: number) => (n > 0 ? kurs(n - 1) : 0);
 
 /* ---------- hjelpere ---------- */
 function tilfeldig(n: number) { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
@@ -127,42 +128,44 @@ function trekk(b: any, felt: string, liste: any[]) {
   u.push(i); return liste[i];
 }
 function saldo(b: any, id: string) { if (b.saldo[id] == null) b.saldo[id] = START_KR; return b.saldo[id]; }
+/** Flytt penger og husk hvorfor, så telefonen til den det gjelder kan vise +xx / −xx. */
+function flytt(b: any, id: string, kr: number, no: string, en: string) {
+  kr = Math.round(kr); if (!kr || !id) return;
+  b.saldo[id] = saldo(b, id) + kr;
+  b.bevNr = (b.bevNr || 0) + 1;
+  (b.bev = b.bev || []).push({ n: b.bevNr, id, kr, no, en });
+  if (b.bev.length > 120) b.bev.splice(0, b.bev.length - 120);
+}
+const qNo = (a: any) => String((a && a.q && (a.q.no || a.q)) || ''), qEn = (a: any) => String((a && a.q && (a.q.en || a.q.no || a.q)) || '');
+const kortQ = (t: string) => (t.length > 42 ? t.slice(0, 40).trimEnd() + '…' : t);
 function beholdning(a: any, id: string) { return a.hold[id] || (a.hold[id] = { n: {}, kost: 0, fikk: 0 }); }
+function finn(b: any, id: any) { return b.aksjer.find((a: any) => a.id === id); }
+/** Kan det handles i aksjen akkurat nå? */
+function handelApen(b: any, a: any) { return a.status === 'apen' && (!a.laast || b.fri) && !(a.stenger && Date.now() >= a.stenger); }
 
 /* ---------- aksjer ---------- */
-function lagAksje(data: any, type: 'hvem' | 'janei', q: any, av: string | null = null) {
+function lagAksje(data: any, type: 'hvem' | 'janei', q: any, av: string | null = null, stenger: number | null = null) {
   const b = data.bors;
   const utfall = type === 'hvem' ? data.spillere.map((p: any) => p.id) : ['ja', 'nei'];
-  const a: any = { id: nyId(), type, q, av, laget: Date.now(), status: av ? 'venter' : 'apen', utfall, qs: utfall.map(() => 0), hold: {}, handler: [], melding: null, vinner: null };
-  b.aksjer.push(a); b.antall = (b.antall || 0) + 1;
+  const a: any = { id: nyId(), type, q, av, laget: Date.now(), stenger, status: av ? 'venter' : 'apen', utfall, qs: utfall.map(() => 0), hold: {}, handler: [], melding: null, vinner: null,
+    laast: !av && !b.fri && b.aksjer.filter((x: any) => !x.av).length >= GRATIS_AKSJER };
+  b.aksjer.push(a);
   return a;
 }
-function kanNyAksje(b: any) { return b.fri || (b.antall || 0) < GRATIS_AKSJER; }
-function nyAutomatisk(data: any) {
-  const b = data.bors;
-  if (!kanNyAksje(b) || b.aksjer.filter((a: any) => a.status === 'apen').length >= MAKS_APNE) { b.neste = Date.now() + INTERVALL; return false; }
-  const hvem = b.aksjer.filter((a: any) => a.type === 'hvem').length <= b.aksjer.filter((a: any) => a.type === 'janei').length * 2;
-  const a = hvem ? lagAksje(data, 'hvem', trekk(b, 'hvem', HVEM)) : lagAksje(data, 'janei', trekk(b, 'janei', JANEI));
-  b.neste = Date.now() + INTERVALL;
-  melde(data, '📈 Ny aksje på Vorsbørsen: ' + (a.q.no || a.q), '📈 New share on the Exchange: ' + (a.q.en || a.q));
-  return true;
-}
-/** Nye spillere får et utfall i «hvem»-aksjer som fortsatt er åpne. */
+/** Nye spillere får et utfall i «hvem»-aksjer som ikke er avgjort. */
 function oppdaterUtfall(data: any) {
   (data.bors.aksjer || []).forEach((a: any) => {
-    if (a.type !== 'hvem' || (a.status !== 'apen' && a.status !== 'venter')) return;
+    if (a.type !== 'hvem' || !['apen', 'venter', 'stengt'].includes(a.status)) return;
     data.spillere.forEach((p: any) => { if (!a.utfall.includes(p.id)) { a.utfall.push(p.id); a.qs.push(0); } });
   });
 }
-function finn(b: any, id: any) { return b.aksjer.find((a: any) => a.id === id); }
-
 /** Utbetaling når en aksje er avgjort. Vinner = utfall-id, eller null = ugyldig (alle får kostpris tilbake). */
 function oppgjor(data: any, a: any, vinner: string | null) {
   const b = data.bors;
   a.status = vinner ? 'avgjort' : 'ugyldig'; a.vinner = vinner; a.avgjort = Date.now();
   Object.entries(a.hold).forEach(([id, h]: any) => {
     const kr = vinner ? (h.n[vinner] || 0) * UTBETALING : h.kost;
-    if (kr > 0) { b.saldo[id] = saldo(b, id) + kr; h.fikk = kr; }
+    if (kr > 0) { flytt(b, id, kr, vinner ? 'Utbetaling: ' + kortQ(qNo(a)) : 'Pengene tilbake: ' + kortQ(qNo(a)), vinner ? 'Payout: ' + kortQ(qEn(a)) : 'Refund: ' + kortQ(qEn(a))); h.fikk = kr; }
   });
   if (b.bilder) delete b.bilder[a.id];
   a.melding = null;
@@ -171,18 +174,24 @@ function oppgjor(data: any, a: any, vinner: string | null) {
 /* ---------- start / slutt ---------- */
 export function startBors(data: any, fri: boolean, fokus = false) {
   if (data.spillere.length < 3) return { feil: 'for-faa', melding: 'Vorsbørsen trenger minst tre spillere.', en: 'The Exchange needs at least three players.' };
-  data.bors = { paa: true, start: Date.now(), saldo: {}, aksjer: [], saker: [], bilder: {}, noterte: {}, fri: !!fri, fokus: !!fokus, antall: 0, neste: Date.now() + INTERVALL, brukt: {} };
-  data.spillere.forEach((p: any) => saldo(data.bors, p.id));
-  lagAksje(data, 'hvem', trekk(data.bors, 'hvem', HVEM));
-  lagAksje(data, 'janei', trekk(data.bors, 'janei', JANEI));
-  melde(data, '📈 Vorsbørsen har åpnet! Alle har 1000 vorskroner.', '📈 The Pre-game Exchange is open! Everyone has 1,000 coins.');
+  data.bors = { paa: true, start: Date.now(), saldo: {}, aksjer: [], saker: [], bilder: {}, noterte: {}, overforinger: [], fri: !!fri, fokus: !!fokus, brukt: {} };
+  const b = data.bors;
+  data.spillere.forEach((p: any) => saldo(b, p.id));
+  // Blandet rekkefølge, og stengetider spredt utover kvelden: 1, 2 eller 3 timer – eller åpen hele kvelden
+  const time = 3600 * 1000, tider = [time, null, 2 * time, null, 3 * time];
+  const liste: [string, any][] = [];
+  for (let i = 0; i < ANTALL_HVEM; i++) liste.push(['hvem', trekk(b, 'hvem', HVEM)]);
+  for (let i = 0; i < ANTALL_JANEI; i++) liste.push(['janei', trekk(b, 'janei', JANEI)]);
+  for (let i = liste.length - 1; i > 0; i--) { const j = tilfeldig(i + 1); [liste[i], liste[j]] = [liste[j], liste[i]]; }
+  liste.forEach(([type, q], i) => { const t = tider[i % tider.length]; lagAksje(data, type as any, q, null, t ? Date.now() + t : null); });
+  melde(data, '📈 Vorsbørsen har åpnet! Alle har 1000 vorskroner – kjøp tidlig, det lønner seg.', '📈 The Pre-game Exchange is open! Everyone has 1,000 coins – buy early, it pays off.');
   return { ok: true };
 }
 function avsluttBors(data: any) {
   const b = data.bors;
   b.aksjer.forEach((a: any) => {
-    if (a.status === 'apen' || a.status === 'meldt') oppgjor(data, a, a.type === 'janei' ? 'nei' : null);
-    if (a.status === 'venter') { a.status = 'avvist'; if (a.av) b.saldo[a.av] = saldo(b, a.av) + NOTERING; }
+    if (['apen', 'stengt', 'meldt'].includes(a.status)) oppgjor(data, a, a.type === 'janei' ? 'nei' : null);
+    if (a.status === 'venter') { a.status = 'avvist'; if (a.av) flytt(b, a.av, NOTERING, 'Noteringen tilbake', 'Listing refunded'); }
   });
   b.saker.forEach((s: any) => { if (s.fase !== 'ferdig') s.fase = 'ferdig'; });
   const rang = data.spillere.map((p: any) => ({ id: p.id, kr: saldo(b, p.id) })).sort((x: any, y: any) => y.kr - x.kr);
@@ -202,43 +211,50 @@ function vurderMelding(data: any, a: any, tvunget = false) {
   const vitneOk = !m.vitne || m.stemmer[m.vitne] === 'ja';
   const vitneNei = m.vitne && m.stemmer[m.vitne] === 'nei';
   if (!alle && !tvunget && !vitneNei) return;
-  // Godkjent: vitnet (hvis valgt) sier ja, og flere ja enn nei blant dem som så det. Ingen stemmer + vitne = godkjent.
   const godkjent = !vitneNei && vitneOk && (ja > nei || (ja === 0 && nei === 0 && !!m.vitne));
   if (godkjent) {
     oppgjor(data, a, m.utfall);
-    melde(data, `✅ Bekreftet: ${a.type === 'hvem' ? navn(data, m.utfall) : 'Ja'} – aksjonærene får 100 kr per aksje!`,
-      `✅ Confirmed: ${a.type === 'hvem' ? navn(data, m.utfall) : 'Yes'} – shareholders get 100 per share!`);
+    melde(data, `✅ Bekreftet: ${a.type === 'hvem' ? navn(data, m.utfall) : 'Ja'} – hver aksje betaler 100 kr!`, `✅ Confirmed: ${a.type === 'hvem' ? navn(data, m.utfall) : 'Yes'} – each share pays 100!`);
   } else {
-    a.status = 'apen'; a.melding = null; if (data.bors.bilder) delete data.bors.bilder[a.id];
-    melde(data, `❌ Ikke godkjent – aksjen handles videre.`, `❌ Not confirmed – trading continues.`);
+    a.status = m.forrige || 'apen'; a.melding = null; if (data.bors.bilder) delete data.bors.bilder[a.id];
+    melde(data, `❌ Ikke godkjent – aksjen er åpen igjen.`, `❌ Not confirmed – the share is open again.`);
   }
 }
 
 /* ---------- Børstilsynet ---------- */
-function tilsynLogg(data: any, a: any) {
-  const slutt = a.avgjort || Date.now();
-  // Mistenkelig: noen som til sammen kjøpte for 200 kr eller mer på vinneren de siste 15 minuttene før det skjedde
+/** Vinnerne på en aksje (de eneste som kan anmeldes for den). */
+function vinnere(a: any) { return a.vinner ? Object.keys(a.hold).filter((id) => (a.hold[id].n[a.vinner] || 0) > 0) : []; }
+function tilsynLogg(data: any, a: any, mistenkt: string) {
+  const slutt = a.avgjort || Date.now(), b = data.bors;
   const sum: Record<string, number> = {};
   a.handler.forEach((h: any) => { if (h.n > 0 && h.u === a.vinner && slutt - h.t < 15 * 60000) sum[h.id] = (sum[h.id] || 0) + h.kr; });
-  return a.handler.map((h: any) => ({ hvem: h.id, navn: navn(data, h.id), utfall: h.u, n: h.n, kr: h.kr, t: h.t, minFor: Math.max(0, Math.round((slutt - h.t) / 60000)),
-    mistenkelig: h.n > 0 && h.u === a.vinner && slutt - h.t < 15 * 60000 && (sum[h.id] || 0) >= 200 }));
+  const handler = a.handler.map((h: any) => ({ navn: navn(data, h.id), hvem: h.id, utfall: h.u, n: h.n, kr: h.kr, minFor: Math.round((slutt - h.t) / 60000),
+    mistenkelig: h.n > 0 && h.u === a.vinner && slutt - h.t < 15 * 60000 && (sum[h.id] || 0) >= 60 }));
+  const subjekt = a.type === 'hvem' ? a.vinner : null;
+  const penger = (b.overforinger || []).filter((o: any) => o.fra === mistenkt || o.til === mistenkt).map((o: any) => ({
+    fra: navn(data, o.fra), til: navn(data, o.til), kr: o.kr, minEtter: Math.round((o.t - slutt) / 60000),
+    mistenkelig: !!subjekt && ((o.fra === mistenkt && o.til === subjekt) || (o.fra === subjekt && o.til === mistenkt)) }));
+  return { handler, penger };
 }
 function dom(data: any, s: any) {
   const b = data.bors, a = finn(b, s.aksje);
-  const velgere = data.spillere.filter((p: any) => p.id !== s.av && !s.mot.includes(p.id));
+  const velgere = data.spillere.filter((p: any) => !s.utenfor.includes(p.id));
   const skyldig = velgere.filter((p: any) => s.stemmer[p.id] === 'skyldig').length, frikjent = velgere.filter((p: any) => s.stemmer[p.id] === 'uskyldig').length;
-  s.resultat = { skyldig, frikjent, dom: skyldig + frikjent > 0 && skyldig / (skyldig + frikjent) >= 2 / 3 };
+  s.resultat = { skyldig, frikjent, dom: skyldig + frikjent > 0 && skyldig / (skyldig + frikjent) >= 2 / 3, medskyldig: null as string | null };
   if (s.resultat.dom) {
-    s.mot.forEach((id: string) => {
-      const h = a && a.hold[id];
-      const beslag = h ? h.fikk || 0 : 0;
-      b.saldo[id] = saldo(b, id) - beslag - BOT_SKYLDIG;
-      if (h) h.fikk = 0;
-    });
-    melde(data, `🚨 Børstilsynet: ${s.mot.map((id: string) => navn(data, id)).join(' og ')} dømt for innsidehandel! Gevinsten beslaglegges, 300 kr i bot – og straffehjulet venter 🎡`,
-      `🚨 Market watchdog: ${s.mot.map((id: string) => navn(data, id)).join(' and ')} convicted of insider trading! Profits seized, 300 fine – and the penalty wheel awaits 🎡`);
+    const h = a && a.hold[s.mot];
+    flytt(b, s.mot, -((h ? h.fikk || 0 : 0) + BOT_SKYLDIG), 'Dømt: gevinst beslaglagt + bot', 'Convicted: profits seized + fine');
+    if (h) h.fikk = 0;
+    // Fikk den aksjen handlet om penger fra vinneren? Da er hen medskyldig: pengene inndras og samme bot.
+    const subjekt = a && a.type === 'hvem' ? a.vinner : null;
+    if (subjekt && subjekt !== s.mot) {
+      const bestikkelse = (b.overforinger || []).filter((o: any) => o.fra === s.mot && o.til === subjekt).reduce((n: number, o: any) => n + o.kr, 0);
+      if (bestikkelse > 0) { flytt(b, subjekt, -(bestikkelse + BOT_SKYLDIG), 'Medskyldig: gaven inndratt + bot', 'Accomplice: gift seized + fine'); s.resultat.medskyldig = subjekt; }
+    }
+    melde(data, `🚨 Børstilsynet: ${navn(data, s.mot)} er dømt for innsidehandel${s.resultat.medskyldig ? ' sammen med ' + navn(data, s.resultat.medskyldig) : ''}! Gevinsten beslaglegges – og straffehjulet venter 🎡`,
+      `🚨 Market watchdog: ${navn(data, s.mot)} is convicted of insider trading${s.resultat.medskyldig ? ' together with ' + navn(data, s.resultat.medskyldig) : ''}! Profits seized – and the penalty wheel awaits 🎡`);
   } else {
-    b.saldo[s.av] = saldo(b, s.av) - BOT_FALSK;
+    flytt(b, s.av, -BOT_FALSK, 'Falsk anmeldelse', 'False report');
     melde(data, `⚖️ Frikjent! ${navn(data, s.av)} betaler 200 kr for falsk anmeldelse.`, `⚖️ Acquitted! ${navn(data, s.av)} pays 200 for a false report.`);
   }
   s.fase = 'ferdig'; s.frist = null;
@@ -256,22 +272,17 @@ export function borsHandling(data: any, meg: any, h: any, erVert: boolean): any 
   if (!b) return { ok: true };
   if (hd === 'bs-lukk') { if (!erVert) return { feil: 'bare-vert' }; data.bors = null; return { ok: true }; }
   if (!b.paa) return { ok: true };
+  if (h._borsFri) b.fri = true;
   oppdaterUtfall(data);
   saldo(b, meg.id);
-  if (hd === 'bs-fokus') {   // børsen som hovedspill (hele skjermen) eller i bakgrunnen ved siden av andre leker
-    if (!erVert) return { feil: 'bare-vert' };
-    b.fokus = !!h.paa; if (b.fokus) data.spill = null;
-    return { ok: true };
-  }
+  if (hd === 'bs-fokus') { if (!erVert) return { feil: 'bare-vert' }; b.fokus = !!h.paa; if (b.fokus) data.spill = null; return { ok: true }; }
   if (hd === 'bs-avslutt') { if (!erVert) return { feil: 'bare-vert' }; avsluttBors(data); return { ok: true }; }
-  if (hd === 'bs-lasopp') {   // Pluss aktivert i rommet i mellomtiden, eller gjeng med konvolutt 6
-    if (h._borsFri) b.fri = true;
-    return { ok: true };
-  }
+  if (hd === 'bs-lasopp') return { ok: true };
   if (hd === 'bs-tikk') {
-    // Tidsstyrte ting: ny aksje, frister på meldinger og saker
-    if (Date.now() >= b.neste - 1000) nyAutomatisk(data);
-    b.aksjer.forEach((a: any) => { if (a.status === 'meldt' && a.melding && ute(a.melding.frist)) vurderMelding(data, a, true); });
+    b.aksjer.forEach((a: any) => {
+      if (a.status === 'apen' && a.stenger && Date.now() >= a.stenger) a.status = 'stengt';
+      if (a.status === 'meldt' && a.melding && ute(a.melding.frist)) vurderMelding(data, a, true);
+    });
     b.saker.forEach((s: any) => {
       if (s.fase === 'forsvar' && ute(s.frist)) { s.fase = 'stem'; s.frist = frist(FRIST_DOM); }
       else if (s.fase === 'stem' && ute(s.frist)) dom(data, s);
@@ -279,33 +290,47 @@ export function borsHandling(data: any, meg: any, h: any, erVert: boolean): any 
     return { ok: true };
   }
   if (hd === 'bs-handel') {
-    const a = finn(b, h.aksje); if (!a || a.status !== 'apen') return { feil: 'stengt', melding: 'Aksjen er ikke åpen for handel.', en: 'This share isn’t open for trading.' };
+    const a = finn(b, h.aksje); if (!a) return { feil: 'ugyldig' };
+    if (a.stenger && Date.now() >= a.stenger && a.status === 'apen') a.status = 'stengt';
+    if (a.laast && !b.fri) return { feil: 'pluss', melding: 'Denne aksjen krever Pluss hos verten.', en: 'This share needs the host to have Plus.' };
+    if (!handelApen(b, a)) return { feil: 'stengt', melding: a.status === 'meldt' ? 'Aksjen er låst – noen har meldt at det skjedde.' : 'Aksjen er stengt for handel.', en: a.status === 'meldt' ? 'The share is locked – someone reported that it happened.' : 'This share is closed for trading.' };
     const i = a.utfall.indexOf(String(h.utfall)); if (i === -1) return { feil: 'ugyldig' };
-    if (a.type === 'hvem' && a.utfall[i] === meg.id && Number(h.n) > 0) return { feil: 'innside', melding: 'Du kan ikke kjøpe aksjer i deg selv – det er innsidehandel 😉', en: 'You can’t buy shares in yourself – that’s insider trading 😉' };
+    const n = Math.round(Number(h.n) || 0) > 0 ? 1 : -1;
+    if (a.type === 'hvem' && a.utfall[i] === meg.id && n > 0) return { feil: 'innside', melding: 'Du kan ikke kjøpe aksjer i deg selv – det er innsidehandel 😉', en: 'You can’t buy shares in yourself – that’s insider trading 😉' };
     if (a.av === meg.id) return { feil: 'innside', melding: 'Du kan ikke handle i en aksje du har notert selv.', en: 'You can’t trade in a share you listed yourself.' };
-    const n = Math.max(-50, Math.min(50, Math.round(Number(h.n) || 0))); if (!n) return { ok: true };
     const hold = beholdning(a, meg.id), har = hold.n[a.utfall[i]] || 0;
-    if (n < 0 && har + n < 0) return { feil: 'ugyldig', melding: 'Du har ikke så mange aksjer.', en: 'You don’t have that many shares.' };
-    const kr = pris(a.qs, i, n), honorar = n > 0 && a.av ? HONORAR : 0;
+    if (n < 0 && har < 1) return { feil: 'ugyldig', melding: 'Du har ingen slike aksjer.', en: 'You don’t own any of these.' };
+    const kr = n > 0 ? kurs(a.qs[i]) : -salgskurs(a.qs[i]), honorar = n > 0 && a.av ? HONORAR : 0;
     if (n > 0 && saldo(b, meg.id) < kr + honorar) return { feil: 'penger', melding: 'Du har ikke nok vorskroner.', en: 'You don’t have enough coins.' };
     a.qs[i] += n; hold.n[a.utfall[i]] = har + n;
-    b.saldo[meg.id] = saldo(b, meg.id) - kr - honorar;
+    const hvaNo = a.type === 'hvem' ? navn(data, a.utfall[i]) : (a.utfall[i] === 'ja' ? 'Ja' : 'Nei'), hvaEn = a.type === 'hvem' ? hvaNo : (a.utfall[i] === 'ja' ? 'Yes' : 'No');
+    flytt(b, meg.id, -(kr + honorar), (n > 0 ? 'Kjøpte ' : 'Solgte ') + hvaNo, (n > 0 ? 'Bought ' : 'Sold ') + hvaEn);
     hold.kost = Math.max(0, hold.kost + kr);
-    if (honorar) b.saldo[a.av] = saldo(b, a.av) + honorar;
+    if (honorar) flytt(b, a.av, honorar, 'Honorar fra aksjen din', 'Fee from your share');
     a.handler.push({ id: meg.id, u: a.utfall[i], n, kr, t: Date.now() });
     return { ok: true };
   }
+  if (hd === 'bs-gi') {
+    const til = String(h.til || ''), kr = Math.round(Number(h.kr) || 0);
+    if (!data.spillere.some((p: any) => p.id === til) || til === meg.id) return { feil: 'ugyldig', melding: 'Velg hvem du vil gi penger til.', en: 'Pick who to give money to.' };
+    if (!(kr >= 10 && kr <= 1000)) return { feil: 'ugyldig', melding: 'Gi mellom 10 og 1000 kr.', en: 'Give between 10 and 1,000.' };
+    if (saldo(b, meg.id) < kr) return { feil: 'penger', melding: 'Du har ikke så mange vorskroner.', en: 'You don’t have that many coins.' };
+    flytt(b, meg.id, -kr, 'Gave til ' + navn(data, til), 'Gift to ' + navn(data, til)); flytt(b, til, kr, 'Gave fra ' + meg.navn, 'Gift from ' + meg.navn);
+    (b.overforinger = b.overforinger || []).push({ fra: meg.id, til, kr, t: Date.now() });
+    return { ok: true };
+  }
   if (hd === 'bs-meld') {
-    const a = finn(b, h.aksje); if (!a || a.status !== 'apen') return { feil: 'stengt', melding: 'Aksjen kan ikke meldes nå.', en: 'This share can’t be reported now.' };
+    const a = finn(b, h.aksje); if (!a || (a.status !== 'apen' && a.status !== 'stengt')) return { feil: 'stengt', melding: 'Aksjen kan ikke meldes nå.', en: 'This share can’t be reported now.' };
+    if (a.laast && !b.fri) return { feil: 'pluss', melding: 'Denne aksjen krever Pluss hos verten.', en: 'This share needs the host to have Plus.' };
     const utfall = a.type === 'janei' ? 'ja' : String(h.utfall || '');
     if (!a.utfall.includes(utfall)) return { feil: 'ugyldig' };
     const vitne = h.vitne && data.spillere.some((p: any) => p.id === h.vitne && p.id !== meg.id) ? String(h.vitne) : null;
     let bilde: string | null = null;
     if (typeof h.bilde === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(h.bilde) && h.bilde.length < 160000) bilde = h.bilde;
-    a.status = 'meldt';
-    a.melding = { av: meg.id, utfall, vitne, subjekt: a.type === 'hvem' ? utfall : null, stemmer: { [meg.id]: 'ja' }, frist: frist(FRIST_MELDING), bilde: !!bilde, t: Date.now() };
+    a.melding = { av: meg.id, utfall, vitne, subjekt: a.type === 'hvem' ? utfall : null, stemmer: { [meg.id]: 'ja' }, frist: frist(FRIST_MELDING), bilde: !!bilde, t: Date.now(), forrige: a.status };
+    a.status = 'meldt';   // låst: ingen kan kjøpe eller selge mens det stemmes
     if (bilde) { b.bilder = b.bilder || {}; b.bilder[a.id] = bilde; }
-    melde(data, `📣 ${meg.navn} melder: ${a.type === 'hvem' ? navn(data, utfall) + ' – ' : ''}${a.q.no || a.q}. Stem nå!`, `📣 ${meg.navn} reports: ${a.type === 'hvem' ? navn(data, utfall) + ' – ' : ''}${a.q.en || a.q}. Vote now!`);
+    melde(data, `📣 ${meg.navn} melder: ${a.type === 'hvem' ? navn(data, utfall) + ' – ' : ''}${a.q.no || a.q} Aksjen er låst – stem nå!`, `📣 ${meg.navn} reports: ${a.type === 'hvem' ? navn(data, utfall) + ' – ' : ''}${a.q.en || a.q} The share is locked – vote now!`);
     return { ok: true };
   }
   if (hd === 'bs-stem') {
@@ -318,11 +343,10 @@ export function borsHandling(data: any, meg: any, h: any, erVert: boolean): any 
   }
   if (hd === 'bs-noter') {
     if (b.noterte[meg.id]) return { feil: 'brukt', melding: 'Du har allerede notert en aksje i kveld.', en: 'You’ve already listed a share tonight.' };
-    if (!kanNyAksje(b)) return { feil: 'pluss', melding: 'Gratisbørsen er full for i kveld. Med Pluss hos verten er det ubegrenset med aksjer.', en: 'The free exchange is full tonight. With Plus the host gets unlimited shares.' };
     const tekst = rens(h.tekst, 100); if (tekst.length < 8) return { feil: 'kort', melding: 'Skriv hele spørsmålet (minst 8 tegn).', en: 'Write the whole question (at least 8 characters).' };
     const type = h.type === 'janei' ? 'janei' : 'hvem';
     if (saldo(b, meg.id) < NOTERING) return { feil: 'penger', melding: 'Det koster 200 vorskroner å notere en aksje.', en: 'Listing a share costs 200 coins.' };
-    b.saldo[meg.id] -= NOTERING; b.noterte[meg.id] = true;
+    flytt(b, meg.id, -NOTERING, 'Noterte egen aksje', 'Listed your own share'); b.noterte[meg.id] = true;
     const a = lagAksje(data, type, tekst, meg.id);
     if (erVert) { a.status = 'apen'; melde(data, `📈 ${meg.navn} har notert en ny aksje: ${tekst}`, `📈 ${meg.navn} listed a new share: ${tekst}`); }
     else melde(data, `🧾 ${meg.navn} vil notere en ny aksje – verten må godkjenne`, `🧾 ${meg.navn} wants to list a new share – the host must approve`);
@@ -332,28 +356,26 @@ export function borsHandling(data: any, meg: any, h: any, erVert: boolean): any 
     if (!erVert) return { feil: 'bare-vert' };
     const a = finn(b, h.aksje); if (!a || a.status !== 'venter') return { ok: true };
     if (h.ok) { a.status = 'apen'; melde(data, `📈 Ny aksje på børsen: ${a.q}`, `📈 New share on the Exchange: ${a.q}`); }
-    else { a.status = 'avvist'; b.saldo[a.av] = saldo(b, a.av) + NOTERING; b.noterte[a.av] = false; b.antall = Math.max(0, (b.antall || 1) - 1); }
+    else { a.status = 'avvist'; flytt(b, a.av, NOTERING, 'Aksjen ble avvist – pengene tilbake', 'Share rejected – refunded'); b.noterte[a.av] = false; }
     return { ok: true };
   }
   if (hd === 'bs-anmeld') {
     const a = finn(b, h.aksje); if (!a || a.status !== 'avgjort') return { feil: 'ugyldig', melding: 'Du kan bare anmelde aksjer som er avgjort.', en: 'You can only report shares that are settled.' };
-    const mot = (Array.isArray(h.mot) ? h.mot : []).map(String).filter((id: string, i: number, l: string[]) => l.indexOf(id) === i && id !== meg.id && data.spillere.some((p: any) => p.id === id)).slice(0, 2);
-    if (!mot.length) return { feil: 'ugyldig', melding: 'Velg hvem du anmelder.', en: 'Pick who you’re reporting.' };
-    if (!data.spillere.some((p: any) => p.id !== meg.id && !mot.includes(p.id))) return { feil: 'for-faa', melding: 'Det må være minst én uinvolvert igjen til å dømme. Anmeld bare én person.', en: 'At least one uninvolved person must be left to judge. Report just one person.' };
-    if (b.saker.some((s: any) => s.aksje === a.id && s.fase !== 'ferdig')) return { feil: 'opptatt', melding: 'Den aksjen er allerede til behandling.', en: 'That share is already under investigation.' };
-    if (b.saker.filter((s: any) => s.aksje === a.id).length >= 2) return { feil: 'opptatt', melding: 'Aksjen er ferdig etterforsket.', en: 'That share has already been investigated.' };
-    b.saker.push({ id: nyId(), aksje: a.id, av: meg.id, mot, fase: 'forsvar', frist: frist(FRIST_FORSVAR), stemmer: {}, resultat: null });
-    melde(data, `🚨 ${meg.navn} anmelder ${mot.map((id: string) => navn(data, id)).join(' og ')} for innsidehandel! Børstilsynet åpner loggen.`,
-      `🚨 ${meg.navn} reports ${mot.map((id: string) => navn(data, id)).join(' and ')} for insider trading! The watchdog opens the trade log.`);
+    const mot = String(h.mot || '');
+    if (!vinnere(a).includes(mot) || mot === meg.id) return { feil: 'ugyldig', melding: 'Bare de som vant på aksjen kan anmeldes.', en: 'Only people who won on this share can be reported.' };
+    const utenfor = [meg.id, mot].concat(a.type === 'hvem' && a.vinner ? [a.vinner] : []);
+    if (!data.spillere.some((p: any) => !utenfor.includes(p.id))) return { feil: 'for-faa', melding: 'Det må være minst én uinvolvert igjen til å dømme.', en: 'At least one uninvolved person must be left to judge.' };
+    if (b.saker.some((s: any) => s.aksje === a.id && s.mot === mot)) return { feil: 'opptatt', melding: 'Den personen er allerede etterforsket for denne aksjen.', en: 'That person has already been investigated for this share.' };
+    b.saker.push({ id: nyId(), aksje: a.id, av: meg.id, mot, utenfor, fase: 'forsvar', frist: frist(FRIST_FORSVAR), stemmer: {}, resultat: null });
+    melde(data, `🚨 ${meg.navn} anmelder ${navn(data, mot)} for innsidehandel! Børstilsynet åpner loggen.`, `🚨 ${meg.navn} reports ${navn(data, mot)} for insider trading! The watchdog opens the log.`);
     return { ok: true };
   }
   if (hd === 'bs-sak-stem') {
     const s = b.saker.find((x: any) => x.id === h.sak); if (!s || (s.fase !== 'stem' && s.fase !== 'forsvar')) return { ok: true };
-    if (s.av === meg.id || s.mot.includes(meg.id)) return { feil: 'innside', melding: 'Du er part i saken og kan ikke stemme.', en: 'You’re involved in the case and can’t vote.' };
+    if (s.utenfor.includes(meg.id)) return { feil: 'innside', melding: 'Du er part i saken og kan ikke stemme.', en: 'You’re involved in the case and can’t vote.' };
     if (h.v !== 'skyldig' && h.v !== 'uskyldig') return { ok: true };
     s.stemmer[meg.id] = h.v;
-    const velgere = data.spillere.filter((p: any) => p.id !== s.av && !s.mot.includes(p.id));
-    if (velgere.every((p: any) => s.stemmer[p.id])) dom(data, s);
+    if (data.spillere.filter((p: any) => !s.utenfor.includes(p.id)).every((p: any) => s.stemmer[p.id])) dom(data, s);
     return { ok: true };
   }
   if (hd === 'bs-sak-videre') {
@@ -369,31 +391,35 @@ export function borsVisning(data: any, meg: any) {
   const b = data.bors; if (!b) return null;
   const m = meg ? meg.id : null;
   const aksjer = b.aksjer.filter((a: any) => a.status !== 'avvist' && (a.status !== 'venter' || m === data.vert || m === a.av)).map((a: any) => {
-    const k = kurser(a.qs), hold = m ? a.hold[m] : null;
+    const hold = m ? a.hold[m] : null;
+    const status = a.status === 'apen' && a.stenger && Date.now() >= a.stenger ? 'stengt' : a.status;
     return {
-      id: a.id, type: a.type, q: a.q, status: a.status, av: a.av, egen: !!a.av,
-      utfall: a.utfall.map((u: string, i: number) => ({ u, kurs: Math.round(k[i] * UTBETALING), kjop: pris(a.qs, i, 1), selg: -pris(a.qs, i, -1), mine: hold ? hold.n[u] || 0 : 0 })),
-      vinner: a.vinner, fikk: hold ? hold.fikk || 0 : 0, antallHandler: a.handler.length,
+      id: a.id, type: a.type, q: a.q, status, av: a.av, egen: !!a.av, stenger: a.stenger, laast: !!a.laast && !b.fri,
+      utfall: a.utfall.map((u: string, i: number) => ({ u, kurs: kurs(a.qs[i]), selg: salgskurs(a.qs[i]), solgt: a.qs[i], mine: hold ? hold.n[u] || 0 : 0 })),
+      vinner: a.vinner, fikk: hold ? hold.fikk || 0 : 0, kost: hold ? hold.kost || 0 : 0,
+      vinnere: a.status === 'avgjort' ? vinnere(a).filter((id: string) => id !== m) : [],
       melding: a.melding ? { av: a.melding.av, utfall: a.melding.utfall, vitne: a.melding.vitne, subjekt: a.melding.subjekt, frist: a.melding.frist, bilde: a.melding.bilde,
         harStemt: Object.keys(a.melding.stemmer), minStemme: m ? a.melding.stemmer[m] || null : null } : null,
       bilde: a.status === 'meldt' && b.bilder ? b.bilder[a.id] || null : null,
     };
   });
   const saker = b.saker.map((s: any) => {
-    const a = finn(b, s.aksje);
-    return { id: s.id, aksje: s.aksje, q: a ? a.q : '', vinner: a ? a.vinner : null, type: a ? a.type : null, av: s.av, mot: s.mot, fase: s.fase, frist: s.frist,
-      logg: a ? tilsynLogg(data, a) : [], harStemt: Object.keys(s.stemmer), minStemme: m ? s.stemmer[m] || null : null, resultat: s.resultat };
+    const a = finn(b, s.aksje), logg = a ? tilsynLogg(data, a, s.mot) : { handler: [], penger: [] };
+    return { id: s.id, aksje: s.aksje, q: a ? a.q : '', vinner: a ? a.vinner : null, type: a ? a.type : null, av: s.av, mot: s.mot, utenfor: s.utenfor, fase: s.fase, frist: s.frist,
+      logg: logg.handler, penger: logg.penger, harStemt: Object.keys(s.stemmer), minStemme: m ? s.stemmer[m] || null : null, resultat: s.resultat };
   });
   const verdi = (id: string) => b.aksjer.reduce((sum: number, a: any) => {
-    if (a.status !== 'apen' && a.status !== 'meldt') return sum;
+    if (!['apen', 'stengt', 'meldt'].includes(a.status)) return sum;
     const h = a.hold[id]; if (!h) return sum;
-    const k = kurser(a.qs); return sum + a.utfall.reduce((s2: number, u: string, i: number) => s2 + (h.n[u] || 0) * k[i] * UTBETALING, 0);
+    return sum + a.utfall.reduce((s2: number, u: string, i: number) => s2 + (h.n[u] || 0) * salgskurs(a.qs[i]), 0);
   }, 0);
   return {
-    paa: b.paa, fri: !!b.fri, fokus: !!b.fokus, neste: b.neste, gratisIgjen: b.fri ? null : Math.max(0, GRATIS_AKSJER - (b.antall || 0)),
+    paa: b.paa, fri: !!b.fri, fokus: !!b.fokus, laaste: b.fri ? 0 : b.aksjer.filter((a: any) => a.laast && ['apen', 'stengt'].includes(a.status)).length,
     saldo: m ? saldo(b, m) : null, formue: m ? Math.round(saldo(b, m) + verdi(m)) : null,
     tavle: data.spillere.map((p: any) => ({ id: p.id, kr: Math.round(saldo(b, p.id) + verdi(p.id)) })).sort((x: any, y: any) => y.kr - x.kr),
     aksjer, saker, harNotert: m ? !!b.noterte[m] : false, slutt: b.slutt || null,
-    priser: { notering: NOTERING, honorar: HONORAR, utbetaling: UTBETALING },
+    mineGaver: m ? (b.overforinger || []).filter((o: any) => o.fra === m || o.til === m).map((o: any) => ({ fra: o.fra, til: o.til, kr: o.kr })) : [],
+    bev: m ? (b.bev || []).filter((x: any) => x.id === m).slice(-6).map((x: any) => ({ n: x.n, kr: x.kr, t: { no: x.no, en: x.en } })) : [],
+    priser: { notering: NOTERING, honorar: HONORAR, utbetaling: UTBETALING, start: STARTKURS, maks: MAKSKURS },
   };
 }

@@ -241,6 +241,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       tilstand = d;
       sjekkSprak(d);
       if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
+      borsPenger(d);
       if (d.meg === null && meg) { glemRom(); return; }
       // Alkoholfri for hele rommet: siden bytter slurker med straffepoeng på alle telefoner
       if (d.alkoholfri) document.documentElement.dataset.alkoholfri = '1';
@@ -1263,13 +1264,32 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
 
     /* ---------- hemmelige oppdrag ---------- */
     /* ---------- Vorsbørsen ---------- */
+    /** +xx / −xx som flyter opp på skjermen når pengene dine endrer seg på børsen. */
+    var sisteBev = null;
+    function borsPenger(d) {
+      var liste = d && d.bors && d.bors.bev; if (!liste) { sisteBev = null; return; }
+      var maks = liste.reduce(function (x, e) { return Math.max(x, e.n); }, 0);
+      if (sisteBev === null || maks < sisteBev) { sisteBev = maks; return; }   // første visning eller ny børs: ikke vis gammelt
+      liste.filter(function (e) { return e.n > sisteBev; }).forEach(function (e, i) { setTimeout(function () { visPenger(e); }, 900 * i); });
+      sisteBev = maks;
+    }
+    function visPenger(e) {
+      var el = document.createElement('div'), pluss = e.kr > 0, stor = Math.abs(e.kr) >= 100;
+      el.className = 'bs-penger ' + (pluss ? 'opp' : 'ned') + (stor ? ' stor' : '');
+      el.setAttribute('role', 'status');
+      el.innerHTML = '<b>' + (pluss ? '+' : '−') + Math.abs(e.kr).toLocaleString(LOKALE) + T(' kr', ' 🪙') + (stor ? (pluss ? ' 💰' : ' 💸') : '') + '</b><span>' + esc(e.t || '') + '</span>';
+      document.body.appendChild(el);
+      if (stor && navigator.vibrate) try { navigator.vibrate(pluss ? [40, 60, 40] : 120); } catch (x) {}
+      if (stor && pluss) try { spillLyd('svar'); } catch (x) {}
+      setTimeout(function () { el.remove(); }, 2600);
+    }
     var borsModal = null, borsFane = 'aksjer', borsMeld = null, borsAnmeld = null, borsTikkSendt = 0;
     function kr(n) { return Math.round(n).toLocaleString(LOKALE) + T(' kr', ' 🪙'); }
     function borsTrengerMeg() {
       var b = tilstand && tilstand.bors; if (!b || !b.paa) return '';
       var m = tilstand.meg;
       if (b.aksjer.some(function (a) { return a.status === 'meldt' && a.melding && a.melding.subjekt !== m && !a.melding.minStemme; })) return 'stem';
-      if (b.saker.some(function (s) { return (s.fase === 'stem' || s.fase === 'forsvar') && s.av !== m && s.mot.indexOf(m) === -1 && !s.minStemme; })) return 'tilsyn';
+      if (b.saker.some(function (s) { return (s.fase === 'stem' || s.fase === 'forsvar') && (s.utenfor || []).indexOf(m) === -1 && !s.minStemme; })) return 'tilsyn';
       if (erVert() && b.aksjer.some(function (a) { return a.status === 'venter'; })) return 'godkjenn';
       return '';
     }
@@ -1283,43 +1303,57 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       return '<button class="bs-pille' + (trenger ? ' varsel' : '') + '" data-g="bs-aapne" type="button">' + tekst + '</button>';
     }
     function utfallNavn(a, u) { return a.type === 'hvem' ? navn(u) : (u === 'ja' ? T('Ja', 'Yes') : T('Nei', 'No')); }
+    function borsTid(a) {
+      if (!a.stenger) return '<span class="bs-tid">' + T('åpen hele kvelden', 'open all night') + '</span>';
+      var min = Math.round((a.stenger - (Date.now() + klokkeAvvik)) / 60000);
+      if (min <= 0) return '<span class="bs-tid">🔒 ' + T('stengt for handel', 'closed for trading') + '</span>';
+      return '<span class="bs-tid">⏳ ' + T('stenger om ', 'closes in ') + (min >= 60 ? Math.floor(min / 60) + ' t ' + (min % 60) + ' min' : min + ' min') + '</span>';
+    }
     function borsAksjeHtml(a) {
       var b = tilstand.bors, m = tilstand.meg;
-      var hode = '<div class="bs-aksje-topp"><span class="bs-type">' + (a.type === 'hvem' ? T('Hvem', 'Who') : T('Ja/nei', 'Yes/no')) + (a.egen ? ' · ' + T('notert av ', 'listed by ') + esc(navn(a.av)) : '') + '</span><b>' + esc(a.q) + '</b></div>';
+      var hode = '<div class="bs-aksje-topp"><span class="bs-type">' + (a.type === 'hvem' ? T('Hvem', 'Who') : T('Ja/nei', 'Yes/no')) + (a.egen ? ' · ' + T('notert av ', 'listed by ') + esc(navn(a.av)) : '') + '</span><b>' + esc(a.q) + '</b>' + (a.status === 'apen' || a.status === 'stengt' ? borsTid(a) : '') + '</div>';
       if (a.status === 'venter') {
         return '<div class="bs-aksje venter">' + hode + (erVert() ? '<p class="small">' + T('Godkjenne aksjen? Avviser du, får hen pengene tilbake.', 'Approve this share? If you reject it, they get their money back.') + '</p><div class="dl-knapper"><button class="btn small gold" data-b="godkjenn" data-a="' + a.id + '" type="button">' + T('Godkjenn', 'Approve') + '</button><button class="btn small ghost" data-b="avvis" data-a="' + a.id + '" type="button">' + T('Avvis', 'Reject') + '</button></div>' : '<p class="small">' + T('Venter på at verten godkjenner.', 'Waiting for the host to approve.') + '</p>') + '</div>';
       }
+      if (a.laast) {
+        return '<div class="bs-aksje laast">' + hode + '<p class="small">🔒 ' + T('Låst i gratisbørsen. ', 'Locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp med Pluss', 'Unlock with Plus') + '</button></p></div>';
+      }
       if (a.status === 'meldt' && a.melding) {
         var ml = a.melding, kanStemme = ml.subjekt !== m;
-        return '<div class="bs-aksje meldt">' + hode + '<p class="bs-meldt">📣 <b>' + esc(navn(ml.av)) + '</b>' + T(' melder: ', ' reports: ') + '<b>' + esc(utfallNavn(a, ml.utfall)) + '</b>' + (ml.vitne ? T(' · vitne: ', ' · witness: ') + esc(navn(ml.vitne)) : '') + '</p>' +
+        return '<div class="bs-aksje meldt">' + hode + '<p class="bs-meldt">🔒 📣 <b>' + esc(navn(ml.av)) + '</b>' + T(' melder: ', ' reports: ') + '<b>' + esc(utfallNavn(a, ml.utfall)) + '</b>' + (ml.vitne ? T(' · vitne: ', ' · witness: ') + esc(navn(ml.vitne)) : '') + '</p>' +
+          '<p class="small">' + T('Aksjen er låst for handel mens dere stemmer.', 'The share is locked for trading while you vote.') + '</p>' +
           (a.bilde ? '<img class="bs-bilde" src="' + a.bilde + '" alt="' + T('Bevis', 'Evidence') + '">' : '') +
           (kanStemme ? '<div class="rom-valg en bs-stem"><button type="button" data-b="stem" data-v="ja" data-a="' + a.id + '" aria-pressed="' + (ml.minStemme === 'ja') + '">' + T('✅ Det skjedde', '✅ It happened') + '</button><button type="button" data-b="stem" data-v="nei" data-a="' + a.id + '" aria-pressed="' + (ml.minStemme === 'nei') + '">' + T('❌ Skjedde ikke', '❌ Didn’t happen') + '</button><button type="button" data-b="stem" data-v="vet" data-a="' + a.id + '" aria-pressed="' + (ml.minStemme === 'vet') + '">' + T('🤷 Så det ikke', '🤷 Didn’t see it') + '</button></div>'
             : '<p class="small">' + T('Dette handler om deg, så du stemmer ikke.', 'This is about you, so you don’t vote.') + '</p>') +
           '<p class="rom-status">' + ml.harStemt.length + T(' har stemt', ' have voted') + '</p>' + fristHtml({ frist: ml.frist }, T('sekunder igjen', 'seconds left')) + '</div>';
       }
       if (a.status === 'avgjort' || a.status === 'ugyldig') {
+        var kanAnmelde = a.status === 'avgjort' && b.paa && a.vinnere && a.vinnere.length;
         return '<div class="bs-aksje ferdig">' + hode + '<p>' + (a.status === 'avgjort' ? '✅ ' + esc(utfallNavn(a, a.vinner)) : T('Ugyldig – pengene tilbake', 'Void – money returned')) + (a.fikk ? ' · <b>' + T('Du fikk ', 'You got ') + kr(a.fikk) + '</b>' : '') + '</p>' +
-          (a.status === 'avgjort' && b.paa ? '<button class="linkbtn" data-b="anmeld-aapne" data-a="' + a.id + '" type="button">' + T('🚨 Anmeld innsidehandel', '🚨 Report insider trading') + '</button>' : '') +
-          (borsAnmeld === a.id ? '<div class="bs-anmeld"><p class="small">' + T('Hvem samarbeidet? Velg én eller to. Blir de frikjent, betaler du 200 kr.', 'Who worked together? Pick one or two. If they’re acquitted, you pay 200.') + '</p><div class="rom-valg">' +
-            tilstand.spillere.filter(function (p) { return p.id !== m; }).map(function (p) { return '<label class="bs-kryss"><input type="checkbox" name="bsMot" value="' + p.id + '"> ' + esc(p.navn) + '</label>'; }).join('') +
+          (kanAnmelde ? '<button class="linkbtn" data-b="anmeld-aapne" data-a="' + a.id + '" type="button">' + T('🚨 Anmeld en vinner for innsidehandel', '🚨 Report a winner for insider trading') + '</button>' : '') +
+          (kanAnmelde && borsAnmeld === a.id ? '<div class="bs-anmeld"><p class="small">' + T('Bare de som tjente på aksjen kan anmeldes. Handler og pengegaver vises i tilsynet. Blir hen frikjent, betaler du 200 kr.', 'Only those who profited from the share can be reported. Trades and money gifts are shown to the watchdog. If they’re acquitted, you pay 200.') + '</p><div class="rom-valg">' +
+            a.vinnere.map(function (id) { return '<label class="bs-kryss"><input type="radio" name="bsMot" value="' + esc(id) + '"> ' + esc(navn(id)) + '</label>'; }).join('') +
             '</div><button class="btn small gold" data-b="anmeld" data-a="' + a.id + '" type="button">' + T('Send til Børstilsynet', 'Send to the watchdog') + '</button></div>' : '') + '</div>';
       }
-      // Åpen for handel
+      // Åpen eller stengt for handel
+      var stengt = a.status === 'stengt';
       var rader = a.utfall.map(function (x) {
         var meg0 = a.type === 'hvem' && x.u === m, egen = a.av === m;
-        return '<div class="bs-rad"><span class="bs-navn">' + esc(utfallNavn(a, x.u)) + (x.mine ? ' <small>' + T('du har ', 'you own ') + x.mine + '</small>' : '') + '</span><span class="bs-kurs">' + x.kurs + '</span>' +
-          (meg0 || egen ? '<span class="bs-sperret">' + (meg0 ? T('deg selv', 'yourself') : T('din aksje', 'your share')) + '</span>'
-            : '<span class="bs-knapper"><button type="button" class="bs-kjop" data-b="kjop" data-a="' + a.id + '" data-u="' + esc(x.u) + '">' + T('Kjøp ', 'Buy ') + x.kjop + '</button>' +
-              (x.mine ? '<button type="button" class="bs-selg" data-b="selg" data-a="' + a.id + '" data-u="' + esc(x.u) + '">' + T('Selg ', 'Sell ') + x.selg + '</button>' : '') + '</span>') + '</div>';
+        var knapper = '';
+        if (meg0 || egen) knapper = '<span class="bs-sperret">' + (meg0 ? T('deg selv', 'yourself') : T('din aksje', 'your share')) + '</span>';
+        else if (stengt) knapper = x.mine ? '<span class="bs-sperret">' + T('du har ', 'you own ') + x.mine + '</span>' : '';
+        else knapper = '<span class="bs-knapper"><button type="button" class="bs-kjop" data-b="kjop" data-a="' + a.id + '" data-u="' + esc(x.u) + '">' + T('Kjøp ', 'Buy ') + x.kurs + '</button>' +
+          (x.mine ? '<button type="button" class="bs-selg" data-b="selg" data-a="' + a.id + '" data-u="' + esc(x.u) + '">' + T('Selg ', 'Sell ') + x.selg + '</button>' : '') + '</span>';
+        return '<div class="bs-rad"><span class="bs-navn">' + esc(utfallNavn(a, x.u)) + (x.mine && !stengt ? ' <small>' + T('du har ', 'you own ') + x.mine + '</small>' : '') + '</span><span class="bs-kurs">' + x.kurs + '</span>' + knapper + '</div>';
       }).join('');
       var meld = borsMeld === a.id
-        ? '<div class="bs-meld"><p class="small">' + T('Hva skjedde? Legg gjerne ved bilde eller et vitne – så stemmer de andre.', 'What happened? Add a photo or a witness if you like – then the others vote.') + '</p>' +
+        ? '<div class="bs-meld"><p class="small">' + T('Hva skjedde? Aksjen låses med en gang. Legg gjerne ved bilde eller et vitne – så stemmer de andre.', 'What happened? The share locks right away. Add a photo or a witness if you like – then the others vote.') + '</p>' +
           (a.type === 'hvem' ? '<label class="lab">' + T('Hvem?', 'Who?') + '</label><select id="bsHvem">' + a.utfall.map(function (x) { return '<option value="' + esc(x.u) + '">' + esc(navn(x.u)) + '</option>'; }).join('') + '</select>' : '') +
           '<label class="lab">' + T('Vitne (valgfritt)', 'Witness (optional)') + '</label><select id="bsVitne"><option value="">' + T('Ingen', 'None') + '</option>' + tilstand.spillere.filter(function (p) { return p.id !== m; }).map(function (p) { return '<option value="' + p.id + '">' + esc(p.navn) + '</option>'; }).join('') + '</select>' +
           '<label class="lab">' + T('Bilde (valgfritt – slettes når aksjen er avgjort)', 'Photo (optional – deleted once settled)') + '</label><input id="bsBilde" type="file" accept="image/*" capture="environment">' +
           '<div class="dl-knapper"><button class="btn small gold" data-b="meld" data-a="' + a.id + '" type="button">' + T('Meld', 'Report') + '</button><button class="btn small ghost" data-b="meld-avbryt" type="button">' + T('Avbryt', 'Cancel') + '</button></div></div>'
         : '<button class="btn small ghost bs-meldknapp" data-b="meld-aapne" data-a="' + a.id + '" type="button">' + (a.type === 'hvem' ? T('📣 Det skjedde!', '📣 It happened!') : T('📣 Det skjedde – ja!', '📣 It happened – yes!')) + '</button>';
-      return '<div class="bs-aksje">' + hode + '<div class="bs-rader"><div class="bs-rad bs-rad-topp"><span></span><span>' + T('Kurs', 'Price') + '</span><span></span></div>' + rader + '</div>' + meld + '</div>';
+      return '<div class="bs-aksje' + (stengt ? ' stengt' : '') + '">' + hode + '<div class="bs-rader"><div class="bs-rad bs-rad-topp"><span></span><span>' + T('Kurs', 'Price') + '</span><span></span></div>' + rader + '</div>' + meld + '</div>';
     }
     /** Børsen som hovedspill: vises på hele skjermen i stedet for lobbyen. */
     function borsSide() {
@@ -1340,28 +1374,37 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       ut += '<div class="rom-mod bs-faner">' + faner.map(function (f) { return '<button type="button" data-b="fane" data-f="' + f[0] + '" aria-pressed="' + (borsFane === f[0]) + '">' + esc(f[1]) + '</button>'; }).join('') + '</div>';
       if (borsFane === 'tavle') {
         return ut + '<ol class="bs-tavle">' + b.tavle.map(function (x, i) { return '<li class="' + (x.id === m ? 'meg' : '') + '"><span>' + (i + 1) + '. ' + esc(navn(x.id)) + '</span><b>' + kr(x.kr) + '</b></li>'; }).join('') + '</ol>' +
-          '<p class="small">' + T('Formue = kontanter + dagens verdi av aksjene. Handler er hemmelige – til noen anmelder dem.', 'Net worth = cash + current value of your shares. Trades are secret – until someone reports them.') + '</p>' +
+          '<p class="small">' + T('Formue = kontanter + dagens verdi av aksjene. Handler og gaver er hemmelige – til noen anmelder dem.', 'Net worth = cash + current value of your shares. Trades and gifts are secret – until someone reports them.') + '</p>' +
+          (b.paa ? '<details class="bs-noter bs-gi"><summary>' + T('💸 Gi vorskroner til noen', '💸 Give coins to someone') + '</summary><p class="small">' + T('Lov og hemmelig – men dukker opp i tilsynet hvis mottakeren eller giveren blir anmeldt.', 'Allowed and secret – but shows up to the watchdog if the giver or receiver is reported.') + '</p>' +
+            '<select id="bsGiTil">' + tilstand.spillere.filter(function (p) { return p.id !== m; }).map(function (p) { return '<option value="' + p.id + '">' + esc(p.navn) + '</option>'; }).join('') + '</select>' +
+            '<div class="dl-knapper">' + [50, 100, 200].map(function (n) { return '<button class="btn small ghost" data-b="gi" data-kr="' + n + '" type="button">' + kr(n) + '</button>'; }).join('') + '</div></details>' : '') +
+          (b.mineGaver && b.mineGaver.length ? '<p class="small">' + b.mineGaver.map(function (g) { return g.fra === m ? T('Du ga ', 'You gave ') + esc(navn(g.til)) + ' ' + kr(g.kr) : esc(navn(g.fra)) + T(' ga deg ', ' gave you ') + kr(g.kr); }).join(' · ') + '</p>' : '') +
           (erVert() ? '<button class="btn ghost" data-b="avslutt" type="button">' + T('Steng børsen og kår Børskongen', 'Close the Exchange and crown the Market King') + '</button>' : '');
       }
       if (borsFane === 'tilsyn') {
-        if (!b.saker.length) return ut + '<p class="small">' + T('Ingen saker ennå. Mistenker du at noen samarbeidet om å få en aksje til å skje? Åpne aksjen etter at den er avgjort og trykk «Anmeld innsidehandel». Da åpnes handelsloggen.', 'No cases yet. Suspect someone worked together to make a share happen? Open the share once it’s settled and tap “Report insider trading”. The trade log is then revealed.') + '</p>';
+        if (!b.saker.length) return ut + '<p class="small">' + T('Ingen saker ennå. Tror du en vinner samarbeidet med noen for å få aksjen til å skje? Trykk «Anmeld en vinner» på den avgjorte aksjen. Da åpnes handelsloggen og pengegavene til den du anmelder.', 'No cases yet. Think a winner worked with someone to make a share happen? Tap “Report a winner” on the settled share. The trade log and the money gifts of the person you report are then revealed.') + '</p>';
         return ut + b.saker.slice().reverse().map(function (s) {
-          var part = s.av === m || s.mot.indexOf(m) !== -1;
-          return '<div class="bs-sak"><p class="rom-etikett">🚨 ' + T('Sak: ', 'Case: ') + esc(s.q) + '</p><p>' + esc(navn(s.av)) + T(' anmelder ', ' reports ') + '<b>' + s.mot.map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and ')) + '</b>' + (s.vinner ? T(' · utfall: ', ' · outcome: ') + esc(s.type === 'hvem' ? navn(s.vinner) : s.vinner) : '') + '</p>' +
+          var part = (s.utenfor || []).indexOf(m) !== -1;
+          return '<div class="bs-sak"><p class="rom-etikett">🚨 ' + T('Sak: ', 'Case: ') + esc(s.q) + '</p><p>' + esc(navn(s.av)) + T(' anmelder ', ' reports ') + '<b>' + esc(navn(s.mot)) + '</b>' + (s.vinner ? T(' · utfall: ', ' · outcome: ') + esc(s.type === 'hvem' ? navn(s.vinner) : s.vinner) : '') + '</p>' +
             '<table class="bs-logg"><thead><tr><th>' + T('Hvem', 'Who') + '</th><th>' + T('Handel', 'Trade') + '</th><th>kr</th><th>' + T('Før', 'Before') + '</th></tr></thead><tbody>' +
             s.logg.map(function (l) { return '<tr class="' + (l.mistenkelig ? 'mistenkelig' : '') + '"><td>' + esc(l.navn) + '</td><td>' + (l.n > 0 ? T('kjøpte ', 'bought ') : T('solgte ', 'sold ')) + Math.abs(l.n) + ' ' + esc(s.type === 'hvem' ? navn(l.utfall) : l.utfall) + '</td><td>' + Math.abs(l.kr) + '</td><td>' + l.minFor + ' min' + (l.mistenkelig ? ' ⚠️' : '') + '</td></tr>'; }).join('') +
             '</tbody></table>' +
+            (s.penger && s.penger.length ? '<p class="rom-etikett">💸 ' + T('Pengegaver', 'Money gifts') + '</p><table class="bs-logg"><thead><tr><th>' + T('Fra', 'From') + '</th><th>' + T('Til', 'To') + '</th><th>kr</th><th>' + T('Når', 'When') + '</th></tr></thead><tbody>' +
+              s.penger.map(function (g) { return '<tr class="' + (g.mistenkelig ? 'mistenkelig' : '') + '"><td>' + esc(g.fra) + '</td><td>' + esc(g.til) + '</td><td>' + g.kr + '</td><td>' + (g.minEtter < 0 ? -g.minEtter + T(' min før', ' min before') : g.minEtter + T(' min etter', ' min after')) + (g.mistenkelig ? ' ⚠️' : '') + '</td></tr>'; }).join('') + '</tbody></table>' : '') +
             (s.fase === 'forsvar' ? '<p class="small">' + T('Begge sider får 30 sekunder hver. Så stemmer resten – 2/3 må si skyldig.', 'Both sides get 30 seconds each. Then the rest vote – 2/3 must say guilty.') + '</p>' + fristHtml({ frist: s.frist }, T('sekunder til avstemning', 'seconds until the vote')) + (erVert() ? '<button class="btn small ghost" data-b="sak-videre" data-s="' + s.id + '" type="button">' + T('Til avstemning nå', 'Vote now') + '</button>' : '') : '') +
             (s.fase === 'stem' || s.fase === 'forsvar' ? (part ? '<p class="small">' + T('Du er part i saken og stemmer ikke.', 'You’re part of the case and don’t vote.') + '</p>'
               : '<div class="rom-valg en"><button type="button" data-b="sak-stem" data-v="skyldig" data-s="' + s.id + '" aria-pressed="' + (s.minStemme === 'skyldig') + '">' + T('🚨 Skyldig', '🚨 Guilty') + '</button><button type="button" data-b="sak-stem" data-v="uskyldig" data-s="' + s.id + '" aria-pressed="' + (s.minStemme === 'uskyldig') + '">' + T('😇 Uskyldig', '😇 Not guilty') + '</button></div>') +
               (s.fase === 'stem' ? fristHtml({ frist: s.frist }, T('sekunder igjen', 'seconds left')) : '') : '') +
-            (s.resultat ? '<p class="dl-melding">' + (s.resultat.dom ? T('🚨 Skyldig! Gevinsten beslaglegges og 300 kr i bot.', '🚨 Guilty! Profits seized and a 300 fine.') : T('😇 Frikjent. Anmelderen betaler 200 kr.', '😇 Acquitted. The reporter pays 200.')) + ' (' + s.resultat.skyldig + '–' + s.resultat.frikjent + ')</p>' : '') + '</div>';
+            (s.resultat ? '<p class="dl-melding">' + (s.resultat.dom ? T('🚨 Skyldig! Gevinsten beslaglegges og 300 kr i bot.', '🚨 Guilty! Profits seized and a 300 fine.') + (s.resultat.medskyldig ? ' ' + esc(navn(s.resultat.medskyldig)) + T(' var medskyldig: gaven inndras og 300 kr i bot.', ' was an accomplice: the gift is seized and a 300 fine.') : '') : T('😇 Frikjent. Anmelderen betaler 200 kr.', '😇 Acquitted. The reporter pays 200.')) + ' (' + s.resultat.skyldig + '–' + s.resultat.frikjent + ')</p>' : '') + '</div>';
         }).join('');
       }
-      var apne = b.aksjer.filter(function (a) { return a.status !== 'avgjort' && a.status !== 'ugyldig'; }), ferdige = b.aksjer.filter(function (a) { return a.status === 'avgjort' || a.status === 'ugyldig'; });
+      var rekke = { meldt: 0, venter: 1, apen: 2, stengt: 3 };
+      var apne = b.aksjer.filter(function (a) { return a.status !== 'avgjort' && a.status !== 'ugyldig'; }).sort(function (x, y) {
+        return ((x.laast ? 5 : rekke[x.status] || 0) - (y.laast ? 5 : rekke[y.status] || 0)) || ((x.stenger || 9e15) - (y.stenger || 9e15));
+      }), ferdige = b.aksjer.filter(function (a) { return a.status === 'avgjort' || a.status === 'ugyldig'; });
+      ut += '<p class="small bs-regel">' + T('Hver aksje betaler 100 kr hvis den skjer. Prisen stiger for hver som kjøper – så det lønner seg å være tidlig ute.', 'Each share pays 100 if it happens. The price rises with every purchase – so it pays to be early.') + '</p>';
       ut += apne.map(borsAksjeHtml).join('') || '<p class="small">' + T('Ingen åpne aksjer akkurat nå.', 'No open shares right now.') + '</p>';
-      if (b.gratisIgjen === 0 && !b.fri) ut += '<p class="small bs-pluss">' + T('Gratisbørsen har brukt opp aksjene sine i kveld. ', 'The free exchange has used up its shares tonight. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp resten av kvelden med Pluss', 'Unlock the rest of the night with Plus') + '</button></p>';
-      else ut += '<p class="small">' + T('Neste aksje fra telefonen om ca. ', 'Next share from the phone in about ') + Math.max(1, Math.round((b.neste - (Date.now() + klokkeAvvik)) / 60000)) + ' min.</p>';
+      if (b.laaste) ut += '<p class="small bs-pluss">' + b.laaste + T(' aksjer er låst i gratisbørsen. ', ' shares are locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp alle med Pluss', 'Unlock all with Plus') + '</button></p>';
       if (!b.harNotert) ut += '<details class="bs-noter"><summary>' + T('🧾 Noter en egen aksje (200 kr)', '🧾 List your own share (200)') + '</summary><p class="small">' + T('Én per person per kveld. Du får 2 kr for hvert kjøp andre gjør i den, men kan ikke handle i den selv. Verten godkjenner.', 'One per person per night. You get 2 for every purchase others make in it, but can’t trade in it yourself. The host approves.') + '</p>' +
         '<div class="rom-mod"><label><input type="radio" name="bsType" value="hvem" checked> ' + T('Hvem …?', 'Who …?') + '</label> <label><input type="radio" name="bsType" value="janei"> ' + T('Ja/nei', 'Yes/no') + '</label></div>' +
         '<input id="bsNyTekst" maxlength="100" placeholder="' + T('F.eks. «Hvem ringer mamma før midnatt?»', 'E.g. “Who calls their mum before midnight?”') + '"><button class="btn small gold" data-b="noter" type="button">' + T('Noter (200 kr)', 'List (200)') + '</button></details>';
@@ -1438,11 +1481,17 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (a === 'godkjenn' || a === 'avvis') return gjorAlltid({ handling: 'bs-godkjenn', aksje: b.dataset.a, ok: a === 'godkjenn' });
       if (a === 'anmeld-aapne') { borsAnmeld = borsAnmeld === b.dataset.a ? null : b.dataset.a; tegnBorsOmrade(true); borsLas = !borsModal && !!borsAnmeld; return; }
       if (a === 'anmeld') {
-        var mot = Array.prototype.map.call(cont.querySelectorAll('input[name=bsMot]:checked'), function (x) { return x.value; }).slice(0, 2);
-        if (!mot.length) return toast(T('Velg hvem du anmelder', 'Pick who you’re reporting'));
-        if (!confirm(T('Anmelde for innsidehandel? Blir de frikjent, betaler du 200 kr.', 'Report for insider trading? If they’re acquitted, you pay 200.'))) return;
+        var valgt = cont.querySelector('input[name=bsMot]:checked'), mot = valgt ? valgt.value : '';
+        if (!mot) return toast(T('Velg hvem du anmelder', 'Pick who you’re reporting'));
+        if (!confirm(T('Anmelde for innsidehandel? Blir hen frikjent, betaler du 200 kr.', 'Report for insider trading? If they’re acquitted, you pay 200.'))) return;
         borsAnmeld = null; borsLas = false; borsFane = 'tilsyn';
         return gjorAlltid({ handling: 'bs-anmeld', aksje: b.dataset.a, mot: mot });
+      }
+      if (a === 'gi') {
+        var til = cont.querySelector('#bsGiTil'), n = Number(b.dataset.kr);
+        if (!til || !til.value) return;
+        if (!confirm(T('Gi ', 'Give ') + kr(n) + T(' til ', ' to ') + navn(til.value) + '?')) return;
+        return gjorAlltid({ handling: 'bs-gi', til: til.value, kr: n });
       }
       if (a === 'sak-stem') return gjorAlltid({ handling: 'bs-sak-stem', sak: b.dataset.s, v: b.dataset.v });
       if (a === 'sak-videre') return gjorAlltid({ handling: 'bs-sak-videre', sak: b.dataset.s });
@@ -1460,7 +1509,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     function borsStartValg() {
       var m = document.createElement('div'); m.className = 'rom-tavle'; m.setAttribute('role', 'dialog');
       m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>📈 ' + T('Start Vorsbørsen', 'Start the Exchange') + '</h2><button class="linkbtn" data-v="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
-        '<p>' + T('Alle får 1000 vorskroner og kjøper aksjer i hva som skjer i løpet av kvelden. Børsen varer hele kvelden.', 'Everyone gets 1,000 coins and buys shares in what happens during the night. The Exchange lasts all night.') + '</p>' +
+        '<p>' + T('Alle får 1000 vorskroner og kjøper aksjer i hva som skjer i løpet av kvelden. Hver aksje betaler 100 kr hvis den skjer – og prisen stiger jo flere som kjøper. Noen aksjer stenger underveis.', 'Everyone gets 1,000 coins and buys shares in what happens during the night. Each share pays 100 if it happens – and the price rises the more people buy. Some shares close along the way.') + '</p>' +
         '<div class="bs-valg"><button class="btn gold" data-v="fokus" type="button"><b>' + T('📈 Bare Vorsbørsen', '📈 Just the Exchange') + '</b><small>' + T('Børsen er hovedspillet – på alles skjerm', 'The Exchange is the main game – on everyone’s screen') + '</small></button>' +
         '<button class="btn ghost" data-v="bakgrunn" type="button"><b>' + T('🎲 Børs i bakgrunnen', '🎲 Exchange in the background') + '</b><small>' + T('Spill andre leker – børsen går ved siden av', 'Play other games – the Exchange runs alongside') + '</small></button></div>' +
         '<p class="small">' + T('Du kan bytte når som helst.', 'You can switch at any time.') + '</p></div>';
@@ -1475,7 +1524,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     window.__bdBorsTikk = setInterval(function () {
       if (!document.getElementById('rom')) { clearInterval(window.__bdBorsTikk); return; }
       var b = tilstand && tilstand.bors; if (!b || !b.paa || !meg || document.hidden) return;
-      var naa = Date.now() + klokkeAvvik, forfalt = naa >= b.neste ||
+      var naa = Date.now() + klokkeAvvik, forfalt = b.aksjer.some(function (a) { return a.status === 'apen' && a.stenger && naa >= a.stenger; }) ||
         b.aksjer.some(function (a) { return a.status === 'meldt' && a.melding && naa >= a.melding.frist; }) ||
         b.saker.some(function (s) { return s.fase !== 'ferdig' && s.frist && naa >= s.frist; });
       if (!forfalt || Date.now() - borsTikkSendt < 8000) return;
