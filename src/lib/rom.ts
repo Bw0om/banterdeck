@@ -98,7 +98,8 @@ function lekelisteRa(lang: Lang) {
     { id: 'mest', navn: nv('mest'), type: 'mest', moduser: moduserFor('pekeleken', lang), om: en ? 'Everyone votes for who it fits best. Every vote is one sip.' : 'Alle stemmer på hvem det passer best på. Hver stemme er én slurk.' },
     { id: 'forraeder', navn: nv('forraeder'), type: 'forraeder', moduser: moduserFor('forraeder', lang), om: en ? 'One player is secretly told to lie or tell the truth. Everyone else votes.' : 'Én får i hemmelighet beskjed om å lyve eller si sannheten. Resten stemmer.' },
     { id: 'bingo', navn: nv('bingo'), type: 'bingo', moduser: B.eras.map((e: any) => ({ v: e.id, t: eraTittel(e.id, lang) })), om: en ? 'Everyone gets their own board. The page calls it out when someone gets a line or bingo.' : 'Hver får sitt eget brett. Siden roper når noen får rekke eller bingo.' },
-    { id: 'ring-of-fire', navn: nv('ring-of-fire'), type: 'kort', moduser: [], om: en ? 'The phones are the deck. Everyone sees the same card.' : 'Telefonene er kortstokken. Alle ser samme kort.' },
+    { id: 'ring-of-fire', navn: nv('ring-of-fire'), type: 'kort', moduser: [{ v: 'ring', t: en ? '🔥 The ring – pull the cards out' : '🔥 Ringen – dra ut kortene' }, { v: 'enkel', t: en ? 'Simple – tap for the next card' : 'Enkel – trykk for neste kort' }],
+      om: en ? 'The cards lie in a ring around a glass. Spin the ring and pull a card out slowly – pull too hard and the ring breaks, and you finish your drink.' : 'Kortene ligger i en ring rundt et glass. Snurr ringen og dra ut et kort forsiktig – drar du for hardt, ryker ringen og du må drikke opp.' },
     ...ekstraLeker(lang),
     ...kort.map((k) => ({ ...k, om: en ? 'Everyone sees the same card. Anyone can draw the next one.' : 'Alle ser samme kort. Hvem som helst kan trekke neste.' })),
     ...PAKKER.map((p) => ({ id: p.id, navn: en ? p.en.navn : p.navn, type: 'kort', moduser: [], pluss: true, om: en ? p.en.om + ' ' + p.antall + ' cards.' : p.om + ' ' + p.antall + ' kort.' })),
@@ -162,7 +163,8 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
   let spill: any = null;
   if (s) {
     spill = { type: s.type, lek: s.lek, navn: s.navn, modus: modusNavn(s, lang), runde: s.runde, frist: s.frist || null, turStart: s.turNokkel ? s.turStart || null : null };
-    if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger });
+    if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger },
+      s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, sist: s.sist, turId: (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null, igjen: s.rekke.length - s.tatt.length } : {});
     if (s.type === 'mest') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase,
       harStemt: Object.keys(s.stemmer),
@@ -271,6 +273,7 @@ function medSmakebiter(rekke: any[]) {
   }
   return ut;
 }
+const ROF_BRUDD = 5;   // slurker når ringen ryker («drikk opp»)
 const KONGE_NR: [string, string][] = [['Første', 'First'], ['Andre', 'Second'], ['Tredje', 'Third'], ['Fjerde', 'Fourth']];
 function visKort(s: any, data: any) {
   const k = s.rekke[s.pos];
@@ -326,8 +329,13 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
     if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && rekke.length > 12) rekke = medSmakebiter(rekke);
     if (!rekke.length) return { feil: 'tom' };
     data.spill = { type: 'kort', lek, navn, modus, rekke, pos: 0, tur: lek === 'ring-of-fire' ? 0 : null, konger: 0 };
-    if (lek === 'ring-of-fire' && rekke[0].v === 'K') data.spill.konger = 1;
-    data.spill.kort = visKort(data.spill, data);
+    if (lek === 'ring-of-fire' && modus !== 'enkel') {
+      // Ringen: alle 52 kortene ligger rundt glasset, og den som har tur drar ut et hvilket som helst kort
+      Object.assign(data.spill, { ring: true, tatt: [], nr: 0, brudd: null, kort: null, sist: null });
+    } else {
+      if (lek === 'ring-of-fire' && rekke[0].v === 'K') data.spill.konger = 1;
+      data.spill.kort = visKort(data.spill, data);
+    }
   }
   if (valgt.type === 'mest') {
     const alle = teksterL('pekeleken');
@@ -357,6 +365,7 @@ function turNokkel(s: any) {
   if (s.type === 'bussruta' && s.fase === 1) return 'b1:' + s.tur;
   if (s.type === 'yatzy' && !s.ferdig) return 'y:' + s.tur;
   if (s.type === 'overunder') return 'o:' + s.tur;
+  if (s.type === 'kort' && s.ring) return 'r:' + s.tur + ':' + s.nr;
   return null;
 }
 const HOPP_ETTER = 40000;
@@ -383,6 +392,8 @@ function hoppOver(data: any) {
     }
   } else if (s.type === 'overunder') {
     s.tur = (s.tur + 1) % Math.max(1, ider.length);
+  } else if (s.type === 'kort' && s.ring) {
+    s.tur = (s.tur + 1) % Math.max(1, data.spillere.length);
   }
   melde(data, 'Hoppet over den som hadde tur', 'Skipped whoever had the turn');
 }
@@ -573,8 +584,38 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!erVert) return { feil: 'bare-vert' };
       data.spillere.forEach((p: any) => { p.slurker = 0; p.gi = 0; }); melde(data, 'Slurketelleren er nullstilt', 'The sip counter has been reset'); return { ok: true };
     }
+    case 'rof-trekk': {
+      if (!s || s.type !== 'kort' || !s.ring) return { feil: 'feil-spill' };
+      if (typeof h.nr === 'number' && h.nr !== s.nr) return { ok: true };   // noen andre rakk å trekke først
+      const tur = data.spillere[s.tur % Math.max(1, data.spillere.length)];
+      if (tur && tur.id !== meg.id && !erVert) return feilL('ikke-tur', 'Det er ikke din tur å trekke.', "It's not your turn to draw.");
+      const plass = Math.round(Number(h.plass));
+      if (!(plass >= 0 && plass < s.rekke.length) || s.tatt.includes(plass)) return { ok: true };
+      const hvem = tur ? tur.id : meg.id;
+      s.tatt.push(plass); s.pos = plass; s.nr++; s.sist = plass;
+      const v = s.rekke[plass].v;
+      if (v === 'K') s.konger++;
+      s.kort = visKort(s, data);
+      // Ringen røk: drikk opp glasset (føres som 5 slurker), og ringen lappes sammen igjen
+      if (h.brutt === true) {
+        s.brudd = { hvem, nr: s.nr, navn: navnPaa(data, hvem) };
+        giSlurker(data, hvem, ROF_BRUDD);
+        melde(data, `💥 ${navnPaa(data, hvem)} brøt ringen – drikk opp glasset!`, `💥 ${navnPaa(data, hvem)} broke the ring – finish your drink!`);
+      }
+      if (v === 'K') giSlurker(data, hvem, D['ring-of-fire'].konger[Math.min(s.konger, 4) - 1] || 5);
+      if (v === '3') giSlurker(data, hvem, 1);
+      if (v === '2') giUtdeling(data, hvem, 1);
+      s.tur = (s.tur + 1) % Math.max(1, data.spillere.length);
+      // Tomt for kort: ny ring
+      if (s.tatt.length >= s.rekke.length) {
+        s.rekke = kortstokkFor(s.lek, s.modus); s.tatt = []; s.konger = 0;
+        melde(data, '🔥 Ringen er tom – en ny ring er lagt ut', '🔥 The ring is empty – a new ring is laid out');
+      }
+      return { ok: true };
+    }
     case 'neste': {
       if (!s || s.type !== 'kort') return { feil: 'feil-spill' };
+      if (s.ring) return { ok: true };
       if (typeof h.pos === 'number' && h.pos !== s.pos) return { ok: true }; // noen andre trykket samtidig
       s.pos++;
       if (s.pos >= s.rekke.length) { s.rekke = kortstokkFor(s.lek, s.modus); s.pos = 0; s.konger = 0; melde(data, 'Stokket på nytt', 'Reshuffled'); }

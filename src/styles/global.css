@@ -1919,3 +1919,31 @@ html.rom-sender::before{content:"";position:fixed;top:0;left:0;right:0;height:3p
 #rom button:active,.bs-modal button:active,.rom-tavle button:active{transform:scale(.96);transition:transform .05s}
 @media (prefers-reduced-motion: reduce){html.rom-sender::before{animation:none;background:var(--gold,#f5b300)}}
 button,a,[role=button]{touch-action:manipulation}
+/* Ring of Fire: kortene i en ring rundt kongekoppen */
+.rofr-bord{--S:min(86vw,340px);--R:calc(var(--S) * .40);position:relative;width:var(--S);height:var(--S);margin:8px auto 4px;touch-action:none;user-select:none;-webkit-user-select:none}
+.rofr-rotor{position:absolute;inset:0;transition:transform .2s ease-out}
+.rofr-k{position:absolute;left:50%;top:50%;width:26px;height:38px;margin:-19px 0 0 -13px;border-radius:4px;border:1.5px solid rgba(255,255,255,.75);
+  background:repeating-linear-gradient(45deg,#b3122e 0 4px,#8e0d24 4px 8px);box-shadow:0 1px 3px rgba(0,0,0,.45);
+  transform:rotate(var(--v)) translateY(calc(-1 * var(--R) - var(--ut, 0px)));transition:transform .15s}
+.rofr-bord.aktiv .rofr-k.valgt{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold),0 0 18px var(--gold);z-index:2;
+  transform:rotate(var(--v)) translateY(calc(-1 * var(--R) - 10px - var(--ut, 0px))) scale(1.45)}
+.rofr-k.drar{transition:none}
+.rofr-k.ute{opacity:0;transform:rotate(var(--v)) translateY(calc(-1 * var(--R) - 140px)) scale(1.6);transition:transform .25s,opacity .25s}
+.rofr-glass{position:absolute;left:50%;top:50%;width:64px;height:84px;margin:-42px 0 0 -32px;border:3px solid rgba(255,255,255,.55);border-top:0;border-radius:6px 6px 16px 16px;overflow:hidden;background:rgba(255,255,255,.05);display:flex;align-items:flex-end;justify-content:center}
+.rofr-glass i{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#ffd24d,#e0a100);transition:height .6s}
+.rofr-glass span{position:relative;font-size:12px;font-weight:800;margin-bottom:4px;color:#fff;text-shadow:0 1px 2px #000}
+.rofr-pil{position:absolute;left:50%;top:-6px;transform:translateX(-50%);color:var(--gold);font-size:16px;animation:rofPil 1s ease-in-out infinite}
+@keyframes rofPil{50%{transform:translate(-50%,4px)}}
+.rofr-spenning{height:10px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden;max-width:340px;margin:6px auto}
+.rofr-spenning i{display:block;height:100%;width:0;background:hsl(120,85%,50%);transition:width .08s}
+.rofr-hint{text-align:center}
+.rofr-bord.brutt{animation:rofRist .08s linear 6}
+.rofr-bord.brutt .rofr-k{transform:rotate(calc(var(--v) + 8deg)) translateY(calc(-1 * var(--R) - 30px)) rotate(35deg);opacity:.5;transition:transform .5s,opacity .5s}
+@keyframes rofRist{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.rof-tur.min{background:var(--gold);color:#1a1200}
+.rof-snu{animation:rofSnu .45s ease-out}
+@keyframes rofSnu{from{transform:rotateY(90deg) scale(.8);opacity:.3}to{transform:none;opacity:1}}
+.rof-knust{position:fixed;inset:0;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;pointer-events:none;background:rgba(200,20,40,.9);color:#fff;animation:drikkInn .3s cubic-bezier(.2,1.6,.4,1)}
+.rof-knust b{font-size:clamp(40px,12vw,84px);font-weight:900;animation:drikkRist .1s linear 8}
+.rof-knust span{font-size:22px;font-weight:700}
+@media (prefers-reduced-motion: reduce){.rofr-pil,.rof-snu,.rof-knust,.rof-knust b,.rofr-bord.brutt{animation:none}}

@@ -233,6 +233,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (navn === 'dundun') { stoy(0, 0.25, 0.5, 120, 'lowpass'); tone(196, 0, 0.3, 'sawtooth', 0.1); tone(185, 0.35, 0.3, 'sawtooth', 0.1); stoy(0.7, 0.5, 0.6, 100, 'lowpass'); tone(156, 0.7, 1.1, 'sawtooth', 0.12, 150, 5); }
       // Seier: fanfare
       if (navn === 'fanfare') { [523, 659, 784].forEach(function (f, i) { tone(f, i * 0.13, 0.14, 'square', 0.08); }); tone(1047, 0.42, 0.7, 'square', 0.09, null, 6); tone(1319, 0.42, 0.7, 'triangle', 0.12); tone(784, 0.42, 0.7, 'triangle', 0.1); }
+      // Glass som knuses (ringen røk)
+      if (navn === 'knus') { stoy(0, 0.35, 0.7, 4000, 'highpass'); stoy(0, 0.15, 0.6, 900, 'bandpass'); [3100, 4200, 2600, 5200, 3700].forEach(function (f, i) { tone(f, 0.03 + i * 0.05, 0.25, 'triangle', 0.08); }); stoy(0.45, 0.5, 0.3, 6000, 'highpass'); }
       // Kortstokk som stokkes
       if (navn === 'bytt') { for (var i = 0; i < 5; i++) stoy(i * 0.045, 0.04, 0.35, 2500 + i * 300); tone(900, 0.25, 0.1, 'triangle', 0.1, 1400); }
     }
@@ -320,6 +322,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       else if (lekerHar.liste && lekerHar.kode === kode) d.leker = lekerHar.liste;
       sjekkSlurker(tilstand, d);
       try { sjekkHendelser(d); } catch (x) {}
+      try { rofSjekkBrudd(d); } catch (x) {}
       tilstand = d;
       sjekkSprak(d);
       if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
@@ -685,10 +688,14 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       bingo: [['Alle får sitt eget bingobrett med sanger.', 'Everyone gets their own bingo card with songs.'], ['Spill spillelista og kryss av sangene du hører.', 'Play the playlist and mark the songs you hear.'], ['Rekke: del ut to slurker. Fullt brett: BINGO – alle andre drikker opp.', 'A line: hand out two sips. Full card: BINGO – everyone else finishes their drink.']],
       nyhetsrunden: [['Spørsmål om ukas nyheter dukker opp på alle telefonene.', 'Questions about this week’s news appear on every phone.'], ['Svar før tiden går ut.', 'Answer before time runs out.'], ['Riktig: del ut en slurk. Feil: drikk.', 'Right: hand out a sip. Wrong: drink.']],
       ring: [['Telefonene er kortstokken – alle ser samme kort.', 'The phones are the deck – everyone sees the same card.'], ['Den som har tur, trekker og gjør det kortet sier.', 'Whoever’s turn it is draws and does what the card says.'], ['Den som trekker fjerde konge, drikker opp!', 'Whoever draws the fourth king finishes their drink!']],
+      ringr: [['Kortene ligger i en ring rundt glasset. Den som har tur, snurrer ringen med fingeren – kortet øverst lyser opp.', 'The cards lie in a ring around the glass. Whoever’s turn it is spins the ring with a finger – the top card lights up.'],
+        ['Hold på kortet og dra det sakte ut. Drar du for fort, ryker ringen: drikk opp glasset ditt!', 'Hold the card and pull it out slowly. Pull too fast and the ring breaks: finish your drink!'],
+        ['Jo færre kort som er igjen, jo strammere blir ringen.', 'The fewer cards left, the tighter the ring gets.'],
+        ['Gjør det kortet sier. Hver konge fyller kongekoppen – den som trekker fjerde konge, drikker den.', 'Do what the card says. Each king fills the king’s cup – whoever draws the fourth king drinks it.']],
       kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Hvem som helst kan trykke «Neste kort».', 'Anyone can tap “Next card”.']],
     };
     function reglerPanel(s) {
-      var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? 'ring' : 'kort') : s.type, r = REGLER[nokkel];
+      var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : 'kort') : s.type, r = REGLER[nokkel];
       if (!r) return '';
       var sett = les('bd_regler_sett') || [], forste = sett.indexOf(nokkel) === -1;
       if (forste) { sett.push(nokkel); skriv('bd_regler_sett', sett.slice(-40)); apneRegler[nokkel] = true; }
@@ -868,7 +875,126 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       }).catch(function (e) { toast(e.message || T('Fikk ikke lagret.', 'Couldn\'t save.')); });
     }
 
+    /* ---------- Ring of Fire: ringen rundt glasset ---------- */
+    var rofFor = -2, rofA = 0, rofDrar = null, rofVentTegn = false, rofBruddSett = null, rofValgt = -1;
+    var ROF_N = 52, ROF_STEG = 360 / 52;
+    function rofNorm(a) { a = a % 360; if (a > 180) a -= 360; if (a < -180) a += 360; return a; }
+    /** Kortet som ligger nærmest toppen av ringen (av dem som er igjen). */
+    function rofTopp(tatt) {
+      var best = -1, bestA = 999;
+      for (var i = 0; i < ROF_N; i++) { if (tatt.indexOf(i) !== -1) continue; var a = Math.abs(rofNorm(i * ROF_STEG + rofA)); if (a < bestA) { bestA = a; best = i; } }
+      return best;
+    }
+    var rofVistNr = -1;
+    function rofKortHtml(k, nr) {
+      var snu = nr !== rofVistNr; rofVistNr = nr;   // snu-animasjonen bare første gang kortet vises
+      return '<div class="rof-kort rom-rof' + (snu ? ' rof-snu' : '') + (k.rod ? ' rod' : '') + '"><div class="rof-hj"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div>' +
+        '<div class="rof-midt"><b class="rof-regel">' + esc(k.regel) + '</b><span class="rof-tekst">' + esc(k.tekst) + '</span></div>' +
+        '<div class="rof-hj rof-hj2"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div></div>';
+    }
+    function rofSpill(s) {
+      // Verten kan trekke for den som har tur (f.eks. hvis telefonen er borte) – gjelder bare dette trekket
+      var tatt = s.tatt || [], min = s.turId === tilstand.meg || (erVert() && rofFor === s.nr), k = s.kort;
+      rofValgt = rofTopp(tatt);
+      var kort = '';
+      for (var i = 0; i < ROF_N; i++) {
+        if (tatt.indexOf(i) !== -1) continue;
+        kort += '<span class="rofr-k' + (i === rofValgt && min ? ' valgt' : '') + '" data-p="' + i + '" style="--v:' + (i * ROF_STEG).toFixed(2) + 'deg"></span>';
+      }
+      var fyll = Math.min(4, s.konger || 0) * 25;
+      return '<div class="rof-tur' + (min ? ' min' : '') + '"><span>' + (min ? T('Din tur!', 'Your turn!') : T('Trekker', 'Drawing')) + '</span><b>' + esc(min ? T('Snurr ringen og dra ut et kort', 'Spin the ring and pull out a card') : navn(s.turId)) + '</b></div>' +
+        '<p class="rom-status">' + (s.igjen != null ? s.igjen : ROF_N - tatt.length) + T(' kort i ringen · ', ' cards in the ring · ') + (s.konger || 0) + T(' av 4 konger', ' of 4 kings') + '</p>' +
+        '<div class="rofr-bord' + (min ? ' aktiv' : '') + '" data-nr="' + s.nr + '">' +
+          '<div class="rofr-rotor" style="transform:rotate(' + rofA + 'deg)">' + kort + '</div>' +
+          '<div class="rofr-glass" title="' + T('Kongekoppen', 'The king’s cup') + '"><i style="height:' + fyll + '%"></i><span>👑 ' + (s.konger || 0) + '/4</span></div>' +
+          (min ? '<div class="rofr-pil">▼</div>' : '') +
+        '</div>' +
+        (min ? '<div class="rofr-spenning" aria-hidden="true"><i></i></div><p class="small rofr-hint">' + T('Snurr: sveip rundt ringen. Trekk: hold på det lyse kortet og dra det <b>sakte</b> oppover.', 'Spin: swipe around the ring. Draw: hold the glowing card and pull it <b>slowly</b> upward.') + '</p>'
+          : '<p class="small rofr-hint">' + T('Følg med – ryker ringen, må ', 'Watch – if the ring breaks, ') + esc(navn(s.turId)) + T(' drikke opp.', ' finishes their drink.') + '</p>') +
+        (k ? '<p class="rom-etikett">' + esc(k.hvem || '') + T(' trakk', ' drew') + '</p>' + rofKortHtml(k, s.nr) : '') +
+        (!min && erVert() ? '<p class="small"><button class="linkbtn" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button></p>' : '');
+    }
+    /** Ringen røk: alle telefonene får vite det. */
+    function rofSjekkBrudd(d) {
+      var sp = d && d.spill, b = sp && sp.ring ? sp.brudd : null, nr = b ? b.nr : 0;
+      if (rofBruddSett !== null && b && nr !== rofBruddSett) rofKnust(b.navn);
+      rofBruddSett = nr;
+    }
+    function rofKnust(hvem) {
+      spillLyd('knus');
+      var el = document.createElement('div'); el.className = 'rof-knust'; el.setAttribute('role', 'alert');
+      el.innerHTML = '<b>💥 ' + T('RINGEN RØK!', 'THE RING BROKE!') + '</b><span>' + esc(hvem || '') + T(' drikker opp glasset', ' finishes their drink') + '</span>';
+      document.body.appendChild(el); setTimeout(function () { el.remove(); }, 2800);
+      try { navigator.vibrate && navigator.vibrate([400, 100, 400]); } catch (e) {}
+    }
+    function rofOppdaterValgt(bord) {
+      var s = tilstand.spill, ny = rofTopp(s.tatt || []);
+      if (ny === rofValgt) return;
+      rofValgt = ny; spillLyd('tikk');
+      bord.querySelectorAll('.rofr-k').forEach(function (e) { e.classList.toggle('valgt', Number(e.dataset.p) === ny); });
+    }
+    function rofVinkel(bord, e) { var r = bord.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; }
+    function rofFerdig(sendTegn) { rofDrar = null; if (rofVentTegn || sendTegn) { rofVentTegn = false; tegn(); } }
+    document.addEventListener('pointerdown', function (e) {
+      var bord = e.target.closest && e.target.closest('.rofr-bord.aktiv'); if (!bord || !tilstand || !tilstand.spill || !tilstand.spill.ring) return;
+      e.preventDefault();
+      var kortEl = e.target.closest('.rofr-k.valgt'), s = tilstand.spill;
+      try { bord.setPointerCapture(e.pointerId); } catch (x) {}
+      if (kortEl) {
+        var igjen = ROF_N - (s.tatt || []).length;
+        // Hvor fort du kan dra før ringen ryker: strammere jo færre kort som er igjen, snillere i første runde, og litt ulikt fra kort til kort
+        var grense = (0.16 + 0.42 * (igjen / ROF_N)) * (0.8 + Math.random() * 0.4) * ((s.nr || 0) < (tilstand.spillere || []).length ? 1.5 : 1);
+        rofDrar = { type: 'dra', bord: bord, el: kortEl, p: Number(kortEl.dataset.p), y0: e.clientY, sistY: e.clientY, t: performance.now(), fart: 0, spenning: 0, grense: grense, maal: Math.max(100, bord.clientWidth * 0.38), nr: s.nr };
+        kortEl.classList.add('drar');
+      } else {
+        rofDrar = { type: 'snurr', bord: bord, a0: rofA, v0: rofVinkel(bord, e) };
+        bord.querySelector('.rofr-rotor').style.transition = 'none';
+      }
+    });
+    window.addEventListener('pointermove', function (e) {
+      var d = rofDrar; if (!d) return;
+      if (e.cancelable) e.preventDefault();
+      if (d.type === 'snurr') {
+        rofA = d.a0 + rofNorm(rofVinkel(d.bord, e) - d.v0);
+        d.bord.querySelector('.rofr-rotor').style.transform = 'rotate(' + rofA + 'deg)';
+        rofOppdaterValgt(d.bord);
+        return;
+      }
+      var naa = performance.now(), dt = Math.max(1, naa - d.t), dy = d.sistY - e.clientY;
+      d.fart = d.fart * 0.6 + (Math.max(0, dy) / dt) * 0.4; d.t = naa; d.sistY = e.clientY;
+      // Spenningen bygger seg opp når du drar fortere enn ringen tåler, og slipper sakte når du roer ned
+      d.spenning = Math.max(0, d.spenning + Math.max(0, d.fart - d.grense) * dt * 0.06 - dt * 0.0003);
+      var ut = Math.max(0, d.y0 - e.clientY), maaler = Math.min(1, Math.max(d.spenning, d.fart / d.grense * 0.55));
+      d.el.style.setProperty('--ut', ut + 'px');
+      var m = document.querySelector('.rofr-spenning i'); if (m) { m.style.width = Math.round(maaler * 100) + '%'; m.style.background = 'hsl(' + Math.round(120 - 120 * maaler) + ',85%,50%)'; }
+      if (d.spenning >= 1) { rofTrekk(d, true); return; }
+      if (ut >= d.maal) rofTrekk(d, false);
+    });
+    function rofSlipp() {
+      var d = rofDrar; if (!d) return;
+      if (d.type === 'snurr') {
+        // Lås ringen slik at det valgte kortet står rett øverst
+        var s = tilstand.spill, p = rofTopp(s.tatt || []);
+        if (p >= 0) rofA = rofA + rofNorm(-(p * ROF_STEG + rofA));
+        var rotor = d.bord.querySelector('.rofr-rotor'); rotor.style.transition = 'transform .2s ease-out'; rotor.style.transform = 'rotate(' + rofA + 'deg)';
+        return rofFerdig(false);
+      }
+      d.el.classList.remove('drar'); d.el.style.setProperty('--ut', '0px');
+      var m = document.querySelector('.rofr-spenning i'); if (m) m.style.width = '0';
+      rofFerdig(false);
+    }
+    window.addEventListener('pointerup', rofSlipp); window.addEventListener('pointercancel', rofSlipp);
+    function rofTrekk(d, brutt) {
+      rofDrar = null;
+      d.el.classList.remove('drar');
+      if (brutt) { d.bord.classList.add('brutt'); spillLyd('knus'); }
+      else { d.el.classList.add('ute'); spillLyd('pop'); }
+      rofBruddSett = null;   // vårt eget brudd vises av knus-effekten over, ikke to ganger
+      gjorAlltid({ handling: 'rof-trekk', plass: d.p, brutt: brutt, nr: d.nr });
+      setTimeout(function () { rofFerdig(true); }, brutt ? 700 : 250);
+    }
     function kortSpill(s) {
+      if (s.ring) return rofSpill(s);
       var k = s.kort || {};
       if (k.id) merkSett(s.lek, k.id);
       var rof = s.lek === 'ring-of-fire';
@@ -2252,6 +2378,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     function tegn() {
       if (tavle && tilstand) tavle.innerHTML = tavleHtml();
       if (!tilstand) return;
+      if (rofDrar) { rofVentTegn = true; return; }   // ikke tegn ringen på nytt midt i et drag
       if (borsLas && document.querySelector('.bs-side .bs-meld, .bs-side .bs-anmeld')) return;   // ikke mist bildet/valgene mens du melder
       var aktivt = document.activeElement;
       if (aktivt && aktivt.closest && aktivt.closest('.bs-side') && (aktivt.tagName === 'SELECT' || aktivt.tagName === 'INPUT')) return;   // ikke forstyrr mens du velger/skriver
@@ -2263,7 +2390,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       else if (!s && tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) innhold = borsSide();
       else if (!s) innhold = lobby();
       else {
-        innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' ? ' · ' + esc(s.modus) : '') + '</p>' + reglerPanel(s) +
+        innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' && s.lek !== 'ring-of-fire' ? ' · ' + esc(s.modus) : '') + '</p>' + reglerPanel(s) +
           ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
              veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + '</div>';
         // Nyhetsrunden finnes bare på norsk
@@ -2436,6 +2563,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (g === 'nr-flipp') return gjor({ handling: 'nr-flipp', hvem: b.dataset.id });
       if (['br-buss', 'br-kjor', 'yz-kast', 'nr-vis', 'nr-neste', 'nr-start'].indexOf(g) !== -1) return gjor({ handling: g });
       if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
+      if (g === 'rof-for') { rofFor = tilstand.spill ? tilstand.spill.nr : -1; return tegn(); }
       if (g === 'stem') return gjor({ handling: 'stem', paa: b.dataset.paa });
       if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
       if (g === 'fjern') return gjor({ handling: 'fjern', hvem: b.dataset.id });
