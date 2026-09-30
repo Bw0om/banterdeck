@@ -3,6 +3,7 @@
 import type { APIRoute } from 'astro';
 import { hentRom, endreRom, visning, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
 import { rpc } from '../../../lib/spilt';
+import { etterpaa } from '../../../lib/etterpaa';
 import { innloggetBruker } from '../../../lib/konto';
 import { plussStatus } from '../../../lib/pluss';
 import { kveldInn, vinnerValg, reglerForRom, startSaldo } from '../../../lib/lovbok';
@@ -25,6 +26,8 @@ const MELDINGER_EN: Record<string, string> = {
   'opptatt': 'Lots of people tapped at once. Try again.',
 };
 type Sprak = 'no' | 'en';
+/** Lekelista er lik hele kvelden – telefonen sier fra hvilket språk den allerede har, så slipper vi å sende den hver gang. */
+const trengerLeker = (request: Request, lang: Sprak) => request.headers.get('x-leker') !== lang;
 /** Melding på riktig språk: engelsk variant fra rom.ts (res.en) eller fra kartet over. */
 function melding(kode: string, lang: Sprak, egen?: { melding?: string; en?: string }) {
   if (lang === 'en') return (egen && egen.en) || MELDINGER_EN[kode] || (egen && egen.melding) || "That didn't work.";
@@ -56,7 +59,9 @@ export const GET: APIRoute = async ({ params, request }) => {
     const vis: any = visning(rom.data, rom.versjon, meg, lang);
     // Den som ikke er med i rommet, får bare se lobbyen – aldri hemmeligheter fra spillet (spionens sted, ord osv.)
     if (!meg) return json({ versjon: vis.versjon, vert: vis.vert, meg: null, spillere: vis.spillere, spill: vis.spill ? { type: vis.spill.type, navn: vis.spill.navn } : null, lang, kode, leker: lekeliste(lang) });
-    return json({ ...vis, kode, leker: lekeliste(lang) });
+    const ut: any = { ...vis, kode };
+    if (trengerLeker(request, lang)) ut.leker = lekeliste(lang);
+    return json(ut);
   } catch (e) {
     console.warn('Rom kunne ikke hentes:', (e as Error).message);
     return json({ feil: 'server', melding: qLang === 'en' ? 'Lost connection. Retrying …' : 'Mistet kontakten. Prøver igjen …' }, 503);
@@ -153,23 +158,21 @@ export const POST: APIRoute = async ({ params, request }) => {
       if (!meg) return { feil: 'ikke-med' };
       return handling(data, meg, d);
     });
-    if (res.feil === 'fullt-gratis') await varsle(kode, 0);
-    if (vent && !res.feil) { await varsle(kode, res.versjon); return json(venterSvar(res.data, res.versjon, vent, kode)); }   // verten får se at noen prøvde å bli med
+    if (res.feil === 'fullt-gratis') etterpaa(varsle(kode, 0));
+    if (vent && !res.feil) { etterpaa(varsle(kode, res.versjon)); return json(venterSvar(res.data, res.versjon, vent, kode)); }   // verten får se at noen prøvde å bli med
     if (res.feil) {
       const status = res.feil === 'finnes-ikke' ? 404 : res.feil === 'ikke-med' ? 403 : res.feil === 'opptatt' ? 409 : 400;
       // Feilen vises på språket til den som trykket (bli-med: body.lang / x-lang)
       const lang: Sprak = meg ? rensLang(meg.lang) : bLang;
       return json({ feil: res.feil, melding: melding(res.feil, lang, res) }, status);
     }
-    // Si fra til de andre telefonene, og tell hvilke leker som startes (uten navn)
-    await Promise.all([
-      varsle(kode, res.versjon),
-      d.handling === 'start' && res.data.spill ? loggRom('lek', d.lek === 'egen' ? 'egen-kortstokk' : String(d.lek || '')) : null,
-    ]);
+    // Si fra til de andre telefonene, og tell hvilke leker som startes (uten navn).
+    // Dette skjer etter at svaret er sendt – telefonen som trykket, slipper å vente på det.
+    etterpaa(varsle(kode, res.versjon));
+    if (d.handling === 'start' && res.data.spill) etterpaa(loggRom('lek', d.lek === 'egen' ? 'egen-kortstokk' : String(d.lek || '')));
     // Verving: husk at en innlogget konto faktisk har spilt i et rom med andre (sjekkes før vervebelønning)
     if ((d.handling === 'bli-med' || d.handling === 'start') && res.data.spillere.length >= 2 && request.headers.get('authorization')) {
-      try { const u = await innloggetBruker(request); if (u) await rpc('konto_rom_spilt', { p_user: u.id }); }
-      catch (e) { console.warn('Rom-spilt feilet:', (e as Error).message); }
+      etterpaa(innloggetBruker(request).then((u) => (u ? rpc('konto_rom_spilt', { p_user: u.id }) : null)));
     }
     // Kvelden er over: lagre den i sesongtabellen til gjengen
     if (d.handling === 'avslutt-kvelden' && res.data.gjeng && res.data.spillere.length >= 2 && (res.data.historikk || []).length) {
@@ -181,20 +184,17 @@ export const POST: APIRoute = async ({ params, request }) => {
     // Kveldens vinner har valgt regel: skriv den inn i lovboka
     if (d.handling === 'lov-valg' && res.data.gjeng && res.data.kveld && res.data.kveld.lovValg && !res.data.kveld.lovValg.lagret) {
       const ok = await lagreLovValg(res.data, kode);
-      if (ok) { const r2: any = await endreRom(kode, (data) => { if (data.kveld && data.kveld.lovValg) data.kveld.lovValg.lagret = true; if (data.gjeng) data.gjeng.regler = ok; return { ok: true }; }); if (!r2.feil) { res.data = r2.data; res.versjon = r2.versjon; await varsle(kode, r2.versjon); } }
+      if (ok) { const r2: any = await endreRom(kode, (data) => { if (data.kveld && data.kveld.lovValg) data.kveld.lovValg.lagret = true; if (data.gjeng) data.gjeng.regler = ok; return { ok: true }; }); if (!r2.feil) { res.data = r2.data; res.versjon = r2.versjon; etterpaa(varsle(kode, r2.versjon)); } }
     }
     // Vorsbørsen: anonym statistikk over hvilke aksjer som blir kjøpt og skjer
-    if (res.svar && Array.isArray(res.svar.stat) && res.svar.stat.length) {
-      try { await rpc('bors_stat_logg', { p_rader: res.svar.stat }); } catch (e) { console.warn('Børsstatistikk feilet:', (e as Error).message); }
-    }
+    if (res.svar && Array.isArray(res.svar.stat) && res.svar.stat.length) etterpaa(rpc('bors_stat_logg', { p_rader: res.svar.stat }));
     // Egne aksjer folk har laget: lagres anonymt, så de beste kan bli faste aksjer senere
     if (res.svar && Array.isArray(res.svar.egne)) {
-      for (const x of res.svar.egne.slice(0, 3)) {
-        try { await rpc('bors_egen_logg', { p_tekst: String(x.tekst || '').slice(0, 100), p_type: x.type === 'janei' ? 'janei' : 'hvem' }); } catch (e) { console.warn('Egen aksje ble ikke logget:', (e as Error).message); }
-      }
+      for (const x of res.svar.egne.slice(0, 3)) etterpaa(rpc('bors_egen_logg', { p_tekst: String(x.tekst || '').slice(0, 100), p_type: x.type === 'janei' ? 'janei' : 'hvem' }));
     }
     const lang: Sprak = meg ? rensLang(meg.lang) : bLang;
-    const svar: any = { ...visning(res.data, res.versjon, meg, lang), kode, leker: lekeliste(lang) };
+    const svar: any = { ...visning(res.data, res.versjon, meg, lang), kode };
+    if (trengerLeker(request, lang)) svar.leker = lekeliste(lang);
     if (ny) { svar.id = ny.id; svar.pollett = ny.pollett; }
     return json(svar);
   } catch (e) {

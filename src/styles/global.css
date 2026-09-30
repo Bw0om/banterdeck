@@ -1913,3 +1913,9 @@ body:not(.humor) .tool.dice{display:none}
 @keyframes drikkRist{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-6px) rotate(-2deg)}75%{transform:translateX(6px) rotate(2deg)}}
 .bs-byttvalg{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px}
 @media (prefers-reduced-motion: reduce){.drikk-alarm,.drikk-alarm b{animation:none}}
+/* Trykk som venter på serveren: stripe øverst + knapper som gir etter når du trykker */
+html.rom-sender::before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:10000;background:linear-gradient(90deg,transparent,var(--gold,#f5b300),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:romSender .9s linear infinite}
+@keyframes romSender{from{background-position:-40% 0}to{background-position:140% 0}}
+#rom button:active,.bs-modal button:active,.rom-tavle button:active{transform:scale(.96);transition:transform .05s}
+@media (prefers-reduced-motion: reduce){html.rom-sender::before{animation:none;background:var(--gold,#f5b300)}}
+button,a,[role=button]{touch-action:manipulation}

@@ -68,13 +68,19 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     }
 
     /* ---------- nettverk ---------- */
+    var lekerHar = { lang: '', kode: '', liste: null }, sender = 0, senderT = null;
     function api(metode, sti, body) {
       var h = { 'Content-Type': 'application/json', 'x-lang': LANG };
+      if (lekerHar.lang && lekerHar.kode === kode) h['x-leker'] = lekerHar.lang;   // serveren slipper å sende lekelista på nytt
       if (meg && metode === 'GET') { h['x-spiller'] = meg.id; h['x-pollett'] = meg.pollett; }
       // Innlogget? Da kan serveren sjekke Pluss når verten starter en pakke
       var sesjon = window.BDKonto && window.BDKonto.les();
       if (metode === 'POST' && sesjon && sesjon.access_token) h.Authorization = 'Bearer ' + sesjon.access_token;
+      // Trykk som venter på serveren: en tynn stripe øverst viser at noe skjer (vises først etter 150 ms, så raske svar ikke blinker)
+      if (metode === 'POST') { sender++; clearTimeout(senderT); senderT = setTimeout(function () { if (sender > 0) document.documentElement.classList.add('rom-sender'); }, 150); }
+      var ferdig = function () { if (metode === 'POST' && --sender <= 0) { sender = 0; clearTimeout(senderT); document.documentElement.classList.remove('rom-sender'); } };
       return fetch(sti, { method: metode, headers: h, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' })
+        .then(function (r) { ferdig(); return r; }, function (e) { ferdig(); throw e; })
         .then(function (r) {
           if (r.status === 204) return null;
           return r.json().then(function (d) { if (!r.ok) { var e = new Error(d.melding || T('Feil', 'Something went wrong')); e.kode = d.feil; e.status = r.status; throw e; } return d; });
@@ -309,6 +315,9 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (tilstand && d.spill && /nyhetsrunden:svar|mest:resultat|forraeder:avslort|tosannheter:avslort/.test(fase) && fase !== sisteFase) spillLyd('svar');
       sisteFase = fase;
       if (d.versjon) versjon = d.versjon;
+      // Lekelista sendes bare når telefonen ikke har den (første gang, eller nytt språk)
+      if (d.leker) { lekerHar = { lang: d.lang || (d.leker && tilstand && tilstand.lang) || '', kode: kode, liste: d.leker }; }
+      else if (lekerHar.liste && lekerHar.kode === kode) d.leker = lekerHar.liste;
       sjekkSlurker(tilstand, d);
       try { sjekkHendelser(d); } catch (x) {}
       tilstand = d;
