@@ -15,7 +15,7 @@ import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
 import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } from './kveld';
 import { MAKS_REGEL } from './lovbok';
-import { borsHandling, borsVisning, borsTilGjeng, settStart } from './bors';
+import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors } from './bors';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
 const D: any = DECKS;
@@ -720,6 +720,7 @@ function leggTil(data: any, fra: { id: string; pollett: string; lang: string }, 
   const s = data.spill;
   if (s && s.type === 'bingo') { s.brett[p.id] = nyttBrett(s); s.merket[p.id] = Array(16).fill(false); }
   if (data.oppdrag && data.oppdrag.paa) nyttOppdrag(data, p.id);
+  nySpillerIBors(data, p.id);
   melde(data, `${n} ble med`, `${n} joined`);
   return { spiller: p };
 }

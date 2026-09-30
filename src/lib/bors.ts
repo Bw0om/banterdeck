@@ -279,7 +279,10 @@ function vurderMelding(data: any, a: any, tvunget = false) {
   const vitneNei = m.vitne && m.stemmer[m.vitne] === 'nei';
   // Hvor mange andre enn den som meldte har tatt stilling (ja eller nei)?
   const andre = Object.entries(m.stemmer).filter(([id, x]) => id !== m.av && id !== m.subjekt && (x === 'ja' || x === 'nei')).length;
-  if (!alle && !tvunget && !vitneNei && !m.utsatt) return;
+  // Flertall avgjør med en gang: når over halvparten av dem som kan stemme har sagt ja (eller nei), trenger vi ikke vente
+  const kan = data.spillere.filter((p: any) => p.id !== m.subjekt).length;
+  const flertallJa = ja > kan / 2 && andre >= 1 && !vitneNei, flertallNei = nei >= kan / 2 && nei > 0;
+  if (!alle && !tvunget && !vitneNei && !m.utsatt && !flertallJa && !flertallNei) return;
   if (!vitneNei && andre < 1 && !alle) {
     // For få har stemt: ikke avvis – vent. Stemmene kan komme senere (i en gjeng: på gjengsiden etter kvelden).
     if (!m.utsatt) {
@@ -318,6 +321,14 @@ export function borsTilGjeng(data: any) {
   return { utsatte, saldoer };
 }
 
+/** Ny spiller midt i børsen: hen blir et utfall i alle hvem-aksjer som fortsatt er åpne. */
+export function nySpillerIBors(data: any, id: string) {
+  const b = data.bors; if (!b || !b.paa) return;
+  b.aksjer.forEach((a: any) => {
+    if (a.type !== 'hvem' || a.utfall.includes(id) || !['apen', 'stengt', 'venter'].includes(a.status)) return;
+    a.utfall.push(id); a.qs.push(0);
+  });
+}
 /** Startsaldo fra gjengens lommebok (medlemmer tar med seg formuen sin inn i kvelden). */
 export function settStart(data: any, start: Record<string, number>) {
   const b = data.bors; if (!b) return;
@@ -334,10 +345,10 @@ export function settStart(data: any, start: Record<string, number>) {
 function vinnere(a: any) { return a.vinner ? Object.keys(a.hold).filter((id) => (a.hold[id].n[a.vinner] || 0) > 0) : []; }
 function tilsynLogg(data: any, a: any, mistenkt: string) {
   const slutt = a.avgjort || Date.now(), b = data.bors;
-  const sum: Record<string, number> = {};
-  a.handler.forEach((h: any) => { if (h.n > 0 && h.u === a.vinner && slutt - h.t < 15 * 60000) sum[h.id] = (sum[h.id] || 0) + h.kr; });
+  // ⚠️ = kjøpte det som skjedde, mindre enn 10 minutter før noen meldte det
+  const ref = a.meldtT || slutt;
   const handler = a.handler.map((h: any) => ({ navn: navn(data, h.id), hvem: h.id, utfall: h.u, n: h.n, kr: h.kr, minFor: Math.round((slutt - h.t) / 60000),
-    mistenkelig: h.n > 0 && h.u === a.vinner && slutt - h.t < 15 * 60000 && (sum[h.id] || 0) >= 60 }));
+    mistenkelig: h.n > 0 && h.u === a.vinner && ref - h.t < 10 * 60000 && ref >= h.t }));
   const subjekt = a.type === 'hvem' ? a.vinner : null;
   const penger = (b.overforinger || []).filter((o: any) => o.fra === mistenkt || o.til === mistenkt).map((o: any) => ({
     fra: navn(data, o.fra), til: navn(data, o.til), kr: o.kr, minEtter: Math.round((o.t - slutt) / 60000),
@@ -350,7 +361,18 @@ function dom(data: any, s: any) {
   const b = data.bors, a = finn(b, s.aksje);
   const velgere = data.spillere.filter((p: any) => !s.utenfor.includes(p.id));
   const skyldig = velgere.filter((p: any) => s.stemmer[p.id] === 'skyldig').length, frikjent = velgere.filter((p: any) => s.stemmer[p.id] === 'uskyldig').length;
-  s.resultat = { skyldig, frikjent, dom: skyldig + frikjent > 0 && skyldig / (skyldig + frikjent) >= 2 / 3, medskyldig: null as string | null };
+  s.resultat = { skyldig, frikjent, dom: skyldig + frikjent > 0 && skyldig / (skyldig + frikjent) >= 2 / 3, medskyldig: null as string | null, bevis: false, henlagt: false } as any;
+  if (!velgere.length && a) {
+    // For få til å dømme (f.eks. tre spillere): bevisene avgjør. ⚠️ i handelsloggen eller pengegavene = skyldig.
+    const l = tilsynLogg(data, a, s.mot);
+    s.resultat.bevis = true;
+    s.resultat.dom = l.handler.some((x: any) => x.hvem === s.mot && x.mistenkelig) || l.penger.some((x: any) => x.mistenkelig);
+  } else if (skyldig + frikjent === 0) {
+    // Ingen stemte: saken henlegges, ingen straffes
+    s.resultat.henlagt = true; s.fase = 'ferdig'; s.frist = null;
+    melde(data, `⚖️ Ingen stemte – saken mot ${navn(data, s.mot)} er henlagt.`, `⚖️ Nobody voted – the case against ${navn(data, s.mot)} is dropped.`);
+    return;
+  }
   if (s.resultat.dom) {
     const h = a && a.hold[s.mot];
     const beslag = h ? h.fikk || 0 : 0;
@@ -504,6 +526,7 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
     if (typeof h.bilde === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(h.bilde) && h.bilde.length < 160000) bilde = h.bilde;
     a.melding = { av: meg.id, utfall, vitne, subjekt: a.type === 'hvem' ? utfall : null, stemmer: { [meg.id]: 'ja' }, frist: frist(FRIST_MELDING), bilde: !!bilde, t: Date.now(), forrige: a.status };
     statFor(a, { meldt: 1 });
+    a.meldtT = Date.now();
     a.status = 'meldt';   // låst: ingen kan kjøpe eller selge mens det stemmes
     if (bilde) { b.bilder = b.bilder || {}; b.bilder[a.id] = bilde; }
     melde(data, `📣 ${meg.navn} melder: ${a.type === 'hvem' ? navn(data, utfall) + ' – ' : ''}${a.q.no || a.q} Aksjen er låst – stem nå!`, `📣 ${meg.navn} reports: ${a.type === 'hvem' ? navn(data, utfall) + ' – ' : ''}${a.q.en || a.q} The share is locked – vote now!`);
@@ -540,9 +563,11 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
     const mot = String(h.mot || '');
     if (!vinnere(a).includes(mot) || mot === meg.id) return { feil: 'ugyldig', melding: 'Bare de som vant på aksjen kan anmeldes.', en: 'Only people who won on this share can be reported.' };
     const utenfor = [meg.id, mot].concat(a.type === 'hvem' && a.vinner ? [a.vinner] : []);
-    if (!data.spillere.some((p: any) => !utenfor.includes(p.id))) return { feil: 'for-faa', melding: 'Det må være minst én uinvolvert igjen til å dømme.', en: 'At least one uninvolved person must be left to judge.' };
     if (b.saker.some((s: any) => s.aksje === a.id && s.mot === mot)) return { feil: 'opptatt', melding: 'Den personen er allerede etterforsket for denne aksjen.', en: 'That person has already been investigated for this share.' };
-    b.saker.push({ id: nyId(), aksje: a.id, av: meg.id, mot, utenfor, fase: 'forsvar', frist: frist(FRIST_FORSVAR), stemmer: {}, resultat: null });
+    const sak = { id: nyId(), aksje: a.id, av: meg.id, mot, utenfor, fase: 'forsvar', frist: frist(FRIST_FORSVAR), stemmer: {}, resultat: null };
+    b.saker.push(sak);
+    // Ingen uinvolverte å spørre? Da avgjør bevisene med en gang.
+    if (!data.spillere.some((p: any) => !utenfor.includes(p.id))) { dom(data, sak); return { ok: true }; }
     melde(data, `🚨 ${meg.navn} anmelder ${navn(data, mot)} for innsidehandel! Børstilsynet åpner loggen.`, `🚨 ${meg.navn} reports ${navn(data, mot)} for insider trading! The watchdog opens the log.`);
     return { ok: true };
   }
@@ -576,7 +601,7 @@ export function borsVisning(data: any, meg: any) {
         if (a.type === 'hvem' && u === m && ['apen', 'stengt'].includes(a.status)) return { u, skjult: true, kurs: null, odds: null, selg: 0, solgt: null, mine: 0, klare: 0, selgOm: 0 };
         return { u, kurs: kurs(a.qs[i]), odds: odds(a.qs[i]), selg: salgskurs(a.qs[i]), solgt: a.qs[i], mine, klare: sb.klare + gamle, selgOm: sb.klare + gamle ? 0 : sb.om }; }),
       vinner: a.vinner, fikk: hold ? hold.fikk || 0 : 0, kost: hold ? hold.kost || 0 : 0,
-      vinnere: a.status === 'avgjort' ? vinnere(a).filter((id: string) => id !== m) : [],
+      vinnere: a.status === 'avgjort' ? vinnere(a).filter((id: string) => id !== m && !b.saker.some((x: any) => x.aksje === a.id && x.mot === id)) : [],
       melding: a.melding ? { av: a.melding.av, utfall: a.melding.utfall, vitne: a.melding.vitne, subjekt: a.melding.subjekt, frist: a.melding.frist, bilde: a.melding.bilde,
         harStemt: Object.keys(a.melding.stemmer), minStemme: m ? a.melding.stemmer[m] || null : null, utsatt: !!a.melding.utsatt } : null,
       bilde: a.status === 'meldt' && b.bilder ? b.bilder[a.id] || null : null,
