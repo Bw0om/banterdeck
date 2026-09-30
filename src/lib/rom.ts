@@ -164,7 +164,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
   if (s) {
     spill = { type: s.type, lek: s.lek, navn: s.navn, modus: modusNavn(s, lang), runde: s.runde, frist: s.frist || null, turStart: s.turNokkel ? s.turStart || null : null };
     if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger },
-      s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, sist: s.sist, turId: (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null, igjen: s.rekke.length - s.tatt.length } : {});
+      s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, sist: s.sist, turId: (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null, igjen: s.rekke.length - s.tatt.length } : {});
     if (s.type === 'mest') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase,
       harStemt: Object.keys(s.stemmer),
@@ -586,7 +586,7 @@ function handlingInne(data: any, meg: any, h: any) {
     }
     case 'rof-trekk': {
       if (!s || s.type !== 'kort' || !s.ring) return { feil: 'feil-spill' };
-      if (typeof h.nr === 'number' && h.nr !== s.nr) return { ok: true };   // noen andre rakk å trekke først
+      // (Samme kort to ganger avvises under – så et dobbelt trykk eller en telefon som henger litt etter gjør ingen skade)
       const tur = data.spillere[s.tur % Math.max(1, data.spillere.length)];
       if (tur && tur.id !== meg.id && !erVert) return feilL('ikke-tur', 'Det er ikke din tur å trekke.', "It's not your turn to draw.");
       const plass = Math.round(Number(h.plass));
@@ -597,10 +597,12 @@ function handlingInne(data: any, meg: any, h: any) {
       if (v === 'K') s.konger++;
       s.kort = visKort(s, data);
       // Ringen røk: drikk opp glasset (føres som 5 slurker), og ringen lappes sammen igjen
-      if (h.brutt === true) {
+      // Ringen kan bare brytes én gang – etter det er det bare å trekke videre
+      if (h.brutt === true && !s.ringBrutt) {
+        s.ringBrutt = true; s.bruddPlass = plass;
         s.brudd = { hvem, nr: s.nr, navn: navnPaa(data, hvem) };
         giSlurker(data, hvem, ROF_BRUDD);
-        melde(data, `💥 ${navnPaa(data, hvem)} brøt ringen – drikk opp glasset!`, `💥 ${navnPaa(data, hvem)} broke the ring – finish your drink!`);
+        melde(data, `💥 ${navnPaa(data, hvem)} brøt ringen – drikk opp glasset! Resten av ringen er trygg.`, `💥 ${navnPaa(data, hvem)} broke the ring – finish your drink! The rest of the ring is safe.`);
       }
       if (v === 'K') giSlurker(data, hvem, D['ring-of-fire'].konger[Math.min(s.konger, 4) - 1] || 5);
       if (v === '3') giSlurker(data, hvem, 1);
@@ -608,7 +610,7 @@ function handlingInne(data: any, meg: any, h: any) {
       s.tur = (s.tur + 1) % Math.max(1, data.spillere.length);
       // Tomt for kort: ny ring
       if (s.tatt.length >= s.rekke.length) {
-        s.rekke = kortstokkFor(s.lek, s.modus); s.tatt = []; s.konger = 0;
+        s.rekke = kortstokkFor(s.lek, s.modus); s.tatt = []; s.konger = 0; s.ringBrutt = false; s.bruddPlass = null;
         melde(data, '🔥 Ringen er tom – en ny ring er lagt ut', '🔥 The ring is empty – a new ring is laid out');
       }
       return { ok: true };

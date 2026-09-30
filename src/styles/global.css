@@ -1947,3 +1947,4 @@ button,a,[role=button]{touch-action:manipulation}
 .rof-knust b{font-size:clamp(40px,12vw,84px);font-weight:900;animation:drikkRist .1s linear 8}
 .rof-knust span{font-size:22px;font-weight:700}
 @media (prefers-reduced-motion: reduce){.rofr-pil,.rof-snu,.rof-knust,.rof-knust b,.rofr-bord.brutt{animation:none}}
+.rofr-sprekk{pointer-events:none;position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;font-size:22px;line-height:30px;text-align:center;z-index:3;transform:rotate(var(--v)) translateY(calc(-1 * var(--R) - 26px))}
