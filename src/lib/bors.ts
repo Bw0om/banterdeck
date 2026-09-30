@@ -344,6 +344,8 @@ function tilsynLogg(data: any, a: any, mistenkt: string) {
     mistenkelig: !!subjekt && ((o.fra === mistenkt && o.til === subjekt) || (o.fra === subjekt && o.til === mistenkt)) }));
   return { handler, penger };
 }
+/** Straff i slurker (føres på poengtavla; immunitet hjelper ikke mot en dom). */
+function straffSlurker(data: any, id: string, n: number) { const p = data.spillere.find((x: any) => x.id === id); if (p) p.slurker = Math.max(0, (p.slurker || 0) + n); }
 function dom(data: any, s: any) {
   const b = data.bors, a = finn(b, s.aksje);
   const velgere = data.spillere.filter((p: any) => !s.utenfor.includes(p.id));
@@ -351,16 +353,19 @@ function dom(data: any, s: any) {
   s.resultat = { skyldig, frikjent, dom: skyldig + frikjent > 0 && skyldig / (skyldig + frikjent) >= 2 / 3, medskyldig: null as string | null };
   if (s.resultat.dom) {
     const h = a && a.hold[s.mot];
-    flytt(b, s.mot, -((h ? h.fikk || 0 : 0) + BOT_SKYLDIG), 'Dømt: gevinst beslaglagt + bot', 'Convicted: profits seized + fine');
+    const beslag = h ? h.fikk || 0 : 0;
+    flytt(b, s.mot, -(beslag + BOT_SKYLDIG), 'Dømt: gevinst beslaglagt + bot', 'Convicted: profits seized + fine');
+    s.resultat.beslag = beslag;
+    straffSlurker(data, s.mot, 5);
     if (h) h.fikk = 0;
     // Fikk den aksjen handlet om penger fra vinneren? Da er hen medskyldig: pengene inndras og samme bot.
     const subjekt = a && a.type === 'hvem' ? a.vinner : null;
     if (subjekt && subjekt !== s.mot) {
       const bestikkelse = (b.overforinger || []).filter((o: any) => o.fra === s.mot && o.til === subjekt).reduce((n: number, o: any) => n + o.kr, 0);
-      if (bestikkelse > 0) { flytt(b, subjekt, -(bestikkelse + BOT_SKYLDIG), 'Medskyldig: gaven inndratt + bot', 'Accomplice: gift seized + fine'); s.resultat.medskyldig = subjekt; }
+      if (bestikkelse > 0) { flytt(b, subjekt, -(bestikkelse + BOT_SKYLDIG), 'Medskyldig: gaven inndratt + bot', 'Accomplice: gift seized + fine'); s.resultat.medskyldig = subjekt; straffSlurker(data, subjekt, 3); }
     }
-    melde(data, `🚨 Børstilsynet: ${navn(data, s.mot)} er dømt for innsidehandel${s.resultat.medskyldig ? ' sammen med ' + navn(data, s.resultat.medskyldig) : ''}! Gevinsten beslaglegges – og straffehjulet venter 🎡`,
-      `🚨 Market watchdog: ${navn(data, s.mot)} is convicted of insider trading${s.resultat.medskyldig ? ' together with ' + navn(data, s.resultat.medskyldig) : ''}! Profits seized – and the penalty wheel awaits 🎡`);
+    melde(data, `🚨 Børstilsynet: ${navn(data, s.mot)} er dømt for innsidehandel${s.resultat.medskyldig ? ' sammen med ' + navn(data, s.resultat.medskyldig) : ''}! ${beslag} kr beslaglagt, 300 kr i bot og 5 slurker 🍺`,
+      `🚨 Market watchdog: ${navn(data, s.mot)} is convicted of insider trading${s.resultat.medskyldig ? ' together with ' + navn(data, s.resultat.medskyldig) : ''}! ${beslag} seized, a 300 fine and 5 sips 🍺`);
   } else {
     flytt(b, s.av, -BOT_FALSK, 'Falsk anmeldelse', 'False report');
     melde(data, `⚖️ Frikjent! ${navn(data, s.av)} betaler 200 kr for falsk anmeldelse.`, `⚖️ Acquitted! ${navn(data, s.av)} pays 200 for a false report.`);

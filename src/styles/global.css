@@ -1785,3 +1785,24 @@ body:not(.humor) .tool.dice{display:none}
 .gj-utsatt p{margin:4px 0}
 .bs-faner{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
 .bs-faner button{white-space:nowrap;padding-left:12px;padding-right:12px}
+/* Vorsbørsen: kort liste */
+.bs-filter{margin:10px 0 6px}
+.bs-filter small{opacity:.7;margin-left:2px}
+.bs-kompakt{margin:6px 0;border-radius:14px;background:rgb(var(--ink-rgb) / .05);border:1px solid var(--border)}
+.bs-kompakt-knapp{display:grid;grid-template-columns:1fr auto;align-items:end;gap:4px 10px;width:100%;padding:12px 14px;background:none;border:0;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.bs-kompakt-q{grid-column:1 / -1;font-family:var(--display);font-weight:700;font-size:15px;line-height:1.25}
+.bs-kompakt-meta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:var(--muted);min-width:0}
+.bs-kompakt-meta .bs-tid{display:inline;margin:0;font-size:12px}
+.bs-kompakt-hoyre{font-size:13px;color:var(--muted);text-align:right;white-space:nowrap}
+.bs-kompakt-hoyre b{color:var(--gold-t)}
+.bs-mine{color:var(--gold-t);font-weight:700}
+.bs-kompakt.ferdig .bs-kompakt-hoyre{color:var(--ink)}
+.bs-anmeldknapp{margin:0 14px 12px}
+.bs-kompakt .bs-anmeld{margin:0 14px 14px}
+.bs-apen{margin:8px 0}
+.bs-apen .bs-aksje{margin-bottom:4px}
+.bs-lukkaksje{display:block;margin:0 auto 10px}
+.bs-regler{margin:14px 0 4px;font-size:14px}
+.bs-regler summary{cursor:pointer;color:var(--muted);font-weight:600}
+.bs-regler ul{margin:8px 0;padding-left:20px;display:grid;gap:6px;color:var(--muted)}
+.bs-anmeld-liste{margin:6px 0 16px}
