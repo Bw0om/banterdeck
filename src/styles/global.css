@@ -1806,3 +1806,17 @@ body:not(.humor) .tool.dice{display:none}
 .bs-regler summary{cursor:pointer;color:var(--muted);font-weight:600}
 .bs-regler ul{margin:8px 0;padding-left:20px;display:grid;gap:6px;color:var(--muted)}
 .bs-anmeld-liste{margin:6px 0 16px}
+/* Vorsbørsen i bakgrunnen: hurtigvalg over leken */
+.bs-hurtig{margin:8px 0;padding:10px 14px;border-radius:16px;background:rgba(63,184,169,.12);border:1px solid rgba(63,184,169,.45)}
+.bs-hurtig p{margin:0 0 8px;font-size:14px;line-height:1.35}
+.bs-hurtig .rom-valg{margin:0}
+.bs-hurtig .rom-valg button{padding:8px 10px;font-size:14px}
+.bs-hurtig.varsel{background:rgba(255,106,77,.14);border-color:var(--accent-t)}
+/* Blålys */
+.bs-blalys{position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:center;justify-content:center;animation:blalys .5s steps(1) 5}
+.bs-blalys span{font-family:var(--display);font-weight:900;font-size:clamp(28px,9vw,54px);color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.6);letter-spacing:.02em;animation:blalysTekst 2.5s ease-out forwards}
+@keyframes blalys{0%{background:rgba(40,90,255,.38)}50%{background:rgba(255,40,50,.38)}}
+@keyframes blalysTekst{0%{transform:scale(.6);opacity:0}15%{transform:scale(1.08);opacity:1}80%{opacity:1}100%{opacity:0;transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){.bs-blalys{animation:none;background:rgba(40,90,255,.25)}}
+.bs-hurtig .rom-valg{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px}
+.bs-hurtig .rom-valg button{flex:1 1 auto;min-width:0;justify-content:center;text-align:center}

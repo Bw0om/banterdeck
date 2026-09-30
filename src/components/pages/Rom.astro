@@ -246,6 +246,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       sjekkSprak(d);
       if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
       borsPenger(d);
+      borsBlalys(d);
       if (d.meg === null && meg) { glemRom(); if (varVenter) tegnStart(T('Du ble ikke sluppet inn denne gangen.', 'You weren’t let in this time.')); return; }
       // Alkoholfri for hele rommet: siden bytter slurker med straffepoeng på alle telefoner
       if (d.alkoholfri) document.documentElement.dataset.alkoholfri = '1';
@@ -1270,11 +1271,56 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var trenger = borsTrengerMeg();
       // Børsen fyller allerede skjermen (hovedspill): ingen grunn til å vise knappen i tillegg
       if (b.fokus && !tilstand.spill && !tilstand.ferdig && !trenger) return '';
+      // Hurtigvalget over leken viser allerede det som trenger deg – da holder det med en rolig knapp
+      if ((trenger === 'stem' || trenger === 'tilsyn') && /varsel/.test(borsHurtig())) trenger = '';
       var tekst = b.paa ? '📈 ' + T('Vorsbørsen', 'The Exchange') + ' · ' + kr(b.formue || 0) : '📈 ' + T('Børsen er stengt – se resultatet', 'The Exchange is closed – see the results');
       if (trenger === 'stem') tekst = '🗳️ ' + T('Børsen: stem – skjedde det?', 'Exchange: vote – did it happen?');
       if (trenger === 'tilsyn') tekst = '🚨 ' + T('Børstilsynet trenger stemmen din', 'The watchdog needs your vote');
       if (trenger === 'godkjenn') tekst = '🧾 ' + T('Ny aksje venter på godkjenning', 'A new share awaits approval');
       return '<button class="bs-pille' + (trenger ? ' varsel' : '') + '" data-g="bs-aapne" type="button">' + tekst + '</button>';
+    }
+    /** Blålys: sirene og blinkende skjerm når noen blir anmeldt – og når noen blir dømt. */
+    var sakerSett = null;
+    function borsBlalys(d) {
+      var saker = (d && d.bors && d.bors.saker) || [];
+      var naa = {}; saker.forEach(function (s) { naa[s.id] = s.resultat ? (s.resultat.dom ? 'dom' : 'ferdig') : 'aapen'; });
+      if (sakerSett === null) { sakerSett = naa; return; }
+      var ny = saker.some(function (s) { return !sakerSett[s.id]; });
+      var dom = saker.some(function (s) { return naa[s.id] === 'dom' && sakerSett[s.id] !== 'dom'; });
+      sakerSett = naa;
+      if (ny || dom) blalys(dom);
+    }
+    function blalys(dom) {
+      var el = document.createElement('div'); el.className = 'bs-blalys' + (dom ? ' dom' : ''); el.setAttribute('aria-hidden', 'true');
+      el.innerHTML = '<span>' + (dom ? '🚨 ' + T('DØMT!', 'CONVICTED!') : '🚨 ' + T('BØRSTILSYNET', 'MARKET WATCHDOG')) + '</span>';
+      document.body.appendChild(el); setTimeout(function () { el.remove(); }, 2600);
+      if (navigator.vibrate) try { navigator.vibrate([200, 100, 200, 100, 200]); } catch (x) {}
+      if (!lyd.paa || !lydCtx()) return;
+      // Sirene: to toner som veksler, med glidende overgang (som et utrykningskjøretøy)
+      for (var i = 0; i < 4; i++) { tone(650, i * 0.5, 0.25, 'sawtooth', 0.07, 950); tone(950, i * 0.5 + 0.25, 0.25, 'sawtooth', 0.07, 650); }
+      if (dom) setTimeout(function () { tone(220, 0, 0.5, 'square', 0.12, 110); }, 2000);
+    }
+    /**
+     * Børsen i bakgrunnen: det som trenger deg (stemme, dømme) og aksjer som snart stenger,
+     * vises rett over leken dere spiller – så du slipper å åpne børsen.
+     */
+    function borsHurtig() {
+      var t = tilstand, b = t.bors, m = t.meg; if (!b || !b.paa) return '';
+      if (b.fokus && !t.spill && !t.ferdig) return '';   // børsen er allerede hele skjermen
+      var stem = b.aksjer.find(function (a) { return a.status === 'meldt' && a.melding && a.melding.subjekt !== m && a.melding.av !== m && !a.melding.minStemme; });
+      if (stem) {
+        var ml = stem.melding;
+        return '<div class="bs-hurtig varsel"><p>🗳️ <b>' + esc(navn(ml.av)) + '</b>' + T(' melder: ', ' reports: ') + '<b>' + esc(utfallNavn(stem, ml.utfall)) + '</b> – ' + esc(stem.q) + '</p>' +
+          '<div class="rom-valg en"><button type="button" data-b="stem" data-v="ja" data-a="' + stem.id + '">' + T('✅ Skjedde', '✅ Happened') + '</button><button type="button" data-b="stem" data-v="nei" data-a="' + stem.id + '">' + T('❌ Nei', '❌ No') + '</button><button type="button" data-b="stem" data-v="vet" data-a="' + stem.id + '">' + T('🤷 Så ikke', '🤷 Didn’t see') + '</button></div></div>';
+      }
+      var sak = b.saker.find(function (s) { return (s.fase === 'stem' || s.fase === 'forsvar') && (s.utenfor || []).indexOf(m) === -1 && !s.minStemme; });
+      if (sak) return '<div class="bs-hurtig varsel sak"><p>🚨 ' + T('Sak: ', 'Case: ') + '<b>' + esc(navn(sak.av)) + '</b>' + T(' anmelder ', ' reports ') + '<b>' + esc(navn(sak.mot)) + '</b> – ' + esc(sak.q) + '</p>' +
+        '<div class="rom-valg en"><button type="button" data-b="sak-stem" data-v="skyldig" data-s="' + sak.id + '">' + T('🚨 Skyldig', '🚨 Guilty') + '</button><button type="button" data-b="sak-stem" data-v="uskyldig" data-s="' + sak.id + '">' + T('😇 Uskyldig', '😇 Not guilty') + '</button><button type="button" data-g="bs-aapne">' + T('Se loggen', 'See the log') + '</button></div></div>';
+      var naa = Date.now() + klokkeAvvik;
+      var snart = b.aksjer.filter(function (a) { return a.status === 'apen' && !a.laast && a.stenger && a.stenger - naa < 10 * 60000 && a.stenger > naa; });
+      if (snart.length) return '<div class="bs-hurtig"><p>⏳ ' + (snart.length === 1 ? '«' + esc(snart[0].q) + '»' + T(' stenger om ', ' closes in ') + Math.max(1, Math.round((snart[0].stenger - naa) / 60000)) + ' min' : snart.length + T(' aksjer stenger innen 10 min', ' shares close within 10 min')) + '</p>' +
+        '<div class="rom-valg en"><button type="button" data-g="bs-aapne">' + T('Handle nå', 'Trade now') + '</button></div></div>';
+      return '';
     }
     function utfallNavn(a, u) { return a.type === 'hvem' ? navn(u) : (u === 'ja' ? T('Ja', 'Yes') : T('Nei', 'No')); }
     function borsTid(a) {
@@ -2027,7 +2073,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
       var sosGammel = document.getElementById('sosInput'), sosVerdi = sosGammel ? sosGammel.value : null, sosFokus = sosGammel && document.activeElement === sosGammel;
       var lovGammel = document.getElementById('lovNyTekst'), lovVerdi = lovGammel ? lovGammel.value : null, lovFokus = lovGammel && document.activeElement === lovGammel;
-      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + venterStripe() + oppdragKnapp() + borsPille() + reaksjonslinje() + innhold + vert +
+      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + venterStripe() + oppdragKnapp() + borsPille() + borsHurtig() + reaksjonslinje() + innhold + vert +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
       // Nytt skjermbilde (lobby, ny lek, oppsummering): start øverst. Ellers: behold plassen.
       var skjerm = s ? 'spill:' + s.type + ':' + (s.navn && s.navn.no ? s.navn.no : s.navn) : tilstand.ferdig ? 'ferdig' : 'lobby';
@@ -2098,7 +2144,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       });
     }
 
-    root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.bs-side [data-b]')) borsKlikk(e); });
+    root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.bs-side [data-b], .bs-hurtig [data-b]')) borsKlikk(e); });
     root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-lov-login]')) { try { sessionStorage.setItem('bd_etter_innlogging', location.pathname + location.search); } catch (x) {} } });
     root.addEventListener('click', function (e) {
       var b = e.target.closest('[data-g]'); if (!b || !tilstand) return;
