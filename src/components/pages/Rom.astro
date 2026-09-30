@@ -1496,10 +1496,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       else if (a.status === 'venter') hoyre = '🧾 ' + T('venter på verten', 'awaiting the host');
       else if (a.status === 'utsatt') hoyre = '⏳ ' + T('venter på stemmer', 'awaiting votes');
       else {
-        var synlige = a.utfall.filter(function (x) { return !x.skjult && x.kurs != null; });
-        var fav = synlige.slice().sort(function (x, y) { return (y.solgt || 0) - (x.solgt || 0); })[0];
-        hoyre = a.type === 'janei' ? synlige.map(function (x) { return utfallNavn(a, x.u) + ' <b>' + String(x.odds).replace('.', EN ? '.' : ',') + '×</b>'; }).join(' · ')
-          : fav && fav.solgt ? T('Favoritt: ', 'Favourite: ') + esc(utfallNavn(a, fav.u)) + ' <b>' + String(fav.odds).replace('.', EN ? '.' : ',') + '×</b>' : T('Ingen har kjøpt ennå · 10×', 'No buys yet · 10×');
+        // Favoritten vises ikke i lista – da hiver ikke alle seg på den samme. Oddsen ser du når du åpner aksjen.
+        hoyre = T('Handle ›', 'Trade ›');
       }
       venstre = (a.status === 'apen' && a.stenger ? borsTid(a) : a.status === 'stengt' ? '<span class="bs-tid">🔒 ' + T('stengt for handel', 'closed for trading') + '</span>' : '') +
         (mine.length ? '<span class="bs-mine">' + T('Du: ', 'You: ') + mine.map(function (x) { return x.mine + '× ' + esc(utfallNavn(a, x.u)); }).join(', ') + '</span>' : '');
@@ -1601,6 +1599,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
          T('Prisen stiger for hver som kjøper – det lønner seg å være tidlig ute.', 'The price rises with every purchase – it pays to be early.'),
          T('Selge: du må ha eid aksjen i 10 minutter, og 25 % går til kurtasje.', 'Selling: you must hold the share for 10 minutes, and 25% goes in fees.'),
          T('Kursen på deg selv er skjult. Blir det deg, får du 30 kr i hovedrollebonus.', 'Your own price is hidden. If it’s you, you get a 30 starring bonus.'),
+         T('Du ser ditt eget utvalg av aksjene – de andre har et annet. Hvem som har de samme som deg, er hemmelig.', 'You see your own selection of shares – the others have a different one. Who shares yours is secret.'),
          T('Skjer det? Trykk «📣 Det skjedde!» – aksjen låses og de andre stemmer.', 'Did it happen? Tap “📣 It happened!” – the share locks and the others vote.'),
          T('Innsidehandel: har en vinner fikset det sammen med noen, kan hen anmeldes under «Avgjort». Skyldig mister hele gevinsten, får 300 kr i bot og 5 slurker.', 'Insider trading: if a winner set it up with someone, report them under “Settled”. Guilty loses the whole payout, gets a 300 fine and 5 sips.')].map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></details>';
       ut += reglerHtml;
@@ -1614,6 +1613,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         '<p class="small">' + (borsFilter === 'mine' ? T('Du eier ingen aksjer ennå. Trykk på en aksje under «Åpne» for å kjøpe.', 'You don’t own any shares yet. Tap a share under “Open” to buy.') : borsFilter === 'ferdige' ? T('Ingen aksjer er avgjort ennå.', 'No shares settled yet.') : T('Ingen åpne aksjer akkurat nå.', 'No open shares right now.')) + '</p>';
       if (borsFilter === 'apne') {
         if (b.laaste) ut += '<p class="small bs-pluss">' + b.laaste + T(' aksjer er låst i gratisbørsen. ', ' shares are locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp alle med Pluss', 'Unlock all with Plus') + '</button></p>';
+        else if (!b.fri) ut += '<p class="small bs-pluss">' + T('Gratisbørsen har 12 aksjer i kveld. ', 'The free exchange has 12 shares tonight. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Med Pluss blir det 24', 'Plus gives you 24') + '</button></p>';
         if (!b.harNotert) ut += '<details class="bs-noter"><summary>' + T('🧾 Noter en egen aksje (200 kr)', '🧾 List your own share (200)') + '</summary><p class="small">' + T('Én per person per kveld. Du får 2 kr for hvert kjøp andre gjør i den, men kan ikke handle i den selv. Verten godkjenner.', 'One per person per night. You get 2 for every purchase others make in it, but can’t trade in it yourself. The host approves.') + '</p>' +
           '<div class="rom-mod"><label><input type="radio" name="bsType" value="hvem" checked> ' + T('Hvem …?', 'Who …?') + '</label> <label><input type="radio" name="bsType" value="janei"> ' + T('Ja/nei', 'Yes/no') + '</label></div>' +
           '<input id="bsNyTekst" maxlength="100" placeholder="' + T('F.eks. «Hvem ringer mamma før midnatt?»', 'E.g. “Who calls their mum before midnight?”') + '"><button class="btn small gold" data-b="noter" type="button">' + T('Noter (200 kr)', 'List (200)') + '</button></details>';

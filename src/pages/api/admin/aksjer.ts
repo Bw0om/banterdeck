@@ -19,5 +19,7 @@ export const GET: APIRoute = async ({ request }) => {
       const r = kart[a.nokkel] || {};
       return { ...a, vist: r.vist || 0, kjop: r.kjop || 0, kjopere: r.kjopere || 0, meldt: r.meldt || 0, avgjort: r.avgjort || 0, skjedde: r.skjedde || 0, vinnere: r.vinnere || 0 };
     });
-  return json({ aksjer: alle, kategorier: KATEGORIER.map((k) => ({ id: k.id, navn: k.no })) });
+  let egne: any[] = [];
+  try { egne = (await rpc('admin_bors_egne', {})) || []; } catch { /* bors-egne-supabase.sql ikke kjørt */ }
+  return json({ aksjer: alle, kategorier: KATEGORIER.map((k) => ({ id: k.id, navn: k.no })), egne });
 };

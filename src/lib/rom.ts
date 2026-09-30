@@ -15,7 +15,7 @@ import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
 import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } from './kveld';
 import { MAKS_REGEL } from './lovbok';
-import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors } from './bors';
+import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors, borsTilPluss } from './bors';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
 const D: any = DECKS;
@@ -402,7 +402,7 @@ function handlingInne(data: any, meg: any, h: any) {
   if (String(h.handling || '').startsWith('bs-')) {
     // Pluss i rommet låser opp hele børsen (også om den ble aktivert etter at børsen startet)
     const r = borsHandling(data, meg, { ...h, _borsFri: h._borsFri || romHarPluss(data) }, erVert);
-    if (data.bors && romHarPluss(data)) data.bors.fri = true;
+    if (data.bors && romHarPluss(data)) borsTilPluss(data);   // Pluss etter start: fyll opp til det store markedet
     return r;
   }
   if (h.handling === 'hjul-liste') {

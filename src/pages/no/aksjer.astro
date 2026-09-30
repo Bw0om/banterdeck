@@ -32,6 +32,10 @@ import Base from '../../layouts/Base.astro';
         data.kategorier.map(function (k) { var s = sum[k.id] || { n: 0, vist: 0, kjop: 0, avgjort: 0, skjedde: 0 };
           return '<tr><td>' + esc(k.navn) + '</td><td>' + s.n + '</td><td>' + s.vist + '</td><td>' + (s.vist ? (s.kjop / s.vist).toFixed(1).replace('.', ',') : '–') + '</td><td>' + pst(s.skjedde, s.avgjort) + '</td></tr>'; }).join('') +
         '</tbody></table></div>' +
+        '<h2>Egne aksjer folk har laget</h2>' + ((data.egne || []).length
+          ? '<p class="small">Anonymt – bare teksten og hvor mange ganger den er brukt. De beste kan legges inn som faste aksjer.</p><div class="gj-tabell-wrap"><table class="gj-tabell"><thead><tr><th>Aksje</th><th>Type</th><th>Brukt</th><th>Sist</th></tr></thead><tbody>' +
+            data.egne.map(function (e) { return '<tr><td>' + esc(e.tekst) + '</td><td>' + (e.type === 'janei' ? 'Ja/nei' : 'Hvem') + '</td><td>' + e.antall + '</td><td>' + new Date(e.sist).toLocaleDateString('nb-NO') + '</td></tr>'; }).join('') + '</tbody></table></div>'
+          : '<p class="small">Ingen ennå (eller bors-egne-supabase.sql er ikke kjørt).</p>') +
         '<h2>Alle aksjene</h2>' +
         '<div class="rom-mod"><button type="button" data-kat="" aria-pressed="' + (!kat) + '">Alle</button>' + data.kategorier.map(function (k) { return '<button type="button" data-kat="' + k.id + '" aria-pressed="' + (kat === k.id) + '">' + esc(k.navn) + '</button>'; }).join('') + '</div>' +
         '<div class="rom-mod"><span class="small">Sorter:</span> ' + [['vist', 'Mest vist'], ['kjop', 'Mest kjøpt'], ['treff', 'Skjer oftest'], ['dod', 'Minst brukt']].map(function (s) { return '<button type="button" data-sort="' + s[0] + '" aria-pressed="' + (sorter === s[0]) + '">' + s[1] + '</button>'; }).join('') + '</div>' +

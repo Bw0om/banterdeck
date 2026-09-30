@@ -187,6 +187,12 @@ export const POST: APIRoute = async ({ params, request }) => {
     if (res.svar && Array.isArray(res.svar.stat) && res.svar.stat.length) {
       try { await rpc('bors_stat_logg', { p_rader: res.svar.stat }); } catch (e) { console.warn('Børsstatistikk feilet:', (e as Error).message); }
     }
+    // Egne aksjer folk har laget: lagres anonymt, så de beste kan bli faste aksjer senere
+    if (res.svar && Array.isArray(res.svar.egne)) {
+      for (const x of res.svar.egne.slice(0, 3)) {
+        try { await rpc('bors_egen_logg', { p_tekst: String(x.tekst || '').slice(0, 100), p_type: x.type === 'janei' ? 'janei' : 'hvem' }); } catch (e) { console.warn('Egen aksje ble ikke logget:', (e as Error).message); }
+      }
+    }
     const lang: Sprak = meg ? rensLang(meg.lang) : bLang;
     const svar: any = { ...visning(res.data, res.versjon, meg, lang), kode, leker: lekeliste(lang) };
     if (ny) { svar.id = ny.id; svar.pollett = ny.pollett; }
