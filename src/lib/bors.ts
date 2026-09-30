@@ -602,6 +602,7 @@ export function borsVisning(data: any, meg: any) {
         return { u, kurs: kurs(a.qs[i]), odds: odds(a.qs[i]), selg: salgskurs(a.qs[i]), solgt: a.qs[i], mine, klare: sb.klare + gamle, selgOm: sb.klare + gamle ? 0 : sb.om }; }),
       vinner: a.vinner, fikk: hold ? hold.fikk || 0 : 0, kost: hold ? hold.kost || 0 : 0,
       vinnere: a.status === 'avgjort' ? vinnere(a).filter((id: string) => id !== m && !b.saker.some((x: any) => x.aksje === a.id && x.mot === id)) : [],
+      antallVinnere: a.status === 'avgjort' ? vinnere(a).length : 0, jegVant: a.status === 'avgjort' && !!m && vinnere(a).includes(m),
       melding: a.melding ? { av: a.melding.av, utfall: a.melding.utfall, vitne: a.melding.vitne, subjekt: a.melding.subjekt, frist: a.melding.frist, bilde: a.melding.bilde,
         harStemt: Object.keys(a.melding.stemmer), minStemme: m ? a.melding.stemmer[m] || null : null, utsatt: !!a.melding.utsatt } : null,
       bilde: a.status === 'meldt' && b.bilder ? b.bilder[a.id] || null : null,

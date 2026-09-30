@@ -1820,3 +1820,4 @@ body:not(.humor) .tool.dice{display:none}
 @media (prefers-reduced-motion: reduce){.bs-blalys{animation:none;background:rgba(40,90,255,.25)}}
 .bs-hurtig .rom-valg{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px}
 .bs-hurtig .rom-valg button{flex:1 1 auto;min-width:0;justify-content:center;text-align:center}
+.bs-hvorfor{margin:-2px 4px 10px;font-size:12px}

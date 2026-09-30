@@ -1405,6 +1405,14 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         '<span class="bs-kompakt-q">' + esc(a.q) + '</span><span class="bs-kompakt-meta">' + venstre + '</span><span class="bs-kompakt-hoyre">' + hoyre + '</span></button>' + anmeld +
         (borsAnmeld === a.id ? anmeldSkjema(a) : '') + '</div>';
     }
+    /** Hvorfor det ikke går an å anmelde noen for denne aksjen. */
+    function hvorforIkke(a) {
+      if (!tilstand.bors.paa) return T('Børsen er stengt – gevinstene er endelige.', 'The Exchange is closed – payouts are final.');
+      if (a.status === 'ugyldig') return T('Ugyldig – alle fikk pengene tilbake, ingen tjente på den.', 'Void – everyone was refunded, nobody profited.');
+      if (!a.antallVinnere) return T('Ingen hadde kjøpt det som skjedde – ingen å anmelde.', 'Nobody had bought what happened – nobody to report.');
+      if (a.jegVant && a.antallVinnere === 1) return T('Bare du tjente på denne – du kan ikke anmelde deg selv.', 'Only you profited from this – you can’t report yourself.');
+      return T('Alle som tjente på denne er allerede etterforsket.', 'Everyone who profited from this has already been investigated.');
+    }
     function anmeldSkjema(a) {
       return '<div class="bs-anmeld"><p class="small">' + T('Hvem tror du fikset det sammen med noen? Bare de som tjente på aksjen kan anmeldes. Tilsynet åpner handlene og pengegavene deres. Skyldig: hele gevinsten beslaglegges, 300 kr i bot og 5 slurker. Frikjent: du betaler 200 kr.', 'Who do you think set it up with someone? Only those who profited can be reported. The watchdog opens their trades and money gifts. Guilty: the whole payout is seized, a 300 fine and 5 sips. Acquitted: you pay 200.') + '</p><div class="rom-valg">' +
         a.vinnere.map(function (id) { return '<label class="bs-kryss"><input type="radio" name="bsMot" value="' + esc(id) + '"' + (a.vinnere.length === 1 ? ' checked' : '') + '> ' + esc(navn(id)) + '</label>'; }).join('') +
@@ -1450,10 +1458,12 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
           (erVert() ? '<button class="btn ghost" data-b="avslutt" type="button">' + T('Steng børsen og kår Børskongen', 'Close the Exchange and crown the Market King') + '</button>' : '');
       }
       if (borsFane === 'tilsyn') {
-        var kan = b.aksjer.filter(function (a) { return a.status === 'avgjort' && b.paa && a.vinnere && a.vinnere.length; }).reverse();
+        // Alle avgjorte aksjer vises – med forklaring når det ikke er noen å anmelde
+        var alleAvgjort = b.aksjer.filter(function (a) { return a.status === 'avgjort' || a.status === 'ugyldig'; }).reverse();
         var anm = '<div class="bs-anmeld-liste"><p class="rom-etikett">🚨 ' + T('Anmeld innsidehandel', 'Report insider trading') + '</p>' +
-          (kan.length ? '<p class="small">' + T('Velg aksjen du mistenker. Bare de som tjente på den kan anmeldes.', 'Pick the share you suspect. Only those who profited from it can be reported.') + '</p>' + kan.map(borsRad).join('')
-            : '<p class="small">' + T('Når en aksje er avgjort, kan du anmelde dem som tjente på den her.', 'Once a share is settled, you can report those who profited from it here.') + '</p>') + '</div>';
+          (alleAvgjort.length ? '<p class="small">' + T('Mistenker du at en vinner fikset det sammen med noen? Trykk «Anmeld» på aksjen. Bare de som tjente på den kan anmeldes.', 'Suspect a winner set it up with someone? Tap “Report” on the share. Only those who profited from it can be reported.') + '</p>' +
+            alleAvgjort.map(function (a) { return borsRad(a) + (a.vinnere && a.vinnere.length && b.paa ? '' : '<p class="small bs-hvorfor">' + hvorforIkke(a) + '</p>'); }).join('')
+            : '<p class="small">' + T('Ingen aksjer er avgjort ennå. Når noen melder «📣 Det skjedde!» og det blir bekreftet, kan du anmelde dem som tjente på den her.', 'No shares are settled yet. When someone reports “📣 It happened!” and it’s confirmed, you can report those who profited from it here.') + '</p>') + '</div>';
         if (!b.saker.length) return ut + anm;
         return ut + anm + '<p class="rom-etikett">⚖️ ' + T('Saker', 'Cases') + '</p>' + b.saker.slice().reverse().map(function (s) {
           var part = (s.utenfor || []).indexOf(m) !== -1;
@@ -1484,7 +1494,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         return '<button type="button" data-b="filter" data-f="' + f[0] + '" aria-pressed="' + (borsFilter === f[0]) + '">' + esc(f[1]) + ' <small>' + f[2] + '</small></button>'; }).join('') + '</div>';
       var liste = borsFilter === 'mine' ? mine : borsFilter === 'ferdige' ? ferdige : apne;
       if (borsFilter === 'ferdige' && anmeldbare) ut += '<p class="small">🚨 ' + T('Tror du noen fikset en aksje sammen? Trykk «Anmeld» – bare de som tjente på den kan anmeldes.', 'Think someone set a share up together? Tap “Report” – only those who profited can be reported.') + '</p>';
-      ut += liste.map(function (a) { return borsApen === a.id && borsFilter !== 'ferdige' ? '<div class="bs-apen">' + borsAksjeHtml(a) + '<button class="linkbtn bs-lukkaksje" data-b="aksje-aapne" data-a="' + a.id + '" type="button">' + T('Lukk ▲', 'Close ▲') + '</button></div>' : borsRad(a); }).join('') ||
+      ut += liste.map(function (a) { return borsApen === a.id && borsFilter !== 'ferdige' ? '<div class="bs-apen">' + borsAksjeHtml(a) + '<button class="linkbtn bs-lukkaksje" data-b="aksje-aapne" data-a="' + a.id + '" type="button">' + T('Lukk ▲', 'Close ▲') + '</button></div>'
+        : borsRad(a) + (borsFilter === 'ferdige' && !(a.vinnere && a.vinnere.length && b.paa) ? '<p class="small bs-hvorfor">' + hvorforIkke(a) + '</p>' : ''); }).join('') ||
         '<p class="small">' + (borsFilter === 'mine' ? T('Du eier ingen aksjer ennå. Trykk på en aksje under «Åpne» for å kjøpe.', 'You don’t own any shares yet. Tap a share under “Open” to buy.') : borsFilter === 'ferdige' ? T('Ingen aksjer er avgjort ennå.', 'No shares settled yet.') : T('Ingen åpne aksjer akkurat nå.', 'No open shares right now.')) + '</p>';
       if (borsFilter === 'apne') {
         if (b.laaste) ut += '<p class="small bs-pluss">' + b.laaste + T(' aksjer er låst i gratisbørsen. ', ' shares are locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp alle med Pluss', 'Unlock all with Plus') + '</button></p>';
