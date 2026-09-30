@@ -17,7 +17,81 @@ const nokkel = (konto: string | null | undefined, navn: string) => (konto ? 'k:'
 const nyId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 export function tomBok() {
-  return { v: 2, kvelder: 0, regler: [] as any[], logg: [] as any[], seire: {} as any, borskonge: {} as any, brukt: [] as string[], ventende: null as any };
+  return { v: 2, kvelder: 0, regler: [] as any[], logg: [] as any[], seire: {} as any, borskonge: {} as any, brukt: [] as string[], ventende: null as any,
+    lommebok: { sesong: new Date().getFullYear(), k: {} as any }, utsatte: [] as any[], aarskonger: [] as any[] };
+}
+
+/* =====================================================================
+   Gjengens lommebok: formuen i Vorsbørsen følger med fra kveld til kveld (per konto).
+   Nullstilles 1. januar – da kåres Årets Børskonge. Gjester uten konto har bare kontanter for kvelden.
+   ===================================================================== */
+export const START_FORMUE = 1000, LONN = 200, FRIST_UTSATT = 48 * 3600 * 1000;
+function lommebok(b: any) {
+  const aar = new Date().getFullYear();
+  if (!b.lommebok || typeof b.lommebok !== 'object') b.lommebok = { sesong: aar, k: {} };
+  if (!b.lommebok.k || typeof b.lommebok.k !== 'object') b.lommebok.k = {};
+  if (b.lommebok.sesong !== aar) {
+    // Ny sesong: årets Børskonge havner i historien, og alle starter likt igjen (navnene beholdes)
+    const topp = Object.values(b.lommebok.k).filter((x: any) => x && x.saldo != null).sort((x: any, y: any) => y.saldo - x.saldo)[0] as any;
+    if (topp) { b.aarskonger = (Array.isArray(b.aarskonger) ? b.aarskonger : []).concat([{ aar: b.lommebok.sesong, navn: topp.navn, saldo: topp.saldo }]).slice(-20); logg(b, `👑 Årets Børskonge ${b.lommebok.sesong}: ${topp.navn} med ${topp.saldo} kr`, `👑 Market King of ${b.lommebok.sesong}: ${topp.navn} with ${topp.saldo}`); }
+    Object.values(b.lommebok.k).forEach((x: any) => { if (x) { x.saldo = null; x.kvelder = 0; } });
+    b.lommebok.sesong = aar;
+  }
+  return b.lommebok;
+}
+function konto(b: any, k: string, navn?: string) {
+  const l = lommebok(b), x = l.k[k] || (l.k[k] = { navn: navn || '', saldo: null, kvelder: 0 });
+  if (navn && !x.navn) x.navn = navn;
+  return x;
+}
+/** Hva et medlem tar med seg inn i kvelden: formuen sin + kveldens lønn. */
+export function startSaldo(bok: any, k: string) {
+  const b = lesBok(bok), x = lommebok(b).k[k];
+  return (x && x.saldo != null ? x.saldo : START_FORMUE) + LONN;
+}
+/** Navnet ditt i gjengen (brukes når du blir med på en kveld). */
+export function settNavn(bok: any, k: string, navn: string) {
+  const b = lesBok(bok), n = rens(navn, 20);
+  if (!n) return { feil: 'Skriv et navn.', en: 'Enter a name.' };
+  konto(b, k).navn = n;
+  return { bok: b };
+}
+export function profilNavn(bok: any, k: string) { const b = lesBok(bok), x = lommebok(b).k[k]; return x && x.navn ? x.navn : ''; }
+
+/** En aksje som manglet stemmer: avgjøres når to andre har stemt, eller når fristen går ut. */
+function avgjorUtsatt(b: any, u: any, tvunget: boolean, antall = 99) {
+  const andre = Object.entries(u.stemmer).filter(([k, v]) => k !== u.melderKonto && k !== u.subjektKonto && (v === 'ja' || v === 'nei'));
+  // To andre må ha stemt – eller alle som kan stemme, i små gjenger
+  const kan = Math.max(1, antall - (u.melderKonto ? 1 : 0) - (u.subjektKonto ? 1 : 0));
+  if (!tvunget && andre.length < Math.min(2, kan)) return false;
+  const ja = Object.entries(u.stemmer).filter(([k, v]) => k !== u.subjektKonto && v === 'ja').length + (u.melderKonto ? 0 : 1);
+  const nei = andre.filter(([, v]) => v === 'nei').length;
+  const godkjent = andre.length >= 1 && ja > nei;
+  u.status = godkjent ? 'godkjent' : 'avvist'; u.avgjort = Date.now();
+  if (godkjent) {
+    u.holdere.forEach((h: any) => { const x = konto(b, h.konto, h.navn); x.saldo = (x.saldo != null ? x.saldo : START_FORMUE) + h.n * 100; });
+    if (u.subjektKonto) { const x = konto(b, u.subjektKonto, u.subjektNavn); x.saldo = (x.saldo != null ? x.saldo : START_FORMUE) + 30; }
+    logg(b, `✅ Avgjort i ettertid: «${u.q}» – ${u.utfallNavn}. Aksjonærene fikk utbetalt.`, `✅ Settled afterwards: “${u.qEn}” – ${u.utfallNavn}. Shareholders were paid.`);
+  } else logg(b, `❌ Avgjort i ettertid: «${u.q}» skjedde ikke – aksjene ble verdiløse.`, `❌ Settled afterwards: “${u.qEn}” didn’t happen – the shares became worthless.`);
+  return true;
+}
+/** Avgjør de som har gått ut på tid. Gir true hvis noe ble endret. */
+export function ryddUtsatte(bok: any) {
+  const b = lesBok(bok); let endret = false;
+  (b.utsatte || []).forEach((u: any) => { if (u.status === 'venter' && Date.now() > u.frist) { avgjorUtsatt(b, u, true); endret = true; } });
+  b.utsatte = (b.utsatte || []).filter((u: any) => u.status === 'venter' || Date.now() - (u.avgjort || 0) < 14 * 24 * 3600 * 1000).slice(-60);
+  return { bok: b, endret };
+}
+/** Et medlem stemmer på gjengsiden: skjedde det? */
+export function stemUtsatt(bok: any, id: string, k: string, v: string, antall = 99) {
+  const b = lesBok(bok), u = (b.utsatte || []).find((x: any) => x.id === id && x.status === 'venter');
+  if (!u) return { feil: 'Den er allerede avgjort.', en: 'It’s already settled.' };
+  if (k === u.subjektKonto) return { feil: 'Aksjen handler om deg, så du kan ikke stemme.', en: 'This share is about you, so you can’t vote.' };
+  if (k === u.melderKonto) return { feil: 'Du meldte den, så stemmen din er allerede med.', en: 'You reported it, so your vote already counts.' };
+  if (v !== 'ja' && v !== 'nei') return { feil: 'Ugyldig stemme.', en: 'Invalid vote.' };
+  u.stemmer[k] = v;
+  avgjorUtsatt(b, u, Date.now() > u.frist, antall);
+  return { bok: b };
 }
 
 /** Leser lovboka – også den gamle formen fra det tidligere lov-spillet. */
@@ -26,7 +100,7 @@ export function lesBok(x: any) {
   if (!x || typeof x !== 'object') return b;
   if (x.v === 2) {
     Object.assign(b, x);
-    ['regler', 'logg', 'brukt'].forEach((k) => { if (!Array.isArray(b[k])) b[k] = []; });
+    ['regler', 'logg', 'brukt', 'utsatte', 'aarskonger'].forEach((k) => { if (!Array.isArray(b[k])) b[k] = []; });
     ['seire', 'borskonge'].forEach((k) => { if (!b[k] || typeof b[k] !== 'object') b[k] = {}; });
     return b;
   }
@@ -55,11 +129,20 @@ function tell(map: any, konto: string | null, navn: string) {
  * Kvelden er over: tell den, gi seieren til kveldens vinner og la hen velge regel.
  * Trygt å kjøre flere ganger (samme kveld telles bare én gang).
  */
-export function kveldInn(bok: any, kveldId: string, r: { vinner: { navn: string; konto: string | null } | null; borskonge?: { navn: string; konto: string | null } | null; leker?: number }) {
+export function kveldInn(bok: any, kveldId: string, r: { vinner: { navn: string; konto: string | null } | null; borskonge?: { navn: string; konto: string | null } | null; leker?: number;
+    lommer?: { konto: string; navn: string; saldo: number | null }[]; utsatte?: any[] }) {
   const b = lesBok(bok);
   if (b.brukt.includes(kveldId)) return b;
   b.brukt.push(kveldId); b.brukt = b.brukt.slice(-60);
   b.kvelder++;
+  // Formuen: det du endte kvelden med (var børsen i gang), ellers bare kveldens lønn
+  (r.lommer || []).forEach((l) => {
+    const x = konto(b, l.konto, l.navn);
+    x.saldo = l.saldo != null ? Math.max(0, Math.round(l.saldo)) : (x.saldo != null ? x.saldo : START_FORMUE) + LONN;
+    x.kvelder = (x.kvelder || 0) + 1;
+  });
+  (r.utsatte || []).forEach((u) => { b.utsatte.push({ ...u, frist: Date.now() + FRIST_UTSATT, status: 'venter' }); });
+  if ((r.utsatte || []).length) logg(b, `⏳ ${r.utsatte!.length} ${r.utsatte!.length === 1 ? 'aksje venter' : 'aksjer venter'} på stemmer – avgjøres her på gjengsiden`, `⏳ ${r.utsatte!.length} ${r.utsatte!.length === 1 ? 'share awaits' : 'shares await'} votes – settled here on the crew page`);
   if (r.vinner) {
     tell(b.seire, r.vinner.konto, r.vinner.navn);
     b.ventende = { kveldId, navn: r.vinner.navn, konto: r.vinner.konto || null, dato: Date.now() };
@@ -141,6 +224,14 @@ export function visBok(bok: any, meg: string | null, lang: Lang = 'no', antallMe
       regler: Object.entries(lagd).map(([navn, n]) => ({ navn, n })).sort((a, c) => c.n - a.n).slice(0, 5),
     },
     ventende: b.ventende ? { kveldId: b.ventende.kveldId, navn: b.ventende.navn, minTur: !!(meg && b.ventende.konto === meg) } : null,
+    sesong: lommebok(b).sesong,
+    formue: Object.entries(lommebok(b).k).filter(([, x]: any) => x && x.navn && (x.saldo != null || x.kvelder)).map(([k, x]: any) => ({ navn: x.navn, saldo: x.saldo != null ? x.saldo : START_FORMUE, kvelder: x.kvelder || 0, meg: !!(meg && k === meg) }))
+      .sort((x: any, y: any) => y.saldo - x.saldo),
+    meg: meg ? (() => { const x = lommebok(b).k[meg]; return { navn: x && x.navn ? x.navn : '', saldo: x && x.saldo != null ? x.saldo : START_FORMUE, kvelder: x ? x.kvelder || 0 : 0 }; })() : null,
+    aarskonger: (b.aarskonger || []).slice().reverse(),
+    utsatte: (b.utsatte || []).slice().reverse().map((u: any) => ({ id: u.id, q: lang === 'en' ? u.qEn : u.q, utfallNavn: u.utfallNavn, melderNavn: u.melderNavn, frist: u.frist, status: u.status,
+      ja: Object.entries(u.stemmer).filter(([k, v]) => k !== u.subjektKonto && v === 'ja').length + (u.melderKonto ? 0 : 1), nei: Object.values(u.stemmer).filter((v) => v === 'nei').length,
+      kanStemme: !!(meg && u.status === 'venter' && meg !== u.subjektKonto && meg !== u.melderKonto), minStemme: meg ? u.stemmer[meg] || null : null, aksjonaerer: u.holdere.length })),
     logg: b.logg.slice(0, 40).map((x: any) => ({ dato: x.dato, tekst: x[lang] || x.no })),
   };
 }

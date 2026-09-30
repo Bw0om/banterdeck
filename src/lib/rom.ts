@@ -15,7 +15,7 @@ import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
 import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } from './kveld';
 import { MAKS_REGEL } from './lovbok';
-import { borsHandling, borsVisning } from './bors';
+import { borsHandling, borsVisning, borsTilGjeng, settStart } from './bors';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
 const D: any = DECKS;
@@ -187,7 +187,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
   const hd = data.hendelse;
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null, lang,
-    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, medlem: !!p.konto, invitert: !!p.invitert, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
+    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, medlem: !!p.konto, invitert: !!p.invitert, immun: p.immun || 0, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     nr: data.nr, reak: data.reak || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
@@ -213,7 +213,14 @@ function venter(s: any, mangler: number) {
 /** Hendelsen alle ser. Lagres på begge språk; visning() viser tekst på språket til den som ser på. */
 function melde(data: any, tekst: string, en?: string) { data.nr = (data.nr || 0) + 1; data.hendelse = { nr: data.nr, tekst, en: en || tekst }; }
 function navnPaa(data: any, id: string) { const p = data.spillere.find((x: any) => x.id === id); return p ? p.navn : '?'; }
-function giSlurker(data: any, id: string, n: number) { const p = data.spillere.find((x: any) => x.id === id); if (p) p.slurker = Math.max(0, (p.slurker || 0) + n); }
+function giSlurker(data: any, id: string, n: number) {
+  const p = data.spillere.find((x: any) => x.id === id); if (!p) return;
+  // Immunitet fra butikken: slipp neste gang du får slurker
+  if (n > 0 && (p.immun || 0) > 0) { p.immun--; melde(data, `🛡️ ${p.navn} brukte immunitet og slapp ${n} ${n === 1 ? 'slurk' : 'slurker'}!`, `🛡️ ${p.navn} used immunity and skipped ${n} ${n === 1 ? 'sip' : 'sips'}!`); return; }
+  p.slurker = Math.max(0, (p.slurker || 0) + n);
+}
+/** Gjengkveld: gi et nytt medlem startsaldoen sin fra gjengens lommebok hvis børsen er i gang. */
+export function startSaldoFor(data: any, id: string, kr: any) { if (data.bors && kr != null) settStart(data, { [id]: Number(kr) }); }
 /** Slurker spilleren har vunnet og kan sende til andre (🍺-knappen). */
 function giUtdeling(data: any, id: string, n: number) { const p = data.spillere.find((x: any) => x.id === id); if (p) p.gi = Math.max(0, Math.min(99, (p.gi || 0) + n)); }
 
@@ -422,6 +429,8 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!erVert) return { feil: 'bare-vert' };
       if (data.spill) lekFerdig(data);
       data.spill = null; data.valgt = null; data.ferdig = Date.now();
+      // Gjengkveld: børsen stenges, formuen går til gjengens lommebok, og aksjer som mangler stemmer avgjøres på gjengsiden
+      if (data.gjeng && data.bors) { const e = borsTilGjeng(data); if (e) kveld(data).eksport = e; }
       const vinner = kaarVinner(data);
       if (vinner) melde(data, `🏆 ${navnPaa(data, vinner)} vant kvelden!` + (data.gjeng ? ' Nå får hen velge en regel til lovboka.' : ''), `🏆 ${navnPaa(data, vinner)} won the night!` + (data.gjeng ? ' Now they get to pick a rule for the law book.' : ''));
       else melde(data, 'Kvelden er over – her er oppsummeringen!', "The night is over – here's the recap!");
@@ -550,7 +559,9 @@ function handlingInne(data: any, meg: any, h: any) {
         const til = data.spillere.find((x: any) => x.id === h.hvem);
         if (!til || til.id === meg.id) return { feil: 'ukjent' };
         if (!(meg.gi > 0)) return feilL('tomt', 'Du har ingen slurker å dele ut. Vinn noe først!', 'You have no sips to give out. Win something first!');
-        meg.gi--; til.slurker = (til.slurker || 0) + 1; reak.e = '🍺'; reak.til = til.id;
+        meg.gi--; reak.e = '🍺'; reak.til = til.id;
+        if ((til.immun || 0) > 0) { til.immun--; reak.e = '🛡️'; melde(data, `🛡️ ${til.navn} brukte immunitet mot slurken fra ${meg.navn}!`, `🛡️ ${til.navn} used immunity against ${meg.navn}’s sip!`); }
+        else til.slurker = (til.slurker || 0) + 1;
         meg.sendt = (meg.sendt || 0) + 1; til.mottatt = (til.mottatt || 0) + 1;
       }
       meg.sistR = naa;

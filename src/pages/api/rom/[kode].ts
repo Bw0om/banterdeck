@@ -1,11 +1,11 @@
 // Ett rom: hente tilstanden (GET) eller gjøre noe i det (POST).
 // Telefonen identifiserer seg med spiller-id og pollett i egne felt, aldri i adressen.
 import type { APIRoute } from 'astro';
-import { hentRom, endreRom, visning, handling, blimed, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
+import { hentRom, endreRom, visning, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
 import { rpc } from '../../../lib/spilt';
 import { innloggetBruker } from '../../../lib/konto';
 import { plussStatus } from '../../../lib/pluss';
-import { kveldInn, vinnerValg, reglerForRom } from '../../../lib/lovbok';
+import { kveldInn, vinnerValg, reglerForRom, startSaldo } from '../../../lib/lovbok';
 export const prerender = false;
 
 const json = (d: any, status = 200) =>
@@ -73,7 +73,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   // Språk før vi vet hvem spilleren er: body.lang (bli-med), ellers x-lang-headeren
   const bLang: Sprak = d.lang === 'en' || d.lang === 'no' ? d.lang : hLang;
   // Pluss sjekkes her på serveren – aldri på det nettleseren påstår
-  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble; delete d._borsFri; delete d._venter; delete d._medlem; delete d._regler;
+  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble; delete d._borsFri; delete d._venter; delete d._medlem; delete d._regler; delete d._start; delete d._startKr;
   // Gjengen sjekkes også her: verten må være innlogget og med i gjengen
   if (d.handling === 'gjeng' && d.gjengId) {
     try {
@@ -92,7 +92,11 @@ export const POST: APIRoute = async ({ params, request }) => {
       if (gj) {
         const u = await innloggetBruker(request).catch(() => null);
         const g = u ? await rpc('gjeng_tilgang', { p_user: u.id, p_id: gj.id }) : null;
-        if (g && u) { d._medlem = true; d._konto = u.id; } else d._venter = true;
+        if (g && u) {
+          d._medlem = true; d._konto = u.id;
+          // Blir med midt i børsen: ta med formuen fra gjengens lommebok
+          if (rom.data.bors) { try { const l = await rpc('gjeng_lov_hent', { p_gjeng: gj.id }); if (l) d._startKr = startSaldo(l.lov, u.id); } catch { /* standard */ } }
+        } else d._venter = true;
       }
     } catch { /* vanlig rom */ }
   }
@@ -112,6 +116,17 @@ export const POST: APIRoute = async ({ params, request }) => {
       d._konto = u.id;
     } catch { return json({ feil: 'server', melding: bLang === 'en' ? "Couldn't check the crew. Try again." : 'Fikk ikke sjekket gjengen. Prøv igjen.' }, 503); }
   }
+  // Vorsbørsen i en gjeng: medlemmene tar med seg formuen sin (+ kveldens lønn) inn i kvelden
+  if (d.handling === 'bs-start') {
+    try {
+      const rom = await hentRom(kode);
+      const gj = rom && rom.data && rom.data.gjeng;
+      if (gj) {
+        const l = await rpc('gjeng_lov_hent', { p_gjeng: gj.id });
+        if (l) { const st: any = {}; rom.data.spillere.forEach((p: any) => { if (p.konto) st[p.id] = startSaldo(l.lov, p.konto); }); d._start = st; }
+      }
+    } catch { /* alle starter med 1000 */ }
+  }
   if (d.handling === 'pluss-aktiver' || (d.handling === 'start' && erPlussLek(d.lek))) {
     try {
       const u = await innloggetBruker(request);
@@ -129,7 +144,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         const fra = d._konto ? data.spillere.find((p: any) => p.konto === d._konto) : null;
         if (fra) { meg = fra; ny = fra; return { ok: true }; }
         const r: any = blimed(data, navn, bLang);
-        if (!r.feil && d._konto) r.spiller.konto = d._konto;
+        if (!r.feil && d._konto) { r.spiller.konto = d._konto; startSaldoFor(data, r.spiller.id, d._startKr); }
         if (r.feil) return r;
         meg = r.spiller; ny = r.spiller;
         return { ok: true };
@@ -203,14 +218,31 @@ async function endreBok(gjengId: string, endring: (bok: any) => any) {
   return null;
 }
 
+/** Alt kvelden skal skrive i lovboka: vinner, Børskonge, formuen til medlemmene og aksjer som venter på stemmer. */
+function kveldData(data: any, kode: string, p: any, bk: any) {
+  const e = (data.kveld && data.kveld.eksport) || null;
+  const sp = (id: string) => data.spillere.find((x: any) => x.id === id);
+  const tekst = (q: any, l: 'no' | 'en') => (q && typeof q === 'object' ? q[l] || q.no : String(q || ''));
+  return {
+    vinner: p ? { navn: p.navn, konto: p.konto || null } : null, borskonge: bk ? { navn: bk.navn, konto: bk.konto || null } : null,
+    lommer: data.spillere.filter((x: any) => x.konto).map((x: any) => ({ konto: x.konto, navn: x.navn, saldo: e && e.saldoer && e.saldoer[x.id] != null ? e.saldoer[x.id] : null })),
+    utsatte: e ? e.utsatte.map((u: any) => {
+      const melder = sp(u.melder), subjekt = u.subjekt ? sp(u.subjekt) : null, stemmer: any = {};
+      Object.entries(u.stemmer || {}).forEach(([id, v]) => { const x = sp(id); if (x && x.konto) stemmer[x.konto] = v; });
+      return { id: kveldId(data, kode) + '-' + u.id, q: tekst(u.q, 'no'), qEn: tekst(u.q, 'en'), type: u.type,
+        utfallNavn: u.type === 'hvem' ? (subjekt ? subjekt.navn : '?') : 'Ja',
+        melderNavn: melder ? melder.navn : '?', melderKonto: melder && melder.konto ? melder.konto : null,
+        subjektKonto: subjekt && subjekt.konto ? subjekt.konto : null, subjektNavn: subjekt ? subjekt.navn : null, stemmer,
+        holdere: u.holdere.map((h: any) => { const x = sp(h.id); return x && x.konto ? { konto: x.konto, navn: x.navn, n: h.n } : null; }).filter(Boolean) };
+    }) : [],
+  };
+}
 async function gjengKveldSlutt(data: any, kode: string) {
   const k = data.kveld || {};
   const p = k.vinner ? data.spillere.find((x: any) => x.id === k.vinner) : null;
   const bk = data.bors && data.bors.slutt && data.bors.slutt.konge ? data.spillere.find((x: any) => x.id === data.bors.slutt.konge) : null;
   try {
-    await endreBok(data.gjeng.id, (bok) => kveldInn(bok, kveldId(data, kode), {
-      vinner: p ? { navn: p.navn, konto: p.konto || null } : null, borskonge: bk ? { navn: bk.navn, konto: bk.konto || null } : null,
-    }));
+    await endreBok(data.gjeng.id, (bok) => kveldInn(bok, kveldId(data, kode), kveldData(data, kode, p, bk)));
   } catch (e) { console.warn('Lovboka ble ikke oppdatert:', (e as Error).message); }
   try { if (data.gjengKveld) await rpc('gjeng_kveld_aktiv_sett', { p_gjeng: data.gjeng.id, p_rom: null }); } catch { /* ikke satt opp */ }
 }
@@ -221,7 +253,7 @@ async function lagreLovValg(data: any, kode: string) {
   const bk = data.bors && data.bors.slutt && data.bors.slutt.konge ? data.spillere.find((x: any) => x.id === data.bors.slutt.konge) : null;
   try {
     const bok = await endreBok(data.gjeng.id, (b0) => {
-      const b1 = kveldInn(b0, kveldId(data, kode), { vinner: p ? { navn: p.navn, konto: p.konto || null } : null, borskonge: bk ? { navn: bk.navn, konto: bk.konto || null } : null });
+      const b1 = kveldInn(b0, kveldId(data, kode), kveldData(data, kode, p, bk));
       const r: any = vinnerValg(b1, kveldId(data, kode), { navn: v.navn, fraRom: true }, { type: v.type, tekst: v.tekst, regel: v.regel });
       return r.bok || null;
     });

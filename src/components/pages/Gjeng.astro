@@ -182,7 +182,32 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
     }
     /* ---------- kvelden: start, bli med, varsler ---------- */
     var STANDARD = ['spion', 'hvemskrev', 'bloff', 'bors'];
-    function mittNavn() { try { return JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (x) { return ''; } }
+    function mittNavn() {
+      if (G && G.lovbok && G.lovbok.meg && G.lovbok.meg.navn) return G.lovbok.meg.navn;
+      try { return JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (x) { return ''; }
+    }
+    function kr(n) { return Math.round(n).toLocaleString(EN ? 'en-GB' : 'nb-NO') + (EN ? ' 🪙' : ' kr'); }
+    /** Profilen din, formuen i gjengen og aksjer som venter på stemmer. */
+    function lommeBoks() {
+      var L = G.lovbok; if (!L) return '';
+      var ut = '';
+      var ventende = (L.utsatte || []).filter(function (u) { return u.status === 'venter'; });
+      if (ventende.length) ut += '<section><h2 class="gj-h2">⏳ ' + (EN ? 'Awaiting votes' : 'Til avgjørelse') + '</h2><p class="small">' + (EN ? 'Reported during the night, but too few voted. Did it happen? Settled when two more have voted – or after 48 hours.' : 'Meldt i løpet av kvelden, men for få rakk å stemme. Skjedde det? Avgjøres når to til har stemt – eller etter 48 timer.') + '</p>' +
+        ventende.map(function (u) {
+          var t = Math.max(0, Math.round((u.frist - Date.now()) / 3600000));
+          return '<div class="gj-utsatt"><p><b>' + esc(u.q) + '</b></p><p class="small">' + esc(u.melderNavn) + (EN ? ' says: ' : ' melder: ') + '<b>' + esc(u.utfallNavn) + '</b> · ' + u.ja + '–' + u.nei + ' · ' + (EN ? t + ' h left' : t + ' t igjen') + ' · ' + u.aksjonaerer + (EN ? ' shareholders' : ' aksjonærer') + '</p>' +
+            (u.kanStemme ? '<div class="rom-valg en"><button type="button" data-g="utsatt-stem" data-id="' + esc(u.id) + '" data-v="ja" aria-pressed="' + (u.minStemme === 'ja') + '">' + (EN ? '✅ It happened' : '✅ Det skjedde') + '</button><button type="button" data-g="utsatt-stem" data-id="' + esc(u.id) + '" data-v="nei" aria-pressed="' + (u.minStemme === 'nei') + '">' + (EN ? '❌ Didn’t happen' : '❌ Skjedde ikke') + '</button></div>' : '') + '</div>';
+        }).join('') + '</section>';
+      if (G.medlem && L.meg) ut += '<div class="gj-profil"><p class="rom-etikett">' + (EN ? 'You in the crew' : 'Deg i gjengen') + '</p>' +
+        '<p><b>' + kr(L.meg.saldo) + '</b> ' + (EN ? 'in your wallet' : 'i lommeboka') + ' · ' + L.meg.kvelder + (EN ? (L.meg.kvelder === 1 ? ' night' : ' nights') : (L.meg.kvelder === 1 ? ' kveld' : ' kvelder')) + (EN ? ' this season' : ' denne sesongen') + '</p>' +
+        '<form class="gj-rad" id="gjProfil"><input id="gjProfilNavn" maxlength="20" value="' + esc(L.meg.navn || mittNavn()) + '" placeholder="' + (EN ? 'Your name in the crew' : 'Navnet ditt i gjengen') + '"><button class="btn ghost small" type="submit">' + (EN ? 'Save name' : 'Lagre navn') + '</button></form>' +
+        '<p class="small">' + (EN ? 'Your Exchange fortune follows you from night to night, and you get ' : 'Formuen din i Vorsbørsen følger med fra kveld til kveld, og du får ') + kr(200) + (EN ? ' in wages every night you join. Everyone starts over on 1 January.' : ' i lønn hver kveld du er med. Alle starter likt igjen 1. januar.') + '</p></div>';
+      var f = L.formue || [];
+      if (f.length) ut += '<section><h2 class="gj-h2">💰 ' + (EN ? 'The crew’s fortune ' : 'Formuen i gjengen ') + L.sesong + '</h2><ol class="gj-formue">' +
+        f.map(function (x, i) { return '<li class="' + (x.meg ? 'meg' : '') + '"><span>' + (i === 0 ? '👑 ' : (i + 1) + '. ') + esc(x.navn) + '</span><b>' + kr(x.saldo) + '</b></li>'; }).join('') + '</ol>' +
+        ((L.aarskonger || []).length ? '<p class="small">' + (EN ? 'Market Kings of the year: ' : 'Årets Børskonger: ') + L.aarskonger.map(function (x) { return x.aar + ' ' + esc(x.navn); }).join(' · ') + '</p>' : '') + '</section>';
+      return ut;
+    }
     function kveldBoks() {
       if (!G.medlem) return '';
       var k = G.kveld;
@@ -225,7 +250,7 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
         '<div class="gj-knapper"><button class="btn gold" data-g="inviter" type="button">' + (EN ? 'Invite the crew' : 'Inviter gjengen') + '</button>' +
 
           (!G.medlem ? '<button class="btn ghost" data-g="bli-med" type="button">' + (G.innlogget ? (EN ? 'Join the crew' : 'Bli med i gjengen') : (EN ? 'Log in to join' : 'Logg inn for å bli med')) + '</button>' : '') + '</div>' +
-        kveldBoks() + varselBoks() +
+        kveldBoks() + varselBoks() + lommeBoks() +
         lovbok() +
         '<div class="rom-mod gj-sesong" role="group" aria-label="' + (EN ? 'Season' : 'Sesong') + '">' + aarListe.map(function (a) { return '<button type="button" data-sesong="' + a + '" aria-pressed="' + (sesong === a) + '">' + a + '</button>'; }).join('') +
           '<button type="button" data-sesong="alle" aria-pressed="' + (sesong === 'alle') + '">' + (EN ? 'All' : 'Alle') + '</button></div>' +
@@ -308,6 +333,7 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
         b.disabled = true;
         return kall('/api/gjeng', { handling: g, id: G.id, navn: nv, leker: leker }).then(function (d) { b.disabled = false; if (!d._ok) return mld(d.melding || ikke); gaaTilRom(d); });
       }
+      if (g === 'utsatt-stem') return kall('/api/gjeng', { handling: 'utsatt-stem', id: G.id, aksje: b.dataset.id, v: b.dataset.v }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
       if (g === 'lov-stem') return kall('/api/gjeng', { handling: 'lov-stem', id: G.id, regel: b.dataset.regel }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
       if (g === 'lov-opphev') {
         if (!confirm(EN ? 'Repeal this rule?' : 'Oppheve denne regelen?')) return;
@@ -349,6 +375,12 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
       }
     });
     root.addEventListener('submit', function (e) {
+      if (e.target && e.target.id === 'gjProfil' && G) {
+        e.preventDefault();
+        var n = root.querySelector('#gjProfilNavn').value.trim(); if (!n) return;
+        try { localStorage.setItem('bd_mittnavn', JSON.stringify(n)); } catch (x) {}
+        return kall('/api/gjeng', { handling: 'profil', id: G.id, navn: n }).then(function (d) { if (!d._ok) { var m = root.querySelector('#gjMld'); if (m) m.innerHTML = feil(d.melding || ''); return; } hent(); });
+      }
       if (!e.target || e.target.id !== 'lbValg' || !G || !G.lovbok || !G.lovbok.ventende) return;
       e.preventDefault();
       var tx = root.querySelector('#lbTekst').value.trim();

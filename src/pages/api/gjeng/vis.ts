@@ -2,7 +2,7 @@
 import type { APIRoute } from 'astro';
 import { rpc } from '../../../lib/spilt';
 import { json, innloggetBruker } from '../../../lib/konto';
-import { visBok } from '../../../lib/lovbok';
+import { visBok, ryddUtsatte } from '../../../lib/lovbok';
 import { hentRom } from '../../../lib/rom';
 export const prerender = false;
 export const GET: APIRoute = async ({ request }) => {
@@ -23,7 +23,12 @@ export const GET: APIRoute = async ({ request }) => {
     try { antall = Number(await rpc('gjeng_antall', { p_gjeng: g.id })) || 0; } catch { /* ikke satt opp */ }
     // Lovboka – uten konto-id-er. Finnes ikke tabellen ennå, vises den bare ikke.
     let lovbok = null;
-    try { const l = await rpc('gjeng_lov_hent', { p_gjeng: g.id }); if (l) lovbok = visBok(l.lov, medlem && u ? u.id : null, lang, antall); } catch { /* ikke satt opp */ }
+    try {
+      let l = await rpc('gjeng_lov_hent', { p_gjeng: g.id });
+      // Aksjer som har ventet på stemmer i over 48 timer, avgjøres nå
+      if (l) { const r = ryddUtsatte(l.lov); if (r.endret) { const v = await rpc('gjeng_lov_lagre', { p_gjeng: g.id, p_lov: r.bok, p_versjon: l.versjon }); if (v != null) l = { lov: r.bok, versjon: v }; } }
+      if (l) lovbok = visBok(l.lov, medlem && u ? u.id : null, lang, antall);
+    } catch { /* ikke satt opp */ }
     // Kvelden som pågår: bare medlemmer får vite om den (og blir med uten kode)
     let kveld = null;
     if (medlem) {

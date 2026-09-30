@@ -2,8 +2,8 @@
 import type { APIRoute } from 'astro';
 import { rpc } from '../../../lib/spilt';
 import { json, innloggetBruker } from '../../../lib/konto';
-import { stemBort, vinnerValg, reglerForRom } from '../../../lib/lovbok';
-import { lagRom, hentRom, endreRom, blimed, rensNavn as romNavn, lekeliste, varsle, loggRom } from '../../../lib/rom';
+import { stemBort, vinnerValg, reglerForRom, startSaldo, settNavn, profilNavn, stemUtsatt } from '../../../lib/lovbok';
+import { lagRom, hentRom, endreRom, blimed, startSaldoFor, rensNavn as romNavn, lekeliste, varsle, loggRom } from '../../../lib/rom';
 import { sendTilGjeng, gyldigAbonnement } from '../../../lib/push';
 export const prerender = false;
 
@@ -63,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
         if (!UUID.test(id)) return json({ feil: 'ugyldig' }, 400);
         const g = await rpc('gjeng_tilgang', { p_user: u.id, p_id: id });
         if (!g) return json({ feil: 'medlem', melding: en ? 'Only crew members can start a night.' : 'Bare medlemmer kan starte kveld.' }, 403);
-        const navn = romNavn(d.navn);
+        const navn = await gjengNavn(id, u.id, d.navn);
         if (!navn) return json({ feil: 'navn', melding: en ? 'Enter your name.' : 'Skriv inn navnet ditt.' }, 400);
         // Er det allerede en kveld i gang? Da blir du med i den i stedet.
         const aktiv = await aktivKveld(id);
@@ -94,7 +94,7 @@ export const POST: APIRoute = async ({ request }) => {
       case 'bli-kveld': {
         if (!UUID.test(id)) return json({ feil: 'ugyldig' }, 400);
         if (!(await rpc('gjeng_tilgang', { p_user: u.id, p_id: id }))) return json({ feil: 'medlem', melding: en ? 'You’re not in this crew.' : 'Du er ikke med i gjengen.' }, 403);
-        const navn = romNavn(d.navn);
+        const navn = await gjengNavn(id, u.id, d.navn);
         if (!navn) return json({ feil: 'navn', melding: en ? 'Enter your name.' : 'Skriv inn navnet ditt.' }, 400);
         const aktiv = await aktivKveld(id);
         if (!aktiv) return json({ feil: 'ingen', melding: en ? 'The night is over.' : 'Kvelden er over.' }, 404);
@@ -118,6 +118,21 @@ export const POST: APIRoute = async ({ request }) => {
           return x.feil ? { feil: en ? x.en : x.feil } : x.bok;
         });
         return r.feil ? json({ feil: 'lov', melding: r.feil }, 409) : json({ ok: true });
+      }
+      case 'profil': {
+        // Navnet ditt i gjengen
+        if (!UUID.test(id)) return json({ feil: 'ugyldig' }, 400);
+        if (!(await rpc('gjeng_tilgang', { p_user: u.id, p_id: id }))) return json({ feil: 'medlem' }, 403);
+        const r = await endreBok(id, (bok) => { const x: any = settNavn(bok, u.id, String(d.navn || '')); return x.feil ? { feil: en ? x.en : x.feil } : x.bok; });
+        return r.feil ? json({ feil: 'navn', melding: r.feil }, 400) : json({ ok: true });
+      }
+      case 'utsatt-stem': {
+        // Stem på en aksje som manglet stemmer i kveld (avgjøres her i ettertid)
+        if (!UUID.test(id)) return json({ feil: 'ugyldig' }, 400);
+        if (!(await rpc('gjeng_tilgang', { p_user: u.id, p_id: id }))) return json({ feil: 'medlem' }, 403);
+        const antall = Number(await rpc('gjeng_antall', { p_gjeng: id }).catch(() => 99)) || 99;
+        const r = await endreBok(id, (bok) => { const x: any = stemUtsatt(bok, String(d.aksje || ''), u.id, String(d.v || ''), antall); return x.feil ? { feil: en ? x.en : x.feil } : x.bok; });
+        return r.feil ? json({ feil: 'stem', melding: r.feil }, 409) : json({ ok: true });
       }
       case 'varsel': {
         // Pushvarsel når gjengen starter kveld (bare for medlemmer)
@@ -153,13 +168,19 @@ async function aktivKveld(gjengId: string): Promise<string | null> {
 }
 /** Et medlem blir med i kvelden (eller får plassen sin tilbake på en ny telefon). */
 async function inn(kode: string, konto: string, navn: string, lang: 'no' | 'en'): Promise<any> {
-  let meg: any = null;
+  let meg: any = null, startKr: number | null = null;
+  // Er børsen i gang, tar medlemmet med seg formuen sin fra gjengens lommebok
+  try {
+    const rom = await hentRom(kode);
+    if (rom && rom.data.bors && rom.data.gjeng) { const l = await rpc('gjeng_lov_hent', { p_gjeng: rom.data.gjeng.id }); if (l) startKr = startSaldo(l.lov, konto); }
+  } catch { /* standard */ }
   const res: any = await endreRom(kode, (data) => {
     const fra = data.spillere.find((p: any) => p.konto === konto);
     if (fra) { meg = fra; return { ok: true }; }
     const r: any = blimed(data, navn, lang);
     if (r.feil) return r;
     r.spiller.konto = konto; meg = r.spiller;
+    startSaldoFor(data, r.spiller.id, startKr);
     return { ok: true };
   });
   if (res.feil) return { feil: res.feil, melding: res.melding || (lang === 'en' ? 'Couldn’t join the night.' : 'Fikk ikke blitt med i kvelden.') };
@@ -177,4 +198,15 @@ async function endreBok(gjengId: string, endring: (bok: any) => any): Promise<an
     if (v !== null && v !== undefined) return { ok: true };
   }
   return { feil: 'Noen andre endret lovboka samtidig. Prøv igjen.' };
+}
+
+/** Navnet ditt i gjengen: det du skrev nå (lagres i profilen), ellers det som ligger i profilen. */
+async function gjengNavn(gjengId: string, konto: string, onsket: any): Promise<string> {
+  const ny = romNavn(onsket);
+  try {
+    const l = await rpc('gjeng_lov_hent', { p_gjeng: gjengId });
+    const gammel = l ? profilNavn(l.lov, konto) : '';
+    if (ny && ny !== gammel) await endreBok(gjengId, (bok) => { const x: any = settNavn(bok, konto, ny); return x.bok || null; });
+    return ny || gammel;
+  } catch { return ny; }
 }

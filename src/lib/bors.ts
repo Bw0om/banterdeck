@@ -11,12 +11,29 @@
  *   handlet om, er et tydelig tegn på bestikkelse.
  * - Egne aksjer: én per spiller per kveld, koster 200 kr å notere, verten godkjenner.
  */
+import { kveld as kveldData } from './kveld';
 type Lang = 'no' | 'en';
 type Tekst = { no: string; en: string };
 const T = (no: string, en: string): Tekst => ({ no, en });
 
 /** Den aksjen handler om, får en liten bonus når det skjer – så ingen tjener på å unngå det. */
 export const HOVEDROLLE = 30;
+/** Butikken: bruk vorskronene på hverandre. */
+export const BUTIKK = { slurk: 80, slurkOkning: 25, immun: 150, poeng: 400, maksImmun: 2, maksSlurker: 5 };
+/** Prisene følger formuen i rommet: blir alle rike, blir butikken dyrere (aldri billigere enn grunnprisen). */
+function prisfaktor(data: any) {
+  const b = data.bors, n = data.spillere.length || 1;
+  const snitt = data.spillere.reduce((sum: number, p: any) => sum + (b.saldo[p.id] != null ? b.saldo[p.id] : START_KR), 0) / n;
+  return Math.max(1, snitt / START_KR);
+}
+const rund10 = (x: number) => Math.round(x / 10) * 10;
+/** Hva n slurker koster for deg nå: hver slurk du har kjøpt i kveld gjør den neste dyrere. */
+function slurkPris(data: any, id: string, n: number) {
+  const b = data.bors, f = prisfaktor(data), kjopt = (b.slurkKjopt && b.slurkKjopt[id]) || 0;
+  let sum = 0; for (let k = 0; k < n; k++) sum += rund10((BUTIKK.slurk + BUTIKK.slurkOkning * (kjopt + k)) * f);
+  return sum;
+}
+function varePris(data: any, vare: 'immun' | 'poeng') { return rund10(BUTIKK[vare] * prisfaktor(data)); }
 export const START_KR = 1000, UTBETALING = 100, NOTERING = 200, HONORAR = 2, BOT_SKYLDIG = 300, BOT_FALSK = 200;
 const STARTKURS = 10, STEG = 6, MAKSKURS = 95;
 const GRATIS_AKSJER = 4;                 // uten Pluss (eller opplåst gjeng): så mange av aksjene er åpne
@@ -243,7 +260,9 @@ function avsluttBors(data: any) {
     if (a.status === 'venter') { a.status = 'avvist'; if (a.av) flytt(b, a.av, NOTERING, 'Noteringen tilbake', 'Listing refunded'); }
   });
   b.saker.forEach((s: any) => { if (s.fase !== 'ferdig') s.fase = 'ferdig'; });
-  const rang = data.spillere.map((p: any) => ({ id: p.id, kr: saldo(b, p.id) })).sort((x: any, y: any) => y.kr - x.kr);
+  // Kveldens resultat: gevinst i kveld (i en gjeng har folk med seg ulik formue inn i kvelden)
+  const start = (id: string) => (b.startKr && b.startKr[id] != null ? b.startKr[id] : START_KR);
+  const rang = data.spillere.map((p: any) => ({ id: p.id, kr: Math.round(saldo(b, p.id)), gevinst: Math.round(saldo(b, p.id) - start(p.id)) })).sort((x: any, y: any) => y.gevinst - x.gevinst || y.kr - x.kr);
   b.slutt = { tid: Date.now(), rang, konge: rang[0] ? rang[0].id : null, konkurs: rang.length > 1 ? rang[rang.length - 1].id : null };
   b.paa = false;
   if (b.slutt.konge) melde(data, `📈 Børsen er stengt! ${navn(data, b.slutt.konge)} er Børskongen – ${navn(data, b.slutt.konkurs)} gikk konkurs og spinner straffehjulet 🎡`,
@@ -257,10 +276,19 @@ function vurderMelding(data: any, a: any, tvunget = false) {
   const ja = tell('ja'), nei = tell('nei');
   const velgere = data.spillere.filter((p: any) => p.id !== m.av && p.id !== m.subjekt);
   const alle = velgere.every((p: any) => m.stemmer[p.id] != null);
-  const vitneOk = !m.vitne || m.stemmer[m.vitne] === 'ja';
   const vitneNei = m.vitne && m.stemmer[m.vitne] === 'nei';
-  if (!alle && !tvunget && !vitneNei) return;
-  const godkjent = !vitneNei && vitneOk && (ja > nei || (ja === 0 && nei === 0 && !!m.vitne));
+  // Hvor mange andre enn den som meldte har tatt stilling (ja eller nei)?
+  const andre = Object.entries(m.stemmer).filter(([id, x]) => id !== m.av && id !== m.subjekt && (x === 'ja' || x === 'nei')).length;
+  if (!alle && !tvunget && !vitneNei && !m.utsatt) return;
+  if (!vitneNei && andre < 1 && !alle) {
+    // For få har stemt: ikke avvis – vent. Stemmene kan komme senere (i en gjeng: på gjengsiden etter kvelden).
+    if (!m.utsatt) {
+      m.utsatt = true; m.frist = null;
+      melde(data, `⏳ For få stemte på «${qNo(a)}» – den venter til flere har sett på den.`, `⏳ Too few votes on “${qEn(a)}” – it waits until more people weigh in.`);
+    }
+    return;
+  }
+  const godkjent = !vitneNei && andre >= 1 && ja > nei;
   if (godkjent) {
     oppgjor(data, a, m.utfall);
     melde(data, `✅ Bekreftet: ${a.type === 'hvem' ? navn(data, m.utfall) : 'Ja'} – hver aksje betaler 100 kr!`, `✅ Confirmed: ${a.type === 'hvem' ? navn(data, m.utfall) : 'Yes'} – each share pays 100!`);
@@ -268,6 +296,37 @@ function vurderMelding(data: any, a: any, tvunget = false) {
     a.status = m.forrige || 'apen'; a.melding = null; if (data.bors.bilder) delete data.bors.bilder[a.id];
     melde(data, `❌ Ikke godkjent – aksjen er åpen igjen.`, `❌ Not confirmed – the share is open again.`);
   }
+}
+
+/**
+ * Gjengkvelden er over: aksjer som fortsatt venter på stemmer flyttes ut (avgjøres på gjengsiden),
+ * resten av børsen stenges, og saldoen til hver spiller blir med i gjengens lommebok.
+ */
+export function borsTilGjeng(data: any) {
+  const b = data.bors; if (!b) return null;
+  const utsatte: any[] = [];
+  b.aksjer.forEach((a: any) => {
+    if (a.status !== 'meldt' || !a.melding) return;
+    const m = a.melding;
+    utsatte.push({ id: a.id, q: a.q, type: a.type, utfall: m.utfall, melder: m.av, subjekt: m.subjekt, stemmer: { ...m.stemmer },
+      holdere: Object.entries(a.hold).map(([id, h]: any) => ({ id, n: h.n[m.utfall] || 0 })).filter((x: any) => x.n > 0) });
+    a.status = 'utsatt'; a.melding.frist = null;
+  });
+  if (b.paa) avsluttBors(data);
+  const saldoer: Record<string, number> = {};
+  data.spillere.forEach((p: any) => { saldoer[p.id] = Math.round(saldo(b, p.id)); });
+  return { utsatte, saldoer };
+}
+
+/** Startsaldo fra gjengens lommebok (medlemmer tar med seg formuen sin inn i kvelden). */
+export function settStart(data: any, start: Record<string, number>) {
+  const b = data.bors; if (!b) return;
+  b.startKr = b.startKr || {};
+  Object.entries(start).forEach(([id, kr]) => {
+    const n = Math.round(Number(kr));
+    if (!data.spillere.some((p: any) => p.id === id) || !isFinite(n) || n < 0 || n > 10000000) return;
+    b.saldo[id] = n; b.startKr[id] = n;
+  });
 }
 
 /* ---------- Børstilsynet ---------- */
@@ -322,7 +381,10 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
   if (hd === 'bs-start') {
     if (!erVert) return { feil: 'bare-vert' };
     if (data.bors && data.bors.paa) return { ok: true };
-    return startBors(data, !!h._borsFri, !!h.fokus, Array.isArray(h.kat) ? h.kat.map(String).slice(0, 10) : null);
+    const r: any = startBors(data, !!h._borsFri, !!h.fokus, Array.isArray(h.kat) ? h.kat.map(String).slice(0, 10) : null);
+    // Gjengkveld: medlemmene tar med seg formuen sin (+ kveldens lønn) – satt av API-ruta
+    if (!r.feil && h._start && typeof h._start === 'object') settStart(data, h._start);
+    return r;
   }
   const b = data.bors;
   if (!b) return { ok: true };
@@ -382,6 +444,50 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
     flytt(b, meg.id, -kr, 'Gave til ' + navn(data, til), 'Gift to ' + navn(data, til)); flytt(b, til, kr, 'Gave fra ' + meg.navn, 'Gift from ' + meg.navn);
     (b.overforinger = b.overforinger || []).push({ fra: meg.id, til, kr, t: Date.now() });
     return { ok: true };
+  }
+  if (hd === 'bs-butikk') {
+    const vare = String(h.vare || '');
+    const p = data.spillere.find((x: any) => x.id === meg.id);
+    if (vare === 'slurk') {
+      const til = data.spillere.find((x: any) => x.id === h.til);
+      const n = Math.max(1, Math.min(BUTIKK.maksSlurker, Math.round(Number(h.n) || 1)));
+      if (!til || til.id === meg.id) return { feil: 'ugyldig', melding: 'Velg hvem som skal drikke.', en: 'Pick who should drink.' };
+      const kr = slurkPris(data, meg.id, n);
+      b.slurkKjopt = b.slurkKjopt || {};
+      if (saldo(b, meg.id) < kr) return { feil: 'penger', melding: 'Du har ikke nok vorskroner.', en: 'You don’t have enough coins.' };
+      b.slurkKjopt[meg.id] = (b.slurkKjopt[meg.id] || 0) + n;
+      flytt(b, meg.id, -kr, `Kjøpte ${n} ${n === 1 ? 'slurk' : 'slurker'} til ${til.navn}`, `Bought ${n} ${n === 1 ? 'sip' : 'sips'} for ${til.navn}`);
+      if ((til.immun || 0) > 0) {
+        til.immun--;
+        melde(data, `🛡️ ${meg.navn} kjøpte ${n} ${n === 1 ? 'slurk' : 'slurker'} til ${til.navn} – men ${til.navn} brukte immunitet!`, `🛡️ ${meg.navn} bought ${n} ${n === 1 ? 'sip' : 'sips'} for ${til.navn} – but ${til.navn} used immunity!`);
+      } else {
+        til.slurker = Math.max(0, (til.slurker || 0) + n); til.mottatt = (til.mottatt || 0) + n;
+        melde(data, `🍺 ${meg.navn} kjøpte ${n} ${n === 1 ? 'slurk' : 'slurker'} til ${til.navn}! Drikk opp.`, `🍺 ${meg.navn} bought ${til.navn} ${n} ${n === 1 ? 'sip' : 'sips'}! Drink up.`);
+      }
+      return { ok: true };
+    }
+    if (vare === 'immun') {
+      if ((p.immun || 0) >= BUTIKK.maksImmun) return { feil: 'maks', melding: `Du kan ha maks ${BUTIKK.maksImmun} immuniteter.`, en: `You can hold at most ${BUTIKK.maksImmun} immunities.` };
+      const prisI = varePris(data, 'immun');
+      if (saldo(b, meg.id) < prisI) return { feil: 'penger', melding: 'Du har ikke nok vorskroner.', en: 'You don’t have enough coins.' };
+      flytt(b, meg.id, -prisI, 'Kjøpte immunitet 🛡️', 'Bought immunity 🛡️');
+      p.immun = (p.immun || 0) + 1;
+      return { ok: true };
+    }
+    if (vare === 'poeng') {
+      b.poengKjopt = b.poengKjopt || {};
+      if (b.poengKjopt[meg.id]) return { feil: 'maks', melding: 'Du har allerede kjøpt et kveldspoeng i kveld.', en: 'You’ve already bought a night point tonight.' };
+      const prisP = varePris(data, 'poeng');
+      if (saldo(b, meg.id) < prisP) return { feil: 'penger', melding: 'Du har ikke nok vorskroner.', en: 'You don’t have enough coins.' };
+      flytt(b, meg.id, -prisP, 'Kjøpte et kveldspoeng 🏅', 'Bought a night point 🏅');
+      b.poengKjopt[meg.id] = true;
+      const k = kveldData(data);
+      k.poeng[meg.id] = (k.poeng[meg.id] || 0) + 1;
+      k.runder.push({ navn: { no: '🛒 Kjøpt kveldspoeng', en: '🛒 Bought night point' }, plass: [[meg.id]], manuell: true, kjopt: true, t: Date.now() });
+      melde(data, `🏅 ${meg.navn} kjøpte seg et kveldspoeng for ${prisP} kr`, `🏅 ${meg.navn} bought a night point for ${prisP}`);
+      return { ok: true };
+    }
+    return { feil: 'ukjent' };
   }
   if (hd === 'bs-meld') {
     const a = finn(b, h.aksje); if (!a || (a.status !== 'apen' && a.status !== 'stengt')) return { feil: 'stengt', melding: 'Aksjen kan ikke meldes nå.', en: 'This share can’t be reported now.' };
@@ -467,7 +573,7 @@ export function borsVisning(data: any, meg: any) {
       vinner: a.vinner, fikk: hold ? hold.fikk || 0 : 0, kost: hold ? hold.kost || 0 : 0,
       vinnere: a.status === 'avgjort' ? vinnere(a).filter((id: string) => id !== m) : [],
       melding: a.melding ? { av: a.melding.av, utfall: a.melding.utfall, vitne: a.melding.vitne, subjekt: a.melding.subjekt, frist: a.melding.frist, bilde: a.melding.bilde,
-        harStemt: Object.keys(a.melding.stemmer), minStemme: m ? a.melding.stemmer[m] || null : null } : null,
+        harStemt: Object.keys(a.melding.stemmer), minStemme: m ? a.melding.stemmer[m] || null : null, utsatt: !!a.melding.utsatt } : null,
       bilde: a.status === 'meldt' && b.bilder ? b.bilder[a.id] || null : null,
     };
   });
@@ -489,6 +595,8 @@ export function borsVisning(data: any, meg: any) {
     mineGaver: m ? (b.overforinger || []).filter((o: any) => o.fra === m || o.til === m).map((o: any) => ({ fra: o.fra, til: o.til, kr: o.kr })) : [],
     bev: m ? (b.bev || []).filter((x: any) => x.id === m).slice(-6).map((x: any) => ({ n: x.n, kr: x.kr, t: { no: x.no, en: x.en } })) : [],
     kategorier: KATEGORIER.map((k) => ({ id: k.id, t: { no: k.no, en: k.en } })), valgteKat: b.kat || null,
+    butikk: { ...BUTIKK, slurkPriser: m ? Object.fromEntries([1, 2, 3, 5].map((n) => [n, slurkPris(data, m, n)])) : {}, prisPoeng: varePris(data, 'poeng'), faktor: Math.round(prisfaktor(data) * 10) / 10, immun: m ? ((data.spillere.find((p: any) => p.id === m) || {}).immun || 0) : 0, poengKjopt: !!(m && b.poengKjopt && b.poengKjopt[m]), maksImmun: BUTIKK.maksImmun, prisImmun: varePris(data, 'immun') },
+    startKr: m && b.startKr && b.startKr[m] != null ? b.startKr[m] : null,
     priser: { hovedrolle: HOVEDROLLE, kurtasje: KURTASJE, laas: LAAS_MIN, notering: NOTERING, honorar: HONORAR, utbetaling: UTBETALING, start: STARTKURS, maks: MAKSKURS },
   };
 }

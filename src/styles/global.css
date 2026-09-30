@@ -1771,3 +1771,17 @@ body:not(.humor) .tool.dice{display:none}
 .gk-planstart small{font-size:14px;font-weight:600;opacity:.8}
 .bs-kurs small{display:block;font-size:11px;font-weight:600;color:var(--muted);line-height:1.1}
 .bs-selg[disabled]{opacity:.55;cursor:not-allowed}
+.bs-vare{display:grid;gap:6px;margin:10px 0;padding:14px;border-radius:16px;background:rgb(var(--ink-rgb) / .05);border:1px solid var(--border)}
+.bs-vare select{padding:10px 12px;border-radius:12px;background:var(--bg2);color:var(--ink);border:1px solid var(--border2);font:inherit}
+.bs-vare .btn{justify-self:start}
+.bs-saldo small{color:var(--muted);font-size:12px}
+.gj-profil{margin:14px 0;padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid var(--border2)}
+.gj-profil .gj-rad{display:flex;gap:8px;flex-wrap:wrap}
+.gj-profil input{flex:1;min-width:140px;box-sizing:border-box;padding:10px 12px;border-radius:12px;background:var(--bg2);color:var(--ink);border:1px solid var(--border2);font:inherit;font-size:16px}
+.gj-formue{list-style:none;margin:8px 0;padding:0;display:grid;gap:4px;max-width:480px}
+.gj-formue li{display:flex;justify-content:space-between;padding:8px 12px;border-radius:12px;background:rgb(var(--ink-rgb) / .05)}
+.gj-formue li.meg{background:rgba(244,183,64,.2)}
+.gj-utsatt{margin:8px 0;padding:12px 14px;border-radius:16px;background:rgba(63,184,169,.1);border:1px solid rgba(63,184,169,.4)}
+.gj-utsatt p{margin:4px 0}
+.bs-faner{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.bs-faner button{white-space:nowrap;padding-left:12px;padding-right:12px}

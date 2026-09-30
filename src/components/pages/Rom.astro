@@ -480,7 +480,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       '</div>' +
       '<div class="rom-spillere">' + t.spillere.map(function (p) {
         return '<span class="' + (p.id === t.meg ? 'meg' : '') + '">' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) +
-          (p.slurker ? ' <small>' + p.slurker + '</small>' : '') +
+          (p.slurker ? ' <small>' + p.slurker + '</small>' : '') + (p.immun ? ' <small title="' + T('Immunitet', 'Immunity') + '">🛡️' + (p.immun > 1 ? p.immun : '') + '</small>' : '') +
           (erVert() && p.id !== t.vert ? ' <button class="rom-fjern" data-g="fjern" data-id="' + p.id + '" aria-label="' + T('Fjern ', 'Remove ') + esc(p.navn) + '">×</button>' : '') + '</span>';
       }).join('') + '</div>';
     }
@@ -1298,8 +1298,10 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
           (a.bilde ? '<img class="bs-bilde" src="' + a.bilde + '" alt="' + T('Bevis', 'Evidence') + '">' : '') +
           (kanStemme ? '<div class="rom-valg en bs-stem"><button type="button" data-b="stem" data-v="ja" data-a="' + a.id + '" aria-pressed="' + (ml.minStemme === 'ja') + '">' + T('✅ Det skjedde', '✅ It happened') + '</button><button type="button" data-b="stem" data-v="nei" data-a="' + a.id + '" aria-pressed="' + (ml.minStemme === 'nei') + '">' + T('❌ Skjedde ikke', '❌ Didn’t happen') + '</button><button type="button" data-b="stem" data-v="vet" data-a="' + a.id + '" aria-pressed="' + (ml.minStemme === 'vet') + '">' + T('🤷 Så det ikke', '🤷 Didn’t see it') + '</button></div>'
             : '<p class="small">' + T('Dette handler om deg, så du stemmer ikke.', 'This is about you, so you don’t vote.') + '</p>') +
-          '<p class="rom-status">' + ml.harStemt.length + T(' har stemt', ' have voted') + '</p>' + fristHtml({ frist: ml.frist }, T('sekunder igjen', 'seconds left')) + '</div>';
+          '<p class="rom-status">' + ml.harStemt.length + T(' har stemt', ' have voted') + '</p>' +
+          (ml.utsatt ? '<p class="small">⏳ ' + T('For få har stemt. Den venter på at noen til sier ja eller nei' + (tilstand.gjeng ? ' – og etter kvelden kan dere stemme på gjengsiden.' : '.'), 'Too few votes. It waits for one more yes or no' + (tilstand.gjeng ? ' – and after the night you can vote on the crew page.' : '.')) + '</p>' : fristHtml({ frist: ml.frist }, T('sekunder igjen', 'seconds left'))) + '</div>';
       }
+      if (a.status === 'utsatt') return '<div class="bs-aksje meldt">' + hode + '<p class="small">⏳ ' + T('Mangler stemmer – avgjøres på gjengsiden innen 48 timer. Blir den godkjent, betales gevinsten inn i lommeboka di i gjengen.', 'Missing votes – settled on the crew page within 48 hours. If confirmed, the payout goes into your crew wallet.') + '</p></div>';
       if (a.status === 'avgjort' || a.status === 'ugyldig') {
         var kanAnmelde = a.status === 'avgjort' && b.paa && a.vinnere && a.vinnere.length;
         return '<div class="bs-aksje ferdig">' + hode + '<p>' + (a.status === 'avgjort' ? '✅ ' + esc(utfallNavn(a, a.vinner)) : T('Ugyldig – pengene tilbake', 'Void – money returned')) + (a.fikk ? ' · <b>' + T('Du fikk ', 'You got ') + kr(a.fikk) + '</b>' : '') + '</p>' +
@@ -1337,16 +1339,29 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     }
     function borsInnhold() {
       var b = tilstand.bors, m = tilstand.meg;
-      var faner = [['aksjer', T('Aksjer', 'Shares')], ['tavle', T('Tavla', 'Board')], ['tilsyn', T('Tilsynet', 'Watchdog') + (b.saker.some(function (s) { return s.fase !== 'ferdig'; }) ? ' 🚨' : '')]];
+      var faner = [['aksjer', T('Aksjer', 'Shares')], ['tavle', T('Tavla', 'Board')], ['butikk', T('🛒 Butikk', '🛒 Shop')], ['tilsyn', T('Tilsynet', 'Watchdog') + (b.saker.some(function (s) { return s.fase !== 'ferdig'; }) ? ' 🚨' : '')]];
       var ut = '<div class="rom-tavle-topp"><h2>📈 ' + T('Vorsbørsen', 'The Exchange') + '</h2><button class="linkbtn" data-b="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>';
       if (b.slutt) {
         return ut + '<p class="dl-melding dl-stor">' + T('Børsen er stengt!', 'The Exchange is closed!') + '</p><ol class="bs-tavle">' + b.slutt.rang.map(function (x, i) {
-          return '<li class="' + (x.id === m ? 'meg' : '') + '"><span>' + (x.id === b.slutt.konge ? '👑 ' : x.id === b.slutt.konkurs ? '📉 ' : (i + 1) + '. ') + esc(navn(x.id)) + '</span><b>' + kr(x.kr) + '</b></li>'; }).join('') + '</ol>' +
+          return '<li class="' + (x.id === m ? 'meg' : '') + '"><span>' + (x.id === b.slutt.konge ? '👑 ' : x.id === b.slutt.konkurs ? '📉 ' : (i + 1) + '. ') + esc(navn(x.id)) + '</span><b>' + kr(x.kr) + (x.gevinst != null && b.startKr != null ? ' <small>(' + (x.gevinst >= 0 ? '+' : '−') + Math.abs(x.gevinst) + T(' i kveld', ' tonight') + ')</small>' : '') + '</b></li>'; }).join('') + '</ol>' +
           '<p>' + '👑 ' + esc(navn(b.slutt.konge)) + T(' er Børskongen. ', ' is the Market King. ') + '📉 ' + esc(navn(b.slutt.konkurs)) + T(' gikk konkurs og spinner straffehjulet!', ' went bankrupt and spins the penalty wheel!') + '</p>' +
           '<div class="dl-knapper"><button class="btn gold" data-g="hjul-aapne" type="button">🎡 ' + T('Straffehjulet', 'Penalty wheel') + '</button>' + (erVert() ? '<button class="btn ghost" data-b="fjern" type="button">' + T('Fjern børsen', 'Remove the Exchange') + '</button>' : '') + '</div>';
       }
-      ut += '<p class="bs-saldo">' + T('Kontanter ', 'Cash ') + '<b>' + kr(b.saldo || 0) + '</b> · ' + T('formue ', 'net worth ') + '<b>' + kr(b.formue || 0) + '</b></p>';
+      ut += '<p class="bs-saldo">' + T('Kontanter ', 'Cash ') + '<b>' + kr(b.saldo || 0) + '</b> · ' + T('formue ', 'net worth ') + '<b>' + kr(b.formue || 0) + '</b>' +
+        (b.startKr != null ? ' <small>' + T('(tok med ' + kr(b.startKr) + ' fra gjengen)', '(brought ' + kr(b.startKr) + ' from the crew)') + '</small>' : '') + '</p>';
       ut += '<div class="rom-mod bs-faner">' + faner.map(function (f) { return '<button type="button" data-b="fane" data-f="' + f[0] + '" aria-pressed="' + (borsFane === f[0]) + '">' + esc(f[1]) + '</button>'; }).join('') + '</div>';
+      if (borsFane === 'butikk') {
+        var bu = b.butikk || {}, andre = tilstand.spillere.filter(function (p) { return p.id !== m; });
+        return ut + '<p class="small">' + T('Bruk vorskronene på hverandre. Alt du kjøper, vises for alle.', 'Spend your coins on each other. Everything you buy is shown to everyone.') + '</p>' +
+          '<div class="bs-vare"><b>🍺 ' + T('Send slurker', 'Send sips') + '</b><span class="small">' + T('Hver slurk du kjøper i kveld gjør den neste dyrere.', 'Every sip you buy tonight makes the next one pricier.') + '</span>' +
+            '<select id="bsSlurkTil">' + andre.map(function (p) { return '<option value="' + p.id + '">' + esc(p.navn) + (p.immun ? ' 🛡️' : '') + '</option>'; }).join('') + '</select>' +
+            '<div class="dl-knapper">' + [1, 2, 3, 5].map(function (n) { return '<button class="btn small ghost" data-b="kjop-slurk" data-n="' + n + '" type="button">' + n + ' · ' + kr((bu.slurkPriser || {})[n] || n * bu.slurk) + '</button>'; }).join('') + '</div></div>' +
+          '<div class="bs-vare"><b>🛡️ ' + T('Immunitet', 'Immunity') + '</b><span class="small">' + T('Slipp neste gang du får slurker – fra en lek, butikken eller 🍺. Du har ', 'Skip the next time you get sips – from a game, the shop or 🍺. You have ') + (bu.immun || 0) + T(' av ', ' of ') + bu.maksImmun + '.</span>' +
+            '<button class="btn small gold" data-b="kjop-immun" type="button"' + ((bu.immun || 0) >= bu.maksImmun ? ' disabled' : '') + '>' + T('Kjøp', 'Buy') + ' · ' + kr(bu.prisImmun) + '</button></div>' +
+          '<div class="bs-vare"><b>🏅 ' + T('Kjøp et kveldspoeng', 'Buy a night point') + '</b><span class="small">' + T('Ett per person per kveld. Kan avgjøre hvem som vinner kvelden – og får velge regel.', 'One per person per night. Could decide who wins the night – and picks the rule.') + '</span>' +
+            '<button class="btn small gold" data-b="kjop-poeng" type="button"' + (bu.poengKjopt ? ' disabled' : '') + '>' + (bu.poengKjopt ? T('Kjøpt i kveld ✓', 'Bought tonight ✓') : T('Kjøp', 'Buy') + ' · ' + kr(bu.prisPoeng || bu.poeng)) + '</button></div>' +
+          (bu.faktor > 1 ? '<p class="small">📈 ' + T('Prisene følger formuen i rommet – dere er rike, så alt koster ' + String(bu.faktor).replace('.', ',') + ' ganger så mye i kveld.', 'Prices follow the wealth in the room – you’re rich, so everything costs ' + bu.faktor + '× tonight.') + '</p>' : '<p class="small">' + T('Prisene stiger når dere blir rikere.', 'Prices rise as you get richer.') + '</p>');
+      }
       if (borsFane === 'tavle') {
         return ut + '<ol class="bs-tavle">' + b.tavle.map(function (x, i) { return '<li class="' + (x.id === m ? 'meg' : '') + '"><span>' + (i + 1) + '. ' + esc(navn(x.id)) + '</span><b>' + kr(x.kr) + '</b></li>'; }).join('') + '</ol>' +
           '<p class="small">' + T('Formue = kontanter + dagens verdi av aksjene. Handler og gaver er hemmelige – til noen anmelder dem.', 'Net worth = cash + current value of your shares. Trades and gifts are secret – until someone reports them.') + '</p>' +
@@ -1468,6 +1483,14 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         if (!confirm(T('Gi ', 'Give ') + kr(n) + T(' til ', ' to ') + navn(til.value) + '?')) return;
         return gjorAlltid({ handling: 'bs-gi', til: til.value, kr: n });
       }
+      if (a === 'kjop-slurk') {
+        var til2 = cont.querySelector('#bsSlurkTil'); if (!til2 || !til2.value) return;
+        var n2 = Number(b.dataset.n);
+        if (!confirm(T('Kjøpe ' + n2 + (n2 === 1 ? ' slurk' : ' slurker') + ' til ' + navn(til2.value) + '?', 'Buy ' + navn(til2.value) + ' ' + n2 + (n2 === 1 ? ' sip' : ' sips') + '?'))) return;
+        return gjorAlltid({ handling: 'bs-butikk', vare: 'slurk', til: til2.value, n: n2 });
+      }
+      if (a === 'kjop-immun') return gjorAlltid({ handling: 'bs-butikk', vare: 'immun' });
+      if (a === 'kjop-poeng') { if (!confirm(T('Kjøpe et kveldspoeng?', 'Buy a night point?'))) return; return gjorAlltid({ handling: 'bs-butikk', vare: 'poeng' }); }
       if (a === 'sak-stem') return gjorAlltid({ handling: 'bs-sak-stem', sak: b.dataset.s, v: b.dataset.v });
       if (a === 'sak-videre') return gjorAlltid({ handling: 'bs-sak-videre', sak: b.dataset.s });
       if (a === 'noter') {
