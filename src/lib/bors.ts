@@ -15,6 +15,8 @@ type Lang = 'no' | 'en';
 type Tekst = { no: string; en: string };
 const T = (no: string, en: string): Tekst => ({ no, en });
 
+/** Den aksjen handler om, får en liten bonus når det skjer – så ingen tjener på å unngå det. */
+export const HOVEDROLLE = 30;
 export const START_KR = 1000, UTBETALING = 100, NOTERING = 200, HONORAR = 2, BOT_SKYLDIG = 300, BOT_FALSK = 200;
 const STARTKURS = 10, STEG = 6, MAKSKURS = 95;
 const GRATIS_AKSJER = 4;                 // uten Pluss (eller opplåst gjeng): så mange av aksjene er åpne
@@ -111,7 +113,17 @@ export const JANEI: Tekst[] = [
 /** Prisen på neste aksje når n allerede er solgt. */
 const kurs = (n: number) => Math.min(MAKSKURS, STARTKURS + STEG * Math.max(0, n));
 /** Hva du får for én aksje hvis du selger nå (prisen på den siste som ble kjøpt). */
-const salgskurs = (n: number) => (n > 0 ? kurs(n - 1) : 0);
+/** Selger du, får du det siste kjøp kostet – minus kurtasje. Da lønner det seg ikke å kjøpe og selge fort. */
+export const KURTASJE = 0.25, LAAS_MIN = 10;
+const salgskurs = (n: number) => (n > 0 ? Math.floor(kurs(n - 1) * (1 - KURTASJE)) : 0);
+/** Odds: hvor mange ganger pengene du får igjen hvis det skjer (100 kr / kursen). */
+const odds = (n: number) => Math.round((UTBETALING / kurs(n)) * 10) / 10;
+/** Aksjer man har eid lenge nok til å selge (kjøpt for mer enn LAAS_MIN minutter siden), og når neste blir ledig. */
+function selgbar(hold: any, u: string) {
+  const tider: number[] = (hold && hold.tider && hold.tider[u]) || [], grense = Date.now() - LAAS_MIN * 60000;
+  const klare = tider.filter((t) => t <= grense).length, neste = tider.filter((t) => t > grense).sort((x, y) => x - y)[0];
+  return { klare, om: klare ? 0 : neste ? Math.max(1, Math.ceil((neste - grense) / 60000)) : 0 };
+}
 
 /* ---------- hjelpere ---------- */
 function tilfeldig(n: number) { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
@@ -187,6 +199,7 @@ function oppgjor(data: any, a: any, vinner: string | null) {
   });
   if (b.bilder) delete b.bilder[a.id];
   a.melding = null;
+  if (vinner && a.type === 'hvem' && data.spillere.some((p: any) => p.id === vinner)) flytt(b, vinner, HOVEDROLLE, 'Hovedrollen: ' + kortQ(qNo(a)), 'Starring role: ' + kortQ(qEn(a)));
   const kjop = a.handler.filter((h: any) => h.n > 0), skjedde = a.status === 'avgjort' && (a.type === 'hvem' || vinner === 'ja');
   statFor(a, { kjop: kjop.length, kjopere: new Set(kjop.map((h: any) => h.id)).size, skjedde: skjedde ? 1 : 0,
     vinnere: skjedde ? Object.values(a.hold).filter((h: any) => (h.n[vinner as string] || 0) > 0).length : 0 });
@@ -343,9 +356,17 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
     if (a.av === meg.id) return { feil: 'innside', melding: 'Du kan ikke handle i en aksje du har notert selv.', en: 'You can’t trade in a share you listed yourself.' };
     const hold = beholdning(a, meg.id), har = hold.n[a.utfall[i]] || 0;
     if (n < 0 && har < 1) return { feil: 'ugyldig', melding: 'Du har ingen slike aksjer.', en: 'You don’t own any of these.' };
+    // Eldre aksjer uten kjøpstid (fra før regelen) regnes som kjøpt ved start
+    hold.tider = hold.tider || {}; const tl: number[] = hold.tider[a.utfall[i]] || (hold.tider[a.utfall[i]] = []);
+    while (tl.length < har) tl.unshift(0);
+    if (n < 0) {
+      const sb = selgbar(hold, a.utfall[i]);
+      if (!sb.klare) return { feil: 'laast', melding: `Du må eie aksjen i ${LAAS_MIN} minutter før du kan selge – om ${sb.om} min.`, en: `You must hold the share for ${LAAS_MIN} minutes before selling – ${sb.om} min to go.` };
+    }
     const kr = n > 0 ? kurs(a.qs[i]) : -salgskurs(a.qs[i]), honorar = n > 0 && a.av ? HONORAR : 0;
     if (n > 0 && saldo(b, meg.id) < kr + honorar) return { feil: 'penger', melding: 'Du har ikke nok vorskroner.', en: 'You don’t have enough coins.' };
     a.qs[i] += n; hold.n[a.utfall[i]] = har + n;
+    if (n > 0) tl.push(Date.now()); else tl.splice(tl.findIndex((t) => t <= Date.now() - LAAS_MIN * 60000), 1);
     const hvaNo = a.type === 'hvem' ? navn(data, a.utfall[i]) : (a.utfall[i] === 'ja' ? 'Ja' : 'Nei'), hvaEn = a.type === 'hvem' ? hvaNo : (a.utfall[i] === 'ja' ? 'Yes' : 'No');
     flytt(b, meg.id, -(kr + honorar), (n > 0 ? 'Kjøpte ' : 'Solgte ') + hvaNo, (n > 0 ? 'Bought ' : 'Sold ') + hvaEn);
     hold.kost = Math.max(0, hold.kost + kr);
@@ -439,7 +460,10 @@ export function borsVisning(data: any, meg: any) {
     const status = a.status === 'apen' && a.stenger && Date.now() >= a.stenger ? 'stengt' : a.status;
     return {
       id: a.id, type: a.type, q: a.q, kat: a.av ? 'egen' : a.kat || null, status, av: a.av, egen: !!a.av, stenger: a.stenger, laast: !!a.laast && !b.fri,
-      utfall: a.utfall.map((u: string, i: number) => ({ u, kurs: kurs(a.qs[i]), selg: salgskurs(a.qs[i]), solgt: a.qs[i], mine: hold ? hold.n[u] || 0 : 0 })),
+      utfall: a.utfall.map((u: string, i: number) => { const sb = selgbar(hold, u), mine = hold ? hold.n[u] || 0 : 0; const gamle = Math.max(0, mine - ((hold && hold.tider && hold.tider[u]) || []).length);
+        // Din egen rad i en hvem-aksje er skjult: du skal ikke vite at du er favoritten (og unngå å gjøre det)
+        if (a.type === 'hvem' && u === m && ['apen', 'stengt'].includes(a.status)) return { u, skjult: true, kurs: null, odds: null, selg: 0, solgt: null, mine: 0, klare: 0, selgOm: 0 };
+        return { u, kurs: kurs(a.qs[i]), odds: odds(a.qs[i]), selg: salgskurs(a.qs[i]), solgt: a.qs[i], mine, klare: sb.klare + gamle, selgOm: sb.klare + gamle ? 0 : sb.om }; }),
       vinner: a.vinner, fikk: hold ? hold.fikk || 0 : 0, kost: hold ? hold.kost || 0 : 0,
       vinnere: a.status === 'avgjort' ? vinnere(a).filter((id: string) => id !== m) : [],
       melding: a.melding ? { av: a.melding.av, utfall: a.melding.utfall, vitne: a.melding.vitne, subjekt: a.melding.subjekt, frist: a.melding.frist, bilde: a.melding.bilde,
@@ -465,6 +489,6 @@ export function borsVisning(data: any, meg: any) {
     mineGaver: m ? (b.overforinger || []).filter((o: any) => o.fra === m || o.til === m).map((o: any) => ({ fra: o.fra, til: o.til, kr: o.kr })) : [],
     bev: m ? (b.bev || []).filter((x: any) => x.id === m).slice(-6).map((x: any) => ({ n: x.n, kr: x.kr, t: { no: x.no, en: x.en } })) : [],
     kategorier: KATEGORIER.map((k) => ({ id: k.id, t: { no: k.no, en: k.en } })), valgteKat: b.kat || null,
-    priser: { notering: NOTERING, honorar: HONORAR, utbetaling: UTBETALING, start: STARTKURS, maks: MAKSKURS },
+    priser: { hovedrolle: HOVEDROLLE, kurtasje: KURTASJE, laas: LAAS_MIN, notering: NOTERING, honorar: HONORAR, utbetaling: UTBETALING, start: STARTKURS, maks: MAKSKURS },
   };
 }

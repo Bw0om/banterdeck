@@ -1769,3 +1769,5 @@ body:not(.humor) .tool.dice{display:none}
 .gj-start input#gjKveldNavn,.gj-kveld input#gjKveldNavn{box-sizing:border-box;padding:11px 14px;border-radius:12px;background:var(--bg2);color:var(--ink);border:1px solid var(--border2);font:inherit;font-size:16px}
 .gk-planstart{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;margin:6px 0 10px}
 .gk-planstart small{font-size:14px;font-weight:600;opacity:.8}
+.bs-kurs small{display:block;font-size:11px;font-weight:600;color:var(--muted);line-height:1.1}
+.bs-selg[disabled]{opacity:.55;cursor:not-allowed}
