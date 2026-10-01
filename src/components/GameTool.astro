@@ -172,22 +172,22 @@ const aarData: any = { eras: bingoData.eras };
       var body = root.querySelector('.gt-body');
       if (root.dataset.bound) return; root.dataset.bound = '1';
       var N = D.items.length, SEG = 360 / N, vinkel = 0, snurrer = false;
-      var FARGER = [['#f4b740','#1a0f08'],['#2a2014','#f4ebdc'],['#ff6a4d','#1a0f08']];
+      var FARGER = [['#C8FF2E','#1a0f08'],['#2a2014','#F5F0FF'],['#FF5B1F','#1a0f08']];
       function p(a, r){ var t = a * Math.PI / 180; return (Math.sin(t)*r).toFixed(2)+' '+(-Math.cos(t)*r).toFixed(2); }
       function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
       var deler = D.items.map(function(x,i){
         var a0 = i*SEG, a1 = a0+SEG, c = a0+SEG/2, f = FARGER[i % 3];
-        return '<path d="M0 0 L'+p(a0,96)+' A96 96 0 0 1 '+p(a1,96)+' Z" fill="'+f[0]+'" stroke="#141009" stroke-width="1"/>' +
+        return '<path d="M0 0 L'+p(a0,96)+' A96 96 0 0 1 '+p(a1,96)+' Z" fill="'+f[0]+'" stroke="#120A1D" stroke-width="1"/>' +
           // venstre halvdel snus, så teksten aldri står opp ned
           (c > 180
             ? '<text transform="rotate('+(c+90)+') translate(-31 0)" text-anchor="end"'
             : '<text transform="rotate('+(c-90)+') translate(31 0)"') +
-          ' dominant-baseline="middle" fill="'+f[1]+'" font-size="7.4" font-weight="700" font-family="Bricolage Grotesque, sans-serif">'+esc(x.t)+'</text>';
+          ' dominant-baseline="middle" fill="'+f[1]+'" font-size="7.4" font-weight="700" font-family="Archivo Variable, Archivo, sans-serif">'+esc(x.t)+'</text>';
       }).join('');
       body.innerHTML =
-        '<div class="gt-wheel"><svg class="gt-pointer" viewBox="0 0 20 16" aria-hidden="true"><path d="M0 0 H20 L10 16 Z" fill="#f4ebdc"/></svg>' +
+        '<div class="gt-wheel"><svg class="gt-pointer" viewBox="0 0 20 16" aria-hidden="true"><path d="M0 0 H20 L10 16 Z" fill="#F5F0FF"/></svg>' +
         '<svg class="gt-disc" viewBox="-100 -100 200 200" role="img" aria-label="'+(EN ? 'Drinking wheel' : 'Drikkehjul')+'"><g class="gt-rot">'+deler+'</g>' +
-        '<circle r="14" fill="#141009" stroke="#f4b740" stroke-width="2"/></svg></div>' +
+        '<circle r="14" fill="#120A1D" stroke="#C8FF2E" stroke-width="2"/></svg></div>' +
         '<p class="gt-result" role="status">&nbsp;</p><p class="gt-desc small">&nbsp;</p>' +
         '<button class="btn gold vp-big" data-a="snurr">'+(EN ? 'Spin' : 'Snurr')+'</button>';
       var rot = body.querySelector('.gt-rot'), res = body.querySelector('.gt-result'), desc = body.querySelector('.gt-desc');

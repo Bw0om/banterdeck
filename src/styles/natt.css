@@ -1,0 +1,369 @@
+/* =====================================================================
+   NATTLILLA – identiteten til Mitt vors
+   ---------------------------------------------------------------------
+   Rommet er mørkt, det er bråk, og telefonen går rundt bordet.
+   1. Farge = tilstand, aldri pynt.
+        volt (lime)  = nå / din tur / på / gevinst
+        glo (oransje) = trykk her / drikk / varme
+   2. Les fra to meter: brødtekst ≥17px, spilltekst ≥28px, knapper ≥52px.
+   3. Én skrift i tre bredder (Archivo):
+        rop  = utstrakt (125 %) og svart – det som skal ropes ut
+        prat = normal bredde – det man leser
+        tall = smal (62–70 %) – koder, nedtellinger, poeng
+   4. Det som kan trykkes, har dybde og trykkes ned. Det som ikke kan
+      trykkes, ligger flatt.
+   5. Litt uorden: kort og klistremerker sitter et par grader skjevt.
+   ===================================================================== */
+
+/* ---------- grunnmur ---------- */
+html{font-synthesis:none}
+body{font-family:var(--sans);font-size:17px;line-height:1.5;font-weight:450;letter-spacing:-.003em}
+body::before{background:
+  radial-gradient(70% 42% at 105% -6%, rgb(var(--glo-rgb) / .22), transparent 62%),
+  radial-gradient(65% 45% at -12% 8%, rgb(var(--lilla-rgb) / .24), transparent 66%),
+  radial-gradient(60% 30% at 50% 108%, rgb(var(--volt-rgb) / .06), transparent 70%),
+  linear-gradient(180deg, var(--bg2), var(--bg) 46%)}
+/* korn – litt røyk i lufta, så flatene ikke blir kliniske */
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.09;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='k'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23k)'/%3E%3C/svg%3E")}
+:root[data-theme="light"] body::before{background:
+  radial-gradient(70% 42% at 105% -6%, rgb(var(--glo-rgb) / .16), transparent 62%),
+  radial-gradient(65% 45% at -12% 8%, rgb(var(--lilla-rgb) / .18), transparent 66%),
+  linear-gradient(180deg, var(--bg2), var(--bg) 46%)}
+:root[data-theme="light"] body::after{opacity:.05;mix-blend-mode:multiply}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:8px}
+::selection{background:var(--gold);color:var(--ink2)}
+
+/* ---------- skrift ---------- */
+h1,h2,h3,.brand{font-family:var(--display)}
+h1{font-stretch:112%;font-weight:850;letter-spacing:-.03em;line-height:.98;font-size:clamp(32px,7.2vw,54px)}
+h2{font-stretch:110%;font-weight:800;letter-spacing:-.022em;line-height:1.05}
+h3{font-stretch:104%;font-weight:750;color:var(--ink);letter-spacing:-.01em}
+p.lead{font-size:17.5px;color:var(--muted);font-style:normal}
+.small{font-size:14.5px;color:var(--faint)}
+.tall{font-family:var(--display);font-stretch:66%;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+/* Fraunces bare der det er sitater (humorsidene) – alt i vorsdelen er grotesk */
+.rom-kort p,.rom-sporsmal,.op-tekst,.vp-twister{font-family:var(--display);font-style:normal}
+/* Ingen etiketter i store bokstaver med sperring: de leser vi ikke på avstand */
+.rom-etikett,.rom-spillnavn,.rof-tur span,.navsplit,.h2-today-top,.lov-konvolutt small,.h2-label,.nr-etikett,.gk-etikett{text-transform:none!important;letter-spacing:0!important}
+
+/* ---------- logo ---------- */
+.brand .bt{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--ink);font-stretch:120%;font-weight:850;letter-spacing:-.035em}
+.brand .bt i{font-style:normal;color:inherit}
+
+/* ---------- knapper: dybde = kan trykkes ---------- */
+.btn{font-family:var(--display);font-stretch:108%;font-weight:750;font-size:16px;min-height:52px;padding:0 22px;border-radius:16px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.15;text-align:center;transition:transform .07s ease,box-shadow .07s ease}
+.btn:hover{filter:none;text-decoration:none}
+.btn.gold,.btn.start,.btn.danger,.appbtn{background:var(--accent);color:var(--ink2);border:0;box-shadow:0 5px 0 var(--glo-dyp)}
+.btn.gold:hover,.btn.start:hover,.appbtn:hover{filter:brightness(1.07)}
+.btn.gold:active,.btn.start:active,.btn.danger:active,.appbtn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--glo-dyp)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--border2);box-shadow:none}
+.btn.ghost:hover{border-color:rgb(var(--ink-rgb) / .55)}
+.btn.ghost:active{transform:translateY(2px)}
+.btn.small{min-height:44px;padding:0 16px;font-size:14.5px;border-radius:14px}
+.btn[disabled],.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.linkbtn{color:var(--gold-t);font-weight:650;font-size:15px;text-decoration-thickness:2px}
+.appbtn{border-radius:16px}
+
+/* ---------- felt ---------- */
+input,select,textarea{font-family:var(--sans)}
+.field input,.field select,.field textarea,.searchhead input,.dictfilter input,.sitfilter input{border-width:2px;border-radius:14px;min-height:50px;font-size:17px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!important;box-shadow:0 0 0 4px rgb(var(--volt-rgb) / .18)}
+
+/* ---------- klistremerker: små ting som skal synes ---------- */
+.h2-badge,.rom-bg-status,.pluss-merke,.nr-pille b{background:var(--gold);color:var(--ink2);border-radius:8px;transform:rotate(-3deg);
+  font-family:var(--display);font-stretch:110%;font-weight:800;box-shadow:0 2px 0 var(--volt-dyp)}
+.h2-uke .h2-badge,.h2-jul .h2-badge{transform:rotate(-3deg)}
+
+/* ---------- topp og bunn på mobil ---------- */
+@media (max-width:899px){
+  .mobilebar{background:rgb(var(--bg-rgb) / .78);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+  .tabbar{background:rgb(var(--bg-rgb) / .9);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--border2);box-shadow:0 16px 44px rgb(0 0 0 / .6)}
+  .tabbar a{font-family:var(--display);font-stretch:100%;font-weight:700;color:var(--muted)}
+  .tabbar a[aria-current=page]{background:var(--gold);color:var(--ink2)}
+}
+.sidenav a{font-family:var(--display);font-stretch:104%}
+.sidenav a[aria-current=page]{background:var(--card2);border-color:var(--border2)}
+.sidenav a[aria-current=page] .icon{color:var(--gold-t)}
+
+/* Pluss: et klistremerke som sitter litt skjevt – synes uten å rope */
+.pluss-pille{background:var(--gold);color:var(--ink2);border-radius:10px;transform:rotate(-3deg);font-stretch:110%;box-shadow:0 3px 0 var(--volt-dyp)}
+.pluss-pille:hover{filter:none;transform:rotate(-1deg) scale(1.03)}
+.pluss-pille.aktiv{transform:none;background:transparent;color:var(--gold-t);box-shadow:inset 0 0 0 2px var(--gold-t)}
+.side a.pluss-pille{transform:rotate(-1.5deg);color:var(--ink2);background:var(--gold);box-shadow:0 4px 0 var(--volt-dyp)}
+.side a.pluss-pille.aktiv{transform:none;background:transparent;color:var(--gold-t);box-shadow:inset 0 0 0 2px var(--gold-t)}
+
+/* =====================================================================
+   FORSIDEN
+   ===================================================================== */
+.h2-hero{background:transparent;color:var(--ink);border-radius:0;padding:14px 0 6px;gap:16px}
+.h2-hero h1{color:var(--ink);font-size:clamp(54px,15.5vw,112px);font-stretch:125%;font-weight:900;line-height:.84;letter-spacing:-.05em;margin:4px 0 2px;
+  animation:strekk 1s cubic-bezier(.16,.84,.24,1) .05s both}
+/* Det eneste som beveger seg av seg selv på forsiden: overskriften strekker seg ut, som en som gir gass */
+@keyframes strekk{0%{font-stretch:62%;letter-spacing:-.02em;opacity:0;transform:translateX(-8px)}40%{opacity:1}100%{font-stretch:125%;letter-spacing:-.05em;transform:none}}
+.h2-sub{color:var(--muted);font-size:17.5px;font-weight:450;max-width:34ch}
+.h2-cta{gap:14px;margin-top:6px}
+.h2-hoved{min-height:72px;border-radius:22px;background:var(--accent);color:var(--ink2);font-stretch:125%;font-weight:900;font-size:23px;letter-spacing:-.025em;
+  box-shadow:0 6px 0 var(--glo-dyp);transition:transform .07s ease,box-shadow .07s ease}
+.h2-hoved:hover{filter:brightness(1.06)}
+.h2-hoved:active{transform:translateY(5px);box-shadow:0 1px 0 var(--glo-dyp)}
+.h2-kode label{color:var(--ink);font-weight:650;font-size:15.5px}
+.h2-kode input{height:64px;border-radius:18px;border:2px solid var(--border2);background:var(--card);color:var(--gold-t);caret-color:var(--gold);
+  font-family:var(--display);font-stretch:66%;font-weight:900;font-size:36px;letter-spacing:.32em;padding:0 0 0 .32em}
+.h2-kode input::placeholder{color:rgb(var(--ink-rgb) / .22)}
+.h2-kode button{height:64px;border-radius:18px;border:2px solid var(--border2);background:transparent;color:var(--ink);font-family:var(--display);font-stretch:110%;font-weight:800;font-size:17px;padding:0 20px}
+.h2-kode button:hover{background:transparent;border-color:var(--ink);color:var(--ink)}
+/* koden er lang nok: knappen blir lime – klar */
+.h2-kode.klar input{border-color:var(--gold)}
+.h2-kode.klar button{background:var(--gold);border-color:var(--gold);color:var(--ink2);box-shadow:0 4px 0 var(--volt-dyp)}
+.h2-kode.klar button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--volt-dyp)}
+.h2-gjeng{border-top:1px solid var(--border);padding-top:14px}
+.h2-gjeng-lenke{color:var(--gold-t);text-decoration-thickness:2px}
+.h2-gjeng-start{min-height:58px;border-radius:18px;border:2px solid rgb(var(--volt-rgb) / .55);background:rgb(var(--volt-rgb) / .08);color:var(--ink);font-size:16.5px}
+.h2-gjeng-start b{color:var(--gold-t)}
+.h2-gjeng-start:hover{background:var(--gold);color:var(--ink2);border-color:var(--gold)}
+.h2-gjeng-start:hover b{color:var(--ink2)}
+
+/* tre steg – tall i smal bredde, som en resultattavle */
+.h2-slik{gap:0;margin:22px 0 4px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.h2-slik li{background:none;border:0;border-radius:0;padding:14px 6px;text-align:left;display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:start}
+.h2-slik li+li{border-left:1px solid var(--border)}
+.h2-slik li::before{grid-row:1 / span 2;width:auto;height:auto;margin:0;border-radius:0;background:none;color:var(--gold-t);font-family:var(--display);font-stretch:62%;font-weight:900;font-size:38px;line-height:.9}
+.h2-slik b{font-size:14px;font-stretch:100%}
+.h2-slik span{font-size:12.5px}
+
+.h2-overskrift{font-size:26px;font-stretch:118%;font-weight:850;margin:34px 0 12px;letter-spacing:-.03em}
+.h2-start{background:var(--card2);color:var(--ink);border:1px solid var(--border2);border-radius:24px;min-height:104px;padding:18px 20px;position:relative;overflow:hidden}
+.h2-start::after{content:"";position:absolute;right:-30px;top:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgb(var(--glo-rgb) / .35),transparent 70%);pointer-events:none}
+.h2-start b{font-size:27px;font-stretch:118%;font-weight:850;letter-spacing:-.03em}
+.h2-start small{color:var(--muted);font-weight:500;font-size:14.5px;margin-top:4px}
+.h2-start svg{flex:none;width:52px;height:52px;padding:12px;border-radius:50%;background:var(--accent);color:var(--ink2);position:relative;z-index:1;box-shadow:0 4px 0 var(--glo-dyp)}
+.h2-start:hover{filter:none;border-color:rgb(var(--ink-rgb) / .4)}
+.h2-uke{background:var(--card);border-color:var(--border)}
+.h2-uke b{font-size:21px;font-stretch:110%}
+.h2-meny b{font-stretch:106%;font-size:17.5px}
+.h2-ikon{background:var(--card2);border-radius:14px}
+.h2-tile{background:var(--card)}
+.h2-tile b{font-stretch:108%}
+.h2-today .today{font-size:clamp(23px,4.6vw,32px)}
+.h2-today-top{color:var(--gold-t);font-weight:700}
+
+/* Pluss-billetten: papir på nattlilla, perforert stubb */
+.h2-pluss{--hull:var(--bg);background:var(--paper);color:var(--ink2);transform:rotate(-.6deg);box-shadow:8px 8px 0 var(--accent)}
+.h2-pluss h2{font-stretch:118%;font-weight:900;color:var(--ink2)}
+.h2-pluss-merke{color:var(--glo-dyp)}
+.h2-pluss li::before{color:var(--glo-dyp)}
+.h2-pluss-pris b{font-stretch:66%;font-weight:900;font-size:32px}
+.h2-pluss-knapp{background:var(--ink2);color:var(--paper);font-stretch:112%}
+
+/* =====================================================================
+   ROMMET
+   ===================================================================== */
+.rom-hode{background:var(--card);color:var(--ink);border:1px solid var(--border2);border-radius:24px;padding:12px 14px 12px 18px}
+.rom-hode .rom-etikett{color:var(--muted);font-size:13px;font-weight:650;opacity:1}
+.rom-kode{font-family:var(--display);font-stretch:62%;font-weight:900;font-size:46px;letter-spacing:.06em;line-height:.9;color:var(--gold-t)}
+.rom-hk{color:var(--muted)}
+.rom-hk-ikon{width:44px;height:44px;background:var(--card2);color:var(--ink);border:1px solid var(--border)}
+.rom-hk-tekst{font-family:var(--display);font-size:11px;font-weight:700;color:var(--muted)}
+.rom-hk:hover .rom-hk-ikon{border-color:var(--gold);color:var(--gold-t)}
+.rom-spillere span{min-height:38px;padding:0 14px;border-radius:12px;font-weight:650;font-size:15px;background:var(--card)}
+.rom-spillere span.meg{border:2px solid var(--gold)}
+.rom-spillere small{color:var(--accent-t)}
+.rom-hjem{display:none}
+
+/* stegene i lobbyen: store smale tall i lime */
+.rom-steg{gap:12px;margin-top:30px;font-size:24px;font-stretch:115%;font-weight:850;letter-spacing:-.03em}
+.rom-steg span{width:auto;height:auto;border-radius:0;background:none;color:var(--gold-t);font-stretch:62%;font-weight:900;font-size:48px;line-height:.8;align-self:flex-start}
+.rom-steg small{color:var(--muted);font-stretch:100%;font-weight:600}
+.rom-qr{border-radius:22px;background:var(--card)}
+.rom-qr b{font-stretch:108%;font-size:19px}
+.rom-anbefalt-lek{background:var(--card2);border:2px solid rgb(var(--volt-rgb) / .35);border-radius:20px;padding:16px 16px 16px 18px;transition:transform .07s ease}
+.rom-anbefalt-lek:hover{border-color:var(--gold)}
+.rom-anbefalt-lek:active{transform:scale(.98)}
+.rom-anbefalt-lek b{font-size:20px;font-stretch:112%;font-weight:850}
+.rom-anbefalt-lek i{width:52px;height:52px;background:var(--accent);color:var(--ink2);font-size:18px;box-shadow:0 4px 0 var(--glo-dyp)}
+.rom-lek{border-radius:20px;padding:16px 18px}
+.rom-lek b{font-stretch:108%;font-size:19px;font-weight:800}
+.rom-lek > span{font-size:15px}
+.rom-mod button{min-height:48px;padding:0 18px;border-radius:14px;border:2px solid var(--border2);background:transparent;font-family:var(--display);font-stretch:104%;font-weight:750;font-size:15px}
+.rom-mod button:hover{background:var(--gold);border-color:var(--gold);color:var(--ink2)}
+.rom-bg{border-radius:22px}
+.rom-bg-rad.paa{background:rgb(var(--volt-rgb) / .07);box-shadow:inset 4px 0 0 var(--gold)}
+.rom-bg-rad b{font-stretch:108%;font-size:17.5px}
+.rom-bg-ikon{width:44px;height:44px;border-radius:14px}
+.rom-mester{border-radius:16px;font-size:15px}
+.rom-mester.meg{border-width:2px}
+.rom-vent .rom-stor{font-stretch:112%;font-weight:850;font-size:26px;line-height:1.12;letter-spacing:-.02em}
+
+/* ---------- selve leken: lesbart fra den andre siden av bordet ---------- */
+.rom-spillnavn{font-family:var(--display);font-stretch:118%;font-weight:850;font-size:17px;color:var(--muted)}
+.rom-sporsmal{font-weight:850;font-stretch:100%;font-size:clamp(29px,7.6vw,42px);line-height:1.08;letter-spacing:-.022em;max-width:20ch}
+.rom-kort{background:var(--paper);color:var(--ink2);border-radius:26px;transform:rotate(-1.2deg);box-shadow:9px 9px 0 var(--accent);min-height:320px}
+.rom-kort p{font-weight:850;font-size:clamp(28px,7.4vw,40px);line-height:1.1;letter-spacing:-.022em}
+.rom-kort .sw-tag{transform:rotate(-3deg)}
+.rom-teller{font-family:var(--display);font-stretch:66%;font-weight:850;font-size:17px;color:rgb(26 14 40 / .55)}
+.rom-stor-knapp{min-height:70px;border-radius:22px;background:var(--accent);color:var(--ink2);font-family:var(--display);font-stretch:125%;font-weight:900;font-size:21px;letter-spacing:-.02em;
+  box-shadow:0 6px 0 var(--glo-dyp);transition:transform .07s ease,box-shadow .07s ease}
+.rom-stor-knapp:active{transform:translateY(5px);box-shadow:0 1px 0 var(--glo-dyp)}
+.rom-valg{gap:10px}
+.rom-valg button{min-height:64px;border-radius:18px;border:2px solid var(--border2);background:var(--card);font-family:var(--display);font-stretch:104%;font-weight:750;font-size:18px;transition:transform .06s ease}
+.rom-valg button:active{transform:scale(.97)}
+.rom-valg button[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:var(--ink2);box-shadow:0 4px 0 var(--volt-dyp)}
+.rom-valg.to button{min-height:84px;font-size:22px;font-stretch:118%;font-weight:850}
+.rom-status{font-size:15.5px;color:var(--muted)}
+.rom-stor{font-stretch:108%}
+.rom-frist span{font-stretch:62%;font-weight:900;font-size:34px;color:var(--gold-t)}
+.rom-frist.snart span{color:var(--accent)}
+.rom-regler{border-radius:16px;background:rgb(var(--ink-rgb) / .04)}
+.rom-regler summary{font-size:15px}
+.rom-regler ol{font-size:15.5px}
+.rom-hemmelig{transform:rotate(-1deg)}
+.rof-tur b{font-stretch:118%;font-weight:900;font-size:34px;color:var(--gold-t)}
+.rof-tur span{font-size:15px;color:var(--muted)}
+.rof-tur.min{background:var(--gold);color:var(--ink2);border-radius:20px;padding:12px 18px;box-shadow:0 5px 0 var(--volt-dyp)}
+.rof-tur.min b,.rof-tur.min span{color:var(--ink2)}
+.rof-kort{background:var(--paper);box-shadow:9px 9px 0 var(--accent),0 30px 60px rgb(0 0 0 / .5)}
+.rof-regel{font-family:var(--display);font-stretch:112%;font-weight:900}
+/* Ring of Fire: en ring av glør */
+.rofr-k{background:repeating-linear-gradient(45deg,var(--accent) 0 4px,var(--glo-dyp) 4px 8px);border-color:rgb(255 230 210 / .8)}
+.rofr-bord.aktiv .rofr-k.valgt{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold),0 0 22px var(--gold)}
+.rofr-glass{border-color:rgb(var(--ink-rgb) / .6)}
+.rofr-glass i{background:linear-gradient(var(--gold),var(--volt-dyp))}
+.rofr-glass span{color:var(--ink2);text-shadow:none}
+.rofr-pil{color:var(--gold-t)}
+
+/* reaksjoner */
+.reak-linje{background:rgb(var(--card-rgb) / .94);border:1px solid var(--border2)}
+.reak-linje button{width:44px;height:44px;font-size:23px}
+.reak-linje .reak-send{background:var(--accent);color:var(--ink2);font-family:var(--display);font-stretch:66%;font-weight:900;font-size:19px}
+
+/* børsen og stripene over leken */
+.bs-pille{border-radius:16px;font-stretch:104%}
+.op-pille{border-width:2px;font-family:var(--display);font-stretch:104%}
+
+/* =====================================================================
+   SPILLMODUS – rommet tar over skjermen (mobil)
+   Når en lek er i gang, forsvinner toppmenyen og menyen nederst, så ingen
+   trykker seg ut når telefonen sendes rundt. Reaksjonene ligger i en dokk
+   nederst, og den store knappen står like over – der tommelen er.
+   ===================================================================== */
+@media (max-width:899px){
+  html.i-spill .mobilebar,html.i-spill .mobilenav,html.i-spill .tabbar,html.i-spill .foot,html.i-spill .tool.dice,html.i-spill .installer{display:none!important}
+  html.i-spill .topbars{min-height:0}
+  html.i-spill body{padding-bottom:calc(env(safe-area-inset-bottom) + 96px)}
+  html.i-spill .main{padding-top:max(env(safe-area-inset-top),12px)}
+  html.i-spill .rom-hode{padding:8px 10px 8px 14px;border-radius:18px}
+  html.i-spill .rom-hode .rom-etikett,html.i-spill .rom-hode .sprak-lenke,html.i-spill .rom-hode small{display:none}
+  html.i-spill .rom-kode{font-size:30px}
+  html.i-spill .rom-hk-tekst{display:none}
+  html.i-spill .rom-hk-ikon{width:40px;height:40px}
+  html.i-spill .rom-hjem{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--card2);border:1px solid var(--border);color:var(--ink);font-size:18px;text-decoration:none;margin-right:6px}
+  html.i-spill .rom-spillere{margin:8px 0 10px}
+  html.i-spill .rom-spillere span{min-height:32px;font-size:14px;padding:0 10px}
+  html.i-spill .reak-hint{display:none}
+  html.i-spill .reak-linje{position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:80;width:auto;max-width:none;margin:0;
+    justify-content:space-between;flex-wrap:nowrap;background:rgb(var(--bg-rgb) / .9);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 12px 36px rgb(0 0 0 / .6)}
+  html.i-spill .rom-stor-knapp{position:sticky;bottom:calc(env(safe-area-inset-bottom) + 78px);z-index:20}
+  html.i-spill .toast{bottom:calc(env(safe-area-inset-bottom) + 84px)}
+}
+
+/* =====================================================================
+   SKJERMKANTEN – tilstanden synes før du har lest et ord
+   lime kant = din tur · oransje striper = hemmelig, ikke vis skjermen
+   ===================================================================== */
+html.min-tur::after{content:"";position:fixed;inset:0;z-index:9000;pointer-events:none;
+  box-shadow:inset 0 0 0 7px var(--gold),inset 0 0 60px rgb(var(--volt-rgb) / .35);animation:kantPuls 1.8s ease-in-out infinite}
+@keyframes kantPuls{50%{box-shadow:inset 0 0 0 4px var(--gold),inset 0 0 24px rgb(var(--volt-rgb) / .18)}}
+html.hemmelig::after{content:"";position:fixed;inset:0;z-index:9000;pointer-events:none;animation:none;box-shadow:none;
+  border:9px solid transparent;border-image:repeating-linear-gradient(45deg,var(--accent) 0 14px,rgb(var(--bg-rgb) / .2) 14px 28px) 9}
+.tur-merke{display:none}
+html.min-tur .tur-merke{display:flex;align-items:center;justify-content:center;gap:10px;position:sticky;top:max(env(safe-area-inset-top),8px);z-index:30;
+  margin:0 0 12px;min-height:52px;border-radius:16px;background:var(--gold);color:var(--ink2);font-family:var(--display);font-stretch:125%;font-weight:900;font-size:22px;letter-spacing:-.02em;
+  box-shadow:0 5px 0 var(--volt-dyp);animation:turInn .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes turInn{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+.hemmelig-merke{display:none}
+html.hemmelig .hemmelig-merke{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 12px;min-height:44px;border-radius:14px;
+  background:repeating-linear-gradient(45deg,rgb(var(--glo-rgb) / .2) 0 10px,transparent 10px 20px);border:2px solid var(--accent);color:var(--ink);font-weight:750;font-size:15.5px}
+
+/* =====================================================================
+   LUNTA – tid og fremdrift som en lunte som brenner ned
+   ===================================================================== */
+.lunte{position:relative;width:100%;max-width:420px;height:8px;margin:6px auto 10px;border-radius:4px;
+  background:repeating-linear-gradient(90deg,rgb(var(--ink-rgb) / .14) 0 7px,transparent 7px 12px)}
+.lunte > i{position:absolute;left:0;top:1px;bottom:1px;width:var(--igjen,100%);border-radius:3px;
+  background:linear-gradient(90deg,var(--glo-dyp),var(--accent) 70%,#FFB37A);transition:width .3s linear}
+.lunte > i::after{content:"";position:absolute;right:-9px;top:50%;width:20px;height:20px;margin-top:-10px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0 16%,var(--gold) 28%,var(--accent) 52%,transparent 70%);filter:drop-shadow(0 0 6px var(--accent));animation:gnist .16s steps(2) infinite}
+.lunte.tom > i::after{display:none}
+.lunte.snart > i{background:linear-gradient(90deg,#8E1B05,var(--accent))}
+@keyframes gnist{50%{transform:scale(1.3) rotate(24deg)}}
+.lunte-tekst{display:block;margin:-4px 0 6px;font-size:14px;color:var(--muted);font-weight:600}
+
+/* =====================================================================
+   SVÆRE VARSLER (DRIKK, ringen røk, blålys) i ny farge
+   ===================================================================== */
+.drikk-alarm{background:rgb(var(--glo-rgb) / .95);color:var(--ink2)}
+.drikk-alarm b{font-stretch:125%;font-weight:900;letter-spacing:-.04em}
+/* stroboskop: oransje med mørk tekst ↔ mørk med oransje tekst – leselig i begge */
+@keyframes drikkBlink{0%{background:rgb(var(--glo-rgb) / .96);color:var(--ink2)}50%{background:rgb(18 8 28 / .96);color:var(--accent)}}
+.rof-knust b,.bs-blalys span{font-family:var(--display);font-stretch:125%;font-weight:900}
+
+/* =====================================================================
+   Andre gule flater fra før: nå papir eller nattlilla
+   ===================================================================== */
+.sw-front{background:var(--paper);color:var(--ink2)}
+.favlek{background:var(--card2);color:var(--ink);border:1px solid var(--border2)}
+.favlek .badges i{background:var(--gold);color:var(--ink2)}
+.boss-kort{background:var(--paper);color:var(--ink2);box-shadow:8px 8px 0 var(--accent)}
+.pk-kort{background:var(--card2);color:var(--ink);border:1px solid var(--border2)}
+.delt-smak li{background:var(--card2);color:var(--ink);border:1px solid var(--border2)}
+.rom-fortsett{border-color:var(--gold)}
+.h2-rom.fortsett{border-color:var(--gold);box-shadow:inset 4px 0 0 var(--gold)}
+.mode .mt{font-stretch:112%}
+.game .gn,.tile .tn{font-stretch:106%}
+.chips a{font-family:var(--display);font-stretch:104%;border-radius:12px;min-height:40px;display:inline-flex;align-items:center}
+
+@media (prefers-reduced-motion:reduce){
+  .h2-hero h1{animation:none;font-stretch:125%}
+  html.min-tur::after{animation:none}
+  .lunte > i::after{animation:none}
+}
+.rom-hode-v{display:flex;align-items:center;min-width:0}
+html.min-tur .rof-tur.min{display:none}
+.rom-bakgrunn:empty{display:none}
+.rom-bakgrunn{margin-top:18px}
+@media (max-width:899px){
+  .h2-hero{margin:-22px -18px 0;padding:22px 18px 8px;border-radius:0}
+}
+/* toppen på mobil: logo + fire knapper skal få plass på 360 px */
+@media (max-width:899px){
+  .mobilebar .brand .bt{font-stretch:106%;font-size:20px}
+  .mobilebar-right{gap:6px}
+  .mobilebar .langlink.compact{min-width:36px;min-height:36px}
+  html.i-spill .rom-sprak{display:none}
+}
+/* bakgrunnslekene er valgfrie brytere – ikke hovedknapper */
+.rom-bg .btn.gold{background:transparent;color:var(--gold-t);border:2px solid rgb(var(--volt-rgb) / .6);box-shadow:none}
+.rom-bg .btn.gold:hover{background:var(--gold);color:var(--ink2);border-color:var(--gold)}
+.rom-regler{margin-top:18px}
+/* under en lek: beskjeder over dokka nederst, ikke over spørsmålet */
+@media (max-width:899px){html.i-spill body:has(#rom) .toast{top:auto;bottom:calc(env(safe-area-inset-bottom) + 82px)}}
+.rom-hemmelig b{display:block;font-stretch:100%;font-weight:900;font-size:clamp(28px,8.4vw,46px);line-height:1.02;overflow-wrap:anywhere;hyphens:auto}
+.rom-hemmelig{box-shadow:0 6px 0 rgb(0 0 0 / .35)}
+.rofr-glass span{color:var(--ink);text-shadow:0 1px 3px rgb(0 0 0 / .8)}
+@media (max-width:899px){.tabbar a .tl{font-stretch:86%;font-size:11px}}
+
+/* PC: hovedknappene trenger ikke hele bredden */
+@media (min-width:900px){.h2-cta,.h2-gjeng{max-width:620px}.h2-hero{padding-top:28px}}
+/* børsens faner: smalere skrift, så alle fire får plass */
+.bs-faner{gap:6px}
+.bs-faner button{flex:1 0 auto;min-height:46px;padding:0 12px;font-stretch:90%;font-size:15px}
+.bs-filter button{font-stretch:92%}
+/* stegene på startsiden for rom: samme resultattavle som på forsiden */
+.rom-slik{gap:0!important;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.rom-slik li{background:none!important;border:0!important;border-radius:0!important;padding:14px 6px!important;text-align:left!important;display:grid!important;grid-template-columns:auto 1fr;column-gap:8px;align-items:start}
+.rom-slik li+li{border-left:1px solid var(--border)!important}
+.rom-slik li::before{grid-row:1 / span 2;width:auto!important;height:auto!important;margin:0!important;border-radius:0!important;background:none!important;color:var(--gold-t)!important;font-family:var(--display);font-stretch:62%;font-weight:900;font-size:38px!important;line-height:.9}
+.rom-slik b{font-size:14px}
+.rom-slik span{font-size:12.5px}

@@ -241,6 +241,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     /** Stor beskjed over hele skjermen når du må drikke – synes og høres selv med musikk på. */
     var drikkEl = null, drikkN = 0, drikkTimer = null, egenSlurkT = 0;
     function drikkAlarm(n) {
+      // «RINGEN RØK!» får stå alene først
+      if (document.querySelector('.rof-knust') && !drikkEl) { setTimeout(function () { drikkAlarm(n); }, 2600); return; }
       drikkN = drikkEl ? drikkN + n : n;
       var fri = tilstand && tilstand.alkoholfri;
       if (!drikkEl) { drikkEl = document.createElement('div'); drikkEl.className = 'drikk-alarm'; drikkEl.setAttribute('role', 'alert'); drikkEl.addEventListener('click', function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }); document.body.appendChild(drikkEl); spillLyd('slurk'); }
@@ -283,13 +285,29 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (s.type === 'forraeder') return s.fase === 'svar' && s.aktiv === m;
       return false;
     }
+    /** Må jeg gjøre noe akkurat nå? Gir teksten til det lime merket øverst (og den lime skjermkanten), eller ''. */
+    function minTurNaa(d) {
+      var s = d && d.spill, m = d && d.meg; if (!s || !m) return '';
+      if (s.ring && s.turId === m) return T('Din tur – trekk et kort!', 'Your turn – draw a card!');
+      if (erMinTur(d)) return T('Din tur!', 'Your turn!');
+      if (s.type === 'mest' && s.fase === 'stem' && !s.minStemme) return T('Stem nå!', 'Vote now!');
+      if (s.type === 'forraeder' && s.fase === 'stem' && s.aktiv !== m && !s.minStemme) return T('Stem nå!', 'Vote now!');
+      return '';
+    }
+    /** Lunta: hvor mye som er igjen (0–1), som en lunte som brenner ned. */
+    function lunte(andel, ekstra) {
+      var p = Math.max(0, Math.min(1, andel || 0));
+      return '<div class="lunte' + (p <= 0 ? ' tom' : '') + (ekstra ? ' ' + ekstra : '') + '" aria-hidden="true"><i style="--igjen:' + (p * 100).toFixed(1) + '%"></i></div>';
+    }
     var varMinTur = false, sisteFase = '';
 
     /* ---------- svarfrist: nedtelling på alle telefoner ---------- */
-    var klokkeAvvik = 0, fristSendt = 0, fristTimer = null;
+    var klokkeAvvik = 0, fristSendt = 0, fristTimer = null, fristTot = {};
     function fristHtml(s, tekst) {
       if (!s || !s.frist) return '';
-      return '<p class="rom-frist"><span data-frist="' + s.frist + '">' + Math.max(0, Math.ceil((s.frist - 1500 - (Date.now() + klokkeAvvik)) / 1000)) + '</span> ' + esc(tekst || T('sekunder igjen', 'seconds left')) + '</p>';
+      var igjen = Math.max(0, Math.ceil((s.frist - 1500 - (Date.now() + klokkeAvvik)) / 1000));
+      fristTot[s.frist] = Math.max(fristTot[s.frist] || 0, igjen, 1);
+      return lunte(igjen / fristTot[s.frist], 'frist-lunte') + '<p class="rom-frist"><span data-frist="' + s.frist + '">' + igjen + '</span> ' + esc(tekst || T('sekunder igjen', 'seconds left')) + '</p>';
     }
     function fristTikk() {
       clearInterval(fristTimer);
@@ -298,6 +316,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         if (!el) return;
         var frist = Number(el.dataset.frist), igjen = Math.max(0, Math.ceil((frist - 1500 - (Date.now() + klokkeAvvik)) / 1000));
         el.textContent = igjen; el.parentNode.classList.toggle('snart', igjen <= 10);
+        var lu = document.querySelector('.frist-lunte'); if (lu) { var tot = fristTot[frist] || Math.max(igjen, 1); lu.firstChild.style.setProperty('--igjen', (100 * igjen / tot).toFixed(1) + '%'); lu.classList.toggle('snart', igjen <= 10); lu.classList.toggle('tom', igjen <= 0); }
         if (igjen <= 0 && fristSendt !== frist) {
           fristSendt = frist;
           // Klokka er ute: be serveren gå videre (den sjekker selv). Litt tilfeldig ventetid, så ikke alle sender samtidig.
@@ -388,6 +407,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         (ln ? T('Gå tilbake og velg ' + esc(ln) + ' der', 'Go back and pick ' + esc(ln) + ' there') : T('Trykk for å gå tilbake til rommet', 'Tap to go back to the room')) + '</small></span><span aria-hidden="true">→</span></a>';
     }
     function tegnStart(melding) {
+      document.documentElement.classList.remove('i-spill', 'min-tur', 'hemmelig');
       var navn = les('bd_mittnavn') || '';
       var ln = onsketLek ? LEKNAVN[onsketLek] : '';
       var medKode = !!kode && !ln;
@@ -564,7 +584,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     function hode() {
       var t = tilstand;
       return '<div class="rom-hode">' +
-        '<div><span class="rom-etikett">' + (t.gjeng && t.gjeng.kveld ? esc(t.gjeng.navn) + ' · ' : '') + T('Rom', 'Room') + '</span><b class="rom-kode">' + esc(kode) + '</b> ' + sprakLenke('small') + '</div>' +
+        '<div class="rom-hode-v"><a class="rom-hjem" href="' + RUTE.hjem + '" aria-label="' + T('Til forsiden (du blir i rommet)', 'Home (you stay in the room)') + '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a>' +
+        '<div><span class="rom-etikett">' + (t.gjeng && t.gjeng.kveld ? esc(t.gjeng.navn) + ' · ' : '') + T('Rom', 'Room') + '</span><b class="rom-kode">' + esc(kode) + '</b> ' + sprakLenke('small') + '</div></div>' +
         '<span class="rom-hodeknapper">' +
           [['hjul-aapne', '🎡', T('Hjul', 'Wheel'), T('Straffehjulet', 'Penalty wheel')], ['tavle', ikon.pokal, T('Poeng', 'Score'), T('Poengtavla', 'Scoreboard')],
            ['qr', ikon.qr, 'QR', T('Vis QR-kode', 'Show QR code')], ['del', ikon.del, T('Inviter', 'Invite'), T('Inviter flere', 'Invite more people')]].map(function (k) {
@@ -709,7 +730,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       return '<div class="rom-intro"><p class="rom-etikett">' + T('Du er med! 🎉', 'You’re in! 🎉') + '</p><ol>' +
         '<li><b>' + T('Verten velger lek', 'The host picks a game') + '</b><span>' + T('Den dukker opp på skjermen din av seg selv.', 'It shows up on your screen by itself.') + '</span></li>' +
         '<li><b>' + T('Noen leker har hemmeligheter', 'Some games have secrets') + '</b><span>' + T('Står det «Bare du ser dette», så ikke vis skjermen til de andre 🤫', 'If it says “Only you can see this”, don’t show your screen to the others 🤫') + '</span></li>' +
-        '<li><b>' + T('Usikker på reglene?', 'Unsure of the rules?') + '</b><span>' + T('Trykk «❓ Slik spiller dere» øverst i hver lek.', 'Tap “❓ How to play” at the top of each game.') + '</span></li></ol>' +
+        '<li><b>' + T('Usikker på reglene?', 'Unsure of the rules?') + '</b><span>' + T('Trykk «❓ Slik spiller dere» under hver lek.', 'Tap “❓ How to play” under each game.') + '</span></li></ol>' +
         '<button class="linkbtn" data-g="intro-lukk" data-k="bd_intro_gjest" type="button">' + T('Skjønner – skjul dette', 'Got it – hide this') + '</button></div>';
     }
     /** Kort forklaring av hver lek i rommet – åpen første gang du ser leken. */
@@ -961,6 +982,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var fyll = Math.min(4, s.konger || 0) * 25;
       return '<div class="rof-tur' + (min ? ' min' : '') + '"><span>' + (min ? T('Din tur!', 'Your turn!') : T('Trekker', 'Drawing')) + '</span><b>' + esc(min ? T('Snurr ringen og dra ut et kort', 'Spin the ring and pull out a card') : navn(s.turId)) + '</b></div>' +
         '<p class="rom-status">' + (s.igjen != null ? s.igjen : ROF_N - tatt.length) + T(' kort i ringen · ', ' cards in the ring · ') + (s.konger || 0) + T(' av 4 konger', ' of 4 kings') + '</p>' +
+        lunte((s.igjen != null ? s.igjen : ROF_N - tatt.length) / ROF_N) +
         '<div class="rofr-bord' + (min ? ' aktiv' : '') + '" data-nr="' + s.nr + '">' +
           '<div class="rofr-rotor" style="transform:rotate(' + rofA + 'deg)">' + kort +
             (s.ringBrutt && s.bruddPlass != null ? '<span class="rofr-sprekk" style="--v:' + (s.bruddPlass * ROF_STEG).toFixed(2) + 'deg">💥</span>' : '') + '</div>' +
@@ -1065,7 +1087,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         : '<div class="rom-kort">' + (k.k ? '<span class="sw-tag">' + esc(k.k) + '</span>' : '<span></span>') + '<p>' + esc(k.t) + '</p><span class="rom-teller">' + (s.pos + 1) + ' / ' + s.antall + '</span></div>';
       return (rof && k.hvem ? '<div class="rof-tur"><span>' + T('Trekker', 'Drawing') + '</span><b>' + esc(k.hvem) + '</b></div>' : '') +
         (rof ? '<p class="rom-status">' + (s.antall - s.pos - 1) + T(' kort igjen · ', ' cards left · ') + (s.konger || 0) + T(' konger', ' kings') + '</p>' : '') +
-        kortHtml + (rof ? makkerHtml(s) : '') +
+        kortHtml + lunte((s.antall - s.pos - 1) / Math.max(1, s.antall)) + (rof ? makkerHtml(s) : '') +
         '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + '</button>';
     }
 
@@ -1092,7 +1114,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var t = tilstand, jeg = t.meg === s.aktiv, han = navn(s.aktiv);
       if (s.fase === 'svar') {
         if (jeg) return '<p class="rom-etikett">' + T('Din tur – bare du ser dette', 'Your turn – only you can see this') + '</p>' +
-          '<div class="rom-hemmelig ' + (s.hemmelig === 'lyv' ? 'lyv' : 'sann') + '"><b>' + (s.hemmelig === 'lyv' ? T('LYV!', 'LIE!') : T('Si sannheten', 'Tell the truth')) + '</b></div>' +
+          '<div data-hemmelig class="rom-hemmelig ' + (s.hemmelig === 'lyv' ? 'lyv' : 'sann') + '"><b>' + (s.hemmelig === 'lyv' ? T('LYV!', 'LIE!') : T('Si sannheten', 'Tell the truth')) + '</b></div>' +
           '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
           '<p class="small">' + T('Fullfør setningen høyt. Hold masken.', 'Finish the sentence out loud. Keep a straight face.') + '</p>' +
           '<button class="rom-stor-knapp" data-g="svart" type="button">' + T('Jeg har svart', 'I\'ve answered') + '</button>';
@@ -1535,8 +1557,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
 
     function spionSpill(s) {
       var steder = '<details class="sp-steder"><summary>' + T('Alle mulige steder', 'All possible locations') + '</summary><p>' + s.steder.map(esc).join(' · ') + '</p></details>';
-      var rolle = s.erSpion ? '<div class="rom-hemmelig lyv"><b>' + T('🕵️ Du er spionen', '🕵️ You\'re the spy') + '</b></div><p>' + T('Finn ut hvor dere er uten å bli avslørt.', 'Figure out where you are without getting caught.') + '</p>'
-                            : '<div class="rom-hemmelig sann"><b>' + esc(s.sted) + '</b></div><p>' + T('Én av dere er spionen og vet ikke stedet. Ikke vær for tydelig!', 'One of you is the spy and doesn\'t know the location. Don\'t make it too obvious!') + '</p>';
+      var rolle = s.erSpion ? '<div data-hemmelig class="rom-hemmelig lyv"><b>' + T('🕵️ Du er spionen', '🕵️ You\'re the spy') + '</b></div><p>' + T('Finn ut hvor dere er uten å bli avslørt.', 'Figure out where you are without getting caught.') + '</p>'
+                            : '<div data-hemmelig class="rom-hemmelig sann"><b>' + esc(s.sted) + '</b></div><p>' + T('Én av dere er spionen og vet ikke stedet. Ikke vær for tydelig!', 'One of you is the spy and doesn\'t know the location. Don\'t make it too obvious!') + '</p>';
       if (s.fase === 'sporsmal') return '<p class="rom-etikett">' + T('Bare du ser dette', 'Only you can see this') + '</p>' + rolle +
         '<p class="small">' + esc(navn(s.start)) + T(' stiller første spørsmål til hvem som helst. Den som svarer, spør videre.', ' asks anyone the first question. Whoever answers asks the next one.') + '</p>' +
         fristHtml(tilstand.spill, T('sekunder til stemming', 'seconds until voting')) + steder +
@@ -2100,19 +2122,19 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
 
     /* ---------- straffehjulet ---------- */
     var tavleHjul = null, sisteHjul = -1, hjulSpinner = false;
-    var HJULFARGER = ['#f4b740', '#ff6a4d', '#2a1f12', '#c98f22'];
+    var HJULFARGER = ['#C8FF2E', '#FF5B1F', '#2B1A44', '#7DA80F'];
     function hjulSvg(liste) {
       var n = liste.length, r = 150, seg = 360 / n, deler = '';
       liste.forEach(function (tekst, i) {
         var a0 = (i * seg - 90) * Math.PI / 180, a1 = ((i + 1) * seg - 90) * Math.PI / 180;
         var x0 = 160 + r * Math.cos(a0), y0 = 160 + r * Math.sin(a0), x1 = 160 + r * Math.cos(a1), y1 = 160 + r * Math.sin(a1);
         var farge = HJULFARGER[i % 4] === HJULFARGER[0] && i === n - 1 && n % 4 === 1 ? HJULFARGER[1] : HJULFARGER[i % 4];
-        var tekstFarge = farge === '#2a1f12' ? '#f4ebdc' : '#1a1208', midt = (i + 0.5) * seg;
+        var tekstFarge = farge === '#2B1A44' ? '#F5F0FF' : '#12081C', midt = (i + 0.5) * seg;
         var kort = tekst.length > 18 ? tekst.slice(0, 17) + '…' : tekst, fs = Math.max(9, Math.min(n > 8 ? 11.5 : 13.5, 108 / (kort.length * 0.6)));
-        deler += '<path d="M160 160 L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + (seg > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + farge + '" stroke="#141009" stroke-width="2"/>' +
+        deler += '<path d="M160 160 L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + (seg > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + farge + '" stroke="#120A1D" stroke-width="2"/>' +
           '<text x="160" y="160" transform="rotate(' + (midt - 90) + ' 160 160) translate(34 4)" fill="' + tekstFarge + '" font-size="' + fs.toFixed(1) + '" font-weight="700">' + esc(kort) + '</text>';
       });
-      return '<div class="hjul-ramme"><svg class="hjul" viewBox="0 0 320 320" aria-hidden="true"><g class="hjul-snurr">' + deler + '</g><circle cx="160" cy="160" r="22" fill="#141009" stroke="#f4b740" stroke-width="3"/></svg><span class="hjul-pil" aria-hidden="true"></span></div>';
+      return '<div class="hjul-ramme"><svg class="hjul" viewBox="0 0 320 320" aria-hidden="true"><g class="hjul-snurr">' + deler + '</g><circle cx="160" cy="160" r="22" fill="#120A1D" stroke="#C8FF2E" stroke-width="3"/></svg><span class="hjul-pil" aria-hidden="true"></span></div>';
     }
     function aapneHjul() {
       if (tavleHjul) return;
@@ -2228,67 +2250,67 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     }
     /** Kveldens oppsummering som story-bilde (1080×1920) – passer Snapchat og Instagram. */
     function storyBilde() {
-      var t = kveldsTall(), W = 1080, H = 1920, font = '"Bricolage Grotesque Variable", "Bricolage Grotesque", system-ui, sans-serif';
+      var t = kveldsTall(), W = 1080, H = 1920, font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
       var c = document.createElement('canvas'); c.width = W; c.height = H;
       var g = medT(c.getContext('2d'));
-      var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#2a1f12'); bg.addColorStop(0.45, '#141009'); bg.addColorStop(1, '#0d0a06');
+      var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#2B1A44'); bg.addColorStop(0.45, '#120A1D'); bg.addColorStop(1, '#0B0614');
       g.fillStyle = bg; g.fillRect(0, 0, W, H);
       // logoen (flisen med to kopper) i hjørnet
       (function () {
         g.save(); g.translate(905, 190); g.rotate(0.1); g.scale(2.3, 2.3); g.translate(-50, -50);
-        g.fillStyle = '#ff6a4d'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
+        g.fillStyle = '#FF5B1F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
         [[45.5, -24], [54.5, 24]].forEach(function (k) {
           g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180);
-          g.fillStyle = '#141009'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z'));
-          g.fillStyle = '#f4ebdc'; g.fillRect(-12.5, -41, 25, 6); g.restore();
+          g.fillStyle = '#120A1D'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z'));
+          g.fillStyle = '#F5F0FF'; g.fillRect(-12.5, -41, 25, 6); g.restore();
         });
-        g.strokeStyle = '#f4ebdc'; g.lineWidth = 5; g.lineCap = 'round';
+        g.strokeStyle = '#F5F0FF'; g.lineWidth = 5; g.lineCap = 'round';
         g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
         g.restore();
       })();
       function sentrert(x, y, stil, farge) { g.font = stil; g.fillStyle = farge; g.fillText(x, 80, y); }
-      g.font = '800 44px ' + font; g.fillStyle = '#f4ebdc'; g.fillText('mitt', 80, 150);
-      var bredde = g.measureText('mitt').width; g.fillStyle = '#ff6a4d'; g.fillText('vors', 80 + bredde, 150);
-      g.font = '800 104px ' + font; g.fillStyle = '#f4ebdc';
+      g.font = '800 44px ' + font; g.fillStyle = '#F5F0FF'; g.fillText('mitt', 80, 150);
+      var bredde = g.measureText('mitt').width; g.fillStyle = '#FF5B1F'; g.fillText('vors', 80 + bredde, 150);
+      g.font = '800 104px ' + font; g.fillStyle = '#F5F0FF';
       g.fillText(T('Kveldens', 'Tonight\'s'), 80, 330); g.fillText(T('oppsummering', 'recap'), 80, 440);
       var dag = new Date(tilstand.ferdig || Date.now()).toLocaleDateString(LOKALE, { weekday: 'long', day: 'numeric', month: 'long' });
-      sentrert(dag.charAt(0).toUpperCase() + dag.slice(1) + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 510, '500 38px ' + font, '#b3a288');
+      sentrert(dag.charAt(0).toUpperCase() + dag.slice(1) + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 510, '500 38px ' + font, '#B4A7CF');
       // tre store tall
       var tall = [[t.sumSlurker, T('slurker', t.sumSlurker === 1 ? 'sip' : 'sips')], [t.leker.length, t.leker.length === 1 ? T('lek', 'game') : T('leker', 'games')], [t.minutter >= 60 ? Math.floor(t.minutter / 60) + T('t ', 'h ') + (t.minutter % 60) + 'm' : t.minutter + ' min', T('sammen', 'together')]];
       tall.forEach(function (x, i) {
         var bx = 80 + i * 310;
-        g.fillStyle = 'rgba(244,183,64,.10)'; g.beginPath(); if (g.roundRect) g.roundRect(bx, 570, 290, 170, 28); else g.rect(bx, 570, 290, 170); g.fill();
-        g.fillStyle = '#f4b740'; g.font = '800 70px ' + font; g.fillText(String(x[0]), bx + 28, 668);
-        g.fillStyle = '#b3a288'; g.font = '500 32px ' + font; g.fillText(x[1], bx + 30, 716);
+        g.fillStyle = 'rgba(200,255,46,.10)'; g.beginPath(); if (g.roundRect) g.roundRect(bx, 570, 290, 170, 28); else g.rect(bx, 570, 290, 170); g.fill();
+        g.fillStyle = '#C8FF2E'; g.font = '800 70px ' + font; g.fillText(String(x[0]), bx + 28, 668);
+        g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x[1], bx + 30, 716);
       });
       var y = 830;
       t.kaaring.slice(0, 4).forEach(function (x) {
         g.fillStyle = 'rgba(248,233,210,.06)'; g.beginPath(); if (g.roundRect) g.roundRect(80, y - 20, W - 160, 132, 26); else g.rect(80, y - 20, W - 160, 132); g.fill();
         g.font = '64px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; g.fillStyle = '#fff'; g.fillText(x.ikon, 110, y + 72);
-        g.fillStyle = '#b3a288'; g.font = '500 32px ' + font; g.fillText(x.tittel, 210, y + 30);
-        g.fillStyle = '#f4ebdc'; g.font = '700 48px ' + font; g.fillText((x.navn + ' · ' + x.tall).slice(0, 34), 210, y + 90);
+        g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x.tittel, 210, y + 30);
+        g.fillStyle = '#F5F0FF'; g.font = '700 48px ' + font; g.fillText((x.navn + ' · ' + x.tall).slice(0, 34), 210, y + 90);
         y += 152;
       });
       y += 30;
-      g.fillStyle = '#f4b740'; g.font = '700 40px ' + font; g.fillText(T('Slurketavla', 'Sip board'), 80, y); y += 20;
+      g.fillStyle = '#C8FF2E'; g.font = '700 40px ' + font; g.fillText(T('Slurketavla', 'Sip board'), 80, y); y += 20;
       var topp = Math.max(1, t.rangert[0] ? t.rangert[0].slurker || 0 : 1);
       t.rangert.slice(0, Math.max(3, Math.min(6, Math.floor((1700 - y) / 76)))).forEach(function (p, i) {
         y += 76;
-        g.fillStyle = i === 0 ? '#f4b740' : '#f4ebdc'; g.font = '700 42px ' + font; g.fillText((i + 1) + '. ' + p.navn.slice(0, 16), 80, y);
-        g.fillStyle = 'rgba(244,183,64,.18)'; g.fillRect(560, y - 30, 300, 26);
-        g.fillStyle = '#f4b740'; g.fillRect(560, y - 30, Math.round(300 * (p.slurker || 0) / topp), 26);
-        g.fillStyle = '#f4ebdc'; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
+        g.fillStyle = i === 0 ? '#C8FF2E' : '#F5F0FF'; g.font = '700 42px ' + font; g.fillText((i + 1) + '. ' + p.navn.slice(0, 16), 80, y);
+        g.fillStyle = 'rgba(200,255,46,.18)'; g.fillRect(560, y - 30, 300, 26);
+        g.fillStyle = '#C8FF2E'; g.fillRect(560, y - 30, Math.round(300 * (p.slurker || 0) / topp), 26);
+        g.fillStyle = '#F5F0FF'; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
       });
       if (t.leker.length && y < 1560) {
-        y += 90; g.fillStyle = '#b3a288'; g.font = '500 32px ' + font; g.fillText(T('Dere spilte', 'You played'), 80, y);
-        g.fillStyle = '#f4ebdc'; g.font = '600 38px ' + font;
+        y += 90; g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(T('Dere spilte', 'You played'), 80, y);
+        g.fillStyle = '#F5F0FF'; g.font = '600 38px ' + font;
         var linje = '', ord = t.leker.join(' · ').split(' ');
         ord.forEach(function (w) { var prov = linje ? linje + ' ' + w : w; if (g.measureText(prov).width > W - 160 && linje) { y += 52; if (y < 1700) g.fillText(linje, 80, y); linje = w; } else linje = prov; });
         y += 52; if (y < 1700) g.fillText(linje, 80, y);
       }
-      g.fillStyle = '#f4b740'; g.fillRect(80, H - 170, W - 160, 4);
-      g.fillStyle = '#f4ebdc'; g.font = '700 44px ' + font; g.fillText(T('Spill med oss neste gang', 'Play with us next time'), 80, H - 95);
-      g.fillStyle = '#b3a288'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
+      g.fillStyle = '#C8FF2E'; g.fillRect(80, H - 170, W - 160, 4);
+      g.fillStyle = '#F5F0FF'; g.font = '700 44px ' + font; g.fillText(T('Spill med oss neste gang', 'Play with us next time'), 80, H - 95);
+      g.fillStyle = '#B4A7CF'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
       return new Promise(function (ok) {
         c.toBlob(function (blob) { ok(blob ? new File([blob], 'mittvors-kveld.png', { type: 'image/png' }) : null); }, 'image/png');
       });
@@ -2296,45 +2318,45 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
 
     /** Gjengens lov som story-bilde (1080×1920): den nye loven, tittelen og konvolutten. */
     function lovStoryBilde() {
-      var W = 1080, H = 1920, font = '"Bricolage Grotesque Variable", "Bricolage Grotesque", system-ui, sans-serif';
+      var W = 1080, H = 1920, font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
       var c = document.createElement('canvas'); c.width = W; c.height = H;
       var g = medT(c.getContext('2d'));
-      var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#3a2a14'); bg.addColorStop(0.5, '#141009'); bg.addColorStop(1, '#0d0a06');
+      var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#3A2560'); bg.addColorStop(0.5, '#120A1D'); bg.addColorStop(1, '#0B0614');
       g.fillStyle = bg; g.fillRect(0, 0, W, H);
-      g.font = '800 44px ' + font; g.fillStyle = '#f4ebdc'; g.fillText('mitt', 80, 150);
-      var b = g.measureText('mitt').width; g.fillStyle = '#ff6a4d'; g.fillText('vors', 80 + b, 150);
+      g.font = '800 44px ' + font; g.fillStyle = '#F5F0FF'; g.fillText('mitt', 80, 150);
+      var b = g.measureText('mitt').width; g.fillStyle = '#FF5B1F'; g.fillText('vors', 80 + b, 150);
       function linjer(tekst, stil, maks) {
         g.font = stil; var ut = [], l = '';
         String(tekst).split(' ').forEach(function (w) { var p = l ? l + ' ' + w : w; if (g.measureText(p).width > maks && l) { ut.push(l); l = w; } else l = p; });
         if (l) ut.push(l); return ut;
       }
       var kv = tilstand.kveld || {}, lv = kv.lovValg || {};
-      g.fillStyle = '#b3a288'; g.font = '600 40px ' + font; g.fillText('⚖️ ' + T('Gjengens lov', 'The Crew’s Law') + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 80, 300);
-      g.fillStyle = '#f4ebdc'; g.font = '800 64px ' + font; g.fillText(linjer('🏆 ' + (kv.vinner ? navn(kv.vinner) : '') + T(' vant kvelden', ' won the night'), '800 64px ' + font, W - 160)[0], 80, 380);
+      g.fillStyle = '#B4A7CF'; g.font = '600 40px ' + font; g.fillText('⚖️ ' + T('Gjengens lov', 'The Crew’s Law') + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 80, 300);
+      g.fillStyle = '#F5F0FF'; g.font = '800 64px ' + font; g.fillText(linjer('🏆 ' + (kv.vinner ? navn(kv.vinner) : '') + T(' vant kvelden', ' won the night'), '800 64px ' + font, W - 160)[0], 80, 380);
       var y = 520;
       var boks = function (hoyde, farge) { g.fillStyle = farge; g.beginPath(); if (g.roundRect) g.roundRect(80, y, W - 160, hoyde, 36); else g.rect(80, y, W - 160, hoyde); g.fill(); };
       if (lv.tekst) {
         var l = linjer('«' + lv.tekst + '»', '800 72px ' + font, W - 260), hh = 200 + l.length * 88;
-        boks(hh, lv.type === 'opphev' ? '#3a2a14' : '#f4ebdc');
-        g.fillStyle = lv.type === 'opphev' ? '#ff6a4d' : '#8a5b00'; g.font = '700 36px ' + font; g.fillText(lv.type === 'opphev' ? '🗑️ ' + T('OPPHEVET', 'REPEALED') : '📜 ' + T('NY REGEL', 'NEW RULE'), 130, y + 90);
-        g.fillStyle = lv.type === 'opphev' ? '#b3a288' : '#1a1208'; g.font = '800 72px ' + font; l.forEach(function (x, i) { g.fillText(x, 130, y + 190 + i * 88); });
+        boks(hh, lv.type === 'opphev' ? '#3A2560' : '#F5F0FF');
+        g.fillStyle = lv.type === 'opphev' ? '#FF5B1F' : '#B33A0B'; g.font = '700 36px ' + font; g.fillText(lv.type === 'opphev' ? '🗑️ ' + T('OPPHEVET', 'REPEALED') : '📜 ' + T('NY REGEL', 'NEW RULE'), 130, y + 90);
+        g.fillStyle = lv.type === 'opphev' ? '#B4A7CF' : '#12081C'; g.font = '800 72px ' + font; l.forEach(function (x, i) { g.fillText(x, 130, y + 190 + i * 88); });
         y += hh + 50;
       }
       var antall = ((tilstand.gjeng && tilstand.gjeng.regler) || []).length;
-      if (antall) { g.fillStyle = '#f4b740'; g.font = '700 48px ' + font; g.fillText('📜 ' + antall + T(antall === 1 ? ' regel i lovboka' : ' regler i lovboka', antall === 1 ? ' rule in the law book' : ' rules in the law book'), 80, y + 60); }
+      if (antall) { g.fillStyle = '#C8FF2E'; g.font = '700 48px ' + font; g.fillText('📜 ' + antall + T(antall === 1 ? ' regel i lovboka' : ' regler i lovboka', antall === 1 ? ' rule in the law book' : ' rules in the law book'), 80, y + 60); }
       y += 120;
       if (y < 1380) {
         // Logoen (flisen) fyller tomrommet nederst
         var cy = Math.min(1500, y + (1700 - y) / 2), sk = Math.min(4.2, (1700 - y) / 130);
         g.save(); g.translate(W / 2, cy); g.rotate(-0.08); g.scale(sk, sk); g.translate(-50, -50);
-        g.fillStyle = '#ff6a4d'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
-        [[45.5, -24], [54.5, 24]].forEach(function (k) { g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180); g.fillStyle = '#141009'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z')); g.fillStyle = '#f4ebdc'; g.fillRect(-12.5, -41, 25, 6); g.restore(); });
-        g.strokeStyle = '#f4ebdc'; g.lineWidth = 5; g.lineCap = 'round'; g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
+        g.fillStyle = '#FF5B1F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
+        [[45.5, -24], [54.5, 24]].forEach(function (k) { g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180); g.fillStyle = '#120A1D'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z')); g.fillStyle = '#F5F0FF'; g.fillRect(-12.5, -41, 25, 6); g.restore(); });
+        g.strokeStyle = '#F5F0FF'; g.lineWidth = 5; g.lineCap = 'round'; g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
         g.restore();
       }
-      g.fillStyle = '#f4b740'; g.fillRect(80, H - 170, W - 160, 4);
-      g.fillStyle = '#f4ebdc'; g.font = '700 44px ' + font; g.fillText(T('Hvilke lover har din gjeng?', 'What laws does your crew have?'), 80, H - 95);
-      g.fillStyle = '#b3a288'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
+      g.fillStyle = '#C8FF2E'; g.fillRect(80, H - 170, W - 160, 4);
+      g.fillStyle = '#F5F0FF'; g.font = '700 44px ' + font; g.fillText(T('Hvilke lover har din gjeng?', 'What laws does your crew have?'), 80, H - 95);
+      g.fillStyle = '#B4A7CF'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
       return new Promise(function (ok) { c.toBlob(function (bl) { ok(bl ? new File([bl], 'mittvors-lov.png', { type: 'image/png' }) : null); }, 'image/png'); });
     }
     function delLov() {
@@ -2408,26 +2430,26 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     function delTavle(knapp) {
       var l = rangert(), k = kaaring(), W = 1080, H = Math.max(1080, 420 + l.length * 96 + k.length * 110);
       var c = document.createElement('canvas'); c.width = W; c.height = H;
-      var g = medT(c.getContext('2d')), font = '"Bricolage Grotesque Variable", "Bricolage Grotesque", system-ui, sans-serif';
-      g.fillStyle = '#141009'; g.fillRect(0, 0, W, H);
-      g.fillStyle = '#f4b740'; g.font = '800 84px ' + font; g.fillText(T('Kveldens tavle', 'Tonight\'s board'), 80, 160);
-      g.fillStyle = '#b3a288'; g.font = '500 36px ' + font;
+      var g = medT(c.getContext('2d')), font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
+      g.fillStyle = '#120A1D'; g.fillRect(0, 0, W, H);
+      g.fillStyle = '#C8FF2E'; g.font = '800 84px ' + font; g.fillText(T('Kveldens tavle', 'Tonight\'s board'), 80, 160);
+      g.fillStyle = '#B4A7CF'; g.font = '500 36px ' + font;
       g.fillText(new Date().toLocaleDateString(LOKALE, { weekday: 'long', day: 'numeric', month: 'long' }) + T(' · rom ', ' · room ') + kode, 80, 220);
       var y = 320, maks = Math.max(1, l[0] ? l[0].slurker || 0 : 1);
       l.forEach(function (p, i) {
-        g.fillStyle = i === 0 ? '#f4b740' : '#f4ebdc'; g.font = '800 48px ' + font; g.fillText((i + 1) + '.', 80, y);
+        g.fillStyle = i === 0 ? '#C8FF2E' : '#F5F0FF'; g.font = '800 48px ' + font; g.fillText((i + 1) + '.', 80, y);
         g.font = '700 48px ' + font; g.fillText(p.navn.slice(0, 18), 160, y);
-        g.fillStyle = 'rgba(244,183,64,.25)'; g.fillRect(620, y - 34, 300, 30);
-        g.fillStyle = '#f4b740'; g.fillRect(620, y - 34, Math.round(300 * (p.slurker || 0) / maks), 30);
-        g.fillStyle = '#f4ebdc'; g.font = '800 48px ' + font; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
+        g.fillStyle = 'rgba(200,255,46,.25)'; g.fillRect(620, y - 34, 300, 30);
+        g.fillStyle = '#C8FF2E'; g.fillRect(620, y - 34, Math.round(300 * (p.slurker || 0) / maks), 30);
+        g.fillStyle = '#F5F0FF'; g.font = '800 48px ' + font; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
         y += 96;
       });
       y += 30;
       k.forEach(function (x) {
-        g.fillStyle = '#b3a288'; g.font = '500 32px ' + font; g.fillText(x.ikon + '  ' + x.tittel, 80, y);
-        g.fillStyle = '#f4ebdc'; g.font = '700 44px ' + font; g.fillText(x.navn + (x.n !== null ? ' · ' + x.n : ''), 80, y + 52); y += 110;
+        g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x.ikon + '  ' + x.tittel, 80, y);
+        g.fillStyle = '#F5F0FF'; g.font = '700 44px ' + font; g.fillText(x.navn + (x.n !== null ? ' · ' + x.n : ''), 80, y + 52); y += 110;
       });
-      g.fillStyle = '#8a7a64'; g.font = '600 32px ' + font; g.fillText('mittvors.no', 80, H - 70);
+      g.fillStyle = '#8F81AD'; g.font = '600 32px ' + font; g.fillText('mittvors.no', 80, H - 70);
       c.toBlob(function (blob) {
         if (!blob) return toast(T('Fikk ikke laget bildet.', 'Couldn\'t create the image.'));
         var fil = new File([blob], 'mittvors-tavle.png', { type: 'image/png' });
@@ -2455,9 +2477,9 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       else if (!s && tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) innhold = borsSide();
       else if (!s) innhold = lobby();
       else {
-        innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' && s.lek !== 'ring-of-fire' ? ' · ' + esc(s.modus) : '') + '</p>' + reglerPanel(s) +
+        innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' && s.lek !== 'ring-of-fire' ? ' · ' + esc(s.modus) : '') + '</p>' +
           ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
-             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + '</div>';
+             veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + reglerPanel(s) + '</div>';
         // Nyhetsrunden finnes bare på norsk
         if (EN && s.type === 'nyhetsrunden') innhold = innhold.replace('</p>', '</p><p class="small">🇳🇴 ' + T('', 'Questions are in Norwegian') + '</p>');
       }
@@ -2468,11 +2490,24 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
       var sosGammel = document.getElementById('sosInput'), sosVerdi = sosGammel ? sosGammel.value : null, sosFokus = sosGammel && document.activeElement === sosGammel;
       var lovGammel = document.getElementById('lovNyTekst'), lovVerdi = lovGammel ? lovGammel.value : null, lovFokus = lovGammel && document.activeElement === lovGammel;
-      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + venterStripe() + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.spill || tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert +
-        '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
+      // Under en lek: leken først, det som går i bakgrunnen etterpå, reaksjonene i en dokk nederst (se natt.css).
+      // I lobbyen: som før.
+      var turTekst = minTurNaa(tilstand);
+      var topp = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + venterStripe();
+      var merker = '<div class="tur-merke" aria-live="polite">' + esc(turTekst) + '</div><div class="hemmelig-merke">🤫 ' + T('Bare du ser dette – hold skjermen for deg selv', 'Only you can see this – keep the screen to yourself') + '</div>';
+      var forlat = '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
+      root.innerHTML = s
+        ? topp + merker + borsHurtig() + innhold + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + vert + forlat
+        : topp + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat;
+      // Skjermkanten: lime når det er din tur, stripete når skjermen viser noe hemmelig
+      var rotEl = document.documentElement;
+      rotEl.classList.toggle('i-spill', !!s);
+      rotEl.classList.toggle('min-tur', !!turTekst);
+      rotEl.classList.toggle('hemmelig', !!root.querySelector('[data-hemmelig]'));
       // Nytt skjermbilde (lobby, ny lek, oppsummering): start øverst. Ellers: behold plassen.
       var skjerm = s ? 'spill:' + s.type + ':' + (s.navn && s.navn.no ? s.navn.no : s.navn) : tilstand.ferdig ? 'ferdig' : 'lobby';
-      if (skjerm !== sisteSkjerm) { sisteSkjerm = skjerm; window.scrollTo(0, 0); } else window.scrollTo(0, y);
+      // 'instant': ellers stopper neste tegning en myk rulling midt på siden
+      if (skjerm !== sisteSkjerm) { sisteSkjerm = skjerm; window.scrollTo({ top: 0, behavior: 'instant' }); } else window.scrollTo({ top: y, behavior: 'instant' });
       tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
       if (tsValgt !== undefined) { var r = document.querySelector('input[name=tsL][value="' + tsValgt + '"]'); if (r) r.checked = true; }
       var nrNy = document.getElementById('nrInput');

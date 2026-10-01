@@ -1,9 +1,9 @@
 ---
 // Storskjerm (TV-modus): en PC eller et nettbrett ved TV-en viser rommet stort.
 // Skjermen er ingen spiller. Den kobler seg til med romkode + PIN fra verten og ser bare det alle skal se.
-import '@fontsource-variable/bricolage-grotesque';
-import '@fontsource-variable/figtree';
+import '@fontsource-variable/archivo/wdth.css';
 import '../../styles/global.css';
+import '../../styles/natt.css';
 import { supabaseUrl, supabaseAnonKey } from '../../config';
 import type { Lang } from '../../lib/i18n';
 const { lang = 'no' } = Astro.props as { lang?: Lang };
@@ -17,7 +17,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
-  <meta name="theme-color" content="#141009" />
+  <meta name="theme-color" content="#120A1D" />
   <title>{EN ? 'Big screen – Mitt vors' : 'Storskjerm – Mitt vors'}</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 </head>
@@ -140,8 +140,10 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       (d.spillere || []).forEach(function (p) { var f = sett.slurker[p.id]; if (f != null && na.slurker[p.id] > f) drikk.push({ navn: p.navn, n: na.slurker[p.id] - f }); });
       // Når resultatet av en avstemning vises, står det allerede hvem som drikker – da holder det med resultatskjermen
       var resultatNaa = na.fase !== sett.fase && /mest:resultat|forraeder:avslort/.test(na.fase);
-      if (drikk.length && drikk.length <= 8 && !resultatNaa) visDrikk(drikk, d.alkoholfri);
-      if (na.brudd && na.brudd !== sett.brudd) visKnust(s.brudd.navn);
+      var knust = na.brudd && na.brudd !== sett.brudd;
+      if (knust) visKnust(s.brudd.navn);
+      // Ringen røk: la «RINGEN RØK!» stå alene først, så kommer DRIKK-tavla
+      if (drikk.length && drikk.length <= 8 && !resultatNaa) { if (knust) setTimeout(function () { visDrikk(drikk, d.alkoholfri); }, 2800); else visDrikk(drikk, d.alkoholfri); }
       if (na.meldte.some(function (id) { return sett.meldte.indexOf(id) === -1; })) { spill('dundun'); var a = (b.meldte || []).find(function (x) { return sett.meldte.indexOf(x.id) === -1; }); if (a) visBanner('📣 ' + T('MELDT: ', 'REPORTED: ') + (a.type === 'hvem' ? navn(a.utfall) + ' – ' : '') + a.q, T('Stem på telefonen – skjedde det?', 'Vote on your phone – did it happen?')); }
       var nyeSaker = na.saker.filter(function (x) { return sett.saker.indexOf(x) === -1; });
       if (nyeSaker.length) visBlalys(nyeSaker.some(function (x) { return /:d$/.test(x); }));
@@ -291,7 +293,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   })();
   </script>
   <style is:global>
-    body.tv{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#2a1f12,#0d0a06 70%);color:var(--ink);overflow:hidden;font-size:clamp(16px,1.6vw,26px)}
+    body.tv{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#2B1A44,#0B0614 70%);color:var(--ink);overflow:hidden;font-size:clamp(16px,1.6vw,26px)}
     .tv-rot{height:100vh;display:flex;flex-direction:column}
     .tv-hode{display:flex;align-items:center;gap:24px;padding:1.2vh 2.5vw;font-size:1em}
     .tv-logo{font-family:var(--display);font-weight:800;font-size:1.5em}.tv-logo b{color:var(--gold)}
@@ -331,29 +333,35 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tv-kort p{font-family:var(--display);font-weight:800;font-size:2.4em;margin:1vh 0 0;line-height:1.15}
     .tv-stolper{list-style:none;padding:0;margin:2vh 0 0;width:min(70vw,1000px);display:flex;flex-direction:column;gap:1.2vh}
     .tv-stolper li{position:relative;display:flex;justify-content:space-between;align-items:center;padding:1.4vh 1.6vw;border-radius:18px;background:var(--card);overflow:hidden;font-size:1.3em;opacity:0;animation:tvInn .5s ease-out forwards}
-    .tv-stolper li i{position:absolute;inset:0 auto 0 0;background:rgba(244,183,64,.28)}.tv-stolper li span,.tv-stolper li b{position:relative}
+    .tv-stolper li i{position:absolute;inset:0 auto 0 0;background:rgba(200,255,46,.28)}.tv-stolper li span,.tv-stolper li b{position:relative}
     .tv-slutt{flex-direction:column}.tv-kaaringer{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(26vw,340px),1fr));gap:2vh 2vw;width:100%;margin-top:3vh}
-    .tv-pris{background:var(--card);border:1px solid rgba(244,183,64,.35);border-radius:24px;padding:2.4vh 1.6vw;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4vh;opacity:0;animation:tvInn .6s cubic-bezier(.2,1.5,.4,1) forwards}
+    .tv-pris{background:var(--card);border:1px solid rgba(200,255,46,.35);border-radius:24px;padding:2.4vh 1.6vw;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4vh;opacity:0;animation:tvInn .6s cubic-bezier(.2,1.5,.4,1) forwards}
     .tv-pris span{font-size:2.6em}.tv-pris small{text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:800}.tv-pris b{font-family:var(--display);font-size:1.8em}.tv-pris em{opacity:.75;font-style:normal}
     @keyframes tvInn{from{opacity:0;transform:translateY(30px) scale(.9)}to{opacity:1;transform:none}}
-    .tv-meldt{background:#c8321f;color:#fff;font-weight:800;padding:1.4vh 2.5vw;font-size:1.2em;animation:tvPuls 1.2s ease-in-out infinite}.tv-meldt small{opacity:.8;font-weight:600}
-    @keyframes tvPuls{50%{background:#e2452d}}
+    .tv-meldt{background:var(--accent);color:var(--ink2);font-weight:800;padding:1.4vh 2.5vw;font-size:1.2em;animation:tvPuls 1.2s ease-in-out infinite}.tv-meldt small{opacity:.8;font-weight:600}
+    @keyframes tvPuls{50%{background:#FF7A45}}
     .tv-kobling{margin:auto;max-width:720px;text-align:center;display:flex;flex-direction:column;gap:2.4vh;align-items:center;padding:4vh 4vw}
     .tv-kobling h1{font-size:2.6em;margin:0}
     .tv-felt{display:flex;gap:2vw}.tv-felt label{display:flex;flex-direction:column;gap:6px;font-weight:700;text-align:left}
     .tv-felt input{font-size:1.6em;padding:10px 16px;border-radius:14px;border:2px solid var(--gold);background:var(--card);color:var(--ink);width:7.5em;letter-spacing:.12em;text-transform:uppercase}
     .tv-start{font-size:1.3em;padding:16px 36px}
     .tv-feil{color:#ff8a70;font-weight:700;margin:0}
-    .tv-drikk{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,184,0,.94);color:#1a1200;animation:drikkInn .35s cubic-bezier(.2,1.6,.4,1),drikkBlink .5s steps(1) 4 .35s}
+    .tv-drikk{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,91,31,.94);color:var(--ink2);animation:drikkInn .35s cubic-bezier(.2,1.6,.4,1),drikkBlink .5s steps(1) 4 .35s}
     .tv-drikk b{font-family:var(--display);font-size:12vw;line-height:1;font-weight:900;animation:drikkRist .12s linear 8}
     .tv-drikk ul{list-style:none;padding:0;margin:3vh 0 0;display:flex;flex-wrap:wrap;gap:2vh 4vw;justify-content:center}
-    .tv-drikk li{display:flex;align-items:baseline;gap:14px;font-size:4vw;font-weight:900}.tv-drikk li i{font-style:normal;background:#1a1200;color:#ffd24d;border-radius:999px;padding:0 .5em}
+    .tv-drikk li{display:flex;align-items:baseline;gap:14px;font-size:4vw;font-weight:900}.tv-drikk li i{font-style:normal;background:var(--ink2);color:var(--gold);border-radius:999px;padding:0 .5em}
     .tv-knust{position:fixed;inset:0;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;background:rgba(200,20,40,.92);color:#fff;animation:drikkInn .3s cubic-bezier(.2,1.6,.4,1)}
     .tv-knust b{font-family:var(--display);font-size:9vw;font-weight:900;animation:drikkRist .1s linear 8}.tv-knust span{font-size:3vw;font-weight:800}
-    .tv-banner{position:fixed;left:50%;top:8vh;transform:translateX(-50%);z-index:9000;background:#c8321f;color:#fff;border-radius:24px;padding:2.4vh 3vw;max-width:80vw;text-align:center;display:flex;flex-direction:column;gap:1vh;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:drikkInn .35s cubic-bezier(.2,1.6,.4,1)}
+    .tv-banner{position:fixed;left:50%;top:8vh;transform:translateX(-50%);z-index:9000;background:var(--accent);color:var(--ink2);border-radius:24px;padding:2.4vh 3vw;max-width:80vw;text-align:center;display:flex;flex-direction:column;gap:1vh;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:drikkInn .35s cubic-bezier(.2,1.6,.4,1)}
     .tv-banner b{font-size:1.8em}.tv-banner span{font-size:1.1em;opacity:.9}
     .tv-toast{position:fixed;left:50%;bottom:4vh;transform:translateX(-50%);z-index:8000;background:rgba(20,16,9,.92);border:1px solid var(--gold);border-radius:999px;padding:1.4vh 2.4vw;font-size:1.2em;font-weight:700;max-width:80vw;text-align:center;animation:tvInn .4s ease-out}
     .tv-reak{bottom:18vh}.tv-reak span{font-size:6vw}.tv-reak small{font-size:1.2vw}
+    /* ny identitet: utstrakt skrift til det som roper, smal til tall, ingen sperrede etiketter */
+    .tv-etikett,.tv-pris small{text-transform:none;letter-spacing:0}
+    .tv-scene h1,.tv-drikk b,.tv-knust b,.tv-banner b,.tv-logo{font-stretch:125%;font-weight:900;letter-spacing:-.03em}
+    .tv-kode b,.tv-liste li b,.tv-pris em{font-stretch:66%;font-weight:900}
+    .tv-lobby h1{font-stretch:68%;font-size:4.2em;letter-spacing:.02em}
+    .tv-side section{background:rgb(var(--card-rgb) / .7)}
   </style>
 </body>
 </html>

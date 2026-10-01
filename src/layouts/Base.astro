@@ -1,12 +1,13 @@
 ---
 // Skriftene ligger på vår egen server: raskere (ingen ekstra tilkobling) og ingen deling av IP-adresser med Google
-import '@fontsource-variable/bricolage-grotesque';
-import '@fontsource-variable/figtree';
+// Én skrifttype i tre bredder: Archivo (utstrakt til det som roper, normal til tekst, smal til tall).
+// Fraunces brukes bare til sitater på humorsidene.
+import '@fontsource-variable/archivo/wdth.css';
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/fraunces/wght-italic.css';
-import fontOverskrift from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
-import fontTekst from '@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url';
+import fontArchivo from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
 import '../styles/global.css';
+import '../styles/natt.css';
 import { SITE_NAME, SELGER, UTVIKLING } from '../config';
 import { collectionsFor, topSituationsFor, dictSection, visible, t } from '../lib/content';
 import { ui, path, otherLangPath, type Lang } from '../lib/i18n';
@@ -74,8 +75,7 @@ const isCurrent = (href: string) => {
 <html lang={L.htmlLang}>
 <head>
   <meta charset="utf-8" />
-  <link rel="preload" href={fontOverskrift} as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href={fontTekst} as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href={fontArchivo} as="font" type="font/woff2" crossorigin />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{fullTitle}</title>
   <meta name="description" content={desc} />
@@ -134,12 +134,12 @@ const isCurrent = (href: string) => {
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content={bildeUrl} />
-  <meta name="theme-color" content="#141009" />
+  <meta name="theme-color" content="#120A1D" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
   <link rel="alternate icon" href="/favicon.ico" sizes="any" />
   <!-- Ikonet på hjemskjermen (iPhone/iPad). ?v= tvinger telefonen til å hente det nye ikonet. -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4" />
   <link rel="sitemap" href="/sitemap-index.xml" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -151,7 +151,7 @@ const isCurrent = (href: string) => {
       function tema() { try { return localStorage.getItem('bd_tema') === 'lys' ? 'light' : 'dark'; } catch (e) { return 'dark'; } }
       function sett(doc) {
         var t = tema(); doc.documentElement.dataset.theme = t;
-        var m = doc.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#f7f1e6' : '#141009');
+        var m = doc.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#F3EFF8' : '#120A1D');
       }
       sett(document);
       document.addEventListener('astro:before-swap', function (e) { sett(e.newDocument); });
@@ -225,7 +225,7 @@ const isCurrent = (href: string) => {
 
   <div class="shell">
     <aside class="side">
-      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#ff6a4d"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g stroke="#f4ebdc" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#FF5B1F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
       <button class="searchbtn" data-search><Icon name="sok" />{L.search}<kbd>⌘K</kbd></button>
       <nav class="sidenav" aria-label={L.pickMode}>
         {nav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}><Icon name={n.icon} />{n.label}</a>)}
@@ -246,7 +246,7 @@ const isCurrent = (href: string) => {
 
     <div class="topbars">
     <div class="mobilebar">
-      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#ff6a4d"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g stroke="#f4ebdc" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#FF5B1F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
       <span class="mobilebar-right">
         <button class="langlink compact" data-search aria-label={L.search}><Icon name="sok" size={19} /></button>
         <a class="pluss-pille" href={lang === 'no' ? '/no/pluss' : '/plus'} data-pluss-pille>✨ {lang === 'no' ? 'Pluss' : 'Plus'}</a>
@@ -306,7 +306,7 @@ const isCurrent = (href: string) => {
   {UTVIKLING.paa && (
     <div id="utvikling" class="utvikling" role="dialog" aria-labelledby="utvTittel">
       <form class="utv-boks" id="utvSkjema" novalidate>
-        <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="30" fill="#ff6a4d"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#141009"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#f4ebdc"/></g><g stroke="#f4ebdc" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg>
+        <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="30" fill="#FF5B1F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg>
         <h1 id="utvTittel">mitt<span>vors</span></h1>
         <p>{lang === 'no' ? 'Vi legger siste hånd på vorset. Siden åpner snart!' : 'We’re putting the final touches on the party. Opening soon!'}</p>
         <label for="utvKode" class="small">{lang === 'no' ? 'Har du fått en kode?' : 'Got a code?'}</label>
