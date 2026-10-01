@@ -149,12 +149,12 @@ const romSti = no ? '/no/rom' : '/room';
         g.disabled = true;
         api('/api/pluss/gratis', { method: 'POST' }).then(function (d) {
           if (!d._ok) { say(d.melding || (EN ? 'That didn’t work.' : 'Det gikk ikke.'), 'err'); g.disabled = false; return; }
-          status = Object.assign({ innlogget: true }, d); tegnStatus(); say(EN ? 'Your free night has started! ✨' : 'Gratiskvelden er i gang! ✨', 'ok');
+          status = Object.assign({ innlogget: true }, d); tegnStatus(); if (window.mvPlussSjekk) window.mvPlussSjekk(); say(EN ? 'Your free night has started! ✨' : 'Gratiskvelden er i gang! ✨', 'ok');
         });
       });
     }
     function hentStatus() {
-      return api('/api/pluss/status').then(function (d) { status = d; tegnStatus(); }).catch(function () { status = null; tegnStatus(); });
+      return api('/api/pluss/status').then(function (d) { status = d; tegnStatus(); if (d && !d.feil && d.innlogget) { try { localStorage.setItem('mv_pluss_v2', JSON.stringify({ a: d.aktiv ? 1 : 0, t: Date.now() })); } catch (e) {} if (window.mvPlussSjekk) window.mvPlussSjekk(); } }).catch(function () { status = null; tegnStatus(); });
     }
 
     // Tilbake fra Vipps: sjekk betalingen til den er godkjent
@@ -222,7 +222,7 @@ const romSti = no ? '/no/rom' : '/room';
       m.textContent = EN ? 'Checking the code …' : 'Sjekker koden …'; m.className = 'formmsg';
       api('/api/pluss/kode', { method: 'POST', body: JSON.stringify({ kode: kode }) }).then(function (d) {
         if (!d._ok) { m.textContent = d.melding || (EN ? 'The code didn’t work.' : 'Koden virket ikke.'); m.className = 'formmsg err'; return; }
-        try { localStorage.removeItem('bd_gavekode'); } catch (e) {}
+        try { localStorage.removeItem('bd_gavekode'); } catch (e) {} if (window.mvPlussSjekk) window.mvPlussSjekk();
         m.textContent = EN
           ? '🎁 Code redeemed – you’ve got Plus for ' + (d.dager === 1 ? '1 day' : d.dager + ' days') + '!'
           : '🎁 Koden er brukt – du har fått Pluss i ' + (d.dager === 1 ? '1 dag' : d.dager + ' dager') + '!'; m.className = 'formmsg ok';

@@ -174,23 +174,41 @@ const isCurrent = (href: string) => {
   (function () {
     // Pluss-knappen i toppen: viser «Pluss ✓» når du har det (sjekkes én gang per økt, bare når du er logget inn)
     // Har du Pluss, trenger du ikke se reklamen for det: html.har-pluss skjuler den (se natt.css)
-    function harPluss() { try { return sessionStorage.getItem('mv_pluss') === '1'; } catch (e) { return false; } }
-    document.documentElement.classList.toggle('har-pluss', harPluss());
-    document.addEventListener('astro:after-swap', function () { document.documentElement.classList.toggle('har-pluss', harPluss()); });
+    // Svaret huskes i localStorage med tidsstempel: «ja» i 30 min, «nei» bare i 1 min,
+    // så et nytt kjøp eller en innløst kode slår inn raskt. Endres innloggingen, sjekkes det på nytt.
+    var NOK = 'mv_pluss_v2', JA_MS = 30 * 60e3, NEI_MS = 60e3, henter = false;
+    try { sessionStorage.removeItem('mv_pluss'); } catch (e) {}
+    function cache() { try { return JSON.parse(localStorage.getItem(NOK) || 'null'); } catch (e) { return null; } }
+    function innlogget() { var K = window.BDKonto; return !!(K && K.les && K.les()); }
+    function harPluss() { var c = cache(); return !!(c && c.a && innlogget()); }
     function merk() {
-      var aktiv = harPluss();
+      var aktiv = harPluss(), en = /^en/.test(document.documentElement.lang);
       document.documentElement.classList.toggle('har-pluss', aktiv);
-      document.querySelectorAll('[data-pluss-pille]').forEach(function (a) { a.classList.toggle('aktiv', aktiv); if (aktiv) a.textContent = /^en/.test(document.documentElement.lang) ? 'Plus ✓' : 'Pluss ✓'; });
+      document.querySelectorAll('[data-pluss-pille]').forEach(function (a) {
+        if (!a.dataset.opprinnelig) a.dataset.opprinnelig = a.textContent;
+        a.classList.toggle('aktiv', aktiv);
+        a.textContent = aktiv ? (en ? 'Plus ✓' : 'Pluss ✓') : a.dataset.opprinnelig;
+      });
     }
-    function sjekk() {
+    function sjekk(tving) {
       merk();
-      var K = window.BDKonto; if (!K || !K.les || !K.les()) return;
-      try { if (sessionStorage.getItem('mv_pluss') !== null) return; } catch (e) { return; }
+      var K = window.BDKonto; if (!innlogget() || henter) return;
+      var c = cache();
+      if (!tving && c && (Date.now() - c.t) < (c.a ? JA_MS : NEI_MS)) return;
+      henter = true;
       K.api('/api/pluss/status').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-        if (!d) return; try { sessionStorage.setItem('mv_pluss', d.aktiv ? '1' : '0'); } catch (e) {} merk();
-      }).catch(function () {});
+        henter = false; if (!d || d.feil) return;
+        try { localStorage.setItem(NOK, JSON.stringify({ a: d.aktiv ? 1 : 0, t: Date.now() })); } catch (e) {}
+        merk();
+      }).catch(function () { henter = false; });
     }
-    document.addEventListener('astro:page-load', sjekk);
+    merk();
+    document.addEventListener('astro:after-swap', merk);
+    if (window.BDKonto && window.BDKonto.naarEndret) window.BDKonto.naarEndret(function () {
+      merk(); setTimeout(function () { sjekk(true); }, 50);
+    });
+    window.mvPlussSjekk = function () { sjekk(true); };
+    document.addEventListener('astro:page-load', function () { sjekk(); });
     if (document.readyState !== 'loading') setTimeout(sjekk, 0); else document.addEventListener('DOMContentLoaded', sjekk);
   })();
   </script>
