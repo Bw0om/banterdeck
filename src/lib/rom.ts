@@ -223,6 +223,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     reak: data.reak || [], kveld: lok(kveldVisning(data), lang), bors: lok(bors, lang),
     alkoholfri: !!data.alkoholfri, ferdig: data.ferdig || null, kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null,
     gjeng: data.gjeng ? { navn: data.gjeng.navn } : null,
+    mester: data.mester ? { id: data.mester.id, til: data.mester.til } : null,
   };
 }
 
@@ -268,6 +269,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode, kveld: !!data.gjengKveld, regler: data.gjeng.regler || [] } : null,
     kveld: lok(kveldVisning(data), lang), plan: data.plan || null,
     kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null,
+    mester: data.mester ? { id: data.mester.id, til: data.mester.til } : null,
     skjermPin: meg && meg.id === data.vert && data.skjerm ? data.skjerm.pin : null,
     // Gjester som venter på å bli sluppet inn: bare verten og medlemmene ser dem
     venter: meg && (meg.id === data.vert || meg.konto) ? (data.venter || []).map((v: any) => ({ id: v.id, navn: v.navn })) : [],
@@ -453,7 +455,30 @@ function turNokkel(s: any) {
   return null;
 }
 const HOPP_ETTER = 40000;
+/* ---------- Spørsmålsmesteren (bakgrunnslek) ---------- */
+// Svarer du på et spørsmål fra spørsmålsmesteren, drikker du. Appen bytter mester av seg selv hvert 25. minutt.
+const MESTER_MIN = 25;
+function nyMester(data: any) {
+  const ider = data.spillere.map((p: any) => p.id).filter((id: string) => !data.mester || id !== data.mester.id);
+  if (!ider.length) return;
+  data.mester = { id: ider[tilfeldig(ider.length)], til: Date.now() + MESTER_MIN * 60000 };
+  melde(data, `❓ ${navnPaa(data, data.mester.id)} er ny spørsmålsmester – svarer du på et spørsmål fra hen, drikker du!`, `❓ ${navnPaa(data, data.mester.id)} is the new question master – answer one of their questions and you drink!`);
+}
+function sjekkMester(data: any) {
+  const m = data.mester; if (!m) return;
+  if (!data.spillere.some((p: any) => p.id === m.id) || Date.now() >= m.til) nyMester(data);
+}
 export function handling(data: any, meg: any, h: any) {
+  sjekkMester(data);
+  if (h.handling === 'mester-paa' || h.handling === 'mester-bytt') {
+    if (meg.id !== data.vert) return { feil: 'bare-vert' };
+    if (data.spillere.length < 2) return feilL('for-faa', 'Spørsmålsmester trenger minst to spillere.', 'Question master needs at least two players.');
+    nyMester(data); return { ok: true };
+  }
+  if (h.handling === 'mester-av') {
+    if (meg.id !== data.vert) return { feil: 'bare-vert' };
+    data.mester = null; melde(data, 'Spørsmålsmesteren er slått av', 'The question master is turned off'); return { ok: true };
+  }
   const svar = handlingInne(data, meg, h);
   const s = data.spill, n = turNokkel(s);
   if (s && n !== s.turNokkel) { s.turNokkel = n; s.turStart = n ? Date.now() : null; }

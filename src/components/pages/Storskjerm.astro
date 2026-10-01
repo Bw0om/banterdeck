@@ -185,6 +185,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     }
     function sidebar(d) {
       var ut = '';
+      if (d.mester) ut += '<section class="tv-mester"><h3>❓ ' + T('Spørsmålsmester', 'Question master') + '</h3><p><b>' + esc(navn(d.mester.id)) + '</b></p><p class="tv-liten">' + T('Svarer du på et spørsmål fra hen, drikker du.', 'Answer one of their questions and you drink.') + '</p></section>';
       var k = d.kveld;
       if (k && k.stilling && k.stilling.some(function (x) { return x.p > 0; })) ut += '<section><h3>🏅 ' + T('Kveldspoeng', 'Night points') + '</h3><ol class="tv-liste">' + k.stilling.slice(0, 8).map(function (x) { return '<li><span>' + esc(navn(x.id)) + '</span><b>' + x.p + '</b></li>'; }).join('') + '</ol></section>';
       var sl = (d.spillere || []).slice().sort(function (a, b) { return b.slurker - a.slurker; });
@@ -315,6 +316,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tv-side section{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:1.4vh 1.2vw}
     .tv-side h3{margin:0 0 1vh;font-size:1em}
     .tv-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.6vh}
+    .tv-mester p{margin:0}.tv-mester b{font-family:var(--display);font-size:1.6em;color:var(--gold)}
     .tv-liste li{display:flex;justify-content:space-between;gap:12px;font-weight:600}.tv-liste li b{color:var(--gold)}
     .tv-ring.rofr-bord{--S:min(66vh,40vw);touch-action:auto}
     .tv-ring .rofr-k{width:calc(var(--S) * .065);height:calc(var(--S) * .095);margin:calc(var(--S) * -.0475) 0 0 calc(var(--S) * -.0325);border-width:2px}

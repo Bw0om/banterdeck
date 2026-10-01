@@ -596,11 +596,15 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
           '<p class="small">' + t.spillere.length + T(' med i rommet. Flere? Del koden <b>', ' in the room. More people? Share the code <b>') + esc(kode) + '</b>.</p>' + romMerker() + '</div>' + gjengBoks() + kveldKort() + reglerKort();
       }
       var borsFull = t.bors && t.bors.paa && !t.bors.fokus ? '<p><button class="btn ghost" data-g="bs-fokus" type="button">' + T('📈 Gjør Vorsbørsen til hovedspill', '📈 Make the Exchange the main game') + '</button></p>' : '';
-      return vertIntro() + plassInfo() + planBoks() +
+      return plassInfo() + planBoks() +
         '<h2 class="rom-h2 rom-steg"><span>1</span>' + T('Få med alle', 'Get everyone in') + '</h2>' + qrBoks() +
         '<p class="small rom-antall">' + (t.spillere.length > 1 ? '👥 ' + t.spillere.length + T(' er med: ', ' are in: ') + t.spillere.map(function (p) { return esc(p.navn); }).join(', ') : T('👤 Bare du er med ennå – vis dem QR-koden eller trykk «Inviter» øverst.', '👤 Just you so far – show them the QR code or tap “Invite” at the top.')) + '</p>' +
-        kveldKort() + reglerKort() + borsFull + romValg() + gjengBoks() +
-        '<h2 class="rom-h2 rom-steg"><span>2</span>' + T('Velg en lek', 'Pick a game') + '</h2>' + anbefalteLeker() +
+        romValg() + gjengBoks() +
+        '<h2 class="rom-h2 rom-steg"><span>2</span>' + T('Noe som går hele kvelden?', 'Something for the whole night?') + ' <small>' + T('valgfritt', 'optional') + '</small></h2>' +
+        '<p class="small rom-steg-forklaring">' + T('Disse går i bakgrunnen uansett hvilken lek dere spiller, og fortsetter når dere bytter lek.', 'These run in the background whatever game you play, and keep going when you switch games.') + '</p>' +
+        bakgrunnBoks() + borsFull +
+        '<h2 class="rom-h2 rom-steg"><span>3</span>' + T('Velg en lek', 'Pick a game') + '</h2>' +
+        '<p class="small rom-steg-forklaring">' + T('Én lek om gangen – den dukker opp på alle telefonene. Dere kan bytte når som helst.', 'One game at a time – it shows up on every phone. You can switch whenever you like.') + '</p>' + kveldKort() + reglerKort() + anbefalteLeker() +
         '<p class="small rom-nivahint">' + T('Mange leker har nivåer: <b>Snill</b> passer for alle, <b>Frekk</b> og <b>Drøy</b> er for de som tåler mer, og <b>Alle</b> blander.', 'Many games have levels: <b>Mild</b> suits everyone, <b>Cheeky</b> and <b>Wild</b> are for those who can take more, and <b>All</b> mixes them.') + '</p>' +
         lekeGrupper(t.leker.filter(function (l) { return !l.pluss; }), function (l) {
           var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
@@ -616,6 +620,27 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
             '</div></div>';
         }) + plussLeker() + egneStokker();
     }
+    /** Bakgrunnslekene: går hele kvelden, uansett hvilken hovedlek dere spiller. Verten slår dem av og på. */
+    function bakgrunnBoks() {
+      var t = tilstand, rader = [];
+      var bors = t.bors && (t.bors.paa || t.bors.slutt);
+      rader.push({ ikon: '📈', navn: T('Vorsbørsen', 'The Exchange'), om: T('Kjøp aksjer i det du tror skjer i kveld – «Hvem søler først?». Vinn vorskroner når det skjer.', 'Buy shares in what you think will happen tonight – “Who spills first?”. Win coins when it does.'),
+        paa: !!bors, knapp: bors ? '<button class="btn small ghost" data-g="bs-aapne" type="button">' + T('Åpne', 'Open') + '</button>' : '<button class="btn small gold" data-g="bs-start" type="button">' + T('Slå på', 'Turn on') + '</button>' });
+      rader.push({ ikon: '❓', navn: T('Spørsmålsmester', 'Question master'), om: t.mester ? T('Mester nå: ', 'Master now: ') + '<b>' + esc(navn(t.mester.id)) + '</b>. ' + T('Svarer du på et spørsmål fra hen, drikker du. Ny mester hvert 25. minutt.', 'Answer one of their questions and you drink. New master every 25 minutes.') : T('Én er mester. Svarer du på et spørsmål fra mesteren, drikker du. Appen bytter mester hvert 25. minutt.', 'One person is master. Answer a question from the master and you drink. The app swaps master every 25 minutes.'),
+        paa: !!t.mester, knapp: t.mester ? '<button class="btn small ghost" data-g="mester-bytt" type="button">' + T('Bytt', 'Swap') + '</button><button class="linkbtn" data-g="mester-av" type="button">' + T('Slå av', 'Turn off') + '</button>' : '<button class="btn small gold" data-g="mester-paa" type="button">' + T('Slå på', 'Turn on') + '</button>' });
+      rader.push({ ikon: '🕵️', navn: T('Hemmelige oppdrag', 'Secret missions') + ' <span class="rom-bg-pluss">✨ Pluss</span>', om: T('Alle får et hemmelig oppdrag, som å få noen til å si «sykt». Klarer du det, deler du ut slurker.', 'Everyone gets a secret mission, like getting someone to say “insane”. Pull it off and you hand out sips.'),
+        paa: !!t.oppdrag, knapp: t.oppdrag ? '<button class="linkbtn" data-g="op-av" type="button">' + T('Slå av', 'Turn off') + '</button>' : '<button class="btn small gold" data-g="op-paa" type="button">' + T('Slå på', 'Turn on') + '</button>' });
+      return '<div class="rom-bg">' + rader.map(function (r) {
+        return '<div class="rom-bg-rad' + (r.paa ? ' paa' : '') + '"><span class="rom-bg-ikon" aria-hidden="true">' + r.ikon + '</span><div><b>' + r.navn + (r.paa ? ' <span class="rom-bg-status">' + T('På', 'On') + '</span>' : '') + '</b><small>' + r.om + '</small></div><div class="rom-bg-knapper">' + r.knapp + '</div></div>';
+      }).join('') + '</div>';
+    }
+    /** Hvem som er spørsmålsmester – vises for alle, både i lobbyen og under lekene. */
+    function mesterStripe() {
+      var m = tilstand.mester; if (!m) return '';
+      var jeg = m.id === tilstand.meg;
+      return '<p class="rom-mester' + (jeg ? ' meg' : '') + '">❓ ' + (jeg ? T('<b>Du er spørsmålsmester!</b> Får du noen til å svare på et spørsmål, drikker de.', '<b>You’re the question master!</b> Get someone to answer one of your questions and they drink.')
+        : T('Spørsmålsmester: <b>' + esc(navn(m.id)) + '</b> – svar på et spørsmål fra hen, så drikker du.', 'Question master: <b>' + esc(navn(m.id)) + '</b> – answer one of their questions and you drink.')) + '</p>';
+    }
     /** Verktøy for verten: raske knapper under leken, og resten forklart i en liste. */
     function vertVerktoy(s) {
       if (!erVert()) return '';
@@ -623,9 +648,14 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (s && t.plan && nestePlan()) rask += '<button class="btn gold small" data-g="plan-start" type="button">⏭ ' + T('Neste: ', 'Next: ') + esc(nestePlan().navn) + '</button>';
       if (s) rask += '<button class="btn ghost small" data-g="avslutt" type="button">' + T('↩︎ Bytt lek', '↩︎ Switch game') + '</button>';
       var rader = [];
-      if (!t.bors) rader.push(['bs-start', '📈', T('Start Vorsbørsen', 'Start the Exchange'), T('Et aksjemarked på vennene dine som varer hele kvelden. Kjøp aksjer i det du tror skjer.', 'A stock market on your friends that lasts all night. Buy shares in what you think will happen.')]);
-      rader.push(t.oppdrag ? ['op-av', '🕵️', T('Stopp hemmelige oppdrag', 'Stop secret missions'), T('Oppdragene forsvinner fra alle telefonene.', 'The missions disappear from every phone.')]
-        : ['op-paa', '🕵️', T('Hemmelige oppdrag ✨', 'Secret missions ✨'), T('Alle får et hemmelig oppdrag som varer hele kvelden. Krever Pluss.', 'Everyone gets a secret mission that lasts all night. Needs Plus.')]);
+      // I lobbyen står bakgrunnslekene som eget steg. Under en lek kan verten slå dem av og på herfra.
+      if (s) {
+        if (!t.bors) rader.push(['bs-start', '📈', T('Slå på Vorsbørsen', 'Turn on the Exchange'), T('Et aksjemarked på vennene dine som går i bakgrunnen resten av kvelden.', 'A stock market on your friends that runs in the background for the rest of the night.')]);
+        rader.push(t.mester ? ['mester-av', '❓', T('Slå av spørsmålsmester', 'Turn off question master'), T('Mester nå: ', 'Master now: ') + navn(t.mester.id)]
+          : ['mester-paa', '❓', T('Slå på spørsmålsmester', 'Turn on question master'), T('Svarer du på et spørsmål fra mesteren, drikker du.', 'Answer a question from the master and you drink.')]);
+        rader.push(t.oppdrag ? ['op-av', '🕵️', T('Slå av hemmelige oppdrag', 'Turn off secret missions'), T('Oppdragene forsvinner fra alle telefonene.', 'The missions disappear from every phone.')]
+          : ['op-paa', '🕵️', T('Hemmelige oppdrag ✨', 'Secret missions ✨'), T('Alle får et hemmelig oppdrag som varer hele kvelden. Krever Pluss.', 'Everyone gets a secret mission that lasts all night. Needs Plus.')]);
+      }
       rader.unshift(['skjerm', '📺', T('Storskjerm på TV-en', 'Big screen on the TV'), T('Vis rommet stort på en PC eller et nettbrett koblet til TV-en – med lyd over musikken.', 'Show the room big on a laptop or tablet hooked up to the TV – with sound over the music.')]);
       rader.push(['nullstill', '🔄', T('Nullstill slurker', 'Reset sips'), T('Starter tellingen på poengtavla på nytt.', 'Restarts the count on the scoreboard.')]);
       if (!t.ferdig) rader.push(['avslutt-kvelden', '🏁', T('Avslutt kvelden', 'End the night'), T('Kårer kveldens vinner og viser oppsummeringen.', 'Crowns tonight’s winner and shows the recap.')]);
@@ -2438,7 +2468,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
       var sosGammel = document.getElementById('sosInput'), sosVerdi = sosGammel ? sosGammel.value : null, sosFokus = sosGammel && document.activeElement === sosGammel;
       var lovGammel = document.getElementById('lovNyTekst'), lovVerdi = lovGammel ? lovGammel.value : null, lovFokus = lovGammel && document.activeElement === lovGammel;
-      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + venterStripe() + oppdragKnapp() + borsPille() + borsHurtig() + reaksjonslinje() + innhold + vert +
+      root.innerHTML = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + venterStripe() + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.spill || tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
       // Nytt skjermbilde (lobby, ny lek, oppsummering): start øverst. Ellers: behold plassen.
       var skjerm = s ? 'spill:' + s.type + ':' + (s.navn && s.navn.no ? s.navn.no : s.navn) : tilstand.ferdig ? 'ferdig' : 'lobby';
@@ -2530,6 +2560,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (g === 'bs-fokus') return gjor({ handling: 'bs-fokus', paa: true });
       if (g === 'bs-start') return borsStartValg();
       if (g === 'op-paa' || g === 'op-av') return gjor({ handling: g });
+      if (g === 'mester-paa' || g === 'mester-bytt' || g === 'mester-av') return gjor({ handling: g });
       if (g === 'hs-stem') return gjor({ handling: 'hs-stem', hvem: b.dataset.paa });
       if (g === 'sp-stem') return gjor({ handling: 'sp-stem', hvem: b.dataset.paa });
       if (g === 'sp-gjett') return gjor({ handling: 'sp-gjett', sted: b.dataset.sted });

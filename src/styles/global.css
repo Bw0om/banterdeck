@@ -2004,3 +2004,19 @@ button,a,[role=button]{touch-action:manipulation}
 .side a.pluss-pille.aktiv{background:transparent;color:var(--gold-t)}
 .side a.appbtn{background:transparent;color:var(--ink);border:1px solid var(--border2);box-shadow:none}
 .side a.appbtn:hover{background:var(--card)}
+/* Lobbyen: forklaring under hvert steg og bakgrunnslekene */
+.rom-steg small{font-family:var(--body,inherit);font-size:13px;font-weight:600;color:var(--muted);margin-left:6px;letter-spacing:0}
+.rom-steg-forklaring{margin:-4px 0 12px;color:var(--muted)}
+.rom-bg{display:flex;flex-direction:column;border-radius:20px;background:var(--card);border:1px solid var(--border);overflow:hidden;margin-bottom:6px}
+.rom-bg-rad{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;padding:14px 16px;border-top:1px solid var(--border);align-items:start}
+.rom-bg-rad:first-child{border-top:0}
+.rom-bg-rad.paa{background:rgba(244,183,64,.07)}
+.rom-bg-ikon{width:40px;height:40px;border-radius:12px;background:var(--card2);display:grid;place-items:center;font-size:20px}
+.rom-bg-rad b{display:block;font-family:var(--display);font-size:16.5px}
+.rom-bg-rad small{display:block;font-size:13.5px;color:var(--muted);line-height:1.4;margin-top:2px}
+.rom-bg-rad small b{display:inline;font-family:inherit;font-size:inherit;color:var(--ink)}
+.rom-bg-knapper{grid-column:2;display:flex;align-items:center;gap:12px;margin-top:8px}
+.rom-bg-status{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--gold);color:var(--ink2);font-family:var(--body,inherit);font-size:11.5px;font-weight:800;vertical-align:2px}
+.rom-bg-pluss{font-family:var(--body,inherit);font-size:12px;font-weight:700;color:var(--gold-t);margin-left:4px}
+.rom-mester{margin:8px 0;padding:10px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);font-size:14px;line-height:1.4}
+.rom-mester.meg{border-color:var(--gold);background:rgba(244,183,64,.1)}
