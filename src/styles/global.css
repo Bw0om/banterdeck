@@ -1948,3 +1948,59 @@ button,a,[role=button]{touch-action:manipulation}
 .rof-knust span{font-size:22px;font-weight:700}
 @media (prefers-reduced-motion: reduce){.rofr-pil,.rof-snu,.rof-knust,.rof-knust b,.rofr-bord.brutt{animation:none}}
 .rofr-sprekk{pointer-events:none;position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;font-size:22px;line-height:30px;text-align:center;z-index:3;transform:rotate(var(--v)) translateY(calc(-1 * var(--R) - 26px))}
+/* Storskjerm-boksen hos verten */
+.rom-skjerm{border:1px solid var(--gold);border-radius:16px;padding:14px 16px;margin:0 0 12px;background:rgba(245,179,0,.06)}
+.rom-skjerm ol{margin:6px 0 10px;padding-left:20px;line-height:1.6}
+.rom-skjerm-pin{font-size:1.25em;letter-spacing:.12em;color:var(--gold)}
+/* Makkere i Ring of Fire */
+.rof-makker-valg{margin:12px 0}
+.rof-makkere{text-align:center;font-weight:700;margin:10px 0}
+/* ---------- Forsiden: gjeng i heroen, meny-liste og Pluss-billetten ---------- */
+.h2-gjeng{display:flex;flex-direction:column;gap:8px;padding-top:14px;margin-top:2px;border-top:1.5px solid rgba(29,22,12,.18)}
+.h2-gjeng-lenke{color:var(--ink2);font-weight:700;font-size:14.5px;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px}
+.h2-gjeng-lenke:hover{text-decoration-thickness:2.5px}
+.h2-gjeng-start{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 18px;border-radius:16px;border:2px solid var(--ink2);background:rgba(29,22,12,.08);color:var(--ink2);font:inherit;font-size:16px;font-weight:600;cursor:pointer;text-align:left}
+.h2-gjeng-start b{font-family:var(--display);font-weight:800}
+.h2-gjeng-start:hover{background:var(--ink2);color:#f4ebdc}
+.h2-gjeng-start:disabled{opacity:.6;cursor:wait}
+.h2-overskrift{font-size:22px;margin:30px 0 12px;letter-spacing:-.02em}
+.h2-meny{display:flex;flex-direction:column;margin-top:12px;border-radius:22px;background:var(--card);border:1px solid var(--border);overflow:hidden}
+.h2-meny a{display:flex;align-items:center;gap:14px;padding:14px 16px;color:var(--ink);text-decoration:none;border-top:1px solid var(--border)}
+.h2-meny a:first-child{border-top:0}
+.h2-meny a:hover{background:var(--card2);text-decoration:none}
+.h2-meny b{display:block;font-family:var(--display);font-weight:700;font-size:17px}
+.h2-meny small{display:block;font-size:13.5px;color:var(--muted)}
+.h2-ikon{flex:none;width:42px;height:42px;border-radius:14px;background:var(--card2);display:grid;place-items:center;font-size:20px;color:var(--gold-t)}
+/* Pluss som en festbillett: hoveddel + avrivbar stubb med prisene */
+.h2-pluss{--hull:#141009;position:relative;display:grid;grid-template-columns:1fr;margin-top:30px;border-radius:24px;background:var(--paper);color:var(--ink2);box-shadow:0 18px 50px rgba(0,0,0,.35)}
+:root[data-theme="light"] .h2-pluss{--hull:var(--bg)}
+.h2-pluss-hoved{padding:22px 22px 18px}
+.h2-pluss-merke{margin:0 0 6px;font-weight:800;font-size:14px;color:#9a5a00}
+.h2-pluss h2{margin:0 0 12px;font-size:clamp(24px,5.5vw,32px);line-height:1.05;letter-spacing:-.025em;color:var(--ink2);max-width:18ch}
+.h2-pluss ul{margin:0;padding:0;list-style:none;display:grid;gap:7px;font-size:15px;font-weight:500}
+.h2-pluss li{display:flex;gap:9px;align-items:baseline}
+.h2-pluss li::before{content:"✓";font-weight:900;color:#c8321f}
+.h2-pluss-stubb{position:relative;display:flex;align-items:center;gap:18px;padding:18px 22px;border-top:2.5px dashed rgba(29,22,12,.35);color:var(--ink2);text-decoration:none}
+.h2-pluss-stubb::before,.h2-pluss-stubb::after{content:"";position:absolute;top:-14px;width:26px;height:26px;border-radius:50%;background:var(--hull)}
+.h2-pluss-stubb::before{left:-13px}.h2-pluss-stubb::after{right:-13px}
+.h2-pluss-stubb:hover{text-decoration:none}
+.h2-pluss-pris b{display:block;font-family:var(--display);font-weight:800;font-size:24px;line-height:1}
+.h2-pluss-pris small{font-size:12.5px;font-weight:600;opacity:.75}
+.h2-pluss-knapp{margin-left:auto;display:inline-flex;align-items:center;height:48px;padding:0 20px;border-radius:14px;background:var(--ink2);color:#f4ebdc;font-family:var(--display);font-weight:800;font-size:16px;white-space:nowrap}
+.h2-pluss-stubb:hover .h2-pluss-knapp{filter:brightness(1.2)}
+@media (min-width:760px){
+  .h2-pluss{grid-template-columns:1fr 230px}
+  .h2-pluss-stubb{flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;border-top:0;border-left:2.5px dashed rgba(29,22,12,.35)}
+  .h2-pluss-stubb::before,.h2-pluss-stubb::after{left:-14px;right:auto}
+  .h2-pluss-stubb::before{top:-13px}.h2-pluss-stubb::after{top:auto;bottom:-13px}
+  .h2-pluss-knapp{margin-left:0}
+}
+/* Pluss-knappen i toppen */
+.pluss-pille{display:inline-flex;align-items:center;gap:5px;height:36px;padding:0 13px;border-radius:999px;background:var(--gold);color:var(--ink2);font-family:var(--display);font-weight:800;font-size:14px;text-decoration:none;white-space:nowrap}
+.pluss-pille:hover{text-decoration:none;filter:brightness(1.07)}
+.pluss-pille.aktiv{background:transparent;color:var(--gold-t);box-shadow:inset 0 0 0 1.5px var(--gold-t)}
+.side .pluss-pille{height:42px;justify-content:center;margin:2px 0 8px}
+.side a.pluss-pille{flex:none;display:flex;height:46px;justify-content:center;margin:4px 0 10px;padding:0 14px;font-size:15px;color:var(--ink2);background:var(--gold);border-radius:14px}
+.side a.pluss-pille.aktiv{background:transparent;color:var(--gold-t)}
+.side a.appbtn{background:transparent;color:var(--ink);border:1px solid var(--border2);box-shadow:none}
+.side a.appbtn:hover{background:var(--card)}

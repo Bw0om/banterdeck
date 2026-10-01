@@ -1,7 +1,7 @@
 // Ett rom: hente tilstanden (GET) eller gjøre noe i det (POST).
 // Telefonen identifiserer seg med spiller-id og pollett i egne felt, aldri i adressen.
 import type { APIRoute } from 'astro';
-import { hentRom, endreRom, visning, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
+import { hentRom, endreRom, visning, skjermVisning, skjermPinOk, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
 import { rpc } from '../../../lib/spilt';
 import { etterpaa } from '../../../lib/etterpaa';
 import { innloggetBruker } from '../../../lib/konto';
@@ -48,6 +48,13 @@ export const GET: APIRoute = async ({ params, request }) => {
     const rom = await hentRom(kode);
     if (!rom) return json({ feil: 'finnes-ikke', melding: melding('finnes-ikke', qLang) }, 404);
     const v = Number(new URL(request.url).searchParams.get('v') || 0);
+    // Storskjerm (TV/PC): verten har gitt den en PIN. Den ser bare det alle i rommet skal se.
+    const pin = request.headers.get('x-skjerm');
+    if (pin) {
+      if (!skjermPinOk(rom.data, pin)) return json({ feil: 'skjerm-pin', melding: qLang === 'en' ? 'Wrong code or PIN. The host finds the PIN under “Big screen”.' : 'Feil kode eller PIN. Verten finner PIN-en under «Storskjerm».' }, 403);
+      if (v && v === rom.versjon) return new Response(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
+      return json({ ...skjermVisning(rom.data, rom.versjon, qLang), kode });
+    }
     const meg = finnSpiller(rom.data, request.headers.get('x-spiller') || '', request.headers.get('x-pollett') || '');
     // Venter på å bli sluppet inn i en gjengkveld: vis bare venterommet
     if (!meg) {

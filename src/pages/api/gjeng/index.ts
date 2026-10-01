@@ -70,12 +70,13 @@ export const POST: APIRoute = async ({ request }) => {
         if (aktiv) return json(await inn(aktiv, u.id, navn, lang));
         const alle = lekeliste(lang), lov = new Set(alle.map((x: any) => x.id).concat(['bors']));
         const leker = (Array.isArray(d.leker) ? d.leker : []).map(String).filter((x: string) => lov.has(x)).slice(0, 12);
-        if (!leker.length) return json({ feil: 'leker', melding: en ? 'Pick at least one game.' : 'Velg minst én lek.' }, 400);
+        // Hurtigstart fra forsiden: ingen plan – verten velger lekene i rommet
+        if (!leker.length && d.rask !== true) return json({ feil: 'leker', melding: en ? 'Pick at least one game.' : 'Velg minst én lek.' }, 400);
         let regler: any[] = [];
         try { const l = await rpc('gjeng_lov_hent', { p_gjeng: id }); if (l) regler = reglerForRom(l.lov); } catch { /* ikke satt opp */ }
         const { kode, spiller } = await lagRom(navn, '', '', lang);
         await endreRom(kode, (data) => {
-          data.gjeng = { id: g.id, navn: g.navn, kode: g.kode, regler }; data.gjengKveld = true; data.plan = leker;
+          data.gjeng = { id: g.id, navn: g.navn, kode: g.kode, regler }; data.gjengKveld = true; data.plan = leker.length ? leker : null;
           data.spillere[0].konto = u.id;
           return { ok: true };
         });
@@ -83,9 +84,10 @@ export const POST: APIRoute = async ({ request }) => {
         await loggRom('lag', 'gjengkveld').catch(() => null);
         const navnPaa = (x: string) => x === 'bors' ? 'Vorsbørsen' : ((lekeliste('no').find((y: any) => y.id === x) || {}) as any).navn || x;
         const liste = leker.slice(0, 3).map(navnPaa).join(', ') + (leker.length > 3 ? ' …' : '');
+        const hva = liste ? ` – ${liste}` : '';
         try {
           await Promise.race([
-            sendTilGjeng(id, u.id, { tittel: `${g.navn}: kvelden starter! 🎉`, tekst: `${navn} har startet kveld – ${liste}. Trykk for å bli med.`, url: '/no/gjeng?k=' + g.kode }),
+            sendTilGjeng(id, u.id, { tittel: `${g.navn}: kvelden starter! 🎉`, tekst: `${navn} har startet kveld${hva}. Trykk for å bli med.`, url: '/no/gjeng?k=' + g.kode }),
             new Promise((ok) => setTimeout(ok, 4000)),
           ]);
         } catch (e) { console.warn('Gjengvarsel feilet:', (e as Error).message); }

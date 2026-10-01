@@ -626,11 +626,27 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (!t.bors) rader.push(['bs-start', '📈', T('Start Vorsbørsen', 'Start the Exchange'), T('Et aksjemarked på vennene dine som varer hele kvelden. Kjøp aksjer i det du tror skjer.', 'A stock market on your friends that lasts all night. Buy shares in what you think will happen.')]);
       rader.push(t.oppdrag ? ['op-av', '🕵️', T('Stopp hemmelige oppdrag', 'Stop secret missions'), T('Oppdragene forsvinner fra alle telefonene.', 'The missions disappear from every phone.')]
         : ['op-paa', '🕵️', T('Hemmelige oppdrag ✨', 'Secret missions ✨'), T('Alle får et hemmelig oppdrag som varer hele kvelden. Krever Pluss.', 'Everyone gets a secret mission that lasts all night. Needs Plus.')]);
+      rader.unshift(['skjerm', '📺', T('Storskjerm på TV-en', 'Big screen on the TV'), T('Vis rommet stort på en PC eller et nettbrett koblet til TV-en – med lyd over musikken.', 'Show the room big on a laptop or tablet hooked up to the TV – with sound over the music.')]);
       rader.push(['nullstill', '🔄', T('Nullstill slurker', 'Reset sips'), T('Starter tellingen på poengtavla på nytt.', 'Restarts the count on the scoreboard.')]);
       if (!t.ferdig) rader.push(['avslutt-kvelden', '🏁', T('Avslutt kvelden', 'End the night'), T('Kårer kveldens vinner og viser oppsummeringen.', 'Crowns tonight’s winner and shows the recap.')]);
-      return '<div class="rom-vert">' + (rask ? '<div class="rom-vert-rask">' + rask + '</div>' : '') +
+      return '<div class="rom-vert">' + (visSkjerm && t.skjermPin ? skjermBoks() : '') + (rask ? '<div class="rom-vert-rask">' + rask + '</div>' : '') +
         '<details class="rom-verktoy" data-gruppe="' + (s ? 'verktoy-spill' : 'verktoy-lobby') + '"' + (erApen(s ? 'verktoy-spill' : 'verktoy-lobby', !s) ? ' open' : '') + '><summary>⚙️ ' + (s ? T('Mer for verten', 'More for the host') : T('Mer til kvelden', 'More for the night')) + '</summary>' +
         rader.map(function (r) { return '<button type="button" class="rom-verktoy-rad" data-g="' + r[0] + '"><span aria-hidden="true">' + r[1] + '</span><b>' + r[2] + '</b><small>' + r[3] + '</small></button>'; }).join('') + '</details></div>';
+    }
+    /** Storskjerm: hvor verten finner adressen og PIN-en til TV-en. */
+    var visSkjerm = false;
+    function skjermAdresse() { return (kortDomene ? 'https://mittvors.no' : location.origin) + (EN ? '/tv' : '/no/tv'); }
+    function skjermLenke() { return skjermAdresse() + '?k=' + kode + '&p=' + tilstand.skjermPin; }
+    function skjermBoks() {
+      var adr = skjermAdresse().replace(/^https?:\/\//, '');
+      return '<div class="rom-skjerm"><p class="rom-etikett">📺 ' + T('Storskjerm', 'Big screen') + '</p>' +
+        '<ol><li>' + T('På PC-en eller nettbrettet ved TV-en: gå til ', 'On the laptop or tablet by the TV: go to ') + '<b>' + esc(adr) + '</b></li>' +
+        '<li>' + T('Skriv inn', 'Enter') + ' <b>' + esc(kode) + '</b> ' + T('og PIN', 'and PIN') + ' <b class="rom-skjerm-pin">' + esc(tilstand.skjermPin) + '</b></li>' +
+        '<li>' + T('Trykk «Start» der, så kommer lyden fra TV-en.', 'Tap “Start” there, and the sound comes from the TV.') + '</li></ol>' +
+        '<div class="gt-row"><button class="btn small gold" data-g="skjerm-del" type="button">' + T('Send lenken til PC-en', 'Send the link to the laptop') + '</button>' +
+        '<button class="btn small ghost" data-g="skjerm-ny" type="button">' + T('Ny PIN', 'New PIN') + '</button>' +
+        '<button class="linkbtn" data-g="skjerm-lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+        '<p class="small">' + T('Storskjermen er ingen spiller: den ser aldri hemmelige roller eller hendene på børsen.', 'The big screen isn’t a player: it never sees secret roles or anyone’s hand on the Exchange.') + '</p></div>';
     }
     /** Hvor mange spillere lekene trenger (samme regler som serveren). */
     var MIN_SPILLERE = { hvemskrev: 3, bloff: 3, samme: 3, spion: 3, pannekort: 3, forraeder: 3, gris: 3, president: 3, skal: 2, pyramiden: 2, bussruta: 2, tosannheter: 2, mest: 2 };
@@ -875,6 +891,17 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       }).catch(function (e) { toast(e.message || T('Fikk ikke lagret.', 'Couldn\'t save.')); });
     }
 
+    /** Makkere (8): den som trakk åtteren, velger makker. Etterpå vises parene under kortet. */
+    function makkerHtml(s) {
+      var ut = '';
+      if (s.velgMakker && (s.velgMakker === tilstand.meg || erVert())) {
+        var jeg = s.velgMakker === tilstand.meg;
+        ut += '<div class="rof-makker-valg"><p class="rom-etikett">🤝 ' + (jeg ? T('Velg makkeren din', 'Pick your mate') : esc(navn(s.velgMakker)) + T(' velger makker', ' picks a mate')) + '</p><div class="rom-valg">' +
+          tilstand.spillere.filter(function (p) { return p.id !== s.velgMakker; }).map(function (p) { return '<button type="button" data-g="rof-makker" data-paa="' + p.id + '">' + esc(p.navn) + '</button>'; }).join('') + '</div></div>';
+      } else if (s.velgMakker) ut += '<p class="small">🤝 ' + esc(navn(s.velgMakker)) + T(' velger makker …', ' is picking a mate …') + '</p>';
+      if (s.makkere && s.makkere.length) ut += '<p class="rof-makkere">🤝 ' + s.makkere.map(function (m) { return esc(navn(m[0])) + ' ↔ ' + esc(navn(m[1])); }).join(' · ') + '</p>';
+      return ut;
+    }
     /* ---------- Ring of Fire: ringen rundt glasset ---------- */
     var rofFor = -2, rofA = 0, rofDrar = null, rofVentTegn = false, rofBruddSett = null, rofValgt = -1;
     var ROF_N = 52, ROF_STEG = 360 / 52;
@@ -913,7 +940,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         (s.ringBrutt ? '<p class="small rofr-hint">💥 ' + T('Ringen er brutt av ', 'The ring was broken by ') + esc((s.brudd && s.brudd.navn) || '') + T(' – nå kan den ikke ryke igjen. Bare trekk!', ' – it can’t break again. Just draw!') + '</p>'
           : min ? '<div class="rofr-spenning" aria-hidden="true"><i></i></div><p class="small rofr-hint">' + T('Snurr: sveip rundt ringen. Trekk: hold på det lyse kortet og dra det <b>sakte</b> oppover.', 'Spin: swipe around the ring. Draw: hold the glowing card and pull it <b>slowly</b> upward.') + '</p>'
           : '<p class="small rofr-hint">' + T('Følg med – ryker ringen, må ', 'Watch – if the ring breaks, ') + esc(navn(s.turId)) + T(' drikke opp.', ' finishes their drink.') + '</p>') +
-        (k ? '<p class="rom-etikett">' + esc(k.hvem || '') + T(' trakk', ' drew') + '</p>' + rofKortHtml(k, s.nr) : '') +
+        (k ? '<p class="rom-etikett">' + esc(k.hvem || '') + T(' trakk', ' drew') + '</p>' + rofKortHtml(k, s.nr) : '') + makkerHtml(s) +
         (!min && erVert() ? '<p class="small"><button class="linkbtn" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button></p>' : '');
     }
     /** Ringen røk: alle telefonene får vite det. */
@@ -1008,7 +1035,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         : '<div class="rom-kort">' + (k.k ? '<span class="sw-tag">' + esc(k.k) + '</span>' : '<span></span>') + '<p>' + esc(k.t) + '</p><span class="rom-teller">' + (s.pos + 1) + ' / ' + s.antall + '</span></div>';
       return (rof && k.hvem ? '<div class="rof-tur"><span>' + T('Trekker', 'Drawing') + '</span><b>' + esc(k.hvem) + '</b></div>' : '') +
         (rof ? '<p class="rom-status">' + (s.antall - s.pos - 1) + T(' kort igjen · ', ' cards left · ') + (s.konger || 0) + T(' konger', ' kings') + '</p>' : '') +
-        kortHtml +
+        kortHtml + (rof ? makkerHtml(s) : '') +
         '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + '</button>';
     }
 
@@ -2134,6 +2161,11 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       t.leker = Object.keys(leker).map(function (n) { return n + (leker[n] > 1 ? ' ×' + leker[n] : ''); });
       t.minutter = Math.max(1, Math.round(((tilstand.ferdig || Date.now()) - (tilstand.laget || Date.now())) / 60000));
       t.kaaring = [];
+      if (tilstand.kaaringer && tilstand.kaaringer.length) {
+        t.kaaring = tilstand.kaaringer.map(function (x) { return { ikon: x.ikon, tittel: x.tittel, navn: x.navn, tall: x.tall }; });
+        t.rangert = l.sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0); });
+        return t;
+      }
       var torst = maks('slurker'); if (torst) t.kaaring.push({ ikon: '🏆', tittel: T('Kveldens tørstigste', 'Thirstiest of the night'), navn: torst.navn, tall: torst.slurker + T(' slurker', ' sips') });
       if (l.length >= 3 && t.sumSlurker) { var edru = l.slice().sort(function (a, b) { return (a.slurker || 0) - (b.slurker || 0); })[0]; t.kaaring.push({ ikon: '🧊', tittel: T('Mest edru', 'Most sober'), navn: edru.navn, tall: (edru.slurker || 0) + T(' slurker', ' sips') }); }
       var gavmild = maks('sendt'); if (gavmild) t.kaaring.push({ ikon: '🎁', tittel: T('Mest gavmild', 'Most generous'), navn: gavmild.navn, tall: gavmild.sendt + T(' 🍺 sendt', ' 🍺 sent') });
@@ -2550,6 +2582,20 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (g === 'del-kveld') return delKveld();
       if (g === 'alkoholfri') return gjorAlltid({ handling: 'alkoholfri', paa: !tilstand.alkoholfri });
       if (g === 'gjeng-av') return gjorAlltid({ handling: 'gjeng', gjengId: '' });
+      if (g === 'skjerm') {
+        visSkjerm = true;
+        var tilSkjerm = function () { setTimeout(function () { var e = document.querySelector('.rom-skjerm'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120); };
+        if (!tilstand.skjermPin) { gjor({ handling: 'skjerm-lag' }); setTimeout(tilSkjerm, 700); return; }
+        tegn(); return tilSkjerm();
+      }
+      if (g === 'skjerm-ny') return gjor({ handling: 'skjerm-lag', ny: true });
+      if (g === 'skjerm-lukk') { visSkjerm = false; return tegn(); }
+      if (g === 'skjerm-del') {
+        var sl = skjermLenke();
+        if (navigator.share) { navigator.share({ title: T('Mitt vors – storskjerm', 'Mitt vors – big screen'), url: sl }).catch(function () {}); return; }
+        try { navigator.clipboard.writeText(sl); toast(T('Lenken er kopiert ✓', 'Link copied ✓')); } catch (e) { prompt(T('Kopier lenken:', 'Copy the link:'), sl); }
+        return;
+      }
       if (g === 'avslutt-kvelden' && !confirm(T('Avslutte kvelden og vise oppsummeringen? Dere kan fortsette etterpå.', 'End the night and show the summary? You can continue afterwards.'))) return;
       if (g === 'avslutt-kvelden' || g === 'fortsett-kvelden') return gjor({ handling: g });
       if (g === 'nullstill' && !confirm(T('Nullstille alle slurkene på tavla?', 'Reset all the sips on the scoreboard?'))) return;
@@ -2566,6 +2612,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (g === 'nr-flipp') return gjor({ handling: 'nr-flipp', hvem: b.dataset.id });
       if (['br-buss', 'br-kjor', 'yz-kast', 'nr-vis', 'nr-neste', 'nr-start'].indexOf(g) !== -1) return gjor({ handling: g });
       if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
+      if (g === 'rof-makker') return gjor({ handling: 'rof-makker', paa: b.dataset.paa });
       if (g === 'rof-for') { rofFor = tilstand.spill ? tilstand.spill.nr : -1; return tegn(); }
       if (g === 'stem') return gjor({ handling: 'stem', paa: b.dataset.paa });
       if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });

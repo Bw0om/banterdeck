@@ -49,6 +49,9 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
         </div>
       </form>
     </div>
+    <div class="h2-gjeng" id="h2Gjeng">
+      <a class="h2-gjeng-lenke" href={no ? '/no/gjeng' : '/crew'}>{no ? 'Fast gjeng? Lag en gjeng, så starter dere kvelden med ett trykk' : 'Same crew every time? Make a crew and start the night with one tap'}</a>
+    </div>
   </section>
 
   <ol class="h2-slik" id="h2Slik">
@@ -61,7 +64,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     <span class="kode" aria-hidden="true">ABCD</span>
   </a>
 
-  <p class="h2-label">{no ? 'Eller finn en lek' : 'Or find a game'}</p>
+  <h2 class="h2-overskrift">{no ? 'Finn en lek' : 'Find a game'}</h2>
   <a class="h2-start" href={path(lang, '/drinking-games')}>
     <span><b>{no ? 'Alle drikkelekene' : 'All the drinking games'}</b><small>{gamesFor(lang).length} {no ? 'leker med regler – mange kan spilles i appen' : 'games with rules – many can be played in the app'}</small></span>
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
@@ -88,29 +91,36 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   })();
   </script>
 
+  <nav class="h2-meny" aria-label={no ? 'Mer for kvelden' : 'More for the night'}>
+    {no && nrBygg && (
+      <a href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}><span class="h2-ikon" aria-hidden="true">📰</span><span><b>Nyhetsrunden</b><small>Uke {nrBygg.uke} · {nrBygg.antall} spørsmål om ukas nyheter</small></span></a>
+    )}
+    <a href={no ? '/no/finn-lek' : '/find-a-game'}><span class="h2-ikon" aria-hidden="true">🎯</span><span><b>{no ? 'Finn riktig lek' : 'Find the right game'}</b><small>{no ? 'Tre spørsmål, så får dere et forslag' : 'Three questions, then a suggestion'}</small></span></a>
+    <a href={no ? '/no/kveld' : '/plan'}><span class="h2-ikon" aria-hidden="true">🗓️</span><span><b>{no ? 'Kveldsplan' : 'Plan the night'}</b><small>{no ? 'Leker fra vors til nachspiel' : 'Games from pre-drinks to afterparty'}</small></span></a>
+    <a href={path(lang, '/favourites')}><span class="h2-ikon" aria-hidden="true">★</span><span><b>{no ? 'Lagret' : 'Saved'}</b><small>{no ? 'Leker og replikker du har tatt vare på' : 'Games and lines you’ve kept'}</small></span></a>
+  </nav>
+
+  <section class="h2-pluss" aria-labelledby="h2PlussTittel">
+    <div class="h2-pluss-hoved">
+      <p class="h2-pluss-merke">✨ Mitt vors {no ? 'Pluss' : 'Plus'}</p>
+      <h2 id="h2PlussTittel">{no ? 'Verten betaler. Hele festen spiller.' : 'The host pays. The whole party plays.'}</h2>
+      <ul>
+        <li>{no ? 'Opptil 16 telefoner i rommet (gratis: 4)' : 'Up to 16 phones in the room (free: 4)'}</li>
+        <li>{no ? 'Vorsbørsen med 100 aksjer og hemmelige oppdrag' : 'The Exchange with 100 shares, plus secret missions'}</li>
+        <li>{no ? 'Bussruta, Yatzy, Pyramiden, President, Gris, Forræder og Bløffquizen' : 'Ride the Bus, Yahtzee, Pyramid, President, Pig, Traitor and Bluff Quiz'}</li>
+        <li>{no ? 'Julebord- og Vill-pakken' : 'The Office Party and Wild packs'}</li>
+      </ul>
+    </div>
+    <a class="h2-pluss-stubb" href={no ? '/no/pluss' : '/plus'}>
+      <span class="h2-pluss-pris"><b>29 kr</b><small>{no ? 'per kveld' : 'per night'}</small></span>
+      <span class="h2-pluss-pris"><b>199 kr</b><small>{no ? 'hele året' : 'whole year'}</small></span>
+      <span class="h2-pluss-knapp" id="h2PlussKnapp">{no ? 'Se Pluss' : 'See Plus'}</span>
+    </a>
+  </section>
+
   {no ? (
     <>
-      {nrBygg && (
-        <div class="h2-tiles">
-          <a class="h2-tile" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
-            <span class="h2-badge">Uke {nrBygg.uke}</span>
-            <span><b>Nyhetsrunden</b><small>{nrBygg.antall} spørsmål</small></span>
-          </a>
-          <a class="h2-tile" href="/no/kveld">
-            <span class="h2-badge">Plan</span>
-            <span><b>Kveldsplan</b><small>Leker fra vors til nachspiel</small></span>
-          </a>
-        </div>
-      )}
-      <div class="h2-row">
-        <a href="/no/finn-lek">🎯 Finn lek</a>
-        <a href="/no/gjeng">👥 Gjengen</a>
-        <a href="/no/pluss">✨ Pluss</a>
-        <a href="/no/nyhetsrunden/arkiv">📰 Arkivet</a>
-        <a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} />Lagret</a>
-      </div>
-
-      <p class="h2-label">Humor ved siden</p>
+      <h2 class="h2-overskrift">Humor ved siden</h2>
       <div class="h2-tiles">
         <button class="h2-tile" type="button" data-sveip>
           <span class="h2-quote" aria-hidden="true">«…»</span>
@@ -130,23 +140,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     </>
   ) : (
     <>
-      <div class="h2-tiles">
-        <a class="h2-tile" href="/plan">
-          <span class="h2-badge">Plan</span>
-          <span><b>Plan the night</b><small>Games from pre-drinks to afterparty</small></span>
-        </a>
-        <a class="h2-tile" href="/find-a-game">
-          <span class="h2-badge">Quiz</span>
-          <span><b>Find a game</b><small>Three questions, the right game</small></span>
-        </a>
-      </div>
-      <div class="h2-row">
-        <a href="/crew">👥 Your crew</a>
-        <a href="/plus">✨ Plus</a>
-        <a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} />Saved</a>
-      </div>
-
-      <p class="h2-label">Humour on the side</p>
+      <h2 class="h2-overskrift">Humour on the side</h2>
       <div class="h2-tiles">
         <button class="h2-tile" type="button" data-sveip>
           <span class="h2-quote" aria-hidden="true">«…»</span>
@@ -197,8 +191,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     var l = []; try { l = JSON.parse(f.dataset.runder || '[]'); } catch (e) {}
     var naa = Date.now(), r = l.filter(function (x) { return x.fra <= naa; })[0];
     if (!r) return;
-    f.querySelector('.h2-badge').textContent = 'Uke ' + r.uke;
-    f.querySelector('small').textContent = r.antall + ' spørsmål';
+    f.querySelector('small').textContent = 'Uke ' + r.uke + ' · ' + r.antall + ' spørsmål om ukas nyheter';
   })();
   </script>
   <div class="installer" id="installer" hidden>
@@ -271,6 +264,37 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     a.querySelector('b').textContent = x.navn;
     a.querySelector('small').textContent = x.gruppe + ' · ' + x.pl + (a.dataset.base === '/drinking-games/' ? ' players' : ' spillere');
     a.querySelector('img').src = x.bilde;
+  })();
+  </script>
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Gjengene dine rett på forsiden: start kvelden med ett trykk (bare når du er logget inn)
+    var boks = document.getElementById('h2Gjeng'); if (!boks || boks.dataset.bound) return; boks.dataset.bound = '1';
+    var K = window.BDKonto, en = /^en/.test(document.documentElement.lang || '');
+    var ROM = en ? '/room' : '/no/rom';
+    function esc(x) { return String(x).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+    if (!K || !K.les || !K.les()) return;
+    K.api('/api/gjeng').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      var g = d && d.gjenger; if (!g) return;
+      if (!g.length) { boks.querySelector('a').textContent = en ? 'Make a crew – then you start the night with one tap' : 'Lag en gjeng – så starter dere kvelden med ett trykk'; return; }
+      boks.innerHTML = g.slice(0, 3).map(function (x) { return '<button type="button" class="h2-gjeng-start" data-id="' + esc(x.id) + '"><span aria-hidden="true">👥</span>' + (en ? 'Start the night with ' : 'Start kvelden med ') + '<b>' + esc(x.navn) + '</b></button>'; }).join('');
+    }).catch(function () {});
+    boks.addEventListener('click', function (e) {
+      var b = e.target.closest('.h2-gjeng-start'); if (!b) return;
+      var navn = ''; try { navn = JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (x) {}
+      b.disabled = true;
+      function start(nv) {
+        return K.api('/api/gjeng', { method: 'POST', headers: { 'x-lang': en ? 'en' : 'no' }, body: JSON.stringify({ handling: 'start-kveld', id: b.dataset.id, navn: nv, rask: true, leker: [] }) })
+          .then(function (r) { return r.json().then(function (d) { d._ok = r.ok; return d; }); })
+          .then(function (d) {
+            if (!d._ok && d.feil === 'navn') { var ny = prompt(en ? 'What’s your name?' : 'Hva heter du?', ''); if (ny && ny.trim()) { try { localStorage.setItem('bd_mittnavn', JSON.stringify(ny.trim())); } catch (x) {} return start(ny.trim()); } b.disabled = false; return; }
+            if (!d._ok) { b.disabled = false; alert(d.melding || (en ? 'That didn’t work. Try again.' : 'Det gikk ikke. Prøv igjen.')); return; }
+            try { localStorage.setItem('bd_rom_' + d.kode, JSON.stringify({ id: d.id, pollett: d.pollett })); localStorage.setItem('bd_sist_rom', JSON.stringify({ k: d.kode, t: Date.now() })); } catch (x) {}
+            location.href = ROM + '?k=' + d.kode;
+          }).catch(function () { b.disabled = false; });
+      }
+      start(navn);
+    });
   })();
   </script>
 </Base>
