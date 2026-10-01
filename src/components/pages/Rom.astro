@@ -649,7 +649,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         paa: !!bors, knapp: bors ? '<button class="btn small ghost" data-g="bs-aapne" type="button">' + T('Åpne', 'Open') + '</button>' : '<button class="btn small gold" data-g="bs-start" type="button">' + T('Slå på', 'Turn on') + '</button>' });
       rader.push({ ikon: '❓', navn: T('Spørsmålsmester', 'Question master'), om: t.mester ? T('Mester nå: ', 'Master now: ') + '<b>' + esc(navn(t.mester.id)) + '</b>. ' + T('Svarer du på et spørsmål fra hen, drikker du. Ny mester hvert 25. minutt.', 'Answer one of their questions and you drink. New master every 25 minutes.') : T('Én er mester. Svarer du på et spørsmål fra mesteren, drikker du. Appen bytter mester hvert 25. minutt.', 'One person is master. Answer a question from the master and you drink. The app swaps master every 25 minutes.'),
         paa: !!t.mester, knapp: t.mester ? '<button class="btn small ghost" data-g="mester-bytt" type="button">' + T('Bytt', 'Swap') + '</button><button class="linkbtn" data-g="mester-av" type="button">' + T('Slå av', 'Turn off') + '</button>' : '<button class="btn small gold" data-g="mester-paa" type="button">' + T('Slå på', 'Turn on') + '</button>' });
-      rader.push({ ikon: '🕵️', navn: T('Hemmelige oppdrag', 'Secret missions') + ' <span class="rom-bg-pluss">✨ Pluss</span>', om: T('Alle får et hemmelig oppdrag, som å få noen til å si «sykt». Klarer du det, deler du ut slurker.', 'Everyone gets a secret mission, like getting someone to say “insane”. Pull it off and you hand out sips.'),
+      rader.push({ ikon: '🕵️', navn: T('Agent 0,5', 'Agent 0.5') + ' <span class="rom-bg-pluss">✨ Pluss</span>', om: T('Hemmelige oppdrag: alle får ett, som å få noen til å si «sykt». Klarer du det, deler du ut slurker.', 'Everyone gets a secret mission, like getting someone to say “insane”. Pull it off and you hand out sips.'),
         paa: !!t.oppdrag, knapp: t.oppdrag ? '<button class="linkbtn" data-g="op-av" type="button">' + T('Slå av', 'Turn off') + '</button>' : '<button class="btn small gold" data-g="op-paa" type="button">' + T('Slå på', 'Turn on') + '</button>' });
       return '<div class="rom-bg">' + rader.map(function (r) {
         return '<div class="rom-bg-rad' + (r.paa ? ' paa' : '') + '"><span class="rom-bg-ikon" aria-hidden="true">' + r.ikon + '</span><div><b>' + r.navn + (r.paa ? ' <span class="rom-bg-status">' + T('På', 'On') + '</span>' : '') + '</b><small>' + r.om + '</small></div><div class="rom-bg-knapper">' + r.knapp + '</div></div>';
@@ -674,8 +674,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
         if (!t.bors) rader.push(['bs-start', '📈', T('Slå på Vorsbørsen', 'Turn on the Exchange'), T('Et aksjemarked på vennene dine som går i bakgrunnen resten av kvelden.', 'A stock market on your friends that runs in the background for the rest of the night.')]);
         rader.push(t.mester ? ['mester-av', '❓', T('Slå av spørsmålsmester', 'Turn off question master'), T('Mester nå: ', 'Master now: ') + navn(t.mester.id)]
           : ['mester-paa', '❓', T('Slå på spørsmålsmester', 'Turn on question master'), T('Svarer du på et spørsmål fra mesteren, drikker du.', 'Answer a question from the master and you drink.')]);
-        rader.push(t.oppdrag ? ['op-av', '🕵️', T('Slå av hemmelige oppdrag', 'Turn off secret missions'), T('Oppdragene forsvinner fra alle telefonene.', 'The missions disappear from every phone.')]
-          : ['op-paa', '🕵️', T('Hemmelige oppdrag ✨', 'Secret missions ✨'), T('Alle får et hemmelig oppdrag som varer hele kvelden. Krever Pluss.', 'Everyone gets a secret mission that lasts all night. Needs Plus.')]);
+        rader.push(t.oppdrag ? ['op-av', '🕵️', T('Slå av Agent 0,5', 'Turn off Agent 0.5'), T('Oppdragene forsvinner fra alle telefonene.', 'The missions disappear from every phone.')]
+          : ['op-paa', '🕵️', T('Agent 0,5 ✨', 'Agent 0.5 ✨'), T('Alle får et hemmelig oppdrag som varer hele kvelden. Krever Pluss.', 'Everyone gets a secret mission that lasts all night. Needs Plus.')]);
       }
       rader.unshift(['skjerm', '📺', T('Storskjerm på TV-en', 'Big screen on the TV'), T('Vis rommet stort på en PC eller et nettbrett koblet til TV-en – med lyd over musikken.', 'Show the room big on a laptop or tablet hooked up to the TV – with sound over the music.')]);
       rader.push(['nullstill', '🔄', T('Nullstill slurker', 'Reset sips'), T('Starter tellingen på poengtavla på nytt.', 'Restarts the count on the scoreboard.')]);
@@ -738,7 +738,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       hvemskrev: [['Alle svarer anonymt på samme spørsmål på sin telefon.', 'Everyone answers the same question anonymously on their phone.'], ['Svarene vises ett og ett – gjett hvem som skrev hva.', 'The answers are shown one at a time – guess who wrote what.'], ['Gjetter du feil, drikker du. Lurer du alle, får du slurker å dele ut.', 'Guess wrong and you drink. Fool everyone and you get sips to hand out.']],
       bloff: [['Alle får samme spørsmål og skriver et troverdig, men feil svar.', 'Everyone gets the same question and writes a believable but wrong answer.'], ['Det ekte svaret blandes med bløffene – stem på det du tror er riktig.', 'The real answer is mixed in with the bluffs – vote for the one you think is right.'], ['Riktig: del ut en slurk. Går du på en bløff, drikker du – og bløfferen deler ut.', 'Right: hand out a sip. Fall for a bluff and you drink – and the bluffer hands one out.']],
       samme: [['Alle skriver ett ord i hemmelighet som passer oppgaven.', 'Everyone secretly writes one word that fits the prompt.'], ['Målet er å svare det samme som de andre.', 'The goal is to answer the same as the others.'], ['Står du alene med svaret ditt, drikker du.', 'If nobody else wrote your answer, you drink.']],
-      spion: [['Alle ser samme sted på skjermen – bortsett fra spionen.', 'Everyone sees the same location on screen – except the spy.'], ['Still hverandre spørsmål om stedet på omgang, uten å røpe det.', 'Take turns asking each other questions about the place, without giving it away.'], ['Stem på hvem som er spionen. Blir hen tatt, kan hen fortsatt vinne ved å gjette stedet.', 'Vote for who the spy is. If caught, the spy can still win by guessing the location.']],
+      spion: [['Alle ser samme sted på skjermen – bortsett fra muldvarpen.', 'Everyone sees the same location on screen – except the mole.'], ['Still hverandre spørsmål om stedet på omgang, uten å røpe det.', 'Take turns asking each other questions about the place, without giving it away.'], ['Stem på hvem som er muldvarpen. Blir hen tatt, kan hen fortsatt vinne ved å gjette stedet.', 'Vote for who the mole is. If caught, the mole can still win by guessing the location.']],
       pannekort: [['Du skriver et ord (en person, ting eller et dyr) til den du får tildelt.', 'You write a word (a person, thing or animal) for the player you’re assigned.'], ['Du ser alles ord – bortsett fra ditt eget.', 'You see everyone’s word – except your own.'], ['Still ja/nei-spørsmål og gjett hva du er.', 'Ask yes/no questions and guess what you are.']],
       skal: [['Vent til det står SKÅL! på skjermen.', 'Wait until it says CHEERS! on screen.'], ['Trykk så fort du kan.', 'Tap as fast as you can.'], ['Tregest drikker – trykker du for tidlig, drikker du dobbelt.', 'Slowest drinks – tap too early and you drink double.']],
       mest: [['Et «Hvem er mest sannsynlig til …»-spørsmål dukker opp.', 'A “Who’s most likely to …” question appears.'], ['Alle stemmer i hemmelighet på den det passer best på.', 'Everyone secretly votes for who it fits best.'], ['Hver stemme du får, er én slurk.', 'Every vote you get is one sip.']],
@@ -930,7 +930,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     }
     function lagreSomStokk() {
       var s = tilstand && tilstand.spill; if (!s || !s.alleKort || !s.alleKort.length) return;
-      var d = new Date(), navn = T('Regelfabrikken ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'Rule Factory ' + d.getDate() + '/' + (d.getMonth() + 1));
+      var d = new Date(), navn = T('Hjemmesnekra ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'Homemade ' + d.getDate() + '/' + (d.getMonth() + 1));
       var K = window.BDKonto;
       (K ? K.bruker() : Promise.resolve(null)).then(function (u) {
         if (!u) {
@@ -1269,7 +1269,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     function regelfabrikkenSpill(s) {
       rfOffset = s.naa - Date.now();
       if (s.fase === 'klar') {
-        return '<p class="dl-melding dl-stor">' + T('Klar for Regelfabrikken?', 'Ready for Rule Factory?') + '</p>' +
+        return '<p class="dl-melding dl-stor">' + T('Klar for Hjemmesnekra?', 'Ready for Homemade?') + '</p>' +
           '<p>' + T('Når klokka starter, har alle ', 'When the clock starts, everyone has ') + s.sek + T(' sekunder til å skrive så mange drikkekort de rekker på sin egen telefon.', ' seconds to write as many drinking cards as they can on their own phone.') + '</p>' +
           '<p class="rom-status">' + tilstand.spillere.length + T(' med i rommet: ', ' in the room: ') + tilstand.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' +
           '<div class="rf-med"><button class="btn ghost" data-g="rf-velg" type="button">' + T('Ta med kort fra kortstokkene dine', 'Bring cards from your decks') + '</button>' +
@@ -1526,7 +1526,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
 
     function bloffSpill(s) {
       var n = tilstand.spillere.length;
-      var q = '<p class="rom-etikett">' + T('Bløffquizen', 'Bluff quiz') + '</p><p class="rom-sporsmal">' + esc(s.q) + '</p>';
+      var q = '<p class="rom-etikett">' + T('Skrøna', 'Tall tales') + '</p><p class="rom-sporsmal">' + esc(s.q) + '</p>';
       if (s.fase === 'skriv') return q + '<p class="small">' + T('Finn på et <b>troverdig feil svar</b>. Du får en 🍺 for hver du lurer.', 'Make up a <b>believable wrong answer</b>. You get a 🍺 for everyone you fool.') + '</p>' +
         (s.mittSvar ? '<p class="small">' + T('Din løgn: <b>', 'Your lie: <b>') + esc(s.mittSvar) + '</b></p>' : '') + skriveFelt(T('Din løgn …', 'Your lie …'), s.mittSvar ? T('Endre', 'Change') : 'Send', 80) +
         '<p class="rom-status">' + s.harSkrevet.length + T(' av ', ' of ') + n + T(' har skrevet', ' have written') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
@@ -1557,21 +1557,21 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
 
     function spionSpill(s) {
       var steder = '<details class="sp-steder"><summary>' + T('Alle mulige steder', 'All possible locations') + '</summary><p>' + s.steder.map(esc).join(' · ') + '</p></details>';
-      var rolle = s.erSpion ? '<div data-hemmelig class="rom-hemmelig lyv"><b>' + T('🕵️ Du er spionen', '🕵️ You\'re the spy') + '</b></div><p>' + T('Finn ut hvor dere er uten å bli avslørt.', 'Figure out where you are without getting caught.') + '</p>'
-                            : '<div data-hemmelig class="rom-hemmelig sann"><b>' + esc(s.sted) + '</b></div><p>' + T('Én av dere er spionen og vet ikke stedet. Ikke vær for tydelig!', 'One of you is the spy and doesn\'t know the location. Don\'t make it too obvious!') + '</p>';
+      var rolle = s.erSpion ? '<div data-hemmelig class="rom-hemmelig lyv"><b>' + T('🐾 Du er muldvarpen', '🐾 You\'re the mole') + '</b></div><p>' + T('Finn ut hvor dere er uten å bli avslørt.', 'Figure out where you are without getting caught.') + '</p>'
+                            : '<div data-hemmelig class="rom-hemmelig sann"><b>' + esc(s.sted) + '</b></div><p>' + T('Én av dere er muldvarpen og vet ikke stedet. Ikke vær for tydelig!', 'One of you is the mole and doesn\'t know the location. Don\'t make it too obvious!') + '</p>';
       if (s.fase === 'sporsmal') return '<p class="rom-etikett">' + T('Bare du ser dette', 'Only you can see this') + '</p>' + rolle +
         '<p class="small">' + esc(navn(s.start)) + T(' stiller første spørsmål til hvem som helst. Den som svarer, spør videre.', ' asks anyone the first question. Whoever answers asks the next one.') + '</p>' +
         fristHtml(tilstand.spill, T('sekunder til stemming', 'seconds until voting')) + steder +
         (erVert() ? '<button class="btn ghost" data-g="sp-til-stemming" type="button">' + T('Til stemming nå', 'Vote now') + '</button>' : '');
-      if (s.fase === 'stem') return '<p class="rom-etikett">' + T('Hvem er spionen?', 'Who\'s the spy?') + '</p>' + spillerKnapper('sp-stem', [tilstand.meg], s.minStemme) +
+      if (s.fase === 'stem') return '<p class="rom-etikett">' + T('Hvem er muldvarpen?', 'Who\'s the mole?') + '</p>' + spillerKnapper('sp-stem', [tilstand.meg], s.minStemme) +
         '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
       if (s.fase === 'gjett') return s.erSpion
         ? '<p class="dl-melding dl-stor">' + T('Du er avslørt! Gjett stedet for å vinne likevel:', 'You\'ve been caught! Guess the location to win anyway:') + '</p><div class="rom-valg">' + s.steder.map(function (x) { return '<button type="button" data-g="sp-gjett" data-sted="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>' + fristHtml(tilstand.spill, T('sekunder', 'seconds'))
-        : '<p class="dl-melding dl-stor">' + esc(navn(s.spion)) + T(' er spionen!', ' is the spy!') + '</p><p class="rom-stor">' + T('Men hen får én sjanse til å gjette stedet …', 'But they get one chance to guess the location …') + '</p>' + fristHtml(tilstand.spill, T('sekunder', 'seconds'));
-      var tekst = s.utfall === 'fanget' ? T('Spionen ', 'The spy ') + esc(navn(s.spion)) + T(' ble tatt! Spionen drikker 3.', ' got caught! The spy drinks 3.') :
-        s.utfall === 'spion-gjettet' ? esc(navn(s.spion)) + T(' ble tatt, men gjettet stedet – spionen vinner! Alle andre drikker 2.', ' got caught but guessed the location – the spy wins! Everyone else drinks 2.') :
-        T('Spionen ', 'The spy ') + esc(navn(s.spion)) + T(' slapp unna', ' got away') + (s.feilMistenkt ? T(' (dere tok ', ' (you picked ') + esc(navn(s.feilMistenkt)) + ')' : '') + T('. Alle andre drikker 2.', '. Everyone else drinks 2.');
-      return '<p class="dl-melding dl-stor">' + tekst + '</p><p>' + T('Stedet var <b>', 'The location was <b>') + esc(s.sted) + '</b>' + (s.spionGjett ? T(' – spionen gjettet «', ' – the spy guessed “') + esc(s.spionGjett) + T('»', '”') : '') + '.</p>' +
+        : '<p class="dl-melding dl-stor">' + esc(navn(s.spion)) + T(' er muldvarpen!', ' is the mole!') + '</p><p class="rom-stor">' + T('Men hen får én sjanse til å gjette stedet …', 'But they get one chance to guess the location …') + '</p>' + fristHtml(tilstand.spill, T('sekunder', 'seconds'));
+      var tekst = s.utfall === 'fanget' ? T('Muldvarpen ', 'The mole ') + esc(navn(s.spion)) + T(' ble tatt! Muldvarpen drikker 3.', ' got caught! The mole drinks 3.') :
+        s.utfall === 'spion-gjettet' ? esc(navn(s.spion)) + T(' ble tatt, men gjettet stedet – muldvarpen vinner! Alle andre drikker 2.', ' got caught but guessed the location – the mole wins! Everyone else drinks 2.') :
+        T('Muldvarpen ', 'The mole ') + esc(navn(s.spion)) + T(' slapp unna', ' got away') + (s.feilMistenkt ? T(' (dere tok ', ' (you picked ') + esc(navn(s.feilMistenkt)) + ')' : '') + T('. Alle andre drikker 2.', '. Everyone else drinks 2.');
+      return '<p class="dl-melding dl-stor">' + tekst + '</p><p>' + T('Stedet var <b>', 'The location was <b>') + esc(s.sted) + '</b>' + (s.spionGjett ? T(' – muldvarpen gjettet «', ' – the mole guessed “') + esc(s.spionGjett) + T('»', '”') : '') + '.</p>' +
         (erVert() ? nyRundeKnapp(T('Ny runde', 'New round')) : '');
     }
 

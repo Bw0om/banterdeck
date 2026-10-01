@@ -71,7 +71,8 @@ export function slugify(s: string): string {
 }
 
 export const games: any[] = spill.groups.flatMap((g: any) =>
-  g.items.map((it: any) => ({ ...it, slug: slugify(t(it.name)), group: g }))
+  // slug i dataene vinner: da kan en lek få nytt navn uten at adressen (og lenkene til den) endres
+  g.items.map((it: any) => ({ ...it, slug: it.slug || slugify(t(it.name)), group: g }))
 );
 /** Lekene som vises på dette språket (noen finnes bare på norsk). */
 export function gamesFor(lang: Lang = 'no'): any[] {

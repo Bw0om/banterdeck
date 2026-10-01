@@ -367,3 +367,16 @@ html.min-tur .rof-tur.min{display:none}
 .rom-slik li::before{grid-row:1 / span 2;width:auto!important;height:auto!important;margin:0!important;border-radius:0!important;background:none!important;color:var(--gold-t)!important;font-family:var(--display);font-stretch:62%;font-weight:900;font-size:38px!important;line-height:.9}
 .rom-slik b{font-size:14px}
 .rom-slik span{font-size:12.5px}
+/* «Telefonen er kortstokken»: bare navn og antall – beskrivelsen står inne på leken */
+.lk-mellom{gap:8px}
+.lk-rad{padding:8px 14px 8px 8px;min-height:72px;border-radius:18px}
+.lk-rad img{width:56px;height:56px;flex-basis:56px;border-radius:14px}
+.lk-rad .lk-tekst{gap:2px}
+.lk-rad .lk-tekst b{font-size:17px;font-stretch:106%;font-weight:800}
+.lk-rad .lk-meta{padding-top:0}
+.lk-rad::after{content:"";flex:none;margin-left:auto;width:9px;height:9px;border-top:2.5px solid var(--faint);border-right:2.5px solid var(--faint);transform:rotate(45deg)}
+.lk-rad:hover::after{border-color:var(--gold-t)}
+/* lekekortene: bilde, navn og antall – resten står inne på leken */
+.lk-kort .lk-tekst{gap:6px;padding:12px 14px 14px}
+.lk-kort .lk-tekst b{font-size:19px;font-stretch:108%;font-weight:850;letter-spacing:-.01em}
+@media (max-width:520px){.lk-kort .lk-tekst b{font-size:17px}}

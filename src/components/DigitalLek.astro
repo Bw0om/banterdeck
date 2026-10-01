@@ -506,7 +506,7 @@ if (!window.BDK) window.BDK = (function () {
       '<button class="btn ghost" data-a="lagre">' + T('Lagre som kortstokk', 'Save as a deck') + '</button></div><p class="dl-info" id="rfLagret" role="status"></p>';
   }
   function lagre() {
-    var d = new Date(), navn = T('Regelfabrikken ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'Regelfabrikken ' + d.getDate() + '/' + (d.getMonth() + 1)), ut = root.querySelector('#rfLagret');
+    var d = new Date(), navn = T('Hjemmesnekra ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'Homemade ' + d.getDate() + '/' + (d.getMonth() + 1)), ut = root.querySelector('#rfLagret');
     var KO = window.BDKonto;
     (KO ? KO.bruker() : Promise.resolve(null)).then(function (u) {
       if (!u) {

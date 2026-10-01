@@ -70,8 +70,8 @@ export function rensNavn(n: any) { return String(n || '').replace(/[\u0000-\u001
 const KORTLEKER = ['pekeleken', 'jeg-har-aldri', '50-50', 'kategorier', 'tanken-bak-sangen', 'sannhet-eller-drikk', 'enten-eller', 'nodt-eller-sannhet', 'rygg-mot-rygg', 'duoleken'];
 const NAVN_L: Record<string, [string, string]> = {
   'pekeleken': ['Pekeleken', 'Most likely to'], 'jeg-har-aldri': ['Jeg har aldri', 'Never have I ever'], 'enten-eller': ['Enten eller', 'Would you rather'], 'kategorier': ['Kategorier', 'Categories'],
-  'nodt-eller-sannhet': ['Nødt eller sannhet', 'Truth or dare'], 'sannhet-eller-drikk': ['Sannhet eller drikk', 'Truth or drink'], 'tanken-bak-sangen': ['Tanken bak sangen', 'The story behind the song'], 'rygg-mot-rygg': ['Rygg mot rygg', 'Back to back'], 'duoleken': ['Duoleken', 'The couples game'], '50-50': ['50/50', '50/50'],
-  'ring-of-fire': ['Ring of Fire', 'Ring of Fire'], 'forraeder': ['Forræder', 'Traitor'], 'mest': ['Mest sannsynlig', 'Most likely to (vote)'], 'bingo': ['Drikke-bingo', 'Drinking bingo'],
+  'nodt-eller-sannhet': ['Nødt eller sannhet', 'Truth or dare'], 'sannhet-eller-drikk': ['Sannhet eller drikk', 'Truth or drink'], 'tanken-bak-sangen': ['Låtbekjennelsen', 'Song confessions'], 'rygg-mot-rygg': ['Rygg mot rygg', 'Back to back'], 'duoleken': ['Duoleken', 'The couples game'], '50-50': ['50/50', '50/50'],
+  'ring-of-fire': ['Ring of Fire', 'Ring of Fire'], 'forraeder': ['Løgnhalsen', 'The liar'], 'mest': ['Mest sannsynlig', 'Most likely to (vote)'], 'bingo': ['Drikke-bingo', 'Drinking bingo'],
 };
 /** Lekene som kan spilles i rom, med navn, beskrivelse og moduser på valgt språk (standard norsk). */
 export function lekeliste(lang: Lang | string = 'no') {
@@ -429,7 +429,7 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
     nyMestRunde(data.spill);
   }
   if (valgt.type === 'forraeder') {
-    if (data.spillere.length < 3) return feilL('for-faa', 'Forræder trenger minst tre spillere.', 'Traitor needs at least three players.');
+    if (data.spillere.length < 3) return feilL('for-faa', 'Løgnhalsen trenger minst tre spillere.', 'The liar needs at least three players.');
     const alle = teksterL('forraeder');
     data.spill = { type: 'forraeder', lek, navn, modus, alle, kø: [], aktiv: data.spillere[data.spillere.length - 1].id };
     nyForraederRunde(data.spill, data);
@@ -915,16 +915,16 @@ export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', '
 export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '🫡'];
 type EkstraInfo = [id: string, navnNo: string, navnEn: string, omNo: string, omEn: string];
 const EKSTRA_INFO: EkstraInfo[] = [
-  ['hvemskrev', 'Hvem skrev det?', 'Who wrote it?', 'Alle svarer anonymt på samme spørsmål. Så gjetter dere hvem som skrev hva.', 'Everyone answers the same question anonymously. Then you guess who wrote what.'],
-  ['bloff', 'Bløffquizen', 'Bluff quiz', 'Finn på et troverdig feil svar. Lur de andre – og finn det ekte.', 'Make up a believable wrong answer. Fool the others – and spot the real one.'],
-  ['samme', 'Samme svar', 'Same answer', 'Alle skriver ett ord i hemmelighet. Unike svar drikker.', 'Everyone secretly writes one word. Unique answers drink.'],
-  ['spion', 'Spionen', 'The spy', 'Alle vet hvor dere er – bortsett fra spionen. Still spørsmål og avslør hen.', 'Everyone knows where you are – except the spy. Ask questions and unmask them.'],
+  ['hvemskrev', 'Ukjent avsender', 'Unknown sender', 'Alle svarer anonymt på samme spørsmål. Så gjetter dere hvem som skrev hva.', 'Everyone answers the same question anonymously. Then you guess who wrote what.'],
+  ['bloff', 'Skrøna', 'Tall tales', 'Finn på et troverdig feil svar. Lur de andre – og finn det ekte.', 'Make up a believable wrong answer. Fool the others – and spot the real one.'],
+  ['samme', 'Saueflokken', 'The herd', 'Alle skriver ett ord i hemmelighet. Unike svar drikker.', 'Everyone secretly writes one word. Unique answers drink.'],
+  ['spion', 'Muldvarpen', 'The mole', 'Alle vet hvor dere er – bortsett fra muldvarpen. Still spørsmål og avslør hen.', 'Everyone knows where you are – except the mole. Ask questions and unmask them.'],
   ['pannekort', 'Hvem er jeg?', 'Who am I?', 'Skriv et ord til den du får tildelt. Du ser alles ord – bortsett fra ditt eget.', "Write a word for the person you're assigned. You see everyone's word – except your own."],
-  ['skal', 'Skål-refleksen', 'Cheers reflex', 'Trykk når det står SKÅL! Treigest drikker. For tidlig drikker dobbelt.', 'Tap when it says CHEERS! Slowest drinks. Too early drinks double.'],
+  ['skal', 'Skålsprinten', 'Cheers sprint', 'Trykk når det står SKÅL! Treigest drikker. For tidlig drikker dobbelt.', 'Tap when it says CHEERS! Slowest drinks. Too early drinks double.'],
   ['bussruta', 'Bussruta', 'Ride the bus', 'Fire spørsmål hver på egen telefon, så pyramiden – og taperen kjører bussen.', 'Four questions each on your own phone, then the pyramid – and the loser rides the bus.'],
   ['yatzy', 'Drikke-Yatzy', 'Drinking Yahtzee', 'Trill på din telefon når det er din tur. Alle ser terningene og blokka.', "Roll on your phone when it's your turn. Everyone sees the dice and the scorecard."],
   ['tosannheter', 'To sannheter og en løgn', 'Two truths and a lie', 'Én skriver tre påstander i hemmelighet. Resten stemmer på løgnen fra sin telefon.', 'One player secretly writes three statements. Everyone else votes for the lie on their phone.'],
-  ['regelfabrikken', 'Regelfabrikken', 'Rule factory', 'Alle skriver så mange drikkekort de rekker på sin telefon. Så stokkes alt og trekkes.', 'Everyone writes as many drinking cards as they can on their phone. Then it all gets shuffled and drawn.'],
+  ['regelfabrikken', 'Hjemmesnekra', 'Homemade', 'Alle skriver så mange drikkekort de rekker på sin telefon. Så stokkes alt og trekkes.', 'Everyone writes as many drinking cards as they can on their phone. Then it all gets shuffled and drawn.'],
   ['overunder', 'Over eller under', 'Higher or lower', 'Den som har tur gjetter på sin telefon. Feil = drikk hele bunken.', 'Whoever has the turn guesses on their phone. Wrong = drink the whole pile.'],
   ['veddelopet', 'Veddeløpet', 'Horse race', 'Alle vedder på sin telefon, så kjøres løpet.', 'Everyone bets on their phone, then the race is on.'],
   ['pyramiden', 'Pyramiden', 'Pyramid', 'Fire skjulte kort hver. Bløff eller si sannheten – og utfordre de andre.', 'Four hidden cards each. Bluff or tell the truth – and call out the others.'],
@@ -1627,8 +1627,8 @@ function spinnHjul(data: any, meg: any, h: any, erVert: boolean) {
 
 
 /* =====================================================================
-   Sosiale leker: Hvem skrev det?, Bløffquizen, Samme svar, Spionen,
-   Hvem er jeg? og Skål-refleksen – pluss hemmelige oppdrag hele kvelden.
+   Sosiale leker: Ukjent avsender, Skrøna, Saueflokken, Muldvarpen,
+   Hvem er jeg? og Skålsprinten – pluss Agent 0,5 (hemmelige oppdrag) hele kvelden.
    ===================================================================== */
 const S_: any = SOSIAL;
 const SE: any = SOSIAL_EN;
@@ -1717,15 +1717,15 @@ function spTelling(data: any) {
   Object.values(s.stemmer).forEach((id: any) => { t[id] = (t[id] || 0) + 1; });
   const liste = Object.entries(t).sort((a: any, b: any) => b[1] - a[1]);
   const topp = liste[0] && (!liste[1] || liste[1][1] < liste[0][1]) ? liste[0][0] : null;
-  if (topp === s.spion) { s.fase = 'gjett'; settFrist(s, SFRIST.spionGjett); melde(data, 'Spionen er avslørt! Men kan hen gjette stedet?', 'The spy has been exposed! But can they guess the location?'); }
+  if (topp === s.spion) { s.fase = 'gjett'; settFrist(s, SFRIST.spionGjett); melde(data, 'Muldvarpen er avslørt! Men kan hen gjette stedet?', 'The mole has been exposed! But can they guess the location?'); }
   else spSlutt(data, 'spion-vant', topp);
 }
 function spSlutt(data: any, utfall: string, feilMistenkt: string | null = null) {
   const s = data.spill; s.fase = 'fasit'; s.frist = null; s.utfall = utfall; s.feilMistenkt = feilMistenkt;
   if (utfall === 'fanget') { giSlurker(data, s.spion, 3); data.spillere.forEach((p: any) => { if (p.id !== s.spion) giUtdeling(data, p.id, 1); }); }
   else { data.spillere.forEach((p: any) => { if (p.id !== s.spion) giSlurker(data, p.id, 2); }); giUtdeling(data, s.spion, 3); }
-  melde(data, utfall === 'fanget' ? `Spionen ${navnPaa(data, s.spion)} ble tatt!` : `Spionen ${navnPaa(data, s.spion)} vant!`,
-    utfall === 'fanget' ? `The spy, ${navnPaa(data, s.spion)}, got caught!` : `The spy, ${navnPaa(data, s.spion)}, won!`);
+  melde(data, utfall === 'fanget' ? `Muldvarpen ${navnPaa(data, s.spion)} ble tatt!` : `Muldvarpen ${navnPaa(data, s.spion)} vant!`,
+    utfall === 'fanget' ? `The mole, ${navnPaa(data, s.spion)}, got caught!` : `The mole, ${navnPaa(data, s.spion)}, won!`);
 }
 function pkStartSpill(data: any) {
   const s = data.spill;
@@ -1935,14 +1935,14 @@ function oppdragHandling(data: any, meg: any, h: any, erVert: boolean): any {
   const hd = h.handling;
   if (hd === 'op-paa') {
     if (!erVert) return { feil: 'bare-vert' };
-    if (!romHarPluss(data)) return feilL('pluss', 'Hemmelige oppdrag krever Pluss hos verten.', 'Secret missions need the host to have Plus.');
+    if (!romHarPluss(data)) return feilL('pluss', 'Agent 0,5 (hemmelige oppdrag) krever Pluss hos verten.', 'Agent 0.5 (secret missions) needs the host to have Plus.');
     if (data.spillere.length < 3) return feilL('for-faa', 'Trenger minst tre spillere.', 'Needs at least three players.');
     data.oppdrag = { paa: true, per: {}, venter: [], anklager: [], brukt: {} };
     data.spillere.forEach((p: any) => nyttOppdrag(data, p.id));
-    melde(data, '🕵️ Hemmelige oppdrag er i gang! Sjekk ditt oppdrag – ikke vis det til noen.', "🕵️ Secret missions are on! Check your mission – don't show it to anyone."); return { ok: true };
+    melde(data, '🕵️ Agent 0,5 er i gang! Sjekk ditt hemmelige oppdrag – ikke vis det til noen.', "🕵️ Agent 0.5 is on! Check your secret mission – don't show it to anyone."); return { ok: true };
   }
   const o = data.oppdrag; if (!o || !o.paa) return { ok: true };
-  if (hd === 'op-av') { if (!erVert) return { feil: 'bare-vert' }; o.paa = false; melde(data, 'Hemmelige oppdrag er avsluttet.', 'Secret missions are over.'); return { ok: true }; }
+  if (hd === 'op-av') { if (!erVert) return { feil: 'bare-vert' }; o.paa = false; melde(data, 'Agent 0,5 er over – oppdragene er avsluttet.', 'Agent 0.5 is over – the missions have ended.'); return { ok: true }; }
   const mitt = o.per[meg.id];
   if (hd === 'op-fullfort') {
     if (!mitt) return { ok: true };

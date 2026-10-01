@@ -3655,8 +3655,8 @@
      },
      {
       "name": {
-       "no": "Forræder",
-       "en": "Traitor"
+       "no": "Løgnhalsen",
+       "en": "The Liar"
       },
       "gear": {
        "no": "Én telefon",
@@ -3690,11 +3690,12 @@
        "tempo": "sosialt",
        "min": 4,
        "maks": 12
-      }
+      },
+      "slug": "forraeder"
      },
      {
       "name": {
-       "no": "Regelfabrikken"
+       "no": "Hjemmesnekra"
       },
       "gear": {
        "no": "Én telefon – eller én hver",
@@ -3726,7 +3727,8 @@
        "tempo": "sosialt",
        "min": 3,
        "maks": 99
-      }
+      },
+      "slug": "regelfabrikken"
      },
      {
       "name": {
@@ -3871,7 +3873,7 @@
      },
      {
       "name": {
-       "no": "Hvem skrev det?"
+       "no": "Ukjent avsender"
       },
       "gear": {
        "no": "Én telefon hver"
@@ -3897,11 +3899,12 @@
        "tempo": "sosialt",
        "min": 3,
        "maks": 16
-      }
+      },
+      "slug": "hvem-skrev-det"
      },
      {
       "name": {
-       "no": "Bløffquizen"
+       "no": "Skrøna"
       },
       "gear": {
        "no": "Én telefon hver"
@@ -3928,11 +3931,12 @@
        "tempo": "sosialt",
        "min": 3,
        "maks": 16
-      }
+      },
+      "slug": "bloffquizen"
      },
      {
       "name": {
-       "no": "Samme svar"
+       "no": "Saueflokken"
       },
       "gear": {
        "no": "Én telefon hver"
@@ -3957,11 +3961,12 @@
        "tempo": "raskt",
        "min": 3,
        "maks": 16
-      }
+      },
+      "slug": "samme-svar"
      },
      {
       "name": {
-       "no": "Spionen"
+       "no": "Muldvarpen"
       },
       "gear": {
        "no": "Én telefon hver"
@@ -3970,11 +3975,11 @@
       "only": "no",
       "rules": {
        "no": [
-        "Alle får samme sted på telefonen – for eksempel «Hytta på fjellet» – bortsett fra én: spionen.",
-        "Dere stiller hverandre spørsmål på omgang uten å avsløre stedet. Spionen prøver å henge med og gjette hvor dere er.",
-        "Etter tre minutter – eller når verten vil – stemmer alle på hvem som er spionen.",
-        "b|Tar dere spionen, får hen én sjanse til å gjette stedet. Gjetter hen feil: spionen drikker tre.",
-        "b|Slipper spionen unna eller gjetter stedet: alle andre drikker to."
+        "Alle får samme sted på telefonen – for eksempel «Hytta på fjellet» – bortsett fra én: muldvarpen.",
+        "Dere stiller hverandre spørsmål på omgang uten å avsløre stedet. Muldvarpen prøver å henge med og gjette hvor dere er.",
+        "Etter tre minutter – eller når verten vil – stemmer alle på hvem som er muldvarpen.",
+        "b|Tar dere muldvarpen, får hen én sjanse til å gjette stedet. Gjetter hen feil: muldvarpen drikker tre.",
+        "b|Slipper muldvarpen unna eller gjetter stedet: alle andre drikker to."
        ]
       },
       "fit": {
@@ -3986,11 +3991,12 @@
        "tempo": "sosialt",
        "min": 3,
        "maks": 16
-      }
+      },
+      "slug": "spionen"
      },
      {
       "name": {
-       "no": "Hemmelig oppdrag"
+       "no": "Agent 0,5"
       },
       "gear": {
        "no": "Én telefon hver"
@@ -4017,7 +4023,8 @@
        "tempo": "sosialt",
        "min": 3,
        "maks": 16
-      }
+      },
+      "slug": "hemmelig-oppdrag"
      },
      {
       "name": {
@@ -4139,9 +4146,8 @@
      },
      {
       "name": {
-       "no": "Tanken bak sangen",
-       "sv": "Tanken bakom låten",
-       "en": "The story behind the song"
+       "no": "Låtbekjennelsen",
+       "en": "Song Confessions"
       },
       "gear": {
        "no": "Bare musikkanlegg",
@@ -4178,7 +4184,8 @@
        "tempo": "rolig",
        "min": 2,
        "maks": 99
-      }
+      },
+      "slug": "tanken-bak-sangen"
      },
      {
       "name": {
@@ -4348,8 +4355,8 @@
      },
      {
       "name": {
-       "no": "Terningen bestemmer",
-       "en": "The Die Decides"
+       "no": "Terningtyrannen",
+       "en": "Dice Tyrant"
       },
       "gear": {
        "no": "Én terning",
@@ -4387,7 +4394,8 @@
        "tempo": "sosialt",
        "min": 3,
        "maks": 99
-      }
+      },
+      "slug": "terningen-bestemmer"
      },
      {
       "name": {
@@ -4424,8 +4432,8 @@
      },
      {
       "name": {
-       "no": "Drikkehjulet",
-       "en": "The Drinking Wheel"
+       "no": "Skjebnehjulet",
+       "en": "Wheel of Fate"
       },
       "gear": {
        "no": "Én telefon",
@@ -4454,7 +4462,8 @@
        "tempo": "sosialt",
        "min": 3,
        "maks": 99
-      }
+      },
+      "slug": "drikkehjulet"
      }
     ]
    },
@@ -5029,7 +5038,7 @@
      },
      {
       "name": {
-       "no": "Skål-refleksen"
+       "no": "Skålsprinten"
       },
       "gear": {
        "no": "Én telefon hver"
@@ -5054,11 +5063,12 @@
        "tempo": "raskt",
        "min": 2,
        "maks": 16
-      }
+      },
+      "slug": "skal-refleksen"
      },
      {
       "name": {
-       "no": "Stilleleken"
+       "no": "Ikke le!"
       },
       "gear": {
        "no": "Én telefon"
@@ -5083,7 +5093,8 @@
        "tempo": "raskt",
        "min": 3,
        "maks": 16
-      }
+      },
+      "slug": "stilleleken"
      }
     ]
    },
@@ -5403,9 +5414,8 @@
      },
      {
       "name": {
-       "no": "Rask fakta",
-       "sv": "Snabba fakta",
-       "en": "Quick facts"
+       "no": "Faktaduellen",
+       "en": "Fact Duel"
       },
       "gear": {
        "no": "Bare glass",
@@ -5415,7 +5425,7 @@
       "pl": "2",
       "rules": {
        "no": [
-        "Rask fakta går ut på å komme opp med fakta om motspilleren. Her gjelder det å kjenne motstanderen godt og tenke raskt.",
+        "Faktaduellen går ut på å komme opp med fakta om motspilleren. Her gjelder det å kjenne motstanderen godt og tenke raskt.",
         "Si en fakta om motstanderen innen 5 sekunder. Stemmer ikke påstanden, får du en prikk — av tre totalt.",
         "Tre prikker = ta en shot. Fortsett til dere ikke kommer på mer fakta om hverandre."
        ],
@@ -5439,7 +5449,8 @@
        "tempo": "rolig",
        "min": 2,
        "maks": 2
-      }
+      },
+      "slug": "rask-fakta"
      },
      {
       "name": {

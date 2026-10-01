@@ -22,8 +22,8 @@ const T = no ? {
   decks: 'Mine kortstokker', decksLead: 'Lag egne drikkekort, og spill dem alene eller i et rom med vennene dine.',
   newDeck: 'Ny kortstokk', deckName: 'Navn', deckCards: 'Kort – ett per linje', deckPh: 'Alle med hvite sokker drikker\nDen yngste deler ut tre slurker',
   saveDeck: 'Lagre kortstokk', play: 'Spill', playRoom: 'Spill i rom', edit: 'Rediger', del: 'Slett', cancel: 'Avbryt', cards: 'kort',
-  noDecks: 'Ingen kortstokker ennå. Lag en her, eller lagre kortene etter en runde Regelfabrikken.',
-  draft: 'kort fra Regelfabrikken er ikke lagret ennå.', saveDraft: 'Lagre dem', delConfirm: 'Trykk igjen for å slette',
+  noDecks: 'Ingen kortstokker ennå. Lag en her, eller lagre kortene etter en runde Hjemmesnekra.',
+  draft: 'kort fra Hjemmesnekra er ikke lagret ennå.', saveDraft: 'Lagre dem', delConfirm: 'Trykk igjen for å slette',
   next: 'Neste kort', close: 'Lukk', of: 'av', saved: 'Lagret ✓', stats: 'Statistikk',
   settings: 'Konto', share: 'Del', unshare: 'Slutt å dele', shared: 'delt', linkCopied: 'Lenken er kopiert – send den til hvem du vil.', unshared: 'Lenken virker ikke lenger.', changeUser: 'Endre brukernavn', changeUserLead: 'Du logger inn med det nye navnet fra nå av. Det gamle blir ledig for andre.', changePw: 'Endre passord', deleteAcc: 'Slett konto',
   deleteLead: 'Sletter kontoen, brukernavnet, kortstokkene og replikkene dine for godt. Det kan ikke angres.', deleteType: 'Skriv SLETT for å bekrefte', deleteBtn: 'Slett kontoen min', deleted: 'Kontoen er slettet.',
@@ -408,7 +408,7 @@ const T = no ? {
         $('utkast').addEventListener('click', function (e) {
           if (!e.target.closest('#lagreUtkast')) return;
           var u = lesLS(UTKAST, null); if (!u) return;
-          K.stokker.lagre({ navn: u.navn || 'Regelfabrikken', kort: u.kort }).then(function () {
+          K.stokker.lagre({ navn: u.navn || 'Hjemmesnekra', kort: u.kort }).then(function () {
             skrivLS(UTKAST, null); say($('syncMsg'), T.saved, 'ok'); return hentStokker();
           }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
         });

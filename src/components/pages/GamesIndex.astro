@@ -79,7 +79,6 @@ const romSti = no ? '/no/rom' : '/room';
           <img src={x.bilde} alt="" width="240" height="126" loading="lazy" decoding="async" />
           <span class="lk-tekst">
             <b>{x.navn}</b>
-            <span class="lk-om">{x.om}</span>
             <span class="lk-meta"><span>👥 {x.pl}</span>{x.pluss ? <i class="pluss">✨ Pluss</i> : <i class="gratis">{no ? 'Gratis' : 'Free'}</i>}</span>
           </span>
         </a>
@@ -95,11 +94,12 @@ const romSti = no ? '/no/rom' : '/room';
       <h2>{no ? '🃏 Telefonen er kortstokken' : '🃏 The phone is the deck'}</h2>
       <p class="small">{no ? 'Én telefon på bordet: kort, terninger, klokke eller spørsmål – dere trenger ikke noe annet.' : 'One phone on the table: cards, dice, timer or questions – you don’t need anything else.'}</p>
     </div>
+    <!-- Bare navn her – beskrivelsen står når man trykker seg inn på leken -->
     <div class="lk-mellom">
       {app.map((x) => (
         <a class="lk-rad" href={x.href} data-q={q(x)} data-niva="app" data-min={x.min} data-maks={x.maks} data-pluss={x.pluss ? '1' : '0'}>
           <img src={x.bilde} alt="" width="72" height="72" loading="lazy" decoding="async" />
-          <span class="lk-tekst"><b>{x.navn}</b><span class="lk-om">{x.om}</span><span class="lk-meta"><span>👥 {x.pl}</span><span>{x.gruppeNavn}</span>{x.pluss && <i class="pluss">✨ Pluss</i>}</span></span>
+          <span class="lk-tekst"><b>{x.navn}</b><span class="lk-meta"><span>👥 {x.pl}</span><span>{x.gruppeNavn}</span>{x.pluss && <i class="pluss">✨ Pluss</i>}</span></span>
         </a>
       ))}
     </div>

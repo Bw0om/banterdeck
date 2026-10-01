@@ -19,7 +19,7 @@ export function niva(slug: string): Niva {
 
 /** Kort, fengende beskrivelse av lekene som spilles i appen. */
 export const HOOK: Record<string, [string, string]> = {
-  'spionen': ['Alle vet hvor dere er – bortsett fra spionen. Avslør hen før hen avslører stedet.', 'Everyone knows where you are – except the spy. Unmask them before they work it out.'],
+  'spionen': ['Alle vet hvor dere er – bortsett fra muldvarpen. Avslør hen før hen avslører stedet.', 'Everyone knows where you are – except the mole. Unmask them before they work it out.'],
   'bloffquizen': ['Finn på et troverdig feil svar og lur de andre.', 'Make up a believable wrong answer and fool the others.'],
   'hvem-skrev-det': ['Alle svarer anonymt. Så gjetter dere hvem som skrev hva.', 'Everyone answers anonymously. Then guess who wrote what.'],
   'samme-svar': ['Tenk som de andre – den som står alene, drikker.', 'Think like the others – whoever stands alone drinks.'],
@@ -27,7 +27,7 @@ export const HOOK: Record<string, [string, string]> = {
   'skal-refleksen': ['Trykk når det står SKÅL! Treigest drikker.', 'Tap when it says CHEERS! Slowest drinks.'],
   'hemmelig-oppdrag': ['Alle får et hemmelig oppdrag som varer hele kvelden.', 'Everyone gets a secret mission that lasts all night.'],
   'nyhetsrunden': ['Ukas nyheter som quiz – ny runde hver fredag.', 'This week’s news as a quiz – a new round every Friday.'],
-  'forraeder': ['Én vet svaret og lyver. Finn forræderen.', 'One person knows the answer and lies. Find the traitor.'],
+  'forraeder': ['Én får beskjed om å lyve. Finn løgnhalsen.', 'One person is told to lie. Find the liar.'],
   'to-sannheter-og-en-logn': ['Tre påstander – stem på løgnen fra telefonen.', 'Three statements – vote for the lie from your phone.'],
   'regelfabrikken': ['Alle skriver egne drikkekort. Så stokkes alt.', 'Everyone writes their own drinking cards. Then it all gets shuffled.'],
   'pyramiden': ['Skjulte kort på hver telefon. Bløff eller si sannheten.', 'Hidden cards on every phone. Bluff or tell the truth.'],
@@ -38,7 +38,7 @@ export const HOOK: Record<string, [string, string]> = {
   'veddelopet': ['Vedd på en kortfarge og se løpet.', 'Bet on a suit and watch the race.'],
   'over-eller-under': ['Gjett over eller under – feil, og du drikker bunken.', 'Guess higher or lower – wrong, and you drink the pile.'],
   'drikke-bingo': ['Hver sitt brett, samme spilleliste.', 'Everyone gets their own card, same playlist.'],
-  'ring-of-fire': ['Klassikeren – telefonen er kortstokken og sier hvem som trekker.', 'The classic – the phone is the deck and says whose turn it is.'],
+  'ring-of-fire': ['Klassikeren – kortene ligger i en ring rundt glasset. Dra ut et kort uten å bryte ringen.', 'The classic – the cards lie in a ring around the glass. Pull one out without breaking the ring.'],
   'pekeleken': ['«Hvem er mest sannsynlig til …» – pek på telefonen.', '“Who’s most likely to …” – point on your phone.'],
   'jeg-har-aldri': ['Hundrevis av «Jeg har aldri» på skjermen.', 'Hundreds of “Never have I ever” on screen.'],
   'enten-eller': ['Umulige valg – alle stemmer.', 'Impossible choices – everyone votes.'],
