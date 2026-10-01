@@ -227,7 +227,16 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     // Kodefeltet: store bokstaver, og bare det som kan være en kode
     var f = document.getElementById('h2Kode'); if (!f || f.dataset.bound) return; f.dataset.bound = '1';
     var inp = document.getElementById('h2KodeFelt');
-    inp.addEventListener('input', function () { var v = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== inp.value) inp.value = v; f.classList.toggle('klar', v.length >= 4); });
+    // Fire riktige tegn = en hel kode: gå videre av seg selv (litt etter, så man rekker å se – og rette – siste tegn).
+    // Romkoder har aldri I, O, 0 eller 1, så de stopper autoturen.
+    var videre = null;
+    inp.addEventListener('input', function () {
+      var v = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== inp.value) inp.value = v;
+      f.classList.toggle('klar', v.length >= 4);
+      clearTimeout(videre);
+      if (/^[A-HJ-NP-Z2-9]{4}$/.test(v)) videre = setTimeout(function () { if (inp.value === v) { if (f.requestSubmit) f.requestSubmit(); else f.submit(); } }, 500);
+    });
+    inp.setAttribute('enterkeyhint', 'go'); inp.setAttribute('autocorrect', 'off');
     f.addEventListener('submit', function (e) { if (inp.value.length < 4) { e.preventDefault(); inp.focus(); } });
     // Har du spilt før, trenger du ikke forklaringen
     try { if (localStorage.getItem('bd_mittnavn') || localStorage.getItem('bd_sist_rom')) { var sl = document.getElementById('h2Slik'); if (sl) sl.hidden = true; } } catch (x) {}
