@@ -380,3 +380,8 @@ html.min-tur .rof-tur.min{display:none}
 .lk-kort .lk-tekst{gap:6px;padding:12px 14px 14px}
 .lk-kort .lk-tekst b{font-size:19px;font-stretch:108%;font-weight:850;letter-spacing:-.01em}
 @media (max-width:520px){.lk-kort .lk-tekst b{font-size:17px}}
+/* Har du Pluss, ser du ikke reklamen for det */
+html.har-pluss .h2-pluss,
+html.har-pluss .lk-meta i.pluss,html.har-pluss .lk-meta i.gratis,
+html.har-pluss .lk-chips [data-f="pluss"]{display:none!important}
+html.har-pluss .pluss-laast .pluss-laas{display:none!important}

@@ -173,8 +173,13 @@ const isCurrent = (href: string) => {
   <script is:inline>
   (function () {
     // Pluss-knappen i toppen: viser «Pluss ✓» når du har det (sjekkes én gang per økt, bare når du er logget inn)
+    // Har du Pluss, trenger du ikke se reklamen for det: html.har-pluss skjuler den (se natt.css)
+    function harPluss() { try { return sessionStorage.getItem('mv_pluss') === '1'; } catch (e) { return false; } }
+    document.documentElement.classList.toggle('har-pluss', harPluss());
+    document.addEventListener('astro:after-swap', function () { document.documentElement.classList.toggle('har-pluss', harPluss()); });
     function merk() {
-      var aktiv = false; try { aktiv = sessionStorage.getItem('mv_pluss') === '1'; } catch (e) {}
+      var aktiv = harPluss();
+      document.documentElement.classList.toggle('har-pluss', aktiv);
       document.querySelectorAll('[data-pluss-pille]').forEach(function (a) { a.classList.toggle('aktiv', aktiv); if (aktiv) a.textContent = /^en/.test(document.documentElement.lang) ? 'Plus ✓' : 'Pluss ✓'; });
     }
     function sjekk() {
