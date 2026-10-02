@@ -1,534 +1,307 @@
 [
 {
-"q": "Hvem kommer mest sannsynlig for sent til sitt eget bryllup?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem hadde overlevd lengst i en zombieapokalypse?",
-"a": "mix",
-"l": 1
-},
-{
 "q": "Hvem sovner først i kveld?",
 "a": "mix",
 "l": 1,
-"c": "Bevis det motsatte: stå oppreist resten av runden."
+"c": "Bevis det motsatte: stå oppreist til neste skål."
 },
 {
-"q": "Hvem har flest uleste meldinger akkurat nå?",
+"q": "Hvem har allerede sagt «jeg skal bare ha én» i kveld?",
 "a": "mix",
 "l": 1,
-"c": "Vis tallet. Én slurk per tiende melding."
+"c": "Hvor mange er du på nå? Ærlig svar."
 },
 {
-"q": "Hvem hadde vunnet Farmen?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem kunne levd på pizza resten av livet?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem ringer fortsatt mamma når noe går i stykker?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem har den tvilsomste musikksmaken?",
+"q": "Hvem har en egen vorslåt som må spilles før de kan gå ut døra?",
 "a": "mix",
 "l": 1,
-"c": "Sett på en låt du liker. Alle som protesterer, drikker."
+"c": "Si hvilken – og nynn refrenget."
 },
 {
-"q": "Hvem hadde blitt kjendis først?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem kunne glemt sitt eget navn på en navnelapp?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem ler høyest av sine egne vitser?",
+"q": "Hvem kommer til å klemme alle og si «jeg er så glad i dere» før midnatt?",
 "a": "mix",
 "l": 1,
-"c": "Fortell en vits. Ingen ler: to slurker."
+"c": "Si det nå, så er det gjort."
 },
 {
-"q": "Hvem brukte lengst tid på å velge antrekk til i kveld?",
+"q": "Hvem har allerede tatt av seg skoene og sikret seg den beste plassen i sofaen?",
 "a": "mix",
 "l": 1
 },
 {
-"q": "Hvem går seg bort selv med Google Maps på?",
+"q": "Hvem sitter med jakka på inne og har allerede funnet panelovnen?",
 "a": "mix",
 "l": 1
 },
 {
-"q": "Hvem hadde blitt sparket først fra en sommerjobb?",
+"q": "Hvem virker som typen som forsvinner fra fester uten å si ha det?",
 "a": "mix",
 "l": 1
 },
 {
-"q": "Hvem har flest bilder av mat på mobilen?",
-"a": "mix",
-"l": 1,
-"c": "Vis det siste."
-},
-{
-"q": "Hvem hadde tapt en krangel mot en sjuåring?",
+"q": "Hvem virker som typen som laster oppvaskmaskinen på nytt etter at andre har gjort det?",
 "a": "mix",
 "l": 1
 },
 {
-"q": "Hvem blir surest av å tape i brettspill?",
-"a": "mix",
-"l": 1,
-"c": "To slurker – uten å klage."
-},
-{
-"q": "Hvem hadde klart seg en uke uten mobil?",
+"q": "Hvem virker som typen som har gitt robotstøvsugeren sin et navn?",
 "a": "mix",
 "l": 1
 },
 {
-"q": "Hvem snakker mest i søvne?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem hadde blitt kastet ut først av Big Brother-huset?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem forteller historier mest dramatisk?",
+"q": "Hvem virker som typen som lukter på vinen før den helles i et plastglass?",
 "a": "mix",
 "l": 1,
-"c": "Gjenfortell hvordan du kom hit i kveld – som en actionfilm."
+"c": "Beskriv drinken din som en vinekspert."
 },
 {
-"q": "Hvem kjøper mest på nett som de ikke trenger?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem hadde vunnet en spisekonkurranse?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem synger høyest i dusjen?",
+"q": "Hvem ser ut som de har sterke meninger om hvilken vei dopapiret skal henge?",
 "a": "mix",
 "l": 1,
-"c": "Syng refrenget. Nå."
+"c": "Over eller under? Alle som er uenige med deg, drikker."
 },
 {
-"q": "Hvem har flest halvferdige prosjekter hjemme?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem hadde vært den verste romkameraten?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem sier «bare én til» og mener det aldri?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem hadde klart seg best alene på en øde øy?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem blir lettest skremt?",
+"q": "Hvem kommer til å krangle om reglene i en drikkelek i kveld?",
 "a": "mix",
 "l": 1,
-"c": "Personen til venstre får skremme deg én gang i løpet av kvelden."
+"c": "Lag én ny regel som gjelder resten av leken."
 },
 {
-"q": "Hvem har det mest unødvendige talentet?",
+"q": "Hvem har noen gang svart «i like måte» da servitøren sa «god appetitt»?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvem sier «vi må ta en kaffe snart» til folk de aldri kommer til å ta kaffe med?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvem tar med en flaske til vorset – og tar den med hjem igjen?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvem klapper fortsatt når flyet lander?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvem leser hele menyen i ti minutter og bestiller det samme som sist?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvem bruker fortsatt foreldrenes Netflix-innlogging?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvis dere havnet på samme hyttetur, hvem hadde tatt over peisen og nektet alle andre å røre den?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvem spør om wifi-passordet før de har sagt hei?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvem skriver «er rett rundt hjørnet» før de har funnet nøklene?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvem svarer på invitasjoner med en tommel opp – og dukker aldri opp?",
+"a": "mix",
+"l": 1
+},
+{
+"q": "Hvem sender lydmeldinger så lange at de må spilles av på dobbel hastighet?",
 "a": "mix",
 "l": 1,
-"c": "Vis det frem."
+"c": "Fortell om dagen din som en lydmelding. Ti sekunder."
 },
 {
-"q": "Hvem gråter av en reklamefilm?",
+"q": "Hvem har sendt en Vipps-forespørsel på 23 kroner for en halv pose chips?",
 "a": "mix",
 "l": 1
 },
 {
-"q": "Hvem hadde blitt en god politiker?",
+"q": "Hvem sa «jeg Vippser deg i morgen» for et halvt år siden?",
 "a": "mix",
 "l": 1
 },
 {
-"q": "Hvem svarer tregest på meldinger?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem hadde vunnet en danseduell?",
+"q": "Hvem holder tale på fester der ingen har bedt om tale?",
 "a": "mix",
 "l": 1,
-"c": "Ti sekunder på gulvet. Nå."
+"c": "Skål for noe som aldri har skjedd. Alle skåler med."
 },
 {
-"q": "Hvem har brukt mest penger på noe helt meningsløst?",
+"q": "Hvem har en historie som blir litt bedre hver gang de forteller den?",
 "a": "mix",
 "l": 1,
-"c": "Fortell hva."
+"c": "Kortversjonen, takk."
 },
 {
-"q": "Hvem løper først ut av et spøkelseshus?",
-"a": "mix",
-"l": 1
-},
-{
-"q": "Hvem hadde vært best som programleder?",
-"a": "mix",
-"l": 1,
-"c": "Introduser neste spørsmål som i en gameshow."
-},
-{
-"q": "Hvem har sagt «ha det» og så gått samme vei som den de sa det til?",
+"q": "Hvem bruker en time på Kiwi fordi de møter tre de kjenner?",
 "a": "mix",
 "l": 1
 },
 {
-"q": "Hvem har flest pinlige bilder i kamerarullen?",
-"a": "mix",
-"l": 1,
-"c": "La personen til høyre bla i ti sekunder."
-},
-{
-"q": "Hvem hadde blitt tatt først for å snike på trikken?",
+"q": "Hvem har mistet jakke, nøkler og bankkort på samme kveld?",
 "a": "mix",
 "l": 1
 },
 {
-"q": "Hvem har lengst liste med ting de «skal fikse selv»?",
-"a": "gutter",
+"q": "Hvem sier «nå skal jeg være helt ærlig» – og så blir det stille rundt bordet?",
+"a": "mix",
 "l": 1
 },
 {
-"q": "Hvem tror de kunne slått en proff fotballspiller på straffe?",
-"a": "gutter",
-"l": 1
-},
-{
-"q": "Hvem har brukt mest penger på treningsutstyr som aldri er brukt?",
-"a": "gutter",
-"l": 1
-},
-{
-"q": "Hvem ringer pappa først hvis bilen stopper?",
-"a": "gutter",
-"l": 1
-},
-{
-"q": "Hvem har flest identiske t-skjorter?",
-"a": "gutter",
-"l": 1
-},
-{
-"q": "Hvem snakker mest om gutteturen som aldri blir noe av?",
-"a": "gutter",
-"l": 1
-},
-{
-"q": "Hvem hadde tapt armbryting mot mora si?",
-"a": "gutter",
-"l": 1
-},
-{
-"q": "Hvem har hatt samme sveis siden ungdomsskolen?",
-"a": "gutter",
-"l": 1
-},
-{
-"q": "Hvem sender flest memes i gruppechatten?",
-"a": "gutter",
-"l": 1
-},
-{
-"q": "Hvem later som de kan grille, men brenner alt?",
-"a": "gutter",
-"l": 1
-},
-{
-"q": "Hvem har lest færrest bøker det siste året?",
-"a": "gutter",
+"q": "Hvem har prøvd å få gjengen med på en idé om «passiv inntekt»?",
+"a": "mix",
 "l": 1,
-"c": "Si tittelen på den siste. Husker du den ikke: to slurker."
+"c": "Pitch ideen din på ti sekunder."
 },
 {
-"q": "Hvem hadde tatt hvilken som helst utfordring for en hundrelapp?",
-"a": "gutter",
+"q": "Hvem har sagt «beklager, jeg var på mute» i et møte de ikke fulgte med i?",
+"a": "mix",
 "l": 1
 },
 {
-"q": "Hvem har flest ubesvarte anrop fra mora si?",
-"a": "gutter",
+"q": "Hvem har googlet en hodepine og endt opp på en side om sjeldne tropesykdommer?",
+"a": "mix",
 "l": 1
 },
 {
-"q": "Hvem har vondt i ryggen etter én dag med flyttehjelp?",
-"a": "gutter",
+"q": "Hvem betaler fortsatt for et treningssenter de ikke har vært på siden januar?",
+"a": "mix",
 "l": 1
 },
 {
-"q": "Hvem har flest skjermbilder av andres samtaler på mobilen?",
-"a": "jenter",
-"l": 1
-},
-{
-"q": "Hvem sender lengst talemeldinger?",
-"a": "jenter",
+"q": "Hvem er mer stolt av Duolingo-streaken sin enn av utdannelsen sin?",
+"a": "mix",
 "l": 1,
-"c": "Snakk i ett minutt om hvordan dagen din har vært."
+"c": "Si streaken høyt. Over 100 dager: alle skåler for deg."
 },
 {
-"q": "Hvem har flest klær med prislappen på?",
-"a": "jenter",
+"q": "Hvem ringer fortsatt pappa før de ringer en rørlegger?",
+"a": "mix",
 "l": 1
 },
 {
-"q": "Hvem planlegger jentekvelden – og avlyser den selv?",
-"a": "jenter",
-"l": 1
-},
-{
-"q": "Hvem finner en ny date på nett raskest av alle?",
-"a": "jenter",
-"l": 1
-},
-{
-"q": "Hvem har flest faner åpne i nettleseren akkurat nå?",
-"a": "jenter",
+"q": "Hvem har skrevet en passiv-aggressiv lapp i kollektivet?",
+"a": "mix",
 "l": 1,
-"c": "Vis tallet."
+"c": "Si hva det sto på lappen – ordrett."
 },
 {
-"q": "Hvem gir de beste rådene – og følger dem aldri selv?",
-"a": "jenter",
+"q": "Hvem har noen gang gitt bort en gave videre – til den som ga den?",
+"a": "mix",
 "l": 1
 },
 {
-"q": "Hvem hadde overlevd lengst på en telttur uten å klage?",
-"a": "jenter",
+"q": "Hvem spør «vil noen ha den siste biten?» med munnen allerede full?",
+"a": "mix",
 "l": 1
 },
 {
-"q": "Hvem har drept flest planter?",
-"a": "jenter",
-"l": 1
+"q": "Hvem tar 40 bilder av maten før noen får lov til å spise?",
+"a": "mix",
+"l": 1,
+"c": "Vis det siste matbildet ditt."
 },
 {
-"q": "Hvem husker bursdagen til alle i gjengen?",
-"a": "jenter",
-"l": 1
-},
-{
-"q": "Hvem tar flest bilder for å få ett godt?",
-"a": "jenter",
-"l": 1
-},
-{
-"q": "Hvem bestiller alltid det samme på restaurant?",
-"a": "jenter",
-"l": 1
-},
-{
-"q": "Hvem har kjøpt mest på Black Friday?",
-"a": "jenter",
-"l": 1
-},
-{
-"q": "Hvem har allerede planlagt hele bryllupet sitt?",
-"a": "jenter",
-"l": 1
-},
-{
-"q": "Hvem har spydd på det mest uheldige stedet?",
+"q": "Hvem står i kebabkøen klokka tre i natt?",
 "a": "mix",
 "l": 2,
-"c": "Fortell hvor."
+"c": "Si bestillingen din – med alt på."
 },
 {
-"q": "Hvem har våknet med en halv kebab i senga?",
+"q": "Hvem legger ut en Strava-økt i morgen bare for å bevise at de lever?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem har sendt «savner deg» til en eks klokka tre om natta?",
-"a": "mix",
-"l": 2,
-"c": "Si til hvem – eller tre slurker."
-},
-{
-"q": "Hvem har det verste fyllenummeret i gjengen?",
-"a": "mix",
-"l": 2,
-"c": "Gjengen avgjør hvilken historie som vinner."
-},
-{
-"q": "Hvem har pyntet på hvor mange de har ligget med?",
-"a": "mix",
-"l": 2,
-"c": "Opp eller ned? Svar ærlig."
-},
-{
-"q": "Hvem har klint med noen uten å vite hva de het?",
+"q": "Hvem virker som typen som har matchet med noen alle i rommet kjenner?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem hadde tatt en shot fra navlen til noen i dette rommet?",
+"q": "Hvem kommer til å flørte med noen i taxikøen i kveld?",
 "a": "mix",
 "l": 2,
-"c": "Pek ut hvem."
+"c": "Gi personen til venstre et ærlig kompliment."
 },
 {
-"q": "Hvem har blitt kastet ut av en taxi?",
+"q": "Hvem ser ut som de har ghostet noen etter en helt grei date?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem har den mest skammelige søkehistorikken?",
-"a": "mix",
-"l": 2,
-"c": "Les opp det siste du googlet."
-},
-{
-"q": "Hvem har stalket en date så langt at de fant mora deres på Facebook?",
+"q": "Hvem har stalket noen på Insta så langt at de likte et bilde fra fem år siden ved et uhell?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem hadde ligget med en kjendis selv om de hadde kjæreste?",
+"q": "Hvem har skyldt på at mobilen døde – med 60 prosent batteri igjen?",
 "a": "mix",
 "l": 2,
-"c": "Si hvem."
+"c": "Vis batteriprosenten din nå."
 },
 {
-"q": "Hvem har kysset to i samme gjeng på samme kveld?",
+"q": "Hvem har googlet en date på forhånd og måttet spille overrasket over hvor daten jobbet?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem har nachspielbilder de aldri vil se igjen?",
-"a": "mix",
-"l": 2,
-"c": "Vis ett – gjengen velger."
-},
-{
-"q": "Hvem har tisset et sted de absolutt ikke burde?",
-"a": "mix",
-"l": 2,
-"c": "Hvor?"
-},
-{
-"q": "Hvem har blitt dumpet over Snap?",
+"q": "Hvem har avlyst en date fordi «noe kom i veien» – og det var sofaen?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem har sjekket ut kjæresten til en kompis?",
-"a": "mix",
-"l": 2,
-"c": "Gjengen stemmer over om du er skyldig."
-},
-{
-"q": "Hvem har den dårligste sjekkerekorden i gjengen?",
-"a": "mix",
-"l": 2,
-"c": "Fortell om det siste nei-et."
-},
-{
-"q": "Hvem hadde vært med på strippepoker i kveld?",
-"a": "mix",
-"l": 2,
-"c": "Nekter du: to slurker."
-},
-{
-"q": "Hvem har sendt en skitten melding i feil gruppechat?",
-"a": "mix",
-"l": 2,
-"c": "Hvilken gruppe var det?"
-},
-{
-"q": "Hvem har blitt tatt av foreldrene med noen på rommet?",
+"q": "Hvem har sagt «jeg tar neste runde» og så forsvunnet på do?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem blir mest sannsynlig nektet inngang i kveld?",
+"q": "Hvem har sendt «er du våken?» etter midnatt?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem har skyldt på fylla for noe de mente helt edru?",
+"q": "Hvis dere havnet på samme julebord, hvem hadde danset med sjefen før desserten?",
 "a": "mix",
 "l": 2,
-"c": "Hva?"
+"c": "Vis dansetrinnet du hadde brukt. Fem sekunder."
 },
 {
-"q": "Hvem har en eks alle i gjengen hater?",
-"a": "mix",
-"l": 2,
-"c": "Si navnet. Alle skåler for at det er over."
-},
-{
-"q": "Hvem har ringt en eks og grått?",
+"q": "Hvem virker som typen som har en mappe med skjermbilder av andres samtaler?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem hadde klint med noen i rommet for en hundrelapp?",
-"a": "mix",
-"l": 2,
-"c": "Pek ut hvem det måtte vært."
-},
-{
-"q": "Hvem har flest ligg de nekter for?",
+"q": "Hvem virker som typen som har en egen spilleliste for å komme over en eks?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem har den mest pinlige profilteksten på en datingapp?",
-"a": "mix",
-"l": 2,
-"c": "Les den opp."
-},
-{
-"q": "Hvem har sjekket opp en bartender – og fått gratis drinker?",
+"q": "Hvem har brukt «jeg må opp tidlig i morgen» for å komme seg hjem fra en date – på en fredag?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem har gått på date bare for å bli invitert på fest?",
+"q": "Hvem har sjekket nettbanken dagen derpå og funnet en runde til alle de ikke husker?",
+"a": "mix",
+"l": 2,
+"c": "Si det dyreste du har kjøpt i fylla."
+},
+{
+"q": "Hvem finner et nachspiel i kveld – hjemme hos noen ingen kjenner?",
 "a": "mix",
 "l": 2
-},
-{
-"q": "Hvem har et skjermbilde av noen i denne gjengen de ikke burde ha?",
-"a": "mix",
-"l": 2,
-"c": "Vis det."
-},
-{
-"q": "Hvem hadde tort å lese opp sin siste melding til eksen?",
-"a": "mix",
-"l": 2,
-"c": "Gjør det – eller tre slurker."
 },
 {
 "q": "Hvem har gått hjem fra byen med skoene i hånda?",
@@ -536,54 +309,410 @@
 "l": 2
 },
 {
-"q": "Hvem blir mest flørtete etter tre drinker?",
+"q": "Hvem har kontakter i mobilen som «Fest lørdag» og «Taxi-fyren» – og aner ikke hvem det er?",
 "a": "mix",
 "l": 2,
-"c": "Flørt med personen til venstre i ti sekunder."
+"c": "Les opp den rareste kontakten du har."
 },
 {
-"q": "Hvem har flest folk de gjemmer seg for på byen?",
+"q": "Hvem har sagt «jeg er ikke full» og snøvlet på hvert eneste ord?",
 "a": "mix",
 "l": 2,
-"c": "Si ett navn."
+"c": "Si «sju sjøsyke sjømenn» tre ganger fort."
 },
 {
-"q": "Hvem har våknet med nye kontakter i mobilen og null anelse?",
-"a": "mix",
-"l": 2,
-"c": "Les opp den siste ukjente kontakten."
-},
-{
-"q": "Hvem har møtt på jobb eller skole fortsatt full?",
-"a": "mix",
-"l": 2,
-"c": "Fortell hvordan dagen gikk."
-},
-{
-"q": "Hvem har kysset noen av samme kjønn?",
+"q": "Hvem har skyldt på fylla for noe de mente helt edru?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem har tatt en snus i fylla og angret på det?",
+"q": "Hvem har sykemeldt seg med «omgangssyke» en mandag etter en lang helg?",
 "a": "mix",
 "l": 2
 },
 {
-"q": "Hvem har lagt seg med klærne på og våknet med én sko?",
-"a": "mix",
-"l": 2
-},
-{
-"q": "Hvem har sagt «jeg er ikke full» med en tydelig slurring?",
+"q": "Hvem har sendt en melding ment for én person i familiechatten?",
 "a": "mix",
 "l": 2,
-"c": "Si «Sju sjøsyke sjømenn» tre ganger fort."
+"c": "Les opp den siste meldingen din i familiechatten."
 },
 {
-"q": "Hvem har spydd på en date?",
+"q": "Hvem har skrevet, slettet og skrevet en melding i en halvtime – før de sendte «hei»?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har gått på en fest bare fordi crushen skulle dit – og crushen kom aldri?",
+"a": "mix",
+"l": 2,
+"c": "Hvor lenge ble du værende? Ærlig."
+},
+{
+"q": "Hvem har flørtet seg forbi køen på et utested?",
+"a": "mix",
+"l": 2,
+"c": "Vis oss blikket du brukte."
+},
+{
+"q": "Hvem har fortalt sjefen hva de egentlig mener på en firmafest?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har sendt et skjermbilde til feil person – og det handlet om personen?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem blir forelsket i en ny hver måned – og alle er «helt annerledes»?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har brukt samme åpningsreplikk på alle matchene sine?",
+"a": "mix",
+"l": 2,
+"c": "Si replikken. Bordet gir terningkast."
+},
+{
+"q": "Hvem sier «jeg er ikke på apper» – og har tre datingapper på mobilen?",
+"a": "mix",
+"l": 2,
+"c": "Si hvor mange datingapper du har. Bare tallet."
+},
+{
+"q": "Hvem har flørtet med noen på jobben i Teams-chatten?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har tatt en powernap på jobbdoen dagen etter en fest?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har fått et falskt nummer på byen – og ringt det dagen etter?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har gitt en eks en ny sjanse – og en til – og en til?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har noen gang tatt med seg et glass fra baren hjem?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har spist frokost på en bensinstasjon i gårsdagens antrekk?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har fortalt en date at de elsker friluftsliv – og eier ikke engang ullsokker?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har sagt «det var bare en klem» om noe som definitivt ikke var bare en klem?",
+"a": "mix",
+"l": 2
+},
+{
+"q": "Hvem har en date-historie gjengen fortsatt ber om å høre?",
+"a": "mix",
+"l": 2,
+"c": "Fortell den på 20 sekunder."
+},
+{
+"q": "Hvem virker som typen som har mer penger på konto enn de noen gang innrømmer?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har løyet om lønna si – oppover?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har snoket i mobilen til en kjæreste som lå og sov?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har sagt «jeg elsker deg» først – og fått «takk» tilbake?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har gjort det slutt i en melding som var kortere enn dette spørsmålet?",
+"a": "mix",
+"l": 3,
+"c": "Si meldingen høyt – ordrett, om du husker den."
+},
+{
+"q": "Hvem ville du lånt en tusenlapp – og aldri sett den igjen?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har en hemmelighet de har holdt skjult for familien i over et år?",
+"a": "mix",
+"l": 3,
+"c": "Ja eller nei holder. Ingen detaljer."
+},
+{
+"q": "Hvem har konkurrert med et søsken hele livet – og teller fortsatt poeng?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har en gruppechat der det snakkes om folk i denne gjengen?",
+"a": "mix",
+"l": 3,
+"c": "Si hva gruppechatten heter. Bare navnet."
+},
+{
+"q": "Hvem har det mest overraskende i søkeloggen sin akkurat nå?",
+"a": "mix",
+"l": 3,
+"c": "Les opp det siste du googlet."
+},
+{
+"q": "Hvem har lånt penger av foreldrene og kalt det «forskudd på arven»?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har tatt æren for noe en kollega gjorde?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem kommer til å kikke i baderomsskapet her i kveld?",
+"a": "mix",
+"l": 3,
+"c": "Si det rareste du har funnet i et baderomsskap."
+},
+{
+"q": "Hvem har en eks som fortsatt er litt forelsket i dem?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem virker som typen som har dumpet noen på bursdagen deres?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem virker som typen som vet nøyaktig hva alle i rommet tjener?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har sagt «vi er bare venner» om noen de var stormforelsket i?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har en favoritt blant foreldrene sine – og har sagt det høyt?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har møtt en venns nye kjæreste, tenkt «seriøst?» og sagt «så hyggelig!»?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har tatt en «pause» i forholdet for å date noen andre?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem virker som typen som ikke klarer å holde på en hemmelighet over natta?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har sagt feil navn i senga?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har fått en lapp fra naboen om lydnivået – og det var ikke musikken?",
+"a": "mix",
+"l": 3,
+"c": "Bank tre ganger i bordet på vegne av naboen."
+},
+{
+"q": "Hvem har tatt «walk of shame» i fullt dagslys?",
+"a": "mix",
+"l": 3,
+"c": "Beskriv antrekket."
+},
+{
+"q": "Hvem har hatt «bare én natt» som ble til flere måneder?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har kastet ut noen før frokosten?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har forsvunnet fra en fest med noen og vært tilbake før noen merket det?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har hatt «en siste gang» med en eks – mer enn én gang?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har latt som de sov for å slippe å si ha det morgenen etter?",
+"a": "mix",
+"l": 3,
+"c": "Vis hvordan du lot som du sov."
+},
+{
+"q": "Hvem har ligget med noen fra jobben og oppført seg helt normalt på mandagsmøtet?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har hatt et ligg så dårlig at det er blitt en fast historie i gjengen?",
+"a": "mix",
+"l": 3,
+"c": "Kortversjonen. Ingen navn."
+},
+{
+"q": "Hvem kommer til å dele taxi hjem med noen de møtte i kveld?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har sagt «jeg sover på sofaen» – og ikke sovet på sofaen?",
+"a": "mix",
+"l": 3,
+"c": "Kortversjonen – uten navn."
+},
+{
+"q": "Hvem har sendt et bilde og angret sekundet etter?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har brukt «skal vi se en film?» som en ganske åpenbar unnskyldning?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har blitt med noen hjem mest på grunn av leiligheten?",
+"a": "mix",
+"l": 3,
+"c": "Beskriv leiligheten med tre ord."
+},
+{
+"q": "Hvem har en historie fra senga som de bare forteller etter klokka to?",
+"a": "mix",
+"l": 3,
+"c": "Er klokka under to? Drikk én ekstra og spar historien."
+},
+{
+"q": "Hvem har datet to i samme vennegjeng uten at noen av dem visste det?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem virker som typen som har noen de bare sender melding til etter midnatt?",
+"a": "mix",
+"l": 3
+},
+{
+"q": "Hvem har hatt en date som startet med brunsj og sluttet dagen etter?",
+"a": "mix",
+"l": 3,
+"c": "Hvor lenge varte den? Svar i timer."
+},
+{
+"q": "Hvem har tapt i FIFA og skyldt på kontrolleren?",
 "a": "gutter",
-"l": 2
+"l": 1,
+"c": "Si høyt hvem som er best i FIFA her. Ærlig."
+},
+{
+"q": "Hvem bruker mer tid på Fantasy-laget sitt enn på jobben?",
+"a": "gutter",
+"l": 1,
+"c": "Si plassen din i ligaen. Sisteplass: drikk én til."
+},
+{
+"q": "Hvem har gått inn på Biltema for å kjøpe én ting og kommet ut med en ny hobby?",
+"a": "gutter",
+"l": 1
+},
+{
+"q": "Hvem sier «det fikser jeg selv» – og et år senere står det fortsatt uåpnet i gangen?",
+"a": "gutter",
+"l": 1
+},
+{
+"q": "Hvem er først ute i shorts når det er åtte grader i april?",
+"a": "gutter",
+"l": 1
+},
+{
+"q": "Hvem har planlagt gutteturen i to år uten at den har blitt noe av?",
+"a": "gutter",
+"l": 1
+},
+{
+"q": "Hvem stiller opp på flyttehjelp – og bærer bare puter og lamper?",
+"a": "gutter",
+"l": 1
+},
+{
+"q": "Hvem har noen gang sagt «det er bare en strekk» og haltet i to uker?",
+"a": "gutter",
+"l": 1
+},
+{
+"q": "Hvem krangler fortsatt om en dommeravgjørelse fra flere år siden?",
+"a": "gutter",
+"l": 1,
+"c": "Forklar avgjørelsen på ti sekunder. Ingen avbryter."
+},
+{
+"q": "Hvem svarer «bare bra» når gutta spør – uansett hva som har skjedd?",
+"a": "gutter",
+"l": 1
+},
+{
+"q": "Hvem har kjøpt et verktøy til 3000 kroner for å bruke det én gang?",
+"a": "gutter",
+"l": 1,
+"c": "Hva var det – og hvor står det nå?"
+},
+{
+"q": "Hvem har sagt «jeg trenger ikke kart» og kjørt feil på vei til hytta?",
+"a": "gutter",
+"l": 1
+},
+{
+"q": "Hvem har sendt en Finn-annonse for en båt til gutta med «skal vi?»",
+"a": "gutter",
+"l": 1
+},
+{
+"q": "Hvem har en «hemmelig» grillmarinade som egentlig er ferdigmarinade fra Rema?",
+"a": "gutter",
+"l": 1,
+"c": "Avslør oppskriften. Nå."
 },
 {
 "q": "Hvem har prøvd å sjekke opp noen med fotballfakta?",
@@ -598,93 +727,285 @@
 "c": "Si det ekte tallet."
 },
 {
-"q": "Hvem har kommet hjem uten lommebok, mobil og verdighet?",
+"q": "Hvem har sovnet først på en guttetur og våknet med tusj i ansiktet?",
 "a": "gutter",
 "l": 2
 },
 {
-"q": "Hvem har tatt flest snus på én fylla?",
+"q": "Hvem har fått en kompis til å ringe med en falsk krise midt i en date?",
+"a": "gutter",
+"l": 2
+},
+{
+"q": "Hvem har blitt med på «én øl etter trening» og kommet hjem klokka fire?",
+"a": "gutter",
+"l": 2
+},
+{
+"q": "Hvem har et bilde med en fisk på datingprofilen sin?",
 "a": "gutter",
 "l": 2,
-"c": "Si antallet."
+"c": "Har du det? Vis bildet."
 },
 {
-"q": "Hvem har blitt kastet ut av et utested?",
+"q": "Hvem har blitt kastet ut av et utested – og prøvd å komme inn igjen med en annen jakke?",
 "a": "gutter",
 "l": 2,
-"c": "Fortell hvorfor."
+"c": "Vis hvordan du så uskyldig ut i døra."
 },
 {
-"q": "Hvem har gått hjem med noen bare fordi de hadde pizza?",
+"q": "Hvem har spurt gutta om råd før en date – og gjort det stikk motsatte?",
 "a": "gutter",
 "l": 2
 },
 {
-"q": "Hvem har grått av en film og skyldt på allergi?",
+"q": "Hvem har vært wingman og endt opp med nummeret selv?",
 "a": "gutter",
 "l": 2
 },
 {
-"q": "Hvem har ringt en eks klokka tre om natta?",
+"q": "Hvem har sendt «elsker dere, gutta» i gruppechatten klokka fire om natta?",
 "a": "gutter",
 "l": 2
 },
 {
-"q": "Hvem har vært med på noe på gutteturen som aldri skal fortelles?",
+"q": "Hvem har kjøpt en flaske til hele bordet i Syden og spist nudler resten av uka?",
+"a": "gutter",
+"l": 2
+},
+{
+"q": "Hvem har laget spillelista til hyttehelga med bare sin egen favorittartist?",
+"a": "gutter",
+"l": 2
+},
+{
+"q": "Hvem har tatt en speilselfie på gymmen og gått hjem rett etterpå?",
+"a": "gutter",
+"l": 2
+},
+{
+"q": "Hvem våkner etter fylla og spør i gruppechatten «hva skjedde egentlig i går?»",
 "a": "gutter",
 "l": 2,
-"c": "Gutta bestemmer om det fortelles."
+"c": "Oppsummer din siste fyllekveld på ti sekunder."
 },
 {
-"q": "Hvem har skrevet «du ser kjent ut» til noen på en datingapp?",
+"q": "Hvem har løyet mest om ligg foran gutta?",
 "a": "gutter",
-"l": 2
+"l": 3,
+"c": "Gutta stemmer: hvor mye av det var løgn – i prosent?"
 },
 {
-"q": "Hvem har barbert noe annet enn skjegget før en date?",
+"q": "Hvem har kortest tid fra «hei» til seng?",
 "a": "gutter",
-"l": 2
+"l": 3,
+"c": "Si rekorden."
 },
 {
-"q": "Hvem har sovnet på do på et utested?",
+"q": "Hvem har lånt senga til en kompis uten å spørre – og ikke for å sove?",
 "a": "gutter",
-"l": 2
+"l": 3
 },
 {
-"q": "Hvem har fått et nei så brutalt at gutta fortsatt ler av det?",
+"q": "Hvem har lagt inn en date i kalenderen som «trening»?",
 "a": "gutter",
-"l": 2,
-"c": "Gjenfortell det."
+"l": 3
 },
 {
-"q": "Hvem har skrevet en melding til en date med hele jentegjengen som publikum?",
+"q": "Hvem har lagret et ligg i mobilen som «Ikke svar»?",
+"a": "gutter",
+"l": 3
+},
+{
+"q": "Hvem har flest ligg fra samme utested?",
+"a": "gutter",
+"l": 3,
+"c": "Hvilket utested?"
+},
+{
+"q": "Hvem har datet eksen til en kompis – og ventet et halvt år med å si det?",
+"a": "gutter",
+"l": 3
+},
+{
+"q": "Hvem har lånt penger av gutta og «glemt» det i over et år?",
+"a": "gutter",
+"l": 3
+},
+{
+"q": "Hvem har meldt avbud på gutteturen med «syk» – og var på date?",
+"a": "gutter",
+"l": 3,
+"c": "Si unnskyld til gutta. Med skål."
+},
+{
+"q": "Hvem har tapt mer penger på krypto enn de har fortalt noen?",
+"a": "gutter",
+"l": 3
+},
+{
+"q": "Hvem har grått i armene til en kompis på byen – og bedt ham aldri nevne det?",
+"a": "gutter",
+"l": 3
+},
+{
+"q": "Hvem tjener mest av gutta – og spanderer minst?",
+"a": "gutter",
+"l": 3,
+"c": "Hent noe å drikke til gutta. Nå."
+},
+{
+"q": "Hvem av gutta ville du minst latt låne leiligheten din en helg?",
+"a": "gutter",
+"l": 3
+},
+{
+"q": "Hvem har brukt navnet til en kompis på byen fordi de ikke ville gi sitt eget?",
+"a": "gutter",
+"l": 3
+},
+{
+"q": "Hvem har planlagt jentekvelden i tre uker – og avlyst den selv dagen før?",
+"a": "jenter",
+"l": 1
+},
+{
+"q": "Hvem gir de beste rådene i gruppechatten – og følger dem aldri selv?",
+"a": "jenter",
+"l": 1,
+"c": "Gi personen til høyre ett godt råd. Nå."
+},
+{
+"q": "Hvem har klær i skapet som egentlig tilhører en annen i gjengen?",
+"a": "jenter",
+"l": 1,
+"c": "Si hvem sin – og lov å levere tilbake."
+},
+{
+"q": "Hvem har lånt en kjole til en fest og levert den tilbake med en ny flekk?",
+"a": "jenter",
+"l": 1
+},
+{
+"q": "Hvem har booket bord til bursdagsmiddagen og brukt en halvtime på å fordele regningen?",
+"a": "jenter",
+"l": 1
+},
+{
+"q": "Hvem har et treningssett som har vært på flere brunsjer enn treninger?",
+"a": "jenter",
+"l": 1
+},
+{
+"q": "Hvem sier «jeg tar bare en rask dusj» og er klar en time senere?",
+"a": "jenter",
+"l": 1
+},
+{
+"q": "Hvem skylder på at Merkur er retrograd når noe går galt?",
+"a": "jenter",
+"l": 1,
+"c": "Hva er stjernetegnet ditt? Alle med samme, drikker."
+},
+{
+"q": "Hvem legger ut gruppebildet der bare hun selv ser bra ut?",
+"a": "jenter",
+"l": 1,
+"c": "Vis det siste gruppebildet du la ut."
+},
+{
+"q": "Hvem har en hel hylle med hudpleie hun ikke vet hva gjør?",
+"a": "jenter",
+"l": 1
+},
+{
+"q": "Hvem husker hva alle hadde på seg på en fest for tre år siden?",
+"a": "jenter",
+"l": 1
+},
+{
+"q": "Hvem har tre ulike gruppechatter med nøyaktig de samme jentene?",
+"a": "jenter",
+"l": 1,
+"c": "Hvor mange har du? Si tallet."
+},
+{
+"q": "Hvem har fått en låt tipset av en venninne – og senere påstått at hun fant den selv?",
+"a": "jenter",
+"l": 1
+},
+{
+"q": "Hvem har alltid hårstrikk, plaster og en ekstra lader i veska – til alle andre?",
+"a": "jenter",
+"l": 1
+},
+{
+"q": "Hvem sender skjermbilder av hele samtaler til gjengen med «hva betyr egentlig dette?»",
 "a": "jenter",
 "l": 2,
-"c": "Les opp den siste gjengen hjalp deg med."
+"c": "Les opp den siste meldingen gjengen hjalp deg å skrive."
 },
 {
-"q": "Hvem har stalket eksens nye så langt at de fant bryllupsbildene til foreldrene?",
+"q": "Hvem har blitt med en fremmed på do på byen og kommet ut med en ny bestevenninne?",
 "a": "jenter",
 "l": 2
 },
 {
-"q": "Hvem har løyet om hva et klesplagg kostet?",
-"a": "jenter",
-"l": 2,
-"c": "Si den ekte prisen."
-},
-{
-"q": "Hvem har kysset noen bare for å få gratis drinker?",
+"q": "Hvem har stalket eksens nye så langt at hun fant bryllupsbildene til foreldrene?",
 "a": "jenter",
 "l": 2
 },
 {
 "q": "Hvem har danset på et bord – og falt ned?",
 "a": "jenter",
+"l": 2,
+"c": "Vis dansen – på gulvet denne gangen."
+},
+{
+"q": "Hvem har lagret en date i mobilen under et kallenavn?",
+"a": "jenter",
+"l": 2,
+"c": "Si kallenavnet."
+},
+{
+"q": "Hvem har kysset crushen til en venninne?",
+"a": "jenter",
+"l": 2,
+"c": "Gjengen avgjør om du er tilgitt."
+},
+{
+"q": "Hvem har lånt en venninnes topp uten å spørre – og lagt ut bilde i den på Insta?",
+"a": "jenter",
 "l": 2
 },
 {
-"q": "Hvem har sagt «jeg drikker ikke i kveld» og vært sist hjem?",
+"q": "Hvem har noen gang spydd i veska si?",
+"a": "jenter",
+"l": 2
+},
+{
+"q": "Hvem har gått på date med noen mest fordi de hadde en søt hund?",
+"a": "jenter",
+"l": 2
+},
+{
+"q": "Hvem har latt venninnene sveipe for seg på Tinder en hel kveld?",
+"a": "jenter",
+"l": 2
+},
+{
+"q": "Hvem har møtt opp på brunsj dagen derpå med solbriller innendørs?",
+"a": "jenter",
+"l": 2
+},
+{
+"q": "Hvem har sendt en lydmelding på fire minutter fra taxien rett etter en date?",
+"a": "jenter",
+"l": 2,
+"c": "Gjør kvelden så langt om til en lydmelding. Ti sekunder."
+},
+{
+"q": "Hvem har brukt «jentekveld» som unnskyldning for å slippe en date?",
 "a": "jenter",
 "l": 2
 },
@@ -694,413 +1015,78 @@
 "l": 2
 },
 {
-"q": "Hvem har flørtet med en dørvakt for å komme inn?",
-"a": "jenter",
-"l": 2
-},
-{
-"q": "Hvem har lagret en date i mobilen under et kallenavn?",
-"a": "jenter",
-"l": 2,
-"c": "Si kallenavnet."
-},
-{
-"q": "Hvem har sjekket mobilen til en kjæreste mens de sov?",
-"a": "jenter",
-"l": 2
-},
-{
-"q": "Hvem har spydd i veska si?",
-"a": "jenter",
-"l": 2
-},
-{
-"q": "Hvem har blitt med noen hjem for å slippe taxikøen?",
-"a": "jenter",
-"l": 2
-},
-{
-"q": "Hvem har kysset crushen til en venninne?",
-"a": "jenter",
-"l": 2,
-"c": "Gruppen avgjør om du er tilgitt."
-},
-{
-"q": "Hvem har sendt et skjermbilde til feil person – og det handlet om personen?",
-"a": "jenter",
-"l": 2
-},
-{
-"q": "Hvem har den høyeste body counten i rommet?",
-"a": "mix",
-"l": 3,
-"c": "Si tallet – eller fire slurker."
-},
-{
-"q": "Hvem har hatt sex på et offentlig sted?",
-"a": "mix",
-"l": 3,
-"c": "Nevn stedet."
-},
-{
-"q": "Hvem har ligget med noen for å slippe nattbussen hjem?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har hatt sex i foreldrenes seng?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har hatt en trekant – eller tenkt seriøst på det?",
-"a": "mix",
-"l": 3,
-"c": "Ja, nei eller «ingen kommentar»."
-},
-{
-"q": "Hvem har falsket en orgasme?",
-"a": "mix",
-"l": 3,
-"c": "Ærlig svar – eller tre slurker."
-},
-{
-"q": "Hvem ligger mest sannsynlig med noen i kveld?",
-"a": "mix",
-"l": 3,
-"c": "Gjengen stemmer."
-},
-{
-"q": "Hvem har ligget med noen i dette rommet?",
-"a": "mix",
-"l": 3,
-"c": "Pek – eller fem slurker."
-},
-{
-"q": "Hvem har sendt nakenbilde før første date?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har hatt sex på jobben?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har blitt tatt midt i akten?",
-"a": "mix",
-"l": 3,
-"c": "Av hvem?"
-},
-{
-"q": "Hvem har forsvunnet fra en fest med noen og kommet tilbake før noen merket det?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har den mest overraskende tingen de tenner på?",
-"a": "mix",
-"l": 3,
-"c": "Hvisk den til personen til høyre."
-},
-{
-"q": "Hvem har ligget med en eks etter bruddet?",
-"a": "mix",
-"l": 3,
-"c": "Hvor mange ganger?"
-},
-{
-"q": "Hvem har hatt sex med noen de aldri fikk vite navnet på?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har datet noen bare for sexen?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem kunne hatt et fast ligg i denne gjengen?",
-"a": "mix",
-"l": 3,
-"c": "Pek ut hvem – eller tre slurker."
-},
-{
-"q": "Hvem har vært utro?",
-"a": "mix",
-"l": 3,
-"c": "Ja eller nei. Ingen detaljer."
-},
-{
-"q": "Hvem har hatt sex i en bil?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har flest nakenbilder på mobilen akkurat nå?",
-"a": "mix",
-"l": 3,
-"c": "Si et tall."
-},
-{
-"q": "Hvem har sagt feil navn i senga?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har ligget med noen de møtte samme kveld?",
-"a": "mix",
-"l": 3,
-"c": "Hvor mange ganger har det skjedd?"
-},
-{
-"q": "Hvem har hatt sex med romkameraten på andre siden av veggen?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har en fyllehistorie de aldri har fortalt noen?",
-"a": "mix",
-"l": 3,
-"c": "Fortell nå – eller fem slurker."
-},
-{
-"q": "Hvem har kastet ut noen før frokost?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har gjort noe i senga de aldri ville fortalt foreldrene?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har hatt sex på et fly, et tog eller en båt?",
-"a": "mix",
-"l": 3,
-"c": "Hvilken?"
-},
-{
-"q": "Hvem hadde vært med på en orgie hvis ingen fikk vite det?",
-"a": "mix",
-"l": 3,
-"c": "Ja eller nei."
-},
-{
-"q": "Hvem har lengst tid siden forrige ligg?",
-"a": "mix",
-"l": 3,
-"c": "Si hvor lenge – eller tre slurker."
-},
-{
-"q": "Hvem har filmet seg selv i senga?",
-"a": "mix",
-"l": 3,
-"c": "Ja eller nei."
-},
-{
-"q": "Hvem har ligget med noen fra treningssenteret?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har ligget med noen bare for å gjøre en eks sjalu?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har hatt sex på hytta med andre i naborommet?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har fått med seg noen hjem på under ti minutter?",
-"a": "mix",
-"l": 3,
-"c": "Rekordtiden?"
-},
-{
-"q": "Hvem har gjort det på et utestedtoalett?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har hatt «bare én natt» som ble til flere måneder?",
-"a": "mix",
-"l": 3
-},
-{
-"q": "Hvem har fått de drøyeste meldingene i kveld?",
-"a": "mix",
-"l": 3,
-"c": "Vis den siste til én person du velger."
-},
-{
-"q": "Hvem har tatt «walk of shame» i fullt dagslys?",
-"a": "mix",
-"l": 3,
-"c": "Beskriv antrekket."
-},
-{
-"q": "Hvem hadde sagt ja til et realityprogram der man ligger med folk på TV?",
-"a": "mix",
-"l": 3,
-"c": "Si hvilket."
-},
-{
-"q": "Hvem har hatt sex på første date?",
-"a": "mix",
-"l": 3,
-"c": "Hvor mange ganger?"
-},
-{
-"q": "Hvem har kortest tid fra «hei» til seng?",
-"a": "gutter",
-"l": 3,
-"c": "Si rekorden."
-},
-{
-"q": "Hvem har ligget med noen og ikke husket det dagen etter?",
-"a": "gutter",
-"l": 3
-},
-{
-"q": "Hvem har sagt «det har aldri skjedd meg før»?",
-"a": "gutter",
-"l": 3
-},
-{
-"q": "Hvem har lånt kompisens seng uten å spørre?",
-"a": "gutter",
-"l": 3
-},
-{
-"q": "Hvem har blitt tatt av mora midt i akten?",
-"a": "gutter",
-"l": 3
-},
-{
-"q": "Hvem har lagret et ligg som «Ikke svar» i mobilen?",
-"a": "gutter",
-"l": 3
-},
-{
-"q": "Hvem har sett wingmanen sin dra hjem med den de selv prøvde seg på?",
-"a": "gutter",
-"l": 3
-},
-{
-"q": "Hvem har løyet mest om ligg foran gutta?",
-"a": "gutter",
-"l": 3,
-"c": "Gutta gjetter hvilken historie som er løgn."
-},
-{
-"q": "Hvem har hatt sex i et telt på festival?",
-"a": "gutter",
-"l": 3
-},
-{
-"q": "Hvem har testet blå piller «bare for å se»?",
-"a": "gutter",
-"l": 3
-},
-{
-"q": "Hvem har brukt samme sjekkereplikk på tre personer samme kveld?",
-"a": "gutter",
-"l": 3,
-"c": "Si den."
-},
-{
-"q": "Hvem har flest ligg fra samme utested?",
-"a": "gutter",
-"l": 3,
-"c": "Hvilket?"
-},
-{
-"q": "Hvem hadde sagt ja til Ex on the Beach?",
-"a": "gutter",
-"l": 3
-},
-{
-"q": "Hvem har vært med på noe i russetiden som aldri kommer ut?",
-"a": "gutter",
-"l": 3,
-"c": "Kortversjonen."
-},
-{
-"q": "Hvem har blitt med noen hjem mest for leilighetens skyld?",
-"a": "jenter",
-"l": 3
-},
-{
-"q": "Hvem har beholdt en genser fra noen de lå med?",
+"q": "Hvem har beholdt en genser fra noen hun lå med?",
 "a": "jenter",
 "l": 3,
-"c": "Si hvem sin."
-},
-{
-"q": "Hvem har sendt et bilde og angret sekundet etter?",
-"a": "jenter",
-"l": 3
-},
-{
-"q": "Hvem har ligget med noen i gjengens omgangskrets i hemmelighet?",
-"a": "jenter",
-"l": 3,
-"c": "Gi et hint."
+"c": "Har du den på deg nå? Drikk to."
 },
 {
 "q": "Hvem har gitt et ligg karakter i gruppechatten?",
 "a": "jenter",
 "l": 3,
-"c": "Hvilken karakter fikk den siste?"
+"c": "Hvilken karakter fikk det siste?"
 },
 {
-"q": "Hvem har ligget med en venninnes eks?",
-"a": "jenter",
-"l": 3
-},
-{
-"q": "Hvem har hatt en jentetur der noen ikke sov på hotellet?",
+"q": "Hvem har vært på jentetur uten å sove én eneste natt på hotellet?",
 "a": "jenter",
 "l": 3,
-"c": "Hvem?"
+"c": "Kortversjonen – uten navn."
 },
 {
-"q": "Hvem har tatt initiativet først på første date?",
+"q": "Hvem har ghostet noen etter en helt fantastisk natt?",
 "a": "jenter",
 "l": 3
 },
 {
-"q": "Hvem har sendt nakenbilde til noen de aldri har møtt?",
+"q": "Hvem har hatt noe med en venninnes søsken – og aldri sagt det?",
 "a": "jenter",
 "l": 3
 },
 {
-"q": "Hvem har hatt en hemmelig affære på jobben?",
+"q": "Hvem har en liste i mobilen over hvem hun kan sende «hva skjer?» til en lørdag klokka ett?",
 "a": "jenter",
 "l": 3
 },
 {
-"q": "Hvem har vært på date med to på samme kveld?",
+"q": "Hvem har lagt igjen noe hjemme hos et ligg med vilje – for å ha en grunn til å komme tilbake?",
 "a": "jenter",
 "l": 3
 },
 {
-"q": "Hvem har ghostet noen etter en fantastisk natt?",
+"q": "Hvem har vært på date med to forskjellige på samme dag?",
 "a": "jenter",
 "l": 3
 },
 {
-"q": "Hvem har gått fra «bare venner» til noe mer raskest?",
+"q": "Hvem har lest hele meldingshistorikken med en eks klokka tre om natta?",
 "a": "jenter",
 "l": 3
 },
 {
-"q": "Hvem har hatt et ligg så dårlig at det er blitt en fast historie i gjengen?",
+"q": "Hvem har sagt «jeg er ikke sur» til en venninne og vært sur i et år?",
+"a": "jenter",
+"l": 3
+},
+{
+"q": "Hvem har holdt en ny kjæreste hemmelig for gjengen i over en måned?",
 "a": "jenter",
 "l": 3,
-"c": "Kortversjonen."
+"c": "Hvor lenge? Si antall uker."
+},
+{
+"q": "Hvem har snakket stygt om en venninnes kjæreste – og så vært forlover i bryllupet?",
+"a": "jenter",
+"l": 3
+},
+{
+"q": "Hvem har datet noen bare for at gjengen skulle slutte å spørre?",
+"a": "jenter",
+"l": 3
+},
+{
+"q": "Hvem har en eks gjengen har nedlagt veto mot – flere ganger?",
+"a": "jenter",
+"l": 3,
+"c": "Hvor mange veto? Si tallet."
 }
 ]

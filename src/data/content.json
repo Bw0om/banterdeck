@@ -3882,7 +3882,7 @@
       "only": "no",
       "rules": {
        "no": [
-        "Alle får samme spørsmål på telefonen, for eksempel «Den verste gaven du har fått» eller «Noe du aldri har fortalt foreldrene dine».",
+        "Alle får samme spørsmål på telefonen, for eksempel «Den verste gaven du har fått» eller «Det første tegnet på at du begynner å bli full».",
         "Alle skriver et svar anonymt. Når alle har svart, vises svarene ett og ett.",
         "Alle gjetter hvem som skrev svaret – forfatteren holder masken.",
         "b|Gjetter du feil: drikk én.",
@@ -4160,19 +4160,19 @@
         "Alle legger inn én sang i køen per kategori. Når alle har valgt, spilles sangene etter tur.",
         "Etter hver sang forteller eieren hvorfor akkurat den ble valgt — historien eller følelsen bak.",
         "Alle drikker når historien er god. Etter hver kategori får personen med dårligst historie 5 slurker.",
-        "b|Kategorier: favorittsangen din · en sang som har påvirket livet ditt · en sang med et minne knyttet til seg · sangen som gjør deg klar for byen."
+        "b|Kategorier: låta som minner deg om en eks · låta du skammer deg over at du kan hele teksten til · låta fra den verste sommerjobben din · låta som gjør deg klar for byen."
        ],
        "sv": [
         "Alla lägger in en låt i kön per kategori. När alla valt spelas låtarna i tur och ordning.",
         "Efter varje låt berättar ägaren varför just den valdes — historien eller känslan bakom.",
         "Alla dricker när historien är bra. Efter varje kategori får personen med sämst historia 5 klunkar.",
-        "b|Kategorier: din favoritlåt · en låt som påverkat ditt liv · en låt med ett minne · låten som gör dig redo för krogen."
+        "b|Kategorier: låten som påminner dig om ett ex · låten du skäms över att du kan hela texten till · låten från ditt värsta sommarjobb · låten som gör dig redo för krogen."
        ],
        "en": [
         "Everyone queues one song per category. Once all have picked, the songs play in turn.",
         "After each song, its owner explains why they chose it — the story or the feeling behind it.",
         "Everyone drinks when the story is good. After each category, the weakest story earns its owner 5 sips.",
-        "b|Categories: your favourite song · a song that shaped your life · a song tied to a memory · the song that gets you ready for a night out."
+        "b|Categories: the song that reminds you of an ex · the song you’re embarrassed to know every word of · the song from your worst summer job · the song that gets you ready for a night out."
        ]
       },
       "fit": {

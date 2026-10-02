@@ -4,380 +4,384 @@
   "om": "For the office Christmas party, the holiday pre-game and the Santa party. Safe to play with coworkers – but never boring.",
   "items": [
    {
-    "t": "Whoever has been at the company the longest gives out three sips.",
-    "k": "Give out"
-   },
-   {
-    "t": "Everyone who has sent an email starting with “Hi all” this year, drink.",
+    "t": "Everyone who has talked for a whole minute before someone said “you're on mute”, drink.",
     "k": "Drink if"
    },
    {
-    "t": "Point at the person most likely to still be sitting there when the afterparty is over.",
+    "t": "Point at whoever says “I'll keep this short” and then talks for ten minutes. Whoever gets the most fingers drinks.",
     "k": "Point"
    },
    {
-    "t": "Everyone who has forgotten a Teams meeting this year, drink one.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Say who here you'd bring to a desert island – and why. The person you pick drinks.",
+    "t": "Explain your job the way you would to your gran on Christmas Day. If the table doesn't get it, drink two.",
     "k": "Challenge"
    },
    {
-    "t": "Cheers to the person who carries the most work without ever getting credit for it.",
+    "t": "Everyone who has microwaved fish at work, drink. Your colleagues haven't forgotten.",
+    "k": "Drink if"
+   },
+   {
+    "t": "A toast to all the office plants that didn't survive the year.",
     "k": "Cheers"
    },
    {
-    "t": "Everyone who has wrapped a present with tape and a guilty conscience, drink.",
+    "t": "Everyone who has signed off with just “Regards” and meant it passive-aggressively, drink.",
     "k": "Drink if"
    },
    {
-    "t": "Whoever has the longest trip home tonight makes the next rule.",
-    "k": "Rule"
-   },
-   {
-    "t": "Sing the first line of a Christmas song. Can't do it? Drink two.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Point at the person with the best Christmas sweater tonight. The winner gives out three.",
+    "t": "Point at whoever is most likely to slip away tonight without a goodbye. Whoever gets the most fingers drinks now – while they still can.",
     "k": "Point"
    },
    {
-    "t": "Everyone who has already had Christmas dinner this year, drink one.",
-    "k": "Drink if"
-   },
-   {
-    "t": "New rule: Anyone who says “work” for the rest of the round drinks.",
-    "k": "Rule"
+    "t": "Give a 20-second speech on why this is the best Christmas party ever. Get through it without laughing and give out three.",
+    "k": "Challenge"
    },
    {
     "t": "Tell us your most embarrassing work moment this year – or drink three.",
     "k": "Truth"
    },
    {
-    "t": "Everyone who has signed off with “Kind regards” and meant it passive-aggressively, drink.",
-    "k": "Drink if"
+    "t": "Cheers to whoever carries the most work without ever getting the credit.",
+    "k": "Cheers"
    },
    {
-    "t": "Point at the person most likely to give a speech nobody asked for.",
-    "k": "Point"
+    "t": "New rule: everyone points with their elbow. Use a finger and drink.",
+    "k": "Rule"
    },
    {
-    "t": "The youngest person in the room gives out two sips. The oldest drinks one.",
+    "t": "Whoever has been at the company the longest gives out three.",
     "k": "Give out"
    },
    {
-    "t": "Everyone who has said “let's take this offline” in a meeting this year, drink.",
+    "t": "Everyone who has hit “Reply all” on something meant for just one person, drink.",
     "k": "Drink if"
    },
    {
-    "t": "Name three Christmas movies in five seconds – or drink two.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Cheers to the boss. If the boss is here, the boss drinks two.",
-    "k": "Cheers"
-   },
-   {
-    "t": "Everyone who asked for something practical for Christmas, drink. Boring!",
-    "k": "Drink if"
-   },
-   {
-    "t": "Point at the person with the messiest desk.",
+    "t": "Point at whoever will be buying their Christmas presents on Christmas Eve. Whoever gets the most fingers drinks.",
     "k": "Point"
    },
    {
-    "t": "Whoever has taken the most days off this year drinks one and explains themselves.",
+    "t": "Do your best impression of the Teams ringtone. The table votes – not convincing enough, drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Which bit of work jargon have you started using at home? Say it – or drink two.",
     "k": "Truth"
    },
    {
-    "t": "Everyone who has chased a bus this week, drink.",
-    "k": "Drink if"
+    "t": "Cheers to IT, who've turned everything we broke this year off and on again.",
+    "k": "Cheers"
    },
    {
-    "t": "New rule: Everyone has to say “Merry Christmas” before they drink. Forget it and drink another.",
+    "t": "New rule: everyone has to say “Merry Christmas” before they drink. Forget and drink another.",
     "k": "Rule"
-   },
-   {
-    "t": "Say something nice about the person on your left. If it gets too nice, you both drink.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Everyone who has fallen asleep on the couch after work this week, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Point at the person most likely to play Santa next year.",
-    "k": "Point"
-   },
-   {
-    "t": "Guess how many people in the room have bought all their Christmas presents. Off by more than two? Drink.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Everyone who has called in sick on a Monday, drink. No one's asking why.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Cheers to the canteen – or to whoever always brings cake.",
-    "k": "Cheers"
-   },
-   {
-    "t": "Whoever has the most unread emails drinks one per thousand.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Say what you really thought of this year's summer party – or drink two.",
-    "k": "Truth"
-   },
-   {
-    "t": "Everyone who has said “this'll only take five minutes” and it took an hour, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Point at the person who would win a quiz about the company.",
-    "k": "Point"
-   },
-   {
-    "t": "Impersonate a coworker (nicely!) until the table guesses who. No correct guess in three tries? Drink.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Everyone who put up Christmas decorations before December 1st, drink one.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Whoever is sitting closest to the door gives out two sips.",
-    "k": "Give out"
-   },
-   {
-    "t": "New rule: No one can say anyone's name for the rest of the round. Say a name, drink.",
-    "k": "Rule"
-   },
-   {
-    "t": "Everyone who has regifted a present, drink. Recycling is good for the planet.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Cheers to everyone who didn't come tonight. They're missing out on this.",
-    "k": "Cheers"
-   },
-   {
-    "t": "Say which coworker you'd swap jobs with for a day. They drink one.",
-    "k": "Truth"
-   },
-   {
-    "t": "Everyone who has worked from home in sweatpants this year, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Point at the person most likely to be the boss in ten years.",
-    "k": "Point"
-   },
-   {
-    "t": "Finish the sentence: “Next year I'm going to …”. Everyone votes on whether it's believable. No = drink.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Everyone who has watched “Home Alone” this year, drink. Everyone else drinks too – for tradition's sake.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Cheers to the year that's been. Everyone drinks!",
-    "k": "Cheers"
-   },
-   {
-    "t": "Everyone who has told a coworker “we should grab a beer sometime” without meaning it, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone with a calendar invite for a meeting that could have been an email, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who read the party invite just to check the menu, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who has googled “what to wear to the Christmas party”, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who still doesn’t know what half their coworkers actually do, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who has complained about the coffee machine this year, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who has eaten lunch at their desk this week, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone with an advent calendar containing something other than chocolate, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who has turned their camera off in a meeting to eat, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who has said “Merry Christmas” before December 1st, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who has bought themselves a Christmas present “by accident”, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who has ever posted a photo from a Christmas party, drink – with a little regret.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who has the whole week after Christmas off, drink. Everyone else toasts enviously.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Everyone who has said “I’m only having one” tonight, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Point at whoever is most likely to hit the dance floor first.",
-    "k": "Point"
-   },
-   {
-    "t": "Point at whoever is most likely to text the boss tonight and regret it.",
-    "k": "Point"
-   },
-   {
-    "t": "Point at whoever has been on holiday the most this year. They give out three.",
-    "k": "Point"
-   },
-   {
-    "t": "Point at the person who always hits “reply all”. They drink two.",
-    "k": "Point"
-   },
-   {
-    "t": "Point at whoever is most likely to lose their jacket tonight.",
-    "k": "Point"
-   },
-   {
-    "t": "Point at whoever has the best laugh in the office.",
-    "k": "Point"
-   },
-   {
-    "t": "Point at whoever is most likely to sing karaoke without anyone asking.",
-    "k": "Point"
-   },
-   {
-    "t": "Point at whoever loves Christmas the most. They choose the next toast.",
-    "k": "Point"
-   },
-   {
-    "t": "Give a 20-second speech on why this year’s party is the best ever. Manage it without laughing and give out three.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Describe your job without saying “meeting”, “project” or “email”. Slip up and drink.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Hum a Christmas song. The first to guess it gives out two.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Make up an elf name for the person on your right. If they don’t like it, you drink.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Say “roast pork, lamb ribs, lutefisk” five times fast. Stumble and drink.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Give a coworker a fake job title. The others vote – if it’s good enough, you give out two.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Tell a Christmas joke. If nobody laughs, you drink. If everyone laughs, everyone else drinks.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Take a group selfie with everyone at the table in under ten seconds. Fail and everyone drinks.",
-    "k": "Challenge"
-   },
-   {
-    "t": "A toast to whoever organised the party. Without them we’d be at home.",
-    "k": "Cheers"
-   },
-   {
-    "t": "A toast to everyone who started this year – welcome to the crew!",
-    "k": "Cheers"
-   },
-   {
-    "t": "A toast to IT, who have turned everything we broke off and on again.",
-    "k": "Cheers"
-   },
-   {
-    "t": "A toast to Fridays, paydays and every day with cake.",
-    "k": "Cheers"
-   },
-   {
-    "t": "A toast to whoever made the biggest blunder this year – and survived.",
-    "k": "Cheers"
-   },
-   {
-    "t": "New rule: everyone talks like a newsreader until the next card. Forget and drink.",
-    "k": "Rule"
-   },
-   {
-    "t": "New rule: whoever checks their phone drinks until the next card.",
-    "k": "Rule"
-   },
-   {
-    "t": "New rule: nobody may say “yes”. Say it and drink.",
-    "k": "Rule"
-   },
-   {
-    "t": "New rule: everyone toasts with their other hand for the rest of the night.",
-    "k": "Rule"
-   },
-   {
-    "t": "What’s the funniest thing that’s happened at a Christmas party you’ve been to? Tell it – or drink two.",
-    "k": "Truth"
-   },
-   {
-    "t": "Who here would you most like as your boss? Answer – or drink three.",
-    "k": "Truth"
-   },
-   {
-    "t": "What’s the worst gift idea you’ve ever received? Tell it – or drink two.",
-    "k": "Truth"
-   },
-   {
-    "t": "What were you doing this time last year? If now is better, give out two. If worse, drink two.",
-    "k": "Truth"
-   },
-   {
-    "t": "Which coworker knows the most about you? They get to ask one question you must answer.",
-    "k": "Truth"
    },
    {
     "t": "Whoever travelled the furthest to be here tonight gives out three.",
     "k": "Give out"
    },
    {
-    "t": "Whoever got the most Christmas cards last year gives out two. Everyone who doesn’t send cards drinks.",
+    "t": "Everyone who has been on a Teams call in a smart shirt and joggers, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever always has snacks in their desk drawer. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Give the person on your left a LinkedIn recommendation – out loud and completely straight-faced. Laugh and you drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "What's the strangest thing you've done working from home with the camera off? Tell us – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to the people who organised tonight. Without you, we'd all be sitting at home.",
+    "k": "Cheers"
+   },
+   {
+    "t": "New rule: address everyone by job title – “Pass the salt, Head of HR?” Forget and drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever has worked the most overtime this year gives out four. Well earned.",
     "k": "Give out"
    },
    {
-    "t": "Whoever has worked the most overtime this year gives out four. They’ve earned it.",
+    "t": "Everyone who has booked a fake meeting in their calendar just to be left alone, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever looks like they have strong opinions on how to load a dishwasher. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Make up your Christmas out-of-office – out loud and brutally honest. If the table laughs, give out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "What's on your CV that you can really only sort of do? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to everyone who's new this year – welcome to the gang!",
+    "k": "Cheers"
+   },
+   {
+    "t": "New rule: raise your hand before you speak, just like on Teams. Forget and drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever has the birthday closest to Christmas gives out three.",
     "k": "Give out"
    },
    {
-    "t": "Whoever has the newest phone gives out two. Whoever has the oldest drinks two.",
+    "t": "Everyone who has brought shop-bought cake to work and let people think it was homemade, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever is most likely to still be wearing the Santa hat in the taxi home. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Name everyone at the table. Miss one and drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Round the table: everyone shares the strangest Secret Santa gift they've ever got. Whoever got the strangest gives out three.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to whoever always refills the coffee machine – and never gets thanked.",
+    "k": "Cheers"
+   },
+   {
+    "t": "New rule: nobody says “work” until the next rule card. Say it and drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever has the most holiday left this year gives out three. The rest of us want to know how.",
     "k": "Give out"
+   },
+   {
+    "t": "Everyone who has a mug at work that nobody else is allowed to use, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever is most likely to go home in the wrong coat tonight. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Name five of Santa's reindeer in ten seconds – or drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "What was your first impression of the person on your right? Say it – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to everyone working between Christmas and New Year – you're the real Santas.",
+    "k": "Cheers"
+   },
+   {
+    "t": "New rule: check your work email before the next rule card and you drink two.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever has the most Christmas decorations at home gives out three. Photo evidence required!",
+    "k": "Give out"
+   },
+   {
+    "t": "Everyone who read the party invite just to check the menu, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever is most likely to answer work emails over Christmas. Whoever gets the most fingers drinks – and turns off notifications.",
+    "k": "Point"
+   },
+   {
+    "t": "Round the table: everyone says a bit of work jargon no outsider would understand. Whoever gets stuck drinks.",
+    "k": "Challenge"
+   },
+   {
+    "t": "What's the most pointless meeting you've ever sat through? Tell us – no names – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to everyone who's said “I can take that one” – and regretted it the same second.",
+    "k": "Cheers"
+   },
+   {
+    "t": "New rule: “cheers” is now “thanks for a great collaboration”. Say “cheers” and drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever has been to the most Christmas parties this year gives out three.",
+    "k": "Give out"
+   },
+   {
+    "t": "Everyone who still doesn't know what half their colleagues actually do, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever has taken the most photos tonight. Whoever gets the most fingers shows the best one – or drinks two.",
+    "k": "Point"
+   },
+   {
+    "t": "Hum a Christmas song. The first to guess it gives out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "What's the funniest thing you've seen at a Christmas party? No names. Tell us – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to cake Friday – the most important meeting of the week.",
+    "k": "Cheers"
+   },
+   {
+    "t": "New rule: every request must start with “as per my last email”. Forget and drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Everyone who has bought themselves a Christmas present “by accident”, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever knows every single verse once the carols start. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Finish the sentence “Next year I'm going to …”. The table votes – not believable, drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Which colleague would you most like to be stuck in a lift with for three hours? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to the boss! If the boss is here, the boss makes a speech – ten seconds, tops.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Everyone who has bought their Secret Santa gift at a petrol station that same morning, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever spends triple the Secret Santa limit. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Say “Merry Christmas” in as many languages as you can in ten seconds. Fewer than three, drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Which Christmas present have you swapped without the giver knowing? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Everyone who has told a colleague “we must grab a pint soon” without meaning it, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever is most likely to google something mid-argument tonight just to win. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Pitch an idea for next year's Christmas party in 15 seconds. The table votes: yes = give out three, no = drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who's off for the whole week after Christmas, drink. Everyone else, toast enviously.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever has the best Christmas jumper tonight. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Compose the most passive-aggressive office-kitchen note you can – out loud. Make the table laugh and give out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has said “I'm only having one” tonight, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever you can hear laughing from the other side of the open-plan office. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Read out the subject line of the last work email you sent – in your most dramatic voice. Or drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who thinks turkey is the worst bit of Christmas dinner, drink. Turkey fans, shake your heads.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever is most likely to drag the whole table onto the dance floor. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Defend Brussels sprouts for 20 seconds. Convince nobody and drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has opened their advent calendar ahead of schedule this year, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has quietly cheated at a family board game over Christmas, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who was playing Christmas music before November this year, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has sent an email at 11 p.m. just so the boss would see the timestamp, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has walked straight past a printer flashing red, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has turned back at the door because someone else was at the coffee machine, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has switched tabs at lightning speed when the boss walked past, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has said “I'll take a look at it” and never did, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has been quietly annoyed that someone took “their” seat at lunch, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has sprinted to the kitchen after a “leftover sandwiches in the kitchen!” email, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has replied with a thumbs-up to get out of writing a proper answer, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has nodded along to an acronym in a meeting with no idea what it meant, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has forgotten a colleague's name and avoided saying it for six months, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has had mince pies from the office kitchen for lunch, drink.",
+    "k": "Drink if"
    }
   ]
  },
@@ -386,188 +390,244 @@
   "om": "For the crew who know each other well and can handle almost anything. 18+.",
   "items": [
    {
-    "t": "Everyone who has texted an ex after midnight, drink two.",
+    "t": "Everyone who has been in a group chat about someone in this room, drink.",
     "k": "Drink if"
    },
    {
-    "t": "Show the last photo in your camera roll – or drink three.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Point at the person most likely to end up in a jail cell tonight. Whoever gets the most fingers drinks.",
+    "t": "Point at whoever looks the most innocent but definitely isn't. Whoever gets the most fingers drinks.",
     "k": "Point"
    },
    {
-    "t": "Tell us about the worst date you've ever been on. Whoever has the worst one gives out four.",
+    "t": "Who here would you call at 4 a.m. – and who would you never call? Answer – or drink three.",
     "k": "Truth"
    },
    {
-    "t": "Everyone who has lied about their age, drink.",
+    "t": "Everyone who has woken up to a payment from last night they can't explain, drink.",
     "k": "Drink if"
    },
    {
-    "t": "The person to your right gets to read your last three messages out loud. Refuse: drink four.",
+    "t": "Show the last screenshot you took – or drink three.",
     "k": "Challenge"
    },
    {
-    "t": "New rule: Everyone has to drink with their other hand. Forget and drink another.",
+    "t": "Everyone who has sent “You up?” after midnight, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at the most convincing liar here. Whoever gets the most fingers tells their best lie – or drinks three.",
+    "k": "Point"
+   },
+   {
+    "t": "What's the biggest lie you've ever told this group? Tell us – or drink three.",
+    "k": "Truth"
+   },
+   {
+    "t": "Read out the last message you sent to a crush – in your best newsreader voice. Or drink three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "New rule: end every sentence with “… in bed”. Forget and drink.",
     "k": "Rule"
    },
    {
-    "t": "Everyone who has woken up with no idea where they were, drink two.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Point at the person with the worst ideas at 3 a.m.",
-    "k": "Point"
-   },
-   {
-    "t": "Say who in the room you think has the most secrets. They can reveal one or drink three.",
-    "k": "Truth"
-   },
-   {
-    "t": "Everyone who has been kicked out of a bar or club, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Call or send a voice message to your last match and say “have a nice weekend”. Or drink five.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Whoever has been single the longest gives out three sips.",
+    "t": "Everyone who has been dumped by text gives out two. You've suffered enough.",
     "k": "Give out"
    },
    {
-    "t": "Everyone who has ghosted someone, drink. Whoever has been ghosted the most gives out two.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Point at the person most likely to get married in Las Vegas.",
-    "k": "Point"
-   },
-   {
-    "t": "Tell us the dumbest thing you've done while drunk. The group votes: boring = drink three.",
-    "k": "Truth"
-   },
-   {
-    "t": "New rule: Anyone who laughs, drinks. Lasts until the next rule card.",
-    "k": "Rule"
-   },
-   {
-    "t": "Everyone who has stalked their ex's new partner on social media, drink two.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Let the group pick an emoji reply you have to send to the last person you talked to. Or drink four.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Point at the person with the most screenshots of other people's messages.",
-    "k": "Point"
-   },
-   {
-    "t": "Everyone who has said “I'm not drinking tonight” and then did anyway, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Share your most unpopular opinion. If everyone disagrees, you give out three.",
-    "k": "Truth"
-   },
-   {
-    "t": "The person with the lowest battery has to hand their phone to their neighbour for one minute. Or drink four.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Everyone who has kissed someone in this room, drink. No questions asked.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Point at the person most likely to be drunk first tonight. They start now.",
-    "k": "Point"
-   },
-   {
-    "t": "Whoever has stayed the longest at an afterparty tells us how it ended – or drinks three.",
-    "k": "Truth"
-   },
-   {
-    "t": "New rule: Every toast is now “yeehaw”. Say “cheers” and drink two.",
-    "k": "Rule"
-   },
-   {
-    "t": "Everyone who has taken a taxi they couldn't afford, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Do your best impression of someone in the group. If they guess wrong, drink three.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Point at the person who always says “just one more”.",
-    "k": "Point"
-   },
-   {
-    "t": "Everyone who has lied in their dating app bio, drink.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Say who in the group you think talks about you the most. They drink if they admit it, you drink if they deny it.",
-    "k": "Truth"
-   },
-   {
-    "t": "Whoever has the most unanswered texts from mom drinks one per text (max five).",
-    "k": "Drink if"
-   },
-   {
-    "t": "Swap seats with the person you've talked to the least tonight. Whoever refuses drinks three.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Point at the person who would survive the longest on Love Island.",
-    "k": "Point"
-   },
-   {
-    "t": "Everyone who has fallen asleep somewhere random after a party, drink two.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Tell us about a time you got caught in a lie. The group votes on whether it was good enough – no = drink.",
-    "k": "Truth"
-   },
-   {
-    "t": "New rule: Everyone has to talk in a fake accent until the next rule card. Slip up, drink.",
-    "k": "Rule"
-   },
-   {
-    "t": "Everyone who has sent a text to the wrong person, drink. If it was embarrassing, drink two.",
-    "k": "Drink if"
-   },
-   {
-    "t": "Pick a drinking buddy. Every time you drink for the rest of the round, they drink too.",
-    "k": "Rule"
-   },
-   {
-    "t": "Point at the person most likely to end up on TV.",
-    "k": "Point"
-   },
-   {
-    "t": "Whoever has the highest screen time this week shows the number – or drinks four.",
-    "k": "Challenge"
-   },
-   {
-    "t": "Everyone who has been dumped over text gives out two. You've suffered enough.",
-    "k": "Give out"
-   },
-   {
-    "t": "Tell us who your secret crush was in middle school – or drink three.",
-    "k": "Truth"
-   },
-   {
-    "t": "Waterfall! Everyone starts drinking, and no one stops until the person to their right has stopped.",
+    "t": "Everyone drinks. If you've kissed someone in this room, drink two. No questions asked.",
     "k": "Everyone"
    },
    {
-    "t": "Cheers to all the bad decisions that turned into good stories.",
+    "t": "Cheers to all the bad decisions that turned into great stories.",
     "k": "Cheers"
+   },
+   {
+    "t": "Everyone who has unsent a drunk text before the other person could read it, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever has the worst ideas at 3 a.m. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Say who here you think talks about you the most. If they admit it, they drink – if not, you drink.",
+    "k": "Truth"
+   },
+   {
+    "t": "Have a staring contest with the person opposite you – using your most seductive look. First to laugh drinks.",
+    "k": "Challenge"
+   },
+   {
+    "t": "New rule: nobody says “ex”. Say it and drink two.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever has hosted the most afterparties this year gives out three. Thanks for having us.",
+    "k": "Give out"
+   },
+   {
+    "t": "Everyone who has used a dating profile photo that's more than three years old, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever has the most screenshots of other people's messages. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "What's the dumbest thing you've done drunk? The group votes – if it's too boring, drink three.",
+    "k": "Truth"
+   },
+   {
+    "t": "Give the person on your left your best flirty compliment – if they're up for it. A blush means you give out three. A laugh means you drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "New rule: whoever says “drunk”, “tipsy” or “wasted” drinks.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever got home latest last weekend gives out three.",
+    "k": "Give out"
+   },
+   {
+    "t": "Everyone who has stalked their ex's new partner while terrified of accidentally liking an old photo, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever says “just one drink” and is the last to leave the afterparty. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "What's the worst excuse you've used to get out of staying the night? Tell us – or drink three.",
+    "k": "Truth"
+   },
+   {
+    "t": "Do your best impression of someone here when they're drunk. If the others guess who, give out three. If not, drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "New rule: everyone drinks with their other hand. Forget and drink another.",
+    "k": "Rule"
+   },
+   {
+    "t": "Everyone who googled someone here before meeting them tonight, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever is most likely to vanish with someone before 2 a.m. tonight. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "What's the most embarrassing thing you've bought online while drunk? Tell us – or drink three.",
+    "k": "Truth"
+   },
+   {
+    "t": "Let the group write you a new dating profile in 20 seconds. Read it out with a straight face – or drink three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Pick a drinking buddy. Every time you drink until the next rule card, they drink too.",
+    "k": "Rule"
+   },
+   {
+    "t": "Everyone who has slept with an ex “just one last time”, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever is worst at keeping a secret. Whoever gets the most fingers drinks two.",
+    "k": "Point"
+   },
+   {
+    "t": "What's the worst chat-up line you've actually used? Say it – or drink three.",
+    "k": "Truth"
+   },
+   {
+    "t": "Tell a drunk story in 30 seconds with one detail that's a lie. If the group spots it, drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has walked home on a Sunday morning in last night's outfit, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever would most likely date someone just for their holiday home. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "What's the pettiest thing you've done after a break-up? Tell us – or drink three.",
+    "k": "Truth"
+   },
+   {
+    "t": "Talk about your ex for 30 seconds without saying anything negative. Can't manage it? Drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has had a regular hook-up they've never once had dinner with, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever says “I'll pay you back” and never does. Whoever gets the most fingers settles up now – or drinks three.",
+    "k": "Point"
+   },
+   {
+    "t": "Who in this group have you been most envious of – and why? Answer – or drink three.",
+    "k": "Truth"
+   },
+   {
+    "t": "Say three things you like about the person on your right – and one habit of theirs that annoys you. Or drink three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has been interrupted by a flatmate coming home too early, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever most likely has an ex in every part of town. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "What's the most awkward thing that's happened to you on a one-night stand? Tell us – or drink three.",
+    "k": "Truth"
+   },
+   {
+    "t": "Review your last date in ten seconds – with a star rating. Or drink three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has lied about how much they earn, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at the most dangerous person to go out with when you've got an early start. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Everyone who has turned down plans with someone here and then been caught out on Instagram somewhere else, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever has the most chaotic dating life. Whoever gets the most fingers shares the latest episode – or drinks three.",
+    "k": "Point"
+   },
+   {
+    "t": "Everyone who has let their parents pay for something this year they really should've covered themselves, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has sent a photo and regretted it the second it said “seen”, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has woken up next to a kebab they don't remember buying, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has borrowed the host's bedroom at a party, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has read a partner's messages without asking, drink.",
+    "k": "Drink if"
    }
   ]
  }

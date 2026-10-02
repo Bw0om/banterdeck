@@ -8,6 +8,8 @@ import { rundeKort } from '../../lib/nyhetsrunden';
 import { UKENS_LEKER, ukensLek } from '../../lib/ukenslek';
 import { games as alleLeker } from '../../lib/content';
 import { illustrasjon } from '../../lib/illustrasjon';
+import PLUSSPAKKER from '../../data/pluss.json';
+const ANT_JUL = (PLUSSPAKKER as any).julebord.items.length;
 const NR = rundeKort();
 const SPRAK = ((Astro.props as any).lang || 'en') as 'no' | 'en';
 const UKE = UKENS_LEKER.map((sl) => alleLeker.find((g: any) => g.slug === sl)).filter((g: any) => g && (SPRAK === 'no' || g.only !== 'no'))
@@ -79,7 +81,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   )}
   <a class="h2-jul" id="julebord" href={no ? '/no/rom?lek=pakke-julebord' : '/room?lek=pakke-julebord'} hidden>
     <span class="h2-badge">{no ? '🎄 Sesongen er her' : '🎄 It’s the season'}</span>
-    <span><b>{no ? 'Julebordpakken' : 'The Christmas party pack'}</b><small>{no ? '94 kort til julebordet – trygt med kolleger, men aldri kjedelig' : '94 cards for the office party – safe with coworkers, never boring'}</small></span>
+    <span><b>{no ? 'Julebordpakken' : 'The Christmas party pack'}</b><small>{no ? ANT_JUL + ' kort til julebordet – trygt med kolleger, men aldri kjedelig' : ANT_JUL + ' cards for the office party – safe with coworkers, never boring'}</small></span>
     <span class="h2-jul-ikon" aria-hidden="true">🎁</span>
   </a>
   <script is:inline data-astro-rerun>

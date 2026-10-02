@@ -18,6 +18,9 @@ const pakker = PAKKER.map((p) => ({
   antall: p.antall,
 }));
 const romSti = no ? '/no/rom' : '/room';
+// Antall kort i pakkene leses fra dataene, så tallene stemmer når kortene endres
+const antJul = PAKKER.find((p) => p.pakke === 'julebord')?.antall || 0;
+const antVill = PAKKER.find((p) => p.pakke === 'vill')?.antall || 0;
 ---
 <Base title={no ? 'Mitt vors Pluss' : 'Mitt vors Plus'} description={no ? 'Verten betaler – alle i rommet spiller med. Kveldspass 29 kr, årspass 199 kr. Første kveld er gratis.' : 'The host pays – everyone in the room plays. Night pass 29 NOK, year pass 199 NOK. Your first night is free.'} lang={lang} gate={true} bilde="/og/rom.jpg">
   {no ? (
@@ -42,7 +45,7 @@ const romSti = no ? '/no/rom' : '/room';
       <div><span>📈</span><b>Hele Vorsbørsen</b><small>100 aksjer i potten hver kveld i stedet for 40 – mer å handle i, mer å jakte på.</small></div>
       <div><span>🕵️</span><b>Agent 0,5</b><small>Alle får et hemmelig oppdrag som varer hele kvelden.</small></div>
       <div><span>🃏</span><b>Flere leker på mobilen</b><small>Bussruta, Drikke-Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna – alene eller i rom.</small></div>
-      <div><span>🎄</span><b>Julebord- og Vill-pakken</b><small>94 kort som funker med kolleger, og 46 for gjengen som tåler det meste (18+).</small></div>
+      <div><span>🎄</span><b>Julebord- og Vill-pakken</b><small>{antJul} kort som funker med kolleger, og {antVill} for gjengen som tåler det meste (18+).</small></div>
       <div><span>✨</span><b>Flere pakker kommer</b><small>Nye pakker legges til Pluss etter hvert – uten ekstra kostnad.</small></div>
     </section>
   ) : (
@@ -51,7 +54,7 @@ const romSti = no ? '/no/rom' : '/room';
       <div><span>📈</span><b>The whole Exchange</b><small>100 shares in the pot every night instead of 40 – more to trade, more to hunt for.</small></div>
       <div><span>🕵️</span><b>Agent 0.5</b><small>Everyone gets a secret mission that lasts all night.</small></div>
       <div><span>🃏</span><b>More games on your phone</b><small>Ride the Bus, Drinking Yahtzee, The Pyramid, President, Pig, The Liar and Tall Tales – on your own or in a room.</small></div>
-      <div><span>🎄</span><b>The Office Party and Wild packs</b><small>94 cards that work with colleagues, and 46 for the crew who can take almost anything (18+).</small></div>
+      <div><span>🎄</span><b>The Office Party and Wild packs</b><small>{antJul} cards that work with colleagues, and {antVill} for the crew who can take almost anything (18+).</small></div>
       <div><span>✨</span><b>More packs on the way</b><small>New packs are added to Plus over time – at no extra cost.</small></div>
     </section>
   )}
