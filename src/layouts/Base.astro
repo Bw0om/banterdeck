@@ -22,7 +22,8 @@ import { ClientRouter } from 'astro:transitions';
 
 interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; bilde?: string; }
 const { title, description, lang = 'en', gate = false, noindex = false, bilde = '/og/mittvors.jpg' } = Astro.props;
-const bildeUrl = new URL(bilde, Astro.site);
+// ?v=… tvinger Snap, Messenger og iMessage til å hente de nye delingsbildene i stedet for gamle kopier
+const bildeUrl = new URL(bilde, Astro.site); if (bildeUrl.pathname.startsWith('/og/')) bildeUrl.searchParams.set('v', '3');
 const L = ui(lang);
 const desc = description || L.tagline;
 const fullTitle = title ? `${title} – ${SITE_NAME}` : `${SITE_NAME} – ${L.tagline}`;

@@ -249,10 +249,15 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (!startet) return tegnStart();
       var meldt = d.bors && d.bors.meldte && d.bors.meldte.length ? '<div class="tv-meldt">📣 ' + d.bors.meldte.map(function (a) { return (a.type === 'hvem' ? esc(navn(a.utfall)) + ' – ' : '') + esc(a.q); }).join(' · ') + ' <small>' + T('stem på telefonen', 'vote on your phone') + '</small></div>' : '';
       var side = d.ferdig ? '' : sidebar(d);
+      // Nytt kort eller nytt spørsmål? Da deles det ut på TV-en også – alle ser mot skjermen samtidig
+      var sp = d.spill, nokkel = sp ? [sp.type, sp.lek, sp.pos, sp.fase, sp.tekst, sp.kort ? (sp.kort.t || '') + (sp.kort.v || '') + (sp.kort.s || '') : ''].join('|') : '';
+      var nyttKort = !!(nokkel && nokkel !== sistTvKort); sistTvKort = nokkel;
       rot.innerHTML = '<header class="tv-hode"><span class="tv-logo">mitt<b>vors</b></span>' + (d.gjeng ? '<span class="tv-gjeng">' + esc(d.gjeng.navn) + '</span>' : '') +
         '<span class="tv-kode">' + T('Bli med: ', 'Join: ') + '<b>' + esc(lenkeTekst()) + '</b></span></header>' +
         '<div class="tv-hoved' + (side ? '' : ' uten-side') + '"><div class="tv-scenebox">' + scene(d) + '</div>' + (side ? '<aside class="tv-side">' + side + '</aside>' : '') + '</div>' + meldt;
+      if (nyttKort) { var inn = rot.querySelector('.tv-kort, .tv-sporsmal, .tv-rof-kort .rof-kort'); if (inn) inn.classList.add('kort-inn'); }
     }
+    var sistTvKort = '';
     function tegnStart() {
       rot.innerHTML = '<div class="tv-kobling"><h1>📺 ' + T('Storskjerm klar', 'Big screen ready') + '</h1><p class="tv-stor">' + T('Rom', 'Room') + ' <b>' + esc(kode) + '</b> · ' + (tilstand.spillere || []).length + T(' med', ' joined') + '</p>' +
         '<button class="btn gold tv-start" id="tvStart" type="button">' + T('▶ Start storskjermen', '▶ Start the big screen') + '</button>' +
@@ -329,8 +334,11 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     body.tv .rof-kort{width:min(46vh,26vw);margin-top:0}
     body.tv .rof-regel{font-size:2em}body.tv .rof-tekst{font-size:1.05em}body.tv .rof-hj b{font-size:2.2em}
     .tv-makkere{font-weight:800;font-size:1.2em}
-    .tv-kort{background:var(--paper);color:var(--ink2);border-radius:28px;padding:5vh 4vw;max-width:60vw;box-shadow:0 30px 80px rgba(0,0,0,.6)}
-    .tv-kort p{font-family:var(--display);font-weight:800;font-size:2.4em;margin:1vh 0 0;line-height:1.15}
+    .tv-kort{background:#ECE5F6;color:var(--ink2);border-radius:32px;padding:5vh 4vw 6vh;max-width:62vw;min-width:min(52vw,900px);transform:rotate(-1.5deg);
+      box-shadow:14px 14px 0 var(--accent),0 30px 80px rgba(0,0,0,.55)}
+    .tv-kort p{font-family:var(--display);font-weight:850;font-stretch:100%;font-size:2.7em;letter-spacing:-.02em;margin:1.4vh 0 0;line-height:1.1}
+    .tv-kort .tv-etikett{color:var(--glo-dyp)}
+    .tv-sentrert > .tv-liten{font-family:var(--display);font-stretch:66%;font-weight:850;font-size:1.15em;letter-spacing:.04em;opacity:.8;margin-top:1.5vh}
     .tv-stolper{list-style:none;padding:0;margin:2vh 0 0;width:min(70vw,1000px);display:flex;flex-direction:column;gap:1.2vh}
     .tv-stolper li{position:relative;display:flex;justify-content:space-between;align-items:center;padding:1.4vh 1.6vw;border-radius:18px;background:var(--card);overflow:hidden;font-size:1.3em;opacity:0;animation:tvInn .5s ease-out forwards}
     .tv-stolper li i{position:absolute;inset:0 auto 0 0;background:rgba(200,255,46,.28)}.tv-stolper li span,.tv-stolper li b{position:relative}

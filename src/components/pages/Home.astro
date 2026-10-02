@@ -9,6 +9,8 @@ import { UKENS_LEKER, ukensLek } from '../../lib/ukenslek';
 import { games as alleLeker } from '../../lib/content';
 import { illustrasjon } from '../../lib/illustrasjon';
 import PLUSSPAKKER from '../../data/pluss.json';
+import DECKS from '../../data/decks.json';
+import DECKS_EN from '../../data/decks.en.json';
 const ANT_JUL = (PLUSSPAKKER as any).julebord.items.length;
 const NR = rundeKort();
 const SPRAK = ((Astro.props as any).lang || 'en') as 'no' | 'en';
@@ -21,6 +23,13 @@ import { ui, path, type Lang } from '../../lib/i18n';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 const no = lang === 'no';
+// Tre kort fra ekte kortstokker – en liten kortbunke ved siden av hovedknappene på PC
+const KS: any = no ? DECKS : DECKS_EN;
+const stokk = [
+  { navn: no ? 'Enten eller' : 'Would you rather', t: KS['enten-eller'].items[2].t },
+  { navn: no ? 'Jeg har aldri' : 'Never have I ever', t: (KS['jeg-har-aldri'].items.find((x: any) => x.m === 'frekk') || KS['jeg-har-aldri'].items[0]).t },
+  { navn: no ? 'Mest sannsynlig' : 'Most likely to', t: KS['pekeleken'].items[0].t },
+];
 
 const totals = totalsFor(lang);
 const hasDict = visible(dictSection, lang);
@@ -54,6 +63,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     <div class="h2-gjeng" id="h2Gjeng">
       <a class="h2-gjeng-lenke" href={no ? '/no/gjeng' : '/crew'}>{no ? 'Fast gjeng? Lag en gjeng, så starter dere kvelden med ett trykk' : 'Same crew every time? Make a crew and start the night with one tap'}</a>
     </div>
+    <div class="h2-stokk" aria-hidden="true">{stokk.map((k, i) => <div class={'h2-skort k' + i}><span>{k.navn}</span><p>{k.t}</p></div>)}</div>
   </section>
 
   <ol class="h2-slik" id="h2Slik">
@@ -81,7 +91,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   )}
   <a class="h2-jul" id="julebord" href={no ? '/no/rom?lek=pakke-julebord' : '/room?lek=pakke-julebord'} hidden>
     <span class="h2-badge">{no ? '🎄 Sesongen er her' : '🎄 It’s the season'}</span>
-    <span><b>{no ? 'Julebordpakken' : 'The Christmas party pack'}</b><small>{no ? ANT_JUL + ' kort til julebordet – trygt med kolleger, men aldri kjedelig' : ANT_JUL + ' cards for the office party – safe with coworkers, never boring'}</small></span>
+    <span><b>{no ? 'Julebordpakken' : 'The Christmas party pack'}</b><small>{no ? ANT_JUL + ' kort til julebordet – trygt med kolleger, men aldri kjedelig' : ANT_JUL + ' cards for the office Christmas party – safe with coworkers, never boring'}</small></span>
     <span class="h2-jul-ikon" aria-hidden="true">🎁</span>
   </a>
   <script is:inline data-astro-rerun>

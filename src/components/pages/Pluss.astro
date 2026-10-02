@@ -8,7 +8,7 @@ const { lang = 'no' } = Astro.props as { lang?: Lang };
 const no = lang === 'no';
 // Pakkenavn og -beskrivelse på engelsk (kortene selv hentes fra serveren).
 const PAKKE_EN: Record<string, { navn: string; om: string }> = {
-  julebord: { navn: 'Office Party', om: 'For the office Christmas party and end-of-year drinks. Safe to play with colleagues – but never boring.' },
+  julebord: { navn: 'Christmas Party', om: 'For the office Christmas party and end-of-year drinks. Safe to play with colleagues – but never boring.' },
   vill: { navn: 'Wild', om: 'For the crew who know each other well and can take almost anything. 18+.' },
 };
 const pakker = PAKKER.map((p) => ({
@@ -54,7 +54,7 @@ const antVill = PAKKER.find((p) => p.pakke === 'vill')?.antall || 0;
       <div><span>📈</span><b>The whole Exchange</b><small>100 shares in the pot every night instead of 40 – more to trade, more to hunt for.</small></div>
       <div><span>🕵️</span><b>Agent 0.5</b><small>Everyone gets a secret mission that lasts all night.</small></div>
       <div><span>🃏</span><b>More games on your phone</b><small>Ride the Bus, Drinking Yahtzee, The Pyramid, President, Pig, The Liar and Tall Tales – on your own or in a room.</small></div>
-      <div><span>🎄</span><b>The Office Party and Wild packs</b><small>{antJul} cards that work with colleagues, and {antVill} for the crew who can take almost anything (18+).</small></div>
+      <div><span>🎄</span><b>The Christmas Party and Wild packs</b><small>{antJul} cards that work with colleagues, and {antVill} for the crew who can take almost anything (18+).</small></div>
       <div><span>✨</span><b>More packs on the way</b><small>New packs are added to Plus over time – at no extra cost.</small></div>
     </section>
   )}
@@ -98,7 +98,7 @@ const antVill = PAKKER.find((p) => p.pakke === 'vill')?.antall || 0;
           <div><b>{p.navn}</b><span>{p.antall} {no ? 'kort' : 'cards'} · {p.om}</span></div>
           <div class="stokk-knapper">
             <button class="btn gold small" type="button" data-spill={p.id}>{no ? 'Spill nå' : 'Play now'}</button>
-            <a class="btn small" href={`${romSti}?lek=pakke-${p.id}`}>{no ? 'Spill i rom' : 'Play in a room'}</a>
+            <a class="btn ghost small" href={`${romSti}?lek=pakke-${p.id}`}>{no ? 'Spill i rom' : 'Play in a room'}</a>
           </div>
         </article>
       ))}

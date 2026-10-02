@@ -41,20 +41,31 @@ const aarData: any = { eras: bingoData.eras };
         }
         pos = 0;
       }
-      function tegn(){
+      // Neste/tilbake: det gamle kortet kastes ut, det nye deles ut (et kvart sekund – som en ekte kortstokk)
+      function rolig(){ try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+      function tegn(retning){
         var x = order[pos];
+        var gammelt = retning && !rolig() ? body.querySelector('.gt-card') : null, rekt = gammelt ? gammelt.getBoundingClientRect() : null;
         body.innerHTML =
           (modes.length > 1 ? '<div class="gt-modes">' + modes.map(function(m){
             return '<button class="gt-mode" data-m="'+m.v+'" aria-pressed="'+(m.v===mode)+'">'+esc(m.t)+'</button>'; }).join('') + '</div>' : '') +
           '<div class="gt-card"><p class="gt-count">'+(pos+1)+' / '+order.length+(x.k ? ' · <span class="gt-kind">'+esc(x.k)+'</span>' : '')+'</p><p class="gt-text">'+esc(x.t)+'</p></div>' +
           '<div class="gt-row"><button class="btn ghost" data-a="tilbake"'+(pos===0?' disabled':'')+'>'+(EN ? 'Back' : 'Tilbake')+'</button>' +
           '<button class="btn gold" data-a="neste">'+(pos === order.length-1 ? (EN ? 'Shuffle again' : 'Stokk på nytt') : (EN ? 'Next' : 'Neste'))+'</button></div>';
+        if (!retning || rolig()) return;
+        var nytt = body.querySelector('.gt-card');
+        if (nytt) { nytt.classList.add('kort-inn'); if (retning < 0) nytt.classList.add('tilbake'); nytt.addEventListener('animationend', function(){ nytt.classList.remove('kort-inn', 'tilbake'); }, { once: true }); }
+        if (gammelt && rekt && rekt.bottom > 0 && rekt.top < innerHeight){
+          var klon = gammelt.cloneNode(true); klon.classList.add('kort-ut'); if (retning < 0) klon.classList.add('tilbake'); klon.setAttribute('aria-hidden', 'true');
+          klon.style.cssText = 'position:fixed;left:'+rekt.left+'px;top:'+rekt.top+'px;width:'+rekt.width+'px;height:'+rekt.height+'px;margin:0;z-index:60;pointer-events:none';
+          document.body.appendChild(klon); setTimeout(function(){ klon.remove(); }, 450);
+        }
       }
       body.addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b) return;
         if (b.dataset.m){ mode = b.dataset.m; stokk(); return tegn(); }
-        if (b.dataset.a === 'neste'){ if (pos < order.length-1) pos++; else stokk(); tegn(); }
-        if (b.dataset.a === 'tilbake' && pos > 0){ pos--; tegn(); }
+        if (b.dataset.a === 'neste'){ if (pos < order.length-1) pos++; else stokk(); tegn(1); }
+        if (b.dataset.a === 'tilbake' && pos > 0){ pos--; tegn(-1); }
       });
       stokk(); tegn();
     })();

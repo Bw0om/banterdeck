@@ -332,6 +332,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (!d) return;
       if (d.naa) klokkeAvvik = d.naa - Date.now();
       var varVenter = !!(tilstand && tilstand.venter === true);
+      var haddeTilstand = !!tilstand;   // første svar etter at siden ble åpnet: ikke vis gamle hendelser som beskjed
       // Venter på å bli sluppet inn i en gjengkveld
       if (d.venter === true) { if (d.versjon) versjon = d.versjon; tilstand = d; rtKobl(); tegnVenter(); return; }
       if (varVenter && d.meg) { toast(T('Du er sluppet inn! 🎉', 'You’re in! 🎉')); spillLyd('tur'); }
@@ -348,7 +349,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       try { rofSjekkBrudd(d); } catch (x) {}
       tilstand = d;
       sjekkSprak(d);
-      if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
+      if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr || haddeTilstand) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
       borsPenger(d);
       borsBlalys(d);
       if (d.meg === null && meg) { glemRom(); if (varVenter) tegnStart(T('Du ble ikke sluppet inn denne gangen.', 'You weren’t let in this time.')); return; }
@@ -1185,7 +1186,9 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var b = s.mittBrett || [], m = s.mineMerker || [];
       return '<p class="rom-etikett">' + T('Ditt brett · ', 'Your board · ') + esc(s.tittel) + '</p>' +
         '<div class="rom-bingo">' + b.map(function (x, i) {
-          return '<button type="button" data-g="merk" data-i="' + i + '" aria-pressed="' + !!m[i] + '"><b>' + esc(x[1]) + '</b><span>' + esc(x[0]) + '</span></button>';
+          // Lange ord (som «Watchtower») får litt mindre skrift i stedet for å deles midt i ordet
+          var lengst = Math.max.apply(null, String(x[1]).split(/\s+/).map(function (w) { return w.length; }));
+          return '<button type="button" data-g="merk" data-i="' + i + '" aria-pressed="' + !!m[i] + '"><b' + (lengst > 12 ? ' class="xlang"' : lengst > 9 ? ' class="lang"' : '') + '>' + esc(x[1]) + '</b><span>' + esc(x[0]) + '</span></button>';
         }).join('') + '</div>' +
         '<div class="gt-row">' + (s.spotify ? '<a class="btn gold" href="' + esc(s.spotify) + '" target="_blank" rel="noopener">' + T('Åpne spillelista ↗', 'Open the playlist ↗') + '</a>' : '') +
         '<button class="btn ghost" data-g="nytt-brett" type="button">' + T('Nytt brett', 'New board') + '</button></div>' +
@@ -2535,6 +2538,12 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var topp = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + venterStripe();
       var merker = '<div class="tur-merke" aria-live="polite">' + esc(turTekst) + '</div><div class="hemmelig-merke">🤫 ' + T('Bare du ser dette – hold skjermen for deg selv', 'Only you can see this – keep the screen to yourself') + '</div>';
       var forlat = '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
+      // Nytt kort? Ta vare på det gamle, så det kan kastes ut av skjermen når det nye deles ut
+      var nyKN = kortNokkel(s), kortByttet = !!(tegnetFor && nyKN && nyKN !== sistKortNokkel) && !roligBevegelse();
+      tegnetFor = true;
+      var gammeltKort = kortByttet ? root.querySelector('.rom-kort, .rof-kort.rom-rof') : null;
+      var gammelRekt = gammeltKort ? gammeltKort.getBoundingClientRect() : null;
+      sistKortNokkel = nyKN;
       root.innerHTML = s
         ? topp + merker + borsHurtig() + innhold + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + vert + forlat
         : topp + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat;
@@ -2550,6 +2559,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       var skjerm = s ? 'spill:' + s.type + ':' + (s.navn && s.navn.no ? s.navn.no : s.navn) : tilstand.ferdig ? 'ferdig' : 'lobby';
       // 'instant': ellers stopper neste tegning en myk rulling midt på siden
       if (skjerm !== sisteSkjerm) { sisteSkjerm = skjerm; window.scrollTo({ top: 0, behavior: 'instant' }); } else window.scrollTo({ top: y, behavior: 'instant' });
+      if (kortByttet) delUtKort(gammeltKort, gammelRekt);
       tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
       if (tsValgt !== undefined) { var r = document.querySelector('input[name=tsL][value="' + tsValgt + '"]'); if (r) r.checked = true; }
       var nrNy = document.getElementById('nrInput');
@@ -2618,6 +2628,27 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
 
     root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.bs-side [data-b], .bs-hurtig [data-b]')) borsKlikk(e); });
     root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-lov-login]')) { try { sessionStorage.setItem('bd_etter_innlogging', location.pathname + location.search); } catch (x) {} } });
+    /* ---------- nytt kort: det gamle kastes ut, det nye «deles ut» ----------
+       Alle telefonene får samme kort samtidig. En kjapp bevegelse (et kvart sekund) gjør at alle
+       ser at noe nytt kom – også den som så bort – og telefonen føles som en kortstokk. */
+    var sistKortNokkel = '', tegnetFor = false;   // første tegning (f.eks. etter oppdatering av siden) skal ikke animeres
+    function roligBevegelse() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+    function kortNokkel(s) {
+      if (!s || s.ring) return '';   // ringen i Ring of Fire har sin egen dra-bevegelse
+      var k = s.kort ? (s.kort.t ? (s.kort.t.no || s.kort.t) : String(s.kort.v || '') + (s.kort.s || '')) : '';
+      return [s.type, s.lek, s.pos, k, s.tekst, s.fase, s.runde, s.i].join('|');
+    }
+    function delUtKort(gammelt, rekt) {
+      var inn = root.querySelector('.rom-kort, .rof-kort.rom-rof, .rom-sporsmal, .rom-hemmelig');
+      if (inn) { inn.classList.add('kort-inn'); inn.addEventListener('animationend', function () { inn.classList.remove('kort-inn'); }, { once: true }); }
+      if (!gammelt || !rekt || rekt.bottom < 0 || rekt.top > innerHeight) return;
+      var klon = gammelt.cloneNode(true);
+      klon.classList.add('kort-ut'); klon.setAttribute('aria-hidden', 'true');
+      klon.style.cssText = 'position:fixed;left:' + rekt.left + 'px;top:' + rekt.top + 'px;width:' + rekt.width + 'px;height:' + rekt.height + 'px;margin:0;z-index:60;pointer-events:none';
+      document.body.appendChild(klon);
+      setTimeout(function () { klon.remove(); }, 450);
+    }
+
     /* ---------- «Trykk igjen»: det som ikke kan angres, krever to rolige trykk ----------
        Et glass i den ene hånda og et bord som rister: ett bomtrykk skal ikke kaste noen ut av rommet.
        Første trykk gjør knappen om til «Trykk igjen …» i fire sekunder. Andre trykk må komme etter
@@ -2797,7 +2828,14 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
 
     /* ---------- oppstart ---------- */
     if (kode) meg = les('bd_rom_' + kode);
-    if (kode && meg) { root.innerHTML = '<p class="rom-stor">' + T('Kobler til rom ', 'Connecting to room ') + esc(kode) + ' …</p>'; hent(); }
+    if (kode && meg) {
+      // Et skjelett av rommet mens det kobler til: koden står der med en gang, så man vet at man er på rett sted
+      document.documentElement.classList.add('i-rom');
+      root.innerHTML = '<div class="rom-laster" aria-busy="true"><div class="rom-hode"><div class="rom-hode-v"><div><span class="rom-etikett">' + T('Rom', 'Room') + '</span><b class="rom-kode">' + esc(kode) + '</b></div></div>' +
+        '<span class="rom-hodeknapper"><i></i><i></i><i></i><i></i></span></div><div class="skj-rad"><i></i><i></i><i></i></div><div class="skj-kort"></div>' +
+        '<p class="rom-laster-tekst" role="status">' + T('Kobler til rom ', 'Connecting to room ') + esc(kode) + ' …</p></div>';
+      hent();
+    }
     else tegnStart();
   })();
   </script>
