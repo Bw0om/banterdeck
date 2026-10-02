@@ -1,0 +1,96 @@
+---
+// Den automatiske feilloggen: tekniske feil fra nettleserne, helt anonymt. Bare for admin.
+// Feilene kommer fra components/FeilFangst.astro via /api/feil og lagres med feillogg-supabase.sql.
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Feilloggen" description="Tekniske feil fra nettleserne, helt anonymt." lang="no" noindex={true}>
+  <h1>Feilloggen</h1>
+  <p class="small"><a href="/no/statistikk">Statistikk</a> · <a href="/no/salg">Salg</a> · <a href="/no/aksjer">Aksjene</a> · <a href="/admin">Admin</a></p>
+  <p class="small">Feil som har skjedd hos folk, sendt automatisk og anonymt: feilmeldingen, hvor i koden, hvilken side og grov nettlesertype. Ingen navn, romkoder eller innhold. Trykk <b>Fikset</b> når en feil er rettet – skjer den igjen, dukker den opp på nytt.</p>
+  <div class="fl-valg" id="flValg" hidden>
+    <div class="rom-mod">
+      <button type="button" data-dager="1" aria-pressed="false">I dag</button>
+      <button type="button" data-dager="7" aria-pressed="false">7 dager</button>
+      <button type="button" data-dager="30" aria-pressed="true">30 dager</button>
+      <button type="button" data-dager="90" aria-pressed="false">90 dager</button>
+    </div>
+    <div class="rom-mod">
+      <button type="button" data-sort="sist" aria-pressed="true">Nyeste</button>
+      <button type="button" data-sort="antall" aria-pressed="false">Flest</button>
+    </div>
+  </div>
+  <div id="feillogg"><p class="small">Henter …</p></div>
+
+  <script is:inline data-astro-rerun>
+  (function () {
+    var root = document.getElementById('feillogg'), valg = document.getElementById('flValg');
+    if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+    var K = window.BDKonto, dager = 30, sorter = 'sist', liste = [];
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function naar(iso) {
+      var d = new Date(iso), s = (Date.now() - d.getTime()) / 1000;
+      if (s < 90) return 'nå nettopp';
+      if (s < 3600) return Math.round(s / 60) + ' min siden';
+      if (s < 86400) return Math.round(s / 3600) + ' t siden';
+      return d.toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' }) + ' kl. ' + d.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' });
+    }
+    function rad(navn, verdi, bred) { return verdi ? '<div' + (bred ? ' class="fl-bred"' : '') + '><dt>' + navn + '</dt><dd>' + esc(verdi) + '</dd></div>' : ''; }
+    function tegn() {
+      if (!liste.length) { root.innerHTML = '<p class="fl-tom">🎉 Ingen feil ' + (dager === 1 ? 'i dag' : 'de siste ' + dager + ' dagene') + '.</p>'; return; }
+      var l = liste.slice().sort(sorter === 'antall' ? function (a, b) { return b.antall - a.antall; } : function (a, b) { return String(b.sist).localeCompare(String(a.sist)); });
+      var sum = l.reduce(function (a, f) { return a + (f.antall || 0); }, 0);
+      root.innerHTML = '<p class="small">' + l.length + (l.length === 1 ? ' feil' : ' ulike feil') + ' · ' + sum + (sum === 1 ? ' gang' : ' ganger') + ' totalt</p>' +
+        l.map(function (f) {
+          return '<article class="fl-kort"><div class="fl-topp"><b class="fl-antall" title="Antall ganger">' + f.antall + '×</b><h2>' + esc(f.melding) + '</h2></div>' +
+            '<p class="fl-meta">Sist ' + naar(f.sist) + (f.antall > 1 ? ' · først ' + naar(f.forst) : '') + '</p>' +
+            '<dl class="fl-info">' + rad('Side', f.side) + rad('Lek', f.kontekst) + rad('Nettleser', f.nettleser) + rad('Versjon', f.versjon) + rad('Kode', f.kilde, true) + '</dl>' +
+            (f.stakk ? '<details class="fl-stakk"><summary>Hele feilen</summary><pre>' + esc(f.stakk) + '</pre></details>' : '') +
+            '<button type="button" class="btn small ghost" data-fjern="' + esc(f.nokkel) + '">Fikset ✓</button></article>';
+        }).join('');
+    }
+    function hent() {
+      root.setAttribute('aria-busy', 'true');
+      K.api('/api/admin/feillogg?dager=' + dager).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
+        root.removeAttribute('aria-busy');
+        if (!x.ok) { root.innerHTML = '<p class="rom-feil">' + esc(x.d.melding || 'Ingen tilgang.') + '</p>'; return; }
+        liste = x.d.liste || []; valg.hidden = false; tegn();
+      }).catch(function () { root.removeAttribute('aria-busy'); root.innerHTML = '<p class="rom-feil">Fikk ikke kontakt.</p>'; });
+    }
+    valg.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      var gruppe = b.parentNode;
+      gruppe.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      if (b.dataset.dager) { dager = Number(b.dataset.dager); hent(); } else { sorter = b.dataset.sort; tegn(); }
+    });
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-fjern]'); if (!b) return;
+      b.disabled = true;
+      K.api('/api/admin/feillogg', { method: 'POST', body: JSON.stringify({ fjern: b.dataset.fjern }) }).then(function (r) {
+        if (!r.ok) { b.disabled = false; b.textContent = 'Prøv igjen'; return; }
+        liste = liste.filter(function (f) { return f.nokkel !== b.dataset.fjern; });
+        tegn();
+      }).catch(function () { b.disabled = false; b.textContent = 'Prøv igjen'; });
+    });
+    if (!K || !K.les || !K.les()) { root.innerHTML = '<p>Logg inn med admin-kontoen først. <a href="/no/account">Logg inn</a></p>'; return; }
+    hent();
+  })();
+  </script>
+  <style is:global>
+    .fl-valg{display:flex;flex-wrap:wrap;gap:8px 16px;margin:14px 0 6px}
+    .fl-valg .rom-mod{margin:0}
+    .fl-kort{margin:12px 0;padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:var(--card)}
+    .fl-topp{display:flex;gap:12px;align-items:flex-start}
+    .fl-topp h2{margin:0;font-size:17px;line-height:1.3;font-weight:750;overflow-wrap:anywhere}
+    .fl-antall{flex:none;min-width:44px;padding:2px 8px;border-radius:999px;background:var(--accent);color:var(--ink2);text-align:center;font-size:15px}
+    .fl-meta{margin:6px 0 8px;color:var(--muted);font-size:14px}
+    .fl-info{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px 16px;margin:0 0 10px}
+    .fl-info .fl-bred{grid-column:1/-1}
+    .fl-info div{min-width:0}
+    .fl-info dt{color:var(--faint);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .fl-info dd{margin:0;font-size:14px;overflow-wrap:anywhere}
+    .fl-stakk{margin:0 0 10px}
+    .fl-stakk summary{cursor:pointer;font-size:14px;color:var(--muted)}
+    .fl-stakk pre{margin:6px 0 0;padding:10px;border-radius:10px;background:var(--card2);font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto}
+    .fl-tom{padding:18px;border:1px dashed var(--border);border-radius:16px;text-align:center;font-weight:700}
+  </style>
+</Base>

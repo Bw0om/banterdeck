@@ -1,0 +1,60 @@
+---
+// Automatisk feilfangst: nettleseren sier fra om tekniske feil av seg selv, helt anonymt (se /api/feil).
+// Sendes: feilmeldingen, fil og linje, siden uten ?-delen (der står romkoden), lek og fase hvis du er i et
+// rom, og byggversjonen. Aldri navn, romkode, e-post eller det folk har skrevet.
+// Ligger øverst i <head>, så den fanger feil fra alle skriptene på siden – også de som kjører med en gang.
+declare const __MV_BYGG__: string;
+const bygg = typeof __MV_BYGG__ !== 'undefined' ? __MV_BYGG__ : '';
+---
+<script is:inline define:vars={{ BYGG: bygg }}>
+(function () {
+  if (window.__mvFeilFangst) return; window.__mvFeilFangst = true;
+  var ORIGO = location.origin, sett = {}, antall = 0;
+  // Støy vi ikke kan gjøre noe med: brudd i nettet, utvidelser, andre domener, lyd og vekking som nettleseren nekter
+  var STOY = /^(Uncaught )?Script error\.?$|ResizeObserver loop|Failed to fetch|Load failed|NetworkError|Network request failed|AbortError|aborted|cancell?ed|avbrutt|webkit-masked-url|extension:\/\/|NotAllowedError|wake ?lock|play\(\)|vibrate|QuotaExceeded|Non-Error promise rejection/i;
+  /** Bare stien for våre egne adresser (ingen ?-del), null for andre domener. */
+  function sti(u) {
+    try { var x = new URL(u, location.href); return x.origin === ORIGO ? x.pathname : null; } catch (e) { return null; }
+  }
+  /** Fjerner alt som kan si noe om hvem: fulle adresser blir til stien, e-poster forsvinner. */
+  function vask(s, n) {
+    return String(s == null ? '' : s)
+      .replace(/https?:\/\/[^\s)'"]+/g, function (m) {
+        var lk = (m.match(/(:\d+){1,2}$/) || [''])[0], p = sti(m.slice(0, m.length - lk.length));
+        return p === null ? '[annet nettsted]' : p + lk;
+      })
+      .replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, '[e-post]')
+      .slice(0, n);
+  }
+  function meld(melding, fil, linje, kol, stakk) {
+    melding = vask(melding, 300).trim();
+    if (!melding || STOY.test(melding) || antall >= 5) return;
+    var kilde = '';
+    if (fil) {
+      var p = sti(String(fil));
+      if (p === null) return;   // feil i et skript fra et annet nettsted eller en utvidelse
+      kilde = p + (linje ? ':' + linje + ':' + (kol || 0) : '');
+    }
+    stakk = String(stakk || '');
+    if (stakk && stakk.indexOf(ORIGO) === -1 && /https?:\/\/|extension:\/\//.test(stakk)) return;   // ingen av linjene er våre
+    var nokkel = melding + '|' + kilde;
+    if (sett[nokkel]) return; sett[nokkel] = 1; antall++;
+    var k = '';
+    try { var x = window.__bdFeilKontekst && window.__bdFeilKontekst(); if (x) k = [x.lekId, x.fase].filter(Boolean).join(' · '); } catch (e) {}
+    var body = JSON.stringify({ auto: 1, melding: melding, kilde: kilde, side: location.pathname, stakk: vask(stakk, 1500).split('\n').slice(0, 10).join('\n'), versjon: BYGG, kontekst: vask(k, 80) });
+    try { fetch('/api/feil', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, keepalive: true }).catch(function () {}); } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    if (!e || !e.message) return;
+    meld(e.message, e.filename, e.lineno, e.colno, e.error && e.error.stack);
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e && e.reason; if (r == null) return;
+    if (typeof r === 'object' && (r.status !== undefined || r.kode !== undefined)) return;   // serveren svarte med en feil – ikke en feil i koden
+    var m = r && r.message ? ((r.name && r.name !== 'Error' ? r.name + ': ' : '') + r.message) : (typeof r === 'string' ? r : '');
+    if (m) meld(m, '', 0, 0, r && r.stack);
+  });
+  // Nytt sidebytte (uten full lasting): nye fem. Samme feil sendes likevel bare én gang.
+  document.addEventListener('astro:after-swap', function () { antall = 0; });
+})();
+</script>

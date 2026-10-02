@@ -94,6 +94,14 @@ Skriver du «Grov» i kommentarfeltet, holdes replikken utenfor «Dagens replikk
 
 Denne tokenen ligger kun på serveren og er aldri synlig i nettleseren. Du får e-post fra GitHub for hvert nye issue.
 
+## Feilloggen (automatisk feilfangst)
+
+Nettleseren sier fra om tekniske feil av seg selv (`src/components/FeilFangst.astro` → `/api/feil`). Det lagres bare feilmeldingen, fil og linje, siden uten `?`-delen, grov nettlesertype, lek og fase og byggversjonen – aldri navn, romkoder, IP-adresser eller innhold. Maks fem feil per side, og serveren bremser.
+
+- Kjør `feillogg-supabase.sql` én gang i Supabase.
+- Se feilene på **/no/feillogg** (innlogget med en adresse i `ADMIN_EPOSTER`). Trykk **Fikset ✓** når en feil er rettet – skjer den igjen, kommer den tilbake.
+- Byggversjonen er git-commiten på Vercel, så du ser om en feil kommer fra en gammel versjon.
+
 ## Språk: engelsk i bunn, norsk på /no
 
 - Engelsk ligger på rota: `/`, `/categories/fest`, `/drinking-games/ring-of-fire`

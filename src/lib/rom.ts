@@ -224,6 +224,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     alkoholfri: !!data.alkoholfri, ferdig: data.ferdig || null, kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null,
     gjeng: data.gjeng ? { navn: data.gjeng.navn } : null,
     mester: data.mester ? { id: data.mester.id, til: data.mester.til } : null,
+    vann: data.vann ? { nr: data.vann.nr, tid: data.vann.tid, t: tr(data.vann.t, lang) } : null,
   };
 }
 
@@ -270,6 +271,8 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     kveld: lok(kveldVisning(data), lang), plan: data.plan || null,
     kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null,
     mester: data.mester ? { id: data.mester.id, til: data.mester.til } : null,
+    vann: data.vann ? { nr: data.vann.nr, tid: data.vann.tid, t: tr(data.vann.t, lang) } : null,
+    vannAv: !!data.vannAv, vannNeste: meg && meg.id === data.vert ? vannNeste(data) : null,
     skjermPin: meg && meg.id === data.vert && data.skjerm ? data.skjerm.pin : null,
     // Gjester som venter på å bli sluppet inn: bare verten og medlemmene ser dem
     venter: meg && (meg.id === data.vert || meg.konto) ? (data.venter || []).map((v: any) => ({ id: v.id, navn: v.navn })) : [],
@@ -468,8 +471,46 @@ function sjekkMester(data: any) {
   const m = data.mester; if (!m) return;
   if (!data.spillere.some((p: any) => p.id === m.id) || Date.now() >= m.til) nyMester(data);
 }
+/* ---------- Vannrunde (bakgrunn) ----------
+   Omtrent én gang i timen mens dere spiller: alle tar et glass vann. Kvelden varer lenger, og færre
+   er ferdige før midnatt. Klokka starter når dere spiller, og nullstilles etter en lang pause uten lek.
+   Verten kan ta en vannrunde når som helst («Vannrunde nå») – en grei måte å senke tempoet på uten
+   å peke på noen – og slå av den automatiske under «Mer til kvelden». Ikke i alkoholfrie rom. */
+const VANN_MIN = 60, VANN_PAUSE_MIN = 20;
+const VANN_TEKST: [string, string][] = [
+  ['Alle tar et glass vann. Sistemann ferdig velger neste låt.', 'Everyone drinks a glass of water. Last one done picks the next song.'],
+  ['Leveren ba om fem minutter. Et glass vann før neste kort.', 'Your liver asked for five minutes. A glass of water before the next card.'],
+  ['Skål i kranvann – Norges beste drikke, og helt gratis.', 'Cheers with tap water – the best drink there is, and it’s free.'],
+  ['Et glass vann nå er en bedre morgen i morgen. Førstemann ferdig deler ut en slurk.', 'A glass of water now is a better morning tomorrow. First one done hands out a sip.'],
+  ['Vann-skål! Alle reiser seg, sier «skål for leveren» og tømmer et glass vann.', 'Water toast! Everyone stands up, says “cheers to the liver” and empties a glass of water.'],
+  ['Vannpause. Ingen drikker noe annet før alle glassene med vann er tomme.', 'Water break. Nobody drinks anything else until every glass of water is empty.'],
+];
+function vannrunde(data: any, naa: number) {
+  data.vannFra = naa;
+  const nr = ((data.vann && data.vann.nr) || 0) + 1, t = VANN_TEKST[(nr - 1) % VANN_TEKST.length];
+  data.vann = { nr, tid: naa, t: L(t[0], t[1]) };
+}
+function sjekkVann(data: any) {
+  if (data.vannAv || data.alkoholfri || !data.spill) return;
+  const naa = Date.now();
+  if (!data.vannFra || naa - (data.vannAktiv || 0) > VANN_PAUSE_MIN * 60000) data.vannFra = naa;   // første lek, eller lenge siden sist
+  data.vannAktiv = naa;
+  if (naa - data.vannFra >= VANN_MIN * 60000) vannrunde(data, naa);
+}
+/** Når kommer neste vannrunde av seg selv (for verten)? */
+function vannNeste(data: any) {
+  return data.vannAv || data.alkoholfri || !data.vannFra ? null : data.vannFra + VANN_MIN * 60000;
+}
 export function handling(data: any, meg: any, h: any) {
   sjekkMester(data);
+  if (h.handling === 'vann-naa' || h.handling === 'vann-av' || h.handling === 'vann-paa') {
+    if (meg.id !== data.vert) return { feil: 'bare-vert' };
+    // To trykk rett etter hverandre gir ikke to vannrunder
+    if (h.handling === 'vann-naa') { if (!data.vann || Date.now() - data.vann.tid > 30000) vannrunde(data, Date.now()); }
+    else { data.vannAv = h.handling === 'vann-av'; if (!data.vannAv) data.vannFra = Date.now();
+      melde(data, data.vannAv ? '💧 Vannrunden hver time er slått av' : '💧 Vannrunde omtrent hver time er slått på', data.vannAv ? '💧 The hourly water round is off' : '💧 A water round about every hour is on'); }
+    return { ok: true };
+  }
   if (h.handling === 'mester-paa' || h.handling === 'mester-bytt') {
     if (meg.id !== data.vert) return { feil: 'bare-vert' };
     if (data.spillere.length < 2) return feilL('for-faa', 'Spørsmålsmester trenger minst to spillere.', 'Question master needs at least two players.');
@@ -480,6 +521,7 @@ export function handling(data: any, meg: any, h: any) {
     data.mester = null; melde(data, 'Spørsmålsmesteren er slått av', 'The question master is turned off'); return { ok: true };
   }
   const svar = handlingInne(data, meg, h);
+  sjekkVann(data);   // etter handlingen: klokka starter med en gang leken er i gang
   const s = data.spill, n = turNokkel(s);
   if (s && n !== s.turNokkel) { s.turNokkel = n; s.turStart = n ? Date.now() : null; }
   return svar;

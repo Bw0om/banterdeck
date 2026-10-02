@@ -16,6 +16,7 @@ import Tools from '../components/Tools.astro';
 import Icon from '../components/Icon.astro';
 import KontoKlient from '../components/KontoKlient.astro';
 import FeilRapport from '../components/FeilRapport.astro';
+import FeilFangst from '../components/FeilFangst.astro';
 import Alkoholfri from '../components/Alkoholfri.astro';
 import Verving from '../components/Verving.astro';
 import { ClientRouter } from 'astro:transitions';
@@ -78,6 +79,7 @@ const isCurrent = (href: string) => {
   <meta charset="utf-8" />
   <link rel="preload" href={fontArchivo} as="font" type="font/woff2" crossorigin />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <FeilFangst />
   <title>{fullTitle}</title>
   <meta name="description" content={desc} />
   {(noindex || UTVIKLING.paa) && <meta name="robots" content="noindex, nofollow" />}

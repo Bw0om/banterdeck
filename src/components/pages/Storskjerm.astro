@@ -6,6 +6,7 @@ import '../../styles/global.css';
 import '../../styles/natt.css';
 import { supabaseUrl, supabaseAnonKey } from '../../config';
 import type { Lang } from '../../lib/i18n';
+import FeilFangst from '../FeilFangst.astro';
 const { lang = 'no' } = Astro.props as { lang?: Lang };
 const EN = lang === 'en';
 const LANG = EN ? 'en' : 'no';
@@ -16,6 +17,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <FeilFangst />
   <meta name="robots" content="noindex" />
   <meta name="theme-color" content="#120A1D" />
   <title>{EN ? 'Big screen – Mitt vors' : 'Storskjerm – Mitt vors'}</title>
@@ -80,6 +82,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (navn === 'knus') { stoy(0, 0.35, 0.7, 4000, 'highpass'); stoy(0, 0.15, 0.6, 900, 'bandpass'); [3100, 4200, 2600, 5200, 3700].forEach(function (f, i) { tone(f, 0.03 + i * 0.05, 0.25, 'triangle', 0.08); }); stoy(0.45, 0.5, 0.3, 6000, 'highpass'); }
       if (navn === 'sirene') { for (var i = 0; i < 4; i++) { tone(650, i * 0.5, 0.25, 'sawtooth', 0.07, 950); tone(950, i * 0.5 + 0.25, 0.25, 'sawtooth', 0.07, 650); } }
       if (navn === 'inn') { tone(784, 0, 0.12, 'square', 0.08); tone(1175, 0.11, 0.3, 'triangle', 0.2); }
+      if (navn === 'vann') { tone(520, 0, 0.11, 'sine', 0.32, 1400); tone(700, 0.24, 0.1, 'sine', 0.24, 1800); tone(460, 0.52, 0.15, 'sine', 0.3, 1250); }
     }
 
     /* ---------- tilkobling ---------- */
@@ -131,7 +134,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         slurker: {}, brudd: s.ring && s.brudd ? s.brudd.nr : 0, kortNr: s.type === 'kort' ? (s.ring ? s.nr : s.pos) + ':' + (s.lek || '') : '',
         meldte: (b.meldte || []).map(function (a) { return a.id; }), saker: (b.saker || []).map(function (x) { return x.id + ':' + (x.dom === true ? 'd' : ''); }),
         vinner: (d.kveld && d.kveld.vinner) || '', ferdig: !!d.ferdig, hend: d.hendelse ? d.hendelse.nr : 0, reak: (d.reak || []).length ? d.reak[d.reak.length - 1].nr : 0,
-        fase: s.type + ':' + (s.fase || ''), spillere: (d.spillere || []).length,
+        fase: s.type + ':' + (s.fase || ''), spillere: (d.spillere || []).length, vann: d.vann ? d.vann.nr : 0,
       };
       (d.spillere || []).forEach(function (p) { na.slurker[p.id] = p.slurker || 0; });
       if (!sett) { sett = na; return; }
@@ -153,6 +156,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (na.spillere > sett.spillere) spill('inn');
       if (na.hend && na.hend !== sett.hend && d.hendelse) toast(d.hendelse.tekst);
       if (na.reak !== sett.reak) flyReak(d.reak || [], sett.reak);
+      if (na.vann > sett.vann && d.vann) visVann(d.vann.t, drikk.length || knust);
       sett = na;
     }
     function lag(kl, html, ms) { var el = document.createElement('div'); el.className = kl; el.innerHTML = html; document.body.appendChild(el); setTimeout(function () { el.remove(); }, ms || 3000); return el; }
@@ -166,6 +170,10 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     }
     function visKnust(hvem) { spill('knus'); lag('tv-knust', '<b>💥 ' + T('RINGEN RØK!', 'THE RING BROKE!') + '</b><span>' + esc(hvem || '') + T(' drikker opp glasset', ' finishes their drink') + '</span>', 3200); }
     function visBlalys(dom) { spill('sirene'); lag('bs-blalys' + (dom ? ' dom' : ''), '<span>🚨 ' + (dom ? T('DØMT!', 'CONVICTED!') : T('BØRSTILSYNET', 'MARKET WATCHDOG')) + '</span>', 2700); }
+    // Vannrunde: rolig blått over hele TV-en. Kommer det en DRIKK!-tavle samtidig, venter vannet til den er borte.
+    function visVann(tekst, vent) {
+      setTimeout(function () { spill('vann'); lag('tv-vann', '<i aria-hidden="true">💧</i><b>' + T('VANNRUNDE', 'WATER ROUND') + '</b><span>' + esc(tekst || '') + '</span>', 10000); }, vent ? 4600 : 0);
+    }
     function visBanner(tittel, under) { lag('tv-banner', '<b>' + esc(tittel) + '</b><span>' + esc(under) + '</span>', 6000); }
     function toast(t) { lag('tv-toast', esc(t), 4200); }
     function flyReak(liste, forrige) {
@@ -360,6 +368,11 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tv-drikk li{display:flex;align-items:baseline;gap:14px;font-size:4vw;font-weight:900}.tv-drikk li i{font-style:normal;background:var(--ink2);color:var(--gold);border-radius:999px;padding:0 .5em}
     .tv-knust{position:fixed;inset:0;z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;background:rgba(200,20,40,.92);color:#fff;animation:drikkInn .3s cubic-bezier(.2,1.6,.4,1)}
     .tv-knust b{font-family:var(--display);font-size:9vw;font-weight:900;animation:drikkRist .1s linear 8}.tv-knust span{font-size:3vw;font-weight:800}
+    .tv-vann{position:fixed;inset:0;z-index:9997;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.4vh;padding:4vh 8vw;text-align:center;color:#fff;
+      background:radial-gradient(130% 55% at 50% 112%,rgb(120 215 255 / .42),transparent 62%),linear-gradient(180deg,#1C5FE8 0%,#123A99 100%);animation:vannInn .5s cubic-bezier(.2,1.2,.4,1)}
+    .tv-vann i{font-style:normal;font-size:10vw;line-height:1;animation:vannDuv 1.8s ease-in-out .5s infinite}
+    .tv-vann b{font-family:var(--display);font-size:9vw;line-height:1;font-weight:900;font-stretch:125%;letter-spacing:-.04em}
+    .tv-vann span{max-width:22em;font-size:3.4vw;line-height:1.2;font-weight:750;text-wrap:balance}
     .tv-banner{position:fixed;left:50%;top:8vh;transform:translateX(-50%);z-index:9000;background:var(--accent);color:var(--ink2);border-radius:24px;padding:2.4vh 3vw;max-width:80vw;text-align:center;display:flex;flex-direction:column;gap:1vh;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:drikkInn .35s cubic-bezier(.2,1.6,.4,1)}
     .tv-banner b{font-size:1.8em}.tv-banner span{font-size:1.1em;opacity:.9}
     .tv-toast{position:fixed;left:50%;bottom:4vh;transform:translateX(-50%);z-index:8000;background:rgba(20,16,9,.92);border:1px solid var(--gold);border-radius:999px;padding:1.4vh 2.4vw;font-size:1.2em;font-weight:700;max-width:80vw;text-align:center;animation:tvInn .4s ease-out}

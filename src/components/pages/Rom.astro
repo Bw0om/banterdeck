@@ -241,6 +241,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (navn === 'knus') { stoy(0, 0.35, 0.7, 4000, 'highpass'); stoy(0, 0.15, 0.6, 900, 'bandpass'); [3100, 4200, 2600, 5200, 3700].forEach(function (f, i) { tone(f, 0.03 + i * 0.05, 0.25, 'triangle', 0.08); }); stoy(0.45, 0.5, 0.3, 6000, 'highpass'); }
       // Kortstokk som stokkes
       if (navn === 'bytt') { for (var i = 0; i < 5; i++) stoy(i * 0.045, 0.04, 0.35, 2500 + i * 300); tone(900, 0.25, 0.1, 'triangle', 0.1, 1400); }
+      // Vannrunde: tre rolige dråper («plopp» med stigende tone) – ikke en alarm
+      if (navn === 'vann') { tone(520, 0, 0.11, 'sine', 0.32, 1400); tone(700, 0.24, 0.1, 'sine', 0.24, 1800); tone(460, 0.52, 0.15, 'sine', 0.3, 1250); }
     }
     /** Stor beskjed over hele skjermen når du må drikke – synes og høres selv med musikk på. */
     var drikkEl = null, drikkN = 0, drikkTimer = null, egenSlurkT = 0;
@@ -260,6 +262,37 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (!f || !e) return;
       var diff = (e.slurker || 0) - (f.slurker || 0);
       if (diff > 0 && diff < 60 && Date.now() - egenSlurkT > 2500) drikkAlarm(diff);   // ikke når du fører dine egne slurker
+    }
+    /** Vannrunde: et rolig blått varsel på alle telefonene – ingen straff, bare et glass vann. */
+    var sisteVann = null, vannKode = '', vannEl = null, vannTimer = null;
+    function sjekkVann(d) {
+      var v = d && d.vann, nr = v ? v.nr : 0;
+      if (vannKode !== kode) { vannKode = kode; sisteVann = null; }
+      // Første svar fra rommet: ikke vis en vannrunde som var før du kom (eller åpnet siden på nytt)
+      if (sisteVann === null) { sisteVann = nr; return; }
+      // Lå telefonen i lomma lenge, er vannrunden gammel – da holder det å la være
+      if (nr > sisteVann && (!v.tid || Date.now() + klokkeAvvik - v.tid < 5 * 60000)) vannAlarm(v.t);
+      sisteVann = nr;
+    }
+    function vannAlarm(tekst) {
+      // DRIKK! og RINGEN RØK! får stå først
+      if (drikkEl || document.querySelector('.rof-knust')) { setTimeout(function () { vannAlarm(tekst); }, 3400); return; }
+      lukkVann();
+      vannEl = document.createElement('div'); vannEl.className = 'vann-alarm'; vannEl.setAttribute('role', 'alert');
+      vannEl.innerHTML = '<i aria-hidden="true">💧</i><b>' + T('VANNRUNDE', 'WATER ROUND') + '</b><span>' + esc(tekst || '') + '</span><small>' + T('Trykk for å lukke', 'Tap to close') + '</small>';
+      vannEl.addEventListener('click', lukkVann);
+      document.body.appendChild(vannEl);
+      spillLyd('vann');
+      try { navigator.vibrate && navigator.vibrate([90, 70, 90]); } catch (e) {}
+      vannTimer = setTimeout(lukkVann, 9000);
+    }
+    function lukkVann() { clearTimeout(vannTimer); if (vannEl) { vannEl.remove(); vannEl = null; } }
+    /** Når kommer neste vannrunde av seg selv? (Teksten under bryteren hos verten.) */
+    function vannIgjen() {
+      var n = tilstand.vannNeste;
+      if (!n) return T('Rommet minner alle på et glass vann omtrent én gang i timen mens dere spiller.', 'The room reminds everyone to drink some water about once an hour while you play.');
+      var min = Math.round((n - (Date.now() + klokkeAvvik)) / 60000);
+      return min <= 1 ? T('Neste vannrunde kommer snart.', 'The next water round is coming up soon.') : T('Neste kommer av seg selv om ca. ' + min + ' min.', 'The next one comes by itself in about ' + min + ' min.');
     }
     /** Lyd når en aksje blir meldt, og fanfare når kvelden eller børsen kårer en vinner. */
     var meldtSett = null, vinnerSett = null;
@@ -346,6 +379,7 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       else if (lekerHar.liste && lekerHar.kode === kode) d.leker = lekerHar.liste;
       sjekkSlurker(tilstand, d);
       try { sjekkHendelser(d); } catch (x) {}
+      try { sjekkVann(d); } catch (x) {}
       try { rofSjekkBrudd(d); } catch (x) {}
       tilstand = d;
       sjekkSprak(d);
@@ -716,6 +750,12 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
           : ['mester-paa', '❓', T('Slå på spørsmålsmester', 'Turn on question master'), T('Svarer du på et spørsmål fra mesteren, drikker du.', 'Answer a question from the master and you drink.')]);
         rader.push(t.oppdrag ? ['op-av', '🕵️', T('Slå av Agent 0,5', 'Turn off Agent 0.5'), T('Oppdragene forsvinner fra alle telefonene.', 'The missions disappear from every phone.')]
           : ['op-paa', '🕵️', T('Agent 0,5 ✨', 'Agent 0.5 ✨'), (t.pluss ? T('Alle får et hemmelig oppdrag som varer hele kvelden.', 'Everyone gets a secret mission that lasts all night.') : T('Alle får et hemmelig oppdrag som varer hele kvelden. Krever Pluss.', 'Everyone gets a secret mission that lasts all night. Needs Plus.'))]);
+      }
+      // Vannrunde: verten kan ta en nå, og slå av den som kommer av seg selv hver time (ikke i alkoholfrie rom)
+      if (!t.alkoholfri) {
+        if (s) rader.push(['vann-naa', '💧', T('Vannrunde nå', 'Water round now'), T('Alle får beskjed om å ta et glass vann – senker tempoet uten å peke på noen.', 'Everyone is told to drink a glass of water – slows things down without singling anyone out.')]);
+        rader.push(t.vannAv ? ['vann-auto', '⏱️', T('Slå på vannrunde hver time', 'Turn on the hourly water round'), T('Av nå. Rommet kan minne alle på et glass vann omtrent én gang i timen.', 'Off now. The room can remind everyone to drink some water about once an hour.')]
+          : ['vann-auto', '⏱️', T('Slå av vannrunde hver time', 'Turn off the hourly water round'), vannIgjen()]);
       }
       rader.unshift(['skjerm', '📺', T('Storskjerm på TV-en', 'Big screen on the TV'), T('Vis rommet stort på en PC eller et nettbrett koblet til TV-en – med lyd over musikken.', 'Show the room big on a laptop or tablet hooked up to the TV – with sound over the music.')]);
       rader.push(['nullstill', '🔄', T('Nullstill slurker', 'Reset sips'), T('Starter tellingen på poengtavla på nytt.', 'Restarts the count on the scoreboard.')]);
@@ -2159,7 +2199,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
     }, 1000);
     window.__bdFeilKontekst = function () {
       var t = tilstand || {}, sp = t.spill || {};
-      return { rom: kode, lek: sp.navn || (t.ferdig ? 'oppsummering' : 'lobby'), fase: String(sp.fase || sp.type || ''), versjon: versjon, vert: erVert(), spillere: (t.spillere || []).length };
+      // lekId er alltid lekens faste id (aldri navnet på en egen kortstokk) – den automatiske feilfangsten bruker bare lekId og fase
+      return { rom: kode, lek: sp.navn || (t.ferdig ? 'oppsummering' : 'lobby'), lekId: String(sp.lek || sp.type || (t.ferdig ? 'oppsummering' : 'lobby')).slice(0, 40), fase: String(sp.fase || sp.type || ''), versjon: versjon, vert: erVert(), spillere: (t.spillere || []).length };
     };
 
     /* ---------- straffehjulet ---------- */
@@ -2725,6 +2766,8 @@ const LEKNAVN = Object.fromEntries(lekeliste(LANG).map((l: any) => [l.id, l.navn
       if (g === 'bs-start') return borsStartValg();
       if (g === 'op-paa' || g === 'op-av') return gjor({ handling: g });
       if (g === 'mester-paa' || g === 'mester-bytt' || g === 'mester-av') return gjor({ handling: g });
+      if (g === 'vann-naa') return gjor({ handling: 'vann-naa' });
+      if (g === 'vann-auto') return gjor({ handling: tilstand.vannAv ? 'vann-paa' : 'vann-av' });
       if (g === 'hs-stem') return gjor({ handling: 'hs-stem', hvem: b.dataset.paa });
       if (g === 'sp-stem') return gjor({ handling: 'sp-stem', hvem: b.dataset.paa });
       if (g === 'sp-gjett') return gjor({ handling: 'sp-gjett', sted: b.dataset.sted });
