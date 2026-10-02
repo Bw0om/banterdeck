@@ -14,6 +14,16 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+// Hver ny versjon av nettsiden gir nye filnavn under /_astro/ (bl.a. romskriptet). Behold bare de nyeste,
+// så gamle versjoner ikke fyller opp telefonen.
+const MAKS_FILER = 60;
+function rydd(c) {
+  return c.keys().then((nokler) => {
+    const filer = nokler.filter((r) => new URL(r.url).pathname.startsWith('/_astro/'));
+    return Promise.all(filer.slice(0, Math.max(0, filer.length - MAKS_FILER)).map((r) => c.delete(r)));
+  }).catch(() => {});
+}
+
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -32,7 +42,8 @@ self.addEventListener('fetch', (e) => {
   // Filer med versjonsnummer i navnet endres aldri: hurtiglager først
   if (url.pathname.startsWith('/_astro/')) {
     e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-      const kopi = res.clone(); caches.open(CACHE).then((c) => c.put(req, kopi)).catch(() => {}); return res;
+      if (res.ok) { const kopi = res.clone(); caches.open(CACHE).then((c) => c.put(req, kopi).then(() => rydd(c))).catch(() => {}); }
+      return res;
     })));
     return;
   }

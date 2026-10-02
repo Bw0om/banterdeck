@@ -1,0 +1,2859 @@
+// Rommet («Spill sammen» / «Play together»): all klientkode for /no/rom og /room.
+// Ligger i en egen fil i stedet for inne i HTML-en: nettleseren og service workeren lagrer den, de to
+// språkversjonene deler den, og telefonen slipper å tolke 200 kB JavaScript på nytt hver gang rommet åpnes.
+// Startes fra Rom.astro ved hver sidevisning (astro:page-load), med lekenavnene og språket som argumenter.
+export function startRom(LEKNAVN, LANG) {
+  // Språk: samme kode for /no/rom og /room. T('norsk', 'English') velger tekst.
+  var EN = LANG === 'en';
+  function T(no, en) { return EN ? en : no; }
+  var LOKALE = EN ? 'en-GB' : 'nb-NO';
+  var RUTE = EN
+    ? { rom: '/room', pluss: '/plus', gjeng: '/crew', konto: '/account', leker: '/drinking-games', hjem: '/en' }
+    : { rom: '/no/rom', pluss: '/no/pluss', gjeng: '/no/gjeng', konto: '/no/account', leker: '/no/drinking-games', hjem: '/no/' };
+  var root = document.getElementById('rom');
+  if (!root || root.dataset.bound) return; root.dataset.bound = '1';
+  if (window.__bdRomStopp) window.__bdRomStopp();
+
+  var kode = (new URLSearchParams(location.search).get('k') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  // Norsk først. Har man selv valgt engelsk med språklenken i rommet (bd_romsprak), huskes det.
+  if (!EN && kode && les('bd_romsprak') === 'en') { location.replace('/room' + location.search); return; }
+  var qs = new URLSearchParams(location.search);
+  var onsketLek = LEKNAVN[qs.get('lek') || ''] ? qs.get('lek') : '', onsketModus = (qs.get('modus') || '').slice(0, 20), visAlle = false;
+  // Kommer man fra en gjengside, telles rommet for den gjengen
+  var onsketGjeng = /^[0-9a-f-]{36}$/i.test(qs.get('gjeng') || '') ? qs.get('gjeng') : '';
+  var vervSjekket = false, sisteSkjerm = '';
+  var meg = null, tilstand = null, versjon = 0, timer = null, sisteNr = 0, opptatt = false, feilTeller = 0;
+  var ikon = {
+    del: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v7h14v-7"/></svg>',
+    qr: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>',
+    pokal: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>',
+    krone: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>'
+  };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function les(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function skriv(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function toast(t) {
+    var el = document.getElementById('toast'); if (!el) return;
+    el.textContent = t; el.classList.add('show');
+    // Lang nok til å rekke å lese den etter et par glass: minst 3 sekunder, lengre for lange beskjeder
+    var ms = Math.min(7000, Math.max(3000, String(t).length * 75));
+    clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, ms);
+  }
+  function settAdresse(k) {
+    var u = location.pathname + (k ? '?k=' + k : '');
+    history.replaceState(history.state, '', u);
+    // Husk rommet, så «Spill sammen» og forsiden kan ta deg tilbake dit
+    if (k) skriv('bd_sist_rom', { k: k, t: Date.now() });
+  }
+
+  /* ---------- nettverk ---------- */
+  var lekerHar = { lang: '', kode: '', liste: null }, sender = 0, senderT = null;
+  function api(metode, sti, body) {
+    var h = { 'Content-Type': 'application/json', 'x-lang': LANG };
+    if (lekerHar.lang && lekerHar.kode === kode) h['x-leker'] = lekerHar.lang;   // serveren slipper å sende lekelista på nytt
+    if (meg && metode === 'GET') { h['x-spiller'] = meg.id; h['x-pollett'] = meg.pollett; }
+    // Innlogget? Da kan serveren sjekke Pluss når verten starter en pakke
+    var sesjon = window.BDKonto && window.BDKonto.les();
+    if (metode === 'POST' && sesjon && sesjon.access_token) h.Authorization = 'Bearer ' + sesjon.access_token;
+    // Trykk som venter på serveren: en tynn stripe øverst viser at noe skjer (vises først etter 150 ms, så raske svar ikke blinker)
+    if (metode === 'POST') { sender++; clearTimeout(senderT); senderT = setTimeout(function () { if (sender > 0) document.documentElement.classList.add('rom-sender'); }, 150); }
+    var ferdig = function () { if (metode === 'POST' && --sender <= 0) { sender = 0; clearTimeout(senderT); document.documentElement.classList.remove('rom-sender'); } };
+    return fetch(sti, { method: metode, headers: h, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' })
+      .then(function (r) { ferdig(); return r; }, function (e) { ferdig(); throw e; })
+      .then(function (r) {
+        if (r.status === 204) return null;
+        return r.json().then(function (d) { if (!r.ok) { var e = new Error(d.melding || T('Feil', 'Something went wrong')); e.kode = d.feil; e.status = r.status; throw e; } return d; });
+      });
+  }
+  /** Kontokall (Pluss, verving, gjeng) sier også fra om språket. */
+  function kontoApi(sti, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({ 'x-lang': LANG }, opts.headers || {});
+    return window.BDKonto.api(sti, opts);
+  }
+  /* ---------- husk hvilke kort denne telefonen har sett, så neste kveld gir nye kort først ---------- */
+  function settListe() { try { var x = JSON.parse(localStorage.getItem('bd_sett') || '{}'); return x && typeof x === 'object' ? x : {}; } catch (e) { return {}; } }
+  function merkSett(lek, id) {
+    if (!lek || !id) return;
+    var x = settListe(), l = x[lek] || (x[lek] = []);
+    if (l.indexOf(id) !== -1) return;
+    l.push(id); if (l.length > 1500) l.splice(0, l.length - 1500);
+    try { localStorage.setItem('bd_sett', JSON.stringify(x)); } catch (e) {}
+  }
+  function gjor(h) {
+    if (!meg || opptatt) return;
+    opptatt = true;
+    h.id = meg.id; h.pollett = meg.pollett;
+    if (h.handling === 'slurk') egenSlurkT = Date.now();
+    if (h.handling === 'start' && h.lek) h.sett = (settListe()[h.lek] || []).slice(-1500);
+    api('POST', '/api/rom/' + kode, h).then(function (d) { opptatt = false; ta(d); })
+      .catch(function (e) { opptatt = false; if (e.kode === 'pluss') return visPlussTilbud(); toast(e.message); if (e.kode === 'ikke-med') glemRom(); });
+  }
+  var ko = Promise.resolve();
+  function gjorAlltid(h) {
+    if (!meg) return;
+    h.id = meg.id; h.pollett = meg.pollett;
+    if (h.handling === 'slurk') egenSlurkT = Date.now();
+    ko = ko.then(function () { return api('POST', '/api/rom/' + kode, h).then(ta).catch(function (e) { toast(e.message); }); });
+  }
+  var henter = false, henteIgjen = false;
+  function hent() {
+    if (!kode || !meg) return;
+    if (henter) { henteIgjen = true; return; }
+    henter = true; clearTimeout(timer);
+    api('GET', '/api/rom/' + kode + '?v=' + versjon).then(function (d) { feilTeller = 0; if (d) ta(d); })
+      .catch(function (e) {
+        if (e.kode === 'finnes-ikke') { glemRom(); toast(e.message); return; }
+        feilTeller++;
+      })
+      .then(function () { henter = false; if (henteIgjen && meg) { henteIgjen = false; hent(); } else planlegg(); });
+  }
+  function planlegg() {
+    clearTimeout(timer);
+    if (!root.isConnected || !meg) return;
+    // Med sanntid kommer endringene med én gang, så da sjekker vi bare av og til for sikkerhets skyld
+    var ms = document.hidden ? (rt.ok ? 20000 : 6000) : rt.ok ? 6000 : Math.min(1500 + feilTeller * 1500, 8000);
+    timer = setTimeout(hent, ms);
+  }
+
+  /* ---------- sanntid: Supabase Realtime sier fra når rommet endres ---------- */
+  var rt = { ws: null, ok: false, hb: null, ref: 0, kode: '', stopp: false };
+  function rtSend(m) { try { rt.ws && rt.ws.readyState === 1 && rt.ws.send(JSON.stringify(m)); } catch (e) {} }
+  function rtKobl() {
+    var K = window.BDKonto;
+    if (!K || !K.cfg || !K.cfg.url || !K.cfg.anon || !kode || !meg || !window.WebSocket) return;
+    if (rt.ws && rt.kode === kode) return;
+    rtStopp(); rt.stopp = false; rt.kode = kode;
+    var emne = 'realtime:rom-' + kode, ws;
+    try { ws = new WebSocket(K.cfg.url.replace(/^http/, 'ws') + '/realtime/v1/websocket?apikey=' + encodeURIComponent(K.cfg.anon) + '&vsn=1.0.0'); } catch (e) { return; }
+    rt.ws = ws;
+    ws.onopen = function () {
+      var ref = String(++rt.ref);
+      rtSend({ topic: emne, event: 'phx_join', ref: ref, join_ref: ref, payload: { config: { broadcast: { ack: false, self: false }, presence: { key: '' }, postgres_changes: [], private: false }, access_token: K.cfg.anon } });
+      rt.hb = setInterval(function () { rtSend({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: String(++rt.ref) }); }, 25000);
+    };
+    ws.onmessage = function (e) {
+      var m; try { m = JSON.parse(e.data); } catch (x) { return; }
+      if (!m || m.topic !== emne) return;
+      if (m.event === 'phx_reply' && m.payload && m.payload.status === 'ok' && !rt.ok) { rt.ok = true; planlegg(); }
+      if (m.event === 'broadcast' && m.payload && m.payload.event === 'endret') {
+        var v = m.payload.payload && m.payload.payload.v;
+        if (!v || v > versjon) hent();
+      }
+    };
+    ws.onclose = function () {
+      clearInterval(rt.hb); if (rt.ws !== ws) return;
+      rt.ws = null; rt.ok = false; planlegg();
+      if (!rt.stopp) setTimeout(function () { if (!rt.stopp && meg && kode && document.getElementById('rom')) rtKobl(); }, 5000);
+    };
+    ws.onerror = function () { try { ws.close(); } catch (x) {} };
+  }
+  function rtStopp() {
+    rt.stopp = true; rt.ok = false; clearInterval(rt.hb);
+    if (rt.ws) { var w = rt.ws; rt.ws = null; try { w.close(); } catch (e) {} }
+  }
+  /* ---------- lyd: små effekter laget i nettleseren (ingen lydfiler) ---------- */
+  var lyd = { ctx: null, paa: les('bd_lyd') !== false };
+  function lydCtx() {
+    if (!lyd.ctx) {
+      try { lyd.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+      // Alt går gjennom en kompressor og en forsterker: høyere og jevnere, så lydene høres over musikken
+      try {
+        var k = lyd.ctx.createDynamicsCompressor(); k.threshold.value = -18; k.knee.value = 8; k.ratio.value = 6; k.attack.value = 0.002; k.release.value = 0.2;
+        var g = lyd.ctx.createGain(); g.gain.value = 2.2; k.connect(g); g.connect(lyd.ctx.destination); lyd.ut = k;
+      } catch (e) { lyd.ut = lyd.ctx.destination; }
+    }
+    if (lyd.ctx.state === 'suspended') lyd.ctx.resume().catch(function () {});
+    return lyd.ctx;
+  }
+  // Telefoner krever et trykk før lyd kan spilles – lås opp ved første berøring
+  document.addEventListener('pointerdown', function () { if (lyd.paa) lydCtx(); }, { passive: true });
+  function tone(f, t0, varighet, type, volum, tilF, vibrato) {
+    var c = lyd.ctx; if (!c) return;
+    var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+    if (tilF) o.frequency.exponentialRampToValueAtTime(tilF, t + varighet);
+    if (vibrato) { var l = c.createOscillator(), lg = c.createGain(); l.frequency.value = vibrato; lg.gain.value = f * 0.025; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t + varighet + 0.05); }
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(volum || 0.2, t + 0.012); g.gain.setValueAtTime(volum || 0.2, t + Math.max(0.013, varighet * 0.6)); g.gain.exponentialRampToValueAtTime(0.0001, t + varighet);
+    o.connect(g); g.connect(lyd.ut || c.destination); o.start(t); o.stop(t + varighet + 0.02);
+  }
+  /** Støy (klirr, kortstokk, trommeslag) – filtrert rundt en frekvens. */
+  function stoy(t0, varighet, volum, frekvens, filtertype) {
+    var c = lyd.ctx; if (!c) return;
+    var n = Math.max(1, Math.floor(c.sampleRate * varighet)), buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    var src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(), t = c.currentTime + t0;
+    src.buffer = buf; f.type = filtertype || 'bandpass'; f.frequency.value = frekvens || 3000; g.gain.value = volum || 0.3;
+    src.connect(f); f.connect(g); g.connect(lyd.ut || c.destination); src.start(t);
+  }
+  /** Lufthorn: flere skurrende toner litt ved siden av hverandre – skjærer gjennom musikk. */
+  function horn(t0, varighet) {
+    [466, 470, 587, 592, 698].forEach(function (f) { tone(f * 0.97, t0, varighet, 'sawtooth', 0.06, f); });
+  }
+  function spillLyd(navn) {
+    if (!lyd.paa || !lydCtx()) return;
+    if (navn === 'tikk') tone(1800, 0, 0.03, 'square', 0.05);
+    if (navn === 'ding') { tone(880, 0, 0.35, 'triangle', 0.25); tone(1320, 0.12, 0.5, 'triangle', 0.2); }
+    // Din tur: tre lyse toner og en høy «pling» på slutten
+    if (navn === 'tur') { tone(784, 0, 0.12, 'square', 0.09); tone(1047, 0.11, 0.12, 'square', 0.09); tone(1568, 0.22, 0.35, 'triangle', 0.25); tone(2093, 0.22, 0.35, 'sine', 0.12); }
+    // Du må drikke: to lufthorn-støt og så «glugg glugg»
+    if (navn === 'slurk') {
+      horn(0, 0.28); horn(0.36, 0.6);
+      [1.05, 1.25, 1.45].forEach(function (t) { tone(260, t, 0.13, 'sine', 0.35, 780); });
+    }
+    if (navn === 'pop') tone(600, 0, 0.08, 'sine', 0.14, 900);
+    if (navn === 'svar') { tone(523, 0, 0.12, 'triangle', 0.18); tone(784, 0.1, 0.25, 'triangle', 0.18); }
+    // Kassaapparat: klikk + to lyse bjeller
+    if (navn === 'kaching') { stoy(0, 0.06, 0.4, 5000, 'highpass'); tone(2093, 0.05, 0.25, 'triangle', 0.22); tone(2637, 0.13, 0.6, 'triangle', 0.22); tone(3136, 0.13, 0.6, 'sine', 0.08); }
+    if (navn === 'mynt') { tone(1760, 0, 0.07, 'square', 0.06); tone(2637, 0.06, 0.2, 'triangle', 0.14); }
+    // Tap: trist trombone «womp womp womp wooomp»
+    if (navn === 'womp') { tone(311, 0, 0.28, 'sawtooth', 0.09); tone(294, 0.3, 0.28, 'sawtooth', 0.09); tone(277, 0.6, 0.28, 'sawtooth', 0.09); tone(262, 0.9, 0.9, 'sawtooth', 0.09, 247, 6); }
+    // Dramatisk «dun dun DUNN» når noe blir meldt
+    if (navn === 'dundun') { stoy(0, 0.25, 0.5, 120, 'lowpass'); tone(196, 0, 0.3, 'sawtooth', 0.1); tone(185, 0.35, 0.3, 'sawtooth', 0.1); stoy(0.7, 0.5, 0.6, 100, 'lowpass'); tone(156, 0.7, 1.1, 'sawtooth', 0.12, 150, 5); }
+    // Seier: fanfare
+    if (navn === 'fanfare') { [523, 659, 784].forEach(function (f, i) { tone(f, i * 0.13, 0.14, 'square', 0.08); }); tone(1047, 0.42, 0.7, 'square', 0.09, null, 6); tone(1319, 0.42, 0.7, 'triangle', 0.12); tone(784, 0.42, 0.7, 'triangle', 0.1); }
+    // Glass som knuses (ringen røk)
+    if (navn === 'knus') { stoy(0, 0.35, 0.7, 4000, 'highpass'); stoy(0, 0.15, 0.6, 900, 'bandpass'); [3100, 4200, 2600, 5200, 3700].forEach(function (f, i) { tone(f, 0.03 + i * 0.05, 0.25, 'triangle', 0.08); }); stoy(0.45, 0.5, 0.3, 6000, 'highpass'); }
+    // Kortstokk som stokkes
+    if (navn === 'bytt') { for (var i = 0; i < 5; i++) stoy(i * 0.045, 0.04, 0.35, 2500 + i * 300); tone(900, 0.25, 0.1, 'triangle', 0.1, 1400); }
+    // Vannrunde: tre rolige dråper («plopp» med stigende tone) – ikke en alarm
+    if (navn === 'vann') { tone(520, 0, 0.11, 'sine', 0.32, 1400); tone(700, 0.24, 0.1, 'sine', 0.24, 1800); tone(460, 0.52, 0.15, 'sine', 0.3, 1250); }
+  }
+  /** Stor beskjed over hele skjermen når du må drikke – synes og høres selv med musikk på. */
+  var drikkEl = null, drikkN = 0, drikkTimer = null, egenSlurkT = 0;
+  function drikkAlarm(n) {
+    // «RINGEN RØK!» får stå alene først
+    if (document.querySelector('.rof-knust') && !drikkEl) { setTimeout(function () { drikkAlarm(n); }, 2600); return; }
+    drikkN = drikkEl ? drikkN + n : n;
+    var fri = tilstand && tilstand.alkoholfri;
+    if (!drikkEl) { drikkEl = document.createElement('div'); drikkEl.className = 'drikk-alarm'; drikkEl.setAttribute('role', 'alert'); drikkEl.addEventListener('click', function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }); document.body.appendChild(drikkEl); spillLyd('slurk'); }
+    drikkEl.innerHTML = '<b>' + (fri ? '⚠️ ' + T('STRAFFEPOENG!', 'PENALTY!') : '🍺 ' + T('DRIKK!', 'DRINK!')) + '</b><span>' + drikkN + ' ' + (fri ? T(drikkN === 1 ? 'straffepoeng' : 'straffepoeng', drikkN === 1 ? 'point' : 'points') : T(drikkN === 1 ? 'slurk' : 'slurker', drikkN === 1 ? 'sip' : 'sips')) + '</span><small>' + T('Trykk for å lukke', 'Tap to close') + '</small>';
+    try { navigator.vibrate && navigator.vibrate([300, 120, 300, 120, 500]); } catch (e) {}
+    clearTimeout(drikkTimer); drikkTimer = setTimeout(function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }, 3200);
+  }
+  function sjekkSlurker(gammel, ny) {
+    if (!gammel || !ny || !ny.meg) return;
+    var f = (gammel.spillere || []).find(function (p) { return p.id === ny.meg; }), e = (ny.spillere || []).find(function (p) { return p.id === ny.meg; });
+    if (!f || !e) return;
+    var diff = (e.slurker || 0) - (f.slurker || 0);
+    if (diff > 0 && diff < 60 && Date.now() - egenSlurkT > 2500) drikkAlarm(diff);   // ikke når du fører dine egne slurker
+  }
+  /** Vannrunde: et rolig blått varsel på alle telefonene – ingen straff, bare et glass vann. */
+  var sisteVann = null, vannKode = '', vannEl = null, vannTimer = null;
+  function sjekkVann(d) {
+    var v = d && d.vann, nr = v ? v.nr : 0;
+    if (vannKode !== kode) { vannKode = kode; sisteVann = null; }
+    // Første svar fra rommet: ikke vis en vannrunde som var før du kom (eller åpnet siden på nytt)
+    if (sisteVann === null) { sisteVann = nr; return; }
+    // Lå telefonen i lomma lenge, er vannrunden gammel – da holder det å la være
+    if (nr > sisteVann && (!v.tid || Date.now() + klokkeAvvik - v.tid < 5 * 60000)) vannAlarm(v.t);
+    sisteVann = nr;
+  }
+  function vannAlarm(tekst) {
+    // DRIKK! og RINGEN RØK! får stå først
+    if (drikkEl || document.querySelector('.rof-knust')) { setTimeout(function () { vannAlarm(tekst); }, 3400); return; }
+    lukkVann();
+    vannEl = document.createElement('div'); vannEl.className = 'vann-alarm'; vannEl.setAttribute('role', 'alert');
+    vannEl.innerHTML = '<i aria-hidden="true">💧</i><b>' + T('VANNRUNDE', 'WATER ROUND') + '</b><span>' + esc(tekst || '') + '</span><small>' + T('Trykk for å lukke', 'Tap to close') + '</small>';
+    vannEl.addEventListener('click', lukkVann);
+    document.body.appendChild(vannEl);
+    spillLyd('vann');
+    try { navigator.vibrate && navigator.vibrate([90, 70, 90]); } catch (e) {}
+    vannTimer = setTimeout(lukkVann, 9000);
+  }
+  function lukkVann() { clearTimeout(vannTimer); if (vannEl) { vannEl.remove(); vannEl = null; } }
+  /** Når kommer neste vannrunde av seg selv? (Teksten under bryteren hos verten.) */
+  function vannIgjen() {
+    var n = tilstand.vannNeste;
+    if (!n) return T('Rommet minner alle på et glass vann omtrent én gang i timen mens dere spiller.', 'The room reminds everyone to drink some water about once an hour while you play.');
+    var min = Math.round((n - (Date.now() + klokkeAvvik)) / 60000);
+    return min <= 1 ? T('Neste vannrunde kommer snart.', 'The next water round is coming up soon.') : T('Neste kommer av seg selv om ca. ' + min + ' min.', 'The next one comes by itself in about ' + min + ' min.');
+  }
+  /** Lyd når en aksje blir meldt, og fanfare når kvelden eller børsen kårer en vinner. */
+  var meldtSett = null, vinnerSett = null;
+  function sjekkHendelser(d) {
+    var b = d && d.bors, ider = {};
+    (b ? b.aksjer : []).forEach(function (a) { if (a.status === 'meldt') ider[a.id] = 1; });
+    if (meldtSett && Object.keys(ider).some(function (id) { return !meldtSett[id]; })) spillLyd('dundun');
+    meldtSett = ider;
+    var v = (d.kveld && d.kveld.vinner) || (b && b.slutt && b.slutt.konge) || '';
+    if (vinnerSett !== null && v && v !== vinnerSett) spillLyd('fanfare');
+    vinnerSett = v;
+  }
+  /** Tikk som går saktere og saktere mens hjulet spinner, og et pling når det stopper. */
+  function hjulLyd(ms) {
+    if (!lyd.paa || !lydCtx()) return;
+    var t = 0, steg = 45;
+    while (t < ms - 150) { tone(1700, t / 1000, 0.025, 'square', 0.04); t += steg; steg *= 1.075; }
+    setTimeout(function () { spillLyd('ding'); }, ms);
+  }
+  function erMinTur(t) {
+    var s = t && t.spill, m = t && t.meg; if (!s || !m) return false;
+    if (s.type === 'bussruta') return (s.fase === 1 && s.aktiv === m) || (s.fase === 3 && s.buss === m && s.bussRekke < s.maal);
+    if (s.type === 'yatzy') return !s.ferdig && s.aktiv === m;
+    if (s.type === 'overunder' || s.type === 'president') return s.tur === m;
+    if (s.type === 'opus') return s.holder === m;
+    if (s.type === 'tosannheter') return s.fase === 'skriv' && s.aktiv === m;
+    if (s.type === 'forraeder') return s.fase === 'svar' && s.aktiv === m;
+    return false;
+  }
+  /** Må jeg gjøre noe akkurat nå? Gir teksten til det lime merket øverst (og den lime skjermkanten), eller ''. */
+  function minTurNaa(d) {
+    var s = d && d.spill, m = d && d.meg; if (!s || !m) return '';
+    if (s.ring && s.turId === m) return T('Din tur – trekk et kort!', 'Your turn – draw a card!');
+    if (erMinTur(d)) return T('Din tur!', 'Your turn!');
+    if (s.type === 'mest' && s.fase === 'stem' && !s.minStemme) return T('Stem nå!', 'Vote now!');
+    if (s.type === 'forraeder' && s.fase === 'stem' && s.aktiv !== m && !s.minStemme) return T('Stem nå!', 'Vote now!');
+    return '';
+  }
+  /** Lunta: hvor mye som er igjen (0–1), som en lunte som brenner ned. */
+  function lunte(andel, ekstra) {
+    var p = Math.max(0, Math.min(1, andel || 0));
+    return '<div class="lunte' + (p <= 0 ? ' tom' : '') + (ekstra ? ' ' + ekstra : '') + '" aria-hidden="true"><i style="--igjen:' + (p * 100).toFixed(1) + '%"></i></div>';
+  }
+  var varMinTur = false, sisteFase = '';
+
+  /* ---------- svarfrist: nedtelling på alle telefoner ---------- */
+  var klokkeAvvik = 0, fristSendt = 0, fristTimer = null, fristTot = {};
+  function fristHtml(s, tekst) {
+    if (!s || !s.frist) return '';
+    var igjen = Math.max(0, Math.ceil((s.frist - 1500 - (Date.now() + klokkeAvvik)) / 1000));
+    fristTot[s.frist] = Math.max(fristTot[s.frist] || 0, igjen, 1);
+    return lunte(igjen / fristTot[s.frist], 'frist-lunte') + '<p class="rom-frist"><span data-frist="' + s.frist + '">' + igjen + '</span> ' + esc(tekst || T('sekunder igjen', 'seconds left')) + '</p>';
+  }
+  function fristTikk() {
+    clearInterval(fristTimer);
+    fristTimer = setInterval(function () {
+      var el = document.querySelector('[data-frist]');
+      if (!el) return;
+      var frist = Number(el.dataset.frist), igjen = Math.max(0, Math.ceil((frist - 1500 - (Date.now() + klokkeAvvik)) / 1000));
+      el.textContent = igjen; el.parentNode.classList.toggle('snart', igjen <= 10);
+      var lu = document.querySelector('.frist-lunte'); if (lu) { var tot = fristTot[frist] || Math.max(igjen, 1); lu.firstChild.style.setProperty('--igjen', (100 * igjen / tot).toFixed(1) + '%'); lu.classList.toggle('snart', igjen <= 10); lu.classList.toggle('tom', igjen <= 0); }
+      if (igjen <= 0 && fristSendt !== frist) {
+        fristSendt = frist;
+        // Klokka er ute: be serveren gå videre (den sjekker selv). Litt tilfeldig ventetid, så ikke alle sender samtidig.
+        setTimeout(function () { gjorAlltid({ handling: 'tid-ute' }); }, 300 + Math.random() * 900);
+      }
+    }, 250);
+  }
+  function ta(d) {
+    if (!d) return;
+    if (d.naa) klokkeAvvik = d.naa - Date.now();
+    var varVenter = !!(tilstand && tilstand.venter === true);
+    var haddeTilstand = !!tilstand;   // første svar etter at siden ble åpnet: ikke vis gamle hendelser som beskjed
+    // Venter på å bli sluppet inn i en gjengkveld
+    if (d.venter === true) { if (d.versjon) versjon = d.versjon; tilstand = d; rtKobl(); tegnVenter(); return; }
+    if (varVenter && d.meg) { toast(T('Du er sluppet inn! 🎉', 'You’re in! 🎉')); spillLyd('tur'); }
+    var naaTur = erMinTur(d); if (naaTur && !varMinTur && tilstand) spillLyd('tur'); varMinTur = naaTur;
+    var fase = d.spill ? d.spill.type + ':' + (d.spill.fase || '') + ':' + (d.spill.i || 0) : '';
+    if (tilstand && d.spill && /nyhetsrunden:svar|mest:resultat|forraeder:avslort|tosannheter:avslort/.test(fase) && fase !== sisteFase) spillLyd('svar');
+    sisteFase = fase;
+    if (d.versjon) versjon = d.versjon;
+    // Lekelista sendes bare når telefonen ikke har den (første gang, eller nytt språk)
+    if (d.leker) { lekerHar = { lang: d.lang || (d.leker && tilstand && tilstand.lang) || '', kode: kode, liste: d.leker }; }
+    else if (lekerHar.liste && lekerHar.kode === kode) d.leker = lekerHar.liste;
+    sjekkSlurker(tilstand, d);
+    try { sjekkHendelser(d); } catch (x) {}
+    try { sjekkVann(d); } catch (x) {}
+    try { rofSjekkBrudd(d); } catch (x) {}
+    tilstand = d;
+    sjekkSprak(d);
+    if (d.hendelse && d.hendelse.nr > sisteNr) { if (sisteNr || haddeTilstand) toast(d.hendelse.tekst); sisteNr = d.hendelse.nr; }
+    borsPenger(d);
+    borsBlalys(d);
+    if (d.meg === null && meg) { glemRom(); if (varVenter) tegnStart(T('Du ble ikke sluppet inn denne gangen.', 'You weren’t let in this time.')); return; }
+    // Alkoholfri for hele rommet: siden bytter slurker med straffepoeng på alle telefoner
+    if (d.alkoholfri) document.documentElement.dataset.alkoholfri = '1';
+    else if (document.documentElement.dataset.alkoholfri) delete document.documentElement.dataset.alkoholfri;
+    // Vervet av en venn? Første rom med minst to telefoner gir begge et kveldspass
+    if (!vervSjekket && d.spill && (d.spillere || []).length >= 2 && window.BDVerv) { vervSjekket = true; window.BDVerv.fullfor(); }
+    if (onsketGjeng && meg && d.vert === d.meg && !d.gjeng) { var gid = onsketGjeng; onsketGjeng = ''; gjorAlltid({ handling: 'gjeng', gjengId: gid }); }
+    rtKobl();
+    holdVaaken();
+    tegn();
+  }
+  // Byttet til det andre språket midt i rommet? Serveren husker språket fra da man ble med, så si fra.
+  var sprakSendt = false;
+  function sjekkSprak(d) {
+    if (sprakSendt || !meg || !kode || !d || !d.meg) return;
+    var jeg = (d.spillere || []).find(function (p) { return p.id === d.meg; }) || {};
+    var hans = jeg.lang || d.lang;
+    if (!hans || hans === LANG) return;
+    sprakSendt = true;
+    api('POST', '/api/rom/' + kode, { handling: 'sprak', lang: LANG, id: meg.id, pollett: meg.pollett })
+      .then(function (x) { if (x && x.versjon) ta(x); }).catch(function () {});
+  }
+  /** Lenke til samme rom på det andre språket (for blandede grupper). */
+  function sprakLenke(kl) {
+    var til = EN ? 'no' : 'en', sti = (EN ? '/no/rom' : '/room') + (kode ? '?k=' + kode : location.search);
+    return '<a class="rom-sprak' + (kl ? ' ' + kl : '') + '" href="' + esc(sti) + '" hreflang="' + til + '" lang="' + til + '" data-sprak="' + til + '" data-astro-reload>🌐 ' + (EN ? 'Norsk' : 'English') + '</a>';
+  }
+  root.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-sprak]'); if (a) skriv('bd_romsprak', a.dataset.sprak); });
+  function glemRom() {
+    if (kode) { try { localStorage.removeItem('bd_rom_' + kode); var sr = les('bd_sist_rom'); if (sr && sr.k === kode) localStorage.removeItem('bd_sist_rom'); } catch (e) {} }
+    meg = null; tilstand = null; versjon = 0; clearTimeout(timer); rtStopp(); lukkTavle(); lukkHjul(); slippVaaken();
+    if (document.documentElement.dataset.alkoholfri) delete document.documentElement.dataset.alkoholfri;
+    tegnStart();
+  }
+
+  /* ---------- skjermen sovner ikke mens dere spiller ----------
+     Telefonen ligger ofte på bordet mens noen leser opp, og en låst skjerm midt i en runde er tungvint
+     med kalde fingre og et glass i hånda. Låsen slippes når du går ut av rommet, og etter 10 minutter
+     uten noe nytt i rommet (så telefonen ikke står og lyser hele natta). Nettleseren slipper den selv
+     når fanen skjules – da hentes den igjen når du kommer tilbake. */
+  var vaaken = { las: null, venter: false, sist: Date.now(), t: null };
+  function holdVaaken() {
+    vaaken.sist = Date.now();
+    if (!meg || vaaken.las || vaaken.venter || document.hidden || !navigator.wakeLock || !root.isConnected) return;
+    vaaken.venter = true;
+    navigator.wakeLock.request('screen').then(function (l) {
+      vaaken.venter = false; vaaken.las = l;
+      l.addEventListener('release', function () { if (vaaken.las === l) vaaken.las = null; });
+      if (!meg || !root.isConnected) slippVaaken();
+    }).catch(function () { vaaken.venter = false; });
+    if (!vaaken.t) vaaken.t = setInterval(function () {
+      if (!root.isConnected) { slippVaaken(); clearInterval(vaaken.t); vaaken.t = null; return; }
+      if (vaaken.las && Date.now() - vaaken.sist > 10 * 60 * 1000) slippVaaken();
+    }, 60 * 1000);
+  }
+  function slippVaaken() { var l = vaaken.las; vaaken.las = null; if (l) { try { l.release(); } catch (e) {} } }
+  root.addEventListener('click', function () { if (meg) holdVaaken(); });
+  if (window.__bdQrLytter) document.removeEventListener('bdqr-klar', window.__bdQrLytter);
+  window.__bdQrLytter = function () { if (tilstand && root.isConnected && root.querySelector('.rom-qr') && !root.querySelector('.rom-qrbilde')) tegn(); };
+  document.addEventListener('bdqr-klar', window.__bdQrLytter);
+
+  window.__bdRomStopp = function () { clearTimeout(timer); clearInterval(fristTimer); rtStopp(); lukkTavle(); slippVaaken(); };
+  document.addEventListener('astro:before-swap', function stopp() { clearTimeout(timer); rtStopp(); lukkTavle(); lukkBors(); slippVaaken(); document.removeEventListener('astro:before-swap', stopp); }, { once: true });
+  // (en gammel utgave av rommet fra før en sidebytte skal ikke hente eller holde skjermen våken)
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && meg && root.isConnected) { hent(); holdVaaken(); } });
+  if (window.__bdRomEsc) document.removeEventListener('keydown', window.__bdRomEsc);
+  window.__bdRomEsc = function (e) {
+    if (e.key !== 'Escape') return;
+    var pt = document.querySelector('.pluss-tilbud'); if (pt) return pt.remove();
+    if (borsModal) return lukkBors();
+    if (tavleHjul) return lukkHjul();
+    if (tavle) return lukkTavle();
+  };
+  document.addEventListener('keydown', window.__bdRomEsc);
+
+  /* ---------- start: lag eller bli med ---------- */
+  /** Er du allerede i et rom (lagret på denne telefonen)? Da vises en snarvei tilbake. */
+  function sistRom() {
+    var sr = les('bd_sist_rom'); if (!sr || !sr.k || kode === sr.k) return null;
+    if (Date.now() - (sr.t || 0) > 24 * 3600 * 1000 || !les('bd_rom_' + sr.k)) return null;
+    return sr.k;
+  }
+  function fortsettBanner() {
+    var k = sistRom(); if (!k) return '';
+    var ln = onsketLek ? LEKNAVN[onsketLek] : '';
+    return '<a class="rom-fortsett" href="' + esc(location.pathname + '?k=' + k) + '"><span><b>' + T('Du er i rom ', 'You’re in room ') + esc(k) + '</b><small>' +
+      (ln ? T('Gå tilbake og velg ' + esc(ln) + ' der', 'Go back and pick ' + esc(ln) + ' there') : T('Trykk for å gå tilbake til rommet', 'Tap to go back to the room')) + '</small></span><span aria-hidden="true">→</span></a>';
+  }
+  function tegnStart(melding) {
+    document.documentElement.classList.remove('i-spill', 'min-tur', 'hemmelig', 'i-rom');
+    var navn = les('bd_mittnavn') || '';
+    var ln = onsketLek ? LEKNAVN[onsketLek] : '';
+    var medKode = !!kode && !ln;
+    root.innerHTML =
+      '<h1 class="rom-h1">' + (medKode ? T('Bli med i rom ', 'Join room ') + esc(kode) : ln ? T(esc(ln) + ' fra hver sin telefon', 'Play ' + esc(ln) + ' on your phones') : T('Spill sammen', 'Play together')) + '</h1>' +
+      (medKode ? '<p class="lead">' + T('Skriv navnet ditt, så er du med. Navnet vises for de andre i rommet.', 'Enter your name and you’re in. Your name is shown to the others in the room.') + '</p>'
+        : '<p class="lead">' + (ln ? T('Lag et rom for ' + esc(ln) + '. Leken starter når alle har blitt med.', 'Create a room for ' + esc(ln) + '. The game starts once everyone has joined.') : T('Drikkeleker dere spiller fra hver deres telefon.', 'Drinking games you play from your own phones.')) + '</p>' +
+          '<ol class="rom-slik"><li><b>' + T('Én lager et rom', 'One person creates a room') + '</b><span>' + T('og blir vert', 'and becomes the host') + '</span></li><li><b>' + T('Resten blir med', 'Everyone else joins') + '</b><span>' + T('med QR-kode eller en kode på fire tegn', 'with a QR code or a four-letter code') + '</span></li><li><b>' + T('Alle spiller', 'Everyone plays') + '</b><span>' + T('på sin egen telefon', 'on their own phone') + '</span></li></ol>') +
+      '<p class="small">' + sprakLenke() + '</p>' +
+      (melding ? '<p class="rom-feil" role="alert">' + esc(melding) + '</p>' : '') +
+      fortsettBanner() +
+      '<div class="rom-start' + (kode ? ' med-kode' : ' uten-kode') + '">' +
+        '<form class="rom-boks" id="blimedSkjema">' +
+          '<h2>' + T('Bli med', 'Join') + '</h2>' + (medKode ? '' : '<p class="small">' + T('Har du fått en kode av verten? Skriv den her.', 'Got a code from the host? Enter it here.') + '</p>') +
+          '<label for="romKode">' + T('Kode', 'Code') + '</label>' +
+          '<input id="romKode" class="rom-kodefelt" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="next" maxlength="6" placeholder="ABCD" value="' + esc(kode) + '">' +
+          '<label for="romNavn1">' + T('Navnet ditt', 'Your name') + '</label>' +
+          '<input id="romNavn1" maxlength="20" autocomplete="nickname" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="' + T('F.eks. Jonas', 'E.g. Alex') + '" value="' + esc(navn) + '">' +
+          '<button class="btn gold rom-knapp" type="submit">' + T('Bli med', 'Join') + '</button>' +
+          (medKode ? '<p class="small rom-annet"><button type="button" class="linkbtn" id="visLag">' + T('… eller lag et eget rom', '… or create your own room') + '</button></p>' : '') +
+        '</form>' +
+        '<form class="rom-boks lag' + (medKode ? ' skjult-lag' : '') + '" id="lagSkjema">' +
+          '<h2>' + (ln ? T('Lag rom for ', 'Create a room for ') + esc(ln) : T('Lag et rom', 'Create a room')) + '</h2>' +
+          '<p class="small">' + (ln ? T('Du blir vert og starter når alle er med.', 'You\'ll be the host and start when everyone\'s in.') : T('Du blir vert og velger lekene.', 'You\'ll be the host and pick the games.')) + '</p>' +
+          '<label for="romNavn2">' + T('Navnet ditt', 'Your name') + '</label>' +
+          '<input id="romNavn2" maxlength="20" autocomplete="nickname" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="' + T('F.eks. Maria', 'E.g. Sam') + '" value="' + esc(navn) + '">' +
+          '<button class="btn ' + (ln ? 'gold ' : '') + 'rom-knapp" type="submit">' + T('Lag rom', 'Create room') + '</button>' +
+        '</form>' +
+      '</div>' +
+      (medKode ? '' : '<p class="small">' + T('Lag mot lag? La hvert lag bli med fra én telefon og bruk lagnavnet som navn.', 'Team vs team? Let each team join from one phone and use the team name as their name.') + '</p>');
+    var vl = document.getElementById('visLag');
+    if (vl) vl.addEventListener('click', function () { var f = document.getElementById('lagSkjema'); if (f) { f.classList.remove('skjult-lag'); f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } vl.parentNode.remove(); });
+    if (qs.get('lag') === '1' && !kode) { var nf2 = document.getElementById('romNavn2'); if (nf2) setTimeout(function () { nf2.focus(); nf2.scrollIntoView({ block: 'center' }); }, 60); }
+    document.getElementById('blimedSkjema').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var k = document.getElementById('romKode').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      var n = document.getElementById('romNavn1').value.trim();
+      if (k.length < 4) return toast(T('Skriv inn koden.', 'Enter the code.'));
+      if (!n) return toast(T('Skriv inn navnet ditt.', 'Enter your name.'));
+      skriv('bd_mittnavn', n);
+      api('POST', '/api/rom/' + k, { handling: 'bli-med', navn: n, lang: LANG }).then(function (d) {
+        kode = k; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode); ta(d); planlegg();
+      }).catch(function (err) { tegnStart(err.message); });
+    });
+    // Kom man med en kode, er navnet det eneste som mangler
+    if (kode) { var nf = document.getElementById('romNavn1'); if (nf && !nf.value) setTimeout(function () { nf.focus(); }, 50); }
+    // Skriver du koden selv: store bokstaver, og videre til navnet når fire tegn er på plass
+    var kf = document.getElementById('romKode');
+    if (kf) kf.addEventListener('input', function () {
+      var v = kf.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== kf.value) kf.value = v;
+      var nf1 = document.getElementById('romNavn1'); if (v.length === 4 && nf1 && !nf1.value) nf1.focus();
+    });
+    document.getElementById('lagSkjema').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var n = document.getElementById('romNavn2').value.trim();
+      if (!n) return toast(T('Skriv inn navnet ditt.', 'Enter your name.'));
+      skriv('bd_mittnavn', n);
+      api('POST', '/api/rom', { navn: n, lek: onsketLek, modus: onsketModus, lang: LANG }).then(function (d) {
+        kode = d.kode; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode);
+        versjon = 0; hent();
+      }).catch(function (err) { tegnStart(err.message); });
+    });
+  }
+
+  /* ---------- gjengkveld: venterommet ---------- */
+  function tegnVenter() {
+    var t = tilstand;
+    root.innerHTML = '<div class="rom-venter">' + (t.gjeng ? '<p class="rom-etikett">' + esc(t.gjeng.navn) + '</p>' : '') +
+      '<h1 class="rom-h1">🚪 ' + T('Venter på å bli sluppet inn', 'Waiting to be let in') + '</h1>' +
+      '<p>' + T('Du har bedt om å bli med som <b>' + esc(t.navn) + '</b>. ' + (t.vertNavn ? esc(t.vertNavn) + ' eller noen andre i gjengen' : 'Noen i gjengen') + ' må slippe deg inn.',
+        'You asked to join as <b>' + esc(t.navn) + '</b>. ' + (t.vertNavn ? esc(t.vertNavn) + ' or someone else in the crew' : 'Someone in the crew') + ' needs to let you in.') + '</p>' +
+      '<div class="rom-vent-prikker" aria-hidden="true"><span></span><span></span><span></span></div>' +
+      ((t.spillere || []).length ? '<p class="small">' + T('Med i kveld: ', 'In tonight: ') + t.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' : '') +
+      '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Avbryt', 'Cancel') + '</button></p></div>';
+  }
+  /** Gjester som venter: verten og medlemmene kan slippe dem inn som gjest eller som nytt medlem. */
+  function venterStripe() {
+    var v = tilstand.venter || []; if (!v.length) return '';
+    return '<div class="gk-venter" role="status">' + v.map(function (x) {
+      return '<div class="gk-venter-rad"><span>🚪 <b>' + esc(x.navn) + '</b> ' + T('vil bli med', 'wants to join') + '</span><span class="gk-venter-knapper">' +
+        '<button class="btn small gold" data-g="slipp-inn" data-id="' + esc(x.id) + '" data-som="gjest" type="button">' + T('Gjest i kveld', 'Guest tonight') + '</button>' +
+        (tilstand.gjeng ? '<button class="btn small ghost" data-g="slipp-inn" data-id="' + esc(x.id) + '" data-som="medlem" type="button">' + T('Som medlem', 'As a member') + '</button>' : '') +
+        '<button class="linkbtn" data-g="avvis-inn" data-id="' + esc(x.id) + '" type="button">' + T('Nei', 'No') + '</button></span></div>';
+    }).join('') + '</div>';
+  }
+  /** Reglene i lovboka som gjelder i kveld. */
+  function reglerKort() {
+    var g = tilstand.gjeng; if (!g) return '';
+    var r = g.regler || [];
+    if (!r.length) return '<p class="gk-regler tom">📜 ' + T('Lovboka til ' + esc(g.navn) + ' er tom. Kveldens vinner skriver den første regelen.', esc(g.navn) + '’s law book is empty. Tonight’s winner writes the first rule.') + '</p>';
+    var vis = r.slice(0, 6);
+    return '<details class="gk-regler"' + (erApen('regler', true) ? ' open' : '') + ' data-gruppe="regler"><summary>📜 ' + T('Gjengens lov', 'The crew’s law') + ' <small>' + r.length + T(' regler gjelder i kveld', r.length === 1 ? ' rule applies tonight' : ' rules apply tonight') + '</small></summary><ol>' +
+      vis.map(function (x) { return '<li><b>' + esc(x.tekst) + '</b><small>' + esc(x.av) + '</small></li>'; }).join('') + '</ol>' +
+      (r.length > vis.length ? '<p class="small"><a href="' + RUTE.gjeng + '?k=' + esc(g.kode) + '#lovboka" target="_blank" rel="noopener">' + T('+ ' + (r.length - vis.length) + ' til i lovboka', '+ ' + (r.length - vis.length) + ' more in the law book') + '</a></p>' : '') + '</details>';
+  }
+  /** Kveldspoengene: 3–2–1 i hver lek. Verten velger vinneren av leker appen ikke kan måle. */
+  function kveldKort() {
+    var t = tilstand, k = t.kveld;
+    var intro = '<p class="small">🏅 ' + T('Hver lek gir 3, 2 og 1 kveldspoeng til de beste.', 'Every game gives 3, 2 and 1 night points to the best.') + (t.gjeng ? T(' Kveldens vinner velger en regel til lovboka.', ' Tonight’s winner picks a rule for the law book.') : '') + '</p>';
+    if (!k) return '<div class="gk-poeng">' + intro + '</div>';
+    var sp = '';
+    if (k.sporsmal && erVert()) sp = '<div class="gk-sporsmal"><p><b>' + T('Hvem vant «' + esc(k.sporsmal.navn) + '»?', 'Who won “' + esc(k.sporsmal.navn) + '”?') + '</b> <small>' + T('Appen kunne ikke måle denne leken.', 'The app couldn’t measure this game.') + '</small></p><div class="rom-valg">' +
+      t.spillere.map(function (p) { return '<button type="button" data-g="kv-vinner" data-id="' + p.id + '">' + esc(p.navn) + '</button>'; }).join('') +
+      '<button type="button" data-g="kv-vinner" data-id="">' + T('Ingen / hopp over', 'Nobody / skip') + '</button></div></div>';
+    var med = (k.stilling || []).filter(function (x) { return x.p > 0; });
+    if (!med.length) return '<div class="gk-poeng">' + sp + intro + '</div>';
+    var siste = (k.runder || [])[k.runder.length - 1];
+    return '<div class="gk-poeng">' + sp + '<p class="rom-etikett">🏅 ' + T('Kveldens stilling', 'Tonight’s standings') + '</p><ol class="gk-stilling">' +
+      med.slice(0, 6).map(function (x, i) { return '<li class="' + (x.id === t.meg ? 'meg' : '') + '"><span>' + (i === 0 ? '👑 ' : '') + esc(navn(x.id)) + '</span><b>' + x.p + '</b></li>'; }).join('') + '</ol>' +
+      (siste ? '<p class="small">' + T('Sist: ', 'Last: ') + esc(siste.navn) + ' – ' + siste.plass.map(function (g, i) { return g.map(function (id) { return esc(navn(id)); }).join(' & ') + ' ' + [3, 2, 1][i]; }).join(', ') + '</p>' : '') + '</div>';
+  }
+  /** Planen verten valgte da kvelden ble startet fra gjengen. */
+  function planLek(id) {
+    var l = (tilstand.leker || []).find(function (x) { return x.id === id; }); if (!l) return null;
+    return { id: l.id, navn: l.navn, modus: l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*', pluss: !!l.pluss };
+  }
+  /** Neste lek i planen: den første som ikke er spilt ennå (etter den som spilles nå). */
+  function nestePlan() {
+    var t = tilstand; if (!t.plan || !t.plan.length) return null;
+    var leker = t.plan.filter(function (id) { return id !== 'bors'; }).map(planLek).filter(Boolean);
+    if (!leker.length) return null;
+    var spilt = (t.historikk || []).map(String), naa = t.spill ? String(t.spill.navn) : '';
+    var ikke = leker.filter(function (l) { return spilt.indexOf(l.navn) === -1 && l.navn !== naa; });
+    if (ikke.length) return ikke[0];
+    // Alt er spilt: start runden på nytt, men ikke samme lek som nå
+    return leker.find(function (l) { return l.navn !== naa; }) || null;
+  }
+  /** Start neste lek i planen – og Vorsbørsen i bakgrunnen første gang, hvis den er med i planen. */
+  function startPlan() {
+    var t = tilstand, l = nestePlan();
+    if (t.plan && t.plan.indexOf('bors') !== -1 && !t.bors) {
+      if (t.spillere.length >= 3) gjorAlltid({ handling: 'bs-start', fokus: !l });
+      else toast(T('Vorsbørsen starter når dere er minst tre.', 'The Exchange starts once there are at least three of you.'));
+    }
+    if (!l) return;
+    if (l.pluss && !t.pluss) return visPlussTilbud();
+    gjorAlltid({ handling: 'start', lek: l.id, modus: l.modus, sett: (settListe()[l.id] || []).slice(-1500) });
+  }
+  function planBoks() {
+    var t = tilstand; if (!erVert() || !t.plan || !t.plan.length) return '';
+    var spilt = (t.historikk || []).map(String), neste = nestePlan(), forste = !spilt.length && !t.bors;
+    return '<div class="gk-plan"><p class="rom-etikett">' + T('Kveldens plan', 'Tonight’s plan') + '</p>' +
+      '<button class="rom-stor-knapp gk-planstart" data-g="plan-start" type="button">' + (forste ? '▶ ' + T('Start kvelden', 'Start the night') : '⏭ ' + T('Neste lek', 'Next game')) +
+        (neste ? '<small>' + esc(neste.navn) + (forste && t.plan.indexOf('bors') !== -1 ? T(' + Vorsbørsen i bakgrunnen', ' + the Exchange in the background') : '') + '</small>' : (t.plan.indexOf('bors') !== -1 ? '<small>' + T('Vorsbørsen', 'The Exchange') + '</small>' : '')) + '</button>' +
+      '<p class="small">' + T('Eller velg fritt fra planen:', 'Or pick freely from the plan:') + '</p><div class="rom-valg">' + t.plan.map(function (id) {
+        if (id === 'bors') return t.bors ? '' : '<button type="button" data-g="bs-start">📈 ' + T('Vorsbørsen', 'The Exchange') + '</button>';
+        var l = planLek(id); if (!l) return '';
+        return '<button type="button" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(l.modus) + '">' + (spilt.indexOf(l.navn) !== -1 ? '✓ ' : '') + esc(l.navn) + '</button>';
+      }).join('') + '</div></div>';
+  }
+  /** Slutten av kvelden: kveldens vinner – og i en gjeng: vinneren velger regel. */
+  function kveldVinnerBoks() {
+    var t = tilstand, k = t.kveld || {}, v = k.vinner;
+    if (!v) return t.kveld ? '<p class="small">' + T('Ingen fikk kveldspoeng i kveld.', 'Nobody got night points tonight.') + '</p>' : '';
+    var poeng = ((k.stilling || []).find(function (x) { return x.id === v; }) || {}).p || 0;
+    var ut = '<div class="gk-vinner"><p class="gk-krone" aria-hidden="true">🏆</p><h2>' + esc(navn(v)) + T(' vant kvelden!', ' won the night!') + '</h2><p class="small">' + poeng + T(' kveldspoeng', ' night points') + '</p>';
+    if (!t.gjeng) return ut + '</div>';
+    var lv = k.lovValg;
+    if (lv) {
+      ut += lv.type === 'ny' ? '<p class="rom-etikett">📜 ' + T('Ny regel i lovboka', 'New rule in the law book') + '</p><p class="gk-regel">«' + esc(lv.tekst) + '»</p>'
+        : lv.type === 'opphev' ? '<p class="rom-etikett">🗑️ ' + T('Opphevet', 'Repealed') + '</p><p class="gk-regel strek">«' + esc(lv.tekst) + '»</p>'
+        : '<p>' + T('Lovboka står som den er.', 'The law book stays as it is.') + '</p>';
+      ut += lv.lagret ? '<p class="small">' + T('Lagret i lovboka til ' + esc(t.gjeng.navn) + '. Gjelder fra neste kveld – til noen opphever den.', 'Saved in ' + esc(t.gjeng.navn) + '’s law book. Applies from the next night – until someone repeals it.') + '</p>' : '<p class="small">' + T('Lagrer …', 'Saving …') + '</p>';
+      if (lv.type !== 'ingen') ut += '<button class="btn ghost small" data-g="lov-del" type="button">' + T('Del regelen', 'Share the rule') + '</button>';
+      return ut + '</div>';
+    }
+    if (v !== t.meg) return ut + '<p>' + esc(navn(v)) + T(' velger en regel til lovboka …', ' is picking a rule for the law book …') + '</p></div>';
+    var r = t.gjeng.regler || [];
+    return ut + '<p class="rom-etikett">' + T('Du vant! Skriv en ny regel', 'You won! Write a new rule') + '</p>' +
+      '<p class="small">' + T('Regelen gjelder hver gang gjengen spiller – til en senere vinner opphever den, eller flertallet stemmer den bort.', 'The rule applies every time the crew plays – until a later winner repeals it, or the majority votes it out.') + '</p>' +
+      '<form class="rf-skjema" id="lovNySkjema"><div class="rf-rad"><input id="lovNyTekst" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="' + T('F.eks. «Alle skåler på norsk dialekt»', 'E.g. “Every toast is in a pirate voice”') + '"><button class="btn gold" type="submit">' + T('Innfør', 'Introduce') + '</button></div></form>' +
+      (r.length ? '<p class="rom-etikett">' + T('… eller opphev en regel', '… or repeal a rule') + '</p><div class="rom-valg en">' + r.map(function (x) { return '<button type="button" data-g="lov-opphev" data-id="' + esc(x.id) + '">🗑️ ' + esc(x.tekst) + '</button>'; }).join('') + '</div>' : '') +
+      '<p><button class="linkbtn" data-g="lov-ingen" type="button">' + T('La lovboka være som den er', 'Leave the law book as it is') + '</button></p></div>';
+  }
+
+  /* ---------- selve rommet ---------- */
+  function navn(id) { var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }); return p ? p.navn : '?'; }
+  function erVert() { return tilstand && meg && tilstand.vert === meg.id; }
+
+  function hode() {
+    var t = tilstand;
+    return '<div class="rom-hode">' +
+      '<div class="rom-hode-v"><a class="rom-hjem" href="' + RUTE.hjem + '" aria-label="' + T('Til forsiden (du blir i rommet)', 'Home (you stay in the room)') + '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a>' +
+      '<div><span class="rom-etikett">' + (t.gjeng && t.gjeng.kveld ? esc(t.gjeng.navn) + ' · ' : '') + T('Rom', 'Room') + '</span><b class="rom-kode">' + esc(kode) + '</b> ' + sprakLenke('small') + '</div></div>' +
+      '<span class="rom-hodeknapper">' +
+        [['hjul-aapne', '🎡', T('Hjul', 'Wheel'), T('Straffehjulet', 'Penalty wheel')], ['tavle', ikon.pokal, T('Poeng', 'Score'), T('Poengtavla', 'Scoreboard')],
+         ['qr', ikon.qr, 'QR', T('Vis QR-kode', 'Show QR code')], ['del', ikon.del, T('Inviter', 'Invite'), T('Inviter flere', 'Invite more people')]].map(function (k) {
+          return '<button class="rom-hk" data-g="' + k[0] + '" type="button" aria-label="' + k[3] + '"><span class="rom-hk-ikon">' + k[1] + '</span><span class="rom-hk-tekst">' + k[2] + '</span></button>';
+        }).join('') + '</span>' +
+    '</div>' +
+    '<div class="rom-spillere">' + t.spillere.map(function (p) {
+      return '<span class="' + (p.id === t.meg ? 'meg' : '') + '">' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) +
+        (p.slurker ? ' <small>' + p.slurker + '</small>' : '') + (p.immun ? ' <small title="' + T('Immunitet', 'Immunity') + '">🛡️' + (p.immun > 1 ? p.immun : '') + '</small>' : '') +
+        (erVert() && p.id !== t.vert ? ' <button class="rom-fjern" data-g="fjern" data-id="' + p.id + '" aria-label="' + T('Fjern ', 'Remove ') + esc(p.navn) + '">×</button>' : '') + '</span>';
+    }).join('') + '</div>';
+  }
+
+
+  // På mittvors.no holder det med mittvors.no/KODE (kortere lenke og enklere QR-kode)
+  var kortDomene = /(^|\.)mittvors\.no$/.test(location.hostname);
+  function lenke() { return kortDomene ? 'https://mittvors.no/' + kode : location.origin + RUTE.rom + '?k=' + kode; }
+  function qrBoks(stor) {
+    var svg = window.BDqr ? window.BDqr(lenke()) : '';
+    return '<div class="rom-qr' + (stor ? ' stor' : '') + '">' + (svg ? '<div class="rom-qrbilde">' + svg + '</div>' : '') +
+      '<div><b>' + T('Scan for å bli med', 'Scan to join') + '</b><span>' + (kortDomene ? T('Eller gå til ', 'Or go to ') + '<b>mittvors.no/' + esc(kode) + '</b>' : T('Eller gå til ', 'Or go to ') + esc(location.host) + RUTE.rom + T(' og skriv ', ' and enter ') + '<b>' + esc(kode) + '</b>') + '</span></div></div>';
+  }
+  function lobby() {
+    var t = tilstand;
+    if (t.valgt && !visAlle) return valgtLobby();
+    if (!erVert()) {
+      return gjestIntro() + '<div class="rom-vent"><p class="rom-stor">' + (t.plan && t.plan.length ? T('Venter på at ' + esc(navn(t.vert)) + ' starter kvelden …', 'Waiting for ' + esc(navn(t.vert)) + ' to start the night …') : T('Venter på at ' + esc(navn(t.vert)) + ' velger en lek …', 'Waiting for ' + esc(navn(t.vert)) + ' to pick a game …')) + '</p>' +
+        '<p class="small">' + T('Du trenger ikke gjøre noe – leken dukker opp her av seg selv.', 'You don’t need to do anything – the game shows up here by itself.') + '</p>' +
+        '<p class="small">' + t.spillere.length + T(' med i rommet. Flere? Del koden <b>', ' in the room. More people? Share the code <b>') + esc(kode) + '</b>.</p>' + romMerker() + '</div>' + gjengBoks() + kveldKort() + reglerKort();
+    }
+    var borsFull = t.bors && t.bors.paa && !t.bors.fokus ? '<p><button class="btn ghost" data-g="bs-fokus" type="button">' + T('📈 Gjør Vorsbørsen til hovedspill', '📈 Make the Exchange the main game') + '</button></p>' : '';
+    return plassInfo() + planBoks() +
+      '<h2 class="rom-h2 rom-steg"><span>1</span>' + T('Få med alle', 'Get everyone in') + '</h2>' + qrBoks() +
+      '<p class="small rom-antall">' + (t.spillere.length > 1 ? '👥 ' + t.spillere.length + T(' er med: ', ' are in: ') + t.spillere.map(function (p) { return esc(p.navn); }).join(', ') : T('👤 Bare du er med ennå – vis dem QR-koden eller trykk «Inviter» øverst.', '👤 Just you so far – show them the QR code or tap “Invite” at the top.')) + '</p>' +
+      romValg() + gjengBoks() +
+      '<h2 class="rom-h2 rom-steg"><span>2</span>' + T('Noe som går hele kvelden?', 'Something for the whole night?') + ' <small>' + T('valgfritt', 'optional') + '</small></h2>' +
+      '<p class="small rom-steg-forklaring">' + T('Disse går i bakgrunnen uansett hvilken lek dere spiller, og fortsetter når dere bytter lek.', 'These run in the background whatever game you play, and keep going when you switch games.') + '</p>' +
+      bakgrunnBoks() + borsFull +
+      '<h2 class="rom-h2 rom-steg"><span>3</span>' + T('Velg en lek', 'Pick a game') + '</h2>' +
+      '<p class="small rom-steg-forklaring">' + T('Én lek om gangen – den dukker opp på alle telefonene. Dere kan bytte når som helst.', 'One game at a time – it shows up on every phone. You can switch whenever you like.') + '</p>' + kveldKort() + reglerKort() + anbefalteLeker() +
+      '<p class="small rom-nivahint">' + T('Mange leker har nivåer: <b>Snill</b> passer for alle, <b>Frekk</b> og <b>Drøy</b> er for de som tåler mer, og <b>Alle</b> blander.', 'Many games have levels: <b>Mild</b> suits everyone, <b>Cheeky</b> and <b>Wild</b> are for those who can take more, and <b>All</b> mixes them.') + '</p>' +
+      lekeGrupper(t.leker.filter(function (l) { return !l.pluss; }), function (l) {
+        var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
+        var min = forFa(l);
+        if (min) return '<div class="rom-lek for-fa"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><p class="small">👥 ' + T('Trenger minst ' + min + ' spillere – dere er ' + t.spillere.length + '.', 'Needs at least ' + min + ' players – you’re ' + t.spillere.length + '.') + '</p></div>';
+        return '<div class="rom-lek"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' +
+          '<div class="rom-mod">' + (mod.length
+            ? mod.slice(0, l.type === 'nyhetsrunden' ? 4 : 99).map(function (m) { return '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') +
+              (l.type !== 'bingo' && l.type !== 'nyhetsrunden' ? '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">' + T('Alle', 'All') + '</button>' : '') +
+              (l.type === 'nyhetsrunden' && mod.length > 4 ? '<select class="rom-nr-arkiv" data-nr-arkiv aria-label="' + T('Eldre uker', 'Older weeks') + '"><option value="">' + T('Eldre uker …', 'Older weeks …') + '</option>' +
+                mod.slice(4).map(function (m) { return '<option value="' + esc(m.v) + '">' + esc(m.t) + (nrSpilt().indexOf(m.v) !== -1 ? ' ✓' : '') + '</option>'; }).join('') + '</select>' : '')
+            : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
+          '</div></div>';
+      }) + plussLeker() + egneStokker();
+  }
+  /** Bakgrunnslekene: går hele kvelden, uansett hvilken hovedlek dere spiller. Verten slår dem av og på. */
+  function bakgrunnBoks() {
+    var t = tilstand, rader = [];
+    var bors = t.bors && (t.bors.paa || t.bors.slutt);
+    rader.push({ ikon: '📈', navn: T('Vorsbørsen', 'The Exchange'), om: T('Kjøp aksjer i det du tror skjer i kveld – «Hvem søler først?». Vinn vorskroner når det skjer.', 'Buy shares in what you think will happen tonight – “Who spills first?”. Win coins when it does.'),
+      paa: !!bors, knapp: bors ? '<button class="btn small ghost" data-g="bs-aapne" type="button">' + T('Åpne', 'Open') + '</button>' : '<button class="btn small gold" data-g="bs-start" type="button">' + T('Slå på', 'Turn on') + '</button>' });
+    rader.push({ ikon: '❓', navn: T('Spørsmålsmester', 'Question master'), om: t.mester ? T('Mester nå: ', 'Master now: ') + '<b>' + esc(navn(t.mester.id)) + '</b>. ' + T('Svarer du på et spørsmål fra hen, drikker du. Ny mester hvert 25. minutt.', 'Answer one of their questions and you drink. New master every 25 minutes.') : T('Én er mester. Svarer du på et spørsmål fra mesteren, drikker du. Appen bytter mester hvert 25. minutt.', 'One person is master. Answer a question from the master and you drink. The app swaps master every 25 minutes.'),
+      paa: !!t.mester, knapp: t.mester ? '<button class="btn small ghost" data-g="mester-bytt" type="button">' + T('Bytt', 'Swap') + '</button><button class="linkbtn" data-g="mester-av" type="button">' + T('Slå av', 'Turn off') + '</button>' : '<button class="btn small gold" data-g="mester-paa" type="button">' + T('Slå på', 'Turn on') + '</button>' });
+    rader.push({ ikon: '🕵️', navn: T('Agent 0,5', 'Agent 0.5') + (t.pluss ? '' : ' <span class="rom-bg-pluss">✨ Pluss</span>'), om: T('Hemmelige oppdrag: alle får ett, som å få noen til å si «sykt». Klarer du det, deler du ut slurker.', 'Everyone gets a secret mission, like getting someone to say “insane”. Pull it off and you hand out sips.'),
+      paa: !!t.oppdrag, knapp: t.oppdrag ? '<button class="linkbtn" data-g="op-av" type="button">' + T('Slå av', 'Turn off') + '</button>' : '<button class="btn small gold" data-g="op-paa" type="button">' + T('Slå på', 'Turn on') + '</button>' });
+    return '<div class="rom-bg">' + rader.map(function (r) {
+      return '<div class="rom-bg-rad' + (r.paa ? ' paa' : '') + '"><span class="rom-bg-ikon" aria-hidden="true">' + r.ikon + '</span><div><b>' + r.navn + (r.paa ? ' <span class="rom-bg-status">' + T('På', 'On') + '</span>' : '') + '</b><small>' + r.om + '</small></div><div class="rom-bg-knapper">' + r.knapp + '</div></div>';
+    }).join('') + '</div>';
+  }
+  /** Hvem som er spørsmålsmester – vises for alle, både i lobbyen og under lekene. */
+  function mesterStripe() {
+    var m = tilstand.mester; if (!m) return '';
+    var jeg = m.id === tilstand.meg;
+    return '<p class="rom-mester' + (jeg ? ' meg' : '') + '">❓ ' + (jeg ? T('<b>Du er spørsmålsmester!</b> Får du noen til å svare på et spørsmål, drikker de.', '<b>You’re the question master!</b> Get someone to answer one of your questions and they drink.')
+      : T('Spørsmålsmester: <b>' + esc(navn(m.id)) + '</b> – svar på et spørsmål fra hen, så drikker du.', 'Question master: <b>' + esc(navn(m.id)) + '</b> – answer one of their questions and you drink.')) + '</p>';
+  }
+  /** Verktøy for verten: raske knapper under leken, og resten forklart i en liste. */
+  function vertVerktoy(s) {
+    if (!erVert()) return '';
+    var t = tilstand, rask = '';
+    if (s && t.plan && nestePlan()) rask += '<button class="btn gold small" data-g="plan-start" type="button">⏭ ' + T('Neste: ', 'Next: ') + esc(nestePlan().navn) + '</button>';
+    if (s) rask += '<button class="btn ghost small" data-g="avslutt" type="button">' + T('↩︎ Bytt lek', '↩︎ Switch game') + '</button>';
+    var rader = [];
+    // I lobbyen står bakgrunnslekene som eget steg. Under en lek kan verten slå dem av og på herfra.
+    if (s) {
+      if (!t.bors) rader.push(['bs-start', '📈', T('Slå på Vorsbørsen', 'Turn on the Exchange'), T('Et aksjemarked på vennene dine som går i bakgrunnen resten av kvelden.', 'A stock market on your friends that runs in the background for the rest of the night.')]);
+      rader.push(t.mester ? ['mester-av', '❓', T('Slå av spørsmålsmester', 'Turn off question master'), T('Mester nå: ', 'Master now: ') + navn(t.mester.id)]
+        : ['mester-paa', '❓', T('Slå på spørsmålsmester', 'Turn on question master'), T('Svarer du på et spørsmål fra mesteren, drikker du.', 'Answer a question from the master and you drink.')]);
+      rader.push(t.oppdrag ? ['op-av', '🕵️', T('Slå av Agent 0,5', 'Turn off Agent 0.5'), T('Oppdragene forsvinner fra alle telefonene.', 'The missions disappear from every phone.')]
+        : ['op-paa', '🕵️', T('Agent 0,5 ✨', 'Agent 0.5 ✨'), (t.pluss ? T('Alle får et hemmelig oppdrag som varer hele kvelden.', 'Everyone gets a secret mission that lasts all night.') : T('Alle får et hemmelig oppdrag som varer hele kvelden. Krever Pluss.', 'Everyone gets a secret mission that lasts all night. Needs Plus.'))]);
+    }
+    // Vannrunde: verten kan ta en nå, og slå av den som kommer av seg selv hver time (ikke i alkoholfrie rom)
+    if (!t.alkoholfri) {
+      if (s) rader.push(['vann-naa', '💧', T('Vannrunde nå', 'Water round now'), T('Alle får beskjed om å ta et glass vann – senker tempoet uten å peke på noen.', 'Everyone is told to drink a glass of water – slows things down without singling anyone out.')]);
+      rader.push(t.vannAv ? ['vann-auto', '⏱️', T('Slå på vannrunde hver time', 'Turn on the hourly water round'), T('Av nå. Rommet kan minne alle på et glass vann omtrent én gang i timen.', 'Off now. The room can remind everyone to drink some water about once an hour.')]
+        : ['vann-auto', '⏱️', T('Slå av vannrunde hver time', 'Turn off the hourly water round'), vannIgjen()]);
+    }
+    rader.unshift(['skjerm', '📺', T('Storskjerm på TV-en', 'Big screen on the TV'), T('Vis rommet stort på en PC eller et nettbrett koblet til TV-en – med lyd over musikken.', 'Show the room big on a laptop or tablet hooked up to the TV – with sound over the music.')]);
+    rader.push(['nullstill', '🔄', T('Nullstill slurker', 'Reset sips'), T('Starter tellingen på poengtavla på nytt.', 'Restarts the count on the scoreboard.')]);
+    if (!t.ferdig) rader.push(['avslutt-kvelden', '🏁', T('Avslutt kvelden', 'End the night'), T('Kårer kveldens vinner og viser oppsummeringen.', 'Crowns tonight’s winner and shows the recap.')]);
+    return '<div class="rom-vert">' + (visSkjerm && t.skjermPin ? skjermBoks() : '') + (rask ? '<div class="rom-vert-rask">' + rask + '</div>' : '') +
+      '<details class="rom-verktoy" data-gruppe="' + (s ? 'verktoy-spill' : 'verktoy-lobby') + '"' + (erApen(s ? 'verktoy-spill' : 'verktoy-lobby', !s) ? ' open' : '') + '><summary>⚙️ ' + (s ? T('Mer for verten', 'More for the host') : T('Mer til kvelden', 'More for the night')) + '</summary>' +
+      rader.map(function (r) { return '<button type="button" class="rom-verktoy-rad" data-g="' + r[0] + '"><span aria-hidden="true">' + r[1] + '</span><b>' + r[2] + '</b><small>' + r[3] + '</small></button>'; }).join('') + '</details></div>';
+  }
+  /** Storskjerm: hvor verten finner adressen og PIN-en til TV-en. */
+  var visSkjerm = false;
+  function skjermAdresse() { return (kortDomene ? 'https://mittvors.no' : location.origin) + (EN ? '/tv' : '/no/tv'); }
+  function skjermLenke() { return skjermAdresse() + '?k=' + kode + '&p=' + tilstand.skjermPin; }
+  function skjermBoks() {
+    var adr = skjermAdresse().replace(/^https?:\/\//, '');
+    return '<div class="rom-skjerm"><p class="rom-etikett">📺 ' + T('Storskjerm', 'Big screen') + '</p>' +
+      '<ol><li>' + T('På PC-en eller nettbrettet ved TV-en: gå til ', 'On the laptop or tablet by the TV: go to ') + '<b>' + esc(adr) + '</b></li>' +
+      '<li>' + T('Skriv inn', 'Enter') + ' <b>' + esc(kode) + '</b> ' + T('og PIN', 'and PIN') + ' <b class="rom-skjerm-pin">' + esc(tilstand.skjermPin) + '</b></li>' +
+      '<li>' + T('Trykk «Start» der, så kommer lyden fra TV-en.', 'Tap “Start” there, and the sound comes from the TV.') + '</li></ol>' +
+      '<div class="gt-row"><button class="btn small gold" data-g="skjerm-del" type="button">' + T('Send lenken til PC-en', 'Send the link to the laptop') + '</button>' +
+      '<button class="btn small ghost" data-g="skjerm-ny" type="button">' + T('Ny PIN', 'New PIN') + '</button>' +
+      '<button class="linkbtn" data-g="skjerm-lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+      '<p class="small">' + T('Storskjermen er ingen spiller: den ser aldri hemmelige roller eller hendene på børsen.', 'The big screen isn’t a player: it never sees secret roles or anyone’s hand on the Exchange.') + '</p></div>';
+  }
+  /** Hvor mange spillere lekene trenger (samme regler som serveren). */
+  var MIN_SPILLERE = { hvemskrev: 3, bloff: 3, samme: 3, spion: 3, pannekort: 3, forraeder: 3, gris: 3, president: 3, skal: 2, pyramiden: 2, bussruta: 2, tosannheter: 2, mest: 2 };
+  function forFa(l) { var min = MIN_SPILLERE[l.id] || MIN_SPILLERE[l.type] || 0; return min && tilstand.spillere.length < min ? min : 0; }
+  /** Tre leker som er lette å starte med – ut fra hvor mange dere er. */
+  function anbefalteLeker() {
+    var t = tilstand, n = t.spillere.length;
+    var ider = n >= 3 ? ['hvemskrev', 'mest', 'spion'] : ['mest', 'ring-of-fire', 'skal'];
+    var liste = ider.map(function (id) { return (t.leker || []).find(function (x) { return x.id === id; }); }).filter(function (l) { return l && !l.pluss && !forFa(l); });
+    if (!liste.length) return '';
+    return '<div class="rom-anbefalt"><p class="rom-etikett">⭐ ' + (n >= 3 ? T('Usikker? Start med en av disse', 'Not sure? Start with one of these') : T('Dere er få – disse funker fint', 'Just a few of you – these work great')) + '</p>' +
+      liste.map(function (l) {
+        var mod = l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*';
+        return '<button type="button" class="rom-anbefalt-lek" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(mod) + '"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><i aria-hidden="true">▶</i></button>';
+      }).join('') + '</div>';
+  }
+  /** Første gang som vert: tre steg som forklarer hvordan rommet funker. */
+  function vertIntro() {
+    if (les('bd_intro_vert')) return '';
+    var n = tilstand.spillere.length;
+    return '<div class="rom-intro"><p class="rom-etikett">' + T('Første gang? Slik funker det', 'First time? Here’s how it works') + '</p><ol>' +
+      '<li class="' + (n > 1 ? 'ok' : '') + '"><b>' + T('Få med vennene', 'Get your friends in') + '</b><span>' + T('De skanner QR-koden under, eller går til mittvors.no og skriver koden <b>' + esc(kode) + '</b>.', 'They scan the QR code below, or go to mittvors.no and enter the code <b>' + esc(kode) + '</b>.') + (n > 1 ? ' <b>' + n + T(' er med ✓', ' are in ✓') + '</b>' : '') + '</span></li>' +
+      '<li><b>' + T('Velg en lek', 'Pick a game') + '</b><span>' + T('Usikker? Trykk på en av de anbefalte lekene.', 'Not sure? Tap one of the suggested games.') + '</span></li>' +
+      '<li><b>' + T('Alle spiller på sin egen telefon', 'Everyone plays on their own phone') + '</b><span>' + T('Du er verten og bestemmer når det er ny lek. De andre følger med på skjermen sin.', 'You’re the host and decide when it’s time for a new game. Everyone else follows along on their screen.') + '</span></li></ol>' +
+      '<button class="linkbtn" data-g="intro-lukk" data-k="bd_intro_vert" type="button">' + T('Skjønner – skjul dette', 'Got it – hide this') + '</button></div>';
+  }
+  /** Første gang som gjest: hva som skjer nå. */
+  function gjestIntro() {
+    if (les('bd_intro_gjest')) return '';
+    return '<div class="rom-intro"><p class="rom-etikett">' + T('Du er med! 🎉', 'You’re in! 🎉') + '</p><ol>' +
+      '<li><b>' + T('Verten velger lek', 'The host picks a game') + '</b><span>' + T('Den dukker opp på skjermen din av seg selv.', 'It shows up on your screen by itself.') + '</span></li>' +
+      '<li><b>' + T('Noen leker har hemmeligheter', 'Some games have secrets') + '</b><span>' + T('Står det «Bare du ser dette», så ikke vis skjermen til de andre 🤫', 'If it says “Only you can see this”, don’t show your screen to the others 🤫') + '</span></li>' +
+      '<li><b>' + T('Usikker på reglene?', 'Unsure of the rules?') + '</b><span>' + T('Trykk «❓ Slik spiller dere» under hver lek.', 'Tap “❓ How to play” under each game.') + '</span></li></ol>' +
+      '<button class="linkbtn" data-g="intro-lukk" data-k="bd_intro_gjest" type="button">' + T('Skjønner – skjul dette', 'Got it – hide this') + '</button></div>';
+  }
+  /** Kort forklaring av hver lek i rommet – åpen første gang du ser leken. */
+  var REGLER = {
+    hvemskrev: [['Alle svarer anonymt på samme spørsmål på sin telefon.', 'Everyone answers the same question anonymously on their phone.'], ['Svarene vises ett og ett – gjett hvem som skrev hva.', 'The answers are shown one at a time – guess who wrote what.'], ['Gjetter du feil, drikker du. Lurer du alle, får du slurker å dele ut.', 'Guess wrong and you drink. Fool everyone and you get sips to hand out.']],
+    bloff: [['Alle får samme spørsmål og skriver et troverdig, men feil svar.', 'Everyone gets the same question and writes a believable but wrong answer.'], ['Det ekte svaret blandes med bløffene – stem på det du tror er riktig.', 'The real answer is mixed in with the bluffs – vote for the one you think is right.'], ['Riktig: del ut en slurk. Går du på en bløff, drikker du – og bløfferen deler ut.', 'Right: hand out a sip. Fall for a bluff and you drink – and the bluffer hands one out.']],
+    samme: [['Alle skriver ett ord i hemmelighet som passer oppgaven.', 'Everyone secretly writes one word that fits the prompt.'], ['Målet er å svare det samme som de andre.', 'The goal is to answer the same as the others.'], ['Står du alene med svaret ditt, drikker du.', 'If nobody else wrote your answer, you drink.']],
+    spion: [['Alle ser samme sted på skjermen – bortsett fra muldvarpen.', 'Everyone sees the same location on screen – except the mole.'], ['Still hverandre spørsmål om stedet på omgang, uten å røpe det.', 'Take turns asking each other questions about the place, without giving it away.'], ['Stem på hvem som er muldvarpen. Blir hen tatt, kan hen fortsatt vinne ved å gjette stedet.', 'Vote for who the mole is. If caught, the mole can still win by guessing the location.']],
+    pannekort: [['Du skriver et ord (en person, ting eller et dyr) til den du får tildelt.', 'You write a word (a person, thing or animal) for the player you’re assigned.'], ['Du ser alles ord – bortsett fra ditt eget.', 'You see everyone’s word – except your own.'], ['Still ja/nei-spørsmål og gjett hva du er.', 'Ask yes/no questions and guess what you are.']],
+    skal: [['Vent til det står SKÅL! på skjermen.', 'Wait until it says CHEERS! on screen.'], ['Trykk så fort du kan.', 'Tap as fast as you can.'], ['Tregest drikker – trykker du for tidlig, drikker du dobbelt.', 'Slowest drinks – tap too early and you drink double.']],
+    mest: [['Et «Hvem er mest sannsynlig til …»-spørsmål dukker opp.', 'A “Who’s most likely to …” question appears.'], ['Alle stemmer i hemmelighet på den det passer best på.', 'Everyone secretly votes for who it fits best.'], ['Hver stemme du får, er én slurk.', 'Every vote you get is one sip.']],
+    forraeder: [['Én spiller får i hemmelighet beskjed om å lyve eller si sannheten.', 'One player is secretly told to lie or tell the truth.'], ['Hen svarer høyt på spørsmålet på skjermen.', 'They answer the question on screen out loud.'], ['Resten stemmer: sannhet eller løgn? Tar du feil, drikker du.', 'Everyone else votes: truth or lie? Get it wrong and you drink.']],
+    tosannheter: [['Én skriver tre påstander om seg selv – to sanne og én løgn.', 'One player writes three statements about themselves – two true, one lie.'], ['Resten stemmer på løgnen fra sin telefon.', 'Everyone else votes for the lie on their phone.'], ['Så avsløres løgnen – de som bommet, drikker.', 'Then the lie is revealed – those who missed drink.']],
+    regelfabrikken: [['Alle skriver så mange drikkekort de rekker før tiden går ut.', 'Everyone writes as many drinking cards as they can before time runs out.'], ['Kortene stokkes og trekkes ett og ett.', 'The cards are shuffled and drawn one by one.'], ['Gjør det kortet sier!', 'Do what the card says!']],
+    bussruta: [['Alle svarer på fire spørsmål om kortene sine på sin telefon.', 'Everyone answers four questions about their cards on their phone.'], ['Så snus pyramiden – har du kortet, deler du ut slurker.', 'Then the pyramid is turned – if you have the card, you hand out sips.'], ['Den med flest kort igjen, kjører bussen.', 'Whoever has the most cards left rides the bus.']],
+    yatzy: [['Trill på din telefon når det er din tur – opptil tre kast.', 'Roll on your phone when it’s your turn – up to three throws.'], ['Hold terningene du vil beholde, og velg hvor poengene føres.', 'Hold the dice you want to keep and pick where the score goes.'], ['Alle ser blokka. Den med minst til slutt, drikker opp.', 'Everyone sees the scorecard. Lowest score at the end finishes their drink.']],
+    overunder: [['Den som har tur, gjetter om neste kort er over eller under.', 'Whoever’s turn it is guesses if the next card is higher or lower.'], ['Riktig: bunken vokser og går videre.', 'Right: the pile grows and moves on.'], ['Feil: du drikker hele bunken.', 'Wrong: you drink the whole pile.']],
+    veddelopet: [['Alle vedder på en kortfarge.', 'Everyone bets on a suit.'], ['Kortene trekkes, og hestene rykker fram.', 'Cards are drawn and the horses move forward.'], ['Vinnerne deler ut slurker – de andre drikker.', 'The winners hand out sips – everyone else drinks.']],
+    pyramiden: [['Alle får fire skjulte kort på telefonen sin.', 'Everyone gets four hidden cards on their phone.'], ['Kort snus i pyramiden. Har du samme verdi, deler du ut slurker – eller bløffer.', 'Cards are turned in the pyramid. Have the same value? Hand out sips – or bluff.'], ['Blir du utfordret og bløffet, drikker du dobbelt.', 'Get called out while bluffing and you drink double.']],
+    gris: [['Alle får fire kort. Send ett kort videre samtidig.', 'Everyone gets four cards. Pass one card on at the same time.'], ['Får noen fire like, tar hen seg på nesa – og alle må gjøre det samme.', 'When someone gets four of a kind, they touch their nose – and everyone must follow.'], ['Sistemann får en bokstav. G-R-I-S = ta en shot.', 'The last one gets a letter. P-I-G-S = take a shot.']],
+    president: [['Bli kvitt kortene dine først – legg likt eller høyere enn det som ligger.', 'Get rid of your cards first – play equal or higher than what’s on the table.'], ['Toere er høyest og rydder bordet.', 'Twos are highest and clear the table.'], ['Først ut blir president, sist ut blir rævkjører.', 'First out is President, last out is the Scumbag.']],
+    bingo: [['Alle får sitt eget bingobrett med sanger.', 'Everyone gets their own bingo card with songs.'], ['Spill spillelista og kryss av sangene du hører.', 'Play the playlist and mark the songs you hear.'], ['Rekke: del ut to slurker. Fullt brett: BINGO – alle andre drikker opp.', 'A line: hand out two sips. Full card: BINGO – everyone else finishes their drink.']],
+    nyhetsrunden: [['Spørsmål om ukas nyheter dukker opp på alle telefonene.', 'Questions about this week’s news appear on every phone.'], ['Svar før tiden går ut.', 'Answer before time runs out.'], ['Riktig: del ut en slurk. Feil: drikk.', 'Right: hand out a sip. Wrong: drink.']],
+    ring: [['Telefonene er kortstokken – alle ser samme kort.', 'The phones are the deck – everyone sees the same card.'], ['Den som har tur, trekker og gjør det kortet sier.', 'Whoever’s turn it is draws and does what the card says.'], ['Den som trekker fjerde konge, drikker opp!', 'Whoever draws the fourth king finishes their drink!']],
+    ringr: [['Kortene ligger i en ring rundt glasset. Den som har tur, snurrer ringen med fingeren – kortet øverst lyser opp.', 'The cards lie in a ring around the glass. Whoever’s turn it is spins the ring with a finger – the top card lights up.'],
+      ['Hold på kortet og dra det sakte ut. Drar du for fort, ryker ringen: drikk opp glasset ditt!', 'Hold the card and pull it out slowly. Pull too fast and the ring breaks: finish your drink!'],
+      ['Jo færre kort som er igjen, jo strammere blir ringen. Ringen kan bare brytes én gang – etter det er resten trygt.', 'The fewer cards left, the tighter the ring gets. The ring can only break once – after that the rest is safe.'],
+      ['Gjør det kortet sier. Hver konge fyller kongekoppen – den som trekker fjerde konge, drikker den.', 'Do what the card says. Each king fills the king’s cup – whoever draws the fourth king drinks it.']],
+    kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Hvem som helst kan trykke «Neste kort».', 'Anyone can tap “Next card”.']],
+  };
+  function reglerPanel(s) {
+    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : 'kort') : s.type, r = REGLER[nokkel];
+    if (!r) return '';
+    var sett = les('bd_regler_sett') || [], forste = sett.indexOf(nokkel) === -1;
+    if (forste) { sett.push(nokkel); skriv('bd_regler_sett', sett.slice(-40)); apneRegler[nokkel] = true; }
+    return '<details class="rom-regler" data-regler="' + nokkel + '"' + (apneRegler[nokkel] ? ' open' : '') + '><summary>❓ ' + T('Slik spiller dere', 'How to play') + '</summary><ol>' +
+      r.map(function (x) { return '<li>' + esc(T(x[0], x[1])) + '</li>'; }).join('') + '</ol></details>';
+  }
+  var apneRegler = {};
+  root.addEventListener('toggle', function (e) { var d = e.target; if (d && d.dataset && d.dataset.regler) apneRegler[d.dataset.regler] = d.open; }, true);
+  /** Lekene i lobbyen sortert i grupper som kan åpnes og lukkes, så lista ikke blir uendelig lang. */
+  var GRUPPER = [
+    [T('Snakk, stem og avslør', 'Talk, vote and reveal'), ['nyhetsrunden', 'hvemskrev', 'samme', 'spion', 'pannekort', 'mest', 'tosannheter', 'regelfabrikken']],
+    [T('Kort og terninger', 'Cards and dice'), ['ring-of-fire', 'veddelopet', 'overunder', 'bingo']],
+    [T('Raske runder', 'Quick rounds'), ['skal']],
+  ];
+  // Husk hvilke grupper verten har åpnet, siden lobbyen tegnes på nytt når noen blir med
+  var apneGrupper = {};
+  function erApen(n, standard) { return n in apneGrupper ? apneGrupper[n] : standard; }
+  root.addEventListener('toggle', function (e) { var d = e.target; if (d && d.dataset && d.dataset.gruppe) apneGrupper[d.dataset.gruppe] = d.open; }, true);
+  function lekeGrupper(leker, tegnLek) {
+    var brukt = {}, ut = '';
+    GRUPPER.forEach(function (g, i) {
+      var l = leker.filter(function (x) { return g[1].indexOf(x.id) !== -1; }); if (!l.length) return;
+      l.forEach(function (x) { brukt[x.id] = 1; });
+      ut += '<details class="rom-gruppe" data-gruppe="' + i + '"' + (erApen(String(i), false) ? ' open' : '') + '><summary>' + esc(g[0]) + ' <small>' + l.length + '</small></summary><div class="rom-leker">' + l.map(tegnLek).join('') + '</div></details>';
+    });
+    var rest = leker.filter(function (x) { return !brukt[x.id]; });
+    if (rest.length) ut += '<details class="rom-gruppe" data-gruppe="rest"' + (erApen('rest', false) ? ' open' : '') + '><summary>' + T('Kortstokker med spørsmål', 'Question decks') + ' <small>' + rest.length + '</small></summary><div class="rom-leker">' + rest.map(tegnLek).join('') + '</div></details>';
+    return ut;
+  }
+  function plussLeker() {
+    var t = tilstand, l = (t.leker || []).filter(function (x) { return x.pluss; }); if (!l.length) return '';
+    var aapen = !!t.pluss;
+    return '<details class="rom-gruppe pluss" data-gruppe="pluss"' + (erApen('pluss', aapen) ? ' open' : '') + '><summary>' + T('✨ Med Pluss', '✨ With Plus') + ' <small>' + l.length + '</small></summary>' + (aapen ? '' : '<p class="small">' + T('Har verten Pluss, er disse åpne for alle i rommet – og dere kan være opptil 16 telefoner.', 'If the host has Plus, these are open to everyone in the room – and you can have up to 16 phones.') + ' <a href="' + RUTE.pluss + '">' + T('Første kveld er gratis.', 'Your first night is free.') + '</a></p>') +
+      '<div class="rom-leker">' + l.map(function (x) {
+        return '<div class="rom-lek pluss' + (aapen ? '' : ' laast') + '"><b>' + (aapen ? '' : '🔒 ') + esc(x.navn) + '</b><span>' + esc(x.om || '') + '</span>' +
+          '<div class="rom-mod"><button type="button" data-g="start" data-lek="' + x.id + '" data-modus="*">' + (aapen ? 'Start' : T('Lås opp', 'Unlock')) + '</button></div></div>';
+      }).join('') + '</div></details>';
+  }
+  /** Hvor mange gratisplasser som er brukt, og beskjed hvis noen ble stoppet i døra. */
+  function plassInfo() {
+    var t = tilstand; if (!erVert() || t.pluss || !t.gratisPlasser) return '';
+    var n = t.spillere.length, maks = t.gratisPlasser, nylig = t.fullForsok && (Date.now() + klokkeAvvik) - t.fullForsok < 10 * 60000;
+    if (nylig) return '<div class="rom-plass full"><b>' + T('Noen prøvde å bli med, men rommet er fullt.', 'Someone tried to join, but the room is full.') + '</b><span>' + T('Gratisversjonen har plass til ' + maks + ' telefoner. Med Pluss kan dere være opptil 16.', 'The free version fits ' + maks + ' phones. With Plus you can have up to 16.') + '</span><button class="btn gold small" data-g="pluss-tilbud" type="button">' + T('Lås opp rommet', 'Unlock the room') + '</button></div>';
+    if (n >= maks - 1) return '<p class="rom-plass">' + n + T(' av ', ' of ') + maks + T(' gratis plasser er brukt.', ' free spots used.') + ' <button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Flere? Lås opp med Pluss', 'More people? Unlock with Plus') + '</button></p>';
+    return '';
+  }
+  function visPlussTilbud() {
+    if (document.querySelector('.pluss-tilbud')) return;
+    var m = document.createElement('div'); m.className = 'rom-tavle pluss-tilbud'; m.setAttribute('role', 'dialog');
+    var inne = window.BDKonto && window.BDKonto.les();
+    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + T('✨ Mitt vors Pluss', '✨ Mitt vors Plus') + '</h2><button class="linkbtn" data-p="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+      '<p>' + T('Med Pluss hos <b>verten</b> får hele rommet alle lekene og pakkene, og dere kan være opptil 16 telefoner. Gjestene trenger ikke betale.', 'When the <b>host</b> has Plus, the whole room gets every game and pack, and you can have up to 16 phones. Guests don\'t pay a thing.') + '</p>' +
+      '<p>' + T('<b>Første kveld er gratis.</b> Etterpå 29 kr for en kveld eller 199 kr for et år.', '<b>Your first night is free.</b> After that it\'s NOK 29 for a night or NOK 199 for a year.') + '</p>' +
+      '<div class="dl-knapper">' + (inne ? '<button class="btn gold" data-p="gratis" type="button">' + T('Prøv gratis i kveld', 'Try it free tonight') + '</button>' : '<a class="btn gold" data-tilbake href="' + RUTE.konto + '">' + T('Logg inn for å prøve gratis', 'Log in to try it free') + '</a>') +
+      '<a class="btn ghost" href="' + RUTE.pluss + '" target="_blank" rel="noopener">' + T('Se Pluss', 'See Plus') + '</a></div><p class="formmsg" role="status"></p></div>';
+    m.addEventListener('click', function (e) {
+      if (e.target === m || e.target.closest('[data-p=lukk]')) return m.remove();
+      if (e.target.closest('[data-tilbake]')) { try { sessionStorage.setItem('bd_etter_innlogging', location.pathname + location.search); } catch (x) {} return; }
+      var b = e.target.closest('[data-p=gratis]'); if (!b) return;
+      b.disabled = true;
+      kontoApi('/api/pluss/gratis', { method: 'POST' }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
+        var msg = m.querySelector('.formmsg');
+        if (!x.ok && x.d.feil !== 'brukt') { msg.textContent = x.d.melding || T('Det gikk ikke.', 'That didn\'t work.'); msg.className = 'formmsg err'; b.disabled = false; return; }
+        if (x.d.feil === 'brukt') { msg.innerHTML = (x.d.melding ? esc(x.d.melding) : T('Gratiskvelden er brukt.', 'Your free night is used up.')) + ' <a href="' + RUTE.pluss + '">' + T('Kjøp et pass', 'Buy a pass') + '</a>.'; msg.className = 'formmsg err'; return; }
+        m.remove(); plussSjekket = false; aktiverPluss(true);
+      });
+    });
+    document.body.appendChild(m);
+    // Har verten et lagret kveldspass (f.eks. fra verving)? Da kan det brukes med én gang.
+    if (inne) kontoApi('/api/pluss/status').then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.kveldspass || !m.isConnected) return;
+      var k = m.querySelector('.dl-knapper'), b = document.createElement('button');
+      b.className = 'btn gold'; b.type = 'button'; b.dataset.g = 'kveldspass';
+      b.textContent = T('Bruk et lagret kveldspass (', 'Use a saved night pass (') + d.kveldspass + ')';
+      b.addEventListener('click', function () {
+        b.disabled = true;
+        kontoApi('/api/verv', { method: 'POST' }).then(function (r) { return r.json().then(function (x) { return { ok: r.ok, d: x }; }); }).then(function (x) {
+          if (!x.ok) { b.disabled = false; return toast(x.d.melding || T('Det gikk ikke.', 'That didn\'t work.')); }
+          m.remove(); plussSjekket = false; aktiverPluss(true);
+        });
+      });
+      k.insertBefore(b, k.firstChild);
+    }).catch(function () {});
+  }
+  // Er verten logget inn med Pluss? Da låses rommet opp automatisk.
+  var plussSjekket = false;
+  function aktiverPluss(tving) {
+    if (plussSjekket || !erVert() || (tilstand && tilstand.pluss) || !window.BDKonto || !window.BDKonto.les()) return;
+    plussSjekket = true;
+    kontoApi('/api/pluss/status').then(function (r) { return r.json(); }).then(function (d) {
+      if (d.aktiv) gjorAlltid({ handling: 'pluss-aktiver' });
+      else if (tving) toast(T('Fant ikke Pluss på kontoen.', 'Couldn\'t find Plus on your account.'));
+    }).catch(function () {});
+  }
+
+  /* ---------- venterom for en lek som er valgt på forhånd ---------- */
+  function valgtLobby() {
+    var t = tilstand, v = t.valgt, l = (t.leker || []).find(function (x) { return x.id === v.lek; }) || { navn: LEKNAVN[v.lek] || v.lek, moduser: [] };
+    var liste = '<ul class="rom-venter">' + t.spillere.map(function (p) { return '<li>' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) + '</li>'; }).join('') + '</ul>';
+    if (!erVert()) {
+      return '<div class="rom-vent"><p class="rom-etikett">' + T('Neste lek', 'Next game') + '</p><p class="rom-stor">' + esc(l.navn) + '</p>' +
+        '<p>' + T('Venter på at ' + esc(navn(t.vert)) + ' starter når alle er med …', 'Waiting for ' + esc(navn(t.vert)) + ' to start once everyone\'s in …') + '</p>' + liste + romMerker() + '</div>';
+    }
+    var mod = l.moduser || [], valgtMod = mod.some(function (m) { return m.v === v.modus; }) || (l.type === 'nyhetsrunden' && /^\d{4}-\d{2}$/.test(v.modus || '')) ? v.modus : '';
+    var startKnapper = mod.length > 1 && !valgtMod
+      ? '<p class="small">' + T('Velg variant for å starte:', 'Pick a version to start:') + '</p><div class="rom-mod stor">' + mod.map(function (m) { return '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') + '</div>'
+      : '<button class="rom-stor-knapp" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(valgtMod || (mod[0] && l.type === 'nyhetsrunden' ? mod[0].v : '*')) + '" type="button">Start ' + esc(l.navn) + '</button>';
+    return '<p class="rom-etikett">' + T('Dere skal spille', 'You\'re playing') + '</p><h2 class="rom-h2" style="margin-top:0">' + esc(l.navn) + '</h2>' +
+      plassInfo() + qrBoks() + romValg() + '<p class="rom-status">' + t.spillere.length + T(' med i rommet', ' in the room') + '</p>' + liste +
+      '<p class="small">' + T('Start når alle har blitt med – ingen ser noe fra leken før du trykker.', 'Start once everyone has joined – nobody sees anything from the game until you tap.') + '</p>' + startKnapper +
+      '<p><button class="linkbtn" data-g="velg-annen" type="button">' + T('Velg en annen lek', 'Pick another game') + '</button></p>';
+  }
+
+  /* ---------- innstillinger for kvelden: alkoholfri og fast gjeng ---------- */
+  var mineGjenger = null, gjengerHentet = false;
+  function hentMineGjenger() {
+    if (gjengerHentet || !window.BDKonto || !window.BDKonto.les()) return; gjengerHentet = true;
+    kontoApi('/api/gjeng').then(function (r) { return r.ok ? r.json() : { gjenger: [] }; })
+      .then(function (d) { mineGjenger = d.gjenger || []; tegn(); }).catch(function () { mineGjenger = []; });
+  }
+  function romValg() {
+    var t = tilstand; if (!erVert()) return '';
+    hentMineGjenger();
+    var inne = window.BDKonto && window.BDKonto.les(), gj = '';
+    if (t.gjeng) gj = '<p class="rom-gjeng">' + T('🏆 Kvelden telles i sesongen til ', '🏆 Tonight counts toward the season for ') + '<a href="' + RUTE.gjeng + '?k=' + esc(t.gjeng.kode) + '" target="_blank" rel="noopener"><b>' + esc(t.gjeng.navn) + '</b></a>' + (t.gjeng.kveld ? '' : ' · <button class="linkbtn" data-g="gjeng-av" type="button">' + T('Fjern', 'Remove') + '</button>') + '</p>';
+    else if (mineGjenger && mineGjenger.length) gj = '<label class="rom-gjeng">' + T('🏆 Fast gjeng? ', '🏆 Regular crew? ') + '<select id="romGjeng"><option value="">' + T('Velg gjeng …', 'Pick a crew …') + '</option>' +
+      mineGjenger.map(function (g) { return '<option value="' + esc(g.id) + '">' + esc(g.navn) + '</option>'; }).join('') + '</select></label>';
+    else if (inne && mineGjenger) gj = '<p class="rom-gjeng small">' + T('Spiller dere ofte sammen?', 'Play together often?') + ' <a href="' + RUTE.gjeng + '" target="_blank" rel="noopener">' + T('Lag en fast gjeng', 'Make a crew') + '</a> ' + T('og få sesongtabell.', 'and get a season table.') + '</p>';
+    return '<div class="rom-innst"><button type="button" class="alkfri-bryter" data-g="alkoholfri" aria-pressed="' + !!t.alkoholfri + '"><span class="alkfri-knott" aria-hidden="true"></span>' + T('🥤 Alkoholfri for alle', '🥤 Alcohol-free for everyone') + '</button>' +
+      (t.alkoholfri ? '<span class="small">' + T('Alle telefonene viser straffepoeng. Den med flest til slutt spinner straffehjulet!', 'Every phone shows penalty points. Whoever has the most at the end spins the penalty wheel!') + '</span>' : '') + gj + '</div>';
+  }
+  /** Det gjestene ser: at kvelden er alkoholfri eller telles for en gjeng. */
+  function romMerker() {
+    var t = tilstand, ut = '';
+    if (t.alkoholfri) ut += '<p class="small">' + T('🥤 Alkoholfri kveld – straffepoeng i stedet for alkohol.', '🥤 Alcohol-free night – penalty points instead of drinks.') + '</p>';
+    if (t.gjeng) ut += '<p class="small">' + T('🏆 Kvelden telles i sesongen til ', '🏆 Tonight counts toward the season for ') + '<a href="' + RUTE.gjeng + '?k=' + esc(t.gjeng.kode) + '" target="_blank" rel="noopener">' + esc(t.gjeng.navn) + '</a>.</p>';
+    ut += gjengBoks();
+    return ut;
+  }
+
+  /* ---------- egne kortstokker fra kontoen ---------- */
+  var mineStokker = null, stokkerHentet = false;
+  function hentMineStokker() {
+    if (stokkerHentet || !window.BDKonto) return; stokkerHentet = true;
+    window.BDKonto.bruker().then(function (u) {
+      if (!u) { mineStokker = []; return; }
+      return window.BDKonto.stokker.liste().then(function (l) { mineStokker = l; });
+    }).catch(function () { mineStokker = []; }).then(function () { mineStokker = mineStokker || []; tegn(); });
+  }
+  function egneStokker() {
+    hentMineStokker();
+    var klar = les('bd_stokk_rom'), liste = (mineStokker || []).slice();
+    if (klar && klar.kort) liste = [klar].concat(liste.filter(function (x) { return x.id !== klar.id; }));
+    var logget = window.BDKonto && window.BDKonto.les();
+    if (!liste.length) return '<p class="small rom-egnetips">' + T('Egne drikkekort? Lag kortstokker på', 'Your own drinking cards? Make decks under') + ' <a href="' + RUTE.konto + '">' + T('Min stokk', 'My decks') + '</a> ' + T('og spill dem her.', 'and play them here.') + '</p>';
+    return '<h2 class="rom-h2">' + T('Dine kortstokker', 'Your decks') + '</h2><div class="rom-leker">' + liste.map(function (x, i) {
+      return '<div class="rom-lek' + (klar && i === 0 ? ' klar' : '') + '"><b>' + esc(x.navn) + '</b><span>' + (x.kort || []).length + T(' egne kort. Alle ser samme kort.', ' custom cards. Everyone sees the same card.') + '</span>' +
+        '<div class="rom-mod"><button type="button" data-g="egen" data-i="' + i + '">Start</button></div></div>';
+    }).join('') + '</div>' + (logget ? '' : '<p class="small">' + T('Logg inn på', 'Log in at') + ' <a href="' + RUTE.konto + '">' + T('Min stokk', 'My decks') + '</a> ' + T('for å se alle kortstokkene dine.', 'to see all your decks.') + '</p>');
+  }
+  function egenListe() {
+    var klar = les('bd_stokk_rom'), liste = (mineStokker || []).slice();
+    if (klar && klar.kort) liste = [klar].concat(liste.filter(function (x) { return x.id !== klar.id; }));
+    return liste;
+  }
+  function lagreSomStokk() {
+    var s = tilstand && tilstand.spill; if (!s || !s.alleKort || !s.alleKort.length) return;
+    var d = new Date(), navn = T('Hjemmesnekra ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'Homemade ' + d.getDate() + '/' + (d.getMonth() + 1));
+    var K = window.BDKonto;
+    (K ? K.bruker() : Promise.resolve(null)).then(function (u) {
+      if (!u) {
+        skriv('bd_stokk_utkast', { navn: navn, kort: s.alleKort });
+        toast(T('Kortene er lagt til side. Logg inn på Min stokk for å lagre dem.', 'The cards are set aside. Log in under My decks to save them.'));
+        return;
+      }
+      return K.stokker.lagre({ navn: navn, kort: s.alleKort }).then(function () { toast(T('Lagret som kortstokk på kontoen din ✓', 'Saved as a deck on your account ✓')); stokkerHentet = false; mineStokker = null; });
+    }).catch(function (e) { toast(e.message || T('Fikk ikke lagret.', 'Couldn\'t save.')); });
+  }
+
+  /** Makkere (8): den som trakk åtteren, velger makker. Etterpå vises parene under kortet. */
+  function makkerHtml(s) {
+    var ut = '';
+    if (s.velgMakker && (s.velgMakker === tilstand.meg || erVert())) {
+      var jeg = s.velgMakker === tilstand.meg;
+      ut += '<div class="rof-makker-valg"><p class="rom-etikett">🤝 ' + (jeg ? T('Velg makkeren din', 'Pick your mate') : esc(navn(s.velgMakker)) + T(' velger makker', ' picks a mate')) + '</p><div class="rom-valg">' +
+        tilstand.spillere.filter(function (p) { return p.id !== s.velgMakker; }).map(function (p) { return '<button type="button" data-g="rof-makker" data-paa="' + p.id + '">' + esc(p.navn) + '</button>'; }).join('') + '</div></div>';
+    } else if (s.velgMakker) ut += '<p class="small">🤝 ' + esc(navn(s.velgMakker)) + T(' velger makker …', ' is picking a mate …') + '</p>';
+    if (s.makkere && s.makkere.length) ut += '<p class="rof-makkere">🤝 ' + s.makkere.map(function (m) { return esc(navn(m[0])) + ' ↔ ' + esc(navn(m[1])); }).join(' · ') + '</p>';
+    return ut;
+  }
+  /* ---------- Ring of Fire: ringen rundt glasset ---------- */
+  var rofFor = -2, rofA = 0, rofDrar = null, rofVentTegn = false, rofBruddSett = null, rofValgt = -1;
+  var ROF_N = 52, ROF_STEG = 360 / 52;
+  function rofNorm(a) { a = a % 360; if (a > 180) a -= 360; if (a < -180) a += 360; return a; }
+  /** Kortet som ligger nærmest toppen av ringen (av dem som er igjen). */
+  function rofTopp(tatt) {
+    var best = -1, bestA = 999;
+    for (var i = 0; i < ROF_N; i++) { if (tatt.indexOf(i) !== -1) continue; var a = Math.abs(rofNorm(i * ROF_STEG + rofA)); if (a < bestA) { bestA = a; best = i; } }
+    return best;
+  }
+  var rofVistNr = -1;
+  function rofKortHtml(k, nr) {
+    var snu = nr !== rofVistNr; rofVistNr = nr;   // snu-animasjonen bare første gang kortet vises
+    return '<div class="rof-kort rom-rof' + (snu ? ' rof-snu' : '') + (k.rod ? ' rod' : '') + '"><div class="rof-hj"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div>' +
+      '<div class="rof-midt"><b class="rof-regel">' + esc(k.regel) + '</b><span class="rof-tekst">' + esc(k.tekst) + '</span></div>' +
+      '<div class="rof-hj rof-hj2"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div></div>';
+  }
+  function rofSpill(s) {
+    // Verten kan trekke for den som har tur (f.eks. hvis telefonen er borte) – gjelder bare dette trekket
+    var tatt = s.tatt || [], min = s.turId === tilstand.meg || (erVert() && rofFor === s.nr), k = s.kort;
+    rofValgt = rofTopp(tatt);
+    var kort = '';
+    for (var i = 0; i < ROF_N; i++) {
+      if (tatt.indexOf(i) !== -1) continue;
+      kort += '<span class="rofr-k' + (i === rofValgt && min ? ' valgt' : '') + '" data-p="' + i + '" style="--v:' + (i * ROF_STEG).toFixed(2) + 'deg"></span>';
+    }
+    var fyll = Math.min(4, s.konger || 0) * 25;
+    return '<div class="rof-tur' + (min ? ' min' : '') + '"><span>' + (min ? T('Din tur!', 'Your turn!') : T('Trekker', 'Drawing')) + '</span><b>' + esc(min ? T('Snurr ringen og dra ut et kort', 'Spin the ring and pull out a card') : navn(s.turId)) + '</b></div>' +
+      '<p class="rom-status">' + (s.igjen != null ? s.igjen : ROF_N - tatt.length) + T(' kort i ringen · ', ' cards in the ring · ') + (s.konger || 0) + T(' av 4 konger', ' of 4 kings') + '</p>' +
+      lunte((s.igjen != null ? s.igjen : ROF_N - tatt.length) / ROF_N) +
+      '<div class="rofr-bord' + (min ? ' aktiv' : '') + '" data-nr="' + s.nr + '">' +
+        '<div class="rofr-rotor" style="transform:rotate(' + rofA + 'deg)">' + kort +
+          (s.ringBrutt && s.bruddPlass != null ? '<span class="rofr-sprekk" style="--v:' + (s.bruddPlass * ROF_STEG).toFixed(2) + 'deg">💥</span>' : '') + '</div>' +
+        '<div class="rofr-glass" title="' + T('Kongekoppen', 'The king’s cup') + '"><i style="height:' + fyll + '%"></i><span>👑 ' + (s.konger || 0) + '/4</span></div>' +
+        (min ? '<div class="rofr-pil">▼</div>' : '') +
+      '</div>' +
+      (s.ringBrutt ? '<p class="small rofr-hint">💥 ' + T('Ringen er brutt av ', 'The ring was broken by ') + esc((s.brudd && s.brudd.navn) || '') + T(' – nå kan den ikke ryke igjen. Bare trekk!', ' – it can’t break again. Just draw!') + '</p>'
+        : min ? '<div class="rofr-spenning" aria-hidden="true"><i></i></div><p class="small rofr-hint">' + T('Snurr: sveip rundt ringen. Trekk: hold på det lyse kortet og dra det <b>sakte</b> oppover.', 'Spin: swipe around the ring. Draw: hold the glowing card and pull it <b>slowly</b> upward.') + '</p>'
+        : '<p class="small rofr-hint">' + T('Følg med – ryker ringen, må ', 'Watch – if the ring breaks, ') + esc(navn(s.turId)) + T(' drikke opp.', ' finishes their drink.') + '</p>') +
+      (k ? '<p class="rom-etikett">' + esc(k.hvem || '') + T(' trakk', ' drew') + '</p>' + rofKortHtml(k, s.nr) : '') + makkerHtml(s) +
+      (!min && erVert() ? '<p class="small"><button class="linkbtn" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button></p>' : '');
+  }
+  /** Ringen røk: alle telefonene får vite det. */
+  function rofSjekkBrudd(d) {
+    var sp = d && d.spill, b = sp && sp.ring ? sp.brudd : null, nr = b ? b.nr : 0;
+    if (rofBruddSett !== null && b && nr !== rofBruddSett) rofKnust(b.navn);
+    rofBruddSett = nr;
+  }
+  function rofKnust(hvem) {
+    spillLyd('knus');
+    var el = document.createElement('div'); el.className = 'rof-knust'; el.setAttribute('role', 'alert');
+    el.innerHTML = '<b>💥 ' + T('RINGEN RØK!', 'THE RING BROKE!') + '</b><span>' + esc(hvem || '') + T(' drikker opp glasset', ' finishes their drink') + '</span>';
+    document.body.appendChild(el); setTimeout(function () { el.remove(); }, 2800);
+    try { navigator.vibrate && navigator.vibrate([400, 100, 400]); } catch (e) {}
+  }
+  function rofOppdaterValgt(bord) {
+    var s = tilstand.spill, ny = rofTopp(s.tatt || []);
+    if (ny === rofValgt) return;
+    rofValgt = ny; spillLyd('tikk');
+    bord.querySelectorAll('.rofr-k').forEach(function (e) { e.classList.toggle('valgt', Number(e.dataset.p) === ny); });
+  }
+  function rofVinkel(bord, e) { var r = bord.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; }
+  function rofFerdig(sendTegn) { rofDrar = null; if (rofVentTegn || sendTegn) { rofVentTegn = false; tegn(); } }
+  document.addEventListener('pointerdown', function (e) {
+    var bord = e.target.closest && e.target.closest('.rofr-bord.aktiv'); if (!bord || !tilstand || !tilstand.spill || !tilstand.spill.ring) return;
+    e.preventDefault();
+    var kortEl = e.target.closest('.rofr-k.valgt'), s = tilstand.spill;
+    try { bord.setPointerCapture(e.pointerId); } catch (x) {}
+    if (kortEl) {
+      var igjen = ROF_N - (s.tatt || []).length;
+      // Hvor fort du kan dra før ringen ryker: strammere jo færre kort som er igjen, snillere i første runde, og litt ulikt fra kort til kort
+      // Ringen er allerede brutt: da kan den ikke ryke igjen
+      var grense = s.ringBrutt ? Infinity : (0.16 + 0.42 * (igjen / ROF_N)) * (0.8 + Math.random() * 0.4) * ((s.nr || 0) < (tilstand.spillere || []).length ? 1.5 : 1);
+      rofDrar = { type: 'dra', bord: bord, el: kortEl, p: Number(kortEl.dataset.p), y0: e.clientY, sistY: e.clientY, t: performance.now(), fart: 0, spenning: 0, grense: grense, maal: Math.max(100, bord.clientWidth * 0.38), nr: s.nr };
+      kortEl.classList.add('drar');
+    } else {
+      rofDrar = { type: 'snurr', bord: bord, a0: rofA, v0: rofVinkel(bord, e) };
+      bord.querySelector('.rofr-rotor').style.transition = 'none';
+    }
+  });
+  window.addEventListener('pointermove', function (e) {
+    var d = rofDrar; if (!d) return;
+    if (e.cancelable) e.preventDefault();
+    if (d.type === 'snurr') {
+      rofA = d.a0 + rofNorm(rofVinkel(d.bord, e) - d.v0);
+      d.bord.querySelector('.rofr-rotor').style.transform = 'rotate(' + rofA + 'deg)';
+      rofOppdaterValgt(d.bord);
+      return;
+    }
+    var naa = performance.now(), dt = Math.max(1, naa - d.t), dy = d.sistY - e.clientY;
+    d.fart = d.fart * 0.6 + (Math.max(0, dy) / dt) * 0.4; d.t = naa; d.sistY = e.clientY;
+    // Spenningen bygger seg opp når du drar fortere enn ringen tåler, og slipper sakte når du roer ned
+    d.spenning = Math.max(0, d.spenning + Math.max(0, d.fart - d.grense) * dt * 0.06 - dt * 0.0003);
+    var ut = Math.max(0, d.y0 - e.clientY), maaler = Math.min(1, Math.max(d.spenning, d.fart / d.grense * 0.55));
+    d.el.style.setProperty('--ut', ut + 'px');
+    var m = document.querySelector('.rofr-spenning i'); if (m) { m.style.width = Math.round(maaler * 100) + '%'; m.style.background = 'hsl(' + Math.round(120 - 120 * maaler) + ',85%,50%)'; }
+    if (d.spenning >= 1) { rofTrekk(d, true); return; }
+    if (ut >= d.maal) rofTrekk(d, false);
+  });
+  function rofSlipp() {
+    var d = rofDrar; if (!d) return;
+    if (d.type === 'snurr') {
+      // Lås ringen slik at det valgte kortet står rett øverst
+      var s = tilstand.spill, p = rofTopp(s.tatt || []);
+      if (p >= 0) rofA = rofA + rofNorm(-(p * ROF_STEG + rofA));
+      var rotor = d.bord.querySelector('.rofr-rotor'); rotor.style.transition = 'transform .2s ease-out'; rotor.style.transform = 'rotate(' + rofA + 'deg)';
+      return rofFerdig(false);
+    }
+    d.el.classList.remove('drar'); d.el.style.setProperty('--ut', '0px');
+    var m = document.querySelector('.rofr-spenning i'); if (m) m.style.width = '0';
+    rofFerdig(false);
+  }
+  window.addEventListener('pointerup', rofSlipp); window.addEventListener('pointercancel', rofSlipp);
+  function rofTrekk(d, brutt) {
+    rofDrar = null;
+    d.el.classList.remove('drar');
+    if (brutt) { d.bord.classList.add('brutt'); spillLyd('knus'); }
+    else { d.el.classList.add('ute'); spillLyd('pop'); }
+    rofBruddSett = null;   // vårt eget brudd vises av knus-effekten over, ikke to ganger
+    gjorAlltid({ handling: 'rof-trekk', plass: d.p, brutt: brutt, nr: d.nr });
+    setTimeout(function () { rofFerdig(true); }, brutt ? 700 : 250);
+  }
+  function kortSpill(s) {
+    if (s.ring) return rofSpill(s);
+    var k = s.kort || {};
+    if (k.id) merkSett(s.lek, k.id);
+    var rof = s.lek === 'ring-of-fire';
+    var kortHtml = rof
+      ? '<div class="rof-kort rom-rof' + (k.rod ? ' rod' : '') + '"><div class="rof-hj"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div>' +
+        '<div class="rof-midt"><b class="rof-regel">' + esc(k.regel) + '</b><span class="rof-tekst">' + esc(k.tekst) + '</span></div>' +
+        '<div class="rof-hj rof-hj2"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div></div>'
+      : '<div class="rom-kort">' + (k.k ? '<span class="sw-tag">' + esc(k.k) + '</span>' : '<span></span>') + '<p>' + esc(k.t) + '</p><span class="rom-teller">' + (s.pos + 1) + ' / ' + s.antall + '</span></div>';
+    return (rof && k.hvem ? '<div class="rof-tur"><span>' + T('Trekker', 'Drawing') + '</span><b>' + esc(k.hvem) + '</b></div>' : '') +
+      (rof ? '<p class="rom-status">' + (s.antall - s.pos - 1) + T(' kort igjen · ', ' cards left · ') + (s.konger || 0) + T(' konger', ' kings') + '</p>' : '') +
+      kortHtml + lunte((s.antall - s.pos - 1) / Math.max(1, s.antall)) + (rof ? makkerHtml(s) : '') +
+      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + '</button>';
+  }
+
+  function mestSpill(s) {
+    var t = tilstand;
+    if (s.fase === 'resultat') {
+      var maks = s.resultat.length ? s.resultat[0].stemmer : 1;
+      return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+        '<ol class="rom-resultat">' + s.resultat.map(function (r) {
+          return '<li><span>' + esc(r.navn) + '</span><i style="width:' + Math.round(100 * r.stemmer / maks) + '%"></i><b>' + r.stemmer + ' ' + (r.stemmer === 1 ? T('slurk', 'sip') : T('slurker', 'sips')) + '</b></li>';
+        }).join('') + '</ol>' +
+        '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste spørsmål', 'Next question') + '</button>';
+    }
+    var stemt = s.harStemt.length, alle = t.spillere.length;
+    return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+      '<p class="small">' + T('Stem på hvem det passer best på. Hver stemme er én slurk.', 'Vote for who it fits best. Every vote is one sip.') + '</p>' +
+      '<div class="rom-valg">' + t.spillere.map(function (p) {
+        return '<button type="button" data-g="stem" data-paa="' + p.id + '" aria-pressed="' + (s.minStemme === p.id) + '">' + esc(p.navn) + (p.id === t.meg ? T(' (deg)', ' (you)') : '') + '</button>';
+      }).join('') + '</div>' +
+      '<p class="rom-status">' + stemt + T(' av ', ' of ') + alle + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder til resultatet vises', 'seconds until the results'));
+  }
+
+  function forraederSpill(s) {
+    var t = tilstand, jeg = t.meg === s.aktiv, han = navn(s.aktiv);
+    if (s.fase === 'svar') {
+      if (jeg) return '<p class="rom-etikett">' + T('Din tur – bare du ser dette', 'Your turn – only you can see this') + '</p>' +
+        '<div data-hemmelig class="rom-hemmelig ' + (s.hemmelig === 'lyv' ? 'lyv' : 'sann') + '"><b>' + (s.hemmelig === 'lyv' ? T('LYV!', 'LIE!') : T('Si sannheten', 'Tell the truth')) + '</b></div>' +
+        '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+        '<p class="small">' + T('Fullfør setningen høyt. Hold masken.', 'Finish the sentence out loud. Keep a straight face.') + '</p>' +
+        '<button class="rom-stor-knapp" data-g="svart" type="button">' + T('Jeg har svart', 'I\'ve answered') + '</button>';
+      return '<p class="rom-etikett">' + esc(han) + T(' fullfører', ' finishes the sentence') + '</p><p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+        '<p class="rom-stor">' + T('Hør godt etter …', 'Listen closely …') + '</p>' +
+        (erVert() ? '<button class="btn ghost" data-g="svart" type="button">' + T('Gå til stemming', 'Go to voting') + '</button>' : '');
+    }
+    if (s.fase === 'stem') {
+      if (jeg) return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p><p class="rom-stor">' + T('De andre stemmer nå …', 'The others are voting …') + '</p>' +
+        '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + (t.spillere.length - 1) + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder til avsløringen', 'seconds to the reveal'));
+      return '<p class="rom-etikett">' + esc(han) + T(' sa', ' said') + '</p><p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
+        '<div class="rom-valg to">' +
+          '<button type="button" data-g="stem" data-paa="sannhet" aria-pressed="' + (s.minStemme === 'sannhet') + '">' + T('Sannhet', 'Truth') + '</button>' +
+          '<button type="button" data-g="stem" data-paa="lyv" aria-pressed="' + (s.minStemme === 'lyv') + '">' + T('Løgn', 'Lie') + '</button>' +
+        '</div>' +
+        '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + (t.spillere.length - 1) + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder til avsløringen', 'seconds to the reveal'));
+    }
+    var r = s.resultat || {};
+    return '<p class="rom-etikett">' + T('Fasit', 'The answer') + '</p>' +
+      '<div class="rom-hemmelig ' + (r.svar === 'lyv' ? 'lyv' : 'sann') + '"><b>' + esc(han) + ' ' + (r.svar === 'lyv' ? T('løy!', 'lied!') : T('sa sannheten!', 'told the truth!')) + '</b></div>' +
+      (r.drikker && r.drikker.length
+        ? '<ul class="rom-drikker">' + r.drikker.map(function (x) { return '<li><b>' + esc(x.navn) + '</b>' + T(' drikker ', ' drinks ') + x.slurker + '</li>'; }).join('') + '</ul>'
+        : '<p class="rom-stor">' + T('Ingen drikker denne gangen.', 'Nobody drinks this time.') + '</p>') +
+      '<p class="small">' + T('Gjettet du feil: 2 slurker. Gjettet alle riktig: den som svarte drikker 3.', 'Guessed wrong: 2 sips. If everyone guessed right, the one who answered drinks 3.') + '</p>' +
+      '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste runde', 'Next round') + '</button>';
+  }
+
+  function bingoSpill(s) {
+    var b = s.mittBrett || [], m = s.mineMerker || [];
+    return '<p class="rom-etikett">' + T('Ditt brett · ', 'Your board · ') + esc(s.tittel) + '</p>' +
+      '<div class="rom-bingo">' + b.map(function (x, i) {
+        // Lange ord (som «Watchtower») får litt mindre skrift i stedet for å deles midt i ordet
+        var lengst = Math.max.apply(null, String(x[1]).split(/\s+/).map(function (w) { return w.length; }));
+        return '<button type="button" data-g="merk" data-i="' + i + '" aria-pressed="' + !!m[i] + '"><b' + (lengst > 12 ? ' class="xlang"' : lengst > 9 ? ' class="lang"' : '') + '>' + esc(x[1]) + '</b><span>' + esc(x[0]) + '</span></button>';
+      }).join('') + '</div>' +
+      '<div class="gt-row">' + (s.spotify ? '<a class="btn gold" href="' + esc(s.spotify) + '" target="_blank" rel="noopener">' + T('Åpne spillelista ↗', 'Open the playlist ↗') + '</a>' : '') +
+      '<button class="btn ghost" data-g="nytt-brett" type="button">' + T('Nytt brett', 'New board') + '</button></div>' +
+      (s.bingo && s.bingo.length ? '<p class="rom-status">BINGO: ' + s.bingo.map(function (id) { return esc(navn(id)); }).join(', ') + '</p>' : '') +
+      '<p class="small">' + T('Merk en låt når den spilles. Rekke: del ut to slurker. Fullt brett: alle andre drikker opp.', 'Mark a song when it plays. Line: hand out two sips. Full board: everyone else finishes their drink.') + '</p>';
+  }
+
+
+  /* ---------- kort og terninger ---------- */
+  function vn(v) { return v <= 10 ? String(v) : (EN ? { 11: 'J', 12: 'Q', 13: 'K', 14: 'A' } : { 11: 'Kn', 12: 'D', 13: 'K', 14: 'A' })[v]; }
+  function kk(k, kl, attr) {
+    if (!k) return '<span class="kk bak ' + (kl || '') + '"></span>';
+    var rod = k.f === '♥' || k.f === '♦';
+    return '<span class="kk ' + (rod ? 'rod ' : '') + (kl || '') + '"' + (attr || '') + '><b>' + vn(k.v) + '</b><i>' + k.f + '</i></span>';
+  }
+  var PRIKKER = { 1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
+  function terning(n) { var s = '<span class="dice" data-n="' + n + '">'; for (var i = 1; i <= 9; i++) s += '<i' + (PRIKKER[n].indexOf(i) !== -1 ? ' class="p"' : '') + '></i>'; return s + '</span>'; }
+  var sisteKastNr = 0, presValg = [];
+
+  function opusSpill(s) {
+    var jeg = s.holder === tilstand.meg;
+    var ny = s.nr !== sisteKastNr; sisteKastNr = s.nr;
+    return '<p><a class="btn ghost small" href="https://open.spotify.com/search/Opus%20Eric%20Prydz" target="_blank" rel="noopener">' + T('«Opus» i Spotify ↗', '“Opus” on Spotify ↗') + '</a></p>' +
+      '<p class="rom-etikett">' + T('Terningen er hos', 'The die is with') + '</p><p class="dl-holder">' + esc(navn(s.holder)) + (jeg ? T(' (deg!)', ' (you!)') : '') + '</p>' +
+      '<div class="dl-terninger' + (ny && s.kast ? ' landet' : '') + '">' + terning(s.kast || 6) + '</div>' +
+      '<p class="dl-melding dl-stor">' + (s.kast === 6 && s.fra ? T('SEKSER! ', 'SIX! ') + esc(navn(s.fra)) + T(' sendte videre.', ' passed it on.') : s.kast ? s.kast + (jeg ? T(' – trill igjen!', ' – roll again!') : '') : T('Start sangen og trill!', 'Start the song and roll!')) + '</p>' +
+      (jeg ? '<button class="rom-stor-knapp" data-g="kast" type="button">' + T('Trill', 'Roll') + '</button>' : '<p class="small">' + T('Vent til terningen kommer til deg.', 'Wait until the die comes to you.') + '</p>') +
+      '<p class="rom-status">' + s.antall + T(' kast', ' rolls') + '</p>' +
+      (erVert() ? '<button class="btn ghost" data-g="drop" type="button">' + T('Droppet kom!', 'The drop hit!') + '</button>' : '');
+  }
+  function overunderSpill(s) {
+    var jeg = s.tur === tilstand.meg, si = s.sist;
+    return '<p class="rom-etikett">' + (jeg ? T('Din tur', 'Your turn') : esc(navn(s.tur)) + T(' gjetter', ' is guessing')) + '</p>' +
+      '<div class="dl-bord">' + kk(s.kort, 'stor inn') + '</div>' +
+      (si ? '<p class="dl-melding">' + esc(navn(si.hvem)) + ': ' + vn(si.fra.v) + si.fra.f + ' → ' + vn(si.til.v) + si.til.f + ' – ' + (si.riktig ? T('riktig!', 'right!') : T('feil, drakk ', 'wrong, drank ') + si.bunke + '.') + '</p>' : '') +
+      '<p class="rom-status">' + T('Bunken: ', 'Pile: ') + s.bunke + T(' kort', ' cards') + '</p>' +
+      (jeg ? '<div class="rom-valg to"><button type="button" data-g="gjett" data-paa="over">' + T('Høyere ↑', 'Higher ↑') + '</button><button type="button" data-g="gjett" data-paa="under">' + T('Lavere ↓', 'Lower ↓') + '</button></div>' : '');
+  }
+  function veddelopetSpill(s) {
+    var F = ['♥', '♠', '♦', '♣'], NAVN = EN ? { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' } : { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' };
+    var bane = '<div class="dl-bane" style="--lengde:9">' + F.map(function (f) {
+      var c = ''; for (var i = 0; i <= 8; i++) c += '<span class="dl-celle' + (i === 8 ? ' mal' : '') + '">' + (s.pos[f] === i ? kk({ v: 14, f: f }, 'liten' + (s.vinner === f ? ' vinner' : '')) : '') + '</span>';
+      return '<div class="dl-rad">' + c + '</div>';
+    }).join('') + '<div class="dl-rad banekort"><span class="dl-celle"></span>' + s.bane.map(function (k) { return '<span class="dl-celle">' + kk(k, 'liten') + '</span>'; }).join('') + '<span class="dl-celle"></span></div></div>';
+    var vedd = Object.keys(s.veddemaal).map(function (id) { var v = s.veddemaal[id]; return esc(navn(id)) + ': ' + v.farge + ' ' + v.slurker; }).join(' · ');
+    if (s.fase === 'vedd') {
+      var mv = s.mittVeddemaal || {};
+      return bane + '<p class="rom-etikett">' + T('Vedd på en hest', 'Bet on a horse') + '</p>' +
+        '<div class="rom-valg fire">' + F.map(function (f) { return '<button type="button" data-g="vedd" data-farge="' + f + '" aria-pressed="' + (mv.farge === f) + '">' + f + ' ' + NAVN[f] + '</button>'; }).join('') + '</div>' +
+        '<label class="rof-lab" for="veddSl">' + T('Slurker du vedder', 'Sips you bet') + '</label><input class="rof-inp" id="veddSl" type="number" min="1" max="10" value="' + (mv.slurker || 2) + '">' +
+        '<p class="rom-status">' + (vedd || T('Ingen har veddet ennå', 'Nobody has bet yet')) + '</p>' + fristHtml(tilstand.spill, T('sekunder til løpet starter', 'seconds until the race starts')) +
+        (erVert() ? (function () { var mangler = tilstand.spillere.length - Object.keys(s.veddemaal).length;
+          return '<button class="rom-stor-knapp" data-g="lop" type="button">' + (mangler > 0 ? T('Venter på ' + mangler + ' veddemål …', 'Waiting for ' + mangler + (mangler === 1 ? ' bet …' : ' bets …')) : T('Start løpet', 'Start the race')) + '</button>'; })() : '');
+    }
+    return bane + '<div class="dl-bord">' + (s.sist ? kk(s.sist, 'stor inn') : '') + '</div>' +
+      (s.vinner ? '<p class="dl-melding dl-stor">' + NAVN[s.vinner] + T(' vant! Riktig veddemål: del ut det dobbelte.', ' won! Winning bets: hand out double.') + '</p>' : '') +
+      '<p class="rom-status">' + vedd + '</p>' +
+      (s.fase === 'lop' ? '<button class="rom-stor-knapp" data-g="snu" type="button">' + T('Snu kort', 'Flip card') + '</button>' : '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Nytt løp', 'New race') + '</button>');
+  }
+  function pyramidenSpill(s) {
+    var rader = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
+    var pyr = '<div class="dl-pyramide">' + rader.map(function (r) { return '<div>' + r.map(function (i) { return i < s.pos ? kk(s.pyr[i], 'liten' + (i === s.pos - 1 ? ' vinner' : '')) : kk(null, 'liten'); }).join('') + '</div>'; }).join('') + '</div>';
+    var siste = s.pos ? s.pyr[s.pos - 1] : null, rad = s.pos ? (s.pos - 1 < 5 ? 1 : s.pos - 1 < 9 ? 2 : s.pos - 1 < 12 ? 3 : s.pos - 1 < 14 ? 4 : 5) : 0;
+    var minPast = s.pastander.some(function (p) { return p.id === tilstand.meg; });
+    var past = s.pastander.map(function (p) {
+      return '<li><b>' + esc(navn(p.id)) + '</b>' + T(' sier de har ', ' says they have ') + (siste ? vn(siste.v) : '') + T(' (del ut ', ' (hand out ') + p.rad + ')' +
+        (p.avgjort ? ' – <em>' + (p.avgjort === 'bløff' ? T('bløffet!', 'bluffed!') : p.avgjort === 'sant' ? T('hadde den!', 'had it!') : T('godtatt', 'accepted')) + '</em>'
+          : (p.id !== tilstand.meg ? ' <button class="btn ghost small" type="button" data-g="utfordre" data-paa="' + p.id + '">' + T('Utfordre', 'Challenge') + '</button>' : '')) + '</li>';
+    }).join('');
+    return pyr + (siste ? '<p class="dl-melding">' + T('Snudd: ', 'Flipped: ') + vn(siste.v) + siste.f + T(' · rad ', ' · row ') + rad + '</p>' : '<p class="dl-melding">' + T('Snu første kort nederst til venstre.', 'Flip the first card at the bottom left.') + '</p>') +
+      '<p class="rom-etikett">' + T('Din hånd – bare du ser den', 'Your hand – only you can see it') + '</p><div class="dl-hand">' + (s.minHand || []).map(function (k) { return kk(k); }).join('') + '</div>' +
+      (siste && !minPast ? '<button class="btn gold" data-g="pastand" type="button">' + T('Jeg har den! (eller bløffer …)', 'I have it! (or I\'m bluffing …)') + '</button>' : '') +
+      (past ? '<ul class="rom-past">' + past + '</ul>' : '') +
+      (s.pos < 15 ? '<button class="rom-stor-knapp" data-g="snu" type="button">' + T('Snu neste kort', 'Flip next card') + '</button>' : '<p class="dl-melding dl-stor">' + T('Toppen er snudd – runden er ferdig!', 'The top card is flipped – the round is over!') + '</p><button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny runde', 'New round') + '</button>');
+  }
+  function grisSpill(s) {
+    var bok = function (id) { var n = s.bokstaver[id] || 0; return n ? T('GRIS', 'PIGS').slice(0, n) : '–'; };
+    var tavle = '<div class="rom-gris-tavle">' + tilstand.spillere.map(function (p) { return '<span>' + esc(p.navn) + ' <b>' + bok(p.id) + '</b></span>'; }).join('') + '</div>';
+    var nese = '<button class="rom-nese' + (s.fase === 'nese' ? ' blink' : '') + '" data-g="nese" type="button" aria-pressed="' + (s.neser.indexOf(tilstand.meg) !== -1) + '"><b>' + T('NESA!', 'NOSE!') + '</b><span>' + T('Trykk når noen har fire like', 'Tap when someone has four of a kind') + '</span></button>';
+    if (s.fase === 'ferdig') {
+      return tavle + '<p class="dl-melding dl-stor">' + esc(navn(s.taper)) + T(' var sist på nesa!', ' was last to the nose!') + '</p>' +
+        '<div class="dl-hender">' + Object.keys(s.fasit || {}).map(function (id) { return '<div><b>' + esc(navn(id)) + '</b><span>' + s.fasit[id].map(function (k) { return kk(k, 'mini'); }).join('') + '</span></div>'; }).join('') + '</div>' +
+        '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny runde', 'New round') + '</button>';
+    }
+    var hand = s.minHand || [];
+    return tavle + '<p class="rom-etikett">' + T('Din hånd – velg et kort å sende til venstre', 'Your hand – pick a card to pass left') + '</p>' +
+      '<div class="dl-hand gris">' + hand.map(function (k, i) { return '<button type="button" data-g="velg" data-i="' + i + '" aria-pressed="' + (s.mittValg === i) + '">' + kk(k) + '</button>'; }).join('') + '</div>' +
+      '<p class="rom-status">' + s.harValgt.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har valgt', ' have picked') + (s.harFire ? ' · <b class="dl-hint">' + T('Du har fire like!', 'You have four of a kind!') + '</b>' : '') + '</p>' +
+      nese + '<p class="small">' + T('Tar du deg på nesa uten fire like, får du en bokstav.', 'Touch your nose without four of a kind and you get a letter.') + '</p>';
+  }
+  function presidentSpill(s) {
+    var jeg = s.tur === tilstand.meg, hand = s.minHand || [];
+    presValg = presValg.filter(function (i) { return i < hand.length; });
+    var tavle = '<div class="rom-gris-tavle">' + tilstand.spillere.map(function (p) {
+      var t = s.titler && s.titler[p.id];
+      return '<span class="' + (p.id === s.tur ? 'tur' : '') + '">' + esc(p.navn) + ' <b>' + (s.antall[p.id] !== undefined ? s.antall[p.id] : '–') + '</b>' + (t ? ' <em>' + t + '</em>' : '') + (s.pass.indexOf(p.id) !== -1 ? ' <small>pass</small>' : '') + '</span>';
+    }).join('') + '</div>';
+    if (s.fase === 'ferdig') return tavle + '<p class="dl-melding dl-stor">' + T('Runden er over!', 'The round is over!') + '</p><p class="small">' + T('Presidenten bestemmer når andre skal drikke. Rævkjøreren henter drikke og gir sitt beste kort til presidenten.', 'The president decides when others drink. The scum fetches drinks and gives their best card to the president.') + '</p>' +
+      '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny runde', 'New round') + '</button>';
+    return tavle + '<p class="rom-etikett">' + T('På bordet', 'On the table') + (s.bordAv ? T(' – lagt av ', ' – played by ') + esc(navn(s.bordAv)) : '') + '</p>' +
+      '<div class="dl-bord">' + (s.bord.length ? s.bord.map(function (k) { return kk(k, 'inn'); }).join('') : '<span class="small">' + T('Tomt – ', 'Empty – ') + esc(navn(s.tur)) + T(' starter', ' starts') + '</span>') + '</div>' +
+      '<p class="rom-etikett">' + (jeg ? T('Din tur – velg like kort', 'Your turn – pick matching cards') : T('Venter på ', 'Waiting for ') + esc(navn(s.tur))) + '</p>' +
+      '<div class="dl-hand pres">' + hand.map(function (k, i) { return '<button type="button" data-g="pvelg" data-i="' + i + '" aria-pressed="' + (presValg.indexOf(i) !== -1) + '"' + (jeg ? '' : ' disabled') + '>' + kk(k, 'liten') + '</button>'; }).join('') + '</div>' +
+      (jeg ? '<div class="dl-knapper"><button class="btn gold" data-g="legg" type="button">' + T('Legg ut', 'Play') + '</button>' + (s.bord.length ? '<button class="btn ghost" data-g="pass" type="button">Pass</button>' : '') + '</div>' : '') +
+      '<p class="small">' + T('Toere er høyest og rydder bordet.', 'Twos are highest and clear the table.') + '</p>';
+  }
+
+  var rfOffset = 0, rfTimer = null;
+  function rfIgjen(s) { return Math.max(0, Math.ceil((s.frist - 3000 - (Date.now() + rfOffset)) / 1000)); }
+  function rfTikk() {
+    clearInterval(rfTimer);
+    rfTimer = setInterval(function () {
+      var s = tilstand && tilstand.spill, el = document.getElementById('rfTid');
+      if (!s || s.type !== 'regelfabrikken' || s.fase !== 'skriv' || !el) { clearInterval(rfTimer); return; }
+      var n = rfIgjen(s); el.textContent = n;
+      el.classList.toggle('snart', n <= 10);
+      if (n <= 0) { var inp = document.getElementById('rfInput'); if (inp) inp.disabled = true; var f = document.getElementById('rfTekst'); if (f) f.textContent = T('Tiden er ute!', 'Time\'s up!'); }
+    }, 250);
+  }
+  function regelfabrikkenSpill(s) {
+    rfOffset = s.naa - Date.now();
+    if (s.fase === 'klar') {
+      return '<p class="dl-melding dl-stor">' + T('Klar for Hjemmesnekra?', 'Ready for Homemade?') + '</p>' +
+        '<p>' + T('Når klokka starter, har alle ', 'When the clock starts, everyone has ') + s.sek + T(' sekunder til å skrive så mange drikkekort de rekker på sin egen telefon.', ' seconds to write as many drinking cards as they can on their own phone.') + '</p>' +
+        '<p class="rom-status">' + tilstand.spillere.length + T(' med i rommet: ', ' in the room: ') + tilstand.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' +
+        '<div class="rf-med"><button class="btn ghost" data-g="rf-velg" type="button">' + T('Ta med kort fra kortstokkene dine', 'Bring cards from your decks') + '</button>' +
+        (s.mineMed ? '<span class="small">' + T('Du har tatt med <b>', 'You\'ve brought <b>') + s.mineMed + T('</b> kort – de blandes inn når det stokkes.', '</b> cards – they get mixed in when the deck is shuffled.') + '</span>' : '<span class="small">' + T('Valgfritt. Bare du ser hvilke kort du tar med.', 'Optional. Only you can see which cards you bring.') + '</span>') + '</div>' +
+        (erVert()
+          ? '<p class="small">' + T('Vent til alle har blitt med. Del koden <b>', 'Wait until everyone has joined. Share the code <b>') + esc(kode) + '</b>.</p><button class="rom-stor-knapp" data-g="startklokke" type="button">' + T('Start klokka', 'Start the clock') + '</button>'
+          : '<p class="rom-stor">' + T('Venter på at ' + esc(navn(tilstand.vert)) + ' starter klokka …', 'Waiting for ' + esc(navn(tilstand.vert)) + ' to start the clock …') + '</p>');
+    }
+    if (s.fase === 'skriv') {
+      var n = rfIgjen(s);
+      setTimeout(rfTikk, 0);
+      var andre = tilstand.spillere.map(function (p) { return esc(p.navn) + ' ' + (s.antall[p.id] || 0); }).join(' · ');
+      return '<div class="rf-tid" id="rfTid">' + n + '</div>' +
+        '<p class="dl-melding" id="rfTekst">' + (n > 0 ? T('Skriv så mange drikkekort du rekker!', 'Write as many drinking cards as you can!') : T('Tiden er ute!', 'Time\'s up!')) + '</p>' +
+        '<form class="rf-skjema" id="rfSkjema"><label for="rfInput" class="small">' + T('F.eks. «Alle med hvite sokker drikker»', 'E.g. “Everyone wearing white socks drinks”') + '</label>' +
+        '<div class="rf-rad"><input id="rfInput" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="' + T('Skriv et kort …', 'Write a card …') + '"' + (n > 0 ? '' : ' disabled') + '>' +
+        '<button class="btn gold" type="submit">' + T('Legg til', 'Add') + '</button></div></form>' +
+        '<ol class="rf-mine">' + s.mineKort.slice().reverse().map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
+        (s.mineMed ? '<p class="small">+ ' + s.mineMed + T(' kort du tok med', ' cards you brought') + '</p>' : '') +
+        '<p class="rom-status">' + andre + '</p>' +
+        (erVert() || n <= 0 ? '<button class="rom-stor-knapp" data-g="stokk" type="button">' + (n > 0 ? T('Stopp og stokk nå', 'Stop and shuffle now') : T('Stokk ', 'Shuffle ') + s.totalt + T(' kort', ' cards')) + '</button>' : '');
+    }
+    return '<div class="rom-kort rf-kort"><span class="sw-tag">' + T('Kort ', 'Card ') + (s.pos + 1) + T(' av ', ' of ') + s.totalt + '</span><p>' + esc(s.kortet) + '</p><span></span></div>' +
+      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Trekk neste', 'Draw next') + '</button>' +
+      '<div class="dl-knapper">' +
+        (erVert() ? '<button class="btn ghost" data-g="nytt" type="button">' + (s.egen ? T('Stokk på nytt', 'Shuffle again') : T('Ny skriverunde', 'New writing round')) + '</button>' : '') +
+        (!s.egen && s.alleKort ? '<button class="btn ghost" data-g="lagrestokk" type="button">' + T('Lagre alle kortene', 'Save all the cards') + '</button>' : '') +
+        (!s.egen && s.mineKort && s.mineKort.length ? '<button class="btn ghost" data-g="rf-lagre-mine" type="button">' + T('Lagre mine ', 'Save my ') + s.mineKort.length + T(' kort', ' cards') + '</button>' : '') +
+      '</div>';
+  }
+
+  function tosannheterSpill(s) {
+    var jeg = s.aktiv === tilstand.meg, han = esc(navn(s.aktiv));
+    if (s.fase === 'skriv') {
+      if (!jeg) return '<p class="rom-stor">' + han + T(' skriver tre påstander …', ' is writing three statements …') + '</p><p class="small">' + T('To er sanne, én er løgn. Gjør deg klar til å avsløre.', 'Two are true, one is a lie. Get ready to call it.') + '</p>';
+      return '<p class="rom-etikett">' + T('Din tur – bare du ser dette', 'Your turn – only you can see this') + '</p><p>' + T('Skriv tre påstander om deg selv og merk løgnen.', 'Write three statements about yourself and mark the lie.') + '</p>' +
+        '<form id="tsSkjema" class="ts-skjema">' + [0, 1, 2].map(function (i) {
+          return '<div class="ts-rad"><input id="tsR' + i + '" maxlength="120" placeholder="' + T('Påstand ', 'Statement ') + (i + 1) + '"><label><input type="radio" name="tsL" value="' + i + '"> ' + T('Løgn', 'Lie') + '</label></div>';
+        }).join('') + '<button class="rom-stor-knapp" type="submit">' + T('Send til de andre', 'Send to the others') + '</button></form>';
+    }
+    var liste = '<div class="ts-valg">' + s.pastander.map(function (t, i) {
+      var kl = s.fase === 'avslort' ? (i === s.logn ? 'logn' : 'sann') : '';
+      var ant = s.stemmer ? Object.keys(s.stemmer).filter(function (k) { return s.stemmer[k] === i; }).length : 0;
+      var knapp = s.fase === 'stem' && !jeg;
+      return (knapp ? '<button type="button" data-g="stem" data-paa="' + i + '" aria-pressed="' + (s.minStemme === i) + '"' : '<div') + ' class="' + kl + '"><b>' + (i + 1) + '</b><span>' + esc(t) + '</span>' +
+        (s.fase === 'avslort' ? '<small>' + ant + T(' stemmer', ant === 1 ? ' vote' : ' votes') + '</small>' : '') + (knapp ? '</button>' : '</div>');
+    }).join('') + '</div>';
+    if (s.fase === 'stem') return '<p class="rom-etikett">' + (jeg ? T('De andre stemmer', 'The others are voting') : T('Hvilken er ' + han + ' sin løgn?', 'Which one is ' + han + '\'s lie?')) + '</p>' + liste +
+      '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + (tilstand.spillere.length - 1) + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder til avsløringen', 'seconds to the reveal'));
+    return '<p class="rom-etikett">' + T('Fasit', 'The answer') + '</p>' + liste +
+      (s.drikker && s.drikker.length ? '<ul class="rom-drikker">' + s.drikker.map(function (x) { return '<li><b>' + esc(x.navn) + '</b>' + T(' drikker ', ' drinks ') + x.slurker + '</li>'; }).join('') + '</ul>' : '') +
+      '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste spiller', 'Next player') + '</button>';
+  }
+  /* ---------- Bussruta ---------- */
+  function bussrutaSpill(s) {
+    var jeg = s.aktiv === tilstand.meg;
+    var hender = '<div class="dl-hender">' + s.ider.map(function (id) {
+      return '<div class="' + (id === s.aktiv && s.fase === 1 ? 'aktiv' : '') + '"><b>' + esc(navn(id)) + '</b><span>' + (s.hender[id] || []).map(function (k) { return kk(k, 'mini'); }).join('') + '</span></div>';
+    }).join('') + '</div>';
+    var melding = s.melding ? '<p class="dl-melding" aria-live="polite">' + esc(s.melding) + '</p>' : '';
+    if (s.fase === 1) {
+      var VALG = [[['rod', T('Rød', 'Red')], ['svart', T('Svart', 'Black')]], [['over', T('Over', 'Higher')], ['under', T('Under', 'Lower')]], [['inn', T('Innenfor', 'Inside')], ['ut', T('Utenfor', 'Outside')]], [['♥', '♥'], ['♦', '♦'], ['♠', '♠'], ['♣', '♣']]];
+      var hand = s.hender[s.aktiv] || [];
+      return '<p class="dl-steg">' + T('Runde 1 av 3 · spørsmål ', 'Round 1 of 3 · question ') + (s.steg + 1) + T(' av 4', ' of 4') + '</p>' +
+        '<p class="rom-etikett">' + (jeg ? T('Din tur', 'Your turn') : esc(navn(s.aktiv)) + T(' svarer', ' is answering')) + '</p>' +
+        '<div class="dl-hand">' + hand.map(function (k) { return kk(k); }).join('') + kk(null) + '</div>' + melding +
+        '<p class="dl-sporsmal">' + esc(s.sporsmal) + '</p>' +
+        (jeg || (erVert() && !tilstand.spillere.some(function (p) { return p.id === s.aktiv; }))
+          ? '<div class="rom-valg ' + (s.steg === 3 ? 'fire' : 'to') + '">' + VALG[s.steg].map(function (v) { return '<button type="button" data-g="br-svar" data-v="' + v[0] + '">' + v[1] + '</button>'; }).join('') + '</div>'
+          : '<p class="small">' + T('Vent på ', 'Wait for ') + esc(navn(s.aktiv)) + '.</p>') + hender;
+    }
+    if (s.fase === 2) {
+      var rader = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
+      return '<p class="dl-steg">' + T('Runde 2 av 3 · pyramiden', 'Round 2 of 3 · the pyramid') + '</p><div class="dl-pyramide">' + rader.map(function (r) {
+        return '<div>' + r.map(function (i) { return i < s.pyrPos ? kk(s.pyr[i], 'liten') : kk(null, 'liten'); }).join('') + '</div>';
+      }).join('') + '</div>' + melding +
+        (s.pyrPos < 15 ? '<button class="rom-stor-knapp" data-g="br-snu" data-pos="' + s.pyrPos + '" type="button">' + T('Snu neste', 'Flip next') + '</button>' : '<button class="rom-stor-knapp" data-g="br-buss" type="button">' + T('Til bussen', 'To the bus') + '</button>') + hender;
+    }
+    var prikker = ''; for (var i = 0; i < s.maal; i++) prikker += '<i' + (i < s.bussRekke ? ' class="ok"' : '') + '></i>';
+    var sjafor = s.buss === tilstand.meg;
+    return '<p class="dl-steg">' + T('Runde 3 av 3 · bussen', 'Round 3 of 3 · the bus') + '</p><p class="rom-etikett">' + (sjafor ? T('Du kjører bussen!', 'You\'re riding the bus!') : esc(navn(s.buss)) + T(' kjører bussen', ' is riding the bus')) + '</p>' +
+      '<div class="dl-bord">' + (s.sist ? kk(s.sist, 'stor inn') : kk(null, 'stor')) + '</div><div class="dl-buss">' + prikker + '</div>' + melding +
+      (s.bussRekke >= s.maal ? (erVert() ? '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny runde', 'New round') + '</button>' : '')
+        : (sjafor || erVert() ? '<button class="rom-stor-knapp" data-g="br-kjor" type="button">' + T('Snu kort', 'Flip card') + '</button>' : '<p class="small">' + esc(navn(s.buss)) + T(' snur kortene.', ' flips the cards.') + '</p>'));
+  }
+
+  /* ---------- Drikke-Yatzy ---------- */
+  var YZF = EN ? [['1', 'Ones'], ['2', 'Twos'], ['3', 'Threes'], ['4', 'Fours'], ['5', 'Fives'], ['6', 'Sixes'], ['p', 'One pair'], ['pp', 'Two pairs'], ['3l', 'Three of a kind'], ['4l', 'Four of a kind'], ['ls', 'Small straight'], ['ss', 'Large straight'], ['hus', 'Full house'], ['sj', 'Chance'], ['y', 'Yatzy']] : [['1', 'Enere'], ['2', 'Toere'], ['3', 'Treere'], ['4', 'Firere'], ['5', 'Femmere'], ['6', 'Seksere'], ['p', 'Ett par'], ['pp', 'To par'], ['3l', 'Tre like'], ['4l', 'Fire like'], ['ls', 'Liten straight'], ['ss', 'Stor straight'], ['hus', 'Hus'], ['sj', 'Sjanse'], ['y', 'Yatzy']];
+  var sisteYzNr = 0;
+  function yatzySpill(s) {
+    if (s.ferdig) {
+      return '<p class="dl-melding dl-stor">' + esc(s.ferdig[0].navn) + T(' vant med ', ' won with ') + s.ferdig[0].sum + T(' poeng!', ' points!') + '</p><ol class="rom-resultat">' +
+        s.ferdig.map(function (x) { return '<li><span>' + esc(x.navn) + '</span><b>' + x.sum + '</b></li>'; }).join('') + '</ol>' +
+        '<p class="dl-melding">' + esc(s.ferdig[s.ferdig.length - 1].navn) + T(' tapte og drikker opp. Vinneren deler ut 5.', ' lost and finishes their drink. The winner hands out 5.') + '</p>' +
+        (erVert() ? '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Nytt spill', 'New game') + '</button>' : '');
+    }
+    var jeg = s.aktiv === tilstand.meg, nyttKast = s.nr !== sisteYzNr; sisteYzNr = s.nr;
+    var b = s.blokker[s.aktiv] || {};
+    return '<p class="rom-etikett">' + (jeg ? T('Din tur', 'Your turn') : esc(navn(s.aktiv)) + T(' sin tur', '\'s turn')) + T(' · kast ', ' · roll ') + s.kast + T(' av 3', ' of 3') + '</p>' +
+      '<div class="yz-terninger' + (nyttKast && s.kast ? ' landet' : '') + '">' + s.terninger.map(function (t, i) {
+        return '<button type="button" data-g="yz-hold" data-i="' + i + '" aria-pressed="' + !!s.hold[i] + '"' + (jeg && s.kast && s.kast < 3 ? '' : ' disabled') + ' aria-label="' + T('Hold terning ', 'Hold die ') + (i + 1) + '">' + terning(t) + '</button>';
+      }).join('') + '</div>' +
+      (s.melding ? '<p class="dl-melding" aria-live="polite">' + esc(s.melding) + '</p>' : '') +
+      (jeg ? '<button class="rom-stor-knapp" data-g="yz-kast" type="button"' + (s.kast >= 3 ? ' disabled' : '') + '>' + (s.kast ? T('Trill igjen', 'Roll again') : T('Trill', 'Roll')) + '</button>' : '') +
+      '<div class="yz-blokk">' + YZF.map(function (f) {
+        var v = b[f[0]], mulig = s.mulige && v == null ? s.mulige[f[0]] : null;
+        return '<button type="button" data-g="yz-felt" data-f="' + f[0] + '"' + (!jeg || v != null || !s.kast ? ' disabled' : '') + '><span>' + f[1] + '</span><b>' + (v != null ? v : (mulig != null ? '+' + mulig : '')) + '</b></button>';
+      }).join('') + '</div>' +
+      '<p class="dl-info">' + s.ider.map(function (id) { return esc(navn(id)) + ': ' + (s.summer[id] || 0); }).join(' · ') + '</p>';
+  }
+
+  /* ---------- Nyhetsrunden: verten leser, alle svarer ---------- */
+  var TYPER = EN ? { valg: 'Pick the right one', sant: 'True or nonsense?', tall: 'Which number?', fritt: 'Free answer' } : { valg: 'Velg riktig', sant: 'Sant eller tull?', tall: 'Hvilket tall?', fritt: 'Svar fritt' };
+  function nyhetsrundenSpill(s) {
+    var vert = erVert(), topp = '<p class="gt-count">' + T('Spørsmål ', 'Question ') + (s.i + 1) + T(' av ', ' of ') + s.antall + ' · ' + (TYPER[s.qtype] || '') + '</p>';
+    if (s.fase === 'klar') {
+      return '<p class="dl-melding dl-stor">' + T('Uke ', 'Week ') + s.uke + ' · ' + s.antall + T(' spørsmål', ' questions') + '</p>' +
+        '<p>' + (vert ? T('Du leser spørsmålene høyt. De andre svarer på sin telefon – riktig gir én 🍺 å dele ut, feil er én slurk.', 'You read the questions out loud. The others answer on their phones – right gives you one 🍺 to hand out, wrong is one sip.') : esc(navn(tilstand.vert)) + T(' leser spørsmålene høyt. Du svarer her på telefonen.', ' reads the questions out loud. You answer here on your phone.')) + '</p>' +
+        '<p class="rom-status">' + tilstand.spillere.length + T(' med: ', ' in: ') + tilstand.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' +
+        (vert ? '<p class="small">' + T('Vent til alle er med. Del koden <b>', 'Wait until everyone\'s in. Share the code <b>') + esc(kode) + '</b>.</p><button class="rom-stor-knapp" data-g="nr-start" type="button">' + T('Første spørsmål', 'First question') + '</button>'
+              : '<p class="rom-stor">' + T('Venter på at ' + esc(navn(tilstand.vert)) + ' starter …', 'Waiting for ' + esc(navn(tilstand.vert)) + ' to start …') + '</p>');
+    }
+    if (s.fase === 'ferdig') {
+      var l = s.tavle;
+      if (s.rid) { var sp = nrSpilt(); if (sp.indexOf(s.rid) === -1) { sp.push(s.rid); skriv('bd_nr_spilt', sp.slice(-300)); } }
+      return '<p class="dl-melding dl-stor">🏆 ' + esc(l[0] ? l[0].navn : '') + T(' vant uke ', ' won week ') + s.uke + '!</p>' +
+        '<ol class="rom-resultat">' + l.map(function (x) { return '<li><span>' + esc(x.navn) + '</span><b>' + x.riktige + ' / ' + s.antall + '</b></li>'; }).join('') + '</ol>' +
+        (vert ? '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ta runden på nytt', 'Play the round again') + '</button>' : '');
+    }
+    if (s.fase === 'spm') {
+      var mitt = s.mittSvar, input;
+      if (s.alt) input = '<div class="rom-valg ' + (s.alt.length === 2 ? 'to' : 'en') + '">' + s.alt.map(function (a) {
+        return '<button type="button" data-g="nr-svar" data-v="' + esc(a) + '" aria-pressed="' + (mitt === a) + '">' + esc(a) + '</button>'; }).join('') + '</div>';
+      else input = '<form class="rf-skjema" id="nrSkjema"><div class="rf-rad"><input id="nrInput" maxlength="80" autocomplete="off" enterkeyhint="send"' +
+        (s.qtype === 'tall' ? ' inputmode="decimal" placeholder="' + T('Skriv et tall', 'Enter a number') + '"' : ' placeholder="' + T('Skriv svaret ditt', 'Type your answer') + '"') + ' value="' + esc(mitt || '') + '">' +
+        '<button class="btn gold" type="submit">' + (mitt ? T('Endre', 'Change') : T('Svar', 'Answer')) + '</button></div></form>' + (mitt ? '<p class="small">' + T('Du svarte: ', 'You answered: ') + '<b>' + esc(mitt) + '</b></p>' : '');
+      return topp + (vert
+          ? '<div class="nr-opples"><span class="rom-etikett">' + T('Les høyt', 'Read aloud') + '</span><p class="gt-text">' + esc(s.q) + '</p></div>'
+          : '<p class="rom-stor">' + T('Hør på ', 'Listen to ') + esc(navn(tilstand.vert)) + T(' og svar her:', ' and answer here:') + '</p>') + input +
+        '<p class="rom-status">' + s.harSvart.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har svart', ' have answered') + '</p>' + fristHtml(tilstand.spill, T('sekunder til svaret vises', 'seconds until the answer is shown')) +
+        (vert ? '<button class="rom-stor-knapp" data-g="nr-vis" type="button"' + (s.harSvart.length < tilstand.spillere.length ? ' data-vent="1"' : '') + '>' + (s.harSvart.length < tilstand.spillere.length ? (function (m) { return T('Venter på ' + m + ' svar …', 'Waiting for ' + m + (m === 1 ? ' answer …' : ' answers …')); })(tilstand.spillere.length - s.harSvart.length) : T('Vis svaret', 'Show the answer')) + '</button>' : '');
+    }
+    var rader = tilstand.spillere.map(function (p) {
+      var r = s.resultat[p.id], sv = s.svarene[p.id];
+      return '<li class="' + (r ? 'rett' : 'feil') + '"><span class="nr-hvem">' + esc(p.navn) + '</span><span class="nr-hva">' + (sv ? esc(sv) : '<i>' + T('ingen svar', 'no answer') + '</i>') + '</span>' +
+        (vert ? '<button type="button" data-g="nr-flipp" data-id="' + p.id + '" aria-label="' + T('Endre vurdering for ', 'Change the verdict for ') + esc(p.navn) + '">' + (r ? '✓' : '✗') + '</button>' : '<b>' + (r ? '✓' : '✗') + '</b>') + '</li>';
+    }).join('');
+    return topp + '<p class="gt-text">' + esc(s.q) + '</p><div class="nr-svar"><p class="nr-fasit">' + esc(s.fasit) + '</p>' + (s.info ? '<p>' + esc(s.info) + '</p>' : '') +
+      (s.url ? '<p class="small"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + T('Les saken hos ', 'Read the story at ') + esc(s.kilde) + ' ↗</a></p>' : '') + '</div>' +
+      '<ul class="nr-rom-svar">' + rader + '</ul>' +
+      '<p class="small">' + T('Riktig: del ut én 🍺. Feil: drikk én.', 'Right: hand out one 🍺. Wrong: drink one.') + (vert ? T(' Trykk ✓/✗ for å rette en vurdering.', ' Tap ✓/✗ to fix a verdict.') : '') + '</p>' +
+      (vert ? '<button class="rom-stor-knapp" data-g="nr-neste" type="button">' + (s.i + 1 < s.antall ? T('Neste spørsmål', 'Next question') : T('Se hvem som vant', 'See who won')) + '</button>' : '');
+  }
+
+  /* ---------- reaksjoner og «send en slurk» ---------- */
+  var sisteReak = -1;
+  function visReaksjoner(liste) {
+    if (!liste || !liste.length) { if (sisteReak < 0) sisteReak = 0; return; }
+    var nyeste = liste[liste.length - 1].nr;
+    if (sisteReak < 0) { sisteReak = nyeste; return; }   // ikke spill av gamle reaksjoner når man kommer inn
+    liste.forEach(function (r) {
+      if (r.nr <= sisteReak) return;
+      var el = document.createElement('div');
+      el.className = 'reak-fly' + (r.til ? ' send' : '');
+      el.style.left = (8 + Math.random() * 55) + '%';
+      el.innerHTML = '<span>' + esc(r.e) + '</span>' + (r.til ? '<small>' + esc(navn(r.fra)) + ' → ' + esc(navn(r.til)) + '</small>' : '<small>' + esc(navn(r.fra)) + '</small>');
+      document.body.appendChild(el);
+      setTimeout(function () { el.remove(); }, 2600);
+      if (!(r.til && r.til === tilstand.meg) && r.fra !== tilstand.meg) spillLyd('pop');
+      if (r.til && r.til === tilstand.meg) {
+        toast(navn(r.fra) + T(' sendte deg en slurk 🍺', ' sent you a sip 🍺'));   // lyd og DRIKK-varsel kommer fra slurketelleren
+      }
+    });
+    sisteReak = nyeste;
+  }
+  function reaksjonslinje() {
+    var megS = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {};
+    var hint = les('bd_intro_reak') ? '' : '<p class="small reak-hint">' + T('👆 Trykk en emoji for å sende den til alle telefonene. 🔊 slår lyden av og på.', '👆 Tap an emoji to send it to every phone. 🔊 turns sound on and off.') + '</p>';
+    return hint + '<div class="reak-linje" id="reakLinje">' + ['🍻', '😂', '🔥', '😱', '👏'].map(function (e) {
+      return '<button type="button" data-g="reager" data-e="' + e + '" aria-label="Send ' + e + '">' + e + '</button>';
+    }).join('') + '<button type="button" data-g="lyd" aria-label="' + (lyd.paa ? T('Skru av lyd', 'Turn sound off') : T('Skru på lyd', 'Turn sound on')) + '" aria-pressed="' + lyd.paa + '">' + (lyd.paa ? '🔊' : '🔇') + '</button>' +
+      (megS.gi ? '' : '<!-- ingen slurker å dele ut -->') + '<button type="button" class="reak-send" data-g="send-velg"' + (megS.gi ? '' : ' hidden') + ' aria-label="' + T('Send en slurk til noen', 'Send someone a sip') + '">🍺 <b>' + (megS.gi || 0) + '</b></button></div>';
+  }
+  function sendVelger() {
+    var megS = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {};
+    if (!megS.gi) return toast(T('Du har ingen slurker å dele ut ennå. Vinn noe først!', 'You have no sips to hand out yet. Win something first!'));
+    var m = document.createElement('div'); m.className = 'rom-tavle'; m.setAttribute('role', 'dialog');
+    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + T('Send en slurk', 'Send a sip') + '</h2><button class="linkbtn" data-s="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+      '<p class="small">' + T('Du har <b>', 'You have <b>') + megS.gi + T('</b> å dele ut – vunnet i spillene. Den du velger får én slurk på tavla.', '</b> to hand out – won in the games. Whoever you pick gets one sip on the board.') + '</p>' +
+      '<div class="rom-valg en">' + tilstand.spillere.filter(function (p) { return p.id !== tilstand.meg; }).map(function (p) {
+        return '<button type="button" data-s="til" data-id="' + p.id + '">' + esc(p.navn) + ' <small>(' + (p.slurker || 0) + ')</small></button>'; }).join('') + '</div></div>';
+    m.addEventListener('click', function (e) {
+      if (e.target === m) return m.remove();
+      var b = e.target.closest('[data-s]'); if (!b) return;
+      if (b.dataset.s === 'til') gjorAlltid({ handling: 'send', hvem: b.dataset.id });
+      m.remove();
+    });
+    document.body.appendChild(m);
+  }
+
+  /* ---------- Gjengens lov ---------- */
+  var gjengSjekk = '', gjengSjekket = false;
+  /** Kobler denne telefonen til kontoen i gjengen (medlemmer kan stemme over lover). */
+  function sjekkGjengMedlem() {
+    var t = tilstand; if (!t || !t.gjeng || !meg || gjengSjekket) return;
+    var jeg = (t.spillere || []).find(function (p) { return p.id === t.meg; });
+    if (!jeg || jeg.medlem) return;
+    if (!(window.BDKonto && window.BDKonto.les())) { gjengSjekk = 'logg-inn'; return; }
+    gjengSjekket = true;
+    api('POST', '/api/rom/' + kode, { handling: 'gjeng-meg', id: meg.id, pollett: meg.pollett }).then(ta).catch(function (e) { gjengSjekk = e.kode || 'feil'; tegn(); });
+  }
+  function gjengBoks() {
+    var t = tilstand; if (!t.gjeng) return '';
+    var jeg = (t.spillere || []).find(function (p) { return p.id === t.meg; });
+    if (!jeg || jeg.medlem) return '';
+    if (!jeg.invitert && !erVert()) return '';
+    if (gjengSjekk === 'logg-inn') return '<p class="lov-medlem">🤝 ' + T('Du er invitert inn i <b>' + esc(t.gjeng.navn) + '</b>. Logg inn eller lag en gratis konto for å bli medlem. ', 'You’re invited to join <b>' + esc(t.gjeng.navn) + '</b>. Log in or create a free account to become a member. ') + '<a href="' + RUTE.konto + '" data-lov-login>' + T('Logg inn', 'Log in') + '</a></p>';
+    if (gjengSjekk === 'ikke-medlem') return '<p class="lov-medlem">' + T('Du er ikke med i ', 'You’re not in ') + '<b>' + esc(t.gjeng.navn) + '</b>' + T(' ennå. ', ' yet. ') + '<button class="btn small gold" data-g="lov-bli" type="button">' + T('Bli med i gjengen', 'Join the crew') + '</button></p>';
+    return '';
+  }
+  /* ---------- sosiale leker ---------- */
+  function skriveFelt(plass, knapp, maks) {
+    return '<form class="rf-skjema" id="sosSkjema"><div class="rf-rad"><input id="sosInput" maxlength="' + (maks || 120) + '" autocomplete="off" enterkeyhint="send" placeholder="' + esc(plass) + '">' +
+      '<button class="btn gold" type="submit">' + esc(knapp) + '</button></div></form>';
+  }
+  function hvem(ider) { return (ider || []).map(function (id) { return esc(navn(id)); }).join(', '); }
+  function spillerKnapper(g, unntak, valgt) {
+    return '<div class="rom-valg">' + tilstand.spillere.filter(function (p) { return (unntak || []).indexOf(p.id) === -1; }).map(function (p) {
+      return '<button type="button" data-g="' + g + '" data-paa="' + p.id + '" aria-pressed="' + (valgt === p.id) + '">' + esc(p.navn) + '</button>';
+    }).join('') + '</div>';
+  }
+  function nyRundeKnapp(tekst) { return '<button class="rom-stor-knapp" data-g="runde" type="button">' + esc(tekst) + '</button>'; }
+
+  function hvemskrevSpill(s) {
+    var n = tilstand.spillere.length;
+    if (s.fase === 'skriv') return '<p class="rom-etikett">' + T('Svar anonymt', 'Answer anonymously') + '</p><p class="rom-sporsmal">' + esc(s.oppgave) + '</p>' +
+      (s.mittSvar ? '<p class="small">' + T('Du skrev: <b>', 'You wrote: <b>') + esc(s.mittSvar) + T('</b> – du kan endre til alle har svart.', '</b> – you can change it until everyone has answered.') + '</p>' : '<p class="small">' + T('Ingen får vite at det var deg – før de gjetter det.', 'Nobody will know it was you – until they guess it.') + '</p>') +
+      skriveFelt(T('Skriv svaret ditt …', 'Type your answer …'), s.mittSvar ? T('Endre', 'Change') : 'Send', 160) +
+      '<p class="rom-status">' + s.harSkrevet.length + T(' av ', ' of ') + n + T(' har svart', ' have answered') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+    if (s.fase === 'gjett' || s.fase === 'fasit') {
+      var kort = '<p class="gt-count">' + T('Svar ', 'Answer ') + (s.i + 1) + T(' av ', ' of ') + s.antallSvar + '</p><div class="rom-kort rf-kort"><span class="sw-tag">' + esc(s.oppgave) + '</span><p>«' + esc(s.tekst) + '»</p><span></span></div>';
+      if (s.fase === 'gjett') return kort + (s.erMitt ? '<p class="rom-stor">' + T('Dette er ditt svar 🤫 Hold masken!', 'This is your answer 🤫 Keep a straight face!') + '</p>' :
+        '<p class="rom-etikett">' + T('Hvem skrev dette?', 'Who wrote this?') + '</p>' + spillerKnapper('hs-stem', [tilstand.meg], s.minStemme)) +
+        '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + (n - 1) + T(' har gjettet', ' have guessed') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+      var riktige = Object.keys(s.stemmer || {}).filter(function (id) { return s.stemmer[id] === s.forfatter; });
+      var feil = Object.keys(s.stemmer || {}).filter(function (id) { return s.stemmer[id] !== s.forfatter; });
+      return kort + '<p class="dl-melding dl-stor">' + T('Det var ', 'It was ') + esc(navn(s.forfatter)) + '!</p>' +
+        (riktige.length ? '<p>' + T('🎯 Riktig: ', '🎯 Right: ') + hvem(riktige) + '</p>' : '<p>' + T('Ingen gjettet det – ', 'Nobody guessed it – ') + esc(navn(s.forfatter)) + T(' deler ut 2.', ' hands out 2.') + '</p>') +
+        (feil.length ? '<p>' + T('🍺 Feil (drikk 1): ', '🍺 Wrong (drink 1): ') + hvem(feil) + '</p>' : '') +
+        (erVert() ? '<button class="rom-stor-knapp" data-g="hs-neste" type="button">' + (s.i + 1 < s.antallSvar ? T('Neste svar', 'Next answer') : T('Ferdig med runden', 'Finish the round')) + '</button>' : '');
+    }
+    return '<p class="dl-melding dl-stor">' + T('Alle svarene er avslørt!', 'All the answers are revealed!') + '</p>' + (erVert() ? nyRundeKnapp(T('Nytt spørsmål', 'New question')) : '<p class="small">' + T('Venter på at verten tar et nytt spørsmål …', 'Waiting for the host to pick a new question …') + '</p>');
+  }
+
+  function bloffSpill(s) {
+    var n = tilstand.spillere.length;
+    var q = '<p class="rom-etikett">' + T('Skrøna', 'Tall tales') + '</p><p class="rom-sporsmal">' + esc(s.q) + '</p>';
+    if (s.fase === 'skriv') return q + '<p class="small">' + T('Finn på et <b>troverdig feil svar</b>. Du får en 🍺 for hver du lurer.', 'Make up a <b>believable wrong answer</b>. You get a 🍺 for everyone you fool.') + '</p>' +
+      (s.mittSvar ? '<p class="small">' + T('Din løgn: <b>', 'Your lie: <b>') + esc(s.mittSvar) + '</b></p>' : '') + skriveFelt(T('Din løgn …', 'Your lie …'), s.mittSvar ? T('Endre', 'Change') : 'Send', 80) +
+      '<p class="rom-status">' + s.harSkrevet.length + T(' av ', ' of ') + n + T(' har skrevet', ' have written') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+    if (s.fase === 'stem') return q + '<p class="rom-etikett">' + T('Hvilket svar er det ekte?', 'Which answer is the real one?') + '</p><div class="rom-valg en">' + s.valg.map(function (v, i) {
+        return '<button type="button" data-g="bf-stem" data-i="' + i + '" aria-pressed="' + (s.minStemme === i) + '"' + (v.min ? ' disabled' : '') + '>' + esc(v.t) + (v.min ? T(' <small>(din løgn)</small>', ' <small>(your lie)</small>') : '') + '</button>';
+      }).join('') + '</div><p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + n + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+    return q + '<p class="dl-melding dl-stor">' + T('Svaret er: ', 'The answer is: ') + esc(s.sant) + '</p><ul class="bf-fasit">' + s.valg.map(function (v, i) {
+        var velgere = Object.keys(s.stemmer || {}).filter(function (id) { return s.stemmer[id] === i; });
+        var ekte = v.av[0] === 'sant';
+        return '<li class="' + (ekte ? 'ekte' : '') + '"><b>' + esc(v.t) + '</b><span>' + (ekte ? T('✓ Det ekte svaret', '✓ The real answer') : T('Løgn fra ', 'Lie from ') + hvem(v.av)) + '</span>' +
+          (velgere.length ? '<small>' + (ekte ? T('Riktig: ', 'Right: ') : T('Lurt: ', 'Fooled: ')) + hvem(velgere) + '</small>' : '') + '</li>';
+      }).join('') + '</ul><p class="small">' + T('Lurt = drikk 1. Løgneren deler ut 1 per person som ble lurt. Riktig = del ut 1.', 'Fooled = drink 1. The liar hands out 1 per person fooled. Right = hand out 1.') + '</p>' +
+      (erVert() ? nyRundeKnapp(T('Neste spørsmål', 'Next question')) : '');
+  }
+
+  function sammeSpill(s) {
+    var n = tilstand.spillere.length;
+    if (s.fase === 'skriv') return '<p class="rom-etikett">' + T('Skriv ett svar – tenk som de andre', 'Write one answer – think like the others') + '</p><p class="rom-sporsmal">' + esc(s.oppgave) + '</p>' +
+      (s.mittSvar ? '<p class="small">' + T('Du skrev: <b>', 'You wrote: <b>') + esc(s.mittSvar) + '</b></p>' : '') + skriveFelt(T('Ditt svar …', 'Your answer …'), s.mittSvar ? T('Endre', 'Change') : 'Send', 40) +
+      '<p class="rom-status">' + s.harSkrevet.length + T(' av ', ' of ') + n + T(' har svart', ' have answered') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+    var med = {}; (s.grupper || []).forEach(function (g) { g.ider.forEach(function (id) { med[id] = 1; }); });
+    var uten = tilstand.spillere.filter(function (p) { return !med[p.id]; }).map(function (p) { return p.id; });
+    return '<p class="rom-sporsmal">' + esc(s.oppgave) + '</p><ul class="sm-grupper">' + (s.grupper || []).map(function (g) {
+        return '<li class="' + (g.ider.length > 1 ? 'trygg' : 'alene') + '"><b>' + esc(g.t) + '</b><span>' + hvem(g.ider) + '</span><small>' + (g.ider.length > 1 ? T('Trygge ✓', 'Safe ✓') : T('Alene – drikk 1', 'Alone – drink 1')) + '</small></li>';
+      }).join('') + (uten.length ? '<li class="alene"><b>' + T('Ingen svar', 'No answer') + '</b><span>' + hvem(uten) + '</span><small>' + T('Drikk 1', 'Drink 1') + '</small></li>' : '') + '</ul>' +
+      (erVert() ? nyRundeKnapp(T('Nytt spørsmål', 'New question')) : '');
+  }
+
+  function spionSpill(s) {
+    var steder = '<details class="sp-steder"><summary>' + T('Alle mulige steder', 'All possible locations') + '</summary><p>' + s.steder.map(esc).join(' · ') + '</p></details>';
+    var rolle = s.erSpion ? '<div data-hemmelig class="rom-hemmelig lyv"><b>' + T('🐾 Du er muldvarpen', '🐾 You\'re the mole') + '</b></div><p>' + T('Finn ut hvor dere er uten å bli avslørt.', 'Figure out where you are without getting caught.') + '</p>'
+                          : '<div data-hemmelig class="rom-hemmelig sann"><b>' + esc(s.sted) + '</b></div><p>' + T('Én av dere er muldvarpen og vet ikke stedet. Ikke vær for tydelig!', 'One of you is the mole and doesn\'t know the location. Don\'t make it too obvious!') + '</p>';
+    if (s.fase === 'sporsmal') return '<p class="rom-etikett">' + T('Bare du ser dette', 'Only you can see this') + '</p>' + rolle +
+      '<p class="small">' + esc(navn(s.start)) + T(' stiller første spørsmål til hvem som helst. Den som svarer, spør videre.', ' asks anyone the first question. Whoever answers asks the next one.') + '</p>' +
+      fristHtml(tilstand.spill, T('sekunder til stemming', 'seconds until voting')) + steder +
+      (erVert() ? '<button class="btn ghost" data-g="sp-til-stemming" type="button">' + T('Til stemming nå', 'Vote now') + '</button>' : '');
+    if (s.fase === 'stem') return '<p class="rom-etikett">' + T('Hvem er muldvarpen?', 'Who\'s the mole?') + '</p>' + spillerKnapper('sp-stem', [tilstand.meg], s.minStemme) +
+      '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+    if (s.fase === 'gjett') return s.erSpion
+      ? '<p class="dl-melding dl-stor">' + T('Du er avslørt! Gjett stedet for å vinne likevel:', 'You\'ve been caught! Guess the location to win anyway:') + '</p><div class="rom-valg">' + s.steder.map(function (x) { return '<button type="button" data-g="sp-gjett" data-sted="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>' + fristHtml(tilstand.spill, T('sekunder', 'seconds'))
+      : '<p class="dl-melding dl-stor">' + esc(navn(s.spion)) + T(' er muldvarpen!', ' is the mole!') + '</p><p class="rom-stor">' + T('Men hen får én sjanse til å gjette stedet …', 'But they get one chance to guess the location …') + '</p>' + fristHtml(tilstand.spill, T('sekunder', 'seconds'));
+    var tekst = s.utfall === 'fanget' ? T('Muldvarpen ', 'The mole ') + esc(navn(s.spion)) + T(' ble tatt! Muldvarpen drikker 3.', ' got caught! The mole drinks 3.') :
+      s.utfall === 'spion-gjettet' ? esc(navn(s.spion)) + T(' ble tatt, men gjettet stedet – muldvarpen vinner! Alle andre drikker 2.', ' got caught but guessed the location – the mole wins! Everyone else drinks 2.') :
+      T('Muldvarpen ', 'The mole ') + esc(navn(s.spion)) + T(' slapp unna', ' got away') + (s.feilMistenkt ? T(' (dere tok ', ' (you picked ') + esc(navn(s.feilMistenkt)) + ')' : '') + T('. Alle andre drikker 2.', '. Everyone else drinks 2.');
+    return '<p class="dl-melding dl-stor">' + tekst + '</p><p>' + T('Stedet var <b>', 'The location was <b>') + esc(s.sted) + '</b>' + (s.spionGjett ? T(' – muldvarpen gjettet «', ' – the mole guessed “') + esc(s.spionGjett) + T('»', '”') : '') + '.</p>' +
+      (erVert() ? nyRundeKnapp(T('Ny runde', 'New round')) : '');
+  }
+
+  function pannekortSpill(s) {
+    if (s.fase === 'skriv') {
+      var skrevet = s.harSkrevet.indexOf(tilstand.meg) !== -1;
+      return '<p class="rom-etikett">' + T('Hvem er jeg?', 'Who am I?') + '</p><p>' + T('Skriv en person, figur eller ting til <b>', 'Write a person, character or thing for <b>') + esc(navn(s.mitMaal)) + T('</b>. Hen ser ikke ordet sitt – alle andre gjør.', '</b>. They can\'t see their own word – everyone else can.') + '</p>' +
+        (skrevet ? '<p class="small">' + T('✓ Sendt. Du kan endre til alle er klare.', '✓ Sent. You can change it until everyone\'s ready.') + '</p>' : '') + skriveFelt(T('F.eks. Kong Harald', 'E.g. Taylor Swift'), skrevet ? T('Endre', 'Change') : 'Send', 40) +
+        '<p class="rom-status">' + s.harSkrevet.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har skrevet', ' have written') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
+    }
+    var liste = '<div class="pk-liste">' + tilstand.spillere.map(function (p) {
+      var o = s.ord[p.id], meg = p.id === tilstand.meg, gjettet = s.gjettet.indexOf(p.id) !== -1;
+      return '<div class="pk-kort' + (meg ? ' meg' : '') + (gjettet ? ' gjettet' : '') + '"><span>' + esc(p.navn) + (meg ? T(' (deg)', ' (you)') : '') + '</span>' +
+        '<b>' + (meg && s.fase !== 'ferdig' ? '???' : o ? esc(o.t) : '–') + '</b>' +
+        (gjettet ? '<small>' + T('✓ Gjettet', '✓ Guessed') + '</small>' : (!meg && s.fase === 'spill' ? '<button class="mini" data-g="pk-riktig" data-paa="' + p.id + '" type="button">' + T('Gjettet riktig', 'Guessed it') + '</button>' : '')) + '</div>';
+    }).join('') + '</div>';
+    if (s.fase === 'spill') return '<p class="rom-etikett">' + T('Hvem er du?', 'Who are you?') + '</p><p class="small">' + T('Still ja/nei-spørsmål på omgang. Nei = neste person. Når noen gjetter riktig, trykker en av de andre «Gjettet riktig». Først ut deler ut 2 – sistemann drikker 3.', 'Take turns asking yes/no questions. A no passes to the next person. When someone guesses right, one of the others taps “Guessed it”. First one out hands out 2 – last one drinks 3.') + '</p>' + liste +
+      (erVert() ? '<button class="btn ghost" data-g="pk-avslutt" type="button">' + T('Avslutt runden', 'End the round') + '</button>' : '');
+    return '<p class="dl-melding dl-stor">' + (s.sist ? esc(navn(s.sist)) + T(' ble sist – drikk 3!', ' came last – drink 3!') : T('Runden er over!', 'The round is over!')) + '</p>' + liste + (erVert() ? nyRundeKnapp(T('Ny runde', 'New round')) : '');
+  }
+
+  var skalVist = null, skalTid = null, skalTimer = null;
+  function skalSpill(s) {
+    if (s.fase === 'vent') {
+      if (skalTid !== s.tid) {   // ny runde: planlegg når SKÅL vises på denne telefonen
+        skalTid = s.tid; skalVist = null; clearTimeout(skalTimer);
+        var om = s.tid - (Date.now() + klokkeAvvik);
+        skalTimer = setTimeout(function () {
+          skalVist = performance.now();
+          var b = document.getElementById('skalKnapp'); if (b) { b.classList.add('naa'); b.textContent = T('SKÅL!', 'CHEERS!'); }
+          try { navigator.vibrate && navigator.vibrate(80); } catch (e) {}
+        }, Math.max(0, om));
+      }
+      var trykket = s.harTrykket.indexOf(tilstand.meg) !== -1;
+      return '<button class="skal-knapp' + (skalVist ? ' naa' : '') + '" id="skalKnapp" data-g="sk-trykk" type="button"' + (trykket ? ' disabled' : '') + '>' +
+        (trykket ? T('Trykket!', 'Tapped!') : skalVist ? T('SKÅL!', 'CHEERS!') : T('Vent …', 'Wait …')) + '</button>' +
+        '<p class="rom-status">' + s.harTrykket.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har trykket', ' have tapped') + '</p>';
+    }
+    if (s.fase === 'fasit' && s.resultat) {
+      var r = s.resultat;
+      return '<p class="dl-melding dl-stor">' + (r.treigest ? esc(navn(r.treigest)) + T(' var treigest – drikk!', ' was slowest – drink!') : T('Runden er over', 'The round is over')) + '</p>' +
+        '<ol class="rom-resultat">' + r.tider.map(function (x) { return '<li><span>' + esc(navn(x[0])) + '</span><b>' + x[1] + ' ms</b></li>'; }).join('') + '</ol>' +
+        (r.tidlig.length ? '<p>' + T('For tidlig (drikk 2): ', 'Too early (drink 2): ') + hvem(r.tidlig) + '</p>' : '') +
+        (r.ikke.length ? '<p>' + T('Trykket ikke (drikk 1): ', 'Didn\'t tap (drink 1): ') + hvem(r.ikke) + '</p>' : '') +
+        '<button class="rom-stor-knapp" data-g="sk-start" type="button">' + T('Ny runde', 'New round') + '</button>';
+    }
+    return '<p class="dl-melding dl-stor">' + T('Klar?', 'Ready?') + '</p><p>' + T('Når det står <b>SKÅL!</b>, trykker alle så fort de kan. Treigest drikker. Trykker du for tidlig, drikker du dobbelt.', 'When it says <b>CHEERS!</b>, everyone taps as fast as they can. Slowest drinks. Tap too early and you drink double.') + '</p>' +
+      '<button class="rom-stor-knapp" data-g="sk-start" type="button">Start</button>';
+  }
+
+  /* ---------- hemmelige oppdrag ---------- */
+  /* ---------- Vorsbørsen ---------- */
+  /** +xx / −xx som flyter opp på skjermen når pengene dine endrer seg på børsen. */
+  var sisteBev = null;
+  function borsPenger(d) {
+    var liste = d && d.bors && d.bors.bev; if (!liste) { sisteBev = null; return; }
+    var maks = liste.reduce(function (x, e) { return Math.max(x, e.n); }, 0);
+    if (sisteBev === null || maks < sisteBev) { sisteBev = maks; return; }   // første visning eller ny børs: ikke vis gammelt
+    liste.filter(function (e) { return e.n > sisteBev; }).forEach(function (e, i) { setTimeout(function () { visPenger(e); }, 900 * i); });
+    sisteBev = maks;
+  }
+  function visPenger(e) {
+    var el = document.createElement('div'), pluss = e.kr > 0, stor = Math.abs(e.kr) >= 100;
+    el.className = 'bs-penger ' + (pluss ? 'opp' : 'ned') + (stor ? ' stor' : '');
+    el.setAttribute('role', 'status');
+    el.innerHTML = '<b>' + (pluss ? '+' : '−') + Math.abs(e.kr).toLocaleString(LOKALE) + T(' kr', ' 🪙') + (stor ? (pluss ? ' 💰' : ' 💸') : '') + '</b><span>' + esc(e.t || '') + '</span>';
+    document.body.appendChild(el);
+    if (stor && navigator.vibrate) try { navigator.vibrate(pluss ? [40, 60, 40] : 120); } catch (x) {}
+    try { spillLyd(pluss ? (stor ? 'kaching' : 'mynt') : (stor ? 'womp' : '')); } catch (x) {}
+    setTimeout(function () { el.remove(); }, 2600);
+  }
+  var borsReglerApen = false; window.__bdBsRegler = function (v) { borsReglerApen = v; };
+  var borsBytt = null, borsModal = null, borsFane = 'aksjer', borsMeld = null, borsAnmeld = null, borsTikkSendt = 0, borsFilter = 'apne', borsApen = null;
+  function kr(n) { return Math.round(n).toLocaleString(LOKALE) + T(' kr', ' 🪙'); }
+  function borsTrengerMeg() {
+    var b = tilstand && tilstand.bors; if (!b || !b.paa) return '';
+    var m = tilstand.meg;
+    if (b.aksjer.some(function (a) { return a.status === 'meldt' && a.melding && a.melding.subjekt !== m && !a.melding.minStemme; })) return 'stem';
+    if (b.saker.some(function (s) { return (s.fase === 'stem' || s.fase === 'forsvar') && (s.utenfor || []).indexOf(m) === -1 && !s.minStemme; })) return 'tilsyn';
+    if (erVert() && b.aksjer.some(function (a) { return a.status === 'venter'; })) return 'godkjenn';
+    return '';
+  }
+  function borsPille() {
+    var b = tilstand.bors; if (!b) return '';
+    var trenger = borsTrengerMeg();
+    // Børsen fyller allerede skjermen (hovedspill): ingen grunn til å vise knappen i tillegg
+    if (b.fokus && !tilstand.spill && !tilstand.ferdig && !trenger) return '';
+    // Hurtigvalget over leken viser allerede det som trenger deg – da holder det med en rolig knapp
+    if ((trenger === 'stem' || trenger === 'tilsyn') && /varsel/.test(borsHurtig())) trenger = '';
+    var tekst = b.paa ? '📈 ' + T('Vorsbørsen', 'The Exchange') + ' · ' + kr(b.formue || 0) : '📈 ' + T('Børsen er stengt – se resultatet', 'The Exchange is closed – see the results');
+    if (trenger === 'stem') tekst = '🗳️ ' + T('Børsen: stem – skjedde det?', 'Exchange: vote – did it happen?');
+    if (trenger === 'tilsyn') tekst = '🚨 ' + T('Børstilsynet trenger stemmen din', 'The watchdog needs your vote');
+    if (trenger === 'godkjenn') tekst = '🧾 ' + T('Ny aksje venter på godkjenning', 'A new share awaits approval');
+    return '<button class="bs-pille' + (trenger ? ' varsel' : '') + '" data-g="bs-aapne" type="button">' + tekst + '</button>';
+  }
+  /** Blålys: sirene og blinkende skjerm når noen blir anmeldt – og når noen blir dømt. */
+  var sakerSett = null;
+  function borsBlalys(d) {
+    var saker = (d && d.bors && d.bors.saker) || [];
+    var naa = {}; saker.forEach(function (s) { naa[s.id] = s.resultat ? (s.resultat.dom ? 'dom' : 'ferdig') : 'aapen'; });
+    if (sakerSett === null) { sakerSett = naa; return; }
+    var ny = saker.some(function (s) { return !sakerSett[s.id]; });
+    var dom = saker.some(function (s) { return naa[s.id] === 'dom' && sakerSett[s.id] !== 'dom'; });
+    sakerSett = naa;
+    if (ny || dom) blalys(dom);
+  }
+  function blalys(dom) {
+    var el = document.createElement('div'); el.className = 'bs-blalys' + (dom ? ' dom' : ''); el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<span>' + (dom ? '🚨 ' + T('DØMT!', 'CONVICTED!') : '🚨 ' + T('BØRSTILSYNET', 'MARKET WATCHDOG')) + '</span>';
+    document.body.appendChild(el); setTimeout(function () { el.remove(); }, 2600);
+    if (navigator.vibrate) try { navigator.vibrate([200, 100, 200, 100, 200]); } catch (x) {}
+    if (!lyd.paa || !lydCtx()) return;
+    // Sirene: to toner som veksler, med glidende overgang (som et utrykningskjøretøy)
+    for (var i = 0; i < 4; i++) { tone(650, i * 0.5, 0.25, 'sawtooth', 0.07, 950); tone(950, i * 0.5 + 0.25, 0.25, 'sawtooth', 0.07, 650); }
+    if (dom) setTimeout(function () { tone(220, 0, 0.5, 'square', 0.12, 110); }, 2000);
+  }
+  /**
+   * Børsen i bakgrunnen: det som trenger deg (stemme, dømme) og aksjer som snart stenger,
+   * vises rett over leken dere spiller – så du slipper å åpne børsen.
+   */
+  function borsHurtig() {
+    var t = tilstand, b = t.bors, m = t.meg; if (!b || !b.paa) return '';
+    if (b.fokus && !t.spill && !t.ferdig) return '';   // børsen er allerede hele skjermen
+    var stem = b.aksjer.find(function (a) { return a.status === 'meldt' && a.melding && a.melding.subjekt !== m && a.melding.av !== m && !a.melding.minStemme; });
+    if (stem) {
+      var ml = stem.melding;
+      return '<div class="bs-hurtig varsel"><p>🗳️ <b>' + esc(navn(ml.av)) + '</b>' + T(' melder: ', ' reports: ') + '<b>' + esc(utfallNavn(stem, ml.utfall)) + '</b> – ' + esc(stem.q) + '</p>' +
+        '<div class="rom-valg en"><button type="button" data-b="stem" data-v="ja" data-a="' + stem.id + '">' + T('✅ Skjedde', '✅ Happened') + '</button><button type="button" data-b="stem" data-v="nei" data-a="' + stem.id + '">' + T('❌ Nei', '❌ No') + '</button><button type="button" data-b="stem" data-v="vet" data-a="' + stem.id + '">' + T('🤷 Så ikke', '🤷 Didn’t see') + '</button></div></div>';
+    }
+    var sak = b.saker.find(function (s) { return (s.fase === 'stem' || s.fase === 'forsvar') && (s.utenfor || []).indexOf(m) === -1 && !s.minStemme; });
+    if (sak) return '<div class="bs-hurtig varsel sak"><p>🚨 ' + T('Sak: ', 'Case: ') + '<b>' + esc(navn(sak.av)) + '</b>' + T(' anmelder ', ' reports ') + '<b>' + esc(navn(sak.mot)) + '</b> – ' + esc(sak.q) + '</p>' +
+      '<div class="rom-valg en"><button type="button" data-b="sak-stem" data-v="skyldig" data-s="' + sak.id + '">' + T('🚨 Skyldig', '🚨 Guilty') + '</button><button type="button" data-b="sak-stem" data-v="uskyldig" data-s="' + sak.id + '">' + T('😇 Uskyldig', '😇 Not guilty') + '</button><button type="button" data-g="bs-aapne">' + T('Se loggen', 'See the log') + '</button></div></div>';
+    var naa = Date.now() + klokkeAvvik;
+    var snart = b.aksjer.filter(function (a) { return a.status === 'apen' && !a.laast && a.stenger && a.stenger - naa < 10 * 60000 && a.stenger > naa; });
+    if (snart.length) return '<div class="bs-hurtig"><p>⏳ ' + (snart.length === 1 ? '«' + esc(snart[0].q) + '»' + T(' stenger om ', ' closes in ') + Math.max(1, Math.round((snart[0].stenger - naa) / 60000)) + ' min' : snart.length + T(' aksjer stenger innen 10 min', ' shares close within 10 min')) + '</p>' +
+      '<div class="rom-valg en"><button type="button" data-g="bs-aapne">' + T('Handle nå', 'Trade now') + '</button></div></div>';
+    return '';
+  }
+  function utfallNavn(a, u) { return a.type === 'hvem' ? navn(u) : (u === 'ja' ? T('Ja', 'Yes') : T('Nei', 'No')); }
+  function borsTid(a) {
+    if (!a.stenger) return '<span class="bs-tid">' + T('åpen hele kvelden', 'open all night') + '</span>';
+    var min = Math.round((a.stenger - (Date.now() + klokkeAvvik)) / 60000);
+    if (min <= 0) return '<span class="bs-tid">🔒 ' + T('stengt for handel', 'closed for trading') + '</span>';
+    return '<span class="bs-tid">⏳ ' + T('stenger om ', 'closes in ') + (min >= 60 ? Math.floor(min / 60) + ' t ' + (min % 60) + ' min' : min + ' min') + '</span>';
+  }
+  function borsAksjeHtml(a) {
+    var b = tilstand.bors, m = tilstand.meg;
+    var katNavn = (BS_KAT.find(function (k) { return k[0] === a.kat; }) || [])[T(1, 2)];
+    var hode = '<div class="bs-aksje-topp"><span class="bs-type">' + (a.type === 'hvem' ? T('Hvem', 'Who') : T('Ja/nei', 'Yes/no')) + (katNavn ? ' · ' + esc(katNavn) : '') + (a.egen ? ' · ' + T('notert av ', 'listed by ') + esc(navn(a.av)) : '') + '</span><b>' + esc(a.q) + '</b>' + (a.status === 'apen' || a.status === 'stengt' ? borsTid(a) : '') + '</div>';
+    if (a.status === 'venter') {
+      return '<div class="bs-aksje venter">' + hode + (erVert() ? '<p class="small">' + T('Godkjenne aksjen? Avviser du, får hen pengene tilbake.', 'Approve this share? If you reject it, they get their money back.') + '</p><div class="dl-knapper"><button class="btn small gold" data-b="godkjenn" data-a="' + a.id + '" type="button">' + T('Godkjenn', 'Approve') + '</button><button class="btn small ghost" data-b="avvis" data-a="' + a.id + '" type="button">' + T('Avvis', 'Reject') + '</button></div>' : '<p class="small">' + T('Venter på at verten godkjenner.', 'Waiting for the host to approve.') + '</p>') + '</div>';
+    }
+    if (a.laast) {
+      return '<div class="bs-aksje laast">' + hode + '<p class="small">🔒 ' + T('Låst i gratisbørsen. ', 'Locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp med Pluss', 'Unlock with Plus') + '</button></p></div>';
+    }
+    if (a.status === 'meldt' && a.melding) {
+      var ml = a.melding, kanStemme = ml.subjekt !== m;
+      return '<div class="bs-aksje meldt">' + hode + '<p class="bs-meldt">🔒 📣 <b>' + esc(navn(ml.av)) + '</b>' + T(' melder: ', ' reports: ') + '<b>' + esc(utfallNavn(a, ml.utfall)) + '</b>' + (ml.vitne ? T(' · vitne: ', ' · witness: ') + esc(navn(ml.vitne)) : '') + '</p>' +
+        '<p class="small">' + T('Aksjen er låst for handel mens dere stemmer.', 'The share is locked for trading while you vote.') + '</p>' +
+        (a.bilde ? '<img class="bs-bilde" src="' + a.bilde + '" alt="' + T('Bevis', 'Evidence') + '">' : '') +
+        (kanStemme ? '<div class="rom-valg en bs-stem"><button type="button" data-b="stem" data-v="ja" data-a="' + a.id + '" aria-pressed="' + (ml.minStemme === 'ja') + '">' + T('✅ Det skjedde', '✅ It happened') + '</button><button type="button" data-b="stem" data-v="nei" data-a="' + a.id + '" aria-pressed="' + (ml.minStemme === 'nei') + '">' + T('❌ Skjedde ikke', '❌ Didn’t happen') + '</button><button type="button" data-b="stem" data-v="vet" data-a="' + a.id + '" aria-pressed="' + (ml.minStemme === 'vet') + '">' + T('🤷 Så det ikke', '🤷 Didn’t see it') + '</button></div>'
+          : '<p class="small">' + T('Dette handler om deg, så du stemmer ikke.', 'This is about you, so you don’t vote.') + '</p>') +
+        '<p class="rom-status">' + ml.harStemt.length + T(' har stemt', ' have voted') + '</p>' +
+        (ml.utsatt ? '<p class="small">⏳ ' + T('For få har stemt. Den venter på at noen til sier ja eller nei' + (tilstand.gjeng ? ' – og etter kvelden kan dere stemme på gjengsiden.' : '.'), 'Too few votes. It waits for one more yes or no' + (tilstand.gjeng ? ' – and after the night you can vote on the crew page.' : '.')) + '</p>' : fristHtml({ frist: ml.frist }, T('sekunder igjen', 'seconds left'))) + '</div>';
+    }
+    if (a.status === 'utsatt') return '<div class="bs-aksje meldt">' + hode + '<p class="small">⏳ ' + T('Mangler stemmer – avgjøres på gjengsiden innen 48 timer. Blir den godkjent, betales gevinsten inn i lommeboka di i gjengen.', 'Missing votes – settled on the crew page within 48 hours. If confirmed, the payout goes into your crew wallet.') + '</p></div>';
+    if (a.status === 'avgjort' || a.status === 'ugyldig') {
+      var kanAnmelde = a.status === 'avgjort' && b.paa && a.vinnere && a.vinnere.length;
+      return '<div class="bs-aksje ferdig">' + hode + '<p>' + (a.status === 'avgjort' ? '✅ ' + esc(utfallNavn(a, a.vinner)) : T('Ugyldig – pengene tilbake', 'Void – money returned')) + (a.fikk ? ' · <b>' + T('Du fikk ', 'You got ') + kr(a.fikk) + '</b>' : '') + '</p>' +
+        (kanAnmelde ? '<button class="linkbtn" data-b="anmeld-aapne" data-a="' + a.id + '" type="button">' + T('🚨 Anmeld en vinner for innsidehandel', '🚨 Report a winner for insider trading') + '</button>' : '') +
+        (kanAnmelde && borsAnmeld === a.id ? '<div class="bs-anmeld"><p class="small">' + T('Bare de som tjente på aksjen kan anmeldes. Handler og pengegaver vises i tilsynet. Blir hen frikjent, betaler du 200 kr.', 'Only those who profited from the share can be reported. Trades and money gifts are shown to the watchdog. If they’re acquitted, you pay 200.') + '</p><div class="rom-valg">' +
+          a.vinnere.map(function (id) { return '<label class="bs-kryss"><input type="radio" name="bsMot" value="' + esc(id) + '"> ' + esc(navn(id)) + '</label>'; }).join('') +
+          '</div><button class="btn small gold" data-b="anmeld" data-a="' + a.id + '" type="button">' + T('Send til Børstilsynet', 'Send to the watchdog') + '</button></div>' : '') + '</div>';
+    }
+    // Åpen eller stengt for handel
+    var stengt = a.status === 'stengt';
+    var rader = a.utfall.map(function (x) {
+      var meg0 = a.type === 'hvem' && x.u === m, egen = a.av === m;
+      var knapper = '';
+      if (meg0 || egen) knapper = '<span class="bs-sperret">' + (meg0 ? T('deg selv', 'yourself') : T('din aksje', 'your share')) + '</span>';
+      if (x.skjult) return '<div class="bs-rad bs-meg"><span class="bs-navn">' + esc(utfallNavn(a, x.u)) + '</span><span class="bs-kurs">🙈<small>' + T('skjult', 'hidden') + '</small></span><span class="bs-sperret">' + T('+' + ((b.priser && b.priser.hovedrolle) || 30) + ' kr hvis det blir deg', '+' + ((b.priser && b.priser.hovedrolle) || 30) + ' if it’s you') + '</span></div>';
+      else if (stengt) knapper = x.mine ? '<span class="bs-sperret">' + T('du har ', 'you own ') + x.mine + '</span>' : '';
+      else knapper = '<span class="bs-knapper"><button type="button" class="bs-kjop" data-b="kjop" data-a="' + a.id + '" data-u="' + esc(x.u) + '">' + T('Kjøp ', 'Buy ') + x.kurs + '</button>' +
+        (x.mine ? (x.klare ? '<button type="button" class="bs-selg" data-b="selg" data-a="' + a.id + '" data-u="' + esc(x.u) + '">' + T('Selg ', 'Sell ') + x.selg + '</button>'
+          : '<button type="button" class="bs-selg" disabled title="' + T('Du må eie aksjen i 10 minutter før du kan selge', 'You must hold the share for 10 minutes before selling') + '">🔒 ' + x.selgOm + ' min</button>') : '') + '</span>';
+      return '<div class="bs-rad"><span class="bs-navn">' + esc(utfallNavn(a, x.u)) + (x.mine && !stengt ? ' <small>' + T('du har ', 'you own ') + x.mine + '</small>' : '') + '</span><span class="bs-kurs">' + x.kurs + '<small>' + T('odds ', 'odds ') + String(x.odds).replace('.', EN ? '.' : ',') + '</small></span>' + knapper + '</div>';
+    }).join('');
+    var meld = borsMeld === a.id
+      ? '<div class="bs-meld"><p class="small">' + T('Hva skjedde? Aksjen låses med en gang. Legg gjerne ved bilde eller et vitne – så stemmer de andre.', 'What happened? The share locks right away. Add a photo or a witness if you like – then the others vote.') + '</p>' +
+        (a.type === 'hvem' ? '<label class="lab">' + T('Hvem?', 'Who?') + '</label><select id="bsHvem">' + a.utfall.map(function (x) { return '<option value="' + esc(x.u) + '">' + esc(navn(x.u)) + '</option>'; }).join('') + '</select>' : '') +
+        '<label class="lab">' + T('Vitne (valgfritt)', 'Witness (optional)') + '</label><select id="bsVitne"><option value="">' + T('Ingen', 'None') + '</option>' + tilstand.spillere.filter(function (p) { return p.id !== m; }).map(function (p) { return '<option value="' + p.id + '">' + esc(p.navn) + '</option>'; }).join('') + '</select>' +
+        '<label class="lab">' + T('Bilde (valgfritt – slettes når aksjen er avgjort)', 'Photo (optional – deleted once settled)') + '</label><input id="bsBilde" type="file" accept="image/*" capture="environment">' +
+        '<div class="dl-knapper"><button class="btn small gold" data-b="meld" data-a="' + a.id + '" type="button">' + T('Meld', 'Report') + '</button><button class="btn small ghost" data-b="meld-avbryt" type="button">' + T('Avbryt', 'Cancel') + '</button></div></div>'
+      : '<button class="btn small ghost bs-meldknapp" data-b="meld-aapne" data-a="' + a.id + '" type="button">' + (a.type === 'hvem' ? T('📣 Det skjedde!', '📣 It happened!') : T('📣 Det skjedde – ja!', '📣 It happened – yes!')) + '</button>';
+    return '<div class="bs-aksje' + (stengt ? ' stengt' : '') + '">' + hode + '<div class="bs-rader"><div class="bs-rad bs-rad-topp"><span></span><span>' + T('Kurs', 'Price') + '</span><span></span></div>' + rader + '</div>' + meld + '</div>';
+  }
+  /** Kort oppsummering av en aksje i lista: trykk for å åpne den. */
+  function borsRad(a) {
+    var m = tilstand.meg, venstre = '', hoyre = '';
+    var mine = a.utfall.filter(function (x) { return x.mine; });
+    if (a.status === 'avgjort' || a.status === 'ugyldig') {
+      hoyre = a.status === 'avgjort' ? '✅ ' + esc(utfallNavn(a, a.vinner)) : T('Ugyldig', 'Void');
+      if (a.fikk) hoyre += ' · <b>+' + kr(a.fikk) + '</b>';
+    } else if (a.laast) hoyre = '🔒 Pluss';
+    else if (a.status === 'meldt') hoyre = '📣 ' + T('meldt – stemmes over', 'reported – being voted on');
+    else if (a.status === 'venter') hoyre = '🧾 ' + T('venter på verten', 'awaiting the host');
+    else if (a.status === 'utsatt') hoyre = '⏳ ' + T('venter på stemmer', 'awaiting votes');
+    else {
+      // Favoritten vises ikke i lista – da hiver ikke alle seg på den samme. Oddsen ser du når du åpner aksjen.
+      hoyre = T('Handle ›', 'Trade ›');
+    }
+    venstre = (a.status === 'apen' && a.stenger ? borsTid(a) : a.status === 'stengt' ? '<span class="bs-tid">🔒 ' + T('stengt for handel', 'closed for trading') + '</span>' : '') +
+      (mine.length ? '<span class="bs-mine">' + T('Du: ', 'You: ') + mine.map(function (x) { return x.mine + '× ' + esc(utfallNavn(a, x.u)); }).join(', ') + '</span>' : '');
+    var kanMelde = (a.status === 'apen' || a.status === 'stengt') && !a.laast && tilstand.bors.paa;
+    var anmeld = kanMelde ? '<button class="btn small ghost bs-anmeldknapp" data-b="meld-rask" data-a="' + a.id + '" type="button">📣 ' + T('Det skjedde!', 'It happened!') + '</button>' : (a.status === 'avgjort' && tilstand.bors.paa && a.vinnere && a.vinnere.length) ? '<button class="btn small ghost bs-anmeldknapp" data-b="anmeld-aapne" data-a="' + a.id + '" type="button">🚨 ' + T('Anmeld', 'Report') + '</button>' : '';
+    // Bytt: aksjer på hånda du ikke eier noe i kan byttes mot en ny fra potten
+    var hd = tilstand.bors.hand;
+    var bytt = '';
+    if (a.iHand && a.status === 'apen' && !mine.length && hd && tilstand.bors.paa) {
+      var sl = tilstand.alkoholfri ? T('1 straffepoeng', '1 penalty point') : T('1 slurk 🍺', '1 sip 🍺');
+      bytt = borsBytt === a.id
+        ? '<span class="bs-byttvalg">' + T('Bytt for:', 'Swap for:') + ' <button class="btn small gold" data-b="bytt-ok" data-med="kr" data-a="' + a.id + '" type="button">' + kr(hd.pris) + '</button><button class="btn small gold" data-b="bytt-ok" data-med="slurk" data-a="' + a.id + '" type="button">' + sl + '</button><button class="linkbtn" data-b="bytt" data-a="' + a.id + '" type="button">' + T('Avbryt', 'Cancel') + '</button></span>'
+        : '<button class="btn small ghost bs-byttknapp" data-b="bytt" data-a="' + a.id + '" type="button" title="' + T('Bytt mot en ny aksje', 'Swap for a new share') + '">🔄 ' + T('Bytt', 'Swap') + '</button>';
+    }
+    return '<div class="bs-kompakt' + (a.status === 'avgjort' || a.status === 'ugyldig' ? ' ferdig' : '') + '"><button type="button" class="bs-kompakt-knapp" data-b="aksje-aapne" data-a="' + a.id + '">' +
+      '<span class="bs-kompakt-q">' + esc(a.q) + '</span><span class="bs-kompakt-meta">' + venstre + '</span><span class="bs-kompakt-hoyre">' + hoyre + '</span></button>' + (anmeld || bytt ? '<div class="bs-kompakt-knapper">' + anmeld + bytt + '</div>' : '') +
+      (borsAnmeld === a.id ? anmeldSkjema(a) : '') + '</div>';
+  }
+  /** Hvorfor det ikke går an å anmelde noen for denne aksjen. */
+  function hvorforIkke(a) {
+    if (!tilstand.bors.paa) return T('Børsen er stengt – gevinstene er endelige.', 'The Exchange is closed – payouts are final.');
+    if (a.status === 'ugyldig') return T('Ugyldig – alle fikk pengene tilbake, ingen tjente på den.', 'Void – everyone was refunded, nobody profited.');
+    if (!a.antallVinnere) return T('Ingen hadde kjøpt det som skjedde – ingen å anmelde.', 'Nobody had bought what happened – nobody to report.');
+    if (a.jegVant && a.antallVinnere === 1) return T('Bare du tjente på denne – du kan ikke anmelde deg selv.', 'Only you profited from this – you can’t report yourself.');
+    return T('Alle som tjente på denne er allerede etterforsket.', 'Everyone who profited from this has already been investigated.');
+  }
+  function anmeldSkjema(a) {
+    return '<div class="bs-anmeld"><p class="small">' + T('Hvem tror du fikset det sammen med noen? Bare de som tjente på aksjen kan anmeldes. Tilsynet åpner handlene og pengegavene deres. Skyldig: hele gevinsten beslaglegges, 300 kr i bot og 5 slurker. Frikjent: du betaler 200 kr.', 'Who do you think set it up with someone? Only those who profited can be reported. The watchdog opens their trades and money gifts. Guilty: the whole payout is seized, a 300 fine and 5 sips. Acquitted: you pay 200.') + '</p><div class="rom-valg">' +
+      a.vinnere.map(function (id) { return '<label class="bs-kryss"><input type="radio" name="bsMot" value="' + esc(id) + '"' + (a.vinnere.length === 1 ? ' checked' : '') + '> ' + esc(navn(id)) + '</label>'; }).join('') +
+      '</div><div class="dl-knapper"><button class="btn small gold" data-b="anmeld" data-a="' + a.id + '" type="button">' + T('Send til Børstilsynet', 'Send to the watchdog') + '</button><button class="btn small ghost" data-b="anmeld-aapne" data-a="' + a.id + '" type="button">' + T('Avbryt', 'Cancel') + '</button></div></div>';
+  }
+  /** Børsen som hovedspill: vises på hele skjermen i stedet for lobbyen. */
+  function borsSide() {
+    var html = borsInnhold().replace(/<div class="rom-tavle-topp">[\s\S]*?<\/div>/, '<h1 class="rom-h1">📈 ' + T('Vorsbørsen', 'The Exchange') + '</h1><p class="small">' + T('Børsen er kveldens hovedspill. Kjøp aksjer i det dere tror skjer – og meld det når det gjør det.', 'The Exchange is tonight’s main game. Buy shares in what you think will happen – and report it when it does.') + '</p>');
+    return '<div class="bs-side">' + html + (erVert() ? '<div class="bs-side-vert"><button class="btn ghost" data-b="bakgrunn" type="button">' + T('🎲 Spill en lek ved siden av (børsen fortsetter i bakgrunnen)', '🎲 Play a game on the side (the Exchange keeps running)') + '</button></div>' : '') + '</div>';
+  }
+  function borsInnhold() {
+    var b = tilstand.bors, m = tilstand.meg;
+    var faner = [['aksjer', T('Aksjer', 'Shares')], ['tavle', T('Tavla', 'Board')], ['butikk', T('🛒 Butikk', '🛒 Shop')], ['tilsyn', T('Tilsynet', 'Watchdog') + (b.saker.some(function (s) { return s.fase !== 'ferdig'; }) ? ' 🚨' : '')]];
+    var ut = '<div class="rom-tavle-topp"><h2>📈 ' + T('Vorsbørsen', 'The Exchange') + '</h2><button class="linkbtn" data-b="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>';
+    if (b.slutt) {
+      return ut + '<p class="dl-melding dl-stor">' + T('Børsen er stengt!', 'The Exchange is closed!') + '</p><ol class="bs-tavle">' + b.slutt.rang.map(function (x, i) {
+        return '<li class="' + (x.id === m ? 'meg' : '') + '"><span>' + (x.id === b.slutt.konge ? '👑 ' : x.id === b.slutt.konkurs ? '📉 ' : (i + 1) + '. ') + esc(navn(x.id)) + '</span><b>' + kr(x.kr) + (x.gevinst != null && b.startKr != null ? ' <small>(' + (x.gevinst >= 0 ? '+' : '−') + Math.abs(x.gevinst) + T(' i kveld', ' tonight') + ')</small>' : '') + '</b></li>'; }).join('') + '</ol>' +
+        '<p>' + '👑 ' + esc(navn(b.slutt.konge)) + T(' er Børskongen. ', ' is the Market King. ') + '📉 ' + esc(navn(b.slutt.konkurs)) + T(' gikk konkurs og spinner straffehjulet!', ' went bankrupt and spins the penalty wheel!') + '</p>' +
+        '<div class="dl-knapper"><button class="btn gold" data-g="hjul-aapne" type="button">🎡 ' + T('Straffehjulet', 'Penalty wheel') + '</button>' + (erVert() ? '<button class="btn ghost" data-b="fjern" type="button">' + T('Fjern børsen', 'Remove the Exchange') + '</button>' : '') + '</div>';
+    }
+    ut += '<p class="bs-saldo">' + T('Kontanter ', 'Cash ') + '<b>' + kr(b.saldo || 0) + '</b> · ' + T('formue ', 'net worth ') + '<b>' + kr(b.formue || 0) + '</b>' +
+      (b.startKr != null ? ' <small>' + T('(tok med ' + kr(b.startKr) + ' fra gjengen)', '(brought ' + kr(b.startKr) + ' from the crew)') + '</small>' : '') + '</p>';
+    ut += '<div class="rom-mod bs-faner">' + faner.map(function (f) { return '<button type="button" data-b="fane" data-f="' + f[0] + '" aria-pressed="' + (borsFane === f[0]) + '">' + esc(f[1]) + '</button>'; }).join('') + '</div>';
+    if (borsFane === 'butikk') {
+      var bu = b.butikk || {}, andre = tilstand.spillere.filter(function (p) { return p.id !== m; });
+      return ut + '<p class="small">' + T('Bruk vorskronene på hverandre. Alt du kjøper, vises for alle.', 'Spend your coins on each other. Everything you buy is shown to everyone.') + '</p>' +
+        '<div class="bs-vare"><b>🍺 ' + T('Send slurker', 'Send sips') + '</b><span class="small">' + T('Hver slurk du kjøper i kveld gjør den neste dyrere.', 'Every sip you buy tonight makes the next one pricier.') + '</span>' +
+          '<select id="bsSlurkTil">' + andre.map(function (p) { return '<option value="' + p.id + '">' + esc(p.navn) + (p.immun ? ' 🛡️' : '') + '</option>'; }).join('') + '</select>' +
+          '<div class="dl-knapper">' + [1, 2, 3, 5].map(function (n) { return '<button class="btn small ghost" data-b="kjop-slurk" data-n="' + n + '" type="button">' + n + ' · ' + kr((bu.slurkPriser || {})[n] || n * bu.slurk) + '</button>'; }).join('') + '</div></div>' +
+        '<div class="bs-vare"><b>🛡️ ' + T('Immunitet', 'Immunity') + '</b><span class="small">' + T('Slipp neste gang du får slurker – fra en lek, butikken eller 🍺. Du har ', 'Skip the next time you get sips – from a game, the shop or 🍺. You have ') + (bu.immun || 0) + T(' av ', ' of ') + bu.maksImmun + '.</span>' +
+          '<button class="btn small gold" data-b="kjop-immun" type="button"' + ((bu.immun || 0) >= bu.maksImmun ? ' disabled' : '') + '>' + T('Kjøp', 'Buy') + ' · ' + kr(bu.prisImmun) + '</button></div>' +
+        '<div class="bs-vare"><b>🏅 ' + T('Kjøp et kveldspoeng', 'Buy a night point') + '</b><span class="small">' + T('Ett per person per kveld. Kan avgjøre hvem som vinner kvelden – og får velge regel.', 'One per person per night. Could decide who wins the night – and picks the rule.') + '</span>' +
+          '<button class="btn small gold" data-b="kjop-poeng" type="button"' + (bu.poengKjopt ? ' disabled' : '') + '>' + (bu.poengKjopt ? T('Kjøpt i kveld ✓', 'Bought tonight ✓') : T('Kjøp', 'Buy') + ' · ' + kr(bu.prisPoeng || bu.poeng)) + '</button></div>' +
+        (bu.faktor > 1 ? '<p class="small">📈 ' + T('Prisene følger formuen i rommet – dere er rike, så alt koster ' + String(bu.faktor).replace('.', ',') + ' ganger så mye i kveld.', 'Prices follow the wealth in the room – you’re rich, so everything costs ' + bu.faktor + '× tonight.') + '</p>' : '<p class="small">' + T('Prisene stiger når dere blir rikere.', 'Prices rise as you get richer.') + '</p>');
+    }
+    if (borsFane === 'tavle') {
+      return ut + '<ol class="bs-tavle">' + b.tavle.map(function (x, i) { return '<li class="' + (x.id === m ? 'meg' : '') + '"><span>' + (i + 1) + '. ' + esc(navn(x.id)) + '</span><b>' + kr(x.kr) + '</b></li>'; }).join('') + '</ol>' +
+        '<p class="small">' + T('Formue = kontanter + dagens verdi av aksjene. Handler og gaver er hemmelige – til noen anmelder dem.', 'Net worth = cash + current value of your shares. Trades and gifts are secret – until someone reports them.') + '</p>' +
+        (b.paa ? '<details class="bs-noter bs-gi"><summary>' + T('💸 Gi vorskroner til noen', '💸 Give coins to someone') + '</summary><p class="small">' + T('Lov og hemmelig – men dukker opp i tilsynet hvis mottakeren eller giveren blir anmeldt.', 'Allowed and secret – but shows up to the watchdog if the giver or receiver is reported.') + '</p>' +
+          '<select id="bsGiTil">' + tilstand.spillere.filter(function (p) { return p.id !== m; }).map(function (p) { return '<option value="' + p.id + '">' + esc(p.navn) + '</option>'; }).join('') + '</select>' +
+          '<div class="dl-knapper">' + [50, 100, 200].map(function (n) { return '<button class="btn small ghost" data-b="gi" data-kr="' + n + '" type="button">' + kr(n) + '</button>'; }).join('') + '</div></details>' : '') +
+        (b.mineGaver && b.mineGaver.length ? '<p class="small">' + b.mineGaver.map(function (g) { return g.fra === m ? T('Du ga ', 'You gave ') + esc(navn(g.til)) + ' ' + kr(g.kr) : esc(navn(g.fra)) + T(' ga deg ', ' gave you ') + kr(g.kr); }).join(' · ') + '</p>' : '') +
+        (erVert() ? '<button class="btn ghost" data-b="avslutt" type="button">' + T('Steng børsen og kår Børskongen', 'Close the Exchange and crown the Market King') + '</button>' : '');
+    }
+    if (borsFane === 'tilsyn') {
+      // Alle avgjorte aksjer vises – med forklaring når det ikke er noen å anmelde
+      var alleAvgjort = b.aksjer.filter(function (a) { return a.status === 'avgjort' || a.status === 'ugyldig'; }).reverse();
+      var anm = '<div class="bs-anmeld-liste"><p class="rom-etikett">🚨 ' + T('Anmeld innsidehandel', 'Report insider trading') + '</p>' +
+        (alleAvgjort.length ? '<p class="small">' + T('Mistenker du at en vinner fikset det sammen med noen? Trykk «Anmeld» på aksjen. Bare de som tjente på den kan anmeldes.', 'Suspect a winner set it up with someone? Tap “Report” on the share. Only those who profited from it can be reported.') + '</p>' +
+          alleAvgjort.map(function (a) { return borsRad(a) + (a.vinnere && a.vinnere.length && b.paa ? '' : '<p class="small bs-hvorfor">' + hvorforIkke(a) + '</p>'); }).join('')
+          : '<p class="small">' + T('Ingen aksjer er avgjort ennå. Når noen melder «📣 Det skjedde!» og det blir bekreftet, kan du anmelde dem som tjente på den her.', 'No shares are settled yet. When someone reports “📣 It happened!” and it’s confirmed, you can report those who profited from it here.') + '</p>') + '</div>';
+      if (!b.saker.length) return ut + anm;
+      return ut + anm + '<p class="rom-etikett">⚖️ ' + T('Saker', 'Cases') + '</p>' + b.saker.slice().reverse().map(function (s) {
+        var part = (s.utenfor || []).indexOf(m) !== -1;
+        return '<div class="bs-sak"><p class="rom-etikett">🚨 ' + T('Sak: ', 'Case: ') + esc(s.q) + '</p><p>' + esc(navn(s.av)) + T(' anmelder ', ' reports ') + '<b>' + esc(navn(s.mot)) + '</b>' + (s.vinner ? T(' · utfall: ', ' · outcome: ') + esc(s.type === 'hvem' ? navn(s.vinner) : s.vinner) : '') + '</p>' +
+          '<table class="bs-logg"><thead><tr><th>' + T('Hvem', 'Who') + '</th><th>' + T('Handel', 'Trade') + '</th><th>kr</th><th>' + T('Før', 'Before') + '</th></tr></thead><tbody>' +
+          s.logg.map(function (l) { return '<tr class="' + (l.mistenkelig ? 'mistenkelig' : '') + '"><td>' + esc(l.navn) + '</td><td>' + (l.n > 0 ? T('kjøpte ', 'bought ') : T('solgte ', 'sold ')) + Math.abs(l.n) + ' ' + esc(s.type === 'hvem' ? navn(l.utfall) : l.utfall) + '</td><td>' + Math.abs(l.kr) + '</td><td>' + l.minFor + ' min' + (l.mistenkelig ? ' ⚠️' : '') + '</td></tr>'; }).join('') +
+          '</tbody></table>' +
+          (s.penger && s.penger.length ? '<p class="rom-etikett">💸 ' + T('Pengegaver', 'Money gifts') + '</p><table class="bs-logg"><thead><tr><th>' + T('Fra', 'From') + '</th><th>' + T('Til', 'To') + '</th><th>kr</th><th>' + T('Når', 'When') + '</th></tr></thead><tbody>' +
+            s.penger.map(function (g) { return '<tr class="' + (g.mistenkelig ? 'mistenkelig' : '') + '"><td>' + esc(g.fra) + '</td><td>' + esc(g.til) + '</td><td>' + g.kr + '</td><td>' + (g.minEtter < 0 ? -g.minEtter + T(' min før', ' min before') : g.minEtter + T(' min etter', ' min after')) + (g.mistenkelig ? ' ⚠️' : '') + '</td></tr>'; }).join('') + '</tbody></table>' : '') +
+          (s.fase === 'forsvar' ? '<p class="small">' + T('Begge sider får 30 sekunder hver. Så stemmer resten – 2/3 må si skyldig.', 'Both sides get 30 seconds each. Then the rest vote – 2/3 must say guilty.') + '</p>' + fristHtml({ frist: s.frist }, T('sekunder til avstemning', 'seconds until the vote')) + (erVert() ? '<button class="btn small ghost" data-b="sak-videre" data-s="' + s.id + '" type="button">' + T('Til avstemning nå', 'Vote now') + '</button>' : '') : '') +
+          (s.fase === 'stem' || s.fase === 'forsvar' ? (part ? '<p class="small">' + T('Du er part i saken og stemmer ikke.', 'You’re part of the case and don’t vote.') + '</p>'
+            : '<div class="rom-valg en"><button type="button" data-b="sak-stem" data-v="skyldig" data-s="' + s.id + '" aria-pressed="' + (s.minStemme === 'skyldig') + '">' + T('🚨 Skyldig', '🚨 Guilty') + '</button><button type="button" data-b="sak-stem" data-v="uskyldig" data-s="' + s.id + '" aria-pressed="' + (s.minStemme === 'uskyldig') + '">' + T('😇 Uskyldig', '😇 Not guilty') + '</button></div>') +
+            (s.fase === 'stem' ? fristHtml({ frist: s.frist }, T('sekunder igjen', 'seconds left')) : '') : '') +
+          (s.resultat ? '<p class="dl-melding">' + (s.resultat.henlagt ? T('⚖️ Ingen stemte – saken er henlagt. Ingen straffes.', '⚖️ Nobody voted – the case is dropped. Nobody is punished.') : (s.resultat.bevis ? T('🔎 For få til å stemme – bevisene avgjorde: ', '🔎 Too few to vote – the evidence decided: ') : '') + (s.resultat.dom ? T('🚨 Skyldig! ' + (s.resultat.beslag ? kr(s.resultat.beslag) + ' i gevinst beslaglagt' : 'Gevinsten beslaglagt') + ', 300 kr i bot og 5 slurker.', '🚨 Guilty! ' + (s.resultat.beslag ? kr(s.resultat.beslag) + ' in profits seized' : 'Profits seized') + ', a 300 fine and 5 sips.') + (s.resultat.medskyldig ? ' ' + esc(navn(s.resultat.medskyldig)) + T(' var medskyldig: gaven inndras, 300 kr i bot og 3 slurker.', ' was an accomplice: the gift is seized, a 300 fine and 3 sips.') : '') : T('😇 Frikjent. Anmelderen betaler 200 kr.', '😇 Acquitted. The reporter pays 200.')) + (s.resultat.bevis ? '' : ' (' + s.resultat.skyldig + '–' + s.resultat.frikjent + ')')) + '</p>' : '') + '</div>';
+      }).join('');
+    }
+    // Det som trenger deg nå (stemme, godkjenne) står øverst og åpent. Resten er en kort liste – trykk for å handle.
+    var trenger = b.aksjer.filter(function (a) { return (a.status === 'meldt' && a.melding && a.melding.subjekt !== m && !a.melding.minStemme && a.melding.av !== m) || (a.status === 'venter' && erVert()); });
+    var ferdige = b.aksjer.filter(function (a) { return a.status === 'avgjort' || a.status === 'ugyldig'; }).reverse();
+    var apne = b.aksjer.filter(function (a) { return !a.laast && trenger.indexOf(a) === -1 && ferdige.indexOf(a) === -1; }).sort(function (x, y) {
+      var r = { meldt: 0, venter: 1, apen: 2, stengt: 3, utsatt: 4 };
+      return ((x.laast ? 9 : r[x.status] || 0) - (y.laast ? 9 : r[y.status] || 0)) || ((x.stenger || 9e15) - (y.stenger || 9e15));
+    });
+    var mine = b.aksjer.filter(function (a) { return a.utfall.some(function (x) { return x.mine; }) || (a.fikk && a.status === 'avgjort'); });
+    var anmeldbare = ferdige.filter(function (a) { return a.status === 'avgjort' && a.vinnere && a.vinnere.length; }).length;
+    // Første gang du åpner børsen, står reglene åpne
+    var bsForste = !les('bd_bors_regler'); if (bsForste) skriv('bd_bors_regler', 1);
+    if (bsForste) borsReglerApen = true;
+    var reglerHtml = '<details class="bs-regler"' + (borsReglerApen ? ' open' : '') + ' ontoggle="window.__bdBsRegler && window.__bdBsRegler(this.open)"><summary>❓ ' + T('Slik funker børsen', 'How the Exchange works') + '</summary><ul>' +
+      [T('Hver aksje betaler <b>100 kr</b> hvis den skjer. Oddsen viser hvor mange ganger pengene du får igjen.', 'Each share pays <b>100</b> if it happens. The odds show how many times your money you get back.'),
+       T('Prisen stiger for hver som kjøper – det lønner seg å være tidlig ute.', 'The price rises with every purchase – it pays to be early.'),
+       T('Selge: du må ha eid aksjen i 10 minutter, og 25 % går til kurtasje.', 'Selling: you must hold the share for 10 minutes, and 25% goes in fees.'),
+       T('Kursen på deg selv er skjult. Blir det deg, får du 30 kr i hovedrollebonus.', 'Your own price is hidden. If it’s you, you get a 30 starring bonus.'),
+       T('Du har din egen hånd på 6 aksjer, trukket tilfeldig fra kveldens pott (40 aksjer, 100 med Pluss). Ingen vet hvem som har de samme – eller aksjen om dem.', 'You have your own hand of 6 shares, drawn at random from tonight’s pot (40 shares, 100 with Plus). Nobody knows who holds the same ones – or the one about them.'),
+       T('Liker du ikke en aksje? Trykk «🔄 Bytt» – det koster 25 kr eller én slurk, du velger. Stenger eller avgjøres en aksje, får du en ny gratis.', 'Don’t like a share? Tap “🔄 Swap” – it costs 25 or one sip, your choice. When a share closes or settles, you get a new one for free.'),
+       T('Skjer det? Trykk «📣 Det skjedde!» – aksjen avsløres for alle, låses, og de andre stemmer. Blir det bekreftet, får du 20 kr i meldebonus – også om du ikke eide noe i den.', 'Did it happen? Tap “📣 It happened!” – the share is revealed to everyone, locks and the others vote. If confirmed, you get a 20 reporter bonus – even if you didn’t own any.'),
+       T('Innsidehandel: har en vinner fikset det sammen med noen, kan hen anmeldes under «Avgjort». Skyldig mister hele gevinsten, får 300 kr i bot og 5 slurker.', 'Insider trading: if a winner set it up with someone, report them under “Settled”. Guilty loses the whole payout, gets a 300 fine and 5 sips.')].map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></details>';
+    ut += reglerHtml;
+    if (trenger.length) ut += '<p class="rom-etikett">🔔 ' + T('Trenger deg nå', 'Needs you now') + '</p>' + trenger.map(borsAksjeHtml).join('');
+    ut += '<div class="rom-mod bs-filter">' + [['apne', T('Åpne', 'Open'), apne.length], ['mine', T('Mine', 'Mine'), mine.length], ['ferdige', T('Avgjort', 'Settled') + (anmeldbare ? ' 🚨' : ''), ferdige.length]].map(function (f) {
+      return '<button type="button" data-b="filter" data-f="' + f[0] + '" aria-pressed="' + (borsFilter === f[0]) + '">' + esc(f[1]) + ' <small>' + f[2] + '</small></button>'; }).join('') + '</div>';
+    var liste = borsFilter === 'mine' ? mine : borsFilter === 'ferdige' ? ferdige : apne;
+    if (borsFilter === 'ferdige' && anmeldbare) ut += '<p class="small">🚨 ' + T('Tror du noen fikset en aksje sammen? Trykk «Anmeld» – bare de som tjente på den kan anmeldes.', 'Think someone set a share up together? Tap “Report” – only those who profited can be reported.') + '</p>';
+    ut += liste.map(function (a) { return borsApen === a.id && borsFilter !== 'ferdige' ? '<div class="bs-apen">' + borsAksjeHtml(a) + '<button class="linkbtn bs-lukkaksje" data-b="aksje-aapne" data-a="' + a.id + '" type="button">' + T('Lukk ▲', 'Close ▲') + '</button></div>'
+      : borsRad(a) + (borsFilter === 'ferdige' && !(a.vinnere && a.vinnere.length && b.paa) ? '<p class="small bs-hvorfor">' + hvorforIkke(a) + '</p>' : ''); }).join('') ||
+      '<p class="small">' + (borsFilter === 'mine' ? T('Du eier ingen aksjer ennå. Trykk på en aksje under «Åpne» for å kjøpe.', 'You don’t own any shares yet. Tap a share under “Open” to buy.') : borsFilter === 'ferdige' ? T('Ingen aksjer er avgjort ennå.', 'No shares settled yet.') : T('Ingen åpne aksjer akkurat nå.', 'No open shares right now.')) + '</p>';
+    if (borsFilter === 'apne') {
+      if (b.laaste) ut += '<p class="small bs-pluss">' + b.laaste + T(' aksjer er låst i gratisbørsen. ', ' shares are locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp alle med Pluss', 'Unlock all with Plus') + '</button></p>';
+      if (b.hand) ut += '<p class="small bs-hand">🃏 ' + T('Din hånd: ' + b.hand.str + ' aksjer · ' + 'bytte koster ' + kr(b.hand.pris) + ' eller en slurk' + ' · ' + b.hand.igjen + ' ukjente aksjer i potten', 'Your hand: ' + b.hand.str + ' shares · ' + 'a swap costs ' + kr(b.hand.pris) + ' or a sip' + ' · ' + b.hand.igjen + ' unseen shares in the pot') + '</p>';
+      if (!b.fri && !b.laaste) ut += '<p class="small bs-pluss">' + T('Gratisbørsen har 40 aksjer i potten i kveld. ', 'The free exchange has 40 shares in the pot tonight. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Med Pluss blir det 100', 'Plus makes it 100') + '</button></p>';
+      if (!b.harNotert) ut += '<details class="bs-noter"><summary>' + T('🧾 Noter en egen aksje (200 kr)', '🧾 List your own share (200)') + '</summary><p class="small">' + T('Én per person per kveld. Du får 2 kr for hvert kjøp andre gjør i den, men kan ikke handle i den selv. Verten godkjenner.', 'One per person per night. You get 2 for every purchase others make in it, but can’t trade in it yourself. The host approves.') + '</p>' +
+        '<div class="rom-mod"><label><input type="radio" name="bsType" value="hvem" checked> ' + T('Hvem …?', 'Who …?') + '</label> <label><input type="radio" name="bsType" value="janei"> ' + T('Ja/nei', 'Yes/no') + '</label></div>' +
+        '<input id="bsNyTekst" maxlength="100" placeholder="' + T('F.eks. «Hvem ringer mamma før midnatt?»', 'E.g. “Who calls their mum before midnight?”') + '"><button class="btn small gold" data-b="noter" type="button">' + T('Noter (200 kr)', 'List (200)') + '</button></details>';
+    }
+
+    return ut;
+  }
+  function tegnBors() {
+    if (!borsModal || !tilstand || !tilstand.bors) { if (borsModal && (!tilstand || !tilstand.bors)) lukkBors(); return; }
+    var akt = document.activeElement;
+    if (akt && borsModal.contains(akt) && (akt.tagName === 'INPUT' || akt.tagName === 'SELECT')) return;   // ikke forstyrr mens du skriver
+    if (borsMeld || borsAnmeld) { var aapen = borsModal.querySelector('.bs-meld, .bs-anmeld'); if (aapen) return; }
+    var y = borsModal.querySelector('.rom-tavle-innhold') ? borsModal.querySelector('.rom-tavle-innhold').scrollTop : 0;
+    var valg = {}; ['bsSlurkTil', 'bsGiTil'].forEach(function (id) { var e = borsModal.querySelector('#' + id); if (e) valg[id] = e.value; });
+    borsModal.innerHTML = '<div class="rom-tavle-innhold bs-innhold">' + borsInnhold() + '</div>';
+    Object.keys(valg).forEach(function (id) { var e = borsModal.querySelector('#' + id); if (e && valg[id]) e.value = valg[id]; });
+    var inn = borsModal.querySelector('.rom-tavle-innhold'); if (inn) inn.scrollTop = y;
+  }
+  function aapneBors() {
+    if (!tilstand || !tilstand.bors) return;
+    lukkBors();
+    var tr = borsTrengerMeg(); if (tr === 'tilsyn') borsFane = 'tilsyn'; else if (tr) borsFane = 'aksjer';
+    borsModal = document.createElement('div'); borsModal.className = 'rom-tavle bs-modal'; borsModal.setAttribute('role', 'dialog');
+    borsModal.addEventListener('click', borsKlikk);
+    document.body.appendChild(borsModal);
+    tegnBors();
+  }
+  function lukkBors() { if (borsModal) { borsModal.remove(); borsModal = null; } borsMeld = null; borsAnmeld = null; }
+  function komprimer(fil) {
+    return new Promise(function (ok) {
+      if (!fil) return ok(null);
+      var r = new FileReader();
+      r.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var maks = 640, s = Math.min(1, maks / Math.max(img.width, img.height));
+          var c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          var d = c.toDataURL('image/jpeg', 0.6);
+          if (d.length > 150000) { c.width = Math.round(c.width * 0.7); c.height = Math.round(c.height * 0.7); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); d = c.toDataURL('image/jpeg', 0.5); }
+          ok(d.length < 158000 ? d : null);
+        };
+        img.onerror = function () { ok(null); };
+        img.src = r.result;
+      };
+      r.onerror = function () { ok(null); };
+      r.readAsDataURL(fil);
+    });
+  }
+  /** Tegn børsen på nytt der den vises: i vinduet, eller på hele skjermen (hovedspill). */
+  function tegnBorsOmrade(ny) {
+    if (borsModal) { if (ny) borsModal.innerHTML = '<div class="rom-tavle-innhold bs-innhold">' + borsInnhold() + '</div>'; else tegnBors(); }
+    else { borsLas = false; tegn(); }
+  }
+  var borsLas = false;
+  function borsKlikk(e) {
+    if (borsModal && e.target === borsModal) return lukkBors();
+    var b = e.target.closest('[data-b]'); if (!b) return;
+    var cont = b.closest('.bs-modal, .bs-side') || borsModal || root;
+    var a = b.dataset.b;
+    if (a === 'lukk') return lukkBors();
+    if (a === 'fane') { borsFane = b.dataset.f; borsMeld = null; borsAnmeld = null; return tegnBorsOmrade(true); }
+    if (a === 'filter') { borsFilter = b.dataset.f; borsApen = null; borsMeld = null; borsAnmeld = null; return tegnBorsOmrade(true); }
+    if (a === 'meld-rask') { borsApen = b.dataset.a; borsMeld = b.dataset.a; borsFilter = borsFilter === 'ferdige' ? 'apne' : borsFilter; tegnBorsOmrade(true); borsLas = !borsModal; return; }
+    if (a === 'aksje-aapne') { borsApen = borsApen === b.dataset.a ? null : b.dataset.a; borsMeld = null; return tegnBorsOmrade(true); }
+    if (a === 'bytt') { borsBytt = borsBytt === b.dataset.a ? null : b.dataset.a; return tegnBorsOmrade(true); }
+    if (a === 'bytt-ok') { borsBytt = null; if (borsApen === b.dataset.a) borsApen = null; spillLyd('bytt'); return gjorAlltid({ handling: 'bs-bytt', aksje: b.dataset.a, med: b.dataset.med }); }
+    if (a === 'kjop') return gjorAlltid({ handling: 'bs-handel', aksje: b.dataset.a, utfall: b.dataset.u, n: 1 });
+    if (a === 'selg') return gjorAlltid({ handling: 'bs-handel', aksje: b.dataset.a, utfall: b.dataset.u, n: -1 });
+    if (a === 'meld-aapne') { borsMeld = b.dataset.a; tegnBorsOmrade(true); borsLas = !borsModal; return; }
+    if (a === 'meld-avbryt') { borsMeld = null; return tegnBorsOmrade(true); }
+    if (a === 'meld') {
+      var hvem = cont.querySelector('#bsHvem'), vitne = cont.querySelector('#bsVitne'), fil = cont.querySelector('#bsBilde');
+      b.disabled = true; b.textContent = T('Sender …', 'Sending …');
+      return komprimer(fil && fil.files && fil.files[0]).then(function (bilde) {
+        if (fil && fil.files && fil.files[0] && !bilde) toast(T('Bildet var for stort – sendt uten bilde', 'The photo was too big – sent without it'));
+        borsMeld = null; borsLas = false;
+        gjorAlltid({ handling: 'bs-meld', aksje: b.dataset.a, utfall: hvem ? hvem.value : 'ja', vitne: vitne ? vitne.value : '', bilde: bilde || '' });
+      });
+    }
+    if (a === 'stem') return gjorAlltid({ handling: 'bs-stem', aksje: b.dataset.a, v: b.dataset.v });
+    if (a === 'godkjenn' || a === 'avvis') return gjorAlltid({ handling: 'bs-godkjenn', aksje: b.dataset.a, ok: a === 'godkjenn' });
+    if (a === 'anmeld-aapne') { borsAnmeld = borsAnmeld === b.dataset.a ? null : b.dataset.a; tegnBorsOmrade(true); borsLas = !borsModal && !!borsAnmeld; return; }
+    if (a === 'anmeld') {
+      var valgt = cont.querySelector('input[name=bsMot]:checked'), mot = valgt ? valgt.value : '';
+      if (!mot) return toast(T('Velg hvem du anmelder', 'Pick who you’re reporting'));
+      if (!confirm(T('Anmelde for innsidehandel? Blir hen frikjent, betaler du 200 kr.', 'Report for insider trading? If they’re acquitted, you pay 200.'))) return;
+      borsAnmeld = null; borsLas = false; borsFane = 'tilsyn';
+      return gjorAlltid({ handling: 'bs-anmeld', aksje: b.dataset.a, mot: mot });
+    }
+    if (a === 'gi') {
+      var til = cont.querySelector('#bsGiTil'), n = Number(b.dataset.kr);
+      if (!til || !til.value) return;
+      if (!confirm(T('Gi ', 'Give ') + kr(n) + T(' til ', ' to ') + navn(til.value) + '?')) return;
+      return gjorAlltid({ handling: 'bs-gi', til: til.value, kr: n });
+    }
+    if (a === 'kjop-slurk') {
+      var til2 = cont.querySelector('#bsSlurkTil'); if (!til2 || !til2.value) return;
+      var n2 = Number(b.dataset.n);
+      if (!confirm(T('Kjøpe ' + n2 + (n2 === 1 ? ' slurk' : ' slurker') + ' til ' + navn(til2.value) + '?', 'Buy ' + navn(til2.value) + ' ' + n2 + (n2 === 1 ? ' sip' : ' sips') + '?'))) return;
+      return gjorAlltid({ handling: 'bs-butikk', vare: 'slurk', til: til2.value, n: n2 });
+    }
+    if (a === 'kjop-immun') return gjorAlltid({ handling: 'bs-butikk', vare: 'immun' });
+    if (a === 'kjop-poeng') { if (!confirm(T('Kjøpe et kveldspoeng?', 'Buy a night point?'))) return; return gjorAlltid({ handling: 'bs-butikk', vare: 'poeng' }); }
+    if (a === 'sak-stem') return gjorAlltid({ handling: 'bs-sak-stem', sak: b.dataset.s, v: b.dataset.v });
+    if (a === 'sak-videre') return gjorAlltid({ handling: 'bs-sak-videre', sak: b.dataset.s });
+    if (a === 'noter') {
+      var t = (cont.querySelector('#bsNyTekst') || {}).value || '', type = (cont.querySelector('input[name=bsType]:checked') || {}).value || 'hvem';
+      if (t.trim().length < 8) return toast(T('Skriv hele spørsmålet', 'Write the whole question'));
+      if (!confirm(T('Notere aksjen for 200 kr?', 'List the share for 200?'))) return;
+      return gjorAlltid({ handling: 'bs-noter', tekst: t.trim(), type: type });
+    }
+    if (a === 'avslutt') { if (!confirm(T('Stenge børsen og kåre Børskongen? Åpne ja/nei-aksjer blir «nei», andre får pengene tilbake.', 'Close the Exchange and crown the Market King? Open yes/no shares resolve as “no”, others are refunded.'))) return; return gjorAlltid({ handling: 'bs-avslutt' }); }
+    if (a === 'fjern') { lukkBors(); return gjorAlltid({ handling: 'bs-lukk' }); }
+    if (a === 'bakgrunn') return gjor({ handling: 'bs-fokus', paa: false });
+    if (a === 'fokus') { lukkBors(); return gjor({ handling: 'bs-fokus', paa: true }); }
+  }
+  var BS_KAT = [['drikke', '🍻 Drikke og skål', '🍻 Drinks'], ['musikk', '🎶 Musikk og dans', '🎶 Music'], ['mat', '🍕 Mat', '🍕 Food'], ['mobil', '📱 Mobil og bilder', '📱 Phones'], ['kaos', '💥 Kaos og uhell', '💥 Chaos'], ['prat', '💬 Prat og klassikere', '💬 Chat'], ['kvelden', '🌙 Kvelden og veien videre', '🌙 The night']];
+  function borsStartValg() {
+    var m = document.createElement('div'); m.className = 'rom-tavle'; m.setAttribute('role', 'dialog');
+    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>📈 ' + T('Start Vorsbørsen', 'Start the Exchange') + '</h2><button class="linkbtn" data-v="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+      '<p>' + T('Alle får 1000 vorskroner og kjøper aksjer i hva som skjer i løpet av kvelden. Hver aksje betaler 100 kr hvis den skjer – og prisen stiger jo flere som kjøper. Noen aksjer stenger underveis.', 'Everyone gets 1,000 coins and buys shares in what happens during the night. Each share pays 100 if it happens – and the price rises the more people buy. Some shares close along the way.') + '</p>' +
+      '<div class="bs-valg"><button class="btn gold" data-v="fokus" type="button"><b>' + T('📈 Bare Vorsbørsen', '📈 Just the Exchange') + '</b><small>' + T('Børsen er hovedspillet – på alles skjerm', 'The Exchange is the main game – on everyone’s screen') + '</small></button>' +
+      '<button class="btn ghost" data-v="bakgrunn" type="button"><b>' + T('🎲 Børs i bakgrunnen', '🎲 Exchange in the background') + '</b><small>' + T('Spill andre leker – børsen går ved siden av', 'Play other games – the Exchange runs alongside') + '</small></button></div>' +
+      '<p class="rom-etikett">' + T('Hva slags aksjer?', 'What kind of shares?') + '</p><div class="rom-mod bs-kat">' + BS_KAT.map(function (k) { return '<button type="button" data-k="' + k[0] + '" aria-pressed="true">' + esc(T(k[1], k[2])) + '</button>'; }).join('') + '</div>' +
+      '<p class="small">' + T('Du kan bytte mellom hovedspill og bakgrunn når som helst.', 'You can switch between main game and background at any time.') + '</p></div>';
+    m.addEventListener('click', function (e) {
+      var k = e.target.closest('[data-k]');
+      if (k) { k.setAttribute('aria-pressed', String(k.getAttribute('aria-pressed') !== 'true')); if (!m.querySelector('[data-k][aria-pressed=true]')) k.setAttribute('aria-pressed', 'true'); return; }
+      var b = e.target.closest('[data-v]'); if (e.target === m || (b && b.dataset.v === 'lukk')) return m.remove(); if (!b) return;
+      var kat = Array.prototype.map.call(m.querySelectorAll('[data-k][aria-pressed=true]'), function (x) { return x.dataset.k; });
+      m.remove(); gjor({ handling: 'bs-start', fokus: b.dataset.v === 'fokus', kat: kat.length === BS_KAT.length ? null : kat });
+    });
+    document.body.appendChild(m);
+  }
+  /** Tidsstyrte ting på børsen (ny aksje, frister) – en tilfeldig telefon sier fra til serveren. */
+  if (window.__bdBorsTikk) clearInterval(window.__bdBorsTikk);
+  window.__bdBorsTikk = setInterval(function () {
+    if (!document.getElementById('rom')) { clearInterval(window.__bdBorsTikk); return; }
+    var b = tilstand && tilstand.bors; if (!b || !b.paa || !meg || document.hidden) return;
+    var naa = Date.now() + klokkeAvvik, forfalt = b.aksjer.some(function (a) { return a.status === 'apen' && a.stenger && naa >= a.stenger; }) ||
+      b.aksjer.some(function (a) { return a.status === 'meldt' && a.melding && naa >= a.melding.frist; }) ||
+      b.saker.some(function (s) { return s.fase !== 'ferdig' && s.frist && naa >= s.frist; });
+    if (!forfalt || Date.now() - borsTikkSendt < 8000) return;
+    borsTikkSendt = Date.now();
+    setTimeout(function () { gjorAlltid({ handling: 'bs-tikk' }); }, Math.random() * 2500);
+  }, 5000);
+
+  var opModal = null, opSettNokkel = '';
+  function oppdragKnapp() {
+    var o = tilstand.oppdrag; if (!o) return '';
+    return '<button class="op-pille" data-g="op-aapne" type="button">' + T('🕵️ Ditt hemmelige oppdrag', '🕵️ Your secret mission') + '</button>';
+  }
+  function aapneOppdrag() {
+    var o = tilstand.oppdrag; if (!o) return;
+    lukkOppdrag();
+    opModal = document.createElement('div'); opModal.className = 'rom-tavle'; opModal.setAttribute('role', 'dialog');
+    opModal.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + T('🕵️ Ditt oppdrag', '🕵️ Your mission') + '</h2><button class="linkbtn" data-o="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+      (o.mitt ? '<p class="op-tekst">' + esc(o.mitt.t) + '</p>' : '<p>' + T('Du får et oppdrag straks.', 'You\'ll get a mission shortly.') + '</p>') +
+      '<p class="small">' + T('Klarer du det, trykk «Fullført» – den andre må bekrefte. Da deler du ut 3. Ikke vis dette til noen!', 'Pull it off, then tap “Done!” – the other person has to confirm. Then you hand out 3. Don\'t show this to anyone!') + '</p>' +
+      '<div class="dl-knapper"><button class="btn gold" data-o="fullfort" type="button"' + (o.venterPaaBekreftelse ? ' disabled' : '') + '>' + (o.venterPaaBekreftelse ? T('Venter på bekreftelse …', 'Waiting for confirmation …') : T('Fullført!', 'Done!')) + '</button>' +
+      '<button class="btn ghost" data-o="bytt" type="button">' + T('Bytt oppdrag (drikk 1)', 'Swap mission (drink 1)') + '</button></div>' +
+      '<h3>' + T('Mistenker du noen?', 'Suspect someone?') + '</h3><p class="small">' + T('Tror du noen holder på med sitt oppdrag? Treffer du, drikker de 2. Bommer du, drikker du 1.', 'Think someone is working on their mission? If you\'re right, they drink 2. If you\'re wrong, you drink 1.') + '</p>' +
+      (o.minAnklage ? '<p class="small">' + T('Venter på svar på anklagen din …', 'Waiting for an answer to your accusation …') + '</p>' :
+        '<div class="rom-valg">' + tilstand.spillere.filter(function (p) { return p.id !== tilstand.meg; }).map(function (p) { return '<button type="button" data-o="beskyld" data-id="' + p.id + '">' + esc(p.navn) + '</button>'; }).join('') + '</div>') +
+      '</div>';
+    opModal.addEventListener('click', function (e) {
+      if (e.target === opModal) return lukkOppdrag();
+      var b = e.target.closest('[data-o]'); if (!b) return;
+      var a = b.dataset.o;
+      if (a === 'lukk') return lukkOppdrag();
+      if (a === 'fullfort') { gjorAlltid({ handling: 'op-fullfort' }); toast(T('Sendt – venter på at den andre bekrefter', 'Sent – waiting for the other person to confirm')); return lukkOppdrag(); }
+      if (a === 'bytt') { gjorAlltid({ handling: 'op-bytt' }); return lukkOppdrag(); }
+      if (a === 'beskyld') { gjorAlltid({ handling: 'op-beskyld', hvem: b.dataset.id }); toast(T('Anklagen er sendt 👀', 'Accusation sent 👀')); return lukkOppdrag(); }
+    });
+    document.body.appendChild(opModal);
+  }
+  function lukkOppdrag() { if (opModal) { opModal.remove(); opModal = null; } }
+  /** Spørsmål som må besvares: «stemmer det at hen fikk deg til …?» og anklager mot deg. */
+  function sjekkOppdrag() {
+    var o = tilstand && tilstand.oppdrag; if (!o) { lukkOppdrag(); return; }
+    var sporsmal = (o.bekreft || []).map(function (b) { return 'b:' + b.fra + ':' + b.t; }).concat((o.anklager || []).map(function (a) { return 'a:' + a.fra; }));
+    var nokkel = sporsmal[0] || '';
+    if (!nokkel || nokkel === opSettNokkel || document.querySelector('.op-sporsmal')) return;
+    opSettNokkel = nokkel;
+    var m = document.createElement('div'); m.className = 'rom-tavle op-sporsmal'; m.setAttribute('role', 'dialog');
+    if (nokkel[0] === 'b') {
+      var b = o.bekreft[0];
+      m.innerHTML = '<div class="rom-tavle-innhold"><h2>' + T('🕵️ Avslørt oppdrag', '🕵️ Mission revealed') + '</h2><p><b>' + esc(navn(b.fra)) + '</b>' + T(' hadde oppdraget:', ' had the mission:') + '</p><p class="op-tekst">' + esc(b.t) + '</p><p>' + T('Klarte hen det?', 'Did they pull it off?') + '</p>' +
+        '<div class="dl-knapper"><button class="btn gold" data-s="ja" type="button">' + T('Ja, jeg ble lurt', 'Yes, I fell for it') + '</button><button class="btn ghost" data-s="nei" type="button">' + T('Nei', 'No') + '</button></div></div>';
+      m.addEventListener('click', function (e) { var k = e.target.closest('[data-s]'); if (!k) return; gjorAlltid({ handling: 'op-bekreft', fra: b.fra, ja: k.dataset.s === 'ja' }); m.remove(); });
+    } else {
+      var a = o.anklager[0];
+      m.innerHTML = '<div class="rom-tavle-innhold"><h2>' + T('👀 Du er mistenkt!', '👀 You\'re a suspect!') + '</h2><p><b>' + esc(navn(a.fra)) + '</b>' + T(' tror du holder på med ditt hemmelige oppdrag.', ' thinks you\'re working on your secret mission.') + '</p><p>' + T('Vær ærlig: har du prøvd på det?', 'Be honest: have you been trying?') + '</p>' +
+        '<div class="dl-knapper"><button class="btn gold" data-s="tatt" type="button">' + T('Ja, tatt (drikk 2)', 'Yes, caught (drink 2)') + '</button><button class="btn ghost" data-s="nei" type="button">' + T('Nei, feil', 'No, wrong') + '</button></div></div>';
+      m.addEventListener('click', function (e) { var k = e.target.closest('[data-s]'); if (!k) return; gjorAlltid({ handling: 'op-svar', fra: a.fra, tatt: k.dataset.s === 'tatt' }); m.remove(); });
+    }
+    document.body.appendChild(m);
+    spillLyd('tur');
+  }
+
+  /* ---------- «hopp over» når den som har tur har forsvunnet ---------- */
+  setInterval(function () {
+    var el = document.querySelector('.rom-hopp'); if (!el) return;
+    el.hidden = (Date.now() + klokkeAvvik) - Number(el.dataset.turstart) < 40000;
+  }, 1000);
+  window.__bdFeilKontekst = function () {
+    var t = tilstand || {}, sp = t.spill || {};
+    // lekId er alltid lekens faste id (aldri navnet på en egen kortstokk) – den automatiske feilfangsten bruker bare lekId og fase
+    return { rom: kode, lek: sp.navn || (t.ferdig ? 'oppsummering' : 'lobby'), lekId: String(sp.lek || sp.type || (t.ferdig ? 'oppsummering' : 'lobby')).slice(0, 40), fase: String(sp.fase || sp.type || ''), versjon: versjon, vert: erVert(), spillere: (t.spillere || []).length };
+  };
+
+  /* ---------- straffehjulet ---------- */
+  var tavleHjul = null, sisteHjul = -1, hjulSpinner = false;
+  var HJULFARGER = ['#C8FF2E', '#FF5B1F', '#2B1A44', '#7DA80F'];
+  function hjulSvg(liste) {
+    var n = liste.length, r = 150, seg = 360 / n, deler = '';
+    liste.forEach(function (tekst, i) {
+      var a0 = (i * seg - 90) * Math.PI / 180, a1 = ((i + 1) * seg - 90) * Math.PI / 180;
+      var x0 = 160 + r * Math.cos(a0), y0 = 160 + r * Math.sin(a0), x1 = 160 + r * Math.cos(a1), y1 = 160 + r * Math.sin(a1);
+      var farge = HJULFARGER[i % 4] === HJULFARGER[0] && i === n - 1 && n % 4 === 1 ? HJULFARGER[1] : HJULFARGER[i % 4];
+      var tekstFarge = farge === '#2B1A44' ? '#F5F0FF' : '#12081C', midt = (i + 0.5) * seg;
+      var kort = tekst.length > 18 ? tekst.slice(0, 17) + '…' : tekst, fs = Math.max(9, Math.min(n > 8 ? 11.5 : 13.5, 108 / (kort.length * 0.6)));
+      deler += '<path d="M160 160 L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + (seg > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + farge + '" stroke="#120A1D" stroke-width="2"/>' +
+        '<text x="160" y="160" transform="rotate(' + (midt - 90) + ' 160 160) translate(34 4)" fill="' + tekstFarge + '" font-size="' + fs.toFixed(1) + '" font-weight="700">' + esc(kort) + '</text>';
+    });
+    return '<div class="hjul-ramme"><svg class="hjul" viewBox="0 0 320 320" aria-hidden="true"><g class="hjul-snurr">' + deler + '</g><circle cx="160" cy="160" r="22" fill="#120A1D" stroke="#C8FF2E" stroke-width="3"/></svg><span class="hjul-pil" aria-hidden="true"></span></div>';
+  }
+  function aapneHjul() {
+    if (tavleHjul) return;
+    tavleHjul = document.createElement('div'); tavleHjul.className = 'rom-tavle'; tavleHjul.setAttribute('role', 'dialog'); tavleHjul.setAttribute('aria-label', T('Straffehjul', 'Penalty wheel'));
+    tavleHjul.addEventListener('click', function (e) {
+      if (e.target === tavleHjul) return lukkHjul();
+      var b = e.target.closest('[data-h]'); if (!b) return;
+      var h = b.dataset.h;
+      if (h === 'lukk') return lukkHjul();
+      if (h === 'spinn') { var sel = tavleHjul.querySelector('#hjulHvem'); return gjor({ handling: 'hjul', hvem: sel ? sel.value : '' }); }
+      if (h === 'rediger') { tavleHjul.querySelector('.hjul-rediger').hidden = false; return; }
+      if (h === 'lagre-liste') {
+        var l = tavleHjul.querySelector('#hjulListe').value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+        if (l.length < 2) return toast(T('Skriv minst to utfall.', 'Write at least two outcomes.'));
+        return gjor({ handling: 'hjul-liste', liste: l });
+      }
+      if (h === 'standard') return gjor({ handling: 'hjul-liste', liste: [] });
+    });
+    document.body.appendChild(tavleHjul);
+    tegnHjulModal(true);
+  }
+  function lukkHjul() { if (tavleHjul) { tavleHjul.remove(); tavleHjul = null; } }
+  function tegnHjulModal(ny) {
+    if (!tavleHjul || !tilstand || hjulSpinner) return;
+    var liste = tilstand.hjulListe || [], hj = tilstand.hjul, vert = erVert();
+    var red = tavleHjul.querySelector('.hjul-rediger'), redApen = red && !red.hidden, redTekst = redApen ? tavleHjul.querySelector('#hjulListe').value : null;
+    var gSel = tavleHjul.querySelector('#hjulHvem'), gHvem = gSel ? gSel.value : null;
+    tavleHjul.innerHTML = '<div class="rom-tavle-innhold hjul-innhold"><div class="rom-tavle-topp"><h2>' + T('Straffehjulet', 'The penalty wheel') + '</h2><button class="linkbtn" data-h="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+      hjulSvg(liste) +
+      '<p class="hjul-resultat" aria-live="polite">' + (hj && !ny ? '<b>' + esc(navn(hj.hvem)) + '</b>: ' + esc(hj.tekst) : T('Tapte du? Spinn hjulet – alle ser hvor det stopper.', 'Lost? Spin the wheel – everyone sees where it lands.')) + '</p>' +
+      (vert ? '<label class="rof-lab" for="hjulHvem">' + T('Hvem skal spinne?', 'Who\'s spinning?') + '</label><select id="hjulHvem" class="rof-inp">' + tilstand.spillere.map(function (p) { return '<option value="' + p.id + '"' + (p.id === tilstand.meg ? ' selected' : '') + '>' + esc(p.navn) + '</option>'; }).join('') + '</select>' : '') +
+      '<button class="rom-stor-knapp" data-h="spinn" type="button">' + T('Spinn', 'Spin') + '</button>' +
+      (vert ? '<p><button class="linkbtn" data-h="rediger" type="button">' + T('Endre utfallene', 'Edit the outcomes') + '</button></p><div class="hjul-rediger" hidden><label class="rof-lab" for="hjulListe">' + T('Ett utfall per linje (2–12). «Drikk 3», «Del ut 2», «Shot» og «Alle andre drikker 1» føres på tavla av seg selv.', 'One outcome per line (2–12). “Drink 3”, “Hand out 2”, “Shot” and “Everyone else drinks 1” are added to the board automatically.') + '</label>' +
+        '<textarea id="hjulListe" class="rof-inp rf-tekst" rows="7">' + esc(liste.join('\n')) + '</textarea><div class="dl-knapper"><button class="btn gold" data-h="lagre-liste" type="button">' + T('Lagre hjulet', 'Save the wheel') + '</button><button class="btn ghost" data-h="standard" type="button">' + T('Tilbake til standard', 'Back to default') + '</button></div></div>' : '') +
+      '</div>';
+    if (redApen) { tavleHjul.querySelector('.hjul-rediger').hidden = false; tavleHjul.querySelector('#hjulListe').value = redTekst; }
+    var nSel = tavleHjul.querySelector('#hjulHvem'); if (nSel && gHvem) nSel.value = gHvem;
+    if (hj && !ny) settVinkel(hj.i, liste.length, false);
+  }
+  function settVinkel(i, n, animer, runder) {
+    var g = tavleHjul && tavleHjul.querySelector('.hjul-snurr'); if (!g) return;
+    var seg = 360 / n, maal = (runder || 0) * 360 + (360 - (i + 0.5) * seg);
+    g.style.transition = animer ? 'transform 4s cubic-bezier(.17,.67,.2,1)' : 'none';
+    g.style.transform = 'rotate(' + maal + 'deg)';
+  }
+  function sjekkHjul() {
+    var hj = tilstand && tilstand.hjul;
+    if (!hj) { if (sisteHjul < 0) sisteHjul = 0; return; }
+    if (sisteHjul < 0) { sisteHjul = hj.nr; return; }   // ikke spill av gamle spinn
+    if (hj.nr <= sisteHjul) return;
+    sisteHjul = hj.nr;
+    if ((Date.now() + klokkeAvvik) - hj.tid > 15000) return;
+    if (!tavleHjul) aapneHjul();
+    hjulSpinner = false; tegnHjulModal(true);
+    hjulSpinner = true;
+    var res = tavleHjul.querySelector('.hjul-resultat'); res.textContent = navn(hj.hvem) + T(' spinner …', ' is spinning …');
+    settVinkel(0, hj.antall, false);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { settVinkel(hj.i, hj.antall, true, 5); }); });
+    hjulLyd(4000);
+    setTimeout(function () {
+      hjulSpinner = false;
+      if (!tavleHjul) return;
+      res.innerHTML = '<b>' + esc(navn(hj.hvem)) + '</b>: ' + esc(hj.tekst);
+      res.classList.add('landet');
+      if (hj.hvem === tilstand.meg) { try { navigator.vibrate && navigator.vibrate(120); } catch (e) {} }
+    }, 4100);
+  }
+
+  /* ---------- kveldens oppsummering ---------- */
+  function kveldsTall() {
+    var l = (tilstand.spillere || []).slice(), t = {};
+    function maks(felt) { var m = l.slice().sort(function (a, b) { return (b[felt] || 0) - (a[felt] || 0); })[0]; return m && m[felt] ? m : null; }
+    t.sumSlurker = l.reduce(function (n, p) { return n + (p.slurker || 0); }, 0);
+    t.sumSendt = l.reduce(function (n, p) { return n + (p.sendt || 0); }, 0);
+    var leker = {}; (tilstand.historikk || []).forEach(function (n) { leker[n] = (leker[n] || 0) + 1; });
+    t.leker = Object.keys(leker).map(function (n) { return n + (leker[n] > 1 ? ' ×' + leker[n] : ''); });
+    t.minutter = Math.max(1, Math.round(((tilstand.ferdig || Date.now()) - (tilstand.laget || Date.now())) / 60000));
+    t.kaaring = [];
+    if (tilstand.kaaringer && tilstand.kaaringer.length) {
+      t.kaaring = tilstand.kaaringer.map(function (x) { return { ikon: x.ikon, tittel: x.tittel, navn: x.navn, tall: x.tall }; });
+      t.rangert = l.sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0); });
+      return t;
+    }
+    var torst = maks('slurker'); if (torst) t.kaaring.push({ ikon: '🏆', tittel: T('Kveldens tørstigste', 'Thirstiest of the night'), navn: torst.navn, tall: torst.slurker + T(' slurker', ' sips') });
+    if (l.length >= 3 && t.sumSlurker) { var edru = l.slice().sort(function (a, b) { return (a.slurker || 0) - (b.slurker || 0); })[0]; t.kaaring.push({ ikon: '🧊', tittel: T('Mest edru', 'Most sober'), navn: edru.navn, tall: (edru.slurker || 0) + T(' slurker', ' sips') }); }
+    var gavmild = maks('sendt'); if (gavmild) t.kaaring.push({ ikon: '🎁', tittel: T('Mest gavmild', 'Most generous'), navn: gavmild.navn, tall: gavmild.sendt + T(' 🍺 sendt', ' 🍺 sent') });
+    var mobbet = maks('mottatt'); if (mobbet) t.kaaring.push({ ikon: '🎯', tittel: T('Mest mobbet', 'Most picked on'), navn: mobbet.navn, tall: mobbet.mottatt + T(' 🍺 fått', ' 🍺 received') });
+    var quiz = maks('quiz'); if (quiz) t.kaaring.push({ ikon: '🧠', tittel: T('Quizmester', 'Quiz master'), navn: quiz.navn, tall: quiz.quiz + T(' riktige', ' correct') });
+    t.rangert = l.sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0); });
+    return t;
+  }
+  function oppsummering() {
+    var t = kveldsTall();
+    return kveldVinnerBoks() + '<div class="kveld-sum"><p class="rom-etikett">' + T('Kvelden er over', 'The night is over') + '</p><h2 class="rom-h2" style="margin-top:0">' + T('Kveldens oppsummering', 'Tonight\'s recap') + '</h2>' +
+      '<div class="stat-tall"><div><b>' + t.sumSlurker + '</b><span>' + T('slurker til sammen', 'sips in total') + '</span></div><div><b>' + t.leker.length + '</b><span>' + T('leker spilt', 'games played') + '</span></div>' +
+      '<div><b>' + t.sumSendt + '</b><span>' + T('🍺 sendt', '🍺 sent') + '</span></div><div><b>' + (t.minutter >= 60 ? Math.floor(t.minutter / 60) + T('t ', 'h ') + (t.minutter % 60) + 'm' : t.minutter + ' min') + '</b><span>' + T('i rommet', 'in the room') + '</span></div></div>' +
+      (t.kaaring.length ? '<div class="rom-kaaring">' + t.kaaring.map(function (x) { return '<div><span>' + x.ikon + '</span><small>' + esc(x.tittel) + '</small><b>' + esc(x.navn) + ' · ' + esc(x.tall) + '</b></div>'; }).join('') + '</div>' : '') +
+      (t.leker.length ? '<p class="small">' + T('Dere spilte: ', 'You played: ') + t.leker.map(esc).join(', ') + '</p>' : '') +
+      '<ol class="rom-resultat">' + t.rangert.map(function (p) { return '<li><span>' + esc(p.navn) + '</span><b>' + (p.slurker || 0) + '</b></li>'; }).join('') + '</ol>' +
+      (tilstand.gjeng ? '<p class="rom-gjeng">' + T('🏆 Kvelden er lagret i sesongtabellen til ', '🏆 Tonight is saved in the season table for ') + '<a href="' + RUTE.gjeng + '?k=' + esc(tilstand.gjeng.kode) + '"><b>' + esc(tilstand.gjeng.navn) + '</b></a>.</p>'
+        : erVert() ? '<p class="small">' + T('Spiller dere ofte sammen?', 'Play together often?') + ' <a href="' + RUTE.gjeng + '">' + T('Lag en fast gjeng', 'Make a crew') + '</a>' + T(', så samles poengene fra kveld til kveld.', ' and your points add up night after night.') + '</p>' : '') +
+      '<div class="dl-knapper"><button class="btn gold" data-g="del-kveld" type="button">' + T('Del på Snap, Insta eller Messenger', 'Share on Snap, Insta or Messenger') + '</button>' +
+      (erVert() ? '<button class="btn ghost" data-g="fortsett-kvelden" type="button">' + T('Fortsett kvelden', 'Keep the night going') + '</button>' : '') + '</div></div>';
+  }
+  /** Tekst på delingsbilder følger alkoholfri modus. */
+  function torr(x) { return window.BDTorr ? window.BDTorr.tekst(String(x)) : String(x); }
+  function medT(g) { var ft = g.fillText.bind(g); g.fillText = function (x, a, b2, c) { return c ? ft(torr(x), a, b2, c) : ft(torr(x), a, b2); }; return g; }
+  var vervKode = null;
+  function hentVervKode() {
+    if (vervKode !== null || !window.BDKonto || !window.BDKonto.les()) return;
+    vervKode = '';
+    kontoApi('/api/verv').then(function (r) { return r.ok ? r.json() : {}; }).then(function (d) { vervKode = d.kode || ''; }).catch(function () {});
+  }
+  /** Kveldens oppsummering som story-bilde (1080×1920) – passer Snapchat og Instagram. */
+  function storyBilde() {
+    var t = kveldsTall(), W = 1080, H = 1920, font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
+    var c = document.createElement('canvas'); c.width = W; c.height = H;
+    var g = medT(c.getContext('2d'));
+    var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#2B1A44'); bg.addColorStop(0.45, '#120A1D'); bg.addColorStop(1, '#0B0614');
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    // logoen (flisen med to kopper) i hjørnet
+    (function () {
+      g.save(); g.translate(905, 190); g.rotate(0.1); g.scale(2.3, 2.3); g.translate(-50, -50);
+      g.fillStyle = '#FF5B1F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
+      [[45.5, -24], [54.5, 24]].forEach(function (k) {
+        g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180);
+        g.fillStyle = '#120A1D'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z'));
+        g.fillStyle = '#F5F0FF'; g.fillRect(-12.5, -41, 25, 6); g.restore();
+      });
+      g.strokeStyle = '#F5F0FF'; g.lineWidth = 5; g.lineCap = 'round';
+      g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
+      g.restore();
+    })();
+    function sentrert(x, y, stil, farge) { g.font = stil; g.fillStyle = farge; g.fillText(x, 80, y); }
+    g.font = '800 44px ' + font; g.fillStyle = '#F5F0FF'; g.fillText('mitt', 80, 150);
+    var bredde = g.measureText('mitt').width; g.fillStyle = '#FF5B1F'; g.fillText('vors', 80 + bredde, 150);
+    g.font = '800 104px ' + font; g.fillStyle = '#F5F0FF';
+    g.fillText(T('Kveldens', 'Tonight\'s'), 80, 330); g.fillText(T('oppsummering', 'recap'), 80, 440);
+    var dag = new Date(tilstand.ferdig || Date.now()).toLocaleDateString(LOKALE, { weekday: 'long', day: 'numeric', month: 'long' });
+    sentrert(dag.charAt(0).toUpperCase() + dag.slice(1) + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 510, '500 38px ' + font, '#B4A7CF');
+    // tre store tall
+    var tall = [[t.sumSlurker, T('slurker', t.sumSlurker === 1 ? 'sip' : 'sips')], [t.leker.length, t.leker.length === 1 ? T('lek', 'game') : T('leker', 'games')], [t.minutter >= 60 ? Math.floor(t.minutter / 60) + T('t ', 'h ') + (t.minutter % 60) + 'm' : t.minutter + ' min', T('sammen', 'together')]];
+    tall.forEach(function (x, i) {
+      var bx = 80 + i * 310;
+      g.fillStyle = 'rgba(200,255,46,.10)'; g.beginPath(); if (g.roundRect) g.roundRect(bx, 570, 290, 170, 28); else g.rect(bx, 570, 290, 170); g.fill();
+      g.fillStyle = '#C8FF2E'; g.font = '800 70px ' + font; g.fillText(String(x[0]), bx + 28, 668);
+      g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x[1], bx + 30, 716);
+    });
+    var y = 830;
+    t.kaaring.slice(0, 4).forEach(function (x) {
+      g.fillStyle = 'rgba(248,233,210,.06)'; g.beginPath(); if (g.roundRect) g.roundRect(80, y - 20, W - 160, 132, 26); else g.rect(80, y - 20, W - 160, 132); g.fill();
+      g.font = '64px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; g.fillStyle = '#fff'; g.fillText(x.ikon, 110, y + 72);
+      g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x.tittel, 210, y + 30);
+      g.fillStyle = '#F5F0FF'; g.font = '700 48px ' + font; g.fillText((x.navn + ' · ' + x.tall).slice(0, 34), 210, y + 90);
+      y += 152;
+    });
+    y += 30;
+    g.fillStyle = '#C8FF2E'; g.font = '700 40px ' + font; g.fillText(T('Slurketavla', 'Sip board'), 80, y); y += 20;
+    var topp = Math.max(1, t.rangert[0] ? t.rangert[0].slurker || 0 : 1);
+    t.rangert.slice(0, Math.max(3, Math.min(6, Math.floor((1700 - y) / 76)))).forEach(function (p, i) {
+      y += 76;
+      g.fillStyle = i === 0 ? '#C8FF2E' : '#F5F0FF'; g.font = '700 42px ' + font; g.fillText((i + 1) + '. ' + p.navn.slice(0, 16), 80, y);
+      g.fillStyle = 'rgba(200,255,46,.18)'; g.fillRect(560, y - 30, 300, 26);
+      g.fillStyle = '#C8FF2E'; g.fillRect(560, y - 30, Math.round(300 * (p.slurker || 0) / topp), 26);
+      g.fillStyle = '#F5F0FF'; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
+    });
+    if (t.leker.length && y < 1560) {
+      y += 90; g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(T('Dere spilte', 'You played'), 80, y);
+      g.fillStyle = '#F5F0FF'; g.font = '600 38px ' + font;
+      var linje = '', ord = t.leker.join(' · ').split(' ');
+      ord.forEach(function (w) { var prov = linje ? linje + ' ' + w : w; if (g.measureText(prov).width > W - 160 && linje) { y += 52; if (y < 1700) g.fillText(linje, 80, y); linje = w; } else linje = prov; });
+      y += 52; if (y < 1700) g.fillText(linje, 80, y);
+    }
+    g.fillStyle = '#C8FF2E'; g.fillRect(80, H - 170, W - 160, 4);
+    g.fillStyle = '#F5F0FF'; g.font = '700 44px ' + font; g.fillText(T('Spill med oss neste gang', 'Play with us next time'), 80, H - 95);
+    g.fillStyle = '#B4A7CF'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
+    return new Promise(function (ok) {
+      c.toBlob(function (blob) { ok(blob ? new File([blob], 'mittvors-kveld.png', { type: 'image/png' }) : null); }, 'image/png');
+    });
+  }
+
+  /** Gjengens lov som story-bilde (1080×1920): den nye loven, tittelen og konvolutten. */
+  function lovStoryBilde() {
+    var W = 1080, H = 1920, font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
+    var c = document.createElement('canvas'); c.width = W; c.height = H;
+    var g = medT(c.getContext('2d'));
+    var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#3A2560'); bg.addColorStop(0.5, '#120A1D'); bg.addColorStop(1, '#0B0614');
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    g.font = '800 44px ' + font; g.fillStyle = '#F5F0FF'; g.fillText('mitt', 80, 150);
+    var b = g.measureText('mitt').width; g.fillStyle = '#FF5B1F'; g.fillText('vors', 80 + b, 150);
+    function linjer(tekst, stil, maks) {
+      g.font = stil; var ut = [], l = '';
+      String(tekst).split(' ').forEach(function (w) { var p = l ? l + ' ' + w : w; if (g.measureText(p).width > maks && l) { ut.push(l); l = w; } else l = p; });
+      if (l) ut.push(l); return ut;
+    }
+    var kv = tilstand.kveld || {}, lv = kv.lovValg || {};
+    g.fillStyle = '#B4A7CF'; g.font = '600 40px ' + font; g.fillText('⚖️ ' + T('Gjengens lov', 'The Crew’s Law') + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 80, 300);
+    g.fillStyle = '#F5F0FF'; g.font = '800 64px ' + font; g.fillText(linjer('🏆 ' + (kv.vinner ? navn(kv.vinner) : '') + T(' vant kvelden', ' won the night'), '800 64px ' + font, W - 160)[0], 80, 380);
+    var y = 520;
+    var boks = function (hoyde, farge) { g.fillStyle = farge; g.beginPath(); if (g.roundRect) g.roundRect(80, y, W - 160, hoyde, 36); else g.rect(80, y, W - 160, hoyde); g.fill(); };
+    if (lv.tekst) {
+      var l = linjer('«' + lv.tekst + '»', '800 72px ' + font, W - 260), hh = 200 + l.length * 88;
+      boks(hh, lv.type === 'opphev' ? '#3A2560' : '#F5F0FF');
+      g.fillStyle = lv.type === 'opphev' ? '#FF5B1F' : '#B33A0B'; g.font = '700 36px ' + font; g.fillText(lv.type === 'opphev' ? '🗑️ ' + T('OPPHEVET', 'REPEALED') : '📜 ' + T('NY REGEL', 'NEW RULE'), 130, y + 90);
+      g.fillStyle = lv.type === 'opphev' ? '#B4A7CF' : '#12081C'; g.font = '800 72px ' + font; l.forEach(function (x, i) { g.fillText(x, 130, y + 190 + i * 88); });
+      y += hh + 50;
+    }
+    var antall = ((tilstand.gjeng && tilstand.gjeng.regler) || []).length;
+    if (antall) { g.fillStyle = '#C8FF2E'; g.font = '700 48px ' + font; g.fillText('📜 ' + antall + T(antall === 1 ? ' regel i lovboka' : ' regler i lovboka', antall === 1 ? ' rule in the law book' : ' rules in the law book'), 80, y + 60); }
+    y += 120;
+    if (y < 1380) {
+      // Logoen (flisen) fyller tomrommet nederst
+      var cy = Math.min(1500, y + (1700 - y) / 2), sk = Math.min(4.2, (1700 - y) / 130);
+      g.save(); g.translate(W / 2, cy); g.rotate(-0.08); g.scale(sk, sk); g.translate(-50, -50);
+      g.fillStyle = '#FF5B1F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
+      [[45.5, -24], [54.5, 24]].forEach(function (k) { g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180); g.fillStyle = '#120A1D'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z')); g.fillStyle = '#F5F0FF'; g.fillRect(-12.5, -41, 25, 6); g.restore(); });
+      g.strokeStyle = '#F5F0FF'; g.lineWidth = 5; g.lineCap = 'round'; g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
+      g.restore();
+    }
+    g.fillStyle = '#C8FF2E'; g.fillRect(80, H - 170, W - 160, 4);
+    g.fillStyle = '#F5F0FF'; g.font = '700 44px ' + font; g.fillText(T('Hvilke lover har din gjeng?', 'What laws does your crew have?'), 80, H - 95);
+    g.fillStyle = '#B4A7CF'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
+    return new Promise(function (ok) { c.toBlob(function (bl) { ok(bl ? new File([bl], 'mittvors-lov.png', { type: 'image/png' }) : null); }, 'image/png'); });
+  }
+  function delLov() {
+    var lov = (tilstand.kveld && tilstand.kveld.lovValg) || null;
+    var url = location.origin + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
+    var tekst = lov && lov.type === 'ny' ? T('📜 Ny regel i ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'gjengen') + ': «' + lov.tekst + '»', '📜 New rule in ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'the crew') + ': “' + lov.tekst + '”') : T('Gjengens lov på Mitt vors ⚖️', 'The Crew’s Law on Mitt vors ⚖️');
+    hentVervKode();
+    if (window.BDDel) return window.BDDel.lenke(url, tekst, { tittel: T('Del kvelden', 'Share the night'), bilde: lovStoryBilde });
+    lovStoryBilde().then(function (fil) {
+      if (fil && navigator.canShare && navigator.canShare({ files: [fil] })) navigator.share({ files: [fil], text: tekst + ' ' + url }).catch(function () {});
+    });
+  }
+  function delKveld() {
+    var url = tilstand.gjeng ? location.origin + RUTE.gjeng + '?k=' + tilstand.gjeng.kode : location.origin + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
+    var t = kveldsTall();
+    var tekst = torr(t.kaaring[0] ? t.kaaring[0].tittel + ': ' + t.kaaring[0].navn + ' 🏆 ' : '') + T('Kveldens oppsummering fra Mitt vors –', 'Tonight\'s recap from Mitt vors –');
+    if (!window.BDDel) {
+      // Uten delingsarket: del bildet direkte, eller last det ned
+      return storyBilde().then(function (fil) {
+        if (!fil) return toast(T('Fikk ikke laget bildet.', 'Couldn\'t create the image.'));
+        if (navigator.canShare && navigator.canShare({ files: [fil] })) return navigator.share({ files: [fil], title: 'Mitt vors', text: tekst + ' ' + url }).catch(function () {});
+        var a = document.createElement('a'); a.href = URL.createObjectURL(fil); a.download = fil.name;
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+      });
+    }
+    window.BDDel.lenke(url, tekst, { tittel: T('Del kvelden', 'Share the night'), ingress: T('Bildet passer rett i storyen på Snapchat og Instagram. Lenken kan sendes på Messenger eller SMS.', 'The image fits straight into your Snapchat or Instagram story. The link can be sent on Messenger or by text.'), bilde: storyBilde });
+  }
+
+  /* ---------- poengtavla ---------- */
+  var tavle = null;
+  function rangert() {
+    return (tilstand.spillere || []).slice().sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0) || a.navn.localeCompare(b.navn); });
+  }
+  function kaaring() {
+    var l = rangert(), sum = l.reduce(function (n, p) { return n + (p.slurker || 0); }, 0), ut = [];
+    if (!sum) return ut;
+    ut.push({ ikon: '🏆', tittel: T('Kveldens tørstigste', 'Thirstiest of the night'), navn: l[0].navn, n: l[0].slurker });
+    if (l.length >= 3) { var sist = l[l.length - 1]; ut.push({ ikon: '🧊', tittel: T('Kveldens edruste', 'Soberest of the night'), navn: sist.navn, n: sist.slurker || 0 }); }
+    ut.push({ ikon: '🍻', tittel: T('Hele gjengen', 'The whole crew'), navn: sum + ' ' + T('slurker til sammen', 'sips in total'), n: null });
+    return ut;
+  }
+  function tavleHtml() {
+    var l = rangert(), k = kaaring(), vert = erVert();
+    return '<div class="rom-tavle-innhold" role="document"><div class="rom-tavle-topp"><h2>' + T('Poengtavla', 'The scoreboard') + '</h2><button class="linkbtn" data-t="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+      '<p class="small">' + T('Mange leker fører slurkene selv. Før resten med + og −. ', 'Many games keep track of sips themselves. Log the rest with + and −. ') + (vert ? T('Som vert kan du rette på alle.', 'As the host you can fix anyone\'s score.') : T('Verten kan rette på alle.', 'The host can fix anyone\'s score.')) + T(' 🍺 er slurker du har vunnet og kan sende til andre.', ' 🍺 are sips you\'ve won and can send to others.') + '</p>' +
+      '<ol class="rom-tavle-liste">' + l.map(function (p, i) {
+        var kan = vert || p.id === tilstand.meg;
+        return '<li class="' + (p.id === tilstand.meg ? 'meg' : '') + '"><span class="rt-plass">' + (i + 1) + '</span><span class="rt-navn">' + esc(p.navn) + '</span>' +
+          (kan ? '<button type="button" data-t="minus" data-id="' + p.id + '" aria-label="' + T('Én slurk mindre for ', 'One sip less for ') + esc(p.navn) + '">−</button>' : '') +
+          '<b class="rt-tall">' + (p.slurker || 0) + '</b>' + (p.gi ? '<span class="rt-gi" title="' + T('Slurker å dele ut', 'Sips to hand out') + '">🍺' + p.gi + '</span>' : '') +
+          (kan ? '<button type="button" data-t="pluss" data-id="' + p.id + '" aria-label="' + T('Én slurk til ', 'One more sip for ') + esc(p.navn) + '">+</button>' : '') + '</li>';
+      }).join('') + '</ol>' +
+      (k.length ? '<div class="rom-kaaring">' + k.map(function (x) { return '<div><span>' + x.ikon + '</span><small>' + esc(x.tittel) + '</small><b>' + esc(x.navn) + (x.n !== null ? ' · ' + x.n : '') + '</b></div>'; }).join('') + '</div>' : '') +
+      '<div class="dl-knapper"><button class="btn gold" data-t="del" type="button">' + T('Del tavla som bilde', 'Share the board as an image') + '</button></div></div>';
+  }
+  function aapneTavle() {
+    if (tavle) return;
+    tavle = document.createElement('div'); tavle.className = 'rom-tavle'; tavle.setAttribute('role', 'dialog'); tavle.setAttribute('aria-label', T('Poengtavle', 'Scoreboard'));
+    tavle.innerHTML = tavleHtml();
+    tavle.addEventListener('click', function (e) {
+      if (e.target === tavle) return lukkTavle();
+      var b = e.target.closest('[data-t]'); if (!b) return;
+      var t = b.dataset.t;
+      if (t === 'lukk') return lukkTavle();
+      if (t === 'pluss' || t === 'minus') return gjorAlltid({ handling: 'slurk', hvem: b.dataset.id, n: t === 'pluss' ? 1 : -1 });
+      if (t === 'del') return delTavle(b);
+    });
+    document.body.appendChild(tavle);
+  }
+  function lukkTavle() { if (tavle) { tavle.remove(); tavle = null; } }
+  function delTavle(knapp) {
+    var l = rangert(), k = kaaring(), W = 1080, H = Math.max(1080, 420 + l.length * 96 + k.length * 110);
+    var c = document.createElement('canvas'); c.width = W; c.height = H;
+    var g = medT(c.getContext('2d')), font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
+    g.fillStyle = '#120A1D'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#C8FF2E'; g.font = '800 84px ' + font; g.fillText(T('Kveldens tavle', 'Tonight\'s board'), 80, 160);
+    g.fillStyle = '#B4A7CF'; g.font = '500 36px ' + font;
+    g.fillText(new Date().toLocaleDateString(LOKALE, { weekday: 'long', day: 'numeric', month: 'long' }) + T(' · rom ', ' · room ') + kode, 80, 220);
+    var y = 320, maks = Math.max(1, l[0] ? l[0].slurker || 0 : 1);
+    l.forEach(function (p, i) {
+      g.fillStyle = i === 0 ? '#C8FF2E' : '#F5F0FF'; g.font = '800 48px ' + font; g.fillText((i + 1) + '.', 80, y);
+      g.font = '700 48px ' + font; g.fillText(p.navn.slice(0, 18), 160, y);
+      g.fillStyle = 'rgba(200,255,46,.25)'; g.fillRect(620, y - 34, 300, 30);
+      g.fillStyle = '#C8FF2E'; g.fillRect(620, y - 34, Math.round(300 * (p.slurker || 0) / maks), 30);
+      g.fillStyle = '#F5F0FF'; g.font = '800 48px ' + font; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
+      y += 96;
+    });
+    y += 30;
+    k.forEach(function (x) {
+      g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x.ikon + '  ' + x.tittel, 80, y);
+      g.fillStyle = '#F5F0FF'; g.font = '700 44px ' + font; g.fillText(x.navn + (x.n !== null ? ' · ' + x.n : ''), 80, y + 52); y += 110;
+    });
+    g.fillStyle = '#8F81AD'; g.font = '600 32px ' + font; g.fillText('mittvors.no', 80, H - 70);
+    c.toBlob(function (blob) {
+      if (!blob) return toast(T('Fikk ikke laget bildet.', 'Couldn\'t create the image.'));
+      var fil = new File([blob], 'mittvors-tavle.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [fil] })) {
+        navigator.share({ files: [fil], title: T('Kveldens tavle', 'Tonight\'s board'), text: T('Kveldens tavle fra Mitt vors', 'Tonight\'s board from Mitt vors') }).catch(function () {});
+      } else {
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mittvors-tavle.png';
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+      }
+    }, 'image/png');
+  }
+
+  function tegn() {
+    if (tavle && tilstand) tavle.innerHTML = tavleHtml();
+    if (!tilstand) return;
+    if (rofDrar) { rofVentTegn = true; return; }   // ikke tegn ringen på nytt midt i et drag
+    if (borsLas && document.querySelector('.bs-side .bs-meld, .bs-side .bs-anmeld')) return;   // ikke mist bildet/valgene mens du melder
+    var aktivt = document.activeElement;
+    if (aktivt && aktivt.closest && aktivt.closest('.bs-side') && (aktivt.tagName === 'SELECT' || aktivt.tagName === 'INPUT')) return;   // ikke forstyrr mens du velger/skriver
+    var bsValg = {}; ['bsSlurkTil', 'bsGiTil'].forEach(function (id) { var e = document.getElementById(id); if (e) bsValg[id] = e.value; });
+    var bsTekst = document.getElementById('bsNyTekst'), bsTekstV = bsTekst && !borsModal ? bsTekst.value : null;
+    var s = tilstand.spill, innhold = '';
+    if (!s) aktiverPluss(false);
+    if (!s && tilstand.ferdig) { innhold = oppsummering(); hentVervKode(); }
+    else if (!s && tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) innhold = borsSide();
+    else if (!s) innhold = lobby();
+    else {
+      innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' && s.lek !== 'ring-of-fire' ? ' · ' + esc(s.modus) : '') + '</p>' +
+        ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
+           veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + reglerPanel(s) + '</div>';
+      // Nyhetsrunden finnes bare på norsk
+      if (EN && s.type === 'nyhetsrunden') innhold = innhold.replace('</p>', '</p><p class="small">🇳🇴 ' + T('', 'Questions are in Norwegian') + '</p>');
+    }
+    if (s && s.turStart && erVert()) innhold += '<p class="rom-hopp" data-turstart="' + s.turStart + '" hidden><button class="btn ghost small" data-g="hopp-over" type="button">' + T('Hopp over den som har tur', 'Skip whoever\'s turn it is') + '</button></p>';
+    var vert = vertVerktoy(s);
+    var tsLagret = [0, 1, 2].map(function (i) { var e = document.getElementById('tsR' + i); return e ? e.value : null; }), tsValgt = (document.querySelector('input[name=tsL]:checked') || {}).value;
+    var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
+    var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
+    var sosGammel = document.getElementById('sosInput'), sosVerdi = sosGammel ? sosGammel.value : null, sosFokus = sosGammel && document.activeElement === sosGammel;
+    var lovGammel = document.getElementById('lovNyTekst'), lovVerdi = lovGammel ? lovGammel.value : null, lovFokus = lovGammel && document.activeElement === lovGammel;
+    // Under en lek: leken først, det som går i bakgrunnen etterpå, reaksjonene i en dokk nederst (se natt.css).
+    // I lobbyen: som før.
+    var turTekst = minTurNaa(tilstand);
+    var topp = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + venterStripe();
+    var merker = '<div class="tur-merke" aria-live="polite">' + esc(turTekst) + '</div><div class="hemmelig-merke">🤫 ' + T('Bare du ser dette – hold skjermen for deg selv', 'Only you can see this – keep the screen to yourself') + '</div>';
+    var forlat = '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
+    // Nytt kort? Ta vare på det gamle, så det kan kastes ut av skjermen når det nye deles ut
+    var nyKN = kortNokkel(s), kortByttet = !!(tegnetFor && nyKN && nyKN !== sistKortNokkel) && !roligBevegelse();
+    tegnetFor = true;
+    var gammeltKort = kortByttet ? root.querySelector('.rom-kort, .rof-kort.rom-rof') : null;
+    var gammelRekt = gammeltKort ? gammeltKort.getBoundingClientRect() : null;
+    sistKortNokkel = nyKN;
+    root.innerHTML = s
+      ? topp + merker + borsHurtig() + innhold + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + vert + forlat
+      : topp + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat;
+    merkNyttInnhold(s);
+    trinnEtterTegning();
+    // Skjermkanten: lime når det er din tur, stripete når skjermen viser noe hemmelig
+    var rotEl = document.documentElement;
+    rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
+    rotEl.classList.toggle('i-spill', !!s);
+    rotEl.classList.toggle('min-tur', !!turTekst);
+    rotEl.classList.toggle('hemmelig', !!root.querySelector('[data-hemmelig]'));
+    // Nytt skjermbilde (lobby, ny lek, oppsummering): start øverst. Ellers: behold plassen.
+    var skjerm = s ? 'spill:' + s.type + ':' + (s.navn && s.navn.no ? s.navn.no : s.navn) : tilstand.ferdig ? 'ferdig' : 'lobby';
+    // 'instant': ellers stopper neste tegning en myk rulling midt på siden
+    if (skjerm !== sisteSkjerm) { sisteSkjerm = skjerm; window.scrollTo({ top: 0, behavior: 'instant' }); } else window.scrollTo({ top: y, behavior: 'instant' });
+    if (kortByttet) delUtKort(gammeltKort, gammelRekt);
+    tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
+    if (tsValgt !== undefined) { var r = document.querySelector('input[name=tsL][value="' + tsValgt + '"]'); if (r) r.checked = true; }
+    var nrNy = document.getElementById('nrInput');
+    if (nrNy && nrVerdi !== null) { nrNy.value = nrVerdi; if (nrFokus) nrNy.focus({ preventScroll: true }); }
+    var nrS = document.getElementById('nrSkjema');
+    if (nrS) nrS.addEventListener('submit', function (e) {
+      e.preventDefault(); var i = document.getElementById('nrInput'); gjorAlltid({ handling: 'nr-svar', v: i.value.trim() }); i.blur();
+    });
+    var sosNy = document.getElementById('sosInput');
+    if (sosNy && sosVerdi !== null) { sosNy.value = sosVerdi; if (sosFokus) sosNy.focus({ preventScroll: true }); }
+    Object.keys(bsValg).forEach(function (id) { var e = document.getElementById(id); if (e && bsValg[id]) e.value = bsValg[id]; });
+    var lovNy = document.getElementById('lovNyTekst');
+    if (lovNy && lovVerdi !== null) { lovNy.value = lovVerdi; if (lovFokus) lovNy.focus({ preventScroll: true }); }
+    var lovSkj = document.getElementById('lovNySkjema');
+    if (lovSkj) lovSkj.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var tx = (document.getElementById('lovNyTekst') || {}).value || '';
+      if (tx.trim().length < 4) return toast(T('Skriv hele regelen.', 'Write the whole rule.'));
+      if (!confirm(T('Innføre regelen «' + tx.trim() + '»?', 'Introduce the rule “' + tx.trim() + '”?'))) return;
+      gjor({ handling: 'lov-valg', type: 'ny', tekst: tx.trim() });
+    });
+    var sosS = document.getElementById('sosSkjema');
+    if (sosS) sosS.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var i = document.getElementById('sosInput'), t = i.value.trim(); if (!t) return;
+      var typ = tilstand.spill && tilstand.spill.type;
+      var hd = { hvemskrev: 'hs-skriv', bloff: 'bf-skriv', samme: 'sm-skriv', pannekort: 'pk-skriv' }[typ]; if (!hd) return;
+      i.value = ''; i.blur(); gjorAlltid({ handling: hd, tekst: t });
+    });
+    var lovS = document.getElementById('lovSkjema');
+    if (lovS) lovS.addEventListener('submit', function (e) { e.preventDefault(); var i = document.getElementById('lovInput'), t = i.value.trim(); if (!t) return; if (!confirm(T('Foreslå loven «' + t + '»?', 'Propose the law “' + t + '”?'))) return; gjor({ handling: 'lov-forslag', tekst: t }); });
+    var titS = document.getElementById('tittelSkjema');
+    if (titS) titS.addEventListener('submit', function (e) { e.preventDefault(); var t = document.getElementById('tittelInput').value.trim(); if (t) gjor({ handling: 'lov-tittel', tittel: t }); });
+    var lsS = document.getElementById('lovSvarSkjema');
+    if (lsS) lsS.addEventListener('submit', function (e) {
+      e.preventDefault(); var i = document.getElementById('lovSvar'), t = i.value.trim(); if (!t) return;
+      var r = tilstand.spill && tilstand.spill.r; i.value = ''; i.blur();
+      gjorAlltid(r && r.type === 'mage' ? { handling: 'lov-svar', tall: t } : { handling: 'lov-svar', tekst: t });
+    });
+    sjekkGjengMedlem();
+    if (bsTekstV) { var bsNy = document.getElementById('bsNyTekst'); if (bsNy) { bsNy.value = bsTekstV; bsNy.closest('details') && (bsNy.closest('details').open = true); } }
+    sjekkOppdrag();
+    tegnBors();
+    visReaksjoner(tilstand.reak);
+    sjekkHjul();
+    if (tavleHjul) tegnHjulModal(false);
+    if (document.querySelector('[data-frist]')) fristTikk(); else clearInterval(fristTimer);
+    var ny = document.getElementById('rfInput');
+    if (ny && gVerdi !== null) { ny.value = gVerdi; if (gFokus) ny.focus({ preventScroll: true }); }
+    var ts = document.getElementById('tsSkjema');
+    if (ts) ts.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var p = [0, 1, 2].map(function (i) { return document.getElementById('tsR' + i).value.trim(); });
+      var l = ts.querySelector('input[name=tsL]:checked');
+      if (p.some(function (x) { return !x; }) || !l) return toast(T('Skriv tre påstander og merk løgnen.', 'Write three statements and mark the lie.'));
+      gjor({ handling: 'pastander', p: p, logn: Number(l.value) });
+    });
+    var sk = document.getElementById('rfSkjema');
+    if (sk) sk.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var i = document.getElementById('rfInput'), t = i.value.trim(); if (!t) return;
+      i.value = ''; i.focus({ preventScroll: true });
+      gjorAlltid({ handling: 'skriv', tekst: t });
+    });
+  }
+
+  root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.bs-side [data-b], .bs-hurtig [data-b]')) borsKlikk(e); });
+  root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-lov-login]')) { try { sessionStorage.setItem('bd_etter_innlogging', location.pathname + location.search); } catch (x) {} } });
+  /* ---------- nytt kort: det gamle kastes ut, det nye «deles ut» ----------
+     Alle telefonene får samme kort samtidig. En kjapp bevegelse (et kvart sekund) gjør at alle
+     ser at noe nytt kom – også den som så bort – og telefonen føles som en kortstokk. */
+  var sistKortNokkel = '', tegnetFor = false;   // første tegning (f.eks. etter oppdatering av siden) skal ikke animeres
+  function roligBevegelse() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+  function kortNokkel(s) {
+    if (!s || s.ring) return '';   // ringen i Ring of Fire har sin egen dra-bevegelse
+    var k = s.kort ? (s.kort.t ? (s.kort.t.no || s.kort.t) : String(s.kort.v || '') + (s.kort.s || '')) : '';
+    return [s.type, s.lek, s.pos, k, s.tekst, s.fase, s.runde, s.i].join('|');
+  }
+  function delUtKort(gammelt, rekt) {
+    var inn = root.querySelector('.rom-kort, .rof-kort.rom-rof, .rom-sporsmal, .rom-hemmelig');
+    if (inn) { inn.classList.add('kort-inn'); inn.addEventListener('animationend', function () { inn.classList.remove('kort-inn'); }, { once: true }); }
+    if (!gammelt || !rekt || rekt.bottom < 0 || rekt.top > innerHeight) return;
+    var klon = gammelt.cloneNode(true);
+    klon.classList.add('kort-ut'); klon.setAttribute('aria-hidden', 'true');
+    klon.style.cssText = 'position:fixed;left:' + rekt.left + 'px;top:' + rekt.top + 'px;width:' + rekt.width + 'px;height:' + rekt.height + 'px;margin:0;z-index:60;pointer-events:none';
+    document.body.appendChild(klon);
+    setTimeout(function () { klon.remove(); }, 450);
+  }
+
+  /* ---------- «Trykk igjen»: det som ikke kan angres, krever to rolige trykk ----------
+     Et glass i den ene hånda og et bord som rister: ett bomtrykk skal ikke kaste noen ut av rommet.
+     Første trykk gjør knappen om til «Trykk igjen …» i fire sekunder. Andre trykk må komme etter
+     minst 0,4 s, så et utilsiktet dobbelttrykk ikke teller som to. Tilstanden overlever at rommet
+     tegnes på nytt (det skjer hele tiden når de andre trykker). */
+  var trinn = { nokkel: '', t: 0, tekst: '', timer: null };
+  function trinnNokkel(b) { return (b.dataset.g || '') + ':' + (b.dataset.id || b.dataset.i || ''); }
+  function visTrinn(b) {
+    if (!b || b.classList.contains('to-trinn')) return;
+    b.dataset.foer = b.innerHTML;
+    b.classList.add('to-trinn');
+    (b.querySelector('b') || b).textContent = trinn.tekst;
+  }
+  function nullTrinn() {
+    clearTimeout(trinn.timer); trinn.nokkel = '';
+    root.querySelectorAll('.to-trinn').forEach(function (el) { el.classList.remove('to-trinn'); if (el.dataset.foer != null) { el.innerHTML = el.dataset.foer; delete el.dataset.foer; } });
+  }
+  function trinnEtterTegning() {
+    if (!trinn.nokkel) return;
+    var del = trinn.nokkel.split(':'), g = del[0], id = del.slice(1).join(':');
+    var el = Array.prototype.find.call(root.querySelectorAll('[data-g="' + g + '"]'), function (x) { return (x.dataset.id || x.dataset.i || '') === id; });
+    if (el) visTrinn(el); else nullTrinn();
+  }
+  function bekreftet(b, tekst) {
+    var k = trinnNokkel(b), naa = Date.now();
+    if (trinn.nokkel === k) { if (naa - trinn.t < 400) return false; nullTrinn(); return true; }
+    nullTrinn();
+    trinn.nokkel = k; trinn.t = naa; trinn.tekst = tekst; visTrinn(b);
+    trinn.timer = setTimeout(nullTrinn, 4000);
+    try { navigator.vibrate && navigator.vibrate(25); } catch (x) {}
+    return false;
+  }
+  function farligTekst(g, b) {
+    if (g === 'fjern') return T('Fjern?', 'Remove?');
+    if (g === 'forlat') return tilstand && tilstand.venter === true ? '' : T('Trykk igjen for å gå ut', 'Tap again to leave');
+    if (g === 'avslutt') return T('Trykk igjen – avslutt leken', 'Tap again – end the game');
+    if (g === 'nytt-brett') return T('Nytt brett? Trykk igjen', 'New board? Tap again');
+    if (g === 'nullstill') return T('Trykk igjen – nullstill tavla', 'Tap again – reset the scores');
+    if (g === 'avslutt-kvelden') return T('Trykk igjen – avslutt kvelden', 'Tap again – end the night');
+    if (g === 'lov-opphev') return T('Trykk igjen – opphev', 'Tap again – repeal');
+    if (g === 'lov-ingen') return T('Trykk igjen – ingen endring', 'Tap again – no change');
+    return '';
+  }
+  // Dobbelttrykk-sperre: kommer det et nytt kort eller en ny runde, teller ikke trykk på den store
+  // knappen det første 0,7 sekundet – ellers hopper et dobbelttrykk over kortet ingen rakk å lese.
+  var sistInnhold = '', sperreTil = 0;
+  function merkNyttInnhold(s) {
+    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur].join('|') : 'ingen';
+    if (k !== sistInnhold) { if (sistInnhold) sperreTil = Date.now() + 700; sistInnhold = k; }
+  }
+
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-g]');
+    if (trinn.nokkel && (!b || trinnNokkel(b) !== trinn.nokkel)) nullTrinn();
+    if (!b || !tilstand) return;
+    var g = b.dataset.g;
+    if (b.classList.contains('rom-stor-knapp') && Date.now() < sperreTil) return;
+    var farlig = farligTekst(g, b);
+    if (farlig && !bekreftet(b, farlig)) return;
+    if (g === 'del') {
+      var url = location.origin + RUTE.rom + '?k=' + kode;
+      var tekst = T('Bli med på Mitt vors! Kode: ', 'Join me on Mitt vors! Code: ') + kode;
+      if (window.BDDel) return window.BDDel.lenke(url, tekst, { tittel: T('Inviter til rommet', 'Invite to the room'), ingress: T('Romkode: ', 'Room code: ') + kode });
+      if (navigator.share) navigator.share({ title: 'Mitt vors', text: tekst, url: url }).catch(function () {});
+      else if (navigator.clipboard) navigator.clipboard.writeText(tekst + '\n' + url).then(function () { toast(T('Lenken er kopiert', 'Link copied')); });
+      return;
+    }
+    if (g === 'tavle') return aapneTavle();
+    if (g === 'hjul-aapne') return aapneHjul();
+    if (g === 'pluss-tilbud') return visPlussTilbud();
+    if (g === 'op-aapne') return aapneOppdrag();
+    if (g === 'bs-aapne') return aapneBors();
+    if (g === 'bs-fokus') return gjor({ handling: 'bs-fokus', paa: true });
+    if (g === 'bs-start') return borsStartValg();
+    if (g === 'op-paa' || g === 'op-av') return gjor({ handling: g });
+    if (g === 'mester-paa' || g === 'mester-bytt' || g === 'mester-av') return gjor({ handling: g });
+    if (g === 'vann-naa') return gjor({ handling: 'vann-naa' });
+    if (g === 'vann-auto') return gjor({ handling: tilstand.vannAv ? 'vann-paa' : 'vann-av' });
+    if (g === 'hs-stem') return gjor({ handling: 'hs-stem', hvem: b.dataset.paa });
+    if (g === 'sp-stem') return gjor({ handling: 'sp-stem', hvem: b.dataset.paa });
+    if (g === 'sp-gjett') return gjor({ handling: 'sp-gjett', sted: b.dataset.sted });
+    if (g === 'bf-stem') return gjor({ handling: 'bf-stem', i: Number(b.dataset.i) });
+    if (g === 'pk-riktig') return gjor({ handling: 'pk-riktig', hvem: b.dataset.paa });
+    if (g === 'sk-trykk') {
+      var tidlig = !skalVist, ms = skalVist ? Math.round(performance.now() - skalVist) : null;
+      b.disabled = true; b.textContent = tidlig ? T('For tidlig! 🍺🍺', 'Too early! 🍺🍺') : ms + ' ms';
+      return gjorAlltid({ handling: 'sk-trykk', tidlig: tidlig, ms: ms });
+    }
+    if (['hs-neste', 'sp-til-stemming', 'pk-avslutt', 'sk-start'].indexOf(g) !== -1) return gjor({ handling: g });
+    if (g === 'hopp-over') return gjor({ handling: 'hopp-over' });
+    if (g === 'lov-del') return delLov();
+    if (g === 'lov-opphev') return gjor({ handling: 'lov-valg', type: 'opphev', regel: b.dataset.id });
+    if (g === 'lov-ingen') return gjor({ handling: 'lov-valg', type: 'ingen' });
+    if (g === 'plan-start') return startPlan();
+    if (g === 'kv-vinner') return gjor({ handling: 'kv-vinner', hvem: b.dataset.id || null });
+    if (g === 'slipp-inn' || g === 'avvis-inn') return gjor({ handling: g, hvem: b.dataset.id, som: b.dataset.som || 'gjest' });
+    if (g === 'lov-bli') { gjengSjekket = true; return api('POST', '/api/rom/' + kode, { handling: 'gjeng-meg', bli: true, id: meg.id, pollett: meg.pollett }).then(function (d) { gjengSjekk = ''; ta(d); toast(T('Velkommen i gjengen! 🤝', 'Welcome to the crew! 🤝')); }).catch(function (e) { toast(e.message); }); }
+    if (g === 'qr') {
+      var m = document.createElement('div'); m.className = 'rom-qrmodal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', T('QR-kode', 'QR code'));
+      m.innerHTML = qrBoks(true) + '<button class="btn gold" type="button">' + T('Lukk', 'Close') + '</button>';
+      m.addEventListener('click', function () { m.remove(); });
+      document.body.appendChild(m); return;
+    }
+    if (g === 'forlat') { glemRom(); settAdresse(''); kode = ''; tegnStart(); return; }
+    if (g === 'start') {
+      var lekInfo = (tilstand.leker || []).find(function (x) { return x.id === b.dataset.lek; });
+      if (lekInfo && lekInfo.pluss && !tilstand.pluss) return visPlussTilbud();
+      return gjor({ handling: 'start', lek: b.dataset.lek, modus: b.dataset.modus });
+    }
+    if (g === 'egen') {
+      var st = egenListe()[Number(b.dataset.i)]; if (!st) return;
+      var klar = les('bd_stokk_rom'); if (klar && klar.navn === st.navn) { try { localStorage.removeItem('bd_stokk_rom'); } catch (x) {} }
+      return gjor({ handling: 'start', lek: 'egen', navn: st.navn, kort: st.kort });
+    }
+    if (g === 'lagrestokk') return lagreSomStokk();
+    if (g === 'rf-velg') {
+      if (!window.BDVelgKort) return;
+      return window.BDVelgKort({ maks: 60 }).then(function (kort) {
+        if (kort.length) { gjorAlltid({ handling: 'rf-legg-til', kort: kort }); toast(kort.length + T(' kort er lagt i bunken din', ' cards added to your pile')); }
+      });
+    }
+    if (g === 'rf-lagre-mine') {
+      var sp = tilstand.spill, d = new Date(), nv = T('Mine kort ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'My cards ' + d.getDate() + '/' + (d.getMonth() + 1));
+      return window.BDLagreKort(nv, sp.mineKort || []).then(function (r) {
+        toast(r === 'lagret' ? T('Kortene dine er lagret på kontoen ✓', 'Your cards are saved to your account ✓') : T('Kortene er lagt til side. Logg inn på Min stokk for å lagre dem.', 'The cards are set aside. Log in under My decks to save them.'));
+      }).catch(function (e) { toast(e.message || T('Fikk ikke lagret.', 'Couldn\'t save.')); });
+    }
+    if (g === 'del-kveld') return delKveld();
+    if (g === 'alkoholfri') return gjorAlltid({ handling: 'alkoholfri', paa: !tilstand.alkoholfri });
+    if (g === 'gjeng-av') return gjorAlltid({ handling: 'gjeng', gjengId: '' });
+    if (g === 'skjerm') {
+      visSkjerm = true;
+      var tilSkjerm = function () { setTimeout(function () { var e = document.querySelector('.rom-skjerm'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120); };
+      if (!tilstand.skjermPin) { gjor({ handling: 'skjerm-lag' }); setTimeout(tilSkjerm, 700); return; }
+      tegn(); return tilSkjerm();
+    }
+    if (g === 'skjerm-ny') return gjor({ handling: 'skjerm-lag', ny: true });
+    if (g === 'skjerm-lukk') { visSkjerm = false; return tegn(); }
+    if (g === 'skjerm-del') {
+      var sl = skjermLenke();
+      if (navigator.share) { navigator.share({ title: T('Mitt vors – storskjerm', 'Mitt vors – big screen'), url: sl }).catch(function () {}); return; }
+      try { navigator.clipboard.writeText(sl); toast(T('Lenken er kopiert ✓', 'Link copied ✓')); } catch (e) { prompt(T('Kopier lenken:', 'Copy the link:'), sl); }
+      return;
+    }
+    if (g === 'avslutt-kvelden' || g === 'fortsett-kvelden') return gjor({ handling: g });
+    if (g === 'velg-annen') { visAlle = true; if (erVert()) gjor({ handling: 'velg-annen' }); return tegn(); }
+    if (g === 'lyd') { lyd.paa = !lyd.paa; skriv('bd_lyd', lyd.paa); if (lyd.paa) { lydCtx(); spillLyd('tur'); } return tegn(); }
+    if (g === 'reager') { if (!les('bd_intro_reak')) { skriv('bd_intro_reak', 1); var hh = document.querySelector('.reak-hint'); if (hh) hh.remove(); } return gjorAlltid({ handling: 'reager', e: b.dataset.e }); }
+    if (g === 'intro-lukk') { skriv(b.dataset.k, 1); return tegn(); }
+    if (g === 'send-velg') return sendVelger();
+    if (g === 'br-svar') return gjor({ handling: 'br-svar', v: b.dataset.v });
+    if (g === 'br-snu') return gjor({ handling: 'br-snu', pos: Number(b.dataset.pos) });
+    if (g === 'yz-hold') return gjor({ handling: 'yz-hold', i: Number(b.dataset.i) });
+    if (g === 'yz-felt') return gjor({ handling: 'yz-felt', f: b.dataset.f });
+    if (g === 'nr-svar') return gjorAlltid({ handling: 'nr-svar', v: b.dataset.v });
+    if (g === 'nr-flipp') return gjor({ handling: 'nr-flipp', hvem: b.dataset.id });
+    if (['br-buss', 'br-kjor', 'yz-kast', 'nr-vis', 'nr-neste', 'nr-start'].indexOf(g) !== -1) return gjor({ handling: g });
+    if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
+    if (g === 'rof-makker') return gjor({ handling: 'rof-makker', paa: b.dataset.paa });
+    if (g === 'rof-for') { rofFor = tilstand.spill ? tilstand.spill.nr : -1; return tegn(); }
+    if (g === 'stem') return gjor({ handling: 'stem', paa: b.dataset.paa });
+    if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
+    if (g === 'fjern') return gjor({ handling: 'fjern', hvem: b.dataset.id });
+    if (g === 'gjett') return gjor({ handling: 'gjett', paa: b.dataset.paa });
+    if (g === 'vedd') { var sl = document.getElementById('veddSl'); return gjor({ handling: 'vedd', farge: b.dataset.farge, slurker: sl ? Number(sl.value) : 2 }); }
+    if (g === 'utfordre') return gjor({ handling: 'utfordre', paa: b.dataset.paa });
+    if (g === 'velg') return gjor({ handling: 'velg', i: Number(b.dataset.i) });
+    if (g === 'pvelg') { var i = Number(b.dataset.i), j = presValg.indexOf(i); if (j === -1) presValg.push(i); else presValg.splice(j, 1); b.setAttribute('aria-pressed', j === -1); return; }
+    if (g === 'legg') { var valgte = presValg.slice(); presValg = []; return gjor({ handling: 'legg', kort: valgte }); }
+    if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass', 'stokk', 'startklokke'].indexOf(g) !== -1) return gjor({ handling: g });
+    if (['avslutt', 'nullstill', 'svart', 'avslor', 'runde', 'nytt-brett'].indexOf(g) !== -1) return gjor({ handling: g });
+  });
+
+  function nrSpilt() { var l = les('bd_nr_spilt'); return Array.isArray(l) ? l : []; }
+  root.addEventListener('change', function (e) {
+    if (e.target && e.target.dataset && 'nrArkiv' in e.target.dataset && e.target.value) return gjor({ handling: 'start', lek: 'nyhetsrunden', modus: e.target.value });
+    if (e.target && e.target.id === 'romGjeng' && e.target.value) gjorAlltid({ handling: 'gjeng', gjengId: e.target.value });
+  });
+
+  /* ---------- oppstart ---------- */
+  if (kode) meg = les('bd_rom_' + kode);
+  if (kode && meg) {
+    // Et skjelett av rommet mens det kobler til: koden står der med en gang, så man vet at man er på rett sted
+    document.documentElement.classList.add('i-rom');
+    root.innerHTML = '<div class="rom-laster" aria-busy="true"><div class="rom-hode"><div class="rom-hode-v"><div><span class="rom-etikett">' + T('Rom', 'Room') + '</span><b class="rom-kode">' + esc(kode) + '</b></div></div>' +
+      '<span class="rom-hodeknapper"><i></i><i></i><i></i><i></i></span></div><div class="skj-rad"><i></i><i></i><i></i></div><div class="skj-kort"></div>' +
+      '<p class="rom-laster-tekst" role="status">' + T('Kobler til rom ', 'Connecting to room ') + esc(kode) + ' …</p></div>';
+    hent();
+  }
+  else tegnStart();
+}

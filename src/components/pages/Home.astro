@@ -9,6 +9,7 @@ import { UKENS_LEKER, ukensLek } from '../../lib/ukenslek';
 import { games as alleLeker } from '../../lib/content';
 import { illustrasjon } from '../../lib/illustrasjon';
 import PLUSSPAKKER from '../../data/pluss.json';
+import PLUSSPAKKER_EN from '../../data/pluss.en.json';
 import DECKS from '../../data/decks.json';
 import DECKS_EN from '../../data/decks.en.json';
 const ANT_JUL = (PLUSSPAKKER as any).julebord.items.length;
@@ -23,6 +24,9 @@ import { ui, path, type Lang } from '../../lib/i18n';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 const no = lang === 'no';
+// Pluss-pakkene ved navn (leses fra dataene, så lista oppdaterer seg når det kommer nye pakker)
+const PAKKENAVN: string[] = Object.keys(PLUSSPAKKER).map((id) => (lang === 'no' ? (PLUSSPAKKER as any)[id].navn : ((PLUSSPAKKER_EN as any)[id]?.navn || (PLUSSPAKKER as any)[id].navn)));
+const PAKKELISTE = PAKKENAVN.length > 1 ? PAKKENAVN.slice(0, -1).join(', ') + (lang === 'no' ? ' og ' : ' and ') + PAKKENAVN[PAKKENAVN.length - 1] : PAKKENAVN[0];
 // Tre kort fra ekte kortstokker – en liten kortbunke ved siden av hovedknappene på PC
 const KS: any = no ? DECKS : DECKS_EN;
 const stokk = [
@@ -120,7 +124,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
         <li>{no ? 'Opptil 16 telefoner i rommet (gratis: 4)' : 'Up to 16 phones in the room (free: 4)'}</li>
         <li>{no ? 'Vorsbørsen med 100 aksjer og Agent 0,5 (hemmelige oppdrag)' : 'The Exchange with 100 shares, plus Agent 0.5 (secret missions)'}</li>
         <li>{no ? 'Bussruta, Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna' : 'Ride the Bus, Yahtzee, Pyramid, President, Pig, The Liar and Tall Tales'}</li>
-        <li>{no ? 'Julebord- og Vill-pakken' : 'The Office Party and Wild packs'}</li>
+        <li>{no ? PAKKENAVN.length + ' kortpakker: ' + PAKKELISTE : PAKKENAVN.length + ' card packs: ' + PAKKELISTE}</li>
       </ul>
     </div>
     <a class="h2-pluss-stubb" href={no ? '/no/pluss' : '/plus'}>

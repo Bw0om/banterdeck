@@ -630,5 +630,791 @@
     "k": "Drink if"
    }
   ]
+ },
+ "bli-kjent": {
+  "navn": "Icebreaker",
+  "om": "For freshers’ week, a new flatshare or the first party with new people. Nobody needs to know anyone yet.",
+  "items": [
+   {
+    "t": "Everyone who has gone in for a handshake while the other person went for a hug, drink. If it ended in a high five, drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "New rule: “what do you study?” and “what do you do?” are banned. Whoever asks drinks.",
+    "k": "Rule"
+   },
+   {
+    "t": "Point at whoever seems most likely to set up the group chat after tonight. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Whoever’s reading: say the name of everyone round the table and one thing you know about each. Get them all and give out three. Miss any and drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Cheers to the host! Anyone who doesn’t know the host’s surname drinks an extra one.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Everyone who has said they live “just outside the city” about somewhere two hours away, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "What’s the weirdest summer job you’ve ever had? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Point at whoever you think has the best story about how they ended up here tonight. Whoever gets the most fingers tells it – or drinks two.",
+    "k": "Point"
+   },
+   {
+    "t": "Swap seats with whoever you’ve talked to least tonight. Ask each other one question before the next card – or you both drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has said “sorry, what?” three times and then just nodded and smiled, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "New rule: before you drink, say the name of the person on your left. Wrong name: drink another.",
+    "k": "Rule"
+   },
+   {
+    "t": "Which app would you be most embarrassed for someone to see in your screen time? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Everyone who has introduced themselves to the same person twice at one party, drink. If it happened tonight, drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "You and the person on your right have ten seconds to find something you both hate. Manage it and cheers. If not, drink one each.",
+    "k": "Challenge"
+   },
+   {
+    "t": "If you all shared a flat: point at whoever would buy the loo roll without asking anyone to pay them back. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Whoever grew up furthest north gives out three. Whoever grew up furthest south drinks one.",
+    "k": "Give out"
+   },
+   {
+    "t": "Everyone who has turned up to a party too early and walked round the block to kill time, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "What did you buy with your very first pay cheque? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Guess where the person on your left grew up. Right region: give out two. Right town: give out four. Wrong: drink one.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has been at a party where the only person they knew left first, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Cheers to everyone who came tonight knowing just one person – you know more now!",
+    "k": "Cheers"
+   },
+   {
+    "t": "Point at whoever seems to know someone everywhere. Whoever gets the most fingers names someone they know in Lisbon – or drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "What’s the best decision you’ve ever made after a few drinks? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Everyone who has made a new best friend in the queue for the loo at a party, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone with a different accent from whoever’s reading: say “I’m just popping to the shop” in your accent. The best one gives out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "New rule: every time someone says your name, raise your glass. Forget and you drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Everyone who has danced all night with someone without ever finding out their name, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever would definitely put their hand up just as the lecturer says “that’s all for today”. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "What’s the coolest thing you’ve pretended you could do – on your CV or on a date? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Show the last song you played. If the table finds it embarrassing, drink two. If someone else has it on a playlist, cheers with them.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has already followed someone here on Instagram tonight, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Round: everyone says their name and one thing they’re good at that nobody would guess. The best one gives out three.",
+    "k": "Everyone"
+   },
+   {
+    "t": "Point at whoever seems like they’ve never camped at a festival. Whoever gets the most fingers drinks – or tells us about their first.",
+    "k": "Point"
+   },
+   {
+    "t": "Everyone who has lived somewhere so small they could reach the fridge from bed, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Learn the name of whoever’s sitting furthest from you. On the next card, cheers with them and say their name. Forget it: drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "What’s your most unpopular food opinion? Answer – whoever disagrees most drinks.",
+    "k": "Truth"
+   },
+   {
+    "t": "Whoever had the most recent birthday gives out two. Whoever’s birthday is coming up next drinks one – in advance.",
+    "k": "Give out"
+   },
+   {
+    "t": "Everyone who knows their neighbour’s cat’s name but not their neighbour’s, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever you think studies or works in something completely different from everyone else. Whoever gets the most fingers says what – and gives out two.",
+    "k": "Point"
+   },
+   {
+    "t": "Cheers to student loans – the only ones who have ever truly believed in us.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Make up a secret handshake with the person on your right: a high five, a sound and a move. If the table likes it, you each give out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "New rule: check your phone and you have to tell the table what you were checking – or drink two.",
+    "k": "Rule"
+   },
+   {
+    "t": "Everyone who has got through a whole holiday on “thank you”, “beer” and pointing, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Which song makes you sing at the top of your voice when you’re alone in the car? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Point at whoever you think has been to the most gigs this year. Whoever gets the most fingers names the best one – and gives out two.",
+    "k": "Point"
+   },
+   {
+    "t": "Find something in this room that says a lot about the host. Explain why in ten seconds. The funniest explanation gives out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has been asked for a fun fact about themselves and gone completely blank, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "New rule: you can only ask questions to people you didn’t know before tonight. Ask someone you already knew and you drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "What flatmate habit has made you move out – or nearly? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to whoever turned up first tonight – they got to see the host in joggers.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Everyone who has said “we should hang out!” to someone they never saw again, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever has talked to the most new people tonight. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Guess the star sign of the person on your left. Right: give out three. Wrong: drink one – and hear why that’s so typical.",
+    "k": "Challenge"
+   },
+   {
+    "t": "What’s the most overrated thing about where you grew up? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Everyone who puts pineapple on pizza, drink – and explain yourselves.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Ask the person on your right about the worst place they’ve ever lived. Retell it to the table in 20 seconds. Good story: give out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Whoever has the fewest unread emails gives out three. Whoever has the most drinks one per thousand – up to three.",
+    "k": "Give out"
+   },
+   {
+    "t": "Point at whoever seems like the type to say hello to everyone they pass on a Sunday walk. The winner gives out two.",
+    "k": "Point"
+   },
+   {
+    "t": "Everyone says cheers in a different language or accent. The most convincing one gives out two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "What’s the best thing you’ve ever bought second-hand – and the worst? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "New rule: drinks in your left hand only. Get caught with it in your right and you drink – and say the name of whoever caught you.",
+    "k": "Rule"
+   },
+   {
+    "t": "Give the person on your left a nickname based on something they’ve told you tonight. If they like it, give out two. If not, drink one.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Round: everyone says what song they’d put on next. The table votes – the winner goes on, and whoever suggested it gives out two.",
+    "k": "Everyone"
+   },
+   {
+    "t": "Everyone who has said “I’m terrible with names” tonight, drink. Ask again – it’s allowed.",
+    "k": "Drink if"
+   }
+  ]
+ },
+ "hyttetur": {
+  "navn": "Cabin Trip",
+  "om": "For the crew at the cabin – from Friday arrival to the Sunday clean-up. Some rules last all weekend.",
+  "items": [
+   {
+    "t": "Everyone who has used an outdoor loo by headtorch with the door ajar, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever always dodges the washing-up. Whoever gets the most fingers drinks – and does it tomorrow.",
+    "k": "Point"
+   },
+   {
+    "t": "Weekend rule: whoever says the word “cabin” for the rest of the trip drinks. Yes, it’s going to be hard.",
+    "k": "Weekend rule"
+   },
+   {
+    "t": "Cheers to whoever planned this trip! Anyone who never replied in the group chat about it drinks an extra one.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Do an impression of a noise the cabin makes at night. If the table guesses what it is, give out two. If not, drink one.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who forgot something that was on the packing list, drink. If it was your sleeping bag, drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever claimed the double bed before anyone else had their shoes off. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "What’s the worst thing you’ve ever forgotten to bring on a cabin trip? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Everyone who has paid into the kitty and is still waiting to be paid back, drink – on the kitty.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has slept in a bunk bed and banged their head on the ceiling in the morning, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Write a new house rule for the cabin in the guestbook – or on a note on the fridge. If the table likes it, give out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has ever explained a word in a guessing game by saying the word itself, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever will fall asleep first tonight – probably on the sofa with their coat on. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Whoever carried the most in from the car gives out three.",
+    "k": "Give out"
+   },
+   {
+    "t": "Everyone who has promised to get up early for a hike – and didn’t, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "New rule: everyone talks about themselves in the third person. Forget and you drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Tell us about the worst cabin trip you’ve ever been on – no names. Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Point at whoever will be up first tomorrow making breakfast for everyone. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Everyone who packed more beer than clothes, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Weekend rule: whoever takes the last cup of coffee without making more drinks two.",
+    "k": "Weekend rule"
+   },
+   {
+    "t": "Give a 20-second weather forecast for tomorrow – in your most dramatic voice. If the table approves, give out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has slept on an airbed that was flat by morning, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever cheats at board games and calls it “strategy”. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Cheers to cabin peace! Everyone puts their phone in the middle of the table until the next card. First to grab theirs drinks two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Everyone who has spent ten minutes trying to light the fire and ended up with a room full of smoke, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "What’s the most pointless thing you packed for this trip? Show us – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Point at whoever is guaranteed to say “we should do this more often” at some point this weekend. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Guess how many empty bottles are in the kitchen right now. Closest gives out two; furthest off clears them away.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has flicked through a cabin guestbook and read out an entry from 1997, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Weekend rule: whoever gets up first tomorrow picks their seat in the car home. No arguments.",
+    "k": "Weekend rule"
+   },
+   {
+    "t": "Whoever has been to this cabin the most times gives out one for each visit – up to five.",
+    "k": "Give out"
+   },
+   {
+    "t": "Everyone who has arrived to find the off-licence shut an hour ago, drink – if there’s anything left.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever packed like you were going away for three weeks. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Build a tower out of things on the table – no glasses – in 30 seconds. If it stands for five seconds, give out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has fallen over on skis and claimed it was on purpose, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Which cabin tradition from childhood do you miss – and which are you glad is gone? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "New rule: everyone talks quietly, as if the neighbours in the next cabin are asleep. Whoever gets loud drinks.",
+    "k": "Rule"
+   },
+   {
+    "t": "Point at whoever has done the most driving – and the least drinking – on cabin trips over the years. The winner gives out four.",
+    "k": "Point"
+   },
+   {
+    "t": "Everyone who has worn earplugs on a cabin trip because of someone in this room, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Weekend rule: whoever snores tonight makes breakfast. The burden of proof lies with whoever lay awake.",
+    "k": "Weekend rule"
+   },
+   {
+    "t": "Put on the most cabin-ish thing you can find – wool socks, an anorak or a beanie – and keep it on until the next card. Refuse and drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who brought their work laptop “just in case”, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Cheers to the cabin owner – and to being invited back. Anyone who’s broken something here drinks an extra one.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Point at whoever has sent a photo of the view to the family group chat today. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Mountains or seaside – and what’s your silliest argument for it? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Everyone who has hunted for signal with their phone held up over their head, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Pick an object in this room. Everyone else gets five yes/no questions. If they don’t guess it, give out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Weekend rule: whoever loses a board game writes a guestbook entry on behalf of the winner.",
+    "k": "Weekend rule"
+   },
+   {
+    "t": "Everyone who has eaten a chocolate bar on a hike and said “it just tastes better up here”, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Whoever did the food shop gives out three. Whoever has only eaten it drinks one.",
+    "k": "Give out"
+   },
+   {
+    "t": "Point at whoever will be first to suggest “one more round” of cards at 3 a.m. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "What’s the most embarrassing thing that’s happened to you on a cabin trip – that you can tell here? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Everyone who has driven to a cabin with the wrong address in the sat nav, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "New rule: whoever goes to the loo has to announce “just popping out to check the weather”. Forget and you drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Write a five-item packing list for the next trip – no phone. Forget loo roll and drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Point at whoever has a packing list – in their notes app or laminated. Whoever gets the most fingers gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Everyone who has gone on a “quick” cabin trip and stayed an extra day, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Weekend rule: shoes off indoors. Anyone caught in shoes drinks – and mops the floor.",
+    "k": "Weekend rule"
+   },
+   {
+    "t": "Cheers to the kitty – may it balance on Sunday. Whoever’s keeping track gives out three.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Do an impression of a cabin owner giving the tour: “and this is the fuse box …”. Nail it and give out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Point at whoever takes longest in the bathroom in the morning – at a cabin with one bathroom. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "If you got snowed in for a week, who here becomes the leader – and who starts a mutiny? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Whoever walked furthest today gives out one per kilometre – up to four.",
+    "k": "Give out"
+   },
+   {
+    "t": "Weekend rule: whoever goes to bed last tonight brings in the firewood tomorrow.",
+    "k": "Weekend rule"
+   }
+  ]
+ },
+ "bursdag": {
+  "navn": "Birthday",
+  "om": "For the birthday pre-party: the birthday person takes centre stage, and everyone hears the best stories.",
+  "items": [
+   {
+    "t": "Everyone who bought the present on the way here, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "The birthday person picks tonight’s DJ. Anyone who changes the song without permission drinks.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Give a 20-second speech for the birthday person – without saying “happy birthday” or “amazing”. Pull it off and give out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Point at whoever definitely forgot to buy a card. Whoever gets the most fingers drinks – and writes one on a napkin.",
+    "k": "Point"
+   },
+   {
+    "t": "New rule: the birthday person doesn’t pour their own drinks. If anyone sees it happen, whoever was sitting closest drinks.",
+    "k": "Rule"
+   },
+   {
+    "t": "Everyone who has known the birthday person for more than ten years, drink. More than twenty: drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "The birthday person says who here they’ve known longest. You cheers – and that person shares their first memory of the two of you.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "What did you think of the birthday person when you first met – and when did that change? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Everyone who met the birthday person for the first time tonight, drink – welcome!",
+    "k": "Drink if"
+   },
+   {
+    "t": "Cheers to the birthday person with a booming “hip hip hooray”. Whoever shouts quietest drinks an extra one.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Point at whoever is going to give a speech nobody asked for later tonight. Whoever gets the most fingers drinks – and practises.",
+    "k": "Point"
+   },
+   {
+    "t": "The birthday person brings in a law for the rest of the night – and is the only one exempt from it. Break it: drink.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Everyone who has wrapped a present in newspaper or a carrier bag because they forgot wrapping paper, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Tell us how you met the birthday person – in ten seconds. Good story: give out two. If not, drink one.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Everyone who has forgotten the birthday person’s birthday at least once, drink. If it was this year, drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Birthday person: name the best thing that’s happened to you in the past year. Everyone who was part of it, cheers.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "What’s the worst present you’ve ever received – and did you say thank you? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Point at whoever has been to the most of the birthday person’s birthdays. Whoever gets the most fingers gives out one per birthday – up to five.",
+    "k": "Point"
+   },
+   {
+    "t": "Everyone who has had a voice note over two minutes long from the birthday person, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Find someone you didn’t know before tonight and find out how they know the birthday person. Introduce them to the table – manage it and give out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "The birthday person points at whoever knows them best. Three questions from the birthday person: all right, give out three. Otherwise drink three.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Cheers to all the other birthdays we forgot this year.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Everyone who has said “I’m too old for this” this year, drink – and join in anyway.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Which story about the birthday person gets told at every single party? Tell it – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "The birthday person skips their drink on the next card – and can give it to whoever they like.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Point at whoever has definitely scrolled through the birthday person’s old photos looking for an embarrassing one. Whoever gets the most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Everyone who has blown out the candles on someone else’s cake, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Make up a two-line birthday rhyme about the birthday person – it has to rhyme with “cake”. If they approve, give out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "The birthday person picks two people who didn’t know each other before tonight. They’re drinking buddies until the next card: if one drinks, both drink.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Everyone who has asked for “nothing” for their birthday and been disappointed to get exactly that, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Cheers to the guests who didn’t know each other before tonight – and soon will.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Point at whoever has given the birthday person the best present ever. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "The table guesses what the birthday person wants most right now. The birthday person decides – the right guess gives out three.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Everyone who has started the birthday song in the wrong key and never recovered, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "What’s the weirdest thing you’ve ever done on a birthday? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Sing the birthday song like an opera singer or a metal vocalist – the birthday person chooses. Refuse and drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "The birthday person crowns tonight’s best outfit. The winner gives out three.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Everyone who has a photo of the birthday person on their phone that they don’t know about, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "New rule: say “happy birthday” every time you speak to the birthday person. Forget and you drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Point at whoever is bound to get emotional during the speeches tonight. Whoever gets the most fingers drinks – and finds the tissues.",
+    "k": "Point"
+   },
+   {
+    "t": "The birthday person does an impression of someone in this room. If the table guesses who within ten seconds, that person drinks.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Everyone who has been to an afterparty with the birthday person that lasted until breakfast, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Show the oldest photo you’ve got of the birthday person. The oldest one gives out three – the birthday person has a veto.",
+    "k": "Challenge"
+   },
+   {
+    "t": "What’s the most expensive thing you’ve bought yourself “as a birthday present”? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to the cake – or to there being no cake. Whoever was meant to bring it drinks either way.",
+    "k": "Cheers"
+   },
+   {
+    "t": "The birthday person tells us about their worst birthday ever. Anyone who was there drinks.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Everyone who has argued with the birthday person about something completely trivial, drink. Still disagree: drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever will post the most photos from tonight. Whoever gets the most fingers drinks – and promises to ask before posting.",
+    "k": "Point"
+   },
+   {
+    "t": "Predict the birthday person’s life in ten years – job, home and one bad habit. The best prediction gives out two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "The birthday person gives a sip to everyone who hasn’t said happy birthday yet tonight.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Everyone who has written “happy birthday!” in a group chat without knowing whose birthday it was, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "What’s one thing you’ve learned from the birthday person? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to everyone who took time off, travelled far or came straight from work to be here tonight!",
+    "k": "Cheers"
+   },
+   {
+    "t": "Whoever arrived last tonight drinks two. Whoever arrived first gives out two.",
+    "k": "Give out"
+   },
+   {
+    "t": "The birthday person picks a song. Everyone sings the chorus – anyone who doesn’t know the words drinks.",
+    "k": "Birthday person"
+   },
+   {
+    "t": "Everyone who has lived with the birthday person, drink – and reveal one of their habits.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Share one thing about the birthday person you think nobody else here knows – something nice. If someone already knew, drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "What’s the most desperate thing you’ve done to cover up forgetting someone’s birthday? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Cheers to the birthday person’s best years still being ahead – and the best night being tonight.",
+    "k": "Cheers"
+   },
+   {
+    "t": "New rule: anyone who mentions the birthday person’s age drinks. The birthday person drinks double.",
+    "k": "Rule"
+   },
+   {
+    "t": "Point at whoever would plan the best surprise party for the birthday person. The winner gives out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Guess how old the birthday person is turning – in months. Closest gives out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Which age has been your best so far – and why? Answer – or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Whoever’s birthday comes next after the birthday person’s gives out three – and hosts the next party.",
+    "k": "Give out"
+   }
+  ]
  }
 }

@@ -630,5 +630,791 @@
     "k": "Drikk hvis"
    }
   ]
+ },
+ "bli-kjent": {
+  "navn": "Bli kjent",
+  "om": "Til fadderuka, nytt kollektiv og første vors med nye folk. Ingen trenger å kjenne noen fra før.",
+  "items": [
+   {
+    "t": "Alle som har gått for håndtrykk mens den andre gikk for klem, drikker. Endte det i en high five, drikk to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Ny regel: Det er forbudt å spørre «hva studerer du?» og «hva jobber du med?». Den som gjør det, drikker.",
+    "k": "Regel"
+   },
+   {
+    "t": "Pek på den som virker som typen som lager gruppechatten etter i kveld. Vinneren deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Den som leser: si navnet og én ting du vet om hver person rundt bordet. Klarer du alle, del ut tre. Bommer du, drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Skål for verten! Alle som ikke vet hva verten heter til etternavn, drikker en ekstra.",
+    "k": "Skål"
+   },
+   {
+    "t": "Alle som har sagt «rett utenfor Oslo» om et sted som ligger to timer unna, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Hva er den rareste sommerjobben du har hatt? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Pek på den du tror har den beste historien om hvordan hen havnet her i kveld. Den med flest pekere forteller – eller drikker to.",
+    "k": "Pek"
+   },
+   {
+    "t": "Bytt plass med den du har snakket minst med i kveld. Still hverandre ett spørsmål hver før neste kort – ellers drikker begge.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har sagt «hæ?» tre ganger og så bare nikket og smilt, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Ny regel: Før du drikker, må du si navnet til den som sitter til venstre for deg. Feil navn: drikk én til.",
+    "k": "Regel"
+   },
+   {
+    "t": "Hvilken app ville du skammet deg mest over om noen så skjermtiden din? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Alle som har presentert seg for samme person to ganger på én fest, drikker. Skjedde det i kveld, drikk to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Du og den til høyre har ti sekunder på å finne noe dere begge hater. Klarer dere det, skål. Hvis ikke, drikk én hver.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Hvis dere bodde i kollektiv sammen: Pek på den som ville kjøpt dopapir uten å sende Vipps-krav. Vinneren deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Den som er oppvokst lengst nord, deler ut tre. Den som er oppvokst lengst sør, drikker én.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Alle som har kommet for tidlig til en fest og gått en runde rundt kvartalet, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Hva kjøpte du for den aller første lønna di? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Gjett hvor den til venstre for deg er oppvokst. Riktig fylke: del ut to. Riktig sted: del ut fire. Bom: drikk én.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har vært på en fest der den eneste de kjente, dro først, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Skål for alle som kom hit i kveld og bare kjente én person – nå kjenner dere flere!",
+    "k": "Skål"
+   },
+   {
+    "t": "Pek på den som virker som typen som kjenner noen overalt. Den med flest pekere nevner en bekjent i Hammerfest – eller drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Hva er den beste avgjørelsen du har tatt på fylla? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Alle som har fått en ny bestevenn i dokøen på en fest, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle med en annen dialekt enn den som leser: si «jeg må bare innom butikken» på dialekt. Beste versjon deler ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Ny regel: Hver gang noen sier navnet ditt, må du løfte glasset. Glemmer du det, drikk.",
+    "k": "Regel"
+   },
+   {
+    "t": "Alle som har danset hele kvelden med noen uten å få vite hva de het, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som garantert rekker opp hånda når foreleseren sier «da var vi ferdige». Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Hva er det kuleste du har latt som du kunne – på CV-en eller på date? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Vis den siste sangen du spilte. Synes bordet den er pinlig, drikk to. Har noen andre den på en spilleliste, skål med dem.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som allerede har fulgt noen her på Insta i kveld, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Runde: Alle sier navnet sitt og én ting de er gode på som ingen ville gjettet. Den beste deler ut tre.",
+    "k": "Alle"
+   },
+   {
+    "t": "Pek på den som virker som typen som aldri har vært på låvefest. Den med flest pekere drikker – eller forteller om sin første.",
+    "k": "Pek"
+   },
+   {
+    "t": "Alle som har bodd på en hybel der man nådde kjøleskapet fra senga, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Lær navnet til den som sitter lengst unna deg. På neste kort må du skåle med hen og si navnet. Glemmer du det: drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Hva er din mest upopulære mening om mat? Svar – den som er mest uenig, drikker.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Den som har hatt bursdag sist, deler ut to. Den som har bursdag snarest, drikker én – på forskudd.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Alle som vet hva naboens katt heter, men ikke hva naboen heter, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den du tror studerer eller jobber med noe helt annet enn resten. Den med flest pekere sier hva – og deler ut to.",
+    "k": "Pek"
+   },
+   {
+    "t": "Skål for Lånekassen – den eneste som har trodd på oss alle.",
+    "k": "Skål"
+   },
+   {
+    "t": "Lag en hemmelig hilsen med den til høyre: en high five, en lyd og en bevegelse. Liker bordet den, deler dere ut to hver.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Ny regel: Sjekker du mobilen, må du fortelle bordet hva du sjekket – eller drikke to.",
+    "k": "Regel"
+   },
+   {
+    "t": "Alle som har klart seg en hel ferie på «takk», «øl» og peking, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Hvilken låt får deg til å synge høyt i bilen når du er alene? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Pek på den du tror har vært på flest konserter i år. Den med flest pekere nevner den beste – og deler ut to.",
+    "k": "Pek"
+   },
+   {
+    "t": "Finn en ting i rommet som sier mye om verten. Forklar hvorfor på ti sekunder. Morsomste forklaring deler ut to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har måttet si en «fun fact» om seg selv og fått totalt jernteppe, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Ny regel: Du kan bare stille spørsmål til folk du ikke kjente før i kveld. Spør du en du kjente fra før, drikk.",
+    "k": "Regel"
+   },
+   {
+    "t": "Hvilken vane hos en romkamerat har fått deg til å flytte – eller nesten? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Skål for den som kom først i kveld – hen fikk se verten i joggebukse.",
+    "k": "Skål"
+   },
+   {
+    "t": "Alle som har sagt «vi må finne på noe!» til en de aldri så igjen, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som har snakket med flest nye folk i kveld. Vinneren deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Gjett stjernetegnet til den til venstre for deg. Riktig: del ut tre. Feil: drikk én – og hør hvorfor det er så typisk.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Hva er det mest overvurderte ved stedet du vokste opp? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Alle som har banan i tacoen, drikker – og forklarer seg.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Spør den til høyre om det verste stedet hen har bodd. Gjenfortell historien til bordet på 20 sekunder. God historie: del ut to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Den med færrest uleste e-poster deler ut tre. Den med flest drikker én per tusen – maks tre.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Pek på den som virker som typen som sier «hei» til alle på søndagsturen. Vinneren deler ut to.",
+    "k": "Pek"
+   },
+   {
+    "t": "Alle skåler på et annet språk eller en annen dialekt. Den mest overbevisende deler ut to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Hva er det beste du har kjøpt brukt på Finn – og det verste? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Ny regel: Glasset i venstre hånd. Blir du tatt med det i høyre, drikker du – og sier navnet til den som tok deg.",
+    "k": "Regel"
+   },
+   {
+    "t": "Gi den til venstre et kallenavn basert på noe hen har fortalt i kveld. Liker hen det, del ut to. Hvis ikke, drikk én.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Runde: Alle sier hvilken låt de ville satt på nå. Bordet stemmer – vinnerlåten settes på, og den som foreslo den, deler ut to.",
+    "k": "Alle"
+   },
+   {
+    "t": "Alle som har sagt «jeg er så dårlig på navn» i kveld, drikker. Spør på nytt – det er lov.",
+    "k": "Drikk hvis"
+   }
+  ]
+ },
+ "hyttetur": {
+  "navn": "Hyttetur",
+  "om": "For gjengen på hytta – fra fredagsankomst til søndagsvasken. Noen regler varer hele helga.",
+  "items": [
+   {
+    "t": "Alle som har brukt utedo med hodelykt og døra på gløtt, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som alltid sniker seg unna oppvasken. Den med flest pekere drikker – og tar den i morgen.",
+    "k": "Pek"
+   },
+   {
+    "t": "Helgeregel: Den som sier ordet «hytta» resten av turen, drikker. Ja, det blir vanskelig.",
+    "k": "Helgeregel"
+   },
+   {
+    "t": "Skål for den som planla turen! Alle som aldri svarte i gruppechatten om den, drikker en ekstra.",
+    "k": "Skål"
+   },
+   {
+    "t": "Imiter en lyd hytta lager om natta. Gjetter bordet hva det er, del ut to. Hvis ikke, drikk én.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har glemt noe som stod på pakkelista, drikker. Var det soveposen, drikk to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som sikret seg dobbeltsenga før noen andre hadde fått av seg skoa. Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Hva er det verste du har glemt å ta med på en hyttetur? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Alle som har lagt ut for felleskassa og fortsatt venter på Vipps, drikker – på felleskassas regning.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har sovet i en køyeseng og slått hodet i taket om morgenen, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Lag en ny regel for hytta og skriv den i hytteboka – eller på en lapp på kjøleskapet. Liker bordet den, del ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har spilt Alias og forklart et ord med ordet selv, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som kommer til å sovne først i kveld – gjerne i sofaen med jakka på. Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Den som bar mest inn fra bilen, deler ut tre.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Alle som har lovet å stå opp tidlig for å gå på tur – og ikke gjorde det, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Ny regel: Alle snakker om seg selv i tredjeperson. Den som glemmer det, drikker.",
+    "k": "Regel"
+   },
+   {
+    "t": "Fortell om den verste hytteturen du har vært på – uten å nevne navn. Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Pek på den som står opp først i morgen og lager frokost til alle. Vinneren deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Alle som har tatt med mer øl enn klær, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Helgeregel: Den som tar siste kopp kaffe uten å sette på ny, drikker to.",
+    "k": "Helgeregel"
+   },
+   {
+    "t": "Hold en 20 sekunders værmelding for i morgen – med dramatisk stemme. Godkjenner bordet den, del ut to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har sovet på en luftmadrass som var flat innen morgenen, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som jukser i brettspill og kaller det «strategi». Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Skål for hyttefreden! Alle legger mobilen midt på bordet til neste kort. Den som tar sin først, drikker to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Alle som har prøvd å tenne i peisen i ti minutter og endt med en stue full av røyk, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Hva er den mest unødvendige tingen du har pakket til denne turen? Vis den fram – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Pek på den som garantert sier «vi burde gjøre dette oftere» i løpet av helga. Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Gjett hvor mange tomme flasker som står på kjøkkenet akkurat nå. Nærmest deler ut to, lengst unna rydder dem.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har bladd i hytteboka og lest opp en hilsen fra 1997, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Helgeregel: Den som står opp først i morgen, velger plass i bilen hjem. Ingen protester.",
+    "k": "Helgeregel"
+   },
+   {
+    "t": "Den som har vært på denne hytta flest ganger, deler ut én for hver gang – maks fem.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Alle som har kommet fram og oppdaget at Polet stengte for en time siden, drikker – hvis det er noe igjen.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som har pakket som om dere skulle være borte i tre uker. Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Bygg et tårn av ting fra bordet – ikke glass – på 30 sekunder. Står det i fem sekunder, del ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har gått på ski, falt og sagt «det var med vilje», drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Hvilken hyttetradisjon fra barndommen savner du – og hvilken er du glad er borte? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Ny regel: Alle snakker lavt, som om naboene i hytta ved siden av sover. Den som blir høylytt, drikker.",
+    "k": "Regel"
+   },
+   {
+    "t": "Pek på den som har kjørt mest og drukket minst på hytteturer opp gjennom. Vinneren deler ut fire.",
+    "k": "Pek"
+   },
+   {
+    "t": "Alle som har brukt ørepropper på hyttetur på grunn av noen i dette rommet, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Helgeregel: Den som snorker i natt, lager frokost. Bevisbyrden ligger hos de som lå våkne.",
+    "k": "Helgeregel"
+   },
+   {
+    "t": "Ta på deg det mest hytteaktige plagget du finner – ullsokker, anorakk eller lue – og behold det til neste kort. Nekter du, drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har tatt med jobb-PC-en «i tilfelle», drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Skål for hytteeieren – og for å bli invitert tilbake. Alle som har knust noe her, drikker en ekstra.",
+    "k": "Skål"
+   },
+   {
+    "t": "Pek på den som har sendt bilde av utsikten til familiechatten i dag. Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Fjellet eller sjøen – og hva er det dummeste argumentet ditt for det? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Alle som har lett etter dekning med mobilen strukket over hodet, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Velg en ting i rommet. De andre får fem ja/nei-spørsmål. Gjetter de det ikke, del ut to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Helgeregel: Den som taper et brettspill, skriver en hilsen i hytteboka på vegne av vinneren.",
+    "k": "Helgeregel"
+   },
+   {
+    "t": "Alle som har spist kvikklunsj på tur og sagt «det smaker bedre på fjellet», drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Den som handlet inn maten, deler ut tre. Den som bare har spist den, drikker én.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Pek på den som først foreslår «én runde til» med kortspillet klokka tre i natt. Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Hva er det pinligste som har skjedd deg på en hyttetur – som du kan fortelle her? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Alle som har kjørt til en hytte med feil adresse på GPS-en, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Ny regel: Den som går på do, må si «skal bare ut og sjekke været». Glemmer du det, drikk.",
+    "k": "Regel"
+   },
+   {
+    "t": "Lag en pakkeliste til neste tur med fem ting – uten mobil. Glemmer du dopapir, drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Pek på den som har en pakkeliste – i notatappen eller laminert. Den med flest pekere deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Alle som har dratt på en «kjapp» hyttetur og blitt en dag ekstra, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Helgeregel: Sko av inne. Den som blir tatt i sko, drikker – og tørker gulvet.",
+    "k": "Helgeregel"
+   },
+   {
+    "t": "Skål for felleskassa – måtte den gå i null på søndag. Den som har oversikten, deler ut tre.",
+    "k": "Skål"
+   },
+   {
+    "t": "Vis hvordan hytteeieren viser fram hytta: «og her er sikringsskapet …». Treffer du, del ut to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Pek på den som bruker lengst tid på badet om morgenen – på en hytte med ett bad. Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Hvis dere ble snødd inne en uke, hvem her blir lederen – og hvem starter et opprør? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Den som har gått lengst tur i dag, deler ut én per kilometer – maks fire.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Helgeregel: Den som går sist til sengs i kveld, bærer inn ved i morgen.",
+    "k": "Helgeregel"
+   }
+  ]
+ },
+ "bursdag": {
+  "navn": "Bursdag",
+  "om": "Til bursdagsvorset: bursdagsbarnet står i sentrum, og alle får høre de beste historiene.",
+  "items": [
+   {
+    "t": "Alle som kjøpte gaven på vei hit, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Bursdagsbarnet velger kveldens DJ. Den som bytter låt uten lov, drikker.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Hold en tale for bursdagsbarnet på 20 sekunder – uten å si «gratulerer» eller «fantastisk». Klarer du det, del ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Pek på den som garantert har glemt å kjøpe kort. Den med flest pekere drikker – og skriver et på en serviett.",
+    "k": "Pek"
+   },
+   {
+    "t": "Ny regel: Bursdagsbarnet skal ikke skjenke seg selv. Ser noen det skje, drikker den som satt nærmest.",
+    "k": "Regel"
+   },
+   {
+    "t": "Alle som har kjent bursdagsbarnet i mer enn ti år, drikker. Mer enn tjue år: drikk to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Bursdagsbarnet sier hvem i rommet hen har kjent lengst. Dere skåler – og den andre forteller sitt første minne av dere to.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Hva tenkte du om bursdagsbarnet første gang dere møttes – og når endret det seg? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Alle som møtte bursdagsbarnet for første gang i kveld, drikker – velkommen!",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Skål for bursdagsbarnet med et rungende «hipp hipp hurra». Den som roper svakest, drikker en ekstra.",
+    "k": "Skål"
+   },
+   {
+    "t": "Pek på den som kommer til å holde en tale ingen ba om senere i kveld. Den med flest pekere drikker – og øver.",
+    "k": "Pek"
+   },
+   {
+    "t": "Bursdagsbarnet innfører en lov som gjelder resten av kvelden – og er den eneste som slipper å følge den. Brudd: drikk.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Alle som har pakket inn en gave i avispapir eller en handlepose fordi de glemte gavepapir, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Fortell hvordan du møtte bursdagsbarnet – på ti sekunder. God historie: del ut to. Hvis ikke, drikk én.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Alle som har glemt bursdagen til bursdagsbarnet minst én gang, drikker. Var det i år, drikk to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Bursdagsbarnet: Nevn det beste som har skjedd deg det siste året. Alle som var med på det, skåler.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Hva er den verste gaven du noen gang har fått – og sa du takk? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Pek på den som har vært på flest av bursdagsbarnets bursdager. Den med flest pekere deler ut én per bursdag – maks fem.",
+    "k": "Pek"
+   },
+   {
+    "t": "Alle som har fått en lydmelding på over to minutter fra bursdagsbarnet, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Finn noen du ikke kjente før i kveld, og finn ut hvordan hen kjenner bursdagsbarnet. Presenter hen for bordet – klarer du det, del ut to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Bursdagsbarnet peker på den som kjenner hen best. Tre spørsmål fra bursdagsbarnet: alle riktige, del ut tre. Ellers drikk tre.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Skål for alle de andre bursdagene vi har glemt i år.",
+    "k": "Skål"
+   },
+   {
+    "t": "Alle som har sagt «jeg er for gammel til dette» i år, drikker – og blir med likevel.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Hvilken historie om bursdagsbarnet blir fortalt på hver eneste fest? Fortell den – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Bursdagsbarnet slipper å drikke på neste kort – og kan gi slurken sin til hvem hen vil.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Pek på den som garantert har bladd gjennom bursdagsbarnets gamle bilder for å finne et pinlig ett. Den med flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Alle som har blåst ut lysene på en kake som ikke var deres egen, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Lag et bursdagsrim på to linjer om bursdagsbarnet – det må rime på «kake». Godkjenner bursdagsbarnet det, del ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Bursdagsbarnet velger to som ikke kjente hverandre fra før. De er makkere til neste kort: drikker én, drikker begge.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Alle som har ønsket seg «ingenting» til bursdagen og blitt skuffet da de fikk det, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Skål for gjestene som ikke kjente hverandre før i kveld – og som snart gjør det.",
+    "k": "Skål"
+   },
+   {
+    "t": "Pek på den som har gitt bursdagsbarnet den beste gaven noensinne. Vinneren deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Bordet gjetter hva bursdagsbarnet ønsker seg mest akkurat nå. Bursdagsbarnet avgjør – riktig gjetning deler ut tre.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Alle som har startet bursdagssangen i feil toneart og ikke kommet seg ut av det, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Hva er det rareste du har gjort på en bursdag? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Syng bursdagssangen som en operasanger eller en metal-vokalist – bursdagsbarnet velger. Nekter du, drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Bursdagsbarnet kårer kveldens beste antrekk. Vinneren deler ut tre.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Alle som har et bilde av bursdagsbarnet på mobilen som hen ikke vet om, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Ny regel: Alle må si «gratulerer» hver gang de snakker til bursdagsbarnet. Den som glemmer det, drikker.",
+    "k": "Regel"
+   },
+   {
+    "t": "Pek på den som garantert blir rørt under talene i kveld. Den med flest pekere drikker – og finner fram tørkepapiret.",
+    "k": "Pek"
+   },
+   {
+    "t": "Bursdagsbarnet imiterer noen i rommet. Gjetter bordet hvem det er innen ti sekunder, drikker den som ble imitert.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Alle som har vært på nachspiel med bursdagsbarnet som varte til frokost, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Vis det eldste bildet du har av bursdagsbarnet. Eldste bilde deler ut tre – bursdagsbarnet har vetorett.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Hva er det dyreste du har kjøpt til deg selv «i bursdagsgave»? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Skål for kaken – eller for at det ikke ble noen. Den som skulle ta med kake, drikker uansett.",
+    "k": "Skål"
+   },
+   {
+    "t": "Bursdagsbarnet forteller om sin verste bursdag noensinne. Alle som var der, drikker.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Alle som har kranglet med bursdagsbarnet om noe helt uviktig, drikker. Fortsatt uenige: drikk to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som kommer til å legge ut flest bilder fra i kveld. Den med flest pekere drikker – og lover å spørre før hen poster.",
+    "k": "Pek"
+   },
+   {
+    "t": "Spå hvordan bursdagsbarnet har det om ti år – jobb, bosted og én dårlig vane. Beste spådom deler ut to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Bursdagsbarnet gir én slurk til alle som ikke har sagt gratulerer ennå i kveld.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Alle som har skrevet «gratulerer!» i en gruppechat uten å vite hvem som hadde bursdag, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Hva er én ting du har lært av bursdagsbarnet? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Skål for alle som har tatt seg fri, reist langt eller kommet rett fra jobb for å være her i kveld!",
+    "k": "Skål"
+   },
+   {
+    "t": "Den som kom sist i kveld, drikker to. Den som kom først, deler ut to.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Bursdagsbarnet velger en sang. Alle synger med på refrenget – den som ikke kan teksten, drikker.",
+    "k": "Bursdagsbarnet"
+   },
+   {
+    "t": "Alle som har bodd sammen med bursdagsbarnet, drikker – og avslører én av bursdagsbarnets vaner.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Fortell én ting om bursdagsbarnet som du tror ingen andre her vet – noe snilt. Visste noen det, drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Hva er det mest desperate du har gjort for å skjule at du glemte noens bursdag? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Skål for at bursdagsbarnet har de beste årene foran seg – og den beste kvelden i kveld.",
+    "k": "Skål"
+   },
+   {
+    "t": "Ny regel: Den som nevner alderen til bursdagsbarnet, drikker. Bursdagsbarnet selv drikker dobbelt.",
+    "k": "Regel"
+   },
+   {
+    "t": "Pek på den som ville planlagt den beste overraskelsesfesten for bursdagsbarnet. Vinneren deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Gjett hvor gammel bursdagsbarnet blir – i måneder. Nærmest deler ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Hvilken alder har vært den beste for deg så langt – og hvorfor? Svar – eller drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Den som har bursdag nærmest etter bursdagsbarnet, deler ut tre – og arrangerer neste fest.",
+    "k": "Del ut"
+   }
+  ]
  }
 }
