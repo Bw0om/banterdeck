@@ -83,7 +83,8 @@ const DATA = Object.fromEntries(Object.entries(LEKER).filter(([s]) => finnes.has
     var skjema = document.getElementById('kvSkjema'), ut = document.getElementById('kvPlan');
     if (!skjema || skjema.dataset.bound) return; skjema.dataset.bound = '1';
     var EN = LANG === 'en';
-    var plan = null, valg = null, aktiv = -1, klokke = null;
+    // nyPlan: bare en helt ny plan glir inn punkt for punkt – ikke hvert steg eller bytte senere
+    var plan = null, valg = null, aktiv = -1, klokke = null, nyPlan = false;
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
     function bland(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
     function lagre() { try { localStorage.setItem('bd_kveld', JSON.stringify({ plan: plan, valg: valg, aktiv: aktiv, start: plan && plan.start })); } catch (e) {} }
@@ -134,7 +135,7 @@ const DATA = Object.fromEntries(Object.entries(LEKER).filter(([s]) => finnes.has
       ut.hidden = false;
       var totalt = plan.blokker.reduce(function (n, b) { return n + b.min; }, 0), t0 = 0;
       ut.innerHTML = '<div class="kv-topp"><h2>' + (EN ? "Tonight's plan" : 'Kveldens plan') + '</h2><span class="small">' + plan.blokker.length + (EN ? ' games · about ' : ' leker · ca. ') + tid(totalt) + '</span></div>' +
-        '<ol class="kv-liste">' + plan.blokker.map(function (b, i) {
+        '<ol class="kv-liste' + (nyPlan ? ' kv-ny' : '') + '">' + plan.blokker.map(function (b, i) {
           var g = DATA[b.slug], fra = t0; t0 += b.min;
           var merke = i === 0 ? (EN ? 'Warm-up' : 'Oppvarming') : b.finale ? 'Finale' : (EN ? 'Main event' : 'Hoveddel');
           return '<li class="' + (i === aktiv ? 'aktiv' : i < aktiv ? 'ferdig' : '') + '">' +
@@ -168,7 +169,7 @@ const DATA = Object.fromEntries(Object.entries(LEKER).filter(([s]) => finnes.has
       e.preventDefault();
       var f = new FormData(skjema);
       valg = { tid: +f.get('tid'), pl: +f.get('pl'), vill: +f.get('vill'), utstyr: f.getAll('utstyr'), rom: !!f.get('rom') };
-      plan = lagPlan(); aktiv = -1; lagre(); tegn();
+      plan = lagPlan(); aktiv = -1; nyPlan = true; lagre(); tegn(); nyPlan = false;
       ut.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     ut.addEventListener('click', function (e) {
@@ -176,8 +177,8 @@ const DATA = Object.fromEntries(Object.entries(LEKER).filter(([s]) => finnes.has
       var k = e.target.closest('[data-k]'); if (!k) return;
       if (k.dataset.k === 'start') { aktiv = 0; plan.blokkStart = Date.now(); }
       if (k.dataset.k === 'neste') { aktiv++; plan.blokkStart = Date.now(); }
-      if (k.dataset.k === 'ny') { plan = lagPlan(); aktiv = -1; }
-      lagre(); tegn();
+      if (k.dataset.k === 'ny') { plan = lagPlan(); aktiv = -1; nyPlan = true; }
+      lagre(); tegn(); nyPlan = false;
     });
     document.addEventListener('astro:before-swap', function () { clearInterval(klokke); }, { once: true });
     // Fortsett en plan fra tidligere i kveld

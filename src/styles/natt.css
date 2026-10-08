@@ -677,3 +677,49 @@ html[data-laast] .utvikling{overscroll-behavior:contain}
   html:not(.rom-sender)::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);
     background:rgb(var(--bg-rgb) / .92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);z-index:30;pointer-events:none}
 }
+
+/* ---------- Øyeblikk som åpner seg (okt 2026) ---------- */
+/* Alt her er inngang med @starting-style: elementet tegnes først i startverdiene og glir så på plass.
+   Lukking er umiddelbar (raskt ut, roligere inn). Redusert bevegelse slår av alt via regelen øverst i global.css. */
+
+/* 1. Ark og vinduer (poengtavle, regler, oppdrag, del, meld fra om feil …).
+      Bakgrunnen toner inn; selve arket glir opp fra bunnen på mobil og vokser litt på store skjermer.
+      Vorsbørsen (.bs-modal) tegnes på nytt ved hver kursendring – den får bare bakgrunnstoningen,
+      ellers ville arket hoppe for hver oppdatering. */
+.rom-tavle,.del-ark{transition:background-color 200ms ease}
+@starting-style{.rom-tavle,.del-ark{background-color:transparent}}
+.rom-tavle:not(.bs-modal) > .rom-tavle-innhold,.del-ark > .del-ark-innhold{transition:transform 400ms var(--ease-drawer),opacity 200ms ease}
+@starting-style{.rom-tavle:not(.bs-modal) > .rom-tavle-innhold,.del-ark > .del-ark-innhold{transform:translateY(100%);opacity:0}}
+@media (min-width:700px){
+  .rom-tavle:not(.bs-modal) > .rom-tavle-innhold,.del-ark > .del-ark-innhold{transition:transform 220ms var(--ease-out),opacity 220ms var(--ease-out)}
+  @starting-style{.rom-tavle:not(.bs-modal) > .rom-tavle-innhold,.del-ark > .del-ark-innhold{transform:scale(.96);opacity:0}}
+}
+
+/* 2. Kveldsplanen: en helt ny plan glir inn punkt for punkt (bare når den lages, ikke ved hvert steg) */
+.kv-ny > li{animation:kvInn 260ms var(--ease-out) both}
+.kv-ny > li:nth-child(2){animation-delay:40ms}.kv-ny > li:nth-child(3){animation-delay:80ms}
+.kv-ny > li:nth-child(4){animation-delay:120ms}.kv-ny > li:nth-child(5){animation-delay:160ms}
+.kv-ny > li:nth-child(6){animation-delay:200ms}.kv-ny > li:nth-child(7){animation-delay:240ms}
+.kv-ny > li:nth-child(n+8){animation-delay:280ms}
+@keyframes kvInn{from{opacity:0;transform:translateY(6px)}}
+
+/* 3. Pluss ble nettopp aktivert: boksen setter seg på plass og den grønne kanten roer seg – én gang */
+.pluss-status.pluss-feiring{animation:plussFeir 420ms var(--ease-out),plussKant 900ms ease-out}
+@keyframes plussFeir{from{transform:scale(.97)}}
+@keyframes plussKant{from{border-color:var(--gold);background:rgb(var(--volt-rgb) / .14)}}
+
+/* 4. Sveip replikker åpner seg i stedet for å dukke opp */
+.sw{transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out)}
+@starting-style{.sw{opacity:0;transform:scale(.98)}}
+
+/* 5. «Hopp til»-panelet faller ned fra knappen */
+@media (max-width:899px){
+  .mb-panel{transform-origin:top;transition:opacity 180ms var(--ease-out),transform 180ms var(--ease-out)}
+  @starting-style{.minibar.open .mb-panel{opacity:0;transform:translateY(-4px)}}
+}
+
+/* 6. Grupper i lekevelgeren: innholdet toner inn når gruppen åpnes (pilen roterer allerede).
+      En overgang, ikke en animasjon: rommet tegnes på nytt ved hver oppdatering med gruppene fortsatt åpne,
+      og da skal ingenting spille av igjen. Nettlesere uten ::details-content åpner bare uten toning. */
+.rom-gruppe::details-content{opacity:0;transition:opacity 160ms var(--ease-out),content-visibility 160ms allow-discrete}
+.rom-gruppe[open]::details-content{opacity:1}
