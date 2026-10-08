@@ -38,7 +38,7 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 h1,h2,h3,.brand{font-family:var(--display)}
 h1{font-stretch:112%;font-weight:850;letter-spacing:-.03em;line-height:.98;font-size:clamp(32px,7.2vw,54px)}
 h2{font-stretch:110%;font-weight:800;letter-spacing:-.022em;line-height:1.05}
-h3{font-stretch:104%;font-weight:750;color:var(--ink);letter-spacing:-.01em}
+h3,.h3{font-stretch:104%;font-weight:750;color:var(--ink);letter-spacing:-.01em}
 p.lead{font-size:17.5px;color:var(--muted);font-style:normal}
 .small{font-size:14.5px;color:var(--faint)}
 .tall{font-family:var(--display);font-stretch:66%;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:.01em}

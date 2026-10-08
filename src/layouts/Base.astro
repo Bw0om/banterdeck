@@ -145,6 +145,7 @@ const isCurrent = (href: string) => {
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4" />
   <link rel="sitemap" href="/sitemap-index.xml" />
   <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Mitt vors" />
@@ -330,7 +331,7 @@ const isCurrent = (href: string) => {
 
   <div id="toast" class="toast" role="status">{L.copied}</div>
   {UTVIKLING.paa && (
-    <div id="utvikling" class="utvikling" role="dialog" aria-labelledby="utvTittel">
+    <div id="utvikling" class="utvikling" role="dialog" aria-modal="true" aria-labelledby="utvTittel">
       <form class="utv-boks" id="utvSkjema" novalidate>
         <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="30" fill="#FF5B1F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg>
         <h1 id="utvTittel">mitt<span>vors</span></h1>

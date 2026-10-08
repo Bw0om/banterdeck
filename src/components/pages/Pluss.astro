@@ -77,7 +77,7 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
 
   <section class="pluss-kode konto-boks">
     <h2>{no ? 'Har du en gavekode?' : 'Got a gift code?'}</h2>
-    <form class="rf-rad" id="kodeSkjema"><input id="kodeInput" maxlength="24" autocomplete="off" autocapitalize="characters" placeholder={no ? 'F.eks. BD-7K3P9Q' : 'E.g. BD-7K3P9Q'} aria-label={no ? 'Gavekode' : 'Gift code'} /><button class="btn gold" type="submit">{no ? 'Bruk koden' : 'Use the code'}</button></form>
+    <form class="rf-rad" id="kodeSkjema"><input id="kodeInput" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder={no ? 'F.eks. BD-7K3P9Q' : 'E.g. BD-7K3P9Q'} aria-label={no ? 'Gavekode' : 'Gift code'} /><button class="btn gold" type="submit">{no ? 'Bruk koden' : 'Use the code'}</button></form>
     <p class="formmsg" id="kodeMsg" role="status"></p>
   </section>
 

@@ -59,7 +59,7 @@
     inn.innerHTML = '<div class="del-ark-topp"><h2>' + L('Inviter på e-post', 'Invite by email') + '</h2><button class="linkbtn" data-d="lukk" type="button">' + L('Lukk', 'Close') + '</button></div>' +
       '<form class="form del-epost" id="delEpost">' +
         '<label class="lab" for="deTil">' + L('Til (én eller flere e-postadresser)', 'To (one or more email addresses)') + '</label>' +
-        '<textarea id="deTil" rows="2" placeholder="' + L('ola@eksempel.no, kari@eksempel.no', 'alex@example.com, sam@example.com') + '" required></textarea>' +
+        '<textarea id="deTil" rows="2" spellcheck="false" autocapitalize="none" placeholder="' + L('ola@eksempel.no, kari@eksempel.no', 'alex@example.com, sam@example.com') + '" required></textarea>' +
         (inne ? '<label class="lab" for="deNavn">' + L('Navnet ditt', 'Your name') + '</label><input id="deNavn" maxlength="30" value="' + esc(navn) + '" required>' +
           '<label class="lab" for="deMelding">' + L('Hilsen (valgfritt)', 'Message (optional)') + '</label><textarea id="deMelding" rows="2" maxlength="200" placeholder="' + L('Vi er i gang – bli med!', 'We’re getting started – join us!') + '"></textarea>' : '') +
         '<button class="btn gold" type="submit">' + (inne ? L('Send invitasjon', 'Send invite') : L('Åpne e-postappen', 'Open email app')) + '</button>' +

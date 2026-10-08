@@ -38,7 +38,8 @@ button{font:inherit;cursor:pointer}
 h1,h2,h3,.brand{font-family:var(--display);letter-spacing:-.02em;line-height:1.1}
 h1{font-size:clamp(30px,4.6vw,46px);font-weight:800;margin-bottom:6px}
 h2{font-size:clamp(21px,2.6vw,27px);font-weight:700;margin:38px 0 14px}
-h3{font-size:18px;font-weight:700;margin:26px 0 10px;color:var(--accent-t)}
+/* .h3 = ser ut som h3, men er h2 i dokumentet (riktig overskriftsnivå for skjermlesere) */
+h3,.h3{font-size:18px;font-weight:700;margin:26px 0 10px;color:var(--accent-t);line-height:1.1}
 p.lead{color:var(--muted);font-size:18px;font-style:italic;max-width:60ch}
 .muted{color:var(--muted)}
 .small{font-size:14px;color:var(--faint)}
@@ -415,7 +416,7 @@ button.langlink:hover{color:var(--ink);background:var(--card)}
 .sitgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:6px}
 .sitcard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px 8px 8px}
 .sitcard[hidden]{display:none}
-.sitcard h3{margin:0 10px 8px;font-size:13.5px;color:var(--faint);letter-spacing:.02em}
+.sitcard h3,.sitcard .h3{margin:0 10px 8px;font-size:13.5px;color:var(--faint);letter-spacing:.02em}
 .sitlist{list-style:none}
 .sitlist li[hidden]{display:none}
 .sitlist a{display:flex;align-items:center;gap:10px;padding:12px 10px;border-radius:11px;color:var(--ink);
@@ -982,7 +983,7 @@ body:has(#rom) .tool.dice{display:none}
 .gruppe-rolig .gamelist{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
 .gruppe-rolig .game{background:transparent;min-height:0;padding:12px 14px}
 .gruppe-rolig .game .gn{font-size:16px}
-.gruppe-rolig h3{color:var(--muted)}
+.gruppe-rolig h3,.gruppe-rolig .h3{color:var(--muted)}
 /* ---------- Opus: telefonen er terningen ---------- */
 .op-full{position:fixed;inset:0;z-index:160;background:#0B0614}
 .op-full[hidden]{display:none}

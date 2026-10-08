@@ -90,7 +90,7 @@ import Base from '../../layouts/Base.astro';
         vippsBoks(d.vipps) +
         perDag(d.perDag) +
         '<section class="stat-boks"><h2>Kjøp</h2>' +
-          '<form class="salg-sok" id="salgSok"><input id="salgSokFelt" type="search" placeholder="Søk på e-post eller ordrenummer" autocomplete="off"><button class="btn small" type="submit">Søk</button></form>' +
+          '<form class="salg-sok" id="salgSok"><input id="salgSokFelt" type="search" placeholder="Søk på e-post eller ordrenummer" aria-label="Søk på e-post eller ordrenummer" autocomplete="off"><button class="btn small" type="submit">Søk</button></form>' +
           '<div id="salgListe">' + rader(d.siste) + '</div>' +
           '<p class="small">Refusjon sender pengene tilbake i Vipps og tar bort Pluss-tiden kjøpet ga. Kunden får pengene på kontoen etter noen dager.</p></section>';
       document.getElementById('salgSok').addEventListener('submit', function (e) {

@@ -22,7 +22,7 @@ const themes = situationThemes
   <div class="sitgrid">
     {themes.map((th: any) => (
       <section class="sitcard" data-theme>
-        <h3>{t(th.title, lang)}</h3>
+        <h2 class="h3">{t(th.title, lang)}</h2>
         <ul class="sitlist">
           {th.list.map((x: any) => (
             <li data-q={`${t(x.title, 'no')} ${t(x.title, 'en')} ${t(th.title, lang)}`.toLowerCase()}>

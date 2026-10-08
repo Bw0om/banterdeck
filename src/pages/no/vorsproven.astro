@@ -96,7 +96,7 @@ const NAVN = 'Nasjonal vorsprøve';
       stopp();
       navn = navn && navn.length ? navn : ['','',''];
       vis('<div class="vp-card"><h2>Hvem er med?</h2><p class="small">Skriv inn navnene. Telefonen går rundt i denne rekkefølgen.</p>'+
-        '<div id="vpNavn">'+navn.map(function(n,i){ return '<input class="vp-in" maxlength="20" placeholder="Spiller '+(i+1)+'" value="'+esc(n)+'">'; }).join('')+'</div>'+
+        '<div id="vpNavn">'+navn.map(function(n,i){ return '<input class="vp-in" maxlength="20" autocomplete="off" aria-label="Spiller '+(i+1)+'" placeholder="Spiller '+(i+1)+'" value="'+esc(n)+'">'; }).join('')+'</div>'+
         '<button class="btn ghost" data-a="leggtil">+ Legg til spiller</button>'+
         '<p class="small vp-err" id="vpErr" hidden>Dere må være minst to.</p>'+
         '<button class="btn gold vp-big" data-a="start">Start prøven</button></div>');
