@@ -1,4 +1,4 @@
-// Mitt vors Pluss: hvem som har Pluss, og betaling med Vipps (ePayment-API-et).
+// mittvors pluss: hvem som har Pluss, og betaling med Vipps (ePayment-API-et).
 // Miljøvariabler i Vercel: VIPPS_CLIENT_ID, VIPPS_CLIENT_SECRET, VIPPS_SUBSCRIPTION_KEY, VIPPS_MSN,
 // og VIPPS_TEST=1 mens du tester mot Vipps sitt testmiljø.
 import { rpc, supabaseServer } from './spilt';
@@ -6,8 +6,8 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { epostKlar, sendEpost, kvitteringEpost } from './epost';
 
 export const PRODUKTER: Record<string, { navn: string; ore: number; beskrivelse: string }> = {
-  kveld: { navn: 'Kveldspass', ore: 2900, beskrivelse: 'Mitt vors Pluss i 24 timer' },
-  aar: { navn: 'Årspass', ore: 19900, beskrivelse: 'Mitt vors Pluss i ett år' },
+  kveld: { navn: 'Kveldspass', ore: 2900, beskrivelse: 'mittvors pluss i 24 timer' },
+  aar: { navn: 'Årspass', ore: 19900, beskrivelse: 'mittvors pluss i ett år' },
 };
 
 function env(): any { return (typeof process !== 'undefined' && process.env) || {}; }

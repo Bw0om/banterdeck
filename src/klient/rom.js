@@ -725,7 +725,7 @@ export function startRom(LEKNAVN, LANG) {
       rader.push(t.mester ? ['mester-av', '❓', T('Slå av spørsmålsmester', 'Turn off question master'), T('Mester nå: ', 'Master now: ') + navn(t.mester.id)]
         : ['mester-paa', '❓', T('Slå på spørsmålsmester', 'Turn on question master'), T('Svarer du på et spørsmål fra mesteren, drikker du.', 'Answer a question from the master and you drink.')]);
       rader.push(t.oppdrag ? ['op-av', '🕵️', T('Slå av Agent 0,5', 'Turn off Agent 0.5'), T('Oppdragene forsvinner fra alle telefonene.', 'The missions disappear from every phone.')]
-        : ['op-paa', '🕵️', T('Agent 0,5 ✨', 'Agent 0.5 ✨'), (t.pluss ? T('Alle får et hemmelig oppdrag som varer hele kvelden.', 'Everyone gets a secret mission that lasts all night.') : T('Alle får et hemmelig oppdrag som varer hele kvelden. Krever Pluss.', 'Everyone gets a secret mission that lasts all night. Needs Plus.'))]);
+        : ['op-paa', '🕵️', T('Agent 0,5 ✨', 'Agent 0.5 ✨'), (t.pluss ? T('Alle får et hemmelig oppdrag som varer hele kvelden.', 'Everyone gets a secret mission that lasts all night.') : T('Alle får et hemmelig oppdrag som varer hele kvelden. Krever Pluss.', 'Everyone gets a secret mission that lasts all night. Needs Pluss.'))]);
     }
     // Vannrunde: verten kan ta en nå, og slå av den som kommer av seg selv hver time (ikke i alkoholfrie rom)
     if (!t.alkoholfri) {
@@ -851,7 +851,7 @@ export function startRom(LEKNAVN, LANG) {
   function plussLeker() {
     var t = tilstand, l = (t.leker || []).filter(function (x) { return x.pluss; }); if (!l.length) return '';
     var aapen = !!t.pluss;
-    return '<details class="rom-gruppe pluss" data-gruppe="pluss"' + (erApen('pluss', aapen) ? ' open' : '') + '><summary>' + T('✨ Med Pluss', '✨ With Plus') + ' <small>' + l.length + '</small></summary>' + (aapen ? '' : '<p class="small">' + T('Har verten Pluss, er disse åpne for alle i rommet – og dere kan være opptil 16 telefoner.', 'If the host has Plus, these are open to everyone in the room – and you can have up to 16 phones.') + ' <a href="' + RUTE.pluss + '">' + T('Første kveld er gratis.', 'Your first night is free.') + '</a></p>') +
+    return '<details class="rom-gruppe pluss" data-gruppe="pluss"' + (erApen('pluss', aapen) ? ' open' : '') + '><summary>' + T('✨ Med Pluss', '✨ With Pluss') + ' <small>' + l.length + '</small></summary>' + (aapen ? '' : '<p class="small">' + T('Har verten Pluss, er disse åpne for alle i rommet – og dere kan være opptil 16 telefoner.', 'If the host has Pluss, these are open to everyone in the room – and you can have up to 16 phones.') + ' <a href="' + RUTE.pluss + '">' + T('Første kveld er gratis.', 'Your first night is free.') + '</a></p>') +
       '<div class="rom-leker">' + l.map(function (x) {
         return '<div class="rom-lek pluss' + (aapen ? '' : ' laast') + '"><b>' + (aapen ? '' : '🔒 ') + esc(x.navn) + '</b><span>' + esc(x.om || '') + '</span>' +
           '<div class="rom-mod"><button type="button" data-g="start" data-lek="' + x.id + '" data-modus="*">' + (aapen ? 'Start' : T('Lås opp', 'Unlock')) + '</button></div></div>';
@@ -861,19 +861,19 @@ export function startRom(LEKNAVN, LANG) {
   function plassInfo() {
     var t = tilstand; if (!erVert() || t.pluss || !t.gratisPlasser) return '';
     var n = t.spillere.length, maks = t.gratisPlasser, nylig = t.fullForsok && (Date.now() + klokkeAvvik) - t.fullForsok < 10 * 60000;
-    if (nylig) return '<div class="rom-plass full"><b>' + T('Noen prøvde å bli med, men rommet er fullt.', 'Someone tried to join, but the room is full.') + '</b><span>' + T('Gratisversjonen har plass til ' + maks + ' telefoner. Med Pluss kan dere være opptil 16.', 'The free version fits ' + maks + ' phones. With Plus you can have up to 16.') + '</span><button class="btn gold small" data-g="pluss-tilbud" type="button">' + T('Lås opp rommet', 'Unlock the room') + '</button></div>';
-    if (n >= maks - 1) return '<p class="rom-plass">' + n + T(' av ', ' of ') + maks + T(' gratis plasser er brukt.', ' free spots used.') + ' <button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Flere? Lås opp med Pluss', 'More people? Unlock with Plus') + '</button></p>';
+    if (nylig) return '<div class="rom-plass full"><b>' + T('Noen prøvde å bli med, men rommet er fullt.', 'Someone tried to join, but the room is full.') + '</b><span>' + T('Gratisversjonen har plass til ' + maks + ' telefoner. Med Pluss kan dere være opptil 16.', 'The free version fits ' + maks + ' phones. With Pluss you can have up to 16.') + '</span><button class="btn gold small" data-g="pluss-tilbud" type="button">' + T('Lås opp rommet', 'Unlock the room') + '</button></div>';
+    if (n >= maks - 1) return '<p class="rom-plass">' + n + T(' av ', ' of ') + maks + T(' gratis plasser er brukt.', ' free spots used.') + ' <button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Flere? Lås opp med Pluss', 'More people? Unlock with Pluss') + '</button></p>';
     return '';
   }
   function visPlussTilbud() {
     if (document.querySelector('.pluss-tilbud')) return;
     var m = document.createElement('div'); m.className = 'rom-tavle pluss-tilbud'; m.setAttribute('role', 'dialog');
     var inne = window.BDKonto && window.BDKonto.les();
-    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + T('✨ Mitt vors Pluss', '✨ Mitt vors Plus') + '</h2><button class="linkbtn" data-p="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
-      '<p>' + T('Med Pluss hos <b>verten</b> får hele rommet alle lekene og pakkene, og dere kan være opptil 16 telefoner. Gjestene trenger ikke betale.', 'When the <b>host</b> has Plus, the whole room gets every game and pack, and you can have up to 16 phones. Guests don\'t pay a thing.') + '</p>' +
+    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + T('✨ mittvors pluss', '✨ mittvors pluss') + '</h2><button class="linkbtn" data-p="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+      '<p>' + T('Med Pluss hos <b>verten</b> får hele rommet alle lekene og pakkene, og dere kan være opptil 16 telefoner. Gjestene trenger ikke betale.', 'When the <b>host</b> has Pluss, the whole room gets every game and pack, and you can have up to 16 phones. Guests don\'t pay a thing.') + '</p>' +
       '<p>' + T('<b>Første kveld er gratis.</b> Etterpå 29 kr for en kveld eller 199 kr for et år.', '<b>Your first night is free.</b> After that it\'s NOK 29 for a night or NOK 199 for a year.') + '</p>' +
       '<div class="dl-knapper">' + (inne ? '<button class="btn gold" data-p="gratis" type="button">' + T('Prøv gratis i kveld', 'Try it free tonight') + '</button>' : '<a class="btn gold" data-tilbake href="' + RUTE.konto + '">' + T('Logg inn for å prøve gratis', 'Log in to try it free') + '</a>') +
-      '<a class="btn ghost" href="' + RUTE.pluss + '" target="_blank" rel="noopener">' + T('Se Pluss', 'See Plus') + '</a></div><p class="formmsg" role="status"></p></div>';
+      '<a class="btn ghost" href="' + RUTE.pluss + '" target="_blank" rel="noopener">' + T('Se Pluss', 'See Pluss') + '</a></div><p class="formmsg" role="status"></p></div>';
     m.addEventListener('click', function (e) {
       if (e.target === m || e.target.closest('[data-p=lukk]')) return m.remove();
       if (e.target.closest('[data-tilbake]')) { try { sessionStorage.setItem('bd_etter_innlogging', location.pathname + location.search); } catch (x) {} return; }
@@ -910,7 +910,7 @@ export function startRom(LEKNAVN, LANG) {
     plussSjekket = true;
     kontoApi('/api/pluss/status').then(function (r) { return r.json(); }).then(function (d) {
       if (d.aktiv) gjorAlltid({ handling: 'pluss-aktiver' });
-      else if (tving) toast(T('Fant ikke Pluss på kontoen.', 'Couldn\'t find Plus on your account.'));
+      else if (tving) toast(T('Fant ikke Pluss på kontoen.', 'Couldn\'t find Pluss on your account.'));
     }).catch(function () {});
   }
 
@@ -1783,7 +1783,7 @@ export function startRom(LEKNAVN, LANG) {
       return '<div class="bs-aksje venter">' + hode + (erVert() ? '<p class="small">' + T('Godkjenne aksjen? Avviser du, får hen pengene tilbake.', 'Approve this share? If you reject it, they get their money back.') + '</p><div class="dl-knapper"><button class="btn small gold" data-b="godkjenn" data-a="' + a.id + '" type="button">' + T('Godkjenn', 'Approve') + '</button><button class="btn small ghost" data-b="avvis" data-a="' + a.id + '" type="button">' + T('Avvis', 'Reject') + '</button></div>' : '<p class="small">' + T('Venter på at verten godkjenner.', 'Waiting for the host to approve.') + '</p>') + '</div>';
     }
     if (a.laast) {
-      return '<div class="bs-aksje laast">' + hode + '<p class="small">🔒 ' + T('Låst i gratisbørsen. ', 'Locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp med Pluss', 'Unlock with Plus') + '</button></p></div>';
+      return '<div class="bs-aksje laast">' + hode + '<p class="small">🔒 ' + T('Låst i gratisbørsen. ', 'Locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp med Pluss', 'Unlock with Pluss') + '</button></p></div>';
     }
     if (a.status === 'meldt' && a.melding) {
       var ml = a.melding, kanStemme = ml.subjekt !== m;
@@ -1950,7 +1950,7 @@ export function startRom(LEKNAVN, LANG) {
        T('Prisen stiger for hver som kjøper – det lønner seg å være tidlig ute.', 'The price rises with every purchase – it pays to be early.'),
        T('Selge: du må ha eid aksjen i 10 minutter, og 25 % går til kurtasje.', 'Selling: you must hold the share for 10 minutes, and 25% goes in fees.'),
        T('Kursen på deg selv er skjult. Blir det deg, får du 30 kr i hovedrollebonus.', 'Your own price is hidden. If it’s you, you get a 30 starring bonus.'),
-       T('Du har din egen hånd på 6 aksjer, trukket tilfeldig fra kveldens pott (40 aksjer, 100 med Pluss). Ingen vet hvem som har de samme – eller aksjen om dem.', 'You have your own hand of 6 shares, drawn at random from tonight’s pot (40 shares, 100 with Plus). Nobody knows who holds the same ones – or the one about them.'),
+       T('Du har din egen hånd på 6 aksjer, trukket tilfeldig fra kveldens pott (40 aksjer, 100 med Pluss). Ingen vet hvem som har de samme – eller aksjen om dem.', 'You have your own hand of 6 shares, drawn at random from tonight’s pot (40 shares, 100 with Pluss). Nobody knows who holds the same ones – or the one about them.'),
        T('Liker du ikke en aksje? Trykk «🔄 Bytt» – det koster 25 kr eller én slurk, du velger. Stenger eller avgjøres en aksje, får du en ny gratis.', 'Don’t like a share? Tap “🔄 Swap” – it costs 25 or one sip, your choice. When a share closes or settles, you get a new one for free.'),
        T('Skjer det? Trykk «📣 Det skjedde!» – aksjen avsløres for alle, låses, og de andre stemmer. Blir det bekreftet, får du 20 kr i meldebonus – også om du ikke eide noe i den.', 'Did it happen? Tap “📣 It happened!” – the share is revealed to everyone, locks and the others vote. If confirmed, you get a 20 reporter bonus – even if you didn’t own any.'),
        T('Innsidehandel: har en vinner fikset det sammen med noen, kan hen anmeldes under «Avgjort». Skyldig mister hele gevinsten, får 300 kr i bot og 5 slurker.', 'Insider trading: if a winner set it up with someone, report them under “Settled”. Guilty loses the whole payout, gets a 300 fine and 5 sips.')].map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></details>';
@@ -1964,9 +1964,9 @@ export function startRom(LEKNAVN, LANG) {
       : borsRad(a) + (borsFilter === 'ferdige' && !(a.vinnere && a.vinnere.length && b.paa) ? '<p class="small bs-hvorfor">' + hvorforIkke(a) + '</p>' : ''); }).join('') ||
       '<p class="small">' + (borsFilter === 'mine' ? T('Du eier ingen aksjer ennå. Trykk på en aksje under «Åpne» for å kjøpe.', 'You don’t own any shares yet. Tap a share under “Open” to buy.') : borsFilter === 'ferdige' ? T('Ingen aksjer er avgjort ennå.', 'No shares settled yet.') : T('Ingen åpne aksjer akkurat nå.', 'No open shares right now.')) + '</p>';
     if (borsFilter === 'apne') {
-      if (b.laaste) ut += '<p class="small bs-pluss">' + b.laaste + T(' aksjer er låst i gratisbørsen. ', ' shares are locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp alle med Pluss', 'Unlock all with Plus') + '</button></p>';
+      if (b.laaste) ut += '<p class="small bs-pluss">' + b.laaste + T(' aksjer er låst i gratisbørsen. ', ' shares are locked on the free exchange. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Lås opp alle med Pluss', 'Unlock all with Pluss') + '</button></p>';
       if (b.hand) ut += '<p class="small bs-hand">🃏 ' + T('Din hånd: ' + b.hand.str + ' aksjer · ' + 'bytte koster ' + kr(b.hand.pris) + ' eller en slurk' + ' · ' + b.hand.igjen + ' ukjente aksjer i potten', 'Your hand: ' + b.hand.str + ' shares · ' + 'a swap costs ' + kr(b.hand.pris) + ' or a sip' + ' · ' + b.hand.igjen + ' unseen shares in the pot') + '</p>';
-      if (!b.fri && !b.laaste) ut += '<p class="small bs-pluss">' + T('Gratisbørsen har 40 aksjer i potten i kveld. ', 'The free exchange has 40 shares in the pot tonight. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Med Pluss blir det 100', 'Plus makes it 100') + '</button></p>';
+      if (!b.fri && !b.laaste) ut += '<p class="small bs-pluss">' + T('Gratisbørsen har 40 aksjer i potten i kveld. ', 'The free exchange has 40 shares in the pot tonight. ') + '<button class="linkbtn" data-g="pluss-tilbud" type="button">' + T('Med Pluss blir det 100', 'Pluss makes it 100') + '</button></p>';
       if (!b.harNotert) ut += '<details class="bs-noter"><summary>' + T('🧾 Noter en egen aksje (200 kr)', '🧾 List your own share (200)') + '</summary><p class="small">' + T('Én per person per kveld. Du får 2 kr for hvert kjøp andre gjør i den, men kan ikke handle i den selv. Verten godkjenner.', 'One per person per night. You get 2 for every purchase others make in it, but can’t trade in it yourself. The host approves.') + '</p>' +
         '<div class="rom-mod"><label><input type="radio" name="bsType" value="hvem" checked> ' + T('Hvem …?', 'Who …?') + '</label> <label><input type="radio" name="bsType" value="janei"> ' + T('Ja/nei', 'Yes/no') + '</label></div>' +
         '<input id="bsNyTekst" maxlength="100" placeholder="' + T('F.eks. «Hvem ringer mamma før midnatt?»', 'E.g. “Who calls their mum before midnight?”') + '"><button class="btn small gold" data-b="noter" type="button">' + T('Noter (200 kr)', 'List (200)') + '</button></details>';
@@ -2552,7 +2552,7 @@ export function startRom(LEKNAVN, LANG) {
     // Under en lek: leken først, det som går i bakgrunnen etterpå, reaksjonene i en dokk nederst (se natt.css).
     // I lobbyen: som før.
     var turTekst = minTurNaa(tilstand);
-    var topp = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Plus tonight – every game is open, room for 16') + '</p>' : '') + venterStripe();
+    var topp = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Pluss tonight – every game is open, room for 16') + '</p>' : '') + venterStripe();
     var merker = '<div class="tur-merke" aria-live="polite">' + esc(turTekst) + '</div><div class="hemmelig-merke">🤫 ' + T('Bare du ser dette – hold skjermen for deg selv', 'Only you can see this – keep the screen to yourself') + '</div>';
     var forlat = '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
     // Nytt kort? Ta vare på det gamle, så det kan kastes ut av skjermen når det nye deles ut

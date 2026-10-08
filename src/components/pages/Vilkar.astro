@@ -1,5 +1,5 @@
 ---
-// Salgsvilkår for Mitt vors Pluss. Felles for /no/vilkar (lang="no") og /terms (lang="en").
+// Salgsvilkår for mittvors pluss. Felles for /no/vilkar (lang="no") og /terms (lang="en").
 import Base from '../../layouts/Base.astro';
 import { SELGER, CONTACT_EMAIL } from '../../config';
 import type { Lang } from '../../lib/i18n';
@@ -9,8 +9,8 @@ const epost = SELGER.epost || CONTACT_EMAIL;
 const tlf = '+47' + String(SELGER.telefon || '').replace(/\s/g, '');
 ---
 {no ? (
-<Base title="Salgsvilkår" description="Salgsvilkår for Mitt vors Pluss." lang="no">
-  <h1>Salgsvilkår for Mitt vors Pluss</h1>
+<Base title="Salgsvilkår" description="Salgsvilkår for mittvors pluss." lang="no">
+  <h1>Salgsvilkår for mittvors pluss</h1>
   <p class="lead">Kort og ærlig: du betaler én gang, Pluss virker med en gang, og ingenting fornyes av seg selv.</p>
 
   <h2>1. Parter</h2>
@@ -25,8 +25,8 @@ const tlf = '+47' + String(SELGER.telefon || '').replace(/\s/g, '');
 
   <h2>2. Hva du kjøper og pris</h2>
   <ul>
-    <li><b>Kveldspass – 29 kr:</b> Mitt vors Pluss i 24 timer fra kjøpet.</li>
-    <li><b>Årspass – 199 kr:</b> Mitt vors Pluss i 365 dager fra kjøpet.</li>
+    <li><b>Kveldspass – 29 kr:</b> mittvors pluss i 24 timer fra kjøpet.</li>
+    <li><b>Årspass – 199 kr:</b> mittvors pluss i 365 dager fra kjøpet.</li>
   </ul>
   <p>Pluss gir tilgang til betalte kortpakker og leker, og låser dem opp for alle i rom der du er vert (opptil 16 telefoner). Kjøper du et nytt pass mens du allerede har Pluss, legges tiden til. Prisene er oppgitt i norske kroner og er totalpriser – det kommer ingen gebyrer i tillegg.</p>
 
@@ -58,9 +58,9 @@ const tlf = '+47' + String(SELGER.telefon || '').replace(/\s/g, '');
   <p>Vi lagrer hvilken konto som har Pluss og hvilke kjøp som er gjort. Betalingsopplysninger håndteres av Vipps. Les mer i <a href="/no/privacy">personvernerklæringen</a>.</p>
 </Base>
 ) : (
-<Base title="Terms of sale" description="Terms of sale for Mitt vors Plus." lang="en">
-  <h1>Terms of sale for Mitt vors Plus</h1>
-  <p class="lead">Short and honest: you pay once, Plus works straight away, and nothing renews by itself.</p>
+<Base title="Terms of sale" description="Terms of sale for mittvors pluss." lang="en">
+  <h1>Terms of sale for mittvors pluss</h1>
+  <p class="lead">Short and honest: you pay once, Pluss works straight away, and nothing renews by itself.</p>
 
   <h2>1. Parties</h2>
   <p>The seller is:<br />
@@ -70,40 +70,40 @@ const tlf = '+47' + String(SELGER.telefon || '').replace(/\s/g, '');
     Phone: <a href={`tel:${tlf}`}>+47 {SELGER.telefon}</a><br />
     Email: <a href={`mailto:${epost}`}>{epost}</a>
   </p>
-  <p>The buyer is the person logged in with the account Plus is bought for. You must be over 18 to buy.</p>
+  <p>The buyer is the person logged in with the account Pluss is bought for. You must be over 18 to buy.</p>
 
   <h2>2. What you buy and price</h2>
   <ul>
-    <li><b>Night pass – 29 NOK:</b> Mitt vors Plus for 24 hours from purchase.</li>
-    <li><b>Year pass – 199 NOK:</b> Mitt vors Plus for 365 days from purchase.</li>
+    <li><b>Night pass – 29 NOK:</b> mittvors pluss for 24 hours from purchase.</li>
+    <li><b>Year pass – 199 NOK:</b> mittvors pluss for 365 days from purchase.</li>
   </ul>
-  <p>Plus gives access to paid card packs and games, and unlocks them for everyone in rooms where you are the host (up to 16 phones). If you buy a new pass while you already have Plus, the time is added on. Prices are in Norwegian kroner (NOK) and are total prices – there are no extra fees.</p>
+  <p>Pluss gives access to paid card packs and games, and unlocks them for everyone in rooms where you are the host (up to 16 phones). If you buy a new pass while you already have Pluss, the time is added on. Prices are in Norwegian kroner (NOK) and are total prices – there are no extra fees.</p>
 
   <h2>3. Payment</h2>
-  <p>You pay with Vipps, the Norwegian mobile payment app, which requires a Norwegian Vipps account. The amount is reserved when you approve in Vipps and charged when Plus is delivered, which is immediately. Plus is linked to the account you are logged in with. You get a receipt you can save as a PDF.</p>
+  <p>You pay with Vipps, the Norwegian mobile payment app, which requires a Norwegian Vipps account. The amount is reserved when you approve in Vipps and charged when Pluss is delivered, which is immediately. Pluss is linked to the account you are logged in with. You get a receipt you can save as a PDF.</p>
 
   <h2>4. Delivery</h2>
-  <p>Plus is digital content and is delivered immediately when the payment is approved – you see it straight away on your account and in the rooms you create. Nothing is sent by post.</p>
+  <p>Pluss is digital content and is delivered immediately when the payment is approved – you see it straight away on your account and in the rooms you create. Nothing is sent by post.</p>
 
   <h2>5. Duration and cancellation</h2>
-  <p>The passes are one-off purchases, not subscriptions. When the time runs out, Plus stops by itself, and you will never be charged again unless you buy a new pass. So there is nothing to cancel.</p>
+  <p>The passes are one-off purchases, not subscriptions. When the time runs out, Pluss stops by itself, and you will never be charged again unless you buy a new pass. So there is nothing to cancel.</p>
 
   <h2>6. Right of withdrawal</h2>
   <p>When buying digital content you normally have a 14-day right of withdrawal. Before you pay, you agree that delivery starts immediately and confirm that you thereby lose the right of withdrawal (Norwegian Cancellation Act, section 22 (n)). This is also stated on your receipt.</p>
 
   <h2>7. Returns</h2>
-  <p>Since Plus is digital content delivered immediately, there is nothing to return. If you bought by mistake, or Plus doesn’t work, get in touch – see section 8.</p>
+  <p>Since Pluss is digital content delivered immediately, there is nothing to return. If you bought by mistake, or Pluss doesn’t work, get in touch – see section 8.</p>
 
   <h2>8. Complaints about defects</h2>
-  <p>If Plus doesn’t work as described, you are entitled to complain under the Norwegian Consumer Purchases Act. Email <a href={`mailto:${epost}`}>{epost}</a> with the order number from your receipt and what isn’t working, within a reasonable time after you discovered the problem. We reply within 14 days and will fix the problem, extend your Plus or refund you.</p>
+  <p>If Pluss doesn’t work as described, you are entitled to complain under the Norwegian Consumer Purchases Act. Email <a href={`mailto:${epost}`}>{epost}</a> with the order number from your receipt and what isn’t working, within a reasonable time after you discovered the problem. We reply within 14 days and will fix the problem, extend your Pluss or refund you.</p>
 
   <h2>9. Dispute resolution</h2>
   <p>We always try to resolve disagreements amicably. If we can’t agree, you can get free help and mediation from the <a href="https://www.forbrukerradet.no" rel="noopener">Norwegian Consumer Council (Forbrukerrådet)</a>, and the case can then be brought before the Consumer Disputes Commission (Forbrukerklageutvalget). Norwegian law applies.</p>
 
   <h2>10. Gift codes and referrals</h2>
-  <p>Gift codes and night passes from referrals give Plus without payment and have no cash value. An account can only be referred once, and only within the first 30 days after it was created, and each account can be rewarded for at most 20 referrals per year. Abuse, such as creating accounts to refer yourself, may lead to the passes being removed.</p>
+  <p>Gift codes and night passes from referrals give Pluss without payment and have no cash value. An account can only be referred once, and only within the first 30 days after it was created, and each account can be rewarded for at most 20 referrals per year. Abuse, such as creating accounts to refer yourself, may lead to the passes being removed.</p>
 
   <h2>11. Personal data</h2>
-  <p>We store which account has Plus and which purchases have been made. Payment details are handled by Vipps. Read more in the <a href="/privacy">privacy policy</a>.</p>
+  <p>We store which account has Pluss and which purchases have been made. Payment details are handled by Vipps. Read more in the <a href="/privacy">privacy policy</a>.</p>
 </Base>
 )}

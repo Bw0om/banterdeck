@@ -484,7 +484,7 @@ export function borsTilPluss(data: any) {
   b.fri = true;
   const n = fyllPott(b);
   delAlle(data);
-  if (n) melde(data, `✨ Pluss! ${n} nye aksjer er lagt i potten.`, `✨ Plus! ${n} new shares added to the pot.`);
+  if (n) melde(data, `✨ Pluss! ${n} nye aksjer er lagt i potten.`, `✨ Pluss! ${n} new shares added to the pot.`);
 }
 
 /* ---------- start / slutt ---------- */
@@ -688,7 +688,7 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
   if (hd === 'bs-handel') {
     const a = finn(b, h.aksje); if (!a) return { feil: 'ugyldig' };
     if (a.stenger && Date.now() >= a.stenger && a.status === 'apen') a.status = 'stengt';
-    if (a.laast && !b.fri) return { feil: 'pluss', melding: 'Denne aksjen krever Pluss hos verten.', en: 'This share needs the host to have Plus.' };
+    if (a.laast && !b.fri) return { feil: 'pluss', melding: 'Denne aksjen krever Pluss hos verten.', en: 'This share needs the host to have Pluss.' };
     if (!kanSe(b, a, meg.id)) return { feil: 'ugyldig', melding: 'Denne aksjen er ikke på hånda di.', en: 'This share isn’t in your hand.' };
     if (!handelApen(b, a)) return { feil: 'stengt', melding: a.status === 'meldt' ? 'Aksjen er låst – noen har meldt at det skjedde.' : 'Aksjen er stengt for handel.', en: a.status === 'meldt' ? 'The share is locked – someone reported that it happened.' : 'This share is closed for trading.' };
     const i = a.utfall.indexOf(String(h.utfall)); if (i === -1) return { feil: 'ugyldig' };
@@ -789,7 +789,7 @@ function borsHandlingInne(data: any, meg: any, h: any, erVert: boolean): any {
   }
   if (hd === 'bs-meld') {
     const a = finn(b, h.aksje); if (!a || (a.status !== 'apen' && a.status !== 'stengt')) return { feil: 'stengt', melding: 'Aksjen kan ikke meldes nå.', en: 'This share can’t be reported now.' };
-    if (a.laast && !b.fri) return { feil: 'pluss', melding: 'Denne aksjen krever Pluss hos verten.', en: 'This share needs the host to have Plus.' };
+    if (a.laast && !b.fri) return { feil: 'pluss', melding: 'Denne aksjen krever Pluss hos verten.', en: 'This share needs the host to have Pluss.' };
     if (!kanSe(b, a, meg.id)) return { feil: 'ugyldig', melding: 'Denne aksjen er ikke på hånda di.', en: 'This share isn’t in your hand.' };
     const utfall = a.type === 'janei' ? 'ja' : String(h.utfall || '');
     if (!a.utfall.includes(utfall)) return { feil: 'ugyldig' };

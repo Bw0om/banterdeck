@@ -8,6 +8,7 @@ import '@fontsource-variable/fraunces/wght-italic.css';
 import fontArchivo from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
 import '../styles/global.css';
 import '../styles/natt.css';
+import '../styles/champagne.css';
 import { SITE_NAME, SELGER, UTVIKLING } from '../config';
 import { collectionsFor, topSituationsFor, dictSection, visible, t } from '../lib/content';
 import { ui, path, otherLangPath, type Lang } from '../lib/i18n';
@@ -137,7 +138,7 @@ const isCurrent = (href: string) => {
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content={bildeUrl} />
-  <meta name="theme-color" content="#120A1D" />
+  <meta name="theme-color" content="#0F0A10" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
   <link rel="alternate icon" href="/favicon.ico" sizes="any" />
@@ -155,7 +156,7 @@ const isCurrent = (href: string) => {
       function tema() { try { return localStorage.getItem('bd_tema') === 'lys' ? 'light' : 'dark'; } catch (e) { return 'dark'; } }
       function sett(doc) {
         var t = tema(); doc.documentElement.dataset.theme = t;
-        var m = doc.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#F3EFF8' : '#120A1D');
+        var m = doc.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#F7F2EB' : '#0F0A10');
       }
       sett(document);
       document.addEventListener('astro:before-swap', function (e) { sett(e.newDocument); });
@@ -191,7 +192,7 @@ const isCurrent = (href: string) => {
       document.querySelectorAll('[data-pluss-pille]').forEach(function (a) {
         if (!a.dataset.opprinnelig) a.dataset.opprinnelig = a.textContent;
         a.classList.toggle('aktiv', aktiv);
-        a.textContent = aktiv ? (en ? 'Plus ✓' : 'Pluss ✓') : a.dataset.opprinnelig;
+        a.textContent = aktiv ? 'Pluss ✓' : a.dataset.opprinnelig;
       });
     }
     function sjekk(tving) {
@@ -252,7 +253,7 @@ const isCurrent = (href: string) => {
 
   <div class="shell">
     <aside class="side">
-      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#FF5B1F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#E4C47F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
       <button class="searchbtn" data-search><Icon name="sok" />{L.search}<kbd>⌘K</kbd></button>
       <nav class="sidenav" aria-label={L.pickMode}>
         {nav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}><Icon name={n.icon} />{n.label}</a>)}
@@ -260,7 +261,7 @@ const isCurrent = (href: string) => {
         {humorNav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}><Icon name={n.icon} />{n.label}</a>)}
         {subNav.map((n) => <a class="sub" href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
       </nav>
-      <a class="pluss-pille" href={lang === 'no' ? '/no/pluss' : '/plus'} data-pluss-pille>{lang === 'no' ? 'Mitt vors Pluss' : 'Mitt vors Plus'}</a>
+      <a class="pluss-pille" href={lang === 'no' ? '/no/pluss' : '/plus'} data-pluss-pille>mittvors pluss</a>
       <a class="appbtn" href={path(lang, '/favourites')}><Icon name="favoritt" />{L.favourites}</a>
       <button class="langlink temaknapp" type="button" data-tema aria-label={lang === 'no' ? 'Bytt mellom lys og mørk modus' : 'Switch light or dark mode'}><svg class="tema-sol" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg><svg class="tema-maane" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg><span class="tema-sol">{lang === 'no' ? 'Lys modus' : 'Light mode'}</span><span class="tema-maane">{lang === 'no' ? 'Mørk modus' : 'Dark mode'}</span></button>
       <a class="langlink" href={altPath} hreflang={lang === 'en' ? 'no' : 'en'}>{L.switchTo}</a>
@@ -273,10 +274,10 @@ const isCurrent = (href: string) => {
 
     <div class="topbars">
     <div class="mobilebar">
-      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#FF5B1F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#E4C47F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
       <span class="mobilebar-right">
         <button class="langlink compact" data-search aria-label={L.search}><Icon name="sok" size={19} /></button>
-        <a class="pluss-pille" href={lang === 'no' ? '/no/pluss' : '/plus'} data-pluss-pille>{lang === 'no' ? 'Pluss' : 'Plus'}</a>
+        <a class="pluss-pille" href={lang === 'no' ? '/no/pluss' : '/plus'} data-pluss-pille>Pluss</a>
         <button class="langlink compact" type="button" data-tema aria-label={lang === 'no' ? 'Bytt mellom lys og mørk modus' : 'Switch light or dark mode'}><svg class="tema-sol" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg><svg class="tema-maane" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button>
         <a class="langlink compact" href={altPath} hreflang={lang === 'en' ? 'no' : 'en'}>{lang === 'en' ? 'NO' : 'EN'}</a>
       </span>
@@ -333,7 +334,7 @@ const isCurrent = (href: string) => {
   {UTVIKLING.paa && (
     <div id="utvikling" class="utvikling" role="dialog" aria-modal="true" aria-labelledby="utvTittel">
       <form class="utv-boks" id="utvSkjema" novalidate>
-        <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="30" fill="#FF5B1F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#120A1D"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg>
+        <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="30" fill="#E4C47F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg>
         <h1 id="utvTittel">mitt<span>vors</span></h1>
         <p>{lang === 'no' ? 'Vi legger siste hånd på vorset. Siden åpner snart!' : 'We’re putting the final touches on the party. Opening soon!'}</p>
         <label for="utvKode" class="small">{lang === 'no' ? 'Har du fått en kode?' : 'Got a code?'}</label>

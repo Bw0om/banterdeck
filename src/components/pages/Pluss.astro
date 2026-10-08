@@ -1,5 +1,5 @@
 ---
-// Mitt vors Pluss: hva man får, prøv gratis, kjøp med Vipps, og spill pakkene.
+// mittvors pluss: hva man får, prøv gratis, kjøp med Vipps, og spill pakkene.
 // Felles for /no/pluss (lang="no") og /plus (lang="en").
 import Base from '../../layouts/Base.astro';
 import Icon from '../Icon.astro';
@@ -20,16 +20,18 @@ const ogListe = (l: string[]) => (l.length > 1 ? l.slice(0, -1).join(', ') + (no
 const pakkeNavn = ogListe(pakker.map((p) => p.navn));
 const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
 ---
-<Base title={no ? 'Mitt vors Pluss' : 'Mitt vors Plus'} description={no ? 'Verten betaler – alle i rommet spiller med. Kveldspass 29 kr, årspass 199 kr. Første kveld er gratis.' : 'The host pays – everyone in the room plays. Night pass 29 NOK, year pass 199 NOK. Your first night is free.'} lang={lang} gate={true} bilde="/og/rom.jpg">
+<Base title="mittvors pluss" description={no ? 'Verten betaler – alle i rommet spiller med. Kveldspass 29 kr, årspass 199 kr. Første kveld er gratis.' : 'The host pays – everyone in the room plays. Night pass 29 NOK, year pass 199 NOK. Your first night is free.'} lang={lang} gate={true} bilde="/og/rom.jpg">
   {no ? (
     <section class="pluss-hero">
-      <h1>Verten betaler.<br />Alle spiller med.</h1>
+      <p class="pluss-merkenavn">mittvors <i>pluss</i></p>
+      <h1>Verten betaler.<br /><em>Alle spiller med.</em></h1>
       <p class="lead">Når du har Pluss og lager et rom, låses alle pakkene opp for alle som blir med – uansett om de har Pluss selv.</p>
     </section>
   ) : (
     <section class="pluss-hero">
-      <h1>The host pays.<br />Everyone plays.</h1>
-      <p class="lead">When you have Plus and create a room, every pack is unlocked for everyone who joins – whether they have Plus or not.</p>
+      <p class="pluss-merkenavn">mittvors <i>pluss</i></p>
+      <h1>The host pays.<br /><em>Everyone plays.</em></h1>
+      <p class="lead">When you have Pluss and create a room, every pack is unlocked for everyone who joins – whether they have Pluss or not.</p>
     </section>
   )}
 
@@ -46,12 +48,12 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
     </section>
   ) : (
     <section class="pluss-fordeler">
-      <div><Icon name="telefon" size={22} /><b>Up to 16 phones</b><small>Free rooms fit 4. With Plus the whole party can join – and nobody else has to pay.</small></div>
+      <div><Icon name="telefon" size={22} /><b>Up to 16 phones</b><small>Free rooms fit 4. With Pluss the whole party can join – and nobody else has to pay.</small></div>
       <div><Icon name="graf" size={22} /><b>The whole Exchange</b><small>100 shares in the pot every night instead of 40 – more to trade, more to hunt for.</small></div>
       <div><Icon name="agent" size={22} /><b>Agent 0.5</b><small>Everyone gets a secret mission that lasts all night.</small></div>
       <div><Icon name="kort" size={22} /><b>More games on your phone</b><small>Ride the Bus, Drinking Yahtzee, The Pyramid, President, Pig, The Liar and Tall Tales – on your own or in a room.</small></div>
       <div><Icon name="gave" size={22} /><b>{pakker.length} card packs for different nights</b><small>{pakkeNavn} – {antKort} cards in total, each made for that kind of night.</small></div>
-      <div><Icon name="gnist" size={22} /><b>More packs on the way</b><small>New packs are added to Plus over time – at no extra cost.</small></div>
+      <div><Icon name="gnist" size={22} /><b>More packs on the way</b><small>New packs are added to Pluss over time – at no extra cost.</small></div>
     </section>
   )}
 
@@ -67,8 +69,8 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
     </article>
     {no
       ? <label class="pluss-samtykke"><input type="checkbox" id="samtykke"><span>Jeg vil at Pluss starter med en gang, og forstår at angreretten da faller bort. Jeg har lest <a href="/no/vilkar">salgsvilkårene</a>.</span></label>
-      : <label class="pluss-samtykke"><input type="checkbox" id="samtykke"><span>I want Plus to start right away, and I understand that I then lose my right of withdrawal. I have read the <a href="/terms">terms of sale</a>.</span></label>}
-    <p class="small">{no ? 'Engangskjøp – ingenting fornyes av seg selv. Tiden legges til hvis du allerede har Pluss.' : 'One-off purchase – nothing renews automatically. The time is added on if you already have Plus.'}</p>
+      : <label class="pluss-samtykke"><input type="checkbox" id="samtykke"><span>I want Pluss to start right away, and I understand that I then lose my right of withdrawal. I have read the <a href="/terms">terms of sale</a>.</span></label>}
+    <p class="small">{no ? 'Engangskjøp – ingenting fornyes av seg selv. Tiden legges til hvis du allerede har Pluss.' : 'One-off purchase – nothing renews automatically. The time is added on if you already have Pluss.'}</p>
     {!no && <p class="small">Payment is by Vipps, the Norwegian mobile payment app – it requires a Norwegian Vipps account. Gift codes and free nights from referrals work for everyone.</p>}
     <p class="formmsg" id="kjopMsg" role="status" aria-live="polite"></p>
     <p><a class="btn ghost" id="kvLenke" href="#" hidden>{no ? 'Se kvitteringen (lagre som PDF)' : 'See the receipt (save as PDF)'}</a></p>
@@ -105,7 +107,7 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
     <p class="stokk-spill-navn" id="ssNavn"></p>
     <div class="rom-kort rf-kort"><span class="sw-tag" id="ssTeller"></span><p id="ssKort"></p><span></span></div>
     <button class="rom-stor-knapp" type="button" id="ssNeste">{no ? 'Neste kort' : 'Next card'}</button>
-    <p class="small" id="ssSmak" hidden>{no ? 'Dette er smakebiter. Med Pluss får du hele pakken.' : 'This is a taster. With Plus you get the whole pack.'}</p>
+    <p class="small" id="ssSmak" hidden>{no ? 'Dette er smakebiter. Med Pluss får du hele pakken.' : 'This is a taster. With Pluss you get the whole pack.'}</p>
     <button class="btn ghost" type="button" id="ssLukk">{no ? 'Lukk' : 'Close'}</button>
   </div>
 
@@ -133,20 +135,20 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
       if (bleAktiv) { st.classList.remove('pluss-feiring'); void st.offsetWidth; st.classList.add('pluss-feiring'); }
       if (!K || !K.les() || !status || !status.innlogget) {
         st.innerHTML = EN
-          ? '<p><b>Your first night is free.</b> Create a free account or log in, and you can try Plus for 24 hours.</p><a class="btn gold" href="' + KONTO + '">Log in or create an account</a>'
+          ? '<p><b>Your first night is free.</b> Create a free account or log in, and you can try Pluss for 24 hours.</p><a class="btn gold" href="' + KONTO + '">Log in or create an account</a>'
           : '<p><b>Første kveld er gratis.</b> Lag en gratis konto eller logg inn, så kan du prøve Pluss i 24 timer.</p><a class="btn gold" href="/no/account">Logg inn eller lag konto</a>';
         return;
       }
       if (status.aktiv) {
         st.innerHTML = EN
-          ? '<p>✨ <b>You have Plus</b> until ' + esc(dato(status.til)) + '.</p><p class="small">Create a room – every pack is unlocked for everyone who joins.</p><a class="btn gold" href="' + ROM + '">Create a room</a>'
+          ? '<p>✨ <b>You have Pluss</b> until ' + esc(dato(status.til)) + '.</p><p class="small">Create a room – every pack is unlocked for everyone who joins.</p><a class="btn gold" href="' + ROM + '">Create a room</a>'
           : '<p>✨ <b>Du har Pluss</b> til ' + esc(dato(status.til)) + '.</p><p class="small">Lag et rom – alle pakkene er låst opp for alle som blir med.</p><a class="btn gold" href="/no/rom">Lag et rom</a>';
         return;
       }
       st.innerHTML = status.gratisBrukt
         ? (EN ? '<p>You’ve used your free night. Buy a pass below to unlock it again.</p>' : '<p>Du har brukt gratiskvelden din. Kjøp et pass under for å låse opp igjen.</p>')
         : (EN
-          ? '<p><b>Your first night is free.</b> Try Plus for 24 hours – no payment, nothing renews.</p><button class="btn gold" type="button" id="gratisKnapp">Try it free tonight</button>'
+          ? '<p><b>Your first night is free.</b> Try Pluss for 24 hours – no payment, nothing renews.</p><button class="btn gold" type="button" id="gratisKnapp">Try it free tonight</button>'
           : '<p><b>Første kveld er gratis.</b> Prøv Pluss i 24 timer – ingen betaling, ingenting fornyes.</p><button class="btn gold" type="button" id="gratisKnapp">Prøv gratis i kveld</button>');
       var g = $('gratisKnapp');
       if (g) g.addEventListener('click', function () {
@@ -166,7 +168,7 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
       api('/api/pluss/sjekk', { method: 'POST', body: JSON.stringify({ ref: ref }) }).then(function (d) {
         if (d.status === 'fullfort') {
           try { localStorage.removeItem('bd_pluss_ref'); } catch (e) {}
-          say(EN ? 'Thanks! Plus is activated ✨' : 'Takk! Pluss er aktivert ✨', 'ok'); hentStatus();
+          say(EN ? 'Thanks! Pluss is activated ✨' : 'Takk! Pluss er aktivert ✨', 'ok'); hentStatus();
           // Kvitteringen (varig medium): vis lenken, og husk den på denne enheten
           var kv = document.getElementById('kvLenke');
           if (kv) { kv.href = (EN ? '/receipt?ref=' : '/no/kvittering?ref=') + encodeURIComponent(ref); kv.hidden = false; }
@@ -174,7 +176,7 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
           try { localStorage.removeItem('bd_pluss_ref'); } catch (e) {}
           say(EN ? 'The payment was cancelled. No money has been taken.' : 'Betalingen ble avbrutt. Ingen penger er trukket.', 'err');
         } else if (forsok < 15) { say(EN ? 'Waiting for confirmation from Vipps …' : 'Venter på bekreftelse fra Vipps …'); setTimeout(function () { sjekk(ref, forsok + 1); }, 2000); }
-        else say(EN ? 'Vipps hasn’t confirmed yet. Plus will turn on by itself as soon as the payment is approved.' : 'Vipps har ikke bekreftet ennå. Pluss kommer av seg selv så snart betalingen er godkjent.', '');
+        else say(EN ? 'Vipps hasn’t confirmed yet. Pluss will turn on by itself as soon as the payment is approved.' : 'Vipps har ikke bekreftet ennå. Pluss kommer av seg selv så snart betalingen er godkjent.', '');
       }).catch(function () { if (forsok < 15) setTimeout(function () { sjekk(ref, forsok + 1); }, 2500); });
     }
     var qs = new URLSearchParams(location.search), ref = qs.get('ref');
@@ -183,8 +185,8 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
 
     document.querySelector('.pluss-priser').addEventListener('click', function (e) {
       var b = e.target.closest('[data-kjop]'); if (!b) return;
-      if (!K || !K.les()) { say(EN ? 'Log in first, so Plus ends up on your account.' : 'Logg inn først, så havner Pluss på kontoen din.', 'err'); return; }
-      if (!$('samtykke').checked) { say(EN ? 'Tick the box to confirm that Plus starts right away.' : 'Kryss av for at Pluss starter med en gang.', 'err'); $('samtykke').focus(); return; }
+      if (!K || !K.les()) { say(EN ? 'Log in first, so Pluss ends up on your account.' : 'Logg inn først, så havner Pluss på kontoen din.', 'err'); return; }
+      if (!$('samtykke').checked) { say(EN ? 'Tick the box to confirm that Pluss starts right away.' : 'Kryss av for at Pluss starter med en gang.', 'err'); $('samtykke').focus(); return; }
       b.disabled = true; say(EN ? 'Sending you to Vipps …' : 'Sender deg til Vipps …');
       api('/api/pluss/kjop', { method: 'POST', body: JSON.stringify({ produkt: b.dataset.kjop, samtykke: true, lang: EN ? 'en' : 'no' }) }).then(function (d) {
         if (!d._ok || !d.url) { say(d.melding || (EN ? 'Couldn’t start the payment.' : 'Fikk ikke startet betalingen.'), 'err'); b.disabled = false; return; }
@@ -228,7 +230,7 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
         if (!d._ok) { m.textContent = d.melding || (EN ? 'The code didn’t work.' : 'Koden virket ikke.'); m.className = 'formmsg err'; return; }
         try { localStorage.removeItem('bd_gavekode'); } catch (e) {} if (window.mvPlussSjekk) window.mvPlussSjekk();
         m.textContent = EN
-          ? '🎁 Code redeemed – you’ve got Plus for ' + (d.dager === 1 ? '1 day' : d.dager + ' days') + '!'
+          ? '🎁 Code redeemed – you’ve got Pluss for ' + (d.dager === 1 ? '1 day' : d.dager + ' days') + '!'
           : '🎁 Koden er brukt – du har fått Pluss i ' + (d.dager === 1 ? '1 dag' : d.dager + ' dager') + '!'; m.className = 'formmsg ok';
         $('kodeInput').value = ''; hentStatus();
       });

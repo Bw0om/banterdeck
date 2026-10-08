@@ -71,7 +71,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   <!-- Toppen: rett til et rom eller inn med kode – og på PC ligger kortbunken du kan trekke fra ved siden av -->
   <div class="fn-topp">
     <section class="h2-hero">
-      <h1>{no ? <>Klar for<br />vors?</> : <>Ready to<br /><span class="fn-hel">pre-game?</span></>}</h1>
+      <h1>{no ? <>Klar for<br /><em>vors?</em></> : <>Ready to<br /><em class="fn-hel">pre-game?</em></>}</h1>
       <p class="h2-sub">{N('Drikkeleker dere spiller fra hver deres telefon. Én lager et rom – resten blir med på koden.', 'Drinking games you play from your own phones. One person creates a room – everyone else joins with the code.')}</p>
       <div class="h2-cta">
         <a class="h2-hoved" href={ROM + '?lag=1'}>{N('Lag et rom', 'Create a room')}</a>
@@ -122,7 +122,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
         <li><a class="fn-lek" href={x.href}>
           <img src={x.bilde} alt="" width="240" height="126" loading="lazy" decoding="async" />
           <b>{x.navn}</b>
-          <small><Icon name="gjeng" size={13} />{x.pl}{x.pluss && <span class="fn-pluss"><Icon name="gnist" size={11} />{N('Pluss', 'Plus')}</span>}</small>
+          <small><Icon name="gjeng" size={13} />{x.pl}{x.pluss && <span class="fn-pluss"><Icon name="gnist" size={11} />Pluss</span>}</small>
         </a></li>
       ))}
     </ul>
@@ -167,10 +167,10 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
       </ul>
     </div>
     <a class="h2-pluss-stubb" href={no ? '/no/pluss' : '/plus'}>
-      <span class="h2-pluss-navn">Mitt vors {N('Pluss', 'Plus')}</span>
+      <span class="h2-pluss-navn">mittvors pluss</span>
       <span class="h2-pluss-pris"><b>29 kr</b><small>{N('per kveld', 'per night')}</small></span>
       <span class="h2-pluss-pris"><b>199 kr</b><small>{N('hele året', 'whole year')}</small></span>
-      <span class="h2-pluss-knapp" id="h2PlussKnapp">{N('Se Pluss', 'See Plus')}</span>
+      <span class="h2-pluss-knapp" id="h2PlussKnapp">{N('Se Pluss', 'See Pluss')}</span>
     </a>
   </section>
 
@@ -344,7 +344,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
 
 <style>
   /* Forsidens egne flater – samme farger, skrifter og kurver som resten av siden */
-  .fn-h,.fn-hode h2,.fn-trekk h2{font-size:clamp(24px,3.2vw,32px);font-stretch:112%;font-weight:850;letter-spacing:-.025em;line-height:1.05;margin:0;text-wrap:balance}
+  .fn-h,.fn-hode h2,.fn-trekk h2{font-family:var(--serif);font-size:clamp(28px,3.6vw,38px);font-weight:540;letter-spacing:-.022em;line-height:1.04;margin:0;text-wrap:balance}
   .fn-seksjon,.fn-trekk,.fn-humor,.fn-hjem{margin-top:clamp(48px,7vw,80px)}
 
   /* 1+2. Toppen: på store skjermer står «Klar for vors?» og kortbunken side om side */
@@ -368,19 +368,20 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   .fn-stokkvalg{display:flex;flex-wrap:wrap;gap:8px}
   .fn-stokkvalg button{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--ink);
     font-family:var(--display);font-weight:700;font-size:14.5px;transition:background-color 160ms ease,color 160ms ease,scale 160ms var(--ease-out)}
-  .fn-stokkvalg button[aria-selected="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink2)}
+  .fn-stokkvalg button[aria-selected="true"]{background:var(--gull-glans);border-color:var(--gold);color:var(--ink2)}
   .fn-stokkvalg button:active{scale:.97}
-  .fn-kortbord{display:grid;place-items:center;padding:8px 0 14px}
+  .fn-kortbord{display:grid;grid-template-areas:"k";place-items:center;padding:8px 0 14px}
   .fn-kort{position:relative;width:min(calc(100% - 28px),400px);min-height:250px;display:flex;flex-direction:column;gap:14px;text-align:left;
     padding:24px 24px 22px;border:0;border-radius:26px;background:var(--paper);color:var(--ink2);rotate:-2deg;
     box-shadow:0 18px 40px -12px rgb(0 0 0 / .55),0 0 0 1px rgb(0 0 0 / .04);transition:scale 160ms var(--ease-out),rotate 200ms var(--ease-out)}
-  /* Bunken under: to kort som stikker ut bak – viser at det er flere */
-  .fn-kort::before,.fn-kort::after{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1}
-  .fn-kort::before{background:#DCD2EA;rotate:5deg;translate:10px 6px}
-  .fn-kort::after{background:#C9BDDC;rotate:-6deg;translate:-12px 12px}
+  /* Bak-kortene ligger i samme rute som kortet – viser at det er flere. (Ikke inni kortet: det er rotert, og da ville de blitt tegnet over forsiden.) */
+  .fn-kort{grid-area:k;z-index:1}
+  .fn-kortbord::before,.fn-kortbord::after{content:"";grid-area:k;align-self:stretch;width:min(calc(100% - 28px),400px);border-radius:26px}
+  .fn-kortbord::before{background:#D9C6A6;rotate:5deg;translate:10px 6px}
+  .fn-kortbord::after{background:#BFA27A;rotate:-6deg;translate:-12px 12px}
   .fn-kort:active{scale:.98}
-  .fn-kort-navn{font-family:var(--display);font-stretch:66%;font-weight:850;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--glo-dyp)}
-  .fn-kort-tekst{font-family:var(--display);font-weight:850;font-size:clamp(22px,2.6vw,27px);line-height:1.12;letter-spacing:-.02em;text-wrap:pretty;flex:1}
+  .fn-kort-navn{font-family:var(--serif);font-style:italic;font-weight:500;font-size:17px;color:var(--glo-dyp)}
+  .fn-kort-tekst{font-family:var(--serif);font-weight:560;font-size:clamp(22px,2.6vw,27px);line-height:1.12;letter-spacing:-.02em;text-wrap:pretty;flex:1}
   .fn-kort-hint{font-family:var(--display);font-size:13px;font-weight:650;color:rgb(24 13 38 / .55)}
   .fn-kort.nytt .fn-kort-tekst{animation:fnNytt 220ms var(--ease-out)}
   @keyframes fnNytt{from{opacity:0;transform:translateY(6px)}}
@@ -407,14 +408,14 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   .fn-uka{display:grid;gap:12px;margin-top:16px}
   @media (min-width:700px){.fn-uka{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
   .fn-nr{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:4px 18px;align-items:center;padding:20px 22px;border-radius:22px;
-    background:var(--accent);color:var(--ink2);text-decoration:none;transition:scale 160ms var(--ease-out)}
+    background:radial-gradient(90% 120% at 100% 0%,rgb(255 255 255 / .12),transparent 60%),linear-gradient(150deg,#C9452F,#8E2A1D);color:#FFF4EA;text-decoration:none;transition:scale 160ms var(--ease-out)}
   .fn-nr-uke{grid-row:span 2;display:flex;flex-direction:column;align-items:center;font-family:var(--display);font-weight:800;font-size:13px;
     text-transform:uppercase;letter-spacing:.08em;line-height:1}
-  .fn-nr-uke b{font-size:56px;font-stretch:125%;letter-spacing:-.04em;margin-top:4px;font-variant-numeric:tabular-nums}
+  .fn-nr-uke b{font-family:var(--serif);font-weight:540;font-size:60px;letter-spacing:-.04em;margin-top:4px;font-variant-numeric:tabular-nums}
   .fn-nr-tekst{display:flex;flex-direction:column;gap:3px}
-  .fn-nr-tekst b{font-family:var(--display);font-stretch:112%;font-size:22px;line-height:1.05}
+  .fn-nr-tekst b{font-family:var(--serif);font-weight:560;font-size:25px;line-height:1.05}
   .fn-nr-tekst small{font-size:14.5px;opacity:.82}
-  .fn-nr-knapp{justify-self:start;font-family:var(--display);font-weight:800;font-size:14.5px;padding:8px 14px;border-radius:999px;background:var(--ink2);color:var(--accent)}
+  .fn-nr-knapp{justify-self:start;font-family:var(--display);font-weight:800;font-size:14.5px;padding:8px 14px;border-radius:999px;background:#FFF4EA;color:#8E2A1D}
   .fn-nr:active,.fn-ukelek:active{scale:.985}
   @media (hover:hover) and (pointer:fine){.fn-nr:hover{text-decoration:none;filter:brightness(1.05)}}
   .fn-ukelek{display:grid;grid-template-columns:112px 1fr;gap:14px;align-items:center;padding:14px;border-radius:22px;border:1px solid var(--border2);
@@ -422,7 +423,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   .fn-ukelek img{width:112px;height:auto;aspect-ratio:240/126;object-fit:cover;border-radius:12px}
   .fn-ukelek span{display:flex;flex-direction:column;gap:2px;min-width:0}
   .fn-ukelek small{font-family:var(--display);font-weight:750;font-size:12.5px;color:var(--gold-t)}
-  .fn-ukelek b{font-family:var(--display);font-stretch:108%;font-size:20px;line-height:1.1}
+  .fn-ukelek b{font-family:var(--serif);font-weight:560;font-size:22px;line-height:1.1}
   .fn-ukelek em{font-style:normal;font-size:14px;color:var(--muted)}
   .fn-jul{grid-template-columns:1fr}
   @media (hover:hover) and (pointer:fine){.fn-ukelek:hover{text-decoration:none;border-color:rgb(var(--volt-rgb) / .5)}}
@@ -448,7 +449,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   .fn-humor-valg > a .icon{color:var(--faint)}
   @media (hover:hover) and (pointer:fine){.fn-humor-valg > a:hover{color:var(--gold-t)}.fn-humor-valg > a:hover .icon{color:var(--gold-t)}}
   .fn-sveip{display:flex;align-items:center;gap:14px;padding:16px 18px;margin-bottom:6px;border-radius:20px;border:0;text-align:left;
-    background:var(--gold);color:var(--ink2);box-shadow:0 4px 0 var(--volt-dyp);transition:translate 120ms var(--ease-out),box-shadow 120ms var(--ease-out)}
+    background:var(--gull-glans);color:var(--ink2);box-shadow:inset 0 1px 0 rgb(255 255 255 / .45),0 3px 0 var(--volt-dyp);transition:translate 120ms var(--ease-out),box-shadow 120ms var(--ease-out)}
   .fn-sveip span{display:flex;flex-direction:column;gap:1px}
   .fn-sveip b{font-family:var(--display);font-stretch:108%;font-size:18px}
   .fn-sveip small{font-size:14px;opacity:.75}
