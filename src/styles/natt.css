@@ -54,12 +54,12 @@ p.lead{font-size:17.5px;color:var(--muted);font-style:normal}
 /* ---------- knapper: dybde = kan trykkes ---------- */
 .btn{font-family:var(--display);font-stretch:108%;font-weight:750;font-size:16px;min-height:52px;padding:0 22px;border-radius:16px;
   display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.15;text-align:center;transition:transform .07s ease,box-shadow .07s ease}
-.btn:hover{filter:none;text-decoration:none}
+@media (hover:hover) and (pointer:fine){.btn:hover{filter:none;text-decoration:none}}
 .btn.gold,.btn.start,.btn.danger,.appbtn{background:var(--accent);color:var(--ink2);border:0;box-shadow:0 5px 0 var(--glo-dyp)}
-.btn.gold:hover,.btn.start:hover,.appbtn:hover{filter:brightness(1.07)}
+@media (hover:hover) and (pointer:fine){.btn.gold:hover,.btn.start:hover,.appbtn:hover{filter:brightness(1.07)}}
 .btn.gold:active,.btn.start:active,.btn.danger:active,.appbtn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--glo-dyp)}
 .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--border2);box-shadow:none}
-.btn.ghost:hover{border-color:rgb(var(--ink-rgb) / .55)}
+@media (hover:hover) and (pointer:fine){.btn.ghost:hover{border-color:rgb(var(--ink-rgb) / .55)}}
 .btn.ghost:active{transform:translateY(2px)}
 .btn.small{min-height:44px;padding:0 16px;font-size:14.5px;border-radius:14px}
 .btn[disabled],.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
@@ -108,14 +108,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .h2-cta{gap:14px;margin-top:6px}
 .h2-hoved{min-height:72px;border-radius:22px;background:var(--accent);color:var(--ink2);font-stretch:125%;font-weight:900;font-size:23px;letter-spacing:-.025em;
   box-shadow:0 6px 0 var(--glo-dyp);transition:transform .07s ease,box-shadow .07s ease}
-.h2-hoved:hover{filter:brightness(1.06)}
+@media (hover:hover) and (pointer:fine){.h2-hoved:hover{filter:brightness(1.06)}}
 .h2-hoved:active{transform:translateY(5px);box-shadow:0 1px 0 var(--glo-dyp)}
 .h2-kode label{color:var(--ink);font-weight:650;font-size:15.5px}
 .h2-kode input{height:64px;border-radius:18px;border:2px solid var(--border2);background:var(--card);color:var(--gold-t);caret-color:var(--gold);
   font-family:var(--display);font-stretch:66%;font-weight:900;font-size:36px;letter-spacing:.32em;padding:0 0 0 .32em}
 .h2-kode input::placeholder{color:rgb(var(--ink-rgb) / .22)}
 .h2-kode button{height:64px;border-radius:18px;border:2px solid var(--border2);background:transparent;color:var(--ink);font-family:var(--display);font-stretch:110%;font-weight:800;font-size:17px;padding:0 20px}
-.h2-kode button:hover{background:transparent;border-color:var(--ink);color:var(--ink)}
+@media (hover:hover) and (pointer:fine){.h2-kode button:hover{background:transparent;border-color:var(--ink);color:var(--ink)}}
 /* koden er lang nok: knappen blir lime – klar */
 .h2-kode.klar input{border-color:var(--gold)}
 .h2-kode.klar button{background:var(--gold);border-color:var(--gold);color:var(--ink2);box-shadow:0 4px 0 var(--volt-dyp)}
@@ -124,8 +124,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .h2-gjeng-lenke{color:var(--gold-t);text-decoration-thickness:2px}
 .h2-gjeng-start{min-height:58px;border-radius:18px;border:2px solid rgb(var(--volt-rgb) / .55);background:rgb(var(--volt-rgb) / .08);color:var(--ink);font-size:16.5px}
 .h2-gjeng-start b{color:var(--gold-t)}
-.h2-gjeng-start:hover{background:var(--gold);color:var(--ink2);border-color:var(--gold)}
-.h2-gjeng-start:hover b{color:var(--ink2)}
+@media (hover:hover) and (pointer:fine){.h2-gjeng-start:hover{background:var(--gold);color:var(--ink2);border-color:var(--gold)}}
+@media (hover:hover) and (pointer:fine){.h2-gjeng-start:hover b{color:var(--ink2)}}
 
 /* tre steg – tall i smal bredde, som en resultattavle */
 .h2-slik{gap:0;margin:22px 0 4px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
@@ -140,7 +140,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .h2-start b{font-size:27px;font-stretch:118%;font-weight:850;letter-spacing:-.03em}
 .h2-start small{color:var(--muted);font-weight:500;font-size:14.5px;margin-top:4px}
 .h2-start svg{flex:none;width:52px;height:52px;padding:12px;border-radius:50%;background:var(--accent);color:var(--ink2);position:relative;z-index:1;box-shadow:0 4px 0 var(--glo-dyp)}
-.h2-start:hover{filter:none;border-color:rgb(var(--ink-rgb) / .4)}
+@media (hover:hover) and (pointer:fine){.h2-start:hover{filter:none;border-color:rgb(var(--ink-rgb) / .4)}}
 .h2-uke{background:var(--card);border-color:var(--border)}
 .h2-uke b{font-size:21px;font-stretch:110%}
 .h2-meny b{font-stretch:106%;font-size:17.5px}
@@ -164,7 +164,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .rom-hk{color:var(--muted)}
 .rom-hk-ikon{width:44px;height:44px;background:var(--card2);color:var(--ink);border:1px solid var(--border)}
 .rom-hk-tekst{font-family:var(--display);font-size:11px;font-weight:700;color:var(--muted)}
-.rom-hk:hover .rom-hk-ikon{border-color:var(--gold);color:var(--gold-t)}
+@media (hover:hover) and (pointer:fine){.rom-hk:hover .rom-hk-ikon{border-color:var(--gold);color:var(--gold-t)}}
 .rom-spillere span{min-height:38px;padding:0 14px;border-radius:12px;font-weight:650;font-size:15px;background:var(--card)}
 .rom-spillere span.meg{border:2px solid var(--gold)}
 .rom-spillere small{color:var(--accent-t)}
@@ -177,7 +177,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .rom-qr{border-radius:22px;background:var(--card)}
 .rom-qr b{font-stretch:108%;font-size:19px}
 .rom-anbefalt-lek{background:var(--card2);border:2px solid rgb(var(--volt-rgb) / .35);border-radius:20px;padding:16px 16px 16px 18px;transition:transform .07s ease}
-.rom-anbefalt-lek:hover{border-color:var(--gold)}
+@media (hover:hover) and (pointer:fine){.rom-anbefalt-lek:hover{border-color:var(--gold)}}
 .rom-anbefalt-lek:active{transform:scale(.98)}
 .rom-anbefalt-lek b{font-size:20px;font-stretch:112%;font-weight:850}
 .rom-anbefalt-lek i{width:52px;height:52px;background:var(--accent);color:var(--ink2);font-size:18px;box-shadow:0 4px 0 var(--glo-dyp)}
@@ -185,7 +185,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .rom-lek b{font-stretch:108%;font-size:19px;font-weight:800}
 .rom-lek > span{font-size:15px}
 .rom-mod button{min-height:48px;padding:0 18px;border-radius:14px;border:2px solid var(--border2);background:transparent;font-family:var(--display);font-stretch:104%;font-weight:750;font-size:15px}
-.rom-mod button:hover{background:var(--gold);border-color:var(--gold);color:var(--ink2)}
+@media (hover:hover) and (pointer:fine){.rom-mod button:hover{background:var(--gold);border-color:var(--gold);color:var(--ink2)}}
 .rom-bg{border-radius:22px}
 .rom-bg-rad.paa{background:rgb(var(--volt-rgb) / .09);box-shadow:inset 0 0 0 1px rgb(var(--volt-rgb) / .45)}
 .rom-bg-rad b{font-stretch:108%;font-size:17.5px}
@@ -343,7 +343,7 @@ html.min-tur .rof-tur.min{display:none}
 }
 /* bakgrunnslekene er valgfrie brytere – ikke hovedknapper */
 .rom-bg .btn.gold{background:transparent;color:var(--gold-t);border:2px solid rgb(var(--volt-rgb) / .6);box-shadow:none}
-.rom-bg .btn.gold:hover{background:var(--gold);color:var(--ink2);border-color:var(--gold)}
+@media (hover:hover) and (pointer:fine){.rom-bg .btn.gold:hover{background:var(--gold);color:var(--ink2);border-color:var(--gold)}}
 .rom-regler{margin-top:18px}
 /* under en lek: beskjeder over dokka nederst, ikke over spørsmålet */
 @media (max-width:899px){html.i-spill body:has(#rom) .toast{top:auto;bottom:calc(env(safe-area-inset-bottom) + 82px)}}
@@ -373,7 +373,7 @@ html.min-tur .rof-tur.min{display:none}
 .lk-rad .lk-tekst b{font-size:17px;font-stretch:106%;font-weight:800}
 .lk-rad .lk-meta{padding-top:0}
 .lk-rad::after{content:"";flex:none;margin-left:auto;width:9px;height:9px;border-top:2.5px solid var(--faint);border-right:2.5px solid var(--faint);transform:rotate(45deg)}
-.lk-rad:hover::after{border-color:var(--gold-t)}
+@media (hover:hover) and (pointer:fine){.lk-rad:hover::after{border-color:var(--gold-t)}}
 /* lekekortene: bilde, navn og antall – resten står inne på leken */
 .lk-kort .lk-tekst{gap:6px;padding:12px 14px 14px}
 .lk-kort .lk-tekst b{font-size:19px;font-stretch:108%;font-weight:850;letter-spacing:-.01em}
@@ -485,7 +485,7 @@ html:not([data-theme="light"]).i-spill :is(.rom-kort,.rof-kort){background:#ECE5
 .rom-laster .rom-hodeknapper i{display:block;width:44px;height:44px;border-radius:50%;background:var(--card2)}
 .skj-rad{display:flex;gap:8px;margin:12px 0 18px}
 .skj-rad i{display:block;width:84px;height:38px;border-radius:12px;background:var(--card)}
-.skj-kort{height:min(52vh,330px);border-radius:26px;transform:rotate(-1.2deg);
+.skj-kort{height:min(52dvh,330px);border-radius:26px;transform:rotate(-1.2deg);
   background:linear-gradient(100deg,var(--card) 40%,var(--card2) 50%,var(--card) 60%) 0 0/250% 100%;animation:skimmer 1.3s linear infinite}
 @keyframes skimmer{to{background-position:-150% 0}}
 .rom-laster-tekst{margin-top:18px;text-align:center;font-family:var(--display);font-weight:750;color:var(--muted)}
@@ -568,7 +568,7 @@ html:not([data-theme="light"]) .gt-card{background:#ECE5F6}
 /* ---------- forsiden: ikoner og klistremerker i stedet for emoji ---------- */
 .h2-meny button{width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border:0;border-top:1px solid var(--border);background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
 .h2-meny > :first-child{border-top:0}
-.h2-meny button:hover{background:var(--card2)}
+@media (hover:hover) and (pointer:fine){.h2-meny button:hover{background:var(--card2)}}
 .h2-meny b{display:block;font-family:var(--display)}
 .h2-meny small{display:block;font-size:13.5px;color:var(--muted)}
 .h2-ikon .icon{display:block}
@@ -604,7 +604,7 @@ h2.withicon{gap:10px}
 .kv-valg input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
 .kv-valg label:has(input:focus-visible){outline:3px solid var(--gold);outline-offset:3px}
 :root[data-theme="light"] .kv-valg label:has(input:focus-visible){outline-color:var(--volt-kant)}
-.kv-valg label:hover{border-color:var(--gold-t)}
+@media (hover:hover) and (pointer:fine){.kv-valg label:hover{border-color:var(--gold-t)}}
 
 /* Pluss-fordelene: en ryddig liste med streker, ikke seks like bokser */
 .pluss-fordeler{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:0 36px;margin:26px 0 30px}
@@ -626,7 +626,7 @@ p:has(> .btn:only-child) + p.small{margin-top:12px}
 
 /* Sidemenyen: underpunktene (Fornemt sagt, Sitater …) står innrykket under teksten til punktet over, ikke løst i margen */
 .sidenav a.sub{padding-left:40px;font-size:14px;color:var(--faint);min-height:0;padding-top:7px;padding-bottom:7px}
-.sidenav a.sub:hover,.sidenav a.sub[aria-current=page]{color:var(--ink)}
+.sidenav a.sub[aria-current=page]{color:var(--ink)}@media (hover:hover) and (pointer:fine){.sidenav a.sub:hover{color:var(--ink)}}
 
 /* Knapperader som brytes på smal skjerm fyller hele linjen, i stedet for hakkete bredder */
 @media (max-width:640px){
@@ -645,3 +645,35 @@ p:has(> .btn:only-child) + p.small{margin-top:12px}
 :is(.lk-chips button,.kv-valg label,.alkfri-bryter,.lk-rad,.lk-liten,.tabbar a,.mobilenav a,.sidenav a,.langlink,.starbtn):active{scale:.97}
 /* Store flater krymper mindre – samme følelse, mindre bevegelse */
 :is(.lk-kort,.card,.tile,.h2-rom,.h2-uke,.h2-start,.h2-jul,.h2-pluss-stubb,.sitlist a):active{scale:.985}
+
+/* ---------- Som en app på mobilen (okt 2026) ---------- */
+/* Ingen grå/blå blink over det man trykker på – alle knapper har sitt eget :active-svar */
+html{-webkit-tap-highlight-color:transparent}
+
+/* Kontroller er ikke tekst: et langt trykk skal ikke markere knappeteksten eller åpne lenkemenyen.
+   Innhold (replikker, regler, kvitteringer) forblir markerbart. */
+:is(button,.btn,[role=button],.tabbar a,.mobilenav a,.sidenav a,.lk-chips button,.kv-valg label,.alkfri-bryter,.pluss-pille,.tool,.langlink){
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* Felt uten egen skriftstørrelse arver nettleserens 13px – under 16px zoomer iPhone inn på siden */
+@media (pointer:coarse){input,textarea,select{font-size:16px}}
+
+/* Kanten rundt kamerahakket og hjemlinjen: bakgrunnen går helt ut, innholdet trekkes inn.
+   (env() er 0 uten viewport-fit=cover i viewport-taggen.) */
+@media (max-width:899px){
+  .topbars{padding-top:env(safe-area-inset-top,0px)}
+  .mobilebar,.mobilenav{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+  .main{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+}
+
+/* Rulling i paneler og vinduer skal ikke dra med seg siden bak (eller utløse «dra for å oppdatere») */
+.overlay.search,.overlay.search .cards,.mb-panel,.rof-full,.rom-tavle-innhold,.del-ark-innhold,.kv-stokk ul,.side,.sw,
+html[data-laast] .utvikling{overscroll-behavior:contain}
+/* Sidelengs rullerader: et sveip til enden skal ikke bli «tilbake» i nettleseren */
+.mobilenav,.lk-chips,.bs-faner,.gj-tabell-wrap,.salg-tabell-ramme{overscroll-behavior-x:contain}
+/* Installert app (statuslinjen ligger oppå siden): en stripe bak klokke og batteri, så innhold
+   ikke ruller rett under dem når toppfeltet gjemmer seg. Høyden er 0 i vanlig nettleser. */
+@media (display-mode:standalone) and (max-width:899px){
+  html:not(.rom-sender)::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);
+    background:rgb(var(--bg-rgb) / .92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);z-index:30;pointer-events:none}
+}
