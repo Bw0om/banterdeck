@@ -27,7 +27,12 @@
 :root[data-theme="light"] .kk,:root[data-theme="light"] .dice:not(.tool),:root[data-theme="light"] .rof-kort{border:1px solid var(--border2)}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+/* Redusert bevegelse: færre og roligere, ikke null. Ingenting flytter, vokser, rister eller spinner,
+   men toninger som forklarer hva som skjer (et ark som dukker opp, en farge som skifter) får bli.
+   Overganger begrenses til farge og gjennomsiktighet; flytting skjer momentant. Keyframe-animasjoner
+   (rist, sprett, spinn) slås av – de få som har en rolig variant, får den i natt.css. */
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}
+  *,*::before,*::after{transition-property:opacity,color,background-color,border-color,box-shadow!important;animation:none!important}}
 body{font-family:var(--serif);font-size:17px;line-height:1.55;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0;z-index:-1;
   background:radial-gradient(110% 60% at 85% -10%,rgb(var(--glo-rgb) / .14),transparent 60%),
@@ -1910,7 +1915,7 @@ body:not(.humor) .tool.dice{display:none}
 /* Trykk som venter på serveren: stripe øverst + knapper som gir etter når du trykker */
 html.rom-sender::before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:10000;background:linear-gradient(90deg,transparent,var(--gold,var(--gold)),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:romSender .9s linear infinite}
 @keyframes romSender{from{background-position:-40% 0}to{background-position:140% 0}}
-#rom button:active,.bs-modal button:active,.rom-tavle button:active{transform:scale(.96);transition:transform .05s}
+#rom button:active,.bs-modal button:active,.rom-tavle button:active{transform:scale(.96);transition:transform 100ms var(--ease-out)}
 @media (prefers-reduced-motion: reduce){html.rom-sender::before{animation:none;background:var(--gold,var(--gold))}}
 button,a,[role=button]{touch-action:manipulation}
 /* Ring of Fire: kortene i en ring rundt kongekoppen */
