@@ -124,8 +124,13 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
       return (K ? K.api(sti, opts) : fetch(sti, opts)).then(function (r) { return r.json().then(function (d) { d._ok = r.ok; d._status = r.status; return d; }); });
     }
 
+    // forrigeAktiv: markér boksen én gang idet Pluss faktisk blir aktivert (ikke ved vanlig sidelasting)
+    var forrigeAktiv;
     function tegnStatus() {
       st.hidden = false;
+      var bleAktiv = forrigeAktiv === false && status && status.aktiv;
+      forrigeAktiv = !!(status && status.aktiv);
+      if (bleAktiv) { st.classList.remove('pluss-feiring'); void st.offsetWidth; st.classList.add('pluss-feiring'); }
       if (!K || !K.les() || !status || !status.innlogget) {
         st.innerHTML = EN
           ? '<p><b>Your first night is free.</b> Create a free account or log in, and you can try Plus for 24 hours.</p><a class="btn gold" href="' + KONTO + '">Log in or create an account</a>'
