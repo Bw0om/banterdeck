@@ -1,0 +1,140 @@
+- generic [active] [ref=f5e1]:
+  - link "Hopp til innhold" [ref=f5e2] [cursor=pointer]:
+    - /url: "#innhold"
+  - generic [ref=f5e3]:
+    - complementary [ref=f5e4]:
+      - link "Mitt vors" [ref=f5e5] [cursor=pointer]:
+        - /url: /no/
+        - generic "Mitt vors" [ref=f5e17]: mittvors
+      - button "Søk ⌘K" [ref=f5e18] [cursor=pointer]:
+        - text: Søk
+        - generic [ref=f5e22]: ⌘K
+      - navigation "Hva er du ute etter?" [ref=f5e23]:
+        - link "Forside" [ref=f5e24] [cursor=pointer]:
+          - /url: /no/
+        - link "Drikkeleker" [ref=f5e27] [cursor=pointer]:
+          - /url: /no/drinking-games
+        - link "Spill sammen" [ref=f5e32] [cursor=pointer]:
+          - /url: /no/rom
+        - link "Nyhetsrunden" [ref=f5e38] [cursor=pointer]:
+          - /url: /no/nyhetsrunden
+        - generic [ref=f5e43]: Humor ved siden
+        - link "Replikker" [ref=f5e44] [cursor=pointer]:
+          - /url: /no/situations
+        - link "Ord" [ref=f5e48] [cursor=pointer]:
+          - /url: /no/ord
+        - link "Uttrykk" [ref=f5e51] [cursor=pointer]:
+          - /url: /no/uttrykk
+        - link "Fornemt sagt" [ref=f5e54] [cursor=pointer]:
+          - /url: /no/categories/fornemt
+        - link "Sitater" [ref=f5e55] [cursor=pointer]:
+          - /url: /no/categories/sitater
+        - link "Fleksnes-sitater" [ref=f5e56] [cursor=pointer]:
+          - /url: /no/categories/fleksnes
+      - link "Mitt vors Pluss" [ref=f5e57] [cursor=pointer]:
+        - /url: /no/pluss
+      - link "Favoritter" [ref=f5e58] [cursor=pointer]:
+        - /url: /no/favourites
+      - button "Bytt mellom lys og mørk modus" [ref=f5e61] [cursor=pointer]:
+        - generic [ref=f5e65]: Lys modus
+      - link "Read in English" [ref=f5e66] [cursor=pointer]:
+        - /url: /drinking-games/opus
+      - paragraph [ref=f5e67]:
+        - link "Send inn" [ref=f5e68] [cursor=pointer]:
+          - /url: /no/suggest
+        - link "Min stokk" [ref=f5e69] [cursor=pointer]:
+          - /url: /no/account
+        - link "Om" [ref=f5e70] [cursor=pointer]:
+          - /url: /no/about
+    - main [ref=f5e71]:
+      - paragraph [ref=f5e72]:
+        - link "Forside" [ref=f5e73] [cursor=pointer]:
+          - /url: /no/
+        - text: ›
+        - link "Drikkeleker" [ref=f5e74] [cursor=pointer]:
+          - /url: /no/drinking-games
+        - text: › Opus
+      - paragraph [ref=f5e75]: 🃏 Telefonen er kortstokken
+      - heading "Opus" [level=1] [ref=f5e77]
+      - generic [ref=f5e78]:
+        - generic [ref=f5e79]:
+          - generic [ref=f5e80]: Spillere
+          - generic [ref=f5e81]: 4+
+        - generic [ref=f5e82]:
+          - generic [ref=f5e83]: Utstyr
+          - generic [ref=f5e84]: Terning + sangen «Opus» (Eric Prydz)
+        - generic [ref=f5e85]:
+          - generic [ref=f5e86]: Type
+          - generic [ref=f5e87]: Med musikk
+      - paragraph [ref=f5e88]:
+        - button "🥤 Alkoholfri modus" [ref=f5e89] [cursor=pointer]
+      - paragraph [ref=f5e91]:
+        - link "Start leken ↓" [ref=f5e92] [cursor=pointer]:
+          - /url: "#lekverktoy"
+      - generic [ref=f5e93]:
+        - paragraph [ref=f5e94]: Sett på «Opus» av Eric Prydz — hele 9-minutteren — og sitt i ring med én terning (to hvis dere er mange).
+        - paragraph [ref=f5e95]: Trill til du får en sekser; da sendes terningen videre til nestemann. Ingen sekser = trill igjen.
+        - paragraph [ref=f5e96]: Den som holder terningen når droppet kommer, må drikke opp glasset sitt.
+        - paragraph [ref=f5e97]: "Variant: fortsett hele sangen — hver gang bygget topper seg, drikker den som sitter med terningen."
+      - paragraph [ref=f5e98]:
+        - button "Kopier reglene" [ref=f5e99] [cursor=pointer]
+      - generic [ref=f5e102]:
+        - heading "Telefonen er terningen" [level=2] [ref=f5e103]
+        - generic [ref=f5e104]:
+          - paragraph [ref=f5e105]: Telefonen er terningen. Send selve mobilen rundt i ringen. Er dere mange, åpne siden på flere telefoner og send dem rundt samtidig.
+          - paragraph [ref=f5e106]:
+            - link "Åpne «Opus» i Spotify ↗" [ref=f5e107] [cursor=pointer]:
+              - /url: https://open.spotify.com/search/Opus%20Eric%20Prydz
+          - button "Gjør telefonen til terning" [ref=f5e108] [cursor=pointer]
+      - generic [ref=f5e109]:
+        - 'heading "Flere drikkeleker: med musikk" [level=2] [ref=f5e110]'
+        - list [ref=f5e111]:
+          - listitem [ref=f5e112]:
+            - link "Thunderstruck" [ref=f5e113] [cursor=pointer]:
+              - /url: /no/drinking-games/thunderstruck
+          - listitem [ref=f5e114]:
+            - link "Låtbekjennelsen" [ref=f5e115] [cursor=pointer]:
+              - /url: /no/drinking-games/tanken-bak-sangen
+          - listitem [ref=f5e116]:
+            - link "Power hour" [ref=f5e117] [cursor=pointer]:
+              - /url: /no/drinking-games/power-hour
+          - listitem [ref=f5e118]:
+            - link "Drikke-bingo" [ref=f5e119] [cursor=pointer]:
+              - /url: /no/drinking-games/drikke-bingo
+          - listitem [ref=f5e120]:
+            - link "Gjett året" [ref=f5e121] [cursor=pointer]:
+              - /url: /no/drinking-games/gjett-aret
+          - listitem [ref=f5e122]:
+            - link "Alle drikkeleker" [ref=f5e123] [cursor=pointer]:
+              - /url: /no/drinking-games
+      - generic [ref=f5e124]:
+        - generic [ref=f5e125]: © 2026 Mitt vors
+        - link "Send inn" [ref=f5e126] [cursor=pointer]:
+          - /url: /no/suggest
+        - link "Min stokk" [ref=f5e127] [cursor=pointer]:
+          - /url: /no/account
+        - link "Om" [ref=f5e128] [cursor=pointer]:
+          - /url: /no/about
+        - link "Personvern" [ref=f5e129] [cursor=pointer]:
+          - /url: /no/privacy
+        - link "Favoritter" [ref=f5e130] [cursor=pointer]:
+          - /url: /no/favourites
+        - link "Read in English" [ref=f5e131] [cursor=pointer]:
+          - /url: /drinking-games/opus
+        - link "Salgsvilkår" [ref=f5e132] [cursor=pointer]:
+          - /url: /no/vilkar
+        - button "Noe galt?" [ref=f5e133] [cursor=pointer]
+        - generic [ref=f5e134]: Flaten Kapital · Org.nr. 931976532 · Skanseløkka 21, 1383 Asker · Tlf. 911 96 359 · post@mittvors.no
+  - dialog [ref=f5e136]:
+    - heading "Er du over 18?" [level=2] [ref=f5e137]
+    - paragraph [ref=f5e138]: Drikkelekene er for voksne. Drikk med vett – og aldri kjør etterpå.
+    - generic [ref=f5e139]:
+      - button "Ja, jeg er over 18" [ref=f5e140] [cursor=pointer]
+      - link "Nei, ta meg tilbake" [ref=f5e141] [cursor=pointer]:
+        - /url: /no/
+  - status: Kopiert
+  - generic [ref=f5e144]:
+    - button [ref=f5e145]
+    - button [ref=f5e151]
+    - button [ref=f5e155]
+    - button [ref=f5e160]

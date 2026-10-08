@@ -1,7 +1,7 @@
 import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
 import { d as renderTemplate, i as renderComponent } from "./server_Bjx7FWTN.mjs";
 import { t as createComponent } from "./compiler_Bf6GLUpQ.mjs";
-import { t as $$Account$1 } from "./Account_Y3SY3ceR.mjs";
+import { t as $$Account$1 } from "./Account_CYm7_Pxg.mjs";
 //#region src/pages/account.astro
 var account_exports = /* @__PURE__ */ __exportAll({
 	default: () => $$Account,

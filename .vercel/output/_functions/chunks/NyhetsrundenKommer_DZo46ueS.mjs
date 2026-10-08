@@ -1,6 +1,6 @@
 import { a as Fragment, d as renderTemplate, f as maybeRenderHead, h as defineScriptVars, i as renderComponent, m as addAttribute, w as createAstro } from "./server_Bjx7FWTN.mjs";
 import { t as createComponent } from "./compiler_Bf6GLUpQ.mjs";
-import { t as $$Base } from "./Base_DavqrLOn.mjs";
+import { t as $$Base } from "./Base_DfsBJvHX.mjs";
 import { a as rundeId, i as publiserteRunder, r as publiseringstid } from "./nyhetsrunden_D1RpSAip.mjs";
 import { t as $$NyhetsVarsel } from "./NyhetsVarsel_v9bk1ffm.mjs";
 //#region src/components/pages/Nyhetsrunden.astro
