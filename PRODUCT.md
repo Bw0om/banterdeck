@@ -47,6 +47,7 @@ Phone-to-phone live play is the core: rooms, the TV view, crews, the weekly Nyhe
 - **Name:** **Mitt vors** (domain mittvors.no). "banterdeck" is a legacy repo and asset name, not the brand.
 - **Paid tier:** **mittvors pluss** (one word, lowercase, also in English); short form **Pluss** in both languages. Never "Mitt vors Plus".
 - **Look:** "champagnenatt" (`src/styles/champagne.css`, on top of `natt.css`): wine-black night, champagne gold for now/on/primary, Campari red for press/drink, Fraunces serif headlines. Elegant, but still a party.
+- **Logo:** two champagne flutes clinking under three sparks, dark on a champagne-gold tile (`public/favicon.svg` is the master; icons come from `scripts/lag-ikoner.mjs`). Wordmark: «mitt» in Fraunces, «vors» in gold italic.
 - **Voice:** cheeky and Norwegian-native (*"Frekk, men morsom – det er hele regelen"*). Humour comes from recognisable everyday situations (office life, family, the crew), not shock. Content marked *Grov* stays out of featured spots like *Dagens replikk*.
 - **Seller of record:** Flaten Kapital, org.nr 931976532 (see `SELGER` in `src/config.ts`).
 
