@@ -53,7 +53,7 @@ p.lead{font-size:17.5px;color:var(--muted);font-style:normal}
 
 /* ---------- knapper: dybde = kan trykkes ---------- */
 .btn{font-family:var(--display);font-stretch:108%;font-weight:750;font-size:16px;min-height:52px;padding:0 22px;border-radius:16px;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.15;text-align:center;transition:transform .07s ease,box-shadow .07s ease}
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.15;text-align:center;transition:transform 120ms var(--ease-out),box-shadow 120ms var(--ease-out)}
 @media (hover:hover) and (pointer:fine){.btn:hover{filter:none;text-decoration:none}}
 .btn.gold,.btn.start,.btn.danger,.appbtn{background:var(--accent);color:var(--ink2);border:0;box-shadow:0 5px 0 var(--glo-dyp)}
 @media (hover:hover) and (pointer:fine){.btn.gold:hover,.btn.start:hover,.appbtn:hover{filter:brightness(1.07)}}
@@ -107,7 +107,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .h2-sub{color:var(--muted);font-size:17.5px;font-weight:450;max-width:34ch}
 .h2-cta{gap:14px;margin-top:6px}
 .h2-hoved{min-height:72px;border-radius:22px;background:var(--accent);color:var(--ink2);font-stretch:125%;font-weight:900;font-size:23px;letter-spacing:-.025em;
-  box-shadow:0 6px 0 var(--glo-dyp);transition:transform .07s ease,box-shadow .07s ease}
+  box-shadow:0 6px 0 var(--glo-dyp);transition:transform 120ms var(--ease-out),box-shadow 120ms var(--ease-out)}
 @media (hover:hover) and (pointer:fine){.h2-hoved:hover{filter:brightness(1.06)}}
 .h2-hoved:active{transform:translateY(5px);box-shadow:0 1px 0 var(--glo-dyp)}
 .h2-kode label{color:var(--ink);font-weight:650;font-size:15.5px}
@@ -176,7 +176,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .rom-steg small{color:var(--muted);font-stretch:100%;font-weight:600}
 .rom-qr{border-radius:22px;background:var(--card)}
 .rom-qr b{font-stretch:108%;font-size:19px}
-.rom-anbefalt-lek{background:var(--card2);border:2px solid rgb(var(--volt-rgb) / .35);border-radius:20px;padding:16px 16px 16px 18px;transition:transform .07s ease}
+.rom-anbefalt-lek{background:var(--card2);border:2px solid rgb(var(--volt-rgb) / .35);border-radius:20px;padding:16px 16px 16px 18px;transition:transform 120ms var(--ease-out)}
 @media (hover:hover) and (pointer:fine){.rom-anbefalt-lek:hover{border-color:var(--gold)}}
 .rom-anbefalt-lek:active{transform:scale(.98)}
 .rom-anbefalt-lek b{font-size:20px;font-stretch:112%;font-weight:850}
@@ -202,10 +202,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .rom-kort .sw-tag{transform:rotate(-3deg)}
 .rom-teller{font-family:var(--display);font-stretch:66%;font-weight:850;font-size:17px;color:rgb(26 14 40 / .55)}
 .rom-stor-knapp{min-height:70px;border-radius:22px;background:var(--accent);color:var(--ink2);font-family:var(--display);font-stretch:125%;font-weight:900;font-size:21px;letter-spacing:-.02em;
-  box-shadow:0 6px 0 var(--glo-dyp);transition:transform .07s ease,box-shadow .07s ease}
+  box-shadow:0 6px 0 var(--glo-dyp);transition:transform 120ms var(--ease-out),box-shadow 120ms var(--ease-out)}
 .rom-stor-knapp:active{transform:translateY(5px);box-shadow:0 1px 0 var(--glo-dyp)}
 .rom-valg{gap:10px}
-.rom-valg button{min-height:64px;border-radius:18px;border:2px solid var(--border2);background:var(--card);font-family:var(--display);font-stretch:104%;font-weight:750;font-size:18px;transition:transform .06s ease}
+.rom-valg button{min-height:64px;border-radius:18px;border:2px solid var(--border2);background:var(--card);font-family:var(--display);font-stretch:104%;font-weight:750;font-size:18px;transition:transform 120ms var(--ease-out)}
 .rom-valg button:active{transform:scale(.97)}
 .rom-valg button[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:var(--ink2);box-shadow:0 4px 0 var(--volt-dyp)}
 .rom-valg.to button{min-height:84px;font-size:22px;font-stretch:118%;font-weight:850}
@@ -723,3 +723,17 @@ html[data-laast] .utvikling{overscroll-behavior:contain}
       og da skal ingenting spille av igjen. Nettlesere uten ::details-content åpner bare uten toning. */
 .rom-gruppe::details-content{opacity:0;transition:opacity 160ms var(--ease-out),content-visibility 160ms allow-discrete}
 .rom-gruppe[open]::details-content{opacity:1}
+
+/* ---------- Redusert bevegelse: rolige varianter (okt 2026) ----------
+   Den generelle regelen i global.css skrur av alle keyframes. Disse er rene toninger uten flytting,
+   så de får komme tilbake (spesifisiteten slår *-regelen). Ark, «Hopp til», sveip og lekegrupper
+   trenger ingenting her: de bruker overganger, og der står opacity igjen mens transform hopper. */
+@keyframes rolig-inn{from{opacity:0}}
+@keyframes rolig-ut{to{opacity:0}}
+@media (prefers-reduced-motion:reduce){
+  .kv-ny > li{animation:rolig-inn 200ms ease-out both!important}
+  .pluss-status.pluss-feiring{animation:plussKant 900ms ease-out!important}
+  .kort-inn{animation:rolig-inn 200ms ease-out both!important}
+  .kort-ut{animation:rolig-ut 200ms ease-out forwards!important}
+  .rom-venter li{animation:rolig-inn 200ms ease-out!important}
+}
