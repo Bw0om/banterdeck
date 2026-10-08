@@ -30,7 +30,7 @@ const groups = dictGroups(view, lang).map((g: any) => ({
 
   {groups.map((g: any) => (
     <section class="group dictgroup" id={g.id} data-dgroup>
-      <h3>{t(g.title, lang)}<span class="group-count">{g.items.length}</span></h3>
+      <h2 class="h3">{t(g.title, lang)}<span class="group-count">{g.items.length}</span></h2>
       <div class="cards">
         {g.items.map((it: any) => (
           <article class="card dict" id={dictAnchor(it.word)} data-copy={`${it.word} – ${tdef(it, lang)}`}

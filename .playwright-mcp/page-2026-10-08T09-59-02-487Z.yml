@@ -1,0 +1,88 @@
+- generic [active] [ref=f4e1]:
+  - link "Hopp til innhold" [ref=f4e2] [cursor=pointer]:
+    - /url: "#innhold"
+  - generic [ref=f4e3]:
+    - complementary [ref=f4e4]:
+      - link "Mitt vors" [ref=f4e5] [cursor=pointer]:
+        - /url: /no/
+        - generic "Mitt vors" [ref=f4e17]: mittvors
+      - button "Søk ⌘K" [ref=f4e18] [cursor=pointer]:
+        - text: Søk
+        - generic [ref=f4e22]: ⌘K
+      - navigation "Hva er du ute etter?" [ref=f4e23]:
+        - link "Forside" [ref=f4e24] [cursor=pointer]:
+          - /url: /no/
+        - link "Drikkeleker" [ref=f4e27] [cursor=pointer]:
+          - /url: /no/drinking-games
+        - link "Spill sammen" [ref=f4e32] [cursor=pointer]:
+          - /url: /no/rom
+        - link "Nyhetsrunden" [ref=f4e38] [cursor=pointer]:
+          - /url: /no/nyhetsrunden
+        - generic [ref=f4e43]: Humor ved siden
+        - link "Replikker" [ref=f4e44] [cursor=pointer]:
+          - /url: /no/situations
+        - link "Ord" [ref=f4e48] [cursor=pointer]:
+          - /url: /no/ord
+        - link "Uttrykk" [ref=f4e51] [cursor=pointer]:
+          - /url: /no/uttrykk
+        - link "Fornemt sagt" [ref=f4e54] [cursor=pointer]:
+          - /url: /no/categories/fornemt
+        - link "Sitater" [ref=f4e55] [cursor=pointer]:
+          - /url: /no/categories/sitater
+        - link "Fleksnes-sitater" [ref=f4e56] [cursor=pointer]:
+          - /url: /no/categories/fleksnes
+      - link "Mitt vors Pluss" [ref=f4e57] [cursor=pointer]:
+        - /url: /no/pluss
+      - link "Favoritter" [ref=f4e58] [cursor=pointer]:
+        - /url: /no/favourites
+      - button "Bytt mellom lys og mørk modus" [ref=f4e61] [cursor=pointer]:
+        - generic [ref=f4e65]: Lys modus
+      - link "Read in English" [ref=f4e66] [cursor=pointer]:
+        - /url: /en
+      - paragraph [ref=f4e67]:
+        - link "Send inn" [ref=f4e68] [cursor=pointer]:
+          - /url: /no/suggest
+        - link "Min stokk" [ref=f4e69] [cursor=pointer]:
+          - /url: /no/account
+        - link "Om" [ref=f4e70] [cursor=pointer]:
+          - /url: /no/about
+    - main [ref=f4e71]:
+      - generic [ref=f4e72]:
+        - heading "Her var det tomt i glasset 🥤" [level=1] [ref=f4e73]
+        - paragraph [ref=f4e74]: Siden du lette etter finnes ikke (lenger). Kanskje lenken var feil, eller rommet er avsluttet.
+        - generic [ref=f4e75]:
+          - link "Til forsiden" [ref=f4e76] [cursor=pointer]:
+            - /url: /no/
+          - link "Spill sammen" [ref=f4e77] [cursor=pointer]:
+            - /url: /no/rom
+          - link "Drikkeleker" [ref=f4e78] [cursor=pointer]:
+            - /url: /no/drinking-games
+        - paragraph [ref=f4e79]:
+          - text: Page not found.
+          - link "Go to the English home page" [ref=f4e80] [cursor=pointer]:
+            - /url: /en
+          - text: .
+      - generic [ref=f4e81]:
+        - generic [ref=f4e82]: © 2026 Mitt vors
+        - link "Send inn" [ref=f4e83] [cursor=pointer]:
+          - /url: /no/suggest
+        - link "Min stokk" [ref=f4e84] [cursor=pointer]:
+          - /url: /no/account
+        - link "Om" [ref=f4e85] [cursor=pointer]:
+          - /url: /no/about
+        - link "Personvern" [ref=f4e86] [cursor=pointer]:
+          - /url: /no/privacy
+        - link "Favoritter" [ref=f4e87] [cursor=pointer]:
+          - /url: /no/favourites
+        - link "Read in English" [ref=f4e88] [cursor=pointer]:
+          - /url: /en
+        - link "Salgsvilkår" [ref=f4e89] [cursor=pointer]:
+          - /url: /no/vilkar
+        - button "Noe galt?" [ref=f4e90] [cursor=pointer]
+        - generic [ref=f4e91]: Flaten Kapital · Org.nr. 931976532 · Skanseløkka 21, 1383 Asker · Tlf. 911 96 359 · post@mittvors.no
+  - status: Kopiert
+  - generic [ref=f4e94]:
+    - button [ref=f4e95]
+    - button [ref=f4e101]
+    - button [ref=f4e105]
+    - button [ref=f4e110]

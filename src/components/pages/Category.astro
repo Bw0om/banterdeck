@@ -23,7 +23,7 @@ const description = `${t(s.desc, lang)} ${countSection(s, lang)} ${lang === 'no'
 
   {groups.map((g: any, i: number) => (
     <section class="group" id={g.id}>
-      {g.title && <h3>{t(g.title, lang)}<span class="group-count">{itemsOf(g, lang).length}</span></h3>}
+      {g.title && <h2 class="h3">{t(g.title, lang)}<span class="group-count">{itemsOf(g, lang).length}</span></h2>}
       <div class="cards">
         {itemsOf(g, lang).map((it: any) => <Card it={it} lang={lang} />)}
       </div>

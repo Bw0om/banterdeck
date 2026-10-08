@@ -76,11 +76,11 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
             ? '<form class="form gj-skjema" id="gjLag"><label class="lab" for="gjNavn">Create a new crew</label>' +
               '<div class="gj-rad"><input id="gjNavn" maxlength="40" placeholder="E.g. The Usual Suspects" required><button class="btn gold" type="submit">Create crew</button></div></form>' +
               '<form class="form gj-skjema" id="gjBli"><label class="lab" for="gjKode">Got a crew code?</label>' +
-              '<div class="gj-rad"><input id="gjKode" maxlength="8" placeholder="8 characters" autocapitalize="characters" required><button class="btn ghost" type="submit">Join</button></div></form>'
+              '<div class="gj-rad"><input id="gjKode" maxlength="8" placeholder="8 characters" autocapitalize="characters" autocomplete="off" spellcheck="false" required><button class="btn ghost" type="submit">Join</button></div></form>'
             : '<form class="form gj-skjema" id="gjLag"><label class="lab" for="gjNavn">Lag en ny gjeng</label>' +
               '<div class="gj-rad"><input id="gjNavn" maxlength="40" placeholder="F.eks. Gutta på tur" required><button class="btn gold" type="submit">Lag gjeng</button></div></form>' +
               '<form class="form gj-skjema" id="gjBli"><label class="lab" for="gjKode">Har du en gjengkode?</label>' +
-              '<div class="gj-rad"><input id="gjKode" maxlength="8" placeholder="8 tegn" autocapitalize="characters" required><button class="btn ghost" type="submit">Bli med</button></div></form>') +
+              '<div class="gj-rad"><input id="gjKode" maxlength="8" placeholder="8 tegn" autocapitalize="characters" autocomplete="off" spellcheck="false" required><button class="btn ghost" type="submit">Bli med</button></div></form>') +
           '<p id="gjMld"></p>';
         root.querySelector('#gjLag').addEventListener('submit', function (e) {
           e.preventDefault();
@@ -167,7 +167,7 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
           ' · ' + L.kvelder + (EN ? (L.kvelder === 1 ? ' night' : ' nights') : (L.kvelder === 1 ? ' kveld' : ' kvelder')) + '</p>' +
         (v ? (v.minTur
           ? '<div class="lb-valg"><b>' + (EN ? '🏆 You won the last night! Pick your rule' : '🏆 Du vant forrige kveld! Velg regelen din') + '</b>' +
-            '<form class="gj-skjema" id="lbValg"><div class="gj-rad"><input id="lbTekst" maxlength="140" placeholder="' + (EN ? 'The new rule …' : 'Den nye regelen …') + '"><button class="btn gold" type="submit">' + (EN ? 'Introduce' : 'Innfør') + '</button></div></form>' +
+            '<form class="gj-skjema" id="lbValg"><div class="gj-rad"><input id="lbTekst" maxlength="140" autocomplete="off" aria-label="' + (EN ? 'The new rule' : 'Den nye regelen') + '" placeholder="' + (EN ? 'The new rule …' : 'Den nye regelen …') + '"><button class="btn gold" type="submit">' + (EN ? 'Introduce' : 'Innfør') + '</button></div></form>' +
             (L.aktive.length ? '<p class="small">' + (EN ? '… or repeal one:' : '… eller opphev en:') + '</p><div class="rom-valg en">' + L.aktive.map(function (x) { return '<button type="button" data-g="lov-opphev" data-regel="' + esc(x.id) + '">🗑️ ' + esc(x.tekst) + '</button>'; }).join('') + '</div>' : '') + '</div>'
           : '<p class="lb-valg">⏳ ' + esc(v.navn) + (EN ? ' won the last night and hasn’t picked a rule yet.' : ' vant forrige kveld og har ikke valgt regel ennå.') + '</p>') : '') +
         '<h3>' + (EN ? 'Rules in force' : 'Reglene som gjelder') + ' <small>(' + L.aktive.length + ')</small></h3>' +
@@ -200,7 +200,7 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
         }).join('') + '</section>';
       if (G.medlem && L.meg) ut += '<div class="gj-profil"><p class="rom-etikett">' + (EN ? 'You in the crew' : 'Deg i gjengen') + '</p>' +
         '<p><b>' + kr(L.meg.saldo) + '</b> ' + (EN ? 'in your wallet' : 'i lommeboka') + ' · ' + L.meg.kvelder + (EN ? (L.meg.kvelder === 1 ? ' night' : ' nights') : (L.meg.kvelder === 1 ? ' kveld' : ' kvelder')) + (EN ? ' this season' : ' denne sesongen') + '</p>' +
-        '<form class="gj-rad" id="gjProfil"><input id="gjProfilNavn" maxlength="20" value="' + esc(L.meg.navn || mittNavn()) + '" placeholder="' + (EN ? 'Your name in the crew' : 'Navnet ditt i gjengen') + '"><button class="btn ghost small" type="submit">' + (EN ? 'Save name' : 'Lagre navn') + '</button></form>' +
+        '<form class="gj-rad" id="gjProfil"><input id="gjProfilNavn" maxlength="20" autocomplete="off" aria-label="' + (EN ? 'Your name in the crew' : 'Navnet ditt i gjengen') + '" value="' + esc(L.meg.navn || mittNavn()) + '" placeholder="' + (EN ? 'Your name in the crew' : 'Navnet ditt i gjengen') + '"><button class="btn ghost small" type="submit">' + (EN ? 'Save name' : 'Lagre navn') + '</button></form>' +
         '<p class="small">' + (EN ? 'Your Exchange fortune follows you from night to night, and you get ' : 'Formuen din i Vorsbørsen følger med fra kveld til kveld, og du får ') + kr(200) + (EN ? ' in wages every night you join. Everyone starts over on 1 January.' : ' i lønn hver kveld du er med. Alle starter likt igjen 1. januar.') + '</p></div>';
       var f = L.formue || [];
       if (f.length) ut += '<section><h2 class="gj-h2">💰 ' + (EN ? 'The crew’s fortune ' : 'Formuen i gjengen ') + L.sesong + '</h2><ol class="gj-formue">' +

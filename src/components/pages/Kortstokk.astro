@@ -8,7 +8,7 @@ const no = lang === 'no';
 ---
 <Base title={no ? 'Delt kortstokk' : 'Shared deck'} description={no ? 'Egne drikkekort laget på Mitt vors. Spill dem alene, i et rom, eller lagre en kopi.' : 'Custom drinking cards made on Mitt vors. Play them on one phone, in a room, or save a copy.'} lang={lang} gate={true} noindex={true}>
   <div id="delt" class="delt"><p class="small">{no ? 'Henter kortstokken …' : 'Loading the deck …'}</p></div>
-  <div id="stokkSpill" class="stokk-spill" hidden role="dialog" aria-modal="true">
+  <div id="stokkSpill" class="stokk-spill" hidden role="dialog" aria-modal="true" aria-labelledby="ssNavn">
     <p class="stokk-spill-navn" id="ssNavn"></p>
     <div class="rom-kort rf-kort"><span class="sw-tag" id="ssTeller"></span><p id="ssKort"></p><span></span></div>
     <button class="rom-stor-knapp" type="button" id="ssNeste">{no ? 'Neste kort' : 'Next card'}</button>
@@ -44,7 +44,7 @@ const no = lang === 'no';
     root.addEventListener('click', function (e) {
       var b = e.target.closest('[data-d]'); if (!b || !st) return;
       var a = b.dataset.d;
-      if (a === 'spill') { rekke = stokk(st.kort); pos = 0; $('ssNavn').textContent = st.navn; visKort(); $('stokkSpill').hidden = false; document.body.classList.add('stokk-aapen'); }
+      if (a === 'spill') { rekke = stokk(st.kort); pos = 0; $('ssNavn').textContent = st.navn; visKort(); apner = b; $('stokkSpill').hidden = false; document.body.classList.add('stokk-aapen'); $('ssNeste').focus(); }
       if (a === 'rom') { try { localStorage.setItem('bd_stokk_rom', JSON.stringify({ id: 'delt-' + id, navn: st.navn, kort: st.kort })); } catch (x) {} location.href = ROM; }
       if (a === 'kopi') {
         var K = window.BDKonto, msg = $('deltMsg');
@@ -58,7 +58,11 @@ const no = lang === 'no';
       }
     });
     $('ssNeste').addEventListener('click', function () { pos++; if (pos >= rekke.length) { rekke = stokk(rekke); pos = 0; } visKort(); });
-    $('ssLukk').addEventListener('click', function () { $('stokkSpill').hidden = true; document.body.classList.remove('stokk-aapen'); });
+    // Lukk spillvinduet og gi fokus tilbake til knappen som åpnet det
+    var apner = null;
+    function lukkSpill() { $('stokkSpill').hidden = true; document.body.classList.remove('stokk-aapen'); if (apner && apner.isConnected) apner.focus(); }
+    $('ssLukk').addEventListener('click', lukkSpill);
+    $('stokkSpill').addEventListener('keydown', function (e) { if (e.key === 'Escape') lukkSpill(); });
   })();
   </script>
 </Base>

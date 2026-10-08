@@ -658,8 +658,8 @@ if (!window.BDK) window.BDK = (function () {
   var root = document.querySelector('[data-dl="krig"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
   var K = window.BDK, T = K.T, A, B, na = T('Spiller 1', 'Player 1'), nb = T('Spiller 2', 'Player 2'), vist = null, melding = '';
   function oppsett() {
-    root.innerHTML = '<div class="dl-navn"><label for="krA">' + T('Spiller 1', 'Player 1') + '</label><input id="krA" maxlength="20" placeholder="' + T('Navn', 'Name') + '">' +
-      '<label for="krB">' + T('Spiller 2', 'Player 2') + '</label><input id="krB" maxlength="20" placeholder="' + T('Navn', 'Name') + '"></div>' +
+    root.innerHTML = '<div class="dl-navn"><label for="krA">' + T('Spiller 1', 'Player 1') + '</label><input id="krA" maxlength="20" autocomplete="off" placeholder="' + T('Navn', 'Name') + '">' +
+      '<label for="krB">' + T('Spiller 2', 'Player 2') + '</label><input id="krB" maxlength="20" autocomplete="off" placeholder="' + T('Navn', 'Name') + '"></div>' +
       '<button class="btn gold" data-a="start">' + T('Del ut', 'Deal') + '</button>';
   }
   function start() {
@@ -900,10 +900,11 @@ if (!window.BDK) window.BDK = (function () {
     '</div>';
   var full = root.querySelector('.op-full'), flate = root.querySelector('.op-flate'), tekst = root.querySelector('.op-tekst'), t = root.querySelector('.dl-terninger');
   function vaken() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (l) { laas = l; }).catch(function () {}); } catch (e) {} }
-  function lukk() { full.hidden = true; document.body.classList.remove('noscroll'); try { if (laas) laas.release(); } catch (e) {} laas = null; }
+  function lukk() { full.hidden = true; document.body.classList.remove('noscroll'); try { if (laas) laas.release(); } catch (e) {} laas = null; var s = root.querySelector('[data-a=start]'); if (s) s.focus(); }
+  full.addEventListener('keydown', function (e) { if (e.key === 'Escape') lukk(); });
   root.addEventListener('click', function (e) {
     var b = e.target.closest('[data-a]'); if (!b) return;
-    if (b.dataset.a === 'start') { full.hidden = false; document.body.classList.add('noscroll'); flate.classList.remove('sekser'); tekst.textContent = T('Trykk hvor som helst for å trille', 'Tap anywhere to roll'); vaken(); }
+    if (b.dataset.a === 'start') { full.hidden = false; document.body.classList.add('noscroll'); flate.classList.remove('sekser'); tekst.textContent = T('Trykk hvor som helst for å trille', 'Tap anywhere to roll'); vaken(); flate.focus(); }
     if (b.dataset.a === 'lukk') { e.stopPropagation(); lukk(); }
     if (b.dataset.a === 'kast' && !opptatt) {
       opptatt = true; flate.classList.remove('sekser'); tekst.textContent = '…';
@@ -1230,7 +1231,7 @@ if (!window.BDK) window.BDK = (function () {
   var RADER = { 6: [3, 2, 1], 10: [4, 3, 2, 1] };
   function oppsett() {
     root.innerHTML = '<div class="rom-mod">' + [6, 10].map(function (n) { return '<button type="button" data-n="' + n + '" aria-pressed="' + (n === antall) + '">' + n + T(' kopper', ' cups') + '</button>'; }).join('') + '</div>' +
-      '<div class="dl-navn"><label for="bpA">' + T('Lag 1', 'Team 1') + '</label><input id="bpA" maxlength="20" placeholder="' + T('Lagnavn', 'Team name') + '"><label for="bpB">' + T('Lag 2', 'Team 2') + '</label><input id="bpB" maxlength="20" placeholder="' + T('Lagnavn', 'Team name') + '"></div>' +
+      '<div class="dl-navn"><label for="bpA">' + T('Lag 1', 'Team 1') + '</label><input id="bpA" maxlength="20" autocomplete="off" placeholder="' + T('Lagnavn', 'Team name') + '"><label for="bpB">' + T('Lag 2', 'Team 2') + '</label><input id="bpB" maxlength="20" autocomplete="off" placeholder="' + T('Lagnavn', 'Team name') + '"></div>' +
       '<button class="btn gold" data-a="start">' + T('Start kampen', 'Start the match') + '</button>';
   }
   function stativ(l, li) {
@@ -1263,7 +1264,7 @@ if (!window.BDK) window.BDK = (function () {
   var root = document.querySelector('[data-dl="rask-fakta"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
   var K = window.BDK, T = K.T, navn = T(['Spiller 1', 'Spiller 2'], ['Player 1', 'Player 2']), prikker = [0, 0], tur = 0, klokke = null;
   function oppsett() {
-    root.innerHTML = '<div class="dl-navn"><label for="rfA">' + T('Spiller 1', 'Player 1') + '</label><input id="rfA" maxlength="20" placeholder="' + T('Navn', 'Name') + '"><label for="rfB">' + T('Spiller 2', 'Player 2') + '</label><input id="rfB" maxlength="20" placeholder="' + T('Navn', 'Name') + '"></div><button class="btn gold" data-a="start">Start</button>';
+    root.innerHTML = '<div class="dl-navn"><label for="rfA">' + T('Spiller 1', 'Player 1') + '</label><input id="rfA" maxlength="20" autocomplete="off" placeholder="' + T('Navn', 'Name') + '"><label for="rfB">' + T('Spiller 2', 'Player 2') + '</label><input id="rfB" maxlength="20" autocomplete="off" placeholder="' + T('Navn', 'Name') + '"></div><button class="btn gold" data-a="start">Start</button>';
   }
   function tegn(tekst) {
     root.innerHTML = '<p class="dl-steg">' + K.esc(navn[tur]) + T(' sin tur', "'s turn") + '</p><div class="rf-tid" id="rkTid">5</div>' +
@@ -1290,7 +1291,7 @@ if (!window.BDK) window.BDK = (function () {
   var K = window.BDK, T = K.T, rekke = [], logn = -1;
   function skriv() {
     root.innerHTML = '<p>' + T('Skriv tre påstander om deg selv, og merk hvilken som er løgnen. Så viser du telefonen til de andre.', 'Write three statements about yourself and mark which one is the lie. Then show the phone to the others.') + '</p>' +
-      [0, 1, 2].map(function (i) { return '<div class="ts-rad"><input id="ts' + i + '" maxlength="120" placeholder="' + T('Påstand ', 'Statement ') + (i + 1) + '"><label><input type="radio" name="tsLogn" value="' + i + '"> ' + T('Løgn', 'Lie') + '</label></div>'; }).join('') +
+      [0, 1, 2].map(function (i) { return '<div class="ts-rad"><input id="ts' + i + '" maxlength="120" autocomplete="off" aria-label="' + T('Påstand ', 'Statement ') + (i + 1) + '" placeholder="' + T('Påstand ', 'Statement ') + (i + 1) + '"><label><input type="radio" name="tsLogn" value="' + i + '"> ' + T('Løgn', 'Lie') + '</label></div>'; }).join('') +
       '<button class="btn gold" data-a="vis">' + T('Stokk og vis de andre', 'Shuffle and show the others') + '</button>';
   }
   function vis() {
@@ -1338,7 +1339,7 @@ if (!window.BDK) window.BDK = (function () {
   function tegn() {
     var ruter = ''; for (var i = 1; i <= 14; i++) ruter += '<button type="button" class="' + (regler[i] ? 'har' : '') + '" data-t="' + i + '"><b>' + i + '</b><span>' + K.esc(regler[i] || '') + '</span></button>';
     root.innerHTML = '<div class="ft-tavle">' + ruter + '</div><p class="small">' + T('Trykk på et tall for å gi det en regel. Tavla huskes på denne telefonen.', 'Tap a number to give it a rule. The board is saved on this phone.') + '</p>' +
-      '<div class="ft-skjema" hidden><label class="rof-lab" for="ftInp">' + T('Regel for ', 'Rule for ') + '<b class="ft-nr"></b></label><div class="rf-rad"><input id="ftInp" maxlength="40" placeholder="' + T('F.eks. bytt med «hallo»', 'E.g. replace it with “hello”') + '"><button class="btn gold" data-a="lagre">' + T('Lagre', 'Save') + '</button></div><button class="btn ghost small" data-a="fjern">' + T('Fjern regelen', 'Remove the rule') + '</button></div>' +
+      '<div class="ft-skjema" hidden><label class="rof-lab" for="ftInp">' + T('Regel for ', 'Rule for ') + '<b class="ft-nr"></b></label><div class="rf-rad"><input id="ftInp" maxlength="40" autocomplete="off" placeholder="' + T('F.eks. bytt med «hallo»', 'E.g. replace it with “hello”') + '"><button class="btn gold" data-a="lagre">' + T('Lagre', 'Save') + '</button></div><button class="btn ghost small" data-a="fjern">' + T('Fjern regelen', 'Remove the rule') + '</button></div>' +
       '<button class="btn ghost" data-a="nullstill">' + T('Nullstill tavla', 'Reset the board') + '</button>';
   }
   var valgt = null;

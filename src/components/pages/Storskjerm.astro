@@ -284,7 +284,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       rot.innerHTML = '<form class="tv-kobling" id="tvSkjema"><h1>📺 ' + T('Storskjerm', 'Big screen') + '</h1>' +
         '<p class="tv-stor">' + T('Vis rommet på TV-en. Verten finner koden og PIN-en under «Mer til kvelden» → «Storskjerm».', 'Show the room on the TV. The host finds the code and PIN under “More for the night” → “Big screen”.') + '</p>' +
         (feilmelding ? '<p class="tv-feil">' + esc(feilmelding) + '</p>' : '') +
-        '<div class="tv-felt"><label>' + T('Romkode', 'Room code') + '<input id="tvKode" maxlength="4" autocomplete="off" autocapitalize="characters" value="' + esc(kode) + '" required></label>' +
+        '<div class="tv-felt"><label>' + T('Romkode', 'Room code') + '<input id="tvKode" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" value="' + esc(kode) + '" required></label>' +
         '<label>PIN<input id="tvPin" inputmode="numeric" maxlength="6" autocomplete="off" value="' + esc(pin) + '" required></label></div>' +
         '<button class="btn gold tv-start" type="submit">' + T('Koble til', 'Connect') + '</button></form>';
       document.getElementById('tvSkjema').onsubmit = function (e) {
