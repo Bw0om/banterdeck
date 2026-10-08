@@ -1,0 +1,377 @@
+---
+// Forhåndsvisning av ny forside (/no/forside-ny). Samme topp som i dag – rett til et rom –
+// men resten er bygget som en spillapp: trekk et kort med en gang, lekene som spilles fra hver sin
+// telefon med bilder, ukas faste ritualer samlet, og humoren som egen blokk i stedet for en lang liste.
+import Base from '../../layouts/Base.astro';
+import Icon from '../Icon.astro';
+import PopulaertNaa from '../PopulaertNaa.astro';
+import Sveip from '../Sveip.astro';
+import { rundeKort } from '../../lib/nyhetsrunden';
+import { UKENS_LEKER, ukensLek } from '../../lib/ukenslek';
+import { games as alleLeker, gamesFor, gameHref, situationSectionsFor, dictSection, visible, langGroups, itemsOf, t, tf, isCrude, totalsFor, situationById } from '../../lib/content';
+import { illustrasjon } from '../../lib/illustrasjon';
+import { niva } from '../../lib/niva';
+import { PLUSS_SLUGS } from '../../lib/plussleker';
+import PLUSSPAKKER from '../../data/pluss.json';
+import DECKS from '../../data/decks.json';
+import { ui, path, type Lang } from '../../lib/i18n';
+
+const lang: Lang = 'no';
+const L = ui(lang);
+const ANT_JUL = (PLUSSPAKKER as any).julebord.items.length;
+const PAKKENAVN: string[] = Object.keys(PLUSSPAKKER).map((id) => (PLUSSPAKKER as any)[id].navn);
+const PAKKELISTE = PAKKENAVN.slice(0, -1).join(', ') + ' og ' + PAKKENAVN[PAKKENAVN.length - 1];
+
+// Ukas ritualer
+const NR = rundeKort();
+const nrBygg = NR.find((r) => r.fra <= Date.now()) || NR[NR.length - 1];
+const UKE = UKENS_LEKER.map((sl) => alleLeker.find((g: any) => g.slug === sl)).filter(Boolean)
+  .map((g: any) => ({ slug: g.slug, navn: t(g.name, lang), pl: g.pl, gruppe: t(g.group.title, lang), bilde: illustrasjon(g) }));
+const ukeBygg = UKE.find((x) => x.slug === ukensLek()) || UKE[0];
+
+// Lekene som spilles fra hver sin telefon – samme rekkefølge som på lekesiden
+const TOPP = ['spionen', 'hvem-skrev-det', 'bloffquizen', 'pekeleken', 'nyhetsrunden', 'ring-of-fire', 'forraeder', 'regelfabrikken', 'samme-svar'];
+const PL = new Set(PLUSS_SLUGS);
+const alle = gamesFor(lang);
+const romLeker = alle.filter((g: any) => niva(g.slug) === 'rom')
+  .sort((a: any, b: any) => ((TOPP.indexOf(a.slug) + 1 || 99) - (TOPP.indexOf(b.slug) + 1 || 99)))
+  .slice(0, 8)
+  .map((g: any) => ({ navn: t(g.name, lang), pl: g.pl, href: gameHref(g, (p: string) => path(lang, p), lang), bilde: illustrasjon(g), pluss: PL.has(g.slug) }));
+
+// «Trekk et kort»: tre ekte kortstokker, bare de snille og frekke kortene (aldri de grove på forsiden)
+const KS: any = DECKS;
+const trekk = [
+  { id: 'pekeleken', navn: 'Mest sannsynlig' },
+  { id: 'jeg-har-aldri', navn: 'Jeg har aldri' },
+  { id: 'enten-eller', navn: 'Enten eller' },
+].map((s) => ({ ...s, kort: KS[s.id].items.filter((x: any) => x.m !== 'droy').slice(0, 24).map((x: any) => x.t) }));
+
+// Humor
+const totals = totalsFor(lang);
+const hasDict = visible(dictSection, lang);
+const pool = situationSectionsFor(lang).flatMap((s) => langGroups(s, lang).flatMap((g: any) =>
+  itemsOf(g, lang).filter((it: any) => it.line && !isCrude(it)).map((it: any) => {
+    const sit = it.sit && situationById(it.sit[0]);
+    return { l: tf(it, 'line', lang), k: sit ? t(sit.title, lang) : t(s.title, lang) };
+  })));
+const first = pool[0];
+const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
+---
+<Base lang={lang} noindex={true} title="Ny forside (forhåndsvisning)">
+  <!-- 1+2. Toppen: rett til et rom eller inn med kode – og på PC ligger kortbunken du kan trekke fra ved siden av -->
+  <div class="fn-topp">
+  <section class="h2-hero">
+    <h1>Klar for<br />vors?</h1>
+    <p class="h2-sub">Drikkeleker dere spiller fra hver deres telefon. Én lager et rom – resten blir med på koden.</p>
+    <div class="h2-cta">
+      <a class="h2-hoved" href="/no/rom?lag=1">Lag et rom</a>
+      <form class="h2-kode" action="/no/rom" method="get" id="h2Kode">
+        <label for="h2KodeFelt">Har du fått en kode?</label>
+        <div class="h2-kode-rad">
+          <input id="h2KodeFelt" name="k" size="6" maxlength="6" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" required />
+          <button type="submit">Bli med</button>
+        </div>
+      </form>
+    </div>
+    <div class="h2-gjeng" id="h2Gjeng">
+      <a class="h2-gjeng-lenke" href="/no/gjeng">Fast gjeng? Lag en gjeng, så starter dere kvelden med ett trykk</a>
+    </div>
+  </section>
+
+  <!-- 2. Første runde på sekunder: trekk et kort på denne telefonen, uten rom og uten konto -->
+  <section class="fn-trekk" aria-labelledby="fnTrekkTittel" data-stokker={JSON.stringify(trekk)}>
+    <div class="fn-trekk-tekst">
+      <h2 id="fnTrekkTittel">Ingen rom ennå? Trekk et kort.</h2>
+      <p>Send telefonen rundt bordet. Når dere vil ha poeng, stemming og hemmeligheter, lager én et rom.</p>
+      <div class="fn-stokkvalg" role="tablist" aria-label="Velg kortstokk">
+        {trekk.map((s, i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-stokk={i}>{s.navn}</button>)}
+      </div>
+    </div>
+    <div class="fn-kortbord">
+      <button type="button" class="fn-kort" id="fnKort" aria-live="polite">
+        <span class="fn-kort-navn" id="fnKortNavn">{trekk[0].navn}</span>
+        <span class="fn-kort-tekst" id="fnKortTekst">{trekk[0].kort[0]}</span>
+        <span class="fn-kort-hint">Trykk for neste kort</span>
+      </button>
+    </div>
+  </section>
+  </div>
+  <a class="h2-rom" href="/no/rom" hidden>
+    <span><b>Spill sammen fra hver sin telefon</b><small>Lag et rom og del koden</small></span>
+    <span class="kode" aria-hidden="true">ABCD</span>
+  </a>
+
+  <!-- 3. Lekene i appen – bilder og navn, ikke en liste -->
+  <section class="fn-seksjon" aria-labelledby="fnLekerTittel">
+    <div class="fn-hode">
+      <h2 id="fnLekerTittel">Spill fra hver sin telefon</h2>
+      <a href="/no/drinking-games" class="fn-alle">Alle {alle.length} leker <span aria-hidden="true">→</span></a>
+    </div>
+    <ul class="fn-rad" role="list">
+      {romLeker.map((x) => (
+        <li><a class="fn-lek" href={x.href}>
+          <img src={x.bilde} alt="" width="240" height="126" loading="lazy" decoding="async" />
+          <b>{x.navn}</b>
+          <small><Icon name="gjeng" size={13} />{x.pl}{x.pluss && <span class="fn-pluss"><Icon name="gnist" size={11} />Pluss</span>}</small>
+        </a></li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- 4. Denne uka: de faste ritualene samlet -->
+  <section class="fn-seksjon" aria-labelledby="fnUkeTittel">
+    <h2 id="fnUkeTittel" class="fn-h">Denne uka</h2>
+    <div class="fn-uka">
+      {nrBygg && (
+        <a class="fn-nr" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
+          <span class="fn-nr-uke">Uke <b id="nrUke">{nrBygg.uke}</b></span>
+          <span class="fn-nr-tekst"><b>Nyhetsrunden</b><small id="nrAntall">{nrBygg.antall} spørsmål om ukas nyheter</small></span>
+          <span class="fn-nr-knapp">Spill quizen</span>
+        </a>
+      )}
+      {ukeBygg && (
+        <a class="fn-ukelek" id="ukensLek" href={`/no/drinking-games/${ukeBygg.slug}/`} data-leker={JSON.stringify(UKE)} data-base="/no/drinking-games/">
+          <img src={ukeBygg.bilde} alt="" width="240" height="126" loading="lazy" decoding="async" />
+          <span><small>Ukens lek</small><b>{ukeBygg.navn}</b><em>{ukeBygg.gruppe} · {ukeBygg.pl} spillere</em></span>
+        </a>
+      )}
+      <a class="fn-ukelek fn-jul" id="julebord" href="/no/rom?lek=pakke-julebord" hidden>
+        <span><small>Sesongen er her</small><b>Julebordpakken</b><em>{ANT_JUL} kort – trygt med kolleger, men aldri kjedelig</em></span>
+      </a>
+    </div>
+    <ul class="fn-verktoy" role="list">
+      <li><a href="/no/finn-lek"><Icon name="mal" size={20} /><span><b>Finn riktig lek</b><small>Tre spørsmål, så får dere et forslag</small></span></a></li>
+      <li><a href="/no/kveld"><Icon name="kalender" size={20} /><span><b>Kveldsplan</b><small>Leker fra vors til nachspiel</small></span></a></li>
+      <li><a href="/no/favourites"><Icon name="favoritt" size={20} /><span><b>Lagret</b><small>Det du har tatt vare på</small></span></a></li>
+    </ul>
+  </section>
+
+  <!-- 5. Pluss: samme innhold som i dag -->
+  <section class="h2-pluss" aria-labelledby="h2PlussTittel">
+    <div class="h2-pluss-hoved">
+      <h2 id="h2PlussTittel">Verten betaler. Hele festen spiller.</h2>
+      <ul>
+        <li>Opptil 16 telefoner i rommet (gratis: 4)</li>
+        <li>Vorsbørsen med 100 aksjer og Agent 0,5 (hemmelige oppdrag)</li>
+        <li>Bussruta, Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna</li>
+        <li>{PAKKENAVN.length} kortpakker: {PAKKELISTE}</li>
+      </ul>
+    </div>
+    <a class="h2-pluss-stubb" href="/no/pluss">
+      <span class="h2-pluss-navn">Mitt vors Pluss</span>
+      <span class="h2-pluss-pris"><b>29 kr</b><small>per kveld</small></span>
+      <span class="h2-pluss-pris"><b>199 kr</b><small>hele året</small></span>
+      <span class="h2-pluss-knapp" id="h2PlussKnapp">Se Pluss</span>
+    </a>
+  </section>
+
+  <!-- 6. Humor ved siden: dagens replikk stort, resten som snarveier -->
+  <section class="fn-humor" aria-labelledby="fnHumorTittel">
+    <h2 id="fnHumorTittel" class="fn-h">Humor ved siden</h2>
+    <div class="fn-replikk">
+      <p class="fn-replikk-kat" id="todayCat">{first.k}</p>
+      <p class="today fn-replikk-tekst" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
+      <p class="fn-replikk-hint">Dagens replikk · trykk for å kopiere</p>
+    </div>
+    <div class="fn-humor-valg">
+      <button type="button" class="fn-sveip" data-sveip><Icon name="sveip" size={22} /><span><b>Sveip replikker</b><small>{totals.lines} replikker, én om gangen</small></span></button>
+      <a href="/no/situations"><Icon name="replikker" size={20} />{L.linesTitle}</a>
+      {hasDict && <a href="/no/ord"><Icon name="ordbok" size={20} />{L.ordTitle}</a>}
+      {hasDict && <a href="/no/uttrykk"><Icon name="uttrykk" size={20} />{L.uttrykkTitle}</a>}
+    </div>
+  </section>
+
+  <PopulaertNaa lang={lang} />
+
+  <section class="fn-hjem">
+    <h2 class="fn-h">{L.takeItWithYou}</h2>
+    <p>{L.takeItBody}</p>
+    <div class="device">
+      <p class="ios-only">{L.iosSteps}</p>
+      <p class="android-only">{L.androidSteps}</p>
+      <p class="desktop-only">{L.desktopSteps}</p>
+      <p class="standalone-only">{L.standalone}</p>
+    </div>
+  </section>
+
+  <Sveip items={sveipItems} title="Alle replikker" lang={lang} shuffle={true} />
+
+  <script is:inline data-astro-rerun define:vars={{ pool: sveipItems }}>
+    var d = new Date(), dag = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+    var p = pool[dag % pool.length], line = document.getElementById('todayLine');
+    line.textContent = '«' + p.l + '»'; line.setAttribute('data-copy', p.l);
+    document.getElementById('todayCat').textContent = p.k;
+  </script>
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Trekk et kort: velg stokk, trykk på kortet for neste. Ingen rom, ingen konto.
+    var s = document.querySelector('.fn-trekk'); if (!s || s.dataset.bound) return; s.dataset.bound = '1';
+    var stokker = []; try { stokker = JSON.parse(s.dataset.stokker || '[]'); } catch (e) {}
+    var valgt = 0, pos = 0, rekke = [];
+    var kort = document.getElementById('fnKort'), navn = document.getElementById('fnKortNavn'), tekst = document.getElementById('fnKortTekst');
+    function bland(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    function vis() { navn.textContent = stokker[valgt].navn; tekst.textContent = rekke[pos]; kort.classList.remove('nytt'); void kort.offsetWidth; kort.classList.add('nytt'); }
+    function velg(i) { valgt = i; rekke = bland(stokker[i].kort); pos = 0; vis();
+      s.querySelectorAll('[data-stokk]').forEach(function (b) { b.setAttribute('aria-selected', String(+b.dataset.stokk === i)); }); }
+    s.addEventListener('click', function (e) { var b = e.target.closest('[data-stokk]'); if (b) velg(+b.dataset.stokk); });
+    kort.addEventListener('click', function () { pos++; if (pos >= rekke.length) { rekke = bland(rekke); pos = 0; } vis(); });
+    if (stokker.length) { rekke = bland(stokker[0].kort); pos = 0; navn.textContent = stokker[0].navn; tekst.textContent = rekke[0]; }
+  })();
+  </script>
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Nyhetsrunden og ukens lek bygges på forhånd – velg det som faktisk gjelder nå
+    var f = document.getElementById('nrFlis');
+    if (f) { var l = []; try { l = JSON.parse(f.dataset.runder || '[]'); } catch (e) {}
+      var r = l.filter(function (x) { return x.fra <= Date.now(); })[0];
+      if (r) { document.getElementById('nrUke').textContent = r.uke; document.getElementById('nrAntall').textContent = r.antall + ' spørsmål om ukas nyheter'; } }
+    var a = document.getElementById('ukensLek');
+    if (a) { var u = []; try { u = JSON.parse(a.dataset.leker || '[]'); } catch (e) {}
+      if (u.length) {
+        var o = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' }));
+        var t = new Date(Date.UTC(o.getFullYear(), o.getMonth(), o.getDate())); t.setUTCDate(t.getUTCDate() - (t.getUTCDay() + 6) % 7 + 3);
+        var aar = t.getUTCFullYear(), jan4 = new Date(Date.UTC(aar, 0, 4));
+        var uke = 1 + Math.round(((t - jan4) / 86400000 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7);
+        var x = u[(aar * 53 + uke) % u.length];
+        a.href = a.dataset.base + x.slug + '/'; a.querySelector('b').textContent = x.navn;
+        a.querySelector('em').textContent = x.gruppe + ' · ' + x.pl + ' spillere'; a.querySelector('img').src = x.bilde;
+      } }
+    // Julebordsesongen: 1. november til lille julaften
+    var j = document.getElementById('julebord');
+    if (j) { var n = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' })), m = n.getMonth(), dd = n.getDate(); if (m === 10 || (m === 11 && dd <= 23)) j.hidden = false; }
+  })();
+  </script>
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Kodefeltet (som på dagens forside): store bokstaver, og fire riktige tegn går videre av seg selv
+    var f = document.getElementById('h2Kode'); if (!f || f.dataset.bound) return; f.dataset.bound = '1';
+    var inp = document.getElementById('h2KodeFelt'), videre = null;
+    inp.addEventListener('input', function () {
+      var v = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== inp.value) inp.value = v;
+      f.classList.toggle('klar', v.length >= 4); clearTimeout(videre);
+      if (/^[A-HJ-NP-Z2-9]{4}$/.test(v)) videre = setTimeout(function () { if (inp.value === v) { if (f.requestSubmit) f.requestSubmit(); else f.submit(); } }, 500);
+    });
+    inp.setAttribute('enterkeyhint', 'go'); inp.setAttribute('autocorrect', 'off');
+    f.addEventListener('submit', function (e) { if (inp.value.length < 4) { e.preventDefault(); inp.focus(); } });
+    // Er du allerede i et rom? Da blir rom-knappen en snarvei tilbake.
+    var a = document.querySelector('.h2-rom'); if (!a) return;
+    try {
+      var sr = JSON.parse(localStorage.getItem('bd_sist_rom') || 'null');
+      if (!sr || !sr.k || Date.now() - (sr.t || 0) > 24 * 3600 * 1000 || !localStorage.getItem('bd_rom_' + sr.k)) return;
+      a.href = '/no/rom?k=' + encodeURIComponent(sr.k); a.classList.add('fortsett'); a.hidden = false;
+      a.querySelector('b').textContent = 'Du er i rom ' + sr.k; a.querySelector('small').textContent = 'Trykk for å gå tilbake til rommet';
+      a.querySelector('.kode').textContent = sr.k;
+    } catch (e) {}
+  })();
+  </script>
+</Base>
+
+<style>
+  /* Bare for forhåndsvisningen – samme farger, skrifter og kurver som resten av siden */
+  .fn-h,.fn-hode h2,.fn-trekk h2{font-size:clamp(24px,3.2vw,32px);font-stretch:112%;font-weight:850;letter-spacing:-.025em;line-height:1.05;margin:0;text-wrap:balance}
+  .fn-seksjon,.fn-trekk,.fn-humor,.fn-hjem{margin-top:clamp(48px,7vw,80px)}
+
+  /* 1+2. Toppen: på store skjermer står «Klar for vors?» og kortbunken side om side */
+  @media (min-width:1100px){
+    .fn-topp{display:grid;grid-template-columns:minmax(500px,1fr) minmax(0,400px);gap:40px;align-items:center}
+    /* Dagens topp holder knappene til 56 % for å gi plass til den liggende kortbunken – her har bunken egen kolonne */
+    .fn-topp :is(.h2-cta,.h2-sub,.h2-gjeng){max-width:100%}
+    .fn-topp .fn-trekk{margin-top:0;grid-template-columns:1fr;gap:18px}
+    .fn-topp .fn-trekk-tekst{order:2}
+    .fn-topp .fn-trekk h2{font-size:22px}
+  }
+  /* 2. Trekk et kort */
+  .fn-trekk{display:grid;gap:22px;align-items:center}
+  @media (min-width:900px){.fn-trekk{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:44px}}
+  .fn-trekk-tekst p{color:var(--muted);margin:10px 0 18px;max-width:42ch}
+  .fn-stokkvalg{display:flex;flex-wrap:wrap;gap:8px}
+  .fn-stokkvalg button{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--ink);
+    font-family:var(--display);font-weight:700;font-size:14.5px;transition:background-color 160ms ease,color 160ms ease,scale 160ms var(--ease-out)}
+  .fn-stokkvalg button[aria-selected="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink2)}
+  .fn-stokkvalg button:active{scale:.97}
+  .fn-kortbord{display:grid;place-items:center;padding:8px 0 14px}
+  .fn-kort{position:relative;width:min(calc(100% - 28px),400px);min-height:250px;display:flex;flex-direction:column;gap:14px;text-align:left;
+    padding:24px 24px 22px;border:0;border-radius:26px;background:var(--paper);color:var(--ink2);rotate:-2deg;
+    box-shadow:0 18px 40px -12px rgb(0 0 0 / .55),0 0 0 1px rgb(0 0 0 / .04);transition:scale 160ms var(--ease-out),rotate 200ms var(--ease-out)}
+  /* Bunken under: to kort som stikker ut bak – viser at det er flere */
+  .fn-kort::before,.fn-kort::after{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1}
+  .fn-kort::before{background:#DCD2EA;rotate:5deg;translate:10px 6px}
+  .fn-kort::after{background:#C9BDDC;rotate:-6deg;translate:-12px 12px}
+  .fn-kort:active{scale:.98}
+  .fn-kort-navn{font-family:var(--display);font-stretch:66%;font-weight:850;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--glo-dyp)}
+  .fn-kort-tekst{font-family:var(--display);font-weight:850;font-size:clamp(22px,2.6vw,27px);line-height:1.12;letter-spacing:-.02em;text-wrap:pretty;flex:1}
+  .fn-kort-hint{font-family:var(--display);font-size:13px;font-weight:650;color:rgb(24 13 38 / .55)}
+  .fn-kort.nytt .fn-kort-tekst{animation:fnNytt 220ms var(--ease-out)}
+  @keyframes fnNytt{from{opacity:0;transform:translateY(6px)}}
+  @media (prefers-reduced-motion:reduce){.fn-kort.nytt .fn-kort-tekst{animation:fnNyttRolig 160ms ease-out!important}}
+  @keyframes fnNyttRolig{from{opacity:0}}
+
+  /* 3. Lekene: vannrett rad på mobil (sveip), rutenett på stor skjerm */
+  .fn-hode{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px}
+  .fn-alle{font-family:var(--display);font-weight:700;font-size:15px;white-space:nowrap}
+  .fn-rad{list-style:none;display:grid;grid-auto-flow:column;grid-auto-columns:min(62vw,240px);gap:12px;overflow-x:auto;
+    scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;margin:0 -18px;padding:2px 18px 6px;scroll-padding:0 18px}
+  .fn-rad::-webkit-scrollbar{display:none}
+  .fn-rad li{scroll-snap-align:start}
+  @media (min-width:900px){.fn-rad{grid-auto-flow:row;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible;margin:0;padding:0}}
+  .fn-lek{display:flex;flex-direction:column;gap:4px;height:100%;color:var(--ink);text-decoration:none;transition:scale 160ms var(--ease-out)}
+  .fn-lek img{width:100%;height:auto;aspect-ratio:240/126;object-fit:cover;border-radius:16px;background:var(--card);margin-bottom:6px}
+  .fn-lek b{font-family:var(--display);font-stretch:108%;font-size:17px;line-height:1.15}
+  .fn-lek small{display:flex;align-items:center;gap:5px;color:var(--faint);font-family:var(--display);font-weight:650;font-size:13px}
+  .fn-pluss{display:inline-flex;align-items:center;gap:3px;margin-left:6px;color:var(--gold-t)}
+  .fn-lek:active{scale:.98}
+  @media (hover:hover) and (pointer:fine){.fn-lek:hover{text-decoration:none}.fn-lek:hover b{color:var(--gold-t)}}
+
+  /* 4. Denne uka */
+  .fn-uka{display:grid;gap:12px;margin-top:16px}
+  @media (min-width:700px){.fn-uka{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+  .fn-nr{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:4px 18px;align-items:center;padding:20px 22px;border-radius:22px;
+    background:var(--accent);color:var(--ink2);text-decoration:none;transition:scale 160ms var(--ease-out)}
+  .fn-nr-uke{grid-row:span 2;display:flex;flex-direction:column;align-items:center;font-family:var(--display);font-weight:800;font-size:13px;
+    text-transform:uppercase;letter-spacing:.08em;line-height:1}
+  .fn-nr-uke b{font-size:56px;font-stretch:125%;letter-spacing:-.04em;margin-top:4px;font-variant-numeric:tabular-nums}
+  .fn-nr-tekst{display:flex;flex-direction:column;gap:3px}
+  .fn-nr-tekst b{font-family:var(--display);font-stretch:112%;font-size:22px;line-height:1.05}
+  .fn-nr-tekst small{font-size:14.5px;opacity:.82}
+  .fn-nr-knapp{justify-self:start;font-family:var(--display);font-weight:800;font-size:14.5px;padding:8px 14px;border-radius:999px;background:var(--ink2);color:var(--accent)}
+  .fn-nr:active,.fn-ukelek:active{scale:.985}
+  @media (hover:hover) and (pointer:fine){.fn-nr:hover{text-decoration:none;filter:brightness(1.05)}}
+  .fn-ukelek{display:grid;grid-template-columns:112px 1fr;gap:14px;align-items:center;padding:14px;border-radius:22px;border:1px solid var(--border2);
+    background:var(--card);color:var(--ink);text-decoration:none;transition:scale 160ms var(--ease-out),border-color 160ms ease}
+  .fn-ukelek img{width:112px;height:auto;aspect-ratio:240/126;object-fit:cover;border-radius:12px}
+  .fn-ukelek span{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fn-ukelek small{font-family:var(--display);font-weight:750;font-size:12.5px;color:var(--gold-t)}
+  .fn-ukelek b{font-family:var(--display);font-stretch:108%;font-size:20px;line-height:1.1}
+  .fn-ukelek em{font-style:normal;font-size:14px;color:var(--muted)}
+  .fn-jul{grid-template-columns:1fr}
+  @media (hover:hover) and (pointer:fine){.fn-ukelek:hover{text-decoration:none;border-color:rgb(var(--volt-rgb) / .5)}}
+  .fn-verktoy{list-style:none;display:grid;margin-top:18px;border-top:1px solid var(--border)}
+  @media (min-width:700px){.fn-verktoy{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px}}
+  .fn-verktoy a{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);color:var(--ink);text-decoration:none}
+  .fn-verktoy .icon{color:var(--gold-t);margin-top:2px;flex:none}
+  .fn-verktoy span{display:flex;flex-direction:column;gap:1px}
+  .fn-verktoy b{font-family:var(--display);font-size:16px}
+  .fn-verktoy small{color:var(--faint);font-size:14px}
+  @media (hover:hover) and (pointer:fine){.fn-verktoy a:hover b{color:var(--gold-t)}}
+
+  /* 6. Humor */
+  .fn-humor{display:grid;gap:24px}
+  @media (min-width:900px){.fn-humor{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px 44px;align-items:start}.fn-humor > h2{grid-column:1/-1}}
+  .fn-replikk-kat{margin:0 0 6px;font-family:var(--display);font-weight:700;font-size:14px;color:var(--accent-t)}
+  .fn-replikk-tekst{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(26px,3.6vw,38px);line-height:1.2;
+    max-width:24ch;text-wrap:balance;cursor:pointer;margin:0}
+  .fn-replikk-hint{margin-top:10px;font-size:13.5px;color:var(--faint)}
+  .fn-humor-valg{display:flex;flex-direction:column}
+  .fn-humor-valg > a{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--border);color:var(--ink);
+    font-family:var(--display);font-weight:650;text-decoration:none}
+  .fn-humor-valg > a .icon{color:var(--faint)}
+  @media (hover:hover) and (pointer:fine){.fn-humor-valg > a:hover{color:var(--gold-t)}.fn-humor-valg > a:hover .icon{color:var(--gold-t)}}
+  .fn-sveip{display:flex;align-items:center;gap:14px;padding:16px 18px;margin-bottom:6px;border-radius:20px;border:0;text-align:left;
+    background:var(--gold);color:var(--ink2);box-shadow:0 4px 0 var(--volt-dyp);transition:translate 120ms var(--ease-out),box-shadow 120ms var(--ease-out)}
+  .fn-sveip span{display:flex;flex-direction:column;gap:1px}
+  .fn-sveip b{font-family:var(--display);font-stretch:108%;font-size:18px}
+  .fn-sveip small{font-size:14px;opacity:.75}
+  .fn-sveip:active{translate:0 3px;box-shadow:0 1px 0 var(--volt-dyp)}
+
+  .fn-hjem p{color:var(--muted);max-width:60ch;margin-top:8px}
+</style>
