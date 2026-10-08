@@ -11,7 +11,11 @@ export const ICONS: Record<string, string> = {
  "ordbok": "<path d=\"M12 6.5C10 5 7 4.5 4 5v13.5c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5Z\"/><path d=\"M12 6.5V20\"/>",
  "replikker": "<path d=\"M5.5 4.5h13a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11l-4.5 4v-4h-1a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z\"/><path d=\"M8 9h8M8 12.5h5\"/>",
  "sok": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m16 16 4.5 4.5\"/>",
- "terning": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"3.5\"/><circle cx=\"8.6\" cy=\"8.6\" r=\"1.25\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"12\" r=\"1.25\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15.4\" cy=\"15.4\" r=\"1.25\" fill=\"currentColor\" stroke=\"none\"/>"
+ "terning": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"3.5\"/><circle cx=\"8.6\" cy=\"8.6\" r=\"1.25\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"12\" r=\"1.25\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15.4\" cy=\"15.4\" r=\"1.25\" fill=\"currentColor\" stroke=\"none\"/>",
+ "mal": "<circle cx=\"12\" cy=\"12\" r=\"8\"/><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 12h.01\"/>",
+ "kalender": "<rect x=\"4\" y=\"5.5\" width=\"16\" height=\"14.5\" rx=\"2\"/><path d=\"M4 10h16M8.5 3.5v4M15.5 3.5v4\"/>",
+ "sveip": "<rect x=\"9\" y=\"3.5\" width=\"10.5\" height=\"14.5\" rx=\"2\"/><path d=\"M9 7 6 7.8a1.5 1.5 0 0 0-1 1.8l2.4 9a1.5 1.5 0 0 0 1.8 1.1l5-1.3\"/>",
+ "gjeng": "<circle cx=\"9\" cy=\"8.5\" r=\"3\"/><path d=\"M3.5 19c.4-3 2.6-5 5.5-5s5.1 2 5.5 5\"/><path d=\"M15 5.8a3 3 0 0 1 0 5.4M17.5 14.4c1.7.7 2.8 2.4 3 4.6\"/>"
 };
 
 /** Ferdig SVG-streng – til kode som bygger HTML i nettleseren. */

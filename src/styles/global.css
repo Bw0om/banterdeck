@@ -675,18 +675,7 @@ p.lead{font-style:normal;font-size:16px}
 .h2-start:hover{text-decoration:none;filter:brightness(1.05)}
 .h2-start b{display:block;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.02em;line-height:1.1}
 .h2-start small{display:block;font-size:14px;font-weight:600;margin-top:2px}
-.h2-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
-.h2-tile{min-height:132px;box-sizing:border-box;padding:16px;border-radius:24px;background:var(--card2);border:1px solid var(--border);
-  color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;font:inherit;cursor:pointer}
-.h2-tile:hover{text-decoration:none;border-color:var(--border2)}
-.h2-tile b{display:block;font-family:var(--display);font-weight:700;font-size:19px}
-.h2-tile small{display:block;font-size:13px;color:var(--muted)}
-.h2-quote{font-family:var(--serif);font-style:italic;font-size:30px;line-height:1;color:var(--gold-t)}
 .h2-badge{height:26px;padding:0 10px;border-radius:13px;background:var(--paper);color:var(--ink2);font-size:12px;font-weight:700;display:inline-flex;align-items:center}
-.h2-row{display:flex;gap:10px;margin-top:10px}
-.h2-row a{flex:1;min-height:56px;border-radius:18px;background:var(--card);border:1px solid var(--border);color:var(--ink);
-  display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:15px}
-.h2-row a:hover{text-decoration:none;border-color:var(--border2)}
 .h2-today{margin-top:26px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:18px 18px 16px}
 .h2-today-top{display:flex;justify-content:space-between;gap:10px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-t)}
 .h2-today-top span:last-child{color:var(--muted);letter-spacing:0;text-transform:none;font-weight:600}
@@ -1252,8 +1241,7 @@ body.stokk-aapen{overflow:hidden}
 .kveld-sum .stat-tall{grid-template-columns:repeat(2,minmax(0,1fr))}
 .h2-uke{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;column-gap:12px;align-items:center;background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:14px 14px 14px 18px;margin:12px 0;color:var(--ink);text-decoration:none}
 .h2-uke:hover{text-decoration:none;border-color:var(--gold)}
-.h2-uke .h2-badge{grid-column:1;justify-self:start;margin-bottom:6px}
-.h2-uke > span:nth-child(2){grid-column:1;display:flex;flex-direction:column}
+.h2-uke > span:first-child{grid-column:1;display:flex;flex-direction:column}
 .h2-uke b{font-family:var(--display);font-size:20px}
 .h2-uke small{color:var(--muted);font-size:13.5px}
 .h2-uke img{grid-column:2;grid-row:1 / span 2;width:112px;height:auto;border-radius:12px;display:block}
@@ -1521,9 +1509,6 @@ body:has(#rom) .toast{top:calc(env(safe-area-inset-top) + 70px);bottom:auto}
 :root[data-theme="light"] .h2-hero .h2-badge,:root[data-theme="light"] .h2-uke .h2-badge{background:var(--ink2);color:#fffdf8}
 .h2-rom.fortsett{border-color:var(--gold-t);box-shadow:0 0 0 2px rgb(var(--volt-rgb) / .25) inset}
 body:not(.humor) .tool.dice{display:none}
-.h2-row{flex-wrap:wrap}
-.h2-row a{white-space:nowrap;min-width:calc(50% - 5px);padding:0 10px}
-@media (min-width:560px){.h2-row a{min-width:0}}
 
 /* ---------- salg (admin) ---------- */
 .salg .stat-boks{margin-top:14px}
@@ -1651,7 +1636,6 @@ body:not(.humor) .tool.dice{display:none}
 .h2-jul .h2-badge{grid-column:1;justify-self:start;background:var(--gold);color:var(--ink2)}
 .h2-jul b{font-family:var(--display);font-size:19px;display:block}
 .h2-jul small{display:block;font-size:13px;opacity:.85}
-.h2-jul-ikon{grid-column:2;grid-row:1 / span 2;font-size:40px}
 
 /* ---------- Vorsbørsen ---------- */
 .bs-pille{display:block;width:100%;margin:8px 0;padding:12px 16px;border-radius:16px;border:1px solid rgb(var(--lilla-rgb) / .45);background:rgb(var(--lilla-rgb) / .14);color:var(--ink);font-family:var(--display);font-weight:700;font-size:15px;text-align:left;cursor:pointer}
@@ -1979,11 +1963,10 @@ button,a,[role=button]{touch-action:manipulation}
 .h2-pluss{--hull:var(--bg);position:relative;display:grid;grid-template-columns:1fr;margin-top:30px;border-radius:24px;background:var(--paper);color:var(--ink2);box-shadow:0 18px 50px rgba(0,0,0,.35)}
 :root[data-theme="light"] .h2-pluss{--hull:var(--bg)}
 .h2-pluss-hoved{padding:22px 22px 18px}
-.h2-pluss-merke{margin:0 0 6px;font-weight:800;font-size:14px;color:#9a5a00}
 .h2-pluss h2{margin:0 0 12px;font-size:clamp(24px,5.5vw,32px);line-height:1.05;letter-spacing:-.025em;color:var(--ink2);max-width:18ch}
 .h2-pluss ul{margin:0;padding:0;list-style:none;display:grid;gap:7px;font-size:15px;font-weight:500}
 .h2-pluss li{display:flex;gap:9px;align-items:baseline}
-.h2-pluss li::before{content:"✓";font-weight:900;color:#c8321f}
+.h2-pluss li::before{content:"";flex:none;width:15px;height:15px;transform:translateY(2px);background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4.5 12.5 5 5L19.5 7'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4.5 12.5 5 5L19.5 7'/%3E%3C/svg%3E") center/contain no-repeat}
 .h2-pluss-stubb{position:relative;display:flex;align-items:center;gap:18px;padding:18px 22px;border-top:2.5px dashed rgb(26 14 40 / .35);color:var(--ink2);text-decoration:none}
 .h2-pluss-stubb::before,.h2-pluss-stubb::after{content:"";position:absolute;top:-14px;width:26px;height:26px;border-radius:50%;background:var(--hull)}
 .h2-pluss-stubb::before{left:-13px}.h2-pluss-stubb::after{right:-13px}

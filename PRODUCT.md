@@ -40,7 +40,7 @@ Phone-to-phone live play is the core: rooms, the TV view, crews, the weekly Nyhe
 - **Age gate:** 18+ confirmation is stored in localStorage. The copy says *"Drikk med vett – og aldri kjør etterpå."*
 - **Pre-launch lock:** the site is currently behind a development lock (`UTVIKLING.paa` in `src/config.ts`).
 - **Legacy redirects:** old Norwegian URLs (`/kategori`, `/drikkeleker`, `/forslag`, `/om`, `/personvern`, `/app/`) must keep redirecting.
-- **Open:** the homepage hero still leads with comebacks (*"Aldri stå tom for svar igjen"*), while the tagline and the stated positioning lead with live games. The hero copy is out of date relative to the positioning.
+- **Leftover copy:** `heroTitle` / `heroSub` in `src/lib/i18n.ts` (*"Aldri stå tom for svar igjen"*) are no longer rendered. The live homepage hero leads with rooms (*"Klar for vors?"*).
 
 ## Brand Commitments
 
