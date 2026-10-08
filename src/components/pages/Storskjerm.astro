@@ -3,7 +3,10 @@
 // Skjermen er ingen spiller. Den kobler seg til med romkode + PIN fra verten og ser bare det alle skal se.
 import '@fontsource-variable/archivo/wdth.css';
 import '../../styles/global.css';
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/fraunces/wght-italic.css';
 import '../../styles/natt.css';
+import '../../styles/champagne.css';
 import { supabaseUrl, supabaseAnonKey } from '../../config';
 import type { Lang } from '../../lib/i18n';
 import FeilFangst from '../FeilFangst.astro';
@@ -19,7 +22,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
   <FeilFangst />
   <meta name="robots" content="noindex" />
-  <meta name="theme-color" content="#120A1D" />
+  <meta name="theme-color" content="#0F0A10" />
   <title>{EN ? 'Big screen – Mitt vors' : 'Storskjerm – Mitt vors'}</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 </head>
@@ -306,7 +309,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   })();
   </script>
   <style is:global>
-    body.tv{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#2B1A44,#0B0614 70%);color:var(--ink);overflow:hidden;font-size:clamp(16px,1.6vw,26px)}
+    body.tv{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#2A1A22,#0A0609 70%);color:var(--ink);overflow:hidden;font-size:clamp(16px,1.6vw,26px)}
     .tv-rot{height:100vh;display:flex;flex-direction:column}
     .tv-hode{display:flex;align-items:center;gap:24px;padding:1.2vh 2.5vw;font-size:1em}
     .tv-logo{font-family:var(--display);font-weight:800;font-size:1.5em}.tv-logo b{color:var(--gold)}
@@ -342,7 +345,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     body.tv .rof-kort{width:min(46vh,26vw);margin-top:0}
     body.tv .rof-regel{font-size:2em}body.tv .rof-tekst{font-size:1.05em}body.tv .rof-hj b{font-size:2.2em}
     .tv-makkere{font-weight:800;font-size:1.2em}
-    .tv-kort{background:#ECE5F6;color:var(--ink2);border-radius:32px;padding:5vh 4vw 6vh;max-width:62vw;min-width:min(52vw,900px);transform:rotate(-1.5deg);
+    .tv-kort{background:#F7EFE3;color:var(--ink2);border-radius:32px;padding:5vh 4vw 6vh;max-width:62vw;min-width:min(52vw,900px);transform:rotate(-1.5deg);
       box-shadow:14px 14px 0 var(--accent),0 30px 80px rgba(0,0,0,.55)}
     .tv-kort p{font-family:var(--display);font-weight:850;font-stretch:100%;font-size:2.7em;letter-spacing:-.02em;margin:1.4vh 0 0;line-height:1.1}
     .tv-kort .tv-etikett{color:var(--glo-dyp)}
@@ -355,7 +358,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tv-pris span{font-size:2.6em}.tv-pris small{text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:800}.tv-pris b{font-family:var(--display);font-size:1.8em}.tv-pris em{opacity:.75;font-style:normal}
     @keyframes tvInn{from{opacity:0;transform:translateY(30px) scale(.9)}to{opacity:1;transform:none}}
     .tv-meldt{background:var(--accent);color:var(--ink2);font-weight:800;padding:1.4vh 2.5vw;font-size:1.2em;animation:tvPuls 1.2s ease-in-out infinite}.tv-meldt small{opacity:.8;font-weight:600}
-    @keyframes tvPuls{50%{background:#FF7A45}}
+    @keyframes tvPuls{50%{background:#E8705A}}
     .tv-kobling{margin:auto;max-width:720px;text-align:center;display:flex;flex-direction:column;gap:2.4vh;align-items:center;padding:4vh 4vw}
     .tv-kobling h1{font-size:2.6em;margin:0}
     .tv-felt{display:flex;gap:2vw}.tv-felt label{display:flex;flex-direction:column;gap:6px;font-weight:700;text-align:left}

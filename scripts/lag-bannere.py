@@ -2,7 +2,8 @@
 import math, os, json
 UT = os.path.join(os.path.dirname(__file__), '..', 'public', 'illustrasjoner', 'lek')
 os.makedirs(UT, exist_ok=True)
-BG = '#2a1f12'; KORAL = '#ff6a4d'; GULL = '#f4b740'; KREM = '#f4ebdc'; MORK = '#141009'; TURK = '#3fb8a9'; LILLA = '#8b7cf6'; ROSA = '#ff8fb1'
+# Champagnenatt (samme palett som scripts/fargelegg-illustrasjoner.mjs)
+BG = '#2A1A22'; KORAL = '#D9503C'; GULL = '#E4C47F'; KREM = '#F7EFE3'; MORK = '#1A1012'; TURK = '#C98B8F'; LILLA = '#C98B8F'; ROSA = '#EFA0A6'
 FONT = 'Arial,Helvetica,sans-serif'
 
 def svg(innhold, blob1=KORAL, blob2=GULL, bx=175, by=20):

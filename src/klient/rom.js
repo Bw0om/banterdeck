@@ -2181,19 +2181,19 @@ export function startRom(LEKNAVN, LANG) {
 
   /* ---------- straffehjulet ---------- */
   var tavleHjul = null, sisteHjul = -1, hjulSpinner = false;
-  var HJULFARGER = ['#C8FF2E', '#FF5B1F', '#2B1A44', '#7DA80F'];
+  var HJULFARGER = ['#E4C47F', '#D9503C', '#2A1A22', '#8C6A2C'];
   function hjulSvg(liste) {
     var n = liste.length, r = 150, seg = 360 / n, deler = '';
     liste.forEach(function (tekst, i) {
       var a0 = (i * seg - 90) * Math.PI / 180, a1 = ((i + 1) * seg - 90) * Math.PI / 180;
       var x0 = 160 + r * Math.cos(a0), y0 = 160 + r * Math.sin(a0), x1 = 160 + r * Math.cos(a1), y1 = 160 + r * Math.sin(a1);
       var farge = HJULFARGER[i % 4] === HJULFARGER[0] && i === n - 1 && n % 4 === 1 ? HJULFARGER[1] : HJULFARGER[i % 4];
-      var tekstFarge = farge === '#2B1A44' ? '#F5F0FF' : '#12081C', midt = (i + 0.5) * seg;
+      var tekstFarge = farge === '#2A1A22' ? '#F7EFE3' : '#1A1012', midt = (i + 0.5) * seg;
       var kort = tekst.length > 18 ? tekst.slice(0, 17) + '…' : tekst, fs = Math.max(9, Math.min(n > 8 ? 11.5 : 13.5, 108 / (kort.length * 0.6)));
-      deler += '<path d="M160 160 L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + (seg > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + farge + '" stroke="#120A1D" stroke-width="2"/>' +
+      deler += '<path d="M160 160 L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + (seg > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + farge + '" stroke="#1A1012" stroke-width="2"/>' +
         '<text x="160" y="160" transform="rotate(' + (midt - 90) + ' 160 160) translate(34 4)" fill="' + tekstFarge + '" font-size="' + fs.toFixed(1) + '" font-weight="700">' + esc(kort) + '</text>';
     });
-    return '<div class="hjul-ramme"><svg class="hjul" viewBox="0 0 320 320" aria-hidden="true"><g class="hjul-snurr">' + deler + '</g><circle cx="160" cy="160" r="22" fill="#120A1D" stroke="#C8FF2E" stroke-width="3"/></svg><span class="hjul-pil" aria-hidden="true"></span></div>';
+    return '<div class="hjul-ramme"><svg class="hjul" viewBox="0 0 320 320" aria-hidden="true"><g class="hjul-snurr">' + deler + '</g><circle cx="160" cy="160" r="22" fill="#1A1012" stroke="#E4C47F" stroke-width="3"/></svg><span class="hjul-pil" aria-hidden="true"></span></div>';
   }
   function aapneHjul() {
     if (tavleHjul) return;
@@ -2312,25 +2312,25 @@ export function startRom(LEKNAVN, LANG) {
     var t = kveldsTall(), W = 1080, H = 1920, font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
     var c = document.createElement('canvas'); c.width = W; c.height = H;
     var g = medT(c.getContext('2d'));
-    var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#2B1A44'); bg.addColorStop(0.45, '#120A1D'); bg.addColorStop(1, '#0B0614');
+    var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#2A1A22'); bg.addColorStop(0.45, '#1A1012'); bg.addColorStop(1, '#0A0609');
     g.fillStyle = bg; g.fillRect(0, 0, W, H);
     // logoen (flisen med to kopper) i hjørnet
     (function () {
       g.save(); g.translate(905, 190); g.rotate(0.1); g.scale(2.3, 2.3); g.translate(-50, -50);
-      g.fillStyle = '#FF5B1F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
+      g.fillStyle = '#E4C47F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
       [[45.5, -24], [54.5, 24]].forEach(function (k) {
         g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180);
-        g.fillStyle = '#120A1D'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z'));
-        g.fillStyle = '#F5F0FF'; g.fillRect(-12.5, -41, 25, 6); g.restore();
+        g.fillStyle = '#1A1012'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z'));
+        g.fillStyle = '#F7EFE3'; g.fillRect(-12.5, -41, 25, 6); g.restore();
       });
-      g.strokeStyle = '#F5F0FF'; g.lineWidth = 5; g.lineCap = 'round';
+      g.strokeStyle = '#1A1012'; g.lineWidth = 5; g.lineCap = 'round';
       g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
       g.restore();
     })();
     function sentrert(x, y, stil, farge) { g.font = stil; g.fillStyle = farge; g.fillText(x, 80, y); }
-    g.font = '800 44px ' + font; g.fillStyle = '#F5F0FF'; g.fillText('mitt', 80, 150);
-    var bredde = g.measureText('mitt').width; g.fillStyle = '#FF5B1F'; g.fillText('vors', 80 + bredde, 150);
-    g.font = '800 104px ' + font; g.fillStyle = '#F5F0FF';
+    g.font = '800 44px ' + font; g.fillStyle = '#F7EFE3'; g.fillText('mitt', 80, 150);
+    var bredde = g.measureText('mitt').width; g.fillStyle = '#E4C47F'; g.fillText('vors', 80 + bredde, 150);
+    g.font = '800 104px ' + font; g.fillStyle = '#F7EFE3';
     g.fillText(T('Kveldens', 'Tonight\'s'), 80, 330); g.fillText(T('oppsummering', 'recap'), 80, 440);
     var dag = new Date(tilstand.ferdig || Date.now()).toLocaleDateString(LOKALE, { weekday: 'long', day: 'numeric', month: 'long' });
     sentrert(dag.charAt(0).toUpperCase() + dag.slice(1) + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 510, '500 38px ' + font, '#B4A7CF');
@@ -2339,7 +2339,7 @@ export function startRom(LEKNAVN, LANG) {
     tall.forEach(function (x, i) {
       var bx = 80 + i * 310;
       g.fillStyle = 'rgba(200,255,46,.10)'; g.beginPath(); if (g.roundRect) g.roundRect(bx, 570, 290, 170, 28); else g.rect(bx, 570, 290, 170); g.fill();
-      g.fillStyle = '#C8FF2E'; g.font = '800 70px ' + font; g.fillText(String(x[0]), bx + 28, 668);
+      g.fillStyle = '#E4C47F'; g.font = '800 70px ' + font; g.fillText(String(x[0]), bx + 28, 668);
       g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x[1], bx + 30, 716);
     });
     var y = 830;
@@ -2347,28 +2347,28 @@ export function startRom(LEKNAVN, LANG) {
       g.fillStyle = 'rgba(248,233,210,.06)'; g.beginPath(); if (g.roundRect) g.roundRect(80, y - 20, W - 160, 132, 26); else g.rect(80, y - 20, W - 160, 132); g.fill();
       g.font = '64px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; g.fillStyle = '#fff'; g.fillText(x.ikon, 110, y + 72);
       g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x.tittel, 210, y + 30);
-      g.fillStyle = '#F5F0FF'; g.font = '700 48px ' + font; g.fillText((x.navn + ' · ' + x.tall).slice(0, 34), 210, y + 90);
+      g.fillStyle = '#F7EFE3'; g.font = '700 48px ' + font; g.fillText((x.navn + ' · ' + x.tall).slice(0, 34), 210, y + 90);
       y += 152;
     });
     y += 30;
-    g.fillStyle = '#C8FF2E'; g.font = '700 40px ' + font; g.fillText(T('Slurketavla', 'Sip board'), 80, y); y += 20;
+    g.fillStyle = '#E4C47F'; g.font = '700 40px ' + font; g.fillText(T('Slurketavla', 'Sip board'), 80, y); y += 20;
     var topp = Math.max(1, t.rangert[0] ? t.rangert[0].slurker || 0 : 1);
     t.rangert.slice(0, Math.max(3, Math.min(6, Math.floor((1700 - y) / 76)))).forEach(function (p, i) {
       y += 76;
-      g.fillStyle = i === 0 ? '#C8FF2E' : '#F5F0FF'; g.font = '700 42px ' + font; g.fillText((i + 1) + '. ' + p.navn.slice(0, 16), 80, y);
+      g.fillStyle = i === 0 ? '#E4C47F' : '#F7EFE3'; g.font = '700 42px ' + font; g.fillText((i + 1) + '. ' + p.navn.slice(0, 16), 80, y);
       g.fillStyle = 'rgba(200,255,46,.18)'; g.fillRect(560, y - 30, 300, 26);
-      g.fillStyle = '#C8FF2E'; g.fillRect(560, y - 30, Math.round(300 * (p.slurker || 0) / topp), 26);
-      g.fillStyle = '#F5F0FF'; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
+      g.fillStyle = '#E4C47F'; g.fillRect(560, y - 30, Math.round(300 * (p.slurker || 0) / topp), 26);
+      g.fillStyle = '#F7EFE3'; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
     });
     if (t.leker.length && y < 1560) {
       y += 90; g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(T('Dere spilte', 'You played'), 80, y);
-      g.fillStyle = '#F5F0FF'; g.font = '600 38px ' + font;
+      g.fillStyle = '#F7EFE3'; g.font = '600 38px ' + font;
       var linje = '', ord = t.leker.join(' · ').split(' ');
       ord.forEach(function (w) { var prov = linje ? linje + ' ' + w : w; if (g.measureText(prov).width > W - 160 && linje) { y += 52; if (y < 1700) g.fillText(linje, 80, y); linje = w; } else linje = prov; });
       y += 52; if (y < 1700) g.fillText(linje, 80, y);
     }
-    g.fillStyle = '#C8FF2E'; g.fillRect(80, H - 170, W - 160, 4);
-    g.fillStyle = '#F5F0FF'; g.font = '700 44px ' + font; g.fillText(T('Spill med oss neste gang', 'Play with us next time'), 80, H - 95);
+    g.fillStyle = '#E4C47F'; g.fillRect(80, H - 170, W - 160, 4);
+    g.fillStyle = '#F7EFE3'; g.font = '700 44px ' + font; g.fillText(T('Spill med oss neste gang', 'Play with us next time'), 80, H - 95);
     g.fillStyle = '#B4A7CF'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
     return new Promise(function (ok) {
       c.toBlob(function (blob) { ok(blob ? new File([blob], 'mittvors-kveld.png', { type: 'image/png' }) : null); }, 'image/png');
@@ -2380,10 +2380,10 @@ export function startRom(LEKNAVN, LANG) {
     var W = 1080, H = 1920, font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
     var c = document.createElement('canvas'); c.width = W; c.height = H;
     var g = medT(c.getContext('2d'));
-    var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#3A2560'); bg.addColorStop(0.5, '#120A1D'); bg.addColorStop(1, '#0B0614');
+    var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#3A2230'); bg.addColorStop(0.5, '#1A1012'); bg.addColorStop(1, '#0A0609');
     g.fillStyle = bg; g.fillRect(0, 0, W, H);
-    g.font = '800 44px ' + font; g.fillStyle = '#F5F0FF'; g.fillText('mitt', 80, 150);
-    var b = g.measureText('mitt').width; g.fillStyle = '#FF5B1F'; g.fillText('vors', 80 + b, 150);
+    g.font = '800 44px ' + font; g.fillStyle = '#F7EFE3'; g.fillText('mitt', 80, 150);
+    var b = g.measureText('mitt').width; g.fillStyle = '#E4C47F'; g.fillText('vors', 80 + b, 150);
     function linjer(tekst, stil, maks) {
       g.font = stil; var ut = [], l = '';
       String(tekst).split(' ').forEach(function (w) { var p = l ? l + ' ' + w : w; if (g.measureText(p).width > maks && l) { ut.push(l); l = w; } else l = p; });
@@ -2391,30 +2391,30 @@ export function startRom(LEKNAVN, LANG) {
     }
     var kv = tilstand.kveld || {}, lv = kv.lovValg || {};
     g.fillStyle = '#B4A7CF'; g.font = '600 40px ' + font; g.fillText('⚖️ ' + T('Gjengens lov', 'The Crew’s Law') + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 80, 300);
-    g.fillStyle = '#F5F0FF'; g.font = '800 64px ' + font; g.fillText(linjer('🏆 ' + (kv.vinner ? navn(kv.vinner) : '') + T(' vant kvelden', ' won the night'), '800 64px ' + font, W - 160)[0], 80, 380);
+    g.fillStyle = '#F7EFE3'; g.font = '800 64px ' + font; g.fillText(linjer('🏆 ' + (kv.vinner ? navn(kv.vinner) : '') + T(' vant kvelden', ' won the night'), '800 64px ' + font, W - 160)[0], 80, 380);
     var y = 520;
     var boks = function (hoyde, farge) { g.fillStyle = farge; g.beginPath(); if (g.roundRect) g.roundRect(80, y, W - 160, hoyde, 36); else g.rect(80, y, W - 160, hoyde); g.fill(); };
     if (lv.tekst) {
       var l = linjer('«' + lv.tekst + '»', '800 72px ' + font, W - 260), hh = 200 + l.length * 88;
-      boks(hh, lv.type === 'opphev' ? '#3A2560' : '#F5F0FF');
-      g.fillStyle = lv.type === 'opphev' ? '#FF5B1F' : '#B33A0B'; g.font = '700 36px ' + font; g.fillText(lv.type === 'opphev' ? '🗑️ ' + T('OPPHEVET', 'REPEALED') : '📜 ' + T('NY REGEL', 'NEW RULE'), 130, y + 90);
-      g.fillStyle = lv.type === 'opphev' ? '#B4A7CF' : '#12081C'; g.font = '800 72px ' + font; l.forEach(function (x, i) { g.fillText(x, 130, y + 190 + i * 88); });
+      boks(hh, lv.type === 'opphev' ? '#3A2230' : '#F7EFE3');
+      g.fillStyle = lv.type === 'opphev' ? '#D9503C' : '#8A2A1D'; g.font = '700 36px ' + font; g.fillText(lv.type === 'opphev' ? '🗑️ ' + T('OPPHEVET', 'REPEALED') : '📜 ' + T('NY REGEL', 'NEW RULE'), 130, y + 90);
+      g.fillStyle = lv.type === 'opphev' ? '#B4A7CF' : '#1A1012'; g.font = '800 72px ' + font; l.forEach(function (x, i) { g.fillText(x, 130, y + 190 + i * 88); });
       y += hh + 50;
     }
     var antall = ((tilstand.gjeng && tilstand.gjeng.regler) || []).length;
-    if (antall) { g.fillStyle = '#C8FF2E'; g.font = '700 48px ' + font; g.fillText('📜 ' + antall + T(antall === 1 ? ' regel i lovboka' : ' regler i lovboka', antall === 1 ? ' rule in the law book' : ' rules in the law book'), 80, y + 60); }
+    if (antall) { g.fillStyle = '#E4C47F'; g.font = '700 48px ' + font; g.fillText('📜 ' + antall + T(antall === 1 ? ' regel i lovboka' : ' regler i lovboka', antall === 1 ? ' rule in the law book' : ' rules in the law book'), 80, y + 60); }
     y += 120;
     if (y < 1380) {
       // Logoen (flisen) fyller tomrommet nederst
       var cy = Math.min(1500, y + (1700 - y) / 2), sk = Math.min(4.2, (1700 - y) / 130);
       g.save(); g.translate(W / 2, cy); g.rotate(-0.08); g.scale(sk, sk); g.translate(-50, -50);
-      g.fillStyle = '#FF5B1F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
-      [[45.5, -24], [54.5, 24]].forEach(function (k) { g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180); g.fillStyle = '#120A1D'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z')); g.fillStyle = '#F5F0FF'; g.fillRect(-12.5, -41, 25, 6); g.restore(); });
-      g.strokeStyle = '#F5F0FF'; g.lineWidth = 5; g.lineCap = 'round'; g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
+      g.fillStyle = '#E4C47F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
+      [[45.5, -24], [54.5, 24]].forEach(function (k) { g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180); g.fillStyle = '#1A1012'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z')); g.fillStyle = '#F7EFE3'; g.fillRect(-12.5, -41, 25, 6); g.restore(); });
+      g.strokeStyle = '#1A1012'; g.lineWidth = 5; g.lineCap = 'round'; g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
       g.restore();
     }
-    g.fillStyle = '#C8FF2E'; g.fillRect(80, H - 170, W - 160, 4);
-    g.fillStyle = '#F5F0FF'; g.font = '700 44px ' + font; g.fillText(T('Hvilke lover har din gjeng?', 'What laws does your crew have?'), 80, H - 95);
+    g.fillStyle = '#E4C47F'; g.fillRect(80, H - 170, W - 160, 4);
+    g.fillStyle = '#F7EFE3'; g.font = '700 44px ' + font; g.fillText(T('Hvilke lover har din gjeng?', 'What laws does your crew have?'), 80, H - 95);
     g.fillStyle = '#B4A7CF'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
     return new Promise(function (ok) { c.toBlob(function (bl) { ok(bl ? new File([bl], 'mittvors-lov.png', { type: 'image/png' }) : null); }, 'image/png'); });
   }
@@ -2490,23 +2490,23 @@ export function startRom(LEKNAVN, LANG) {
     var l = rangert(), k = kaaring(), W = 1080, H = Math.max(1080, 420 + l.length * 96 + k.length * 110);
     var c = document.createElement('canvas'); c.width = W; c.height = H;
     var g = medT(c.getContext('2d')), font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
-    g.fillStyle = '#120A1D'; g.fillRect(0, 0, W, H);
-    g.fillStyle = '#C8FF2E'; g.font = '800 84px ' + font; g.fillText(T('Kveldens tavle', 'Tonight\'s board'), 80, 160);
+    g.fillStyle = '#1A1012'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#E4C47F'; g.font = '800 84px ' + font; g.fillText(T('Kveldens tavle', 'Tonight\'s board'), 80, 160);
     g.fillStyle = '#B4A7CF'; g.font = '500 36px ' + font;
     g.fillText(new Date().toLocaleDateString(LOKALE, { weekday: 'long', day: 'numeric', month: 'long' }) + T(' · rom ', ' · room ') + kode, 80, 220);
     var y = 320, maks = Math.max(1, l[0] ? l[0].slurker || 0 : 1);
     l.forEach(function (p, i) {
-      g.fillStyle = i === 0 ? '#C8FF2E' : '#F5F0FF'; g.font = '800 48px ' + font; g.fillText((i + 1) + '.', 80, y);
+      g.fillStyle = i === 0 ? '#E4C47F' : '#F7EFE3'; g.font = '800 48px ' + font; g.fillText((i + 1) + '.', 80, y);
       g.font = '700 48px ' + font; g.fillText(p.navn.slice(0, 18), 160, y);
       g.fillStyle = 'rgba(200,255,46,.25)'; g.fillRect(620, y - 34, 300, 30);
-      g.fillStyle = '#C8FF2E'; g.fillRect(620, y - 34, Math.round(300 * (p.slurker || 0) / maks), 30);
-      g.fillStyle = '#F5F0FF'; g.font = '800 48px ' + font; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
+      g.fillStyle = '#E4C47F'; g.fillRect(620, y - 34, Math.round(300 * (p.slurker || 0) / maks), 30);
+      g.fillStyle = '#F7EFE3'; g.font = '800 48px ' + font; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
       y += 96;
     });
     y += 30;
     k.forEach(function (x) {
       g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x.ikon + '  ' + x.tittel, 80, y);
-      g.fillStyle = '#F5F0FF'; g.font = '700 44px ' + font; g.fillText(x.navn + (x.n !== null ? ' · ' + x.n : ''), 80, y + 52); y += 110;
+      g.fillStyle = '#F7EFE3'; g.font = '700 44px ' + font; g.fillText(x.navn + (x.n !== null ? ' · ' + x.n : ''), 80, y + 52); y += 110;
     });
     g.fillStyle = '#8F81AD'; g.font = '600 32px ' + font; g.fillText('mittvors.no', 80, H - 70);
     c.toBlob(function (blob) {

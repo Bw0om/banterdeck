@@ -25,7 +25,7 @@ import { ClientRouter } from 'astro:transitions';
 interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; bilde?: string; }
 const { title, description, lang = 'en', gate = false, noindex = false, bilde = '/og/mittvors.jpg' } = Astro.props;
 // ?v=… tvinger Snap, Messenger og iMessage til å hente de nye delingsbildene i stedet for gamle kopier
-const bildeUrl = new URL(bilde, Astro.site); if (bildeUrl.pathname.startsWith('/og/')) bildeUrl.searchParams.set('v', '3');
+const bildeUrl = new URL(bilde, Astro.site); if (bildeUrl.pathname.startsWith('/og/')) bildeUrl.searchParams.set('v', '4');
 const L = ui(lang);
 const desc = description || L.tagline;
 const fullTitle = title ? `${title} – ${SITE_NAME}` : `${SITE_NAME} – ${L.tagline}`;
@@ -253,7 +253,7 @@ const isCurrent = (href: string) => {
 
   <div class="shell">
     <aside class="side">
-      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#E4C47F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#E4C47F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F7EFE3"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F7EFE3"/></g><g stroke="#1A1012" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
       <button class="searchbtn" data-search><Icon name="sok" />{L.search}<kbd>⌘K</kbd></button>
       <nav class="sidenav" aria-label={L.pickMode}>
         {nav.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}><Icon name={n.icon} />{n.label}</a>)}
@@ -274,7 +274,7 @@ const isCurrent = (href: string) => {
 
     <div class="topbars">
     <div class="mobilebar">
-      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#E4C47F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
+      <a class="brand" href={path(lang, '/')}><svg class="brandmark" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><rect x="4" y="4" width="92" height="92" rx="30" fill="#E4C47F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F7EFE3"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F7EFE3"/></g><g stroke="#1A1012" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg><span class="bt" aria-label={SITE_NAME}>mitt<i>vors</i></span></a>
       <span class="mobilebar-right">
         <button class="langlink compact" data-search aria-label={L.search}><Icon name="sok" size={19} /></button>
         <a class="pluss-pille" href={lang === 'no' ? '/no/pluss' : '/plus'} data-pluss-pille>Pluss</a>
@@ -334,7 +334,7 @@ const isCurrent = (href: string) => {
   {UTVIKLING.paa && (
     <div id="utvikling" class="utvikling" role="dialog" aria-modal="true" aria-labelledby="utvTittel">
       <form class="utv-boks" id="utvSkjema" novalidate>
-        <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="30" fill="#E4C47F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F5F0FF"/></g><g stroke="#F5F0FF" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg>
+        <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true"><rect x="4" y="4" width="92" height="92" rx="30" fill="#E4C47F"/><g transform="translate(45.5 78) rotate(-24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F7EFE3"/></g><g transform="translate(54.5 78) rotate(24)"><path d="M-8 0 L-12 -41 H12 L8 0 Z" fill="#1A1012"/><rect x="-12.5" y="-41" width="25" height="6" rx="2" fill="#F7EFE3"/></g><g stroke="#1A1012" stroke-width="5" stroke-linecap="round"><path d="M50 29 V18"/><path d="M40.5 31 L35.5 24.5"/><path d="M59.5 31 L64.5 24.5"/></g></svg>
         <h1 id="utvTittel">mitt<span>vors</span></h1>
         <p>{lang === 'no' ? 'Vi legger siste hånd på vorset. Siden åpner snart!' : 'We’re putting the final touches on the party. Opening soon!'}</p>
         <label for="utvKode" class="small">{lang === 'no' ? 'Har du fått en kode?' : 'Got a code?'}</label>
