@@ -185,7 +185,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 .rom-mod button{min-height:48px;padding:0 18px;border-radius:14px;border:2px solid var(--border2);background:transparent;font-family:var(--display);font-stretch:104%;font-weight:750;font-size:15px}
 .rom-mod button:hover{background:var(--gold);border-color:var(--gold);color:var(--ink2)}
 .rom-bg{border-radius:22px}
-.rom-bg-rad.paa{background:rgb(var(--volt-rgb) / .07);box-shadow:inset 4px 0 0 var(--gold)}
+.rom-bg-rad.paa{background:rgb(var(--volt-rgb) / .09);box-shadow:inset 0 0 0 1px rgb(var(--volt-rgb) / .45)}
 .rom-bg-rad b{font-stretch:108%;font-size:17.5px}
 .rom-bg-ikon{width:44px;height:44px;border-radius:14px}
 .rom-mester{border-radius:16px;font-size:15px}
@@ -315,7 +315,7 @@ html.hemmelig .hemmelig-merke{display:flex;align-items:center;justify-content:ce
 .pk-kort{background:var(--card2);color:var(--ink);border:1px solid var(--border2)}
 .delt-smak li{background:var(--card2);color:var(--ink);border:1px solid var(--border2)}
 .rom-fortsett{border-color:var(--gold)}
-.h2-rom.fortsett{border-color:var(--gold);box-shadow:inset 4px 0 0 var(--gold)}
+.h2-rom.fortsett{border-color:var(--gold)}
 .mode .mt{font-stretch:112%}
 .game .gn,.tile .tn{font-stretch:106%}
 .chips a{font-family:var(--display);font-stretch:104%;border-radius:12px;min-height:40px;display:inline-flex;align-items:center}
@@ -421,7 +421,7 @@ html:has(#rom),html:has(#rom) body{overscroll-behavior-y:none}
 #rom .linkbtn.to-trinn{background:var(--accent);color:var(--ink2);border-radius:12px;padding:10px 16px;text-decoration:none;font-family:var(--display);font-weight:850}
 #rom .btn.to-trinn{background:repeating-linear-gradient(45deg,var(--accent) 0 12px,#FF7A45 12px 24px);border-color:var(--accent);color:var(--ink2)}
 .rom-fjern.to-trinn{background:var(--accent);color:var(--ink2);border-radius:9px;padding:0 10px;margin-left:6px;font-family:var(--display);font-weight:850;font-size:14px;min-height:30px}
-.rom-verktoy-rad.to-trinn{background:rgb(var(--glo-rgb) / .16);box-shadow:inset 4px 0 0 var(--accent)}
+.rom-verktoy-rad.to-trinn{background:rgb(var(--glo-rgb) / .16);box-shadow:inset 0 0 0 1px rgb(var(--glo-rgb) / .55)}
 .rom-verktoy-rad.to-trinn b{color:var(--accent-t)}
 .rom-verktoy-rad.to-trinn small{display:none}
 @media (prefers-reduced-motion:reduce){.to-trinn{animation:none}}
@@ -578,3 +578,58 @@ html:not([data-theme="light"]) .gt-card{background:#ECE5F6}
 .h2-jul .h2-badge{grid-column:2;grid-row:1;align-self:center;transform:rotate(4deg)}
 .h2-pluss-navn{font-family:var(--display);font-stretch:112%;font-weight:850;font-size:15px;color:var(--glo-dyp);letter-spacing:-.01em}
 @media (max-width:759px){.h2-pluss-navn{flex-basis:100%;margin-bottom:-6px}.h2-pluss-stubb{flex-wrap:wrap}}
+
+
+/* ---------- Pussing (okt 2026) ---------- */
+/* Nettleserflatene: rullefelt og skrivemerke i paletten, ikke grå standard */
+html{scrollbar-color:rgb(var(--ink-rgb) / .22) transparent}
+input,textarea{caret-color:var(--gold)}
+:root[data-theme="light"] :is(input,textarea){caret-color:var(--gold-t)}
+
+/* Ikoner i knapper, filterbrikker og merker står på linje med teksten */
+.lk-chips button{display:inline-flex;align-items:center;gap:7px}
+.lk-chips button .icon,.btn .icon{flex:none}
+.lk-pl{display:inline-flex;align-items:center;gap:4px}
+.lk-meta i{display:inline-flex;align-items:center;gap:4px}
+/* Gratis er normalen – bare Pluss får aksentfargen */
+.lk-meta i.gratis{background:transparent;color:var(--faint);border:1px solid var(--border2);padding:1px 7px}
+.lek-niva{display:inline-flex;align-items:center;gap:6px}
+.rom-etikett:has(.icon){display:inline-flex;align-items:center;gap:6px}
+h2.withicon{gap:10px}
+
+/* Kveldsplan: hele brikken er valget – skjul nettleserens egne runde knapper og avkrysningsbokser */
+.kv-valg label{position:relative;min-height:44px;padding:0 18px}
+.kv-valg input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.kv-valg label:has(input:focus-visible){outline:3px solid var(--gold);outline-offset:3px}
+:root[data-theme="light"] .kv-valg label:has(input:focus-visible){outline-color:var(--volt-kant)}
+.kv-valg label:hover{border-color:var(--gold-t)}
+
+/* Pluss-fordelene: en ryddig liste med streker, ikke seks like bokser */
+.pluss-fordeler{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:0 36px;margin:26px 0 30px}
+.pluss-fordeler div{background:none;border:0;border-top:1px solid var(--border);border-radius:0;padding:16px 0 18px;
+  display:grid;grid-template-columns:30px 1fr;column-gap:12px;row-gap:3px;align-items:start}
+.pluss-fordeler .icon{grid-row:span 2;color:var(--gold-t);margin-top:1px}
+.pluss-fordeler small{max-width:46ch;line-height:1.5}
+
+/* Spill sammen: boksene tar bare plassen de trenger, og hinttekst under får luft */
+.rom-start{align-items:start}
+.rom-start + .small{margin-top:16px}
+
+/* Knapperader på lekesiden brytes pent på mobil */
+.startrow{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.startrow .romlenke{margin:0}
+
+/* Hinttekst rett under en stor knapp skal ikke klistre seg til knappens skygge */
+p:has(> .btn:only-child) + p.small{margin-top:12px}
+
+/* Sidemenyen: underpunktene (Fornemt sagt, Sitater …) står innrykket under teksten til punktet over, ikke løst i margen */
+.sidenav a.sub{padding-left:40px;font-size:14px;color:var(--faint);min-height:0;padding-top:7px;padding-bottom:7px}
+.sidenav a.sub:hover,.sidenav a.sub[aria-current=page]{color:var(--ink)}
+
+/* Knapperader som brytes på smal skjerm fyller hele linjen, i stedet for hakkete bredder */
+@media (max-width:640px){
+  .lk-snarveier .btn,.startrow .btn{flex:1 1 auto}
+}
+/* Sidemenyen ruller selv når skjermen er lav, så bunnlenkene ikke kuttes */
+.side{overflow-y:auto;scrollbar-width:none}
+.side::-webkit-scrollbar{display:none}

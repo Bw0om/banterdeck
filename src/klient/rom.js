@@ -478,7 +478,7 @@ export function startRom(LEKNAVN, LANG) {
           '<p class="small">' + (ln ? T('Du blir vert og starter når alle er med.', 'You\'ll be the host and start when everyone\'s in.') : T('Du blir vert og velger lekene.', 'You\'ll be the host and pick the games.')) + '</p>' +
           '<label for="romNavn2">' + T('Navnet ditt', 'Your name') + '</label>' +
           '<input id="romNavn2" maxlength="20" autocomplete="nickname" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="' + T('F.eks. Maria', 'E.g. Sam') + '" value="' + esc(navn) + '">' +
-          '<button class="btn ' + (ln ? 'gold ' : '') + 'rom-knapp" type="submit">' + T('Lag rom', 'Create room') + '</button>' +
+          '<button class="btn gold rom-knapp" type="submit">' + T('Lag rom', 'Create room') + '</button>' +
         '</form>' +
       '</div>' +
       (medKode ? '' : '<p class="small">' + T('Lag mot lag? La hvert lag bli med fra én telefon og bruk lagnavnet som navn.', 'Team vs team? Let each team join from one phone and use the team name as their name.') + '</p>');

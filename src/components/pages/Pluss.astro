@@ -2,6 +2,7 @@
 // Mitt vors Pluss: hva man får, prøv gratis, kjøp med Vipps, og spill pakkene.
 // Felles for /no/pluss (lang="no") og /plus (lang="en").
 import Base from '../../layouts/Base.astro';
+import Icon from '../Icon.astro';
 import { PAKKER } from '../../lib/rom';
 import type { Lang } from '../../lib/i18n';
 const { lang = 'no' } = Astro.props as { lang?: Lang };
@@ -22,13 +23,11 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
 <Base title={no ? 'Mitt vors Pluss' : 'Mitt vors Plus'} description={no ? 'Verten betaler – alle i rommet spiller med. Kveldspass 29 kr, årspass 199 kr. Første kveld er gratis.' : 'The host pays – everyone in the room plays. Night pass 29 NOK, year pass 199 NOK. Your first night is free.'} lang={lang} gate={true} bilde="/og/rom.jpg">
   {no ? (
     <section class="pluss-hero">
-      <p class="rom-etikett">Mitt vors Pluss</p>
       <h1>Verten betaler.<br />Alle spiller med.</h1>
       <p class="lead">Når du har Pluss og lager et rom, låses alle pakkene opp for alle som blir med – uansett om de har Pluss selv.</p>
     </section>
   ) : (
     <section class="pluss-hero">
-      <p class="rom-etikett">Mitt vors Plus</p>
       <h1>The host pays.<br />Everyone plays.</h1>
       <p class="lead">When you have Plus and create a room, every pack is unlocked for everyone who joins – whether they have Plus or not.</p>
     </section>
@@ -38,21 +37,21 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
 
   {no ? (
     <section class="pluss-fordeler">
-      <div><span>📱</span><b>Opptil 16 telefoner</b><small>Gratis rom har plass til 4. Med Pluss kan hele festen være med – og ingen andre trenger å betale.</small></div>
-      <div><span>📈</span><b>Hele Vorsbørsen</b><small>100 aksjer i potten hver kveld i stedet for 40 – mer å handle i, mer å jakte på.</small></div>
-      <div><span>🕵️</span><b>Agent 0,5</b><small>Alle får et hemmelig oppdrag som varer hele kvelden.</small></div>
-      <div><span>🃏</span><b>Flere leker på mobilen</b><small>Bussruta, Drikke-Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna – alene eller i rom.</small></div>
-      <div><span>🎉</span><b>{pakker.length} kortpakker til ulike kvelder</b><small>{pakkeNavn} – {antKort} kort til sammen, laget for akkurat den kvelden.</small></div>
-      <div><span>✨</span><b>Flere pakker kommer</b><small>Nye pakker legges til Pluss etter hvert – uten ekstra kostnad.</small></div>
+      <div><Icon name="telefon" size={22} /><b>Opptil 16 telefoner</b><small>Gratis rom har plass til 4. Med Pluss kan hele festen være med – og ingen andre trenger å betale.</small></div>
+      <div><Icon name="graf" size={22} /><b>Hele Vorsbørsen</b><small>100 aksjer i potten hver kveld i stedet for 40 – mer å handle i, mer å jakte på.</small></div>
+      <div><Icon name="agent" size={22} /><b>Agent 0,5</b><small>Alle får et hemmelig oppdrag som varer hele kvelden.</small></div>
+      <div><Icon name="kort" size={22} /><b>Flere leker på mobilen</b><small>Bussruta, Drikke-Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna – alene eller i rom.</small></div>
+      <div><Icon name="gave" size={22} /><b>{pakker.length} kortpakker til ulike kvelder</b><small>{pakkeNavn} – {antKort} kort til sammen, laget for akkurat den kvelden.</small></div>
+      <div><Icon name="gnist" size={22} /><b>Flere pakker kommer</b><small>Nye pakker legges til Pluss etter hvert – uten ekstra kostnad.</small></div>
     </section>
   ) : (
     <section class="pluss-fordeler">
-      <div><span>📱</span><b>Up to 16 phones</b><small>Free rooms fit 4. With Plus the whole party can join – and nobody else has to pay.</small></div>
-      <div><span>📈</span><b>The whole Exchange</b><small>100 shares in the pot every night instead of 40 – more to trade, more to hunt for.</small></div>
-      <div><span>🕵️</span><b>Agent 0.5</b><small>Everyone gets a secret mission that lasts all night.</small></div>
-      <div><span>🃏</span><b>More games on your phone</b><small>Ride the Bus, Drinking Yahtzee, The Pyramid, President, Pig, The Liar and Tall Tales – on your own or in a room.</small></div>
-      <div><span>🎉</span><b>{pakker.length} card packs for different nights</b><small>{pakkeNavn} – {antKort} cards in total, each made for that kind of night.</small></div>
-      <div><span>✨</span><b>More packs on the way</b><small>New packs are added to Plus over time – at no extra cost.</small></div>
+      <div><Icon name="telefon" size={22} /><b>Up to 16 phones</b><small>Free rooms fit 4. With Plus the whole party can join – and nobody else has to pay.</small></div>
+      <div><Icon name="graf" size={22} /><b>The whole Exchange</b><small>100 shares in the pot every night instead of 40 – more to trade, more to hunt for.</small></div>
+      <div><Icon name="agent" size={22} /><b>Agent 0.5</b><small>Everyone gets a secret mission that lasts all night.</small></div>
+      <div><Icon name="kort" size={22} /><b>More games on your phone</b><small>Ride the Bus, Drinking Yahtzee, The Pyramid, President, Pig, The Liar and Tall Tales – on your own or in a room.</small></div>
+      <div><Icon name="gave" size={22} /><b>{pakker.length} card packs for different nights</b><small>{pakkeNavn} – {antKort} cards in total, each made for that kind of night.</small></div>
+      <div><Icon name="gnist" size={22} /><b>More packs on the way</b><small>New packs are added to Plus over time – at no extra cost.</small></div>
     </section>
   )}
 
@@ -82,7 +81,7 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
   </section>
 
   <section class="pluss-kode konto-boks">
-    <h2>{no ? '🎁 Gratis kvelder: verv en venn' : '🎁 Free nights: refer a friend'}</h2>
+    <h2 class="withicon"><Icon name="gave" size={24} />{no ? 'Gratis kvelder: verv en venn' : 'Free nights: refer a friend'}</h2>
     <p>{no ? 'Del lenken din. Når vennen lager konto og spiller sitt første rom, får dere et kveldspass hver – som du bruker når du vil.' : 'Share your link. When your friend creates an account and plays their first room, you both get a night pass – to use whenever you like.'}</p>
     <p><a class="btn ghost" href={no ? '/no/account' : '/account'}>{no ? 'Hent vervelenken på Min stokk' : 'Get your referral link in My deck'}</a></p>
   </section>

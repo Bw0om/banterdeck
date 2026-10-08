@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import Icon from '../Icon.astro';
 import fs from 'node:fs';
 import AdSlot from '../AdSlot.astro';
 import GameTool from '../GameTool.astro';
@@ -24,7 +25,8 @@ const rules: string[] = trules(game, lang);
 // Hvor mye appen betyr for leken – rene regelleker får forslag om en lek som spilles i appen
 const lekNiva = niva(game.slug);
 const forslag = lekNiva === 'regler' ? provIAppen(game, gamesFor(lang)) : [];
-const NIVA_TEKST: Record<string, [string, string]> = { rom: ['📱 Spilles fra hver sin telefon', '📱 Played from your own phones'], app: ['🃏 Telefonen er kortstokken', '🃏 The phone is the deck'], regler: ['📖 Bare regler', '📖 Just the rules'] };
+const NIVA_IKON: Record<string, string> = { rom: 'telefon', app: 'kort', regler: 'ordbok' };
+const NIVA_TEKST: Record<string, [string, string]> = { rom: ['Spilles fra hver sin telefon', 'Played from your own phones'], app: ['Telefonen er kortstokken', 'The phone is the deck'], regler: ['Bare regler', 'Just the rules'] };
 
 const blocks: { type: 'p' | 'ul'; items: string[] }[] = [];
 for (const r of rules) {
@@ -60,7 +62,7 @@ const jsonLd = JSON.stringify([{
     <a href={path(lang, '/')}>{L.breadcrumbHome}</a> ›
     <a href={path(lang, '/drinking-games')}>{L.gamesTitle}</a> › {name}
   </p>
-  <p class={`lek-niva ${lekNiva}`}>{NIVA_TEKST[lekNiva][lang === 'en' ? 1 : 0]}</p>
+  <p class={`lek-niva ${lekNiva}`}><Icon name={NIVA_IKON[lekNiva]} size={15} />{NIVA_TEKST[lekNiva][lang === 'en' ? 1 : 0]}</p>
   <div class="lek-topp"><h1>{name}</h1><img class="lek-illu" src={illustrasjon(game)} alt="" width="240" height="126" decoding="async" /></div>
   {game.fra && <p class="lek-fra">{lang === 'no' ? 'Sendt inn av' : 'Submitted by'} <b>{game.fra}</b></p>}
   <div class="meta2">
@@ -68,11 +70,11 @@ const jsonLd = JSON.stringify([{
     <div><small>{lang === 'no' ? 'Utstyr' : 'Gear'}</small><b>{t(game.gear, lang)}</b></div>
     <div><small>{lang === 'no' ? 'Type' : 'Type'}</small><b>{t(game.group.title, lang)}</b></div>
   </div>
-  {lang === 'no' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>🥤 Alkoholfri modus</button></p>}
-  {lang === 'en' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>🥤 Alcohol-free mode</button></p>}
+  {lang === 'no' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>Alkoholfri modus</button></p>}
+  {lang === 'en' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>Alcohol-free mode</button></p>}
   {(harVerktoy || iRom) && (
     <p class="startrow">
-      {harVerktoy && <a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'}{plussLek ? ' ✨' : ''} ↓</a>}
+      {harVerktoy && <a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'}{plussLek && <Icon name="gnist" size={16} />}<span aria-hidden="true">↓</span></a>}
       {iRom && <a class="btn ghost romlenke" href={romLenke(game.slug, '', lang)}>{lang === 'en' ? 'Play from your own phones' : 'Spill fra hver sin telefon'}</a>}
     </p>
   )}
@@ -104,14 +106,14 @@ const jsonLd = JSON.stringify([{
   <div id="lekverktoy" class:list={[plussLek && 'pluss-laast']} data-pluss={plussLek ? '1' : undefined}>
     {plussLek && lang !== 'en' && (
       <div class="pluss-laas" id="plussLaas">
-        <p class="rom-etikett">✨ Pluss</p>
+        <p class="rom-etikett"><Icon name="gnist" size={14} />Pluss</p>
         <p><b>Spill {name} på mobilen med Mitt vors Pluss.</b> Reglene over er gratis – med Pluss blir telefonen kortstokken, og i rom får alle være med.</p>
         <div class="dl-knapper"><a class="btn gold" href="/no/pluss">Første kveld er gratis</a></div>
       </div>
     )}
     {plussLek && lang === 'en' && (
       <div class="pluss-laas" id="plussLaas">
-        <p class="rom-etikett">✨ Plus</p>
+        <p class="rom-etikett"><Icon name="gnist" size={14} />Plus</p>
         <p><b>Play {name} on your phone with Mitt vors Plus.</b> The rules above are free – with Plus the phone becomes the deck, and in a room everyone can join in.</p>
         <div class="dl-knapper"><a class="btn gold" href="/plus">Your first night is free</a></div>
       </div>
