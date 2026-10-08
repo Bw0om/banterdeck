@@ -1,6 +1,6 @@
 import { a as Fragment, d as renderTemplate, f as maybeRenderHead, h as defineScriptVars, i as renderComponent, m as addAttribute, w as createAstro } from "./server_Bjx7FWTN.mjs";
 import { t as createComponent } from "./compiler_Bf6GLUpQ.mjs";
-import { n as ui, t as $$Base } from "./Base_DfsBJvHX.mjs";
+import { n as ui, t as $$Base } from "./Base_CrQzSnO-.mjs";
 import { a as supabaseAnonKey, o as supabaseDebug, s as supabaseUrl } from "./config_DZEmFZJP.mjs";
 //#region src/components/pages/Account.astro
 createAstro("https://www.mittvors.no");
