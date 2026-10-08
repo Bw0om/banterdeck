@@ -89,7 +89,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 
 /* Pluss: et klistremerke som sitter litt skjevt – synes uten å rope */
 .pluss-pille{background:var(--gold);color:var(--ink2);border-radius:10px;transform:rotate(-3deg);font-stretch:110%;box-shadow:0 3px 0 var(--volt-dyp)}
-.pluss-pille:hover{filter:none;transform:rotate(-1deg) scale(1.03)}
+.pluss-pille{transition:transform 200ms var(--ease-out),scale 160ms var(--ease-out)}
+@media (hover:hover) and (pointer:fine){.pluss-pille:hover{filter:none;transform:rotate(-1deg) scale(1.03)}}
+.pluss-pille:active{scale:.97}
 .pluss-pille.aktiv{transform:none;background:transparent;color:var(--gold-t);box-shadow:inset 0 0 0 2px var(--gold-t)}
 .side a.pluss-pille{transform:rotate(-1.5deg);color:var(--ink2);background:var(--gold);box-shadow:0 4px 0 var(--volt-dyp)}
 .side a.pluss-pille.aktiv{transform:none;background:transparent;color:var(--gold-t);box-shadow:inset 0 0 0 2px var(--gold-t)}
@@ -277,7 +279,7 @@ html.hemmelig::after{content:"";position:fixed;inset:0;z-index:9000;pointer-even
 html.min-tur .tur-merke{display:flex;align-items:center;justify-content:center;gap:10px;position:sticky;top:max(env(safe-area-inset-top),8px);z-index:30;
   margin:0 0 12px;min-height:52px;border-radius:16px;background:var(--gold);color:var(--ink2);font-family:var(--display);font-stretch:125%;font-weight:900;font-size:22px;letter-spacing:-.02em;
   box-shadow:0 5px 0 var(--volt-dyp);animation:turInn .5s cubic-bezier(.2,1.4,.4,1)}
-@keyframes turInn{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+@keyframes turInn{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
 .hemmelig-merke{display:none}
 html.hemmelig .hemmelig-merke{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 12px;min-height:44px;border-radius:14px;
   background:repeating-linear-gradient(45deg,rgb(var(--glo-rgb) / .2) 0 10px,transparent 10px 20px);border:2px solid var(--accent);color:var(--ink);font-weight:750;font-size:15.5px}
@@ -463,7 +465,7 @@ html:not([data-theme="light"]).i-spill :is(.rom-kort,.rof-kort){background:#ECE5
 @keyframes kortInn{from{transform:translate(42px,-8px) rotate(7deg) scale(.96);opacity:0}}
 .rom-sporsmal.kort-inn,.rom-hemmelig.kort-inn{animation:tekstInn .28s cubic-bezier(.2,.8,.3,1) both}
 @keyframes tekstInn{from{transform:translateY(16px);opacity:0}}
-.kort-ut{animation:kortUt .34s cubic-bezier(.55,0,.8,.2) forwards}
+.kort-ut{animation:kortUt .3s var(--ease-out) forwards}
 @keyframes kortUt{to{transform:translate(-125%,-20px) rotate(-18deg);opacity:.2}}
 .kort-inn.tilbake{animation-name:kortInnTilbake}
 @keyframes kortInnTilbake{from{transform:translate(-42px,-8px) rotate(-7deg) scale(.96);opacity:0}}
@@ -633,3 +635,13 @@ p:has(> .btn:only-child) + p.small{margin-top:12px}
 /* Sidemenyen ruller selv når skjermen er lav, så bunnlenkene ikke kuttes */
 .side{overflow-y:auto;scrollbar-width:none}
 .side::-webkit-scrollbar{display:none}
+
+/* ---------- Bevegelse (okt 2026) ---------- */
+/* Alt man trykker på, gir et lite svar under fingeren. `scale` (ikke transform) så det legger seg
+   oppå skrå merker og 3D-knapper i stedet for å overstyre dem. */
+:is(.lk-chips button,.kv-valg label,.alkfri-bryter,.lk-rad,.lk-liten,.card,.tile,.starbtn,.tabbar a,.mobilenav a,
+  .sidenav a,.langlink,.h2-rom,.h2-uke,.h2-start,.h2-jul,.h2-pluss-stubb,.sitlist a){transition:scale 160ms var(--ease-out)}
+.lk-kort{transition:transform 200ms var(--ease-out),scale 160ms var(--ease-out),border-color .15s ease}
+:is(.lk-chips button,.kv-valg label,.alkfri-bryter,.lk-rad,.lk-liten,.tabbar a,.mobilenav a,.sidenav a,.langlink,.starbtn):active{scale:.97}
+/* Store flater krymper mindre – samme følelse, mindre bevegelse */
+:is(.lk-kort,.card,.tile,.h2-rom,.h2-uke,.h2-start,.h2-jul,.h2-pluss-stubb,.sitlist a):active{scale:.985}
