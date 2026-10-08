@@ -1,4 +1,6 @@
 ---
+// Forsiden. Øverst: rett til et rom eller inn med kode – og en kortbunke man kan trekke fra med en gang.
+// Så lekene som spilles fra hver sin telefon (med bilder), ukas faste ritualer, Pluss og humoren som egen blokk.
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../AdSlot.astro';
 import Icon from '../Icon.astro';
@@ -6,192 +8,287 @@ import PopulaertNaa from '../PopulaertNaa.astro';
 import Sveip from '../Sveip.astro';
 import { rundeKort } from '../../lib/nyhetsrunden';
 import { UKENS_LEKER, ukensLek } from '../../lib/ukenslek';
-import { games as alleLeker } from '../../lib/content';
+import { games as alleLeker, gamesFor, gameHref, situationSectionsFor, dictSection, visible, langGroups, itemsOf, t, tf, isCrude, totalsFor, situationById } from '../../lib/content';
 import { illustrasjon } from '../../lib/illustrasjon';
+import { niva } from '../../lib/niva';
+import { PLUSS_SLUGS } from '../../lib/plussleker';
 import PLUSSPAKKER from '../../data/pluss.json';
 import PLUSSPAKKER_EN from '../../data/pluss.en.json';
 import DECKS from '../../data/decks.json';
 import DECKS_EN from '../../data/decks.en.json';
-const ANT_JUL = (PLUSSPAKKER as any).julebord.items.length;
-const NR = rundeKort();
-const SPRAK = ((Astro.props as any).lang || 'en') as 'no' | 'en';
-const UKE = UKENS_LEKER.map((sl) => alleLeker.find((g: any) => g.slug === sl)).filter((g: any) => g && (SPRAK === 'no' || g.only !== 'no'))
-  .map((g: any) => ({ slug: g.slug, navn: t(g.name, SPRAK), pl: g.pl, gruppe: t(g.group.title, SPRAK), bilde: illustrasjon(g) }));
-const ukeBygg = UKE.find((x) => x.slug === ukensLek()) || UKE[0];
-const nrBygg = NR.find((r) => r.fra <= Date.now()) || NR[NR.length - 1];
-import { situationSectionsFor, dictSection, visible, langGroups, itemsOf, t, tf, isCrude, totalsFor, topSituationsFor, situationById, gamesFor, dictCount } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
+
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 const no = lang === 'no';
-// Pluss-pakkene ved navn (leses fra dataene, så lista oppdaterer seg når det kommer nye pakker)
-const PAKKENAVN: string[] = Object.keys(PLUSSPAKKER).map((id) => (lang === 'no' ? (PLUSSPAKKER as any)[id].navn : ((PLUSSPAKKER_EN as any)[id]?.navn || (PLUSSPAKKER as any)[id].navn)));
-const PAKKELISTE = PAKKENAVN.length > 1 ? PAKKENAVN.slice(0, -1).join(', ') + (lang === 'no' ? ' og ' : ' and ') + PAKKENAVN[PAKKENAVN.length - 1] : PAKKENAVN[0];
-// Tre kort fra ekte kortstokker – en liten kortbunke ved siden av hovedknappene på PC
-const KS: any = no ? DECKS : DECKS_EN;
-const stokk = [
-  { navn: no ? 'Enten eller' : 'Would you rather', t: KS['enten-eller'].items[2].t },
-  { navn: no ? 'Jeg har aldri' : 'Never have I ever', t: (KS['jeg-har-aldri'].items.find((x: any) => x.m === 'frekk') || KS['jeg-har-aldri'].items[0]).t },
-  { navn: no ? 'Mest sannsynlig' : 'Most likely to', t: KS['pekeleken'].items[0].t },
-];
+const N = (nb: string, en: string) => (no ? nb : en);
+const ROM = no ? '/no/rom' : '/room';
 
+const ANT_JUL = (PLUSSPAKKER as any).julebord.items.length;
+// Pluss-pakkene ved navn (leses fra dataene, så lista oppdaterer seg når det kommer nye pakker)
+const PAKKENAVN: string[] = Object.keys(PLUSSPAKKER).map((id) => (no ? (PLUSSPAKKER as any)[id].navn : ((PLUSSPAKKER_EN as any)[id]?.navn || (PLUSSPAKKER as any)[id].navn)));
+const PAKKELISTE = PAKKENAVN.length > 1 ? PAKKENAVN.slice(0, -1).join(', ') + N(' og ', ' and ') + PAKKENAVN[PAKKENAVN.length - 1] : PAKKENAVN[0];
+
+// Ukas ritualer (Nyhetsrunden finnes bare på norsk)
+const NR = rundeKort();
+const nrBygg = NR.find((r) => r.fra <= Date.now()) || NR[NR.length - 1];
+const UKE = UKENS_LEKER.map((sl) => alleLeker.find((g: any) => g.slug === sl)).filter((g: any) => g && (no || g.only !== 'no'))
+  .map((g: any) => ({ slug: g.slug, navn: t(g.name, lang), pl: g.pl, gruppe: t(g.group.title, lang), bilde: illustrasjon(g) }));
+const ukeBygg = UKE.find((x) => x.slug === ukensLek()) || UKE[0];
+const UKEBASE = no ? '/no/drinking-games/' : '/drinking-games/';
+
+// Lekene som spilles fra hver sin telefon – samme rekkefølge som på lekesiden
+const TOPP = ['spionen', 'hvem-skrev-det', 'bloffquizen', 'pekeleken', 'nyhetsrunden', 'ring-of-fire', 'forraeder', 'regelfabrikken', 'samme-svar'];
+const PL = new Set(PLUSS_SLUGS);
+const alle = gamesFor(lang);
+const romLeker = alle.filter((g: any) => niva(g.slug) === 'rom')
+  .sort((a: any, b: any) => ((TOPP.indexOf(a.slug) + 1 || 99) - (TOPP.indexOf(b.slug) + 1 || 99)))
+  .slice(0, 8)
+  .map((g: any) => ({ navn: t(g.name, lang), pl: g.pl, href: gameHref(g, (p: string) => path(lang, p), lang), bilde: illustrasjon(g), pluss: PL.has(g.slug) }));
+
+// «Trekk et kort»: tre ekte kortstokker, bare de snille og frekke kortene (aldri de grove på forsiden)
+const KS: any = no ? DECKS : DECKS_EN;
+const trekk = [
+  { id: 'pekeleken', navn: N('Mest sannsynlig', 'Most likely to') },
+  { id: 'jeg-har-aldri', navn: N('Jeg har aldri', 'Never have I ever') },
+  { id: 'enten-eller', navn: N('Enten eller', 'Would you rather') },
+].map((s) => ({ ...s, kort: KS[s.id].items.filter((x: any) => x.m !== 'droy').slice(0, 24).map((x: any) => x.t) }));
+
+// Humor
 const totals = totalsFor(lang);
 const hasDict = visible(dictSection, lang);
 const pool = situationSectionsFor(lang).flatMap((s) => langGroups(s, lang).flatMap((g: any) =>
-  itemsOf(g, lang).filter((it: any) => it.line && !isCrude(it))
-    .map((it: any) => {
-      const sit = it.sit && situationById(it.sit[0]);
-      return { l: tf(it, 'line', lang), c: tf(it, 'ctx', lang),
-               k: sit ? t(sit.title, lang) : t(s.title, lang) };
-    })
-));
+  itemsOf(g, lang).filter((it: any) => it.line && !isCrude(it)).map((it: any) => {
+    const sit = it.sit && situationById(it.sit[0]);
+    return { l: tf(it, 'line', lang), k: sit ? t(sit.title, lang) : t(s.title, lang) };
+  })));
 const first = pool[0];
-const quick = topSituationsFor(lang).slice(0, 5);
 const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
 ---
 <Base lang={lang}>
-  <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Mitt vors', url: 'https://www.mittvors.no/', inLanguage: lang === 'no' ? 'nb' : 'en' })} /></Fragment>
-  <section class="h2-hero">
-    <h1>{no ? <>Klar for<br />vors?</> : <>Ready to<br />pre-game?</>}</h1>
-    <p class="h2-sub">{no ? 'Drikkeleker dere spiller fra hver deres telefon. Én lager et rom – resten blir med på koden.' : 'Drinking games you play from your own phones. One person creates a room – everyone else joins with the code.'}</p>
-    <div class="h2-cta">
-      <a class="h2-hoved" href={no ? '/no/rom?lag=1' : '/room?lag=1'}>{no ? 'Lag et rom' : 'Create a room'}</a>
-      <form class="h2-kode" action={no ? '/no/rom' : '/room'} method="get" id="h2Kode">
-        <label for="h2KodeFelt">{no ? 'Har du fått en kode?' : 'Got a code?'}</label>
-        <div class="h2-kode-rad">
-          <input id="h2KodeFelt" name="k" size="6" maxlength="6" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" required />
-          <button type="submit">{no ? 'Bli med' : 'Join'}</button>
-        </div>
-      </form>
-    </div>
-    <div class="h2-gjeng" id="h2Gjeng">
-      <a class="h2-gjeng-lenke" href={no ? '/no/gjeng' : '/crew'}>{no ? 'Fast gjeng? Lag en gjeng, så starter dere kvelden med ett trykk' : 'Same crew every time? Make a crew and start the night with one tap'}</a>
-    </div>
-    <div class="h2-stokk" aria-hidden="true">{stokk.map((k, i) => <div class={'h2-skort k' + i}><span>{k.navn}</span><p>{k.t}</p></div>)}</div>
-  </section>
+  <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Mitt vors', url: 'https://www.mittvors.no/', inLanguage: no ? 'nb' : 'en' })} /></Fragment>
 
-  <ol class="h2-slik" id="h2Slik">
-    <li><b>{no ? 'Én lager et rom' : 'One creates a room'}</b><span>{no ? 'og blir vert' : 'and hosts'}</span></li>
-    <li><b>{no ? 'Resten blir med' : 'The rest join'}</b><span>{no ? 'med QR eller kode' : 'by QR or code'}</span></li>
-    <li><b>{no ? 'Alle spiller' : 'Everyone plays'}</b><span>{no ? 'på sin egen telefon' : 'on their own phone'}</span></li>
-  </ol>
-  <a class="h2-rom" href={no ? '/no/rom' : '/room'} hidden>
-    <span><b>{no ? 'Spill sammen fra hver sin telefon' : 'Play together from your own phones'}</b><small>{no ? 'Lag et rom og del koden' : 'Create a room and share the code'}</small></span>
+  <!-- Toppen: rett til et rom eller inn med kode – og på PC ligger kortbunken du kan trekke fra ved siden av -->
+  <div class="fn-topp">
+    <section class="h2-hero">
+      <h1>{no ? <>Klar for<br />vors?</> : <>Ready to<br /><span class="fn-hel">pre-game?</span></>}</h1>
+      <p class="h2-sub">{N('Drikkeleker dere spiller fra hver deres telefon. Én lager et rom – resten blir med på koden.', 'Drinking games you play from your own phones. One person creates a room – everyone else joins with the code.')}</p>
+      <div class="h2-cta">
+        <a class="h2-hoved" href={ROM + '?lag=1'}>{N('Lag et rom', 'Create a room')}</a>
+        <form class="h2-kode" action={ROM} method="get" id="h2Kode">
+          <label for="h2KodeFelt">{N('Har du fått en kode?', 'Got a code?')}</label>
+          <div class="h2-kode-rad">
+            <input id="h2KodeFelt" name="k" size="6" maxlength="6" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" required />
+            <button type="submit">{N('Bli med', 'Join')}</button>
+          </div>
+        </form>
+      </div>
+      <div class="h2-gjeng" id="h2Gjeng">
+        <a class="h2-gjeng-lenke" href={no ? '/no/gjeng' : '/crew'}>{N('Fast gjeng? Lag en gjeng, så starter dere kvelden med ett trykk', 'Same crew every time? Make a crew and start the night with one tap')}</a>
+      </div>
+    </section>
+
+    <!-- Første runde på sekunder: trekk et kort på denne telefonen, uten rom og uten konto -->
+    <section class="fn-trekk" aria-labelledby="fnTrekkTittel" data-stokker={JSON.stringify(trekk)}>
+      <div class="fn-trekk-tekst">
+        <h2 id="fnTrekkTittel">{N('Ingen rom ennå? Trekk et kort.', 'No room yet? Draw a card.')}</h2>
+        <p>{N('Send telefonen rundt bordet. Når dere vil ha poeng, stemming og hemmeligheter, lager én et rom.', 'Pass the phone round the table. When you want scores, voting and secrets, one of you creates a room.')}</p>
+        <div class="fn-stokkvalg" role="tablist" aria-label={N('Velg kortstokk', 'Choose a deck')}>
+          {trekk.map((s, i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-stokk={i}>{s.navn}</button>)}
+        </div>
+      </div>
+      <div class="fn-kortbord">
+        <button type="button" class="fn-kort" id="fnKort" aria-live="polite">
+          <span class="fn-kort-navn" id="fnKortNavn">{trekk[0].navn}</span>
+          <span class="fn-kort-tekst" id="fnKortTekst">{trekk[0].kort[0]}</span>
+          <span class="fn-kort-hint">{N('Trykk for neste kort', 'Tap for the next card')}</span>
+        </button>
+      </div>
+    </section>
+  </div>
+  <a class="h2-rom" href={ROM} hidden>
+    <span><b>{N('Spill sammen fra hver sin telefon', 'Play together from your own phones')}</b><small>{N('Lag et rom og del koden', 'Create a room and share the code')}</small></span>
     <span class="kode" aria-hidden="true">ABCD</span>
   </a>
 
-  <h2 class="h2-overskrift">{no ? 'Finn en lek' : 'Find a game'}</h2>
-  <a class="h2-start" href={path(lang, '/drinking-games')}>
-    <span><b>{no ? 'Alle drikkelekene' : 'All the drinking games'}</b><small>{gamesFor(lang).length} {no ? 'leker med regler – mange kan spilles i appen' : 'games with rules – many can be played in the app'}</small></span>
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
-  </a>
+  <!-- Lekene i appen – bilder og navn, ikke en liste -->
+  <section class="fn-seksjon" aria-labelledby="fnLekerTittel">
+    <div class="fn-hode">
+      <h2 id="fnLekerTittel">{N('Spill fra hver sin telefon', 'Play from your own phones')}</h2>
+      <a href={path(lang, '/drinking-games')} class="fn-alle">{N(`Alle ${alle.length} leker`, `All ${alle.length} games`)} <span aria-hidden="true">→</span></a>
+    </div>
+    <ul class="fn-rad" role="list">
+      {romLeker.map((x) => (
+        <li><a class="fn-lek" href={x.href}>
+          <img src={x.bilde} alt="" width="240" height="126" loading="lazy" decoding="async" />
+          <b>{x.navn}</b>
+          <small><Icon name="gjeng" size={13} />{x.pl}{x.pluss && <span class="fn-pluss"><Icon name="gnist" size={11} />{N('Pluss', 'Plus')}</span>}</small>
+        </a></li>
+      ))}
+    </ul>
+  </section>
 
-  {ukeBygg && (
-    <a class="h2-uke" id="ukensLek" href={no ? `/no/drinking-games/${ukeBygg.slug}/` : `/drinking-games/${ukeBygg.slug}/`} data-leker={JSON.stringify(UKE)} data-base={no ? '/no/drinking-games/' : '/drinking-games/'}>
-      <span><b>{ukeBygg.navn}</b><small>{ukeBygg.gruppe} · {ukeBygg.pl} {no ? 'spillere' : 'players'}</small></span>
-      <span class="h2-uke-bilde"><img src={ukeBygg.bilde} alt="" width="120" height="63" loading="lazy" decoding="async" /><span class="h2-badge">{no ? 'Ukens lek' : 'Game of the week'}</span></span>
-    </a>
-  )}
-  <a class="h2-jul" id="julebord" href={no ? '/no/rom?lek=pakke-julebord' : '/room?lek=pakke-julebord'} hidden>
-    <span><b>{no ? 'Julebordpakken' : 'The Christmas party pack'}</b><small>{no ? ANT_JUL + ' kort til julebordet – trygt med kolleger, men aldri kjedelig' : ANT_JUL + ' cards for the office Christmas party – safe with coworkers, never boring'}</small></span>
-    <span class="h2-badge">{no ? 'Sesongen er her' : 'It’s the season'}</span>
-  </a>
-  <script is:inline data-astro-rerun>
-  (function () {
-    // Julebordsesongen: 1. november til lille julaften (norsk tid)
-    var a = document.getElementById('julebord'); if (!a) return;
-    var o = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' })), m = o.getMonth(), d = o.getDate();
-    if (m === 10 || (m === 11 && d <= 23)) a.hidden = false;
-  })();
-  </script>
-
-  <nav class="h2-meny" aria-label={no ? 'Mer for kvelden' : 'More for the night'}>
-    {no && nrBygg && (
-      <a href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}><span class="h2-ikon"><Icon name="nyhet" size={22} /></span><span><b>Nyhetsrunden</b><small>Uke {nrBygg.uke} · {nrBygg.antall} spørsmål om ukas nyheter</small></span></a>
-    )}
-    <a href={no ? '/no/finn-lek' : '/find-a-game'}><span class="h2-ikon"><Icon name="mal" size={22} /></span><span><b>{no ? 'Finn riktig lek' : 'Find the right game'}</b><small>{no ? 'Tre spørsmål, så får dere et forslag' : 'Three questions, then a suggestion'}</small></span></a>
-    <a href={no ? '/no/kveld' : '/plan'}><span class="h2-ikon"><Icon name="kalender" size={22} /></span><span><b>{no ? 'Kveldsplan' : 'Plan the night'}</b><small>{no ? 'Leker fra vors til nachspiel' : 'Games from pre-drinks to afterparty'}</small></span></a>
-    <a href={path(lang, '/favourites')}><span class="h2-ikon"><Icon name="favoritt" size={22} /></span><span><b>{no ? 'Lagret' : 'Saved'}</b><small>{no ? 'Leker og replikker du har tatt vare på' : 'Games and lines you’ve kept'}</small></span></a>
-  </nav>
+  <!-- Denne uka: de faste ritualene samlet -->
+  <section class="fn-seksjon" aria-labelledby="fnUkeTittel">
+    <h2 id="fnUkeTittel" class="fn-h">{N('Denne uka', 'This week')}</h2>
+    <div class="fn-uka">
+      {no && nrBygg && (
+        <a class="fn-nr" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
+          <span class="fn-nr-uke">Uke <b id="nrUke">{nrBygg.uke}</b></span>
+          <span class="fn-nr-tekst"><b>Nyhetsrunden</b><small id="nrAntall">{nrBygg.antall} spørsmål om ukas nyheter</small></span>
+          <span class="fn-nr-knapp">Spill quizen</span>
+        </a>
+      )}
+      {ukeBygg && (
+        <a class="fn-ukelek" id="ukensLek" href={UKEBASE + ukeBygg.slug + '/'} data-leker={JSON.stringify(UKE)} data-base={UKEBASE} data-en={no ? undefined : '1'}>
+          <img src={ukeBygg.bilde} alt="" width="240" height="126" loading="lazy" decoding="async" />
+          <span><small>{N('Ukens lek', 'Game of the week')}</small><b>{ukeBygg.navn}</b><em>{ukeBygg.gruppe} · {ukeBygg.pl} {N('spillere', 'players')}</em></span>
+        </a>
+      )}
+      <a class="fn-ukelek fn-jul" id="julebord" href={ROM + '?lek=pakke-julebord'} hidden>
+        <span><small>{N('Sesongen er her', 'It’s the season')}</small><b>{N('Julebordpakken', 'The Christmas party pack')}</b><em>{N(`${ANT_JUL} kort – trygt med kolleger, men aldri kjedelig`, `${ANT_JUL} cards – safe with coworkers, never boring`)}</em></span>
+      </a>
+    </div>
+    <ul class="fn-verktoy" role="list">
+      <li><a href={no ? '/no/finn-lek' : '/find-a-game'}><Icon name="mal" size={20} /><span><b>{N('Finn riktig lek', 'Find the right game')}</b><small>{N('Tre spørsmål, så får dere et forslag', 'Three questions, then a suggestion')}</small></span></a></li>
+      <li><a href={no ? '/no/kveld' : '/plan'}><Icon name="kalender" size={20} /><span><b>{N('Kveldsplan', 'Plan the night')}</b><small>{N('Leker fra vors til nachspiel', 'Games from pre-drinks to afterparty')}</small></span></a></li>
+      <li><a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} /><span><b>{N('Lagret', 'Saved')}</b><small>{N('Det du har tatt vare på', 'What you’ve kept')}</small></span></a></li>
+    </ul>
+  </section>
 
   <section class="h2-pluss" aria-labelledby="h2PlussTittel">
     <div class="h2-pluss-hoved">
-      <h2 id="h2PlussTittel">{no ? 'Verten betaler. Hele festen spiller.' : 'The host pays. The whole party plays.'}</h2>
+      <h2 id="h2PlussTittel">{N('Verten betaler. Hele festen spiller.', 'The host pays. The whole party plays.')}</h2>
       <ul>
-        <li>{no ? 'Opptil 16 telefoner i rommet (gratis: 4)' : 'Up to 16 phones in the room (free: 4)'}</li>
-        <li>{no ? 'Vorsbørsen med 100 aksjer og Agent 0,5 (hemmelige oppdrag)' : 'The Exchange with 100 shares, plus Agent 0.5 (secret missions)'}</li>
-        <li>{no ? 'Bussruta, Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna' : 'Ride the Bus, Yahtzee, Pyramid, President, Pig, The Liar and Tall Tales'}</li>
-        <li>{no ? PAKKENAVN.length + ' kortpakker: ' + PAKKELISTE : PAKKENAVN.length + ' card packs: ' + PAKKELISTE}</li>
+        <li>{N('Opptil 16 telefoner i rommet (gratis: 4)', 'Up to 16 phones in the room (free: 4)')}</li>
+        <li>{N('Vorsbørsen med 100 aksjer og Agent 0,5 (hemmelige oppdrag)', 'The Exchange with 100 shares, plus Agent 0.5 (secret missions)')}</li>
+        <li>{N('Bussruta, Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna', 'Ride the Bus, Yahtzee, Pyramid, President, Pig, The Liar and Tall Tales')}</li>
+        <li>{PAKKENAVN.length} {N('kortpakker', 'card packs')}: {PAKKELISTE}</li>
       </ul>
     </div>
     <a class="h2-pluss-stubb" href={no ? '/no/pluss' : '/plus'}>
-      <span class="h2-pluss-navn">Mitt vors {no ? 'Pluss' : 'Plus'}</span>
-      <span class="h2-pluss-pris"><b>29 kr</b><small>{no ? 'per kveld' : 'per night'}</small></span>
-      <span class="h2-pluss-pris"><b>199 kr</b><small>{no ? 'hele året' : 'whole year'}</small></span>
-      <span class="h2-pluss-knapp" id="h2PlussKnapp">{no ? 'Se Pluss' : 'See Plus'}</span>
+      <span class="h2-pluss-navn">Mitt vors {N('Pluss', 'Plus')}</span>
+      <span class="h2-pluss-pris"><b>29 kr</b><small>{N('per kveld', 'per night')}</small></span>
+      <span class="h2-pluss-pris"><b>199 kr</b><small>{N('hele året', 'whole year')}</small></span>
+      <span class="h2-pluss-knapp" id="h2PlussKnapp">{N('Se Pluss', 'See Plus')}</span>
     </a>
   </section>
 
-  <h2 class="h2-overskrift">{no ? 'Humor ved siden' : 'Humour on the side'}</h2>
-  <nav class="h2-meny" aria-label={no ? 'Humor ved siden' : 'Humour on the side'}>
-    <button type="button" data-sveip><span class="h2-ikon"><Icon name="sveip" size={22} /></span><span><b>{no ? 'Sveip replikker' : 'Swipe lines'}</b><small>{no ? `${totals.lines} replikker, én om gangen` : `${totals.lines} lines, one at a time`}</small></span></button>
-    <a href={path(lang, '/situations')}><span class="h2-ikon"><Icon name="replikker" size={22} /></span><span><b>{L.linesTitle}</b><small>{no ? 'Sortert etter situasjon' : 'Sorted by situation'}</small></span></a>
-    {no && hasDict && (
-      <>
-        <a href={path(lang, '/ord')}><span class="h2-ikon"><Icon name="ordbok" size={22} /></span><span><b>{L.ordTitle}</b><small>Slengord og gamle ord som fortjener et comeback</small></span></a>
-        <a href={path(lang, '/uttrykk')}><span class="h2-ikon"><Icon name="uttrykk" size={22} /></span><span><b>{L.uttrykkTitle}</b><small>Faste vendinger og ordtak</small></span></a>
-      </>
-    )}
-  </nav>
-
-  <section class="h2-today">
-    <div class="h2-today-top"><span>{L.todayLabel}</span><span id="todayCat">{first.k}</span></div>
-    <p class="today" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
-    <p class="h2-today-hint">{no ? 'Trykk for å kopiere' : 'Tap to copy'}</p>
+  <!-- Humor ved siden: dagens replikk stort, resten som snarveier -->
+  <section class="fn-humor" aria-labelledby="fnHumorTittel">
+    <h2 id="fnHumorTittel" class="fn-h">{N('Humor ved siden', 'Humour on the side')}</h2>
+    <div class="fn-replikk">
+      <p class="fn-replikk-kat" id="todayCat">{first.k}</p>
+      <p class="today fn-replikk-tekst" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
+      <p class="fn-replikk-hint">{N('Dagens replikk · trykk for å kopiere', 'Line of the day · tap to copy')}</p>
+    </div>
+    <div class="fn-humor-valg">
+      <button type="button" class="fn-sveip" data-sveip><Icon name="sveip" size={22} /><span><b>{N('Sveip replikker', 'Swipe lines')}</b><small>{N(`${totals.lines} replikker, én om gangen`, `${totals.lines} lines, one at a time`)}</small></span></button>
+      <a href={path(lang, '/situations')}><Icon name="replikker" size={20} />{L.linesTitle}</a>
+      {no && hasDict && <a href={path(lang, '/ord')}><Icon name="ordbok" size={20} />{L.ordTitle}</a>}
+      {no && hasDict && <a href={path(lang, '/uttrykk')}><Icon name="uttrykk" size={20} />{L.uttrykkTitle}</a>}
+    </div>
   </section>
-
-  <script is:inline data-astro-rerun define:vars={{ pool: sveipItems }}>
-    var d = new Date();
-    var day = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
-    var p = pool[day % pool.length];
-    var line = document.getElementById('todayLine');
-    line.textContent = '«' + p.l + '»';
-    line.setAttribute('data-copy', p.l);
-    document.getElementById('todayCat').textContent = p.k;
-  </script>
 
   <PopulaertNaa lang={lang} />
 
   <AdSlot />
 
-  <h2>{L.takeItWithYou}</h2>
-  <p class="lead">{L.takeItBody}</p>
-  <div class="device">
-    <p class="ios-only">{L.iosSteps}</p>
-    <p class="android-only">{L.androidSteps}</p>
-    <p class="desktop-only">{L.desktopSteps}</p>
-    <p class="standalone-only">{L.standalone}</p>
+  <section class="fn-hjem">
+    <h2 class="fn-h">{L.takeItWithYou}</h2>
+    <p>{L.takeItBody}</p>
+    <div class="device">
+      <p class="ios-only">{L.iosSteps}</p>
+      <p class="android-only">{L.androidSteps}</p>
+      <p class="desktop-only">{L.desktopSteps}</p>
+      <p class="standalone-only">{L.standalone}</p>
+    </div>
+  </section>
+
+  <Sveip items={sveipItems} title={N('Alle replikker', 'All lines')} lang={lang} shuffle={true} />
+
+  <div class="installer" id="installer" hidden>
+    <span>{N('Legg Mitt vors på hjemskjermen – åpner som en app og virker uten nett.', 'Add Mitt vors to your home screen – opens like an app and works offline.')}</span>
+    <button type="button" class="btn gold small" id="installerKnapp">{N('Legg til', 'Add')}</button>
+    <button type="button" class="linkbtn" id="installerNei" aria-label={N('Ikke nå', 'Not now')}>✕</button>
+    <p class="small" id="installerIos" hidden>{N('Trykk Del-knappen i Safari, og velg «Legg til på Hjem-skjerm».', 'Tap the Share button in Safari and choose “Add to Home Screen”.')}</p>
   </div>
 
-  <Sveip items={sveipItems} title={no ? 'Alle replikker' : 'All lines'} lang={lang} shuffle={true} />
+  <script is:inline data-astro-rerun define:vars={{ pool: sveipItems }}>
+    var d = new Date(), dag = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+    var p = pool[dag % pool.length], line = document.getElementById('todayLine');
+    line.textContent = '«' + p.l + '»'; line.setAttribute('data-copy', p.l);
+    document.getElementById('todayCat').textContent = p.k;
+  </script>
   <script is:inline data-astro-rerun>
   (function () {
-    // Forsiden bygges på forhånd – velg her hvilken uke som faktisk er ute nå (fredag kl. 12)
-    var f = document.getElementById('nrFlis'); if (!f) return;
-    var l = []; try { l = JSON.parse(f.dataset.runder || '[]'); } catch (e) {}
-    var naa = Date.now(), r = l.filter(function (x) { return x.fra <= naa; })[0];
-    if (!r) return;
-    f.querySelector('small').textContent = 'Uke ' + r.uke + ' · ' + r.antall + ' spørsmål om ukas nyheter';
+    // Trekk et kort: velg stokk, trykk på kortet for neste. Ingen rom, ingen konto.
+    var s = document.querySelector('.fn-trekk'); if (!s || s.dataset.bound) return; s.dataset.bound = '1';
+    var stokker = []; try { stokker = JSON.parse(s.dataset.stokker || '[]'); } catch (e) {}
+    var valgt = 0, pos = 0, rekke = [];
+    var kort = document.getElementById('fnKort'), navn = document.getElementById('fnKortNavn'), tekst = document.getElementById('fnKortTekst');
+    function bland(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    function vis() { navn.textContent = stokker[valgt].navn; tekst.textContent = rekke[pos]; kort.classList.remove('nytt'); void kort.offsetWidth; kort.classList.add('nytt'); }
+    function velg(i) { valgt = i; rekke = bland(stokker[i].kort); pos = 0; vis();
+      s.querySelectorAll('[data-stokk]').forEach(function (b) { b.setAttribute('aria-selected', String(+b.dataset.stokk === i)); }); }
+    s.addEventListener('click', function (e) { var b = e.target.closest('[data-stokk]'); if (b) velg(+b.dataset.stokk); });
+    kort.addEventListener('click', function () { pos++; if (pos >= rekke.length) { rekke = bland(rekke); pos = 0; } vis(); });
+    if (stokker.length) { rekke = bland(stokker[0].kort); pos = 0; navn.textContent = stokker[0].navn; tekst.textContent = rekke[0]; }
   })();
   </script>
-  <div class="installer" id="installer" hidden>
-    <span>{no ? 'Legg Mitt vors på hjemskjermen – åpner som en app og virker uten nett.' : 'Add Mitt vors to your home screen – opens like an app and works offline.'}</span>
-    <button type="button" class="btn gold small" id="installerKnapp">{no ? 'Legg til' : 'Add'}</button>
-    <button type="button" class="linkbtn" id="installerNei" aria-label={no ? 'Ikke nå' : 'Not now'}>✕</button>
-    <p class="small" id="installerIos" hidden>{no ? 'Trykk Del-knappen i Safari, og velg «Legg til på Hjem-skjerm».' : 'Tap the Share button in Safari and choose “Add to Home Screen”.'}</p>
-  </div>
   <script is:inline data-astro-rerun>
   (function () {
+    // Siden bygges sjelden – velg Nyhetsrunden og ukens lek som faktisk gjelder nå (fredag kl. 12 / ISO-uke)
+    var f = document.getElementById('nrFlis');
+    if (f) { var l = []; try { l = JSON.parse(f.dataset.runder || '[]'); } catch (e) {}
+      var r = l.filter(function (x) { return x.fra <= Date.now(); })[0];
+      if (r) { document.getElementById('nrUke').textContent = r.uke; document.getElementById('nrAntall').textContent = r.antall + ' spørsmål om ukas nyheter'; } }
+    var a = document.getElementById('ukensLek');
+    if (a) { var u = []; try { u = JSON.parse(a.dataset.leker || '[]'); } catch (e) {}
+      if (u.length) {
+        var o = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' }));
+        var t = new Date(Date.UTC(o.getFullYear(), o.getMonth(), o.getDate())); t.setUTCDate(t.getUTCDate() - (t.getUTCDay() + 6) % 7 + 3);
+        var aar = t.getUTCFullYear(), jan4 = new Date(Date.UTC(aar, 0, 4));
+        var uke = 1 + Math.round(((t - jan4) / 86400000 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7);
+        var x = u[(aar * 53 + uke) % u.length];
+        a.href = a.dataset.base + x.slug + '/'; a.querySelector('b').textContent = x.navn;
+        a.querySelector('em').textContent = x.gruppe + ' · ' + x.pl + (a.dataset.en ? ' players' : ' spillere'); a.querySelector('img').src = x.bilde;
+      } }
+    // Julebordsesongen: 1. november til lille julaften (norsk tid)
+    var j = document.getElementById('julebord');
+    if (j) { var n = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' })), m = n.getMonth(), dd = n.getDate(); if (m === 10 || (m === 11 && dd <= 23)) j.hidden = false; }
+  })();
+  </script>
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Kodefeltet: store bokstaver, og bare det som kan være en kode.
+    // Fire riktige tegn = en hel kode: gå videre av seg selv (litt etter, så man rekker å se – og rette – siste tegn).
+    // Romkoder har aldri I, O, 0 eller 1, så de stopper autoturen.
+    var f = document.getElementById('h2Kode'); if (!f || f.dataset.bound) return; f.dataset.bound = '1';
+    var inp = document.getElementById('h2KodeFelt'), videre = null;
+    inp.addEventListener('input', function () {
+      var v = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== inp.value) inp.value = v;
+      f.classList.toggle('klar', v.length >= 4); clearTimeout(videre);
+      if (/^[A-HJ-NP-Z2-9]{4}$/.test(v)) videre = setTimeout(function () { if (inp.value === v) { if (f.requestSubmit) f.requestSubmit(); else f.submit(); } }, 500);
+    });
+    inp.setAttribute('enterkeyhint', 'go'); inp.setAttribute('autocorrect', 'off');
+    f.addEventListener('submit', function (e) { if (inp.value.length < 4) { e.preventDefault(); inp.focus(); } });
+    // Er du allerede i et rom på denne telefonen? Da blir rom-knappen en snarvei tilbake.
+    var a = document.querySelector('.h2-rom'); if (!a) return;
+    try {
+      var sr = JSON.parse(localStorage.getItem('bd_sist_rom') || 'null');
+      if (!sr || !sr.k || Date.now() - (sr.t || 0) > 24 * 3600 * 1000 || !localStorage.getItem('bd_rom_' + sr.k)) return;
+      var en = /^en/.test(document.documentElement.lang || '');
+      a.href = (en ? '/room' : '/no/rom') + '?k=' + encodeURIComponent(sr.k); a.classList.add('fortsett'); a.hidden = false;
+      a.querySelector('b').textContent = en ? 'You’re in room ' + sr.k : 'Du er i rom ' + sr.k;
+      a.querySelector('small').textContent = en ? 'Tap to go back to the room' : 'Trykk for å gå tilbake til rommet';
+      a.querySelector('.kode').textContent = sr.k;
+    } catch (e) {}
+  })();
+  </script>
+  <script is:inline data-astro-rerun>
+  (function () {
+    // «Legg på hjemskjermen»: bare på mobil, ikke første besøk, og ikke om du har sagt nei nylig
     var el = document.getElementById('installer'); if (!el || el.dataset.bound) return; el.dataset.bound = '1';
     var ua = navigator.userAgent || '', ios = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     var mobil = ios || /Android/i.test(ua);
@@ -199,7 +296,7 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     var nei = false; try { nei = Number(localStorage.getItem('bd_installer_nei') || 0) > Date.now(); } catch (e) {}
     if (inne || nei || !mobil) return;
     var besok = 0; try { besok = Number(localStorage.getItem('bd_besok') || 0) + 1; localStorage.setItem('bd_besok', besok); } catch (e) {}
-    if (besok < 2) return;   // Ikke mas første gang
+    if (besok < 2) return;
     var hendelse = window.__bdInstall || null;
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); hendelse = e; });
     el.hidden = false;
@@ -210,59 +307,6 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     document.getElementById('installerNei').addEventListener('click', function () {
       el.hidden = true; try { localStorage.setItem('bd_installer_nei', Date.now() + 30 * 86400000); } catch (e) {}
     });
-  })();
-  </script>
-  <script is:inline data-astro-rerun>
-  (function () {
-    // Kodefeltet: store bokstaver, og bare det som kan være en kode
-    var f = document.getElementById('h2Kode'); if (!f || f.dataset.bound) return; f.dataset.bound = '1';
-    var inp = document.getElementById('h2KodeFelt');
-    // Fire riktige tegn = en hel kode: gå videre av seg selv (litt etter, så man rekker å se – og rette – siste tegn).
-    // Romkoder har aldri I, O, 0 eller 1, så de stopper autoturen.
-    var videre = null;
-    inp.addEventListener('input', function () {
-      var v = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== inp.value) inp.value = v;
-      f.classList.toggle('klar', v.length >= 4);
-      clearTimeout(videre);
-      if (/^[A-HJ-NP-Z2-9]{4}$/.test(v)) videre = setTimeout(function () { if (inp.value === v) { if (f.requestSubmit) f.requestSubmit(); else f.submit(); } }, 500);
-    });
-    inp.setAttribute('enterkeyhint', 'go'); inp.setAttribute('autocorrect', 'off');
-    f.addEventListener('submit', function (e) { if (inp.value.length < 4) { e.preventDefault(); inp.focus(); } });
-    // Har du spilt før, trenger du ikke forklaringen
-    try { if (localStorage.getItem('bd_mittnavn') || localStorage.getItem('bd_sist_rom')) { var sl = document.getElementById('h2Slik'); if (sl) sl.hidden = true; } } catch (x) {}
-  })();
-  </script>
-  <script is:inline data-astro-rerun>
-  (function () {
-    // Er du allerede i et rom på denne telefonen? Da blir rom-knappen en snarvei tilbake.
-    var a = document.querySelector('.h2-rom'); if (!a) return;
-    try {
-      var sr = JSON.parse(localStorage.getItem('bd_sist_rom') || 'null');
-      if (!sr || !sr.k || Date.now() - (sr.t || 0) > 24 * 3600 * 1000 || !localStorage.getItem('bd_rom_' + sr.k)) return;
-      var en = /^en/.test(document.documentElement.lang || '');
-      a.href = (en ? '/room' : '/no/rom') + '?k=' + encodeURIComponent(sr.k);
-      a.classList.add('fortsett'); a.hidden = false;
-      a.querySelector('b').textContent = en ? 'You’re in room ' + sr.k : 'Du er i rom ' + sr.k;
-      a.querySelector('small').textContent = en ? 'Tap to go back to the room' : 'Trykk for å gå tilbake til rommet';
-      a.querySelector('.kode').textContent = sr.k;
-    } catch (e) {}
-  })();
-  </script>
-  <script is:inline data-astro-rerun>
-  (function () {
-    // Siden bygges sjelden – velg ukens lek i nettleseren, med samme regel som serveren
-    var a = document.getElementById('ukensLek'); if (!a) return;
-    var l = []; try { l = JSON.parse(a.dataset.leker || '[]'); } catch (e) {}
-    if (!l.length) return;
-    var o = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' }));
-    var t = new Date(Date.UTC(o.getFullYear(), o.getMonth(), o.getDate())); t.setUTCDate(t.getUTCDate() - (t.getUTCDay() + 6) % 7 + 3);
-    var aar = t.getUTCFullYear(), jan4 = new Date(Date.UTC(aar, 0, 4));
-    var uke = 1 + Math.round(((t - jan4) / 86400000 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7);
-    var x = l[(aar * 53 + uke) % l.length];
-    a.href = (a.dataset.base || '/no/drinking-games/') + x.slug + '/';
-    a.querySelector('b').textContent = x.navn;
-    a.querySelector('small').textContent = x.gruppe + ' · ' + x.pl + (a.dataset.base === '/drinking-games/' ? ' players' : ' spillere');
-    a.querySelector('img').src = x.bilde;
   })();
   </script>
   <script is:inline data-astro-rerun>
@@ -297,3 +341,118 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
   })();
   </script>
 </Base>
+
+<style>
+  /* Forsidens egne flater – samme farger, skrifter og kurver som resten av siden */
+  .fn-h,.fn-hode h2,.fn-trekk h2{font-size:clamp(24px,3.2vw,32px);font-stretch:112%;font-weight:850;letter-spacing:-.025em;line-height:1.05;margin:0;text-wrap:balance}
+  .fn-seksjon,.fn-trekk,.fn-humor,.fn-hjem{margin-top:clamp(48px,7vw,80px)}
+
+  /* 1+2. Toppen: på store skjermer står «Klar for vors?» og kortbunken side om side */
+  @media (min-width:1100px){
+    .fn-topp{display:grid;grid-template-columns:minmax(500px,1fr) minmax(0,400px);gap:40px;align-items:center}
+    /* Dagens topp holder knappene til 56 % for å gi plass til den liggende kortbunken – her har bunken egen kolonne */
+    .fn-topp :is(.h2-cta,.h2-sub,.h2-gjeng){max-width:100%}
+    /* Overskriften deler plass med kortbunken: skaler med kolonnen, så «pre-game?» får plass på én linje */
+    .fn-topp .h2-hero h1{font-size:clamp(64px,6.2vw,100px)}
+    /* Engelsk: «pre-game?» er lengre enn «vors?» – mindre, og holdt samlet */
+    .fn-topp .h2-hero h1:has(.fn-hel){font-size:clamp(52px,4.6vw,72px)}
+    .fn-hel{white-space:nowrap}
+    .fn-topp .fn-trekk{margin-top:0;grid-template-columns:1fr;gap:18px}
+    .fn-topp .fn-trekk-tekst{order:2}
+    .fn-topp .fn-trekk h2{font-size:22px}
+  }
+  /* 2. Trekk et kort */
+  .fn-trekk{display:grid;gap:22px;align-items:center}
+  @media (min-width:900px){.fn-trekk{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:44px}}
+  .fn-trekk-tekst p{color:var(--muted);margin:10px 0 18px;max-width:42ch}
+  .fn-stokkvalg{display:flex;flex-wrap:wrap;gap:8px}
+  .fn-stokkvalg button{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--ink);
+    font-family:var(--display);font-weight:700;font-size:14.5px;transition:background-color 160ms ease,color 160ms ease,scale 160ms var(--ease-out)}
+  .fn-stokkvalg button[aria-selected="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink2)}
+  .fn-stokkvalg button:active{scale:.97}
+  .fn-kortbord{display:grid;place-items:center;padding:8px 0 14px}
+  .fn-kort{position:relative;width:min(calc(100% - 28px),400px);min-height:250px;display:flex;flex-direction:column;gap:14px;text-align:left;
+    padding:24px 24px 22px;border:0;border-radius:26px;background:var(--paper);color:var(--ink2);rotate:-2deg;
+    box-shadow:0 18px 40px -12px rgb(0 0 0 / .55),0 0 0 1px rgb(0 0 0 / .04);transition:scale 160ms var(--ease-out),rotate 200ms var(--ease-out)}
+  /* Bunken under: to kort som stikker ut bak – viser at det er flere */
+  .fn-kort::before,.fn-kort::after{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1}
+  .fn-kort::before{background:#DCD2EA;rotate:5deg;translate:10px 6px}
+  .fn-kort::after{background:#C9BDDC;rotate:-6deg;translate:-12px 12px}
+  .fn-kort:active{scale:.98}
+  .fn-kort-navn{font-family:var(--display);font-stretch:66%;font-weight:850;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--glo-dyp)}
+  .fn-kort-tekst{font-family:var(--display);font-weight:850;font-size:clamp(22px,2.6vw,27px);line-height:1.12;letter-spacing:-.02em;text-wrap:pretty;flex:1}
+  .fn-kort-hint{font-family:var(--display);font-size:13px;font-weight:650;color:rgb(24 13 38 / .55)}
+  .fn-kort.nytt .fn-kort-tekst{animation:fnNytt 220ms var(--ease-out)}
+  @keyframes fnNytt{from{opacity:0;transform:translateY(6px)}}
+  @media (prefers-reduced-motion:reduce){.fn-kort.nytt .fn-kort-tekst{animation:fnNyttRolig 160ms ease-out!important}}
+  @keyframes fnNyttRolig{from{opacity:0}}
+
+  /* 3. Lekene: vannrett rad på mobil (sveip), rutenett på stor skjerm */
+  .fn-hode{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px}
+  .fn-alle{font-family:var(--display);font-weight:700;font-size:15px;white-space:nowrap}
+  .fn-rad{list-style:none;display:grid;grid-auto-flow:column;grid-auto-columns:min(62vw,240px);gap:12px;overflow-x:auto;
+    scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;margin:0 -18px;padding:2px 18px 6px;scroll-padding:0 18px}
+  .fn-rad::-webkit-scrollbar{display:none}
+  .fn-rad li{scroll-snap-align:start}
+  @media (min-width:900px){.fn-rad{grid-auto-flow:row;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible;margin:0;padding:0}}
+  .fn-lek{display:flex;flex-direction:column;gap:4px;height:100%;color:var(--ink);text-decoration:none;transition:scale 160ms var(--ease-out)}
+  .fn-lek img{width:100%;height:auto;aspect-ratio:240/126;object-fit:cover;border-radius:16px;background:var(--card);margin-bottom:6px}
+  .fn-lek b{font-family:var(--display);font-stretch:108%;font-size:17px;line-height:1.15}
+  .fn-lek small{display:flex;align-items:center;gap:5px;color:var(--faint);font-family:var(--display);font-weight:650;font-size:13px}
+  .fn-pluss{display:inline-flex;align-items:center;gap:3px;margin-left:6px;color:var(--gold-t)}
+  .fn-lek:active{scale:.98}
+  @media (hover:hover) and (pointer:fine){.fn-lek:hover{text-decoration:none}.fn-lek:hover b{color:var(--gold-t)}}
+
+  /* 4. Denne uka */
+  .fn-uka{display:grid;gap:12px;margin-top:16px}
+  @media (min-width:700px){.fn-uka{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+  .fn-nr{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:4px 18px;align-items:center;padding:20px 22px;border-radius:22px;
+    background:var(--accent);color:var(--ink2);text-decoration:none;transition:scale 160ms var(--ease-out)}
+  .fn-nr-uke{grid-row:span 2;display:flex;flex-direction:column;align-items:center;font-family:var(--display);font-weight:800;font-size:13px;
+    text-transform:uppercase;letter-spacing:.08em;line-height:1}
+  .fn-nr-uke b{font-size:56px;font-stretch:125%;letter-spacing:-.04em;margin-top:4px;font-variant-numeric:tabular-nums}
+  .fn-nr-tekst{display:flex;flex-direction:column;gap:3px}
+  .fn-nr-tekst b{font-family:var(--display);font-stretch:112%;font-size:22px;line-height:1.05}
+  .fn-nr-tekst small{font-size:14.5px;opacity:.82}
+  .fn-nr-knapp{justify-self:start;font-family:var(--display);font-weight:800;font-size:14.5px;padding:8px 14px;border-radius:999px;background:var(--ink2);color:var(--accent)}
+  .fn-nr:active,.fn-ukelek:active{scale:.985}
+  @media (hover:hover) and (pointer:fine){.fn-nr:hover{text-decoration:none;filter:brightness(1.05)}}
+  .fn-ukelek{display:grid;grid-template-columns:112px 1fr;gap:14px;align-items:center;padding:14px;border-radius:22px;border:1px solid var(--border2);
+    background:var(--card);color:var(--ink);text-decoration:none;transition:scale 160ms var(--ease-out),border-color 160ms ease}
+  .fn-ukelek img{width:112px;height:auto;aspect-ratio:240/126;object-fit:cover;border-radius:12px}
+  .fn-ukelek span{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fn-ukelek small{font-family:var(--display);font-weight:750;font-size:12.5px;color:var(--gold-t)}
+  .fn-ukelek b{font-family:var(--display);font-stretch:108%;font-size:20px;line-height:1.1}
+  .fn-ukelek em{font-style:normal;font-size:14px;color:var(--muted)}
+  .fn-jul{grid-template-columns:1fr}
+  @media (hover:hover) and (pointer:fine){.fn-ukelek:hover{text-decoration:none;border-color:rgb(var(--volt-rgb) / .5)}}
+  .fn-verktoy{list-style:none;display:grid;margin-top:18px;border-top:1px solid var(--border)}
+  @media (min-width:700px){.fn-verktoy{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px}}
+  .fn-verktoy a{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);color:var(--ink);text-decoration:none}
+  .fn-verktoy .icon{color:var(--gold-t);margin-top:2px;flex:none}
+  .fn-verktoy span{display:flex;flex-direction:column;gap:1px}
+  .fn-verktoy b{font-family:var(--display);font-size:16px}
+  .fn-verktoy small{color:var(--faint);font-size:14px}
+  @media (hover:hover) and (pointer:fine){.fn-verktoy a:hover b{color:var(--gold-t)}}
+
+  /* 6. Humor */
+  .fn-humor{display:grid;gap:24px}
+  @media (min-width:900px){.fn-humor{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px 44px;align-items:start}.fn-humor > h2{grid-column:1/-1}}
+  .fn-replikk-kat{margin:0 0 6px;font-family:var(--display);font-weight:700;font-size:14px;color:var(--accent-t)}
+  .fn-replikk-tekst{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(26px,3.6vw,38px);line-height:1.2;
+    max-width:24ch;text-wrap:balance;cursor:pointer;margin:0}
+  .fn-replikk-hint{margin-top:10px;font-size:13.5px;color:var(--faint)}
+  .fn-humor-valg{display:flex;flex-direction:column}
+  .fn-humor-valg > a{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--border);color:var(--ink);
+    font-family:var(--display);font-weight:650;text-decoration:none}
+  .fn-humor-valg > a .icon{color:var(--faint)}
+  @media (hover:hover) and (pointer:fine){.fn-humor-valg > a:hover{color:var(--gold-t)}.fn-humor-valg > a:hover .icon{color:var(--gold-t)}}
+  .fn-sveip{display:flex;align-items:center;gap:14px;padding:16px 18px;margin-bottom:6px;border-radius:20px;border:0;text-align:left;
+    background:var(--gold);color:var(--ink2);box-shadow:0 4px 0 var(--volt-dyp);transition:translate 120ms var(--ease-out),box-shadow 120ms var(--ease-out)}
+  .fn-sveip span{display:flex;flex-direction:column;gap:1px}
+  .fn-sveip b{font-family:var(--display);font-stretch:108%;font-size:18px}
+  .fn-sveip small{font-size:14px;opacity:.75}
+  .fn-sveip:active{translate:0 3px;box-shadow:0 1px 0 var(--volt-dyp)}
+
+  .fn-hjem p{color:var(--muted);max-width:60ch;margin-top:8px}
+</style>
