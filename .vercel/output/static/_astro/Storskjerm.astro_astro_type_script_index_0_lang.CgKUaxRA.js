@@ -1,0 +1,1 @@
+import{n as e,t}from"./qrcode.CJHyrcSb.js";var n=e(t(),1);window.BDqr=function(e){let t=(0,n.default)(0,`M`);return t.addData(e),t.make(),t.createSvgTag({cellSize:8,margin:2,scalable:!0})};

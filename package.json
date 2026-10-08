@@ -9,16 +9,21 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.0.0",
-    "@astrojs/vercel": "^8.2.11",
+    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/vercel": "^11.0.12",
     "@fontsource-variable/archivo": "^5.3.0",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "@fontsource-variable/figtree": "^5.3.0",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@vercel/functions": "^2.2.13",
-    "astro": "^5.0.0",
-    "nodemailer": "^6.10.1",
+    "astro": "^7.3.7",
+    "nodemailer": "^10.0.16",
     "qrcode-generator": "^1.4.4",
     "web-push": "^3.6.7"
+  },
+  "overrides": {
+    "@vercel/routing-utils": {
+      "path-to-regexp": "6.3.0"
+    }
   }
 }
