@@ -395,9 +395,9 @@ const isCurrent = (href: string) => {
         var text = sb.getAttribute('data-share');
         var msg = '«' + text + '»';
         if (navigator.share) {
-          navigator.share({ text: msg + '\n— mittvors.no' }).catch(function () {});
+          navigator.share({ text: msg + '\n– mittvors.no' }).catch(function () {});
         } else if (navigator.clipboard) {
-          navigator.clipboard.writeText(msg + '\n— mittvors.no').then(function () { toast(SHARED); });
+          navigator.clipboard.writeText(msg + '\n– mittvors.no').then(function () { toast(SHARED); });
         }
       });
       document.addEventListener('click', function (e) {

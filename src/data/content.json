@@ -108,10 +108,10 @@
      {
       "line": "Jeg må ha gått på feil fest, for her var det mye søppel.",
       "sv": {
-       "l": "Jag måste ha gått på fel fest — här var det mycket skräp."
+       "l": "Jag måste ha gått på fel fest – här var det mycket skräp."
       },
       "en": {
-       "l": "I must be at the wrong party — the rubbish is everywhere."
+       "l": "I must be at the wrong party – the rubbish is everywhere."
       },
       "sit": [
        "someone-arrives"
@@ -276,10 +276,10 @@
      {
       "line": "Oj, pass på alt dere eier.",
       "sv": {
-       "l": "Oj — håll koll på era ägodelar."
+       "l": "Oj – håll koll på era ägodelar."
       },
       "en": {
-       "l": "Careful, everyone — watch your belongings."
+       "l": "Careful, everyone – watch your belongings."
       },
       "sit": [
        "someone-arrives"
@@ -299,14 +299,14 @@
      },
      {
       "line": "Blir det festligere nå, så dauer jeg!",
-      "note": "Fleksnes — perfekt idet du ankommer.",
+      "note": "Fleksnes – perfekt idet du ankommer.",
       "sv": {
        "l": "Blir det festligare nu så dör jag!",
-       "n": "Fleksnes — perfekt när du anländer."
+       "n": "Fleksnes – perfekt när du anländer."
       },
       "en": {
        "l": "Any more fun than this and I will drop dead!",
-       "n": "Fleksnes — perfect as you arrive."
+       "n": "Fleksnes – perfect as you arrive."
       },
       "sit": [
        "someone-arrives"
@@ -346,12 +346,12 @@
       ]
      },
      {
-      "line": "Kom inn — vi trengte noen å skylde på.",
+      "line": "Kom inn – vi trengte noen å skylde på.",
       "sv": {
-       "l": "Kom in — vi behövde någon att skylla på."
+       "l": "Kom in – vi behövde någon att skylla på."
       },
       "en": {
-       "l": "Come in — we needed someone to blame."
+       "l": "Come in – we needed someone to blame."
       },
       "sit": [
        "someone-arrives"
@@ -420,24 +420,24 @@
       ]
      },
      {
-      "line": "Fint antrekk — var det mørkt da du kledde på deg?",
+      "line": "Fint antrekk – var det mørkt da du kledde på deg?",
       "sv": {
-       "l": "Snygg outfit — var det mörkt när du klädde på dig?"
+       "l": "Snygg outfit – var det mörkt när du klädde på dig?"
       },
       "en": {
-       "l": "Nice outfit — did you get dressed in the dark?"
+       "l": "Nice outfit – did you get dressed in the dark?"
       },
       "sit": [
        "someone-arrives"
       ]
      },
      {
-      "line": "Godt du kom — vi holdt på å gå tom for problemer.",
+      "line": "Godt du kom – vi holdt på å gå tom for problemer.",
       "sv": {
-       "l": "Bra att du kom — vi höll på att få slut på problem."
+       "l": "Bra att du kom – vi höll på att få slut på problem."
       },
       "en": {
-       "l": "Good thing you came — we were running out of problems."
+       "l": "Good thing you came – we were running out of problems."
       },
       "sit": [
        "someone-arrives"
@@ -454,12 +454,12 @@
     },
     "items": [
      {
-      "line": "Endelig — vi ventet på en grunn til å drikke mer.",
+      "line": "Endelig – vi ventet på en grunn til å drikke mer.",
       "sv": {
-       "l": "Äntligen — vi väntade på en anledning att dricka mer."
+       "l": "Äntligen – vi väntade på en anledning att dricka mer."
       },
       "en": {
-       "l": "Finally — we were waiting for a reason to drink more."
+       "l": "Finally – we were waiting for a reason to drink more."
       },
       "sit": [
        "toasts"
@@ -497,14 +497,14 @@
      },
      {
       "ctx": "Skål-visdom",
-      "line": "Jeg unngår som regel fristelser — med mindre jeg ikke kan motstå dem.",
+      "line": "Jeg unngår som regel fristelser – med mindre jeg ikke kan motstå dem.",
       "sv": {
        "c": "Skålvisdom",
-       "l": "Jag undviker i regel frestelser — om jag inte kan motstå dem."
+       "l": "Jag undviker i regel frestelser – om jag inte kan motstå dem."
       },
       "en": {
        "c": "Toast wisdom",
-       "l": "I generally avoid temptation — unless I cannot resist it."
+       "l": "I generally avoid temptation – unless I cannot resist it."
       },
       "sit": [
        "about-drinking"
@@ -526,12 +526,12 @@
       ]
      },
      {
-      "line": "Skål for leveren — den tar overtid i kveld.",
+      "line": "Skål for leveren – den tar overtid i kveld.",
       "sv": {
-       "l": "Skål för levern — den jobbar övertid ikväll."
+       "l": "Skål för levern – den jobbar övertid ikväll."
       },
       "en": {
-       "l": "Here is to the liver — it is on overtime tonight."
+       "l": "Here is to the liver – it is on overtime tonight."
       },
       "sit": [
        "toasts"
@@ -575,14 +575,14 @@
      },
      {
       "ctx": "Når noen sier du ikke bør drikke på tom mage",
-      "line": "Slapp av — jeg spiste i går.",
+      "line": "Slapp av – jeg spiste i går.",
       "sv": {
        "c": "När någon säger att du inte bör dricka på tom mage",
-       "l": "Lugn — jag åt igår."
+       "l": "Lugn – jag åt igår."
       },
       "en": {
        "c": "When told not to drink on an empty stomach",
-       "l": "Relax — I ate yesterday."
+       "l": "Relax – I ate yesterday."
       },
       "sit": [
        "about-drinking"
@@ -590,12 +590,12 @@
      },
      {
       "line": "Anni, amori e bicchieri di vino, nun se contano mai.",
-      "note": "«År, kjærester og glass med vin — det skal man aldri telle.» Italiensk skåltale.",
+      "note": "«År, kjærester og glass med vin – det skal man aldri telle.» Italiensk skåltale.",
       "sv": {
-       "n": "«År, kärlekar och glas vin — dem räknar man aldrig.» Italiensk skål."
+       "n": "«År, kärlekar och glas vin – dem räknar man aldrig.» Italiensk skål."
       },
       "en": {
-       "n": "“Years, lovers and glasses of wine — never count them.” Italian toast."
+       "n": "“Years, lovers and glasses of wine – never count them.” Italian toast."
       },
       "sit": [
        "toasts"
@@ -603,14 +603,14 @@
      },
      {
       "ctx": "Når en venn sier han ikke skal bli med ut",
-      "line": "Ja, men det er jo klart at jeg blir litt opprørt når du sier at du ikke skal bli med ut. Man blir jo bekymret om det skulle være sånn at du har gått og blitt avholdsmann. Det hadde jo vært forferdelig. En stor del av vennskapet vårt er jo bygget rundt det å styrte sprit sammen. Uten den delen — ja, da vet jeg faktisk ikke om vi har så mye til felles.",
+      "line": "Ja, men det er jo klart at jeg blir litt opprørt når du sier at du ikke skal bli med ut. Man blir jo bekymret om det skulle være sånn at du har gått og blitt avholdsmann. Det hadde jo vært forferdelig. En stor del av vennskapet vårt er jo bygget rundt det å styrte sprit sammen. Uten den delen – ja, da vet jeg faktisk ikke om vi har så mye til felles.",
       "sv": {
        "c": "När en vän säger att han inte följer med ut",
-       "l": "Klart att jag blir lite upprörd när du säger att du inte följer med ut. Man blir ju orolig att du gått och blivit nykterist. Det vore ju förfärligt. En stor del av vår vänskap bygger ju på att hälla i oss sprit ihop. Utan den delen — ja, då vet jag faktiskt inte om vi har så mycket gemensamt."
+       "l": "Klart att jag blir lite upprörd när du säger att du inte följer med ut. Man blir ju orolig att du gått och blivit nykterist. Det vore ju förfärligt. En stor del av vår vänskap bygger ju på att hälla i oss sprit ihop. Utan den delen – ja, då vet jag faktiskt inte om vi har så mycket gemensamt."
       },
       "en": {
        "c": "When a mate says he is staying in",
-       "l": "Well, of course I am a bit upset when you say you are not coming out. One does worry you might have gone teetotal. That would be dreadful. A large part of our friendship is built on downing spirits together. Without that — honestly, I am not sure we have much in common."
+       "l": "Well, of course I am a bit upset when you say you are not coming out. One does worry you might have gone teetotal. That would be dreadful. A large part of our friendship is built on downing spirits together. Without that – honestly, I am not sure we have much in common."
       },
       "sit": [
        "about-drinking"
@@ -639,9 +639,9 @@
       ]
      },
      {
-      "line": "Skål for å bli eldre — alternativet er langt verre.",
+      "line": "Skål for å bli eldre – alternativet er langt verre.",
       "en": {
-       "l": "Here's to getting older — the alternative is far worse."
+       "l": "Here's to getting older – the alternative is far worse."
       },
       "sit": [
        "toasts"
@@ -666,9 +666,9 @@
       ]
      },
      {
-      "line": "Skål for oss som er her — og for dem som ikke er her: de vet ikke hva de går glipp av.",
+      "line": "Skål for oss som er her – og for dem som ikke er her: de vet ikke hva de går glipp av.",
       "en": {
-       "l": "To those of us who are here — and to those who aren't: they don't know what they're missing."
+       "l": "To those of us who are here – and to those who aren't: they don't know what they're missing."
       },
       "sit": [
        "toasts"
@@ -686,14 +686,14 @@
     "items": [
      {
       "ctx": "Etter en kort dotur",
-      "line": "Godt å være tilbake — jeg har savnet dette stedet.",
+      "line": "Godt å være tilbake – jeg har savnet dette stedet.",
       "sv": {
        "c": "Efter ett kort toabesök",
-       "l": "Skönt att vara tillbaka — jag har saknat det här stället."
+       "l": "Skönt att vara tillbaka – jag har saknat det här stället."
       },
       "en": {
        "c": "After a quick trip to the loo",
-       "l": "Good to be back — I missed this place."
+       "l": "Good to be back – I missed this place."
       },
       "sit": [
        "loo-and-bar"
@@ -716,14 +716,14 @@
      },
      {
       "ctx": "Når du drar fra festen",
-      "line": "Takk for meg — dere var et helt greit publikum.",
+      "line": "Takk for meg – dere var et helt greit publikum.",
       "sv": {
        "c": "När du lämnar festen",
-       "l": "Tack för mig — ni var en helt okej publik."
+       "l": "Tack för mig – ni var en helt okej publik."
       },
       "en": {
        "c": "When leaving the party",
-       "l": "Thanks, everyone — you were an adequate audience."
+       "l": "Thanks, everyone – you were an adequate audience."
       },
       "sit": [
        "you-leave"
@@ -746,14 +746,14 @@
      },
      {
       "ctx": "Til den som drar",
-      "line": "Hils hjem — og be dem hente deg.",
+      "line": "Hils hjem – og be dem hente deg.",
       "sv": {
        "c": "Till den som går",
-       "l": "Hälsa hem — och be dem hämta dig."
+       "l": "Hälsa hem – och be dem hämta dig."
       },
       "en": {
        "c": "To whoever is leaving",
-       "l": "Say hi to the family — and tell them to come collect you."
+       "l": "Say hi to the family – and tell them to come collect you."
       },
       "sit": [
        "someone-leaves-early"
@@ -776,14 +776,14 @@
      },
      {
       "ctx": "Når du går i baren",
-      "line": "Hvis jeg ikke er tilbake om ti minutter — bestill én til meg.",
+      "line": "Hvis jeg ikke er tilbake om ti minutter – bestill én til meg.",
       "sv": {
        "c": "När du går till baren",
-       "l": "Om jag inte är tillbaka om tio minuter — beställ en till mig."
+       "l": "Om jag inte är tillbaka om tio minuter – beställ en till mig."
       },
       "en": {
        "c": "Heading to the bar",
-       "l": "If I am not back in ten minutes — order me another."
+       "l": "If I am not back in ten minutes – order me another."
       },
       "sit": [
        "loo-and-bar"
@@ -821,14 +821,14 @@
      },
      {
       "ctx": "Til den som drar",
-      "line": "Du er som en sky — når du forsvinner, blir det en fin dag.",
+      "line": "Du er som en sky – når du forsvinner, blir det en fin dag.",
       "sv": {
        "c": "Till den som går",
-       "l": "Du är som ett moln — när du försvinner blir det en fin dag."
+       "l": "Du är som ett moln – när du försvinner blir det en fin dag."
       },
       "en": {
        "c": "To whoever is leaving",
-       "l": "You are like a cloud — when you disappear, it turns into a lovely day."
+       "l": "You are like a cloud – when you disappear, it turns into a lovely day."
       },
       "sit": [
        "someone-leaves-early"
@@ -850,14 +850,14 @@
       ]
      },
      {
-      "ctx": "Etter å ha trukket ned — helst på offentlig do",
+      "ctx": "Etter å ha trukket ned – helst på offentlig do",
       "line": "God som ny!",
       "sv": {
-       "c": "Efter att ha spolat — helst på offentlig toa",
+       "c": "Efter att ha spolat – helst på offentlig toa",
        "l": "Som ny!"
       },
       "en": {
-       "c": "After flushing — ideally in a public loo",
+       "c": "After flushing – ideally in a public loo",
        "l": "Good as new!"
       },
       "sit": [
@@ -915,16 +915,16 @@
      {
       "ctx": "Til en som drar tidlig",
       "line": "Kan du holde denne?",
-      "note": "Rekk fram den ene hånda — og vis fingeren med den andre.",
+      "note": "Rekk fram den ene hånda – og vis fingeren med den andre.",
       "sv": {
        "c": "Till någon som går tidigt",
        "l": "Kan du hålla den här?",
-       "n": "Räck fram ena handen — och visa fingret med den andra."
+       "n": "Räck fram ena handen – och visa fingret med den andra."
       },
       "en": {
        "c": "To someone leaving early",
        "l": "Can you hold this?",
-       "n": "Offer one hand — and give them the finger with the other."
+       "n": "Offer one hand – and give them the finger with the other."
       },
       "sit": [
        "someone-leaves-early"
@@ -981,7 +981,7 @@
        "n": "Grov. Braut = Erling Braut Haaland."
       },
       "en": {
-       "l": "Hope the pitch is wet — shall I Braut all over you?",
+       "l": "Hope the pitch is wet – shall I Braut all over you?",
        "n": "Crude. Braut = Erling Braut Haaland."
       },
       "sit": [
@@ -990,14 +990,14 @@
      },
      {
       "ctx": "Når noen avviser deg",
-      "line": "Ikke sett meg på benken da — på tide at jeg blir bytta inn!",
+      "line": "Ikke sett meg på benken da – på tide at jeg blir bytta inn!",
       "sv": {
        "c": "När någon nobbar dig",
-       "l": "Sätt mig inte på bänken — dags att jag blir inbytt!"
+       "l": "Sätt mig inte på bänken – dags att jag blir inbytt!"
       },
       "en": {
        "c": "When someone turns you down",
-       "l": "Do not bench me now — it is about time I got subbed on!"
+       "l": "Do not bench me now – it is about time I got subbed on!"
       },
       "sit": [
        "pickup-lines"
@@ -1049,12 +1049,12 @@
       ]
      },
      {
-      "line": "Håper jeg kan våkne til kjøttkaker i brun saus i morgen tidlig — er du våken?",
+      "line": "Håper jeg kan våkne til kjøttkaker i brun saus i morgen tidlig – er du våken?",
       "sv": {
-       "l": "Hoppas jag får vakna till köttbullar i brunsås imorgon bitti — är du vaken?"
+       "l": "Hoppas jag får vakna till köttbullar i brunsås imorgon bitti – är du vaken?"
       },
       "en": {
-       "l": "Hoping to wake up to meatballs and gravy tomorrow morning — you up?"
+       "l": "Hoping to wake up to meatballs and gravy tomorrow morning – you up?"
       },
       "sit": [
        "pickup-lines"
@@ -1190,15 +1190,15 @@
       ]
      },
      {
-      "line": "Der er han — mannen, myten, forsinkelsen.",
-      "note": "Funker like godt med «hun — dama, myten…».",
+      "line": "Der er han – mannen, myten, forsinkelsen.",
+      "note": "Funker like godt med «hun – dama, myten…».",
       "sv": {
-       "l": "Där är han — mannen, myten, förseningen.",
-       "n": "Funkar lika bra med «hon — kvinnan, myten…»."
+       "l": "Där är han – mannen, myten, förseningen.",
+       "n": "Funkar lika bra med «hon – kvinnan, myten…»."
       },
       "en": {
-       "l": "There he is — the man, the myth, the delay.",
-       "n": "Works just as well with “she — the woman, the myth…”."
+       "l": "There he is – the man, the myth, the delay.",
+       "n": "Works just as well with “she – the woman, the myth…”."
       },
       "sit": [
        "someone-is-late"
@@ -1242,14 +1242,14 @@
      },
      {
       "ctx": "Når noen sier «halv dag?» til deg",
-      "line": "Slapp av — jeg tok den andre halvparten i går.",
+      "line": "Slapp av – jeg tok den andre halvparten i går.",
       "sv": {
        "c": "När någon säger «halvdag?» till dig",
-       "l": "Lugn — jag tog andra halvan igår."
+       "l": "Lugn – jag tog andra halvan igår."
       },
       "en": {
        "c": "When someone says “half day?” to you",
-       "l": "Relax — I did the other half yesterday."
+       "l": "Relax – I did the other half yesterday."
       },
       "sit": [
        "someone-is-late"
@@ -1329,14 +1329,14 @@
     },
     "items": [
      {
-      "ctx": "Når du snakker med en kollega — på jobb",
+      "ctx": "Når du snakker med en kollega – på jobb",
       "line": "Beklager at jeg forstyrrer deg på jobb.",
       "sv": {
-       "c": "När du pratar med en kollega — på jobbet",
+       "c": "När du pratar med en kollega – på jobbet",
        "l": "Ursäkta att jag stör dig på jobbet."
       },
       "en": {
-       "c": "Talking to a colleague — at work",
+       "c": "Talking to a colleague – at work",
        "l": "Sorry to bother you at work."
       },
       "sit": [
@@ -1508,14 +1508,14 @@
      },
      {
       "ctx": "Når noen spør hvordan presentasjonen gikk",
-      "line": "Husker ikke — jeg blacket ut.",
+      "line": "Husker ikke – jeg blacket ut.",
       "sv": {
        "c": "När någon frågar hur presentationen gick",
-       "l": "Minns inte — jag blackade."
+       "l": "Minns inte – jag blackade."
       },
       "en": {
        "c": "When asked how the presentation went",
-       "l": "No idea — I blacked out."
+       "l": "No idea – I blacked out."
       },
       "sit": [
        "office",
@@ -1612,12 +1612,12 @@
       ]
      },
      {
-      "line": "Hvis du kunne endret én ting ved deg selv — bortsett fra det åpenbare — hva ville det vært?",
+      "line": "Hvis du kunne endret én ting ved deg selv – bortsett fra det åpenbare – hva ville det vært?",
       "sv": {
-       "l": "Om du kunde ändra en sak hos dig själv — förutom det uppenbara — vad skulle det vara?"
+       "l": "Om du kunde ändra en sak hos dig själv – förutom det uppenbara – vad skulle det vara?"
       },
       "en": {
-       "l": "If you could change one thing about yourself — other than the obvious — what would it be?"
+       "l": "If you could change one thing about yourself – other than the obvious – what would it be?"
       },
       "sit": [
        "winding-up"
@@ -1639,12 +1639,12 @@
       ]
      },
      {
-      "line": "Du er ikke dum — du har bare uflaks når du tenker.",
+      "line": "Du er ikke dum – du har bare uflaks når du tenker.",
       "sv": {
-       "l": "Du är inte dum — du har bara otur när du tänker."
+       "l": "Du är inte dum – du har bara otur när du tänker."
       },
       "en": {
-       "l": "You are not stupid — you just have bad luck when you think."
+       "l": "You are not stupid – you just have bad luck when you think."
       },
       "sit": [
        "winding-up"
@@ -1664,14 +1664,14 @@
      },
      {
       "ctx": "Når noen skryter eller overdriver",
-      "line": "Fortell mer — jeg elsker eventyr.",
+      "line": "Fortell mer – jeg elsker eventyr.",
       "sv": {
        "c": "När någon skryter eller överdriver",
-       "l": "Berätta mer — jag älskar sagor."
+       "l": "Berätta mer – jag älskar sagor."
       },
       "en": {
        "c": "When someone brags or exaggerates",
-       "l": "Do go on — I love fairy tales."
+       "l": "Do go on – I love fairy tales."
       },
       "sit": [
        "tall-tales",
@@ -1722,12 +1722,12 @@
       ]
      },
      {
-      "line": "Jeg er ikke sur — bare imponert over frekkheten.",
+      "line": "Jeg er ikke sur – bare imponert over frekkheten.",
       "sv": {
-       "l": "Jag är inte sur — bara imponerad av fräckheten."
+       "l": "Jag är inte sur – bara imponerad av fräckheten."
       },
       "en": {
-       "l": "I am not angry — just impressed by the audacity."
+       "l": "I am not angry – just impressed by the audacity."
       },
       "sit": [
        "insulted"
@@ -1786,12 +1786,12 @@
       ]
      },
      {
-      "line": "Jeg skulle tatt deg skikkelig — men du klarte det jo fint selv.",
+      "line": "Jeg skulle tatt deg skikkelig – men du klarte det jo fint selv.",
       "sv": {
-       "l": "Jag skulle sågat dig — men du klarade det ju fint själv."
+       "l": "Jag skulle sågat dig – men du klarade det ju fint själv."
       },
       "en": {
-       "l": "I was going to roast you — but you did that yourself."
+       "l": "I was going to roast you – but you did that yourself."
       },
       "sit": [
        "insulted"
@@ -1888,14 +1888,14 @@
      },
      {
       "ctx": "Når noen synger feil tekst",
-      "line": "Nesten. Ikke i nærheten — men nesten.",
+      "line": "Nesten. Ikke i nærheten – men nesten.",
       "sv": {
        "c": "När någon sjunger fel text",
-       "l": "Nästan. Inte i närheten — men nästan."
+       "l": "Nästan. Inte i närheten – men nästan."
       },
       "en": {
        "c": "When someone sings the wrong lyrics",
-       "l": "Close. Not even remotely — but close."
+       "l": "Close. Not even remotely – but close."
       },
       "sit": [
        "commenting"
@@ -1933,14 +1933,14 @@
      },
      {
       "ctx": "Etter et middels forsøk på humor",
-      "line": "Ok — men ikke si opp dagjobben.",
+      "line": "Ok – men ikke si opp dagjobben.",
       "sv": {
        "c": "Efter ett medelmåttigt skämtförsök",
-       "l": "Okej — men säg inte upp dig från dagjobbet."
+       "l": "Okej – men säg inte upp dig från dagjobbet."
       },
       "en": {
        "c": "After a mediocre attempt at humour",
-       "l": "Okay — just do not quit your day job."
+       "l": "Okay – just do not quit your day job."
       },
       "sit": [
        "joke-flops"
@@ -2044,12 +2044,12 @@
       ]
      },
      {
-      "line": "Jeg skulle gjerne vært enig med deg — men da hadde vi begge tatt feil.",
+      "line": "Jeg skulle gjerne vært enig med deg – men da hadde vi begge tatt feil.",
       "sv": {
-       "l": "Jag skulle gärna hålla med dig — men då hade vi båda haft fel."
+       "l": "Jag skulle gärna hålla med dig – men då hade vi båda haft fel."
       },
       "en": {
-       "l": "I would agree with you — but then we would both be wrong."
+       "l": "I would agree with you – but then we would both be wrong."
       },
       "sit": [
        "losing-an-argument"
@@ -2138,14 +2138,14 @@
      },
      {
       "ctx": "Når du gir deg i diskusjonen",
-      "line": "Greit — alt som hjelper deg å sove om natta.",
+      "line": "Greit – alt som hjelper deg å sove om natta.",
       "sv": {
        "c": "När du ger dig i diskussionen",
-       "l": "Visst — vad som än hjälper dig sova om natten."
+       "l": "Visst – vad som än hjälper dig sova om natten."
       },
       "en": {
        "c": "When you concede the argument",
-       "l": "Sure — whatever helps you sleep at night."
+       "l": "Sure – whatever helps you sleep at night."
       },
       "sit": [
        "losing-an-argument"
@@ -2153,14 +2153,14 @@
      },
      {
       "ctx": "Etter den minste uenighet",
-      "line": "Du skjønner det ikke — og jeg forventet ærlig talt ikke det heller.",
+      "line": "Du skjønner det ikke – og jeg forventet ærlig talt ikke det heller.",
       "sv": {
        "c": "Efter minsta oenighet",
-       "l": "Du fattar inte — och jag förväntade mig ärligt talat inte det heller."
+       "l": "Du fattar inte – och jag förväntade mig ärligt talat inte det heller."
       },
       "en": {
        "c": "After the slightest disagreement",
-       "l": "You do not get it — but honestly, I would not expect you to."
+       "l": "You do not get it – but honestly, I would not expect you to."
       },
       "sit": [
        "losing-an-argument"
@@ -2178,14 +2178,14 @@
     "items": [
      {
       "ctx": "Som svar på hva som helst",
-      "line": "Ja — for deg.",
+      "line": "Ja – for deg.",
       "sv": {
        "c": "Som svar på vad som helst",
-       "l": "Ja — för dig."
+       "l": "Ja – för dig."
       },
       "en": {
        "c": "In response to anything",
-       "l": "Sure — for you."
+       "l": "Sure – for you."
       },
       "sit": [
        "rage-bait"
@@ -2368,14 +2368,14 @@
      },
      {
       "ctx": "Når noen spør hvor gammel du er",
-      "line": "Gammel nok til å vite bedre — ung nok til å gjøre det likevel.",
+      "line": "Gammel nok til å vite bedre – ung nok til å gjøre det likevel.",
       "sv": {
        "c": "När någon frågar hur gammal du är",
-       "l": "Gammal nog att veta bättre — ung nog att göra det ändå."
+       "l": "Gammal nog att veta bättre – ung nog att göra det ändå."
       },
       "en": {
        "c": "When asked your age",
-       "l": "Old enough to know better — young enough to do it anyway."
+       "l": "Old enough to know better – young enough to do it anyway."
       },
       "sit": [
        "questions"
@@ -2413,14 +2413,14 @@
      },
      {
       "ctx": "Livsvisdom",
-      "line": "Gå alltid i andres begravelser — ellers kommer de ikke i din.",
+      "line": "Gå alltid i andres begravelser – ellers kommer de ikke i din.",
       "sv": {
        "c": "Livsvisdom",
-       "l": "Gå alltid på andras begravningar — annars kommer de inte på din."
+       "l": "Gå alltid på andras begravningar – annars kommer de inte på din."
       },
       "en": {
        "c": "Life wisdom",
-       "l": "Always go to other people's funerals — otherwise they will not come to yours."
+       "l": "Always go to other people's funerals – otherwise they will not come to yours."
       },
       "sit": [
        "everyday-deadpan"
@@ -2428,14 +2428,14 @@
      },
      {
       "ctx": "Livsvisdom",
-      "line": "Smil til verden, og du får en støvel i trynet. Smil igjen — vips, et helt par.",
+      "line": "Smil til verden, og du får en støvel i trynet. Smil igjen – vips, et helt par.",
       "sv": {
        "c": "Livsvisdom",
-       "l": "Le mot världen och du får en känga i ansiktet. Le igen — vips, ett helt par."
+       "l": "Le mot världen och du får en känga i ansiktet. Le igen – vips, ett helt par."
       },
       "en": {
        "c": "Life wisdom",
-       "l": "Smile at the world and you get a boot in the face. Smile again — there is the pair."
+       "l": "Smile at the world and you get a boot in the face. Smile again – there is the pair."
       },
       "sit": [
        "everyday-deadpan"
@@ -2504,10 +2504,10 @@
      },
      {
       "ctx": "Når noen påpeker at du er treg/sen",
-      "line": "Hør her — Roma ble ikke bygd på én dag.",
+      "line": "Hør her – Roma ble ikke bygd på én dag.",
       "sv": {
        "c": "När någon påpekar att du är sen/långsam",
-       "l": "Hör här — Rom byggdes inte på en dag."
+       "l": "Hör här – Rom byggdes inte på en dag."
       },
       "en": {
        "c": "When called out for being late/slow",
@@ -2579,14 +2579,14 @@
      },
      {
       "ctx": "Et absurd faktum om deg selv",
-      "line": "Ble født veldig ung — kunne så vidt snakke og gå.",
+      "line": "Ble født veldig ung – kunne så vidt snakke og gå.",
       "sv": {
        "c": "Ett absurt faktum om dig själv",
-       "l": "Föddes väldigt ung — kunde knappt prata och gå."
+       "l": "Föddes väldigt ung – kunde knappt prata och gå."
       },
       "en": {
        "c": "An absurd fact about yourself",
-       "l": "I was born very young — could barely walk or talk."
+       "l": "I was born very young – could barely walk or talk."
       },
       "sit": [
        "everyday-deadpan"
@@ -2813,14 +2813,14 @@
      },
      {
       "ctx": "Når noen ber deg om noe",
-      "line": "Vet ikke — kan jeg?",
+      "line": "Vet ikke – kan jeg?",
       "sv": {
        "c": "När någon ber dig om något",
-       "l": "Vet inte — kan jag?"
+       "l": "Vet inte – kan jag?"
       },
       "en": {
        "c": "When someone asks you to do something",
-       "l": "I do not know — can I?"
+       "l": "I do not know – can I?"
       },
       "sit": [
        "favours"
@@ -2843,14 +2843,14 @@
      },
      {
       "ctx": "Når vitsen din feiler",
-      "line": "Hei — jeg så i det minste potensialet.",
+      "line": "Hei – jeg så i det minste potensialet.",
       "sv": {
        "c": "När ditt skämt floppar",
-       "l": "Hörru — jag såg i alla fall potentialen."
+       "l": "Hörru – jag såg i alla fall potentialen."
       },
       "en": {
        "c": "When your joke fails",
-       "l": "Hey — at least I saw the potential."
+       "l": "Hey – at least I saw the potential."
       },
       "sit": [
        "joke-flops"
@@ -2888,14 +2888,14 @@
      },
      {
       "ctx": "Når noen tilbyr deg hva som helst",
-      "line": "Nei takk — jeg skal kjøre senere.",
+      "line": "Nei takk – jeg skal kjøre senere.",
       "sv": {
        "c": "När någon erbjuder dig vad som helst",
-       "l": "Nej tack — jag ska köra senare."
+       "l": "Nej tack – jag ska köra senare."
       },
       "en": {
        "c": "When offered anything at all",
-       "l": "Nah — I have to drive later."
+       "l": "Nah – I have to drive later."
       },
       "sit": [
        "questions"
@@ -3230,51 +3230,51 @@
       "rules": {
        "no": [
         "Legg kortene i en tett sirkel rundt en kopp eller flaske. Trekk etter tur og gjør det kortet sier. Bryter du sirkelen, drikker du opp glasset ditt.",
-        "b|Ess — Fossefall: alle begynner å drikke samtidig. Du kan ikke stoppe før den før deg har stoppet.",
-        "b|2 — You: pek ut en som drikker.",
-        "b|3 — Me: du drikker selv.",
-        "b|4 — Whores: alle jentene drikker.",
-        "b|5 — Thumb: legg tommelen på bordkanten når som helst i resten av runden. Sistemann som følger etter, drikker.",
-        "b|6 — Dicks: alle gutta drikker.",
-        "b|7 — Heaven: alle rekker hånda i været. Sistemann drikker.",
-        "b|8 — Mate: velg en kompis som må drikke hver gang du drikker.",
-        "b|9 — Rhyme: si et ord. Rundt bordet rimes det til noen står fast – den drikker.",
-        "b|10 — Category: velg en kategori (bilmerker, ølmerker …). Rundt bordet til noen står fast – den drikker.",
-        "b|Knekt — Rule: lag en regel som gjelder resten av spillet. Den som bryter den, drikker.",
-        "b|Dronning — Question master: til neste dronning trekkes, drikker alle som svarer på et spørsmål fra deg.",
-        "b|Konge — første konge drikker 5 slurker, andre 10, tredje 15 og fjerde 20."
+        "b|Ess – Fossefall: alle begynner å drikke samtidig. Du kan ikke stoppe før den før deg har stoppet.",
+        "b|2 – You: pek ut en som drikker.",
+        "b|3 – Me: du drikker selv.",
+        "b|4 – Whores: alle jentene drikker.",
+        "b|5 – Thumb: legg tommelen på bordkanten når som helst i resten av runden. Sistemann som følger etter, drikker.",
+        "b|6 – Dicks: alle gutta drikker.",
+        "b|7 – Heaven: alle rekker hånda i været. Sistemann drikker.",
+        "b|8 – Mate: velg en kompis som må drikke hver gang du drikker.",
+        "b|9 – Rhyme: si et ord. Rundt bordet rimes det til noen står fast – den drikker.",
+        "b|10 – Category: velg en kategori (bilmerker, ølmerker …). Rundt bordet til noen står fast – den drikker.",
+        "b|Knekt – Rule: lag en regel som gjelder resten av spillet. Den som bryter den, drikker.",
+        "b|Dronning – Question master: til neste dronning trekkes, drikker alle som svarer på et spørsmål fra deg.",
+        "b|Konge – første konge drikker 5 slurker, andre 10, tredje 15 og fjerde 20."
        ],
        "sv": [
         "Lägg korten i en tät cirkel runt en kopp eller flaska. Dra i tur och ordning och gör vad kortet säger. Bryter du cirkeln dricker du upp ditt glas.",
-        "b|Ess — Vattenfall: alla börjar dricka; du får inte sluta förrän den före dig slutar.",
-        "b|2 — You: peka ut någon som dricker.",
-        "b|3 — Me: du dricker själv.",
-        "b|4 — Whores: alla tjejer dricker.",
-        "b|5 — Thumb: lägg tummen på bordskanten när du vill; sist att följa dricker.",
-        "b|6 — Dicks: alla killar dricker.",
-        "b|7 — Heaven: alla räcker upp handen; sist dricker.",
-        "b|8 — Mate: välj en polare som dricker varje gång du dricker.",
-        "b|9 — Rhyme: säg ett ord; rimma runt bordet tills någon fastnar – den dricker.",
-        "b|10 — Category: välj kategori; runt bordet tills någon fastnar – den dricker.",
-        "b|Knekt — Rule: hitta på en regel för resten av spelet; bryt den och drick.",
-        "b|Dam — Question master: tills nästa dam dricker alla som svarar på en fråga från dig.",
-        "b|Kung — första kungen dricker 5 klunkar, andra 10, tredje 15 och fjärde 20."
+        "b|Ess – Vattenfall: alla börjar dricka; du får inte sluta förrän den före dig slutar.",
+        "b|2 – You: peka ut någon som dricker.",
+        "b|3 – Me: du dricker själv.",
+        "b|4 – Whores: alla tjejer dricker.",
+        "b|5 – Thumb: lägg tummen på bordskanten när du vill; sist att följa dricker.",
+        "b|6 – Dicks: alla killar dricker.",
+        "b|7 – Heaven: alla räcker upp handen; sist dricker.",
+        "b|8 – Mate: välj en polare som dricker varje gång du dricker.",
+        "b|9 – Rhyme: säg ett ord; rimma runt bordet tills någon fastnar – den dricker.",
+        "b|10 – Category: välj kategori; runt bordet tills någon fastnar – den dricker.",
+        "b|Knekt – Rule: hitta på en regel för resten av spelet; bryt den och drick.",
+        "b|Dam – Question master: tills nästa dam dricker alla som svarar på en fråga från dig.",
+        "b|Kung – första kungen dricker 5 klunkar, andra 10, tredje 15 och fjärde 20."
        ],
        "en": [
         "Lay the cards in a tight circle around a cup or bottle. Take turns drawing and do what the card says. Break the circle and you finish your drink.",
-        "b|Ace — Waterfall: everyone starts drinking; you can't stop until the person before you stops.",
-        "b|2 — You: point at someone who drinks.",
-        "b|3 — Me: you drink.",
-        "b|4 — Whores: all the girls drink.",
-        "b|5 — Thumb: put your thumb on the table edge whenever you like; last to follow drinks.",
-        "b|6 — Dicks: all the guys drink.",
-        "b|7 — Heaven: everyone raises a hand; last one drinks.",
-        "b|8 — Mate: pick a mate who drinks every time you drink.",
-        "b|9 — Rhyme: say a word; rhyme around the table until someone is stuck – they drink.",
-        "b|10 — Category: pick a category; go around until someone is stuck – they drink.",
-        "b|Jack — Rule: make a rule for the rest of the game; break it and drink.",
-        "b|Queen — Question master: until the next queen, anyone who answers your question drinks.",
-        "b|King — first king drinks 5 sips, second 10, third 15 and fourth 20."
+        "b|Ace – Waterfall: everyone starts drinking; you can't stop until the person before you stops.",
+        "b|2 – You: point at someone who drinks.",
+        "b|3 – Me: you drink.",
+        "b|4 – Whores: all the girls drink.",
+        "b|5 – Thumb: put your thumb on the table edge whenever you like; last to follow drinks.",
+        "b|6 – Dicks: all the guys drink.",
+        "b|7 – Heaven: everyone raises a hand; last one drinks.",
+        "b|8 – Mate: pick a mate who drinks every time you drink.",
+        "b|9 – Rhyme: say a word; rhyme around the table until someone is stuck – they drink.",
+        "b|10 – Category: pick a category; go around until someone is stuck – they drink.",
+        "b|Jack – Rule: make a rule for the rest of the game; break it and drink.",
+        "b|Queen – Question master: until the next queen, anyone who answers your question drinks.",
+        "b|King – first king drinks 5 sips, second 10, third 15 and fourth 20."
        ]
       },
       "fit": {
@@ -3346,19 +3346,19 @@
       "pl": "3+",
       "rules": {
        "no": [
-        "Runde 1 — fire spørsmål til hver spiller, ett kort per svar: 1) Rød eller svart? 2) Over eller under ditt forrige kort? 3) Innenfor eller utenfor de to første? 4) Hvilken kortfarge (kløver/spar/hjerter/ruter)? Feil = drikk; riktig = del ut like mange.",
-        "Runde 2 — pyramiden: legg kort i en pyramide (5-4-3-2-1) og snu rad for rad. Har du kortet på hånda, legger du det på og deler ut slurker etter radnivå (nederst 1, øverst 5).",
-        "Runde 3 — bussen: den som sitter igjen med flest kort kjører bussen. Snu kort fra bunken: knekt = 1 slurk, dame = 2, konge = 3, ess = 4 — og nytt kort legges på. Du er i mål først når et avtalt antall kort er passert uten bildekort."
+        "Runde 1 – fire spørsmål til hver spiller, ett kort per svar: 1) Rød eller svart? 2) Over eller under ditt forrige kort? 3) Innenfor eller utenfor de to første? 4) Hvilken kortfarge (kløver/spar/hjerter/ruter)? Feil = drikk; riktig = del ut like mange.",
+        "Runde 2 – pyramiden: legg kort i en pyramide (5-4-3-2-1) og snu rad for rad. Har du kortet på hånda, legger du det på og deler ut slurker etter radnivå (nederst 1, øverst 5).",
+        "Runde 3 – bussen: den som sitter igjen med flest kort kjører bussen. Snu kort fra bunken: knekt = 1 slurk, dame = 2, konge = 3, ess = 4 – og nytt kort legges på. Du er i mål først når et avtalt antall kort er passert uten bildekort."
        ],
        "sv": [
-        "Runda 1 — fyra frågor till varje spelare, ett kort per svar: 1) Rött eller svart? 2) Över eller under ditt förra kort? 3) Innanför eller utanför de två första? 4) Vilken färg (klöver/spader/hjärter/ruter)? Fel = drick; rätt = dela ut lika många.",
-        "Runda 2 — pyramiden: lägg kort i en pyramid (5-4-3-2-1) och vänd rad för rad. Har du kortet på handen lägger du det och delar ut klunkar efter radnivå (nederst 1, överst 5).",
-        "Runda 3 — bussen: den med flest kort kvar åker buss. Vänd kort från leken: knekt = 1 klunk, dam = 2, kung = 3, ess = 4 — och ett nytt kort läggs på. Du är i mål först när ett avtalat antal kort passerat utan klädda kort."
+        "Runda 1 – fyra frågor till varje spelare, ett kort per svar: 1) Rött eller svart? 2) Över eller under ditt förra kort? 3) Innanför eller utanför de två första? 4) Vilken färg (klöver/spader/hjärter/ruter)? Fel = drick; rätt = dela ut lika många.",
+        "Runda 2 – pyramiden: lägg kort i en pyramid (5-4-3-2-1) och vänd rad för rad. Har du kortet på handen lägger du det och delar ut klunkar efter radnivå (nederst 1, överst 5).",
+        "Runda 3 – bussen: den med flest kort kvar åker buss. Vänd kort från leken: knekt = 1 klunk, dam = 2, kung = 3, ess = 4 – och ett nytt kort läggs på. Du är i mål först när ett avtalat antal kort passerat utan klädda kort."
        ],
        "en": [
-        "Round 1 — four questions per player, one card per answer: 1) Red or black? 2) Higher or lower than your last card? 3) Inside or outside the first two? 4) Which suit? Wrong = drink; right = give out the same.",
-        "Round 2 — the pyramid: lay cards in a pyramid (5-4-3-2-1) and flip row by row. Holding a matching card lets you play it and hand out sips by row level (bottom 1, top 5).",
-        "Round 3 — the bus: whoever has most cards left rides the bus. Flip cards off the deck: jack = 1 sip, queen = 2, king = 3, ace = 4 — and a new card replaces it. You are done once an agreed number of cards pass with no face card."
+        "Round 1 – four questions per player, one card per answer: 1) Red or black? 2) Higher or lower than your last card? 3) Inside or outside the first two? 4) Which suit? Wrong = drink; right = give out the same.",
+        "Round 2 – the pyramid: lay cards in a pyramid (5-4-3-2-1) and flip row by row. Holding a matching card lets you play it and hand out sips by row level (bottom 1, top 5).",
+        "Round 3 – the bus: whoever has most cards left rides the bus. Flip cards off the deck: jack = 1 sip, queen = 2, king = 3, ace = 4 – and a new card replaces it. You are done once an agreed number of cards pass with no face card."
        ]
       },
       "fit": {
@@ -3389,21 +3389,21 @@
         "De fire essene er hester på startstreken. Legg 6–8 kort med bildesiden ned i en rekke som løpsbane.",
         "Alle vedder et antall slurker på sin kortfarge før start.",
         "Snu kort fra bunken ett og ett: essen i samme farge rykker fram ett hakk.",
-        "Variant: når alle hestene har passert et banekort, snus det — og den fargens hest rykker ett hakk tilbake.",
+        "Variant: når alle hestene har passert et banekort, snus det – og den fargens hest rykker ett hakk tilbake.",
         "Første hest i mål vinner: de som veddet riktig deler ut det dobbelte av innsatsen sin; alle andre drikker innsatsen selv."
        ],
        "sv": [
         "De fyra essen är hästar på startlinjen. Lägg 6–8 kort med baksidan upp i en rad som bana.",
         "Alla satsar ett antal klunkar på sin färg innan start.",
         "Vänd kort från leken ett och ett: esset i samma färg flyttar fram ett steg.",
-        "Variant: när alla hästar passerat ett bankort vänds det — och den färgens häst backar ett steg.",
+        "Variant: när alla hästar passerat ett bankort vänds det – och den färgens häst backar ett steg.",
         "Första häst i mål vinner: de som satsade rätt delar ut dubbla insatsen; alla andra dricker sin insats själva."
        ],
        "en": [
         "The four aces are horses on the start line. Lay 6–8 cards face down in a row as the track.",
         "Everyone bets a number of sips on a suit before the off.",
         "Flip cards from the deck one by one: the ace of that suit moves up one step.",
-        "Variant: once all horses pass a track card, flip it — that suit's horse moves back one.",
+        "Variant: once all horses pass a track card, flip it – that suit's horse moves back one.",
         "First horse home wins: correct backers give out double their stake; everyone else drinks their own."
        ]
       },
@@ -3433,7 +3433,7 @@
       "rules": {
        "no": [
         "Fjern jokerne og del stokken likt (26 kort hver), i hver sin bunke med bildesiden ned.",
-        "Snu det øverste kortet samtidig — høyest kort vinner begge (2 lavest, ess høyest). Vinnerkortene legges nederst i egen bunke.",
+        "Snu det øverste kortet samtidig – høyest kort vinner begge (2 lavest, ess høyest). Vinnerkortene legges nederst i egen bunke.",
         "Likt kort = krig: begge legger 3 kort med bildesiden ned og snur ett nytt. Høyest åpne kort vinner alle ti. Likt igjen = ny krig.",
         "b|Straff: begge drikker 2 når en krig starter.",
         "b|Taperen av en krig drikker 3.",
@@ -3442,7 +3442,7 @@
        ],
        "sv": [
         "Ta bort jokrarna och dela leken lika (26 kort var), i varsin hög med baksidan upp.",
-        "Vänd översta kortet samtidigt — högst kort vinner båda (2 lägst, ess högst). Vinstkorten läggs underst i egna högen.",
+        "Vänd översta kortet samtidigt – högst kort vinner båda (2 lägst, ess högst). Vinstkorten läggs underst i egna högen.",
         "Lika kort = krig: båda lägger 3 kort med baksidan upp och vänder ett nytt. Högsta öppna kort vinner alla tio. Lika igen = nytt krig.",
         "b|Straff: båda dricker 2 när ett krig startar.",
         "b|Förloraren av ett krig dricker 3.",
@@ -3451,7 +3451,7 @@
        ],
        "en": [
         "Remove the jokers and split the deck evenly (26 each), face down in front of each player.",
-        "Flip your top cards at the same time — highest wins both (2 low, ace high). Won cards go to the bottom of your pile.",
+        "Flip your top cards at the same time – highest wins both (2 low, ace high). Won cards go to the bottom of your pile.",
         "A tie means war: both lay 3 cards face down and flip one more. Highest face-up card takes all ten. Tie again = new war.",
         "b|Penalty: both drink 2 when a war starts.",
         "b|The loser of a war drinks 3.",
@@ -3632,12 +3632,12 @@
       "pl": "4+",
       "rules": {
        "no": [
-        "Én leser opp «Hvem er mest sannsynlig til å …» — for eksempel glemme bursdagen til sin egen mor.",
+        "Én leser opp «Hvem er mest sannsynlig til å …» – for eksempel glemme bursdagen til sin egen mor.",
         "På tre peker alle samtidig på den de mener passer best.",
         "Du drikker én slurk for hver finger som peker på deg."
        ],
        "en": [
-        "Someone reads out “Who is most likely to …” — for instance forget their own mum's birthday.",
+        "Someone reads out “Who is most likely to …” – for instance forget their own mum's birthday.",
         "On three, everyone points at whoever fits best.",
         "You drink one sip for every finger pointing at you."
        ]
@@ -3848,13 +3848,13 @@
       "pl": "4+",
       "rules": {
        "no": [
-        "Én er vert og fyller et glass til hver. Alle glassene er like — bortsett fra ett, som smaker tydelig annerledes.",
+        "Én er vert og fyller et glass til hver. Alle glassene er like – bortsett fra ett, som smaker tydelig annerledes.",
         "Verten deler ut glassene tilfeldig, og alle smaker samtidig. Den som fikk det rare glasset, må holde maska.",
         "Diskuter hvem som reagerte mistenkelig, og pek samtidig på tre.",
         "Tar flertallet feil, drikker alle som pekte feil. Tar dere riktig, drikker den som ble avslørt. Bytt vert hver runde."
        ],
        "en": [
-        "One player hosts and pours a glass for everyone. All the glasses are the same — except one, which tastes clearly different.",
+        "One player hosts and pours a glass for everyone. All the glasses are the same – except one, which tastes clearly different.",
         "The host hands them out at random and everyone tastes at once. Whoever got the odd glass has to keep a straight face.",
         "Discuss who reacted suspiciously, then point on three.",
         "If the majority is wrong, everyone who pointed wrong drinks. If you're right, the unmasked player drinks. Rotate the host each round."
@@ -4077,22 +4077,22 @@
       "pl": "4+",
       "rules": {
        "no": [
-        "Sett på «Opus» av Eric Prydz — hele 9-minutteren — og sitt i ring med én terning (to hvis dere er mange).",
+        "Sett på «Opus» av Eric Prydz – hele 9-minutteren – og sitt i ring med én terning (to hvis dere er mange).",
         "Trill til du får en sekser; da sendes terningen videre til nestemann. Ingen sekser = trill igjen.",
         "Den som holder terningen når droppet kommer, må drikke opp glasset sitt.",
-        "Variant: fortsett hele sangen — hver gang bygget topper seg, drikker den som sitter med terningen."
+        "Variant: fortsett hele sangen – hver gang bygget topper seg, drikker den som sitter med terningen."
        ],
        "sv": [
-        "Sätt på «Opus» av Eric Prydz — hela 9-minutersversionen — och sitt i ring med en tärning (två om ni är många).",
+        "Sätt på «Opus» av Eric Prydz – hela 9-minutersversionen – och sitt i ring med en tärning (två om ni är många).",
         "Slå tills du får en sexa; då skickas tärningen vidare. Ingen sexa = slå igen.",
         "Den som håller tärningen när droppet kommer får dricka upp sitt glas.",
-        "Variant: kör hela låten — varje gång bygget toppar dricker den som sitter med tärningen."
+        "Variant: kör hela låten – varje gång bygget toppar dricker den som sitter med tärningen."
        ],
        "en": [
-        "Put on “Opus” by Eric Prydz — the full 9 minutes — and sit in a circle with one die (two if you are many).",
+        "Put on “Opus” by Eric Prydz – the full 9 minutes – and sit in a circle with one die (two if you are many).",
         "Roll until you get a six; then pass the die on. No six = roll again.",
         "Whoever holds the die when the drop hits finishes their drink.",
-        "Variant: play the whole track — every time the build peaks, the die-holder drinks."
+        "Variant: play the whole track – every time the build peaks, the die-holder drinks."
        ]
       },
       "fit": {
@@ -4119,17 +4119,17 @@
       "rules": {
        "no": [
         "Sett på «Thunderstruck» med AC/DC og bestem rekkefølgen i ringen.",
-        "Ved første «Thunder» begynner første spiller å drikke — og drikker helt til neste «Thunder», da går turen videre.",
+        "Ved første «Thunder» begynner første spiller å drikke – og drikker helt til neste «Thunder», da går turen videre.",
         "Den som drikker når gitarsoloen starter, må drikke gjennom hele soloen. Lykke til."
        ],
        "sv": [
         "Sätt på «Thunderstruck» med AC/DC och bestäm ordningen i ringen.",
-        "Vid första «Thunder» börjar första spelaren dricka — och dricker tills nästa «Thunder», då går turen vidare.",
+        "Vid första «Thunder» börjar första spelaren dricka – och dricker tills nästa «Thunder», då går turen vidare.",
         "Den som dricker när gitarrsolot börjar får dricka genom hela solot. Lycka till."
        ],
        "en": [
         "Put on “Thunderstruck” by AC/DC and set the order of the circle.",
-        "On the first “Thunder”, the first player starts drinking — and keeps going until the next “Thunder”, when it passes on.",
+        "On the first “Thunder”, the first player starts drinking – and keeps going until the next “Thunder”, when it passes on.",
         "Whoever is drinking when the guitar solo starts drinks through the whole solo. Good luck."
        ]
       },
@@ -4158,19 +4158,19 @@
       "rules": {
        "no": [
         "Alle legger inn én sang i køen per kategori. Når alle har valgt, spilles sangene etter tur.",
-        "Etter hver sang forteller eieren hvorfor akkurat den ble valgt — historien eller følelsen bak.",
+        "Etter hver sang forteller eieren hvorfor akkurat den ble valgt – historien eller følelsen bak.",
         "Alle drikker når historien er god. Etter hver kategori får personen med dårligst historie 5 slurker.",
         "b|Kategorier: låta som minner deg om en eks · låta du skammer deg over at du kan hele teksten til · låta fra den verste sommerjobben din · låta som gjør deg klar for byen."
        ],
        "sv": [
         "Alla lägger in en låt i kön per kategori. När alla valt spelas låtarna i tur och ordning.",
-        "Efter varje låt berättar ägaren varför just den valdes — historien eller känslan bakom.",
+        "Efter varje låt berättar ägaren varför just den valdes – historien eller känslan bakom.",
         "Alla dricker när historien är bra. Efter varje kategori får personen med sämst historia 5 klunkar.",
         "b|Kategorier: låten som påminner dig om ett ex · låten du skäms över att du kan hela texten till · låten från ditt värsta sommarjobb · låten som gör dig redo för krogen."
        ],
        "en": [
         "Everyone queues one song per category. Once all have picked, the songs play in turn.",
-        "After each song, its owner explains why they chose it — the story or the feeling behind it.",
+        "After each song, its owner explains why they chose it – the story or the feeling behind it.",
         "Everyone drinks when the story is good. After each category, the weakest story earns its owner 5 sips.",
         "b|Categories: the song that reminds you of an ex · the song you’re embarrassed to know every word of · the song from your worst summer job · the song that gets you ready for a night out."
        ]
@@ -4200,12 +4200,12 @@
       "rules": {
        "no": [
         "Lag en spilleliste der låten bytter hvert minutt, eller bruk en tidtaker.",
-        "Hvert minutt tar alle en liten slurk — i en hel time.",
+        "Hvert minutt tar alle en liten slurk – i en hel time.",
         "Høres lett ut. Er det ikke. Bruk små slurker, og bytt gjerne til vann underveis."
        ],
        "en": [
         "Make a playlist where the song changes every minute, or use a timer.",
-        "Every minute, everyone takes a small sip — for a whole hour.",
+        "Every minute, everyone takes a small sip – for a whole hour.",
         "Sounds easy. It isn't. Keep the sips small and swap to water along the way."
        ]
       },
@@ -4366,22 +4366,22 @@
       "rules": {
        "no": [
         "Trill etter tur. Hvert tall har sin regel:",
-        "b|1 — del ut én slurk.",
-        "b|2 — ta én slurk selv.",
-        "b|3 — pek på noen som drikker.",
-        "b|4 — alle drikker.",
-        "b|5 — lag en regel som gjelder resten av leken.",
-        "b|6 — velg en utfordring til personen til venstre.",
+        "b|1 – del ut én slurk.",
+        "b|2 – ta én slurk selv.",
+        "b|3 – pek på noen som drikker.",
+        "b|4 – alle drikker.",
+        "b|5 – lag en regel som gjelder resten av leken.",
+        "b|6 – velg en utfordring til personen til venstre.",
         "Leken varer så lenge dere vil. Bytt gjerne ut reglene underveis."
        ],
        "en": [
         "Take turns rolling. Each number has its rule:",
-        "b|1 — hand out one sip.",
-        "b|2 — take one sip yourself.",
-        "b|3 — point at someone to drink.",
-        "b|4 — everyone drinks.",
-        "b|5 — make a rule for the rest of the game.",
-        "b|6 — set a challenge for the person on your left.",
+        "b|1 – hand out one sip.",
+        "b|2 – take one sip yourself.",
+        "b|3 – point at someone to drink.",
+        "b|4 – everyone drinks.",
+        "b|5 – make a rule for the rest of the game.",
+        "b|6 – set a challenge for the person on your left.",
         "Play as long as you like, and swap rules as you go."
        ]
       },
@@ -4841,21 +4841,21 @@
       "rules": {
        "no": [
         "Tell høyt etter tur fra 1 til 14 rundt ringen. Startregelen er alltid: du får ikke si tallet 7.",
-        "Klarer gruppen runden, lager personen som landet på 14 en ny regel — for et tall som ikke allerede har en.",
+        "Klarer gruppen runden, lager personen som landet på 14 en ny regel – for et tall som ikke allerede har en.",
         "b|Forslag: bytt 5 med 8 · bytt 5 med «hallo» · bytt 5 med å rekke opp en hånd.",
-        "Fortsett til alle tallene har en regel. Bryter noen en regel: 1 slurk til alle og 2 til synderen — og runden starter på nytt."
+        "Fortsett til alle tallene har en regel. Bryter noen en regel: 1 slurk til alle og 2 til synderen – og runden starter på nytt."
        ],
        "sv": [
         "Räkna högt i tur och ordning från 1 till 14 runt ringen. Startregeln är alltid: du får inte säga siffran 7.",
-        "Klarar gruppen rundan skapar den som landade på 14 en ny regel — för en siffra som inte redan har en.",
+        "Klarar gruppen rundan skapar den som landade på 14 en ny regel – för en siffra som inte redan har en.",
         "b|Förslag: byt 5 mot 8 · byt 5 mot «hallå» · byt 5 mot att räcka upp en hand.",
-        "Fortsätt tills alla siffror har en regel. Bryter någon en regel: 1 klunk till alla och 2 till syndaren — och rundan börjar om."
+        "Fortsätt tills alla siffror har en regel. Bryter någon en regel: 1 klunk till alla och 2 till syndaren – och rundan börjar om."
        ],
        "en": [
         "Count out loud in turn from 1 to 14 around the circle. The starting rule is always: you cannot say the number 7.",
-        "If the group completes the round, whoever landed on 14 makes a new rule — for a number that does not already have one.",
+        "If the group completes the round, whoever landed on 14 makes a new rule – for a number that does not already have one.",
         "b|Ideas: swap 5 for 8 · swap 5 for “hello” · swap 5 for raising a hand.",
-        "Keep going until every number has a rule. Break a rule: everyone drinks 1 and the sinner drinks 2 — and the round restarts."
+        "Keep going until every number has a rule. Break a rule: everyone drinks 1 and the sinner drinks 2 – and the round restarts."
        ]
       },
       "fit": {
@@ -4881,12 +4881,12 @@
       "pl": "3+",
       "rules": {
        "no": [
-        "Én velger en kategori — for eksempel ølmerker, norske fotballag eller filmer med Tom Cruise.",
+        "Én velger en kategori – for eksempel ølmerker, norske fotballag eller filmer med Tom Cruise.",
         "Etter tur nevner alle noe som passer. Du har fem sekunder.",
         "Den som står fast eller gjentar noe, drikker og velger neste kategori."
        ],
        "en": [
-        "Someone picks a category — for example beer brands, football clubs or Tom Cruise films.",
+        "Someone picks a category – for example beer brands, football clubs or Tom Cruise films.",
         "In turn, everyone names something that fits. You have five seconds.",
         "Whoever gets stuck or repeats one drinks and picks the next category."
        ]
@@ -4914,12 +4914,12 @@
       "pl": "4+",
       "rules": {
        "no": [
-        "Én spiller er tommelmester — gjerne den som vant forrige lek.",
+        "Én spiller er tommelmester – gjerne den som vant forrige lek.",
         "Når som helst i løpet av kvelden kan tommelmesteren diskret legge tommelen på bordkanten.",
         "Alle som merker det, gjør det samme. Den siste som oppdager det, drikker og blir ny tommelmester."
        ],
        "en": [
-        "One player is thumb master — ideally whoever won the last game.",
+        "One player is thumb master – ideally whoever won the last game.",
         "At any moment during the night, the thumb master can quietly rest a thumb on the table edge.",
         "Everyone who notices does the same. The last to notice drinks and becomes the new thumb master."
        ]
@@ -4982,12 +4982,12 @@
        "no": [
         "Alle får en klesklype festet på klærne når kvelden starter.",
         "Resten av kvelden er det forbudt å si «ja» og «nei».",
-        "Hører noen deg si det, tar de klypa di. Den med flest klyper når kvelden er slutt, vinner — og resten drikker."
+        "Hører noen deg si det, tar de klypa di. Den med flest klyper når kvelden er slutt, vinner – og resten drikker."
        ],
        "en": [
         "Everyone gets a clothes peg clipped on at the start of the night.",
         "For the rest of the night, saying “yes” or “no” is banned.",
-        "If someone hears you say it, they take your peg. Whoever has the most pegs at the end wins — and everyone else drinks."
+        "If someone hears you say it, they take your peg. Whoever has the most pegs at the end wins – and everyone else drinks."
        ]
       },
       "fit": {
@@ -5279,12 +5279,12 @@
       "pl": "2",
       "rules": {
        "no": [
-        "Sett opp sjakk med små shotglass i stedet for brikker — én drikke per farge.",
+        "Sett opp sjakk med små shotglass i stedet for brikker – én drikke per farge.",
         "Tar du en av motstanderens brikker, drikker du den.",
         "Spill rolig, bruk små glass, og la gjerne bøndene være vann."
        ],
        "en": [
-        "Set up chess with small shot glasses as the pieces — one drink per side.",
+        "Set up chess with small shot glasses as the pieces – one drink per side.",
         "Take one of your opponent's pieces and you drink it.",
         "Play slowly, keep the glasses small, and make the pawns water."
        ]
@@ -5356,12 +5356,12 @@
       "rules": {
        "no": [
         "Still et spørsmål til noen i gruppen.",
-        "Personen svarer helt ærlig — eller drikker i stedet.",
+        "Personen svarer helt ærlig – eller drikker i stedet.",
         "Avtal gjerne at man bare kan hoppe over tre ganger på rad. Den fjerde må besvares."
        ],
        "en": [
         "Ask someone in the group a question.",
-        "They answer completely honestly — or drink instead.",
+        "They answer completely honestly – or drink instead.",
         "Agree that you can only skip three in a row. The fourth must be answered."
        ]
       },
@@ -5426,17 +5426,17 @@
       "rules": {
        "no": [
         "Faktaduellen går ut på å komme opp med fakta om motspilleren. Her gjelder det å kjenne motstanderen godt og tenke raskt.",
-        "Si en fakta om motstanderen innen 5 sekunder. Stemmer ikke påstanden, får du en prikk — av tre totalt.",
+        "Si en fakta om motstanderen innen 5 sekunder. Stemmer ikke påstanden, får du en prikk – av tre totalt.",
         "Tre prikker = ta en shot. Fortsett til dere ikke kommer på mer fakta om hverandre."
        ],
        "sv": [
         "Snabba fakta går ut på att komma på fakta om motspelaren. Här gäller det att känna motståndaren väl och tänka snabbt.",
-        "Säg ett faktum om motståndaren inom 5 sekunder. Stämmer inte påståendet får du en prick — av tre totalt.",
+        "Säg ett faktum om motståndaren inom 5 sekunder. Stämmer inte påståendet får du en prick – av tre totalt.",
         "Tre prickar = ta en shot. Fortsätt tills ni inte kommer på fler fakta om varandra."
        ],
        "en": [
         "Quick facts is about firing off facts about your opponent. Know them well and think fast.",
-        "State a fact about your opponent within 5 seconds. If it is wrong, you get a strike — out of three.",
+        "State a fact about your opponent within 5 seconds. If it is wrong, you get a strike – out of three.",
         "Three strikes = take a shot. Keep going until you run out of facts about each other."
        ]
       },
@@ -5618,7 +5618,7 @@
       "word": "helt Texas",
       "def": "Fullstendig kaos og ville tilstander.",
       "sv": "Fullständigt kaos och vilda tillstånd.",
-      "en": "Total chaos — famously, Norwegians call it “completely Texas”.",
+      "en": "Total chaos – famously, Norwegians call it “completely Texas”.",
       "sit": [
        "something-goes-wrong"
       ]
@@ -5627,7 +5627,7 @@
       "word": "på bærtur",
       "def": "Helt på villspor; langt fra poenget.",
       "sv": "Helt på villovägar; långt från poängen.",
-      "en": "Way off track — literally “out berry-picking”.",
+      "en": "Way off track – literally “out berry-picking”.",
       "sit": [
        "losing-an-argument"
       ]
@@ -5644,17 +5644,17 @@
      {
       "word": "full som ei alke",
       "def": "Svært beruset. Klassikeren.",
-      "sv": "Mycket berusad. Klassikern — «full som en alka».",
-      "en": "Extremely drunk — literally “drunk as an auk”.",
+      "sv": "Mycket berusad. Klassikern – «full som en alka».",
+      "en": "Extremely drunk – literally “drunk as an auk”.",
       "sit": [
        "about-drinking"
       ]
      },
      {
       "word": "kokosbolle i motvind",
-      "def": "Om noe(n) som ser herjet ut — «håret ditt ser ut som en kokosbolle i motvind».",
-      "sv": "Om något/någon som ser härjad ut — «håret ser ut som en kokosboll i motvind».",
-      "en": "For anything dishevelled — “your hair looks like a chocolate teacake in a headwind”.",
+      "def": "Om noe(n) som ser herjet ut – «håret ditt ser ut som en kokosbolle i motvind».",
+      "sv": "Om något/någon som ser härjad ut – «håret ser ut som en kokosboll i motvind».",
+      "en": "For anything dishevelled – “your hair looks like a chocolate teacake in a headwind”.",
       "sit": [
        "winding-up",
        "tired-or-ill"
@@ -5673,7 +5673,7 @@
       "word": "bak mål",
       "def": "Helt på jordet; fullstendig feil.",
       "sv": "Helt uppåt väggarna; fullständigt fel.",
-      "en": "Completely wrong — literally “behind the goal”.",
+      "en": "Completely wrong – literally “behind the goal”.",
       "sit": [
        "losing-an-argument"
       ]
@@ -5682,24 +5682,24 @@
       "word": "helt ute å sykle",
       "def": "Veldig klønete, eller helt på bærtur.",
       "sv": "Väldigt klumpig, eller helt ute och cyklar.",
-      "en": "Completely off the mark — literally “out cycling”.",
+      "en": "Completely off the mark – literally “out cycling”.",
       "sit": [
        "losing-an-argument"
       ]
      },
      {
       "word": "ekstra vann i mølla",
-      "def": "«Nå ble det litt mye» — noe som forsterker en heftig situasjon.",
-      "sv": "«Nu blev det lite mycket» — något som förstärker en redan intensiv situation.",
-      "en": "“That was a bit much” — something that amplifies an already wild situation.",
+      "def": "«Nå ble det litt mye» – noe som forsterker en heftig situasjon.",
+      "sv": "«Nu blev det lite mycket» – något som förstärker en redan intensiv situation.",
+      "en": "“That was a bit much” – something that amplifies an already wild situation.",
       "sit": [
        "something-goes-wrong"
       ]
      },
      {
       "word": "drikke i seg bøss",
-      "def": "Å drikke helt ukritisk — hva som helst.",
-      "sv": "Att dricka helt okritiskt — vad som helst.",
+      "def": "Å drikke helt ukritisk – hva som helst.",
+      "sv": "Att dricka helt okritiskt – vad som helst.",
       "en": "Drinking anything at all, completely indiscriminately.",
       "sit": [
        "about-drinking"
@@ -6155,14 +6155,14 @@
       }
      },
      {
-      "line": "Enkelt og greit — man setter inn litt blod, så tar man det ut igjen.",
+      "line": "Enkelt og greit – man setter inn litt blod, så tar man det ut igjen.",
       "note": "Blodgiveren.",
       "sv": {
-       "l": "Enkelt och lätt — man sätter in lite blod och tar ut det igen.",
+       "l": "Enkelt och lätt – man sätter in lite blod och tar ut det igen.",
        "n": "Blodgivaren."
       },
       "en": {
-       "l": "Simple as that — you deposit a little blood, then you withdraw it again.",
+       "l": "Simple as that – you deposit a little blood, then you withdraw it again.",
        "n": "The Blood Donor."
       }
      },
@@ -6233,12 +6233,12 @@
       }
      },
      {
-      "line": "Jeg vil dø metta — lagret og mett i magen.",
+      "line": "Jeg vil dø metta – lagret og mett i magen.",
       "sv": {
-       "l": "Jag vill dö mätt — lagrad och mätt i magen."
+       "l": "Jag vill dö mätt – lagrad och mätt i magen."
       },
       "en": {
-       "l": "I want to die full — well-aged and with a full stomach."
+       "l": "I want to die full – well-aged and with a full stomach."
       }
      }
     ]
@@ -6252,71 +6252,71 @@
     },
     "items": [
      {
-      "ctx": "Blodgiveren — når legen vil ha en halvliter",
+      "ctx": "Blodgiveren – når legen vil ha en halvliter",
       "line": "En halvliter? Det er jo nesten en hel arm!",
       "note": "Den mest siterte linja i hele manuset («very nearly an armful»).",
       "sv": {
-       "c": "Blodgivaren — när läkaren vill ha en halvliter",
+       "c": "Blodgivaren – när läkaren vill ha en halvliter",
        "l": "En halvliter? Det är ju nästan en hel arm!",
        "n": "Den mest citerade repliken i hela manuset."
       },
       "en": {
-       "c": "The Blood Donor — when the doctor wants a pint",
+       "c": "The Blood Donor – when the doctor wants a pint",
        "l": "A pint? That is very nearly an armful!",
-       "n": "The most quoted line in the script — the original wording."
+       "n": "The most quoted line in the script – the original wording."
       }
      },
      {
-      "ctx": "Blodgiveren — om blodtypen",
+      "ctx": "Blodgiveren – om blodtypen",
       "line": "Rhesus? Er ikke det aper?",
       "sv": {
-       "c": "Blodgivaren — om blodgruppen",
+       "c": "Blodgivaren – om blodgruppen",
        "l": "Rhesus? Är inte det apor?"
       },
       "en": {
-       "c": "The Blood Donor — on blood types",
+       "c": "The Blood Donor – on blood types",
        "l": "Rhesus? They are monkeys, are they not?"
       }
      },
      {
-      "ctx": "Blodgiveren — hvorfor han gir blod",
+      "ctx": "Blodgiveren – hvorfor han gir blod",
       "line": "Det var enten det eller å melde seg inn i Unge Høyre.",
       "sv": {
-       "c": "Blodgivaren — varför han ger blod",
+       "c": "Blodgivaren – varför han ger blod",
        "l": "Det var antingen det eller att gå med i Moderata ungdomsförbundet."
       },
       "en": {
-       "c": "The Blood Donor — why he gives blood",
+       "c": "The Blood Donor – why he gives blood",
        "l": "It was either that or join the Young Conservatives."
       }
      },
      {
       "ctx": "Når du taper en diskusjon totalt",
       "line": "Betyr Magna Carta ingenting for dere? Døde hun forgjeves?",
-      "note": "Fra jury-episoden — han tror Magna Carta er en dame.",
+      "note": "Fra jury-episoden – han tror Magna Carta er en dame.",
       "sv": {
        "c": "När du förlorar en diskussion totalt",
        "l": "Betyder Magna Carta ingenting för er? Dog hon förgäves?",
-       "n": "Från jury-avsnittet — han tror Magna Carta är en dam."
+       "n": "Från jury-avsnittet – han tror Magna Carta är en dam."
       },
       "en": {
        "c": "When losing an argument completely",
        "l": "Does Magna Carta mean nothing to you? Did she die in vain?",
-       "n": "From the jury episode — he thinks Magna Carta is a woman."
+       "n": "From the jury episode – he thinks Magna Carta is a woman."
       },
       "sit": [
        "losing-an-argument"
       ]
      },
      {
-      "ctx": "Radioamatøren — om vennekretsen",
+      "ctx": "Radioamatøren – om vennekretsen",
       "line": "Venner over hele verden! …Ingen her i landet, men venner over hele verden.",
       "sv": {
-       "c": "Radioamatören — om vänkretsen",
+       "c": "Radioamatören – om vänkretsen",
        "l": "Vänner över hela världen! …Inga här i landet, men vänner över hela världen."
       },
       "en": {
-       "c": "The Radio Ham — on his circle of friends",
+       "c": "The Radio Ham – on his circle of friends",
        "l": "Friends all over the world! …None in this country, but friends all over the world."
       }
      },
@@ -6334,14 +6334,14 @@
      },
      {
       "ctx": "Når noen påpeker det åpenbare («det regner»)",
-      "line": "Jaså — så det er dét som gjør veien våt.",
+      "line": "Jaså – så det er dét som gjør veien våt.",
       "sv": {
        "c": "När någon påpekar det uppenbara («det regnar»)",
-       "l": "Jaså — så det är dét som gör vägen våt."
+       "l": "Jaså – så det är dét som gör vägen våt."
       },
       "en": {
        "c": "When someone states the obvious (“it is raining”)",
-       "l": "Ah — so that is what is making the road wet."
+       "l": "Ah – so that is what is making the road wet."
       },
       "sit": [
        "stating-the-obvious"

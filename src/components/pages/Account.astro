@@ -33,7 +33,7 @@ const T = no ? {
   username: 'Username', usernameHelp: '3–20 characters. Only shown to you.', newPw: 'Password (at least 8 characters)', create: 'Create account',
   linkLead: 'Rather skip passwords? Get a sign-in link by email.',
   forgotLead: 'Enter your email and we will send a link to choose a new password.', sendReset: 'Send link', back: 'Back',
-  resetSent: 'Check your inbox — the link is on its way.', confirmSent: 'Almost done! Check your inbox and tap the link to confirm your email.',
+  resetSent: 'Check your inbox – the link is on its way.', confirmSent: 'Almost done! Check your inbox and tap the link to confirm your email.',
   choosePw: 'Choose a new password', savePw: 'Save password', pwSaved: 'Password changed ✓', pwShort: 'The password must be at least 8 characters.',
   fillAll: 'Fill in all the fields.', setUser: 'Pick a username', setUserLead: 'Then you can sign in with username and password next time.', save: 'Save',
   setPw: 'Set a password', setPwLead: 'Signed in with a link? Set a password so you can sign in with your username.',
@@ -351,6 +351,8 @@ const T = no ? {
           if (pw.length < 8) return say($('syncMsg'), T.pwShort, 'err');
           K.sb('/auth/v1/user', { method: 'PUT', body: JSON.stringify({ password: pw }) }).then(function (r) {
             if (!r.ok) return say($('syncMsg'), T.generic, 'err');
+            // Nytt passord: logg ut alle andre enheter (denne forblir innlogget)
+            K.sb('/auth/v1/logout?scope=others', { method: 'POST' }).catch(function () {});
             $('pwNy').value = ''; $('pwForm').hidden = true; say($('syncMsg'), T.pwSaved, 'ok');
           });
         });
