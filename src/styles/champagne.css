@@ -1,0 +1,155 @@
+/* =====================================================================
+   CHAMPAGNENATT – lagt oppå nattlilla (natt.css)
+   ---------------------------------------------------------------------
+   Samme rom, samme regler – men det skal se ut som en kveld man gjerne
+   betaler for. Dyp vinrød natt i stedet for lilla neon.
+   1. Farge betyr fortsatt tilstand, bare dempet:
+        champagne (gull) = nå / din tur / på / gevinst   (var. --gold, «volt»)
+        campari (rød)    = trykk her / drikk / varme      (var. --accent, «glo»)
+   2. Overskrifter i Fraunces (serif) – rolig, tung, med en kursiv å smile med.
+      Alt man leser og trykker på er fortsatt Archivo, i normal bredde.
+   3. Ting står rett. Ingen klistremerker på skrå – gull og hårstreker i stedet.
+   4. Lesbarhet på avstand er uendret: samme størrelser, samme kontrast.
+   ===================================================================== */
+
+:root{
+  --bg:#0F0A10; --bg2:#170F19; --card:#1E1521; --card2:#291D2C;
+  --ink:#F7EFE3; --muted:#C4B5B2; --faint:#9C8B8E;
+  --gold:#E4C47F; --gold-t:#E9CD8E; --accent:#D9503C; --accent-t:#F2907A; --paper:#F7EFE3; --ink2:#1A1012;
+  --bg-rgb:15 10 16; --ink-rgb:247 239 227; --card-rgb:30 21 33;
+  --volt-rgb:228 196 127; --glo-rgb:217 80 60; --lilla-rgb:122 36 72;
+  --glo-dyp:#8A2A1D; --volt-dyp:#8C6A2C;
+  --gull-glans:linear-gradient(180deg,#F1DAA2 0%,#E4C47F 52%,#D2AE63 100%);
+  --hårstrek:rgb(var(--volt-rgb) / .34);
+}
+:root[data-theme="light"]{
+  --bg:#F7F2EB; --bg2:#EFE7DC; --card:#FFFDF9; --card2:#F3EBE0;
+  --ink:#1C1214; --muted:#5D4D4E; --faint:#6E5D5E;
+  --gold-t:#7A5718; --accent-t:#A8321F; --paper:#FFFDF9;
+  --bg-rgb:247 242 235; --ink-rgb:28 18 20; --card-rgb:255 253 249;
+  --volt-kant:#9A7426; --hårstrek:rgb(140 104 40 / .4);
+}
+
+/* ---------- grunnmur ---------- */
+body::before{background:
+  radial-gradient(60% 38% at 100% -4%, rgb(var(--volt-rgb) / .13), transparent 64%),
+  radial-gradient(70% 46% at -14% 6%, rgb(var(--lilla-rgb) / .34), transparent 68%),
+  radial-gradient(60% 30% at 50% 110%, rgb(var(--glo-rgb) / .08), transparent 70%),
+  linear-gradient(180deg, var(--bg2), var(--bg) 46%)}
+:root[data-theme="light"] body::before{background:
+  radial-gradient(60% 38% at 100% -4%, rgb(var(--volt-rgb) / .22), transparent 64%),
+  radial-gradient(70% 46% at -14% 6%, rgb(var(--lilla-rgb) / .08), transparent 68%),
+  linear-gradient(180deg, var(--bg2), var(--bg) 46%)}
+body::after{opacity:.07}
+:root[data-theme="light"] :focus-visible{outline-color:var(--volt-kant)}
+:root[data-theme="light"] :is(input,select,textarea):focus{box-shadow:0 0 0 4px rgb(154 116 38 / .16)}
+:root[data-theme="light"] .rofr-bord.aktiv .rofr-k.valgt{box-shadow:0 0 0 2px var(--volt-kant),0 0 18px rgb(154 116 38 / .45)}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgb(var(--volt-rgb) / .16)}
+
+/* ---------- skrift: serif til overskrifter ---------- */
+h1,h2,.h-serif{font-family:var(--serif);font-stretch:normal;font-optical-sizing:auto;text-wrap:balance}
+h1{font-weight:560;letter-spacing:-.028em;line-height:1}
+h2{font-weight:560;letter-spacing:-.018em;line-height:1.08}
+h1 em,h2 em{font-style:italic;font-weight:440;color:var(--gold-t)}
+h3,.h3{font-stretch:normal;font-weight:700}
+.brand .bt{font-stretch:100%;font-weight:800;letter-spacing:-.04em}
+.mobilebar .brand .bt{font-stretch:100%}
+.sidenav a{font-stretch:100%}
+.tall{font-variant-numeric:tabular-nums lining-nums}
+
+/* ---------- knapper: champagne, med glans og en lav kant ---------- */
+.btn{font-stretch:100%;font-weight:700;letter-spacing:-.005em}
+.btn.gold,.btn.start,.appbtn{background:var(--gull-glans);color:var(--ink2);
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .45),0 3px 0 var(--volt-dyp),0 14px 28px -14px rgb(var(--volt-rgb) / .55)}
+.btn.gold:active,.btn.start:active,.appbtn:active{transform:translateY(2px);box-shadow:inset 0 1px 0 rgb(255 255 255 / .35),0 1px 0 var(--volt-dyp)}
+.btn.danger{background:var(--accent);color:#FFF6EE;box-shadow:0 3px 0 var(--glo-dyp)}
+.btn.danger:active{transform:translateY(2px);box-shadow:0 1px 0 var(--glo-dyp)}
+.btn.ghost{border-width:1px;border-color:rgb(var(--ink-rgb) / .26)}
+@media (hover:hover) and (pointer:fine){.btn.ghost:hover{border-color:var(--hårstrek);color:var(--gold-t)}}
+
+/* ---------- merker: rette, med gull ---------- */
+.h2-badge,.rom-bg-status,.pluss-merke,.nr-pille b{transform:none;border-radius:6px;font-stretch:100%;font-weight:750;
+  background:var(--gull-glans);box-shadow:none;letter-spacing:.01em}
+.h2-uke .h2-badge,.h2-jul .h2-badge{transform:none}
+::selection{background:rgb(var(--volt-rgb) / .85)}
+
+/* ---------- mittvors pluss i toppen: et diskret gullmerke ---------- */
+.pluss-pille,.side a.pluss-pille{transform:none;background:transparent;color:var(--gold-t);box-shadow:inset 0 0 0 1px var(--hårstrek);
+  border-radius:999px;font-family:var(--serif);font-style:italic;font-weight:500;font-stretch:normal;letter-spacing:0}
+@media (hover:hover) and (pointer:fine){.pluss-pille:hover,.side a.pluss-pille:hover{transform:none;background:rgb(var(--volt-rgb) / .1);box-shadow:inset 0 0 0 1px var(--gold)}}
+.pluss-pille.aktiv,.side a.pluss-pille.aktiv{background:rgb(var(--volt-rgb) / .12);box-shadow:inset 0 0 0 1px var(--gold)}
+.tabbar a[aria-current=page]{background:var(--gull-glans)}
+
+/* =====================================================================
+   FORSIDEN
+   ===================================================================== */
+.h2-hero h1{font-family:var(--serif);font-stretch:normal;font-weight:560;letter-spacing:-.035em;line-height:.9;
+  font-size:clamp(58px,17vw,120px);animation:løft 900ms var(--ease-out) .05s both}
+.h2-hero h1 em{display:inline-block;padding-right:.06em}
+@keyframes løft{from{opacity:0;transform:translateY(14px)}}
+.h2-hoved{background:var(--gull-glans);color:var(--ink2);font-stretch:100%;font-weight:800;font-size:21px;letter-spacing:-.015em;border-radius:999px;
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .5),0 4px 0 var(--volt-dyp),0 22px 40px -18px rgb(var(--volt-rgb) / .7)}
+.h2-hoved:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgb(255 255 255 / .4),0 1px 0 var(--volt-dyp)}
+.h2-kode input{border-width:1px;font-stretch:80%}
+.h2-kode button{border-width:1px;font-stretch:100%}
+
+/* mittvors pluss-blokken: mørk, med gullkant – som et kort fra en bar man liker */
+.h2-pluss{--hull:var(--bg);transform:none;background:
+    radial-gradient(120% 90% at 100% 0%, rgb(var(--volt-rgb) / .16), transparent 55%),
+    linear-gradient(160deg,#2A1A22,#1A1016 60%);
+  color:var(--ink);border:1px solid var(--hårstrek);
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .06),0 30px 70px -24px rgb(0 0 0 / .8)}
+.h2-pluss h2{font-family:var(--serif);font-stretch:normal;font-weight:520;color:var(--ink);font-size:clamp(28px,6vw,38px);letter-spacing:-.02em}
+.h2-pluss li{color:rgb(var(--ink-rgb) / .86)}
+.h2-pluss li::before{color:var(--gold)}
+.h2-pluss-stubb{color:var(--ink);border-top-color:var(--hårstrek)!important;border-left-color:var(--hårstrek)!important}
+.h2-pluss-navn{font-family:var(--serif);font-style:italic;font-stretch:normal;font-weight:500;font-size:19px;color:var(--gold-t);letter-spacing:0}
+.h2-pluss-pris b{font-family:var(--serif);font-stretch:normal;font-weight:520;font-size:34px;letter-spacing:-.02em;color:var(--ink)}
+.h2-pluss-pris small{color:var(--muted);opacity:1}
+.h2-pluss-knapp{background:var(--gull-glans);color:var(--ink2);font-stretch:100%;border-radius:999px;
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .45),0 3px 0 var(--volt-dyp)}
+:root[data-theme="light"] .h2-pluss{background:
+    radial-gradient(120% 90% at 100% 0%, rgb(var(--volt-rgb) / .3), transparent 55%),
+    linear-gradient(160deg,#2A1A22,#1A1016 60%);color:#F7EFE3}
+:root[data-theme="light"] .h2-pluss :is(h2,li,.h2-pluss-pris b,.h2-pluss-stubb){color:#F7EFE3}
+:root[data-theme="light"] .h2-pluss :is(.h2-pluss-navn){color:#E9CD8E}
+:root[data-theme="light"] .h2-pluss .h2-pluss-pris small{color:#C4B5B2}
+
+/* =====================================================================
+   mittvors pluss-SIDEN
+   ===================================================================== */
+.pluss-hero{position:relative;padding:8px 0 4px}
+.pluss-merkenavn{display:inline-flex;align-items:baseline;gap:.3em;margin:0 0 14px;font-family:var(--serif);font-size:17px;color:var(--muted)}
+.pluss-merkenavn i{color:var(--gold-t);font-weight:500}
+.pluss-merkenavn::before{content:"";width:28px;height:1px;background:var(--gold);align-self:center}
+.pluss-hero h1{font-size:clamp(42px,10.5vw,76px);line-height:.98;letter-spacing:-.032em;margin:0 0 16px}
+.pluss-hero .lead{max-width:44ch}
+.pluss-status{border:1px solid var(--hårstrek);background:linear-gradient(160deg,rgb(var(--volt-rgb) / .1),transparent 70%),var(--card)}
+
+.pluss-fordeler b{font-family:var(--serif);font-weight:560;font-size:19px;letter-spacing:-.01em}
+.pluss-fordeler .icon{color:var(--gold)}
+
+.pluss-pris{border:1px solid var(--border2);border-radius:24px;padding:24px 22px 22px;gap:6px;
+  background:linear-gradient(180deg,rgb(var(--ink-rgb) / .03),transparent),var(--card)}
+.pluss-pris > b{font-family:var(--serif);font-style:italic;font-weight:500;font-size:20px;color:var(--muted)}
+.pluss-kr{font-family:var(--serif);font-weight:540;font-size:clamp(46px,11vw,58px);letter-spacing:-.035em;line-height:1;color:var(--ink);
+  font-variant-numeric:lining-nums}
+.pluss-pris small{margin-bottom:16px}
+.pluss-pris.beste{border:1px solid transparent;
+  background:linear-gradient(170deg,#2B1B24,#1C1219) padding-box,
+             linear-gradient(160deg,#F1DAA2,rgb(var(--volt-rgb) / .25) 45%,#B48B45) border-box;
+  box-shadow:0 30px 60px -28px rgb(var(--volt-rgb) / .45)}
+.pluss-pris.beste .pluss-kr{background:var(--gull-glans);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pluss-merke{top:-12px;right:18px;padding:4px 11px;font-size:12px}
+:root[data-theme="light"] .pluss-pris.beste{background:
+  linear-gradient(170deg,#FFFDF9,#F6EEE2) padding-box,
+  linear-gradient(160deg,#D9B56A,rgb(var(--volt-rgb) / .3) 45%,#A57E3A) border-box}
+:root[data-theme="light"] .pluss-pris.beste .pluss-kr{background:none;color:var(--gold-t)}
+/* Anbefalt pass løftes frem: det andre får en rolig knapp */
+.pluss-pris:not(.beste) .btn.gold{background:transparent;color:var(--gold-t);box-shadow:inset 0 0 0 1px var(--hårstrek)}
+.pluss-pris:not(.beste) .btn.gold:active{transform:translateY(1px);box-shadow:inset 0 0 0 1px var(--gold)}
+@media (hover:hover) and (pointer:fine){.pluss-pris:not(.beste) .btn.gold:hover{background:rgb(var(--volt-rgb) / .08);filter:none}}
+:root{accent-color:var(--gold)}
+.pluss-pakker .stokk-kort b{font-family:var(--serif);font-weight:560;font-size:20px}
+
+@media (prefers-reduced-motion:reduce){.h2-hero h1{animation:none}}

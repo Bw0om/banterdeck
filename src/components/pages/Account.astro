@@ -532,7 +532,7 @@ const T = no ? {
         if ($('vervDel')) {
           $('vervDel').addEventListener('click', function () {
             if (!verv) return;
-            if (EN) return window.BDDel.lenke(location.origin + '/en?v=' + verv.kode, 'Join me on Mitt vors – drinking games where everyone plays from their own phone. Use my link and we both get a free night of Plus 🎁', {
+            if (EN) return window.BDDel.lenke(location.origin + '/en?v=' + verv.kode, 'Join me on Mitt vors – drinking games where everyone plays from their own phone. Use my link and we both get a free night of Pluss 🎁', {
               tittel: 'Refer a friend', ingress: 'When your friend creates an account and plays their first room, you each get a night pass.',
             });
             window.BDDel.lenke(location.origin + '/no/?v=' + verv.kode, 'Bli med på Mitt vors – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁', {
@@ -544,7 +544,7 @@ const T = no ? {
             K.api('/api/verv', Object.assign({ method: 'POST' }, EN_HODE || {})).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
               b.disabled = false;
               if (!x.ok) return say($('syncMsg'), x.d.melding || (EN ? 'That didn\u2019t work.' : 'Det gikk ikke.'), 'err');
-              say($('syncMsg'), EN ? '✨ Plus is on for 24 hours. Have a great night!' : '✨ Pluss er på i 24 timer. God kveld!', 'ok');
+              say($('syncMsg'), EN ? '✨ Pluss is on for 24 hours. Have a great night!' : '✨ Pluss er på i 24 timer. God kveld!', 'ok');
               setTimeout(function () { location.reload(); }, 900);
             });
           });
@@ -577,15 +577,15 @@ const T = no ? {
               if (EN) {
                 if (kode) { el.innerHTML = '🎁 You have a gift code waiting – <a href="/plus">activate it now</a>'; return; }
                 el.innerHTML = d.aktiv
-                  ? '✨ <b>Plus</b> until ' + esc(new Date(d.til).toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/plus">More</a>'
-                  : '✨ <a href="/plus">' + (d.gratisBrukt ? 'Get Mitt vors Plus' : 'Try Mitt vors Plus free tonight') + '</a>';
+                  ? '✨ <b>Pluss</b> until ' + esc(new Date(d.til).toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/plus">More</a>'
+                  : '✨ <a href="/plus">' + (d.gratisBrukt ? 'Get mittvors pluss' : 'Try mittvors pluss free tonight') + '</a>';
                 kvitteringer(el);
                 return;
               }
               if (kode) { el.innerHTML = '🎁 Du har en gavekode som venter – <a href="/no/pluss">aktiver den nå</a>'; return; }
               el.innerHTML = d.aktiv
                 ? '✨ <b>Pluss</b> til ' + esc(new Date(d.til).toLocaleString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })) + ' · <a href="/no/pluss">Mer</a>'
-                : '✨ <a href="/no/pluss">' + (d.gratisBrukt ? 'Få Mitt vors Pluss' : 'Prøv Mitt vors Pluss gratis i kveld') + '</a>';
+                : '✨ <a href="/no/pluss">' + (d.gratisBrukt ? 'Få mittvors pluss' : 'Prøv mittvors pluss gratis i kveld') + '</a>';
               kvitteringer(el);
             }).catch(function () {});
             {

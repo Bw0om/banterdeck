@@ -140,7 +140,7 @@ const DATA = Object.fromEntries(Object.entries(LEKER).filter(([s]) => finnes.has
           var merke = i === 0 ? (EN ? 'Warm-up' : 'Oppvarming') : b.finale ? 'Finale' : (EN ? 'Main event' : 'Hoveddel');
           return '<li class="' + (i === aktiv ? 'aktiv' : i < aktiv ? 'ferdig' : '') + '">' +
             '<span class="kv-tid">' + (fra ? '+' + tid(fra) : 'Start') + '</span>' +
-            '<div class="kv-lek"><small>' + merke + ' · ' + b.min + ' min' + (g.pluss ? (EN ? ' · ✨ Plus' : ' · ✨ Pluss') : '') + '</small><b>' + esc(g.navn) + '</b><span>' + esc(g.tips) + '</span>' +
+            '<div class="kv-lek"><small>' + merke + ' · ' + b.min + ' min' + (g.pluss ? (EN ? ' · ✨ Pluss' : ' · ✨ Pluss') : '') + '</small><b>' + esc(g.navn) + '</b><span>' + esc(g.tips) + '</span>' +
             '<div class="kv-knapper"><a class="btn gold small" href="' + (EN ? '/drinking-games/' : '/no/drinking-games/') + b.slug + '/">' + (EN ? 'Rules and tools' : 'Regler og verktøy') + '</a>' +
             (g.rom && valg.rom ? '<a class="btn small" href="' + g.romHref + '">' + (EN ? 'Open a room' : 'Åpne rom') + '</a>' : '') +
             (i >= aktiv ? '<button class="mini" type="button" data-bytt="' + i + '">' + (EN ? 'Swap' : 'Bytt') + '</button>' : '') + '</div></div></li>';

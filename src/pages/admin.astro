@@ -562,7 +562,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
     });
     $('kodeListe').addEventListener('click', function (e) {
       var k = e.target.closest('[data-kopier]'), sl = e.target.closest('[data-slett]');
-      if (k) { var l = lenke(k.dataset.kopier); if (navigator.share) navigator.share({ title: 'Mitt vors Pluss', text: 'Her er Mitt vors Pluss til deg 🎁', url: l }).catch(function () {}); else if (navigator.clipboard) navigator.clipboard.writeText(l).then(function () { k.textContent = 'Kopiert ✓'; }); }
+      if (k) { var l = lenke(k.dataset.kopier); if (navigator.share) navigator.share({ title: 'mittvors pluss', text: 'Her er mittvors pluss til deg 🎁', url: l }).catch(function () {}); else if (navigator.clipboard) navigator.clipboard.writeText(l).then(function () { k.textContent = 'Kopiert ✓'; }); }
       if (sl) { if (!confirm('Slette koden ' + sl.dataset.slett + '? Den slutter å virke.')) return; api('/api/admin/pluss', { method: 'POST', body: JSON.stringify({ handling: 'kode-slett', kode: sl.dataset.slett }) }).then(hentKoder); }
     });
     document.querySelector('.tab[data-tab=pluss]').addEventListener('click', function () { if (!fane.dataset.hentet) { fane.dataset.hentet = '1'; hentKoder(); } });

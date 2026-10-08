@@ -29,7 +29,7 @@ const esc = (s: any) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ 
 
 /** Kvittering etter kjøp av Pluss (varig medium: bekrefter kjøpet og at angreretten falt bort). */
 export function kvitteringEpost(b: { ref: string; produkt: string; belop_ore: number; fullfort?: string; laget?: string }, lenke: string) {
-  const produkt = b.produkt === 'aar' ? 'Mitt vors Pluss – årspass (365 dager)' : 'Mitt vors Pluss – kveldspass (24 timer)';
+  const produkt = b.produkt === 'aar' ? 'mittvors pluss – årspass (365 dager)' : 'mittvors pluss – kveldspass (24 timer)';
   const kr = (b.belop_ore / 100).toFixed(2).replace('.', ',');
   const tid = new Date(b.fullfort || b.laget || Date.now()).toLocaleString('nb-NO', { timeZone: 'Europe/Oslo', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   const angrerett = 'Pluss ble levert med en gang etter kjøpet. Før kjøpet samtykket du til at leveringen skulle starte umiddelbart, og bekreftet at angreretten dermed faller bort (angrerettloven § 22 bokstav n).';
@@ -66,7 +66,7 @@ export function invitasjonEpost(o: { navn: string; melding: string; lenke: strin
     : T(`${o.navn} inviterer deg til Mitt vors`, `${o.navn} invited you to Mitt vors`);
   const ingress = erRom ? T('Bli med i rommet – alle spiller fra sin egen telefon. Ingen app å laste ned.', 'Join the room – everyone plays from their own phone. No app to download.')
     : erGjeng ? T('Bli med i gjengen og følg sesongtabellen fra kveld til kveld.', 'Join the crew and follow the season table from night to night.')
-    : erVerv ? T('Lag en gratis konto med lenken – spiller du ditt første rom, får dere begge en gratis kveld med Pluss 🎁', 'Create a free account with the link – play your first room and you both get a free night of Plus 🎁')
+    : erVerv ? T('Lag en gratis konto med lenken – spiller du ditt første rom, får dere begge en gratis kveld med Pluss 🎁', 'Create a free account with the link – play your first room and you both get a free night of Pluss 🎁')
     : T('Drikkeleker og vorsmoro der alle spiller fra sin egen telefon.', 'Drinking games and pre-party fun where everyone plays from their own phone.');
   const knapp = erRom ? T('Bli med i rommet', 'Join the room') : erGjeng ? T('Se gjengen', 'See the crew') : T('Åpne Mitt vors', 'Open Mitt vors');
   const html = `<!doctype html><html lang="${o.en ? 'en' : 'no'}"><body style="margin:0;background:#f7f1e6;font-family:Arial,Helvetica,sans-serif;color:#1d160c">

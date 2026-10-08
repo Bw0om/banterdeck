@@ -413,7 +413,7 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
   };
   if (valgt.type === 'kort') {
     const plussRom = !!(data.pluss && data.pluss.til > Date.now());
-    if ((valgt as any).pluss && !plussRom) return feilL('pluss', 'Denne pakken krever Mitt vors Pluss.', 'This pack needs Mitt vors Plus.');
+    if ((valgt as any).pluss && !plussRom) return feilL('pluss', 'Denne pakken krever mittvors pluss.', 'This pack needs mittvors pluss.');
     let rekke = kortstokkFor(lek, modus, sett);
     if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && rekke.length > 12) rekke = medSmakebiter(rekke);
     if (!rekke.length) return { feil: 'tom' };
@@ -579,7 +579,7 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!erVert) return { feil: 'bare-vert' };
       // Verten har Pluss (sjekket av API-ruta): lås opp rommet for kvelden
       if (h._plussTil > Date.now() && !(data.pluss && data.pluss.til > Date.now())) data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
-      if (h.lek !== 'egen' && erPlussLek(String(h.lek || '')) && !romHarPluss(data)) return feilL('pluss', 'Denne leken krever Mitt vors Pluss hos verten.', 'This game needs the host to have Mitt vors Plus.');
+      if (h.lek !== 'egen' && erPlussLek(String(h.lek || '')) && !romHarPluss(data)) return feilL('pluss', 'Denne leken krever mittvors pluss hos verten.', 'This game needs the host to have mittvors pluss.');
       if (h.lek === 'lov') return feilL('ukjent-lek', 'Gjengens lov er ikke lenger et eget spill – vinneren av kvelden velger regel.', 'The Crew’s Law is no longer a separate game – the winner of the night picks a rule.');
       const forrige = data.spill;
       if (forrige) lekFerdig(data);
@@ -610,10 +610,10 @@ function handlingInne(data: any, meg: any, h: any) {
     case 'pluss-aktiver': {
       // Serveren har allerede sjekket kontoen (h._plussTil settes bare av API-ruta)
       if (!erVert) return { feil: 'bare-vert' };
-      if (!(h._plussTil > Date.now())) return feilL('pluss', 'Kontoen din har ikke Pluss akkurat nå.', "Your account doesn't have Plus right now.");
+      if (!(h._plussTil > Date.now())) return feilL('pluss', 'Kontoen din har ikke Pluss akkurat nå.', "Your account doesn't have Pluss right now.");
       const hadde = !!(data.pluss && data.pluss.til > Date.now());
       data.pluss = { til: Math.min(h._plussTil, Date.now() + 24 * 3600 * 1000) };
-      if (!hadde) melde(data, '✨ Rommet har Pluss i kveld – alle leker er låst opp!', '✨ The room has Plus tonight – every game is unlocked!');
+      if (!hadde) melde(data, '✨ Rommet har Pluss i kveld – alle leker er låst opp!', '✨ The room has Pluss tonight – every game is unlocked!');
       return { ok: true };
     }
     case 'alkoholfri': {
@@ -924,7 +924,7 @@ function leggTil(data: any, fra: { id: string; pollett: string; lang: string }, 
   if (data.spillere.length >= GRATIS_PLASSER && !romHarPluss(data)) {
     data.fullForsok = Date.now();
     return feilL('fullt-gratis', `Rommet er fullt – gratisversjonen har plass til ${GRATIS_PLASSER} telefoner. Be verten låse opp med Pluss, så kan dere bli opptil ${MAKS_SPILLERE}.`,
-      `The room is full – the free version has room for ${GRATIS_PLASSER} phones. Ask the host to unlock Plus and you can be up to ${MAKS_SPILLERE}.`, { lagre: true });
+      `The room is full – the free version has room for ${GRATIS_PLASSER} phones. Ask the host to unlock Pluss and you can be up to ${MAKS_SPILLERE}.`, { lagre: true });
   }
   let n = navn, i = 2;
   while (data.spillere.some((p: any) => p.navn.toLowerCase() === n.toLowerCase())) n = `${navn} ${i++}`;
@@ -1977,7 +1977,7 @@ function oppdragHandling(data: any, meg: any, h: any, erVert: boolean): any {
   const hd = h.handling;
   if (hd === 'op-paa') {
     if (!erVert) return { feil: 'bare-vert' };
-    if (!romHarPluss(data)) return feilL('pluss', 'Agent 0,5 (hemmelige oppdrag) krever Pluss hos verten.', 'Agent 0.5 (secret missions) needs the host to have Plus.');
+    if (!romHarPluss(data)) return feilL('pluss', 'Agent 0,5 (hemmelige oppdrag) krever Pluss hos verten.', 'Agent 0.5 (secret missions) needs the host to have Pluss.');
     if (data.spillere.length < 3) return feilL('for-faa', 'Trenger minst tre spillere.', 'Needs at least three players.');
     data.oppdrag = { paa: true, per: {}, venter: [], anklager: [], brukt: {} };
     data.spillere.forEach((p: any) => nyttOppdrag(data, p.id));
