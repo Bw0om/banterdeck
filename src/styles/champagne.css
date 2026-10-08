@@ -52,8 +52,9 @@ h1{font-weight:560;letter-spacing:-.028em;line-height:1}
 h2{font-weight:560;letter-spacing:-.018em;line-height:1.08}
 h1 em,h2 em{font-style:italic;font-weight:440;color:var(--gold-t)}
 h3,.h3{font-stretch:normal;font-weight:700}
-.brand .bt{font-stretch:100%;font-weight:800;letter-spacing:-.04em}
-.mobilebar .brand .bt{font-stretch:100%}
+.brand .bt{font-family:var(--serif);font-stretch:normal;font-weight:620;font-size:25px;letter-spacing:-.025em;line-height:1}
+.brand .bt i{font-style:italic;font-weight:460;color:var(--gold-t);padding-right:.04em}
+.mobilebar .brand .bt{font-stretch:normal;font-size:23px}
 .sidenav a{font-stretch:100%}
 .tall{font-variant-numeric:tabular-nums lining-nums}
 
@@ -139,12 +140,11 @@ h3,.h3{font-stretch:normal;font-weight:700}
   background:linear-gradient(170deg,#2B1B24,#1C1219) padding-box,
              linear-gradient(160deg,#F1DAA2,rgb(var(--volt-rgb) / .25) 45%,#B48B45) border-box;
   box-shadow:0 30px 60px -28px rgb(var(--volt-rgb) / .45)}
-.pluss-pris.beste .pluss-kr{background:var(--gull-glans);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pluss-pris.beste .pluss-kr{color:var(--gold-t)}
 .pluss-merke{top:-12px;right:18px;padding:4px 11px;font-size:12px}
 :root[data-theme="light"] .pluss-pris.beste{background:
   linear-gradient(170deg,#FFFDF9,#F6EEE2) padding-box,
   linear-gradient(160deg,#D9B56A,rgb(var(--volt-rgb) / .3) 45%,#A57E3A) border-box}
-:root[data-theme="light"] .pluss-pris.beste .pluss-kr{background:none;color:var(--gold-t)}
 /* Anbefalt pass løftes frem: det andre får en rolig knapp */
 .pluss-pris:not(.beste) .btn.gold{background:transparent;color:var(--gold-t);box-shadow:inset 0 0 0 1px var(--hårstrek)}
 .pluss-pris:not(.beste) .btn.gold:active{transform:translateY(1px);box-shadow:inset 0 0 0 1px var(--gold)}

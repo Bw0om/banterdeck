@@ -51,8 +51,9 @@ body::after{content:"";position:fixed;inset:0;opacity:.12;mix-blend-mode:overlay
 .k::before{content:"";width:40px;height:2px;background:#E4C47F}
 h1{margin-top:20px;font-family:S,serif;font-weight:560;font-size:112px;line-height:.95;letter-spacing:-.035em;color:#F7EFE3}
 .u{margin-top:26px;font-weight:500;font-stretch:100%;font-size:29px;line-height:1.3;color:#C4B5B2}
-.b{margin-top:auto;display:flex;align-items:center;gap:14px;font-weight:800;font-stretch:100%;font-size:30px;letter-spacing:-.03em}
-.b i{font-style:normal;color:#E4C47F}
+.b{margin-top:auto;display:flex;align-items:center;gap:16px;font-family:S,serif;font-weight:620;font-size:34px;letter-spacing:-.025em}
+.b i{font-style:italic;font-weight:460;color:#E9CD8E}
+.b small{font-family:A,sans-serif;font-weight:600;font-size:24px;color:#9C8B8E;letter-spacing:0;margin-left:2px}
 .kort{position:absolute;right:70px;top:110px;width:400px;height:380px;padding:32px 32px 36px;border-radius:30px;background:#F7EFE3;color:#1A1012;
   transform:rotate(-3deg);box-shadow:14px 14px 0 #BFA27A,0 50px 90px -30px rgba(0,0,0,.7);display:flex;flex-direction:column}
 .ke{font-family:S,serif;font-style:italic;font-weight:500;font-size:28px;color:#8A2A1D}
@@ -61,7 +62,7 @@ h1{margin-top:20px;font-family:S,serif;font-weight:560;font-size:112px;line-heig
   padding:12px 22px;border-radius:999px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #8C6A2C}
 </style></head><body>
 <div class="v"><div class="k">${esc(kicker)}</div><h1 id="h">${esc(tittel)}</h1><div class="u">${esc(under)}</div>
-<div class="b">${logo}<span>mitt<i>vors</i>.no</span></div></div>
+<div class="b">${logo}<span>mitt<i>vors</i><small>.no</small></span></div></div>
 <div class="kort"><div class="ke">${esc(kortEtikett)}</div><div class="kt" id="kt">${esc(kortTekst)}</div></div>
 ${merke ? `<div class="m">${esc(merke)}</div>` : ''}
 <script>

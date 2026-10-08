@@ -2317,14 +2317,10 @@ export function startRom(LEKNAVN, LANG) {
     // logoen (flisen med to kopper) i hjørnet
     (function () {
       g.save(); g.translate(905, 190); g.rotate(0.1); g.scale(2.3, 2.3); g.translate(-50, -50);
-      g.fillStyle = '#E4C47F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
-      [[45.5, -24], [54.5, 24]].forEach(function (k) {
-        g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180);
-        g.fillStyle = '#1A1012'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z'));
-        g.fillStyle = '#F7EFE3'; g.fillRect(-12.5, -41, 25, 6); g.restore();
-      });
-      g.strokeStyle = '#1A1012'; g.lineWidth = 5; g.lineCap = 'round';
-      g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
+      g.fillStyle = '#E4C47F'; g.beginPath(); if (g.roundRect) g.roundRect(0, 0, 100, 100, 26); else g.rect(0, 0, 100, 100); g.fill();
+      [[28, 14], [72, -14]].forEach(function (k) { g.save(); g.translate(k[0], 87); g.rotate(k[1] * Math.PI / 180); g.fillStyle = '#1A1012'; g.fill(new Path2D('M-7.5 -60 H7.5 Q8 -32 0 -27 Q-8 -32 -7.5 -60 Z')); g.fillRect(-1.6, -28, 3.2, 25); g.fillRect(-9, -4.5, 18, 4.5); g.restore(); });
+      g.strokeStyle = '#1A1012'; g.lineWidth = 4; g.lineCap = 'round';
+      g.stroke(new Path2D('M50 22 V12 M41.5 24 L37 17 M58.5 24 L63 17'));
       g.restore();
     })();
     function sentrert(x, y, stil, farge) { g.font = stil; g.fillStyle = farge; g.fillText(x, 80, y); }
@@ -2333,20 +2329,20 @@ export function startRom(LEKNAVN, LANG) {
     g.font = '800 104px ' + font; g.fillStyle = '#F7EFE3';
     g.fillText(T('Kveldens', 'Tonight\'s'), 80, 330); g.fillText(T('oppsummering', 'recap'), 80, 440);
     var dag = new Date(tilstand.ferdig || Date.now()).toLocaleDateString(LOKALE, { weekday: 'long', day: 'numeric', month: 'long' });
-    sentrert(dag.charAt(0).toUpperCase() + dag.slice(1) + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 510, '500 38px ' + font, '#B4A7CF');
+    sentrert(dag.charAt(0).toUpperCase() + dag.slice(1) + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 510, '500 38px ' + font, '#C4B5B2');
     // tre store tall
     var tall = [[t.sumSlurker, T('slurker', t.sumSlurker === 1 ? 'sip' : 'sips')], [t.leker.length, t.leker.length === 1 ? T('lek', 'game') : T('leker', 'games')], [t.minutter >= 60 ? Math.floor(t.minutter / 60) + T('t ', 'h ') + (t.minutter % 60) + 'm' : t.minutter + ' min', T('sammen', 'together')]];
     tall.forEach(function (x, i) {
       var bx = 80 + i * 310;
       g.fillStyle = 'rgba(200,255,46,.10)'; g.beginPath(); if (g.roundRect) g.roundRect(bx, 570, 290, 170, 28); else g.rect(bx, 570, 290, 170); g.fill();
       g.fillStyle = '#E4C47F'; g.font = '800 70px ' + font; g.fillText(String(x[0]), bx + 28, 668);
-      g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x[1], bx + 30, 716);
+      g.fillStyle = '#C4B5B2'; g.font = '500 32px ' + font; g.fillText(x[1], bx + 30, 716);
     });
     var y = 830;
     t.kaaring.slice(0, 4).forEach(function (x) {
       g.fillStyle = 'rgba(248,233,210,.06)'; g.beginPath(); if (g.roundRect) g.roundRect(80, y - 20, W - 160, 132, 26); else g.rect(80, y - 20, W - 160, 132); g.fill();
       g.font = '64px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif'; g.fillStyle = '#fff'; g.fillText(x.ikon, 110, y + 72);
-      g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x.tittel, 210, y + 30);
+      g.fillStyle = '#C4B5B2'; g.font = '500 32px ' + font; g.fillText(x.tittel, 210, y + 30);
       g.fillStyle = '#F7EFE3'; g.font = '700 48px ' + font; g.fillText((x.navn + ' · ' + x.tall).slice(0, 34), 210, y + 90);
       y += 152;
     });
@@ -2361,7 +2357,7 @@ export function startRom(LEKNAVN, LANG) {
       g.fillStyle = '#F7EFE3'; g.textAlign = 'right'; g.fillText(String(p.slurker || 0), W - 80, y); g.textAlign = 'left';
     });
     if (t.leker.length && y < 1560) {
-      y += 90; g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(T('Dere spilte', 'You played'), 80, y);
+      y += 90; g.fillStyle = '#C4B5B2'; g.font = '500 32px ' + font; g.fillText(T('Dere spilte', 'You played'), 80, y);
       g.fillStyle = '#F7EFE3'; g.font = '600 38px ' + font;
       var linje = '', ord = t.leker.join(' · ').split(' ');
       ord.forEach(function (w) { var prov = linje ? linje + ' ' + w : w; if (g.measureText(prov).width > W - 160 && linje) { y += 52; if (y < 1700) g.fillText(linje, 80, y); linje = w; } else linje = prov; });
@@ -2369,7 +2365,7 @@ export function startRom(LEKNAVN, LANG) {
     }
     g.fillStyle = '#E4C47F'; g.fillRect(80, H - 170, W - 160, 4);
     g.fillStyle = '#F7EFE3'; g.font = '700 44px ' + font; g.fillText(T('Spill med oss neste gang', 'Play with us next time'), 80, H - 95);
-    g.fillStyle = '#B4A7CF'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
+    g.fillStyle = '#C4B5B2'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
     return new Promise(function (ok) {
       c.toBlob(function (blob) { ok(blob ? new File([blob], 'mittvors-kveld.png', { type: 'image/png' }) : null); }, 'image/png');
     });
@@ -2390,7 +2386,7 @@ export function startRom(LEKNAVN, LANG) {
       if (l) ut.push(l); return ut;
     }
     var kv = tilstand.kveld || {}, lv = kv.lovValg || {};
-    g.fillStyle = '#B4A7CF'; g.font = '600 40px ' + font; g.fillText('⚖️ ' + T('Gjengens lov', 'The Crew’s Law') + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 80, 300);
+    g.fillStyle = '#C4B5B2'; g.font = '600 40px ' + font; g.fillText('⚖️ ' + T('Gjengens lov', 'The Crew’s Law') + (tilstand.gjeng ? ' · ' + tilstand.gjeng.navn : ''), 80, 300);
     g.fillStyle = '#F7EFE3'; g.font = '800 64px ' + font; g.fillText(linjer('🏆 ' + (kv.vinner ? navn(kv.vinner) : '') + T(' vant kvelden', ' won the night'), '800 64px ' + font, W - 160)[0], 80, 380);
     var y = 520;
     var boks = function (hoyde, farge) { g.fillStyle = farge; g.beginPath(); if (g.roundRect) g.roundRect(80, y, W - 160, hoyde, 36); else g.rect(80, y, W - 160, hoyde); g.fill(); };
@@ -2398,7 +2394,7 @@ export function startRom(LEKNAVN, LANG) {
       var l = linjer('«' + lv.tekst + '»', '800 72px ' + font, W - 260), hh = 200 + l.length * 88;
       boks(hh, lv.type === 'opphev' ? '#3A2230' : '#F7EFE3');
       g.fillStyle = lv.type === 'opphev' ? '#D9503C' : '#8A2A1D'; g.font = '700 36px ' + font; g.fillText(lv.type === 'opphev' ? '🗑️ ' + T('OPPHEVET', 'REPEALED') : '📜 ' + T('NY REGEL', 'NEW RULE'), 130, y + 90);
-      g.fillStyle = lv.type === 'opphev' ? '#B4A7CF' : '#1A1012'; g.font = '800 72px ' + font; l.forEach(function (x, i) { g.fillText(x, 130, y + 190 + i * 88); });
+      g.fillStyle = lv.type === 'opphev' ? '#C4B5B2' : '#1A1012'; g.font = '800 72px ' + font; l.forEach(function (x, i) { g.fillText(x, 130, y + 190 + i * 88); });
       y += hh + 50;
     }
     var antall = ((tilstand.gjeng && tilstand.gjeng.regler) || []).length;
@@ -2408,14 +2404,14 @@ export function startRom(LEKNAVN, LANG) {
       // Logoen (flisen) fyller tomrommet nederst
       var cy = Math.min(1500, y + (1700 - y) / 2), sk = Math.min(4.2, (1700 - y) / 130);
       g.save(); g.translate(W / 2, cy); g.rotate(-0.08); g.scale(sk, sk); g.translate(-50, -50);
-      g.fillStyle = '#E4C47F'; g.beginPath(); if (g.roundRect) g.roundRect(4, 4, 92, 92, 30); else g.rect(4, 4, 92, 92); g.fill();
-      [[45.5, -24], [54.5, 24]].forEach(function (k) { g.save(); g.translate(k[0], 78); g.rotate(k[1] * Math.PI / 180); g.fillStyle = '#1A1012'; g.fill(new Path2D('M-8 0 L-12 -41 H12 L8 0 Z')); g.fillStyle = '#F7EFE3'; g.fillRect(-12.5, -41, 25, 6); g.restore(); });
-      g.strokeStyle = '#1A1012'; g.lineWidth = 5; g.lineCap = 'round'; g.stroke(new Path2D('M50 29 V18 M40.5 31 L35.5 24.5 M59.5 31 L64.5 24.5'));
+      g.fillStyle = '#E4C47F'; g.beginPath(); if (g.roundRect) g.roundRect(0, 0, 100, 100, 26); else g.rect(0, 0, 100, 100); g.fill();
+      [[28, 14], [72, -14]].forEach(function (k) { g.save(); g.translate(k[0], 87); g.rotate(k[1] * Math.PI / 180); g.fillStyle = '#1A1012'; g.fill(new Path2D('M-7.5 -60 H7.5 Q8 -32 0 -27 Q-8 -32 -7.5 -60 Z')); g.fillRect(-1.6, -28, 3.2, 25); g.fillRect(-9, -4.5, 18, 4.5); g.restore(); });
+      g.strokeStyle = '#1A1012'; g.lineWidth = 4; g.lineCap = 'round'; g.stroke(new Path2D('M50 22 V12 M41.5 24 L37 17 M58.5 24 L63 17'));
       g.restore();
     }
     g.fillStyle = '#E4C47F'; g.fillRect(80, H - 170, W - 160, 4);
     g.fillStyle = '#F7EFE3'; g.font = '700 44px ' + font; g.fillText(T('Hvilke lover har din gjeng?', 'What laws does your crew have?'), 80, H - 95);
-    g.fillStyle = '#B4A7CF'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
+    g.fillStyle = '#C4B5B2'; g.font = '600 38px ' + font; g.fillText('mittvors.no', 80, H - 45);
     return new Promise(function (ok) { c.toBlob(function (bl) { ok(bl ? new File([bl], 'mittvors-lov.png', { type: 'image/png' }) : null); }, 'image/png'); });
   }
   function delLov() {
@@ -2492,7 +2488,7 @@ export function startRom(LEKNAVN, LANG) {
     var g = medT(c.getContext('2d')), font = '"Archivo Variable", "Archivo", system-ui, sans-serif';
     g.fillStyle = '#1A1012'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#E4C47F'; g.font = '800 84px ' + font; g.fillText(T('Kveldens tavle', 'Tonight\'s board'), 80, 160);
-    g.fillStyle = '#B4A7CF'; g.font = '500 36px ' + font;
+    g.fillStyle = '#C4B5B2'; g.font = '500 36px ' + font;
     g.fillText(new Date().toLocaleDateString(LOKALE, { weekday: 'long', day: 'numeric', month: 'long' }) + T(' · rom ', ' · room ') + kode, 80, 220);
     var y = 320, maks = Math.max(1, l[0] ? l[0].slurker || 0 : 1);
     l.forEach(function (p, i) {
@@ -2505,7 +2501,7 @@ export function startRom(LEKNAVN, LANG) {
     });
     y += 30;
     k.forEach(function (x) {
-      g.fillStyle = '#B4A7CF'; g.font = '500 32px ' + font; g.fillText(x.ikon + '  ' + x.tittel, 80, y);
+      g.fillStyle = '#C4B5B2'; g.font = '500 32px ' + font; g.fillText(x.ikon + '  ' + x.tittel, 80, y);
       g.fillStyle = '#F7EFE3'; g.font = '700 44px ' + font; g.fillText(x.navn + (x.n !== null ? ' · ' + x.n : ''), 80, y + 52); y += 110;
     });
     g.fillStyle = '#8F81AD'; g.font = '600 32px ' + font; g.fillText('mittvors.no', 80, H - 70);
