@@ -225,7 +225,7 @@ const aarData: any = { eras: bingoData.eras };
           res.textContent = D.items[i].r || D.items[i].t; desc.textContent = D.items[i].d;
           if (stille) {
             // Redusert bevegelse: rolig fade, ingen sprett (global.css slår av animation uansett)
-            res.classList.add('skjult'); desc.classList.add('skjult');
+            res.classList.add('skjult'); desc.classList.add('skjult'); void res.offsetWidth;
             requestAnimationFrame(function(){ res.classList.remove('skjult'); desc.classList.remove('skjult'); });
           } else {
             void res.offsetWidth; res.classList.add('inn'); desc.classList.add('inn');
