@@ -18,6 +18,8 @@ const L = ui(lang);
     var ok = false;
     try { ok = localStorage.getItem('la_age_ok') === '1'; } catch (e) {}
     if (ok) return;
+    // Romlenke med kode: gjesten bekrefter alderen med selve «Bli med»-knappen (se rom.js), ingen ekstra stopp
+    if (/^\/(no\/rom|room)\/?$/.test(location.pathname) && /[?&]k=[A-Za-z0-9]{4}/.test(location.search)) return;
     var g = document.getElementById('gate');
     g.hidden = false;
     document.body.classList.add('gated');

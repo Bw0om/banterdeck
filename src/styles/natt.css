@@ -448,7 +448,7 @@ html:not([data-theme="light"]).i-spill :is(.rom-kort,.rof-kort){background:#F7EF
 /* I rommet (også i lobbyen): menyen nederst forsvinner på mobil. Den ligger der tommelen hviler,
    og ett bomtrykk tok deg ut av rommet. Logoen øverst tar deg fortsatt til forsiden. */
 @media (max-width:899px){
-  html.i-rom .tabbar{display:none!important}
+  html.i-rom .tabbar,html.bli-med .tabbar{display:none!important}
   html.i-rom:not(.i-spill) body{padding-bottom:calc(env(safe-area-inset-bottom) + 28px)}
 }
 .alkfri-bryter{min-height:44px}
@@ -850,3 +850,19 @@ html[data-laast] .utvikling{overscroll-behavior:contain}
   .kort-ut{animation:rolig-ut 200ms ease-out forwards!important}
   .rom-venter li{animation:rolig-inn 200ms ease-out!important}
 }
+
+/* =====================================================================
+   BLI MED – gjestens første sekunder
+   Med kode i lenken: hvem som er her, navnet, én knapp. Fjesene toner inn
+   når svaret fra rommet kommer, så teksten ikke bare hopper.
+   ===================================================================== */
+.rom-kikk{min-height:58px}
+.rom-kikk .lead{margin:6px 0 0}
+.rom-kikk .lead b{color:var(--ink)}
+.rom-kikk-folk{display:flex;margin-top:4px;animation:aldriTon 220ms var(--ease-out)}
+.rom-kikk-folk + .lead{animation:aldriTon 220ms var(--ease-out)}
+.rom-kikk-folk span{width:36px;height:36px;box-sizing:border-box;margin-right:-8px;border-radius:50%;border:2px solid var(--bg);background:var(--card2);color:var(--gold-t);
+  display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.rom-kikk-folk span.vert{background:var(--gold);color:var(--ink2)}
+.rom-start.med-kode #romNavn1{font-size:20px;min-height:56px}
+.rom-alder{margin:12px 0 0;font-size:13.5px;line-height:1.45;color:var(--muted);text-align:center}

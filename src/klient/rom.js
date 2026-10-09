@@ -450,14 +450,43 @@ export function startRom(LEKNAVN, LANG) {
     return '<a class="rom-fortsett" href="' + esc(location.pathname + '?k=' + k) + '"><span><b>' + T('Du er i rom ', 'You’re in room ') + esc(k) + '</b><small>' +
       (ln ? T('Gå tilbake og velg ' + esc(ln) + ' der', 'Go back and pick ' + esc(ln) + ' there') : T('Trykk for å gå tilbake til rommet', 'Tap to go back to the room')) + '</small></span><span aria-hidden="true">→</span></a>';
   }
+  /** Bli med-skjermen: vis kodefeltet (feil kode, eller rommet finnes ikke). */
+  function visKodefelt() {
+    var r = document.getElementById('kodeRad'); if (r) r.hidden = false;
+    var f = document.getElementById('romKode'); if (f) { f.focus(); f.select(); }
+  }
+  /** Bli med-skjermen: hvem er her, og hva spilles? Gir gjesten trygghet på at det er riktig rom – eller sier fra med en gang hvis koden er feil. */
+  function kikk() {
+    var k = kode;
+    fetch('/api/rom/' + k + '?kikk=1&lang=' + LANG, { cache: 'no-store', headers: { 'x-lang': LANG } })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (x) {
+        var el = document.getElementById('romKikk'); if (!el || kode !== k || meg) return;
+        if (!x.ok) {
+          if (x.d && x.d.feil === 'finnes-ikke') { el.innerHTML = '<p class="rom-feil" role="alert">' + T('Fant ikke rom ', 'Couldn’t find room ') + esc(k) + T('. Sjekk koden med verten.', '. Check the code with the host.') + '</p>'; visKodefelt(); }
+          return;
+        }
+        var d = x.d, sp = d.spillere || [], vert = sp.find(function (p) { return p.id === d.vert; }) || sp[0];
+        if (!vert) return;
+        var andre = sp.filter(function (p) { return p !== vert; });
+        var hvem = '<b>' + esc(vert.navn) + '</b>' + (andre.length === 0 ? T(' venter på deg.', ' is waiting for you.')
+          : andre.length === 1 ? T(' og ', ' and ') + '<b>' + esc(andre[0].navn) + '</b>' + T(' er her.', ' are here.')
+          : T(' og ', ' and ') + andre.length + T(' andre er her.', ' others are here.'));
+        el.innerHTML = '<div class="rom-kikk-folk" aria-hidden="true">' + sp.slice(0, 7).map(function (p) { return '<span' + (p === vert ? ' class="vert"' : '') + '>' + esc(String(p.navn).slice(0, 2)) + '</span>'; }).join('') +
+          (sp.length > 7 ? '<span>+' + (sp.length - 7) + '</span>' : '') + '</div>' +
+          '<p class="lead">' + hvem + (d.spill && d.spill.navn ? ' ' + T('Nå spilles ', 'Now playing ') + '<b>' + esc(d.spill.navn) + '</b>.' : '') + '</p>';
+      }).catch(function () {});
+  }
   function tegnStart(melding) {
     document.documentElement.classList.remove('i-spill', 'min-tur', 'hemmelig', 'i-rom');
     var navn = les('bd_mittnavn') || '';
     var ln = onsketLek ? LEKNAVN[onsketLek] : '';
     var medKode = !!kode && !ln;
+    // Med kode i lenken har gjesten bare én oppgave: bli med. Bunnmenyen tar da bare plass.
+    document.documentElement.classList.toggle('bli-med', medKode);
     root.innerHTML =
       '<h1 class="rom-h1">' + (medKode ? T('Bli med i rom ', 'Join room ') + esc(kode) : ln ? T(esc(ln) + ' fra hver sin telefon', 'Play ' + esc(ln) + ' on your phones') : T('Spill sammen', 'Play together')) + '</h1>' +
-      (medKode ? '<p class="lead">' + T('Skriv navnet ditt, så er du med. Navnet vises for de andre i rommet.', 'Enter your name and you’re in. Your name is shown to the others in the room.') + '</p>'
+      (medKode ? '<div class="rom-kikk" id="romKikk" aria-live="polite"><p class="lead">' + T('Skriv navnet ditt, så er du med.', 'Enter your name and you’re in.') + '</p></div>'
         : '<p class="lead">' + (ln ? T('Lag et rom for ' + esc(ln) + '. Leken starter når alle har blitt med.', 'Create a room for ' + esc(ln) + '. The game starts once everyone has joined.') : T('Drikkeleker dere spiller fra hver deres telefon.', 'Drinking games you play from your own phones.')) + '</p>' +
           '<ol class="rom-slik"><li><b>' + T('Én lager et rom', 'One person creates a room') + '</b><span>' + T('og blir vert', 'and becomes the host') + '</span></li><li><b>' + T('Resten blir med', 'Everyone else joins') + '</b><span>' + T('med QR-kode eller en kode på fire tegn', 'with a QR code or a four-letter code') + '</span></li><li><b>' + T('Alle spiller', 'Everyone plays') + '</b><span>' + T('på sin egen telefon', 'on their own phone') + '</span></li></ol>') +
       '<p class="small">' + sprakLenke() + '</p>' +
@@ -465,13 +494,14 @@ export function startRom(LEKNAVN, LANG) {
       fortsettBanner() +
       '<div class="rom-start' + (kode ? ' med-kode' : ' uten-kode') + '">' +
         '<form class="rom-boks" id="blimedSkjema">' +
-          '<h2>' + T('Bli med', 'Join') + '</h2>' + (medKode ? '' : '<p class="small">' + T('Har du fått en kode av verten? Skriv den her.', 'Got a code from the host? Enter it here.') + '</p>') +
-          '<label for="romKode">' + T('Kode', 'Code') + '</label>' +
-          '<input id="romKode" class="rom-kodefelt" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="next" maxlength="6" placeholder="ABCD" value="' + esc(kode) + '">' +
+          (medKode ? '' : '<h2>' + T('Bli med', 'Join') + '</h2><p class="small">' + T('Har du fått en kode av verten? Skriv den her.', 'Got a code from the host? Enter it here.') + '</p>') +
+          '<div class="rom-koderad" id="kodeRad"' + (medKode ? ' hidden' : '') + '><label for="romKode">' + T('Kode', 'Code') + '</label>' +
+          '<input id="romKode" class="rom-kodefelt" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="next" maxlength="6" placeholder="ABCD" value="' + esc(kode) + '"></div>' +
           '<label for="romNavn1">' + T('Navnet ditt', 'Your name') + '</label>' +
           '<input id="romNavn1" maxlength="20" autocomplete="nickname" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="' + T('F.eks. Jonas', 'E.g. Alex') + '" value="' + esc(navn) + '">' +
           '<button class="btn gold rom-knapp" type="submit">' + T('Bli med', 'Join') + '</button>' +
-          (medKode ? '<p class="small rom-annet"><button type="button" class="linkbtn" id="visLag">' + T('… eller lag et eget rom', '… or create your own room') + '</button></p>' : '') +
+          (medKode ? '<p class="rom-alder">' + T('Ved å bli med bekrefter du at du er over 18. Drikk med vett – og aldri kjør etterpå.', 'By joining you confirm you’re over 18. Drink responsibly – and never drive afterwards.') + '</p>' +
+            '<p class="small rom-annet"><button type="button" class="linkbtn" id="visKode">' + T('Feil kode?', 'Wrong code?') + '</button> · <button type="button" class="linkbtn" id="visLag">' + T('Lag et eget rom', 'Create your own room') + '</button></p>' : '') +
         '</form>' +
         '<form class="rom-boks lag' + (medKode ? ' skjult-lag' : '') + '" id="lagSkjema">' +
           '<h2>' + (ln ? T('Lag rom for ', 'Create a room for ') + esc(ln) : T('Lag et rom', 'Create a room')) + '</h2>' +
@@ -479,9 +509,13 @@ export function startRom(LEKNAVN, LANG) {
           '<label for="romNavn2">' + T('Navnet ditt', 'Your name') + '</label>' +
           '<input id="romNavn2" maxlength="20" autocomplete="nickname" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="' + T('F.eks. Maria', 'E.g. Sam') + '" value="' + esc(navn) + '">' +
           '<button class="btn gold rom-knapp" type="submit">' + T('Lag rom', 'Create room') + '</button>' +
+          (medKode ? '<p class="rom-alder">' + T('Ved å lage et rom bekrefter du at du er over 18.', 'By creating a room you confirm you’re over 18.') + '</p>' : '') +
         '</form>' +
       '</div>' +
       (medKode ? '' : '<p class="small">' + T('Lag mot lag? La hvert lag bli med fra én telefon og bruk lagnavnet som navn.', 'Team vs team? Let each team join from one phone and use the team name as their name.') + '</p>');
+    var vk = document.getElementById('visKode');
+    if (vk) vk.addEventListener('click', visKodefelt);
+    if (medKode) kikk();
     var vl = document.getElementById('visLag');
     if (vl) vl.addEventListener('click', function () { var f = document.getElementById('lagSkjema'); if (f) { f.classList.remove('skjult-lag'); f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } vl.parentNode.remove(); });
     if (qs.get('lag') === '1' && !kode) { var nf2 = document.getElementById('romNavn2'); if (nf2) setTimeout(function () { nf2.focus(); nf2.scrollIntoView({ block: 'center' }); }, 60); }
@@ -492,6 +526,7 @@ export function startRom(LEKNAVN, LANG) {
       if (k.length < 4) return toast(T('Skriv inn koden.', 'Enter the code.'));
       if (!n) return toast(T('Skriv inn navnet ditt.', 'Enter your name.'));
       skriv('bd_mittnavn', n);
+      if (medKode) { try { localStorage.setItem('la_age_ok', '1'); } catch (x) {} }
       api('POST', '/api/rom/' + k, { handling: 'bli-med', navn: n, lang: LANG }).then(function (d) {
         kode = k; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode); ta(d); planlegg();
       }).catch(function (err) { tegnStart(err.message); });
@@ -509,6 +544,7 @@ export function startRom(LEKNAVN, LANG) {
       var n = document.getElementById('romNavn2').value.trim();
       if (!n) return toast(T('Skriv inn navnet ditt.', 'Enter your name.'));
       skriv('bd_mittnavn', n);
+      if (medKode) { try { localStorage.setItem('la_age_ok', '1'); } catch (x) {} }
       api('POST', '/api/rom', { navn: n, lek: onsketLek, modus: onsketModus, lang: LANG }).then(function (d) {
         kode = d.kode; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode);
         versjon = 0; hent();

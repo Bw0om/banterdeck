@@ -65,7 +65,9 @@ export const GET: APIRoute = async ({ params, request }) => {
     const lang: Sprak = meg ? rensLang(meg.lang) : qLang;
     const vis: any = visning(rom.data, rom.versjon, meg, lang);
     // Den som ikke er med i rommet, får bare se lobbyen – aldri hemmeligheter fra spillet (spionens sted, ord osv.)
-    if (!meg) return json({ versjon: vis.versjon, vert: vis.vert, meg: null, spillere: vis.spillere, spill: vis.spill ? { type: vis.spill.type, navn: vis.spill.navn } : null, lang, kode, leker: lekeliste(lang) });
+    // ?kikk=1: bli med-skjermen vil bare vise hvem som er her og hva som spilles – ingen lekeliste
+    const kikk = new URL(request.url).searchParams.get('kikk') === '1';
+    if (!meg) return json({ versjon: vis.versjon, vert: vis.vert, meg: null, spillere: kikk ? vis.spillere.map((p: any) => ({ id: p.id, navn: p.navn })) : vis.spillere, spill: vis.spill ? { type: vis.spill.type, navn: vis.spill.navn } : null, lang, kode, ...(kikk ? {} : { leker: lekeliste(lang) }) });
     const ut: any = { ...vis, kode };
     if (trengerLeker(request, lang)) ut.leker = lekeliste(lang);
     return json(ut);
