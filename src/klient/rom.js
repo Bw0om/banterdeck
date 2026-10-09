@@ -823,10 +823,11 @@ export function startRom(LEKNAVN, LANG) {
       ['Hold på kortet og dra det sakte ut. Drar du for fort, ryker ringen: drikk opp glasset ditt!', 'Hold the card and pull it out slowly. Pull too fast and the ring breaks: finish your drink!'],
       ['Jo færre kort som er igjen, jo strammere blir ringen. Ringen kan bare brytes én gang – etter det er resten trygt.', 'The fewer cards left, the tighter the ring gets. The ring can only break once – after that the rest is safe.'],
       ['Gjør det kortet sier. Hver konge fyller kongekoppen – den som trekker fjerde konge, drikker den.', 'Do what the card says. Each king fills the king’s cup – whoever draws the fourth king drinks it.']],
+    aldri: [['Kortet kommer opp på alle telefonene.', 'The card shows up on every phone.'], ['Svar «Jeg har» eller «Aldri». Ingen ser svaret før alle har svart.', 'Answer “I have” or “Never”. Nobody sees the answers until everyone has answered.'], ['De som har gjort det, drikker én slurk. Så trykker noen «Neste kort».', 'Everyone who has done it drinks one sip. Then someone taps “Next card”.']],
     kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Hvem som helst kan trykke «Neste kort».', 'Anyone can tap “Next card”.']],
   };
   function reglerPanel(s) {
-    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : 'kort') : s.type, r = REGLER[nokkel];
+    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.aldri || s.svarPaa ? 'aldri' : 'kort')) : s.type, r = REGLER[nokkel];
     if (!r) return '';
     var sett = les('bd_regler_sett') || [], forste = sett.indexOf(nokkel) === -1;
     if (forste) { sett.push(nokkel); skriv('bd_regler_sett', sett.slice(-40)); apneRegler[nokkel] = true; }
@@ -1141,6 +1142,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   function kortSpill(s) {
     if (s.ring) return rofSpill(s);
+    if (s.aldri) return aldriSpill(s) + aldriBryter(s);
     var k = s.kort || {};
     if (k.id) merkSett(s.lek, k.id);
     var rof = s.lek === 'ring-of-fire';
@@ -1152,7 +1154,57 @@ export function startRom(LEKNAVN, LANG) {
     return (rof && k.hvem ? '<div class="rof-tur"><span>' + T('Trekker', 'Drawing') + '</span><b>' + esc(k.hvem) + '</b></div>' : '') +
       (rof ? '<p class="rom-status">' + (s.antall - s.pos - 1) + T(' kort igjen · ', ' cards left · ') + (s.konger || 0) + T(' konger', ' kings') + '</p>' : '') +
       kortHtml + lunte((s.antall - s.pos - 1) / Math.max(1, s.antall)) + (rof ? makkerHtml(s) : '') +
-      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + '</button>';
+      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + '</button>' + aldriBryter(s);
+  }
+
+  /* ---------- Alle svarer (Jeg har aldri): hver telefon svarer i hemmelighet, så vises det samtidig ----------
+     Bevegelse bare når noe skjer: et nytt svar fyller én prikk, avsløringen toner inn én gang.
+     Klassene settes bare ved endring, ellers ville hver ny tegning spilt dem på nytt. */
+  var aldriSett = { nokkel: '', svart: null }, aldriAvslort = '', aldriEndre = '';
+  function slurkOrd(n) { return tilstand && tilstand.alkoholfri ? T('straffepoeng', n === 1 ? 'penalty point' : 'penalty points') : (n === 1 ? T('slurk', 'sip') : T('slurker', 'sips')); }
+  function initialer(p) { return p.id === tilstand.meg ? T('Du', 'You') : String(p.navn || '?').slice(0, 2); }
+  function aldriBryter(s) {
+    if (!erVert() || !s.kanSvar) return '';
+    return '<p class="aldri-bryter"><button class="linkbtn" data-g="aldri-modus" data-paa="' + (s.svarPaa ? '0' : '1') + '" type="button">' +
+      (s.svarPaa ? T('Bare trekk kort, uten svar', 'Just draw cards, no answers') : T('La alle svare på telefonen', 'Let everyone answer on their phone')) + '</button></p>';
+  }
+  function aldriSpill(s) {
+    var t = tilstand, a = s.aldri, k = s.kort || {}, alle = t.spillere || [], nokkel = s.pos + ':' + s.antall;
+    if (k.id) merkSett(s.lek, k.id);
+    var kort = '<div class="rom-kort' + (a.fase === 'avslort' ? ' aldri-liten' : '') + '">' + (k.k ? '<span class="sw-tag">' + esc(k.k) + '</span>' : '<span></span>') + '<p>' + esc(k.t) + '</p><span class="rom-teller">' + (s.pos + 1) + ' / ' + s.antall + '</span></div>';
+    if (a.fase === 'avslort') {
+      var inn = aldriAvslort !== nokkel; aldriAvslort = nokkel;
+      var har = a.har || [], fri = alle.filter(function (p) { return har.indexOf(p.id) === -1; });
+      return kort + '<div class="aldri-avslort' + (inn ? ' inn' : '') + '">' +
+        '<h2 class="aldri-tall">' + har.length + T(' av ', ' of ') + alle.length + ' <em>' + T('har gjort det', 'have done it') + '</em></h2>' +
+        (har.length ? '<ul class="aldri-liste">' + har.map(function (id, i) {
+          return '<li style="--i:' + i + '"' + (id === t.meg ? ' class="meg"' : '') + '><span>' + (id === t.meg ? T('Du', 'You') : esc(navn(id))) + '</span><b>1 ' + slurkOrd(1) + '</b></li>'; }).join('') + '</ul>'
+          : '<p class="aldri-ingen">' + T('Ingen har gjort det. Et uskyldig rom!', 'Nobody has. What an innocent room!') + '</p>') +
+        (fri.length ? '<p class="aldri-fri"><b>' + T('Aldri:', 'Never:') + '</b> ' + fri.map(function (p) { return p.id === t.meg ? T('du', 'you') : esc(p.navn); }).join(', ') + '</p>' : '') +
+        (a.mest ? '<p class="aldri-mest">' + esc(navn(a.mest.id)) + T(' har gjort det ', ' has done it ') + a.mest.n + T(' ganger i kveld. Mest av alle.', ' times tonight. More than anyone.') + '</p>' : '') +
+        '</div><button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + '</button>';
+    }
+    // Svarrunden: hvem som har svart (ikke hva). Nye svar siden forrige tegning får en liten markering.
+    if (aldriSett.nokkel !== nokkel) aldriSett = { nokkel: nokkel, svart: null };
+    var forrige = aldriSett.svart, svart = a.harSvart || [], naa = {};
+    var folk = alle.map(function (p) {
+      var har = svart.indexOf(p.id) !== -1; if (har) naa[p.id] = 1;
+      var ny = har && forrige && !forrige[p.id];
+      return '<span class="' + (har ? 'svart' : '') + (ny ? ' ny' : '') + '" title="' + esc(p.navn) + (har ? T(' har svart', ' has answered') : T(' har ikke svart', ' hasn’t answered')) + '">' + esc(initialer(p)) + '</span>';
+    }).join('');
+    aldriSett.svart = naa;
+    var mangler = alle.filter(function (p) { return !naa[p.id]; });
+    var velger = !a.mitt || aldriEndre === nokkel;
+    var midt = velger
+      ? '<div class="aldri-valg"><button type="button" class="aldri-har" data-g="aldri-svar" data-v="har"' + (a.mitt === 'har' ? ' aria-pressed="true"' : '') + '><b>' + T('Jeg har', 'I have') + '</b><small>' + T('og drikker', 'and drink') + '</small></button>' +
+        '<button type="button" class="aldri-aldri" data-g="aldri-svar" data-v="aldri"' + (a.mitt === 'aldri' ? ' aria-pressed="true"' : '') + '><b>' + T('Aldri', 'Never') + '</b><small>' + T('går fri', 'off the hook') + '</small></button></div>' +
+        '<p class="aldri-hint">' + T('Ingen ser hva du svarer før alle har svart.', 'Nobody sees your answer until everyone has answered.') + '</p>'
+      : '<div class="aldri-mitt"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' +
+        T('Du svarte ', 'You answered ') + '<b>«' + (a.mitt === 'har' ? T('Jeg har', 'I have') : T('Aldri', 'Never')) + '»</b></span><button class="linkbtn" data-g="aldri-endre" type="button">' + T('Endre', 'Change') + '</button></div>' +
+        (mangler.length ? '<p class="aldri-hint">' + T('Venter på ', 'Waiting for ') + mangler.slice(0, 3).map(function (p) { return esc(p.navn); }).join(', ') + (mangler.length > 3 ? T(' og ', ' and ') + (mangler.length - 3) + T(' til', ' more') : '') + ' …</p>' : '');
+    return kort + midt +
+      (erVert() && svart.length ? '<button type="button" class="aldri-vis" data-g="avslor">' + T('Vis svarene nå', 'Show the answers now') + '</button>' : '') +
+      '<div class="aldri-status">' + fristHtml(s, T('sekunder igjen', 'seconds left')) + '<p class="rom-status">' + svart.length + T(' av ', ' of ') + alle.length + T(' har svart', ' have answered') + '</p><div class="aldri-folk">' + folk + '</div></div>';
   }
 
   function mestSpill(s) {
@@ -1517,22 +1569,91 @@ export function startRom(LEKNAVN, LANG) {
     return hint + '<div class="reak-linje" id="reakLinje">' + ['🍻', '😂', '🔥', '😱', '👏'].map(function (e) {
       return '<button type="button" data-g="reager" data-e="' + e + '" aria-label="Send ' + e + '">' + e + '</button>';
     }).join('') + '<button type="button" data-g="lyd" aria-label="' + (lyd.paa ? T('Skru av lyd', 'Turn sound off') : T('Skru på lyd', 'Turn sound on')) + '" aria-pressed="' + lyd.paa + '">' + (lyd.paa ? '🔊' : '🔇') + '</button>' +
-      (megS.gi ? '' : '<!-- ingen slurker å dele ut -->') + '<button type="button" class="reak-send" data-g="send-velg"' + (megS.gi ? '' : ' hidden') + ' aria-label="' + T('Send en slurk til noen', 'Send someone a sip') + '">🍺 <b>' + (megS.gi || 0) + '</b></button></div>';
+      (megS.gi ? '' : '<!-- ingen slurker å dele ut -->') + '<button type="button" class="reak-send" data-g="del-ut"' + (megS.gi ? '' : ' hidden') + ' aria-label="' + T('Del ut ', 'Hand out ') + (megS.gi || 0) + '">' + T('Del ut', 'Hand out') + ' <b>' + (megS.gi || 0) + '</b></button></div>';
   }
-  function sendVelger() {
+  /* ---------- Slurker: hva du har drukket, og hva du kan dele ut ----------
+     Linja under leken viser begge tallene hele tiden. «Del ut» åpner et ark der du velger hvor mange,
+     og om de skal fordeles på alle andre eller på dem du velger. Går det ikke opp, får de som har
+     drukket minst resten – det er rettferdig og lett å forklare. */
+  var sisteEgne = { slurker: null, gi: null };
+  function slurkelinje() {
+    var p = (tilstand.spillere || []).find(function (x) { return x.id === tilstand.meg; }); if (!p) return '';
+    var sl = p.slurker || 0, gi = p.gi || 0;
+    var drakk = sisteEgne.slurker !== null && sl > sisteEgne.slurker, fikk = sisteEgne.gi !== null && gi > sisteEgne.gi;
+    sisteEgne = { slurker: sl, gi: gi };
+    return '<div class="slurkelinje"><div class="sl-celle"><small>' + (tilstand.alkoholfri ? T('Straffepoeng i kveld', 'Penalty points tonight') : T('Drukket i kveld', 'Drunk tonight')) + '</small><b class="sl-tall' + (drakk ? ' okt' : '') + '">' + sl + '</b></div>' +
+      '<button type="button" class="sl-gi' + (fikk ? ' okt' : '') + '" data-g="del-ut"' + (gi ? '' : ' disabled') + '><small>' + T('Du kan dele ut', 'You can hand out') + '</small><span><b class="sl-tall">' + gi + '</b>' + (gi ? '<em>' + T('Del ut', 'Hand out') + '</em>' : '') + '</span></button></div>';
+  }
+  /** Fordel `antall` likt på mottakerne. Resten går til dem som har drukket minst. */
+  function fordel(mottakere, antall) {
+    var ut = {}; if (!mottakere.length) return ut;
+    var base = Math.floor(antall / mottakere.length), rest = antall % mottakere.length;
+    mottakere.forEach(function (p) { ut[p.id] = base; });
+    mottakere.slice().sort(function (a, b) { return (a.slurker || 0) - (b.slurker || 0); }).forEach(function (p) { if (rest > 0) { ut[p.id]++; rest--; } });
+    return ut;
+  }
+  var GLASS = '<svg viewBox="0 0 24 28" aria-hidden="true"><path d="M4 3h16l-1.8 22H5.8z"/></svg>';
+  function delUtArk() {
     var megS = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {};
-    if (!megS.gi) return toast(T('Du har ingen slurker å dele ut ennå. Vinn noe først!', 'You have no sips to hand out yet. Win something first!'));
-    var m = document.createElement('div'); m.className = 'rom-tavle'; m.setAttribute('role', 'dialog');
-    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + T('Send en slurk', 'Send a sip') + '</h2><button class="linkbtn" data-s="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
-      '<p class="small">' + T('Du har <b>', 'You have <b>') + megS.gi + T('</b> å dele ut – vunnet i spillene. Den du velger får én slurk på tavla.', '</b> to hand out – won in the games. Whoever you pick gets one sip on the board.') + '</p>' +
-      '<div class="rom-valg en">' + tilstand.spillere.filter(function (p) { return p.id !== tilstand.meg; }).map(function (p) {
-        return '<button type="button" data-s="til" data-id="' + p.id + '">' + esc(p.navn) + ' <small>(' + (p.slurker || 0) + ')</small></button>'; }).join('') + '</div></div>';
+    var gi = megS.gi || 0;
+    if (!gi) return toast(T('Du har ingenting å dele ut ennå. Vinn noe først!', 'You have nothing to hand out yet. Win something first!'));
+    var andre = tilstand.spillere.filter(function (p) { return p.id !== tilstand.meg; });
+    if (!andre.length) return toast(T('Det er ingen andre i rommet ennå.', 'There’s nobody else in the room yet.'));
+    var st = { antall: gi, modus: 'alle', valgt: {} };
+    var m = document.createElement('div'); m.className = 'rom-tavle ut-ark'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', T('Del ut', 'Hand out'));
+    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + T('Del ut ', 'Hand out ') + '<em data-u="tittel"></em></h2><button class="linkbtn" data-u="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
+      '<div class="ut-rad">' + (gi <= 10 ? '<div class="ut-glass">' + Array(gi + 1).join(GLASS) + '</div>' : '<div class="ut-glass"></div>') +
+      '<div class="ut-steg"><button type="button" data-u="faerre" aria-label="' + T('Én færre', 'One fewer') + '">−</button><button type="button" data-u="flere" aria-label="' + T('Én flere', 'One more') + '">+</button></div></div>' +
+      '<p class="ut-spar" data-u="spar" aria-live="polite"></p>' +
+      '<div class="ut-modus" role="group"><i aria-hidden="true"></i><button type="button" data-u="alle">' + T('Alle andre', 'Everyone else') + '</button><button type="button" data-u="velg">' + T('Velg hvem', 'Choose who') + '</button></div>' +
+      '<p class="ut-forklar" data-u="forklar"></p>' +
+      '<ul class="ut-liste">' + andre.map(function (p) {
+        return '<li><button type="button" data-u="rad" data-id="' + p.id + '"><span class="ut-init">' + esc(String(p.navn).slice(0, 2)) + '</span><span class="ut-navn"><b>' + esc(p.navn) + '</b><small>' +
+          (tilstand.alkoholfri ? T('har ', 'has ') + (p.slurker || 0) + T(' straffepoeng', ' penalty points') : T('har drukket ', 'has drunk ') + (p.slurker || 0)) + '</small></span><span class="ut-merke"></span></button></li>'; }).join('') + '</ul>' +
+      '<button type="button" class="rom-stor-knapp ut-send" data-u="send"></button></div>';
+    function mottakere() { return st.modus === 'alle' ? andre : andre.filter(function (p) { return st.valgt[p.id]; }); }
+    function oppdater() {
+      var velg = st.modus === 'velg', mot = mottakere(), f = fordel(mot, st.antall), spar = gi - st.antall, ingen = velg && !mot.length;
+      m.querySelector('[data-u=tittel]').textContent = st.antall + ' ' + slurkOrd(st.antall);
+      m.querySelectorAll('.ut-glass svg').forEach(function (g, i) { g.classList.toggle('fylt', i < st.antall); });
+      m.querySelector('[data-u=faerre]').disabled = st.antall <= 1;
+      m.querySelector('[data-u=flere]').disabled = st.antall >= gi;
+      m.querySelector('[data-u=spar]').textContent = spar ? T('Du deler ut ' + st.antall + ' nå og sparer ' + spar + ' til senere.', 'You hand out ' + st.antall + ' now and keep ' + spar + ' for later.') : T('Du deler ut alle nå.', 'You hand out all of them now.');
+      m.querySelector('.ut-modus').classList.toggle('velg', velg);
+      m.querySelector('[data-u=alle]').setAttribute('aria-pressed', String(!velg));
+      m.querySelector('[data-u=velg]').setAttribute('aria-pressed', String(velg));
+      m.querySelector('[data-u=forklar]').textContent = velg
+        ? (ingen ? T('Trykk på dem som skal drikke. Det fordeles likt mellom dem.', 'Tap the people who should drink. It’s split evenly between them.') : T('Fordeles likt mellom dem du har valgt. Går det ikke opp, får den som har drukket minst resten.', 'Split evenly between the people you chose. If it doesn’t divide evenly, whoever has drunk least gets the rest.'))
+        : T('Fordeles likt på alle andre enn deg. Går det ikke opp, får de som har drukket minst resten.', 'Split evenly between everyone but you. If it doesn’t divide evenly, whoever has drunk least gets the rest.');
+      m.querySelectorAll('[data-u=rad]').forEach(function (r) {
+        var id = r.dataset.id, n = f[id] || 0, valgt = !!st.valgt[id], merke = r.querySelector('.ut-merke');
+        r.classList.toggle('valgbar', velg); r.classList.toggle('valgt', velg && valgt);
+        if (velg) r.setAttribute('aria-pressed', String(valgt)); else r.removeAttribute('aria-pressed');
+        merke.textContent = n ? '+' + n : (velg && !valgt ? '' : '0');
+        merke.classList.toggle('pa', n > 0); merke.classList.toggle('tom', velg && !valgt);
+      });
+      var send = m.querySelector('[data-u=send]');
+      send.disabled = ingen;
+      send.textContent = ingen ? T('Velg hvem som skal drikke', 'Choose who drinks') : T('Send ', 'Send ') + st.antall + ' ' + slurkOrd(st.antall);
+    }
     m.addEventListener('click', function (e) {
       if (e.target === m) return m.remove();
-      var b = e.target.closest('[data-s]'); if (!b) return;
-      if (b.dataset.s === 'til') gjorAlltid({ handling: 'send', hvem: b.dataset.id });
-      m.remove();
+      var b = e.target.closest('[data-u]'); if (!b || b.disabled) return;
+      var u = b.dataset.u;
+      if (u === 'lukk') return m.remove();
+      if (u === 'faerre') st.antall = Math.max(1, st.antall - 1);
+      if (u === 'flere') st.antall = Math.min(gi, st.antall + 1);
+      if (u === 'alle' || u === 'velg') st.modus = u;
+      if (u === 'rad') { if (st.modus !== 'velg') { st.modus = 'velg'; st.valgt = {}; } st.valgt[b.dataset.id] = !st.valgt[b.dataset.id]; }
+      if (u === 'send') {
+        var f = fordel(mottakere(), st.antall);
+        var liste = Object.keys(f).filter(function (id) { return f[id] > 0; }).map(function (id) { return { id: id, n: f[id] }; });
+        if (liste.length) gjorAlltid({ handling: 'del-ut', liste: liste });
+        return m.remove();
+      }
+      oppdater();
     });
+    oppdater();
     document.body.appendChild(m);
   }
 
@@ -2542,7 +2663,7 @@ export function startRom(LEKNAVN, LANG) {
     else {
       innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' && s.lek !== 'ring-of-fire' ? ' · ' + esc(s.modus) : '') + '</p>' +
         ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
-           veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + reglerPanel(s) + '</div>';
+           veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + slurkelinje() + reglerPanel(s) + '</div>';
       // Nyhetsrunden finnes bare på norsk
       if (EN && s.type === 'nyhetsrunden') innhold = innhold.replace('</p>', '</p><p class="small">🇳🇴 ' + T('', 'Questions are in Norwegian') + '</p>');
     }
@@ -2730,7 +2851,7 @@ export function startRom(LEKNAVN, LANG) {
   // knappen det første 0,7 sekundet – ellers hopper et dobbelttrykk over kortet ingen rakk å lese.
   var sistInnhold = '', sperreTil = 0;
   function merkNyttInnhold(s) {
-    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur].join('|') : 'ingen';
+    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur, s.aldri ? s.aldri.fase : ''].join('|') : 'ingen';
     if (k !== sistInnhold) { if (sistInnhold) sperreTil = Date.now() + 700; sistInnhold = k; }
   }
 
@@ -2832,7 +2953,10 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'lyd') { lyd.paa = !lyd.paa; skriv('bd_lyd', lyd.paa); if (lyd.paa) { lydCtx(); spillLyd('tur'); } return tegn(); }
     if (g === 'reager') { if (!les('bd_intro_reak')) { skriv('bd_intro_reak', 1); var hh = document.querySelector('.reak-hint'); if (hh) hh.remove(); } return gjorAlltid({ handling: 'reager', e: b.dataset.e }); }
     if (g === 'intro-lukk') { skriv(b.dataset.k, 1); return tegn(); }
-    if (g === 'send-velg') return sendVelger();
+    if (g === 'send-velg' || g === 'del-ut') return delUtArk();
+    if (g === 'aldri-svar') { aldriEndre = ''; gjorAlltid({ handling: 'aldri-svar', v: b.dataset.v }); return; }
+    if (g === 'aldri-endre') { aldriEndre = tilstand.spill ? tilstand.spill.pos + ':' + tilstand.spill.antall : ''; return tegn(); }
+    if (g === 'aldri-modus') return gjorAlltid({ handling: 'aldri-modus', paa: b.dataset.paa === '1' });
     if (g === 'br-svar') return gjor({ handling: 'br-svar', v: b.dataset.v });
     if (g === 'br-snu') return gjor({ handling: 'br-snu', pos: Number(b.dataset.pos) });
     if (g === 'yz-hold') return gjor({ handling: 'yz-hold', i: Number(b.dataset.i) });
