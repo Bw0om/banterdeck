@@ -114,10 +114,12 @@ const isCurrent = (href: string) => {
             u.searchParams.delete('kode'); history.replaceState(history.state, '', u.pathname + u.search + u.hash);
           }
         } catch (e) {}
-        function sperret(sti) { return !harTilgang() && !APEN.test(sti); }
-        if (sperret(location.pathname)) document.documentElement.dataset.laast = '1';
+        // Romlenke med kode (QR-en på vorset): gjestene kommer rett inn i rommet – resten av siden er fortsatt låst
+        var ROM = /^\/(no\/rom|room)\/?$/;
+        function sperret(u) { return !harTilgang() && !APEN.test(u.pathname) && !(ROM.test(u.pathname) && /[?&]k=[A-Za-z0-9]{4}/.test(u.search)); }
+        if (sperret(location)) document.documentElement.dataset.laast = '1';
         document.addEventListener('astro:before-swap', function (e) {
-          if (sperret(new URL(e.to).pathname)) e.newDocument.documentElement.dataset.laast = '1';
+          if (sperret(new URL(e.to))) e.newDocument.documentElement.dataset.laast = '1';
           else delete e.newDocument.documentElement.dataset.laast;
         });
       })();
