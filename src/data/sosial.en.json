@@ -203,6 +203,154 @@
   {
    "q": "How many keys does a standard piano have?",
    "a": "88"
+  },
+  {
+   "q": "Which is the only continent without ants?",
+   "a": "Antarctica"
+  },
+  {
+   "q": "Which teeth do giraffes not have in their upper jaw?",
+   "a": "Front teeth"
+  },
+  {
+   "q": "Which country has the most islands in the world?",
+   "a": "Sweden"
+  },
+  {
+   "q": "How many times wider than Earth is the sun?",
+   "a": "About 109 times"
+  },
+  {
+   "q": "What was the first product ever scanned with a barcode in a shop?",
+   "a": "A pack of chewing gum"
+  },
+  {
+   "q": "Which animal sleeps with half its brain at a time?",
+   "a": "The dolphin"
+  },
+  {
+   "q": "What colour is a flamingo when it hatches?",
+   "a": "Grey"
+  },
+  {
+   "q": "Which country drinks the most coffee per person?",
+   "a": "Finland"
+  },
+  {
+   "q": "How much water can a thirsty camel drink in one go?",
+   "a": "About 100 litres"
+  },
+  {
+   "q": "What is a group of crows called in English?",
+   "a": "A murder"
+  },
+  {
+   "q": "What is the longest fjord in Norway?",
+   "a": "The Sognefjord"
+  },
+  {
+   "q": "What is the name of Snoopy’s brother?",
+   "a": "Spike"
+  },
+  {
+   "q": "Which country has the oldest national flag still in use?",
+   "a": "Denmark"
+  },
+  {
+   "q": "What is the name of Pippi Longstocking’s horse?",
+   "a": "Lilla Gubben"
+  },
+  {
+   "q": "What was bubble wrap originally meant to be?",
+   "a": "Wallpaper"
+  },
+  {
+   "q": "What was Play-Doh originally sold as?",
+   "a": "Wallpaper cleaner"
+  },
+  {
+   "q": "Which country produces the most coffee in the world?",
+   "a": "Brazil"
+  },
+  {
+   "q": "What is the world’s highest waterfall?",
+   "a": "Angel Falls in Venezuela"
+  },
+  {
+   "q": "Which planet has the most known moons?",
+   "a": "Saturn"
+  },
+  {
+   "q": "How long does sunlight take to reach Earth?",
+   "a": "About eight minutes"
+  },
+  {
+   "q": "Which internal organ can grow back?",
+   "a": "The liver"
+  },
+  {
+   "q": "Which country has no official capital?",
+   "a": "Nauru"
+  },
+  {
+   "q": "How old can a Greenland shark get?",
+   "a": "Around 400 years"
+  },
+  {
+   "q": "Which animal has fingerprints almost identical to ours?",
+   "a": "The koala"
+  },
+  {
+   "q": "What was the name of the first dog to orbit the Earth?",
+   "a": "Laika"
+  },
+  {
+   "q": "What did the Norwegian Erik Rotheim invent?",
+   "a": "The aerosol spray can"
+  },
+  {
+   "q": "Which country has a flag that isn’t rectangular?",
+   "a": "Nepal"
+  },
+  {
+   "q": "How many times a minute can a hummingbird’s heart beat?",
+   "a": "Over a thousand"
+  },
+  {
+   "q": "What colour is a giraffe’s tongue?",
+   "a": "Bluish purple"
+  },
+  {
+   "q": "Which plant does vanilla come from?",
+   "a": "An orchid"
+  },
+  {
+   "q": "Who is Bluetooth named after?",
+   "a": "Harald Bluetooth, a Danish king"
+  },
+  {
+   "q": "Which country used paper money first?",
+   "a": "China"
+  },
+  {
+   "q": "Which food practically never goes off?",
+   "a": "Honey"
+  },
+  {
+   "q": "Which land animal has the longest pregnancy?",
+   "a": "The elephant – almost two years"
+  },
+  {
+   "q": "How many strings does a standard violin have?",
+   "a": "Four"
+  },
+  {
+   "q": "What did Walt Disney originally want to call Mickey Mouse?",
+   "a": "Mortimer"
+  },
+  {
+   "q": "Which city has the world’s oldest underground railway?",
+   "a": "London"
   }
  ],
  "samme": [
@@ -349,7 +497,37 @@
   "The ski lift",
   "The kebab shop at 3 a.m.",
   "The police station",
-  "A first date"
+  "A first date",
+  "The ferry queue",
+  "The zoo",
+  "The stag or hen do",
+  "The car garage",
+  "The fish processing plant",
+  "A cruise ship",
+  "The mountains at Easter",
+  "The National Day parade",
+  "The football changing room",
+  "A spaceship",
+  "The hotel breakfast",
+  "Nursery pick-up",
+  "The sauna",
+  "A stadium concert",
+  "The bowling alley",
+  "The office on a Monday",
+  "A soft play at a kid’s birthday",
+  "The night train",
+  "A LAN party",
+  "A fisherman’s cabin up north",
+  "A garden party",
+  "Pub quiz night",
+  "An escape room",
+  "The theatre interval",
+  "The trampoline park",
+  "Airport customs",
+  "A fishing trip at sea",
+  "The supermarket just before closing",
+  "Christmas Eve with the in-laws",
+  "The driving school"
  ],
  "ord": [
   "Elvis",
