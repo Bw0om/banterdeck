@@ -631,7 +631,7 @@ export function startRom(LEKNAVN, LANG) {
   function navn(id) { var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }); return p ? p.navn : '?'; }
   function erVert() { return tilstand && meg && tilstand.vert === meg.id; }
 
-  function hode() {
+  function hode() { var rivalTopp = null, rivalBunn = null;
     var t = tilstand;
     return '<div class="rom-hode">' +
       '<div class="rom-hode-v"><a class="rom-hjem" href="' + RUTE.hjem + '" aria-label="' + T('Til forsiden (du blir i rommet)', 'Home (you stay in the room)') + '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a>' +
@@ -642,8 +642,16 @@ export function startRom(LEKNAVN, LANG) {
           return '<button class="rom-hk" data-g="' + k[0] + '" type="button" aria-label="' + k[3] + '"><span class="rom-hk-ikon">' + k[1] + '</span><span class="rom-hk-tekst">' + k[2] + '</span></button>';
         }).join('') + '</span>' +
     '</div>' +
-    '<div class="rom-spillere">' + t.spillere.map(function (p) {
-      return '<span class="' + (p.id === t.meg ? 'meg' : '') + '">' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) +
+    '<div class="rom-spillere">' + (function () {
+      // Rivalisering: 🔥 på den som har drukket mest, 😇 på den som har drukket minst – bare når det er klart hvem
+      var sl = t.spillere.map(function (p) { return p.slurker || 0; }).sort(function (a, b) { return a - b; }), n = sl.length;
+      rivalTopp = n >= 2 && sl[n - 1] > 0 && sl[n - 1] > sl[n - 2] ? sl[n - 1] : null;
+      rivalBunn = n >= 3 && sl[n - 1] > 0 && sl[0] < sl[1] ? sl[0] : null;
+      return '';
+    })() + t.spillere.map(function (p) {
+      var rival = rivalTopp !== null && (p.slurker || 0) === rivalTopp ? '<i class="rom-rival" title="' + T('Flest slurker i kveld', 'Most sips tonight') + '">🔥</i>'
+        : rivalBunn !== null && (p.slurker || 0) === rivalBunn ? '<i class="rom-rival" title="' + T('Færrest slurker i kveld', 'Fewest sips tonight') + '">😇</i>' : '';
+      return '<span class="' + (p.id === t.meg ? 'meg' : '') + '">' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) + rival +
         (p.slurker ? ' <small>' + p.slurker + '</small>' : '') + (p.immun ? ' <small title="' + T('Immunitet', 'Immunity') + '">🛡️' + (p.immun > 1 ? p.immun : '') + '</small>' : '') +
         (erVert() && p.id !== t.vert ? ' <button class="rom-fjern" data-g="fjern" data-id="' + p.id + '" aria-label="' + T('Fjern ', 'Remove ') + esc(p.navn) + '">×</button>' : '') + '</span>';
     }).join('') + '</div>';
@@ -1140,7 +1148,7 @@ export function startRom(LEKNAVN, LANG) {
       ? '<div class="rof-kort rom-rof' + (k.rod ? ' rod' : '') + '"><div class="rof-hj"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div>' +
         '<div class="rof-midt"><b class="rof-regel">' + esc(k.regel) + '</b><span class="rof-tekst">' + esc(k.tekst) + '</span></div>' +
         '<div class="rof-hj rof-hj2"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div></div>'
-      : '<div class="rom-kort">' + (k.k ? '<span class="sw-tag">' + esc(k.k) + '</span>' : '<span></span>') + '<p>' + esc(k.t) + '</p><span class="rom-teller">' + (s.pos + 1) + ' / ' + s.antall + '</span></div>';
+      : '<div class="rom-kort' + (k.h ? ' hendelse' : '') + '">' + (k.k ? '<span class="sw-tag">' + esc(k.k) + '</span>' : '<span></span>') + '<p>' + esc(k.t) + '</p><span class="rom-teller">' + (s.pos + 1) + ' / ' + s.antall + '</span></div>';
     return (rof && k.hvem ? '<div class="rof-tur"><span>' + T('Trekker', 'Drawing') + '</span><b>' + esc(k.hvem) + '</b></div>' : '') +
       (rof ? '<p class="rom-status">' + (s.antall - s.pos - 1) + T(' kort igjen · ', ' cards left · ') + (s.konger || 0) + T(' konger', ' kings') + '</p>' : '') +
       kortHtml + lunte((s.antall - s.pos - 1) / Math.max(1, s.antall)) + (rof ? makkerHtml(s) : '') +

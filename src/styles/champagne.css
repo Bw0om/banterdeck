@@ -320,3 +320,17 @@ h3,.h3{font-stretch:normal;font-weight:700}
   .gt-result,.gt-desc{transition:opacity 160ms ease-out}
   .gt-result.skjult,.gt-desc.skjult{opacity:0}
 }
+
+/* =====================================================================
+   HENDELSESKORT – dukker opp innimellom i kortlekene i rommet. Vinrødt
+   med gullkant, så alle skjønner at noe annet skjer nå enn et vanlig kort.
+   ===================================================================== */
+.rom-kort.hendelse,.tv-kort.hendelse{
+  background:radial-gradient(120% 90% at 100% 0%,rgb(var(--volt-rgb) / .24),transparent 55%),linear-gradient(160deg,#2E1C25,#1A1016 62%);
+  color:#F7EFE3;box-shadow:inset 0 0 0 1.5px rgb(228 196 127 / .6),0 28px 60px -24px rgb(0 0 0 / .85);transform:rotate(1deg)}
+.rom-kort.hendelse p,.tv-kort.hendelse p{color:#F7EFE3}
+.rom-kort.hendelse .sw-tag{background:var(--gull-glans);color:var(--ink2);transform:none}
+.tv-kort.hendelse .tv-etikett{color:#E9CD8E}
+.rom-kort.hendelse .rom-teller{color:rgb(247 239 227 / .5)}
+/* Rivalisering i spillerlista: 🔥 flest slurker, 😇 færrest */
+.rom-rival{font-style:normal;margin-left:4px;font-size:.95em}
