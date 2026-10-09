@@ -296,3 +296,27 @@ h3,.h3{font-stretch:normal;font-weight:700}
 .lek-flere-rad a:active{scale:.98}
 @media (hover:hover) and (pointer:fine){.lek-flere-rad a:hover b{color:var(--gold-t)}}
 @media (min-width:900px){.lek-flere-rad{margin:0;padding:2px 0 8px;grid-auto-flow:row;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible}}
+
+/* =====================================================================
+   DRIKKEHJULET – spenning før svaret. Pilen tikker forbi hver bit, hjulet
+   kryper inn mot slutten, vinneren lyser og svaret spretter inn.
+   ===================================================================== */
+.gt-rot{transition:transform 4000ms cubic-bezier(0.1, 0.7, 0.08, 1)}
+/* Pilen vipper rundt toppen sin, som klaffen på et lykkehjul */
+.gt-pointer{transform-origin:50% 20%}
+/* Bitene: dimmes når hjulet har landet, vinneren står igjen */
+.gt-del{transition:opacity 200ms var(--ease-out)}
+.gt-rot.landet .gt-del:not(.vinner){opacity:.35;transition-duration:300ms}
+/* Vinneren får en gullkant, så den synes selv når biten er mørk */
+.gt-rot.landet .gt-del.vinner path{stroke:#F1DAA2;stroke-width:2.5}
+/* Svaret: serif, større, og spretter inn */
+.gt-result{font-family:var(--serif);font-weight:560;font-size:clamp(30px,8vw,38px);letter-spacing:-.02em;line-height:1.1;color:var(--gold-t);min-height:42px;text-wrap:balance}
+.gt-result.inn{animation:gtSvarInn 420ms cubic-bezier(0.2, 0.9, 0.25, 1.12) both}
+@keyframes gtSvarInn{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+.gt-desc.inn{animation:gtBeskrivelseInn 260ms var(--ease-out) 120ms both}
+@keyframes gtBeskrivelseInn{from{opacity:0;transform:translateY(6px)}}
+/* Redusert bevegelse: global.css slår av animation med !important – vis svaret som en rolig fade i stedet */
+@media (prefers-reduced-motion:reduce){
+  .gt-result,.gt-desc{transition:opacity 160ms ease-out}
+  .gt-result.skjult,.gt-desc.skjult{opacity:0}
+}
