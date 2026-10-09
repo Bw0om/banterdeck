@@ -22,14 +22,14 @@ const description = lang === 'no'
     <a href={path(lang, '/')}>{L.breadcrumbHome}</a> ›
     <a href={path(lang, '/situations')}>{L.linesTitle}</a> › {title}
   </p>
-  <h1>{sit.emoji} {title}</h1>
+  <h1>{title}</h1>
   <span hidden data-spilt={`situasjon:${sit.id}`}></span>
-  <p class="lead">{rows.length} {L.itemsLabel} · {t(sit.theme.title, lang)}</p>
+  <p class="sit-meta"><span>{rows.length} {lang === 'no' ? 'replikker' : 'lines'}</span><em>{t(sit.theme.title, lang)}</em></p>
   <p class="sw-open-row">
     <button class="btn gold" type="button" data-sveip>{lang === 'no' ? 'Sveip gjennom' : 'Swipe through'}</button>
   </p>
 
-  <div class="cards" style="margin-top:22px">
+  <div class="cards replikker">
     {rows.map(({ it }) => <Card it={it} lang={lang} mode="clean" cue={sit.cue} />)}
   </div>
 
@@ -55,15 +55,24 @@ const description = lang === 'no'
   {related.length > 0 && (
     <section class="more">
       <h2>{L.related}</h2>
-      <div class="sitchips">
+      <ul class="sit-relatert">
         {related.map((x) => (
-          <a class="sitchip" href={path(lang, `/situations/${x.id}`)}>
-            <span class="st">{t(x.title, lang)}</span><b>{x.count}</b>
-          </a>
+          <li><a href={path(lang, `/situations/${x.id}`)}>{t(x.title, lang)}<span>{x.count}</span></a></li>
         ))}
-      </div>
-      <p style="margin-top:18px"><a class="btn ghost" href={path(lang, '/situations')}>{L.allSituations}</a></p>
+      </ul>
+      <p class="sit-alle"><a class="btn ghost" href={path(lang, '/situations')}>{L.allSituations}</a></p>
     </section>
   )}
   <Sveip items={sveipItems} title={title} lang={lang} />
 </Base>
+
+<style>
+  .sit-meta{display:flex;align-items:baseline;gap:12px;margin:8px 0 22px;color:var(--muted);font-size:16.5px}
+  .sit-meta em{font-family:var(--serif);font-style:italic;color:var(--gold-t);font-size:18px}
+  .sit-meta em::before{content:"";display:inline-block;width:22px;height:1px;background:var(--hårstrek);vertical-align:middle;margin-right:12px}
+  .sit-relatert{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px}
+  .sit-relatert a{font-family:var(--serif);font-size:19px;font-weight:500;color:var(--ink);text-decoration:none;display:inline-flex;align-items:baseline;gap:7px;padding:6px 0}
+  .sit-relatert span{font-style:italic;font-size:15px;color:var(--gold-t)}
+  @media (hover:hover) and (pointer:fine){.sit-relatert a:hover{color:var(--gold-t)}}
+  .sit-alle{margin-top:22px}
+</style>

@@ -18,13 +18,14 @@
     "top": 1
    },
    {
-    "id": "long-time-no-see",
-    "emoji": "👋",
+    "id": "someone-is-late",
+    "emoji": "⏰",
     "title": {
-     "no": "Lenge siden sist",
-     "en": "Long time no see"
+     "no": "Noen kommer for sent",
+     "en": "Someone's late"
     },
-    "cue": false
+    "cue": true,
+    "top": 3
    },
    {
     "id": "someone-leaves-early",
@@ -46,32 +47,22 @@
     "cue": false
    },
    {
-    "id": "someone-is-late",
-    "emoji": "⏰",
+    "id": "long-time-no-see",
+    "emoji": "👋",
     "title": {
-     "no": "Noen kommer for sent",
-     "en": "Someone's late"
+     "no": "Lenge siden sist",
+     "en": "Long time no see"
     },
-    "cue": true,
-    "top": 3
-   },
-   {
-    "id": "loo-and-bar",
-    "emoji": "🚽",
-    "title": {
-     "no": "Do og bardisk",
-     "en": "Loo & bar runs"
-    },
-    "cue": true
+    "cue": false
    }
   ]
  },
  {
-  "id": "nights-out",
-  "emoji": "🍻",
+  "id": "cheers-and-flirting",
+  "emoji": "🥂",
   "title": {
-   "no": "På byen",
-   "en": "Nights out"
+   "no": "Skål & sjekk",
+   "en": "Cheers & flirting"
   },
   "items": [
    {
@@ -101,72 +92,15 @@
      "en": "Pickup lines"
     },
     "cue": true
-   }
-  ]
- },
- {
-  "id": "conversation",
-  "emoji": "💬",
-  "title": {
-   "no": "I samtalen",
-   "en": "In conversation"
-  },
-  "items": [
-   {
-    "id": "questions",
-    "emoji": "❓",
-    "title": {
-     "no": "Noen spør deg om noe",
-     "en": "Someone asks you something"
-    },
-    "cue": true,
-    "top": 5
    },
    {
-    "id": "favours",
-    "emoji": "🙏",
+    "id": "loo-and-bar",
+    "emoji": "🚽",
     "title": {
-     "no": "Noen ber deg om noe",
-     "en": "Someone wants a favour"
+     "no": "Do og bardisk",
+     "en": "Loo & bar runs"
     },
     "cue": true
-   },
-   {
-    "id": "tall-tales",
-    "emoji": "🎣",
-    "title": {
-     "no": "Noen forteller en røverhistorie",
-     "en": "Someone's telling a tall tale"
-    },
-    "cue": true
-   },
-   {
-    "id": "stating-the-obvious",
-    "emoji": "🙄",
-    "title": {
-     "no": "Noen sier noe opplagt",
-     "en": "Stating the obvious"
-    },
-    "cue": false
-   },
-   {
-    "id": "someone-complains",
-    "emoji": "😤",
-    "title": {
-     "no": "Noen syter",
-     "en": "Someone's moaning"
-    },
-    "cue": true
-   },
-   {
-    "id": "losing-an-argument",
-    "emoji": "🥊",
-    "title": {
-     "no": "Du taper en diskusjon",
-     "en": "Losing an argument"
-    },
-    "cue": true,
-    "top": 6
    }
   ]
  },
@@ -199,20 +133,20 @@
     "top": 8
    },
    {
-    "id": "insulted",
-    "emoji": "🛡️",
-    "title": {
-     "no": "Noen fornærmer deg",
-     "en": "Someone insults you"
-    },
-    "cue": true
-   },
-   {
     "id": "rage-bait",
     "emoji": "🔥",
     "title": {
      "no": "Provosere",
      "en": "Rage bait"
+    },
+    "cue": true
+   },
+   {
+    "id": "insulted",
+    "emoji": "🛡️",
+    "title": {
+     "no": "Noen fornærmer deg",
+     "en": "Someone insults you"
     },
     "cue": true
    },
@@ -228,22 +162,79 @@
   ]
  },
  {
-  "id": "at-work",
-  "emoji": "💼",
+  "id": "conversation",
+  "emoji": "💬",
   "title": {
-   "no": "På jobb",
-   "en": "At work"
+   "no": "I samtalen",
+   "en": "In conversation"
   },
   "items": [
    {
-    "id": "meetings",
-    "emoji": "📅",
+    "id": "questions",
+    "emoji": "❓",
     "title": {
-     "no": "Møter",
-     "en": "Meetings"
+     "no": "Noen spør deg om noe",
+     "en": "Someone asks you something"
+    },
+    "cue": true,
+    "top": 5
+   },
+   {
+    "id": "losing-an-argument",
+    "emoji": "🥊",
+    "title": {
+     "no": "Du taper en diskusjon",
+     "en": "Losing an argument"
+    },
+    "cue": true,
+    "top": 6
+   },
+   {
+    "id": "favours",
+    "emoji": "🙏",
+    "title": {
+     "no": "Noen ber deg om noe",
+     "en": "Someone wants a favour"
     },
     "cue": true
    },
+   {
+    "id": "someone-complains",
+    "emoji": "😤",
+    "title": {
+     "no": "Noen syter",
+     "en": "Someone's moaning"
+    },
+    "cue": true
+   },
+   {
+    "id": "tall-tales",
+    "emoji": "🎣",
+    "title": {
+     "no": "Noen forteller en røverhistorie",
+     "en": "Someone's telling a tall tale"
+    },
+    "cue": true
+   },
+   {
+    "id": "stating-the-obvious",
+    "emoji": "🙄",
+    "title": {
+     "no": "Noen sier noe opplagt",
+     "en": "Stating the obvious"
+    },
+    "cue": false
+   }
+  ]
+ },
+ {
+  "id": "work-and-everyday",
+  "emoji": "☕",
+  "title": {
+   "no": "Jobb & hverdag",
+   "en": "Work & everyday"
+  },
+  "items": [
    {
     "id": "office",
     "emoji": "🖨️",
@@ -252,17 +243,16 @@
      "en": "Office life"
     },
     "cue": true
-   }
-  ]
- },
- {
-  "id": "everyday",
-  "emoji": "😅",
-  "title": {
-   "no": "Hverdag",
-   "en": "Everyday"
-  },
-  "items": [
+   },
+   {
+    "id": "everyday-deadpan",
+    "emoji": "🫠",
+    "title": {
+     "no": "Tørre hverdagsvitser",
+     "en": "Everyday deadpan"
+    },
+    "cue": true
+   },
    {
     "id": "something-goes-wrong",
     "emoji": "💥",
@@ -273,20 +263,20 @@
     "cue": true
    },
    {
+    "id": "meetings",
+    "emoji": "📅",
+    "title": {
+     "no": "Møter",
+     "en": "Meetings"
+    },
+    "cue": true
+   },
+   {
     "id": "tired-or-ill",
     "emoji": "🤒",
     "title": {
      "no": "Sliten eller syk",
      "en": "Tired or under the weather"
-    },
-    "cue": true
-   },
-   {
-    "id": "everyday-deadpan",
-    "emoji": "🫠",
-    "title": {
-     "no": "Tørre hverdagsvitser",
-     "en": "Everyday deadpan"
     },
     "cue": true
    }
