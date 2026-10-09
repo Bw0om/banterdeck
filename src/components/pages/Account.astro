@@ -22,8 +22,8 @@ const T = no ? {
   decks: 'Mine kortstokker', decksLead: 'Lag egne drikkekort, og spill dem alene eller i et rom med vennene dine.',
   newDeck: 'Ny kortstokk', deckName: 'Navn', deckCards: 'Kort – ett per linje', deckPh: 'Alle med hvite sokker drikker\nDen yngste deler ut tre slurker',
   saveDeck: 'Lagre kortstokk', play: 'Spill', playRoom: 'Spill i rom', edit: 'Rediger', del: 'Slett', cancel: 'Avbryt', cards: 'kort',
-  noDecks: 'Ingen kortstokker ennå. Lag en her, eller lagre kortene etter en runde Hjemmesnekra.',
-  draft: 'kort fra Hjemmesnekra er ikke lagret ennå.', saveDraft: 'Lagre dem', delConfirm: 'Trykk igjen for å slette',
+  noDecks: 'Ingen kortstokker ennå. Lag en her, eller lagre kortene etter en runde Skriv og drikk.',
+  draft: 'kort fra Skriv og drikk er ikke lagret ennå.', saveDraft: 'Lagre dem', delConfirm: 'Trykk igjen for å slette',
   next: 'Neste kort', close: 'Lukk', of: 'av', saved: 'Lagret ✓', stats: 'Statistikk',
   settings: 'Konto', share: 'Del', unshare: 'Slutt å dele', shared: 'delt', linkCopied: 'Lenken er kopiert – send den til hvem du vil.', unshared: 'Lenken virker ikke lenger.', changeUser: 'Endre brukernavn', changeUserLead: 'Du logger inn med det nye navnet fra nå av. Det gamle blir ledig for andre.', changePw: 'Endre passord', deleteAcc: 'Slett konto',
   deleteLead: 'Sletter kontoen, brukernavnet, kortstokkene og replikkene dine for godt. Det kan ikke angres.', deleteType: 'Skriv SLETT for å bekrefte', deleteBtn: 'Slett kontoen min', deleted: 'Kontoen er slettet.',
@@ -40,8 +40,8 @@ const T = no ? {
   decks: 'My card decks', decksLead: 'Write your own drinking cards and play them alone or in a room with friends.',
   newDeck: 'New deck', deckName: 'Name', deckCards: 'Cards – one per line', deckPh: 'Everyone in white socks drinks\nThe youngest hands out three sips',
   saveDeck: 'Save deck', play: 'Play', playRoom: 'Play in a room', edit: 'Edit', del: 'Delete', cancel: 'Cancel', cards: 'cards',
-  noDecks: 'No decks yet. Make one here, or save the cards after a round of Rule Factory.',
-  draft: 'cards from Rule Factory are not saved yet.', saveDraft: 'Save them', delConfirm: 'Tap again to delete',
+  noDecks: 'No decks yet. Make one here, or save the cards after a round of Write & Drink.',
+  draft: 'cards from Write & Drink are not saved yet.', saveDraft: 'Save them', delConfirm: 'Tap again to delete',
   next: 'Next card', close: 'Close', of: 'of', saved: 'Saved ✓', stats: 'Statistics',
   settings: 'Account', share: 'Share', unshare: 'Stop sharing', shared: 'shared', linkCopied: 'Link copied.', unshared: 'The link no longer works.', changeUser: 'Change username', changeUserLead: 'You sign in with the new name from now on. The old one becomes available to others.', changePw: 'Change password', deleteAcc: 'Delete account',
   deleteLead: 'Deletes your account, username, decks and lines for good. This cannot be undone.', deleteType: 'Type DELETE to confirm', deleteBtn: 'Delete my account', deleted: 'Your account has been deleted.',
@@ -410,7 +410,7 @@ const T = no ? {
         $('utkast').addEventListener('click', function (e) {
           if (!e.target.closest('#lagreUtkast')) return;
           var u = lesLS(UTKAST, null); if (!u) return;
-          K.stokker.lagre({ navn: u.navn || 'Hjemmesnekra', kort: u.kort }).then(function () {
+          K.stokker.lagre({ navn: u.navn || 'Skriv og drikk', kort: u.kort }).then(function () {
             skrivLS(UTKAST, null); say($('syncMsg'), T.saved, 'ok'); return hentStokker();
           }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
         });

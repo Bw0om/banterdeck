@@ -62,14 +62,16 @@ const jsonLd = JSON.stringify([{
     <a href={path(lang, '/')}>{L.breadcrumbHome}</a> ›
     <a href={path(lang, '/drinking-games')}>{L.gamesTitle}</a> › {name}
   </p>
-  <p class={`lek-niva ${lekNiva}`}><Icon name={NIVA_IKON[lekNiva]} size={15} />{NIVA_TEKST[lekNiva][lang === 'en' ? 1 : 0]}</p>
-  <div class="lek-topp"><h1>{name}</h1><img class="lek-illu" src={illustrasjon(game)} alt="" width="240" height="126" decoding="async" /></div>
+  <!-- Toppen: illustrasjonen stort, så navnet, så fakta på én linje (ingen bokser) -->
+  <figure class="lek-banner"><img src={illustrasjon(game)} alt="" width="240" height="126" decoding="async" /></figure>
+  <h1 class="lek-navn">{name}</h1>
   {game.fra && <p class="lek-fra">{lang === 'no' ? 'Sendt inn av' : 'Submitted by'} <b>{game.fra}</b></p>}
-  <div class="meta2">
-    <div><small>{lang === 'no' ? 'Spillere' : 'Players'}</small><b>{game.pl}</b></div>
-    <div><small>{lang === 'no' ? 'Utstyr' : 'Gear'}</small><b>{t(game.gear, lang)}</b></div>
-    <div><small>{lang === 'no' ? 'Type' : 'Type'}</small><b>{t(game.group.title, lang)}</b></div>
-  </div>
+  <ul class="lek-fakta">
+    <li class={`lek-niva ${lekNiva}`}><Icon name={NIVA_IKON[lekNiva]} size={15} />{NIVA_TEKST[lekNiva][lang === 'en' ? 1 : 0]}</li>
+    <li><Icon name="gjeng" size={15} />{game.pl} {lang === 'no' ? 'spillere' : 'players'}</li>
+    <li>{t(game.gear, lang)}</li>
+    <li>{t(game.group.title, lang)}</li>
+  </ul>
   {lang === 'no' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>Alkoholfri modus</button></p>}
   {lang === 'en' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>Alcohol-free mode</button></p>}
   {(harVerktoy || iRom) && (
@@ -79,6 +81,7 @@ const jsonLd = JSON.stringify([{
     </p>
   )}
 
+  <h2 class="lek-h">{lang === 'no' ? 'Slik spiller dere' : 'How to play'}</h2>
   <div class="rules">
     {blocks.map((b) => b.type === 'p' ? <p>{b.items[0]}</p> : <ul>{b.items.map((x) => <li>{x}</li>)}</ul>)}
   </div>
@@ -151,11 +154,18 @@ const jsonLd = JSON.stringify([{
 
   <AdSlot />
 
-  <section class="more">
-    <h2>{L.moreGames}: {t(game.group.title, lang).toLowerCase()}</h2>
-    <ul>
-      {others.map((x) => <li><a class="btn ghost" href={gameHref(x, (p) => path(lang, p), lang)}>{t(x.name, lang)}</a></li>)}
-      <li><a class="btn gold" href={path(lang, '/drinking-games')}>{L.allGames}</a></li>
+  <section class="lek-flere" aria-labelledby="lekFlere">
+    <div class="lek-flere-hode">
+      <h2 id="lekFlere">{L.moreGames}: {t(game.group.title, lang).toLowerCase()}</h2>
+      <a href={path(lang, '/drinking-games')}>{L.allGames} <span aria-hidden="true">→</span></a>
+    </div>
+    <ul class="lek-flere-rad" role="list">
+      {others.map((x) => (
+        <li><a href={gameHref(x, (p) => path(lang, p), lang)}>
+          <img src={illustrasjon(x)} alt="" width="240" height="126" loading="lazy" decoding="async" />
+          <b>{t(x.name, lang)}</b><small>{x.pl} {lang === 'no' ? 'spillere' : 'players'}</small>
+        </a></li>
+      ))}
     </ul>
   </section>
 </Base>

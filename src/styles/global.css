@@ -1431,10 +1431,6 @@ button.langlink{cursor:pointer}
 :root[data-theme="light"] .tool{background:var(--card);border-color:var(--border2);box-shadow:0 8px 20px rgb(26 14 40 / .18)}
 
 /* ---------- Illustrasjoner for lekene ---------- */
-.lek-topp{display:flex;align-items:center;justify-content:space-between;gap:16px}
-.lek-topp h1{min-width:0}
-.lek-illu{width:150px;height:auto;border-radius:16px;flex:none;display:block}
-@media (max-width:560px){.lek-illu{width:108px;border-radius:12px}}
 
 /* ---------- Kvittering ---------- */
 .kv-ark{background:#fffdf8;color:var(--ink2);border-radius:20px;padding:28px 26px;max-width:640px;font-family:var(--sans,system-ui);box-shadow:0 10px 30px rgba(0,0,0,.25)}

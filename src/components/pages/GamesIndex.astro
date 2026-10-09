@@ -43,17 +43,20 @@ const romSti = no ? '/no/rom' : '/room';
 ---
 <Base title={L.gamesTitle} description={L.gamesDesc(synlige.length)} lang={lang} gate={true} bilde="/og/drikkeleker.jpg">
   <p class="crumb"><a href={path(lang, '/')}>{L.breadcrumbHome}</a> › {L.gamesTitle}</p>
-  <h1 class="withicon"><Icon name="drikkeleker" size={34} />{L.gamesTitle}</h1>
+  <h1>{L.gamesTitle}</h1>
   <p class="lead">{no ? `${synlige.length} leker. De beste spiller dere fra hver deres telefon – ingen kortstokk, ingen forberedelser.` : `${synlige.length} games. The best ones you play from your own phones – no deck of cards, no prep.`}</p>
 
   <div class="lk-snarveier">
     <a class="btn gold" href={romSti}><Icon name="telefon" />{no ? 'Lag et rom' : 'Create a room'}</a>
-    <a class="btn ghost" href={no ? '/no/finn-lek' : '/find-a-game'}>{no ? 'Finn lek på 3 spørsmål' : 'Find a game in 3 questions'}</a>
-    <a class="btn ghost" href={no ? '/no/kveld' : '/plan'}>{no ? 'Planlegg kvelden' : 'Plan the night'}</a>
+    <span class="lk-lenker">
+      <a href={no ? '/no/finn-lek' : '/find-a-game'}>{no ? 'Finn lek på 3 spørsmål' : 'Find a game in 3 questions'} <span aria-hidden="true">→</span></a>
+      <a href={no ? '/no/kveld' : '/plan'}>{no ? 'Planlegg kvelden' : 'Plan the night'} <span aria-hidden="true">→</span></a>
+    </span>
   </div>
 
+  <!-- Søket står fast i toppen av lista; bare filterraden følger med når man blar -->
+  <input class="lk-sok" id="gameInput" type="search" autocomplete="off" placeholder={searchPh} aria-label={searchPh} />
   <div class="lk-filter sticky" id="lkFilter">
-    <input id="gameInput" type="search" autocomplete="off" placeholder={searchPh} aria-label={searchPh} />
     <div class="lk-chips" role="group" aria-label={no ? 'Filtrer' : 'Filter'}>
       <button type="button" data-f="niva" data-v="" aria-pressed="true">{no ? 'Alle' : 'All'}</button>
       <button type="button" data-f="niva" data-v="rom" aria-pressed="false"><Icon name="telefon" size={16} />{no ? 'I appen' : 'In the app'}</button>
@@ -64,13 +67,14 @@ const romSti = no ? '/no/rom' : '/room';
       <button type="button" data-f="pl" data-v="4" aria-pressed="false">3–5</button>
       <button type="button" data-f="pl" data-v="6" aria-pressed="false">{no ? '6 eller flere' : '6 or more'}</button>
       <button type="button" data-f="pluss" data-v="0" aria-pressed="false">{no ? 'Bare gratis' : 'Free only'}</button>
+      <span class="lk-skille" aria-hidden="true"></span>
+      <button type="button" class="alkfri-bryter lk-alkfri" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>{no ? 'Alkoholfri' : 'Alcohol-free'}</button>
     </div>
-    <label class="alkfri-linje lk-alkfri"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>{no ? 'Alkoholfri' : 'Alcohol-free'}</button></label>
   </div>
 
   <section class="lk-seksjon" data-seksjon="rom">
     <div class="lk-hode">
-      <h2 class="withicon"><Icon name="telefon" size={24} />{no ? 'Spill fra hver sin telefon' : 'Play from your own phones'}</h2>
+      <h2>{no ? 'Spill fra hver sin telefon' : 'Play from your own phones'}</h2>
       <p class="small">{no ? 'Én lager et rom, resten blir med på koden. Hemmeligheter, stemming og poeng – det kan ingen kortstokk.' : 'One person creates a room, everyone else joins with the code. Secrets, voting and scores – no deck of cards can do that.'}</p>
     </div>
     <div class="lk-store">
@@ -91,7 +95,7 @@ const romSti = no ? '/no/rom' : '/room';
 
   <section class="lk-seksjon" data-seksjon="app">
     <div class="lk-hode">
-      <h2 class="withicon"><Icon name="kort" size={24} />{no ? 'Telefonen er kortstokken' : 'The phone is the deck'}</h2>
+      <h2>{no ? 'Telefonen er kortstokken' : 'The phone is the deck'}</h2>
       <p class="small">{no ? 'Én telefon på bordet: kort, terninger, klokke eller spørsmål – dere trenger ikke noe annet.' : 'One phone on the table: cards, dice, timer or questions – you don’t need anything else.'}</p>
     </div>
     <!-- Bare navn her – beskrivelsen står når man trykker seg inn på leken -->
@@ -107,7 +111,7 @@ const romSti = no ? '/no/rom' : '/room';
 
   <section class="lk-seksjon" data-seksjon="regler">
     <div class="lk-hode">
-      <h2 class="withicon"><Icon name="ordbok" size={24} />{no ? 'Klassikere – bare regler' : 'Classics – just the rules'}</h2>
+      <h2>{no ? 'Klassikere – bare regler' : 'Classics – just the rules'}</h2>
       <p class="small">{no ? 'Kopper, baller og en god dose konkurranseinstinkt. Her finner du reglene.' : 'Cups, balls and a healthy dose of competitive spirit. Here are the rules.'}</p>
     </div>
     <div class="lk-sma">

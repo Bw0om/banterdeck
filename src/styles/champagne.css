@@ -214,3 +214,85 @@ h3,.h3{font-stretch:normal;font-weight:700}
 .toast{background:var(--gull-glans);color:var(--ink2);box-shadow:0 10px 30px -12px rgb(0 0 0 / .6)}
 
 @media (prefers-reduced-motion:reduce){.h2-hero h1{animation:none}.topp3-bilde img{transition:none}}
+
+/* =====================================================================
+   DRIKKELEKER – oversikten og hver lek, laget for mobilen først.
+   Oversikten: én gullknapp, bare filterraden følger med når man blar,
+   lister med hårstreker i stedet for bokser. Leken: stort bilde, navnet,
+   fakta på én linje, reglene som luftig tekst, flere leker å sveipe.
+   ===================================================================== */
+.lk-snarveier{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;margin:18px 0 22px}
+.lk-snarveier .btn.gold{min-height:56px;padding:0 26px;border-radius:999px;font-size:17px}
+.lk-lenker{display:flex;flex-wrap:wrap;gap:6px 22px}
+.lk-lenker a{font-weight:650;font-size:15.5px;color:var(--gold-t);padding:8px 0}
+.lk-sok{width:100%;box-sizing:border-box;min-height:52px;background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:0 16px;color:var(--ink);font:inherit;font-size:16px}
+.lk-sok::placeholder{color:var(--faint)}
+.lk-filter{display:block;padding:10px 0;margin:4px 0 6px;background:rgb(var(--bg-rgb) / .92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.lk-chips{gap:8px;padding:0 0 2px}
+@media (max-width:899px){.lk-filter{margin-left:-18px;margin-right:-18px;padding:10px 0}.lk-chips{padding:0 18px 2px;scroll-padding:0 18px}}
+@media (min-width:900px){.lk-chips{flex-wrap:wrap}}
+.lk-chips button{min-height:42px;border-radius:999px;font-size:14.5px;border-color:var(--border2);background:transparent}
+.lk-chips button[aria-pressed="true"]{background:var(--gull-glans);border-color:transparent;color:var(--ink2)}
+.lk-chips .lk-alkfri{flex:0 0 auto;min-height:42px;padding:0 14px 0 8px;font-size:14.5px;font-weight:600;white-space:nowrap}
+.lk-seksjon{margin:clamp(30px,6vw,48px) 0 0}
+.lk-hode h2{font-size:clamp(28px,4vw,36px)}
+.lk-hode .small{font-size:15.5px;color:var(--muted);max-width:56ch;margin:6px 0 16px}
+/* rom-lekene: bildekort */
+.lk-kort{border-radius:20px;border-color:var(--border)}
+.lk-kort .lk-tekst b{font-family:var(--serif);font-stretch:normal;font-weight:560;font-size:20px;letter-spacing:-.01em;line-height:1.12;text-wrap:balance}
+@media (max-width:520px){.lk-kort .lk-tekst b{font-size:18px}.lk-kort .lk-tekst{padding:10px 12px 12px}}
+.lk-meta i.pluss,.lk-meta i.gratis{background:none;box-shadow:inset 0 0 0 1px var(--hårstrek);border-radius:6px}
+.lk-meta i.gratis{color:var(--faint);box-shadow:inset 0 0 0 1px var(--border2)}
+@media (hover:hover) and (pointer:fine){.lk-kort:hover{border-color:var(--hårstrek)}.lk-kort:hover .lk-tekst b{color:var(--gold-t)}}
+/* telefonen er kortstokken: liste med hårstreker */
+.lk-mellom{gap:0 32px;border-top:1px solid var(--border)}
+.lk-rad{background:none;border:0;border-bottom:1px solid var(--border);border-radius:0;padding:10px 4px 10px 0;min-height:76px}
+.lk-rad img{width:84px;height:auto;flex-basis:84px;aspect-ratio:240/126;object-fit:cover;border-radius:10px}
+.lk-rad .lk-tekst b{font-family:var(--serif);font-stretch:normal;font-weight:560;font-size:19px;letter-spacing:-.005em}
+.lk-rad::after{width:8px;height:8px;border-width:1.5px;border-color:var(--faint)}
+@media (hover:hover) and (pointer:fine){.lk-rad:hover .lk-tekst b{color:var(--gold-t)}}
+/* klassikere: bare navn og utstyr, som en register-liste */
+.lk-sma{gap:0 32px;border-top:1px solid var(--border)}
+.lk-liten{flex-direction:column;gap:2px;padding:13px 2px;border:0;border-bottom:1px solid var(--border);border-radius:0}
+.lk-liten b{font-family:var(--serif);font-weight:560;font-size:18px}
+.lk-liten span{font-size:14px}
+@media (hover:hover) and (pointer:fine){.lk-liten:hover{background:none}.lk-liten:hover b{color:var(--gold-t)}}
+
+/* ---------- én lek ---------- */
+.lek-banner{margin:6px 0 18px;border-radius:20px;overflow:hidden;background:var(--card2);max-width:680px;box-shadow:0 24px 50px -28px rgb(0 0 0 / .8)}
+@media (min-width:900px){.lek-banner{max-width:520px}}
+.lek-banner img{display:block;width:100%;height:auto;aspect-ratio:240/126;object-fit:cover}
+.lek-navn{margin:0;font-size:clamp(40px,10vw,64px);line-height:.98;letter-spacing:-.03em}
+.lek-fakta{list-style:none;margin:14px 0 20px;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;max-width:680px;font-size:15px;font-weight:550;color:var(--muted)}
+.lek-fakta li{display:inline-flex;align-items:center;gap:6px}
+.lek-fakta .icon{color:var(--faint)}
+.lek-fakta .lek-niva{flex-basis:100%;margin:0 0 2px;padding:0;background:none;border-radius:0;font-family:var(--serif);font-style:italic;font-weight:480;font-size:16.5px;color:var(--gold-t)}
+.lek-fakta .lek-niva .icon{color:var(--gold-t)}
+.lek-fakta .lek-niva.regler{color:var(--muted)}
+.lek-fakta .lek-niva.regler .icon{color:var(--faint)}
+.startrow{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+.startrow .btn{border-radius:999px;min-height:54px;padding:0 24px}
+@media (max-width:520px){.startrow .btn{flex:1 1 100%}}
+.lek-h{margin:30px 0 12px;font-size:clamp(26px,5vw,32px)}
+.rules{max-width:640px;font-size:17.5px;line-height:1.6}
+.rules p{margin:0 0 14px;text-wrap:pretty}
+.rules ul{background:none;border:0;border-radius:0;border-top:1px solid var(--border);margin:4px 0 20px}
+.rules li{position:relative;padding:13px 0 13px 22px;border-top:0;border-bottom:1px solid var(--border);line-height:1.5}
+.rules li::before{content:"";position:absolute;left:2px;top:1.35em;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.gameacts{margin:8px 0 0}
+/* flere leker: en rad å sveipe */
+.lek-flere{margin-top:clamp(44px,8vw,64px)}
+.lek-flere-hode{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:14px}
+.lek-flere-hode h2{margin:0;font-size:clamp(24px,4.6vw,30px);text-wrap:balance}
+.lek-flere-hode a{flex:none;font-weight:650;font-size:15px;color:var(--gold-t)}
+.lek-flere-rad{list-style:none;margin:0 -18px;padding:2px 18px 8px;display:grid;grid-auto-flow:column;grid-auto-columns:min(58vw,220px);gap:12px;
+  overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 18px;scrollbar-width:none;overscroll-behavior-x:contain}
+.lek-flere-rad::-webkit-scrollbar{display:none}
+.lek-flere-rad li{scroll-snap-align:start}
+.lek-flere-rad a{display:flex;flex-direction:column;gap:3px;color:var(--ink);text-decoration:none;transition:scale 160ms var(--ease-out)}
+.lek-flere-rad img{width:100%;height:auto;aspect-ratio:240/126;object-fit:cover;border-radius:14px;background:var(--card2);margin-bottom:6px}
+.lek-flere-rad b{font-family:var(--serif);font-weight:560;font-size:17.5px;line-height:1.15}
+.lek-flere-rad small{font-size:13.5px;color:var(--faint);font-weight:600}
+.lek-flere-rad a:active{scale:.98}
+@media (hover:hover) and (pointer:fine){.lek-flere-rad a:hover b{color:var(--gold-t)}}
+@media (min-width:900px){.lek-flere-rad{margin:0;padding:2px 0 8px;grid-auto-flow:row;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible}}
