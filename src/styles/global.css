@@ -419,23 +419,6 @@ button.langlink{background:transparent;color:var(--muted);cursor:pointer;font-fa
 .game .gp{font-family:var(--display);font-size:12.5px;color:var(--faint);font-weight:600;margin-top:auto}
 .game .gm{font-weight:500}
 
-/* ---------- situasjonsfinner: temakort med rene lister ---------- */
-.sitgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:6px}
-.sitcard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px 8px 8px}
-.sitcard[hidden]{display:none}
-.sitcard h3,.sitcard .h3{margin:0 10px 8px;font-size:13.5px;color:var(--faint);letter-spacing:.02em}
-.sitlist{list-style:none}
-.sitlist li[hidden]{display:none}
-.sitlist a{display:flex;align-items:center;gap:10px;padding:12px 10px;border-radius:11px;color:var(--ink);
-  font-family:var(--display);font-weight:600;font-size:15.5px}
-@media (hover:hover) and (pointer:fine){.sitlist a:hover{background:var(--card2);text-decoration:none}}
-.sitlist a span{flex:1}
-.sitlist a b{font-size:12.5px;color:var(--gold-t);font-weight:700}
-.sitlist a::after{content:"›";color:var(--faint);font-size:18px;line-height:1;margin-left:2px}
-.sitlist li+li a{border-top:1px solid var(--border);border-radius:0}
-.sitlist li:first-child a{border-top-left-radius:11px;border-top-right-radius:11px}
-.sitlist li:last-child a{border-bottom-left-radius:11px;border-bottom-right-radius:11px}
-
 /* ---------- klebrige filtre: bakgrunn kun når de faktisk er festet ---------- */
 .sitfilter.sticky,.dictfilter.sticky,.chips.sticky{background:transparent;transition:background .18s ease,box-shadow .18s ease}
 .sticky.is-stuck{background:rgb(var(--bg-rgb) / .94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);

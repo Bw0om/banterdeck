@@ -19,15 +19,18 @@ const themes = situationThemes
     <input id="sitInput" type="search" autocomplete="off" placeholder={L.filterSituations} aria-label={L.filterSituations} />
   </div>
 
-  <div class="sitgrid">
+  <!-- Som et drinkkart: kategori i kursiv gull, situasjonen til venstre, antall replikker til høyre -->
+  <div class="meny">
     {themes.map((th: any) => (
-      <section class="sitcard" data-theme>
-        <h2 class="h3">{t(th.title, lang)}</h2>
-        <ul class="sitlist">
+      <section class="meny-del" data-theme>
+        <h2 class="meny-tittel">{t(th.title, lang)}</h2>
+        <ul class="meny-liste">
           {th.list.map((x: any) => (
             <li data-q={`${t(x.title, 'no')} ${t(x.title, 'en')} ${t(th.title, lang)}`.toLowerCase()}>
               <a href={path(lang, `/situations/${x.id}`)}>
-                <span>{t(x.title, lang)}</span><b>{x.count}</b>
+                <span class="meny-navn">{t(x.title, lang)}</span>
+                <span class="meny-prikker" aria-hidden="true"></span>
+                <span class="meny-tall">{x.count}<span class="sr">{' '}{L.itemsLabel}</span></span>
               </a>
             </li>
           ))}
@@ -37,17 +40,21 @@ const themes = situationThemes
   </div>
   <p class="small" id="sitNone" hidden>{L.noResults}</p>
 
-  <h2>{L.collections}</h2>
-  <p class="lead" style="margin-bottom:16px">{L.collectionsLead}</p>
-  <div class="tiles">
-    {collectionsFor(lang).map((s) => (
-      <a class="tile" href={path(lang, `/categories/${s.id}`)}>
-        <span class="tn">{t(s.title, lang)}</span>
-        <span class="tg">{t(s.desc, lang)}</span>
-        <span class="tc">{countSection(s, lang)} {L.itemsLabel}</span>
-      </a>
-    ))}
-  </div>
+  <section class="meny-samlinger" aria-labelledby="samlTittel">
+    <h2 id="samlTittel">{L.collections}</h2>
+    <p class="meny-lead">{L.collectionsLead}</p>
+    <ul class="meny-liste">
+      {collectionsFor(lang).map((s) => (
+        <li>
+          <a href={path(lang, `/categories/${s.id}`)}>
+            <span class="meny-navn">{t(s.title, lang)}<small>{t(s.desc, lang)}</small></span>
+            <span class="meny-prikker" aria-hidden="true"></span>
+            <span class="meny-tall">{countSection(s, lang)}<span class="sr">{' '}{L.itemsLabel}</span></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
 
   <AdSlot />
 
@@ -75,3 +82,31 @@ const themes = situationThemes
     })();
   </script>
 </Base>
+
+<style>
+  .meny{margin-top:10px;columns:2 380px;column-gap:56px}
+  .meny-del{break-inside:avoid;padding:22px 0 10px}
+  .meny-del[hidden]{display:none}
+  .meny-tittel{margin:0 0 6px;font-family:var(--serif);font-style:italic;font-weight:460;font-size:clamp(26px,3.4vw,32px);letter-spacing:-.015em;color:var(--gold-t);
+    display:flex;align-items:center;gap:14px}
+  .meny-tittel::after{content:"";flex:1;height:1px;background:var(--hårstrek)}
+  .meny-liste{list-style:none;margin:0;padding:0}
+  .meny-liste li[hidden]{display:none}
+  .meny-liste a{display:flex;align-items:baseline;gap:10px;padding:11px 0;min-height:48px;color:var(--ink);text-decoration:none;transition:color 160ms ease}
+  .meny-navn{font-family:var(--serif);font-weight:500;font-size:20px;line-height:1.25;letter-spacing:-.005em;display:flex;flex-direction:column;gap:3px}
+  .meny-navn small{font-family:var(--sans);font-size:14.5px;font-weight:450;color:var(--faint);letter-spacing:0}
+  .meny-prikker{flex:1;min-width:24px;border-bottom:1.5px dotted rgb(var(--ink-rgb) / .22);transform:translateY(-5px)}
+  .meny-tall{font-family:var(--serif);font-style:italic;font-weight:460;font-size:19px;color:var(--gold-t);font-variant-numeric:lining-nums tabular-nums;min-width:2ch;text-align:right}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  @media (hover:hover) and (pointer:fine){
+    .meny-liste a:hover{text-decoration:none}
+    .meny-liste a:hover .meny-navn{color:var(--gold-t)}
+    .meny-liste a:hover .meny-prikker{border-bottom-color:var(--hårstrek)}
+  }
+  .meny-liste a:active .meny-navn{color:var(--gold-t)}
+  .meny-samlinger{margin-top:clamp(48px,7vw,72px);max-width:620px}
+  .meny-samlinger h2{margin:0}
+  .meny-lead{margin:6px 0 10px;color:var(--muted);max-width:52ch}
+  .meny-samlinger .meny-liste li+li{border-top:1px solid var(--border)}
+  .meny-samlinger .meny-liste a{padding:16px 0}
+</style>

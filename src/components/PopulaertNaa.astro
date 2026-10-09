@@ -3,15 +3,17 @@
  * Topp 3: de tre mest spilte lekene de siste sju dagene, hentet fra /api/populaert.
  * Til det finnes nok data, vises tre klassikere – med en overskrift som sier akkurat det,
  * så vi aldri kaller et håndplukket utvalg for «mest spilt».
+ * Bare leker som spilles i appen er med – rene regel-leker (niva «regler») holdes utenfor.
  */
 import { gamesFor, gameHref, t } from '../lib/content';
 import { illustrasjon } from '../lib/illustrasjon';
 import { PLUSS_SLUGS } from '../lib/plussleker';
+import { niva } from '../lib/niva';
 import { path, type Lang } from '../lib/i18n';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const no = lang === 'no';
 const PL = new Set(PLUSS_SLUGS);
-const leker: Record<string, { n: string; h: string; b: string; pl: string; p: boolean }> = Object.fromEntries(gamesFor(lang).map((g: any) => [g.slug, {
+const leker: Record<string, { n: string; h: string; b: string; pl: string; p: boolean }> = Object.fromEntries(gamesFor(lang).filter((g: any) => niva(g.slug) !== 'regler').map((g: any) => [g.slug, {
   n: t(g.name, lang), h: gameHref(g, (p) => path(lang, p), lang), b: illustrasjon(g), pl: g.pl || '', p: PL.has(g.slug),
 }]));
 const STANDARD = ['ring-of-fire', '100-sporsmal', 'pekeleken', 'drikkehjulet', 'beer-pong', 'jeg-har-aldri'];

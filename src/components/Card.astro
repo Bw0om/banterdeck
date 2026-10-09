@@ -18,7 +18,7 @@ const shownNote = mode === 'clean' ? (crude ? '' : note) : note;
 ---
 <article class:list={['card', mode === 'clean' && 'clean', crude && 'crude']} data-copy={line} tabindex="0" title={L.copyHint}>
   {shownCtx && <p class="ctx">{shownCtx}</p>}
-  <p class="line">«{line}»</p>
+  <p class="line"><span class="q">«</span>{line}<span class="q">»</span></p>
   {shownNote && <p class="note">{shownNote}</p>}
   <div class="cardacts">
     <button class="starbtn" data-fav={line} aria-label={L.favAdd}><Icon name="favoritt" /></button>

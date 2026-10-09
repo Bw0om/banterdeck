@@ -191,4 +191,26 @@ h3,.h3{font-stretch:normal;font-weight:700}
   .topp3-rad.r1 .topp3-nr{font-size:140px;margin-top:-64px}
 }
 
+/* =====================================================================
+   REPLIKKER – en luftig liste, ikke en vegg av bokser. Hårstrek mellom hver,
+   rolig serif, gåseøyne i gull. Trykk for å kopiere (som før).
+   ===================================================================== */
+.card .line .q{color:var(--gold-t);font-style:normal}
+.replikker{margin-top:6px;max-width:760px;gap:0;border-top:1px solid var(--border)}
+.replikker .card.clean{background:none;border:0;border-bottom:1px solid var(--border);border-radius:0;padding:22px 96px 22px 4px;
+  transition:background-color 200ms ease,scale 160ms var(--ease-out)}
+.replikker .card.clean .line{font-family:var(--serif);font-style:normal;font-weight:470;font-size:clamp(21px,2.4vw,25px);line-height:1.32;letter-spacing:-.008em;text-wrap:pretty}
+.replikker .card.clean .ctx{font-family:var(--serif);font-style:italic;font-weight:460;font-size:15.5px;letter-spacing:0;color:var(--accent-t);margin-bottom:6px}
+.replikker .card.clean .note{font-size:14.5px;color:var(--faint);margin-top:8px}
+.replikker .cardacts{top:50%;right:4px;transform:translateY(-50%);opacity:.6;transition:opacity 160ms ease}
+.replikker .card:focus-within .cardacts,.replikker .card:hover .cardacts{opacity:1}
+.replikker .cardacts :is(.starbtn,.sharebtn){width:40px;height:40px;background:transparent;box-shadow:inset 0 0 0 1px var(--border2)}
+.replikker .card.copied{background:linear-gradient(90deg,rgb(var(--volt-rgb) / .1),transparent 80%)}
+.replikker .card.copied .line{color:var(--gold-t)}
+@media (hover:hover) and (pointer:fine){.replikker .card.clean:hover{background:linear-gradient(90deg,rgb(var(--ink-rgb) / .035),transparent 85%)}}
+.replikker .card:focus-visible{outline:2px solid var(--gold);outline-offset:-2px;border-radius:6px}
+@media (max-width:899px){.replikker .card.clean{padding:20px 84px 20px 2px}.replikker .cardacts{top:16px;transform:none;gap:6px}.replikker .cardacts :is(.starbtn,.sharebtn){width:36px;height:36px}}
+/* Kopiert = gevinst: champagne, ikke campari */
+.toast{background:var(--gull-glans);color:var(--ink2);box-shadow:0 10px 30px -12px rgb(0 0 0 / .6)}
+
 @media (prefers-reduced-motion:reduce){.h2-hero h1{animation:none}.topp3-bilde img{transition:none}}
