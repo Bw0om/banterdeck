@@ -7,3 +7,6 @@ dist/
 
 # Midlertidige arbeidskopier fra Claude-agenter
 .claude/worktrees/
+
+# graphify: kunnskapsgrafen bygges lokalt (graphify update .)
+graphify-out/
