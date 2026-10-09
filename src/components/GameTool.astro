@@ -188,12 +188,12 @@ const aarData: any = { eras: bingoData.eras };
       function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
       var deler = D.items.map(function(x,i){
         var a0 = i*SEG, a1 = a0+SEG, c = a0+SEG/2, f = FARGER[i % 3];
-        return '<path d="M0 0 L'+p(a0,96)+' A96 96 0 0 1 '+p(a1,96)+' Z" fill="'+f[0]+'" stroke="#1A1012" stroke-width="1"/>' +
+        return '<g class="gt-del" data-i="'+i+'"><path d="M0 0 L'+p(a0,96)+' A96 96 0 0 1 '+p(a1,96)+' Z" fill="'+f[0]+'" stroke="#1A1012" stroke-width="1"/>' +
           // venstre halvdel snus, så teksten aldri står opp ned
           (c > 180
             ? '<text transform="rotate('+(c+90)+') translate(-31 0)" text-anchor="end"'
             : '<text transform="rotate('+(c-90)+') translate(31 0)"') +
-          ' dominant-baseline="middle" fill="'+f[1]+'" font-size="7.4" font-weight="700" font-family="Archivo Variable, Archivo, sans-serif">'+esc(x.t)+'</text>';
+          ' dominant-baseline="middle" fill="'+f[1]+'" font-size="7.4" font-weight="700" font-family="Archivo Variable, Archivo, sans-serif">'+esc(x.t)+'</text></g>';
       }).join('');
       body.innerHTML =
         '<div class="gt-wheel"><svg class="gt-pointer" viewBox="0 0 20 16" aria-hidden="true"><path d="M0 0 H20 L10 16 Z" fill="#F7EFE3"/></svg>' +
@@ -202,14 +202,65 @@ const aarData: any = { eras: bingoData.eras };
         '<p class="gt-result" role="status">&nbsp;</p><p class="gt-desc small">&nbsp;</p>' +
         '<button class="btn gold vp-big" data-a="snurr">'+(EN ? 'Spin' : 'Snurr')+'</button>';
       var rot = body.querySelector('.gt-rot'), res = body.querySelector('.gt-result'), desc = body.querySelector('.gt-desc');
-      body.querySelector('[data-a=snurr]').addEventListener('click', function(){
-        if (snurrer) return; snurrer = true;
+      var pil = body.querySelector('.gt-pointer'), knapp = body.querySelector('[data-a=snurr]');
+      function rolig(){ try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+      // Vinkelen hjulet står i akkurat nå, lest fra den pågående CSS-overgangen
+      function vinkelNaa(){ var m = getComputedStyle(rot).transform; if (!m || m === 'none') return 0; var v = m.match(/matrix\(([^)]+)\)/); if (!v) return 0; var t = v[1].split(',').map(Number); return Math.atan2(t[1], t[0]) * 180 / Math.PI; }
+      knapp.addEventListener('click', function(){
+        if (snurrer) return; snurrer = true; knapp.disabled = true;
         var i = Math.floor(Math.random()*N), senter = i*SEG + SEG/2 + (Math.random()-0.5)*SEG*0.6;
         var maal = (360 - senter) % 360, naa = ((vinkel % 360) + 360) % 360;
         vinkel += 5*360 + ((maal - naa + 360) % 360);
+        // Nullstill forrige runde: bitene får fargen tilbake, svaret tømmes
+        rot.classList.remove('landet');
+        rot.querySelectorAll('.gt-del.vinner').forEach(function(g){ g.classList.remove('vinner'); });
+        res.classList.remove('inn'); desc.classList.remove('inn');
         res.innerHTML = '&nbsp;'; desc.innerHTML = '&nbsp;';
+        var stille = rolig(), landet = false;
+
+        function land(){
+          if (landet) return; landet = true;
+          var vinner = rot.querySelector('.gt-del[data-i="'+i+'"]'); if (vinner) vinner.classList.add('vinner');
+          rot.classList.add('landet');
+          res.textContent = D.items[i].r || D.items[i].t; desc.textContent = D.items[i].d;
+          if (stille) {
+            // Redusert bevegelse: rolig fade, ingen sprett (global.css slår av animation uansett)
+            res.classList.add('skjult'); desc.classList.add('skjult'); void res.offsetWidth;
+            requestAnimationFrame(function(){ res.classList.remove('skjult'); desc.classList.remove('skjult'); });
+          } else {
+            void res.offsetWidth; res.classList.add('inn'); desc.classList.add('inn');
+            if (navigator.vibrate) { try { navigator.vibrate([18, 40, 30]); } catch (e) {} }
+          }
+          snurrer = false; knapp.disabled = false;
+        }
+
         rot.style.transform = 'rotate('+vinkel+'deg)';
-        setTimeout(function(){ res.textContent = D.items[i].r || D.items[i].t; desc.textContent = D.items[i].d; snurrer = false; }, 3300);
+        if (stille) { land(); return; }
+
+        // Pilen tikker for hver bit som passerer. Vi følger vinkelen bilde for bilde.
+        // sum følger hjulets ekte vinkel (ikke fra null), så tikkene treffer de faktiske grensene mellom bitene
+        var forrige = vinkelNaa(), sum = forrige, sistGrense = Math.floor(sum / SEG);
+        function folg(){
+          if (landet) return;
+          var na = vinkelNaa(), d = na - forrige;
+          if (d < -180) d += 360; else if (d > 180) d -= 360;
+          forrige = na; sum += d;
+          var grense = Math.floor(sum / SEG);
+          if (grense !== sistGrense) {
+            sistGrense = grense;
+            pil.getAnimations().forEach(function(a){ a.cancel(); });
+            pil.animate([{ transform: 'translateX(-50%) rotate(0deg)' }, { transform: 'translateX(-50%) rotate(-22deg)', offset: 0.3 }, { transform: 'translateX(-50%) rotate(0deg)' }],
+              { duration: 140, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
+            // De siste, langsomme tikkene merkes også i hånda
+            if (Math.abs(d) < 6 && navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} }
+          }
+          requestAnimationFrame(folg);
+        }
+        requestAnimationFrame(folg);
+
+        rot.addEventListener('transitionend', function ferdig(e){ if (e.propertyName !== 'transform') return; rot.removeEventListener('transitionend', ferdig); land(); });
+        // Sikkerhetsnett hvis transitionend aldri kommer (fanen var skjult o.l.)
+        setTimeout(land, 4300);
       });
     })();
     </script>
