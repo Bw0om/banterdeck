@@ -203,6 +203,154 @@
   {
    "q": "Hvor mange tangenter har et vanlig piano?",
    "a": "88"
+  },
+  {
+   "q": "Hva er det eneste kontinentet uten maur?",
+   "a": "Antarktis"
+  },
+  {
+   "q": "Hvilke tenner mangler sjiraffer i overkjeven?",
+   "a": "Fortennene"
+  },
+  {
+   "q": "Hvilket land har flest øyer i verden?",
+   "a": "Sverige"
+  },
+  {
+   "q": "Hvor mange ganger bredere enn jorda er sola?",
+   "a": "Rundt 109 ganger"
+  },
+  {
+   "q": "Hva var den første varen som ble skannet med strekkode i en butikk?",
+   "a": "En pakke tyggegummi"
+  },
+  {
+   "q": "Hvilket dyr sover med halve hjernen om gangen?",
+   "a": "Delfinen"
+  },
+  {
+   "q": "Hvilken farge har en flamingo når den klekkes?",
+   "a": "Grå"
+  },
+  {
+   "q": "Hvilket land drikker mest kaffe per innbygger?",
+   "a": "Finland"
+  },
+  {
+   "q": "Hvor mye vann kan en tørst kamel drikke på en gang?",
+   "a": "Rundt 100 liter"
+  },
+  {
+   "q": "Hva kalles en flokk kråker på engelsk?",
+   "a": "A murder"
+  },
+  {
+   "q": "Hva er Norges lengste fjord?",
+   "a": "Sognefjorden"
+  },
+  {
+   "q": "Hva heter broren til Snoopy?",
+   "a": "Spike"
+  },
+  {
+   "q": "Hvilket land har det eldste nasjonalflagget som fortsatt er i bruk?",
+   "a": "Danmark"
+  },
+  {
+   "q": "Hva heter hesten til Pippi Langstrømpe?",
+   "a": "Lille Gubben"
+  },
+  {
+   "q": "Hva var bobleplast opprinnelig ment å være?",
+   "a": "Tapet"
+  },
+  {
+   "q": "Hva ble Play-Doh opprinnelig solgt som?",
+   "a": "Rengjøringsmiddel for tapet"
+  },
+  {
+   "q": "Hvilket land produserer mest kaffe i verden?",
+   "a": "Brasil"
+  },
+  {
+   "q": "Hva heter verdens høyeste foss?",
+   "a": "Angelfallet i Venezuela"
+  },
+  {
+   "q": "Hvilken planet har flest kjente måner?",
+   "a": "Saturn"
+  },
+  {
+   "q": "Hvor lang tid bruker lyset fra sola på å nå jorda?",
+   "a": "Rundt åtte minutter"
+  },
+  {
+   "q": "Hvilket indre organ kan vokse ut igjen?",
+   "a": "Leveren"
+  },
+  {
+   "q": "Hvilket land har ingen offisiell hovedstad?",
+   "a": "Nauru"
+  },
+  {
+   "q": "Hvor gammel kan en grønlandshai bli?",
+   "a": "Rundt 400 år"
+  },
+  {
+   "q": "Hvilket dyr har fingeravtrykk nesten helt like menneskets?",
+   "a": "Koalaen"
+  },
+  {
+   "q": "Hva het den første hunden i bane rundt jorda?",
+   "a": "Lajka"
+  },
+  {
+   "q": "Hva oppfant nordmannen Erik Rotheim?",
+   "a": "Sprayboksen"
+  },
+  {
+   "q": "Hvilket land har et flagg som ikke er firkantet?",
+   "a": "Nepal"
+  },
+  {
+   "q": "Hvor mange ganger i minuttet kan hjertet til en kolibri slå?",
+   "a": "Over tusen"
+  },
+  {
+   "q": "Hvilken farge har tunga til en sjiraff?",
+   "a": "Blålilla"
+  },
+  {
+   "q": "Hvilken plante kommer vanilje fra?",
+   "a": "En orkidé"
+  },
+  {
+   "q": "Hvem er Bluetooth oppkalt etter?",
+   "a": "Harald Blåtann, en dansk konge"
+  },
+  {
+   "q": "Hvilket land tok i bruk papirpenger først?",
+   "a": "Kina"
+  },
+  {
+   "q": "Hvilken mat blir i praksis aldri dårlig?",
+   "a": "Honning"
+  },
+  {
+   "q": "Hvilket landdyr er lengst drektig?",
+   "a": "Elefanten – nesten to år"
+  },
+  {
+   "q": "Hvor mange strenger har en vanlig fiolin?",
+   "a": "Fire"
+  },
+  {
+   "q": "Hva ville Walt Disney opprinnelig kalle Mikke Mus?",
+   "a": "Mortimer"
+  },
+  {
+   "q": "Hvilken by har verdens eldste T-bane?",
+   "a": "London"
   }
  ],
  "samme": [
@@ -349,7 +497,37 @@
   "Skiheisen",
   "Kebabsjappa klokka tre",
   "Politistasjonen",
-  "Et første date"
+  "Et første date",
+  "Fergekøen",
+  "Dyreparken",
+  "Utdrikningslaget",
+  "Bilverkstedet",
+  "Fiskemottaket",
+  "Et cruiseskip",
+  "Påskefjellet",
+  "17. mai-toget",
+  "Fotballgarderoben",
+  "Et romskip",
+  "Hotellfrokosten",
+  "Henting i barnehagen",
+  "Badstua",
+  "En stadionkonsert",
+  "Bowlinghallen",
+  "Kontoret en mandag",
+  "Lekeland i en barnebursdag",
+  "Nattoget til Bergen",
+  "Et LAN-party",
+  "En rorbu i Lofoten",
+  "Et hageselskap",
+  "Quiz på puben",
+  "Et escape room",
+  "Teaterpausen",
+  "Trampolinparken",
+  "Tollen på Gardermoen",
+  "Fisketur på sjøen",
+  "Butikken rett før stengetid",
+  "Julaften hos svigerfamilien",
+  "Kjøreskolen"
  ],
  "ord": [
   "Elvis",

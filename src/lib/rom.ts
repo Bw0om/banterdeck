@@ -1798,6 +1798,8 @@ function sosNyRunde(data: any) {
   if (s.type === 'samme') { s.fase = 'skriv'; s.oppgave = trekkFra(s, 'oppg', sosListe('samme')); s.svar = {}; s.grupper = null; settFrist(s, SFRIST.samme); }
   if (s.type === 'spion') {
     s.fase = 'sporsmal'; s.sted = trekkFra(s, 'sted', sosListe('steder')); s.spion = ider[tilfeldig(ider.length)];
+    // Muldvarpen gjetter blant 24 steder (det riktige er alltid med), så lista holder seg kort selv om det finnes mange flere
+    const andre = sosListe('steder').filter((x: any) => x.no !== s.sted.no); s.utvalg = stokk([s.sted, ...stokk(andre).slice(0, 23)]);
     s.start = ider[tilfeldig(ider.length)]; s.stemmer = {}; s.utfall = null; s.spionGjett = null; settFrist(s, SFRIST.sporsmal);
   }
   if (s.type === 'pannekort') {
@@ -2036,7 +2038,7 @@ function sosVisning(s: any, meg: any, data: any) {
   if (s.type === 'samme') return { fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null, grupper: s.fase === 'fasit' ? s.grupper : null };
   if (s.type === 'spion') {
     const aapen = s.fase === 'fasit';
-    return { fase: s.fase, erSpion: m === s.spion, sted: m !== s.spion || aapen ? s.sted : null, steder: sosListe('steder'), start: s.start,
+    return { fase: s.fase, erSpion: m === s.spion, sted: m !== s.spion || aapen ? s.sted : null, steder: s.utvalg || sosListe('steder'), start: s.start,
       harStemt: Object.keys(s.stemmer), minStemme: m ? s.stemmer[m] || null : null,
       spion: aapen || s.fase === 'gjett' ? s.spion : null, stemmer: aapen ? s.stemmer : null, utfall: s.utfall, spionGjett: aapen ? s.spionGjett : null };
   }
