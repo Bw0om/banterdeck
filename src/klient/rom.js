@@ -986,7 +986,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   function lagreSomStokk() {
     var s = tilstand && tilstand.spill; if (!s || !s.alleKort || !s.alleKort.length) return;
-    var d = new Date(), navn = T('Hjemmesnekra ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'Homemade ' + d.getDate() + '/' + (d.getMonth() + 1));
+    var d = new Date(), navn = T('Skriv og drikk ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'Write & Drink ' + d.getDate() + '/' + (d.getMonth() + 1));
     var K = window.BDKonto;
     (K ? K.bruker() : Promise.resolve(null)).then(function (u) {
       if (!u) {
@@ -1327,7 +1327,7 @@ export function startRom(LEKNAVN, LANG) {
   function regelfabrikkenSpill(s) {
     rfOffset = s.naa - Date.now();
     if (s.fase === 'klar') {
-      return '<p class="dl-melding dl-stor">' + T('Klar for Hjemmesnekra?', 'Ready for Homemade?') + '</p>' +
+      return '<p class="dl-melding dl-stor">' + T('Klar for Skriv og drikk?', 'Ready for Write & Drink?') + '</p>' +
         '<p>' + T('Når klokka starter, har alle ', 'When the clock starts, everyone has ') + s.sek + T(' sekunder til å skrive så mange drikkekort de rekker på sin egen telefon.', ' seconds to write as many drinking cards as they can on their own phone.') + '</p>' +
         '<p class="rom-status">' + tilstand.spillere.length + T(' med i rommet: ', ' in the room: ') + tilstand.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' +
         '<div class="rf-med"><button class="btn ghost" data-g="rf-velg" type="button">' + T('Ta med kort fra kortstokkene dine', 'Bring cards from your decks') + '</button>' +

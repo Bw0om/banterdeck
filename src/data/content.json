@@ -3695,7 +3695,9 @@
      },
      {
       "name": {
-       "no": "Hjemmesnekra"
+       "no": "Skriv og drikk",
+       "en": "Write & Drink",
+       "sv": "Skriv och drick"
       },
       "gear": {
        "no": "Én telefon – eller én hver",

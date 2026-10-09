@@ -966,7 +966,7 @@ const EKSTRA_INFO: EkstraInfo[] = [
   ['bussruta', 'Bussruta', 'Ride the bus', 'Fire spørsmål hver på egen telefon, så pyramiden – og taperen kjører bussen.', 'Four questions each on your own phone, then the pyramid – and the loser rides the bus.'],
   ['yatzy', 'Drikke-Yatzy', 'Drinking Yahtzee', 'Trill på din telefon når det er din tur. Alle ser terningene og blokka.', "Roll on your phone when it's your turn. Everyone sees the dice and the scorecard."],
   ['tosannheter', 'To sannheter og en løgn', 'Two truths and a lie', 'Én skriver tre påstander i hemmelighet. Resten stemmer på løgnen fra sin telefon.', 'One player secretly writes three statements. Everyone else votes for the lie on their phone.'],
-  ['regelfabrikken', 'Hjemmesnekra', 'Homemade', 'Alle skriver så mange drikkekort de rekker på sin telefon. Så stokkes alt og trekkes.', 'Everyone writes as many drinking cards as they can on their phone. Then it all gets shuffled and drawn.'],
+  ['regelfabrikken', 'Skriv og drikk', 'Write & Drink', 'Alle skriver så mange drikkekort de rekker på sin telefon. Så stokkes alt og trekkes.', 'Everyone writes as many drinking cards as they can on their phone. Then it all gets shuffled and drawn.'],
   ['overunder', 'Over eller under', 'Higher or lower', 'Den som har tur gjetter på sin telefon. Feil = drikk hele bunken.', 'Whoever has the turn guesses on their phone. Wrong = drink the whole pile.'],
   ['veddelopet', 'Veddeløpet', 'Horse race', 'Alle vedder på sin telefon, så kjøres løpet.', 'Everyone bets on their phone, then the race is on.'],
   ['pyramiden', 'Pyramiden', 'Pyramid', 'Fire skjulte kort hver. Bløff eller si sannheten – og utfordre de andre.', 'Four hidden cards each. Bluff or tell the truth – and call out the others.'],
