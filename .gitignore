@@ -4,3 +4,6 @@ dist/
 .DS_Store
 .vercel/
 .playwright-mcp/
+
+# Midlertidige arbeidskopier fra Claude-agenter
+.claude/worktrees/

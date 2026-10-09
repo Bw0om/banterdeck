@@ -15,7 +15,7 @@ import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
 import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } from './kveld';
 import { MAKS_REGEL } from './lovbok';
-import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors, borsTilPluss } from './bors';
+import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors, borsTilPluss, BUTIKK } from './bors';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
 
 const D: any = DECKS;
@@ -366,7 +366,7 @@ const ROF_BRUDD = 5;   // slurker når ringen ryker («drikk opp»)
 const KONGE_NR: [string, string][] = [['Første', 'First'], ['Andre', 'Second'], ['Tredje', 'Third'], ['Fjerde', 'Fourth']];
 function visKort(s: any, data: any) {
   const k = s.rekke[s.pos];
-  if (s.lek !== 'ring-of-fire') return { t: k.t, k: k.k, id: k.smak ? null : kortId(k) };
+  if (s.lek !== 'ring-of-fire') return { t: k.t, k: k.k, h: k.h || undefined, id: k.smak || k.h ? null : kortId(k) };
   const info = D['ring-of-fire'].kort[k.v], infoEn = (DE['ring-of-fire'] && DE['ring-of-fire'].kort && DE['ring-of-fire'].kort[k.v]) || info;
   let regel: any = L(info[0], infoEn[0]), tekst: any = L(info[1], infoEn[1]);
   if (k.v === 'K') {
@@ -376,6 +376,73 @@ function visKort(s: any, data: any) {
     tekst = L('Drikk ' + sl + ' slurker.' + (nr === 4 ? ' Det var siste konge!' : ''), 'Drink ' + sl + ' sips.' + (nr === 4 ? ' That was the last king!' : ''));
   }
   return { v: k.v === 'J' ? L('Kn', 'J') : (k.v === 'Q' ? L('D', 'Q') : k.v), s: k.s, rod: k.rod, regel, tekst, hvem: s.tur !== null ? navnPaa(data, data.spillere[s.tur]?.id) : null };
+}
+
+/* ---------- Hendelseskort ----------
+   I kortlekene i rommet dukker det opp et hendelseskort omtrent hvert 6.–10. kort: en duell, en ny regel,
+   en gave eller en vri med navnene i rommet. Noen av dem gjør noe med kvelden (deler ut slurker, gir et
+   skjold), og to av dem bruker slurketavla – den som har drukket minst, og den som har drukket mest.
+   Ikke i Ring of Fire, som har egne regler, og bare når dere er minst to. */
+const HENDELSE_MIN = 6, HENDELSE_SPENN = 5;
+const nesteHendelse = () => HENDELSE_MIN + tilfeldig(HENDELSE_SPENN);
+type HendelseKort = { t: L; k: L; h: true };
+const HENDELSER: { id: string; navn: number; lag: (a: string[], data: any) => HendelseKort | null }[] = [
+  { id: 'duell', navn: 2, lag: ([a, b]) => hk('⚔️ Duell', '⚔️ Duel', `${a} mot ${b}: stein, saks, papir. Taperen drikker 2.`, `${a} vs ${b}: rock, paper, scissors. The loser drinks 2.`) },
+  { id: 'regel', navn: 1, lag: ([a]) => hk('📜 Ny regel', '📜 New rule', `${a} lager en regel som gjelder resten av kvelden. Bryter du den, drikker du.`, `${a} makes a rule that lasts the rest of the night. Break it and you drink.`) },
+  { id: 'vert', navn: 0, lag: (_, data) => {
+    const v = navnPaa(data, data.vert); if (v === '?') return null;
+    giUtdeling(data, data.vert, 2);
+    return hk('🥂 Skål for verten', '🥂 Cheers to the host', `Alle reiser seg og skåler for ${v}. ${v} får 2 slurker å dele ut.`, `Everyone stands up and toasts ${v}. ${v} gets 2 sips to hand out.`);
+  } },
+  { id: 'gave', navn: 1, lag: ([a], data) => { giUtdeling(data, idPaa(data, a), 3); return hk('🎁 Gave', '🎁 Gift', `${a} får 3 slurker å dele ut – bruk 🍺-knappen.`, `${a} gets 3 sips to hand out – use the 🍺 button.`); } },
+  { id: 'skjold', navn: 1, lag: ([a], data) => {
+    const p = data.spillere.find((x: any) => x.navn === a); if (!p || (p.immun || 0) >= BUTIKK.maksImmun) return null;
+    p.immun = (p.immun || 0) + 1;
+    return hk('🛡️ Skjold', '🛡️ Shield', `${a} får et skjold og slipper neste gang appen gir hen slurker.`, `${a} gets a shield and skips the next sips the app gives them.`);
+  } },
+  { id: 'bytt', navn: 2, lag: ([a, b]) => hk('🔄 Bytt plass', '🔄 Swap seats', `${a} og ${b} bytter plass. Den som er sist på plass, drikker 1.`, `${a} and ${b} swap seats. Whoever sits down last drinks 1.`) },
+  { id: 'foss', navn: 1, lag: ([a]) => hk('🌊 Foss', '🌊 Waterfall', `${a} starter en foss. Ingen får stoppe før personen til høyre for seg har stoppet.`, `${a} starts a waterfall. Nobody can stop before the person to their right has stopped.`) },
+  { id: 'stille', navn: 0, lag: () => hk('🤫 Ingen navn', '🤫 No names', 'Ingen får si et eneste navn før neste hendelse. Sier du et navn, drikker du.', 'Nobody can say a single name until the next event. Say a name and you drink.') },
+  { id: 'lyn', navn: 0, lag: () => hk('⚡ Lynrunde', '⚡ Lightning round', 'De tre neste kortene går på tid: den som svarer eller peker sist, drikker 1.', 'The next three cards are against the clock: whoever answers or points last drinks 1.') },
+  { id: 'skaal', navn: 0, lag: () => hk('🍻 Skål!', '🍻 Cheers!', 'Alle reiser seg og skåler. Sistemann på beina drikker 1.', 'Everyone stands up and toasts. Last one on their feet drinks 1.') },
+  { id: 'makker', navn: 2, lag: ([a, b]) => hk('🤝 Drikkemakkere', '🤝 Drinking buddies', `${a} og ${b} er makkere til neste hendelse: drikker den ene, drikker den andre.`, `${a} and ${b} are buddies until the next event: when one drinks, so does the other.`) },
+  { id: 'dommer', navn: 1, lag: ([a]) => hk('⚖️ Dommer', '⚖️ Judge', `${a} er dommer for de to neste kortene og bestemmer alene hvem som drikker.`, `${a} judges the next two cards and decides alone who drinks.`) },
+  { id: 'historie', navn: 1, lag: ([a]) => hk('🎤 Fortell', '🎤 Story time', `${a} forteller den pinligste fyllehistorien sin – eller drikker 3.`, `${a} tells their most embarrassing drunk story – or drinks 3.`) },
+  { id: 'dj', navn: 1, lag: ([a]) => hk('🎵 DJ', '🎵 DJ', `${a} velger neste låt. Kan du ikke refrenget når det kommer, drikker du 1.`, `${a} picks the next song. If you don't know the chorus when it comes, drink 1.`) },
+  { id: 'stilling', navn: 0, lag: (_, data) => {
+    const r = slurkeRang(data); if (!r) return null;
+    return hk('📊 Stillingen nå', '📊 The standings', `${r.mest.navn} leder kvelden med ${antSl(r.mest.slurker)}. ${r.minst.navn} er sist med ${r.minst.slurker}. Skal det fortsette sånn?`, `${r.mest.navn} leads the night with ${antSlEn(r.mest.slurker)}. ${r.minst.navn} is last with ${r.minst.slurker}. Is it staying that way?`);
+  } },
+  { id: 'edru', navn: 0, lag: (_, data) => {
+    const r = slurkeRang(data); if (!r) return null;
+    giSlurker(data, r.minst.id, 2);
+    return hk('😇 For edru', '😇 Too sober', `${r.minst.navn} har drukket minst så langt i kveld. Ta 2 – nå.`, `${r.minst.navn} has drunk the least so far tonight. Take 2 – now.`);
+  } },
+  { id: 'toff', navn: 0, lag: (_, data) => {
+    const r = slurkeRang(data); if (!r) return null;
+    const p = data.spillere.find((x: any) => x.id === r.mest.id); if (p && (p.immun || 0) < BUTIKK.maksImmun) p.immun = (p.immun || 0) + 1;
+    giUtdeling(data, r.mest.id, 2);
+    return hk('🫡 Tøffest i kveld', '🫡 Toughest tonight', `${r.mest.navn} har tatt flest slurker i kveld (${r.mest.slurker}). Får et skjold og 2 slurker å dele ut.`, `${r.mest.navn} has taken the most sips tonight (${r.mest.slurker}). Gets a shield and 2 sips to hand out.`);
+  } },
+];
+const antSl = (n: number) => n + (n === 1 ? ' slurk' : ' slurker'), antSlEn = (n: number) => n + (n === 1 ? ' sip' : ' sips');
+function hk(k: string, kEn: string, t: string, tEn: string): HendelseKort { return { k: L(k, kEn), t: L(t, tEn), h: true }; }
+function idPaa(data: any, navn: string) { const p = data.spillere.find((x: any) => x.navn === navn); return p ? p.id : ''; }
+/** Den som har drukket minst og mest – bare når tavla faktisk sier noe (noen har slurker, og det er en klar første og sist). */
+function slurkeRang(data: any) {
+  const ps = data.spillere.filter((p: any) => p.navn).map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0 }));
+  if (ps.length < 2) return null;
+  const sortert = ps.slice().sort((a: any, b: any) => a.slurker - b.slurker);
+  const minst = sortert[0], mest = sortert[sortert.length - 1];
+  if (!mest.slurker || sortert[1].slurker === minst.slurker || sortert[sortert.length - 2].slurker === mest.slurker) return null;
+  return { minst, mest };
+}
+/** Trekk en hendelse som passer rommet (nok spillere, ikke samme som sist). */
+function lagHendelse(data: any, s: any): HendelseKort | null {
+  const navn: string[] = stokk(data.spillere.map((p: any) => p.navn).filter(Boolean));
+  const mulige = stokk(HENDELSER.filter((e) => e.navn <= navn.length && e.id !== s.sisteHendelse));
+  for (const e of mulige) { const kort = e.lag(navn.slice(0, e.navn), data); if (kort) { s.sisteHendelse = e.id; return kort; } }
+  return null;
 }
 
 function nyMestRunde(s: any) {
@@ -417,7 +484,7 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
     let rekke = kortstokkFor(lek, modus, sett);
     if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && rekke.length > 12) rekke = medSmakebiter(rekke);
     if (!rekke.length) return { feil: 'tom' };
-    data.spill = { type: 'kort', lek, navn, modus, rekke, pos: 0, tur: lek === 'ring-of-fire' ? 0 : null, konger: 0 };
+    data.spill = { type: 'kort', lek, navn, modus, rekke, pos: 0, tur: lek === 'ring-of-fire' ? 0 : null, konger: 0, tilHendelse: nesteHendelse() };
     if (lek === 'ring-of-fire' && modus !== 'enkel') {
       // Ringen: alle 52 kortene ligger rundt glasset, og den som har tur drar ut et hvilket som helst kort
       Object.assign(data.spill, { ring: true, tatt: [], nr: 0, brudd: null, kort: null, sist: null });
@@ -520,11 +587,23 @@ export function handling(data: any, meg: any, h: any) {
     if (meg.id !== data.vert) return { feil: 'bare-vert' };
     data.mester = null; melde(data, 'Spørsmålsmesteren er slått av', 'The question master is turned off'); return { ok: true };
   }
+  const nrFor = data.nr || 0;
   const svar = handlingInne(data, meg, h);
+  sjekkLeder(data, nrFor);
   sjekkVann(data);   // etter handlingen: klokka starter med en gang leken er i gang
   const s = data.spill, n = turNokkel(s);
   if (s && n !== s.turNokkel) { s.turNokkel = n; s.turStart = n ? Date.now() : null; }
   return svar;
+}
+/** Rivalisering: når noen tar ledelsen på slurketavla, får hele rommet vite det. Bare når handlingen
+    ikke allerede meldte noe selv, så vi ikke skyver bort en viktigere melding. */
+function sjekkLeder(data: any, nrFor: number) {
+  const ps = (data.spillere || []).filter((p: any) => (p.slurker || 0) > 0).sort((a: any, b: any) => (b.slurker || 0) - (a.slurker || 0));
+  const leder = data.spillere.length >= 2 && ps.length && (ps.length === 1 || ps[0].slurker > ps[1].slurker) ? ps[0] : null;
+  const forrige = data.leder || null;
+  data.leder = leder ? leder.id : null;
+  if (!leder || leder.slurker < 3 || leder.id === forrige || (data.nr || 0) !== nrFor) return;   // ikke mas om ledelsen før det er litt å lede med
+  melde(data, `🔥 ${leder.navn} har tatt ledelsen med ${antSl(leder.slurker)}`, `🔥 ${leder.navn} has taken the lead with ${antSlEn(leder.slurker)}`);
 }
 function hoppOver(data: any) {
   const s = data.spill, ider = aktiveIder(data);
@@ -790,6 +869,11 @@ function handlingInne(data: any, meg: any, h: any) {
       if (typeof h.pos === 'number' && h.pos !== s.pos) return { ok: true }; // noen andre trykket samtidig
       s.pos++;
       if (s.pos >= s.rekke.length) { s.rekke = kortstokkFor(s.lek, s.modus); s.pos = 0; s.konger = 0; melde(data, 'Stokket på nytt', 'Reshuffled'); }
+      // Hendelseskort: legges inn foran kortet som skulle kommet, så ingen kort går tapt
+      if (s.lek !== 'ring-of-fire' && data.spillere.length >= 2) {
+        s.tilHendelse = (s.tilHendelse ?? nesteHendelse()) - 1;
+        if (s.tilHendelse <= 0) { const hkort = lagHendelse(data, s); if (hkort) s.rekke.splice(s.pos, 0, hkort); s.tilHendelse = nesteHendelse(); }
+      }
       if (s.tur !== null) s.tur = (s.tur + 1) % Math.max(1, data.spillere.length);
       if (s.lek === 'ring-of-fire' && s.rekke[s.pos].v === 'K') s.konger++;
       s.kort = visKort(s, data);
