@@ -9,7 +9,7 @@ const EN = lang === 'en';
 const S = { navn: SELGER.navn, orgnr: SELGER.orgnr, adresse: SELGER.adresse, epost: SELGER.epost || CONTACT_EMAIL };
 ---
 <Base title={EN ? 'Receipt' : 'Kvittering'} description={EN ? 'Receipt for mittvors pluss.' : 'Kvittering for mittvors pluss.'} lang={lang} noindex={true}>
-  <div id="kv" class="kv"><p class="small">{EN ? 'Loading receipt …' : 'Henter kvitteringen …'}</p></div>
+  <div id="kv" class="kv"><h1>{EN ? 'Receipt' : 'Kvittering'}</h1><p class="small">{EN ? 'Loading receipt …' : 'Henter kvitteringen …'}</p></div>
 
   <script is:inline data-astro-rerun define:vars={{ S, EN }}>
   (function () {
@@ -21,12 +21,12 @@ const S = { navn: SELGER.navn, orgnr: SELGER.orgnr, adresse: SELGER.adresse, epo
     function dato(d) { var x = new Date(d); if (!d || isNaN(x)) return '–'; return x.toLocaleString(EN ? 'en-GB' : 'nb-NO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo' }); }
     var ref = new URLSearchParams(location.search).get('ref') || '';
     if (!K || !K.les || !K.les()) {
-      root.innerHTML = '<p>' + T('Logg inn med kontoen som kjøpte for å se kvitteringen.', 'Log in with the account that made the purchase to see the receipt.') + '</p><p><a class="btn gold" href="' + T('/no/account', '/account') + '">' + T('Logg inn', 'Log in') + '</a></p>';
+      root.innerHTML = '<h1>' + T('Kvittering', 'Receipt') + '</h1><p>' + T('Logg inn med kontoen som kjøpte for å se kvitteringen.', 'Log in with the account that made the purchase to see the receipt.') + '</p><p><a class="btn gold" href="' + T('/no/account', '/account') + '">' + T('Logg inn', 'Log in') + '</a></p>';
       return;
     }
     K.api('/api/pluss/kvittering?ref=' + encodeURIComponent(ref), { headers: { 'x-lang': EN ? 'en' : 'no' } }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (d) {
-        if (!r.ok) { root.innerHTML = '<p class="rom-feil">' + esc(d.melding || T('Fant ikke kvitteringen.', 'Receipt not found.')) + '</p>'; return; }
+        if (!r.ok) { root.innerHTML = '<h1>' + T('Kvittering', 'Receipt') + '</h1><p class="rom-feil" role="alert">' + esc(d.melding || T('Fant ikke kvitteringen.', 'Receipt not found.')) + '</p>'; return; }
         var produkt = d.produkt === 'aar' ? T('mittvors pluss – årspass (365 dager)', 'mittvors pluss – year pass (365 days)') : T('mittvors pluss – kveldspass (24 timer)', 'mittvors pluss – night pass (24 hours)');
         var kr = (d.belopOre / 100).toFixed(2).replace('.', EN ? '.' : ',');
         root.innerHTML =
