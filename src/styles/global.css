@@ -637,12 +637,6 @@ body:has(.nr) .tool.dice{display:none}
 @media (hover:hover) and (pointer:fine){.nr-pille:hover{text-decoration:none;border-color:var(--gold)}}
 
 /* ---------- Populært nå ---------- */
-.pop{margin:28px 0 8px}
-.pop h2{margin-bottom:4px}
-.pop-sub{margin:0 0 12px}
-.pop-lab{font-family:var(--display);font-weight:700;font-size:13px;color:var(--faint);margin:12px 0 8px}
-.pop .sitchip.pop-topp{border-color:rgb(var(--volt-rgb) / .6)}
-.pop .sitchip.pop-topp .st::before{content:"1 ";color:var(--gold-t);font-weight:800}
 
 /* ---------- Forræder og Gjett året ---------- */
 .fr-ordre{font-family:var(--display);font-weight:800;font-size:clamp(30px,8vw,40px);margin:14px 0 6px}
