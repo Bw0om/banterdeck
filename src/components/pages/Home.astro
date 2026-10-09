@@ -106,6 +106,10 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
       </div>
     </section>
   </div>
+
+  <!-- Topp 3: rett under toppen, så det er det første man ser når man blar videre -->
+  <PopulaertNaa lang={lang} />
+
   <a class="h2-rom" href={ROM} hidden>
     <span><b>{N('Spill sammen fra hver sin telefon', 'Play together from your own phones')}</b><small>{N('Lag et rom og del koden', 'Create a room and share the code')}</small></span>
     <span class="kode" aria-hidden="true">ABCD</span>
@@ -190,7 +194,6 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     </div>
   </section>
 
-  <PopulaertNaa lang={lang} />
 
   <AdSlot />
 

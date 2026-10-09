@@ -152,4 +152,43 @@ h3,.h3{font-stretch:normal;font-weight:700}
 :root{accent-color:var(--gold)}
 .pluss-pakker .stokk-kort b{font-family:var(--serif);font-weight:560;font-size:20px}
 
-@media (prefers-reduced-motion:reduce){.h2-hero h1{animation:none}}
+/* =====================================================================
+   TOPP 3 – tre leker med rang. Nr. 1 får plass og bilde; 2 og 3 står ved siden av.
+   Tallene er kursiv Fraunces i champagne: det første øyet treffer.
+   ===================================================================== */
+.topp3{margin-top:clamp(48px,7vw,80px)}
+.topp3-hode{margin-bottom:18px}
+.topp3 h2{margin:0;font-size:clamp(30px,4vw,42px)}
+.topp3-sub{margin:6px 0 0;color:var(--muted);font-size:16px}
+.topp3-liste{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.topp3-rad.r1{grid-column:1 / -1}
+.topp3-rad a{position:relative;display:flex;flex-direction:column;height:100%;padding:10px 10px 16px;border-radius:22px;background:var(--card);
+  border:1px solid var(--border);color:var(--ink);text-decoration:none;transition:scale 160ms var(--ease-out),border-color 200ms ease}
+.topp3-rad.r1 a{border-color:var(--hårstrek);background:linear-gradient(165deg,rgb(var(--volt-rgb) / .09),transparent 55%),var(--card);padding:12px 12px 22px}
+.topp3-bilde{display:block;border-radius:14px;overflow:hidden;background:var(--card2)}
+.topp3-bilde img{display:block;width:100%;height:auto;aspect-ratio:240/126;object-fit:cover;transition:scale 400ms var(--ease-out)}
+.topp3-nr{font-family:var(--serif);font-style:italic;font-weight:460;line-height:.8;letter-spacing:-.04em;color:var(--gold-t);
+  font-variant-numeric:lining-nums;font-size:56px;margin:-26px 0 2px 6px;position:relative;text-shadow:0 2px 14px rgb(var(--bg-rgb) / .9)}
+.topp3-rad.r1 .topp3-nr{font-size:clamp(96px,22vw,132px);margin:-52px 0 0 10px}
+.topp3-tekst{display:flex;flex-direction:column;gap:4px;padding:0 6px}
+.topp3-tekst b{font-family:var(--serif);font-weight:560;font-size:20px;line-height:1.1;letter-spacing:-.01em;text-wrap:balance}
+.topp3-rad.r1 .topp3-tekst b{font-size:clamp(28px,6vw,36px);letter-spacing:-.02em}
+.topp3-tekst small{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--faint)}
+.topp3-tekst small i{font-style:normal;font-size:12px;font-weight:700;color:var(--gold-t);padding:2px 8px;border-radius:6px;box-shadow:inset 0 0 0 1px var(--hårstrek)}
+.topp3-rad a:active{scale:.985}
+@media (hover:hover) and (pointer:fine){
+  .topp3-rad a:hover{border-color:var(--hårstrek)}
+  .topp3-rad a:hover .topp3-bilde img{scale:1.04}
+  .topp3-rad a:hover .topp3-tekst b{color:var(--gold-t)}
+}
+/* Stor skjerm: nr. 1 til venstre, 2 og 3 som rader til høyre */
+@media (min-width:760px){
+  .topp3-liste{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-template-rows:1fr 1fr;gap:14px}
+  .topp3-rad.r1{grid-column:1;grid-row:1 / span 2}
+  .topp3-rad:not(.r1) a{display:grid;grid-template-columns:minmax(0,46%) auto 1fr;align-items:center;gap:0 14px;padding:10px 18px 10px 10px}
+  .topp3-rad:not(.r1) .topp3-nr{margin:0;font-size:72px}
+  .topp3-rad:not(.r1) .topp3-tekst{padding:0}
+  .topp3-rad.r1 .topp3-nr{font-size:140px;margin-top:-64px}
+}
+
+@media (prefers-reduced-motion:reduce){.h2-hero h1{animation:none}.topp3-bilde img{transition:none}}
