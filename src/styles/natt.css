@@ -478,6 +478,114 @@ html:not([data-theme="light"]).i-spill :is(.rom-kort,.rof-kort){background:#F7EF
 @media (prefers-reduced-motion:reduce){.spill-inn{animation:spillInnRolig 200ms ease-out both}}
 @keyframes spillInnRolig{from{opacity:0}}
 
+/* =====================================================================
+   ALLE SVARER (Jeg har aldri) – svar i hemmelighet, avslør samtidig
+   Bevegelse bare når noe skjer: et nytt svar dytter én prikk, avsløringen
+   toner inn én gang (tallet først, så navnene). Klassene .ny og .inn settes
+   bare ved endring i rom.js, så en ny tegning spiller dem ikke på nytt.
+   ===================================================================== */
+.aldri-valg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%;max-width:420px;margin-top:6px}
+.aldri-valg button{min-height:92px;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  transition:transform 140ms var(--ease-out),box-shadow 140ms var(--ease-out)}
+.aldri-valg b{font-family:var(--display);font-stretch:118%;font-weight:900;font-size:24px;letter-spacing:-.02em}
+.aldri-valg small{font-weight:700;font-size:14px}
+.aldri-har{border:0;background:var(--accent);color:var(--ink2);box-shadow:0 6px 0 var(--glo-dyp)}
+.aldri-har small{opacity:.75}
+.aldri-aldri{border:1.5px solid var(--hårstrek);background:var(--card);color:var(--ink);box-shadow:0 6px 0 var(--bg2)}
+.aldri-aldri small{color:var(--muted)}
+.aldri-har:active{transform:translateY(5px);box-shadow:0 1px 0 var(--glo-dyp)}
+.aldri-aldri:active{transform:translateY(5px);box-shadow:0 1px 0 var(--bg2)}
+.aldri-valg button[aria-pressed=true]{outline:2px solid var(--gold);outline-offset:3px}
+.aldri-hint{margin:0;font-size:14.5px;font-weight:600;color:var(--muted);text-align:center}
+.aldri-mitt{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;max-width:420px;box-sizing:border-box;padding:6px 8px 6px 16px;border-radius:18px;background:var(--card);border:1px solid var(--hårstrek)}
+.aldri-mitt span{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
+.aldri-mitt svg{color:var(--gold);flex:none}
+.aldri-mitt b{color:var(--gold-t)}
+.aldri-mitt .linkbtn{min-height:44px;padding:0 8px}
+.aldri-vis{min-height:48px;padding:0 20px;border-radius:24px;border:1.5px solid var(--hårstrek);background:none;color:var(--ink);font-weight:700;font-size:15px;transition:transform 140ms var(--ease-out)}
+.aldri-vis:active{transform:scale(.97)}
+.aldri-status{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:6px}
+.aldri-folk{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.aldri-folk span{width:40px;height:40px;box-sizing:border-box;border-radius:50%;border:1.5px dashed var(--hårstrek);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.aldri-folk span.svart{background:var(--gold);border:1.5px solid var(--gold);color:var(--ink2)}
+.aldri-folk span.ny{animation:aldriSvar 260ms var(--ease-out)}
+@keyframes aldriSvar{from{transform:scale(.86);opacity:.6}}
+.rom-kort.aldri-liten{min-height:0}
+.rom-kort.aldri-liten p{font-size:clamp(20px,5.4vw,26px)}
+.aldri-avslort{width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px;text-align:left}
+.aldri-tall{margin:4px 0 2px;font-size:clamp(30px,8.6vw,38px)}
+.aldri-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.aldri-liste li{display:flex;align-items:center;justify-content:space-between;min-height:50px;padding:0 10px 0 16px;border-radius:16px;background:var(--card);border:1.5px solid transparent}
+.aldri-liste li span{font-weight:800;font-size:17px}
+.aldri-liste li b{font-weight:800;font-size:14px;color:var(--ink2);background:var(--accent);padding:5px 12px;border-radius:999px}
+.aldri-liste li.meg{border-color:var(--gold)}
+.aldri-fri,.aldri-ingen{margin:0;font-size:15px;color:var(--muted);line-height:1.45}
+.aldri-fri b{color:var(--ink)}
+.aldri-mest{margin:0;font-size:14px;color:var(--faint)}
+.aldri-avslort.inn .aldri-tall{animation:aldriInn 280ms var(--ease-out) both}
+.aldri-avslort.inn .aldri-liste li{animation:aldriInn 240ms var(--ease-out) both;animation-delay:calc(120ms + min(var(--i, 0), 8) * 50ms)}
+.aldri-avslort.inn :is(.aldri-fri,.aldri-ingen,.aldri-mest){animation:aldriTon 240ms var(--ease-out) 200ms both}
+@keyframes aldriInn{from{opacity:0;transform:translateY(8px)}}
+@keyframes aldriTon{from{opacity:0}}
+.aldri-bryter{margin:6px 0 0;text-align:center}
+.aldri-bryter .linkbtn{min-height:44px;font-size:14px;color:var(--muted)}
+
+/* ---------- Slurker: hva du har drukket, og hva du kan dele ut ---------- */
+.slurkelinje{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;max-width:420px;margin:14px auto 4px;padding:8px;box-sizing:border-box;border-radius:22px;background:var(--card)}
+.sl-celle,.sl-gi{display:flex;flex-direction:column;justify-content:center;gap:2px;min-height:62px;padding:6px 14px;border-radius:15px;text-align:left;box-sizing:border-box}
+.sl-celle{background:var(--bg2)}
+.sl-celle small,.sl-gi small{font-size:13px;font-weight:700;color:var(--muted)}
+.sl-tall{display:inline-block;font-family:var(--display);font-stretch:100%;font-weight:900;font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.sl-gi{border:0;background:var(--gull-glans);color:var(--ink2);transition:transform 140ms var(--ease-out)}
+.sl-gi small{color:inherit;opacity:.75}
+.sl-gi span{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.sl-gi em{font-style:normal;font-weight:800;font-size:15px}
+.sl-gi:active{transform:scale(.97)}
+.sl-gi:disabled{background:var(--card2);color:var(--faint)}
+.sl-gi:disabled small{color:var(--faint);opacity:1}
+/* Tallet endret seg: et kort dytt, så øyet finner det */
+.sl-tall.okt,.sl-gi.okt .sl-tall{animation:slDytt 320ms var(--ease-out)}
+@keyframes slDytt{40%{transform:scale(1.14)}}
+
+/* Arket «Del ut»: glass som fylles, en bryter som glir, merker som skifter farge */
+.ut-ark .rom-tavle-topp h2 em{font-style:italic;font-weight:440;color:var(--gold-t)}
+html .ut-ark .rom-stor-knapp,html.i-spill .ut-ark .rom-stor-knapp{position:static}
+.reak-linje .reak-send{white-space:nowrap}
+.ut-rad{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 4px}
+.ut-glass{display:flex;flex-wrap:wrap;gap:6px}
+.ut-glass svg{width:24px;height:28px}
+.ut-glass path{fill:transparent;stroke:var(--gold);stroke-width:1.8;stroke-linejoin:round;transition:fill 160ms ease}
+.ut-glass svg.fylt path{fill:var(--gold)}
+.ut-steg{display:flex;gap:6px}
+.ut-steg button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--hårstrek);background:none;color:var(--ink);font-size:22px;font-weight:700;transition:transform 120ms var(--ease-out),opacity 150ms ease}
+.ut-steg button:active{transform:scale(.92)}
+.ut-steg button:disabled{opacity:.35}
+.ut-spar,.ut-forklar{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--muted);line-height:1.4}
+.ut-forklar{font-weight:500}
+.ut-modus{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px;border-radius:16px;background:var(--bg);margin-bottom:8px}
+.ut-modus i{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 6px);border-radius:12px;background:var(--gold);transition:transform 220ms var(--ease-in-out)}
+.ut-modus.velg i{transform:translateX(calc(100% + 4px))}
+.ut-modus button{position:relative;min-height:46px;border:0;border-radius:12px;background:none;color:var(--muted);font-weight:800;font-size:16px;transition:color 200ms ease}
+.ut-modus button[aria-pressed=true]{color:var(--ink2)}
+.ut-liste{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:6px}
+.ut-liste button{width:100%;display:flex;align-items:center;gap:12px;min-height:54px;padding:0 10px 0 12px;border-radius:14px;border:1.5px solid transparent;background:var(--bg);color:var(--ink);text-align:left;transition:border-color 150ms ease}
+.ut-liste button.valgt{border-color:var(--gold)}
+.ut-init{width:34px;height:34px;flex:none;border-radius:50%;background:var(--card2);color:var(--gold-t);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.ut-navn{flex:1;display:flex;flex-direction:column;min-width:0}
+.ut-navn b{font-size:16px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ut-navn small{font-size:13px;color:var(--faint)}
+.ut-merke{min-width:44px;height:32px;box-sizing:border-box;padding:0 12px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;font-variant-numeric:tabular-nums;color:var(--faint);
+  transition:background-color 160ms ease,color 160ms ease}
+.ut-merke.pa{background:var(--accent);color:var(--ink2)}
+.ut-merke.tom{border:1.5px dashed var(--hårstrek)}
+.ut-send{width:100%;max-width:none}
+.ut-send:disabled{background:var(--card2);color:var(--faint);box-shadow:none}
+@media (prefers-reduced-motion:reduce){
+  .aldri-folk span.ny,.sl-tall.okt,.sl-gi.okt .sl-tall{animation:none}
+  .aldri-avslort.inn .aldri-tall,.aldri-avslort.inn .aldri-liste li{animation-name:aldriTon}
+  .ut-modus i{transition:none}
+}
+
 /* Bingo: lange ord krymper litt i stedet for å deles midt i ordet */
 .rom-bingo b{overflow-wrap:break-word}
 .rom-bingo b.lang{font-size:clamp(10.5px,3vw,13px)}
