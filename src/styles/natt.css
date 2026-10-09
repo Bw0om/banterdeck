@@ -490,7 +490,7 @@ html:not([data-theme="light"]).i-spill :is(.rom-kort,.rof-kort){background:#F7EF
 .aldri-valg b{font-family:var(--display);font-stretch:118%;font-weight:900;font-size:24px;letter-spacing:-.02em}
 .aldri-valg small{font-weight:700;font-size:14px}
 .aldri-har{border:0;background:var(--accent);color:var(--ink2);box-shadow:0 6px 0 var(--glo-dyp)}
-.aldri-har small{opacity:.75}
+.aldri-har small{color:var(--ink2)}
 .aldri-aldri{border:1.5px solid var(--hårstrek);background:var(--card);color:var(--ink);box-shadow:0 6px 0 var(--bg2)}
 .aldri-aldri small{color:var(--muted)}
 .aldri-har:active{transform:translateY(5px);box-shadow:0 1px 0 var(--glo-dyp)}
@@ -556,6 +556,8 @@ html .ut-ark .rom-stor-knapp,html.i-spill .ut-ark .rom-stor-knapp{position:stati
 .ut-glass svg{width:24px;height:28px}
 .ut-glass path{fill:transparent;stroke:var(--gold);stroke-width:1.8;stroke-linejoin:round;transition:fill 160ms ease}
 .ut-glass svg.fylt path{fill:var(--gold)}
+:root[data-theme="light"] .ut-glass path{stroke:var(--volt-kant)}
+:root[data-theme="light"] .ut-glass svg.fylt path{fill:var(--volt-kant)}
 .ut-steg{display:flex;gap:6px}
 .ut-steg button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--hårstrek);background:none;color:var(--ink);font-size:22px;font-weight:700;transition:transform 120ms var(--ease-out),opacity 150ms ease}
 .ut-steg button:active{transform:scale(.92)}

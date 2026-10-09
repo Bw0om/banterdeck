@@ -39,6 +39,8 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;
              radial-gradient(80% 50% at -10% 0%,rgb(var(--volt-rgb) / .08),transparent 55%),
              linear-gradient(180deg,var(--bg2),var(--bg) 40%)}
 a{color:var(--gold-t);text-decoration:none}
+/* Lenker midt i løpende tekst må skilles fra teksten rundt med mer enn farge (WCAG 1.4.1) */
+:is(p,label) a:not([class]){text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.18em}
 @media (hover:hover) and (pointer:fine){a:hover{text-decoration:underline;text-underline-offset:3px}}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
 button{font:inherit;cursor:pointer}
@@ -77,7 +79,7 @@ ul.plain{list-style:none}
 .foot a{color:var(--faint)}
 
 @media (max-width:899px){
-  .shell{grid-template-columns:1fr}
+  .shell{grid-template-columns:1fr;align-content:start}   /* korte sider: ikke strekk topplinja for å fylle skjermen */
   .side{display:none}
   .topbars{display:block;min-width:0;position:sticky;top:0;z-index:20;transition:transform 260ms var(--ease-drawer);
     background:rgb(var(--bg-rgb) / .92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
