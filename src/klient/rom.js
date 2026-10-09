@@ -2579,8 +2579,12 @@ export function startRom(LEKNAVN, LANG) {
     // Nytt skjermbilde (lobby, ny lek, oppsummering): start øverst. Ellers: behold plassen.
     var skjerm = s ? 'spill:' + s.type + ':' + (s.navn && s.navn.no ? s.navn.no : s.navn) : tilstand.ferdig ? 'ferdig' : 'lobby';
     // 'instant': ellers stopper neste tegning en myk rulling midt på siden
+    // Ny lek (ikke første tegning): leken toner inn, og første kort deles ikke ut i tillegg
+    var nyLek = !!(s && sisteSkjerm && skjerm !== sisteSkjerm);
+    if (nyLek) spillInnFra = Date.now();
     if (skjerm !== sisteSkjerm) { sisteSkjerm = skjerm; window.scrollTo({ top: 0, behavior: 'instant' }); } else window.scrollTo({ top: y, behavior: 'instant' });
-    if (kortByttet) delUtKort(gammeltKort, gammelRekt);
+    if (kortByttet && !nyLek) delUtKort(gammeltKort, gammelRekt);
+    spillInn();
     tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
     if (tsValgt !== undefined) { var r = document.querySelector('input[name=tsL][value="' + tsValgt + '"]'); if (r) r.checked = true; }
     var nrNy = document.getElementById('nrInput');
@@ -2653,6 +2657,7 @@ export function startRom(LEKNAVN, LANG) {
      Alle telefonene får samme kort samtidig. En kjapp bevegelse (et kvart sekund) gjør at alle
      ser at noe nytt kom – også den som så bort – og telefonen føles som en kortstokk. */
   var sistKortNokkel = '', tegnetFor = false;   // første tegning (f.eks. etter oppdatering av siden) skal ikke animeres
+  var spillInnFra = 0;   // når en ny lek kom inn på skjermen – inngangen skal overleve neste tegning
   function roligBevegelse() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
   function kortNokkel(s) {
     if (!s || s.ring) return '';   // ringen i Ring of Fire har sin egen dra-bevegelse
@@ -2668,6 +2673,14 @@ export function startRom(LEKNAVN, LANG) {
     klon.style.cssText = 'position:fixed;left:' + rekt.left + 'px;top:' + rekt.top + 'px;width:' + rekt.width + 'px;height:' + rekt.height + 'px;margin:0;z-index:60;pointer-events:none';
     document.body.appendChild(klon);
     setTimeout(function () { klon.remove(); }, 450);
+  }
+  /** Ny lek: la leken tone inn. Kommer det en ny tegning midt i, fortsetter den der den var. */
+  function spillInn() {
+    var gaatt = Date.now() - spillInnFra, el = root.querySelector('.rom-spill');
+    if (!el || gaatt >= 300) return;
+    el.style.animationDelay = -gaatt + 'ms';
+    el.classList.add('spill-inn');
+    el.addEventListener('animationend', function (e) { if (e.target === el) { el.classList.remove('spill-inn'); el.style.animationDelay = ''; } });
   }
 
   /* ---------- «Trykk igjen»: det som ikke kan angres, krever to rolige trykk ----------

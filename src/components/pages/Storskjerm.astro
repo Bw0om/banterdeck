@@ -85,6 +85,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (navn === 'knus') { stoy(0, 0.35, 0.7, 4000, 'highpass'); stoy(0, 0.15, 0.6, 900, 'bandpass'); [3100, 4200, 2600, 5200, 3700].forEach(function (f, i) { tone(f, 0.03 + i * 0.05, 0.25, 'triangle', 0.08); }); stoy(0.45, 0.5, 0.3, 6000, 'highpass'); }
       if (navn === 'sirene') { for (var i = 0; i < 4; i++) { tone(650, i * 0.5, 0.25, 'sawtooth', 0.07, 950); tone(950, i * 0.5 + 0.25, 0.25, 'sawtooth', 0.07, 650); } }
       if (navn === 'inn') { tone(784, 0, 0.12, 'square', 0.08); tone(1175, 0.11, 0.3, 'triangle', 0.2); }
+      if (navn === 'intro') { tone(523, 0, 0.18, 'triangle', 0.12); tone(784, 0.16, 0.5, 'triangle', 0.14); }
       if (navn === 'vann') { tone(520, 0, 0.11, 'sine', 0.32, 1400); tone(700, 0.24, 0.1, 'sine', 0.24, 1800); tone(460, 0.52, 0.15, 'sine', 0.3, 1250); }
     }
 
@@ -138,6 +139,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         meldte: (b.meldte || []).map(function (a) { return a.id; }), saker: (b.saker || []).map(function (x) { return x.id + ':' + (x.dom === true ? 'd' : ''); }),
         vinner: (d.kveld && d.kveld.vinner) || '', ferdig: !!d.ferdig, hend: d.hendelse ? d.hendelse.nr : 0, reak: (d.reak || []).length ? d.reak[d.reak.length - 1].nr : 0,
         fase: s.type + ':' + (s.fase || ''), spillere: (d.spillere || []).length, vann: d.vann ? d.vann.nr : 0,
+        lek: d.spill ? [d.spill.antallLeker || 0, d.spill.type, d.spill.lek || '', d.spill.navn].join('|') : '',
       };
       (d.spillere || []).forEach(function (p) { na.slurker[p.id] = p.slurker || 0; });
       if (!sett) { sett = na; return; }
@@ -153,6 +155,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (na.meldte.some(function (id) { return sett.meldte.indexOf(id) === -1; })) { spill('dundun'); var a = (b.meldte || []).find(function (x) { return sett.meldte.indexOf(x.id) === -1; }); if (a) visBanner('📣 ' + T('MELDT: ', 'REPORTED: ') + (a.type === 'hvem' ? navn(a.utfall) + ' – ' : '') + a.q, T('Stem på telefonen – skjedde det?', 'Vote on your phone – did it happen?')); }
       var nyeSaker = na.saker.filter(function (x) { return sett.saker.indexOf(x) === -1; });
       if (nyeSaker.length) visBlalys(nyeSaker.some(function (x) { return /:d$/.test(x); }));
+      // Ny lek: tittelkort på TV-en. Kvelden er over: bort med det.
+      if (na.lek && na.lek !== sett.lek) visIntro(d);
+      if (na.ferdig) stoppIntro();
       if ((na.vinner && na.vinner !== sett.vinner) || (na.ferdig && !sett.ferdig)) spill('fanfare');
       else if (na.kortNr && na.kortNr !== sett.kortNr) spill('pop');
       if (na.fase !== sett.fase && /mest:resultat|forraeder:avslort/.test(na.fase)) spill('svar');
@@ -164,6 +169,27 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     }
     function lag(kl, html, ms) { var el = document.createElement('div'); el.className = kl; el.innerHTML = html; document.body.appendChild(el); setTimeout(function () { el.remove(); }, ms || 3000); return el; }
     var drikkEl = null, drikkT = null, drikkListe = {};
+    /* ---------- tittelkort: en ny lek starter, alle ser mot TV-en samtidig ---------- */
+    var introEl = null, introT = [];
+    function stoppIntro() {
+      introT.forEach(clearTimeout); introT = [];
+      if (introEl) { introEl.remove(); introEl = null; }
+      document.body.classList.remove('tv-intro-paa');
+    }
+    function visIntro(d) {
+      stoppIntro();
+      var s = d.spill, forste = s.antallLeker === 1, rolig = false;
+      try { rolig = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+      var folk = forste ? (d.spillere || []).map(function (p, i) { return '<span style="animation-delay:' + (450 + Math.min(i, 11) * 60) + 'ms">' + esc(p.navn) + '</span>'; }).join('') : '';
+      var ut = forste ? (rolig ? 2000 : 2800) : (rolig ? 1400 : 1800);
+      introEl = lag('tv-intro', '<p class="tv-intro-etikett">' + (forste ? T('Kvelden er i gang', 'The night is on') : T('Neste lek', 'Next game')) + '</p>' +
+        '<h1>' + esc(s.navn) + '</h1><i class="tv-intro-strek" aria-hidden="true"></i>' + (folk ? '<div class="tv-intro-folk">' + folk + '</div>' : ''), ut + 400);
+      introEl.setAttribute('aria-hidden', 'true');
+      document.body.classList.add('tv-intro-paa');
+      spill('intro');
+      introT.push(setTimeout(function () { if (introEl) introEl.classList.add('ut'); document.body.classList.remove('tv-intro-paa'); }, ut));
+      introT.push(setTimeout(function () { introEl = null; introT = []; }, ut + 400));
+    }
     function visDrikk(liste, fri) {
       if (!drikkEl) { drikkListe = {}; drikkEl = lag('tv-drikk', '', 60000); spill('slurk'); }
       liste.forEach(function (x) { drikkListe[x.navn] = (drikkListe[x.navn] || 0) + x.n; });
@@ -386,6 +412,29 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tv-kode b,.tv-liste li b,.tv-pris em{font-stretch:66%;font-weight:900}
     .tv-lobby h1{font-stretch:68%;font-size:4.2em;letter-spacing:.02em}
     .tv-side section{background:rgb(var(--card-rgb) / .7)}
+    /* Tittelkort når en ny lek starter: hele rommet ser opp samtidig */
+    .tv-intro{position:fixed;inset:0;z-index:8500;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;padding:4vh 8vw;text-align:center;
+      background:radial-gradient(ellipse at top,#2A1A22,#0A0609 70%);animation:tvIntroLag 200ms var(--ease-out) both}
+    .tv-intro.ut{animation:tvIntroUt 400ms var(--ease-out) forwards}
+    .tv-intro-etikett{margin:0;color:var(--gold);font-weight:800;font-size:1.3em;animation:tvIntroOpp 400ms var(--ease-out) 100ms both}
+    .tv-intro h1{margin:0;font-family:var(--display);font-stretch:125%;font-weight:900;letter-spacing:-.03em;font-size:6.5vw;line-height:1.05;max-width:18ch;text-wrap:balance;animation:tvIntroNavn 600ms var(--ease-out) 150ms both}
+    .tv-intro-strek{width:12vw;height:3px;border-radius:3px;background:var(--gold);transform-origin:center;animation:tvIntroStrek 600ms var(--ease-in-out) 300ms both}
+    .tv-intro-folk{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 14px;max-width:70vw;margin-top:1vh}
+    .tv-intro-folk span{background:var(--card2);padding:8px 18px;border-radius:999px;font-weight:700;font-size:1.2em;animation:tvIntroOpp 300ms var(--ease-out) both}
+    .tv-hoved{transition:opacity 500ms var(--ease-out),transform 500ms var(--ease-out)}
+    body.tv-intro-paa .tv-hoved{opacity:0;transform:translateY(12px) scale(.98);transition:none}
+    @keyframes tvIntroLag{from{opacity:0}}
+    @keyframes tvIntroUt{to{opacity:0}}
+    @keyframes tvIntroOpp{from{opacity:0;transform:translateY(8px)}}
+    @keyframes tvIntroNavn{from{opacity:0;transform:scale(.96)}}
+    @keyframes tvIntroStrek{from{transform:scaleX(0)}}
+    @keyframes tvIntroFade{from{opacity:0}}
+    @media (prefers-reduced-motion:reduce){
+      .tv-intro-etikett,.tv-intro h1,.tv-intro-folk span{animation-name:tvIntroFade}
+      .tv-intro-strek{animation:tvIntroFade 300ms ease-out both}
+      .tv-hoved{transition:opacity 500ms var(--ease-out)}
+      body.tv-intro-paa .tv-hoved{transform:none}
+    }
   </style>
 </body>
 </html>

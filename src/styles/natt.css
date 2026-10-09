@@ -472,6 +472,11 @@ html:not([data-theme="light"]).i-spill :is(.rom-kort,.rof-kort){background:#F7EF
 .kort-ut.tilbake{animation-name:kortUtTilbake}
 @keyframes kortUtTilbake{to{transform:translate(125%,-20px) rotate(18deg);opacity:.2}}
 @media (prefers-reduced-motion:reduce){.kort-inn,.kort-ut{animation:none}}
+/* Ny lek: leken toner rolig inn på alle telefonene. Kort – den som har tur skal kunne spille med en gang. */
+.spill-inn{animation:spillInn 300ms var(--ease-out) both}
+@keyframes spillInn{from{opacity:0;transform:translateY(12px) scale(.98)}}
+@media (prefers-reduced-motion:reduce){.spill-inn{animation:spillInnRolig 200ms ease-out both}}
+@keyframes spillInnRolig{from{opacity:0}}
 
 /* Bingo: lange ord krymper litt i stedet for å deles midt i ordet */
 .rom-bingo b{overflow-wrap:break-word}
