@@ -1,0 +1,216 @@
+---
+// Stua: en isometrisk stue tegnet med tykk strek. Én ny gjest går inn døra for hver bokstav i romkoden,
+// TV-en viser koden, og folka kan dras rundt. Ingenting beveger seg uten at noen klikker, drar eller skriver.
+// Skriptet legger også ut en liten fjærmotor (window.mvFjaer) som resten av forsiden bruker.
+import type { Lang } from '../lib/i18n';
+const { lang = 'no' } = Astro.props as { lang?: Lang };
+const no = lang === 'no';
+---
+<div class="stua">
+  <svg id="stuaScene" viewBox="62 -4 396 326" role="img" aria-labelledby="stuaTekst">
+    <title id="stuaTekst">{no ? 'En tegnet stue: TV-en på veggen viser romkoden, venner står rundt et bord, og en ny gjest kommer inn døra for hver bokstav du skriver.' : 'A drawn living room: the TV shows the room code, friends stand around a table, and a new guest walks in for every letter you type.'}</title>
+  </svg>
+  <span class="stua-hint" aria-hidden="true">{no ? 'Dra i folka' : 'Drag the people'}</span>
+</div>
+
+<style>
+  .stua{position:relative}
+  .stua svg{display:block;width:100%;height:auto;overflow:visible}
+  .stua :global(.figur){cursor:grab;touch-action:none}
+  .stua :global(.figur:active){cursor:grabbing}
+  .stua-hint{position:absolute;right:2px;top:4px;font-family:var(--display);font-stretch:80%;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;
+    background:var(--papir);color:var(--blekk);border:2.5px solid var(--blekk);padding:3px 8px;box-shadow:3px 3px 0 var(--blekk);transform:rotate(2deg)}
+  @media (max-width:560px){.stua-hint{font-size:11px}}
+</style>
+
+<script is:inline data-astro-rerun>
+(function () {
+  var svg = document.getElementById('stuaScene'); if (!svg || svg.dataset.bound) return; svg.dataset.bound = '1';
+  var REDUSERT = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var NS = 'http://www.w3.org/2000/svg', B = '#16120F';
+
+  /* ---------- Fjær: dempingsgrad 0,8 gir omtrent 1,5 % oversving ---------- */
+  if (!window.mvFjaer) (function () {
+    function fjaer(k, z) { return { k: k, c: 2 * z * Math.sqrt(k) }; }
+    var aktive = new Set(), gaar = false;
+    function start(o) {
+      aktive.add(o); if (gaar) return; gaar = true; var t0 = performance.now();
+      requestAnimationFrame(function steg(t) {
+        var dt = Math.min(.032, (t - t0) / 1000); t0 = t;
+        aktive.forEach(function (x) { if (x.steg(dt)) aktive.delete(x); });
+        if (aktive.size) requestAnimationFrame(steg); else gaar = false;
+      });
+    }
+    function Verdi(v, f) { this.v = v; this.mal = v; this.fart = 0; this.f = f || MYK; }
+    Verdi.prototype.tikk = function (dt) {
+      var a = -this.f.k * (this.v - this.mal) - this.f.c * this.fart;
+      this.fart += a * dt; this.v += this.fart * dt;
+      if (Math.abs(this.fart) < .002 && Math.abs(this.v - this.mal) < .002) { this.v = this.mal; this.fart = 0; return true; }
+      return false;
+    };
+    var MYK = fjaer(170, .8), RASK = fjaer(320, .82);
+    window.mvFjaer = { Verdi: Verdi, start: start, stopp: function (o) { aktive.delete(o); }, MYK: MYK, RASK: RASK, redusert: REDUSERT };
+  })();
+  var F = window.mvFjaer, Verdi = F.Verdi, start = F.start;
+
+  /* ---------- Figurer: emoji-ansikter med tykk strek ---------- */
+  var MUNN = {
+    smil: '<path d="M-6 -50q6 6 12 0" fill="none" stroke="' + B + '" stroke-width="2.6" stroke-linecap="round"/>',
+    glis: '<path d="M-7 -51h14q-1 8-7 8t-7-8z" fill="' + B + '"/><path d="M-5 -51h10v2.4h-10z" fill="#FFF8EE"/>',
+    o: '<ellipse cx="0" cy="-49" rx="3" ry="3.6" fill="' + B + '"/>',
+    tunge: '<path d="M-6 -51q6 5 12 0" fill="none" stroke="' + B + '" stroke-width="2.6" stroke-linecap="round"/><path d="M1 -48.5q2 4 5 0" fill="#FF5B1F" stroke="' + B + '" stroke-width="2"/>'
+  };
+  var OYNE = {
+    vanlig: '<circle cx="-5" cy="-57" r="2.3" fill="' + B + '"/><circle cx="5" cy="-57" r="2.3" fill="' + B + '"/>',
+    blunk: '<circle cx="-5" cy="-57" r="2.3" fill="' + B + '"/><path d="M2.5 -57h5" stroke="' + B + '" stroke-width="2.4" stroke-linecap="round"/>',
+    glad: '<path d="M-7.5 -56q2.5-3.5 5 0M2.5 -56q2.5-3.5 5 0" fill="none" stroke="' + B + '" stroke-width="2.4" stroke-linecap="round"/>'
+  };
+  var HAAR = {
+    kort: '<path d="M-15 -58a15 15 0 0 1 30 0q-8-6-15-3t-15 3z" fill="{h}" stroke="' + B + '" stroke-width="3" stroke-linejoin="round"/>',
+    lang: '<path d="M-16 -44v-14a16 16 0 0 1 32 0v14h-5v-12q-11-4-22 0v12z" fill="{h}" stroke="' + B + '" stroke-width="3" stroke-linejoin="round"/>',
+    lue: '<path d="M-15 -60a15 15 0 0 1 30 0z" fill="{h}" stroke="' + B + '" stroke-width="3" stroke-linejoin="round"/><path d="M-17 -60h34" stroke="' + B + '" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-76" r="3.6" fill="{h}" stroke="' + B + '" stroke-width="2.6"/>',
+    krus: '<g fill="{h}" stroke="' + B + '" stroke-width="3"><circle cx="-11" cy="-64" r="6"/><circle cx="0" cy="-69" r="7"/><circle cx="11" cy="-64" r="6"/></g>'
+  };
+  function figurHtml(p) {
+    return '<ellipse class="skygge" cx="0" cy="0" rx="16" ry="5" fill="' + B + '" opacity=".22"/><g class="kropp">' +
+      '<rect x="-10" y="-15" width="7" height="15" rx="2" fill="' + B + '"/><rect x="3" y="-15" width="7" height="15" rx="2" fill="' + B + '"/>' +
+      '<rect x="-14" y="-42" width="28" height="30" rx="9" fill="' + p.topp + '" stroke="' + B + '" stroke-width="3"/>' +
+      '<rect x="7" y="-34" width="10" height="15" rx="2.5" fill="' + B + '"/><rect x="9" y="-32" width="6" height="9" rx="1" fill="#FFE07A"/>' +
+      '<circle cx="0" cy="-56" r="15" fill="' + p.hud + '" stroke="' + B + '" stroke-width="3"/>' +
+      '<circle cx="-9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/><circle cx="9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/>' +
+      HAAR[p.haar].replace(/\{h\}/g, p.h) + OYNE[p.oyne] + MUNN[p.munn] + '</g>';
+  }
+  window.mvFigur = figurHtml;
+
+  /* ---------- Rommet ---------- */
+  function I(x, y, z) { return [260 + (x - y) * 30, 112 + (x + y) * 15 - (z || 0)]; }
+  function pts(a) { return a.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' '); }
+  function el(n, attr, mor) { var e = document.createElementNS(NS, n); for (var k in attr) e.setAttribute(k, attr[k]); (mor || svg).appendChild(e); return e; }
+  function flate(p, fyll, mor, ekstra) { return el('polygon', Object.assign({ points: pts(p), fill: fyll, stroke: B, 'stroke-width': 3, 'stroke-linejoin': 'round' }, ekstra || {}), mor); }
+  function boks(x, y, z, w, d, h, topp, v, hoy, mor) {
+    var g = el('g', {}, mor);
+    flate([I(x + w, y, z), I(x + w, y + d, z), I(x + w, y + d, z + h), I(x + w, y, z + h)], hoy, g);
+    flate([I(x, y + d, z), I(x + w, y + d, z), I(x + w, y + d, z + h), I(x, y + d, z + h)], v, g);
+    flate([I(x, y, z + h), I(x + w, y, z + h), I(x + w, y + d, z + h), I(x, y + d, z + h)], topp, g);
+    return g;
+  }
+  flate([I(0, 6, 0), I(6, 6, 0), I(6, 6, -16), I(0, 6, -16)], B);
+  flate([I(6, 0, 0), I(6, 6, 0), I(6, 6, -16), I(6, 0, -16)], B);
+  flate([I(0, 0), I(6, 0), I(6, 6), I(0, 6)], '#FFD23F');
+  for (var i = 1; i < 6; i++) el('line', { x1: I(i, 0)[0], y1: I(i, 0)[1], x2: I(i, 6)[0], y2: I(i, 6)[1], stroke: B, 'stroke-width': 1.5, opacity: .18 });
+  flate([I(1.3, 1.6), I(4.3, 1.6), I(4.3, 4.6), I(1.3, 4.6)], '#FF9CC2');
+  flate([I(1.7, 2.0), I(3.9, 2.0), I(3.9, 4.2), I(1.7, 4.2)], 'none', null, { 'stroke-dasharray': '6 6', 'stroke-width': 2.5 });
+  flate([I(0, 0, 0), I(0, 6, 0), I(0, 6, 100), I(0, 0, 100)], '#63E2A8');
+  flate([I(0, 0, 0), I(6, 0, 0), I(6, 0, 100), I(0, 0, 100)], '#FFF8EE');
+  flate([I(.9, 0, 40), I(2.6, 0, 40), I(2.6, 0, 86), I(.9, 0, 86)], '#1C1B1F');
+  el('line', { x1: I(1.75, 0, 40)[0], y1: I(1.75, 0, 40)[1], x2: I(1.75, 0, 86)[0], y2: I(1.75, 0, 86)[1], stroke: '#FFF8EE', 'stroke-width': 3 });
+  var mp = I(2.2, 0, 72); el('circle', { cx: mp[0], cy: mp[1], r: 7, fill: '#FFE07A', stroke: B, 'stroke-width': 2.5 });
+  var sp = I(1.25, 0, 64); el('circle', { cx: sp[0], cy: sp[1], r: 1.8, fill: '#FFF8EE' }); sp = I(1.5, 0, 78); el('circle', { cx: sp[0], cy: sp[1], r: 1.5, fill: '#FFF8EE' });
+  flate([I(3.0, 0, 44), I(3.9, 0, 44), I(3.9, 0, 88), I(3.0, 0, 88)], '#FF5B1F');
+  var pp = I(3.45, 0, 66); el('circle', { cx: pp[0], cy: pp[1], r: 8, fill: '#FFD23F', stroke: B, 'stroke-width': 2.5 });
+  flate([I(4.5, 0, 0), I(5.6, 0, 0), I(5.6, 0, 74), I(4.5, 0, 74)], B);
+  var dor = flate([I(4.5, 0, 0), I(5.6, 0, 0), I(5.6, 0, 74), I(4.5, 0, 74)], '#FF5B1F');
+  var hp = I(5.35, 0, 36), handtak = el('circle', { cx: hp[0], cy: hp[1], r: 3, fill: B });
+  flate([I(0, 4.5, 36), I(0, 1.5, 36), I(0, 1.5, 86), I(0, 4.5, 86)], B);
+  flate([I(0, 4.3, 40), I(0, 1.7, 40), I(0, 1.7, 82), I(0, 4.3, 82)], '#2A292E', null, { stroke: 'none' });
+  var te = I(0, 4.05, 68), tk = I(0, 4.05, 50);
+  var tvEtikett = el('text', { x: 0, y: 0, transform: 'matrix(1,-0.5,0,1,' + te[0] + ',' + te[1] + ')', 'font-family': 'Archivo Variable, Archivo, sans-serif', 'font-weight': 800, 'font-size': 11, fill: '#B5AA9D', 'letter-spacing': 1.5 });
+  tvEtikett.textContent = svg.closest('[lang=en]') || /^en/.test(document.documentElement.lang) ? 'ROOM CODE' : 'ROMKODE';
+  var tvKode = el('text', { x: 0, y: 0, transform: 'matrix(1,-0.5,0,1,' + tk[0] + ',' + tk[1] + ')', 'font-family': 'Archivo Variable, Archivo, sans-serif', 'font-weight': 900, 'font-size': 21, fill: '#FFE07A', 'letter-spacing': 2.5, 'font-stretch': '75%' });
+  tvKode.textContent = '····';
+
+  var lag = el('g', {}), ting = [];
+  function ny(d, g) { g.dataset.d = d; ting.push(g); return g; }
+  var lampe = ny(6, el('g', {}, lag)), l0 = I(.6, 5.4, 0), l1 = I(.6, 5.4, 62);
+  el('line', { x1: l0[0], y1: l0[1], x2: l1[0], y2: l1[1], stroke: B, 'stroke-width': 3.5 }, lampe);
+  el('polygon', { points: pts([[l1[0] - 14, l1[1] + 4], [l1[0] + 14, l1[1] + 4], [l1[0] + 9, l1[1] - 14], [l1[0] - 9, l1[1] - 14]]), fill: '#FFE07A', stroke: B, 'stroke-width': 3, 'stroke-linejoin': 'round' }, lampe);
+  el('ellipse', { cx: l0[0], cy: l0[1], rx: 9, ry: 4, fill: B }, lampe);
+  var bord = ny(6.2, el('g', {}, lag));
+  boks(2.4, 2.6, 0, 1.2, 1.2, 20, '#FFF8EE', '#FF5B1F', '#E04A12', bord);
+  var a = I(2.85, 2.95, 20);
+  el('rect', { x: a[0] - 5, y: a[1] - 26, width: 10, height: 26, rx: 2, fill: '#2ea873', stroke: B, 'stroke-width': 2.5 }, bord);
+  el('rect', { x: a[0] - 2.5, y: a[1] - 35, width: 5, height: 10, fill: '#2ea873', stroke: B, 'stroke-width': 2.5 }, bord);
+  el('rect', { x: a[0] - 5, y: a[1] - 18, width: 10, height: 7, fill: '#FFD23F', stroke: B, 'stroke-width': 2 }, bord);
+  [I(3.2, 3.5, 20), I(2.8, 3.6, 20)].forEach(function (q) { el('path', { d: 'M' + (q[0] - 5) + ' ' + (q[1] - 15) + 'h10l-2 15h-6z', fill: '#FFE07A', stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, bord); });
+  var sofa = ny(8.5, el('g', {}, lag));
+  boks(5.3, 1.8, 0, .55, 3.0, 40, '#FF9CC2', '#ff7fb0', '#f06a9e', sofa);
+  boks(4.5, 1.8, 0, .85, 3.0, 16, '#FFB3D1', '#ff7fb0', '#f06a9e', sofa);
+  boks(4.5, 1.5, 0, 1.35, .32, 24, '#FF9CC2', '#ff7fb0', '#f06a9e', sofa);
+  boks(4.5, 4.8, 0, 1.35, .32, 24, '#FF9CC2', '#ff7fb0', '#f06a9e', sofa);
+
+  var FOLK = [
+    { topp: '#FF5B1F', hud: '#C98D63', h: B, haar: 'kort', oyne: 'vanlig', munn: 'smil' },
+    { topp: '#63E2A8', hud: '#F2C6A0', h: '#FFD23F', haar: 'lang', oyne: 'glad', munn: 'glis' },
+    { topp: '#FFD23F', hud: '#8D5A3B', h: B, haar: 'krus', oyne: 'vanlig', munn: 'tunge' }
+  ];
+  var GJESTER = [
+    { topp: '#FF9CC2', hud: '#E9B48F', h: '#FF5B1F', haar: 'lue', oyne: 'blunk', munn: 'smil' },
+    { topp: '#FFF8EE', hud: '#C98D63', h: '#7A4A2A', haar: 'lang', oyne: 'vanlig', munn: 'o' },
+    { topp: '#63E2A8', hud: '#F2C6A0', h: B, haar: 'kort', oyne: 'glad', munn: 'glis' },
+    { topp: '#FF5B1F', hud: '#8D5A3B', h: '#FFD23F', haar: 'krus', oyne: 'vanlig', munn: 'tunge' },
+    { topp: '#FFD23F', hud: '#E9B48F', h: '#FF9CC2', haar: 'kort', oyne: 'blunk', munn: 'o' },
+    { topp: '#1C1B1F', hud: '#C98D63', h: '#63E2A8', haar: 'lue', oyne: 'glad', munn: 'smil' }
+  ];
+  var MAL = [[3.4, 5.3], [1.1, 1.2], [4.2, 5.4], [2.0, 1.0], [1.0, 4.0], [3.3, .9]];
+  var folk = [];
+  function Figur(p, x, y) {
+    this.g = ny(x + y, el('g', { class: 'figur' }, lag)); this.g.innerHTML = figurHtml(p);
+    this.kropp = this.g.querySelector('.kropp'); this.skygge = this.g.querySelector('.skygge');
+    this.x = new Verdi(x); this.y = new Verdi(y); this.z = new Verdi(0, F.RASK); this.s = new Verdi(1, F.RASK); this.r = new Verdi(0);
+    this.vei = []; this.drar = false; this.tegn(); dra(this);
+  }
+  Figur.prototype.tegn = function () {
+    var p = I(this.x.v, this.y.v, 0), z = this.z.v, s = this.s.v;
+    this.g.setAttribute('transform', 'translate(' + p[0].toFixed(1) + ',' + p[1].toFixed(1) + ')');
+    this.kropp.setAttribute('transform', 'translate(0,' + (-z).toFixed(1) + ') rotate(' + this.r.v.toFixed(2) + ') scale(' + (2 - s).toFixed(3) + ',' + s.toFixed(3) + ')');
+    this.skygge.setAttribute('rx', (16 - Math.min(8, z * .25)).toFixed(1));
+    this.g.dataset.d = this.x.v + this.y.v;
+  };
+  Figur.prototype.steg = function (dt) {
+    if (this.vei.length && !this.drar) {
+      var m = this.vei[0]; this.x.mal = m[0]; this.y.mal = m[1];
+      var igjen = Math.hypot(this.x.v - m[0], this.y.v - m[1]);
+      if (igjen < .25 && this.vei.length > 1) this.vei.shift();
+      else if (this.vei.length === 1 && igjen < .05) { this.vei.shift(); this.s.v = .86; }
+      this.z.mal = Math.min(10, Math.hypot(this.x.fart, this.y.fart) * 3.2);
+    } else if (!this.drar) this.z.mal = 0;
+    var ro = [this.x, this.y, this.z, this.s, this.r].map(function (v) { return v.tikk(dt); }).every(Boolean);
+    this.tegn(); sorter();
+    return ro && !this.vei.length && !this.drar;
+  };
+  var sist = '';
+  function sorter() {
+    var r = ting.slice().sort(function (a, b) { return a.dataset.d - b.dataset.d; });
+    var k = r.map(function (t) { return ting.indexOf(t); }).join(',');
+    if (k === sist) return; sist = k; r.forEach(function (t) { lag.appendChild(t); });
+  }
+  function punkt(e) { var p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+  function dra(f) {
+    var forrige = null;
+    f.g.addEventListener('pointerdown', function (e) { e.preventDefault(); f.g.setPointerCapture(e.pointerId); f.drar = true; f.vei = []; forrige = punkt(e); f.z.mal = 26; f.s.mal = 1.06; start(f); });
+    f.g.addEventListener('pointermove', function (e) {
+      if (!f.drar) return;
+      var q = punkt(e), a = (q.x - 260) / 30, b = (q.y + 35 - 112) / 15;
+      f.x.mal = Math.max(.4, Math.min(5.6, (a + b) / 2)); f.y.mal = Math.max(.4, Math.min(5.6, (b - a) / 2));
+      f.r.mal = Math.max(-14, Math.min(14, (q.x - forrige.x) * 1.4)); forrige = q; start(f);
+    });
+    function slipp() { if (!f.drar) return; f.drar = false; f.z.mal = 0; f.r.mal = 0; f.s.mal = 1; f.s.v = .9; start(f); }
+    f.g.addEventListener('pointerup', slipp); f.g.addEventListener('pointercancel', slipp);
+  }
+  folk.push(new Figur(FOLK[0], .9, 3.0), new Figur(FOLK[1], 3.8, 1.2), new Figur(FOLK[2], 2.1, 4.9));
+  sorter();
+
+  var dorTid = null, ant = 0;
+  function nyGjest() {
+    var i = ant % GJESTER.length; ant++;
+    if (folk.length >= 3 + GJESTER.length) { var ut = folk.splice(3, 1)[0]; ting.splice(ting.indexOf(ut.g), 1); ut.g.remove(); F.stopp(ut); }
+    var f = new Figur(GJESTER[i], 5.05, .25); f.vei = [[4.0, 1.0], MAL[i]]; folk.push(f);
+    dor.setAttribute('fill', B); handtak.setAttribute('opacity', 0); clearTimeout(dorTid);
+    dorTid = setTimeout(function () { dor.setAttribute('fill', '#FF5B1F'); handtak.setAttribute('opacity', 1); }, 900);
+    if (REDUSERT) { f.x.v = f.x.mal = MAL[i][0]; f.y.v = f.y.mal = MAL[i][1]; f.vei = []; f.tegn(); sorter(); return; }
+    start(f);
+    folk.slice(0, -1).forEach(function (o, n) { setTimeout(function () { if (!o.drar) { o.z.fart = 90; start(o); } }, 120 + n * 40); });
+  }
+  window.mvStua = { nyGjest: nyGjest, kode: function (k) { tvKode.textContent = k; } };
+})();
+</script>

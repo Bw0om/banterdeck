@@ -1,59 +1,62 @@
 ---
-// Forsiden. Øverst: rett til et rom eller inn med kode – og en kortbunke man kan trekke fra med en gang.
-// Så lekene som spilles fra hver sin telefon (med bilder), ukas faste ritualer, Pluss og humoren som egen blokk.
+// Forsiden i stua-designet. Øverst: stua der gjestene går inn når koden skrives, og «Lag et rom».
+// Så lekene med «Hvor mange er dere?», en kortbunke man kan dra fra, ukas faste ritualer, Pluss og humoren.
+// All bevegelse er fjær (window.mvFjaer fra Stua.astro), og skjer bare når noen klikker, drar eller skriver.
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../AdSlot.astro';
-import Icon from '../Icon.astro';
 import PopulaertNaa from '../PopulaertNaa.astro';
 import Sveip from '../Sveip.astro';
+import Stua from '../Stua.astro';
 import { rundeKort } from '../../lib/nyhetsrunden';
 import { UKENS_LEKER, ukensLek } from '../../lib/ukenslek';
 import { games as alleLeker, gamesFor, gameHref, situationSectionsFor, dictSection, visible, langGroups, itemsOf, t, tf, isCrude, totalsFor, situationById } from '../../lib/content';
-import { illustrasjon } from '../../lib/illustrasjon';
-import { niva } from '../../lib/niva';
+import { niva, HOOK } from '../../lib/niva';
 import { PLUSS_SLUGS } from '../../lib/plussleker';
+import { klistremerke } from '../../lib/klistremerker';
 import PLUSSPAKKER from '../../data/pluss.json';
 import PLUSSPAKKER_EN from '../../data/pluss.en.json';
 import DECKS from '../../data/decks.json';
 import DECKS_EN from '../../data/decks.en.json';
 import { ui, path, type Lang } from '../../lib/i18n';
-
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 const no = lang === 'no';
 const N = (nb: string, en: string) => (no ? nb : en);
 const ROM = no ? '/no/rom' : '/room';
-
 const ANT_JUL = (PLUSSPAKKER as any).julebord.items.length;
-// Pluss-pakkene ved navn (leses fra dataene, så lista oppdaterer seg når det kommer nye pakker)
 const PAKKENAVN: string[] = Object.keys(PLUSSPAKKER).map((id) => (no ? (PLUSSPAKKER as any)[id].navn : ((PLUSSPAKKER_EN as any)[id]?.navn || (PLUSSPAKKER as any)[id].navn)));
 const PAKKELISTE = PAKKENAVN.length > 1 ? PAKKENAVN.slice(0, -1).join(', ') + N(' og ', ' and ') + PAKKENAVN[PAKKENAVN.length - 1] : PAKKENAVN[0];
-
 // Ukas ritualer (Nyhetsrunden finnes bare på norsk)
 const NR = rundeKort();
 const nrBygg = NR.find((r) => r.fra <= Date.now()) || NR[NR.length - 1];
 const UKE = UKENS_LEKER.map((sl) => alleLeker.find((g: any) => g.slug === sl)).filter((g: any) => g && (no || g.only !== 'no'))
-  .map((g: any) => ({ slug: g.slug, navn: t(g.name, lang), pl: g.pl, gruppe: t(g.group.title, lang), bilde: illustrasjon(g) }));
+  .map((g: any) => ({ slug: g.slug, navn: t(g.name, lang), pl: g.pl, gruppe: t(g.group.title, lang), merke: klistremerke(g.slug, 'st-ukemerke') }));
 const ukeBygg = UKE.find((x) => x.slug === ukensLek()) || UKE[0];
 const UKEBASE = no ? '/no/drinking-games/' : '/drinking-games/';
-
-// Lekene som spilles fra hver sin telefon – samme rekkefølge som på lekesiden
+// Lekene som spilles fra hver sin telefon. Spillerantallet styrer «Hvor mange er dere?».
 const TOPP = ['spionen', 'hvem-skrev-det', 'bloffquizen', 'pekeleken', 'nyhetsrunden', 'ring-of-fire', 'forraeder', 'regelfabrikken', 'samme-svar'];
 const PL = new Set(PLUSS_SLUGS);
 const alle = gamesFor(lang);
+function spenn(g: any): [number, number] {
+  if (g.fit && g.fit.min) return [g.fit.min, g.fit.maks || 99];
+  const m = String(g.pl || '').match(/(\d+)\s*(?:[–-]\s*(\d+)|(\+))?/);
+  if (!m) return [2, 99];
+  return [+m[1], m[2] ? +m[2] : m[3] ? 99 : +m[1]];
+}
 const romLeker = alle.filter((g: any) => niva(g.slug) === 'rom')
   .sort((a: any, b: any) => ((TOPP.indexOf(a.slug) + 1 || 99) - (TOPP.indexOf(b.slug) + 1 || 99)))
-  .slice(0, 8)
-  .map((g: any) => ({ navn: t(g.name, lang), pl: g.pl, href: gameHref(g, (p: string) => path(lang, p), lang), bilde: illustrasjon(g), pluss: PL.has(g.slug) }));
-
+  .slice(0, 9)
+  .map((g: any) => {
+    const [min, maks] = spenn(g);
+    return { slug: g.slug, navn: t(g.name, lang), pl: g.pl, min, maks, hook: (HOOK[g.slug] || [])[no ? 0 : 1] || '', href: gameHref(g, (p: string) => path(lang, p), lang), pluss: PL.has(g.slug) };
+  });
 // «Trekk et kort»: tre ekte kortstokker, bare de snille og frekke kortene (aldri de grove på forsiden)
 const KS: any = no ? DECKS : DECKS_EN;
 const trekk = [
-  { id: 'pekeleken', navn: N('Mest sannsynlig', 'Most likely to') },
-  { id: 'jeg-har-aldri', navn: N('Jeg har aldri', 'Never have I ever') },
-  { id: 'enten-eller', navn: N('Enten eller', 'Would you rather') },
-].map((s) => ({ ...s, kort: KS[s.id].items.filter((x: any) => x.m !== 'droy').slice(0, 24).map((x: any) => x.t) }));
-
+  { id: 'pekeleken', navn: N('Mest sannsynlig', 'Most likely to'), merke: 'peke' },
+  { id: 'jeg-har-aldri', navn: N('Jeg har aldri', 'Never have I ever'), merke: 'aldri' },
+  { id: 'enten-eller', navn: N('Enten eller', 'Would you rather'), merke: 'enten' },
+].map((s) => ({ navn: s.navn, merke: klistremerke(s.merke), kort: KS[s.id].items.filter((x: any) => x.m !== 'droy').slice(0, 24).map((x: any) => x.t) }));
 // Humor
 const totals = totalsFor(lang);
 const hasDict = visible(dictSection, lang);
@@ -64,141 +67,172 @@ const pool = situationSectionsFor(lang).flatMap((s) => langGroups(s, lang).flatM
   })));
 const first = pool[0];
 const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
+const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="square"/></svg>';
 ---
 <Base lang={lang}>
-  <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Mitt vors', url: 'https://www.mittvors.no/', inLanguage: no ? 'nb' : 'en' })} /></Fragment>
+  <Fragment slot="head"><script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'mittvors', url: 'https://www.mittvors.no/', inLanguage: no ? 'nb' : 'en' })} /></Fragment>
+  <div class="st-forside">
 
-  <!-- Toppen: rett til et rom eller inn med kode – og på PC ligger kortbunken du kan trekke fra ved siden av -->
-  <div class="fn-topp">
-    <section class="h2-hero">
-      <h1>{no ? <>Klar for<br /><em>vors?</em></> : <>Ready to<br /><em class="fn-hel">pre-game?</em></>}</h1>
-      <p class="h2-sub">{N('Drikkeleker dere spiller fra hver deres telefon. Én lager et rom – resten blir med på koden.', 'Drinking games you play from your own phones. One person creates a room – everyone else joins with the code.')}</p>
-      <div class="h2-cta">
-        <a class="h2-hoved" href={ROM + '?lag=1'}>{N('Lag et rom', 'Create a room')}</a>
-        <form class="h2-kode" action={ROM} method="get" id="h2Kode">
-          <label for="h2KodeFelt">{N('Har du fått en kode?', 'Got a code?')}</label>
-          <div class="h2-kode-rad">
-            <input id="h2KodeFelt" name="k" size="6" maxlength="6" placeholder="ABCD" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" required />
-            <button type="submit">{N('Bli med', 'Join')}</button>
-          </div>
-        </form>
-      </div>
-      <div class="h2-gjeng" id="h2Gjeng">
-        <a class="h2-gjeng-lenke" href={no ? '/no/gjeng' : '/crew'}>{N('Fast gjeng? Lag en gjeng, så starter dere kvelden med ett trykk', 'Same crew every time? Make a crew and start the night with one tap')}</a>
-      </div>
-    </section>
-
-    <!-- Første runde på sekunder: trekk et kort på denne telefonen, uten rom og uten konto -->
-    <section class="fn-trekk" aria-labelledby="fnTrekkTittel" data-stokker={JSON.stringify(trekk)}>
-      <div class="fn-trekk-tekst">
-        <h2 id="fnTrekkTittel">{N('Ingen rom ennå? Trekk et kort.', 'No room yet? Draw a card.')}</h2>
-        <p>{N('Send telefonen rundt bordet. Når dere vil ha poeng, stemming og hemmeligheter, lager én et rom.', 'Pass the phone round the table. When you want scores, voting and secrets, one of you creates a room.')}</p>
-        <div class="fn-stokkvalg" role="tablist" aria-label={N('Velg kortstokk', 'Choose a deck')}>
-          {trekk.map((s, i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-stokk={i}>{s.navn}</button>)}
+  <!-- Toppen: stua og veien inn. Hver bokstav i koden sender en ny gjest inn døra. -->
+  <section class="st-felt st-helt" aria-labelledby="stTittel">
+    <div class="st-indre st-helt-grid">
+      <h1 id="stTittel">{no ? <>Klar for <span class="st-boks">vors?</span></> : <>Ready to <span class="st-boks">pre-game?</span></>}</h1>
+      <div class="st-stue"><Stua lang={lang} /></div>
+      <div class="st-ingress">
+        <p>{N('Drikkeleker dere spiller fra hver deres telefon. Én lager et rom, og resten blir med på koden.', 'Drinking games you play from your own phones. One person creates a room, and everyone else joins with the code.')}</p>
+        <div class="st-knapper">
+          <a class="st-knapp st-svart" href={ROM + '?lag=1'}>{N('Lag et rom', 'Create a room')}<Fragment set:html={pil} /></a>
+          <a class="st-knapp st-gul h2-rom" href={ROM} hidden><span><b>{N('Spill sammen', 'Play together')}</b><small>{N('Tilbake til rommet', 'Back to the room')}</small></span><span class="kode" aria-hidden="true">ABCD</span></a>
+        </div>
+        <div class="st-gjeng" id="h2Gjeng">
+          <a class="h2-gjeng-lenke" href={no ? '/no/gjeng' : '/crew'}>{N('Fast gjeng? Lag en gjeng, så starter dere kvelden med ett trykk', 'Same crew every time? Make a crew and start the night with one tap')}</a>
         </div>
       </div>
-      <div class="fn-kortbord">
-        <button type="button" class="fn-kort" id="fnKort" aria-live="polite">
-          <span class="fn-kort-navn" id="fnKortNavn">{trekk[0].navn}</span>
-          <span class="fn-kort-tekst" id="fnKortTekst">{trekk[0].kort[0]}</span>
-          <span class="fn-kort-hint">{N('Trykk for neste kort', 'Tap for the next card')}</span>
-        </button>
+      <form class="st-panel" action={ROM} method="get" id="h2Kode">
+        <label for="h2KodeFelt">{N('Har du fått en kode?', 'Got a code?')}</label>
+        <div class="st-panelrad">
+          <div class="st-flappfelt" id="stFlapp">
+            <span class="flapp" aria-hidden="true"> </span><span class="flapp" aria-hidden="true"> </span><span class="flapp" aria-hidden="true"> </span><span class="flapp" aria-hidden="true"> </span>
+            <input id="h2KodeFelt" name="k" size="6" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" required aria-describedby="stKodeStatus" />
+          </div>
+          <button type="submit" class="st-knapp st-gul">{N('Bli med', 'Join')}</button>
+        </div>
+        <small id="stKodeStatus" aria-live="polite">{N('Skriv koden, så går gjestene inn døra.', 'Type the code and the guests walk in.')}</small>
+      </form>
+    </div>
+  </section>
+
+  <!-- Lekene: velg hvor mange dere er, så stokker de som passer seg fremst -->
+  <section class="st-felt st-lekefelt" aria-labelledby="stLekerTittel">
+    <div class="st-indre">
+      <div class="st-hode">
+        <h2 id="stLekerTittel">{N('Spill fra hver sin telefon', 'Play from your own phones')}</h2>
+        <a href={path(lang, '/drinking-games')} class="st-alle">{N(`Alle ${alle.length} leker`, `All ${alle.length} games`)}<Fragment set:html={pil} /></a>
       </div>
-    </section>
-  </div>
-
-  <!-- Topp 3: rett under toppen, så det er det første man ser når man blar videre -->
-  <PopulaertNaa lang={lang} />
-
-  <a class="h2-rom" href={ROM} hidden>
-    <span><b>{N('Spill sammen fra hver sin telefon', 'Play together from your own phones')}</b><small>{N('Lag et rom og del koden', 'Create a room and share the code')}</small></span>
-    <span class="kode" aria-hidden="true">ABCD</span>
-  </a>
-
-  <!-- Lekene i appen – bilder og navn, ikke en liste -->
-  <section class="fn-seksjon" aria-labelledby="fnLekerTittel">
-    <div class="fn-hode">
-      <h2 id="fnLekerTittel">{N('Spill fra hver sin telefon', 'Play from your own phones')}</h2>
-      <a href={path(lang, '/drinking-games')} class="fn-alle">{N(`Alle ${alle.length} leker`, `All ${alle.length} games`)} <span aria-hidden="true">→</span></a>
-    </div>
-    <ul class="fn-rad" role="list">
-      {romLeker.map((x) => (
-        <li><a class="fn-lek" href={x.href}>
-          <img src={x.bilde} alt="" width="240" height="126" loading="lazy" decoding="async" />
-          <b>{x.navn}</b>
-          <small><Icon name="gjeng" size={13} />{x.pl}{x.pluss && <span class="fn-pluss"><Icon name="gnist" size={11} />Pluss</span>}</small>
-        </a></li>
-      ))}
-    </ul>
-  </section>
-
-  <!-- Denne uka: de faste ritualene samlet -->
-  <section class="fn-seksjon" aria-labelledby="fnUkeTittel">
-    <h2 id="fnUkeTittel" class="fn-h">{N('Denne uka', 'This week')}</h2>
-    <div class="fn-uka">
-      {no && nrBygg && (
-        <a class="fn-nr" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
-          <span class="fn-nr-uke">Uke <b id="nrUke">{nrBygg.uke}</b></span>
-          <span class="fn-nr-tekst"><b>Nyhetsrunden</b><small id="nrAntall">{nrBygg.antall} spørsmål om ukas nyheter</small></span>
-          <span class="fn-nr-knapp">Spill quizen</span>
-        </a>
-      )}
-      {ukeBygg && (
-        <a class="fn-ukelek" id="ukensLek" href={UKEBASE + ukeBygg.slug + '/'} data-leker={JSON.stringify(UKE)} data-base={UKEBASE} data-en={no ? undefined : '1'}>
-          <img src={ukeBygg.bilde} alt="" width="240" height="126" loading="lazy" decoding="async" />
-          <span><small>{N('Ukens lek', 'Game of the week')}</small><b>{ukeBygg.navn}</b><em>{ukeBygg.gruppe} · {ukeBygg.pl} {N('spillere', 'players')}</em></span>
-        </a>
-      )}
-      <a class="fn-ukelek fn-jul" id="julebord" href={ROM + '?lek=pakke-julebord'} hidden>
-        <span><small>{N('Sesongen er her', 'It’s the season')}</small><b>{N('Julebordpakken', 'The Christmas party pack')}</b><em>{N(`${ANT_JUL} kort – trygt med kolleger, men aldri kjedelig`, `${ANT_JUL} cards – safe with coworkers, never boring`)}</em></span>
-      </a>
-    </div>
-    <ul class="fn-verktoy" role="list">
-      <li><a href={no ? '/no/finn-lek' : '/find-a-game'}><Icon name="mal" size={20} /><span><b>{N('Finn riktig lek', 'Find the right game')}</b><small>{N('Tre spørsmål, så får dere et forslag', 'Three questions, then a suggestion')}</small></span></a></li>
-      <li><a href={no ? '/no/kveld' : '/plan'}><Icon name="kalender" size={20} /><span><b>{N('Kveldsplan', 'Plan the night')}</b><small>{N('Leker fra vors til nachspiel', 'Games from pre-drinks to afterparty')}</small></span></a></li>
-      <li><a href={path(lang, '/favourites')}><Icon name="favoritt" size={20} /><span><b>{N('Lagret', 'Saved')}</b><small>{N('Det du har tatt vare på', 'What you’ve kept')}</small></span></a></li>
-    </ul>
-  </section>
-
-  <section class="h2-pluss" aria-labelledby="h2PlussTittel">
-    <div class="h2-pluss-hoved">
-      <h2 id="h2PlussTittel">{N('Verten betaler. Hele festen spiller.', 'The host pays. The whole party plays.')}</h2>
-      <ul>
-        <li>{N('Opptil 16 telefoner i rommet (gratis: 4)', 'Up to 16 phones in the room (free: 4)')}</li>
-        <li>{N('Vorsbørsen med 100 aksjer og Agent 0,5 (hemmelige oppdrag)', 'The Exchange with 100 shares, plus Agent 0.5 (secret missions)')}</li>
-        <li>{N('Bussruta, Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna', 'Ride the Bus, Yahtzee, Pyramid, President, Pig, The Liar and Tall Tales')}</li>
-        <li>{PAKKENAVN.length} {N('kortpakker', 'card packs')}: {PAKKELISTE}</li>
+      <div class="st-antall" id="stAntall" data-min="2" data-maks="16">
+        <span class="st-antall-tekst" id="stAntallLabel">{N('Hvor mange er dere?', 'How many are you?')}</span>
+        <div class="st-teller">
+          <button type="button" class="st-pluss-minus" data-steg="-1" aria-label={N('Én færre', 'One fewer')}>−</button>
+          <output class="st-tall" id="stTall" aria-labelledby="stAntallLabel" aria-live="polite"><span class="flapp" aria-hidden="true">0</span><span class="flapp" aria-hidden="true">4</span><span class="sr">4</span></output>
+          <button type="button" class="st-pluss-minus" data-steg="1" aria-label={N('Én til', 'One more')}>+</button>
+        </div>
+        <div class="st-fjes" id="stFjes" aria-hidden="true"></div>
+        <p class="st-passer" id="stPasser" aria-live="polite"></p>
+      </div>
+      <ul class="st-lekegrid" id="stLeker" role="list">
+        {romLeker.map((x) => (
+          <li data-min={x.min} data-maks={x.maks}>
+            <a class="st-lek" href={x.href}>
+              <Fragment set:html={klistremerke(x.slug, 'st-merke')} />
+              <span class="st-lek-tekst">
+                <b>{x.navn}</b>
+                <small><span class="st-pl">{x.pl} {N('spillere', 'players')}</span>{x.pluss && <span class="st-plussmerke">Pluss</span>}</small>
+                {x.hook && <span class="st-hook">{x.hook}</span>}
+              </span>
+              <span class="st-for-faa" hidden>{N(`Fra ${x.min} spillere`, `From ${x.min} players`)}</span>
+            </a>
+          </li>
+        ))}
       </ul>
     </div>
-    <a class="h2-pluss-stubb" href={no ? '/no/pluss' : '/plus'}>
-      <span class="h2-pluss-navn">mittvors pluss</span>
-      <span class="h2-pluss-pris"><b>29 kr</b><small>{N('per kveld', 'per night')}</small></span>
-      <span class="h2-pluss-pris"><b>199 kr</b><small>{N('hele året', 'whole year')}</small></span>
-      <span class="h2-pluss-knapp" id="h2PlussKnapp">{N('Se Pluss', 'See Pluss')}</span>
-    </a>
   </section>
 
-  <!-- Humor ved siden: dagens replikk stort, resten som snarveier -->
-  <section class="fn-humor" aria-labelledby="fnHumorTittel">
-    <h2 id="fnHumorTittel" class="fn-h">{N('Humor ved siden', 'Humour on the side')}</h2>
-    <div class="fn-replikk">
-      <p class="fn-replikk-kat" id="todayCat">{first.k}</p>
-      <p class="today fn-replikk-tekst" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
-      <p class="fn-replikk-hint">{N('Dagens replikk · trykk for å kopiere', 'Line of the day · tap to copy')}</p>
-    </div>
-    <div class="fn-humor-valg">
-      <button type="button" class="fn-sveip" data-sveip><Icon name="sveip" size={22} /><span><b>{N('Sveip replikker', 'Swipe lines')}</b><small>{N(`${totals.lines} replikker, én om gangen`, `${totals.lines} lines, one at a time`)}</small></span></button>
-      <a href={path(lang, '/situations')}><Icon name="replikker" size={20} />{L.linesTitle}</a>
-      {no && hasDict && <a href={path(lang, '/ord')}><Icon name="ordbok" size={20} />{L.ordTitle}</a>}
-      {no && hasDict && <a href={path(lang, '/uttrykk')}><Icon name="uttrykk" size={20} />{L.uttrykkTitle}</a>}
+  <div class="st-indre st-populaert"><PopulaertNaa lang={lang} /></div>
+
+  <!-- Første runde på sekunder: dra et kort av bunken, uten rom og uten konto -->
+  <section class="st-felt st-kortfelt" aria-labelledby="stKortTittel">
+    <div class="st-indre st-kort-grid">
+      <div>
+        <h2 id="stKortTittel">{N('Ingen rom ennå? Trekk et kort.', 'No room yet? Draw a card.')}</h2>
+        <p class="st-tekst">{N('Send telefonen rundt bordet. Dra kortet av bunken, eller trykk på det. Når dere vil ha poeng, stemming og hemmeligheter, lager én et rom.', 'Pass the phone round the table. Drag the card off the pile, or tap it. When you want scores, voting and secrets, one of you creates a room.')}</p>
+        <div class="st-stokkvalg" role="tablist" aria-label={N('Velg kortstokk', 'Choose a deck')}>
+          {trekk.map((s, i) => <button type="button" class="st-chip" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-stokk={i}><Fragment set:html={s.merke} />{s.navn}</button>)}
+        </div>
+      </div>
+      <div class="st-bunke" id="stBunke" data-stokker={JSON.stringify(trekk)} data-hint={N('Dra eller trykk for neste kort', 'Drag or tap for the next card')}></div>
     </div>
   </section>
 
+  <!-- Denne uka: de faste ritualene -->
+  <section class="st-felt st-ukefelt" aria-labelledby="stUkaTittel">
+    <div class="st-indre">
+      <h2 id="stUkaTittel" class="st-h">{N('Denne uka', 'This week')}</h2>
+      <div class="st-uka">
+        {no && nrBygg && (
+          <a class="st-nr" href="/no/nyhetsrunden" id="nrFlis" data-runder={JSON.stringify(NR)}>
+            <span class="st-nr-topp">
+              <span class="st-nr-navn"><Fragment set:html={klistremerke('avis', 'st-merke')} /><b>Nyhetsrunden</b></span>
+              <span class="st-nr-uke" aria-label={'Uke ' + nrBygg.uke}><small>Uke</small><span class="st-flapprad" id="nrUke" data-uke={nrBygg.uke}>{String(nrBygg.uke).padStart(2, '0').split('').map((c) => <span class="flapp" aria-hidden="true">{c}</span>)}</span></span>
+            </span>
+            <span class="st-nr-meta" id="nrAntall">{nrBygg.antall} spørsmål om ukas nyheter · ny runde hver fredag</span>
+            {nrBygg.smak && <span class="st-nr-smak" id="nrSmak">{nrBygg.smak}</span>}
+            <span class="st-knapp st-svart st-nr-knapp">Spill quizen</span>
+          </a>
+        )}
+        {ukeBygg && (
+          <a class="st-ukelek" id="ukensLek" href={UKEBASE + ukeBygg.slug + '/'} data-leker={JSON.stringify(UKE)} data-base={UKEBASE} data-en={no ? undefined : '1'}>
+            <span class="st-ukelek-merke" set:html={ukeBygg.merke} />
+            <small class="st-merkelapp">{N('Ukens lek', 'Game of the week')}</small>
+            <b>{ukeBygg.navn}</b>
+            <em>{ukeBygg.gruppe} · {ukeBygg.pl} {N('spillere', 'players')}</em>
+          </a>
+        )}
+        <a class="st-ukelek st-jul" id="julebord" href={ROM + '?lek=pakke-julebord'} hidden>
+          <small class="st-merkelapp">{N('Sesongen er her', 'It’s the season')}</small>
+          <b>{N('Julebordpakken', 'The Christmas party pack')}</b>
+          <em>{N(`${ANT_JUL} kort – trygt med kolleger, men aldri kjedelig`, `${ANT_JUL} cards – safe with coworkers, never boring`)}</em>
+        </a>
+      </div>
+      <ul class="st-verktoy" role="list">
+        <li><a href={no ? '/no/finn-lek' : '/find-a-game'}><Fragment set:html={klistremerke('kompass', 'st-merke')} /><span><b>{N('Finn riktig lek', 'Find the right game')}</b><small>{N('Tre spørsmål, så får dere et forslag', 'Three questions, then a suggestion')}</small></span></a></li>
+        <li><a href={no ? '/no/kveld' : '/plan'}><Fragment set:html={klistremerke('kalender', 'st-merke')} /><span><b>{N('Kveldsplan', 'Plan the night')}</b><small>{N('Leker fra vors til nachspiel', 'Games from pre-drinks to afterparty')}</small></span></a></li>
+        <li><a href={path(lang, '/favourites')}><Fragment set:html={klistremerke('hjerte', 'st-merke')} /><span><b>{N('Lagret', 'Saved')}</b><small>{N('Det du har tatt vare på', 'What you’ve kept')}</small></span></a></li>
+      </ul>
+    </div>
+  </section>
 
-  <AdSlot />
+  <!-- Pluss: to billetter -->
+  <section class="st-felt st-plussfelt" aria-labelledby="stPlussTittel">
+    <div class="st-indre st-pluss-grid">
+      <div>
+        <span class="st-plussnavn">mittvors pluss</span>
+        <h2 id="stPlussTittel">{N('Verten betaler. Hele festen spiller.', 'The host pays. The whole party plays.')}</h2>
+        <ul class="st-punkter">
+          <li>{N('Opptil 16 telefoner i rommet (gratis: 4)', 'Up to 16 phones in the room (free: 4)')}</li>
+          <li>{N('Vorsbørsen med 100 aksjer og Agent 0,5 (hemmelige oppdrag)', 'The Exchange with 100 shares, plus Agent 0.5 (secret missions)')}</li>
+          <li>{N('Bussruta, Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna', 'Ride the Bus, Yahtzee, Pyramid, President, Pig, The Liar and Tall Tales')}</li>
+          <li>{PAKKENAVN.length} {N('kortpakker', 'card packs')}: {PAKKELISTE}</li>
+        </ul>
+      </div>
+      <div class="st-billetter">
+        <a class="st-billett" href={no ? '/no/pluss' : '/plus'}><span class="st-billett-v"><span class="st-hva">{N('Kveldspass', 'Night pass')}</span><span class="st-pris">{N('29 kr', '29 NOK')}</span><span class="st-per">{N('24 timer. Perfekt til én fest.', '24 hours. Perfect for one party.')}</span></span><span class="st-stubb" set:html={klistremerke('mane', 'st-merke')} /></a>
+        <a class="st-billett st-aar" href={no ? '/no/pluss' : '/plus'} id="h2PlussKnapp"><span class="st-billett-v"><span class="st-merkelapp st-mork">{N('Mest for pengene', 'Best value')}</span><span class="st-hva">{N('Årspass', 'Year pass')}</span><span class="st-pris">{N('199 kr', '199 NOK')}</span><span class="st-per">{N('Hele året', 'The whole year')}</span></span><span class="st-stubb" set:html={klistremerke('kalender', 'st-merke')} /></a>
+      </div>
+    </div>
+  </section>
 
-  <section class="fn-hjem">
-    <h2 class="fn-h">{L.takeItWithYou}</h2>
+  <!-- Humor ved siden: dagens replikk stort -->
+  <section class="st-felt st-humorfelt" aria-labelledby="stHumorTittel">
+    <div class="st-indre st-humor-grid">
+      <svg class="st-snakker" id="stSnakker" viewBox="-40 -100 80 104" aria-hidden="true"></svg>
+      <div>
+        <h2 id="stHumorTittel" class="st-kat"><span id="todayCat">{first.k}</span><span class="st-kat-del"> · {N('dagens replikk', 'line of the day')}</span></h2>
+        <p class="st-replikk today" id="todayLine" data-copy={first.l} tabindex="0">«{first.l}»</p>
+        <div class="st-humor-valg">
+          <button type="button" class="st-knapp st-gul" data-sveip><Fragment set:html={klistremerke('sveip', 'st-merke st-merke-liten')} />{N(`Sveip ${totals.lines} replikker`, `Swipe ${totals.lines} lines`)}</button>
+          <a class="st-lenke" href={path(lang, '/situations')}>{L.linesTitle}</a>
+          {no && hasDict && <a class="st-lenke" href={path(lang, '/ord')}>{L.ordTitle}</a>}
+          {no && hasDict && <a class="st-lenke" href={path(lang, '/uttrykk')}>{L.uttrykkTitle}</a>}
+        </div>
+        <p class="st-smaa">{N('Trykk på replikken for å kopiere den.', 'Tap the line to copy it.')}</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="st-indre"><AdSlot /></div>
+
+  <section class="st-indre st-hjem">
+    <h2 class="st-h">{L.takeItWithYou}</h2>
     <p>{L.takeItBody}</p>
     <div class="device">
       <p class="ios-only">{L.iosSteps}</p>
@@ -207,11 +241,12 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
       <p class="standalone-only">{L.standalone}</p>
     </div>
   </section>
+  </div>
 
   <Sveip items={sveipItems} title={N('Alle replikker', 'All lines')} lang={lang} shuffle={true} />
 
   <div class="installer" id="installer" hidden>
-    <span>{N('Legg Mitt vors på hjemskjermen – åpner som en app og virker uten nett.', 'Add Mitt vors to your home screen – opens like an app and works offline.')}</span>
+    <span>{N('Legg mittvors på hjemskjermen – åpner som en app og virker uten nett.', 'Add mittvors to your home screen – opens like an app and works offline.')}</span>
     <button type="button" class="btn gold small" id="installerKnapp">{N('Legg til', 'Add')}</button>
     <button type="button" class="linkbtn" id="installerNei" aria-label={N('Ikke nå', 'Not now')}>✕</button>
     <p class="small" id="installerIos" hidden>{N('Trykk Del-knappen i Safari, og velg «Legg til på Hjem-skjerm».', 'Tap the Share button in Safari and choose “Add to Home Screen”.')}</p>
@@ -222,73 +257,247 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
     var p = pool[dag % pool.length], line = document.getElementById('todayLine');
     line.textContent = '«' + p.l + '»'; line.setAttribute('data-copy', p.l);
     document.getElementById('todayCat').textContent = p.k;
+    var sn = document.getElementById('stSnakker');
+    if (sn && window.mvFigur) sn.innerHTML = '<g transform="scale(1.3) translate(0,-2)">' + window.mvFigur({ topp: '#63E2A8', hud: '#C98D63', h: '#FF5B1F', haar: 'lue', oyne: 'blunk', munn: 'tunge' }) + '</g>';
   </script>
+
   <script is:inline data-astro-rerun>
   (function () {
-    // Trekk et kort: velg stokk, trykk på kortet for neste. Ingen rom, ingen konto.
-    var s = document.querySelector('.fn-trekk'); if (!s || s.dataset.bound) return; s.dataset.bound = '1';
-    var stokker = []; try { stokker = JSON.parse(s.dataset.stokker || '[]'); } catch (e) {}
-    var valgt = 0, pos = 0, rekke = [];
-    var kort = document.getElementById('fnKort'), navn = document.getElementById('fnKortNavn'), tekst = document.getElementById('fnKortTekst');
-    function bland(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-    function vis() { navn.textContent = stokker[valgt].navn; tekst.textContent = rekke[pos]; kort.classList.remove('nytt'); void kort.offsetWidth; kort.classList.add('nytt'); }
-    function velg(i) { valgt = i; rekke = bland(stokker[i].kort); pos = 0; vis();
-      s.querySelectorAll('[data-stokk]').forEach(function (b) { b.setAttribute('aria-selected', String(+b.dataset.stokk === i)); }); }
-    s.addEventListener('click', function (e) { var b = e.target.closest('[data-stokk]'); if (b) velg(+b.dataset.stokk); });
-    kort.addEventListener('click', function () { pos++; if (pos >= rekke.length) { rekke = bland(rekke); pos = 0; } vis(); });
-    if (stokker.length) { rekke = bland(stokker[0].kort); pos = 0; navn.textContent = stokker[0].navn; tekst.textContent = rekke[0]; }
+    // Splitt-flapp: hver celle blar gjennom noen tegn før den lander. Brukes bare på tall og koder.
+    var TEGN = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var red = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.mvFlipp = function (celle, mal, forsink) {
+      mal = mal || ' ';
+      if (celle.textContent === mal) return;
+      if (red) { celle.textContent = mal; return; }
+      var steg = 3 + (Math.random() * 4 | 0);
+      clearTimeout(celle._t);
+      celle._t = setTimeout(function tikk() {
+        celle.classList.remove('slag'); void celle.offsetWidth; celle.classList.add('slag');
+        if (--steg <= 0) { celle.textContent = mal; return; }
+        celle.textContent = /\d/.test(mal) ? String(Math.random() * 10 | 0) : TEGN[Math.random() * TEGN.length | 0];
+        celle._t = setTimeout(tikk, 55);
+      }, forsink || 0);
+    };
   })();
   </script>
+
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Kodefeltet: store bokstaver, splitt-flapp i rutene, og en ny gjest i stua for hver bokstav.
+    // Fire riktige tegn = en hel kode: gå videre av seg selv (litt etter, så man rekker å se gjesten og rette siste tegn).
+    // Romkoder har aldri I, O, 0 eller 1, så de stopper autoturen.
+    var f = document.getElementById('h2Kode'); if (!f || f.dataset.bound) return; f.dataset.bound = '1';
+    var inp = document.getElementById('h2KodeFelt'), felt = document.getElementById('stFlapp'), st = document.getElementById('stKodeStatus');
+    var en = /^en/.test(document.documentElement.lang || ''), videre = null, forrige = '';
+    function celler(n) {
+      var c = felt.querySelectorAll('.flapp');
+      while (c.length < n) { var s = document.createElement('span'); s.className = 'flapp'; s.setAttribute('aria-hidden', 'true'); s.textContent = ' '; felt.insertBefore(s, inp); c = felt.querySelectorAll('.flapp'); }
+      for (var i = 4; i < c.length; i++) c[i].hidden = i >= n;
+      return felt.querySelectorAll('.flapp');
+    }
+    inp.addEventListener('input', function () {
+      var v = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== inp.value) inp.value = v;
+      celler(Math.max(4, v.length)).forEach(function (c, i) { window.mvFlipp(c, v[i] || ' '); });
+      if (v.length > forrige.length && window.mvStua) window.mvStua.nyGjest();
+      forrige = v;
+      if (window.mvStua) window.mvStua.kode((v + '····').slice(0, Math.max(4, v.length)));
+      f.classList.toggle('klar', v.length >= 4); clearTimeout(videre);
+      st.textContent = v.length >= 4 ? (en ? 'Joining room ' + v + '…' : 'Går inn i rom ' + v + '…') : (en ? 'Type the code and the guests walk in.' : 'Skriv koden, så går gjestene inn døra.');
+      if (/^[A-HJ-NP-Z2-9]{4}$/.test(v)) videre = setTimeout(function () { if (inp.value === v) { if (f.requestSubmit) f.requestSubmit(); else f.submit(); } }, 800);
+    });
+    inp.setAttribute('enterkeyhint', 'go'); inp.setAttribute('autocorrect', 'off');
+    f.addEventListener('submit', function (e) { if (inp.value.length < 4) { e.preventDefault(); st.textContent = en ? 'The code has four characters. Ask the host – it’s on the TV.' : 'Koden har fire tegn. Spør verten, den står på TV-en.'; inp.focus(); } });
+    // Er du allerede i et rom på denne telefonen? Da blir knappen en snarvei tilbake.
+    var a = document.querySelector('.h2-rom'); if (!a) return;
+    try {
+      var sr = JSON.parse(localStorage.getItem('bd_sist_rom') || 'null');
+      if (!sr || !sr.k || Date.now() - (sr.t || 0) > 24 * 3600 * 1000 || !localStorage.getItem('bd_rom_' + sr.k)) return;
+      a.href = (en ? '/room' : '/no/rom') + '?k=' + encodeURIComponent(sr.k); a.hidden = false;
+      a.querySelector('b').textContent = en ? 'You’re in room ' + sr.k : 'Du er i rom ' + sr.k;
+      a.querySelector('small').textContent = en ? 'Tap to go back' : 'Trykk for å gå tilbake';
+      a.querySelector('.kode').textContent = sr.k;
+    } catch (e) {}
+  })();
+  </script>
+
+  <script is:inline data-astro-rerun>
+  (function () {
+    // «Hvor mange er dere?»: telleren styrer hvilke leker som passer. De som passer, glir frem med fjær.
+    var boks = document.getElementById('stAntall'), liste = document.getElementById('stLeker');
+    if (!boks || !liste || boks.dataset.bound) return; boks.dataset.bound = '1';
+    var F = window.mvFjaer, en = /^en/.test(document.documentElement.lang || '');
+    var tall = document.getElementById('stTall'), fjes = document.getElementById('stFjes'), passer = document.getElementById('stPasser');
+    var n = 4, MIN = 2, MAKS = 16;
+    try { var lagret = +localStorage.getItem('mv_antall'); if (lagret >= MIN && lagret <= MAKS) n = lagret; } catch (e) {}
+    var PAL = [['#FF5B1F','#C98D63','#16120F','kort','vanlig','smil'],['#63E2A8','#F2C6A0','#FFD23F','lang','glad','glis'],['#FFD23F','#8D5A3B','#16120F','krus','vanlig','tunge'],
+      ['#FF9CC2','#E9B48F','#FF5B1F','lue','blunk','smil'],['#FFF8EE','#C98D63','#7A4A2A','lang','vanlig','o'],['#1C1B1F','#C98D63','#63E2A8','lue','glad','smil']];
+    function hode(i) { var p = PAL[i % PAL.length]; return '<svg viewBox="-19 -80 38 40">' + (window.mvFigur ? window.mvFigur({ topp: p[0], hud: p[1], h: p[2], haar: p[3], oyne: p[4], munn: p[5] }) : '') + '</svg>'; }
+    var fjesFjaer = [];
+    function settFjes(animer) {
+      var vis = Math.min(n, 12);
+      while (fjes.children.length < vis) {
+        var s = document.createElement('span'); s.className = 'st-hode'; s.innerHTML = hode(fjes.children.length); fjes.appendChild(s);
+        if (animer && F && !F.redusert) { (function (el) { var v = new F.Verdi(0, F.RASK); v.mal = 1; var o = { steg: function (dt) { var ro = v.tikk(dt); el.style.transform = 'scale(' + v.v.toFixed(3) + ')'; return ro; } }; F.start(o); })(s); }
+      }
+      while (fjes.children.length > vis) fjes.removeChild(fjes.lastChild);
+      var ekstra = fjes.querySelector('.st-flere'); if (ekstra) ekstra.remove();
+      if (n > 12) { var e = document.createElement('span'); e.className = 'st-flere'; e.textContent = '+' + (n - 12); fjes.appendChild(e); }
+    }
+    function settTall() {
+      var s = String(n).padStart(2, '0'), c = tall.querySelectorAll('.flapp');
+      c.forEach(function (x, i) { window.mvFlipp ? window.mvFlipp(x, s[i]) : (x.textContent = s[i]); });
+      tall.querySelector('.sr').textContent = n;
+      boks.querySelector('[data-steg="-1"]').disabled = n <= MIN; boks.querySelector('[data-steg="1"]').disabled = n >= MAKS;
+    }
+    // FLIP med fjær: mål hvor kortene står, flytt dem i DOM-en, og la dem gli dit fra der de var
+    var flytt = [];
+    function sorter(animer) {
+      var li = Array.prototype.slice.call(liste.children);
+      var foer = li.map(function (x) { return x.getBoundingClientRect(); });
+      var antPasser = 0;
+      li.forEach(function (x) {
+        var ok = n >= +x.dataset.min && n <= +x.dataset.maks; x.classList.toggle('passer-ikke', !ok); if (ok) antPasser++;
+        var lapp = x.querySelector('.st-for-faa'); lapp.hidden = ok;
+        lapp.textContent = n < +x.dataset.min ? (en ? 'From ' + x.dataset.min + ' players' : 'Fra ' + x.dataset.min + ' spillere') : (en ? 'Up to ' + x.dataset.maks + ' players' : 'Opptil ' + x.dataset.maks + ' spillere');
+        x._rekke = x._rekke == null ? li.indexOf(x) : x._rekke;
+      });
+      var ny = li.slice().sort(function (a, b) { return (a.classList.contains('passer-ikke') - b.classList.contains('passer-ikke')) || (a._rekke - b._rekke); });
+      ny.forEach(function (x) { liste.appendChild(x); });
+      passer.textContent = antPasser === 0 ? (en ? 'These games need more players. Turn the number up.' : 'Disse lekene trenger flere. Skru opp antallet.') : (en ? antPasser + ' of these games work for ' + n + ' players.' : antPasser + ' av disse lekene passer for ' + n + ' spillere.');
+      if (!animer || !F || F.redusert) return;
+      flytt.forEach(function (o) { F.stopp(o); o.el.style.transform = ''; });
+      flytt = [];
+      ny.forEach(function (x) {
+        var r0 = foer[li.indexOf(x)], r1 = x.getBoundingClientRect(), dx = r0.left - r1.left, dy = r0.top - r1.top;
+        if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+        var vx = new F.Verdi(dx), vy = new F.Verdi(dy); vx.mal = 0; vy.mal = 0;
+        var o = { el: x, steg: function (dt) { var a = vx.tikk(dt), b = vy.tikk(dt); x.style.transform = 'translate(' + vx.v.toFixed(1) + 'px,' + vy.v.toFixed(1) + 'px)'; if (a && b) x.style.transform = ''; return a && b; } };
+        flytt.push(o); F.start(o);
+      });
+    }
+    boks.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-steg]'); if (!b || b.disabled) return;
+      n = Math.max(MIN, Math.min(MAKS, n + +b.dataset.steg));
+      try { localStorage.setItem('mv_antall', n); } catch (x) {}
+      settTall(); settFjes(true); sorter(true);
+    });
+    settTall(); settFjes(false); sorter(false);
+  })();
+  </script>
+
+  <script is:inline data-astro-rerun>
+  (function () {
+    // Kortbunken: dra kortet av (eller trykk), så rykker de under opp med fjær. Piltaster virker også.
+    var bunke = document.getElementById('stBunke'); if (!bunke || bunke.dataset.bound) return; bunke.dataset.bound = '1';
+    var F = window.mvFjaer; if (!F) return;
+    var stokker = []; try { stokker = JSON.parse(bunke.dataset.stokker || '[]'); } catch (e) {}
+    if (!stokker.length) return;
+    var HINT = bunke.dataset.hint, valgt = 0, rekke = [], pos = 0, kortene = [], kaster = false;
+    var HVILE = [{ x: 0, y: 0, r: -1 }, { x: 12, y: 6, r: 4 }, { x: -14, y: 12, r: -6 }], FARGE = ['st-k0', 'st-k1', 'st-k2'];
+    function bland(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function Kort(dybde, indeks) {
+      var s = stokker[valgt]; this.i = indeks;
+      this.el = document.createElement(dybde === 0 ? 'button' : 'div');
+      this.el.className = 'st-k ' + FARGE[indeks % 3];
+      if (dybde === 0) this.el.type = 'button'; else this.el.setAttribute('aria-hidden', 'true');
+      this.el.innerHTML = '<span class="st-k-navn">' + s.merke + esc(s.navn) + '</span><span class="st-k-tekst">' + esc(rekke[indeks % rekke.length]) + '</span><span class="st-k-fot"><span>' + esc(HINT) + '</span></span>';
+      var h = HVILE[dybde]; this.x = new F.Verdi(h.x); this.y = new F.Verdi(h.y); this.r = new F.Verdi(h.r); this.s = new F.Verdi(1, F.RASK);
+      this.ut = false; this.tegn();
+    }
+    Kort.prototype.tegn = function () { this.el.style.transform = 'translate(' + this.x.v.toFixed(1) + 'px,' + this.y.v.toFixed(1) + 'px) rotate(' + this.r.v.toFixed(2) + 'deg) scale(' + this.s.v.toFixed(3) + ')'; };
+    Kort.prototype.steg = function (dt) {
+      var ro = [this.x, this.y, this.r, this.s].map(function (v) { return v.tikk(dt); }).every(Boolean);
+      this.tegn();
+      if (this.ut && Math.abs(this.x.v) > bunke.offsetWidth * .9) { ferdig(); return true; }
+      return ro && !this.ut;
+    };
+    Kort.prototype.til = function (d) { var h = HVILE[d]; this.x.mal = h.x; this.y.mal = h.y; this.r.mal = h.r; F.start(this); };
+    function bygg(ny) {
+      kortene.forEach(function (k) { F.stopp(k); });
+      bunke.innerHTML = ''; kortene = [new Kort(0, pos), new Kort(1, pos + 1), new Kort(2, pos + 2)];
+      for (var d = 2; d >= 0; d--) bunke.appendChild(kortene[d].el);
+      koble(kortene[0]);
+      if (ny && !F.redusert) { kortene[0].s.v = .9; kortene[0].r.v = -8; F.start(kortene[0]); }
+    }
+    function kast(k, retning, fart) {
+      if (kaster) return; kaster = true; k.ut = true;
+      k.x.mal = retning * bunke.offsetWidth * 1.6; k.x.fart = fart || retning * 900; k.r.mal = retning * 24; k.y.mal = -40;
+      kortene[1].til(0); kortene[2].til(1);
+      if (F.redusert) ferdig(); else F.start(k);
+    }
+    function ferdig() {
+      if (!kaster) return; kaster = false;
+      var gammel = kortene.shift(); F.stopp(gammel); gammel.el.remove(); pos++;
+      if (pos >= rekke.length) { rekke = bland(rekke); pos = 0; }
+      var ny = new Kort(2, pos + 2); ny.s.v = .92; kortene.push(ny); bunke.insertBefore(ny.el, bunke.firstChild); F.start(ny);
+      var topp = kortene[0], knapp = document.createElement('button');
+      knapp.type = 'button'; knapp.className = topp.el.className; knapp.innerHTML = topp.el.innerHTML; knapp.style.transform = topp.el.style.transform;
+      bunke.replaceChild(knapp, topp.el); topp.el = knapp; koble(topp); knapp.focus({ preventScroll: true });
+    }
+    function koble(k) {
+      var s0 = null, sist = null, flyttet = false;
+      k.el.addEventListener('pointerdown', function (e) {
+        if (kaster) return; k.el.setPointerCapture(e.pointerId);
+        s0 = { x: e.clientX, y: e.clientY, kx: k.x.v, ky: k.y.v }; sist = { x: e.clientX, t: performance.now(), v: 0 }; flyttet = false;
+        k.s.mal = 1.03; F.start(k);
+      });
+      k.el.addEventListener('pointermove', function (e) {
+        if (!s0) return;
+        var dx = e.clientX - s0.x, dy = e.clientY - s0.y; if (Math.abs(dx) + Math.abs(dy) > 6) flyttet = true;
+        var na = performance.now(); sist.v = (e.clientX - sist.x) / Math.max(1, na - sist.t) * 1000; sist.x = e.clientX; sist.t = na;
+        k.x.mal = s0.kx + dx; k.y.mal = s0.ky + dy * .35; k.r.mal = dx * .06; F.start(k);
+      });
+      function slipp() {
+        if (!s0) return; var dx = k.x.mal - s0.kx; s0 = null; k.s.mal = 1; F.start(k);
+        if (!flyttet) return;
+        if (Math.abs(dx) > 110 || Math.abs(sist.v) > 700) kast(k, dx > 0 ? 1 : -1, sist.v); else k.til(0);
+      }
+      k.el.addEventListener('pointerup', slipp); k.el.addEventListener('pointercancel', slipp);
+      k.el.addEventListener('click', function () { if (!flyttet) kast(k, 1); });
+      k.el.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') kast(k, -1); if (e.key === 'ArrowRight') kast(k, 1); });
+    }
+    function velg(i, ny) {
+      valgt = i; rekke = bland(stokker[i].kort); pos = 0; bygg(ny);
+      document.querySelectorAll('.st-chip[data-stokk]').forEach(function (b) { b.setAttribute('aria-selected', String(+b.dataset.stokk === i)); });
+    }
+    document.querySelectorAll('.st-chip[data-stokk]').forEach(function (b) { b.addEventListener('click', function () { velg(+b.dataset.stokk, true); }); });
+    velg(0, false);
+  })();
+  </script>
+
   <script is:inline data-astro-rerun>
   (function () {
     // Siden bygges sjelden – velg Nyhetsrunden og ukens lek som faktisk gjelder nå (fredag kl. 12 / ISO-uke)
     var f = document.getElementById('nrFlis');
     if (f) { var l = []; try { l = JSON.parse(f.dataset.runder || '[]'); } catch (e) {}
       var r = l.filter(function (x) { return x.fra <= Date.now(); })[0];
-      if (r) { document.getElementById('nrUke').textContent = r.uke; document.getElementById('nrAntall').textContent = r.antall + ' spørsmål om ukas nyheter'; } }
+      if (r) {
+        var u = String(r.uke).padStart(2, '0'), rad = document.getElementById('nrUke');
+        rad.querySelectorAll('.flapp').forEach(function (c, i) { window.mvFlipp ? window.mvFlipp(c, u[i], i * 80) : (c.textContent = u[i]); });
+        rad.parentNode.setAttribute('aria-label', 'Uke ' + r.uke);
+        document.getElementById('nrAntall').textContent = r.antall + ' spørsmål om ukas nyheter · ny runde hver fredag';
+        var sm = document.getElementById('nrSmak'); if (sm && r.smak) sm.textContent = r.smak;
+      } }
     var a = document.getElementById('ukensLek');
-    if (a) { var u = []; try { u = JSON.parse(a.dataset.leker || '[]'); } catch (e) {}
-      if (u.length) {
+    if (a) { var uu = []; try { uu = JSON.parse(a.dataset.leker || '[]'); } catch (e) {}
+      if (uu.length) {
         var o = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' }));
         var t = new Date(Date.UTC(o.getFullYear(), o.getMonth(), o.getDate())); t.setUTCDate(t.getUTCDate() - (t.getUTCDay() + 6) % 7 + 3);
         var aar = t.getUTCFullYear(), jan4 = new Date(Date.UTC(aar, 0, 4));
         var uke = 1 + Math.round(((t - jan4) / 86400000 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7);
-        var x = u[(aar * 53 + uke) % u.length];
+        var x = uu[(aar * 53 + uke) % uu.length];
         a.href = a.dataset.base + x.slug + '/'; a.querySelector('b').textContent = x.navn;
-        a.querySelector('em').textContent = x.gruppe + ' · ' + x.pl + (a.dataset.en ? ' players' : ' spillere'); a.querySelector('img').src = x.bilde;
+        a.querySelector('em').textContent = x.gruppe + ' · ' + x.pl + (a.dataset.en ? ' players' : ' spillere');
+        a.querySelector('.st-ukelek-merke').innerHTML = x.merke;
       } }
     // Julebordsesongen: 1. november til lille julaften (norsk tid)
     var j = document.getElementById('julebord');
     if (j) { var n = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' })), m = n.getMonth(), dd = n.getDate(); if (m === 10 || (m === 11 && dd <= 23)) j.hidden = false; }
   })();
   </script>
-  <script is:inline data-astro-rerun>
-  (function () {
-    // Kodefeltet: store bokstaver, og bare det som kan være en kode.
-    // Fire riktige tegn = en hel kode: gå videre av seg selv (litt etter, så man rekker å se – og rette – siste tegn).
-    // Romkoder har aldri I, O, 0 eller 1, så de stopper autoturen.
-    var f = document.getElementById('h2Kode'); if (!f || f.dataset.bound) return; f.dataset.bound = '1';
-    var inp = document.getElementById('h2KodeFelt'), videre = null;
-    inp.addEventListener('input', function () {
-      var v = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== inp.value) inp.value = v;
-      f.classList.toggle('klar', v.length >= 4); clearTimeout(videre);
-      if (/^[A-HJ-NP-Z2-9]{4}$/.test(v)) videre = setTimeout(function () { if (inp.value === v) { if (f.requestSubmit) f.requestSubmit(); else f.submit(); } }, 500);
-    });
-    inp.setAttribute('enterkeyhint', 'go'); inp.setAttribute('autocorrect', 'off');
-    f.addEventListener('submit', function (e) { if (inp.value.length < 4) { e.preventDefault(); inp.focus(); } });
-    // Er du allerede i et rom på denne telefonen? Da blir rom-knappen en snarvei tilbake.
-    var a = document.querySelector('.h2-rom'); if (!a) return;
-    try {
-      var sr = JSON.parse(localStorage.getItem('bd_sist_rom') || 'null');
-      if (!sr || !sr.k || Date.now() - (sr.t || 0) > 24 * 3600 * 1000 || !localStorage.getItem('bd_rom_' + sr.k)) return;
-      var en = /^en/.test(document.documentElement.lang || '');
-      a.href = (en ? '/room' : '/no/rom') + '?k=' + encodeURIComponent(sr.k); a.classList.add('fortsett'); a.hidden = false;
-      a.querySelector('b').textContent = en ? 'You’re in room ' + sr.k : 'Du er i rom ' + sr.k;
-      a.querySelector('small').textContent = en ? 'Tap to go back to the room' : 'Trykk for å gå tilbake til rommet';
-      a.querySelector('.kode').textContent = sr.k;
-    } catch (e) {}
-  })();
-  </script>
+
   <script is:inline data-astro-rerun>
   (function () {
     // «Legg på hjemskjermen»: bare på mobil, ikke første besøk, og ikke om du har sagt nei nylig
@@ -346,117 +555,213 @@ const sveipItems = pool.map((p) => ({ l: p.l, k: p.k }));
 </Base>
 
 <style>
-  /* Forsidens egne flater – samme farger, skrifter og kurver som resten av siden */
-  .fn-h,.fn-hode h2,.fn-trekk h2{font-family:var(--serif);font-size:clamp(28px,3.6vw,38px);font-weight:540;letter-spacing:-.022em;line-height:1.04;margin:0;text-wrap:balance}
-  .fn-seksjon,.fn-trekk,.fn-humor,.fn-hjem{margin-top:clamp(48px,7vw,80px)}
+  /* Forsiden bruker hele bredden ved siden av menyen; fargefeltene går kant i kant */
+  :global(.main:has(.st-forside)){max-width:none;padding-top:0}
+  .st-forside{--kant:clamp(18px,4vw,56px);margin-inline:calc(var(--kant) * -1)}
+  @media (max-width:899px){.st-forside{--kant:18px}}
+  .st-indre{max-width:1180px;margin-inline:auto;padding-inline:var(--kant)}
+  .st-felt{border-bottom:var(--strek) solid var(--blekk);overflow-x:clip}
+  .st-felt > .st-indre{padding-block:clamp(56px,8vw,96px)}
+  .st-forside h2{font-size:clamp(40px,6.4vw,84px)}
+  .st-h{margin-bottom:28px}
 
-  /* 1+2. Toppen: på store skjermer står «Klar for vors?» og kortbunken side om side */
-  @media (min-width:1100px){
-    .fn-topp{display:grid;grid-template-columns:minmax(500px,1fr) minmax(0,400px);gap:40px;align-items:center}
-    /* Dagens topp holder knappene til 56 % for å gi plass til den liggende kortbunken – her har bunken egen kolonne */
-    .fn-topp :is(.h2-cta,.h2-sub,.h2-gjeng){max-width:100%}
-    /* Overskriften deler plass med kortbunken: skaler med kolonnen, så «pre-game?» får plass på én linje */
-    .fn-topp .h2-hero h1{font-size:clamp(64px,6.2vw,100px)}
-    /* Engelsk: «pre-game?» er lengre enn «vors?» – mindre, og holdt samlet */
-    .fn-topp .h2-hero h1:has(.fn-hel){font-size:clamp(52px,4.6vw,72px)}
-    .fn-hel{white-space:nowrap}
-    .fn-topp .fn-trekk{margin-top:0;grid-template-columns:1fr;gap:18px}
-    .fn-topp .fn-trekk-tekst{order:2}
-    .fn-topp .fn-trekk h2{font-size:22px}
+  /* Knapper som hører til forsiden (samme språk som .btn) */
+  .st-knapp{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 24px;font-family:var(--display);font-stretch:75%;font-weight:900;
+    font-size:21px;text-transform:uppercase;line-height:1;border:var(--strek) solid var(--blekk);box-shadow:var(--skygge);text-decoration:none;cursor:pointer;border-radius:4px;
+    transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+  .st-knapp :global(svg){width:22px;height:22px;flex:none}
+  .st-svart{background:var(--blekk);color:var(--gul)}
+  .st-gul{background:var(--gul);color:var(--blekk)}
+  @media (hover:hover) and (pointer:fine){.st-knapp:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 var(--hard);text-decoration:none}}
+  .st-knapp:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--hard);transition-duration:90ms;transition-timing-function:ease-out}
+  .st-merkelapp{display:inline-block;justify-self:start;font-family:var(--display);font-stretch:80%;font-weight:900;font-size:13px;text-transform:uppercase;letter-spacing:.03em;
+    background:var(--oransje);color:var(--blekk);padding:3px 9px}
+  .st-merkelapp.st-mork{background:var(--blekk);color:var(--gul)}
+
+  /* Splitt-flapp: brukes på koden, antall spillere og ukenummeret */
+  :global(.flapp){position:relative;display:inline-grid;place-items:center;width:var(--c,48px);height:calc(var(--c,48px) * 1.28);background:#2F2E34;color:var(--flapp-tekst);
+    font-family:var(--display);font-stretch:85%;font-weight:850;font-size:calc(var(--c,48px) * .88);line-height:1;border-radius:4px;overflow:hidden;font-variant-numeric:tabular-nums}
+  :global(.flapp)::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#0b0b0d}
+  :global(.flapp)::before{content:"";position:absolute;left:0;right:0;top:0;height:50%;background:linear-gradient(#3a3940,#323137);transform-origin:50% 100%;transform:scaleY(0);z-index:1}
+  :global(.flapp.slag)::before{animation:stKlaff 70ms linear}
+  @keyframes stKlaff{0%{transform:scaleY(1)}100%{transform:scaleY(0)}}
+
+  /* 1. Toppen */
+  .st-helt{background:var(--oransje);color:var(--blekk)}
+  .st-helt-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);grid-template-areas:"h1 stue" "ingress stue" "ingress panel";gap:24px 44px;align-items:start}
+  .st-helt-grid > .st-indre{padding:0}
+  .st-helt h1{grid-area:h1;align-self:end;font-size:clamp(64px,10.5vw,152px);line-height:.82;color:var(--blekk)}
+  .st-boks{display:inline-block;background:var(--blekk);color:var(--oransje);padding:0 .08em .04em;transform:rotate(-1.5deg);margin-top:.06em}
+  .st-stue{grid-area:stue}
+  .st-ingress{grid-area:ingress;display:grid;gap:24px;align-content:start}
+  .st-ingress > p{font-size:clamp(18px,1.7vw,23px);font-weight:600;max-width:32ch;line-height:1.35}
+  .st-knapper{display:flex;flex-wrap:wrap;gap:14px}
+  .h2-rom :global(span){display:flex;flex-direction:column;gap:2px;text-align:left}
+  .h2-rom small{font-size:13px;text-transform:none;font-stretch:100%;font-weight:700}
+  .h2-rom .kode{font-size:24px;padding:4px 8px;background:var(--blekk);color:var(--gul)}
+  .st-gjeng{font-size:16px;font-weight:650}
+  .st-gjeng a{color:var(--blekk);text-decoration:underline;text-decoration-thickness:2.5px;text-underline-offset:.18em}
+  .st-gjeng :global(.h2-gjeng-start){display:block;margin:0 0 8px;padding:10px 14px;border:2.5px solid var(--blekk);background:var(--papir);color:var(--blekk);font:inherit;font-weight:700;cursor:pointer;box-shadow:var(--skygge-liten);text-align:left}
+  .st-panel{grid-area:panel;background:var(--tavle);color:var(--papir);border:var(--strek) solid var(--blekk);box-shadow:var(--skygge-stor);padding:20px 22px 22px;display:grid;gap:12px;border-radius:4px}
+  .st-panel label{font-family:var(--display);font-stretch:75%;font-weight:900;text-transform:uppercase;font-size:19px;color:var(--flapp-tekst)}
+  .st-panelrad{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch}
+  .st-flappfelt{position:relative;display:flex;gap:6px;--c:52px}
+  .st-flappfelt input{position:absolute;inset:0;opacity:0;width:100%;font-size:16px;cursor:text;border:0!important;box-shadow:none!important}
+  .st-flappfelt:focus-within :global(.flapp){outline:3px solid var(--flapp-tekst);outline-offset:2px}
+  .st-panel .st-knapp{box-shadow:4px 4px 0 #000}
+  .st-panel small{font-size:14.5px;color:#D9CFC2;min-height:1.4em}
+  @media (max-width:980px){
+    .st-helt-grid{grid-template-columns:1fr;grid-template-areas:"h1" "stue" "ingress" "panel"}
   }
-  /* 2. Trekk et kort */
-  .fn-trekk{display:grid;gap:22px;align-items:center}
-  @media (min-width:900px){.fn-trekk{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:44px}}
-  .fn-trekk-tekst p{color:var(--muted);margin:10px 0 18px;max-width:42ch}
-  .fn-stokkvalg{display:flex;flex-wrap:wrap;gap:8px}
-  .fn-stokkvalg button{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--ink);
-    font-family:var(--display);font-weight:700;font-size:14.5px;transition:background-color 160ms ease,color 160ms ease,scale 160ms var(--ease-out)}
-  .fn-stokkvalg button[aria-selected="true"]{background:var(--gull-glans);border-color:var(--gold);color:var(--ink2)}
-  .fn-stokkvalg button:active{scale:.97}
-  .fn-kortbord{display:grid;grid-template-areas:"k";place-items:center;padding:8px 0 14px}
-  .fn-kort{position:relative;width:min(calc(100% - 28px),400px);min-height:250px;display:flex;flex-direction:column;gap:14px;text-align:left;
-    padding:24px 24px 22px;border:0;border-radius:26px;background:var(--paper);color:var(--ink2);rotate:-2deg;
-    box-shadow:0 18px 40px -12px rgb(0 0 0 / .55),0 0 0 1px rgb(0 0 0 / .04);transition:scale 160ms var(--ease-out),rotate 200ms var(--ease-out)}
-  /* Bak-kortene ligger i samme rute som kortet – viser at det er flere. (Ikke inni kortet: det er rotert, og da ville de blitt tegnet over forsiden.) */
-  .fn-kort{grid-area:k;z-index:1}
-  .fn-kortbord::before,.fn-kortbord::after{content:"";grid-area:k;align-self:stretch;width:min(calc(100% - 28px),400px);border-radius:26px}
-  .fn-kortbord::before{background:#D9C6A6;rotate:5deg;translate:10px 6px}
-  .fn-kortbord::after{background:#BFA27A;rotate:-6deg;translate:-12px 12px}
-  .fn-kort:active{scale:.98}
-  .fn-kort-navn{font-family:var(--serif);font-style:italic;font-weight:500;font-size:17px;color:var(--glo-dyp)}
-  .fn-kort-tekst{font-family:var(--serif);font-weight:560;font-size:clamp(22px,2.6vw,27px);line-height:1.12;letter-spacing:-.02em;text-wrap:pretty;flex:1}
-  .fn-kort-hint{font-family:var(--display);font-size:13px;font-weight:650;color:rgb(24 13 38 / .55)}
-  .fn-kort.nytt .fn-kort-tekst{animation:fnNytt 220ms var(--ease-out)}
-  @keyframes fnNytt{from{opacity:0;transform:translateY(6px)}}
-  @media (prefers-reduced-motion:reduce){.fn-kort.nytt .fn-kort-tekst{animation:fnNyttRolig 160ms ease-out!important}}
-  @keyframes fnNyttRolig{from{opacity:0}}
+  @media (max-width:560px){.st-flappfelt{--c:46px}.st-knapp{font-size:19px;padding:0 18px}}
 
-  /* 3. Lekene: vannrett rad på mobil (sveip), rutenett på stor skjerm */
-  .fn-hode{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px}
-  .fn-alle{font-family:var(--display);font-weight:700;font-size:15px;white-space:nowrap}
-  .fn-rad{list-style:none;display:grid;grid-auto-flow:column;grid-auto-columns:min(62vw,240px);gap:12px;overflow-x:auto;
-    scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;margin:0 -18px;padding:2px 18px 6px;scroll-padding:0 18px}
-  .fn-rad::-webkit-scrollbar{display:none}
-  .fn-rad li{scroll-snap-align:start}
-  @media (min-width:900px){.fn-rad{grid-auto-flow:row;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible;margin:0;padding:0}}
-  .fn-lek{display:flex;flex-direction:column;gap:4px;height:100%;color:var(--ink);text-decoration:none;transition:scale 160ms var(--ease-out)}
-  .fn-lek img{width:100%;height:auto;aspect-ratio:240/126;object-fit:cover;border-radius:16px;background:var(--card);margin-bottom:6px}
-  .fn-lek b{font-family:var(--display);font-stretch:108%;font-size:17px;line-height:1.15}
-  .fn-lek small{display:flex;align-items:center;gap:5px;color:var(--faint);font-family:var(--display);font-weight:650;font-size:13px}
-  .fn-pluss{display:inline-flex;align-items:center;gap:3px;margin-left:6px;color:var(--gold-t)}
-  .fn-lek:active{scale:.98}
-  @media (hover:hover) and (pointer:fine){.fn-lek:hover{text-decoration:none}.fn-lek:hover b{color:var(--gold-t)}}
+  /* 2. Lekene */
+  .st-lekefelt{background:var(--bg)}
+  .st-hode{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+  .st-alle{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-stretch:80%;font-weight:900;font-size:18px;text-transform:uppercase;color:var(--ink);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:.2em}
+  .st-alle :global(svg){width:18px;height:18px}
+  .st-antall{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;padding:18px 20px;margin-bottom:28px;background:var(--gul);color:var(--blekk);border:var(--strek) solid var(--blekk);box-shadow:var(--skygge);border-radius:4px}
+  .st-antall-tekst{font-family:var(--display);font-stretch:72%;font-weight:900;font-size:clamp(22px,2.6vw,30px);text-transform:uppercase;line-height:1}
+  .st-teller{display:flex;align-items:center;gap:10px}
+  .st-tall{display:flex;gap:4px;--c:44px}
+  .st-pluss-minus{width:52px;height:52px;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:30px;line-height:1;background:var(--papir);color:var(--blekk);
+    border:var(--strek) solid var(--blekk);box-shadow:var(--skygge-liten);border-radius:4px;cursor:pointer;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+  @media (hover:hover) and (pointer:fine){.st-pluss-minus:hover:not(:disabled){transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--blekk)}}
+  .st-pluss-minus:active:not(:disabled){transform:translate(3px,3px);box-shadow:0 0 0 var(--blekk);transition-duration:90ms}
+  .st-pluss-minus:disabled{opacity:.4;cursor:default}
+  .st-fjes{display:flex;flex-wrap:wrap;align-items:center;gap:0;flex:1 1 220px;min-height:44px}
+  .st-fjes :global(.st-hode){width:40px;height:42px;margin-right:-8px;transform-origin:50% 100%}
+  .st-fjes :global(.st-hode svg){width:100%;height:100%;overflow:hidden}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .st-fjes :global(.st-flere){margin-left:16px;font-family:var(--display);font-weight:900;font-size:18px}
+  .st-passer{flex-basis:100%;font-weight:650;font-size:15.5px}
+  .st-lekegrid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .st-lekegrid li{will-change:transform}
+  .st-lek{position:relative;height:100%;display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;align-items:start;padding:16px;background:var(--card);color:var(--ink);text-decoration:none;
+    border:var(--strek) solid var(--ink);box-shadow:var(--skygge);border-radius:6px;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer),opacity 200ms ease}
+  .st-lek :global(.st-merke){width:64px;height:64px;transition:transform var(--fjaer-tid) var(--fjaer)}
+  @media (hover:hover) and (pointer:fine){
+    .st-lek:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 var(--hard);text-decoration:none}
+    .st-lek:hover :global(.st-merke){transform:rotate(-8deg) scale(1.08)}
+  }
+  .st-lek:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
+  .st-lek-tekst{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .st-lek b{font-family:var(--display);font-stretch:75%;font-weight:900;font-size:24px;line-height:1;text-transform:uppercase}
+  .st-lek small{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--muted)}
+  .st-plussmerke{background:var(--rosa);color:var(--blekk);padding:1px 7px;font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:12px;border:2px solid var(--blekk)}
+  .st-hook{font-size:15px;line-height:1.4;color:var(--ink)}
+  .st-for-faa{position:absolute;right:10px;top:-12px;background:var(--blekk);color:var(--papir);font-family:var(--display);font-stretch:80%;font-weight:900;font-size:12px;text-transform:uppercase;padding:3px 8px;transform:rotate(2deg)}
+  .passer-ikke .st-lek{opacity:.5;box-shadow:var(--skygge-liten)}
+  .passer-ikke .st-lek :global(.st-merke){filter:grayscale(1)}
+  @media (max-width:1100px){.st-lekegrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:640px){
+    .st-lekegrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .st-lek{grid-template-columns:1fr;gap:8px;padding:12px}
+    .st-lek :global(.st-merke){width:46px;height:46px}
+    .st-lek b{font-size:19px}
+    .st-hook{display:none}
+    .st-antall{padding:16px}.st-fjes{flex-basis:100%}
+  }
+
+  .st-populaert{padding-block:8px 48px}
+
+  /* 3. Kortbunken */
+  .st-kortfelt{background:var(--mint);color:var(--blekk)}
+  .st-kort-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:56px;align-items:center}
+  .st-tekst{font-size:19px;font-weight:550;max-width:38ch;margin-top:20px}
+  .st-stokkvalg{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+  .st-chip{display:inline-flex;align-items:center;gap:8px;padding:7px 14px 7px 7px;font-family:var(--display);font-stretch:80%;font-weight:900;font-size:15px;text-transform:uppercase;
+    background:var(--papir);color:var(--blekk);border:var(--strek) solid var(--blekk);box-shadow:var(--skygge-liten);border-radius:4px;cursor:pointer;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+  .st-chip :global(svg){width:30px;height:30px}
+  @media (hover:hover) and (pointer:fine){.st-chip:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--blekk)}}
+  .st-chip[aria-selected="true"]{background:var(--blekk);color:var(--mint)}
+  .st-bunke{position:relative;height:clamp(360px,40vw,450px);display:grid;place-items:center;touch-action:pan-y}
+  .st-bunke :global(.st-k){position:absolute;width:min(100%,440px);height:100%;border:var(--strek) solid var(--blekk);box-shadow:var(--skygge-stor);padding:24px 26px;border-radius:6px;
+    display:grid;grid-template-rows:auto 1fr auto;gap:14px;text-align:left;font:inherit;color:var(--blekk);cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform}
+  .st-bunke :global(.st-k:active){cursor:grabbing}
+  .st-bunke :global(.st-k0){background:var(--papir)} .st-bunke :global(.st-k1){background:var(--gul)} .st-bunke :global(.st-k2){background:var(--rosa)}
+  .st-bunke :global(.st-k-navn){display:flex;align-items:center;gap:10px;font-family:var(--display);font-stretch:75%;font-weight:900;text-transform:uppercase;font-size:16px}
+  .st-bunke :global(.st-k-navn svg){width:40px;height:40px}
+  .st-bunke :global(.st-k-tekst){font-size:clamp(23px,2.6vw,31px);font-weight:800;line-height:1.2;align-self:center;text-wrap:pretty}
+  .st-bunke :global(.st-k-fot){font-size:14px;font-weight:700}
+  @media (max-width:900px){.st-kort-grid{grid-template-columns:1fr;gap:36px}}
 
   /* 4. Denne uka */
-  .fn-uka{display:grid;gap:12px;margin-top:16px}
-  @media (min-width:700px){.fn-uka{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
-  .fn-nr{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:4px 18px;align-items:center;padding:20px 22px;border-radius:22px;
-    background:radial-gradient(90% 120% at 100% 0%,rgb(255 255 255 / .12),transparent 60%),linear-gradient(150deg,#C9452F,#8E2A1D);color:#FFF4EA;text-decoration:none;transition:scale 160ms var(--ease-out)}
-  .fn-nr-uke{grid-row:span 2;display:flex;flex-direction:column;align-items:center;font-family:var(--display);font-weight:800;font-size:13px;
-    text-transform:uppercase;letter-spacing:.08em;line-height:1}
-  .fn-nr-uke b{font-family:var(--serif);font-weight:540;font-size:60px;letter-spacing:-.04em;margin-top:4px;font-variant-numeric:tabular-nums}
-  .fn-nr-tekst{display:flex;flex-direction:column;gap:3px}
-  .fn-nr-tekst b{font-family:var(--serif);font-weight:560;font-size:25px;line-height:1.05}
-  .fn-nr-tekst small{font-size:14.5px;opacity:.82}
-  .fn-nr-knapp{justify-self:start;font-family:var(--display);font-weight:800;font-size:14.5px;padding:8px 14px;border-radius:999px;background:#FFF4EA;color:#8E2A1D}
-  .fn-nr:active,.fn-ukelek:active{scale:.985}
-  @media (hover:hover) and (pointer:fine){.fn-nr:hover{text-decoration:none;filter:brightness(1.05)}}
-  .fn-ukelek{display:grid;grid-template-columns:112px 1fr;gap:14px;align-items:center;padding:14px;border-radius:22px;border:1px solid var(--border2);
-    background:var(--card);color:var(--ink);text-decoration:none;transition:scale 160ms var(--ease-out),border-color 160ms ease}
-  .fn-ukelek img{width:112px;height:auto;aspect-ratio:240/126;object-fit:cover;border-radius:12px}
-  .fn-ukelek span{display:flex;flex-direction:column;gap:2px;min-width:0}
-  .fn-ukelek small{font-family:var(--display);font-weight:750;font-size:12.5px;color:var(--gold-t)}
-  .fn-ukelek b{font-family:var(--serif);font-weight:560;font-size:22px;line-height:1.1}
-  .fn-ukelek em{font-style:normal;font-size:14px;color:var(--muted)}
-  .fn-jul{grid-template-columns:1fr}
-  @media (hover:hover) and (pointer:fine){.fn-ukelek:hover{text-decoration:none;border-color:rgb(var(--volt-rgb) / .5)}}
-  .fn-verktoy{list-style:none;display:grid;margin-top:18px;border-top:1px solid var(--border)}
-  @media (min-width:700px){.fn-verktoy{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px}}
-  .fn-verktoy a{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);color:var(--ink);text-decoration:none}
-  .fn-verktoy .icon{color:var(--gold-t);margin-top:2px;flex:none}
-  .fn-verktoy span{display:flex;flex-direction:column;gap:1px}
-  .fn-verktoy b{font-family:var(--display);font-size:16px}
-  .fn-verktoy small{color:var(--faint);font-size:14px}
-  @media (hover:hover) and (pointer:fine){.fn-verktoy a:hover b{color:var(--gold-t)}}
+  .st-ukefelt{background:var(--gul);color:var(--blekk)}
+  .st-uka{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:36px;align-items:start}
+  .st-nr{display:grid;gap:18px;padding:28px;background:var(--papir);color:var(--blekk);text-decoration:none;border:var(--strek) solid var(--blekk);box-shadow:var(--skygge-stor);border-radius:6px;
+    transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+  @media (hover:hover) and (pointer:fine){.st-nr:hover{transform:translate(-3px,-3px);box-shadow:12px 12px 0 var(--blekk);text-decoration:none}}
+  .st-nr:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--blekk);transition-duration:90ms}
+  .st-nr-topp{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .st-nr-navn{display:flex;align-items:center;gap:14px}
+  .st-nr-navn :global(svg){width:clamp(48px,6vw,68px);height:auto}
+  .st-nr-navn b{font-family:var(--display);font-stretch:62%;font-weight:900;font-size:clamp(40px,5.4vw,66px);line-height:.9;text-transform:uppercase}
+  .st-nr-uke{display:flex;align-items:center;gap:10px}
+  .st-nr-uke small{font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:15px}
+  .st-flapprad{display:flex;gap:4px;--c:clamp(40px,5vw,58px)}
+  .st-nr-meta{font-weight:750;font-size:15px;text-transform:uppercase;letter-spacing:.04em}
+  .st-nr-smak{font-size:clamp(19px,2vw,24px);font-weight:750;line-height:1.3;max-width:36ch;padding:16px 18px;background:var(--gul);border:var(--strek) solid var(--blekk)}
+  .st-nr-knapp{justify-self:start}
+  .st-ukelek{position:relative;display:grid;gap:10px;padding:28px;background:var(--blekk);color:var(--papir);text-decoration:none;border:var(--strek) solid var(--blekk);
+    box-shadow:10px 10px 0 var(--oransje);transform:rotate(-1.5deg);border-radius:6px;transition:transform var(--fjaer-tid) var(--fjaer)}
+  @media (hover:hover) and (pointer:fine){.st-ukelek:hover{transform:rotate(0) translate(-2px,-2px);text-decoration:none}}
+  .st-ukelek b{font-family:var(--display);font-stretch:62%;font-weight:900;font-size:clamp(38px,4.6vw,58px);line-height:.92;text-transform:uppercase;color:var(--gul)}
+  .st-ukelek em{font-style:normal;color:#E8E0D4}
+  .st-ukelek-merke{position:absolute;right:-16px;top:-34px}
+  .st-ukelek-merke :global(svg){width:104px;height:104px;transform:rotate(10deg)}
+  .st-jul{background:var(--papir);color:var(--blekk);box-shadow:var(--skygge-stor)}
+  .st-jul b{color:var(--blekk)}
+  .st-jul em{color:var(--muted)}
+  .st-verktoy{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .st-verktoy a{display:flex;gap:14px;align-items:center;padding:14px 16px;background:var(--papir);color:var(--blekk);text-decoration:none;border:var(--strek) solid var(--blekk);box-shadow:var(--skygge-liten);border-radius:6px;
+    transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+  @media (hover:hover) and (pointer:fine){.st-verktoy a:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--blekk);text-decoration:none}}
+  .st-verktoy :global(svg){width:44px;height:44px;flex:none}
+  .st-verktoy span{display:flex;flex-direction:column;gap:2px}
+  .st-verktoy b{font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:18px;line-height:1}
+  .st-verktoy small{font-size:14px;color:#4A3F37}
+  @media (max-width:900px){.st-uka,.st-verktoy{grid-template-columns:1fr}.st-ukelek{transform:none;margin-top:16px}.st-ukelek-merke :global(svg){width:84px;height:84px}.st-ukelek-merke{right:-4px;top:-30px}}
+
+  /* 5. Pluss */
+  .st-plussfelt{background:var(--rosa);color:var(--blekk)}
+  .st-pluss-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}
+  .st-plussnavn{display:inline-block;font-family:var(--display);font-weight:800;font-size:20px;background:var(--blekk);color:var(--rosa);padding:4px 12px;margin-bottom:18px}
+  .st-punkter{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:10px}
+  .st-punkter li{font-weight:650;padding-left:28px;position:relative;max-width:46ch}
+  .st-punkter li::before{content:"";position:absolute;left:0;top:.42em;width:14px;height:14px;background:var(--blekk)}
+  .st-billetter{display:grid;gap:22px}
+  .st-billett{display:grid;grid-template-columns:minmax(0,1fr) auto;background:var(--papir);color:var(--blekk);text-decoration:none;border:var(--strek) solid var(--blekk);box-shadow:var(--skygge);border-radius:6px;
+    transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+  @media (hover:hover) and (pointer:fine){.st-billett:hover{transform:translate(-3px,-3px) rotate(-.6deg);box-shadow:9px 9px 0 var(--blekk);text-decoration:none}}
+  .st-billett:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--blekk);transition-duration:90ms}
+  .st-billett.st-aar{background:var(--gul)}
+  .st-billett-v{padding:20px 22px;display:grid;gap:4px}
+  .st-hva{font-size:13px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+  .st-pris{font-family:var(--display);font-stretch:70%;font-weight:900;font-size:clamp(46px,5vw,64px);line-height:.95}
+  .st-per{font-weight:650}
+  .st-stubb{border-left:var(--strek) dashed var(--blekk);padding:16px 20px;display:grid;place-items:center}
+  .st-stubb :global(svg){width:48px;height:48px}
+  @media (max-width:900px){.st-pluss-grid{grid-template-columns:1fr;gap:36px}}
 
   /* 6. Humor */
-  .fn-humor{display:grid;gap:24px}
-  @media (min-width:900px){.fn-humor{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px 44px;align-items:start}.fn-humor > h2{grid-column:1/-1}}
-  .fn-replikk-kat{margin:0 0 6px;font-family:var(--display);font-weight:700;font-size:14px;color:var(--accent-t)}
-  .fn-replikk-tekst{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(26px,3.6vw,38px);line-height:1.2;
-    max-width:24ch;text-wrap:balance;cursor:pointer;margin:0}
-  .fn-replikk-hint{margin-top:10px;font-size:13.5px;color:var(--faint)}
-  .fn-humor-valg{display:flex;flex-direction:column}
-  .fn-humor-valg > a{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--border);color:var(--ink);
-    font-family:var(--display);font-weight:650;text-decoration:none}
-  .fn-humor-valg > a .icon{color:var(--faint)}
-  @media (hover:hover) and (pointer:fine){.fn-humor-valg > a:hover{color:var(--gold-t)}.fn-humor-valg > a:hover .icon{color:var(--gold-t)}}
-  .fn-sveip{display:flex;align-items:center;gap:14px;padding:16px 18px;margin-bottom:6px;border-radius:20px;border:0;text-align:left;
-    background:var(--gull-glans);color:var(--ink2);box-shadow:inset 0 1px 0 rgb(255 255 255 / .45),0 3px 0 var(--volt-dyp);transition:translate 120ms var(--ease-out),box-shadow 120ms var(--ease-out)}
-  .fn-sveip span{display:flex;flex-direction:column;gap:1px}
-  .fn-sveip b{font-family:var(--display);font-stretch:108%;font-size:18px}
-  .fn-sveip small{font-size:14px;opacity:.75}
-  .fn-sveip:active{translate:0 3px;box-shadow:0 1px 0 var(--volt-dyp)}
+  .st-humorfelt{background:var(--bg)}
+  .st-humor-grid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px 48px;align-items:end}
+  .st-snakker{width:clamp(110px,16vw,190px);height:auto;overflow:visible}
+  .st-kat{font-family:var(--display);font-stretch:85%;font-weight:850;text-transform:uppercase;letter-spacing:.05em;font-size:15px!important;line-height:1.3;color:var(--accent-t)}
+  .st-kat-del{color:var(--ink)}
+  .st-replikk{margin:16px 0 0;font-family:var(--display);font-stretch:62%;font-weight:900;font-size:clamp(40px,6.4vw,88px);line-height:.95;text-transform:uppercase;max-width:16ch;text-wrap:balance;cursor:copy}
+  .st-humor-valg{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;margin-top:36px}
+  .st-humor-valg :global(.st-merke-liten){width:30px;height:30px;margin-left:-8px}
+  .st-lenke{font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;color:var(--ink);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:.2em}
+  .st-smaa{margin-top:14px;font-size:14px;color:var(--muted)}
+  @media (max-width:640px){.st-humor-grid{grid-template-columns:1fr}.st-snakker{width:96px}}
 
-  .fn-hjem p{color:var(--muted);max-width:60ch;margin-top:8px}
+  .st-hjem{padding-block:56px 24px}
+  .st-hjem h2{font-size:clamp(32px,4.6vw,52px)}
+  .st-hjem p{color:var(--muted);max-width:60ch;margin-top:10px}
+
+  @media (prefers-reduced-motion:reduce){
+    .st-knapp,.st-lek,.st-chip,.st-billett,.st-nr,.st-ukelek,.st-verktoy a,.st-pluss-minus{transition:none}
+  }
 </style>

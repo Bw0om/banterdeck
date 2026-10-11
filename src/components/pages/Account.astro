@@ -421,7 +421,7 @@ const T = no ? {
           if (b.dataset.st === 'del') {
             var lenke = location.origin + (LANG === 'no' ? '/no/kortstokk?s=' : '/deck?s=') + s.id;
             var dele = function () {
-              if (navigator.share) return navigator.share({ title: s.navn, text: LANG === 'no' ? 'Spill kortstokken «' + s.navn + '» på Mitt vors' : 'Play the deck “' + s.navn + '” on Mitt vors', url: lenke }).catch(function () {});
+              if (navigator.share) return navigator.share({ title: s.navn, text: LANG === 'no' ? 'Spill kortstokken «' + s.navn + '» på mittvors' : 'Play the deck “' + s.navn + '” on mittvors', url: lenke }).catch(function () {});
               if (navigator.clipboard) navigator.clipboard.writeText(lenke).then(function () { say($('syncMsg'), T.linkCopied, 'ok'); });
             };
             if (s.delt) return dele();
@@ -532,10 +532,10 @@ const T = no ? {
         if ($('vervDel')) {
           $('vervDel').addEventListener('click', function () {
             if (!verv) return;
-            if (EN) return window.BDDel.lenke(location.origin + '/en?v=' + verv.kode, 'Join me on Mitt vors – drinking games where everyone plays from their own phone. Use my link and we both get a free night of Pluss 🎁', {
+            if (EN) return window.BDDel.lenke(location.origin + '/en?v=' + verv.kode, 'Join me on mittvors – drinking games where everyone plays from their own phone. Use my link and we both get a free night of Pluss 🎁', {
               tittel: 'Refer a friend', ingress: 'When your friend creates an account and plays their first room, you each get a night pass.',
             });
-            window.BDDel.lenke(location.origin + '/no/?v=' + verv.kode, 'Bli med på Mitt vors – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁', {
+            window.BDDel.lenke(location.origin + '/no/?v=' + verv.kode, 'Bli med på mittvors – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁', {
               tittel: 'Verv en venn', ingress: 'Når vennen lager konto og spiller sitt første rom, får dere et kveldspass hver.',
             });
           });

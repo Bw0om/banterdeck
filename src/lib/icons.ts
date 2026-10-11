@@ -1,4 +1,4 @@
-// Mitt vors sine egne ikoner (24×24, strek). Tar fargen fra teksten rundt (currentColor).
+// mittvors sine egne ikoner (24×24, strek). Tar fargen fra teksten rundt (currentColor).
 export const ICONS: Record<string, string> = {
  "nyhet": "<rect x=\"4\" y=\"5\" width=\"13\" height=\"14\" rx=\"2\"/><path d=\"M17 9h2.5a.5.5 0 0 1 .5.5V17a2 2 0 0 1-2 2H6\"/><path d=\"M7.5 9h6M7.5 12.5h6M7.5 16h3.5\"/>",
  "uttrykk": "<path d=\"M9.2 7.8 5.8 12l3.4 4.2M14 7.8 10.6 12l3.4 4.2M15.6 7.8 19 12l-3.4 4.2\"/>",

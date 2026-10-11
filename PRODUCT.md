@@ -19,7 +19,7 @@ The host makes the decisions and the rest of the group joins. Joining has to be 
 
 ## Product Purpose
 
-Mitt vors runs the games at the pre-party. You pick a game, and everyone plays it from their own phone, with the TV showing it to the room when there is one. Success means a group starts a game within seconds and keeps playing all night, then comes back on later nights as a crew.
+mittvors runs the games at the pre-party. You pick a game, and everyone plays it from their own phone, with the TV showing it to the room when there is one. Success means a group starts a game within seconds and keeps playing all night, then comes back on later nights as a crew.
 
 ## Positioning
 
@@ -44,10 +44,10 @@ Phone-to-phone live play is the core: rooms, the TV view, crews, the weekly Nyhe
 
 ## Brand Commitments
 
-- **Name:** **Mitt vors** (domain mittvors.no). "banterdeck" is a legacy repo and asset name, not the brand.
-- **Paid tier:** **mittvors pluss** (one word, lowercase, also in English); short form **Pluss** in both languages. Never "Mitt vors Plus".
-- **Look:** "champagnenatt" (`src/styles/champagne.css`, on top of `natt.css`): wine-black night, champagne gold for now/on/primary, Campari red for press/drink, Fraunces serif headlines. Elegant, but still a party.
-- **Logo:** two champagne flutes clinking under three sparks, dark on a champagne-gold tile (`public/favicon.svg` is the master; icons come from `scripts/lag-ikoner.mjs`). Wordmark: «mitt» in Fraunces, «vors» in gold italic.
+- **Name:** **mittvors**, one word, lowercase, everywhere (domain mittvors.no). Never "Mitt vors". "banterdeck" is a legacy repo and asset name, not the brand.
+- **Paid tier:** **mittvors pluss** (one word, lowercase, also in English); short form **Pluss** in both languages. Never "mittvors Plus".
+- **Look:** "stua" (`src/styles/stua.css`, on top of the older champagne/natt layers; see DESIGN.md): neo-brutalism with full-width colour fields, thick black strokes and hard shadows. Light is the default, dark is a choice. Sticker-style game icons and emoji-faced characters; an isometric living room on the homepage where guests walk in as the code is typed. Split-flap only for numbers and codes. Motion is springs (≤2 % overshoot) and only happens when someone clicks, drags or types.
+- **Logo:** two champagne flutes clinking under three sparks. In the site header it is a yellow sticker tile with black strokes; app icons still come from `public/favicon.svg` via `scripts/lag-ikoner.mjs`. Wordmark: «mittvors» in condensed heavy Archivo in a black box, «vors» in yellow italic.
 - **Voice:** cheeky and Norwegian-native (*"Frekk, men morsom – det er hele regelen"*). Humour comes from recognisable everyday situations (office life, family, the crew), not shock. Content marked *Grov* stays out of featured spots like *Dagens replikk*.
 - **Seller of record:** Flaten Kapital, org.nr 931976532 (see `SELGER` in `src/config.ts`).
 

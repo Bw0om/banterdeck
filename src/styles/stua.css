@@ -1,0 +1,143 @@
+/* =====================================================================
+   STUA – neo-brutalisme, lagt oppå champagnenatt (champagne.css)
+   ---------------------------------------------------------------------
+   1. Fargefelt med tykk svart strek og harde skygger. Lys er standard,
+      mørk er et valg.
+        gul    = nå / på / valgt / hovedknapp   (--gold, «volt»)
+        oransje = merkevaren, trykk og drikk    (--accent, «glo»)
+        mint og rosa = flater og klistremerker
+   2. Overskrifter i Archivo, smal og tung, med store bokstaver.
+      Alt man leser og trykker på er Archivo i normal bredde.
+   3. Bevegelse er fjær med høyst 2 % oversving, og skjer bare når noen
+      klikker, drar eller skriver.
+   ===================================================================== */
+
+:root,:root[data-theme="light"]{
+  --oransje:#FF5B1F; --gul:#FFD23F; --mint:#63E2A8; --rosa:#FF9CC2; --papir:#FFF8EE; --blekk:#16120F; --tavle:#1C1B1F;
+  --flapp:#2A292E; --flapp-tekst:#FFE07A;
+  --bg:#FFF8EE; --bg2:#FFF1DE; --card:#FFFFFF; --card2:#FFF1DE;
+  --ink:#16120F; --muted:#4A3F37; --faint:#62564C; --ink2:#16120F;
+  --gold:#FFD23F; --gold-t:#B8380A; --accent:#FF5B1F; --accent-t:#B8380A; --paper:#FFFFFF;
+  --bg-rgb:255 248 238; --ink-rgb:22 18 15; --card-rgb:255 255 255;
+  --volt-rgb:255 210 63; --glo-rgb:255 91 31; --lilla-rgb:255 156 194;
+  --glo-dyp:#16120F; --volt-dyp:#16120F; --volt-kant:#16120F;
+  --gull-glans:var(--gul); --hårstrek:rgb(22 18 15 / .55);
+  --border:rgb(22 18 15 / .2); --border2:rgb(22 18 15 / .6);
+  --hard:#16120F; --strek:3px;
+  --skygge:5px 5px 0 var(--hard); --skygge-liten:3px 3px 0 var(--hard); --skygge-stor:9px 9px 0 var(--hard);
+  --serif:var(--display);
+  --r:8px;
+  /* Fjær med 2 % oversving */
+  --fjaer:linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1);
+  --fjaer-tid:520ms;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#1C1B1F; --bg2:#232227; --card:#2A292E; --card2:#333238;
+  --ink:#FFF8EE; --muted:#D9CFC2; --faint:#B5AA9D; --ink2:#16120F;
+  --gold:#FFD23F; --gold-t:#FFD23F; --accent:#FF5B1F; --accent-t:#FF8A5C; --paper:#FFF8EE;
+  --bg-rgb:28 27 31; --ink-rgb:255 248 238; --card-rgb:42 41 46;
+  --hårstrek:rgb(255 248 238 / .45);
+  --border:rgb(255 248 238 / .16); --border2:rgb(255 248 238 / .5);
+  --hard:#000; --volt-kant:#FFD23F;
+  color-scheme:dark;
+}
+
+/* ---------- grunnmur ---------- */
+body{background:var(--bg)}
+body::before,:root[data-theme="light"] body::before{background:var(--bg)}
+body::after{display:none}
+::selection{background:var(--gul);color:var(--blekk)}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+:root[data-theme="light"] :focus-visible{outline-color:var(--blekk)}
+a{color:var(--gold-t)}
+
+/* ---------- skrift ---------- */
+h1,h2,.h-serif{font-family:var(--display);font-stretch:68%;font-weight:900;text-transform:uppercase;letter-spacing:-.005em;line-height:.92;text-wrap:balance}
+h1{font-size:clamp(40px,6.4vw,72px)}
+h1 em,h2 em{font-style:normal;font-weight:900;color:var(--blekk);background:var(--gul);padding:0 .08em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+h3,.h3{font-family:var(--display);font-stretch:85%;font-weight:850;letter-spacing:0}
+.tall{font-variant-numeric:tabular-nums lining-nums}
+
+/* ---------- merket: mittvors i en svart boks ---------- */
+.brand{gap:10px}
+.brand .brandmark{width:36px;height:36px;border-radius:0;transform:rotate(-4deg);transition:transform var(--fjaer-tid) var(--fjaer)}
+.brand:hover .brandmark{transform:rotate(4deg) scale(1.06)}
+.brand .bt,.mobilebar .brand .bt{font-family:var(--display);font-stretch:72%;font-weight:900;font-size:26px;letter-spacing:-.01em;line-height:1;
+  background:var(--blekk);color:var(--papir);padding:4px 10px 6px;transform:rotate(-2deg);box-shadow:3px 3px 0 var(--gul)}
+.brand .bt i{font-style:italic;font-weight:900;color:var(--gul);padding:0}
+.mobilebar .brand .bt{font-size:23px}
+
+/* ---------- knapper: tykk strek, hard skygge, fjær ---------- */
+.btn,.appbtn{font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;letter-spacing:.01em;border-radius:4px;
+  border:var(--strek) solid var(--blekk);box-shadow:var(--skygge);
+  transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer),background-color 160ms ease}
+.btn.gold,.btn.start,.appbtn{background:var(--gul);color:var(--blekk);box-shadow:var(--skygge)}
+.btn.danger{background:var(--oransje);color:var(--blekk);box-shadow:var(--skygge)}
+.btn.ghost{background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);box-shadow:var(--skygge)}
+.btn.small{border-width:2.5px;box-shadow:var(--skygge-liten)}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover,.appbtn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--hard)}
+  .btn.small:hover{box-shadow:5px 5px 0 var(--hard)}
+  .btn.ghost:hover{color:var(--ink);border-color:var(--ink)}
+}
+.btn:active,.btn.gold:active,.btn.start:active,.btn.danger:active,.btn.ghost:active,.appbtn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard);transition-duration:90ms;transition-timing-function:ease-out}
+.btn[disabled],.btn:disabled{opacity:.55;box-shadow:none;transform:none}
+
+/* Runde «piller» fra før blir rette, med strek */
+.btn,.btn.small,.startrow .btn,.lk-snarveier .btn.gold{border-radius:4px!important}
+.lk-chips button,.kv-valg label,.gj-start label.gj-lek,.rom-nr-arkiv,.konto-faner,.konto-faner button,.nr-pille,.op-pille{border-radius:4px;border-color:var(--ink)}
+.lk-chips button[aria-pressed="true"],.lk-chips button[aria-selected="true"]{background:var(--gul);color:var(--blekk)}
+
+/* ---------- skjemafelt ---------- */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea{border:2.5px solid var(--ink)!important;border-radius:4px;background:var(--card);color:var(--ink)}
+input:focus,select:focus,textarea:focus,:root[data-theme="light"] :is(input,select,textarea):focus{outline:none;box-shadow:var(--skygge-liten),0 0 0 3px var(--gul)!important}
+input,textarea{caret-color:var(--oransje)}
+
+/* ---------- merker og piller ---------- */
+.h2-badge,.rom-bg-status,.pluss-merke,.nr-pille b{border-radius:0;background:var(--gul);color:var(--blekk);font-stretch:80%;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+.pluss-pille,.side a.pluss-pille{background:var(--rosa);color:var(--blekk);border:2.5px solid var(--blekk);border-radius:0;box-shadow:var(--skygge-liten);
+  font-family:var(--display);font-style:normal;font-stretch:80%;font-weight:900;letter-spacing:0;
+  transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+@media (hover:hover) and (pointer:fine){.pluss-pille:hover,.side a.pluss-pille:hover{background:var(--rosa);transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--hard)}}
+.pluss-pille.aktiv{background:var(--mint)}
+
+/* ---------- kort og flater ---------- */
+.card{border:2.5px solid var(--ink);border-radius:var(--r);box-shadow:var(--skygge-liten)}
+.gatebox{background:var(--card);border:var(--strek) solid var(--ink);border-radius:var(--r);box-shadow:var(--skygge-stor)}
+.gatebox h2{font-size:clamp(30px,6vw,42px)}
+
+/* ---------- sidemeny (stor skjerm) ---------- */
+.side{background:var(--bg);border-right:var(--strek) solid var(--ink)}
+.sidenav a{font-family:var(--display);font-stretch:85%;font-weight:800;border-radius:4px;transition:transform var(--fjaer-tid) var(--fjaer),background-color 120ms ease}
+@media (hover:hover) and (pointer:fine){.sidenav a:hover{background:var(--bg2);transform:translateX(3px)}}
+.sidenav a[aria-current="page"]{background:var(--gul);color:var(--blekk);box-shadow:inset 0 0 0 2.5px var(--blekk)}
+.sidenav a[aria-current="page"] .icon{color:var(--blekk)}
+.searchbtn{border:2.5px solid var(--ink);border-radius:4px;background:var(--card);box-shadow:var(--skygge-liten)}
+
+/* ---------- topplinja (mobil): oransje med tykk strek ---------- */
+@media (max-width:899px){
+  .mobilebar,:root[data-theme="light"] .mobilebar{background:var(--oransje);-webkit-backdrop-filter:none;backdrop-filter:none;color:var(--blekk)}
+  .topbars{background:var(--oransje);border-bottom:var(--strek) solid var(--blekk)}
+  .mobilebar .langlink,.mobilebar .langlink.compact{color:var(--blekk)}
+  .mobilenav{background:var(--oransje)}
+  .mobilenav a{color:var(--blekk);font-family:var(--display);font-stretch:85%;font-weight:850}
+  .mobilenav a[aria-current="page"]{background:var(--blekk);color:var(--gul)}
+  .mobilebar .pluss-pille{box-shadow:2px 2px 0 var(--blekk)}
+}
+
+/* ---------- fanelinja nederst (flytende på mobil) ---------- */
+@media (max-width:899px){
+  .tabbar,:root[data-theme="light"] .tabbar{background:var(--card);-webkit-backdrop-filter:none;backdrop-filter:none;border:var(--strek) solid var(--blekk);box-shadow:var(--skygge);border-radius:8px}
+  .tabbar a{color:var(--ink);border-radius:4px;font-family:var(--display);font-stretch:85%;font-weight:850;transition:transform var(--fjaer-tid) var(--fjaer),flex-grow var(--fjaer-tid) var(--fjaer)}
+  .tabbar a[aria-current=page]{background:var(--gul);color:var(--blekk);box-shadow:inset 0 0 0 2.5px var(--blekk)}
+  .tabbar a:active{transform:scale(.94);transition-duration:90ms}
+}
+
+/* ---------- bunnen ---------- */
+.foot{border-top:var(--strek) solid var(--ink);color:var(--muted)}
+.foot a{color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){
+  .btn,.appbtn,.brand .brandmark,.sidenav a,.tabbar a .ti,.pluss-pille{transition:none!important}
+}

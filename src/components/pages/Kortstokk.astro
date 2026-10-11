@@ -6,7 +6,7 @@ import type { Lang } from '../../lib/i18n';
 const { lang = 'no' } = Astro.props as { lang?: Lang };
 const no = lang === 'no';
 ---
-<Base title={no ? 'Delt kortstokk' : 'Shared deck'} description={no ? 'Egne drikkekort laget på Mitt vors. Spill dem alene, i et rom, eller lagre en kopi.' : 'Custom drinking cards made on Mitt vors. Play them on one phone, in a room, or save a copy.'} lang={lang} gate={true} noindex={true}>
+<Base title={no ? 'Delt kortstokk' : 'Shared deck'} description={no ? 'Egne drikkekort laget på mittvors. Spill dem alene, i et rom, eller lagre en kopi.' : 'Custom drinking cards made on mittvors. Play them on one phone, in a room, or save a copy.'} lang={lang} gate={true} noindex={true}>
   <div id="delt" class="delt"><p class="small">{no ? 'Henter kortstokken …' : 'Loading the deck …'}</p></div>
   <div id="stokkSpill" class="stokk-spill" hidden role="dialog" aria-modal="true" aria-labelledby="ssNavn">
     <p class="stokk-spill-navn" id="ssNavn"></p>
@@ -29,7 +29,7 @@ const no = lang === 'no';
     fetch('/api/stokk/' + id, EN ? { headers: { 'x-lang': 'en' } } : undefined).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.melding); return d; }); })
       .then(function (d) {
         st = d;
-        document.title = d.navn + (EN ? ' – shared deck – Mitt vors' : ' – delt kortstokk – Mitt vors');
+        document.title = d.navn + (EN ? ' – shared deck – mittvors' : ' – delt kortstokk – mittvors');
         var smak = stokk(d.kort).slice(0, 3);
         root.innerHTML = '<p class="rom-etikett">' + tittel + '</p><h1>' + esc(d.navn) + '</h1>' +
           '<p class="lead">' + d.kort.length + (EN

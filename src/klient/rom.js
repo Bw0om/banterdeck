@@ -2582,7 +2582,7 @@ export function startRom(LEKNAVN, LANG) {
   function delLov() {
     var lov = (tilstand.kveld && tilstand.kveld.lovValg) || null;
     var url = location.origin + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
-    var tekst = lov && lov.type === 'ny' ? T('📜 Ny regel i ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'gjengen') + ': «' + lov.tekst + '»', '📜 New rule in ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'the crew') + ': “' + lov.tekst + '”') : T('Gjengens lov på Mitt vors ⚖️', 'The Crew’s Law on Mitt vors ⚖️');
+    var tekst = lov && lov.type === 'ny' ? T('📜 Ny regel i ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'gjengen') + ': «' + lov.tekst + '»', '📜 New rule in ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'the crew') + ': “' + lov.tekst + '”') : T('Gjengens lov på mittvors ⚖️', 'The Crew’s Law on mittvors ⚖️');
     hentVervKode();
     if (window.BDDel) return window.BDDel.lenke(url, tekst, { tittel: T('Del kvelden', 'Share the night'), bilde: lovStoryBilde });
     lovStoryBilde().then(function (fil) {
@@ -2592,12 +2592,12 @@ export function startRom(LEKNAVN, LANG) {
   function delKveld() {
     var url = tilstand.gjeng ? location.origin + RUTE.gjeng + '?k=' + tilstand.gjeng.kode : location.origin + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
     var t = kveldsTall();
-    var tekst = torr(t.kaaring[0] ? t.kaaring[0].tittel + ': ' + t.kaaring[0].navn + ' 🏆 ' : '') + T('Kveldens oppsummering fra Mitt vors –', 'Tonight\'s recap from Mitt vors –');
+    var tekst = torr(t.kaaring[0] ? t.kaaring[0].tittel + ': ' + t.kaaring[0].navn + ' 🏆 ' : '') + T('Kveldens oppsummering fra mittvors –', 'Tonight\'s recap from mittvors –');
     if (!window.BDDel) {
       // Uten delingsarket: del bildet direkte, eller last det ned
       return storyBilde().then(function (fil) {
         if (!fil) return toast(T('Fikk ikke laget bildet.', 'Couldn\'t create the image.'));
-        if (navigator.canShare && navigator.canShare({ files: [fil] })) return navigator.share({ files: [fil], title: 'Mitt vors', text: tekst + ' ' + url }).catch(function () {});
+        if (navigator.canShare && navigator.canShare({ files: [fil] })) return navigator.share({ files: [fil], title: 'mittvors', text: tekst + ' ' + url }).catch(function () {});
         var a = document.createElement('a'); a.href = URL.createObjectURL(fil); a.download = fil.name;
         document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
       });
@@ -2674,7 +2674,7 @@ export function startRom(LEKNAVN, LANG) {
       if (!blob) return toast(T('Fikk ikke laget bildet.', 'Couldn\'t create the image.'));
       var fil = new File([blob], 'mittvors-tavle.png', { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [fil] })) {
-        navigator.share({ files: [fil], title: T('Kveldens tavle', 'Tonight\'s board'), text: T('Kveldens tavle fra Mitt vors', 'Tonight\'s board from Mitt vors') }).catch(function () {});
+        navigator.share({ files: [fil], title: T('Kveldens tavle', 'Tonight\'s board'), text: T('Kveldens tavle fra mittvors', 'Tonight\'s board from mittvors') }).catch(function () {});
       } else {
         var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mittvors-tavle.png';
         document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
@@ -2901,9 +2901,9 @@ export function startRom(LEKNAVN, LANG) {
     if (farlig && !bekreftet(b, farlig)) return;
     if (g === 'del') {
       var url = location.origin + RUTE.rom + '?k=' + kode;
-      var tekst = T('Bli med på Mitt vors! Kode: ', 'Join me on Mitt vors! Code: ') + kode;
+      var tekst = T('Bli med på mittvors! Kode: ', 'Join me on mittvors! Code: ') + kode;
       if (window.BDDel) return window.BDDel.lenke(url, tekst, { tittel: T('Inviter til rommet', 'Invite to the room'), ingress: T('Romkode: ', 'Room code: ') + kode });
-      if (navigator.share) navigator.share({ title: 'Mitt vors', text: tekst, url: url }).catch(function () {});
+      if (navigator.share) navigator.share({ title: 'mittvors', text: tekst, url: url }).catch(function () {});
       else if (navigator.clipboard) navigator.clipboard.writeText(tekst + '\n' + url).then(function () { toast(T('Lenken er kopiert', 'Link copied')); });
       return;
     }
@@ -2980,7 +2980,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'skjerm-lukk') { visSkjerm = false; return tegn(); }
     if (g === 'skjerm-del') {
       var sl = skjermLenke();
-      if (navigator.share) { navigator.share({ title: T('Mitt vors – storskjerm', 'Mitt vors – big screen'), url: sl }).catch(function () {}); return; }
+      if (navigator.share) { navigator.share({ title: T('mittvors – storskjerm', 'mittvors – big screen'), url: sl }).catch(function () {}); return; }
       try { navigator.clipboard.writeText(sl); toast(T('Lenken er kopiert ✓', 'Link copied ✓')); } catch (e) { prompt(T('Kopier lenken:', 'Copy the link:'), sl); }
       return;
     }
