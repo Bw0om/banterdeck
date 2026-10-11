@@ -353,3 +353,34 @@ html.i-spill .rom-kode{font-size:.92em}
 @media (prefers-reduced-motion:reduce){
   :is(.lk-kort,.lk-rad,.rom-lek,.rom-anbefalt-lek,.st-lek,.lek-banner,.topp3-rad a,.lek-flere-rad a,.prov-appen-leker a,.fn-lek):active :is([data-a],[class^="a-"],[class*=" a-"]){animation:none}
 }
+
+/* =====================================================================
+   PYNT OG TEMAER: figuren din på kontosiden, temavalg i rommet, nytt i garderoben
+   ===================================================================== */
+.figur-rad{display:flex;align-items:center;gap:18px;margin:12px 0 18px}
+.figur-preview{width:116px;flex:none;height:auto;overflow:visible}
+.pynt-grid h3{margin:16px 0 8px;font-size:15px;font-stretch:80%;text-transform:uppercase;letter-spacing:.03em}
+.pynt-rad{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.pynt-valg{appearance:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px 10px;text-align:center;cursor:pointer;color:var(--ink);
+  background:var(--card);border:2.5px solid var(--ink);border-radius:6px;box-shadow:var(--skygge-liten);font:inherit;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.pynt-valg svg{width:56px;height:56px;overflow:visible}
+.pynt-valg b{font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:14px;line-height:1.05}
+.pynt-valg small{font-size:12px;color:var(--muted);line-height:1.25}
+@media (hover:hover) and (pointer:fine){.pynt-valg:not(:disabled):hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--hard)}}
+.pynt-valg:not(:disabled):active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
+.pynt-valg[aria-pressed="true"]{background:var(--gul);color:var(--blekk)}
+.pynt-valg[aria-pressed="true"] small{color:var(--blekk)}
+.pynt-valg.laast{cursor:default;box-shadow:none;background:var(--bg2);color:var(--muted)}
+.pynt-valg.laast svg{filter:grayscale(1);opacity:.45}
+
+.rom-tema{display:flex;flex-wrap:wrap;gap:8px;padding:10px 0 6px}
+.rom-tema-knapp{appearance:none;cursor:pointer;font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:13px;padding:7px 11px;color:var(--blekk);
+  background:var(--papir);border:2.5px solid var(--blekk);border-radius:4px;box-shadow:3px 3px 0 var(--blekk);transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.rom-tema-knapp[aria-pressed="true"]{background:var(--gul)}
+.rom-tema-knapp:not(:disabled):active{transform:translate(3px,3px);box-shadow:0 0 0 var(--blekk);transition-duration:90ms}
+.rom-tema-knapp.laast{opacity:.55;cursor:default;box-shadow:none}
+.rom-tema-knapp i{font-style:normal;font-size:11px;margin-left:4px;padding:1px 5px;background:var(--rosa);border:2px solid var(--blekk)}
+
+.rom-nypynt{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 14px;padding:14px 16px;background:var(--mint);color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:6px;box-shadow:var(--skygge)}
+.rom-nypynt b{flex:1 1 200px;font-family:var(--display);font-stretch:85%;font-weight:850}
+.rom-nypynt-dytt{margin:0 0 14px;padding:12px 14px;border:2.5px dashed var(--ink);border-radius:6px;font-size:15px}

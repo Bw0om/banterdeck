@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { supabaseUrl, supabaseAnonKey, supabaseDebug } from '../../config';
 import { ui, type Lang } from '../../lib/i18n';
+import { PYNT } from '../../lib/pynt.js';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 const SUPABASE_URL = supabaseUrl();
@@ -136,6 +137,13 @@ const T = no ? {
           <button type="button" class="mini danger" id="slettBtn">{T.deleteAcc}</button>
         </div>
         <p id="plussLinje" class="konto-pluss" hidden></p>
+        <section class="konto-boks figur-boks" id="figurBoks" hidden aria-labelledby="figurTittel">
+          <h2 id="figurTittel">{no ? 'Figuren din' : 'Your figure'}</h2>
+          <p class="small">{no ? 'Slik ser du ut i stua når du spiller. Pynt låser du opp ved å spille – alt er gratis, og alle i rommet ser det.' : 'This is you in the living room when you play. You unlock gear by playing – it is all free, and everyone in the room sees it.'}</p>
+          <div class="figur-rad"><svg class="figur-preview" id="figurPreview" viewBox="-48 -100 96 106" aria-hidden="true"></svg><p class="small" id="figurTekst"></p></div>
+          <div id="figurPynt" class="pynt-grid"></div>
+          <p id="figurMsg" class="formmsg" role="status" aria-live="polite"></p>
+        </section>
         {no ? (
           <div class="konto-ekstra">
             <a class="konto-kort" href="/no/gjeng"><span>👥</span><b>Gjengene dine</b><small id="gjengTall">Sesongtabell over flere kvelder</small></a>
@@ -228,7 +236,14 @@ const T = no ? {
         <button class="btn ghost" type="button" id="ssLukk">{T.close}</button>
       </div>
 
-      <script is:inline data-astro-rerun define:vars={{ LANG: lang, T: {
+      <script>
+        // Figuren tegnes med de samme delene som i stua
+        import { figurHtml, utseende, PYNT_SVG } from '../../klient/stua.js';
+        import { figurNokkel } from '../../lib/pynt.js';
+        (window as any).mvFigur = figurHtml; (window as any).mvUtseende = utseende; (window as any).mvFigurNokkel = figurNokkel; (window as any).mvPyntSvg = PYNT_SVG;
+        document.dispatchEvent(new CustomEvent('mv-figur-klar'));
+      </script>
+      <script is:inline data-astro-rerun define:vars={{ LANG: lang, PYNT, T: {
         linkSent: L.linkSent, syncing: L.syncing, synced: L.synced, none: L.noLines,
         del: L.delete, generic: L.errGeneric, copyHint: L.copyHint, linkBad: L.linkBad, ...T } }}>
       (function () {
@@ -557,6 +572,49 @@ const T = no ? {
           el.innerHTML += ' · <a href="' + (LANG === 'no' ? '/no/kvittering?ref=' : '/receipt?ref=') + encodeURIComponent(l[0]) + '">' + (LANG === 'no' ? 'Kvittering' : 'Receipt') + '</a>';
         }
 
+        /* ---------- Figuren din: pynt du har låst opp, og hva du har på deg ---------- */
+        var figur = { laast: [], valgt: {}, kvelder: 0, sesong: null }, figurTimer = null;
+        var SLOTNAVN = EN ? { hode: 'On your head', ansikt: 'Glasses', bryst: 'On your chest', venn: 'Pet' } : { hode: 'På hodet', ansikt: 'Briller', bryst: 'På brystet', venn: 'Kjæledyr' };
+        var SLOTBOKS = { hode: '-32 -100 64 56', ansikt: '-24 -74 48 32', bryst: '-26 -52 52 36', venn: '-16 -30 44 34' };
+        function tegnFigur() {
+          if (!window.mvFigur || !bruker) return;
+          $('figurPreview').innerHTML = window.mvFigur(window.mvUtseende(window.mvFigurNokkel(bruker.id)), figur.valgt);
+          var n = figur.laast.length;
+          $('figurTekst').textContent = EN ? (n ? n + ' of ' + PYNT.length + ' unlocked · ' : '') + figur.kvelder + (figur.kvelder === 1 ? ' night played' : ' nights played')
+            : (n ? n + ' av ' + PYNT.length + ' låst opp · ' : '') + figur.kvelder + (figur.kvelder === 1 ? ' kveld spilt' : ' kvelder spilt');
+        }
+        function tegnPynt() {
+          var har = {}; figur.laast.forEach(function (id) { har[id] = true; });
+          var slots = ['hode', 'ansikt', 'bryst', 'venn'];
+          $('figurPynt').innerHTML = slots.map(function (slot) {
+            return '<h3>' + SLOTNAVN[slot] + '</h3><div class="pynt-rad">' + PYNT.filter(function (x) { return x.slot === slot; }).map(function (x) {
+              var kan = !!har[x.id] && (!x.sesong || x.sesong === figur.sesong), paa = figur.valgt[slot] === x.id;
+              var hint = !har[x.id] ? x.laas[EN ? 1 : 0] : (x.sesong && x.sesong !== figur.sesong ? (EN ? 'Back in season' : 'Kommer tilbake i sesongen') : (paa ? (EN ? 'Wearing' : 'På') : (EN ? 'Tap to wear' : 'Trykk for å ta på')));
+              return '<button type="button" class="pynt-valg' + (kan ? '' : ' laast') + '" data-id="' + x.id + '" data-slot="' + slot + '" aria-pressed="' + paa + '"' + (kan ? '' : ' disabled') + '>' +
+                '<svg viewBox="' + SLOTBOKS[slot] + '" aria-hidden="true">' + (window.mvPyntSvg ? window.mvPyntSvg[x.id] : '') + '</svg><b>' + esc(x.navn[EN ? 1 : 0]) + '</b><small>' + esc(hint) + '</small></button>';
+            }).join('') + '</div>';
+          }).join('');
+        }
+        function visFigur() {
+          if (!window.mvFigur) { document.addEventListener('mv-figur-klar', visFigur, { once: true }); return; }
+          K.api('/api/konto/pynt', EN_HODE).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+            if (!d) return;
+            figur = d; $('figurBoks').hidden = false; tegnFigur(); tegnPynt();
+          }).catch(function () {});
+        }
+        document.addEventListener('click', function (e) {
+          var b = e.target.closest('.pynt-valg'); if (!b || b.disabled) return;
+          var slot = b.dataset.slot, id = b.dataset.id;
+          figur.valgt[slot] = figur.valgt[slot] === id ? null : id;
+          tegnFigur(); tegnPynt();
+          clearTimeout(figurTimer);
+          figurTimer = setTimeout(function () {
+            K.api('/api/konto/pynt', Object.assign({ method: 'POST', body: JSON.stringify({ valgt: figur.valgt }) }, EN_HODE || {})).then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (d) { say($('figurMsg'), d && d.ok ? (EN ? 'Saved. You show up like this next time you join a room.' : 'Lagret. Slik ser du ut neste gang du blir med i et rom.') : T.generic, d && d.ok ? 'ok' : 'err'); })
+              .catch(function () { say($('figurMsg'), T.generic, 'err'); });
+          }, 400);
+        });
+
         function visHvem() { $('who').textContent = bruker.brukernavn ? bruker.brukernavn + ' · ' + bruker.email : bruker.email; }
 
         function start() {
@@ -592,7 +650,7 @@ const T = no ? {
               // Kom man hit for å logge inn fra en annen side (f.eks. en gjenglenke), gå tilbake dit
               var tilbake = null; try { tilbake = sessionStorage.getItem('bd_etter_innlogging'); sessionStorage.removeItem('bd_etter_innlogging'); } catch (x) {}
               if (tilbake && (EN ? /^\/(?!no\/|\/)[a-z0-9/?=&%-]*$/i : /^\/no\/[a-z0-9/?=&%-]*$/i).test(tilbake)) { location.href = tilbake; return; }
-              visVerv(); visGjenger();
+              visVerv(); visGjenger(); visFigur();
             }
             try { sessionStorage.setItem('bd_favsynk', '1'); } catch (x) {}
             K.synkFav().catch(function () {}).then(pull).then(function (remote) {

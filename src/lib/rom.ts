@@ -13,6 +13,7 @@ import BINGO_EN from '../data/bingo.en.json';
 import PLUSSPAKKER_EN from '../data/pluss.en.json';
 import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
+import { rensPynt, temaLov, temaFor, figurNokkel } from './pynt.js';
 import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } from './kveld';
 import { MAKS_REGEL } from './lovbok';
 import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors, borsTilPluss, BUTIKK } from './bors';
@@ -162,22 +163,22 @@ export function kaaringer(data: any) {
   const navn = (id: string) => navnPaa(data, id);
   const maks = (felt: string) => { const m = l.slice().sort((a: any, b: any) => (b[felt] || 0) - (a[felt] || 0))[0]; return m && m[felt] ? m : null; };
   const k = data.kveld;
-  if (k && k.vinner) ut.push({ ikon: '🏆', tittel: L('Kveldens vinner', 'Winner of the night'), id: k.vinner, navn: navn(k.vinner), tall: L((k.poeng[k.vinner] || 0) + ' kveldspoeng', (k.poeng[k.vinner] || 0) + ' night points') });
+  if (k && k.vinner) ut.push({ ikon: '🏆', kode: 'vinner', tittel: L('Kveldens vinner', 'Winner of the night'), id: k.vinner, navn: navn(k.vinner), tall: L((k.poeng[k.vinner] || 0) + ' kveldspoeng', (k.poeng[k.vinner] || 0) + ' night points') });
   const sum = l.reduce((n: number, p: any) => n + (p.slurker || 0), 0);
-  const torst = maks('slurker'); if (torst) ut.push({ ikon: '🍺', tittel: L('Kveldens tørstigste', 'Thirstiest of the night'), id: torst.id, navn: torst.navn, tall: L(torst.slurker + ' slurker', torst.slurker + ' sips') });
-  if (l.length >= 3 && sum) { const e = l.slice().sort((a: any, b: any) => (a.slurker || 0) - (b.slurker || 0))[0]; ut.push({ ikon: '😇', tittel: L('Slapp unna', 'Got away with it'), id: e.id, navn: e.navn, tall: L((e.slurker || 0) + ' slurker', (e.slurker || 0) + ' sips') }); }
+  const torst = maks('slurker'); if (torst) ut.push({ ikon: '🍺', kode: 'torst', tittel: L('Kveldens tørstigste', 'Thirstiest of the night'), id: torst.id, navn: torst.navn, tall: L(torst.slurker + ' slurker', torst.slurker + ' sips') });
+  if (l.length >= 3 && sum) { const e = l.slice().sort((a: any, b: any) => (a.slurker || 0) - (b.slurker || 0))[0]; ut.push({ ikon: '😇', kode: 'slapp', tittel: L('Slapp unna', 'Got away with it'), id: e.id, navn: e.navn, tall: L((e.slurker || 0) + ' slurker', (e.slurker || 0) + ' sips') }); }
   const brudd = (data.rekord && data.rekord.brudd) || {}, bId = Object.keys(brudd).sort((a, b) => brudd[b] - brudd[a])[0];
-  if (bId && l.some((p: any) => p.id === bId)) ut.push({ ikon: '💥', tittel: L('Ringbryteren', 'The ring breaker'), id: bId, navn: navn(bId), tall: L(brudd[bId] + (brudd[bId] === 1 ? ' ring' : ' ringer'), brudd[bId] + (brudd[bId] === 1 ? ' ring' : ' rings')) });
+  if (bId && l.some((p: any) => p.id === bId)) ut.push({ ikon: '💥', kode: 'ring', tittel: L('Ringbryteren', 'The ring breaker'), id: bId, navn: navn(bId), tall: L(brudd[bId] + (brudd[bId] === 1 ? ' ring' : ' ringer'), brudd[bId] + (brudd[bId] === 1 ? ' ring' : ' rings')) });
   const b = data.bors;
   if (b) {
     const start = (id: string) => (b.startKr && b.startKr[id] != null ? b.startKr[id] : 1000);
     const formue = l.map((p: any) => ({ id: p.id, navn: p.navn, g: Math.round((b.saldo && b.saldo[p.id] != null ? b.saldo[p.id] : 1000) - start(p.id)) })).sort((x: any, y: any) => y.g - x.g);
-    if (formue.length >= 2 && formue[0].g > 0) ut.push({ ikon: '📈', tittel: L('Børskongen', 'Market king'), id: formue[0].id, navn: formue[0].navn, tall: L('+' + formue[0].g + ' kr', '+' + formue[0].g + ' coins') });
+    if (formue.length >= 2 && formue[0].g > 0) ut.push({ ikon: '📈', kode: 'bors', tittel: L('Børskongen', 'Market king'), id: formue[0].id, navn: formue[0].navn, tall: L('+' + formue[0].g + ' kr', '+' + formue[0].g + ' coins') });
     const bunn = formue[formue.length - 1]; if (formue.length >= 2 && bunn.g < 0) ut.push({ ikon: '💸', tittel: L('Gikk konkurs', 'Went bust'), id: bunn.id, navn: bunn.navn, tall: L(bunn.g + ' kr', bunn.g + ' coins') });
   }
-  const gav = maks('sendt'); if (gav) ut.push({ ikon: '🎁', tittel: L('Mest gavmild', 'Most generous'), id: gav.id, navn: gav.navn, tall: L(gav.sendt + ' 🍺 sendt', gav.sendt + ' 🍺 sent') });
-  const mob = maks('mottatt'); if (mob) ut.push({ ikon: '🎯', tittel: L('Mest mobbet', 'Most picked on'), id: mob.id, navn: mob.navn, tall: L(mob.mottatt + ' 🍺 fått', mob.mottatt + ' 🍺 received') });
-  const quiz = maks('quiz'); if (quiz) ut.push({ ikon: '🧠', tittel: L('Quizmester', 'Quiz master'), id: quiz.id, navn: quiz.navn, tall: L(quiz.quiz + ' riktige', quiz.quiz + ' correct') });
+  const gav = maks('sendt'); if (gav) ut.push({ ikon: '🎁', kode: 'gavmild', tittel: L('Mest gavmild', 'Most generous'), id: gav.id, navn: gav.navn, tall: L(gav.sendt + ' 🍺 sendt', gav.sendt + ' 🍺 sent') });
+  const mob = maks('mottatt'); if (mob) ut.push({ ikon: '🎯', kode: 'mobbet', tittel: L('Mest mobbet', 'Most picked on'), id: mob.id, navn: mob.navn, tall: L(mob.mottatt + ' 🍺 fått', mob.mottatt + ' 🍺 received') });
+  const quiz = maks('quiz'); if (quiz) ut.push({ ikon: '🧠', kode: 'quiz', tittel: L('Quizmester', 'Quiz master'), id: quiz.id, navn: quiz.navn, tall: L(quiz.quiz + ' riktige', quiz.quiz + ' correct') });
   return ut;
 }
 
@@ -231,7 +232,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
   const hd = data.hendelse;
   return {
     skjerm: true, versjon, vert: data.vert, lang, naa: Date.now(), laget: data.laget,
-    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0 })),
+    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, slurker: p.slurker || 0 })),
     spill: lok(spill, lang), valgt: data.valgt ? { lek: data.valgt.lek, navn: tr(lekNavnL(data.valgt.lek), lang) } : null,
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     reak: data.reak || [], utdeling: data.utdeling || null, kveld: lok(kveldVisning(data), lang), bors: lok(bors, lang),
@@ -245,11 +246,11 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
 
 /** Stua: hvor folk står, og siste slurk for plaging. `plager` = hvor mange ganger du har flyttet de andre siste minutt. */
 function stuaVisning(data: any, meg: any) {
-  const st = data.stua; if (!st) return null;
+  const st = data.stua || {};
   const ider = new Set(data.spillere.map((p: any) => p.id));
   const pos: any = {}; Object.keys(st.pos || {}).forEach((id) => { if (ider.has(id)) pos[id] = st.pos[id]; });
   const naa = Date.now();
-  return { pos, straff: st.straff || null, plager: meg && st.plag && st.plag[meg.id] ? st.plag[meg.id].filter((t: number) => naa - t < 60000).length : 0, grense: STUA_PLAG };
+  return { pos, tema: temaFor(st.tema).id, straff: st.straff || null, plager: meg && st.plag && st.plag[meg.id] ? st.plag[meg.id].filter((t: number) => naa - t < 60000).length : 0, grense: STUA_PLAG };
 }
 
 /* ---------- hva hver telefon får se ---------- */
@@ -287,11 +288,11 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
   const hd = data.hendelse;
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null, lang,
-    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, medlem: !!p.konto, invitert: !!p.invitert, immun: p.immun || 0, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
+    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, bruker: !!(p.konto || p.bruker), medlem: !!p.konto, invitert: !!p.invitert, immun: p.immun || 0, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     nr: data.nr, reak: data.reak || [], utdeling: data.utdeling || null, valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
-    stua: stuaVisning(data, meg),
+    stua: stuaVisning(data, meg), nyPynt: meg && data.nyPynt ? data.nyPynt[meg.id] || null : null,
     hjulListe: data.hjulListe || (lang === 'en' ? HJUL_STANDARD_EN : HJUL_STANDARD), oppdrag: lok(oppdragVisning(data, meg), lang), bors: lok(borsVisning(data, meg), lang), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: lok(data.historikk || [], lang),
     alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode, kveld: !!data.gjengKveld, regler: data.gjeng.regler || [] } : null,
     kveld: lok(kveldVisning(data), lang), plan: data.plan || null,
@@ -709,7 +710,7 @@ function handlingInne(data: any, meg: any, h: any) {
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
     data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
   }
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut', 'stua-flytt'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut', 'stua-flytt', 'stua-tema', 'min-pynt'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -766,7 +767,7 @@ function handlingInne(data: any, meg: any, h: any) {
       data.gjeng = h._gjeng && h._gjeng.id ? { id: h._gjeng.id, navn: h._gjeng.navn, kode: h._gjeng.kode, regler: Array.isArray(h._regler) ? h._regler : [] } : null;
       // Nytt valg av gjeng: medlemskap må sjekkes på nytt for alle (verten er sjekket nå)
       data.spillere.forEach((p: any) => { delete p.konto; });
-      if (data.gjeng && h._konto) meg.konto = h._konto;
+      if (data.gjeng && h._konto) { meg.konto = h._konto; if (h._pynt) meg.pynt = h._pynt; }
       if (data.gjeng) melde(data, `Kvelden telles i sesongen til ${data.gjeng.navn} 🏆`, `Tonight counts towards ${data.gjeng.navn}'s season 🏆`);
       return { ok: true };
     }
@@ -774,7 +775,7 @@ function handlingInne(data: any, meg: any, h: any) {
       // API-ruta har sjekket at kontoen er med i gjengen til rommet (h._konto settes bare der)
       if (!data.gjeng || !h._konto) return { ok: true };
       if (data.spillere.some((p: any) => p.konto === h._konto && p.id !== meg.id)) return feilL('konto', 'Kontoen din er allerede med i rommet på en annen telefon.', 'Your account is already in the room on another phone.');
-      const ny = !meg.konto; meg.konto = h._konto;
+      const ny = !meg.konto; meg.konto = h._konto; if (h._pynt) meg.pynt = h._pynt;
       if (ny && h._ble) melde(data, `${meg.navn} ble med i gjengen ${data.gjeng.navn} 🤝`, `${meg.navn} joined the crew ${data.gjeng.navn} 🤝`);
       return { ok: true };
     }
@@ -849,6 +850,21 @@ function handlingInne(data: any, meg: any, h: any) {
       const p = data.spillere.find((x: any) => x.id === hvem); if (!p) return { ok: true };
       const n = Number(h.n) === -1 ? -1 : 1;
       p.slurker = Math.max(0, Math.min(999, (p.slurker || 0) + n));
+      return { ok: true };
+    }
+    case 'stua-tema': {
+      // Verten velger hvordan stua ser ut. Pluss-temaene krever Pluss i rommet (julebordstua er gratis i desember).
+      if (!erVert) return { feil: 'bare-vert' };
+      const t = temaFor(String(h.tema || ''));
+      if (!temaLov(t.id, data.pluss && data.pluss.til > Date.now())) return feilL('pluss', 'Det temaet krever Pluss i rommet.', 'That look needs Pluss in the room.');
+      data.stua = data.stua || { pos: {} };
+      if (data.stua.tema !== t.id) { data.stua.tema = t.id; melde(data, `Stua ble til ${t.navn[0]}`, `The room became ${t.navn[1]}`); }
+      return { ok: true };
+    }
+    case 'min-pynt': {
+      // Figuren min: det kontoen har på seg (API-ruta har hentet og renset det)
+      if (h._pynt) meg.pynt = h._pynt;
+      if (h._bruker) meg.bruker = h._bruker;
       return { ok: true };
     }
     case 'stua-flytt': {

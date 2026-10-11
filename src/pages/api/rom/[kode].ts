@@ -1,13 +1,33 @@
 // Ett rom: hente tilstanden (GET) eller gjøre noe i det (POST).
 // Telefonen identifiserer seg med spiller-id og pollett i egne felt, aldri i adressen.
 import type { APIRoute } from 'astro';
-import { hentRom, endreRom, visning, skjermVisning, skjermPinOk, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
+import { kaaringer, hentRom, endreRom, visning, skjermVisning, skjermPinOk, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
 import { rpc } from '../../../lib/spilt';
 import { etterpaa } from '../../../lib/etterpaa';
 import { innloggetBruker } from '../../../lib/konto';
 import { plussStatus } from '../../../lib/pluss';
+import { rensPynt, laasOppForKveld } from '../../../lib/pynt.js';
 import { kveldInn, vinnerValg, reglerForRom, startSaldo } from '../../../lib/lovbok';
 export const prerender = false;
+
+/** Etter kvelden: tell kvelden på hver konto, og lås opp pynt etter kåringene. Det nye vises i oppsummeringen. */
+async function delUtPynt(kode: string, data: any) {
+  try {
+    const med = data.spillere.filter((p: any) => p.konto || p.bruker).map((p: any) => ({ id: p.id, konto: p.konto || p.bruker }));
+    const kvelder: Record<string, number> = {};
+    for (const p of med) { try { kvelder[p.konto] = Number(await rpc('kveld_tell', { p_user: p.konto })) || 0; } catch { kvelder[p.konto] = 0; } }
+    const ka = kaaringer(data).filter((k: any) => k.kode && k.id).map((k: any) => ({ kode: k.kode, id: k.id }));
+    const nye = laasOppForKveld({ kaaringer: ka, spillere: med, kvelder, gjengKveld: !!data.gjengKveld, naa: Date.now() });
+    const nyPynt: Record<string, string[]> = {};
+    for (const p of med) {
+      const ider = nye[p.konto] || []; if (!ider.length) continue;
+      const fikk: any = await rpc('pynt_laas_opp', { p_user: p.konto, p_ider: ider });
+      if (Array.isArray(fikk) && fikk.length) nyPynt[p.id] = fikk;
+    }
+    const r: any = await endreRom(kode, (d) => { d.pyntDelt = true; if (Object.keys(nyPynt).length) d.nyPynt = nyPynt; return { ok: true }; });
+    if (!r.feil && Object.keys(nyPynt).length) await varsle(kode, r.versjon);
+  } catch (e) { console.warn('Pynt ble ikke delt ut:', (e as Error).message); }
+}
 
 const json = (d: any, status = 200) =>
   new Response(JSON.stringify(d), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -87,7 +107,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   // Språk før vi vet hvem spilleren er: body.lang (bli-med), ellers x-lang-headeren
   const bLang: Sprak = d.lang === 'en' || d.lang === 'no' ? d.lang : hLang;
   // Pluss sjekkes her på serveren – aldri på det nettleseren påstår
-  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble; delete d._borsFri; delete d._venter; delete d._medlem; delete d._regler; delete d._start; delete d._startKr;
+  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble; delete d._borsFri; delete d._venter; delete d._medlem; delete d._regler; delete d._start; delete d._startKr; delete d._pynt; delete d._bruker;
   // Gjengen sjekkes også her: verten må være innlogget og med i gjengen
   if (d.handling === 'gjeng' && d.gjengId) {
     try {
@@ -97,6 +117,13 @@ export const POST: APIRoute = async ({ params, request }) => {
       d._gjeng = g; d._konto = u!.id;
       try { const l = await rpc('gjeng_lov_hent', { p_gjeng: g.id }); d._regler = l ? reglerForRom(l.lov) : []; } catch { d._regler = []; }
     } catch { return json({ feil: 'server', melding: bLang === 'en' ? "Couldn't check the crew. Try again." : 'Fikk ikke sjekket gjengen. Prøv igjen.' }, 503); }
+  }
+  // Innlogget? Da tar figuren med seg pynten sin inn i rommet (det kontoen har låst opp og valgt)
+  if ((d.handling === 'bli-med' || d.handling === 'min-pynt' || d.handling === 'gjeng-meg' || d.handling === 'gjeng') && request.headers.get('authorization')) {
+    try {
+      const u = await innloggetBruker(request);
+      if (u) { d._bruker = u.id; const ph: any = await rpc('pynt_hent', { p_user: u.id }); if (ph) d._pynt = rensPynt(ph.valgt, ph.laast); }
+    } catch { /* uten pynt */ }
   }
   // Gjengkveld: medlemmer kommer rett inn, alle andre venter på å bli sluppet inn
   if (d.handling === 'bli-med') {
@@ -156,9 +183,11 @@ export const POST: APIRoute = async ({ params, request }) => {
         if (d._venter) { const v: any = venteInn(data, navn, bLang); vent = v.spiller; return { ok: true }; }
         // Medlem som allerede er i rommet (f.eks. på en annen telefon): samme plass igjen
         const fra = d._konto ? data.spillere.find((p: any) => p.konto === d._konto) : null;
-        if (fra) { meg = fra; ny = fra; return { ok: true }; }
+        if (fra) { meg = fra; ny = fra; if (d._pynt) fra.pynt = d._pynt; return { ok: true }; }
         const r: any = blimed(data, navn, bLang);
         if (!r.feil && d._konto) { r.spiller.konto = d._konto; startSaldoFor(data, r.spiller.id, d._startKr); }
+        if (!r.feil && d._pynt) r.spiller.pynt = d._pynt;
+        if (!r.feil && d._bruker) r.spiller.bruker = d._bruker;
         if (r.feil) return r;
         meg = r.spiller; ny = r.spiller;
         return { ok: true };
@@ -190,6 +219,8 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
     // Gjengkveld over: tell kvelden i lovboka (kveldens vinner får velge regel) og frigjør gjengen
     if (d.handling === 'avslutt-kvelden' && res.data.gjeng) await gjengKveldSlutt(res.data, kode);
+    // Kvelden er over: del ut pynt til kontoene som var med (krone til vinneren, kveldstelling osv.)
+    if (d.handling === 'avslutt-kvelden' && !res.data.pyntDelt && res.data.spillere.some((p: any) => p.konto || p.bruker)) etterpaa(delUtPynt(kode, res.data));
     // Kveldens vinner har valgt regel: skriv den inn i lovboka
     if (d.handling === 'lov-valg' && res.data.gjeng && res.data.kveld && res.data.kveld.lovValg && !res.data.kveld.lovValg.lagret) {
       const ok = await lagreLovValg(res.data, kode);
