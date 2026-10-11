@@ -52,8 +52,8 @@ const E = {
   bobleG: `<path d="M6 8h52v34H28l-14 14V42H6z" fill="${G}" ${S}/>`,
   bobleO: `<path d="M58 8H6v34h30l14 14V42h8z" fill="${O}" ${S}/>`,
   bobleM: `<path d="M58 8H6v34h30l14 14V42h8z" fill="${M}" ${S}/>`,
-  spm: `<path d="M20 22q0-14 13-14t13 12q0 9-13 13v7" fill="none" stroke="${B}" stroke-width="15" stroke-linecap="round"/><path d="M20 22q0-14 13-14t13 12q0 9-13 13v7" fill="none" stroke="${O}" stroke-width="8" stroke-linecap="round"/><circle cx="33" cy="54" r="7" fill="${O}" ${S}/>`,
-  utrop: `<path d="M32 8v28" stroke="${B}" stroke-width="16" stroke-linecap="round"/><path d="M32 8v28" stroke="${O}" stroke-width="9" stroke-linecap="round"/><circle cx="32" cy="53" r="7" fill="${O}" ${S}/>`,
+  spm: `<path d="M21 24q0-13 11-13t11 11q0 8-11 11v5" fill="none" stroke="${B}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 24q0-13 11-13t11 11q0 8-11 11v5" fill="none" stroke="${O}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="51" r="5.5" fill="${O}" ${S}/>`,
+  utrop: `<path d="M32 12v24" stroke="${B}" stroke-width="13" stroke-linecap="round"/><path d="M32 12v24" stroke="${O}" stroke-width="6.5" stroke-linecap="round"/><circle cx="32" cy="51" r="5.5" fill="${O}" ${S}/>`,
   hake: `<rect x="6" y="10" width="52" height="44" rx="5" fill="${M}" ${S}/><path d="M19 32l9 9 18-18" fill="none" stroke="${B}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`,
   kryss: `<rect x="6" y="10" width="52" height="44" rx="5" fill="${RD}" ${S}/><path d="M22 22l20 20M42 22L22 42" stroke="${P}" stroke-width="6" stroke-linecap="round"/>`,
   stjerne: `<path d="M32 5l8 17 18 2-13 12 4 18-17-9-17 9 4-18L6 24l18-2z" fill="${G}" ${S}/>`,
@@ -74,7 +74,9 @@ const E = {
   tv: `<rect x="4" y="8" width="56" height="40" rx="5" fill="${B}" ${S}/><rect x="9" y="13" width="46" height="30" rx="2" fill="${BL}"/><path d="M28 21l12 7-12 7z" fill="${O}" ${S}/><path d="M24 48l-6 10M40 48l6 10" ${S}/>`,
   pilOpp: `<path d="M32 4l24 26H42v28H22V30H8z" fill="${G}" ${S}/>`,
   pilNed: `<path d="M32 60L8 34h14V6h20v28h14z" fill="${O}" ${S}/>`,
-  haand: `<path d="M4 28h10v20H4z" fill="${O}" ${S}/><path d="M14 26c6-10 14-14 20-12h24a5 5 0 0 1 0 10H38v4h6a4 4 0 0 1 0 8h-6v2a4 4 0 0 1 0 8H22c-5 0-8-3-8-8z" fill="${H}" ${S}/>`,
+  haand: `<path d="M19 26c-3-9 2-16 8-15 4 1 5 7 2 15z" fill="${H}" ${S}/><rect x="12" y="22" width="30" height="32" rx="9" fill="${H}" ${S}/>` +
+    `<rect x="28" y="33" width="18" height="9" rx="4.5" fill="${H}" ${S}/><rect x="28" y="42" width="17" height="9" rx="4.5" fill="${H}" ${S}/><rect x="26" y="50" width="14" height="8" rx="4" fill="${H}" ${S}/>` +
+    `<rect x="26" y="21" width="34" height="11" rx="5.5" fill="${H}" ${S}/><rect x="2" y="24" width="12" height="30" rx="3" fill="${O}" ${S}/>`,
   maske: `<path d="M4 22q14-12 28 0 14-12 28 0-2 20-16 20-8 0-12-8-4 8-12 8-14 0-16-20z" fill="${M}" ${S}/><ellipse cx="19" cy="28" rx="7" ry="4.5" fill="${B}"/><ellipse cx="45" cy="28" rx="7" ry="4.5" fill="${B}"/>`,
   fabrikk: `<path d="M4 58V30l14-9v9l14-9v9l14-9v37z" fill="${G}" ${S}/><rect x="46" y="10" width="10" height="48" fill="#8A8580" ${S}/><circle cx="52" cy="5" r="4" fill="${P}" ${S}/><path d="M10 38h8v8h-8zM24 38h8v8h-8z" fill="${O}" ${S}/>`,
   fingre: `<path d="M18 62V40c0-4-6-10-6-14a3 3 0 0 1 6-1l4 6V9a3.5 3.5 0 0 1 7 0v17V5a3.5 3.5 0 0 1 7 0v21V8a3.5 3.5 0 0 1 7 0v20V15a3.5 3.5 0 0 1 7 0v27c0 8-4 12-8 14v6z" fill="${H}" ${S}/><rect x="16" y="56" width="30" height="8" fill="${O}" ${S}/>`,
@@ -111,8 +113,8 @@ function scene(slug, deler, opt = {}) {
   total *= skala;
   let x = (240 - total) / 2;
   const bunn = opt.bunn ?? 112;
-  let ut = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 126" width="240" height="126"><defs><filter id="h" x="-15%" y="-15%" width="140%" height="140%">` +
-    `<feOffset in="SourceAlpha" dx="3.5" dy="3.5" result="s"/><feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>` +
+  let ut = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 126" width="240" height="126"><defs><filter id="h" x="-30%" y="-30%" width="170%" height="170%">` +
+    `<feOffset in="SourceAlpha" dx="3" dy="3" result="s"/><feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>` +
     `<rect width="240" height="126" fill="${felt}"/>`;
   // Pynt: noen små gnister og prikker i bakgrunnen
   for (let i = 0; i < 4; i++) {
@@ -125,7 +127,8 @@ function scene(slug, deler, opt = {}) {
     const str = STR * (d.s || 1) * skala;
     const px = d.x != null ? d.x : x, py = d.y != null ? d.y : bunn - str - (d.l || 0) * skala;
     const rot = d.r != null ? d.r : (r() - 0.5) * 12;
-    const inn = ALLE[d.m]; if (!inn) throw new Error('Ukjent merke: ' + d.m + ' (' + slug + ')');
+    let inn = ALLE[d.m]; if (!inn) throw new Error('Ukjent merke: ' + d.m + ' (' + slug + ')');
+    inn = inn.replace(/stroke-width="3\.5"/g, 'stroke-width="2.4"');
     ut += `<g transform="translate(${px.toFixed(1)} ${py.toFixed(1)}) rotate(${rot.toFixed(1)} ${(str / 2).toFixed(1)} ${(str / 2).toFixed(1)}) scale(${(str / 64).toFixed(3)})" filter="url(#h)">${inn}</g>`;
     if (d.x == null) x += str + GAP * skala;
   });
@@ -141,7 +144,7 @@ const L = {
   'beerio-kart': [{ m: 'kontroller', s: 1.3 }, 'maalflagg'],
   'bloffquizen': [{ m: 'fisk', s: 1.3 }, { m: 'spm', s: 0.8, l: 20 }],
   'bossen-sier': [{ m: 'krone', s: 0.75, l: 40 }, 'personM', { m: 'boble', l: 26, s: 0.9 }],
-  'buffalo': [{ m: 'haand', l: 12 }, 'ol'],
+  'buffalo': [{ m: 'haand', s: 1.05, l: 12 }, 'ol'],
   'bussruta': [{ m: 'kortH', s: 0.7, l: 26 }, { m: 'buss', s: 1.35 }, { m: 'kortS', s: 0.7, l: 26 }],
   'chandelier': [{ m: 'kopp', s: 0.7 }, { m: 'kopp', s: 0.7 }, { m: 'koppMint', s: 0.8 }, { m: 'kopp', s: 0.7 }, { m: 'kopp', s: 0.7 }, { m: 'pingpong', s: 0.6, x: 108, y: 2, r: 0 }],
   'drikke-bingo': [{ m: 'bingobrett', s: 1.2 }, { m: 'note', l: 18 }],
@@ -173,7 +176,7 @@ const L = {
   'nyhetsrunden': [{ m: 'avis', s: 1.2 }, { m: 'spm', s: 0.8, l: 22 }],
   'opus': [{ m: 'kortR', s: 0.85 }, { m: 'klokke', s: 1.15 }, { m: 'kortK', s: 0.85 }],
   'over-eller-under': [{ m: 'pilOpp', s: 0.8, l: 20 }, 'kortR', { m: 'pilNed', s: 0.8 }],
-  'pekeleken': [{ m: 'haand', s: 1.1, l: 16 }, 'personM'],
+  'pekeleken': [{ m: 'haand', s: 1.15, l: 14 }, 'personM'],
   'power-hour': [{ m: 'klokke', s: 1.1 }, { m: 'lyn', s: 0.8, l: 18 }, 'ol'],
   'president': [{ m: 'kortK', r: -10 }, { m: 'kortH', l: 6, r: 0 }, { m: 'kortR', r: 10 }, { m: 'krone', s: 0.85, x: 82, y: 2, r: -4 }],
   'pyramiden': [{ m: 'pyramide', s: 1.4 }],
