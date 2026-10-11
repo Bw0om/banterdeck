@@ -9,7 +9,7 @@ import { spill, gamesFor, gameHref, langGroups, t } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
 import { PLUSS_SLUGS } from '../../lib/plussleker';
 import { niva, HOOK, spillere } from '../../lib/niva';
-import { illustrasjon } from '../../lib/illustrasjon';
+import { lekebilde } from '../../lib/illustrasjon';
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 const no = lang === 'no';
@@ -30,7 +30,7 @@ function kort(g: any) {
 const leker = synlige.map((g: any) => {
   const [min, maks] = spillere(g.pl);
   const n = niva(g.slug);
-  return { g, slug: g.slug, navn: t(g.name, lang), niva: n, href: gameHref(g, (p) => path(lang, p), lang), bilde: illustrasjon(g),
+  return { g, slug: g.slug, navn: t(g.name, lang), niva: n, href: gameHref(g, (p) => path(lang, p), lang), bilde: lekebilde(g),
     om: HOOK[g.slug] ? HOOK[g.slug][no ? 0 : 1] : kort(g), utstyr: t(g.gear, lang), pl: g.pl, min, maks, gruppe: g.group.id,
     gruppeNavn: gruppeNavn[g.group.id] || '', pluss: PL.has(g.slug) };
 });
@@ -80,7 +80,7 @@ const romSti = no ? '/no/rom' : '/room';
     <div class="lk-store">
       {rom.map((x) => (
         <a class="lk-kort" href={x.href} data-q={q(x)} data-niva="rom" data-min={x.min} data-maks={x.maks} data-pluss={x.pluss ? '1' : '0'}>
-          <img src={x.bilde} alt="" width="240" height="126" loading="lazy" decoding="async" />
+          <Fragment set:html={x.bilde} />
           <span class="lk-tekst">
             <b>{x.navn}</b>
             <span class="lk-meta"><span class="lk-pl"><Icon name="gjeng" size={14} />{x.pl}</span>{x.pluss ? <i class="pluss"><Icon name="gnist" size={12} />Pluss</i> : <i class="gratis">{no ? 'Gratis' : 'Free'}</i>}</span>
@@ -102,7 +102,7 @@ const romSti = no ? '/no/rom' : '/room';
     <div class="lk-mellom">
       {app.map((x) => (
         <a class="lk-rad" href={x.href} data-q={q(x)} data-niva="app" data-min={x.min} data-maks={x.maks} data-pluss={x.pluss ? '1' : '0'}>
-          <img src={x.bilde} alt="" width="72" height="72" loading="lazy" decoding="async" />
+          <Fragment set:html={x.bilde} />
           <span class="lk-tekst"><b>{x.navn}</b><span class="lk-meta"><span class="lk-pl"><Icon name="gjeng" size={14} />{x.pl}</span><span>{x.gruppeNavn}</span>{x.pluss && <i class="pluss"><Icon name="gnist" size={12} />Pluss</i>}</span></span>
         </a>
       ))}

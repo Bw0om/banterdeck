@@ -8,7 +8,7 @@ import DigitalLek from '../DigitalLek.astro';
 import DECKS from '../../data/decks.json';
 import { ROMLEK, romLenke } from '../../lib/romlenke';
 import { PLUSS_SLUGS } from '../../lib/plussleker';
-import { illustrasjon } from '../../lib/illustrasjon';
+import { lekebilde } from '../../lib/illustrasjon';
 import { niva, provIAppen, HOOK } from '../../lib/niva';
 import { gamesFor, gameHref, t, trules } from '../../lib/content';
 import { ui, path, type Lang } from '../../lib/i18n';
@@ -63,7 +63,7 @@ const jsonLd = JSON.stringify([{
     <a href={path(lang, '/drinking-games')}>{L.gamesTitle}</a> › {name}
   </p>
   <!-- Toppen: illustrasjonen stort, så navnet, så fakta på én linje (ingen bokser) -->
-  <figure class="lek-banner"><img src={illustrasjon(game)} alt="" width="240" height="126" decoding="async" /></figure>
+  <figure class="lek-banner" set:html={lekebilde(game)} />
   <h1 class="lek-navn">{name}</h1>
   {game.fra && <p class="lek-fra">{lang === 'no' ? 'Sendt inn av' : 'Submitted by'} <b>{game.fra}</b></p>}
   <ul class="lek-fakta">
@@ -97,7 +97,7 @@ const jsonLd = JSON.stringify([{
       <div class="prov-appen-leker">
         {forslag.map((x: any) => (
           <a href={gameHref(x, (p) => path(lang, p), lang)}>
-            <img src={illustrasjon(x)} alt="" width="120" height="63" loading="lazy" decoding="async" />
+            <Fragment set:html={lekebilde(x)} />
             <span><b>{t(x.name, lang)}</b><small>{HOOK[x.slug] ? HOOK[x.slug][lang === 'en' ? 1 : 0] : ''}</small></span>
           </a>
         ))}
@@ -162,7 +162,7 @@ const jsonLd = JSON.stringify([{
     <ul class="lek-flere-rad" role="list">
       {others.map((x) => (
         <li><a href={gameHref(x, (p) => path(lang, p), lang)}>
-          <img src={illustrasjon(x)} alt="" width="240" height="126" loading="lazy" decoding="async" />
+          <Fragment set:html={lekebilde(x)} />
           <b>{t(x.name, lang)}</b><small>{x.pl} {lang === 'no' ? 'spillere' : 'players'}</small>
         </a></li>
       ))}
