@@ -74,9 +74,8 @@ const E = {
   tv: `<rect x="4" y="8" width="56" height="40" rx="5" fill="${B}" ${S}/><rect x="9" y="13" width="46" height="30" rx="2" fill="${BL}"/><path d="M28 21l12 7-12 7z" fill="${O}" ${S}/><path d="M24 48l-6 10M40 48l6 10" ${S}/>`,
   pilOpp: `<path d="M32 4l24 26H42v28H22V30H8z" fill="${G}" ${S}/>`,
   pilNed: `<path d="M32 60L8 34h14V6h20v28h14z" fill="${O}" ${S}/>`,
-  haand: `<path d="M19 26c-3-9 2-16 8-15 4 1 5 7 2 15z" fill="${H}" ${S}/><rect x="12" y="22" width="30" height="32" rx="9" fill="${H}" ${S}/>` +
-    `<rect x="28" y="33" width="18" height="9" rx="4.5" fill="${H}" ${S}/><rect x="28" y="42" width="17" height="9" rx="4.5" fill="${H}" ${S}/><rect x="26" y="50" width="14" height="8" rx="4" fill="${H}" ${S}/>` +
-    `<rect x="26" y="21" width="34" height="11" rx="5.5" fill="${H}" ${S}/><rect x="2" y="24" width="12" height="30" rx="3" fill="${O}" ${S}/>`,
+  haand: `<path d="M14 24h6c-1-8 6-15 12-12 4 2 4 8 0 12h22a5 5 0 0 1 0 10H44c3 1 3 8 0 9 3 1 3 8 0 9 1 3-2 6-5 6H22c-4 0-8-3-8-8z" fill="${H}" ${S}/>` +
+    `<path d="M30 34h14M30 43h14M31 52h12M22 24c2-2 4-2 6 0" fill="none" ${S}/><rect x="2" y="23" width="13" height="30" rx="3" fill="${O}" ${S}/>`,
   maske: `<path d="M4 22q14-12 28 0 14-12 28 0-2 20-16 20-8 0-12-8-4 8-12 8-14 0-16-20z" fill="${M}" ${S}/><ellipse cx="19" cy="28" rx="7" ry="4.5" fill="${B}"/><ellipse cx="45" cy="28" rx="7" ry="4.5" fill="${B}"/>`,
   fabrikk: `<path d="M4 58V30l14-9v9l14-9v9l14-9v37z" fill="${G}" ${S}/><rect x="46" y="10" width="10" height="48" fill="#8A8580" ${S}/><circle cx="52" cy="5" r="4" fill="${P}" ${S}/><path d="M10 38h8v8h-8zM24 38h8v8h-8z" fill="${O}" ${S}/>`,
   fingre: `<path d="M18 62V40c0-4-6-10-6-14a3 3 0 0 1 6-1l4 6V9a3.5 3.5 0 0 1 7 0v17V5a3.5 3.5 0 0 1 7 0v21V8a3.5 3.5 0 0 1 7 0v20V15a3.5 3.5 0 0 1 7 0v27c0 8-4 12-8 14v6z" fill="${H}" ${S}/><rect x="16" y="56" width="30" height="8" fill="${O}" ${S}/>`,
