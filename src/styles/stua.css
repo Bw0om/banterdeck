@@ -232,3 +232,16 @@ html.i-spill .rom-kode{font-size:.92em}
   html.i-spill .rom-hode-v{flex:none;gap:6px}
   html.i-spill .rom-hodeknapper{gap:2px!important}
 }
+
+/* =====================================================================
+   LEKEOVERSIKTEN: kortene rundt klistremerke-bildene
+   ===================================================================== */
+.lk-kort{border:2.5px solid var(--ink)!important;border-radius:6px!important;box-shadow:var(--skygge-liten);transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)!important}
+.lk-kort img{border-bottom:2.5px solid var(--ink)}
+.lk-kort b{font-family:var(--display);font-stretch:78%;font-weight:900;text-transform:uppercase;letter-spacing:.005em}
+@media (hover:hover) and (pointer:fine){.lk-kort:hover{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--hard);text-decoration:none}}
+.lk-kort:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard);transition-duration:90ms!important}
+.lk-rad img{border:2.5px solid var(--ink);border-radius:4px!important}
+.lk-meta i{border-radius:3px!important}
+.lk-sok,.lk-filter input{border-radius:4px!important}
+.lk-chips button{border:2.5px solid var(--ink)!important;border-radius:4px!important}
