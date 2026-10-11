@@ -2,6 +2,9 @@
 // Ligger i en egen fil i stedet for inne i HTML-en: nettleseren og service workeren lagrer den, de to
 // språkversjonene deler den, og telefonen slipper å tolke 200 kB JavaScript på nytt hver gang rommet åpnes.
 // Startes fra Rom.astro ved hver sidevisning (astro:page-load), med lekenavnene og språket som argumenter.
+import { lagStua } from './stua.js';
+import { klistremerke } from '../lib/klistremerker';
+
 export function startRom(LEKNAVN, LANG) {
   // Språk: samme kode for /no/rom og /room. T('norsk', 'English') velger tekst.
   var EN = LANG === 'en';
@@ -673,7 +676,7 @@ export function startRom(LEKNAVN, LANG) {
       '<div class="rom-hode-v"><a class="rom-hjem" href="' + RUTE.hjem + '" aria-label="' + T('Til forsiden (du blir i rommet)', 'Home (you stay in the room)') + '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a>' +
       '<div><span class="rom-etikett">' + (t.gjeng && t.gjeng.kveld ? esc(t.gjeng.navn) + ' · ' : '') + T('Rom', 'Room') + '</span><b class="rom-kode">' + esc(kode) + '</b> ' + sprakLenke('small') + '</div></div>' +
       '<span class="rom-hodeknapper">' +
-        [['hjul-aapne', '🎡', T('Hjul', 'Wheel'), T('Straffehjulet', 'Penalty wheel')], ['tavle', ikon.pokal, T('Poeng', 'Score'), T('Poengtavla', 'Scoreboard')],
+        [['hjul-aapne', klistremerke('hjul', 'rom-hk-merke'), T('Hjul', 'Wheel'), T('Straffehjulet', 'Penalty wheel')], ['tavle', klistremerke('pokal', 'rom-hk-merke'), T('Poeng', 'Score'), T('Poengtavla', 'Scoreboard')],
          ['qr', ikon.qr, 'QR', T('Vis QR-kode', 'Show QR code')], ['del', ikon.del, T('Inviter', 'Invite'), T('Inviter flere', 'Invite more people')]].map(function (k) {
           return '<button class="rom-hk" data-g="' + k[0] + '" type="button" aria-label="' + k[3] + '"><span class="rom-hk-ikon">' + k[1] + '</span><span class="rom-hk-tekst">' + k[2] + '</span></button>';
         }).join('') + '</span>' +
@@ -685,8 +688,8 @@ export function startRom(LEKNAVN, LANG) {
       rivalBunn = n >= 3 && sl[n - 1] > 0 && sl[0] < sl[1] ? sl[0] : null;
       return '';
     })() + t.spillere.map(function (p) {
-      var rival = rivalTopp !== null && (p.slurker || 0) === rivalTopp ? '<i class="rom-rival" title="' + T('Flest slurker i kveld', 'Most sips tonight') + '">🔥</i>'
-        : rivalBunn !== null && (p.slurker || 0) === rivalBunn ? '<i class="rom-rival" title="' + T('Færrest slurker i kveld', 'Fewest sips tonight') + '">😇</i>' : '';
+      var rival = rivalTopp !== null && (p.slurker || 0) === rivalTopp ? '<i class="rom-rival" title="' + T('Flest slurker i kveld', 'Most sips tonight') + '">' + klistremerke('flamme', 'rom-rival-merke') + '</i>'
+        : rivalBunn !== null && (p.slurker || 0) === rivalBunn ? '<i class="rom-rival" title="' + T('Færrest slurker i kveld', 'Fewest sips tonight') + '">' + klistremerke('glorie', 'rom-rival-merke') + '</i>' : '';
       return '<span class="' + (p.id === t.meg ? 'meg' : '') + '">' + (p.id === t.vert ? ikon.krone : '') + esc(p.navn) + rival +
         (p.slurker ? ' <small>' + p.slurker + '</small>' : '') + (p.immun ? ' <small title="' + T('Immunitet', 'Immunity') + '">🛡️' + (p.immun > 1 ? p.immun : '') + '</small>' : '') +
         (erVert() && p.id !== t.vert ? ' <button class="rom-fjern" data-g="fjern" data-id="' + p.id + '" aria-label="' + T('Fjern ', 'Remove ') + esc(p.navn) + '">×</button>' : '') + '</span>';
@@ -724,8 +727,8 @@ export function startRom(LEKNAVN, LANG) {
       lekeGrupper(t.leker.filter(function (l) { return !l.pluss; }), function (l) {
         var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
         var min = forFa(l);
-        if (min) return '<div class="rom-lek for-fa"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><p class="small">👥 ' + T('Trenger minst ' + min + ' spillere – dere er ' + t.spillere.length + '.', 'Needs at least ' + min + ' players – you’re ' + t.spillere.length + '.') + '</p></div>';
-        return '<div class="rom-lek"><b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' +
+        if (min) return '<div class="rom-lek for-fa">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><p class="small">👥 ' + T('Trenger minst ' + min + ' spillere – dere er ' + t.spillere.length + '.', 'Needs at least ' + min + ' players – you’re ' + t.spillere.length + '.') + '</p></div>';
+        return '<div class="rom-lek">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' +
           '<div class="rom-mod">' + (mod.length
             ? mod.slice(0, l.type === 'nyhetsrunden' ? 4 : 99).map(function (m) { return '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') +
               (l.type !== 'bingo' && l.type !== 'nyhetsrunden' ? '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">' + T('Alle', 'All') + '</button>' : '') +
@@ -739,11 +742,11 @@ export function startRom(LEKNAVN, LANG) {
   function bakgrunnBoks() {
     var t = tilstand, rader = [];
     var bors = t.bors && (t.bors.paa || t.bors.slutt);
-    rader.push({ ikon: '📈', navn: T('Vorsbørsen', 'The Exchange'), om: T('Kjøp aksjer i det du tror skjer i kveld – «Hvem søler først?». Vinn vorskroner når det skjer.', 'Buy shares in what you think will happen tonight – “Who spills first?”. Win coins when it does.'),
+    rader.push({ ikon: klistremerke('graf'), navn: T('Vorsbørsen', 'The Exchange'), om: T('Kjøp aksjer i det du tror skjer i kveld – «Hvem søler først?». Vinn vorskroner når det skjer.', 'Buy shares in what you think will happen tonight – “Who spills first?”. Win coins when it does.'),
       paa: !!bors, knapp: bors ? '<button class="btn small ghost" data-g="bs-aapne" type="button">' + T('Åpne', 'Open') + '</button>' : '<button class="btn small gold" data-g="bs-start" type="button">' + T('Slå på', 'Turn on') + '</button>' });
-    rader.push({ ikon: '❓', navn: T('Spørsmålsmester', 'Question master'), om: t.mester ? T('Mester nå: ', 'Master now: ') + '<b>' + esc(navn(t.mester.id)) + '</b>. ' + T('Svarer du på et spørsmål fra hen, drikker du. Ny mester hvert 25. minutt.', 'Answer one of their questions and you drink. New master every 25 minutes.') : T('Én er mester. Svarer du på et spørsmål fra mesteren, drikker du. Appen bytter mester hvert 25. minutt.', 'One person is master. Answer a question from the master and you drink. The app swaps master every 25 minutes.'),
+    rader.push({ ikon: klistremerke('sporsmal'), navn: T('Spørsmålsmester', 'Question master'), om: t.mester ? T('Mester nå: ', 'Master now: ') + '<b>' + esc(navn(t.mester.id)) + '</b>. ' + T('Svarer du på et spørsmål fra hen, drikker du. Ny mester hvert 25. minutt.', 'Answer one of their questions and you drink. New master every 25 minutes.') : T('Én er mester. Svarer du på et spørsmål fra mesteren, drikker du. Appen bytter mester hvert 25. minutt.', 'One person is master. Answer a question from the master and you drink. The app swaps master every 25 minutes.'),
       paa: !!t.mester, knapp: t.mester ? '<button class="btn small ghost" data-g="mester-bytt" type="button">' + T('Bytt', 'Swap') + '</button><button class="linkbtn" data-g="mester-av" type="button">' + T('Slå av', 'Turn off') + '</button>' : '<button class="btn small gold" data-g="mester-paa" type="button">' + T('Slå på', 'Turn on') + '</button>' });
-    rader.push({ ikon: '🕵️', navn: T('Agent 0,5', 'Agent 0.5') + (t.pluss ? '' : ' <span class="rom-bg-pluss">✨ Pluss</span>'), om: T('Hemmelige oppdrag: alle får ett, som å få noen til å si «sykt». Klarer du det, deler du ut slurker.', 'Everyone gets a secret mission, like getting someone to say “insane”. Pull it off and you hand out sips.'),
+    rader.push({ ikon: klistremerke('agent'), navn: T('Agent 0,5', 'Agent 0.5') + (t.pluss ? '' : ' <span class="rom-bg-pluss">✨ Pluss</span>'), om: T('Hemmelige oppdrag: alle får ett, som å få noen til å si «sykt». Klarer du det, deler du ut slurker.', 'Everyone gets a secret mission, like getting someone to say “insane”. Pull it off and you hand out sips.'),
       paa: !!t.oppdrag, knapp: t.oppdrag ? '<button class="linkbtn" data-g="op-av" type="button">' + T('Slå av', 'Turn off') + '</button>' : '<button class="btn small gold" data-g="op-paa" type="button">' + T('Slå på', 'Turn on') + '</button>' });
     return '<div class="rom-bg">' + rader.map(function (r) {
       return '<div class="rom-bg-rad' + (r.paa ? ' paa' : '') + '"><span class="rom-bg-ikon" aria-hidden="true">' + r.ikon + '</span><div><b>' + r.navn + (r.paa ? ' <span class="rom-bg-status">' + T('På', 'On') + '</span>' : '') + '</b><small>' + r.om + '</small></div><div class="rom-bg-knapper">' + r.knapp + '</div></div>';
@@ -898,7 +901,7 @@ export function startRom(LEKNAVN, LANG) {
     var aapen = !!t.pluss;
     return '<details class="rom-gruppe pluss" data-gruppe="pluss"' + (erApen('pluss', aapen) ? ' open' : '') + '><summary>' + T('✨ Med Pluss', '✨ With Pluss') + ' <small>' + l.length + '</small></summary>' + (aapen ? '' : '<p class="small">' + T('Har verten Pluss, er disse åpne for alle i rommet – og dere kan være opptil 16 telefoner.', 'If the host has Pluss, these are open to everyone in the room – and you can have up to 16 phones.') + ' <a href="' + RUTE.pluss + '">' + T('Første kveld er gratis.', 'Your first night is free.') + '</a></p>') +
       '<div class="rom-leker">' + l.map(function (x) {
-        return '<div class="rom-lek pluss' + (aapen ? '' : ' laast') + '"><b>' + (aapen ? '' : '🔒 ') + esc(x.navn) + '</b><span>' + esc(x.om || '') + '</span>' +
+        return '<div class="rom-lek pluss' + (aapen ? '' : ' laast') + '">' + klistremerke(x.id || '', 'rom-lek-merke') + '<b>' + (aapen ? '' : '🔒 ') + esc(x.navn) + '</b><span>' + esc(x.om || '') + '</span>' +
           '<div class="rom-mod"><button type="button" data-g="start" data-lek="' + x.id + '" data-modus="*">' + (aapen ? 'Start' : T('Lås opp', 'Unlock')) + '</button></div></div>';
       }).join('') + '</div></details>';
   }
@@ -2686,6 +2689,7 @@ export function startRom(LEKNAVN, LANG) {
     if (tavle && tilstand) tavle.innerHTML = tavleHtml();
     if (!tilstand) return;
     if (rofDrar) { rofVentTegn = true; return; }   // ikke tegn ringen på nytt midt i et drag
+    if (document.documentElement.classList.contains('stua-drar') && Date.now() - stuaDrarFra < 8000) { stuaVentTegn = true; return; }   // eller stua mens noen holder en person (høyst 8 s)
     if (borsLas && document.querySelector('.bs-side .bs-meld, .bs-side .bs-anmeld')) return;   // ikke mist bildet/valgene mens du melder
     var aktivt = document.activeElement;
     if (aktivt && aktivt.closest && aktivt.closest('.bs-side') && (aktivt.tagName === 'SELECT' || aktivt.tagName === 'INPUT')) return;   // ikke forstyrr mens du velger/skriver
@@ -2713,8 +2717,8 @@ export function startRom(LEKNAVN, LANG) {
     // Under en lek: leken først, det som går i bakgrunnen etterpå, reaksjonene i en dokk nederst (se natt.css).
     // I lobbyen: som før.
     var turTekst = minTurNaa(tilstand);
-    var topp = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + T('✨ Pluss i kveld – alle leker er åpne, plass til 16', '✨ Pluss tonight – every game is open, room for 16') + '</p>' : '') + venterStripe();
-    var merker = '<div class="tur-merke" aria-live="polite">' + esc(turTekst) + '</div><div class="hemmelig-merke">🤫 ' + T('Bare du ser dette – hold skjermen for deg selv', 'Only you can see this – keep the screen to yourself') + '</div>';
+    var topp = hode() + (tilstand.pluss ? '<p class="rom-pluss">' + klistremerke('gnist', 'rom-inline-merke') + T('Pluss i kveld – alle leker er åpne, plass til 16', 'Pluss tonight – every game is open, room for 16') + '</p>' : '') + venterStripe();
+    var merker = '<div class="tur-merke" aria-live="polite">' + esc(turTekst) + '</div><div class="hemmelig-merke">' + klistremerke('hysj', 'rom-inline-merke') + T('Bare du ser dette – hold skjermen for deg selv', 'Only you can see this – keep the screen to yourself') + '</div>';
     var forlat = '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
     // Nytt kort? Ta vare på det gamle, så det kan kastes ut av skjermen når det nye deles ut
     var nyKN = kortNokkel(s), kortByttet = !!(tegnetFor && nyKN && nyKN !== sistKortNokkel) && !roligBevegelse();
@@ -2722,9 +2726,11 @@ export function startRom(LEKNAVN, LANG) {
     var gammeltKort = kortByttet ? root.querySelector('.rom-kort, .rof-kort.rom-rof') : null;
     var gammelRekt = gammeltKort ? gammeltKort.getBoundingClientRect() : null;
     sistKortNokkel = nyKN;
+    var stuaPlass = tilstand.ferdig ? '' : '<div class="rom-stua-plass" id="romStuaPlass"></div>';
     root.innerHTML = s
-      ? topp + merker + borsHurtig() + innhold + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + vert + forlat
-      : topp + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat;
+      ? topp + merker + borsHurtig() + innhold + stuaPlass + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + vert + forlat
+      : topp + stuaPlass + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat;
+    tegnStua(s);
     merkNyttInnhold(s);
     trinnEtterTegning();
     // Skjermkanten: lime når det er din tur, stripete når skjermen viser noe hemmelig
@@ -2806,6 +2812,48 @@ export function startRom(LEKNAVN, LANG) {
       i.value = ''; i.focus({ preventScroll: true });
       gjorAlltid({ handling: 'skriv', tekst: t });
     });
+  }
+
+  /* ---------- stua: alle i rommet som tegnede figurer ----------
+     Den samme stua står på alle telefonene og på TV-en. Nye spillere går inn døra, alle kan dras rundt,
+     og plasseringen lagres på serveren så alle ser det samme. Flytter du de andre for ofte, må du ta en slurk.
+     Elementet lever på tvers av tegningene (root tegnes på nytt hele tiden), og flyttes inn i plassholderen. */
+  var stuaEl = null, stua = null, stuaVentTegn = false, stuaStraffSett = null, stuaVarslet = 0, stuaDrarFra = 0;
+  document.addEventListener('pointerdown', function (e) { if (e.target.closest && e.target.closest('.rom-stua .figur')) stuaDrarFra = Date.now(); }, true);
+  function stuaKort(s) {
+    if (!s) return '';
+    if (s.kort) return s.kort.regel ? s.kort.regel + (s.kort.t ? ': ' + s.kort.t : '') : (s.kort.t || '');
+    if (s.tekst && typeof s.tekst === 'string') return s.tekst;
+    if (s.oppgave) return s.oppgave;
+    if (s.q) return s.q;
+    if (s.kortet) return s.kortet;
+    return '';
+  }
+  function tegnStua(s) {
+    var plass = root.querySelector('#romStuaPlass'); if (!plass || !meg) return;
+    if (!stuaEl) {
+      stuaEl = document.createElement('div'); stuaEl.className = 'rom-stua';
+      stuaEl.innerHTML = '<svg role="img" aria-label="' + T('Stua: alle i rommet som tegnede figurer. Dra i folka for å flytte dem.', 'The living room: everyone in the room as drawn figures. Drag people to move them.') + '"></svg>' +
+        '<span class="rom-stua-hint" aria-hidden="true">' + T('Dra i folka', 'Drag the people') + '</span>';
+      stua = lagStua(stuaEl.querySelector('svg'), {
+        lang: EN ? 'en' : 'no', navn: true, vandre: true, meg: meg.id,
+        onSlipp: function (id, x, y) { gjorAlltid({ handling: 'stua-flytt', hvem: id, x: x, y: y }); },
+        onFerdig: function () { if (stuaVentTegn) { stuaVentTegn = false; tegn(); } },
+      });
+    }
+    plass.appendChild(stuaEl);
+    stuaEl.classList.toggle('kompakt', !!s);
+    var st = tilstand.stua || {};
+    stua.settFolk(tilstand.spillere || [], st.pos);
+    var kt = stuaKort(s);
+    if (kt) stua.tv(kt, s.navn); else stua.kode(kode);
+    // Påskeegget: noen plaget de andre for mye og må ta en slurk – vises på alle skjermer
+    var nr = st.straff ? st.straff.nr : 0;
+    if (stuaStraffSett === null) stuaStraffSett = nr;
+    else if (nr > stuaStraffSett) { stuaStraffSett = nr; stua.straff(st.straff.hvem, tilstand.alkoholfri ? T('Straffepoeng!', 'Penalty!') : T('Skål da …', 'Fine, cheers …')); }
+    // Et lite hint før det smeller
+    if (st.plager >= (st.grense || 6) - 2 && st.plager > stuaVarslet) { stuaVarslet = st.plager; toast(T('Rolig nå! Flytter du de andre ' + ((st.grense || 6) - st.plager) + ' ganger til, må du ta en slurk.', 'Easy! Move the others ' + ((st.grense || 6) - st.plager) + ' more times and you drink.')); }
+    if (!st.plager) stuaVarslet = 0;
   }
 
   root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.bs-side [data-b], .bs-hurtig [data-b]')) borsKlikk(e); });

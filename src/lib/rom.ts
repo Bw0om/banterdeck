@@ -189,6 +189,18 @@ export function skjermPinOk(data: any, pin: string) {
   let d = 0; for (let i = 0; i < p.length; i++) d |= p.charCodeAt(i) ^ pin.charCodeAt(i);
   return d === 0;
 }
+/** Det TV-en kan vise fra lekene der alle svarer på samme spørsmål. Aldri noe hemmelig (ikke muldvarp, ikke pannekort). */
+function offentligTekst(s: any, data: any) {
+  try {
+    if (s.type === 'hvemskrev') return { tekst: s.oppgave, sitat: (s.fase === 'gjett' || s.fase === 'fasit') ? s.svar[s.ko[s.i]] || null : null, svart: Object.keys(s.svar || {}).length };
+    if (s.type === 'bloff') return { tekst: s.q, valg: s.fase === 'skriv' ? null : (s.valg || []).map((v: any) => v.t), sant: s.fase === 'fasit' ? s.sant : null, svart: Object.keys(s.falske || {}).length };
+    if (s.type === 'samme') return { tekst: s.oppgave, svart: Object.keys(s.svar || {}).length };
+    if (s.type === 'tosannheter') return { tekst: null, hvem: s.aktiv || null, valg: s.pastander || null };
+    if (s.type === 'regelfabrikken') return s.fase === 'trekk' ? { tekst: s.rekke[s.pos] || null } : null;
+    if (s.type === 'nyhetsrunden') { const q = s.sporsmal[s.i]; const aapen = s.fase === 'svar' || s.fase === 'ferdig'; return { tekst: q ? q.q : null, fasit: aapen && q ? q.svar : null, nr: s.i + 1, antall: s.sporsmal.length }; }
+  } catch { /* ufullstendig runde: vis ingenting */ }
+  return null;
+}
 export function skjermVisning(data: any, versjon: number, sprak: Lang | string = 'no') {
   const lang = rensLang(sprak), s = data.spill;
   let spill: any = null;
@@ -201,6 +213,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     if (s.type === 'mest') Object.assign(spill, { tekst: s.tekst, fase: s.fase, stemt: Object.keys(s.stemmer || {}).length, resultat: s.fase === 'resultat' ? s.resultat : null });
     if (s.type === 'forraeder') Object.assign(spill, { tekst: s.tekst, fase: s.fase, aktiv: s.aktiv, stemt: Object.keys(s.stemmer || {}).length,
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, drikker: s.drikker } : null });
+    const off = offentligTekst(s, data); if (off) spill.offentlig = off;
   }
   // Børsen: bare det som er offentlig – tavla, meldte og avgjorte aksjer og sakene. Aldri hendene til folk.
   let bors: any = null;
@@ -222,11 +235,21 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     spill: lok(spill, lang), valgt: data.valgt ? { lek: data.valgt.lek, navn: tr(lekNavnL(data.valgt.lek), lang) } : null,
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     reak: data.reak || [], utdeling: data.utdeling || null, kveld: lok(kveldVisning(data), lang), bors: lok(bors, lang),
+    stua: stuaVisning(data, null),
     alkoholfri: !!data.alkoholfri, ferdig: data.ferdig || null, kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null,
     gjeng: data.gjeng ? { navn: data.gjeng.navn } : null,
     mester: data.mester ? { id: data.mester.id, til: data.mester.til } : null,
     vann: data.vann ? { nr: data.vann.nr, tid: data.vann.tid, t: tr(data.vann.t, lang) } : null,
   };
+}
+
+/** Stua: hvor folk står, og siste slurk for plaging. `plager` = hvor mange ganger du har flyttet de andre siste minutt. */
+function stuaVisning(data: any, meg: any) {
+  const st = data.stua; if (!st) return null;
+  const ider = new Set(data.spillere.map((p: any) => p.id));
+  const pos: any = {}; Object.keys(st.pos || {}).forEach((id) => { if (ider.has(id)) pos[id] = st.pos[id]; });
+  const naa = Date.now();
+  return { pos, straff: st.straff || null, plager: meg && st.plag && st.plag[meg.id] ? st.plag[meg.id].filter((t: number) => naa - t < 60000).length : 0, grense: STUA_PLAG };
 }
 
 /* ---------- hva hver telefon får se ---------- */
@@ -268,6 +291,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     nr: data.nr, reak: data.reak || [], utdeling: data.utdeling || null, valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
+    stua: stuaVisning(data, meg),
     hjulListe: data.hjulListe || (lang === 'en' ? HJUL_STANDARD_EN : HJUL_STANDARD), oppdrag: lok(oppdragVisning(data, meg), lang), bors: lok(borsVisning(data, meg), lang), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: lok(data.historikk || [], lang),
     alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode, kveld: !!data.gjengKveld, regler: data.gjeng.regler || [] } : null,
     kveld: lok(kveldVisning(data), lang), plan: data.plan || null,
@@ -283,6 +307,8 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
 
 /* ---------- spillene ---------- */
 /* ---------- svarfrister: runden går ikke videre før alle har svart eller tiden er ute ---------- */
+/** Stua: så mange ganger kan du flytte på de andre i løpet av et minutt før du må ta en slurk. */
+const STUA_PLAG = 6;
 const FRIST = { mest: 30, forraeder: 30, tosannheter: 45, veddelopet: 45, nrKort: 40, nrLang: 60, aldri: 30 };
 
 /* ---------- alle svarer: kortleker der hver telefon svarer i hemmelighet, og svarene vises samtidig ----------
@@ -683,7 +709,7 @@ function handlingInne(data: any, meg: any, h: any) {
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
     data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
   }
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut', 'stua-flytt'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -823,6 +849,31 @@ function handlingInne(data: any, meg: any, h: any) {
       const p = data.spillere.find((x: any) => x.id === hvem); if (!p) return { ok: true };
       const n = Number(h.n) === -1 ? -1 : 1;
       p.slurker = Math.max(0, Math.min(999, (p.slurker || 0) + n));
+      return { ok: true };
+    }
+    case 'stua-flytt': {
+      // Stua: noen ble flyttet. Plasseringen gjelder for alle skjermer.
+      // Påskeegg: flytter du de andre rundt for ofte (STUA_PLAG ganger på ett minutt), må du ta en slurk.
+      const naa = Date.now();
+      const hvem = data.spillere.find((x: any) => x.id === String(h.hvem)); if (!hvem) return { ok: true };
+      const x = Number(h.x), y = Number(h.y);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return { ok: true };
+      if (meg.sistS && naa - meg.sistS < 300) return { ok: true };
+      meg.sistS = naa;
+      const st = data.stua = data.stua || { pos: {} };
+      st.pos[hvem.id] = [Math.round(Math.max(0.4, Math.min(5.6, x)) * 100) / 100, Math.round(Math.max(0.4, Math.min(5.7, y)) * 100) / 100];
+      if (hvem.id !== meg.id) {
+        const plag = st.plag = st.plag || {};
+        const liste = (plag[meg.id] || []).filter((t: number) => naa - t < 60000).concat([naa]);
+        plag[meg.id] = liste;
+        if (liste.length >= STUA_PLAG) {
+          plag[meg.id] = [];
+          giSlurker(data, meg.id, 1);
+          st.straff = { nr: ((st.straff && st.straff.nr) || 0) + 1, hvem: meg.id };
+          if (data.alkoholfri) melde(data, `${meg.navn} plaget de andre for mye i stua. Ett straffepoeng!`, `${meg.navn} pestered the others too much. One penalty point!`);
+          else melde(data, `${meg.navn} plaget de andre for mye i stua. Én slurk!`, `${meg.navn} pestered the others too much. One sip!`);
+        }
+      }
       return { ok: true };
     }
     case 'reager':

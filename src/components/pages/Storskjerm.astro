@@ -7,6 +7,7 @@ import '@fontsource-variable/fraunces';
 import '@fontsource-variable/fraunces/wght-italic.css';
 import '../../styles/natt.css';
 import '../../styles/champagne.css';
+import '../../styles/stua.css';
 import { supabaseUrl, supabaseAnonKey } from '../../config';
 import type { Lang } from '../../lib/i18n';
 import FeilFangst from '../FeilFangst.astro';
@@ -22,7 +23,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
   <FeilFangst />
   <meta name="robots" content="noindex" />
-  <meta name="theme-color" content="#0F0A10" />
+  <meta name="theme-color" content="#1C1B1F" />
   <title>{EN ? 'Big screen – mittvors' : 'Storskjerm – mittvors'}</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 </head>
@@ -35,6 +36,12 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       const q = qrcode(0, 'M'); q.addData(tekst); q.make();
       return q.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
     };
+  </script>
+  <script>
+    // Stua (src/klient/stua.js): de samme figurene som på telefonene
+    import { lagStua } from '../../klient/stua.js';
+    (window as any).mvLagStua = lagStua;
+    document.dispatchEvent(new CustomEvent('mv-stua-klar'));
   </script>
   <script is:inline define:vars={{ LANG, SB }}>
   (function () {
@@ -295,9 +302,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       if (!s) {
         var qr = window.BDqr ? window.BDqr(lenke()) : '';
-        return '<div class="tv-scene tv-lobby"><div class="tv-qr">' + qr + '</div><div><p class="tv-etikett">' + T('Bli med fra telefonen', 'Join from your phone') + '</p><h1>' + esc(lenkeTekst()) + '</h1>' +
+        return '<div class="tv-scene tv-lobby"><div class="tv-lobby-venstre"><div class="tv-qr">' + qr + '</div><div><p class="tv-etikett">' + T('Bli med fra telefonen', 'Join from your phone') + '</p><h1>' + esc(lenkeTekst()) + '</h1>' +
           (d.valgt ? '<p class="tv-stor">' + T('Neste: ', 'Up next: ') + '<b>' + esc(d.valgt.navn || d.valgt.lek) + '</b></p>' : '<p class="tv-stor">' + T('Scan koden – så er du med.', 'Scan the code – and you’re in.') + '</p>') +
-          '<div class="tv-chips">' + (d.spillere || []).map(function (p) { return '<span>' + (p.id === d.vert ? '👑 ' : '') + esc(p.navn) + '</span>'; }).join('') + '</div></div></div>';
+          '<div class="tv-chips">' + (d.spillere || []).map(function (p) { return '<span>' + (p.id === d.vert ? '👑 ' : '') + esc(p.navn) + '</span>'; }).join('') + '</div></div></div><div class="tv-stua-plass" id="tvStuaPlass"></div></div>';
       }
       var topp = '<p class="tv-etikett">' + esc(s.navn) + '</p>';
       if (s.type === 'kort' && s.ring) {
@@ -322,19 +329,52 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
           ((s.resultat.drikker || []).length ? '<ul class="tv-chips">' + s.resultat.drikker.map(function (x) { return '<span>🍺 ' + esc(x.navn) + ' · ' + x.slurker + '</span>'; }).join('') + '</ul>' : '') + '</div>';
         return '<div class="tv-scene tv-sentrert">' + topp + '<p class="tv-stor">' + esc(navn(s.aktiv)) + T(' fullfører:', ' finishes:') + '</p><h1 class="tv-sporsmal">' + esc(s.tekst) + '</h1>' + (s.fase === 'stem' ? '<p class="tv-stor">' + T('Sannhet eller løgn? Stem på telefonen', 'Truth or lie? Vote on your phone') + '</p>' : '') + '</div>';
       }
+      if (s.offentlig && (s.offentlig.tekst || (s.offentlig.valg && s.offentlig.valg.length))) {
+        var o = s.offentlig, ant = (d.spillere || []).length;
+        return '<div class="tv-scene tv-sentrert">' + topp +
+          (o.nr ? '<p class="tv-stor">' + T('Spørsmål ', 'Question ') + o.nr + ' / ' + o.antall + '</p>' : '') +
+          (o.hvem ? '<p class="tv-stor">' + esc(navn(o.hvem)) + T(' sier:', ' says:') + '</p>' : '') +
+          (o.tekst ? '<h1 class="tv-sporsmal">' + esc(o.tekst) + '</h1>' : '') +
+          (o.sitat ? '<p class="tv-sitat">«' + esc(o.sitat) + '»</p>' : '') +
+          (o.valg && o.valg.length ? '<ol class="tv-valg">' + o.valg.map(function (v, i) { return '<li style="--i:' + i + '"><b>' + String.fromCharCode(65 + i) + '</b>' + esc(v) + '</li>'; }).join('') + '</ol>' : '') +
+          (o.fasit ? '<p class="tv-fasit">' + T('Svar: ', 'Answer: ') + '<b>' + esc(o.fasit) + '</b></p>' : '') +
+          (o.sant ? '<p class="tv-fasit">' + T('Det sanne svaret: ', 'The true answer: ') + '<b>' + esc(o.sant) + '</b></p>' : '') +
+          (o.svart != null && !o.sitat && !(o.valg && o.valg.length) ? '<p class="tv-liten">' + o.svart + ' / ' + ant + T(' har svart på telefonen', ' have answered on their phone') + '</p>' : '') + '</div>';
+      }
       return '<div class="tv-scene tv-sentrert">' + topp + '<h1>' + T('Følg med på telefonene', 'Follow along on your phones') + '</h1><div class="tv-chips">' + (d.spillere || []).map(function (p) { return '<span>' + esc(p.navn) + '</span>'; }).join('') + '</div></div>';
+    }
+    /* ---------- stua: de samme figurene som på telefonene, og TV-en i stua viser kortet ---------- */
+    var tvStuaEl = null, tvStua = null, tvStraffSett = null;
+    document.addEventListener('mv-stua-klar', function () { if (tilstand && startet) tegn(); });
+    function tegnTvStua(d) {
+      var plass = document.getElementById('tvStuaPlass'); if (!plass || !window.mvLagStua) return;
+      if (!tvStuaEl) {
+        tvStuaEl = document.createElement('div'); tvStuaEl.className = 'tv-stua';
+        tvStuaEl.innerHTML = '<svg role="img" aria-label="' + T('Stua med alle i rommet', 'The living room with everyone in the room') + '"></svg>';
+        tvStua = window.mvLagStua(tvStuaEl.querySelector('svg'), { lang: LANG, navn: true, vandre: true, kanDra: false });
+      }
+      plass.appendChild(tvStuaEl);
+      var st = d.stua || {};
+      tvStua.settFolk(d.spillere || [], st.pos);
+      var s = d.spill, kt = '';
+      if (s) kt = s.kort ? (s.kort.regel ? s.kort.regel : (s.kort.t || '')) : (s.tekst || (s.offentlig && s.offentlig.tekst) || '');
+      if (kt) tvStua.tv(kt, s.navn); else tvStua.kode(kode);
+      var nr = st.straff ? st.straff.nr : 0;
+      if (tvStraffSett === null) tvStraffSett = nr;
+      else if (nr > tvStraffSett) { tvStraffSett = nr; tvStua.straff(st.straff.hvem, d.alkoholfri ? T('Straffepoeng!', 'Penalty!') : T('Skål da …', 'Fine, cheers …')); }
     }
     function tegn() {
       var d = tilstand; if (!d) return;
       if (!startet) return tegnStart();
       var meldt = d.bors && d.bors.meldte && d.bors.meldte.length ? '<div class="tv-meldt">📣 ' + d.bors.meldte.map(function (a) { return (a.type === 'hvem' ? esc(navn(a.utfall)) + ' – ' : '') + esc(a.q); }).join(' · ') + ' <small>' + T('stem på telefonen', 'vote on your phone') + '</small></div>' : '';
-      var side = d.ferdig ? '' : sidebar(d);
+      var side = d.ferdig ? '' : (d.spill ? '<section class="tv-stua-seksjon"><div class="tv-stua-plass" id="tvStuaPlass"></div></section>' : '') + sidebar(d);
       // Nytt kort eller nytt spørsmål? Da deles det ut på TV-en også – alle ser mot skjermen samtidig
       var sp = d.spill, nokkel = sp ? [sp.type, sp.lek, sp.pos, sp.fase, sp.tekst, sp.kort ? (sp.kort.t || '') + (sp.kort.v || '') + (sp.kort.s || '') : ''].join('|') : '';
       var nyttKort = !!(nokkel && nokkel !== sistTvKort); sistTvKort = nokkel;
       rot.innerHTML = '<header class="tv-hode"><span class="tv-logo">mitt<b>vors</b></span>' + (d.gjeng ? '<span class="tv-gjeng">' + esc(d.gjeng.navn) + '</span>' : '') +
         '<span class="tv-kode">' + T('Bli med: ', 'Join: ') + '<b>' + esc(lenkeTekst()) + '</b></span></header>' +
         '<div class="tv-hoved' + (side ? '' : ' uten-side') + '"><div class="tv-scenebox">' + scene(d) + '</div>' + (side ? '<aside class="tv-side">' + side + '</aside>' : '') + '</div>' + meldt;
+      tegnTvStua(d);
       if (nyttKort) { var inn = rot.querySelector('.tv-kort, .tv-sporsmal, .tv-rof-kort .rof-kort'); if (inn) inn.classList.add('kort-inn'); }
       var avsl = rot.querySelector('.tv-aldri-avslort');
       if (avsl && avsl.dataset.nokkel !== aldriVist) { aldriVist = avsl.dataset.nokkel; avsl.classList.add('inn'); }
@@ -527,6 +567,32 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       .tv-aldri-avslort.inn :is(.tv-aldri-tall,.tv-aldri-har span),.tv-ut-panel,.tv-ut-glass svg,.tv-ut-navn span{animation-name:tvTon}
       .tv-aldri-svar li.ny svg{animation:none}
     }
-  </style>
+  
+    /* ---------- stua-designet på TV-en: mørkt rom, kremhvit strek, gule harde skygger ---------- */
+    body.tv{background:#1C1B1F;color:#FFF8EE}
+    .tv-logo{font-family:var(--display);font-stretch:72%;font-weight:900;background:#16120F;color:#FFF8EE;padding:4px 14px 6px;border:3px solid #FFF8EE;box-shadow:5px 5px 0 #FFD23F;transform:rotate(-2deg);display:inline-block}
+    .tv-logo b{color:#FFD23F;font-style:italic}
+    .tv h1,.tv h2,.tv h3{text-transform:none}
+    .tv-lobby{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:center;gap:4vw}
+    .tv-lobby-venstre{display:flex;flex-direction:column;gap:2vh}
+    .tv-lobby h1{font-size:3.4em;color:#FFD23F;text-transform:none;word-break:break-word}
+    .tv-qr{border:4px solid #16120F;box-shadow:8px 8px 0 #FFD23F;border-radius:8px!important;width:min(30vh,20vw)!important}
+    .tv-stua{background:#FF5B1F;border:4px solid #FFF8EE;border-radius:8px;box-shadow:10px 10px 0 #FFD23F;padding:1vh 1vw .4vh}
+    .tv-stua svg{display:block;width:100%;height:auto;overflow:visible}
+    .tv-stua-seksjon{padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+    .tv-stua-seksjon .tv-stua{box-shadow:6px 6px 0 #FFD23F;border-width:3px}
+    .tv-chips span{border:3px solid #FFF8EE;border-radius:4px!important;background:#2A292E;box-shadow:3px 3px 0 #000;font-family:var(--display);font-stretch:85%;font-weight:850}
+    .tv-side section{border:3px solid #FFF8EE!important;border-radius:6px!important;background:#2A292E!important;box-shadow:6px 6px 0 #FFD23F}
+    .tv-kort,.tv-scene .rof-kort{background:#FFF8EE!important;color:#16120F!important;border:5px solid #16120F!important;border-radius:10px!important;box-shadow:14px 14px 0 #FF5B1F!important}
+    .tv-etikett{font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#FFD23F}
+    .tv-sporsmal{font-family:var(--display);font-stretch:78%;font-weight:900;color:#FFF8EE;max-width:24ch;line-height:1.02}
+    .tv-sitat{font-family:var(--display);font-stretch:80%;font-weight:850;font-size:2.4em;background:#FFF8EE;color:#16120F;border:5px solid #16120F;box-shadow:12px 12px 0 #FFD23F;padding:.5em .8em;border-radius:8px;max-width:26ch;margin-top:3vh}
+    .tv-valg{list-style:none;padding:0;margin:3vh 0 0;display:grid;gap:1.6vh;max-width:56vw}
+    .tv-valg li{display:flex;gap:1em;align-items:center;font-size:1.7em;font-weight:750;background:#2A292E;border:3px solid #FFF8EE;border-radius:6px;padding:.4em .7em;box-shadow:5px 5px 0 #000}
+    .tv-valg b{display:inline-grid;place-items:center;min-width:1.6em;height:1.6em;background:#FFD23F;color:#16120F;border-radius:4px;font-family:var(--display);font-weight:900}
+    .tv-fasit{font-size:2em;margin-top:3vh}
+    .tv-fasit b{background:#63E2A8;color:#16120F;padding:0 .3em;border-radius:4px}
+    .tv-toast,.tv-banner{border:3px solid #FFF8EE!important;border-radius:6px!important;box-shadow:6px 6px 0 #FFD23F!important;background:#16120F!important}
+</style>
 </body>
 </html>

@@ -141,3 +141,94 @@ input,textarea{caret-color:var(--oransje)}
 @media (prefers-reduced-motion:reduce){
   .btn,.appbtn,.brand .brandmark,.sidenav a,.tabbar a .ti,.pluss-pille{transition:none!important}
 }
+
+/* =====================================================================
+   ROMMET: samme strek og skygger, stua øverst, klistremerker i stedet for emoji
+   ===================================================================== */
+.rom-stua{position:relative;margin:8px 0 22px;padding:8px 10px 4px;background:var(--oransje);border:var(--strek) solid var(--blekk);border-radius:6px;box-shadow:var(--skygge)}
+.rom-stua svg{display:block;width:100%;height:auto;overflow:visible}
+.rom-stua.kompakt{max-width:460px;margin:20px auto 26px}
+.rom-stua-hint{position:absolute;right:10px;top:10px;font-family:var(--display);font-stretch:80%;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;
+  background:var(--papir);color:var(--blekk);border:2.5px solid var(--blekk);padding:3px 8px;box-shadow:3px 3px 0 var(--blekk);transform:rotate(2deg);pointer-events:none}
+.rom-stua .figur{cursor:grab}
+html.stua-drar,html.stua-drar body{overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+html.stua-drar .rom-stua .figur{cursor:grabbing}
+
+/* Paneler */
+.rom-hode,.rom-boks,.rom-qr,.rom-bg,.rom-gruppe,.rom-intro,.rom-regler,.rom-verktoy,.rom-anbefalt-lek,.rom-fortsett,.rom-skjerm,.rom-del,.rom-mester,.rom-vent,.rom-feil{
+  border:2.5px solid var(--ink)!important;border-radius:6px!important;box-shadow:var(--skygge-liten)}
+.rom-hode{background:var(--card)}
+.rom-qrbilde,.rom-bg-ikon{border-radius:4px!important}
+.rom-bg-ikon{background:transparent!important;display:grid;place-items:center}
+.rom-bg-ikon svg{width:44px;height:44px}
+.rom-bg-rad.paa .rom-bg-ikon svg{transform:rotate(-6deg)}
+.rom-tavle-innhold{border:var(--strek) solid var(--blekk);border-radius:8px 8px 0 0!important}
+
+/* Romkoden og stegnumrene som på en avgangstavle */
+.rom-kode{display:inline-block;background:var(--flapp);color:var(--flapp-tekst)!important;font-family:var(--display);font-stretch:85%;font-weight:850;letter-spacing:.12em;padding:2px 6px 2px 9px;border-radius:4px;
+  background-image:linear-gradient(transparent calc(50% - .5px),#0b0b0d calc(50% - .5px),#0b0b0d calc(50% + .5px),transparent calc(50% + .5px))}
+.rom-steg > span{display:inline-grid;place-items:center;min-width:1.15em;background:var(--flapp);color:var(--flapp-tekst)!important;border-radius:4px;padding:0 .12em;margin-right:.3em;
+  background-image:linear-gradient(transparent calc(50% - .5px),#0b0b0d calc(50% - .5px),#0b0b0d calc(50% + .5px),transparent calc(50% + .5px))}
+
+/* Toppknappene: klistremerker */
+.rom-hk{transition:transform var(--fjaer-tid) var(--fjaer)}
+.rom-hk:active{transform:scale(.92);transition-duration:90ms}
+.rom-hk-ikon .rom-hk-merke{width:30px;height:30px;display:block}
+@media (hover:hover) and (pointer:fine){.rom-hk:hover .rom-hk-merke{transform:rotate(-8deg) scale(1.08)}}
+.rom-hk-merke{transition:transform var(--fjaer-tid) var(--fjaer)}
+.rom-inline-merke{width:24px;height:24px;vertical-align:-6px;margin-right:8px;display:inline-block}
+.rom-rival{font-style:normal}
+.rom-rival-merke{width:17px;height:17px;vertical-align:-3px;margin-left:3px}
+
+/* Spillerne som brikker */
+.rom-spillere span{border:2.5px solid var(--ink)!important;border-radius:4px!important;box-shadow:2px 2px 0 var(--hard);background:var(--card);font-family:var(--display);font-stretch:90%;font-weight:800}
+.rom-spillere span.meg{background:var(--gul);color:var(--blekk)}
+
+/* Lekene: kort med klistremerke */
+.rom-lek{position:relative;border:2.5px solid var(--ink)!important;border-radius:6px!important;box-shadow:var(--skygge-liten);
+  transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.rom-lek > b{padding-right:58px;font-family:var(--display);font-stretch:78%;font-weight:900;text-transform:uppercase;letter-spacing:.005em}
+.rom-lek .rom-lek-merke{position:absolute;right:12px;top:12px;width:46px;height:46px;transition:transform var(--fjaer-tid) var(--fjaer)}
+@media (hover:hover) and (pointer:fine){.rom-lek:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--hard)}.rom-lek:hover .rom-lek-merke{transform:rotate(-8deg) scale(1.08)}}
+.rom-lek.for-fa .rom-lek-merke,.rom-lek.laast .rom-lek-merke{filter:grayscale(1);opacity:.6}
+.rom-mod button,.rom-anbefalt-lek button{border-radius:4px!important;border:2.5px solid var(--ink)!important;font-family:var(--display);font-stretch:85%;font-weight:850;
+  transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.rom-mod button:active{transform:translate(2px,2px)}
+
+/* Kortet: papir med tykk strek, likt i lys og mørk */
+.rom-kort,:root[data-theme="dark"] .rom-kort{background:var(--papir)!important;color:var(--blekk)!important;border:var(--strek) solid var(--blekk)!important;border-radius:8px!important;box-shadow:var(--skygge-stor)!important}
+.rom-kort *{color:inherit}
+.rom-hemmelig{background:var(--rosa)!important;color:var(--blekk)!important;border:var(--strek) solid var(--blekk)!important;border-radius:8px!important;box-shadow:var(--skygge)!important}
+.rom-spillnavn{font-family:var(--display);font-stretch:75%;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+
+/* Store knapper */
+.rom-stor-knapp,html.i-spill .rom-stor-knapp{background:var(--gul)!important;color:var(--blekk)!important;border:var(--strek) solid var(--blekk)!important;border-radius:6px!important;box-shadow:var(--skygge)!important;
+  font-family:var(--display);font-stretch:78%;font-weight:900;text-transform:uppercase;letter-spacing:.01em;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.rom-stor-knapp:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)!important;transition-duration:90ms}
+
+/* «Jeg har» / «Aldri»: to store klistremerke-knapper med fjær */
+.aldri-valg button{border-radius:6px;border:var(--strek) solid var(--blekk)!important;box-shadow:var(--skygge)!important;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.aldri-valg b{font-stretch:75%;text-transform:uppercase;font-size:27px;letter-spacing:0}
+.aldri-har{background:var(--oransje)!important;color:var(--blekk)!important}
+.aldri-aldri{background:var(--mint)!important;color:var(--blekk)!important}
+.aldri-aldri small,.aldri-har small{color:var(--blekk)!important}
+.aldri-valg button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)!important;transition-duration:90ms}
+.aldri-valg button[aria-pressed=true]{outline:3px solid var(--ink);outline-offset:3px;transform:rotate(-1.5deg)}
+
+/* Slurkelinja: to brikker, den du kan dele ut er gul */
+.slurkelinje{border-radius:6px;background:transparent;padding:0;gap:12px}
+.sl-celle,.sl-gi{border-radius:6px;border:2.5px solid var(--ink)!important;box-shadow:var(--skygge-liten)}
+.sl-celle{background:var(--card)}
+.sl-tall{font-stretch:80%}
+.sl-gi{background:var(--gul);color:var(--blekk);transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.sl-gi:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+.ut-ark .ut-valg,.reak-linje,.rom-pluss,.rom-mester{border-radius:6px!important}
+
+/* Romkoden i toppen skal få plass ved siden av knappene */
+.rom-kode{letter-spacing:.06em;padding:0 4px 0 6px}
+html.i-spill .rom-kode{font-size:.92em}
+@media (max-width:440px){
+  html.i-spill .rom-kode{font-size:22px!important;letter-spacing:.03em;padding:0 3px 0 5px}
+  html.i-spill .rom-hode-v{flex:none;gap:6px}
+  html.i-spill .rom-hodeknapper{gap:2px!important}
+}
