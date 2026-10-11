@@ -4,7 +4,7 @@ const B = '#16120F';
 const S = `stroke="${B}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"`;
 const O = '#FF5B1F', G = '#FFD23F', M = '#63E2A8', R = '#FF9CC2', P = '#FFF8EE', H = '#F2B98B';
 
-const MERKER: Record<string, string> = {
+export const MERKER = {
   muldvarp: `<path d="M6 54c4-10 14-14 26-14s22 4 26 14z" fill="#B9773F" ${S}/><path d="M14 46c0-16 8-28 18-28s18 12 18 28" fill="#7A4A2A" ${S}/><rect x="17" y="27" width="12" height="8" rx="3" fill="${B}"/><rect x="35" y="27" width="12" height="8" rx="3" fill="${B}"/><path d="M29 31h6" ${S}/><ellipse cx="32" cy="41" rx="4" ry="3" fill="${R}" ${S}/><path d="M26 47q6 3 12 0" fill="none" ${S}/>`,
   brev: `<rect x="6" y="16" width="52" height="36" fill="${P}" ${S}/><path d="M6 16l26 20 26-20" fill="none" ${S}/><circle cx="32" cy="38" r="9" fill="${O}" ${S}/><path d="M29 35q3-4 6 0t-3 4v1" fill="none" stroke="${B}" stroke-width="2.6" stroke-linecap="round"/><circle cx="32" cy="43.5" r="1.4" fill="${B}"/>`,
   fisk: `<path d="M8 32c8-12 22-16 34-8l12-8v32l-12-8c-12 8-26 4-34-8z" fill="${M}" ${S}/><circle cx="20" cy="29" r="3.5" fill="${P}" ${S}/><circle cx="20.5" cy="29.5" r="1.4" fill="${B}"/><path d="M14 36q4 3 8 1" fill="none" ${S}/><path d="M30 24q4 8 0 16" fill="none" ${S}/><path d="M44 8q4 3 0 6M52 6q3 3 0 6" fill="none" ${S}/>`,
@@ -51,7 +51,7 @@ const MERKER: Record<string, string> = {
 };
 
 // Hvilken lek får hvilket merke
-const LEK: Record<string, string> = {
+const LEK = {
   'spionen': 'muldvarp', 'hvem-skrev-det': 'brev', 'bloffquizen': 'fisk', 'samme-svar': 'sau', 'forraeder': 'nese',
   'regelfabrikken': 'blyant', 'nyhetsrunden': 'avis', 'hemmelig-oppdrag': 'agent', 'tanken-bak-sangen': 'note',
   'skal-refleksen': 'lyn', 'stilleleken': 'stille', 'rask-fakta': 'duell', 'terningen-bestemmer': 'terning',
@@ -62,10 +62,10 @@ const LEK: Record<string, string> = {
 };
 
 /** Navnet på merket som hører til en lek (eller et generelt glass). */
-export function merkeFor(slug: string): string { return LEK[slug] || 'glass'; }
+export function merkeFor(slug) { return LEK[slug] || 'glass'; }
 
 /** Ferdig SVG for et merke eller en lek. */
-export function klistremerke(navnEllerSlug: string, klasse = 'merke'): string {
+export function klistremerke(navnEllerSlug, klasse = 'merke') {
   const navn = MERKER[navnEllerSlug] ? navnEllerSlug : merkeFor(navnEllerSlug);
   return `<svg class="${klasse}" viewBox="0 0 64 64" aria-hidden="true" focusable="false">${MERKER[navn]}</svg>`;
 }

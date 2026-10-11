@@ -62,7 +62,7 @@ One family, Archivo Variable (self-hosted, width axis).
 
 ## Game images
 
-`scripts/lag-pikselbilder.py` draws all 63 game images and the 10 shared motifs as pixel art in the stua style: big square pixels (6 px, smaller only when a scene is wide), a one-pixel ink outline around every figure, flat stua colours, a hard one-pixel ink shadow and one colour field per game (mint, pink, blue, paper, peach or lilac). Each game is composed from a small sprite library (cards, dice, cups, beer, bottles, phones, faces, animals, speech bubbles …) so every game has its own scene. Run `python scripts/lag-pikselbilder.py` after changing it, and bump the service worker cache. The in-room game symbols are the vector stickers in `src/lib/klistremerker.ts`, not these images.
+`scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). Every sticker has the 3.5 ink stroke and flat stua colours; each one gets a hard 3.5 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
 
 ## Not yet migrated
 
