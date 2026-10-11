@@ -4,6 +4,7 @@
 // Startes fra Rom.astro ved hver sidevisning (astro:page-load), med lekenavnene og språket som argumenter.
 import { lagStua } from './stua.js';
 import { klistremerke } from '../lib/klistremerker';
+import { TEMAER, temaLov, pyntNavn } from '../lib/pynt.js';
 
 export function startRom(LEKNAVN, LANG) {
   // Språk: samme kode for /no/rom og /room. T('norsk', 'English') velger tekst.
@@ -2453,9 +2454,19 @@ export function startRom(LEKNAVN, LANG) {
     t.rangert = l.sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0); });
     return t;
   }
+  /** Nytt i garderoben etter kvelden – eller et lite dytt om å lage bruker, så pynten kan samles på. */
+  function nyPyntBoks() {
+    var meg2 = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; });
+    if (tilstand.nyPynt && tilstand.nyPynt.length) {
+      return '<div class="rom-nypynt">' + klistremerke('gnist', 'rom-inline-merke') + '<b>' + T('Nytt i garderoben: ', 'New in your wardrobe: ') + esc(tilstand.nyPynt.map(function (id) { return pyntNavn(id, EN ? 'en' : 'no'); }).join(', ')) + '</b>' +
+        '<a class="btn small gold" href="' + RUTE.konto + '">' + T('Ta det på figuren', 'Put it on your figure') + '</a></div>';
+    }
+    if (meg2 && !meg2.bruker) return '<p class="rom-nypynt-dytt">' + T('Med en bruker låser du opp luer, briller og kjæledyr til figuren din når du spiller. Alt er gratis.', 'With an account you unlock hats, glasses and pets for your figure as you play. All free.') + ' <a href="' + RUTE.konto + '">' + T('Lag bruker', 'Create an account') + '</a></p>';
+    return '';
+  }
   function oppsummering() {
     var t = kveldsTall();
-    return kveldVinnerBoks() + '<div class="kveld-sum"><p class="rom-etikett">' + T('Kvelden er over', 'The night is over') + '</p><h2 class="rom-h2" style="margin-top:0">' + T('Kveldens oppsummering', 'Tonight\'s recap') + '</h2>' +
+    return kveldVinnerBoks() + nyPyntBoks() + '<div class="kveld-sum"><p class="rom-etikett">' + T('Kvelden er over', 'The night is over') + '</p><h2 class="rom-h2" style="margin-top:0">' + T('Kveldens oppsummering', 'Tonight\'s recap') + '</h2>' +
       '<div class="stat-tall"><div><b>' + t.sumSlurker + '</b><span>' + T('slurker til sammen', 'sips in total') + '</span></div><div><b>' + t.leker.length + '</b><span>' + T('leker spilt', 'games played') + '</span></div>' +
       '<div><b>' + t.sumSendt + '</b><span>' + T('🍺 sendt', '🍺 sent') + '</span></div><div><b>' + (t.minutter >= 60 ? Math.floor(t.minutter / 60) + T('t ', 'h ') + (t.minutter % 60) + 'm' : t.minutter + ' min') + '</b><span>' + T('i rommet', 'in the room') + '</span></div></div>' +
       (t.kaaring.length ? '<div class="rom-kaaring">' + t.kaaring.map(function (x) { return '<div><span>' + x.ikon + '</span><small>' + esc(x.tittel) + '</small><b>' + esc(x.navn) + ' · ' + esc(x.tall) + '</b></div>'; }).join('') + '</div>' : '') +
@@ -2844,7 +2855,19 @@ export function startRom(LEKNAVN, LANG) {
     plass.appendChild(stuaEl);
     stuaEl.classList.toggle('kompakt', !!s);
     var st = tilstand.stua || {};
+    stua.tema(st.tema || 'stue');
     stua.settFolk(tilstand.spillere || [], st.pos);
+    // Verten velger hvordan stua ser ut (i lobbyen). Pluss-temaene krever Pluss i rommet.
+    var tv = stuaEl.querySelector('.rom-tema');
+    if (erVert() && !s) {
+      if (!tv) { tv = document.createElement('div'); tv.className = 'rom-tema'; tv.setAttribute('role', 'group'); tv.setAttribute('aria-label', T('Hvordan stua ser ut', 'How the room looks')); stuaEl.appendChild(tv);
+        tv.addEventListener('click', function (e) { var b = e.target.closest('[data-tema]'); if (b && !b.disabled) gjor({ handling: 'stua-tema', tema: b.dataset.tema }); }); }
+      var harPluss = !!(tilstand.pluss && tilstand.pluss.til > Date.now()), naa = st.tema || 'stue';
+      tv.innerHTML = TEMAER.map(function (t) {
+        var lov = temaLov(t.id, harPluss);
+        return '<button type="button" class="rom-tema-knapp' + (lov ? '' : ' laast') + '" data-tema="' + t.id + '" aria-pressed="' + (naa === t.id) + '"' + (lov ? '' : ' disabled') + '>' + esc(t.navn[EN ? 1 : 0]) + (t.pluss && !harPluss ? ' <i>' + (lov ? T('gratis nå', 'free now') : 'Pluss') + '</i>' : '') + '</button>';
+      }).join('');
+    } else if (tv) tv.remove();
     var kt = stuaKort(s);
     if (kt) stua.tv(kt, s.navn); else stua.kode(kode);
     // Påskeegget: noen plaget de andre for mye og må ta en slurk – vises på alle skjermer

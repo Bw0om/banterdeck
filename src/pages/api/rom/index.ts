@@ -1,6 +1,9 @@
 // Lager et nytt rom. Svarer med koden og en hemmelig pollett som bare denne telefonen får.
 import type { APIRoute } from 'astro';
-import { lagRom, rensNavn, lekeliste, loggRom, rensLang } from '../../../lib/rom';
+import { lagRom, endreRom, rensNavn, lekeliste, loggRom, rensLang } from '../../../lib/rom';
+import { rpc } from '../../../lib/spilt';
+import { innloggetBruker } from '../../../lib/konto';
+import { rensPynt } from '../../../lib/pynt.js';
 export const prerender = false;
 
 const json = (d: any, status = 200) =>
@@ -17,6 +20,17 @@ export const POST: APIRoute = async ({ request }) => {
   if (!navn) return json({ feil: 'navn', melding: en ? 'Enter a name.' : 'Skriv inn et navn.' }, 400);
   try {
     const { kode, spiller } = await lagRom(navn, String(d.lek || '').slice(0, 30), String(d.modus || ''), lang);
+    // Innlogget vert: figuren tar med seg pynten sin, og kvelden teller på kontoen
+    if (request.headers.get('authorization')) {
+      try {
+        const u = await innloggetBruker(request);
+        if (u) {
+          const ph: any = await rpc('pynt_hent', { p_user: u.id });
+          const pynt = ph ? rensPynt(ph.valgt, ph.laast) : {};
+          await endreRom(kode, (data) => { const v = data.spillere[0]; if (v) { v.bruker = u.id; v.pynt = pynt; } return { ok: true }; });
+        }
+      } catch { /* rommet virker uten */ }
+    }
     await loggRom('lag', 'rom');
     return json({ kode, id: spiller.id, pollett: spiller.pollett, lang, leker: lekeliste(lang) });
   } catch (e) {

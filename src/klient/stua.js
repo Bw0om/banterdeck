@@ -49,14 +49,40 @@ const HAAR = {
   krus: `<g fill="{h}" stroke="${B}" stroke-width="3"><circle cx="-11" cy="-64" r="6"/><circle cx="0" cy="-69" r="7"/><circle cx="11" cy="-64" r="6"/></g>`,
   hestehale: `<path d="M-15 -58a15 15 0 0 1 30 0q-8-5-15-3t-15 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><path d="M13 -64q10 2 9 16q-6-4-8-10" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
 };
-export function figurHtml(p) {
-  return `<ellipse class="skygge" cx="0" cy="0" rx="16" ry="5" fill="${B}" opacity=".22"/><g class="kropp">` +
+/* Pynt: luer, briller, medaljer og kjæledyr. Tegnes over håret (hode), over øynene (ansikt), på brystet, eller ved siden av (venn). */
+const HS = `stroke="${B}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`;
+export const PYNT_SVG = {
+  partyhatt: `<path d="M-11 -66L0 -94l11 28z" fill="#FF5B1F" ${HS}/><path d="M-6 -76l12-7M-3 -85l6-3" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-94" r="3.5" fill="#FFD23F" ${HS}/>`,
+  krone: `<path d="M-14 -64l3-14 7 7 4-12 4 12 7-7 3 14z" fill="#FFD23F" ${HS}/><circle cx="-6" cy="-68" r="2" fill="#FF5B1F"/><circle cx="6" cy="-68" r="2" fill="#FF5B1F"/>`,
+  glorie: `<ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="${B}" stroke-width="6.5"/><ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="#FFD23F" stroke-width="3.5"/>`,
+  cowboyhatt: `<path d="M-23 -63q23 9 46 0q-5 9-23 9t-23-9z" fill="#B9773F" ${HS}/><path d="M-12 -63q0-20 12-20t12 20z" fill="#B9773F" ${HS}/><path d="M-12 -65h24" stroke="${B}" stroke-width="3"/>`,
+  topphatt: `<ellipse cx="0" cy="-64" rx="19" ry="4.5" fill="#1C1B1F" ${HS}/><rect x="-11" y="-91" width="22" height="28" rx="2" fill="#1C1B1F" ${HS}/><rect x="-11" y="-72" width="22" height="5" fill="#FF5B1F"/>`,
+  hjelm: `<path d="M-15 -63q0-21 15-21t15 21z" fill="#FFD23F" ${HS}/><rect x="-19" y="-65" width="38" height="5" rx="2.5" fill="#FFD23F" ${HS}/><path d="M-4 -81v12" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
+  lue: `<path d="M-15 -61a15 15 0 0 1 30 0z" fill="#63E2A8" ${HS}/><rect x="-17" y="-64" width="34" height="6" rx="3" fill="#FFF8EE" ${HS}/><circle cx="0" cy="-78" r="4" fill="#FFF8EE" ${HS}/>`,
+  nisselue: `<path d="M-15 -62q2-21 15-23q14-2 19 8l-4 3q-4-6-11-3q-5 9-3 15z" fill="#E2363B" ${HS}/><rect x="-17" y="-64" width="34" height="6" rx="3" fill="#FFF8EE" ${HS}/><circle cx="19" cy="-74" r="4" fill="#FFF8EE" ${HS}/>`,
+  solbriller: `<rect x="-13" y="-61" width="11" height="8" rx="3" fill="#1C1B1F" stroke="${B}" stroke-width="2.5"/><rect x="2" y="-61" width="11" height="8" rx="3" fill="#1C1B1F" stroke="${B}" stroke-width="2.5"/><path d="M-2 -58h4M-13 -59l-3-2M13 -59l3-2" stroke="${B}" stroke-width="2.5" stroke-linecap="round"/>`,
+  nerdebriller: `<circle cx="-6" cy="-57" r="5.5" fill="none" stroke="${B}" stroke-width="5.5"/><circle cx="6" cy="-57" r="5.5" fill="none" stroke="${B}" stroke-width="5.5"/><circle cx="-6" cy="-57" r="5.5" fill="none" stroke="#FF5B1F" stroke-width="2.5"/><circle cx="6" cy="-57" r="5.5" fill="none" stroke="#FF5B1F" stroke-width="2.5"/>`,
+  medalje: `<path d="M4 -41l3 10M12 -41l-3 10" stroke="#FF5B1F" stroke-width="4" stroke-linecap="round"/><circle cx="8" cy="-27" r="5.5" fill="#FFD23F" stroke="${B}" stroke-width="2.5"/>`,
+  sloyfe: `<path d="M-15 -38l-5 10 6-1 2 4 5-10zM-7 -38l5 10-6-1-2 4-5-10z" fill="#E2363B" stroke="${B}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="-11" cy="-37" r="4" fill="#7CC6FE" stroke="${B}" stroke-width="2.2"/>`,
+  hund: `<ellipse cx="2" cy="0" rx="10" ry="3" fill="${B}" opacity=".22"/><path d="M-11 -8l-5-5" stroke="${B}" stroke-width="3" stroke-linecap="round"/><rect x="-11" y="-13" width="18" height="11" rx="5.5" fill="#B9773F" ${HS}/><circle cx="8" cy="-15" r="6.5" fill="#B9773F" ${HS}/><path d="M3 -20l-2-6 5 3zM13 -20l2-6-5 3z" fill="#7A4A2A" ${HS}/><circle cx="10" cy="-15" r="1.4" fill="${B}"/><path d="M-7 -2v2M3 -2v2" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
+  katt: `<ellipse cx="2" cy="0" rx="10" ry="3" fill="${B}" opacity=".22"/><path d="M-11 -8q-8 2-5-7" fill="none" stroke="${B}" stroke-width="3" stroke-linecap="round"/><rect x="-11" y="-13" width="18" height="11" rx="5.5" fill="#8A8580" ${HS}/><circle cx="8" cy="-15" r="6.5" fill="#8A8580" ${HS}/><path d="M3 -19l0-7 5 3zM13 -19l0-7-5 3z" fill="#8A8580" ${HS}/><circle cx="10" cy="-15" r="1.4" fill="${B}"/><path d="M14 -13l5 1M14 -11l5 1" stroke="${B}" stroke-width="1.6" stroke-linecap="round"/><path d="M-7 -2v2M3 -2v2" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
+  and: `<ellipse cx="2" cy="0" rx="9" ry="3" fill="${B}" opacity=".22"/><ellipse cx="0" cy="-8" rx="10" ry="6" fill="#FFD23F" ${HS}/><circle cx="8" cy="-16" r="5.5" fill="#FFD23F" ${HS}/><path d="M13 -16l7 2-7 2z" fill="#FF5B1F" ${HS}/><circle cx="9" cy="-17" r="1.3" fill="${B}"/><path d="M-3 -2v2M3 -2v2" stroke="#FF5B1F" stroke-width="3" stroke-linecap="round"/>`,
+};
+function pyntHtml(pynt) {
+  if (!pynt) return '';
+  let ut = '';
+  ['bryst', 'hode', 'ansikt'].forEach((s) => { if (pynt[s] && PYNT_SVG[pynt[s]]) ut += PYNT_SVG[pynt[s]]; });
+  return ut;
+}
+export function figurHtml(p, pynt) {
+  const venn = pynt && pynt.venn && PYNT_SVG[pynt.venn] ? `<g class="venn" transform="translate(23,0)">${PYNT_SVG[pynt.venn]}</g>` : '';
+  return `<ellipse class="skygge" cx="0" cy="0" rx="16" ry="5" fill="${B}" opacity=".22"/>${venn}<g class="kropp">` +
     `<rect x="-10" y="-15" width="7" height="15" rx="2" fill="${B}"/><rect x="3" y="-15" width="7" height="15" rx="2" fill="${B}"/>` +
     `<rect x="-14" y="-42" width="28" height="30" rx="9" fill="${p.topp}" stroke="${B}" stroke-width="3"/>` +
     `<rect x="7" y="-34" width="10" height="15" rx="2.5" fill="${B}"/><rect x="9" y="-32" width="6" height="9" rx="1" fill="#FFE07A"/>` +
     `<circle cx="0" cy="-56" r="15" fill="${p.hud}" stroke="${B}" stroke-width="3"/>` +
     `<circle cx="-9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/><circle cx="9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/>` +
-    HAAR[p.haar].replace(/\{h\}/g, p.h) + OYNE[p.oyne] + MUNN[p.munn] + '<g class="boble-plass"></g></g>';
+    HAAR[p.haar].replace(/\{h\}/g, p.h) + OYNE[p.oyne] + MUNN[p.munn] + pyntHtml(pynt) + '<g class="boble-plass"></g></g>';
 }
 /** Bare hodet, til små fjes (f.eks. «Hvor mange er dere?»). */
 export function hodeSvg(p) { return `<svg viewBox="-19 -80 38 40" aria-hidden="true">${figurHtml(p)}</svg>`; }
@@ -101,6 +127,13 @@ function ledig(x, y) {
   return x > 0.4 && x < 5.6 && y > 0.4 && y < 5.7;
 }
 const DOR = [5.05, 0.25];
+/** Hvordan stua ser ut. Fargene følger stua-paletten; hvert tema har én liten ting som er sin egen. */
+export const TEMA = {
+  stue: { gulv: '#FFD23F', teppe: '#FF9CC2', veggV: '#63E2A8', veggH: '#FFF8EE', sofa: ['#FF9CC2', '#ff7fb0', '#f06a9e', '#FFB3D1'], bord: ['#FFF8EE', '#FF5B1F', '#E04A12'], plakat: '#FF5B1F', plakatPrikk: '#FFD23F', dor: '#FF5B1F', vindu: 'natt' },
+  hytte: { gulv: '#D9A26A', teppe: '#FFF8EE', veggV: '#B9773F', veggH: '#C98D63', sofa: ['#2EA873', '#258a5e', '#1f7a52', '#63E2A8'], bord: ['#D9A26A', '#B9773F', '#9c6433'], plakat: '#63E2A8', plakatPrikk: '#7A4A2A', dor: '#7A4A2A', vindu: 'fjell', planker: true },
+  takterrasse: { gulv: '#8A8580', fliser: true, teppe: '#63E2A8', veggV: '#7CC6FE', veggH: '#7CC6FE', skyer: true, sofa: ['#FFF8EE', '#e8e0d4', '#d4cbbf', '#FFF8EE'], bord: ['#1C1B1F', '#2A292E', '#16120F'], plakat: null, dor: '#1C1B1F', vindu: 'by', lyskjede: true },
+  julebord: { gulv: '#E2363B', teppe: '#FFF8EE', veggV: '#2EA873', veggH: '#FFF8EE', sofa: ['#E2363B', '#c42d31', '#a82329', '#ff6b6b'], bord: ['#FFF8EE', '#2EA873', '#258a5e'], plakat: '#E2363B', stjerne: true, dor: '#2EA873', vindu: 'sno', juletre: true, krans: true },
+};
 
 /**
  * Tegner stua i en tom <svg> og gir tilbake et lite API.
@@ -123,33 +156,61 @@ export function lagStua(svg, valg = {}) {
     flate([I(x, y, z + h), I(x + w, y, z + h), I(x + w, y + d, z + h), I(x, y + d, z + h)], topp, g);
     return g;
   }
-  // Gulv, vegger, vindu, plakat og dør
-  flate([I(0, 6, 0), I(6, 6, 0), I(6, 6, -16), I(0, 6, -16)], B);
-  flate([I(6, 0, 0), I(6, 6, 0), I(6, 6, -16), I(6, 0, -16)], B);
-  flate([I(0, 0), I(6, 0), I(6, 6), I(0, 6)], '#FFD23F');
-  for (let i = 1; i < 6; i++) el('line', { x1: I(i, 0)[0], y1: I(i, 0)[1], x2: I(i, 6)[0], y2: I(i, 6)[1], stroke: B, 'stroke-width': 1.5, opacity: 0.18 });
-  flate([I(1.3, 1.6), I(4.3, 1.6), I(4.3, 4.6), I(1.3, 4.6)], '#FF9CC2');
-  flate([I(1.7, 2.0), I(3.9, 2.0), I(3.9, 4.2), I(1.7, 4.2)], 'none', null, { 'stroke-dasharray': '6 6', 'stroke-width': 2.5 });
-  flate([I(0, 0, 0), I(0, 6, 0), I(0, 6, 100), I(0, 0, 100)], '#63E2A8');
-  flate([I(0, 0, 0), I(6, 0, 0), I(6, 0, 100), I(0, 0, 100)], '#FFF8EE');
-  flate([I(0.9, 0, 40), I(2.6, 0, 40), I(2.6, 0, 86), I(0.9, 0, 86)], '#1C1B1F');
-  el('line', { x1: I(1.75, 0, 40)[0], y1: I(1.75, 0, 40)[1], x2: I(1.75, 0, 86)[0], y2: I(1.75, 0, 86)[1], stroke: '#FFF8EE', 'stroke-width': 3 });
-  const mp = I(2.2, 0, 72); el('circle', { cx: mp[0], cy: mp[1], r: 7, fill: '#FFE07A', stroke: B, 'stroke-width': 2.5 });
-  let sp = I(1.25, 0, 64); el('circle', { cx: sp[0], cy: sp[1], r: 1.8, fill: '#FFF8EE' }); sp = I(1.5, 0, 78); el('circle', { cx: sp[0], cy: sp[1], r: 1.5, fill: '#FFF8EE' });
-  flate([I(3.0, 0, 44), I(3.9, 0, 44), I(3.9, 0, 88), I(3.0, 0, 88)], '#FF5B1F');
-  const pp = I(3.45, 0, 66); el('circle', { cx: pp[0], cy: pp[1], r: 8, fill: '#FFD23F', stroke: B, 'stroke-width': 2.5 });
-  flate([I(4.5, 0, 0), I(5.6, 0, 0), I(5.6, 0, 74), I(4.5, 0, 74)], B);
-  const dor = flate([I(4.5, 0, 0), I(5.6, 0, 0), I(5.6, 0, 74), I(4.5, 0, 74)], '#FF5B1F');
-  const hp = I(5.35, 0, 36), handtak = el('circle', { cx: hp[0], cy: hp[1], r: 3, fill: B });
-  // TV-en på venstre vegg: viser romkoden, eller kortet som spilles nå
-  const tvG = el('g', { class: 'stua-tv', style: 'cursor:pointer' });
-  flate([I(0, 4.6, 32), I(0, 1.4, 32), I(0, 1.4, 88), I(0, 4.6, 88)], B, tvG);
-  flate([I(0, 4.4, 36), I(0, 1.6, 36), I(0, 1.6, 84), I(0, 4.4, 84)], '#2A292E', tvG, { stroke: 'none' });
-  const tvTekst = el('g', {}, tvG);
+  // Rommet (gulv, vegger, vindu, plakat, dør og TV) tegnes etter tema, og kan tegnes om
+  const romG = el('g', { class: 'stua-rom' });
+  const ref = { dor: null, handtak: null, tvTekst: null };
+  let temaNaa = null;
+  function tegnRom(id) {
+    const t = TEMA[id] || TEMA.stue; temaNaa = TEMA[id] ? id : 'stue';
+    romG.innerHTML = '';
+    const r = (p, f, ekstra) => flate(p, f, romG, ekstra);
+    r([I(0, 6, 0), I(6, 6, 0), I(6, 6, -16), I(0, 6, -16)], B);
+    r([I(6, 0, 0), I(6, 6, 0), I(6, 6, -16), I(6, 0, -16)], B);
+    r([I(0, 0), I(6, 0), I(6, 6), I(0, 6)], t.gulv);
+    for (let i = 1; i < 6; i++) el('line', { x1: I(i, 0)[0], y1: I(i, 0)[1], x2: I(i, 6)[0], y2: I(i, 6)[1], stroke: B, 'stroke-width': 1.5, opacity: 0.18 }, romG);
+    if (t.fliser) for (let i = 1; i < 6; i++) el('line', { x1: I(0, i)[0], y1: I(0, i)[1], x2: I(6, i)[0], y2: I(6, i)[1], stroke: B, 'stroke-width': 1.5, opacity: 0.18 }, romG);
+    r([I(1.3, 1.6), I(4.3, 1.6), I(4.3, 4.6), I(1.3, 4.6)], t.teppe);
+    r([I(1.7, 2.0), I(3.9, 2.0), I(3.9, 4.2), I(1.7, 4.2)], 'none', { 'stroke-dasharray': '6 6', 'stroke-width': 2.5 });
+    r([I(0, 0, 0), I(0, 6, 0), I(0, 6, 100), I(0, 0, 100)], t.veggV);
+    r([I(0, 0, 0), I(6, 0, 0), I(6, 0, 100), I(0, 0, 100)], t.veggH);
+    if (t.planker) for (let z = 20; z < 100; z += 20) { el('line', { x1: I(0, 0, z)[0], y1: I(0, 0, z)[1], x2: I(6, 0, z)[0], y2: I(6, 0, z)[1], stroke: B, 'stroke-width': 1.5, opacity: 0.25 }, romG); el('line', { x1: I(0, 0, z)[0], y1: I(0, 0, z)[1], x2: I(0, 6, z)[0], y2: I(0, 6, z)[1], stroke: B, 'stroke-width': 1.5, opacity: 0.25 }, romG); }
+    if (t.skyer) [[1.2, 78], [3.6, 88], [5.0, 70]].forEach(([x, z]) => { const c = I(x, 0, z); el('path', { d: `M${c[0] - 14} ${c[1]}q0-9 9-8q3-9 13-5q9-1 9 8q0 5-6 5h-20q-5 0-5-5z`, fill: '#FFF8EE', stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, romG); });
+    // Vinduet på høyre vegg
+    r([I(0.9, 0, 40), I(2.6, 0, 40), I(2.6, 0, 86), I(0.9, 0, 86)], t.vindu === 'fjell' || t.vindu === 'by' ? '#7CC6FE' : '#1C1B1F');
+    if (t.vindu === 'natt' || t.vindu === 'sno') {
+      const mp = I(2.2, 0, 72); el('circle', { cx: mp[0], cy: mp[1], r: 7, fill: '#FFE07A', stroke: B, 'stroke-width': 2.5 }, romG);
+      [[1.25, 64], [1.5, 78], [1.1, 50], [1.9, 56], [2.4, 48]].forEach(([x, z], n) => { const q = I(x, 0, z); if (t.vindu === 'sno' || n < 2) el('circle', { cx: q[0], cy: q[1], r: t.vindu === 'sno' ? 2.4 : 1.6, fill: '#FFF8EE' }, romG); });
+    }
+    if (t.vindu === 'fjell') { r([I(0.9, 0, 40), I(1.4, 0, 62), I(1.75, 0, 54), I(2.2, 0, 70), I(2.6, 0, 40)], '#FFF8EE', { 'stroke-width': 2.5 }); r([I(0.9, 0, 40), I(1.4, 0, 52), I(1.9, 0, 44), I(2.6, 0, 40)], '#2EA873', { 'stroke-width': 2.5 }); }
+    if (t.vindu === 'by') [[0.95, 0.3, 58], [1.3, 0.4, 72], [1.75, 0.3, 50], [2.1, 0.45, 66]].forEach(([x, w, z]) => { r([I(x, 0, 40), I(x + w, 0, 40), I(x + w, 0, z), I(x, 0, z)], '#1C1B1F', { 'stroke-width': 2 }); const q = I(x + w / 2, 0, z - 8); el('rect', { x: q[0] - 1.5, y: q[1] - 1.5, width: 3, height: 3, fill: '#FFE07A' }, romG); });
+    el('line', { x1: I(1.75, 0, 40)[0], y1: I(1.75, 0, 40)[1], x2: I(1.75, 0, 86)[0], y2: I(1.75, 0, 86)[1], stroke: '#FFF8EE', 'stroke-width': 3 }, romG);
+    // Plakat (eller lyslenke)
+    if (t.plakat) { r([I(3.0, 0, 44), I(3.9, 0, 44), I(3.9, 0, 88), I(3.0, 0, 88)], t.plakat); const pp = I(3.45, 0, 66); if (t.stjerne) el('path', { d: `M${pp[0]} ${pp[1] - 10}l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z`, fill: '#FFD23F', stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, romG); else el('circle', { cx: pp[0], cy: pp[1], r: 8, fill: t.plakatPrikk, stroke: B, 'stroke-width': 2.5 }, romG); }
+    if (t.lyskjede) { const pkt = []; for (let x = 0; x <= 6; x += 0.5) pkt.push(I(x, 0, 94 - Math.abs(Math.sin(x * 2.1)) * 4)); for (let y = 0.5; y <= 6; y += 0.5) pkt.unshift(I(0, y, 94 - Math.abs(Math.sin(y * 2.1)) * 4)); el('polyline', { points: pts(pkt), fill: 'none', stroke: B, 'stroke-width': 2 }, romG); pkt.forEach((q, n) => el('circle', { cx: q[0], cy: q[1] + 3, r: 2.6, fill: ['#FFD23F', '#FF5B1F', '#63E2A8', '#FF9CC2'][n % 4], stroke: B, 'stroke-width': 1.5 }, romG)); }
+    // Døra
+    r([I(4.5, 0, 0), I(5.6, 0, 0), I(5.6, 0, 74), I(4.5, 0, 74)], B);
+    ref.dor = r([I(4.5, 0, 0), I(5.6, 0, 0), I(5.6, 0, 74), I(4.5, 0, 74)], t.dor);
+    ref.dorFarge = t.dor;
+    const hp = I(5.35, 0, 36); ref.handtak = el('circle', { cx: hp[0], cy: hp[1], r: 3, fill: B }, romG);
+    if (t.krans) { const k = I(5.05, 0, 52); el('circle', { cx: k[0], cy: k[1], r: 9, fill: 'none', stroke: '#2EA873', 'stroke-width': 6 }, romG); el('circle', { cx: k[0], cy: k[1], r: 9, fill: 'none', stroke: B, 'stroke-width': 1.5 }, romG); el('circle', { cx: k[0], cy: k[1] + 9, r: 2.5, fill: '#E2363B', stroke: B, 'stroke-width': 1.5 }, romG); }
+    // Juletre i hjørnet
+    if (t.juletre) { const b0 = I(0.6, 0.6, 0); [[0, 26, 30], [16, 22, 52], [30, 17, 72]].forEach(([z, w, h]) => el('path', { d: `M${b0[0] - w} ${b0[1] - z}L${b0[0]} ${b0[1] - h}L${b0[0] + w} ${b0[1] - z}z`, fill: '#2EA873', stroke: B, 'stroke-width': 3, 'stroke-linejoin': 'round' }, romG)); el('rect', { x: b0[0] - 4, y: b0[1] - 2, width: 8, height: 8, fill: '#7A4A2A', stroke: B, 'stroke-width': 2.5 }, romG); [[-10, 22], [8, 38], [-6, 54], [6, 14]].forEach(([dx, dz], n) => el('circle', { cx: b0[0] + dx, cy: b0[1] - dz, r: 3.5, fill: ['#E2363B', '#FFD23F', '#FF9CC2', '#7CC6FE'][n], stroke: B, 'stroke-width': 2 }, romG)); el('path', { d: `M${b0[0]} ${b0[1] - 82}l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z`, fill: '#FFD23F', stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, romG); }
+    // TV-en på venstre vegg: viser romkoden, eller kortet som spilles nå
+    const tvG = el('g', { class: 'stua-tv', style: 'cursor:pointer' }, romG);
+    flate([I(0, 4.6, 32), I(0, 1.4, 32), I(0, 1.4, 88), I(0, 4.6, 88)], B, tvG);
+    flate([I(0, 4.4, 36), I(0, 1.6, 36), I(0, 1.6, 84), I(0, 4.4, 84)], '#2A292E', tvG, { stroke: 'none' });
+    ref.tvTekst = el('g', {}, tvG);
+    tvG.addEventListener('click', () => {
+      clearTimeout(tvTimer); tegnTv({ etikett: T('ALLE SAMMEN', 'EVERYBODY'), kode: T('SKÅL!', 'CHEERS!'), stor: true });
+      folk.forEach((f, n) => { if (!f.drar) setTimeout(() => { f.z.fart = 70; start(f); }, n * 50); });
+      tvTimer = setTimeout(() => tegnTv(), 1600);
+    });
+  }
   let tvInnhold = { etikett: T('ROMKODE', 'ROOM CODE'), kode: '····', linjer: null };
   function skjev(x, y) { return 'matrix(1,-0.5,0,1,' + x.toFixed(1) + ',' + y.toFixed(1) + ')'; }
   function tegnTv(midl) {
     const v = midl || tvInnhold;
+    const tvTekst = ref.tvTekst; if (!tvTekst) return;
     tvTekst.innerHTML = '';
     const f = 'Archivo Variable, Archivo, sans-serif';
     if (v.linjer) {
@@ -165,13 +226,9 @@ export function lagStua(svg, valg = {}) {
     el('text', { x: 0, y: 0, transform: skjev(te[0], te[1]), 'font-family': f, 'font-weight': 800, 'font-size': 11, fill: '#B5AA9D', 'letter-spacing': 1.5 }, tvTekst).textContent = v.etikett;
     el('text', { x: 0, y: 0, transform: skjev(tk[0], tk[1]), 'font-family': f, 'font-weight': 900, 'font-size': v.stor ? 26 : 21, fill: v.stor ? '#FF9CC2' : '#FFE07A', 'letter-spacing': 2.5, 'font-stretch': '75%' }, tvTekst).textContent = v.kode;
   }
-  tegnTv();
   let tvTimer = null;
-  tvG.addEventListener('click', () => {
-    clearTimeout(tvTimer); tegnTv({ etikett: T('ALLE SAMMEN', 'EVERYBODY'), kode: T('SKÅL!', 'CHEERS!'), stor: true });
-    folk.forEach((f, n) => { if (!f.drar) setTimeout(() => { f.z.fart = 70; start(f); }, n * 50); });
-    tvTimer = setTimeout(() => tegnTv(), 1600);
-  });
+  tegnRom(valg.tema || 'stue');
+  tegnTv();
 
   // Mørket (lampa av) ligger over alt annet, men under folk og møbler sin lysflekk
   const lag = el('g', {});
@@ -185,17 +242,24 @@ export function lagStua(svg, valg = {}) {
   el('ellipse', { cx: l0[0], cy: l0[1], rx: 9, ry: 4, fill: B }, lampe);
   el('rect', { x: l1[0] - 18, y: l1[1] - 20, width: 36, height: 90, fill: 'transparent' }, lampe);
   const bord = ny(6.2, el('g', {}, lag));
-  boks(2.4, 2.6, 0, 1.2, 1.2, 20, '#FFF8EE', '#FF5B1F', '#E04A12', bord);
+  function tegnBord() {
+    const t = TEMA[temaNaa] || TEMA.stue; bord.innerHTML = '';
+    boks(2.4, 2.6, 0, 1.2, 1.2, 20, t.bord[0], t.bord[1], t.bord[2], bord);
   const a = I(2.85, 2.95, 20);
   el('rect', { x: a[0] - 5, y: a[1] - 26, width: 10, height: 26, rx: 2, fill: '#2ea873', stroke: B, 'stroke-width': 2.5 }, bord);
   el('rect', { x: a[0] - 2.5, y: a[1] - 35, width: 5, height: 10, fill: '#2ea873', stroke: B, 'stroke-width': 2.5 }, bord);
   el('rect', { x: a[0] - 5, y: a[1] - 18, width: 10, height: 7, fill: '#FFD23F', stroke: B, 'stroke-width': 2 }, bord);
   [I(3.2, 3.5, 20), I(2.8, 3.6, 20)].forEach((q) => el('path', { d: 'M' + (q[0] - 5) + ' ' + (q[1] - 15) + 'h10l-2 15h-6z', fill: '#FFE07A', stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, bord));
+  }
   const sofa = ny(8.5, el('g', {}, lag));
-  boks(5.3, 1.8, 0, 0.55, 3.0, 40, '#FF9CC2', '#ff7fb0', '#f06a9e', sofa);
-  boks(4.5, 1.8, 0, 0.85, 3.0, 16, '#FFB3D1', '#ff7fb0', '#f06a9e', sofa);
-  boks(4.5, 1.5, 0, 1.35, 0.32, 24, '#FF9CC2', '#ff7fb0', '#f06a9e', sofa);
-  boks(4.5, 4.8, 0, 1.35, 0.32, 24, '#FF9CC2', '#ff7fb0', '#f06a9e', sofa);
+  function tegnSofa() {
+    const t = TEMA[temaNaa] || TEMA.stue, f = t.sofa; sofa.innerHTML = '';
+    boks(5.3, 1.8, 0, 0.55, 3.0, 40, f[0], f[1], f[2], sofa);
+    boks(4.5, 1.8, 0, 0.85, 3.0, 16, f[3], f[1], f[2], sofa);
+    boks(4.5, 1.5, 0, 1.35, 0.32, 24, f[0], f[1], f[2], sofa);
+    boks(4.5, 4.8, 0, 1.35, 0.32, 24, f[0], f[1], f[2], sofa);
+  }
+  tegnBord(); tegnSofa();
   const morke = el('polygon', { points: pts([I(0, 0, 100), I(6, 0, 100), I(6, 0, 0), I(6, 6, 0), I(6, 6, -16), I(0, 6, -16), I(0, 6, 100)]), fill: '#0b0a14', opacity: 0, 'pointer-events': 'none' });
   // Lampa: trykk for å slå lyset av og på (bare på denne skjermen)
   let mork = false;
@@ -231,7 +295,7 @@ export function lagStua(svg, valg = {}) {
     this.tegnHtml(); this.tegn(); dra(this); this.planleggRusling();
   }
   Figur.prototype.tegnHtml = function () {
-    this.g.innerHTML = figurHtml(this.p) + (valg.navn && this.info.navn
+    this.g.innerHTML = figurHtml(this.p, this.info.pynt) + (valg.navn && this.info.navn
       ? `<text class="stua-navn" y="17" text-anchor="middle" font-family="Archivo Variable, Archivo, sans-serif" font-weight="850" font-size="11" fill="${B}" stroke="#FFF8EE" stroke-width="4" paint-order="stroke" stroke-linejoin="round">${esc(this.info.navn)}</text>` : '');
     this.kropp = this.g.querySelector('.kropp'); this.skygge = this.g.querySelector('.skygge'); this.boble = this.g.querySelector('.boble-plass');
   };
@@ -355,8 +419,8 @@ export function lagStua(svg, valg = {}) {
   }
   let dorTid = null;
   function aapneDor() {
-    dor.setAttribute('fill', B); handtak.setAttribute('opacity', 0); clearTimeout(dorTid);
-    dorTid = setTimeout(() => { dor.setAttribute('fill', '#FF5B1F'); handtak.setAttribute('opacity', 1); }, 900);
+    ref.dor.setAttribute('fill', B); ref.handtak.setAttribute('opacity', 0); clearTimeout(dorTid);
+    dorTid = setTimeout(() => { ref.dor.setAttribute('fill', ref.dorFarge); ref.handtak.setAttribute('opacity', 1); }, 900);
   }
   function hopp() { if (REDUSERT) return; folk.forEach((o, n) => { if (!o.drar) setTimeout(() => { o.z.fart = 90; start(o); }, 120 + n * 40); }); }
   function ledigPlass() {
@@ -367,7 +431,7 @@ export function lagStua(svg, valg = {}) {
   /* ---------- forsiden: tre faste, og en anonym gjest per bokstav ---------- */
   let antGjester = 0;
   if (valg.demo) {
-    folk.push(new Figur(START[0], 0.9, 3.0), new Figur(START[1], 3.8, 1.2), new Figur(START[2], 2.1, 4.9));
+    folk.push(new Figur(START[0], 0.9, 3.0, { pynt: { hode: 'partyhatt' } }), new Figur(START[1], 3.8, 1.2, { pynt: { ansikt: 'solbriller' } }), new Figur(START[2], 2.1, 4.9, { pynt: { venn: 'hund' } }));
     sorter();
   }
   function nyGjest() {
@@ -390,13 +454,13 @@ export function lagStua(svg, valg = {}) {
       const lagret = Array.isArray(pos[p.id]) ? pos[p.id] : null;
       if (!f) {
         const mal = lagret || ledigPlass();
-        if (forste) f = new Figur(utseende(p.id), mal[0], mal[1], { id: p.id, navn: p.navn });
-        else { f = new Figur(utseende(p.id), DOR[0], DOR[1], { id: p.id, navn: p.navn }); f.hjem = mal; setTimeout(() => f.gaaTil(mal, true), nye * 500); nye++; }
+        if (forste) f = new Figur(utseende(p.figur || p.id), mal[0], mal[1], { id: p.id, navn: p.navn, pynt: p.pynt || null });
+        else { f = new Figur(utseende(p.figur || p.id), DOR[0], DOR[1], { id: p.id, navn: p.navn, pynt: p.pynt || null }); f.hjem = mal; setTimeout(() => f.gaaTil(mal, true), nye * 500); nye++; }
         f.hjem = mal; kart.set(p.id, f); folk.push(f);
         if (!forste && p.id !== valg.meg) setTimeout(() => f.si(T('Hei!', 'Hi!'), 1400), 900 + nye * 500);
         return;
       }
-      if (f.info.navn !== p.navn) { f.info.navn = p.navn; f.tegnHtml(); f.tegn(); }
+      if (f.info.navn !== p.navn || JSON.stringify(f.info.pynt || null) !== JSON.stringify(p.pynt || null)) { f.info.navn = p.navn; f.info.pynt = p.pynt || null; f.tegnHtml(); f.tegn(); }
       // Noen har flyttet personen på en annen skjerm: gå dit
       if (lagret && !f.drar && Math.hypot(lagret[0] - f.hjem[0], lagret[1] - f.hjem[1]) > 0.05) { f.hjem = lagret; f.gaaTil(lagret); }
     });
@@ -425,6 +489,9 @@ export function lagStua(svg, valg = {}) {
       tegnTv();
     },
     tvKode() { tegnTv(); },
+    /** Bytt hvordan stua ser ut (stue, hytte, takterrasse, julebord). Folka blir stående. */
+    tema(id) { if ((TEMA[id] ? id : 'stue') === temaNaa) return; tegnRom(id); tegnTv(); tegnBord(); tegnSofa(); svg.appendChild(morke); svg.appendChild(lag); },
+    temaNaa() { return temaNaa; },
   };
 }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }

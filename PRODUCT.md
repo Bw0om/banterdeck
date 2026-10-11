@@ -38,6 +38,7 @@ Phone-to-phone live play is the core: rooms, the TV view, crews, the weekly Nyhe
 - **Features:** live rooms, TV/big-screen mode, crews, a game finder, evening plan (`/plan`), deck builder, favourites, search (⌘K), random-line die, offline rules, web push, suggestion submission (creates GitHub issues), admin panel and automatic error capture.
 - **Monetisation:** Pluss game packs sold via Vipps at 29 kr per night or 199 kr per year. Sales terms, receipt, pricing and privacy pages must stay reachable for Vipps review. AdSense slots exist but are disabled until approval.
 - **Age gate:** 18+ confirmation is stored in localStorage. The copy says *"Drikk med vett – og aldri kjør etterpå."*
+- **Gear and themes:** figures in the living room can wear free gear unlocked by playing (never sold); the host can pick a room theme, two of them in Pluss. Seasonal gear rotates yearly. See DESIGN.md.
 - **Pre-launch lock:** the site is currently behind a development lock (`UTVIKLING.paa` in `src/config.ts`).
 - **Legacy redirects:** old Norwegian URLs (`/kategori`, `/drikkeleker`, `/forslag`, `/om`, `/personvern`, `/app/`) must keep redirecting.
 - **Leftover copy:** `heroTitle` / `heroSub` in `src/lib/i18n.ts` (*"Aldri stå tom for svar igjen"*) are no longer rendered. The live homepage hero leads with rooms (*"Klar for vors?"*).
