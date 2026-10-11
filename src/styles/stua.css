@@ -245,3 +245,12 @@ html.i-spill .rom-kode{font-size:.92em}
 .lk-meta i{border-radius:3px!important}
 .lk-sok,.lk-filter input{border-radius:4px!important}
 .lk-chips button{border:2.5px solid var(--ink)!important;border-radius:4px!important}
+
+/* =====================================================================
+   HOLD INNE: lekesymbolet vrikker så lenge fingeren ligger på kortet
+   ===================================================================== */
+@keyframes st-vrikk{0%{transform:rotate(0) scale(1)}25%{transform:rotate(-7deg) scale(1.07)}50%{transform:rotate(0) scale(1.1)}75%{transform:rotate(7deg) scale(1.07)}100%{transform:rotate(0) scale(1)}}
+.lk-kort img,.lk-rad img,.rom-lek .rom-lek-merke,.st-lek .st-merke,.fn-lek img{transform-origin:50% 60%}
+.lk-kort:active img,.lk-rad:active img,.rom-lek:active .rom-lek-merke,.st-lek:active .st-merke{animation:st-vrikk 560ms var(--fjaer) infinite}
+.lk-kort:active,.lk-rad:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--hard)!important}
+@media (prefers-reduced-motion:reduce){.lk-kort:active img,.lk-rad:active img,.rom-lek:active .rom-lek-merke,.st-lek:active .st-merke{animation:none}}
