@@ -258,7 +258,8 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
     line.textContent = '«' + p.l + '»'; line.setAttribute('data-copy', p.l);
     document.getElementById('todayCat').textContent = p.k;
     var sn = document.getElementById('stSnakker');
-    if (sn && window.mvFigur) sn.innerHTML = '<g transform="scale(1.3) translate(0,-2)">' + window.mvFigur({ topp: '#63E2A8', hud: '#C98D63', h: '#FF5B1F', haar: 'lue', oyne: 'blunk', munn: 'tunge' }) + '</g>';
+    function snakker() { if (sn && window.mvFigur) sn.innerHTML = '<g transform="scale(1.3) translate(0,-2)">' + window.mvFigur({ topp: '#63E2A8', hud: '#C98D63', h: '#FF5B1F', haar: 'lue', oyne: 'blunk', munn: 'tunge' }) + '</g>'; }
+    if (window.mvFigur) snakker(); else document.addEventListener('mv-stua-klar', snakker, { once: true });
   </script>
 
   <script is:inline data-astro-rerun>
@@ -322,8 +323,9 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
   </script>
 
   <script is:inline data-astro-rerun>
-  (function () {
+  (function teller() {
     // «Hvor mange er dere?»: telleren styrer hvilke leker som passer. De som passer, glir frem med fjær.
+    if (!window.mvFjaer) { document.addEventListener('mv-stua-klar', teller, { once: true }); return; }
     var boks = document.getElementById('stAntall'), liste = document.getElementById('stLeker');
     if (!boks || !liste || boks.dataset.bound) return; boks.dataset.bound = '1';
     var F = window.mvFjaer, en = /^en/.test(document.documentElement.lang || '');
@@ -332,7 +334,7 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
     try { var lagret = +localStorage.getItem('mv_antall'); if (lagret >= MIN && lagret <= MAKS) n = lagret; } catch (e) {}
     var PAL = [['#FF5B1F','#C98D63','#16120F','kort','vanlig','smil'],['#63E2A8','#F2C6A0','#FFD23F','lang','glad','glis'],['#FFD23F','#8D5A3B','#16120F','krus','vanlig','tunge'],
       ['#FF9CC2','#E9B48F','#FF5B1F','lue','blunk','smil'],['#FFF8EE','#C98D63','#7A4A2A','lang','vanlig','o'],['#1C1B1F','#C98D63','#63E2A8','lue','glad','smil']];
-    function hode(i) { var p = PAL[i % PAL.length]; return '<svg viewBox="-19 -80 38 40">' + (window.mvFigur ? window.mvFigur({ topp: p[0], hud: p[1], h: p[2], haar: p[3], oyne: p[4], munn: p[5] }) : '') + '</svg>'; }
+    function hode(i) { var p = PAL[i % PAL.length]; return window.mvHode({ topp: p[0], hud: p[1], h: p[2], haar: p[3], oyne: p[4], munn: p[5] }); }
     var fjesFjaer = [];
     function settFjes(animer) {
       var vis = Math.min(n, 12);
@@ -387,10 +389,11 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
   </script>
 
   <script is:inline data-astro-rerun>
-  (function () {
+  (function kortbunke() {
     // Kortbunken: dra kortet av (eller trykk), så rykker de under opp med fjær. Piltaster virker også.
+    if (!window.mvFjaer) { document.addEventListener('mv-stua-klar', kortbunke, { once: true }); return; }
     var bunke = document.getElementById('stBunke'); if (!bunke || bunke.dataset.bound) return; bunke.dataset.bound = '1';
-    var F = window.mvFjaer; if (!F) return;
+    var F = window.mvFjaer;
     var stokker = []; try { stokker = JSON.parse(bunke.dataset.stokker || '[]'); } catch (e) {}
     if (!stokker.length) return;
     var HINT = bunke.dataset.hint, valgt = 0, rekke = [], pos = 0, kortene = [], kaster = false;

@@ -40,6 +40,13 @@ const MERKER: Record<string, string> = {
   kompass: `<circle cx="32" cy="32" r="24" fill="${P}" ${S}/><path d="M32 14l6 18-6 18-6-18z" fill="${O}" ${S}/><circle cx="32" cy="32" r="3.5" fill="${B}"/>`,
   hjerte: `<path d="M32 54S8 40 8 24a12 12 0 0 1 24-4 12 12 0 0 1 24 4c0 16-24 30-24 30z" fill="${R}" ${S}/><path d="M18 22q2-6 8-6" fill="none" stroke="${P}" stroke-width="3" stroke-linecap="round"/>`,
   sveip: `<rect x="14" y="12" width="30" height="40" rx="4" fill="${R}" ${S} transform="rotate(-10 29 32)"/><rect x="20" y="12" width="30" height="40" rx="4" fill="${P}" ${S}/><path d="M28 30q7-4 14 0" fill="none" ${S}/><path d="M50 50l8-4-4 8" fill="none" ${S}/>`,
+  graf: `<rect x="6" y="8" width="52" height="46" rx="3" fill="${P}" ${S}/><path d="M12 44l12-12 9 7 17-19" fill="none" stroke="${O}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 20h8v8" fill="none" stroke="${O}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 54v4M52 54v4" ${S}/>`,
+  sporsmal: `<path d="M8 10h48v34H30l-12 10v-10H8z" fill="${G}" ${S}/><path d="M26 22q6-8 12 0t-6 8v3" fill="none" stroke="${B}" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="39" r="2.4" fill="${B}"/>`,
+  pokal: `<path d="M18 8h28v14a14 14 0 0 1-28 0z" fill="${G}" ${S}/><path d="M18 14H8q0 14 12 14M46 14h10q0 14-12 14" fill="none" ${S}/><path d="M28 36h8v10h-8z" fill="${G}" ${S}/><rect x="18" y="46" width="28" height="10" rx="2" fill="${O}" ${S}/><path d="M26 16l4 4" stroke="${P}" stroke-width="3" stroke-linecap="round"/>`,
+  hysj: `<circle cx="32" cy="32" r="24" fill="${R}" ${S}/><circle cx="24" cy="27" r="3" fill="${B}"/><circle cx="40" cy="27" r="3" fill="${B}"/><rect x="29" y="34" width="6" height="22" rx="3" fill="${H}" ${S}/><path d="M24 42h6M34 42h6" ${S}/>`,
+  gnist: `<path d="M32 4l6 20 20 8-20 8-6 20-6-20-20-8 20-8z" fill="${G}" ${S}/><path d="M52 6l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="${R}" stroke="${B}" stroke-width="2.5" stroke-linejoin="round"/>`,
+  flamme: `<path d="M32 58c-12 0-18-8-18-18 0-12 10-16 12-30 8 6 6 14 6 14s4-4 4-10c8 6 14 14 14 26 0 10-6 18-18 18z" fill="${O}" ${S}/><path d="M32 54c-5 0-8-3-8-8 0-6 5-8 6-14 6 6 10 9 10 14 0 5-3 8-8 8z" fill="${G}" ${S}/>`,
+  glorie: `<ellipse cx="32" cy="12" rx="16" ry="5" fill="none" stroke="${G}" stroke-width="5"/><ellipse cx="32" cy="12" rx="16" ry="5" fill="none" stroke="${B}" stroke-width="2"/><circle cx="32" cy="38" r="20" fill="${P}" ${S}/><path d="M23 36q3-4 6 0M35 36q3-4 6 0" fill="none" ${S}/><path d="M26 46q6 4 12 0" fill="none" ${S}/>`,
   ordbok: `<path d="M10 12h20a6 6 0 0 1 6 6v38a6 6 0 0 0-6-6H10z" fill="${M}" ${S}/><path d="M54 12H38a6 6 0 0 0-6 6v38a6 6 0 0 1 6-6h16z" fill="${P}" ${S}/><path d="M40 24h8M40 32h8" ${S}/>`,
 };
 
