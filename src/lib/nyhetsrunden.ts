@@ -43,4 +43,4 @@ export const publiserteRunder = (naa = Date.now()) => alleRunder.filter((r) => e
 export const sisteRunde = (naa = Date.now()) => publiserteRunder(naa)[0] || null;
 
 /** Lite sammendrag til forsiden, så den kan velge riktig uke i nettleseren uten å vise innholdet. */
-export const rundeKort = () => alleRunder.slice(0, 3).map((r) => ({ id: rundeId(r), uke: r.uke, antall: (r.sporsmal || []).length, fra: publiseringstid(r) }));
+export const rundeKort = () => alleRunder.slice(0, 3).map((r) => ({ id: rundeId(r), uke: r.uke, antall: (r.sporsmal || []).length, fra: publiseringstid(r), smak: String((r.sporsmal || [])[0]?.q || '') }));

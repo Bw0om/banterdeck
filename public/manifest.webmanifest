@@ -1,12 +1,12 @@
 {
-  "name": "Mitt vors",
-  "short_name": "Mitt vors",
+  "name": "mittvors",
+  "short_name": "mittvors",
   "description": "Drikkeleker og vorsmoro – alle spiller fra sin egen telefon.",
   "start_url": "/no/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0F0A10",
-  "theme_color": "#0F0A10",
+  "background_color": "#FFF8EE",
+  "theme_color": "#FF5B1F",
   "lang": "nb",
   "icons": [
     {

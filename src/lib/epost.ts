@@ -21,7 +21,7 @@ function hent() {
 export async function sendEpost(til: string, emne: string, html: string, tekst: string, svarTil?: string) {
   if (!epostKlar() || !til) return false;
   const e = env();
-  await hent().sendMail({ from: `"Mitt vors" <${e.SMTP_USER}>`, replyTo: svarTil || e.SMTP_USER, to: til, subject: emne, html, text: tekst });
+  await hent().sendMail({ from: `"mittvors" <${e.SMTP_USER}>`, replyTo: svarTil || e.SMTP_USER, to: til, subject: emne, html, text: tekst });
   return true;
 }
 
@@ -61,14 +61,14 @@ export function invitasjonEpost(o: { navn: string; melding: string; lenke: strin
   const erGjeng = /\/(gjeng|crew)$/.test(u.pathname);
   const erVerv = u.searchParams.has('v');
   const navn = esc(o.navn);
-  const emne = erRom ? T(`${o.navn} inviterer deg til vors på Mitt vors`, `${o.navn} invited you to a party on Mitt vors`)
-    : erGjeng ? T(`${o.navn} vil ha deg med i gjengen på Mitt vors`, `${o.navn} wants you in their crew on Mitt vors`)
-    : T(`${o.navn} inviterer deg til Mitt vors`, `${o.navn} invited you to Mitt vors`);
+  const emne = erRom ? T(`${o.navn} inviterer deg til vors på mittvors`, `${o.navn} invited you to a party on mittvors`)
+    : erGjeng ? T(`${o.navn} vil ha deg med i gjengen på mittvors`, `${o.navn} wants you in their crew on mittvors`)
+    : T(`${o.navn} inviterer deg til mittvors`, `${o.navn} invited you to mittvors`);
   const ingress = erRom ? T('Bli med i rommet – alle spiller fra sin egen telefon. Ingen app å laste ned.', 'Join the room – everyone plays from their own phone. No app to download.')
     : erGjeng ? T('Bli med i gjengen og følg sesongtabellen fra kveld til kveld.', 'Join the crew and follow the season table from night to night.')
     : erVerv ? T('Lag en gratis konto med lenken – spiller du ditt første rom, får dere begge en gratis kveld med Pluss 🎁', 'Create a free account with the link – play your first room and you both get a free night of Pluss 🎁')
     : T('Drikkeleker og vorsmoro der alle spiller fra sin egen telefon.', 'Drinking games and pre-party fun where everyone plays from their own phone.');
-  const knapp = erRom ? T('Bli med i rommet', 'Join the room') : erGjeng ? T('Se gjengen', 'See the crew') : T('Åpne Mitt vors', 'Open Mitt vors');
+  const knapp = erRom ? T('Bli med i rommet', 'Join the room') : erGjeng ? T('Se gjengen', 'See the crew') : T('Åpne mittvors', 'Open mittvors');
   const html = `<!doctype html><html lang="${o.en ? 'en' : 'no'}"><body style="margin:0;background:#f7f1e6;font-family:Arial,Helvetica,sans-serif;color:#1d160c">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fffdf8;border-radius:16px;padding:28px">
@@ -78,7 +78,7 @@ ${o.melding ? `<tr><td style="padding-top:14px"><div style="background:#f4b74026
 <tr><td style="padding-top:14px;font-size:15px;line-height:1.5">${ingress}</td></tr>
 ${erRom && k ? `<tr><td style="padding-top:14px;font-size:14px;color:#6f604b">${T('Romkode', 'Room code')}: <b style="font-size:22px;letter-spacing:3px;color:#1d160c">${esc(k)}</b></td></tr>` : ''}
 <tr><td style="padding-top:18px"><a href="${esc(o.lenke)}" style="display:inline-block;background:#ff6a4d;color:#141009;text-decoration:none;font-weight:700;padding:13px 22px;border-radius:999px">${knapp}</a></td></tr>
-<tr><td style="padding-top:22px;font-size:12px;line-height:1.5;color:#6f604b;border-top:1px solid #e6dccb">${T(`Du får denne e-posten fordi ${navn} skrev inn adressen din på mittvors.no. Vi lagrer den ikke, og du får ingen flere e-poster fra oss uten at noen inviterer deg igjen. Svar på e-posten for å svare ${navn}. Mitt vors er for personer over 18 år.`, `You’re getting this because ${navn} entered your address on mittvors.no. We don’t store it, and you won’t get more emails from us unless someone invites you again. Reply to answer ${navn}. Mitt vors is for people over 18.`)}</td></tr>
+<tr><td style="padding-top:22px;font-size:12px;line-height:1.5;color:#6f604b;border-top:1px solid #e6dccb">${T(`Du får denne e-posten fordi ${navn} skrev inn adressen din på mittvors.no. Vi lagrer den ikke, og du får ingen flere e-poster fra oss uten at noen inviterer deg igjen. Svar på e-posten for å svare ${navn}. mittvors er for personer over 18 år.`, `You’re getting this because ${navn} entered your address on mittvors.no. We don’t store it, and you won’t get more emails from us unless someone invites you again. Reply to answer ${navn}. mittvors is for people over 18.`)}</td></tr>
 </table></td></tr></table></body></html>`;
   const tekst = `${emne}\n\n${o.melding ? '«' + o.melding + '» – ' + o.navn + '\n\n' : ''}${ingress.replace(/<[^>]+>/g, '')}\n${erRom && k ? T('Romkode', 'Room code') + ': ' + k + '\n' : ''}\n${o.lenke}\n\n${T('Du får denne e-posten fordi ' + o.navn + ' skrev inn adressen din på mittvors.no. Vi lagrer den ikke.', 'You’re getting this because ' + o.navn + ' entered your address on mittvors.no. We don’t store it.')}`;
   return { emne, html, tekst };

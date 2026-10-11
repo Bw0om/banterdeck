@@ -1,5 +1,5 @@
 // Inviter venner på e-post. Bare innloggede kontoer, maks 10 mottakere per gang og 30 per døgn.
-// Lenken må peke til Mitt vors. Adressene lagres ikke – bare antallet (mot spam).
+// Lenken må peke til mittvors. Adressene lagres ikke – bare antallet (mot spam).
 import type { APIRoute } from 'astro';
 import { rpc } from '../../lib/spilt';
 import { json, innloggetBruker, gyldigEpost } from '../../lib/konto';
