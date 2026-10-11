@@ -211,10 +211,14 @@ export function lagStua(svg, valg = {}) {
   const folk = [];
   const kart = new Map();
   let sist = '';
+  // Tegnerekkefølge etter dybde. Den som holdes, flyttes aldri i DOM-en (det ville sluppet grepet):
+  // den ligger øverst mens den dras, og de andre sorteres under den.
   function sorter() {
-    const r = ting.slice().sort((x, y) => x.dataset.d - y.dataset.d);
-    const k = r.map((t) => ting.indexOf(t)).join(',');
-    if (k === sist) return; sist = k; r.forEach((t) => lag.appendChild(t));
+    const holdt = folk.find((f) => f.drar);
+    const r = ting.filter((t) => !holdt || t !== holdt.g).sort((x, y) => x.dataset.d - y.dataset.d);
+    const k = (holdt ? 'h' + ting.indexOf(holdt.g) + ':' : '') + r.map((t) => ting.indexOf(t)).join(',');
+    if (k === sist) return; sist = k;
+    if (holdt) r.forEach((t) => lag.insertBefore(t, holdt.g)); else r.forEach((t) => lag.appendChild(t));
   }
   function punkt(e) { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
 
@@ -302,7 +306,10 @@ export function lagStua(svg, valg = {}) {
     f.g.addEventListener('touchmove', (e) => { if (f.drar) e.preventDefault(); }, { passive: false });
     f.g.addEventListener('pointerdown', (e) => {
       if (valg.kanDra === false) return;
-      e.preventDefault(); f.g.setPointerCapture(e.pointerId);
+      e.preventDefault();
+      if (lag.lastChild !== f.g) lag.appendChild(f.g);   // øverst mens den holdes – før grepet tas
+      sist = '';
+      f.g.setPointerCapture(e.pointerId);
       f.drar = true; f.vei = []; forrige = punkt(e); fra = [f.x.v, f.y.v]; risting = 0;
       f.x.f = f.y.f = MYK; f.z.mal = 26; f.s.mal = 1.06; start(f);
       document.documentElement.classList.add('stua-drar');

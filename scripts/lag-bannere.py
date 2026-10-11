@@ -1,7 +1,7 @@
-# Lager bildene til drikkelekene (240x126 SVG) i champagnenatt-stilen «Blanding»:
-# vinsvart natt, faste figurer i dempet antikkgull, ett rødt Campari-element som viser hvor det skjer.
-# Ting står rett på en tynn bordlinje og kaster skygge. Champagnebobler i kantene, gnistene fra logoen
-# der noe skjer. Ingen tekst og ingen skrifttegn: bildene vises som <img>, og da finnes ikke sidens skrifter.
+# Lager bildene til drikkelekene (240x126 SVG) i stua-stilen (se DESIGN.md):
+# klistremerker med tykk svart strek og flate farger på et fargefelt. Figurene er gule, det som skjer
+# er oransje, detaljene er svarte, og hele motivet kaster en hard skygge. Hver lek får sin egen bakgrunnsfarge.
+# Ingen tekst og ingen skrifttegn: bildene vises som <img>, og da finnes ikke sidens skrifter.
 #
 # Lager både ett banner per lek (public/illustrasjoner/lek/<slug>.svg + src/data/bannere.json)
 # og de ti felles motivene (public/illustrasjoner/<motiv>.svg).
@@ -14,15 +14,18 @@ UT_LEK = os.path.join(ROT, 'public', 'illustrasjoner', 'lek')
 UT_MOTIV = os.path.join(ROT, 'public', 'illustrasjoner')
 os.makedirs(UT_LEK, exist_ok=True)
 
-# Blanding-paletten
-BG = '#2A1A22'    # vinsvart bunn
-G = '#B8995A'     # dempet antikkgull – figurene
-GL = '#D4B77A'    # lys kant på gullet
-GM = '#6E5A3C'    # gull i skygge
-R = '#D9503C'     # campari – det som skjer
-RM = '#9E3526'    # campari i skygge
-K = '#F7EFE3'     # elfenben – bare små detaljer
-M = '#1A1012'     # nesten svart
+# Stua-paletten
+BG = '#16120F'    # blekk – detaljer, hull, skjermer
+G = '#FFD23F'     # gul – figurene
+GL = '#FFF8EE'    # papir – lys kant og høylys
+GM = '#63E2A8'    # mint – det andre fargen på figurene
+R = '#FF5B1F'     # oransje – det som skjer
+RM = '#C23D0A'    # oransje i skygge
+K = '#FFF8EE'     # papir – små detaljer
+M = '#16120F'     # blekk
+STREK = '#16120F'
+# Bakgrunnen: ett fargefelt per lek (aldri gult, så figurene synes)
+FELT = ['#63E2A8', '#FF9CC2', '#7CC6FE', '#FFF8EE', '#FFB98A']
 BAKKE = 112       # bordlinja
 
 def n(v):
@@ -30,18 +33,30 @@ def n(v):
     return '0' if s == '-0' else s
 
 # ---------- ramme ----------
-def svg(slug, innhold, bakke=True, bobler=True):
-    rng = random.Random(slug)
-    ut = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 126" width="240" height="126"><rect width="240" height="126" fill="{BG}"/>'
-    if bobler:
-        for side in (0, 1):
-            for _ in range(rng.randint(2, 3)):
-                x = rng.uniform(10, 34) if side == 0 else rng.uniform(206, 230)
-                y = rng.uniform(14, 98); r = rng.uniform(1.2, 2.6)
-                ut += f'<circle cx="{n(x)}" cy="{n(y)}" r="{n(r)}" fill="none" stroke="{GL}" stroke-opacity="{n(rng.uniform(.25, .5))}" stroke-width=".9"/>'
+import re
+TAG = re.compile(r'<(rect|path|circle|ellipse|polygon)(\s[^>]*?)(/?)>')
+def _tall(attr, navn):
+    m = re.search(r'\s' + navn + r'="(-?[\d.]+)"', attr)
+    return float(m.group(1)) if m else None
+def strek(innhold):
+    """Tykk svart strek rundt alle flater (ikke høylys, gjennomsiktige lag eller bittesmå detaljer)."""
+    def bytt(m):
+        tag, attr, slutt = m.group(1), m.group(2), m.group(3)
+        if 'stroke=' in attr or 'opacity=' in attr or 'fill="none"' in attr or 'fill=' not in attr: return m.group(0)
+        if tag == 'rect' and ((_tall(attr, 'width') or 0) < 5 or (_tall(attr, 'height') or 0) < 5): return m.group(0)
+        if tag == 'circle' and (_tall(attr, 'r') or 0) < 2.5: return m.group(0)
+        if tag == 'ellipse' and min(_tall(attr, 'rx') or 0, _tall(attr, 'ry') or 0) < 2.5: return m.group(0)
+        return f'<{tag}{attr} stroke="{STREK}" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"{slutt}>'
+    return TAG.sub(bytt, innhold)
+def svg(slug, innhold, bakke=True, bobler=False):
+    felt = FELT[sum(ord(c) for c in slug) % len(FELT)]
+    ut = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 126" width="240" height="126">'
+          f'<defs><filter id="h" x="-5%" y="-5%" width="115%" height="125%"><feOffset in="SourceAlpha" dx="3" dy="3" result="s"/>'
+          f'<feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'
+          f'<rect width="240" height="126" fill="{felt}"/>')
     if bakke:
-        ut += f'<line x1="24" y1="{BAKKE}" x2="216" y2="{BAKKE}" stroke="{G}" stroke-opacity=".35" stroke-width="1"/>'
-    return ut + innhold + '</svg>'
+        ut += f'<line x1="18" y1="{BAKKE}" x2="222" y2="{BAKKE}" stroke="{STREK}" stroke-width="2.5" stroke-linecap="round"/>'
+    return ut + '<g filter="url(#h)">' + strek(innhold) + '</g></svg>'
 
 def skygge(cx, w):
     return f'<ellipse cx="{n(cx)}" cy="{BAKKE}" rx="{n(w/2)}" ry="2.6" fill="{M}" opacity=".6"/>'

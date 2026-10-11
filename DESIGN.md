@@ -60,6 +60,10 @@ One family, Archivo Variable (self-hosted, width axis).
 - **The TV in stua** shows the room code in the lobby and the current card or question during a game. The real TV view (`Storskjerm.astro`) shows the same stua, and now also shows the public question for Ukjent avsender, Skrøna, Saueflokken, To sannheter og en løgn, Skriv og drikk and Nyhetsrunden. Secret games (Muldvarpen, Hvem er jeg?) never show their secret.
 - **Room surfaces**: panels, cards, chips and buttons use the same strokes and hard shadows; the room code and step numbers use the split-flap look; header buttons and background games use stickers instead of emoji.
 
+## Game images
+
+`scripts/lag-bannere.py` draws all 63 game images and the 10 shared motifs as stickers: yellow figures, orange for what happens, ink details, a 2.2px ink outline on every shape, a hard 3px offset shadow on the whole motif, and one flat colour field per game (mint, pink, blue, paper or peach; never yellow). Run `python scripts/lag-bannere.py` after changing it, and bump the service worker cache.
+
 ## Not yet migrated
 
-Game illustrations in `public/illustrasjoner/` still use the champagnenatt drawing style. Some less used in-room screens (Vorsbørsen, the wheel, card games like Bussruta and Yatzy) inherit the tokens but have not been reviewed one by one.
+Some less used in-room screens (Vorsbørsen, the wheel, card games like Bussruta and Yatzy) inherit the tokens but have not been reviewed one by one.
