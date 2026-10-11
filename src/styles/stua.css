@@ -195,6 +195,12 @@ html.stua-drar .rom-stua .figur{cursor:grabbing}
   transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
 .rom-mod button:active{transform:translate(2px,2px)}
 
+/* Anbefalte leker: klistremerket til venstre, pila til høyre */
+.rom-anbefalt-lek{grid-template-columns:48px 1fr auto;gap:2px 14px}
+.rom-anbefalt-lek .rom-anbefalt-merke{grid-column:1;grid-row:1 / span 2;width:48px;height:48px;transition:transform var(--fjaer-tid) var(--fjaer)}
+.rom-anbefalt-lek b,.rom-anbefalt-lek span{grid-column:2}
+.rom-anbefalt-lek i{grid-column:3;border-radius:4px;border:2.5px solid var(--blekk);box-shadow:3px 3px 0 var(--blekk);background:var(--gul)!important;color:var(--blekk)!important}
+
 /* Kortet: papir med tykk strek, likt i lys og mørk */
 .rom-kort,:root[data-theme="dark"] .rom-kort{background:var(--papir)!important;color:var(--blekk)!important;border:var(--strek) solid var(--blekk)!important;border-radius:8px!important;box-shadow:var(--skygge-stor)!important}
 .rom-kort *{color:inherit}
@@ -247,10 +253,103 @@ html.i-spill .rom-kode{font-size:.92em}
 .lk-chips button{border:2.5px solid var(--ink)!important;border-radius:4px!important}
 
 /* =====================================================================
-   HOLD INNE: lekesymbolet vrikker så lenge fingeren ligger på kortet
+   HOLD INNE: hver lek rører på seg på sin egen måte så lenge fingeren ligger på kortet.
+   Bildene er limt inn som SVG (class="lekebilde"), og hvert klistremerke har data-a="<navn>".
+   Delene som rører seg hver for seg har egne klasser (a-b bobler, a-skum, a-viser, a-rotor …).
    ===================================================================== */
-@keyframes st-vrikk{0%{transform:rotate(0) scale(1)}25%{transform:rotate(-7deg) scale(1.07)}50%{transform:rotate(0) scale(1.1)}75%{transform:rotate(7deg) scale(1.07)}100%{transform:rotate(0) scale(1)}}
-.lk-kort img,.lk-rad img,.rom-lek .rom-lek-merke,.st-lek .st-merke,.fn-lek img{transform-origin:50% 60%}
-.lk-kort:active img,.lk-rad:active img,.rom-lek:active .rom-lek-merke,.st-lek:active .st-merke{animation:st-vrikk 560ms var(--fjaer) infinite}
+.lekebilde{display:block;width:100%;height:auto;aspect-ratio:240/126}
+.lk-kort .lekebilde{border-bottom:2.5px solid var(--ink)}
+.lk-rad .lekebilde{width:84px;flex:0 0 84px;border:2.5px solid var(--ink);border-radius:4px}
+.prov-appen-leker .lekebilde{width:84px;flex:0 0 84px;border:2.5px solid var(--ink);border-radius:4px}
+.lek-flere-rad .lekebilde{border:2.5px solid var(--ink);border-radius:6px;margin-bottom:6px}
+.lek-banner .lekebilde{border:var(--strek) solid var(--ink);border-radius:8px;box-shadow:var(--skygge)}
+.topp3-bilde .lekebilde{transition:scale 400ms var(--fjaer)}
+@media (hover:hover) and (pointer:fine){.topp3-rad a:hover .topp3-bilde .lekebilde{scale:1.04}}
 .lk-kort:active,.lk-rad:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--hard)!important}
-@media (prefers-reduced-motion:reduce){.lk-kort:active img,.lk-rad:active img,.rom-lek:active .rom-lek-merke,.st-lek:active .st-merke{animation:none}}
+
+[data-a],.a-b,.a-skum,.a-royk,.a-rotor,.a-nese,.a-tryne,.a-naal,.a-opp,.a-ned,.a-brikke,.a-play,.a-gnist,.a-flamme,.a-viser{transform-box:fill-box;transform-origin:50% 50%}
+.a-rotor,.a-naal,.a-viser{transform-box:view-box}
+.a-rotor,.a-naal{transform-origin:32px 32px}
+.a-viser{transform-origin:32px 36px}
+[data-a="nese"] .a-nese{transform-origin:0 50%}
+.a-skum,.a-flamme,[data-a="kopp"],[data-a="koppMint"],[data-a="mugge"],[data-a="flaske"],[data-a="shot"],[data-a="blyant"],[data-a="mikrofon"],[data-a="glass"],[data-a^="person"],[data-a="fingre"]{transform-origin:50% 100%}
+[data-a="medalje"],[data-a="pokal"]{transform-origin:50% 0}
+[data-a="flagg"],[data-a="maalflagg"]{transform-origin:22% 12%}
+
+@keyframes a-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes a-vift{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg) translateY(-2px)}75%{transform:rotate(6deg) translateY(-2px)}}
+@keyframes a-tumle{0%{transform:rotate(0) translateY(0)}30%{transform:rotate(-18deg) translateY(-10px)}60%{transform:rotate(14deg) translateY(0)}80%{transform:rotate(-5deg) translateY(-3px)}100%{transform:rotate(0) translateY(0)}}
+@keyframes a-vipp{0%,100%{transform:rotate(0)}30%{transform:rotate(-9deg)}70%{transform:rotate(9deg)}}
+@keyframes a-snurr{to{transform:rotate(360deg)}}
+@keyframes a-flipp{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.08)}}
+@keyframes a-boble-opp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-18px);opacity:0}}
+@keyframes a-skum{0%,100%{transform:scale(1)}50%{transform:scale(1.12) translateY(-2px)}}
+@keyframes a-hopp{0%,100%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-9px) scale(.96,1.06)}60%{transform:translateY(0) scale(1.06,.94)}}
+@keyframes a-nikk{0%,100%{transform:rotate(0)}30%{transform:rotate(-5deg)}70%{transform:rotate(5deg)}}
+@keyframes a-glimt{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(20deg) scale(1.22)}}
+@keyframes a-blink{0%,40%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(1.15)}60%{opacity:1}}
+@keyframes a-flakk{0%,100%{transform:scale(1,1)}33%{transform:scale(.94,1.12)}66%{transform:scale(1.06,.94)}}
+@keyframes a-surr{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-1.5px) rotate(-1.5deg)}40%{transform:translateX(1.5px) rotate(1.5deg)}60%{transform:translateX(-1.5px) rotate(-1.5deg)}80%{transform:translateX(1.5px) rotate(1.5deg)}}
+@keyframes a-rist{0%,100%{transform:translateX(0)}20%{transform:translateX(-3px) rotate(-3deg)}40%{transform:translateX(3px) rotate(3deg)}60%{transform:translateX(-3px) rotate(-3deg)}80%{transform:translateX(3px) rotate(3deg)}}
+@keyframes a-popp{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes a-svom{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(6px) rotate(-5deg)}75%{transform:translateX(-6px) rotate(5deg)}}
+@keyframes a-sving{0%,100%{transform:rotate(0)}30%{transform:rotate(-10deg)}70%{transform:rotate(10deg)}}
+@keyframes a-flagre{0%,100%{transform:rotate(0) skewY(0)}50%{transform:rotate(5deg) skewY(-4deg)}}
+@keyframes a-stikk{0%,100%{transform:translateX(0)}40%{transform:translateX(8px)}60%{transform:translateX(7px)}}
+@keyframes a-vokse{0%,100%{transform:scaleX(1)}50%{transform:scaleX(1.35)}}
+@keyframes a-royk{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-12px) scale(1.6);opacity:0}}
+@keyframes a-slaa{0%,100%{transform:scale(1)}15%{transform:scale(1.14)}30%{transform:scale(1)}45%{transform:scale(1.14)}}
+@keyframes a-kikk{0%,100%{transform:translateY(0)}50%{transform:translateY(9px)}}
+@keyframes a-pil-opp{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes a-pil-ned{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+@keyframes a-sprett{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes a-humpe{0%,100%{transform:translate(0,0)}25%{transform:translate(2px,-2px)}50%{transform:translate(0,0)}75%{transform:translate(2px,-2px)}}
+@keyframes a-kork{0%,100%{transform:translateY(0) rotate(0)}40%{transform:translateY(-16px) rotate(25deg)}}
+@keyframes a-flyt{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+:is(.lk-kort,.lk-rad,.rom-lek,.rom-anbefalt-lek,.st-lek,.lek-banner,.topp3-rad a,.lek-flere-rad a,.prov-appen-leker a,.fn-lek):active{
+  [data-a]{animation:a-bob 900ms ease-in-out infinite}
+  .a-gnist{animation:a-glimt 800ms ease-in-out infinite}
+  .a-gnist:nth-of-type(2n){animation-delay:-400ms}
+  [data-a^="kort"],[data-a="note"],[data-a="avis"],[data-a="liste"],[data-a="lapp"],[data-a="brev"],[data-a="kalender"]{animation:a-vift 700ms ease-in-out infinite}
+  [data-a^="terning"]{animation:a-tumle 800ms ease-in-out infinite}
+  [data-a="kopp"],[data-a="koppMint"],[data-a="mugge"],[data-a="flaske"],[data-a="shot"],[data-a="blyant"],[data-a="mikrofon"],[data-a="glass"]{animation:a-vipp 700ms ease-in-out infinite}
+  [data-a="koppSnudd"],[data-a="flaskeLigg"],[data-a="halvt"]{animation:a-snurr 900ms linear infinite}
+  [data-a="ring"]{animation:a-snurr 2.4s linear infinite}
+  .a-rotor{animation:a-snurr 900ms linear infinite}
+  .a-viser{animation:a-snurr 1.2s linear infinite}
+  [data-a="mynt"]{animation:a-flipp 900ms ease-in-out infinite}
+  .a-b{animation:a-boble-opp 1.1s linear infinite}
+  .a-b2{animation-delay:-370ms}.a-b3{animation-delay:-740ms}
+  .a-skum{animation:a-skum 900ms ease-in-out infinite}
+  [data-a="sau"],[data-a="gris"],[data-a="hest"],[data-a="smil"],[data-a="glis"],[data-a="overrasket"],[data-a="glidelas"],[data-a="peke"],[data-a="aldri"],[data-a="enten"],[data-a="duell"],[data-a="stille"],[data-a="hysj"],[data-a="rygg"],[data-a="spm"],[data-a="utrop"],[data-a="tommel"],[data-a="krone"],[data-a="agent"],[data-a="trapp"]{animation:a-hopp 700ms ease-in-out infinite}
+  [data-a="muldvarp"]{animation:a-kikk 1.1s ease-in-out infinite}
+  [data-a^="person"],[data-a="fingre"]{animation:a-nikk 800ms ease-in-out infinite}
+  [data-a^="stjerne"],[data-a="gnist"]{animation:a-glimt 800ms ease-in-out infinite}
+  [data-a="lyn"]{animation:a-blink 600ms ease-in-out infinite}
+  .a-flamme{animation:a-flakk 450ms ease-in-out infinite}
+  [data-a^="telefon"],[data-a="kontroller"]{animation:a-surr 300ms linear infinite}
+  [data-a="kryss"],[data-a="sverd"],[data-a="pyramide"],[data-a="maske"]{animation:a-rist 400ms linear infinite}
+  [data-a="hake"],[data-a^="boble"],[data-a="bobler"],[data-a="sporsmal"],[data-a="tv"]{animation:a-popp 800ms ease-in-out infinite}
+  .a-play,.a-brikke{animation:a-popp 700ms ease-in-out infinite}
+  .a-brikke:nth-of-type(2n){animation-delay:-230ms}.a-brikke:nth-of-type(3n){animation-delay:-460ms}
+  [data-a="fisk"]{animation:a-svom 1.2s ease-in-out infinite}
+  [data-a="medalje"],[data-a="pokal"]{animation:a-sving 1s ease-in-out infinite}
+  [data-a="flagg"],[data-a="maalflagg"]{animation:a-flagre 700ms ease-in-out infinite}
+  [data-a="haand"],[data-a="sveip"]{animation:a-stikk 500ms ease-in-out infinite}
+  .a-nese{animation:a-vokse 900ms ease-in-out infinite}
+  .a-royk{animation:a-royk 1.2s linear infinite}
+  [data-a="hjerte"],[data-a="hjerteStor"]{animation:a-slaa 1s ease-in-out infinite}
+  [data-a="pilOpp"],.a-opp{animation:a-pil-opp 700ms ease-in-out infinite}
+  [data-a="pilNed"],.a-ned{animation:a-pil-ned 700ms ease-in-out infinite}
+  [data-a="ball"]{animation:a-snurr 1.2s linear infinite}
+  [data-a="pingpong"]{animation:a-sprett 600ms ease-in-out infinite}
+  [data-a="buss"]{animation:a-humpe 500ms linear infinite}
+  [data-a="kork"]{animation:a-kork 900ms ease-in-out infinite}
+  [data-a="tanke"],[data-a="mane"],[data-a="glorie"]{animation:a-flyt 1.4s ease-in-out infinite}
+  .a-tryne{animation:a-rist 400ms linear infinite}
+  .a-naal{animation:a-sving 900ms ease-in-out infinite}
+}
+@media (prefers-reduced-motion:reduce){
+  :is(.lk-kort,.lk-rad,.rom-lek,.rom-anbefalt-lek,.st-lek,.lek-banner,.topp3-rad a,.lek-flere-rad a,.prov-appen-leker a,.fn-lek):active :is([data-a],[class^="a-"],[class*=" a-"]){animation:none}
+}

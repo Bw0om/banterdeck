@@ -6,7 +6,7 @@
  * Bare leker som spilles i appen er med – rene regel-leker (niva «regler») holdes utenfor.
  */
 import { gamesFor, gameHref, t } from '../lib/content';
-import { illustrasjon } from '../lib/illustrasjon';
+import { illustrasjon, lekebilde } from '../lib/illustrasjon';
 import { PLUSS_SLUGS } from '../lib/plussleker';
 import { niva } from '../lib/niva';
 import { path, type Lang } from '../lib/i18n';
@@ -16,6 +16,7 @@ const PL = new Set(PLUSS_SLUGS);
 const leker: Record<string, { n: string; h: string; b: string; pl: string; p: boolean }> = Object.fromEntries(gamesFor(lang).filter((g: any) => niva(g.slug) !== 'regler').map((g: any) => [g.slug, {
   n: t(g.name, lang), h: gameHref(g, (p) => path(lang, p), lang), b: illustrasjon(g), pl: g.pl || '', p: PL.has(g.slug),
 }]));
+const SPILL: Record<string, any> = Object.fromEntries(gamesFor(lang).map((g: any) => [g.slug, g]));
 const STANDARD = ['ring-of-fire', '100-sporsmal', 'pekeleken', 'drikkehjulet', 'beer-pong', 'jeg-har-aldri'];
 const utvalg = STANDARD.filter((s) => leker[s]).slice(0, 3);
 const T = {
@@ -37,7 +38,7 @@ const T = {
       return (
         <li class={`topp3-rad r${i + 1}`}>
           <a href={x.h}>
-            <span class="topp3-bilde"><img src={x.b} alt="" width="240" height="126" loading="lazy" decoding="async" /></span>
+            <span class="topp3-bilde" set:html={lekebilde(SPILL[s])} />
             <span class="topp3-nr" aria-hidden="true">{i + 1}</span>
             <span class="topp3-tekst"><b>{x.n}</b><small>{x.pl && `${x.pl} ${T.spillere}`}{x.p && <i>Pluss</i>}</small></span>
           </a>

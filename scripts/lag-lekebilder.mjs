@@ -42,7 +42,7 @@ const E = {
   koppMint: `<rect x="9" y="8" width="46" height="8" rx="2" fill="${P}" ${S}/><path d="M12 16h40l-6 42H18z" fill="${M}" ${S}/><path d="M14 34h36" ${S}/>`,
   koppSnudd: `<path d="M18 6h28l6 42H12z" fill="${O}" ${S}/><rect x="9" y="48" width="46" height="8" rx="2" fill="${P}" ${S}/><path d="M14 28h36" ${S}/>`,
   ol: `<path d="M44 26h5a7 7 0 0 1 7 7v8a7 7 0 0 1-7 7h-5" fill="none" stroke="${B}" stroke-width="5"/><path d="M12 20h32v34a5 5 0 0 1-5 5H17a5 5 0 0 1-5-5z" fill="${G}" ${S}/>` +
-    `<path d="M9 22c-2-8 5-13 11-11 2-5 12-6 15-1 6-3 13 1 11 10z" fill="${P}" ${S}/><circle cx="21" cy="38" r="2" fill="${P}"/><circle cx="31" cy="46" r="2" fill="${P}"/><circle cx="26" cy="30" r="1.6" fill="${P}"/>`,
+    `<path class="a-skum" d="M9 22c-2-8 5-13 11-11 2-5 12-6 15-1 6-3 13 1 11 10z" fill="${P}" ${S}/><circle class="a-b a-b1" cx="21" cy="38" r="2" fill="${P}"/><circle class="a-b a-b2" cx="31" cy="46" r="2" fill="${P}"/><circle class="a-b a-b3" cx="26" cy="30" r="1.6" fill="${P}"/>`,
   shot: `<path d="M18 18h28l-4 36H22z" fill="${P}" ${S}/><path d="M20 32h24l-2.5 20h-19z" fill="${G}"/><path d="M18 18h28l-4 36H22z" fill="none" ${S}/>`,
   flaske: `<rect x="26" y="2" width="12" height="7" rx="1.5" fill="${O}" ${S}/><path d="M27 9h10v9c7 4 10 9 10 16v22a4 4 0 0 1-4 4H21a4 4 0 0 1-4-4V34c0-7 3-12 10-16z" fill="${M}" ${S}/><rect x="17" y="34" width="30" height="14" fill="${P}" ${S}/><path d="M24 41h16" stroke="${O}" stroke-width="3.5" stroke-linecap="round"/>`,
   flaskeLigg: `<g transform="rotate(-90 32 32)"><rect x="26" y="2" width="12" height="7" rx="1.5" fill="${O}" ${S}/><path d="M27 9h10v9c7 4 10 9 10 16v22a4 4 0 0 1-4 4H21a4 4 0 0 1-4-4V34c0-7 3-12 10-16z" fill="${M}" ${S}/><rect x="17" y="34" width="30" height="14" fill="${P}" ${S}/></g>`,
@@ -71,24 +71,24 @@ const E = {
   maalflagg: `<path d="M14 6v54" stroke="${B}" stroke-width="5" stroke-linecap="round"/><rect x="16" y="8" width="36" height="24" fill="${P}" ${S}/><path d="M16 8h9v8h-9zM34 8h9v8h-9zM25 16h9v8h-9zM43 16h9v8h-9zM16 24h9v8h-9zM34 24h9v8h-9z" fill="${B}"/>`,
   sjakk: `<rect x="4" y="22" width="56" height="36" fill="${G}" ${S}/>` + [0, 1, 2, 3, 4, 5, 6].map((c) => [0, 1, 2, 3].map((r) => ((c + r) % 2 ? `<rect x="${4 + c * 8}" y="${22 + r * 9}" width="8" height="9" fill="${M}"/>` : '')).join('')).join('') +
     `<rect x="4" y="22" width="56" height="36" fill="none" ${S}/><path d="M24 22V8l4 3 4-4 4 4 4-3v14z" fill="${B}"/>`,
-  tv: `<rect x="4" y="8" width="56" height="40" rx="5" fill="${B}" ${S}/><rect x="9" y="13" width="46" height="30" rx="2" fill="${BL}"/><path d="M28 21l12 7-12 7z" fill="${O}" ${S}/><path d="M24 48l-6 10M40 48l6 10" ${S}/>`,
+  tv: `<rect x="4" y="8" width="56" height="40" rx="5" fill="${B}" ${S}/><rect x="9" y="13" width="46" height="30" rx="2" fill="${BL}"/><path class="a-play" d="M28 21l12 7-12 7z" fill="${O}" ${S}/><path d="M24 48l-6 10M40 48l6 10" ${S}/>`,
   pilOpp: `<path d="M32 4l24 26H42v28H22V30H8z" fill="${G}" ${S}/>`,
   pilNed: `<path d="M32 60L8 34h14V6h20v28h14z" fill="${O}" ${S}/>`,
   haand: `<path d="M14 24h6c-1-8 6-15 12-12 4 2 4 8 0 12h22a5 5 0 0 1 0 10H44c3 1 3 8 0 9 3 1 3 8 0 9 1 3-2 6-5 6H22c-4 0-8-3-8-8z" fill="${H}" ${S}/>` +
     `<path d="M30 34h14M30 43h14M31 52h12M22 24c2-2 4-2 6 0" fill="none" ${S}/><rect x="2" y="23" width="13" height="30" rx="3" fill="${O}" ${S}/>`,
   maske: `<path d="M4 22q14-12 28 0 14-12 28 0-2 20-16 20-8 0-12-8-4 8-12 8-14 0-16-20z" fill="${M}" ${S}/><ellipse cx="19" cy="28" rx="7" ry="4.5" fill="${B}"/><ellipse cx="45" cy="28" rx="7" ry="4.5" fill="${B}"/>`,
-  fabrikk: `<path d="M4 58V30l14-9v9l14-9v9l14-9v37z" fill="${G}" ${S}/><rect x="46" y="10" width="10" height="48" fill="#8A8580" ${S}/><circle cx="52" cy="5" r="4" fill="${P}" ${S}/><path d="M10 38h8v8h-8zM24 38h8v8h-8z" fill="${O}" ${S}/>`,
+  fabrikk: `<path d="M4 58V30l14-9v9l14-9v9l14-9v37z" fill="${G}" ${S}/><rect x="46" y="10" width="10" height="48" fill="#8A8580" ${S}/><circle class="a-royk" cx="52" cy="5" r="4" fill="${P}" ${S}/><path d="M10 38h8v8h-8zM24 38h8v8h-8z" fill="${O}" ${S}/>`,
   fingre: `<path d="M18 62V40c0-4-6-10-6-14a3 3 0 0 1 6-1l4 6V9a3.5 3.5 0 0 1 7 0v17V5a3.5 3.5 0 0 1 7 0v21V8a3.5 3.5 0 0 1 7 0v20V15a3.5 3.5 0 0 1 7 0v27c0 8-4 12-8 14v6z" fill="${H}" ${S}/><rect x="16" y="56" width="30" height="8" fill="${O}" ${S}/>`,
   medalje: `<path d="M18 2l10 22M46 2L36 24" stroke="${O}" stroke-width="8"/><path d="M18 2l10 22M46 2L36 24" fill="none" stroke="${B}" stroke-width="2"/><circle cx="32" cy="42" r="18" fill="${G}" ${S}/><path d="M32 31l3.5 7 7.5 1-5.5 5 1.5 7.5-7-4-7 4 1.5-7.5-5.5-5 7.5-1z" fill="${P}" ${S}/>`,
-  klokke: `<rect x="27" y="2" width="10" height="7" rx="2" fill="${O}" ${S}/><circle cx="32" cy="36" r="24" fill="${P}" ${S}/><path d="M32 36V18A18 18 0 0 1 49 30z" fill="${O}" ${S}/><path d="M32 36l-10 6" ${S}/><circle cx="32" cy="36" r="3" fill="${B}"/>`,
+  klokke: `<rect x="27" y="2" width="10" height="7" rx="2" fill="${O}" ${S}/><circle cx="32" cy="36" r="24" fill="${P}" ${S}/><path d="M32 36V18A18 18 0 0 1 49 30z" fill="${O}" ${S}/><path class="a-viser" d="M32 36l-10 6" ${S}/><circle cx="32" cy="36" r="3" fill="${B}"/>`,
   mynt: `<circle cx="32" cy="32" r="24" fill="${G}" ${S}/><circle cx="32" cy="32" r="16" fill="none" ${S}/><path d="M32 22l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="${O}" ${S}/>`,
   tommel: `<path d="M8 30h12v28H8z" fill="${O}" ${S}/><path d="M20 30l10-14c2-4 0-10 4-12 5 0 6 6 5 12l-2 8h17a5 5 0 0 1 5 6l-5 22a6 6 0 0 1-6 4H20z" fill="${H}" ${S}/>`,
   kork: `<path d="M18 22h28l-3 30H21z" fill="#B9773F" ${S}/><ellipse cx="32" cy="22" rx="14" ry="5" fill="#D9A26A" ${S}/><circle cx="27" cy="36" r="1.6" fill="#7A4A2A"/><circle cx="36" cy="44" r="1.6" fill="#7A4A2A"/>`,
   trapp: `<path d="M4 58V46h12V34h12V22h12V10h20v48z" fill="${G}" ${S}/>`,
-  mugge: `<path d="M46 20h6a6 6 0 0 1 6 6v14a6 6 0 0 1-6 6h-6" fill="none" stroke="${B}" stroke-width="5"/><path d="M10 12h36l-2 46H14z" fill="${G}" ${S}/><path d="M6 14c0-7 7-10 12-7 3-5 13-5 16 0 5-3 13 0 12 7z" fill="${P}" ${S}/>`,
+  mugge: `<path d="M46 20h6a6 6 0 0 1 6 6v14a6 6 0 0 1-6 6h-6" fill="none" stroke="${B}" stroke-width="5"/><path d="M10 12h36l-2 46H14z" fill="${G}" ${S}/><path class="a-skum" d="M6 14c0-7 7-10 12-7 3-5 13-5 16 0 5-3 13 0 12 7z" fill="${P}" ${S}/>`,
   tanke: `<path d="M16 34c-10 0-12-14-2-16 0-12 16-14 20-6 8-6 22 0 18 10 10 2 8 16-2 16z" fill="${P}" ${S}/><circle cx="12" cy="48" r="4" fill="${P}" ${S}/><circle cx="6" cy="58" r="2.5" fill="${P}" ${S}/><path d="M28 34V18l12-3v15" fill="none" ${S}/><circle cx="25" cy="34" r="4" fill="${O}" ${S}/><circle cx="37" cy="31" r="4" fill="${O}" ${S}/>`,
   hjerteStor: `<path d="M32 58C8 42 4 30 4 21a14 14 0 0 1 28-5 14 14 0 0 1 28 5c0 9-4 21-28 37z" fill="${O}" ${S}/><path d="M14 18q2-6 8-6" fill="none" stroke="${P}" stroke-width="3.5" stroke-linecap="round"/>`,
-  bingobrett: `<rect x="6" y="6" width="52" height="52" rx="4" fill="${G}" ${S}/><path d="M23 6v52M41 6v52M6 23h52M6 41h52" stroke="${B}" stroke-width="2.5"/><circle cx="14.5" cy="14.5" r="5" fill="${O}" ${S}/><circle cx="32" cy="32" r="5" fill="${O}" ${S}/><circle cx="49.5" cy="49.5" r="5" fill="${O}" ${S}/>`,
+  bingobrett: `<rect x="6" y="6" width="52" height="52" rx="4" fill="${G}" ${S}/><path d="M23 6v52M41 6v52M6 23h52M6 41h52" stroke="${B}" stroke-width="2.5"/><circle class="a-brikke" cx="14.5" cy="14.5" r="5" fill="${O}" ${S}/><circle class="a-brikke" cx="32" cy="32" r="5" fill="${O}" ${S}/><circle class="a-brikke" cx="49.5" cy="49.5" r="5" fill="${O}" ${S}/>`,
   sverd: `<path d="M10 54L50 10M54 54L14 10" stroke="${B}" stroke-width="9" stroke-linecap="round"/><path d="M10 54L50 10M54 54L14 10" stroke="${P}" stroke-width="4" stroke-linecap="round"/><path d="M16 40l8 8M48 40l-8 8" stroke="${G}" stroke-width="7" stroke-linecap="round"/>`,
   halvt: `<circle cx="32" cy="32" r="26" fill="${G}" ${S}/><path d="M32 6a26 26 0 0 1 0 52z" fill="${O}" ${S}/><path d="M16 32l5 5 7-9" fill="none" ${S}/><path d="M40 27l9 10M49 27l-9 10" ${S}/>`,
   gaffel: `<path d="M32 60V36M32 36L14 14M32 36l18-22" fill="none" stroke="${B}" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 60V36M32 36L14 14M32 36l18-22" fill="none" stroke="${G}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
@@ -112,15 +112,15 @@ function scene(slug, deler, opt = {}) {
   total *= skala;
   let x = (240 - total) / 2;
   const bunn = opt.bunn ?? 112;
-  let ut = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 126" width="240" height="126"><defs><filter id="h" x="-30%" y="-30%" width="170%" height="170%">` +
+  let ut = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 126" width="240" height="126"><defs><filter id="h-${slug}" x="-30%" y="-30%" width="170%" height="170%">` +
     `<feOffset in="SourceAlpha" dx="3" dy="3" result="s"/><feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>` +
     `<rect width="240" height="126" fill="${felt}"/>`;
   // Pynt: noen små gnister og prikker i bakgrunnen
   for (let i = 0; i < 4; i++) {
     const gx = 12 + r() * 216, gy = 10 + r() * 100, st = 5 + r() * 4, f = r() < 0.5 ? P : B;
     ut += r() < 0.6
-      ? `<path d="M${(gx).toFixed(1)} ${(gy - st).toFixed(1)}l${(st * .3).toFixed(1)} ${(st * .7).toFixed(1)} ${(st * .7).toFixed(1)} ${(st * .3).toFixed(1)}-${(st * .7).toFixed(1)} ${(st * .3).toFixed(1)}-${(st * .3).toFixed(1)} ${(st * .7).toFixed(1)}-${(st * .3).toFixed(1)}-${(st * .7).toFixed(1)}-${(st * .7).toFixed(1)}-${(st * .3).toFixed(1)} ${(st * .7).toFixed(1)}-${(st * .3).toFixed(1)}z" fill="${f}" stroke="${B}" stroke-width="1.5" stroke-linejoin="round" opacity=".9"/>`
-      : `<circle cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="${(st * .35).toFixed(1)}" fill="${f}" stroke="${B}" stroke-width="1.5"/>`;
+      ? `<path class="a-gnist" d="M${(gx).toFixed(1)} ${(gy - st).toFixed(1)}l${(st * .3).toFixed(1)} ${(st * .7).toFixed(1)} ${(st * .7).toFixed(1)} ${(st * .3).toFixed(1)}-${(st * .7).toFixed(1)} ${(st * .3).toFixed(1)}-${(st * .3).toFixed(1)} ${(st * .7).toFixed(1)}-${(st * .3).toFixed(1)}-${(st * .7).toFixed(1)}-${(st * .7).toFixed(1)}-${(st * .3).toFixed(1)} ${(st * .7).toFixed(1)}-${(st * .3).toFixed(1)}z" fill="${f}" stroke="${B}" stroke-width="1.5" stroke-linejoin="round" opacity=".9"/>`
+      : `<circle class="a-gnist" cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="${(st * .35).toFixed(1)}" fill="${f}" stroke="${B}" stroke-width="1.5"/>`;
   }
   liste.forEach((d, i) => {
     const str = STR * (d.s || 1) * skala;
@@ -128,7 +128,7 @@ function scene(slug, deler, opt = {}) {
     const rot = d.r != null ? d.r : (r() - 0.5) * 12;
     let inn = ALLE[d.m]; if (!inn) throw new Error('Ukjent merke: ' + d.m + ' (' + slug + ')');
     inn = inn.replace(/stroke-width="3\.5"/g, 'stroke-width="2.4"');
-    ut += `<g transform="translate(${px.toFixed(1)} ${py.toFixed(1)}) rotate(${rot.toFixed(1)} ${(str / 2).toFixed(1)} ${(str / 2).toFixed(1)}) scale(${(str / 64).toFixed(3)})" filter="url(#h)">${inn}</g>`;
+    ut += `<g transform="translate(${px.toFixed(1)} ${py.toFixed(1)}) rotate(${rot.toFixed(1)} ${(str / 2).toFixed(1)} ${(str / 2).toFixed(1)}) scale(${(str / 64).toFixed(3)})" filter="url(#h-${slug})"><g class="a" data-a="${d.m}">${inn}</g></g>`;
     if (d.x == null) x += str + GAP * skala;
   });
   return ut + '</svg>';

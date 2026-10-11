@@ -17,3 +17,14 @@ import BANNERE from '../data/bannere.json';
 const EGNE = new Set<string>(BANNERE as string[]);
 /** Eget banner for leken (public/illustrasjoner/lek/<slug>.svg), ellers et felles motiv for gruppa. */
 export const illustrasjon = (g: any) => (g && EGNE.has(g.slug) ? `/illustrasjoner/lek/${g.slug}.svg` : `/illustrasjoner/${motiv(g)}.svg`);
+
+// Bildene limt rett inn i siden (ikke <img>), så «hold inne»-animasjonene i stua.css når inn i dem
+const RAA = import.meta.glob('../../public/illustrasjoner/**/*.svg', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+/** Lekens bilde som inline SVG med class="lekebilde". Finnes ikke fila, blir det en vanlig <img>. */
+export function lekebilde(g: any): string {
+  const sti = illustrasjon(g);
+  const nokkel = Object.keys(RAA).find((k) => k.endsWith('/public' + sti));
+  const svg = nokkel ? RAA[nokkel] : '';
+  if (!svg) return `<img class="lekebilde" src="${sti}" alt="" width="240" height="126" loading="lazy" decoding="async">`;
+  return svg.replace('<svg ', '<svg class="lekebilde" aria-hidden="true" focusable="false" ');
+}
