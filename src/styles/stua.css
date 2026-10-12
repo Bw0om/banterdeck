@@ -666,3 +666,60 @@ html.i-spill .rom-kode{font-size:.92em}
 .lh-utfall li.rett span{background:#FFF8EE}
 .lh-regel{margin:0 0 12px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.lh-forside,.lh-kikk.vis .lh-forside,.lh-sikker{transition:none}.lh-stempel.inn,.lh-kol.inn>div>span,.lh-ide.inn{animation:none}}
+
+/* ---------- Pekeleken: kortet, nedtellingen, fingrene og resultatet ---------- */
+.rom-spill:has(.pk-topp){align-items:stretch;text-align:left;gap:0}
+.rom-spill:has(.pk-topp) .rom-stor-knapp{align-self:stretch}
+.rom-spill:has(.pk-topp) .rom-spillnavn{display:none}
+.pk-kort{position:relative;padding:18px 16px 20px;margin:0 0 14px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:8px;box-shadow:6px 6px 0 var(--hard)}
+.pk-kort.med-vri{margin-top:22px;padding-top:28px}
+.pk-pre{display:block;margin:0 0 6px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.pk-kort p{margin:0;font-family:var(--display);font-size:clamp(23px,7vw,30px);font-weight:900;font-stretch:80%;line-height:1.1}
+.pk-vri{position:absolute;left:-6px;right:24px;top:-24px;display:flex;align-items:center;gap:10px;padding:7px 12px;color:var(--blekk);background:var(--gul);border:var(--strek) solid var(--blekk);box-shadow:4px 4px 0 var(--hard);transform:rotate(-2.5deg)}
+.pk-vri b{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.pk-vri span{font-size:15px;font-weight:800}
+.pk-vri-tekst{display:block;margin-top:10px;font-size:13px;font-weight:700;color:var(--muted)}
+.pk-start{font-size:22px}
+.pk-scene{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:260px}
+.pk-hand{width:200px;height:112px;animation:pkHand 450ms cubic-bezier(.23,1,.32,1) both}
+.pk-hand .f{fill:#FFF8EE;stroke:#16120F;stroke-width:5;stroke-linejoin:round}
+.pk-hand .s{fill:none;stroke:#16120F;stroke-width:5;stroke-linecap:round}
+@keyframes pkHand{from{transform:translateX(-40px) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+.pk-tall{display:block;font-family:var(--display);font-size:200px;font-weight:900;font-stretch:62%;line-height:1;color:var(--ink)}
+.pk-tall.en{color:var(--oransje)}
+.pk-tall.pek{font-size:96px;line-height:.85;text-transform:uppercase;padding:4px 16px 8px;color:var(--blekk);background:var(--oransje);border:4px solid var(--blekk);box-shadow:8px 8px 0 var(--hard);transform:rotate(-3deg)}
+.pk-tall.inn{animation:pkTall 520ms var(--fjaer) both}
+.pk-tall.pek.inn{animation:pkPek 520ms var(--fjaer) both}
+@keyframes pkTall{from{transform:scale(1.45);opacity:0}to{transform:none;opacity:1}}
+@keyframes pkPek{from{transform:rotate(-3deg) scale(1.5);opacity:0}to{transform:rotate(-3deg);opacity:1}}
+.pk-sporsmal{margin:0 0 10px;font-size:18px;font-weight:900}
+.pk-fingre{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:8px;margin:0 0 12px}
+.pk-fingre button{min-height:58px;font:900 26px var(--display);font-stretch:70%;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:4px;box-shadow:3px 3px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out,background-color .15s}
+.pk-fingre button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+.pk-fingre button[aria-pressed="true"]{background:var(--gul);color:var(--blekk);transform:translate(2px,2px);box-shadow:1px 1px 0 var(--hard)}
+.pk-selv{width:100%;margin:0 0 12px;padding:12px;font:900 15px var(--display);font-stretch:78%;text-transform:uppercase;color:var(--blekk);background:var(--mint);border:var(--strek) solid var(--blekk);border-radius:4px;box-shadow:3px 3px 0 var(--hard);cursor:pointer}
+.pk-selv:disabled{opacity:.6;box-shadow:none;cursor:default}
+.pk-videre{display:block;margin:4px auto 0}
+.pk-resultat{display:flex;flex-direction:column;gap:6px;padding:12px 14px;margin:0 0 12px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:var(--skygge)}
+.pk-resultat.drikk,.pk-resultat.forsvar{background:var(--oransje);color:var(--blekk);border-color:var(--blekk)}
+.pk-resultat.inn{animation:nrInn 420ms var(--fjaer) both}
+.pk-res-topp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pk-res-topp .nr-p{min-width:40px;height:40px;border-radius:20px;font-size:14px;border-width:3px}
+.pk-res-topp b{font-family:var(--display);font-size:26px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.95}
+.pk-resultat span{font-size:13.5px;font-weight:700}
+.pk-forsvar-tid{display:block;height:10px;border:2.5px solid var(--blekk);border-radius:3px;background:#FFF8EE;overflow:hidden;position:relative}
+.pk-forsvar-tid::after{content:"";position:absolute;inset:0;background:var(--blekk);transform-origin:left;animation:pkForsvar var(--s) linear both}
+@keyframes pkForsvar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.pk-forsvar-valg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 12px}
+.pk-forsvar-valg button{min-height:56px;font:900 18px var(--display);font-stretch:78%;text-transform:uppercase;color:var(--blekk);background:var(--mint);border:var(--strek) solid var(--blekk);border-radius:4px;box-shadow:4px 4px 0 var(--hard);cursor:pointer}
+.pk-forsvar-valg button.drikk{background:var(--rosa)}
+.pk-merk{margin:0 0 12px;font-size:14px;font-weight:800}
+.pk-soyler{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:6px}
+.pk-soyler li{display:grid;grid-template-columns:64px 1fr 22px;gap:10px;align-items:center;font-weight:800;font-size:13px;color:var(--ink)}
+.pk-soyler span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk-soyler i{display:block;height:14px;border:2.5px solid var(--ink);border-radius:3px;background:var(--bg2);overflow:hidden}
+.pk-soyler i b{display:block;height:100%;transform-origin:left}
+.pk-soyler.inn i b{animation:pkSoyle 560ms var(--fjaer) both;animation-delay:calc(200ms + var(--i) * 70ms)}
+@keyframes pkSoyle{from{transform:scaleX(0)}}
+.pk-soyler em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.pk-hand,.pk-tall.inn,.pk-tall.pek.inn,.pk-resultat.inn,.pk-soyler.inn i b,.pk-forsvar-tid::after{animation:none}}

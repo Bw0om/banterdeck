@@ -200,6 +200,7 @@ export function startRom(LEKNAVN, LANG) {
     if (!lyd.paa || !lydCtx()) return;
     if (navn === 'tikk') { tone(440, 0, 0.035, 'sine', 0.12, 300); stoy(0, 0.02, 0.08, 900); }
     if (navn === 'grip') tone(180, 0, 0.06, 'sine', 0.14, 140);
+    if (navn === 'pek') { tone(150, 0, 0.14, 'sine', 0.4, 80); stoy(0, 0.08, 0.3, 500); tone(330, 0.02, 0.2, 'triangle', 0.14); }
     // Utenfor sporet: et lavt knirk
     if (navn === 'knirk') { tone(110, 0, 0.3, 'sawtooth', 0.06, 150); stoy(0, 0.25, 0.1, 400); }
     if (navn === 'ding') { tone(440, 0, 0.35, 'triangle', 0.25); tone(660, 0.12, 0.5, 'triangle', 0.2); }
@@ -862,17 +863,18 @@ export function startRom(LEKNAVN, LANG) {
     gris: [['Alle får fire kort. Send ett kort videre samtidig.', 'Everyone gets four cards. Pass one card on at the same time.'], ['Får noen fire like, tar hen seg på nesa – og alle må gjøre det samme.', 'When someone gets four of a kind, they touch their nose – and everyone must follow.'], ['Sistemann får en bokstav. G-R-I-S = ta en shot.', 'The last one gets a letter. P-I-G-S = take a shot.']],
     president: [['Bli kvitt kortene dine først – legg likt eller høyere enn det som ligger.', 'Get rid of your cards first – play equal or higher than what’s on the table.'], ['Toere er høyest og rydder bordet.', 'Twos are highest and clear the table.'], ['Først ut blir president, sist ut blir rævkjører.', 'First out is President, last out is the Scumbag.']],
     bingo: [['Alle får sitt eget bingobrett med sanger.', 'Everyone gets their own bingo card with songs.'], ['Spill spillelista og kryss av sangene du hører.', 'Play the playlist and mark the songs you hear.'], ['Rekke: del ut to slurker. Fullt brett: BINGO – alle andre drikker opp.', 'A line: hand out two sips. Full card: BINGO – everyone else finishes their drink.']],
+    pekeleken: [['Den som leser, leser kortet høyt og starter nedtellingen. Alle telefonene sier PEK! samtidig.', 'The reader reads the card out loud and starts the countdown. Every phone says POINT! at the same time.'], ['Pek på den det passer best på. Trykk inn hvor mange som pekte på deg.', 'Point at who it fits best. Then tap how many pointed at you.'], ['Flest fingre drikker like mange slurker. Av og til kommer en vri.', 'Most fingers drinks that many sips. Now and then there is a twist.']],
     nyhetsrunden: [['Spørsmålet dukker opp på alle telefonene – verten leser det høyt.', 'The question appears on every phone – the host reads it out loud.'], ['Svar før klokka går ut. Du kan bytte svar helt til svaret vises.', 'Answer before the clock runs out. You can change your answer until it is shown.'], ['Riktig: del ut én. Feil: drikk én. Tallspørsmål: den nærmest deler ut to, lengst unna drikker.', 'Right: hand out one. Wrong: drink one. Number questions: closest hands out two, furthest off drinks.']],
     ring: [['Telefonene er kortstokken – alle ser samme kort.', 'The phones are the deck – everyone sees the same card.'], ['Den som har tur, trekker og gjør det kortet sier.', 'Whoever’s turn it is draws and does what the card says.'], ['Den som trekker fjerde konge, drikker opp!', 'Whoever draws the fourth king finishes their drink!']],
     ringr: [['Kortene ligger i en ring rundt glasset. Den som har tur, snurrer ringen med fingeren – kortet øverst lyser opp.', 'The cards lie in a ring around the glass. Whoever’s turn it is spins the ring with a finger – the top card lights up.'],
-      ['Hold på kortet og dra det sakte ut. Drar du for fort, ryker ringen: drikk opp glasset ditt!', 'Hold the card and pull it out slowly. Pull too fast and the ring breaks: finish your drink!'],
+      ['Hold på det gule kortet og følg sporet ut av ringen. Går du utenfor sporet, bygger spenningen seg opp – ryker ringen, drikker du opp glasset ditt!', 'Hold the yellow card and follow the lane out of the ring. Leave the lane and the tension builds – if the ring breaks, finish your drink!'],
       ['Jo færre kort som er igjen, jo strammere blir ringen. Ringen kan bare brytes én gang – etter det er resten trygt.', 'The fewer cards left, the tighter the ring gets. The ring can only break once – after that the rest is safe.'],
       ['Gjør det kortet sier. Hver konge fyller kongekoppen – den som trekker fjerde konge, drikker den.', 'Do what the card says. Each king fills the king’s cup – whoever draws the fourth king drinks it.']],
     aldri: [['Kortet kommer opp på alle telefonene.', 'The card shows up on every phone.'], ['Svar «Jeg har» eller «Aldri». Ingen ser svaret før alle har svart.', 'Answer “I have” or “Never”. Nobody sees the answers until everyone has answered.'], ['De som har gjort det, drikker én slurk. Så trykker noen «Neste kort».', 'Everyone who has done it drinks one sip. Then someone taps “Next card”.']],
     kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Hvem som helst kan trykke «Neste kort».', 'Anyone can tap “Next card”.']],
   };
   function reglerPanel(s) {
-    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.aldri || s.svarPaa ? 'aldri' : 'kort')) : s.type, r = REGLER[nokkel];
+    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.pek ? 'pekeleken' : s.aldri || s.svarPaa ? 'aldri' : 'kort')) : s.type, r = REGLER[nokkel];
     if (!r) return '';
     var sett = les('bd_regler_sett') || [], forste = sett.indexOf(nokkel) === -1;
     if (forste) { sett.push(nokkel); skriv('bd_regler_sett', sett.slice(-40)); apneRegler[nokkel] = true; }
@@ -1243,8 +1245,101 @@ export function startRom(LEKNAVN, LANG) {
     if (!e.target.closest || !e.target.closest('[data-g="rof-lukk"]')) return;
     rofSkjult = tilstand && tilstand.spill ? tilstand.spill.nr : -1; tegn();
   });
+  /* ---------- Pekeleken: 3 · 2 · 1 · PEK! og fingertelling ----------
+     Nedtellingen regnes fra et felles starttidspunkt (justert for klokkeavvik), så alle telefonene og
+     TV-en sier «PEK!» i samme øyeblikk. Tallene bytter med en kort fjær; resten står stille. */
+  var PK_PRE = /^(Hvem er mest sannsynlig til å|Who's most likely to|Who is most likely to)\s+/i;
+  var PK_VRI = {
+    lukk: [T('Lukk øynene og pek', 'Close your eyes and point'), T('Ingen ser hvem du peker på før alle åpner samtidig.', 'Nobody sees who you point at until everyone opens at once.')],
+    flertall: [T('Pek der flertallet peker', 'Point where the majority points'), T('Ikke hvem det passer på – hvem du tror de andre velger. De som bommer, drikker én.', 'Not who it fits – who you think the others pick. Miss and you drink one.')],
+    forsvar: [T('Forsvarstale', 'Defence speech'), T('Den med flest fingre får 15 sekunder. Får du én til å snu, slipper du.', 'Most fingers gets 15 seconds. Turn one person and you are off the hook.')],
+    selv: [T('Pek på deg selv hvis det stemmer', 'Point at yourself if it is true'), T('Ærlighet lønner seg: del ut én.', 'Honesty pays: hand out one.')],
+    dobbel: [T('Dobbel', 'Double'), T('Fingrene teller dobbelt denne runden.', 'Fingers count double this round.')],
+  };
+  var pkVist = '', pkTimer = null, pkSist = '';
+  function pkTid(pk) { return Date.now() + klokkeAvvik - (pk.start || 0); }
+  function pkTrinn(pk) { var t = pkTid(pk); return t < 0 ? 3 : t < 800 ? 3 : t < 1600 ? 2 : t < pk.tell ? 1 : 0; }
+  function pkTikk() {
+    clearInterval(pkTimer);
+    pkTimer = setInterval(function () {
+      var el = document.getElementById('pkTall'), sp = tilstand && tilstand.spill, pk = sp && sp.pek;
+      if (!el || !pk || pk.fase !== 'teller') { clearInterval(pkTimer); return; }
+      var trinn = pkTrinn(pk), nokkel = pk.start + ':' + trinn;
+      if (nokkel !== pkSist) {
+        pkSist = nokkel;
+        el.textContent = trinn ? trinn : T('Pek!', 'Point!');
+        el.className = 'pk-tall' + (trinn ? '' : ' pek') + (trinn === 1 ? ' en' : '');
+        void el.offsetWidth; el.classList.add('inn');
+        if (trinn) spillLyd('tikk'); else { spillLyd('pek'); try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} }
+        var hand = document.getElementById('pkHand'); if (hand) { if (trinn) hand.setAttribute('hidden', ''); else hand.removeAttribute('hidden'); }
+      }
+      if (pkTid(pk) > pk.tell + 1400) { clearInterval(pkTimer); tegn(); }
+    }, 60);
+  }
+  function pkKort(s, vri) {
+    var tekst = String((s.kort && s.kort.t) || ''), m = tekst.match(PK_PRE), rest = m ? tekst.slice(m[0].length) : tekst;
+    var v = vri && PK_VRI[vri];
+    return '<div class="pk-kort' + (v ? ' med-vri' : '') + '">' + (v ? '<div class="pk-vri"><b>' + T('Vri', 'Twist') + '</b><span>' + esc(v[0]) + '</span></div>' : '') +
+      (m ? '<span class="pk-pre">' + esc(m[1]) + ' …</span>' : '') + '<p>' + esc(rest) + '</p>' + (v ? '<small class="pk-vri-tekst">' + esc(v[1]) + '</small>' : '') + '</div>';
+  }
+  function pkNesteLeser(pk) {
+    var l = tilstand.spillere || [], i = l.findIndex(function (p) { return p.id === pk.leser; });
+    return l.length ? l[(i + 1) % l.length] : null;
+  }
+  function pekSpill(s) {
+    var pk = s.pek, vert = erVert(), jegLeser = pk.leser === tilstand.meg, kan = jegLeser || vert, alle = tilstand.spillere || [];
+    var topp = '<div class="nr-topp pk-topp"><div class="nr-topp-tekst"><span>' + T('Pekeleken · kort ', 'Most likely to · card ') + (s.pos + 1) + '</span><b' + (jegLeser ? ' class="gul"' : '') + '>' +
+      (jegLeser ? T('Du leser', 'You read') : esc(navn(pk.leser)) + T(' leser', ' reads')) + '</b></div></div>';
+    if (pk.fase === 'klar') {
+      return topp + pkKort(s, pk.vri) +
+        (kan ? '<button class="rom-stor-knapp pk-start" data-g="pek-start" type="button">' + T('Tell ned – 3 · 2 · 1', 'Count down – 3 · 2 · 1') + '</button>' +
+              '<p class="nr-vent">' + (jegLeser ? T('Les kortet høyt først. Alle telefonene teller ned samtidig.', 'Read the card out loud first. All the phones count down together.') : T('Du kan starte for ', 'You can start for ') + esc(navn(pk.leser)) + '.') + '</p>'
+            : '<p class="nr-vent">' + esc(navn(pk.leser)) + T(' leser høyt og starter nedtellingen. Gjør deg klar til å peke.', ' reads it out and starts the countdown. Get ready to point.') + '</p>');
+    }
+    if (pk.fase === 'teller' && pkTid(pk) <= pk.tell + 1400) {
+      var trinn = pkTrinn(pk); pkSist = pk.start + ':' + trinn; setTimeout(pkTikk, 0);
+      return topp + pkKort(s, pk.vri) +
+        '<div class="pk-scene" aria-live="assertive"><svg id="pkHand" class="pk-hand" viewBox="0 0 160 90" aria-hidden="true"' + (trinn ? ' hidden' : '') + '><path class="f" d="M84 40h56a10 10 0 0 1 0 20H96"/><path class="f" d="M14 34c0-6 6-10 14-10h30c10 0 16 6 26 16v34c0 6-6 10-12 10H34C22 84 14 76 14 64z"/><path class="s" d="M58 58h20M58 70h16"/></svg>' +
+        '<span id="pkTall" class="pk-tall' + (trinn ? '' : ' pek') + (trinn === 1 ? ' en' : '') + '">' + (trinn || T('Pek!', 'Point!')) + '</span></div>';
+    }
+    if (pk.fase === 'teller') {
+      var mine = pk.mine, har = pk.harTalt || [], maks = Math.max(1, Math.min(6, alle.length - 1));
+      var knapper = []; for (var i = 0; i <= maks; i++) knapper.push('<button type="button" data-g="pek-fingre" data-n="' + i + '" aria-pressed="' + (mine === i) + '">' + (i === maks && alle.length - 1 > maks ? i + '+' : i) + '</button>');
+      var mangler = alle.length - har.length;
+      return topp + pkKort(s, pk.vri) +
+        '<p class="pk-sporsmal">' + (pk.vri === 'dobbel' ? T('Hvor mange pekte på deg? (Teller dobbelt)', 'How many pointed at you? (Counts double)') : T('Hvor mange pekte på deg?', 'How many pointed at you?')) + '</p>' +
+        '<div class="pk-fingre" style="--n:' + (maks + 1) + '">' + knapper.join('') + '</div>' +
+        (pk.vri === 'selv' ? '<button type="button" class="pk-selv" data-g="pek-selv"' + (pk.selv.indexOf(tilstand.meg) !== -1 ? ' disabled' : '') + '>' + (pk.selv.indexOf(tilstand.meg) !== -1 ? T('Ærlig – du deler ut én', 'Honest – you hand out one') : T('Jeg pekte på meg selv – del ut én', 'I pointed at myself – hand out one')) + '</button>' : '') +
+        '<div class="nr-folk">' + alle.map(function (p) { return nrPille(p.id, har.indexOf(p.id) !== -1 ? 'har' : ''); }).join('') + '<span>' + har.length + T(' av ', ' of ') + alle.length + T(' har talt', ' counted') + '</span></div>' +
+        (kan && mangler > 0 ? '<button class="btn ghost small pk-videre" data-g="pek-tell-ferdig" type="button">' + T('Gå videre uten de siste', 'Move on without the rest') + '</button>' : '');
+    }
+    var r = pk.resultat || {}, inn = pkVist !== s.pos + ':' + pk.fase; pkVist = s.pos + ':' + pk.fase;
+    var navnene = (r.topp || []).map(function (id) { return id === tilstand.meg ? T('Du', 'You') : esc(navn(id)); }).join(T(' og ', ' and '));
+    if (pk.fase === 'forsvar') {
+      var igjen = Math.max(0, 15 - Math.floor((Date.now() + klokkeAvvik - (pk.forsvarFra || Date.now())) / 1000));
+      return topp + pkKort(s, pk.vri) +
+        '<div class="pk-resultat forsvar' + (inn ? ' inn' : '') + '"><div class="pk-res-topp">' + (r.topp || []).map(function (id) { return nrPille(id); }).join('') + '<b>' + navnene + T(' – forsvar deg!', ' – defend yourself!') + '</b></div>' +
+          '<span>' + T('15 sekunder. Får du én til å snu, slipper du ', '15 seconds. Turn one person and you skip ') + r.slurker + T(' slurker.', ' sips.') + '</span><i class="pk-forsvar-tid" style="--s:' + igjen + 's"></i></div>' +
+        (kan ? '<div class="pk-forsvar-valg"><button type="button" data-g="pek-forsvar" data-slapp="1">' + T('Slapp unna', 'Got away') + '</button><button type="button" class="drikk" data-g="pek-forsvar" data-slapp="0">' + T('Drikk', 'Drink') + '</button></div>' : '<p class="nr-vent">' + esc(navn(pk.leser)) + T(' bestemmer.', ' decides.') + '</p>');
+    }
+    // Ferdig
+    var ford = r.fordeling || {}, maksN = Math.max(1, r.maks || 0);
+    var rader = alle.slice().sort(function (a, b) { return (ford[b.id] || 0) - (ford[a.id] || 0); }).filter(function (p) { return ford[p.id] > 0 || p.id === tilstand.meg; });
+    var nesteL = pkNesteLeser(pk);
+    var tittel = !(r.topp || []).length ? T('Ingen fikk fingre', 'Nobody got any fingers') : r.slapp ? navnene + T(' slapp unna!', ' got away!') : navnene + T(' – drikk ', ' – drink ') + r.slurker;
+    return topp + pkKort(s, pk.vri) +
+      '<div class="pk-resultat' + ((r.topp || []).length && !r.slapp ? ' drikk' : '') + (inn ? ' inn' : '') + '"><div class="pk-res-topp">' + (r.topp || []).map(function (id) { return nrPille(id); }).join('') + '<b>' + tittel + '</b></div>' +
+        ((r.topp || []).length ? '<span>' + r.maks + (r.maks === 1 ? T(' finger pekte', ' finger pointed') : T(' fingre pekte', ' fingers pointed')) + (pk.vri === 'dobbel' ? T(' – dobbelt opp.', ' – doubled.') : '.') + '</span>' : '') + '</div>' +
+      (pk.vri === 'flertall' && (r.topp || []).length ? '<p class="pk-merk">' + T('Pekte du ikke på ', 'Didn’t point at ') + navnene + T('? Drikk én.', '? Drink one.') + '</p>' : '') +
+      (rader.length ? '<ul class="pk-soyler' + (inn ? ' inn' : '') + '">' + rader.map(function (p, i) {
+        var n = ford[p.id] || 0;
+        return '<li style="--i:' + i + '"><span>' + (p.id === tilstand.meg ? T('Du', 'You') : esc(p.navn)) + '</span><i><b style="transform:scaleX(' + (n / maksN).toFixed(3) + ');background:' + nrFarge(p.id) + '"></b></i><em>' + n + '</em></li>'; }).join('') + '</ul>' : '') +
+      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + (nesteL ? ' – ' + (nesteL.id === tilstand.meg ? T('du leser', 'you read') : esc(nesteL.navn) + T(' leser', ' reads')) : '') + '</button>';
+  }
+
   function kortSpill(s) {
     if (s.ring) return rofSpill(s);
+    if (s.pek && s.pek.fase !== 'hendelse') return pekSpill(s);
     if (s.aldri) return aldriSpill(s) + aldriBryter(s);
     var k = s.kort || {};
     if (k.id) merkSett(s.lek, k.id);
@@ -3428,6 +3523,11 @@ export function startRom(LEKNAVN, LANG) {
       lhSikker.v = !lhSikker.v; return tegn();
     }
     if (g === 'lh-bytt') return gjor({ handling: 'lh-bytt' });
+    if (g === 'pek-start') return gjor({ handling: 'pek-start' });
+    if (g === 'pek-fingre') return gjorAlltid({ handling: 'pek-fingre', n: Number(b.dataset.n) });
+    if (g === 'pek-selv') return gjor({ handling: 'pek-selv' });
+    if (g === 'pek-tell-ferdig') return gjor({ handling: 'pek-tell-ferdig' });
+    if (g === 'pek-forsvar') return gjor({ handling: 'pek-forsvar', slapp: b.dataset.slapp === '1' });
     if (g === 'lh-ide') { var ide = document.getElementById('lhIde'); if (ide) { ide.textContent = lhIde(); ide.hidden = false; ide.classList.remove('inn'); void ide.offsetWidth; ide.classList.add('inn'); } return; }
     if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
     if (g === 'fjern') return gjor({ handling: 'fjern', hvem: b.dataset.id });
