@@ -296,6 +296,43 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         '<aside class="tv-aldri-svar"><h3>' + svart.length + T(' av ', ' of ') + alle.length + T(' har svart', ' have answered') + '</h3><ul>' + liste + '</ul>' +
         '<p class="tv-liten">' + T('Svar på telefonen. Ingen ser svaret før alle har svart.', 'Answer on your phone. Nobody sees the answers until everyone has answered.') + '</p></aside></div>';
     }
+    /* ---------- Nyhetsrunden: spørsmålet, A–D, hvem som valgte hva, og stillingen ved siden av ---------- */
+    var NR_FARGER = ['#FF9CC2', '#63E2A8', '#FFD23F', '#7CC6FE', '#FF5B1F', '#C9B3FF', '#FFB38A', '#B8E986'];
+    function nrPille(d, id) {
+      var l = d.spillere || [], i = l.findIndex(function (p) { return p.id === id; }), p = l[i] || { navn: '?' };
+      return '<span class="tvnr-p" style="--f:' + NR_FARGER[(i < 0 ? 0 : i) % NR_FARGER.length] + '">' + esc(String(p.navn).slice(0, 2)) + '</span>';
+    }
+    function nrTall(v) { var n = Number(v); return isFinite(n) ? n.toLocaleString(T('nb-NO', 'en-GB')) : esc(v); }
+    var tvnrVist = '';
+    function nrScene(d, n) {
+      var alle = d.spillere || [], uke = '<p class="tv-etikett">' + T('Nyhetsrunden · uke ', 'Nyhetsrunden · week ') + n.uke + '</p>';
+      var stilling = '<ol class="tvnr-stilling" aria-label="' + T('Stillingen', 'Standings') + '">' + (n.tavle || []).map(function (x) {
+        return '<li>' + nrPille(d, x.id) + '<b>' + x.riktige + '</b></li>'; }).join('') + '</ol>';
+      if (n.fase === 'klar') return '<div class="tv-scene tvnr">' + '<div class="tvnr-hoved">' + '<div class="tvnr-hode">' + uke + '</div>' + '<h1 class="tv-sporsmal">' + n.lengde + T(' spørsmål om ukas nyheter', ' questions about this week’s news') + '</h1>' +
+        '<p class="tv-stor">' + esc(navn(n.vert)) + T(' leser. Alle svarer på telefonen.', ' reads. Everyone answers on their phone.') + '</p><div class="tvnr-folk">' + alle.map(function (p) { return nrPille(d, p.id); }).join('') + '</div></div></div>';
+      if (n.fase === 'ferdig') {
+        var l = n.tavle || [];
+        return '<div class="tv-scene tvnr">' + '<div class="tvnr-hoved">' + '<div class="tvnr-hode">' + uke + stilling + '</div>' + '<h1 class="tv-sporsmal">' + (l[0] && l[0].riktige ? T('Ukens nyhetsnerd: ', 'News nerd of the week: ') + '<b class="tvnr-gul">' + esc(l[0].navn) + '</b>' : T('Ingen fikk noe riktig', 'Nobody got anything right')) + '</h1>' +
+          '<p class="tv-stor">' + (l[0] ? l[0].riktige + T(' av ', ' of ') + n.antall + T(' riktige', ' right') : '') + '</p></div></div>';
+      }
+      var aapen = n.fase === 'svar', sv = n.svarene || {}, res = n.resultat || {}, har = n.harSvart || [];
+      var topp = '<div class="tvnr-hode">' + uke + '<p class="tvnr-nr">' + (n.i + 1) + ' / ' + n.antall + '</p>' + stilling + '</div>';
+      var midt = '', vk = n.rid + ':' + n.i + ':' + n.fase, inn = vk !== tvnrVist; tvnrVist = vk;
+      if (n.alt) midt = '<div class="tvnr-alt' + (n.alt.length === 2 ? ' to' : '') + (inn ? ' inn' : '') + '">' + n.alt.map(function (a, i) {
+        var rett = aapen && a === n.fasit, hvem = aapen ? alle.filter(function (p) { return sv[p.id] === a; }) : [];
+        return '<div class="tvnr-a' + (aapen ? (rett ? ' rett' : ' dempet') : '') + '"><i>' + 'ABCD'.charAt(i) + '</i><span>' + esc(a) + '</span><span class="tvnr-hvem">' + hvem.map(function (p) { return nrPille(d, p.id); }).join('') + '</span>' +
+          (rett ? '<em>' + T('Riktig', 'Right') + '</em>' : '') + '</div>'; }).join('') + '</div>';
+      else if (aapen) {
+        var liste = alle.slice().sort(function (a, b) { return (res[b.id] || -1) - (res[a.id] || -1); });
+        midt = '<p class="tv-fasit">' + T('Svar: ', 'Answer: ') + '<b>' + esc(n.fasit) + '</b></p><ul class="tvnr-liste">' + liste.map(function (p) {
+          var k = res[p.id];
+          return '<li class="' + (k > 0 ? 'rett' : k === 0 ? 'null' : 'feil') + '">' + nrPille(d, p.id) + '<span>' + (sv[p.id] ? (n.qtype === 'tall' ? nrTall(String(sv[p.id]).replace(/\D/g, '')) : esc(sv[p.id])) : '–') + '</span><b>' +
+            (k === 2 ? T('Nærmest', 'Closest') : k === 1 ? (n.qtype === 'tall' ? T('Innen 10 %', 'Within 10%') : T('Riktig', 'Right')) : k === 0 ? '' : T('Drikk', 'Drink')) + '</b></li>'; }).join('') + '</ul>';
+      }
+      var svart = aapen ? (n.info ? '<p class="tvnr-info">' + esc(n.info) + (n.kilde ? ' · ' + esc(n.kilde) : '') + '</p>' : '')
+        : '<div class="tvnr-folk">' + alle.map(function (p) { return '<span class="' + (har.indexOf(p.id) !== -1 ? 'har' : 'mangler') + '">' + nrPille(d, p.id) + '</span>'; }).join('') + '<span class="tvnr-teller">' + har.length + ' / ' + alle.length + T(' har svart', ' answered') + '</span></div>';
+      return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + topp + '<h1 class="tv-sporsmal">' + esc(n.q || '') + '</h1>' + midt + svart + '</div></div>';
+    }
     function scene(d) {
       var s = d.spill;
       if (d.ferdig && d.kaaringer) {
@@ -309,6 +346,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
           '<div class="tv-chips">' + (d.spillere || []).map(function (p) { return '<span>' + (p.id === d.vert ? '👑 ' : '') + esc(p.navn) + '</span>'; }).join('') + '</div></div></div><div class="tv-stua-plass" id="tvStuaPlass"></div></div>';
       }
       var topp = '<p class="tv-etikett">' + esc(s.navn) + '</p>';
+      if (s.type === 'nyhetsrunden' && s.nr) return nrScene(d, s.nr);
       if (s.type === 'kort' && s.ring) {
         return '<div class="tv-scene tv-rof">' + '<div>' + topp + '<h1 class="tv-tur">' + T('Trekker: ', 'Drawing: ') + '<b>' + esc(navn(s.turId)) + '</b></h1>' + ring(s) +
           '<p class="tv-liten">' + s.igjen + T(' kort i ringen', ' cards in the ring') + (s.ringBrutt ? ' · 💥 ' + T('ringen er brutt', 'the ring is broken') : '') + '</p></div>' +
@@ -596,6 +634,39 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tv-valg b{display:inline-grid;place-items:center;min-width:1.6em;height:1.6em;background:#FFD23F;color:#16120F;border-radius:4px;font-family:var(--display);font-weight:900}
     .tv-fasit{font-size:2em;margin-top:3vh}
     .tv-fasit b{background:#63E2A8;color:#16120F;padding:0 .3em;border-radius:4px}
+    .tvnr{display:block!important;width:100%;text-align:left;align-self:stretch}
+    .tvnr-hoved{display:flex;flex-direction:column;gap:2.2vh;min-width:0}
+    .tvnr-hode{display:flex;align-items:center;gap:1em;flex-wrap:wrap}
+    .tvnr-hoved .tv-sporsmal{font-size:clamp(26px,2.7vw,52px)!important;max-width:30ch;margin:0}
+    .tvnr-nr{margin:0;font-family:var(--display);font-weight:900;font-size:1em;padding:.1em .5em;border:3px solid #FFF8EE;border-radius:4px}
+    .tvnr-gul{color:#FFD23F}
+    .tvnr-p{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;padding:0 .3em;box-sizing:border-box;border:3px solid #16120F;border-radius:1em;background:var(--f);color:#16120F;font-weight:900;font-size:.8em}
+    .tvnr-alt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.4vw}
+    .tvnr-a{position:relative;display:flex;align-items:center;gap:.6em;padding:.45em .7em;font-size:1.25em;font-weight:800;line-height:1.15;background:#2A292E;color:#FFF8EE;border:3px solid #FFF8EE;border-radius:8px;box-shadow:6px 6px 0 #000;transition:opacity .3s,background-color .3s}
+    .tvnr-a i{flex:none;display:grid;place-items:center;width:1.6em;height:1.6em;font-style:normal;font-weight:900;border:3px solid #16120F;border-radius:6px;background:#FFD23F;color:#16120F}
+    .tvnr-a>span:nth-of-type(1){flex:1}
+    .tvnr-hvem{display:flex;gap:.25em}
+    .tvnr-a.rett{background:#63E2A8;color:#16120F;box-shadow:10px 10px 0 #FFD23F}
+    .tvnr-a.rett i{background:#16120F;color:#FFF8EE}
+    .tvnr-a.dempet{opacity:.5}
+    .tvnr-a em{position:absolute;right:-.4em;top:-.7em;font-style:normal;font-size:.65em;font-weight:900;text-transform:uppercase;padding:.2em .5em;background:#FFF8EE;color:#16120F;border:3px solid #16120F;transform:rotate(-6deg)}
+    .tvnr-alt.inn .tvnr-a em{animation:tvnrStempel .42s cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvnrStempel{from{transform:rotate(-6deg) scale(1.6);opacity:0}to{transform:rotate(-6deg);opacity:1}}
+    .tvnr-folk{display:flex;flex-wrap:wrap;align-items:center;gap:.5em;font-size:1.15em}
+    .tvnr-folk .mangler .tvnr-p{background:transparent;color:#D9D2C7;border-style:dashed;border-color:#D9D2C7}
+    .tvnr-teller{margin-left:.5em;font-weight:800;color:#D9D2C7}
+    .tvnr-liste{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1vh 1.4vw;font-size:1.2em}
+    .tvnr-liste li{display:flex;align-items:center;gap:.6em;padding:.3em .6em;background:#2A292E;border:3px solid #FFF8EE;border-radius:6px}
+    .tvnr-liste li span:not(.tvnr-p){flex:1;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .tvnr-liste li b{font-size:.7em;text-transform:uppercase;font-weight:900;padding:.15em .45em;border-radius:3px;color:#16120F;background:#F2EADF}
+    .tvnr-liste li.rett b{background:#63E2A8}
+    .tvnr-liste li.feil b{background:#FF9CC2}
+    .tvnr-info{margin:0;font-size:1.05em;color:#D9D2C7;max-width:70ch}
+    .tvnr-stilling{list-style:none;margin:0 0 0 auto;padding:0;display:flex;gap:.6em;flex-wrap:wrap}
+    .tvnr-stilling li{display:flex;align-items:center;gap:.35em;padding:.2em .5em .2em .25em;background:#2A292E;border:3px solid #FFF8EE;border-radius:999px;font-weight:900}
+    .tvnr-stilling li:first-child{box-shadow:4px 4px 0 #FFD23F}
+    .tvnr-stilling b{font-variant-numeric:tabular-nums}
+    @media (prefers-reduced-motion:reduce){.tvnr-alt.inn .tvnr-a em{animation:none}}
     .tv-toast,.tv-banner{border:3px solid #FFF8EE!important;border-radius:6px!important;box-shadow:6px 6px 0 #FFD23F!important;background:#16120F!important}
 </style>
 </body>

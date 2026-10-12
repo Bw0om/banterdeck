@@ -475,3 +475,125 @@ html.i-spill .rom-kode{font-size:.92em}
 .tv-spenning b{display:block;height:100%;transition:width .3s linear}
 /* I ringen sier chippen alt: ikke tittel og turbanner i tillegg */
 #rom:has(.ring-topp) .tur-merke,.rom-spill:has(.ring-topp) .rom-spillnavn{display:none}
+
+/* ---------- Nyhetsrunden: spørsmålet på alle telefonene, A–D-klistremerker, tallinje og pall ---------- */
+.rom-spill:has(.nr-topp,.nr-vinner){align-items:stretch;text-align:left;gap:0}
+.rom-spill:has(.nr-topp,.nr-vinner) .rom-stor-knapp{align-self:stretch}
+#rom:has(.nr-topp) .tur-merke,.rom-spill:has(.nr-topp) .rom-spillnavn,.rom-spill:has(.nr-vinner) .rom-spillnavn{display:none}
+.nr-topp{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}
+.nr-topp-tekst{display:flex;flex-direction:column;gap:3px}
+.nr-topp-tekst span,.nr-etikett{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.nr-etikett{margin:14px 0 6px}
+.nr-topp-tekst b{align-self:flex-start;font-family:var(--display);font-stretch:62%;font-weight:900;text-transform:uppercase;font-size:26px;line-height:.95;padding:4px 8px;background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);box-shadow:var(--skygge-liten)}
+.nr-klokke{position:relative;flex:none;width:56px;height:56px}
+.nr-klokke svg{width:56px;height:56px;display:block}
+.nr-klokke circle{fill:var(--card)}
+.nr-klokke circle.kant{fill:none;stroke:var(--ink);stroke-width:3}
+.nr-klokke path{fill:var(--mint)}
+.nr-klokke.snart path{fill:var(--oransje)}
+.nr-klokke span{position:absolute;inset:0;display:grid;place-items:center;font-size:17px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--ink)}
+.nr-p{display:inline-grid;place-items:center;min-width:28px;height:28px;padding:0 5px;box-sizing:border-box;border:2px solid #16120F;border-radius:14px;font-size:11px;font-weight:900;background:var(--f);color:#16120F;line-height:1}
+.nr-p.meg{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+.nr-folk{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 10px}
+.nr-folk .nr-p:not(.har){background:transparent;color:var(--muted);border-style:dashed;border-color:var(--muted)}
+.nr-folk .nr-p.har{transition:background-color .2s}
+.nr-folk>span:last-child{margin-left:auto;font-size:12px;font-weight:800;color:var(--muted)}
+.nr-kort{position:relative;padding:14px 14px 16px;margin:0 0 12px;background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:var(--skygge)}
+.nr-kort p{margin:0;font-size:22px;font-weight:800;line-height:1.2}
+.nr-kort.liten p{font-size:17px}
+.nr-type{display:inline-block;margin:0 6px 8px 0;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
+.nr-les{display:inline-block;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;background:var(--rosa);color:var(--blekk);border:2px solid var(--blekk)}
+.nr-regler-kort{margin:10px 0 0;padding-left:18px;font-size:14px;line-height:1.35}
+.nr-alt{display:flex;flex-direction:column;gap:10px;margin:0 0 12px}
+.nr-alt.to{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.nr-a{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:58px;box-sizing:border-box;padding:8px 12px;font:800 17px/1.2 var(--sans);text-align:left;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out,background-color .15s}
+.nr-alt.to .nr-a{min-height:84px;justify-content:center;font-size:22px;font-family:var(--display);font-stretch:75%;font-weight:900;text-transform:uppercase}
+.nr-a i{flex:none;display:grid;place-items:center;width:30px;height:30px;border:2.5px solid var(--ink);border-radius:4px;font-style:normal;font-size:15px;font-weight:900;background:var(--bg2)}
+.nr-alt.to .nr-a i{display:none}
+.nr-a>span:nth-of-type(1){flex:1}
+.nr-a[aria-pressed="true"]{background:var(--gul);color:var(--blekk);transform:translate(2px,2px);box-shadow:2px 2px 0 var(--hard)}
+.nr-a[aria-pressed="true"] i{background:var(--blekk);color:#FFF8EE;border-color:var(--blekk)}
+.nr-a:not(.avslort):active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+.nr-a.avslort{cursor:default}
+.nr-a.rett{background:var(--mint);color:var(--blekk)}
+.nr-a.rett i,.nr-a.feil i{background:var(--blekk);color:#FFF8EE;border-color:var(--blekk)}
+.nr-a.feil{background:var(--oransje);color:var(--blekk)}
+.nr-a.dempet{opacity:.55;box-shadow:none}
+.nr-hvem{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-end}
+.nr-stempel{position:absolute;right:-6px;top:-13px;font-style:normal;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px;border:2.5px solid #16120F;background:#FFF8EE;color:#16120F;transform:rotate(-8deg)}
+.nr-a.feil .nr-stempel{background:#16120F;color:#FFF8EE}
+.nr-stempel.inn{animation:nrStempel 420ms var(--fjaer) both}
+@keyframes nrStempel{from{transform:rotate(-8deg) scale(1.6);opacity:0}to{transform:rotate(-8deg);opacity:1}}
+.nr-vent{margin:4px 0 0;font-size:14px;font-weight:700;line-height:1.3;text-align:center}
+.nr-vis small{font-size:.7em;opacity:.8}
+.nr-lengder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.nr-lengder button{font:900 15px var(--display);font-stretch:78%;text-transform:uppercase;padding:12px 6px;background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);border-radius:4px;box-shadow:var(--skygge-liten);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.nr-lengder button[aria-pressed="true"]{background:var(--gul);color:var(--blekk)}
+.nr-lengder button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+/* Tall: eget tastatur */
+.nr-tall{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
+.nr-tall label,.nr-fritt label{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.nr-tall-ut{display:block;padding:6px 12px;min-height:56px;box-sizing:border-box;font-family:var(--display);font-size:40px;font-weight:900;font-stretch:70%;font-variant-numeric:tabular-nums;text-align:right;background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);border-radius:6px;overflow:hidden;white-space:nowrap}
+.nr-taster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.nr-taster button{min-height:50px;font:900 22px var(--sans);color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:4px;box-shadow:3px 3px 0 var(--hard);cursor:pointer;transition:transform 70ms ease-out,box-shadow 70ms ease-out;touch-action:manipulation}
+.nr-taster button.graa{background:var(--bg2)}
+.nr-taster button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+.nr-las{font:900 18px var(--display);font-stretch:78%;text-transform:uppercase;padding:13px;background:var(--gul);color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:4px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.nr-las:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+.nr-fritt{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}
+.nr-fritt div{display:flex;gap:8px}
+.nr-fritt input{flex:1;min-width:0;font:700 18px var(--sans);padding:12px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:4px}
+.nr-fritt button{font:900 16px var(--display);font-stretch:78%;text-transform:uppercase;padding:0 16px;background:var(--gul);color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:4px;box-shadow:3px 3px 0 var(--hard);cursor:pointer}
+.nr-fritt small{font-size:13px}
+/* Avsløringen */
+.nr-fasit-boks{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px}
+.nr-fasit-boks span{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.nr-fasit-boks b{font-family:var(--display);font-size:clamp(26px,9vw,40px);font-weight:900;font-stretch:70%;line-height:1.05;text-align:right;background:var(--mint);color:var(--blekk);padding:2px 8px;border:var(--strek) solid var(--blekk)}
+.nr-linje{position:relative;margin:0 22px 14px}
+.nr-akse{position:absolute;left:-14px;right:-14px;bottom:50px;height:6px;background:var(--ink);border-radius:3px}
+.nr-pinne{position:absolute;bottom:56px;display:flex;flex-direction:column;align-items:center;gap:2px;transform:translateX(-50%)}
+.nr-pinne small{font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink);background:var(--bg);padding:0 2px}
+.nr-pinne i{display:block;width:3px;height:var(--h);background:var(--ink)}
+.nr-pinne .nr-p.beste{box-shadow:0 0 0 3px var(--ink)}
+.nr-fasit-flagg{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);z-index:1}
+.nr-fasit-flagg i{display:block;width:3px;height:16px;background:var(--ink)}
+.nr-fasit-flagg b{font-size:13px;font-weight:900;padding:4px 8px;background:var(--mint);color:var(--blekk);border:2.5px solid var(--blekk);white-space:nowrap}
+.nr-linje.inn .nr-pinne{animation:nrPinne 520ms var(--fjaer) both;animation-delay:calc(var(--i) * 70ms)}
+@keyframes nrPinne{from{transform:translate(-50%,18px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.nr-resultat{display:flex;flex-direction:column;gap:4px;padding:12px 14px;margin:0 0 12px;border:var(--strek) solid var(--blekk);border-radius:6px;box-shadow:var(--skygge);color:var(--blekk)}
+.nr-resultat.rett{background:var(--mint)}
+.nr-resultat.feil{background:var(--rosa)}
+.nr-resultat.null{background:#F2EADF}
+.nr-resultat b{font-family:var(--display);font-size:26px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.95}
+.nr-resultat span{font-size:13.5px;line-height:1.35}
+.nr-resultat a{color:var(--blekk);font-weight:800}
+.nr-resultat.inn{animation:nrInn 420ms var(--fjaer) both}
+@keyframes nrInn{from{transform:translateY(14px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.nr-liste{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:6px}
+.nr-liste li{display:grid;grid-template-columns:auto auto 1fr auto;gap:10px;align-items:center;padding:8px 10px;background:var(--card);color:var(--ink);border:2.5px solid var(--ink);border-radius:6px}
+.nr-liste .nr-navn{font-weight:900}
+.nr-liste .nr-hva{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nr-liste b,.nr-liste button{font:900 12px var(--sans);text-transform:uppercase;letter-spacing:.04em;padding:4px 8px;border:2px solid var(--blekk);border-radius:3px;color:var(--blekk);background:#F2EADF}
+.nr-liste button{cursor:pointer;min-height:32px}
+.nr-liste li.rett b,.nr-liste li.rett button{background:var(--mint)}
+.nr-liste li.feil b,.nr-liste li.feil button{background:var(--rosa)}
+/* Pallen */
+.nr-vinner{margin:2px 0 6px;font-family:var(--display);font-size:38px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.92}
+.nr-pall{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end;height:240px;margin:6px 0 14px}
+.nr-pall-plass{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.nr-pall-plass svg{width:40px;height:26px}
+.nr-pall-plass svg path{fill:var(--gul);stroke:var(--blekk);stroke-width:3;stroke-linejoin:round}
+.nr-pall-plass .nr-p{min-width:40px;height:40px;border-radius:20px;font-size:14px;border-width:3px}
+.nr-pall-plass>b{font-size:15px;font-weight:900;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nr-pall-blokk{width:100%;height:calc(var(--h) * 140px);display:grid;place-items:center;background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);border-bottom:0;border-radius:6px 6px 0 0;box-shadow:4px 0 0 var(--hard);transform-origin:bottom}
+.nr-pall-plass.forst .nr-pall-blokk{background:var(--gul);color:var(--blekk)}
+.nr-pall-blokk span{font-family:var(--display);font-size:32px;font-weight:900;font-stretch:70%}
+.nr-pall.inn .nr-pall-blokk{animation:nrPall 640ms var(--fjaer) both;animation-delay:calc(var(--i) * 140ms)}
+@keyframes nrPall{from{transform:scaleY(.15)}to{transform:none}}
+.nr-kaaringer{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+.nr-kaaringer li{padding:10px 12px;font-size:14px;line-height:1.35;background:var(--card);color:var(--ink);border:2.5px solid var(--ink);border-radius:6px;box-shadow:var(--skygge-liten)}
+.nr-kaaringer b{font-weight:900}
+.nr-rest{margin:0 0 12px;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.nr-rest li{display:flex;align-items:center;gap:8px;font-weight:800}
+.nr-rest li b{margin-left:auto;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.nr-stempel.inn,.nr-resultat.inn,.nr-linje.inn .nr-pinne,.nr-pall.inn .nr-pall-blokk{animation:none}.nr-a,.nr-lengder button,.nr-taster button,.nr-las{transition:none}}
