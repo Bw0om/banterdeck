@@ -3806,40 +3806,6 @@
      },
      {
       "name": {
-       "no": "50/50",
-       "en": "50/50"
-      },
-      "gear": {
-       "no": "En snusboks eller noe annet å kaste",
-       "en": "Something small to throw"
-      },
-      "pl": "4+",
-      "rules": {
-       "no": [
-        "Annenhver runde er «Jeg har aldri», annenhver er 100 spørsmål. Trekk kortene under.",
-        "«Jeg har aldri»: alle som HAR gjort det, drikker.",
-        "100 spørsmål: kast snusboksen til den det passer best på. Den som tar imot, drikker.",
-        "Velg nivå før dere starter – de to lekene holder samme tone."
-       ],
-       "en": [
-        "Every other round is “Never have I ever”, every other is 100 questions.",
-        "Never have I ever: everyone who HAS done it drinks.",
-        "100 questions: throw the object to whoever fits best. The catcher drinks."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "nach"
-       ],
-       "utstyr": "mobil",
-       "tempo": "sosialt",
-       "min": 4,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
        "no": "Jug",
        "en": "Jug"
       },
@@ -5347,40 +5313,6 @@
      },
      {
       "name": {
-       "no": "Sannhet eller drikk",
-       "en": "Truth or drink"
-      },
-      "gear": {
-       "no": "Ingen",
-       "en": "None"
-      },
-      "pl": "2+",
-      "rules": {
-       "no": [
-        "Still et spørsmål til noen i gruppen.",
-        "Personen svarer helt ærlig – eller drikker i stedet.",
-        "Avtal gjerne at man bare kan hoppe over tre ganger på rad. Den fjerde må besvares."
-       ],
-       "en": [
-        "Ask someone in the group a question.",
-        "They answer completely honestly – or drink instead.",
-        "Agree that you can only skip three in a row. The fourth must be answered."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "to",
-        "nach",
-        "rolig"
-       ],
-       "utstyr": "ingen",
-       "tempo": "rolig",
-       "min": 2,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
        "no": "Rygg mot rygg",
        "en": "Back to back"
       },
@@ -5555,41 +5487,6 @@
        "utstyr": "ingen",
        "tempo": "kaos",
        "min": 4,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
-       "no": "Duoleken",
-       "en": "The Pair Game"
-      },
-      "gear": {
-       "no": "To snusbokser eller andre ting å kaste, merket 1 og 2",
-       "en": "Two small objects to throw, marked 1 and 2"
-      },
-      "pl": "5+",
-      "rules": {
-       "no": [
-        "Merk to snusbokser som nummer 1 og 2 – med tusj eller ulik snus.",
-        "Én leser opp et spørsmål som handler om to personer, for eksempel «Hvem kunne vært tvillinger?».",
-        "Den som har boks 1, kaster den til en person. Den som har boks 2, kaster sin til den som passer best sammen med den personen.",
-        "Begge som tok imot, drikker – og kaster videre på neste spørsmål."
-       ],
-       "en": [
-        "Mark two small objects as number 1 and 2.",
-        "Someone reads a question about two people, like “Who could be twins?”.",
-        "Whoever holds object 1 throws it to someone. Whoever holds object 2 throws theirs to the person who pairs best with them.",
-        "Both catchers drink – and throw on the next question."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "nach"
-       ],
-       "utstyr": "annet",
-       "tempo": "sosialt",
-       "min": 5,
        "maks": 99
       }
      }
