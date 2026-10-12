@@ -723,3 +723,72 @@ html.i-spill .rom-kode{font-size:.92em}
 @keyframes pkSoyle{from{transform:scaleX(0)}}
 .pk-soyler em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.pk-hand,.pk-tall.inn,.pk-tall.pek.inn,.pk-resultat.inn,.pk-soyler.inn i b,.pk-forsvar-tid::after{animation:none}}
+
+/* ---------- Skriv og drikk: skriv, bunken, trekk, «til deg» og Skammekroken ---------- */
+.rom-spill:has(.sd-topp){align-items:stretch;text-align:left;gap:0}
+.rom-spill:has(.sd-topp) .rom-stor-knapp{align-self:stretch}
+.rom-spill:has(.sd-topp) .rom-spillnavn{display:none}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sd-intro p{font-size:20px}
+.sd-med{margin:10px 0 0;text-align:center;font-size:13px;color:var(--muted)}
+.sd-skriv{display:flex;flex-direction:column;gap:12px;padding:14px;margin:0 0 14px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:8px;box-shadow:6px 6px 0 var(--hard)}
+.sd-til{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.sd-til>span{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:2px}
+.sd-til button{font:800 14px var(--sans);padding:7px 11px;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:999px;box-shadow:3px 3px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out,background-color .15s}
+.sd-til button:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--hard)}
+.sd-til button[aria-pressed="true"]{background:var(--f,var(--ink));color:var(--f,var(--card));transform:translate(2px,2px);box-shadow:1px 1px 0 var(--hard)}
+.sd-til button[style][aria-pressed="true"]{color:var(--blekk)}
+.sd-skriv textarea{width:100%;box-sizing:border-box;resize:none;font:800 20px/1.2 var(--sans);color:var(--ink);background:var(--bg);border:2.5px dashed var(--ink);border-radius:4px;padding:10px 12px}
+.sd-skriv textarea:focus{outline:none;border-style:solid}
+.sd-startere{display:flex;flex-direction:column;gap:6px}
+.sd-startere button{text-align:left;font:800 13px/1.3 var(--sans);padding:7px 10px;color:var(--ink);background:var(--bg2);border:2px solid var(--ink);border-radius:4px;cursor:pointer;transition:transform 90ms ease-out}
+.sd-startere button:active{transform:translate(2px,2px)}
+.sd-legg{font:900 18px var(--display);font-stretch:78%;text-transform:uppercase;padding:13px;color:var(--blekk);background:var(--gul);border:var(--strek) solid var(--blekk);border-radius:4px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.sd-legg:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+.sd-legg:disabled{opacity:.5;box-shadow:none}
+.sd-bunken{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 0 6px;min-height:108px}
+.sd-bunke{position:relative;width:150px;height:104px}
+.sd-bunke-kort{position:absolute;left:calc(var(--i) * 5px);bottom:calc(var(--i) * 3px);width:130px;height:84px;box-sizing:border-box;padding:8px;overflow:hidden;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:6px;box-shadow:3px 3px 0 var(--hard);transform:rotate(calc((var(--i) - 1) * 3deg))}
+.sd-bunke-kort span{font-size:11px;font-weight:800;line-height:1.2}
+.sd-bunke-kort.inn{animation:sdInn 520ms var(--fjaer) both}
+@keyframes sdInn{from{transform:translateY(-140px) rotate(-8deg) scale(1.04);opacity:.3}}
+.sd-tall{display:flex;flex-direction:column;align-items:flex-end;gap:4px;color:var(--ink)}
+.sd-tall b{font-family:var(--display);font-size:46px;font-weight:900;font-stretch:62%;line-height:.9}
+.sd-tall b.inn{animation:sdDunk 460ms var(--fjaer) both}
+@keyframes sdDunk{from{transform:scale(1.35)}}
+.sd-tall span{font-size:12px;font-weight:800;color:var(--muted)}
+.sd-trekk{position:relative;margin:6px 0 14px;padding:4px 0}
+.sd-trekk.til-deg{padding:56px 12px 16px;margin:0 -4px 14px;background:var(--gul);border:var(--strek) solid var(--blekk);border-radius:10px}
+.sd-til-deg-stempel{position:absolute;left:10px;top:-8px;font-family:var(--display);font-size:48px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.85;padding:4px 12px 8px;color:var(--gul);background:var(--blekk);box-shadow:6px 6px 0 var(--oransje);transform:rotate(-3deg);z-index:2}
+.sd-til-deg-stempel.inn{animation:sdStempel 480ms var(--fjaer) both}
+@keyframes sdStempel{from{transform:rotate(-3deg) scale(1.6);opacity:0}to{transform:rotate(-3deg);opacity:1}}
+.sd-stabel{position:relative}
+.sd-stabel::before,.sd-stabel::after{content:"";position:absolute;inset:8px -5px -8px 5px;background:var(--card);border:var(--strek) solid var(--ink);border-radius:10px;transform:rotate(3deg)}
+.sd-stabel::after{inset:4px -2px -4px 2px;transform:rotate(-2deg)}
+.sd-kortet{position:relative;z-index:1;min-height:300px;box-sizing:border-box;padding:18px;display:flex;flex-direction:column;gap:14px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:10px;box-shadow:8px 8px 0 var(--hard)}
+.sd-kortet.inn{animation:sdKort 520ms var(--fjaer) both}
+@keyframes sdKort{from{transform:translateY(30px) rotate(-4deg) scale(.94);opacity:0}}
+.sd-kortet p{margin:auto 0;font-family:var(--display);font-size:clamp(25px,8vw,32px);font-weight:900;font-stretch:78%;line-height:1.08}
+.sd-kortet small{font-size:12px;font-weight:800;color:var(--muted)}
+.sd-til-rad{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.sd-til-lapp,.sd-til-alle{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sd-til-navn{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;font-weight:900;color:var(--blekk);background:var(--gul);border:2.5px solid var(--blekk);border-radius:999px}
+.sd-kast{display:flex;flex-direction:column;gap:8px;padding:12px 14px;margin:0 0 12px;color:var(--blekk);background:var(--rosa);border:var(--strek) solid var(--blekk);border-radius:6px;box-shadow:var(--skygge-liten)}
+.sd-kast b{font-size:16px;font-weight:900}
+.sd-kast span{font-size:13px;font-weight:700}
+.sd-kast-valg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.sd-kast-valg button{min-height:48px;font:900 15px var(--display);font-stretch:78%;text-transform:uppercase;color:var(--blekk);background:#FFF8EE;border:var(--strek) solid var(--blekk);border-radius:4px;box-shadow:3px 3px 0 var(--hard);cursor:pointer}
+.sd-kast-valg button[aria-pressed="true"]{background:var(--oransje)}
+.sd-kast .linkbtn{align-self:flex-start;color:var(--blekk)}
+.sd-skam-stempel{display:inline-block;align-self:flex-start;margin:6px 0 10px;font-family:var(--display);font-size:50px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.85;padding:6px 14px 10px;color:var(--blekk);background:var(--oransje);border:4px solid var(--blekk);box-shadow:8px 8px 0 var(--hard);transform:rotate(-3deg)}
+.sd-skam-stempel.inn{animation:sdStempel 480ms var(--fjaer) both}
+.sd-skam-intro{margin:0 0 12px;font-size:15px;font-weight:700}
+.sd-skam{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:10px}
+.sd-skam li{display:flex;flex-direction:column;gap:8px;padding:12px 14px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:4px 4px 0 var(--hard)}
+.sd-skam li.inn{animation:nrInn 420ms var(--fjaer) both;animation-delay:calc(300ms + var(--i) * 120ms)}
+.sd-skam li div{display:flex;align-items:center;gap:8px}
+.sd-skam li b{font-size:17px;font-weight:900}
+.sd-skam s{font-size:16px;font-weight:700;color:var(--muted);text-decoration-thickness:3px}
+.sd-skam p{margin:0;font-size:14px;font-weight:800}
+.sd-straff{margin:0 0 12px;padding:10px 12px;font-family:var(--display);font-size:17px;font-weight:900;font-stretch:70%;text-transform:uppercase;color:var(--blekk);background:var(--gul);border:var(--strek) solid var(--blekk);border-radius:6px}
+@media (prefers-reduced-motion:reduce){.sd-bunke-kort.inn,.sd-tall b.inn,.sd-til-deg-stempel.inn,.sd-kortet.inn,.sd-skam-stempel.inn,.sd-skam li.inn{animation:none}}

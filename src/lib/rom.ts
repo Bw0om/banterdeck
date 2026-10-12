@@ -204,7 +204,7 @@ function offentligTekst(s: any, data: any) {
     if (s.type === 'bloff') return { tekst: s.q, valg: s.fase === 'skriv' ? null : (s.valg || []).map((v: any) => v.t), sant: s.fase === 'fasit' ? s.sant : null, svart: Object.keys(s.falske || {}).length };
     if (s.type === 'samme') return { tekst: s.oppgave, svart: Object.keys(s.svar || {}).length };
     if (s.type === 'tosannheter') return { tekst: null, hvem: s.aktiv || null, valg: s.pastander || null };
-    if (s.type === 'regelfabrikken') return s.fase === 'trekk' ? { tekst: s.rekke[s.pos] || null } : null;
+    if (s.type === 'regelfabrikken') return s.fase === 'trekk' && s.rekke[s.pos] ? { tekst: rfKortObj(s.rekke[s.pos]).t } : null;
     if (s.type === 'nyhetsrunden') { const q = s.sporsmal[s.i]; const aapen = s.fase === 'svar' || s.fase === 'ferdig'; return { tekst: q ? q.q : null, fasit: aapen && q ? q.svar : null, nr: s.i + 1, antall: s.sporsmal.length }; }
   } catch { /* ufullstendig runde: vis ingenting */ }
   return null;
@@ -225,6 +225,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, sikker: s.sikker || {}, drikker: s.drikker, utdeling: s.utdeling || [], lurte: s.lurte || 0 } : null });
     const off = offentligTekst(s, data); if (off) spill.offentlig = off;
     if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
+    if (s.type === 'regelfabrikken') spill.rf = ekstraVisning(s, null, data);
   }
   // Børsen: bare det som er offentlig – tavla, meldte og avgjorte aksjer og sakene. Aldri hendene til folk.
   let bors: any = null;
@@ -1304,6 +1305,93 @@ export function gyldigKode(k: any) { return typeof k === 'string' && /^[A-Z0-9]{
    Pyramiden, Gris og President. Skjulte hender vises bare til eieren.
    ===================================================================== */
 export const SOS = ['hvemskrev', 'bloff', 'samme', 'spion', 'skal', 'pannekort'];
+
+/* ---------- Skriv og drikk: kort til noen, og Skammekroken ----------
+   Et kort kan være til alle, til den som trekker, til én bestemt person eller til to tilfeldige.
+   Kort som prøver å gi mer enn 10 slurker (tall eller ord: «500», «fem hundre», «tjuefem») kommer
+   aldri med i bunken. De dukker opp i Skammekroken når bunken er tom, med hvem som skrev og en kommentar. */
+const RF_MAKS = 10;
+const RF_TALL: Record<string, number> = { null: 0, en: 1, ett: 1, 'én': 1, ei: 1, to: 2, tre: 3, fire: 4, fem: 5, seks: 6, sju: 7, syv: 7, 'åtte': 8, ni: 9, ti: 10, elleve: 11, tolv: 12, tretten: 13, fjorten: 14, femten: 15, seksten: 16, sytten: 17, atten: 18, nitten: 19,
+  tjue: 20, tyve: 20, tretti: 30, 'førti': 40, femti: 50, seksti: 60, sytti: 70, 'åtti': 80, nitti: 90,
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19,
+  twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+const RF_GANGER: Record<string, number> = { hundre: 100, hundred: 100, tusen: 1000, thousand: 1000, million: 1e6, millioner: 1e6 };
+/** Ett ord som tall, også sammensatte: «tjuefem», «femhundre», «twentyfive». NaN hvis det ikke er et tall. */
+function rfOrdTall(ord: string): number {
+  if (/^\d+$/.test(ord)) return Number(ord);
+  let rest = ord, sum = 0, del = 0, fant = false;
+  const deler = Object.keys(RF_TALL).concat(Object.keys(RF_GANGER), ['og', 'and']).sort((a, b) => b.length - a.length);
+  while (rest) {
+    const d = deler.find((x) => rest.startsWith(x)); if (!d) return NaN;
+    rest = rest.slice(d.length);
+    if (d === 'og' || d === 'and') continue;
+    fant = true;
+    if (RF_GANGER[d]) { const g = RF_GANGER[d]; if (g >= 1000) { sum += (del || 1) * g; del = 0; } else del = (del || 1) * g; }
+    else del += RF_TALL[d];
+  }
+  return fant ? sum + del : NaN;
+}
+/** Hvor mange slurker kortet prøver å dele ut, eller 0. Tallet må stå rett før et drikkeord (slurker, shots …)
+    eller rett etter et verb (drikk, gi, del ut …), så «alle som har vært i 20 land, drikk to» går fint. */
+export function rfSlurker(tekst: string): number {
+  const t = String(tekst || '').toLowerCase().replace(/(\d)[\s.](?=\d{3}\b)/g, '$1').replace(/[^0-9a-zæøå]+/g, ' ').trim().split(' ').filter(Boolean);
+  const grupper: { v: number; fra: number; til: number }[] = [];
+  for (let i = 0; i < t.length; i++) {
+    let v = rfOrdTall(t[i]); if (!isFinite(v)) continue;
+    let j = i, sum = 0, del = v;
+    // Sett sammen «fem hundre», «to tusen og fem», «twenty five»
+    while (j + 1 < t.length) {
+      const n = t[j + 1]; if (n === 'og' || n === 'and') { if (j + 2 < t.length && isFinite(rfOrdTall(t[j + 2]))) { j++; continue; } break; }
+      const nv = rfOrdTall(n); if (!isFinite(nv)) break;
+      if (RF_GANGER[n]) { if (RF_GANGER[n] >= 1000) { sum += (del || 1) * RF_GANGER[n]; del = 0; } else del = (del || 1) * RF_GANGER[n]; } else del += nv;
+      j++;
+    }
+    grupper.push({ v: sum + del, fra: i, til: j }); i = j;
+  }
+  const ENHET = /^(slurk|slurker|slurkene|slurken|sips?|shots?|shotter|glass|øl|bokser|drinker|drinks?|supen?|gulp)$/;
+  const VERB = /^(drikk|drikker|drikke|drink|drinks|gi|gir|give|gives|del|deler|hand|ta|tar|take|chug|bunn)$/;
+  let maks = 0;
+  grupper.forEach((g) => {
+    const etter = t.slice(g.til + 1, g.til + 3).some((w) => ENHET.test(w));
+    const foran = t.slice(Math.max(0, g.fra - 3), g.fra).some((w) => VERB.test(w));
+    if (etter || foran) maks = Math.max(maks, g.v);
+  });
+  return maks;
+}
+/** Kortet som objekt (eldre rom og egne kortstokker har bare tekst). */
+function rfKortObj(x: any) { return typeof x === 'string' ? { t: x, til: 'alle' } : x; }
+/** Kommentaren fra oss i Skammekroken, tilpasset det som ble skrevet. */
+function rfKommentar(data: any, k: any) {
+  const fra = navnPaa(data, k.fra), til = k.til && !['alle', 'trekker', 'to'].includes(k.til) ? navnPaa(data, k.til) : null;
+  if (k.grunn === 'stemt') {
+    const v = [
+      L('Rommet var enstemmig. Kortet var ikke det.', 'The room was unanimous. The card was not.'),
+      L('Folkets dom: ut. ' + fra + ' får prøve igjen neste gang.', 'The people have spoken: out. ' + fra + ' can try again next time.'),
+      L('Alle stemte ja. Det har aldri skjedd i en gruppechat før.', 'Everyone voted yes. That has never happened in a group chat.'),
+    ];
+    return v[tilfeldig(v.length)];
+  }
+  const n = k.n || 0, liter = Math.round(n * 0.02 * 10) / 10;
+  const v = [
+    L(n + ' slurker er omtrent ' + String(liter).replace('.', ',') + ' liter. ' + (til ? til + ' er ikke et badekar.' : 'Det er ikke en vors, det er en flom.'), n + ' sips is about ' + liter + ' litres. ' + (til ? til + ' is not a bathtub.' : 'That is not a pre-party, it is a flood.')),
+    til ? L(fra + ' tror ' + til + ' har en lever av rustfritt stål.', fra + ' thinks ' + til + ' has a stainless steel liver.') : L(fra + ' tror alle her har en lever av rustfritt stål.', fra + ' thinks everyone here has a stainless steel liver.'),
+    L('Matematikk: 1. ' + fra + ': 0.', 'Maths: 1. ' + fra + ': 0.'),
+    L(n + ' slurker. Selv en elg hadde sagt nei takk.', n + ' sips. Even a moose would say no thanks.'),
+  ];
+  return v[tilfeldig(v.length)];
+}
+function rfTilSkam(data: any, k: any) {
+  const s = data.spill; s.skam = s.skam || [];
+  s.skam.push({ fra: k.fra, t: k.t, til: k.til || 'alle', grunn: k.grunn || 'tall', n: k.n || 0, kommentar: rfKommentar(data, k) });
+}
+/** Hvem kortet som nå ligger øverst er til: ingen (alle), den som trakk, én person, eller to tilfeldige. */
+function rfMottakere(data: any, k: any, trekker: string | null): string[] {
+  const ider = data.spillere.map((p: any) => p.id);
+  if (!k || !k.til || k.til === 'alle') return [];
+  if (k.til === 'trekker') return trekker ? [trekker] : [];
+  if (k.til === 'to') return stokk(ider.slice()).slice(0, 2);
+  return ider.includes(k.til) ? [k.til] : [];
+}
 export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
 export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '🫡'];
 type EkstraInfo = [id: string, navnNo: string, navnEn: string, omNo: string, omEn: string];
@@ -1471,7 +1559,11 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         if (!tekst) return { ok: true };
         const mine = s.kort[meg.id] || (s.kort[meg.id] = []);
         if (mine.length >= 40) return feilL('fullt', 'Maks 40 kort hver.', 'Max 40 cards each.');
-        mine.push(tekst); return { ok: true };
+        const til = ['alle', 'trekker', 'to'].includes(h.til) || data.spillere.some((p: any) => p.id === h.til) ? h.til : 'alle';
+        const n = rfSlurker(tekst);
+        // For mange slurker: den som skriver merker ingenting – kortet havner i Skammekroken i stedet for i bunken
+        mine.push({ t: tekst, til, fra: meg.id, ...(n > RF_MAKS ? { skam: true, n } : {}) });
+        return { ok: true };
       }
       if (h.handling === 'rf-legg-til') {
         // Kort fra egne lagrede kortstokker, tatt med før eller mens klokka går
@@ -1484,19 +1576,58 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
       if (h.handling === 'stokk') {
         if (s.fase !== 'skriv') return { ok: true };
         if (Date.now() < s.frist - 3000 && meg.id !== data.vert) return feilL('bare-vert', 'Vent til tiden er ute.', "Wait until time's up.");
-        const alle: string[] = []; Object.values(s.kort).forEach((l: any) => l.forEach((t: string) => alle.push(t)));
-        Object.values(s.med || {}).forEach((l: any) => l.forEach((t: string) => alle.push(t)));
-        if (!alle.length) return feilL('tom', 'Ingen har skrevet noe ennå.', "Nobody has written anything yet.");
-        s.rekke = stokk(alle); s.pos = 0; s.fase = 'trekk';
+        const alle: any[] = []; s.skam = s.skam || [];
+        Object.values(s.kort).forEach((l: any) => l.forEach((x: any) => { const k = rfKortObj(x); if (k.skam) rfTilSkam(data, { ...k, grunn: 'tall' }); else alle.push(k); }));
+        Object.entries(s.med || {}).forEach(([id, l]: any) => l.forEach((t: string) => alle.push({ t, til: 'alle', fra: id })));
+        if (!alle.length && !s.skam.length) return feilL('tom', 'Ingen har skrevet noe ennå.', "Nobody has written anything yet.");
+        s.rekke = stokk(alle); s.pos = 0; s.fase = alle.length ? 'trekk' : 'skam'; s.trekker = meg.id; s.kast = null;
+        s.mottakere = rfMottakere(data, s.rekke[0], meg.id);
         melde(data, alle.length + ' kort er stokket. Trekk!', alle.length + (alle.length === 1 ? ' card' : ' cards') + ' shuffled. Draw!');
         return { ok: true };
       }
       if (h.handling === 'neste') {
+        if (s.fase === 'skam') {   // videre fra Skammekroken: stokk og spill videre
+          (s.skam || []).forEach((k: any) => giSlurker(data, k.fra, 1));
+          s.skamVist = (s.skamVist || []).concat(s.skam || []); s.skam = [];
+          if (!s.rekke.length) { s.fase = 'ferdig'; return { ok: true }; }
+          s.rekke = stokk(s.rekke); s.pos = 0; s.fase = 'trekk'; s.trekker = meg.id; s.kast = null; s.mottakere = rfMottakere(data, rfKortObj(s.rekke[0]), meg.id);
+          return { ok: true };
+        }
         if (s.fase !== 'trekk') return { ok: true };
         if (typeof h.pos === 'number' && h.pos !== s.pos) return { ok: true };
-        s.pos++; if (s.pos >= s.rekke.length) { s.rekke = stokk(s.rekke); s.pos = 0; melde(data, 'Alle kortene er trukket – stokket på nytt.', 'All the cards have been drawn – reshuffled.'); }
+        s.pos++; s.trekker = meg.id; s.kast = null;
+        if (s.pos >= s.rekke.length) {
+          if ((s.skam || []).length) { s.fase = 'skam'; melde(data, 'Skammekroken!', 'The corner of shame!'); return { ok: true }; }
+          s.rekke = stokk(s.rekke); s.pos = 0; melde(data, 'Alle kortene er trukket – stokket på nytt.', 'All the cards have been drawn – reshuffled.');
+        }
+        s.mottakere = rfMottakere(data, rfKortObj(s.rekke[s.pos]), meg.id);
         return { ok: true };
       }
+      if (h.handling === 'rf-kast') {   // verten foreslår å kaste kortet; alle unntatt den som skrev det må si ja
+        if (s.fase !== 'trekk' || s.egen) return { ok: true };
+        if (meg.id !== data.vert) return feilL('bare-vert', 'Bare verten kan foreslå å kaste et kort.', 'Only the host can suggest binning a card.');
+        const k = rfKortObj(s.rekke[s.pos]);
+        s.kast = { pos: s.pos, fra: k.fra || null, ja: [], nei: [] };
+        return { ok: true };
+      }
+      if (h.handling === 'rf-kast-stem') {
+        const kk = s.kast; if (!kk || s.fase !== 'trekk' || kk.pos !== s.pos) return { ok: true };
+        if (meg.id === kk.fra) return { ok: true };
+        kk.ja = kk.ja.filter((id: string) => id !== meg.id); kk.nei = kk.nei.filter((id: string) => id !== meg.id);
+        (h.ja === true ? kk.ja : kk.nei).push(meg.id);
+        if (kk.nei.length) { s.kast = null; melde(data, 'Kortet blir. Noen likte det.', 'The card stays. Someone liked it.'); return { ok: true }; }
+        const stemmere = data.spillere.filter((p: any) => p.id !== kk.fra).map((p: any) => p.id);
+        if (stemmere.every((id: string) => kk.ja.includes(id))) {
+          const k = rfKortObj(s.rekke[s.pos]);
+          rfTilSkam(data, { ...k, grunn: 'stemt' });
+          s.rekke.splice(s.pos, 1); s.kast = null;
+          melde(data, 'Kortet er kastet i Skammekroken.', 'The card went to the corner of shame.');
+          if (s.pos >= s.rekke.length) { s.fase = 'skam'; return { ok: true }; }
+          s.mottakere = rfMottakere(data, rfKortObj(s.rekke[s.pos]), s.trekker);
+        }
+        return { ok: true };
+      }
+      if (h.handling === 'rf-kast-avbryt') { if (meg.id === data.vert) s.kast = null; return { ok: true }; }
       if (h.handling === 'nytt') {
         if (s.egen) { s.rekke = stokk(s.rekke); s.pos = 0; melde(data, 'Stokket på nytt.', 'Reshuffled.'); return { ok: true }; }
         return startEkstra(data, 'regelfabrikken', String(s.sek));
@@ -1678,10 +1809,17 @@ export function ekstraVisning(s: any, meg: any, data: any) {
   const ider = aktiveIder(data);
   if (s.type === 'tosannheter') return { aktiv: s.aktiv, fase: s.fase, pastander: s.pastander, harStemt: Object.keys(s.stemmer),
     minStemme: meg ? (s.stemmer[meg.id] ?? null) : null, logn: s.fase === 'avslort' ? s.logn : null, stemmer: s.fase === 'avslort' ? s.stemmer : null, drikker: s.fase === 'avslort' ? s.drikker : null };
-  if (s.type === 'regelfabrikken') return { fase: s.fase, frist: s.frist, naa: Date.now(), sek: s.sek,
-    mineKort: meg ? s.kort[meg.id] || [] : [], mineMed: meg && s.med ? (s.med[meg.id] || []).length : 0,
-    antall: Object.fromEntries(data.spillere.map((p: any) => [p.id, ((s.kort[p.id] || []).length + ((s.med || {})[p.id] || []).length)])),
-    kortet: s.fase === 'trekk' ? s.rekke[s.pos] : null, pos: s.pos, egen: !!s.egen, alleKort: s.fase === 'trekk' && meg ? s.rekke : null, totalt: s.fase === 'trekk' ? s.rekke.length : Object.values(s.kort).concat(Object.values(s.med || {})).reduce((n: number, l: any) => n + l.length, 0) };
+  if (s.type === 'regelfabrikken') {
+    const kortet = s.fase === 'trekk' ? rfKortObj(s.rekke[s.pos]) : null, kk = s.kast;
+    return { fase: s.fase, frist: s.frist, naa: Date.now(), sek: s.sek,
+      mineKort: meg ? (s.kort[meg.id] || []).map((x: any) => rfKortObj(x).t) : [], mineMed: meg && s.med ? (s.med[meg.id] || []).length : 0,
+      antall: Object.fromEntries(data.spillere.map((p: any) => [p.id, ((s.kort[p.id] || []).length + ((s.med || {})[p.id] || []).length)])),
+      kortet: kortet ? kortet.t : null, til: kortet ? (kortet.til || 'alle') : null, mottakere: s.fase === 'trekk' ? s.mottakere || [] : [], trekker: s.trekker || null,
+      pos: s.pos, egen: !!s.egen, alleKort: s.fase === 'trekk' && meg ? s.rekke.map((x: any) => rfKortObj(x).t) : null,
+      totalt: s.fase === 'trekk' ? s.rekke.length : Object.values(s.kort).concat(Object.values(s.med || {})).reduce((n: number, l: any) => n + l.length, 0),
+      kast: kk ? { ja: kk.ja.length, nei: kk.nei.length, stemmere: data.spillere.filter((p: any) => p.id !== kk.fra).length, kanStemme: !!meg && meg.id !== kk.fra, mitt: meg ? (kk.ja.includes(meg.id) ? 'ja' : kk.nei.includes(meg.id) ? 'nei' : null) : null } : null,
+      skam: s.fase === 'skam' ? (s.skam || []).map((k: any) => ({ fra: k.fra, t: k.t, kommentar: k.kommentar, grunn: k.grunn })) : null };
+  }
   if (s.type === 'opus') return { holder: s.holder, kast: s.kast, antall: s.antall, nr: s.nr, fra: s.fra || null };
   if (s.type === 'overunder') return { kort: s.kort, bunke: s.bunke, tur: ider[s.tur % ider.length], sist: s.sist, igjen: s.stokk.length };
   if (s.type === 'veddelopet') return { fase: s.fase, pos: s.pos, sist: s.sist, vinner: s.vinner, bane: s.bane.map((k: any, i: number) => (s.snudd[i] ? k : null)),

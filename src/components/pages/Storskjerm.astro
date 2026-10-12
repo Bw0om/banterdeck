@@ -39,8 +39,10 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   </script>
   <script>
     // Stua (src/klient/stua.js): de samme figurene som på telefonene
-    import { lagStua } from '../../klient/stua.js';
+    import { lagStua, figurHtml, utseende } from '../../klient/stua.js';
     (window as any).mvLagStua = lagStua;
+    // Figuren til en spiller (samme som i stua), til «kortet er til»-visningen
+    (window as any).mvFigurSvg = (p: any) => '<svg class="tvsd-figur" viewBox="-36 -106 72 112" aria-hidden="true">' + figurHtml(utseende(p.figur || p.id), p.pynt || null) + '</svg>';
     document.dispatchEvent(new CustomEvent('mv-stua-klar'));
   </script>
   <script is:inline define:vars={{ LANG, SB }}>
@@ -309,6 +311,32 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var tvlhVist = '';
     /* ---------- Pekeleken: kortet, nedtellingen og hvem som ble pekt mest på ---------- */
     var tvAvvik = 0, tvPekTimer = null, tvPekSist = '';
+    /* ---------- Skriv og drikk: bunken som vokser, kortet, hvem det er til (med figuren), Skammekroken ---------- */
+    var tvRfTimer = null;
+    function tvRfIgjen(rf) { return Math.max(0, Math.ceil((rf.frist - 3000 - (Date.now() + tvAvvik)) / 1000)); }
+    function rfScene(d, rf) {
+      var alle = d.spillere || [], spiller = function (id) { return alle.find(function (p) { return p.id === id; }) || { id: id, navn: '?' }; };
+      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Skriv og drikk', 'Write & Drink') + (rf.fase === 'trekk' ? ' · ' + (rf.pos + 1) + ' / ' + rf.totalt : '') + '</p></div>';
+      if (rf.fase === 'klar') return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<h1 class="tv-sporsmal">' + T('Alle skriver drikkekort i ', 'Everyone writes drinking cards for ') + rf.sek + T(' sekunder', ' seconds') + '</h1><p class="tv-stor">' + T('Noen av dem er til deg.', 'Some of them are for you.') + '</p></div></div>';
+      if (rf.fase === 'skriv') {
+        clearInterval(tvRfTimer);
+        tvRfTimer = setInterval(function () { var e = document.getElementById('tvRfTid'), sp = tilstand && tilstand.spill; if (!e || !sp || !sp.rf || sp.rf.fase !== 'skriv') { clearInterval(tvRfTimer); return; } e.textContent = tvRfIgjen(sp.rf); }, 250);
+        var tot = rf.totalt || 0, lag = Math.min(4, Math.max(1, tot));
+        var bunke = ''; for (var i = 0; i < lag; i++) bunke += '<div class="tvsd-kort" style="--i:' + i + '">' + (i === lag - 1 ? '<b>' + tot + '</b>' : '') + '</div>';
+        return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<div class="tvsd-skriv"><div><span id="tvRfTid" class="tvsd-tid">' + tvRfIgjen(rf) + '</span><p class="tv-stor">' + T('sekunder igjen til bunken stokkes', 'seconds until the pile is shuffled') + '</p></div><div class="tvsd-bunke">' + bunke + '</div></div>' +
+          '<div class="tvnr-folk">' + alle.map(function (p) { return '<span class="tvsd-teller">' + nrPille(d, p.id) + '<b>' + (rf.antall[p.id] || 0) + '</b></span>'; }).join('') + '</div></div></div>';
+      }
+      if (rf.fase === 'skam') return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<span class="tvpk-tall pek">' + T('Skammekroken', 'Corner of shame') + '</span>' +
+        '<ul class="tvsd-skam">' + (rf.skam || []).map(function (k) { return '<li>' + nrPille(d, k.fra) + '<div><b>' + esc(navn(k.fra)) + T(' skrev ', ' wrote ') + '<s>«' + esc(k.t) + '»</s></b><span>' + esc(k.kommentar) + '</span></div></li>'; }).join('') + '</ul></div></div>';
+      if (rf.fase !== 'trekk') return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<h1 class="tv-sporsmal">' + T('Alle kortene er brukt opp', 'All the cards are used up') + '</h1></div></div>';
+      var mott = rf.mottakere || [];
+      var til = mott.length ? '<div class="tvsd-til">' + mott.map(function (id) { return window.mvFigurSvg ? window.mvFigurSvg(spiller(id)) : ''; }).join('') +
+          '<div><span>' + T('Kortet er til', 'This card is for') + '</span><b>' + mott.map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and ')) + '</b></div></div>'
+        : '<p class="tvsd-alle">' + (rf.til === 'trekker' ? T('Til den som trekker', 'For whoever draws') : T('Til alle', 'For everyone')) + '</p>';
+      var kast = rf.kast ? '<p class="tvsd-kast">' + T('Kaste kortet i Skammekroken? ', 'Bin the card? ') + rf.kast.ja + ' / ' + rf.kast.stemmere + T(' har sagt ja', ' said yes') + '</p>' : '';
+      return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + (rf.trekker ? '<p class="tvsd-trakk">' + esc(navn(rf.trekker)) + T(' trakk', ' drew') + '</p>' : '') + til +
+        '<div class="tvsd-kortet"><p>' + esc(rf.kortet || '') + '</p></div>' + kast + '</div></div>';
+    }
     var TV_VRI = { lukk: T('Lukk øynene og pek', 'Close your eyes and point'), flertall: T('Pek der flertallet peker', 'Point where the majority points'), forsvar: T('Forsvarstale', 'Defence speech'), selv: T('Pek på deg selv hvis det stemmer', 'Point at yourself if it is true'), dobbel: T('Dobbel – fingrene teller dobbelt', 'Double – fingers count double') };
     function tvPekTrinn(pk) { var t = Date.now() + tvAvvik - (pk.start || 0); return t < 800 ? 3 : t < 1600 ? 2 : t < pk.tell ? 1 : 0; }
     function tvPekTikk() {
@@ -427,6 +455,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         return '<div class="tv-scene tv-sentrert">' + topp + '<h1 class="tv-sporsmal">' + esc(s.tekst) + '</h1><p class="tv-stor">' + T('Stem på telefonen', 'Vote on your phone') + ' · ' + (s.stemt || 0) + ' / ' + (d.spillere || []).length + '</p></div>';
       }
       if (s.type === 'forraeder') return lhScene(d, s);
+      if (s.type === 'regelfabrikken' && s.rf) return rfScene(d, s.rf);
       if (s.offentlig && (s.offentlig.tekst || (s.offentlig.valg && s.offentlig.valg.length))) {
         var o = s.offentlig, ant = (d.spillere || []).length;
         return '<div class="tv-scene tv-sentrert">' + topp +
@@ -748,6 +777,28 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvpk-tall.pek{font-size:clamp(48px,6vw,110px);text-transform:uppercase;padding:.08em .3em .14em;color:#16120F;background:#FF5B1F;border:6px solid #FFF8EE;box-shadow:14px 14px 0 #FFD23F;transform:rotate(-3deg)}
     .tvpk-tall.inn{animation:tvpkInn .52s cubic-bezier(.23,1,.32,1) both}
     @keyframes tvpkInn{from{scale:1.45;opacity:0}to{scale:1;opacity:1}}
+    .tvsd-skriv{display:flex;align-items:center;gap:4vw}
+    .tvsd-tid{display:block;font-family:var(--display);font-size:clamp(90px,10vw,180px);font-weight:900;font-stretch:62%;line-height:.85}
+    .tvsd-bunke{position:relative;width:24vw;height:16vw;min-width:240px;min-height:160px}
+    .tvsd-kort{position:absolute;left:calc(var(--i) * 10px);bottom:calc(var(--i) * 8px);width:80%;height:80%;display:grid;place-items:center;background:#FFF8EE;border:4px solid #16120F;border-radius:10px;box-shadow:8px 8px 0 #000;transform:rotate(calc((var(--i) - 1.5) * 3deg))}
+    .tvsd-kort:last-child{background:#FFD23F}
+    .tvsd-kort b{font-family:var(--display);font-size:4em;font-weight:900;font-stretch:62%;color:#16120F}
+    .tvsd-teller{display:inline-flex;align-items:center;gap:.4em;padding:.2em .6em .2em .2em;border:3px solid #FFF8EE;border-radius:999px;font-weight:900}
+    .tvsd-trakk{margin:0;font-size:1.2em;font-weight:800;color:#D9D2C7}
+    .tvsd-til{display:flex;align-items:flex-end;gap:1.2em}
+    .tvsd-figur{width:7vw;min-width:80px;height:auto;aspect-ratio:72/112;overflow:visible}
+    .tvsd-til div{display:flex;flex-direction:column;gap:.3em;padding-bottom:1em}
+    .tvsd-til span{font-size:1.2em;font-weight:800;color:#D9D2C7}
+    .tvsd-til b{align-self:flex-start;font-family:var(--display);font-size:clamp(44px,5vw,90px);font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.85;padding:.06em .2em .12em;background:#FFD23F;color:#16120F;border:5px solid #16120F;box-shadow:10px 10px 0 #FF5B1F;transform:rotate(-2deg)}
+    .tvsd-alle{margin:0;font-size:1.3em;font-weight:900;text-transform:uppercase;color:#FFD23F}
+    .tvsd-kortet{padding:1.2em 1.4em;background:#FFF8EE;color:#16120F;border:5px solid #16120F;border-radius:12px;box-shadow:14px 14px 0 #FFD23F;transform:rotate(-1deg)}
+    .tvsd-kortet p{margin:0;font-family:var(--display);font-size:clamp(28px,3vw,56px);font-weight:900;font-stretch:78%;line-height:1.05}
+    .tvsd-kast{margin:0;font-size:1.2em;font-weight:900;color:#FF9CC2}
+    .tvsd-skam{list-style:none;margin:2vh 0 0;padding:0;display:flex;flex-direction:column;gap:1.2vh;font-size:1.25em}
+    .tvsd-skam li{display:flex;align-items:center;gap:.8em;padding:.6em .8em;background:#2A292E;border:3px solid #FFF8EE;border-radius:8px}
+    .tvsd-skam div{display:flex;flex-direction:column;gap:.2em}
+    .tvsd-skam s{color:#D9D2C7;text-decoration-thickness:3px}
+    .tvsd-skam span{color:#FFD23F;font-weight:800}
     @media (prefers-reduced-motion:reduce){.tvlh-stempel.inn,.tvpk-tall.inn{animation:none}}
     @media (prefers-reduced-motion:reduce){.tvnr-alt.inn .tvnr-a em{animation:none}}
     .tv-toast,.tv-banner{border:3px solid #FFF8EE!important;border-radius:6px!important;box-shadow:6px 6px 0 #FFD23F!important;background:#16120F!important}

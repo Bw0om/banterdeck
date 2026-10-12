@@ -1646,39 +1646,108 @@ export function startRom(LEKNAVN, LANG) {
       if (n <= 0) { var inp = document.getElementById('rfInput'); if (inp) inp.disabled = true; var f = document.getElementById('rfTekst'); if (f) f.textContent = T('Tiden er ute!', 'Time\'s up!'); }
     }, 250);
   }
+  /* ---------- Skriv og drikk: skriv kort til noen, trekk, og Skammekroken ----------
+     Skrivesiden er bare klokka, kortet du skriver på og bunken din. Hver person får tre forslag fra en stor
+     samling, nye etter hvert kort. Kort kan være til alle, den som trekker, én person eller to tilfeldige. */
+  var SD_STARTERE = EN ? [
+    'Whoever last sent a voice message over a minute long, …', 'Everyone with a dead plant at home, drink …', 'If you have ever fallen asleep at the cinema, …',
+    'Whoever has the most unread messages right now, …', 'Everyone who has been to IKEA this year, …', 'Whoever lives closest, hand out …',
+    'If you have cried at an advert, …', 'Whoever last had a haircut, …', 'Everyone wearing odd socks, …', 'If you have argued with a self-checkout, …',
+    'Whoever has the longest name, cheers with …', 'Everyone still following an ex, …', 'Whoever was born furthest north, …', 'If you watch series at double speed, …',
+    'Swap seats with whoever …', 'Whoever has the most apps on their phone, …', 'If you have ever been recognised by a former teacher on a night out, …',
+    'Whoever spent the most on food today, …', 'Everyone who has a nickname nobody here uses, …', 'If your phone is under 20 % right now, …',
+    'Whoever has been in the longest relationship, …', 'Everyone who has lied about reading the terms and conditions, …', 'Whoever arrived last tonight, …',
+    'If you have a screenshot of this group chat, …', 'Whoever has the worst handwriting, write …', 'Everyone who has sung in the shower this week, …'
+  ] : [
+    'Den som sist sendte en talemelding over ett minutt, …', 'Alle som har en død plante hjemme, drikk …', 'Hvis du har sovnet på kino, …',
+    'Den med flest uleste meldinger akkurat nå, …', 'Alle som har vært på Ikea i år, …', 'Den som bor nærmest, del ut …',
+    'Hvis du har grått av en reklame, …', 'Den som sist var hos frisøren, …', 'Alle med sokker i to forskjellige farger, …', 'Hvis du har kranglet med en selvbetjent kasse, …',
+    'Den som har lengst navn, skål med …', 'Alle som fortsatt følger en eks, …', 'Den som er født lengst nord, …', 'Hvis du ser serier på dobbel hastighet, …',
+    'Bytt plass med den som …', 'Den med flest apper på telefonen, …', 'Hvis du har møtt en gammel lærer på byen, …',
+    'Den som har brukt mest på mat i dag, …', 'Alle som har et kallenavn ingen her bruker, …', 'Hvis telefonen din er under 20 % nå, …',
+    'Den som har vært lengst i et forhold, …', 'Alle som har løyet om å ha lest vilkårene, …', 'Den som kom sist i kveld, …',
+    'Hvis du har et skjermbilde av denne gruppechatten, …', 'Den med styggest håndskrift, skriv …', 'Alle som har sunget i dusjen denne uka, …',
+    'Den som sist ble stoppet av en dørvakt, …', 'Hvis du har en app du skammer deg over, …', 'Den som har flest søsken, …', 'Alle som har kalt læreren «mamma», …'
+  ];
+  var sdTil = 'alle', sdStartere = null, sdSistAntall = -1, sdTilDegVist = '', sdVist = '';
+  function sdNyeStartere() {
+    var l = SD_STARTERE.slice(), ut = [];
+    while (ut.length < 3 && l.length) ut.push(l.splice(Math.floor(Math.random() * l.length), 1)[0]);
+    sdStartere = ut;
+  }
+  function sdPlass() {
+    if (sdTil === 'alle') return T('Alle som har på seg svart, drikker to', 'Everyone wearing black drinks two');
+    if (sdTil === 'trekker') return T('Den som trekker dette, må …', 'Whoever draws this has to …');
+    if (sdTil === 'to') return T('Disse to skåler og forteller …', 'These two cheers and tell …');
+    return T('Fortell hvem du sist sendte melding til, eller drikk tre', 'Say who you last texted, or drink three');
+  }
+  function sdTilPiller(s) {
+    var l = s.mottakere || [];
+    if (!l.length) return '<span class="sd-til-alle">' + (s.til === 'trekker' ? T('Til den som trekker', 'To whoever draws') : T('Til alle', 'To everyone')) + '</span>';
+    return '<span class="sd-til-lapp">' + T('Til', 'To') + '</span>' + l.map(function (id) { return '<span class="sd-til-navn">' + nrPille(id) + esc(id === tilstand.meg ? T('Deg', 'You') : navn(id)) + '</span>'; }).join('');
+  }
   function regelfabrikkenSpill(s) {
     rfOffset = s.naa - Date.now();
+    var vert = erVert(), alle = tilstand.spillere || [];
+    var topp = function (tekst, gul, klokke) {
+      return '<div class="nr-topp sd-topp"><div class="nr-topp-tekst"><span>' + T('Skriv og drikk', 'Write & Drink') + (s.fase === 'trekk' ? ' · ' + (s.pos + 1) + T(' av ', ' of ') + s.totalt : '') + '</span><b' + (gul ? ' class="gul"' : '') + '>' + tekst + '</b></div>' + (klokke ? nrKlokke() : '') + '</div>';
+    };
     if (s.fase === 'klar') {
-      return '<p class="dl-melding dl-stor">' + T('Klar for Skriv og drikk?', 'Ready for Write & Drink?') + '</p>' +
-        '<p>' + T('Når klokka starter, har alle ', 'When the clock starts, everyone has ') + s.sek + T(' sekunder til å skrive så mange drikkekort de rekker på sin egen telefon.', ' seconds to write as many drinking cards as they can on their own phone.') + '</p>' +
-        '<p class="rom-status">' + tilstand.spillere.length + T(' med i rommet: ', ' in the room: ') + tilstand.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' +
-        '<div class="rf-med"><button class="btn ghost" data-g="rf-velg" type="button">' + T('Ta med kort fra kortstokkene dine', 'Bring cards from your decks') + '</button>' +
-        (s.mineMed ? '<span class="small">' + T('Du har tatt med <b>', 'You\'ve brought <b>') + s.mineMed + T('</b> kort – de blandes inn når det stokkes.', '</b> cards – they get mixed in when the deck is shuffled.') + '</span>' : '<span class="small">' + T('Valgfritt. Bare du ser hvilke kort du tar med.', 'Optional. Only you can see which cards you bring.') + '</span>') + '</div>' +
-        (erVert()
-          ? '<p class="small">' + T('Vent til alle har blitt med. Del koden <b>', 'Wait until everyone has joined. Share the code <b>') + esc(kode) + '</b>.</p><button class="rom-stor-knapp" data-g="startklokke" type="button">' + T('Start klokka', 'Start the clock') + '</button>'
-          : '<p class="rom-stor">' + T('Venter på at ' + esc(navn(tilstand.vert)) + ' starter klokka …', 'Waiting for ' + esc(navn(tilstand.vert)) + ' to start the clock …') + '</p>');
+      return topp(T('Klar?', 'Ready?'), false) +
+        '<div class="pk-kort sd-intro"><p>' + T('Alle skriver drikkekort i ', 'Everyone writes drinking cards for ') + s.sek + T(' sekunder. Så stokkes de og trekkes – og noen er til deg.', ' seconds. Then they are shuffled and drawn – and some are for you.') + '</p></div>' +
+        '<div class="nr-folk">' + alle.map(function (p) { return nrPille(p.id, 'har'); }).join('') + '<span>' + alle.length + T(' med', ' in') + '</span></div>' +
+        (vert ? '<button class="rom-stor-knapp" data-g="startklokke" type="button">' + T('Start klokka', 'Start the clock') + '</button>' : '<p class="nr-vent">' + T('Venter på at ', 'Waiting for ') + esc(navn(tilstand.vert)) + T(' starter klokka …', ' to start the clock …') + '</p>') +
+        '<p class="sd-med"><button class="linkbtn" data-g="rf-velg" type="button">' + T('Ta med kort fra kortstokkene dine', 'Bring cards from your decks') + '</button>' + (s.mineMed ? ' · ' + s.mineMed + T(' tatt med', ' brought') : '') + '</p>';
     }
     if (s.fase === 'skriv') {
-      var n = rfIgjen(s);
-      setTimeout(rfTikk, 0);
-      var andre = tilstand.spillere.map(function (p) { return esc(p.navn) + ' ' + (s.antall[p.id] || 0); }).join(' · ');
-      return '<div class="rf-tid" id="rfTid">' + n + '</div>' +
-        '<p class="dl-melding" id="rfTekst">' + (n > 0 ? T('Skriv så mange drikkekort du rekker!', 'Write as many drinking cards as you can!') : T('Tiden er ute!', 'Time\'s up!')) + '</p>' +
-        '<form class="rf-skjema" id="rfSkjema"><label for="rfInput" class="small">' + T('F.eks. «Alle med hvite sokker drikker»', 'E.g. “Everyone wearing white socks drinks”') + '</label>' +
-        '<div class="rf-rad"><input id="rfInput" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="' + T('Skriv et kort …', 'Write a card …') + '"' + (n > 0 ? '' : ' disabled') + '>' +
-        '<button class="btn gold" type="submit">' + T('Legg til', 'Add') + '</button></div></form>' +
-        '<ol class="rf-mine">' + s.mineKort.slice().reverse().map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
-        (s.mineMed ? '<p class="small">+ ' + s.mineMed + T(' kort du tok med', ' cards you brought') + '</p>' : '') +
-        '<p class="rom-status">' + andre + '</p>' +
-        (erVert() || n <= 0 ? '<button class="rom-stor-knapp" data-g="stokk" type="button">' + (n > 0 ? T('Stopp og stokk nå', 'Stop and shuffle now') : T('Stokk ', 'Shuffle ') + s.totalt + T(' kort', ' cards')) + '</button>' : '');
+      var n = rfIgjen(s), mine = s.mineKort || [];
+      if (!sdStartere) sdNyeStartere();
+      var ny = mine.length > sdSistAntall && sdSistAntall >= 0; sdSistAntall = mine.length;
+      var valg = [['alle', T('Alle', 'Everyone')], ['trekker', T('Den som trekker', 'Whoever draws')]].concat(alle.filter(function (p) { return p.id !== tilstand.meg; }).map(function (p) { return [p.id, p.navn]; })).concat([['to', T('To tilfeldige', 'Two at random')]]);
+      if (!valg.some(function (v) { return v[0] === sdTil; })) sdTil = 'alle';
+      var bunke = mine.slice(-3).map(function (t, i, l) {
+        return '<div class="sd-bunke-kort' + (ny && i === l.length - 1 ? ' inn' : '') + '" style="--i:' + i + '"><span>' + esc(t) + '</span></div>'; }).join('');
+      return topp(n > 0 ? T('Skriv!', 'Write!') : T('Tiden er ute', 'Time is up'), n > 0, n > 0) +
+        '<form class="sd-skriv" id="rfSkjema">' +
+          '<div class="sd-til" role="group" aria-label="' + T('Hvem kortet er til', 'Who the card is for') + '"><span>' + T('Til', 'To') + '</span>' + valg.map(function (v) {
+            var p = alle.find(function (x) { return x.id === v[0]; });
+            return '<button type="button" data-g="rf-til" data-til="' + esc(v[0]) + '" aria-pressed="' + (sdTil === v[0]) + '"' + (p ? ' style="--f:' + nrFarge(p.id) + '"' : '') + '>' + esc(v[1]) + '</button>'; }).join('') + '</div>' +
+          '<label for="rfInput" class="sr-only">' + T('Kortet', 'The card') + '</label><textarea id="rfInput" rows="3" maxlength="140" enterkeyhint="send" placeholder="' + esc(sdPlass()) + '"' + (n > 0 ? '' : ' disabled') + '></textarea>' +
+          '<div class="sd-startere">' + sdStartere.map(function (t) { return '<button type="button" data-g="rf-starter" data-t="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' +
+          '<button class="sd-legg" type="submit"' + (n > 0 ? '' : ' disabled') + '>' + T('Legg i bunken', 'Add to the pile') + '</button>' +
+        '</form>' +
+        '<div class="sd-bunken"><div class="sd-bunke">' + bunke + '</div><div class="sd-tall"><b' + (ny ? ' class="inn"' : '') + '>' + mine.length + '</b><span>' + T('kort fra deg', 'cards from you') + '</span><span>' + s.totalt + T(' i bunken', ' in the pile') + '</span></div></div>' +
+        (n <= 0 ? '<button class="rom-stor-knapp" data-g="stokk" type="button">' + T('Stokk ', 'Shuffle ') + s.totalt + T(' kort', ' cards') + '</button>'
+          : vert ? '<p class="sd-med"><button class="linkbtn" data-g="stokk" type="button">' + T('Stopp og stokk nå', 'Stop and shuffle now') + '</button></p>' : '');
     }
-    return '<div class="rom-kort rf-kort"><span class="sw-tag">' + T('Kort ', 'Card ') + (s.pos + 1) + T(' av ', ' of ') + s.totalt + '</span><p>' + esc(s.kortet) + '</p><span></span></div>' +
+    if (s.fase === 'skam') {
+      var nokkel = 'skam:' + (s.skam || []).length, inn = sdVist !== nokkel; sdVist = nokkel;
+      return topp(T('Bunken er tom', 'The pile is empty'), false) +
+        '<span class="sd-skam-stempel' + (inn ? ' inn' : '') + '">' + T('Skammekroken', 'Corner of shame') + '</span>' +
+        '<p class="sd-skam-intro">' + T('Disse kortene kom aldri med i bunken.', 'These cards never made it into the pile.') + '</p>' +
+        '<ul class="sd-skam">' + (s.skam || []).map(function (k, i) {
+          return '<li style="--i:' + i + '"' + (inn ? ' class="inn"' : '') + '><div>' + nrPille(k.fra) + '<b>' + esc(k.fra === tilstand.meg ? T('Du', 'You') : navn(k.fra)) + T(' skrev:', ' wrote:') + '</b></div><s>«' + esc(k.t) + '»</s><p>' + esc(k.kommentar) + '</p></li>'; }).join('') + '</ul>' +
+        '<p class="sd-straff">' + T('Straff: én slurk for hvert forsøk.', 'Penalty: one sip per attempt.') + '</p>' +
+        '<button class="rom-stor-knapp" data-g="neste" type="button">' + T('Stokk og spill videre', 'Shuffle and play on') + '</button>';
+    }
+    if (s.fase === 'ferdig') return topp(T('Ferdig', 'Done'), false) + '<p class="nr-vent">' + T('Alle kortene er brukt opp.', 'All the cards are used up.') + '</p>' + (vert ? '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny skriverunde', 'New writing round') + '</button>' : '');
+    // Trekk
+    var tilMeg = (s.mottakere || []).indexOf(tilstand.meg) !== -1, kn = s.pos + ':' + s.totalt + ':' + s.kortet;
+    var innK = sdVist !== kn; sdVist = kn;
+    if (tilMeg && sdTilDegVist !== kn) { sdTilDegVist = kn; try { navigator.vibrate && navigator.vibrate([60, 60, 120]); } catch (e) {} spillLyd('ding'); }
+    var kk = s.kast;
+    var kast = kk ? '<div class="sd-kast"><b>' + T('Kaste kortet i Skammekroken?', 'Bin the card to the corner of shame?') + '</b><span>' + kk.ja + T(' av ', ' of ') + kk.stemmere + T(' har sagt ja. Alle må si ja.', ' said yes. Everyone has to say yes.') + '</span>' +
+        (kk.kanStemme ? '<div class="sd-kast-valg"><button type="button" data-g="rf-kast-stem" data-ja="1" aria-pressed="' + (kk.mitt === 'ja') + '">' + T('Ja, kast', 'Yes, bin it') + '</button><button type="button" data-g="rf-kast-stem" data-ja="0">' + T('Nei, behold', 'No, keep it') + '</button></div>'
+          : '<span>' + T('Du kan ikke stemme på dette kortet.', 'You can’t vote on this card.') + '</span>') +
+        (vert ? '<button type="button" class="linkbtn" data-g="rf-kast-avbryt">' + T('Avbryt', 'Cancel') + '</button>' : '') + '</div>' : '';
+    return topp(s.trekker ? (s.trekker === tilstand.meg ? T('Du trakk', 'You drew') : esc(navn(s.trekker)) + T(' trakk', ' drew')) : T('Trekk!', 'Draw!'), false) +
+      '<div class="sd-trekk' + (tilMeg ? ' til-deg' : '') + '">' + (tilMeg ? '<span class="sd-til-deg-stempel' + (innK ? ' inn' : '') + '">' + T('Til deg!', 'For you!') + '</span>' : '') +
+        '<div class="sd-stabel"><div class="sd-kortet' + (innK ? ' inn' : '') + '"><div class="sd-til-rad">' + sdTilPiller(s) + '</div><p>' + esc(s.kortet) + '</p><small>' + (s.egen ? '' : T('Skrevet av en av dere', 'Written by one of you')) + '</small></div></div>' +
+      '</div>' + kast +
       '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Trekk neste', 'Draw next') + '</button>' +
-      '<div class="dl-knapper">' +
-        (erVert() ? '<button class="btn ghost" data-g="nytt" type="button">' + (s.egen ? T('Stokk på nytt', 'Shuffle again') : T('Ny skriverunde', 'New writing round')) + '</button>' : '') +
-        (!s.egen && s.alleKort ? '<button class="btn ghost" data-g="lagrestokk" type="button">' + T('Lagre alle kortene', 'Save all the cards') + '</button>' : '') +
-        (!s.egen && s.mineKort && s.mineKort.length ? '<button class="btn ghost" data-g="rf-lagre-mine" type="button">' + T('Lagre mine ', 'Save my ') + s.mineKort.length + T(' kort', ' cards') + '</button>' : '') +
-      '</div>';
+      '<p class="sd-med">' + (vert && !s.egen && !kk ? '<button class="linkbtn" data-g="rf-kast" type="button">' + T('Kast i Skammekroken', 'Bin to the corner of shame') + '</button> · ' : '') +
+        (vert ? '<button class="linkbtn" data-g="nytt" type="button">' + (s.egen ? T('Stokk på nytt', 'Shuffle again') : T('Ny skriverunde', 'New writing round')) + '</button> · ' : '') +
+        (!s.egen && s.alleKort ? '<button class="linkbtn" data-g="lagrestokk" type="button">' + T('Lagre kortene', 'Save the cards') + '</button>' : '') + '</p>';
   }
 
   function tosannheterSpill(s) {
@@ -3260,7 +3329,12 @@ export function startRom(LEKNAVN, LANG) {
       e.preventDefault();
       var i = document.getElementById('rfInput'), t = i.value.trim(); if (!t) return;
       i.value = ''; i.focus({ preventScroll: true });
-      gjorAlltid({ handling: 'skriv', tekst: t });
+      sdNyeStartere();
+      gjorAlltid({ handling: 'skriv', tekst: t, til: sdTil });
+    });
+    var sdFelt = document.getElementById('rfInput');
+    if (sdFelt && sdFelt.tagName === 'TEXTAREA') sdFelt.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = document.getElementById('rfSkjema'); if (f && f.requestSubmit) f.requestSubmit(); }
     });
   }
 
@@ -3462,6 +3536,11 @@ export function startRom(LEKNAVN, LANG) {
       return gjor({ handling: 'start', lek: 'egen', navn: st.navn, kort: st.kort });
     }
     if (g === 'lagrestokk') return lagreSomStokk();
+    if (g === 'rf-til') { sdTil = b.dataset.til; var fe = document.getElementById('rfInput'); document.querySelectorAll('[data-g="rf-til"]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.til === sdTil); }); if (fe) fe.placeholder = sdPlass(); return; }
+    if (g === 'rf-starter') { var ft = document.getElementById('rfInput'); if (ft) { ft.value = b.dataset.t.replace(/\s*…\s*$/, ' '); ft.focus(); ft.setSelectionRange(ft.value.length, ft.value.length); } return; }
+    if (g === 'rf-kast') return gjor({ handling: 'rf-kast' });
+    if (g === 'rf-kast-stem') return gjorAlltid({ handling: 'rf-kast-stem', ja: b.dataset.ja === '1' });
+    if (g === 'rf-kast-avbryt') return gjor({ handling: 'rf-kast-avbryt' });
     if (g === 'rf-velg') {
       if (!window.BDVelgKort) return;
       return window.BDVelgKort({ maks: 60 }).then(function (kort) {
