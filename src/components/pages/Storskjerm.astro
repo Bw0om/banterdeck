@@ -172,7 +172,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var drikk = [];
       (d.spillere || []).forEach(function (p) { var f = sett.slurker[p.id]; if (f != null && na.slurker[p.id] > f) drikk.push({ navn: p.navn, n: na.slurker[p.id] - f }); });
       // Når resultatet av en avstemning vises, står det allerede hvem som drikker – da holder det med resultatskjermen
-      var resultatNaa = na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar|kort:rr-avslort|kort:ns-avslort/.test(na.fase);
+      var resultatNaa = na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar|kort:rr-avslort|kort:ns-avslort|kort:kb-bom/.test(na.fase);
       var nyUt = na.ut && na.ut !== sett.ut && d.utdeling;
       if (nyUt) visUtdeling(d.utdeling, d.alkoholfri);
       var knust = na.brudd && na.brudd !== sett.brudd;
@@ -188,6 +188,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if ((na.vinner && na.vinner !== sett.vinner) || (na.ferdig && !sett.ferdig)) spill('fanfare');
       else if (na.kortNr && na.kortNr !== sett.kortNr) spill('pop');
       if (na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar|kort:rr-avslort|kort:ns-avslort/.test(na.fase)) spill('svar');
+      if (na.fase !== sett.fase && na.fase === 'kort:kb-bom') spill('dundun');
       if (na.spillere > sett.spillere) spill('inn');
       if (na.hend && na.hend !== sett.hend && d.hendelse) toast(d.hendelse.tekst);
       if (na.reak !== sett.reak) flyReak(d.reak || [], sett.reak);
@@ -435,17 +436,53 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       else bunn = '<p class="tvja-dom' + (inn ? ' inn' : '') + '" style="--n:2">' + (res.feig ? han + T(' feiget ut og drikker 3.', ' chickened out and drinks 3.') : res.juks ? T('Juks ', 'Cheat ') + res.nei + T(' mot ', ' to ') + res.ja + '! ' + han + T(' drikker 2.', ' drinks 2.') : T('Godkjent', 'Approved') + (res.ja + res.nei ? ' ' + res.ja + T(' mot ', ' to ') + res.nei : '') + '. ' + han + T(' slipper.', ' is off the hook.')) + '</p>';
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + kort + bunn + '</div></div>';
     }
+    /* ---------- Kategorier: bomba går rundt ---------- */
+    var TVKB_FJAER = 'linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1)';
+    var TVKB_SVG = '<svg viewBox="-34 -46 68 80" aria-hidden="true"><path d="M10 -22q8 -14 20 -16" fill="none" stroke="#16120F" stroke-width="4" stroke-linecap="round"/>' +
+      '<g class="tvkb-gnist"><circle cx="31" cy="-39" r="7" fill="#FFD23F"/><circle cx="31" cy="-39" r="3.5" fill="#FF5B1F"/><path d="M31 -50v-5M42 -39h5M38 -47l4-4M24 -47l-4-4" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/></g>' +
+      '<rect x="-2" y="-27" width="18" height="10" rx="2" transform="rotate(30 7 -22)" fill="#4A3F37" stroke="#16120F" stroke-width="3"/><circle cx="0" cy="2" r="28" fill="#4A4950" stroke="#FFF8EE" stroke-width="3.5"/>' +
+      '<path d="M-15 -12a18 18 0 0 1 12 -7" fill="none" stroke="#FFF8EE" stroke-width="4" stroke-linecap="round" opacity=".7"/></svg>';
+    var TVKB_BOM = '<svg viewBox="-60 -60 120 120" aria-hidden="true"><path d="M0 -56L12 -22L46 -36L26 -6L56 12L20 16L28 52L0 26L-28 52L-20 16L-56 12L-26 -6L-46 -36L-12 -22Z" fill="#FFD23F" stroke="#16120F" stroke-width="4" stroke-linejoin="round"/>' +
+      '<path d="M0 -30L7 -12L26 -18L14 0L30 10L10 10L14 30L0 16L-14 30L-10 10L-30 10L-14 0L-26 -18L-7 -12Z" fill="#FF5B1F"/></svg>';
+    function tvKbFart(b) { var naa = Date.now() + tvAvvik, f = Math.max(0, Math.min(1, (naa - b.start) / Math.max(1, b.smell - b.start))); return Math.round(700 - 560 * f) + 'ms'; }
+    function tvKbBombe(x, o) {
+      return '<div class="tvkb-bombe' + (o.bom ? ' bom' : '') + '" style="--x:' + (x / 100).toFixed(3) + '">' + (o.bom ? '<i class="tvkb-smell">' + TVKB_BOM + '<b>BOM!</b></i>' : '<i class="tvkb-rist" style="--fart:' + o.fart + '">' + TVKB_SVG + '</i>') + '</div>';
+    }
+    function tvKbRekt() { var e = rot.querySelector('.tvkb-bombe:not(.bom)'); return e ? e.getBoundingClientRect() : null; }
+    function tvKbFly(fra) {
+      var e = rot.querySelector('.tvkb-bombe:not(.bom)'); if (!e || !fra || !e.animate) return;
+      try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (x) {}
+      var til = e.getBoundingClientRect(), dx = fra.left - til.left, dy = fra.top - til.top;
+      if (Math.abs(dx) < 2 && Math.abs(dy) < 2) return;
+      e.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'translate(' + (dx / 2) + 'px,' + (dy / 2 - 90) + 'px) rotate(' + (dx > 0 ? -160 : 160) + 'deg)', offset: 0.45 }, { transform: 'none' }],
+        { duration: 600, easing: TVKB_FJAER });
+    }
+    var tvKbVist = '', tvKbIntervall = null;
+    function kbScene(d, s) {
+      var b = s.kb, vk = s.pos + ':' + s.antall + ':' + b.fase, inn = vk !== tvKbVist; tvKbVist = vk;
+      var han = esc(navn(b.holder));
+      clearInterval(tvKbIntervall);
+      if (b.fase === 'gaar') tvKbIntervall = setInterval(function () { var r = rot.querySelector('.tvkb-rist'); if (!r) return clearInterval(tvKbIntervall); r.style.setProperty('--fart', tvKbFart(b)); }, 1000);
+      var chip = b.fase === 'bom' ? 'BOM!' : han + T(' har bomba', ' has the bomb');
+      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Kategorier · kort ', 'Categories · card ') + (s.pos + 1) + T(' av ', ' of ') + s.antall + '</p><span class="tvrr-chip ' + (b.fase === 'bom' ? 'uenige' : 'gul') + '">' + chip + '</span></div>';
+      var kort = '<p class="tvpk-pre">' + T('Kategori', 'Category') + '</p><h1 class="tv-sporsmal tvkb-kat">' + esc((s.kort && s.kort.t) || '') + '</h1>';
+      var bunn = b.fase === 'bom'
+        ? '<p class="tvja-dom' + (inn ? ' inn' : '') + '" style="--n:2">' + han + T(' drikker 2', ' drinks 2') + ' · ' + b.resultat.svar + T(' svar', ' answers') + '</p>'
+        : '<p class="tv-stor">' + ((b.protest || []).length ? '<span class="tvkb-protest">' + T('Sagt før!', 'Said before!') + '</span> ' : '') + b.svar + T(' svar', ' answers') + '</p>';
+      return '<div class="tv-scene tvnr"><div class="tvnr-hoved' + (b.fase === 'bom' && inn ? ' tvkb-skjelv' : '') + '">' + hode + kort + bunn + '</div></div>';
+    }
     function tvBenk(d, alle, o) {
       o = o || {}; var r = o.sider || null, n = alle.length, oi = o.oi || [];
       if (!n) return '';
       var plass = o.par ? tvRrPlasser(alle, o.par) : o.stol ? tvStolPlasser(alle, o.stol) : tvEePlasser(alle, r), w = n <= 6 ? 7.5 : n <= 10 ? 6 : 4.8;
       var stil = '--w:' + w + 'vw' + (r && r.fa ? ';--fa:' + r.fa : '') + (r && r.fb ? ';--fb:' + r.fb : '');
       setTimeout(tvBenkTikk, 0);
+      var bombe = o.bombe && plass[o.bombe.id] != null ? tvKbBombe(plass[o.bombe.id], o.bombe) : '';
       return '<div class="tvee-benk' + (r ? ' delt' : '') + (o.par ? ' rygg' + (o.par.snudd ? ' snudd' : '') : '') + (o.stol ? ' stolen' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
-        (r ? '<i class="tvee-midt"></i>' + (r.la ? '<span class="tvee-sidenavn a">' + esc(r.la) + '</span><span class="tvee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') +
+        (r ? '<i class="tvee-midt"></i>' + (r.la ? '<span class="tvee-sidenavn a">' + esc(r.la) + '</span><span class="tvee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') + bombe +
         alle.map(function (p, i) {
           var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1 || p.id === o.stol, erOi = oi.indexOf(p.id) !== -1, uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
-          var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : '';
+          var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : o.bombe && p.id === o.bombe.id ? ' holder' : '';
           return '<div class="tvee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="tvee-hev' + (oppe ? ' oppe' : '') + '"><span class="tvee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.navn) + '</span>' + (window.mvHodeSvg ? window.mvHodeSvg(p, uttrykk) : '') + '</div></div>'; }).join('') + '</div>';
     }
     var tvBenkTimer = null;
@@ -670,6 +707,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
           : tvBenk(d, jaAlle, { oppe: ja.harSvart || [] }));
       }
       if (s.type === 'kort' && s.ee) return eeScene(d, s);
+      if (s.type === 'kort' && s.kb) {
+        return tvMedBenk(kbScene(d, s), tvBenk(d, d.spillere || [], { oppe: true, stirr: s.kb.holder, bombe: { id: s.kb.holder, fart: tvKbFart(s.kb), bom: s.kb.fase === 'bom' }, oi: s.kb.fase === 'bom' ? [s.kb.holder] : [] }));
+      }
       if (s.type === 'kort' && s.ns) {
         var nsR = s.ns.resultat, nsSt = (nsR && nsR.stemmer) || {};
         return tvMedBenk(nsScene(d, s), tvBenk(d, d.spillere || [], { stol: s.ns.hvem, stirr: s.ns.hvem, oppe: s.ns.fase === 'avslort' ? true : s.ns.fase === 'dom' ? s.ns.harStemt || [] : [],
@@ -750,10 +790,12 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       // Nytt kort eller nytt spørsmål? Da deles det ut på TV-en også – alle ser mot skjermen samtidig
       var sp = d.spill, nokkel = sp ? [sp.type, sp.lek, sp.pos, sp.fase, sp.tekst, sp.kort ? (sp.kort.t || '') + (sp.kort.v || '') + (sp.kort.s || '') : ''].join('|') : '';
       var nyttKort = !!(nokkel && nokkel !== sistTvKort); sistTvKort = nokkel;
+      var kbFra = tvKbRekt();
       rot.innerHTML = '<header class="tv-hode"><span class="tv-logo">mitt<b>vors</b></span>' + (d.gjeng ? '<span class="tv-gjeng">' + esc(d.gjeng.navn) + '</span>' : '') +
         '<span class="tv-kode">' + T('Bli med: ', 'Join: ') + '<b>' + esc(lenkeTekst()) + '</b></span></header>' +
         '<div class="tv-hoved' + (side ? '' : ' uten-side') + '"><div class="tv-scenebox">' + scene(d) + '</div>' + (side ? '<aside class="tv-side">' + side + '</aside>' : '') + '</div>' + meldt;
       tegnTvStua(d);
+      tvKbFly(kbFra);
       if (nyttKort) { var inn = rot.querySelector('.tv-kort, .tv-sporsmal, .tv-rof-kort .rof-kort'); if (inn) inn.classList.add('kort-inn'); }
       var avsl = rot.querySelector('.tv-aldri-avslort');
       if (avsl && avsl.dataset.nokkel !== aldriVist) { aldriVist = avsl.dataset.nokkel; avsl.classList.add('inn'); }
@@ -1094,7 +1136,25 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .med-benk .tvee-benk.stolen{height:15vw}
     .med-benk:has(.tvee-benk.stolen) .tvnr-hoved{padding-bottom:15.5vw}
     .tvrr-chip{font-family:var(--display);font-size:1.6em;font-weight:900;font-stretch:62%;text-transform:uppercase;padding:.08em .4em .12em;color:#16120F;background:#FFF8EE;border:4px solid #FFF8EE;box-shadow:6px 6px 0 #FF5B1F;transform:rotate(-2deg)}
-    .tvrr-chip.gul{background:#FFD23F}.tvrr-chip.rosa{background:#FF9CC2}
+    .tvrr-chip.gul{background:#FFD23F}
+    .tvkb-kat{font-size:5vw}
+    .tvkb-protest{padding:.1em .5em;color:#16120F;background:#FF9CC2;border:3px solid #16120F;border-radius:999px;font-weight:900}
+    .tvkb-bombe{position:absolute;z-index:3;width:5vw;left:calc(2vw + (100% - 4vw - var(--w)) * var(--x) + var(--w) / 2 - 2.5vw);bottom:11.8vw;pointer-events:none}
+    .med-benk .tvee-benk:has(.tvkb-bombe){height:18vw}
+    .med-benk:has(.tvkb-bombe) .tvnr-hoved{padding-bottom:18.5vw}
+    .tvkb-bombe svg{display:block;width:100%;height:auto;overflow:visible}
+    .tvkb-rist{display:block;transform-origin:50% 80%;animation:tvkbVipp var(--fart,700ms) ease-in-out infinite}
+    @keyframes tvkbVipp{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+    .tvkb-gnist{transform-origin:31px -39px;transform-box:view-box;animation:tvkbGnist 180ms steps(2) infinite}
+    @keyframes tvkbGnist{0%{transform:scale(1) rotate(0)}50%{transform:scale(1.25) rotate(25deg)}100%{transform:scale(.9) rotate(-10deg)}}
+    .tvkb-bombe.bom{width:10vw;left:calc(2vw + (100% - 4vw - var(--w)) * var(--x) + var(--w) / 2 - 5vw);bottom:7.6vw}
+    .tvkb-smell{position:relative;display:block;animation:tvkbSmell 600ms cubic-bezier(.23,1,.32,1) both}
+    .tvkb-smell b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:2.4vw;font-weight:900;font-stretch:62%;color:#16120F}
+    @keyframes tvkbSmell{0%{transform:scale(.4) rotate(-20deg);opacity:0}35%{transform:scale(1.12) rotate(4deg);opacity:1}100%{transform:none;opacity:1}}
+    .tvkb-skjelv{animation:tvkbRist 460ms cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvkbRist{0%,100%{transform:none}20%{transform:translate(-12px,6px)}40%{transform:translate(10px,-8px)}60%{transform:translate(-6px,4px)}80%{transform:translate(4px,-2px)}}
+    .tvee-hode.holder .tvee-navn{color:#16120F;background:#FFD23F;border:2px solid #16120F}
+    @media (prefers-reduced-motion:reduce){.tvkb-rist,.tvkb-gnist,.tvkb-skjelv{animation:none}.tvkb-smell{animation:none}}.tvrr-chip.rosa{background:#FF9CC2}
     .tvns-stor{margin:0;font-family:var(--display);font-size:5.6vw;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.92}
     .tvns-stor .o{color:#FF5B1F}.tvns-stor .m{color:#63E2A8}
     .tvns-kort{max-width:62vw;padding:1.6vw 2vw;color:#16120F;border:4px solid #FFF8EE;border-radius:10px;box-shadow:10px 10px 0 #FFD23F;transform:rotate(-1deg)}

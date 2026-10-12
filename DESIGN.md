@@ -136,6 +136,14 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **Benken:** den i stolen står i midten, større, med gul navnelapp og et gult søkelys bak seg. Alle de andre ser på hen og reiser seg når de har dømt. TV-en viser det samme, med «Kasper i stolen. Nødt eller sannhet?» i stor skrift mens hen velger.
 - Kåring «Våghalsen» til den som har gjennomført flest godkjente nødt (minst tre).
 
+### Kategorier
+
+- **Bomba går rundt.** Den som har den, får én stor oransje knapp: **«Sagt!»** (med «Send bomba →» under). Bomba flyr i en bue med fjær til neste hode på benken (FLIP med WAAPI, bare transform), og telefonen til den som får den, sier fra med lyd og en kort vibrasjon.
+- **Ingen vet når den smeller:** 20–45 sekunder etter at kortet kom (pluss tre til å lese). Gnisten blafrer, og bomba vipper fortere jo nærmere smellet. Den som har bomba da, drikker 2: gul stjerne med «BOM!», «OI»-fjeset, skjermen rister én gang og TV-en sier «dundun».
+- **Sagt før!** De andre har én rosa knapp. Alle ser hvem som ropte. Det nullstilles når bomba går videre.
+- **Få ord:** ingen forklaringstekster i leken. Tittelen sier hvem som har bomba; «Slik spiller dere» har reglene.
+- Neste kategori starter hos den som sprengte. Ingen smakebiter (det er ikke kategorier). Kortstokken har 120 kategorier (80 + 40 nye). Kåring «Bombeofferet» til den som sprengte flest ganger (minst tre).
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
