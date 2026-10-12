@@ -80,6 +80,7 @@ export function lekeliste(lang: Lang | string = 'no') {
   return lekelisteRa(sp).map((l: any) => (PLUSS_ROM.includes(l.id) ? { ...l, pluss: true } : l));
 }
 function moduserFor(lek: string, lang: Lang) {
+  if (lek === 'nodt-eller-sannhet') return [{ v: 'snill', t: lang === 'en' ? 'Mild' : 'Snill' }, { v: 'droy', t: lang === 'en' ? 'Spicy' : 'Drøy' }];
   const no = D[lek] ? D[lek].modes || [] : [];
   if (lang !== 'en') return no;
   const en = DE[lek] ? DE[lek].modes || [] : [];
@@ -180,6 +181,7 @@ export function kaaringer(data: any) {
   const mob = maks('mottatt'); if (mob) ut.push({ ikon: '🎯', kode: 'mobbet', tittel: L('Mest mobbet', 'Most picked on'), id: mob.id, navn: mob.navn, tall: L(mob.mottatt + ' 🍺 fått', mob.mottatt + ' 🍺 received') });
   const pekt = maks('pekt'); if (pekt && pekt.pekt >= 3) ut.push({ ikon: '👉', kode: 'pekt', tittel: L('Mest utpekt', 'Most pointed at'), id: pekt.id, navn: pekt.navn, tall: L(pekt.pekt + ' fingre', pekt.pekt + ' fingers') });
   const rrE = maks('rrEnige'); if (rrE && rrE.rrEnige >= 3) ut.push({ ikon: '🤝', kode: 'tankeleser', tittel: L('Tankeleseren', 'The mind reader'), id: rrE.id, navn: rrE.navn, tall: L('enig ' + rrE.rrEnige + ' ganger rygg mot rygg', 'agreed ' + rrE.rrEnige + ' times back to back') });
+  const vh = maks('nsNodt'); if (vh && vh.nsNodt >= 3) ut.push({ ikon: '🔥', kode: 'vaghals', tittel: L('Våghalsen', 'The daredevil'), id: vh.id, navn: vh.navn, tall: L(vh.nsNodt + ' nødt gjennomført', vh.nsNodt + ' dares done') });
   const mot = maks('mindretall'); if (mot && mot.mindretall >= 3) ut.push({ ikon: '🧭', kode: 'motstrom', tittel: L('Mot strømmen', 'Against the current'), id: mot.id, navn: mot.navn, tall: L(mot.mindretall + ' ganger i mindretall', mot.mindretall + ' times in the minority') });
   const erf = maks('harGjort'); if (erf && erf.harGjort >= 5) ut.push({ ikon: '🍹', kode: 'erfaren', tittel: L('Mest erfaren', 'Most experienced'), id: erf.id, navn: erf.navn, tall: L('har gjort ' + erf.harGjort, 'has done ' + erf.harGjort) });
   const logn = maks('lurt'); if (logn && logn.lurt >= 2) ut.push({ ikon: '🎭', kode: 'logn', tittel: L('Kveldens løgnhals', 'Liar of the night'), id: logn.id, navn: logn.navn, tall: L('lurte ' + logn.lurt, 'fooled ' + logn.lurt) });
@@ -219,7 +221,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     spill = { type: s.type, lek: s.lek, navn: s.navn, runde: s.runde || null, frist: s.frist || null, antallLeker: (data.historikk || []).length };
     if (s.type === 'kort' && s.pek) Object.assign(spill, { pek: pekVisning(s, null), pektTavle: pektTavle(data), pekForrige: s.pekForrige || null });
     if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
-      aldri: aldriVisning(s, null), ee: eeVisning(s, null), rr: rrVisning(s, null), fase: s.ferdig ? 'kort-ferdig' : s.aldri ? 'aldri-' + s.aldri.fase : s.ee ? 'ee-' + s.ee.fase : s.rr ? 'rr-' + s.rr.fase : undefined, ferdig: !!s.ferdig, jaTavle: s.ferdig && s.lek === 'jeg-har-aldri' ? aldriTavle(s, data) : null, pekSlutt: s.ferdig && s.lek === 'pekeleken' ? pektTavle(data) : null,
+      aldri: aldriVisning(s, null), ee: eeVisning(s, null), rr: rrVisning(s, null), ns: nsVisning(s, null), fase: s.ferdig ? 'kort-ferdig' : s.aldri ? 'aldri-' + s.aldri.fase : s.ee ? 'ee-' + s.ee.fase : s.rr ? 'rr-' + s.rr.fase : s.ns ? 'ns-' + s.ns.fase : undefined, ferdig: !!s.ferdig, jaTavle: s.ferdig && s.lek === 'jeg-har-aldri' ? aldriTavle(s, data) : null, pekSlutt: s.ferdig && s.lek === 'pekeleken' ? pektTavle(data) : null,
       turId: s.tur !== null && s.tur !== undefined ? (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null : null },
       s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
     if (s.type === 'mest') Object.assign(spill, { tekst: s.tekst, fase: s.fase, stemt: Object.keys(s.stemmer || {}).length, resultat: s.fase === 'resultat' ? s.resultat : null });
@@ -279,7 +281,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     spill = { type: s.type, lek: s.lek, navn: s.navn, modus: modusNavn(s, lang), runde: s.runde, frist: s.frist || null, turStart: s.turNokkel ? s.turStart || null : null };
     if (s.type === 'kort' && s.pek) Object.assign(spill, { pek: pekVisning(s, meg), pektTavle: pektTavle(data), pekForrige: s.pekForrige || null });
     if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
-      aldri: aldriVisning(s, meg), ee: eeVisning(s, meg), rr: rrVisning(s, meg), svarPaa: !!s.svarPaa, kanSvar: SVAR_LEKER.includes(s.lek), ferdig: !!s.ferdig, jaTavle: s.ferdig && s.lek === 'jeg-har-aldri' ? aldriTavle(s, data) : null, pekSlutt: s.ferdig && s.lek === 'pekeleken' ? pektTavle(data) : null },
+      aldri: aldriVisning(s, meg), ee: eeVisning(s, meg), rr: rrVisning(s, meg), ns: nsVisning(s, meg), svarPaa: !!s.svarPaa, kanSvar: SVAR_LEKER.includes(s.lek), ferdig: !!s.ferdig, jaTavle: s.ferdig && s.lek === 'jeg-har-aldri' ? aldriTavle(s, data) : null, pekSlutt: s.ferdig && s.lek === 'pekeleken' ? pektTavle(data) : null },
       s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, sist: s.sist, turId: (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
     if (s.type === 'mest') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase,
@@ -468,6 +470,67 @@ function rrVisning(s: any, meg: any) {
     mitt: meg ? (jegIPar ? r.pek[meg.id] || null : r.gjett[meg.id] || null) : null,
     resultat: r.fase === 'svar' ? null : r.resultat };
 }
+/* ---------- Nødt eller sannhet: én i stolen, alle andre er dommere ----------
+   For hvert kort setter appen neste person i stolen (etter tur). Hen velger nødt eller sannhet, og først da
+   trekkes kortet fra den bunken. Hen gjør det – eller feiger ut og drikker 3. Alle andre dømmer: «Godkjent»
+   eller «Juks!». Flertallet bestemmer (likt = godkjent). Juks: drikk 2. Runden er 3 kort per spiller (6–30). */
+const NS_VELG = 20, NS_DOM = 20, NS_LAAS = 2, NS_FEIG = 3, NS_JUKS = 2;
+function nsLengde(n: number) { return Math.min(KORT_LENGDE, Math.max(6, 3 * n)); }
+function nsBunke(modus: string, type: 'nodt' | 'sannhet', sett?: Set<string> | null) {
+  const d = D['nodt-eller-sannhet'], en = (DE['nodt-eller-sannhet'] && DE['nodt-eller-sannhet'].items) || [];
+  const nivaa = modus === 'snill' || modus === 'ss' || modus === 'ns' ? 's' : modus === 'droy' || modus === 'sd' || modus === 'nd' ? 'd' : '';
+  const koder = (type === 'nodt' ? ['ns', 'nd'] : ['ss', 'sd']).filter((m) => !nivaa || m.endsWith(nivaa));
+  const kort = d.items.map((x: any, i: number) => [x, en[i]]).filter(([x]: any) => koder.includes(x.m)).map(([x, e]: any) => ({ ...kortL(x, e), ns: type }));
+  return usetteForst(stokk(kort), sett);
+}
+/** Rekka er tomme plasser: kortet trekkes først når personen i stolen har valgt. */
+function nsRekke(data: any, modus: string, sett?: Set<string> | null) {
+  const bunker = { nodt: nsBunke(modus, 'nodt', sett), sannhet: nsBunke(modus, 'sannhet', sett) };
+  const plass = { t: L('Nødt eller sannhet?', 'Truth or dare?'), k: '', nsPlass: true };
+  return { bunker, rekke: Array.from({ length: nsLengde(data.spillere.length) }, () => ({ ...plass })) };
+}
+function nsTrekk(s: any, type: 'nodt' | 'sannhet') {
+  if (!s.nsBunker) s.nsBunker = {};
+  if (!s.nsBunker[type] || !s.nsBunker[type].length) s.nsBunker[type] = nsBunke(s.modus, type, null);
+  return s.nsBunker[type].shift();
+}
+function nyNsRunde(s: any, data: any) {
+  if (s.lek !== 'nodt-eller-sannhet' || s.ferdig) { s.ns = null; return; }
+  const k = s.rekke[s.pos];
+  if (!k || !k.nsPlass) { s.ns = null; s.frist = null; return; }   // hendelseskort
+  const n = data.spillere.length;
+  if (n < 2) {   // alene: bare et kort, uten stol og dommere
+    s.rekke[s.pos] = nsTrekk(s, tilfeldig(2) ? 'nodt' : 'sannhet'); s.kort = visKort(s, data); s.ns = null; s.frist = null; return;
+  }
+  const i = s.nsNr || 0; s.nsNr = i + 1;
+  s.ns = { fase: 'velg', hvem: data.spillere[i % n].id, valg: null, stemmer: {}, resultat: null, auto: false };
+  settFrist(s, NS_VELG);
+}
+function nsVelg(s: any, data: any, valg: 'nodt' | 'sannhet', auto = false) {
+  const r = s.ns; if (!r || r.fase !== 'velg') return;
+  r.valg = valg; r.auto = auto; r.fase = 'gjor'; s.frist = null;
+  s.rekke[s.pos] = nsTrekk(s, valg); s.kort = visKort(s, data);
+}
+function nsDommere(s: any, data: any) { return data.spillere.filter((p: any) => p.id !== s.ns.hvem); }
+function avgjorNs(data: any) {
+  const s = data.spill, r = s && s.ns; if (!r || r.fase !== 'dom') return;
+  const st: any = {}; nsDommere(s, data).forEach((p: any) => { if (r.stemmer[p.id]) st[p.id] = r.stemmer[p.id]; });
+  const ja = Object.values(st).filter((v) => v === 'ja').length, nei = Object.values(st).filter((v) => v === 'nei').length;
+  const juks = nei > ja;
+  if (juks) giSlurker(data, r.hvem, NS_JUKS);
+  else if (r.valg === 'nodt') { const p = data.spillere.find((x: any) => x.id === r.hvem); if (p) p.nsNodt = (p.nsNodt || 0) + 1; }
+  r.resultat = { ja, nei, juks, feig: false, stemmer: st }; r.fase = 'avslort'; s.frist = null;
+}
+function nsFeig(data: any) {
+  const s = data.spill, r = s && s.ns; if (!r || (r.fase !== 'gjor' && r.fase !== 'dom')) return;
+  giSlurker(data, r.hvem, NS_FEIG);
+  r.resultat = { ja: 0, nei: 0, juks: false, feig: true, stemmer: {} }; r.fase = 'avslort'; s.frist = null;
+}
+function nsVisning(s: any, meg: any) {
+  const r = s.ns; if (!r) return null;
+  return { fase: r.fase, hvem: r.hvem, valg: r.valg, auto: r.auto, harStemt: Object.keys(r.stemmer),
+    mitt: meg && r.fase === 'dom' ? r.stemmer[meg.id] || null : null, resultat: r.fase === 'avslort' ? r.resultat : null };
+}
 function nyAldriRunde(s: any) {
   if (!s.svarPaa || !s.kort || s.kort.h) { s.aldri = null; s.frist = null; return; }
   s.aldri = { fase: 'svar', svar: {}, har: [] };
@@ -591,7 +654,7 @@ const ROF_BRUDD = 5;   // slurker når ringen ryker («drikk opp»)
 const KONGE_NR: [string, string][] = [['Første', 'First'], ['Andre', 'Second'], ['Tredje', 'Third'], ['Fjerde', 'Fourth']];
 function visKort(s: any, data: any) {
   const k = s.rekke[s.pos];
-  if (s.lek !== 'ring-of-fire') return { t: k.t, k: k.k, h: k.h || undefined, id: k.smak || k.h ? null : kortId(k) };
+  if (s.lek !== 'ring-of-fire') return { t: k.t, k: k.k, h: k.h || undefined, ns: k.ns || undefined, id: k.smak || k.h || k.nsPlass ? null : kortId(k) };
   const info = D['ring-of-fire'].kort[k.v], infoEn = (DE['ring-of-fire'] && DE['ring-of-fire'].kort && DE['ring-of-fire'].kort[k.v]) || info;
   let regel: any = L(info[0], infoEn[0]), tekst: any = L(info[1], infoEn[1]);
   if (k.v === 'K') {
@@ -706,11 +769,13 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
   if (valgt.type === 'kort') {
     const plussRom = !!(data.pluss && data.pluss.til > Date.now());
     if ((valgt as any).pluss && !plussRom) return feilL('pluss', 'Denne pakken krever mittvors pluss.', 'This pack needs mittvors pluss.');
-    let rekke = kortstokkFor(lek, modus, sett);
+    const nsR = lek === 'nodt-eller-sannhet' ? nsRekke(data, modus, sett) : null;
+    let rekke = nsR ? nsR.rekke : kortstokkFor(lek, modus, sett);
     if (lek !== 'ring-of-fire') rekke = rekke.slice(0, lek === 'rygg-mot-rygg' ? rrLengde(data.spillere.length) : KORT_LENGDE);
-    if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && lek !== 'rygg-mot-rygg' && rekke.length > 12) rekke = medSmakebiter(rekke);
+    if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && lek !== 'rygg-mot-rygg' && lek !== 'nodt-eller-sannhet' && rekke.length > 12) rekke = medSmakebiter(rekke);
     if (!rekke.length) return { feil: 'tom' };
     data.spill = { type: 'kort', lek, navn, modus, rekke, pos: 0, tur: lek === 'ring-of-fire' ? 0 : null, konger: 0, tilHendelse: nesteHendelse() };
+    if (nsR) data.spill.nsBunker = nsR.bunker;
     if (lek === 'ring-of-fire' && modus !== 'enkel') {
       // Ringen: alle 52 kortene ligger rundt glasset, og den som har tur drar ut et hvilket som helst kort
       Object.assign(data.spill, { ring: true, tatt: [], nr: 0, brudd: null, kort: null, sist: null, holder: null });
@@ -721,6 +786,7 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
       data.spill.trakk = data.vert;
       if (lek === 'enten-eller') nyEeRunde(data.spill);
       if (lek === 'rygg-mot-rygg') nyRrRunde(data.spill, data);
+      if (lek === 'nodt-eller-sannhet') nyNsRunde(data.spill, data);
       if (lek === 'pekeleken') { data.spill.pekTekst = data.spill.kort && data.spill.kort.t; nyPekRunde(data.spill, data); }
     }
   }
@@ -1164,11 +1230,12 @@ function handlingInne(data: any, meg: any, h: any) {
       if (s.aldri && s.aldri.fase === 'svar' && !erVert) return { ok: true }; // alle svarer: bare verten kan hoppe over kortet
       if (s.ee && s.ee.fase !== 'avslort' && !erVert) return { ok: true };   // Enten eller: bare verten kan hoppe over valget
       if (s.rr && s.rr.fase === 'svar' && !erVert) return { ok: true };       // Rygg mot rygg: det samme
+      if (s.ns && s.ns.fase !== 'avslort' && !erVert) return { ok: true };    // Nødt eller sannhet: det samme
       if (s.ferdig) return { ok: true };
       s.pos++;
       if (s.pos >= s.rekke.length) {
         // Kortlekene slutter når bunken er tom – så velger verten hva dere gjør nå
-        s.pos = s.rekke.length - 1; s.ferdig = true; s.aldri = null; s.ee = null; s.rr = null; s.frist = null; s.velgMakker = null;
+        s.pos = s.rekke.length - 1; s.ferdig = true; s.aldri = null; s.ee = null; s.rr = null; s.ns = null; s.frist = null; s.velgMakker = null;
         if (s.pek && s.pek.resultat) s.pekForrige = { tekst: s.pekTekst || '', resultat: s.pek.resultat };
         s.pek = null;
         melde(data, 'Kortene er brukt opp!', 'The cards are used up!'); return { ok: true };
@@ -1194,6 +1261,35 @@ function handlingInne(data: any, meg: any, h: any) {
       nyAldriRunde(s);
       nyEeRunde(s);
       nyRrRunde(s, data);
+      nyNsRunde(s, data);
+      return { ok: true };
+    }
+    case 'ns-velg': {   // den i stolen velger nødt eller sannhet (verten kan velge for en som ikke er der)
+      const r = s && s.type === 'kort' && s.ns;
+      if (!r || r.fase !== 'velg' || (meg.id !== r.hvem && !erVert)) return { ok: true };
+      if (h.v !== 'nodt' && h.v !== 'sannhet') return { feil: 'ukjent' };
+      nsVelg(s, data, h.v);
+      return { ok: true };
+    }
+    case 'ns-ferdig': {   // ferdig – nå dømmer de andre
+      const r = s && s.type === 'kort' && s.ns;
+      if (!r || r.fase !== 'gjor' || (meg.id !== r.hvem && !erVert)) return { ok: true };
+      r.fase = 'dom'; r.stemmer = {}; settFrist(s, NS_DOM);
+      return { ok: true };
+    }
+    case 'ns-feig': {
+      const r = s && s.type === 'kort' && s.ns;
+      if (!r || (r.fase !== 'gjor' && r.fase !== 'dom') || (meg.id !== r.hvem && !erVert)) return { ok: true };
+      nsFeig(data);
+      melde(data, '🐔 ' + navnPaa(data, r.hvem) + ' feiget ut og drikker ' + NS_FEIG + '!', '🐔 ' + navnPaa(data, r.hvem) + ' chickened out and drinks ' + NS_FEIG + '!');
+      return { ok: true };
+    }
+    case 'ns-stem': {   // dommerne: «ja» (godkjent) eller «nei» (juks)
+      const r = s && s.type === 'kort' && s.ns;
+      if (!r || r.fase !== 'dom' || meg.id === r.hvem) return { ok: true };
+      if (h.v !== 'ja' && h.v !== 'nei') return { feil: 'ukjent' };
+      r.stemmer[meg.id] = h.v;
+      if (nsDommere(s, data).every((p: any) => r.stemmer[p.id])) { const kort = Date.now() + NS_LAAS * 1000 + 1500; if (!s.frist || s.frist > kort) s.frist = kort; }
       return { ok: true };
     }
     case 'rr-pek': {   // en i paret peker: på seg selv eller på den andre
@@ -1293,10 +1389,12 @@ function handlingInne(data: any, meg: any, h: any) {
       }
       const sett = new Set<string>((Array.isArray(h.sett) ? h.sett : []).slice(0, 2000).filter((x: any) => typeof x === 'string' && /^[0-9a-z]{1,8}$/.test(x)));
       s.rekke.forEach((k: any) => { if (!k.h && !k.smak) sett.add(kortId(k)); });
-      let rekke = kortstokkFor(s.lek, s.modus, sett).slice(0, s.lek === 'rygg-mot-rygg' ? rrLengde(data.spillere.length) : KORT_LENGDE);
-      if (!romHarPluss(data) && s.lek !== 'rygg-mot-rygg') rekke = medSmakebiter(rekke);
+      const nsR = s.lek === 'nodt-eller-sannhet' ? nsRekke(data, s.modus, sett) : null;
+      if (nsR) s.nsBunker = nsR.bunker;
+      let rekke = nsR ? nsR.rekke : kortstokkFor(s.lek, s.modus, sett).slice(0, s.lek === 'rygg-mot-rygg' ? rrLengde(data.spillere.length) : KORT_LENGDE);
+      if (!romHarPluss(data) && s.lek !== 'rygg-mot-rygg' && s.lek !== 'nodt-eller-sannhet') rekke = medSmakebiter(rekke);
       Object.assign(s, { rekke, pos: 0, ferdig: false, konger: 0, aldriTeller: {}, tilHendelse: nesteHendelse(), trakk: meg.id });
-      s.kort = visKort(s, data); nyAldriRunde(s); nyEeRunde(s); nyRrRunde(s, data);
+      s.kort = visKort(s, data); nyAldriRunde(s); nyEeRunde(s); nyRrRunde(s, data); nyNsRunde(s, data);
       if (s.lek === 'pekeleken') { s.pekTekst = s.kort && s.kort.t; nyPekRunde(s, data); }
       melde(data, 'Nye kort!', 'New cards!');
       return { ok: true };
@@ -1375,6 +1473,10 @@ function handlingInne(data: any, meg: any, h: any) {
         if (mangler > 0 && !fristUte(s) && !erVert) return venter(s, mangler);
         avgjorAldri(data);
       }
+      if (s.type === 'kort' && s.ns && s.ns.fase === 'dom') {   // Nødt eller sannhet: bare verten kan avslutte dommen før klokka er ute
+        if (!erVert) return { feil: 'bare-vert' };
+        avgjorNs(data);
+      }
       if (s.type === 'kort' && s.rr && s.rr.fase === 'svar') {   // Rygg mot rygg: bare verten kan snu før klokka er ute
         if (!erVert) return { feil: 'bare-vert' };
         avgjorRr(data);
@@ -1391,6 +1493,8 @@ function handlingInne(data: any, meg: any, h: any) {
       if (s.type === 'kort' && s.aldri && s.aldri.fase === 'svar') avgjorAldri(data);
       if (s.type === 'kort' && s.ee && s.ee.fase === 'svar') avgjorEe(data);
       if (s.type === 'kort' && s.rr && s.rr.fase === 'svar') avgjorRr(data);
+      if (s.type === 'kort' && s.ns && s.ns.fase === 'dom') avgjorNs(data);
+      if (s.type === 'kort' && s.ns && s.ns.fase === 'velg') nsVelg(s, data, tilfeldig(2) ? 'nodt' : 'sannhet', true);   // ingen valgte: appen velger
       if (s.type === 'mest' && s.fase === 'stem') avgjorMest(data);
       if (s.type === 'forraeder' && s.fase === 'stem') avgjorForraeder(data);
       return { ok: true };
