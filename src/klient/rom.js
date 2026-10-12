@@ -1123,7 +1123,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   function rofSpill(s) {
     // Verten kan trekke for den som har tur (f.eks. hvis telefonen er borte) – gjelder bare dette trekket
-    var tatt = s.tatt || [], min = s.turId === tilstand.meg || (erVert() && rofFor === s.nr), k = s.kort;
+    var tatt = s.tatt || [], min = !s.ferdig && (s.turId === tilstand.meg || (erVert() && rofFor === s.nr)), k = s.kort;
     var igjen = s.igjen != null ? s.igjen : ROF_N - tatt.length, konger = s.konger || 0;
     var holder = s.holder && s.holder.hvem !== tilstand.meg && s.holder.t > 0 ? s.holder : null;   // noen andre er i gang med et trekk
     rofValgt = rofTopp(tatt);
@@ -1151,14 +1151,14 @@ export function startRom(LEKNAVN, LANG) {
         '</svg>' +
         (visKort ? '<div class="ring-over"><p class="rom-etikett">' + esc(k.hvem || '') + T(' trakk', ' drew') + '</p>' + rofKortHtml(k, s.nr) +
           '<button class="btn gold" data-g="rof-lukk" type="button">' + (min ? T('Greit – din tur', 'Got it – your turn') : T('Greit', 'Got it')) + '</button>' +
-          (!min && s.turId ? '<p class="ring-neste">' + T('Neste: ', 'Next: ') + esc(navn(s.turId)) + '</p>' : '') + '</div>' : '') +
+          (!min && s.turId && !s.ferdig ? '<p class="ring-neste">' + T('Neste: ', 'Next: ') + esc(navn(s.turId)) + '</p>' : '') + '</div>' : '') +
       '</div>' +
       '<p class="ring-hint">' + (s.ringBrutt ? '💥 ' + T('Ringen er brutt av ', 'The ring was broken by ') + esc((s.brudd && s.brudd.navn) || '') + T('. Nå kan den ikke ryke igjen – bare trekk.', '. It can’t break again – just draw.')
         : min ? T('Snurr ringen. Hold på det gule kortet og følg sporet ut – stø hånd.', 'Spin the ring. Hold the yellow card and follow the lane out – steady hand.')
         : holder ? esc(navn(holder.hvem)) + T(' drar … ryker ringen, drikker de opp.', ' is pulling … if the ring breaks, they finish their drink.')
         : T('Ryker ringen, drikker ', 'If the ring breaks, ') + esc(navn(s.turId)) + T(' opp glasset.', ' finishes their drink.')) + '</p>' +
       makkerHtml(s) +
-      (!min && erVert() ? '<p class="ring-knapper"><button class="btn ghost small" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button></p>' : '');
+      (!min && erVert() && !s.ferdig ? '<p class="ring-knapper"><button class="btn ghost small" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button></p>' : '');
   }
   /** Ringen røk: alle telefonene får vite det. */
   function rofSjekkBrudd(d) {
@@ -1353,8 +1353,10 @@ export function startRom(LEKNAVN, LANG) {
   }
 
   function kortSpill(s) {
+    // Ringen er tom: siste kort vises først, og når det er lagt bort kommer «Hva nå?»
+    if (s.ring && s.ferdig && rofSkjult === s.nr) return rofSlutt(s);
     if (s.ring) return rofSpill(s);
-    if (s.ferdig) return s.lek === 'jeg-har-aldri' ? aldriFerdig(s) : kortFerdig(s);
+    if (s.ferdig) return s.lek === 'jeg-har-aldri' ? aldriFerdig(s) : s.lek === 'ring-of-fire' ? rofSlutt(s) : kortFerdig(s);
     if (s.pek && s.pek.fase !== 'hendelse') return pekSpill(s);
     if (s.aldri) return aldriSpill(s) + aldriBryter(s);
     var k = s.kort || {};
@@ -1444,6 +1446,14 @@ export function startRom(LEKNAVN, LANG) {
       '<div class="ja-folk">' + folk + '<span>' + svart.length + T(' av ', ' of ') + alle.length + T(' har svart', ' answered') + '</span></div>' +
       (hint ? '<p class="nr-vent">' + hint + '</p>' : '') +
       (erVert() && svart.length ? '<p class="ja-vis"><button type="button" class="linkbtn" data-g="avslor">' + T('Vis svarene nå', 'Show the answers now') + '</button></p>' : '');
+  }
+  /** Ring of Fire når kortene er brukt opp: hvordan det gikk med ringen, og så ny ring eller noe annet. */
+  function rofSlutt(s) {
+    var b = s.brudd;
+    var midt = '<div class="pk-kort sd-ferdig"><b>' + (s.konger || 0) + '/4</b><p>' + T('konger. ', 'kings. ') +
+      (s.ring ? (s.ringBrutt && b ? esc(b.navn || '') + T(' brøt ringen.', ' broke the ring.') : T('Ringen holdt hele veien!', 'The ring held all the way!')) : T('Alle kortene er trukket.', 'Every card has been drawn.')) + '</p></div>';
+    return jaTopp('Ring of Fire · 52 ' + T('kort', 'cards'), s.ring ? T('Ringen er tom', 'The ring is empty') : T('Kortene er brukt opp', 'The cards are used up'), true) + midt +
+      lekSlutt([['kort-igjen', s.ring ? T('Ny ring', 'New ring') : T('Ny kortstokk', 'New deck'), T('Alle 52 kortene ut igjen', 'All 52 cards out again')]]);
   }
   /** De andre kortlekene når bunken er tom: hvor mange kort dere spilte (i Pekeleken: hvem som ble pekt mest på), og så hva nå. */
   function kortFerdig(s) {
