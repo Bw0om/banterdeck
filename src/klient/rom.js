@@ -337,6 +337,7 @@ export function startRom(LEKNAVN, LANG) {
       if (!el) return;
       var frist = Number(el.dataset.frist), igjen = Math.max(0, Math.ceil((frist - 1500 - (Date.now() + klokkeAvvik)) / 1000));
       el.textContent = igjen; el.parentNode.classList.toggle('snart', igjen <= 10);
+      var kl = el.parentNode.classList.contains('nr-klokke') ? el.parentNode.querySelector('path') : null; if (kl) kl.setAttribute('d', nrPai(igjen / (fristTot[frist] || Math.max(igjen, 1))));
       var lu = document.querySelector('.frist-lunte'); if (lu) { var tot = fristTot[frist] || Math.max(igjen, 1); lu.firstChild.style.setProperty('--igjen', (100 * igjen / tot).toFixed(1) + '%'); lu.classList.toggle('snart', igjen <= 10); lu.classList.toggle('tom', igjen <= 0); }
       if (igjen <= 0 && fristSendt !== frist) {
         fristSendt = frist;
@@ -861,7 +862,7 @@ export function startRom(LEKNAVN, LANG) {
     gris: [['Alle får fire kort. Send ett kort videre samtidig.', 'Everyone gets four cards. Pass one card on at the same time.'], ['Får noen fire like, tar hen seg på nesa – og alle må gjøre det samme.', 'When someone gets four of a kind, they touch their nose – and everyone must follow.'], ['Sistemann får en bokstav. G-R-I-S = ta en shot.', 'The last one gets a letter. P-I-G-S = take a shot.']],
     president: [['Bli kvitt kortene dine først – legg likt eller høyere enn det som ligger.', 'Get rid of your cards first – play equal or higher than what’s on the table.'], ['Toere er høyest og rydder bordet.', 'Twos are highest and clear the table.'], ['Først ut blir president, sist ut blir rævkjører.', 'First out is President, last out is the Scumbag.']],
     bingo: [['Alle får sitt eget bingobrett med sanger.', 'Everyone gets their own bingo card with songs.'], ['Spill spillelista og kryss av sangene du hører.', 'Play the playlist and mark the songs you hear.'], ['Rekke: del ut to slurker. Fullt brett: BINGO – alle andre drikker opp.', 'A line: hand out two sips. Full card: BINGO – everyone else finishes their drink.']],
-    nyhetsrunden: [['Spørsmål om ukas nyheter dukker opp på alle telefonene.', 'Questions about this week’s news appear on every phone.'], ['Svar før tiden går ut.', 'Answer before time runs out.'], ['Riktig: del ut en slurk. Feil: drikk.', 'Right: hand out a sip. Wrong: drink.']],
+    nyhetsrunden: [['Spørsmålet dukker opp på alle telefonene – verten leser det høyt.', 'The question appears on every phone – the host reads it out loud.'], ['Svar før klokka går ut. Du kan bytte svar helt til svaret vises.', 'Answer before the clock runs out. You can change your answer until it is shown.'], ['Riktig: del ut én. Feil: drikk én. Tallspørsmål: den nærmest deler ut to, lengst unna drikker.', 'Right: hand out one. Wrong: drink one. Number questions: closest hands out two, furthest off drinks.']],
     ring: [['Telefonene er kortstokken – alle ser samme kort.', 'The phones are the deck – everyone sees the same card.'], ['Den som har tur, trekker og gjør det kortet sier.', 'Whoever’s turn it is draws and does what the card says.'], ['Den som trekker fjerde konge, drikker opp!', 'Whoever draws the fourth king finishes their drink!']],
     ringr: [['Kortene ligger i en ring rundt glasset. Den som har tur, snurrer ringen med fingeren – kortet øverst lyser opp.', 'The cards lie in a ring around the glass. Whoever’s turn it is spins the ring with a finger – the top card lights up.'],
       ['Hold på kortet og dra det sakte ut. Drar du for fort, ryker ringen: drikk opp glasset ditt!', 'Hold the card and pull it out slowly. Pull too fast and the ring breaks: finish your drink!'],
@@ -1601,48 +1602,174 @@ export function startRom(LEKNAVN, LANG) {
       '<p class="dl-info">' + s.ider.map(function (id) { return esc(navn(id)) + ': ' + (s.summer[id] || 0); }).join(' · ') + '</p>';
   }
 
-  /* ---------- Nyhetsrunden: verten leser, alle svarer ---------- */
-  var TYPER = EN ? { valg: 'Pick the right one', sant: 'True or nonsense?', tall: 'Which number?', fritt: 'Free answer' } : { valg: 'Velg riktig', sant: 'Sant eller tull?', tall: 'Hvilket tall?', fritt: 'Svar fritt' };
-  function nyhetsrundenSpill(s) {
-    var vert = erVert(), topp = '<p class="gt-count">' + T('Spørsmål ', 'Question ') + (s.i + 1) + T(' av ', ' of ') + s.antall + ' · ' + (TYPER[s.qtype] || '') + '</p>';
-    if (s.fase === 'klar') {
-      return '<p class="dl-melding dl-stor">' + T('Uke ', 'Week ') + s.uke + ' · ' + s.antall + T(' spørsmål', ' questions') + '</p>' +
-        '<p>' + (vert ? T('Du leser spørsmålene høyt. De andre svarer på sin telefon – riktig gir én 🍺 å dele ut, feil er én slurk.', 'You read the questions out loud. The others answer on their phones – right gives you one 🍺 to hand out, wrong is one sip.') : esc(navn(tilstand.vert)) + T(' leser spørsmålene høyt. Du svarer her på telefonen.', ' reads the questions out loud. You answer here on your phone.')) + '</p>' +
-        '<p class="rom-status">' + tilstand.spillere.length + T(' med: ', ' in: ') + tilstand.spillere.map(function (p) { return esc(p.navn); }).join(', ') + '</p>' +
-        (vert ? '<p class="small">' + T('Vent til alle er med. Del koden <b>', 'Wait until everyone\'s in. Share the code <b>') + esc(kode) + '</b>.</p><button class="rom-stor-knapp" data-g="nr-start" type="button">' + T('Første spørsmål', 'First question') + '</button>'
-              : '<p class="rom-stor">' + T('Venter på at ' + esc(navn(tilstand.vert)) + ' starter …', 'Waiting for ' + esc(navn(tilstand.vert)) + ' to start …') + '</p>');
-    }
-    if (s.fase === 'ferdig') {
-      var l = s.tavle;
-      if (s.rid) { var sp = nrSpilt(); if (sp.indexOf(s.rid) === -1) { sp.push(s.rid); skriv('bd_nr_spilt', sp.slice(-300)); } }
-      return '<p class="dl-melding dl-stor">🏆 ' + esc(l[0] ? l[0].navn : '') + T(' vant uke ', ' won week ') + s.uke + '!</p>' +
-        '<ol class="rom-resultat">' + l.map(function (x) { return '<li><span>' + esc(x.navn) + '</span><b>' + x.riktige + ' / ' + s.antall + '</b></li>'; }).join('') + '</ol>' +
-        (vert ? '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ta runden på nytt', 'Play the round again') + '</button>' : '');
-    }
-    if (s.fase === 'spm') {
-      var mitt = s.mittSvar, input;
-      if (s.alt) input = '<div class="rom-valg ' + (s.alt.length === 2 ? 'to' : 'en') + '">' + s.alt.map(function (a) {
-        return '<button type="button" data-g="nr-svar" data-v="' + esc(a) + '" aria-pressed="' + (mitt === a) + '">' + esc(a) + '</button>'; }).join('') + '</div>';
-      else input = '<form class="rf-skjema" id="nrSkjema"><div class="rf-rad"><input id="nrInput" maxlength="80" autocomplete="off" enterkeyhint="send"' +
-        (s.qtype === 'tall' ? ' inputmode="decimal" placeholder="' + T('Skriv et tall', 'Enter a number') + '"' : ' placeholder="' + T('Skriv svaret ditt', 'Type your answer') + '"') + ' value="' + esc(mitt || '') + '">' +
-        '<button class="btn gold" type="submit">' + (mitt ? T('Endre', 'Change') : T('Svar', 'Answer')) + '</button></div></form>' + (mitt ? '<p class="small">' + T('Du svarte: ', 'You answered: ') + '<b>' + esc(mitt) + '</b></p>' : '');
-      return topp + (vert
-          ? '<div class="nr-opples"><span class="rom-etikett">' + T('Les høyt', 'Read aloud') + '</span><p class="gt-text">' + esc(s.q) + '</p></div>'
-          : '<p class="rom-stor">' + T('Hør på ', 'Listen to ') + esc(navn(tilstand.vert)) + T(' og svar her:', ' and answer here:') + '</p>') + input +
-        '<p class="rom-status">' + s.harSvart.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har svart', ' have answered') + '</p>' + fristHtml(tilstand.spill, T('sekunder til svaret vises', 'seconds until the answer is shown')) +
-        (vert ? '<button class="rom-stor-knapp" data-g="nr-vis" type="button"' + (s.harSvart.length < tilstand.spillere.length ? ' data-vent="1"' : '') + '>' + (s.harSvart.length < tilstand.spillere.length ? (function (m) { return T('Venter på ' + m + ' svar …', 'Waiting for ' + m + (m === 1 ? ' answer …' : ' answers …')); })(tilstand.spillere.length - s.harSvart.length) : T('Vis svaret', 'Show the answer')) + '</button>' : '');
-    }
-    var rader = tilstand.spillere.map(function (p) {
-      var r = s.resultat[p.id], sv = s.svarene[p.id];
-      return '<li class="' + (r ? 'rett' : 'feil') + '"><span class="nr-hvem">' + esc(p.navn) + '</span><span class="nr-hva">' + (sv ? esc(sv) : '<i>' + T('ingen svar', 'no answer') + '</i>') + '</span>' +
-        (vert ? '<button type="button" data-g="nr-flipp" data-id="' + p.id + '" aria-label="' + T('Endre vurdering for ', 'Change the verdict for ') + esc(p.navn) + '">' + (r ? '✓' : '✗') + '</button>' : '<b>' + (r ? '✓' : '✗') + '</b>') + '</li>';
-    }).join('');
-    return topp + '<p class="gt-text">' + esc(s.q) + '</p><div class="nr-svar"><p class="nr-fasit">' + esc(s.fasit) + '</p>' + (s.info ? '<p>' + esc(s.info) + '</p>' : '') +
-      (s.url ? '<p class="small"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + T('Les saken hos ', 'Read the story at ') + esc(s.kilde) + ' ↗</a></p>' : '') + '</div>' +
-      '<ul class="nr-rom-svar">' + rader + '</ul>' +
-      '<p class="small">' + T('Riktig: del ut én 🍺. Feil: drikk én.', 'Right: hand out one 🍺. Wrong: drink one.') + (vert ? T(' Trykk ✓/✗ for å rette en vurdering.', ' Tap ✓/✗ to fix a verdict.') : '') + '</p>' +
-      (vert ? '<button class="rom-stor-knapp" data-g="nr-neste" type="button">' + (s.i + 1 < s.antall ? T('Neste spørsmål', 'Next question') : T('Se hvem som vant', 'See who won')) + '</button>' : '');
+  /* ---------- Nyhetsrunden: alle ser spørsmålet, verten leser det høyt, avsløringen er et øyeblikk ----------
+     Valg og sant/tull: A–D-klistremerker. Tall: eget tastatur (mobiltastaturet dekker ikke spørsmålet),
+     og en tallinje når svaret vises – nærmest deler ut to. Fritt: et tekstfelt. Bevegelse bare første gang
+     noe vises (stempelet, resultatet, nålene, pallen), så nye tegninger ikke spiller det av igjen. */
+  var TYPER = EN ? { valg: 'Pick the right one', sant: 'True or nonsense?', tall: 'Which number? Closest wins', fritt: 'Free answer' } : { valg: 'Velg riktig', sant: 'Sant eller tull?', tall: 'Hvilket tall? Nærmest vinner', fritt: 'Svar fritt' };
+  var NR_FARGER = ['#FF9CC2', '#63E2A8', '#FFD23F', '#7CC6FE', '#FF5B1F', '#C9B3FF', '#FFB38A', '#B8E986'];
+  var nrTall = { k: '', v: '' }, nrVist = '';
+  function nrFarge(id) { var i = (tilstand.spillere || []).findIndex(function (p) { return p.id === id; }); return NR_FARGER[(i < 0 ? 0 : i) % NR_FARGER.length]; }
+  function nrPille(id, klasse) {
+    var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }) || { id: id, navn: '?' };
+    return '<span class="nr-p' + (klasse ? ' ' + klasse : '') + (id === tilstand.meg ? ' meg' : '') + '" style="--f:' + nrFarge(id) + '" title="' + esc(p.navn) + '">' + esc(initialer(p)) + '</span>';
   }
+  function nrFormat(v) { var n = Number(v); return isFinite(n) && String(v) !== '' ? n.toLocaleString(EN ? 'en-GB' : 'nb-NO') : String(v || ''); }
+  function nrPai(andel) {
+    if (!(andel > 0)) return '';
+    if (andel >= 0.999) return 'M28 4 A24 24 0 1 1 27.99 4 Z';
+    var v = andel * Math.PI * 2, x = 28 + 24 * Math.sin(v), y = 28 - 24 * Math.cos(v);
+    return 'M28 28 L28 4 A24 24 0 ' + (v > Math.PI ? 1 : 0) + ' 1 ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' Z';
+  }
+  function nrKlokke() {
+    var sp = tilstand.spill; if (!sp || !sp.frist) return '';
+    var igjen = Math.max(0, Math.ceil((sp.frist - 1500 - (Date.now() + klokkeAvvik)) / 1000));
+    fristTot[sp.frist] = Math.max(fristTot[sp.frist] || 0, igjen, 1);
+    return '<div class="nr-klokke' + (igjen <= 10 ? ' snart' : '') + '"><svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="24"/><path d="' + nrPai(igjen / fristTot[sp.frist]) + '"/><circle class="kant" cx="28" cy="28" r="24"/></svg>' +
+      '<span data-frist="' + sp.frist + '" aria-label="' + T('sekunder igjen', 'seconds left') + '">' + igjen + '</span></div>';
+  }
+  function nrTopp(s, tekst, klokke) {
+    return '<div class="nr-topp"><div class="nr-topp-tekst"><span>' + T('Nyhetsrunden · uke ', 'Nyhetsrunden · week ') + s.uke + '</span><b>' + tekst + '</b></div>' + (klokke ? nrKlokke() : '') + '</div>';
+  }
+  function nrSporsmal(s, liten) {
+    return '<div class="nr-kort' + (liten ? ' liten' : '') + '"><span class="nr-type">' + esc(TYPER[s.qtype] || '') + '</span>' + (erVert() && s.fase === 'spm' ? '<span class="nr-les">' + T('Les det høyt', 'Read it out loud') + '</span>' : '') +
+      '<p>' + esc(s.q) + '</p></div>';
+  }
+  function nrTastatur(s) {
+    var nokkel = s.rid + ':' + s.i, mitt = s.mittSvar;
+    if (nrTall.k !== nokkel) nrTall = { k: nokkel, v: mitt ? String(mitt).replace(/\D/g, '') : '' };
+    var taster = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', '⌫'];
+    return '<div class="nr-tall"><label for="nrTallUt">' + T('Gjetningen din', 'Your guess') + '</label><output id="nrTallUt" class="nr-tall-ut">' + (nrFormat(nrTall.v) || '0') + '</output>' +
+      '<div class="nr-taster">' + taster.map(function (k) { return '<button type="button" data-g="nr-tast" data-k="' + k + '"' + (k === '⌫' ? ' aria-label="' + T('Slett', 'Delete') + '" class="graa"' : k === '000' ? ' class="graa"' : '') + '>' + k + '</button>'; }).join('') + '</div>' +
+      '<button type="button" class="nr-las" id="nrLas" data-g="nr-las">' + nrLasTekst(mitt) + '</button></div>';
+  }
+  function nrLasTekst(mitt) {
+    var v = nrFormat(nrTall.v) || '0';
+    if (mitt && String(mitt).replace(/\D/g, '') === nrTall.v) return T('Låst inn: ', 'Locked in: ') + v;
+    return (mitt ? T('Bytt til ', 'Change to ') : T('Lås inn ', 'Lock in ')) + v;
+  }
+  function nrTallinje(s) {
+    var t = s.tall; if (!t) return '';
+    // Fasiten i midten, gjetningene etter hvor mange ganger for høyt eller lavt de var (så én vill gjetning ikke klemmer resten sammen)
+    var pos;
+    if (t.fasit > 0 && t.gjett.every(function (g) { return g.v > 0; })) {
+      var r = t.gjett.map(function (g) { return Math.abs(Math.log(g.v / t.fasit)); }), maks = Math.max.apply(null, [0.05].concat(r));
+      pos = function (v) { return (50 + 44 * Math.log(v / t.fasit) / maks).toFixed(2); };
+    } else {
+      var alle = t.gjett.map(function (g) { return g.v; }).concat([t.fasit]);
+      var lo = Math.min.apply(null, alle), hi = Math.max.apply(null, alle); if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
+      var pad = (hi - lo) * 0.08; pos = function (v) { return ((v - lo + pad) / (hi - lo + 2 * pad) * 100).toFixed(2); };
+    }
+    // Nålene over linja, i rader så de ikke dekker hverandre; fasiten som et flagg under linja
+    var sortert = t.gjett.slice().sort(function (a, b) { return a.v - b.v; }), rader = [];
+    var pinner = sortert.map(function (g, i) {
+      var x = Number(pos(g.v)), rad = 0;
+      while (rader[rad] != null && x - rader[rad] < 17) rad++;
+      rader[rad] = x;
+      return '<div class="nr-pinne" style="left:' + x + '%;--i:' + i + ';--h:' + (14 + rad * 46) + 'px;z-index:' + (10 - rad) + '">' + nrPille(g.id, s.resultat[g.id] === 2 ? 'beste' : '') + '<small>' + esc(nrFormat(g.v)) + '</small><i></i></div>';
+    }).join('');
+    var hoyde = 96 + Math.max(0, rader.length - 1) * 46;
+    return '<div class="nr-linje' + (nrVist !== s.rid + ':' + s.i ? ' inn' : '') + '" style="height:' + (hoyde + 56) + 'px" role="img" aria-label="' + T('Svaret er ', 'The answer is ') + esc(nrFormat(t.fasit)) + '">' + pinner +
+      '<div class="nr-fasit-flagg" style="left:' + pos(t.fasit) + '%"><i></i><b>' + esc(nrFormat(t.fasit)) + '</b></div><div class="nr-akse"></div></div>';
+  }
+  function nrResultat(s, k) {
+    var tall = s.qtype === 'tall', mitt = s.mittSvar;
+    var tittel = k === 2 ? T('Nærmest – del ut to', 'Closest – hand out two') : k === 1 ? (tall ? T('Innen 10 % – del ut én', 'Within 10% – hand out one') : T('Riktig – del ut én', 'Right – hand out one'))
+      : k === 0 ? T('Midt på treet – ingenting', 'Somewhere in between – nothing') : !mitt ? T('Ingen svar – drikk én', 'No answer – drink one') : tall ? T('Lengst unna – drikk én', 'Furthest off – drink one') : T('Feil – drikk én', 'Wrong – drink one');
+    return '<div class="nr-resultat ' + (k > 0 ? 'rett' : k === 0 ? 'null' : 'feil') + (nrVist !== s.rid + ':' + s.i ? ' inn' : '') + '"><b>' + tittel + '</b>' +
+      (s.info ? '<span>' + esc(s.info) + (s.url ? ' <a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + T('Les saken hos ', 'Read it at ') + esc(s.kilde) + '</a>' : '') + '</span>' : '') + '</div>';
+  }
+  function nyhetsrundenSpill(s) {
+    var vert = erVert(), alle = tilstand.spillere || [];
+    if (s.fase === 'klar') {
+      var valg = [10, 15, 30].filter(function (n) { return n < s.totalt; }).concat([s.totalt]).filter(function (n, i, a) { return a.indexOf(n) === i; });
+      return nrTopp(s, s.lengde + T(' spørsmål', ' questions'), false) +
+        '<div class="nr-kort"><span class="nr-type">' + T('Slik spiller dere', 'How it works') + '</span><p>' + esc(navn(s.vert)) + T(' leser spørsmålene høyt. Alle ser dem og svarer på sin egen telefon.', ' reads the questions out loud. Everyone sees them and answers on their own phone.') + '</p>' +
+        '<ul class="nr-regler-kort"><li>' + T('Riktig: del ut én. Feil: drikk én.', 'Right: hand out one. Wrong: drink one.') + '</li><li>' + T('Tall: den nærmest deler ut to, lengst unna drikker.', 'Numbers: closest hands out two, furthest off drinks.') + '</li></ul></div>' +
+        '<div class="nr-folk">' + alle.map(function (p) { return nrPille(p.id, 'har'); }).join('') + '<span>' + alle.length + T(' med', ' in') + '</span></div>' +
+        (vert ? '<p class="nr-etikett">' + T('Hvor lang runde?', 'How long a round?') + '</p><div class="nr-lengder">' + valg.map(function (n) {
+              return '<button type="button" data-g="nr-lengde" data-n="' + n + '" aria-pressed="' + (s.lengde === n) + '">' + (n === s.totalt ? T('Hele · ', 'All · ') : n <= 10 ? T('Kort · ', 'Short · ') : T('Vanlig · ', 'Usual · ')) + n + '</button>'; }).join('') + '</div>' +
+            '<button class="rom-stor-knapp" data-g="nr-start" type="button">' + T('Første spørsmål', 'First question') + '</button>'
+          : '<p class="nr-vent">' + T('Venter på at ', 'Waiting for ') + esc(navn(s.vert)) + T(' starter …', ' to start …') + '</p>');
+    }
+    if (s.fase === 'ferdig') return nrFerdig(s, vert);
+    var spm = s.fase === 'spm', har = s.harSvart || [];
+    var topp = nrTopp(s, T('Spørsmål ', 'Question ') + (s.i + 1) + T(' av ', ' of ') + s.antall, spm);
+    if (spm) {
+      var mitt = s.mittSvar, input;
+      if (s.alt) input = '<div class="nr-alt' + (s.alt.length === 2 ? ' to' : '') + '">' + s.alt.map(function (a, i) {
+        return '<button type="button" class="nr-a" data-g="nr-svar" data-v="' + esc(a) + '" aria-pressed="' + (mitt === a) + '"><i>' + 'ABCD'.charAt(i) + '</i><span>' + esc(a) + '</span></button>'; }).join('') + '</div>';
+      else if (s.qtype === 'tall') input = nrTastatur(s);
+      else input = '<form class="nr-fritt" id="nrSkjema"><label for="nrInput">' + T('Svaret ditt', 'Your answer') + '</label><div><input id="nrInput" maxlength="80" autocomplete="off" enterkeyhint="send" placeholder="' + T('Skriv svaret ditt', 'Type your answer') + '" value="' + esc(mitt || '') + '">' +
+        '<button type="submit">' + (mitt ? T('Endre', 'Change') : T('Svar', 'Answer')) + '</button></div>' + (mitt ? '<small>' + T('Du svarte: ', 'You answered: ') + '<b>' + esc(mitt) + '</b></small>' : '') + '</form>';
+      var mangler = alle.length - har.length;
+      return topp +
+        '<div class="nr-folk">' + alle.map(function (p) { return nrPille(p.id, har.indexOf(p.id) !== -1 ? 'har' : ''); }).join('') + '<span>' + har.length + T(' av ', ' of ') + alle.length + T(' har svart', ' answered') + '</span></div>' +
+        nrSporsmal(s) + input +
+        (vert ? '<button class="rom-stor-knapp nr-vis" data-g="nr-vis" type="button"' + (mangler > 0 ? ' data-vent="1"' : '') + '>' + (mangler > 0 ? T('Vis svaret nå', 'Show the answer now') + ' <small>(' + mangler + T(' mangler', ' missing') + ')</small>' : T('Vis svaret', 'Show the answer')) + '</button>'
+          : '<p class="nr-vent">' + (mitt ? T('Låst inn. Du kan bytte til svaret vises.', 'Locked in. You can change until the answer shows.') : T('Velg et svar før klokka går ut.', 'Answer before the clock runs out.')) + '</p>');
+    }
+    // Svaret er vist
+    var nokkel = s.rid + ':' + s.i, inn = nrVist !== nokkel, res = s.resultat || {}, sv = s.svarene || {};
+    var midt = '';
+    if (s.alt) midt = '<div class="nr-alt' + (s.alt.length === 2 ? ' to' : '') + '">' + s.alt.map(function (a, i) {
+      var rett = a === s.fasit, minn = s.mittSvar === a, hvem = alle.filter(function (p) { return sv[p.id] === a; });
+      return '<div class="nr-a avslort' + (rett ? ' rett' : minn ? ' feil' : ' dempet') + '"><i>' + 'ABCD'.charAt(i) + '</i><span>' + esc(a) + '</span><span class="nr-hvem">' + hvem.map(function (p) { return nrPille(p.id); }).join('') + '</span>' +
+        (rett || minn ? '<em class="nr-stempel' + (inn ? ' inn' : '') + '">' + (rett ? T('Riktig', 'Right') : T('Feil', 'Wrong')) + '</em>' : '') + '</div>'; }).join('') + '</div>';
+    else if (s.qtype === 'tall' && s.tall) midt = '<div class="nr-fasit-boks"><span>' + T('Svaret', 'The answer') + '</span><b>' + esc(s.fasit) + '</b></div>' + nrTallinje(s);
+    else midt = '<div class="nr-fasit-boks"><span>' + T('Svaret', 'The answer') + '</span><b>' + esc(s.fasit) + '</b></div>';
+    // Fritt og tall: hva hver enkelt svarte (verten kan rette en vurdering)
+    var liste = s.alt ? '' : '<ul class="nr-liste">' + alle.slice().sort(function (a, b) { return (res[b.id] || -1) - (res[a.id] || -1); }).map(function (p) {
+      var k = res[p.id], merke = k === 2 ? T('Nærmest', 'Closest') : k === 1 ? (s.qtype === 'tall' ? T('Innen 10 %', 'Within 10%') : T('Riktig', 'Right')) : k === 0 ? '–' : T('Drikk', 'Drink');
+      return '<li class="' + (k > 0 ? 'rett' : k === 0 ? 'null' : 'feil') + '">' + nrPille(p.id) + '<span class="nr-navn">' + esc(p.navn) + '</span><span class="nr-hva">' + (sv[p.id] ? esc(s.qtype === 'tall' && /^\d+$/.test(sv[p.id]) ? nrFormat(sv[p.id]) : sv[p.id]) : '<i>' + T('ingen svar', 'no answer') + '</i>') + '</span>' +
+        (vert ? '<button type="button" data-g="nr-flipp" data-id="' + p.id + '" aria-label="' + T('Endre vurdering for ', 'Change the verdict for ') + esc(p.navn) + '">' + merke + '</button>' : '<b>' + merke + '</b>') + '</li>';
+    }).join('') + '</ul>';
+    var megMed = alle.some(function (p) { return p.id === tilstand.meg; });
+    var ut = topp + nrSporsmal(s, true) + midt + (megMed ? nrResultat(s, res[tilstand.meg]) : '') + liste +
+      (vert ? '<button class="rom-stor-knapp" data-g="nr-neste" type="button">' + (s.i + 1 < s.antall ? T('Neste spørsmål', 'Next question') : T('Se hvem som vant', 'See who won')) + '</button>'
+        : '<p class="nr-vent">' + esc(navn(s.vert)) + T(' tar neste spørsmål.', ' moves on to the next question.') + '</p>');
+    nrVist = nokkel;
+    return ut;
+  }
+  function nrFerdig(s, vert) {
+    var l = s.tavle || [], k = s.kaaringer || {}, nokkel = 'slutt:' + s.rid + ':' + s.antall, inn = nrVist !== nokkel;
+    if (s.rid) { var sp = nrSpilt(); if (sp.indexOf(s.rid) === -1) { sp.push(s.rid); skriv('bd_nr_spilt', sp.slice(-300)); } }
+    var delt = l.filter(function (x) { return l[0] && x.riktige === l[0].riktige; });
+    var tittel = !l[0] || !l[0].riktige ? T('Ingen fikk noe riktig', 'Nobody got anything right') : delt.length > 1 ? T('Delt seier: ', 'Shared win: ') + delt.map(function (x) { return esc(x.navn); }).join(T(' og ', ' and ')) : T('Ukens nyhetsnerd: ', 'News nerd of the week: ') + esc(l[0].navn);
+    var plass = [l[1], l[0], l[2]], hoyde = [0.66, 1, 0.48];
+    var pall = '<div class="nr-pall' + (inn ? ' inn' : '') + '">' + plass.map(function (x, i) {
+      if (!x) return '<div></div>';
+      return '<div class="nr-pall-plass' + (i === 1 ? ' forst' : '') + '" style="--h:' + hoyde[i] + ';--i:' + [1, 2, 0][i] + '">' + (i === 1 ? '<svg viewBox="0 0 40 26" aria-hidden="true"><path d="M3 23l3-19 8 8 6-11 6 11 8-8 3 19z"/></svg>' : '') +
+        nrPille(x.id) + '<b>' + esc(x.navn) + '</b><div class="nr-pall-blokk"><span>' + x.riktige + '</span></div></div>';
+    }).join('') + '</div>';
+    var kaar = [];
+    if (k.tall) kaar.push('<b>' + T('Tallgeni:', 'Number genius:') + '</b> ' + esc(navn(k.tall.id)) + T(' var nærmest på ', ' was closest on ') + k.tall.n + T(' av ', ' of ') + k.tallAntall + T(' tallspørsmål', ' number questions'));
+    if (k.lurt) kaar.push('<b>' + T('Lurt av tull:', 'Fooled by nonsense:') + '</b> ' + esc(navn(k.lurt.id)) + T(' trodde på ', ' believed ') + k.lurt.n + T(' av ', ' of ') + k.tullAntall + T(' tullesaker', ' made-up stories'));
+    if (k.ingen) kaar.push('<b>' + T('Ingen fikk:', 'Nobody got:') + '</b> «' + esc(String(k.ingen.q).slice(0, 90)) + (String(k.ingen.q).length > 90 ? '…' : '') + '» (' + esc(k.ingen.svar) + ')');
+    var rest = l.slice(3);
+    var valg = [10, 15, 30].filter(function (n) { return n < s.totalt; }).concat([s.totalt]).filter(function (n, i, a) { return a.indexOf(n) === i; });
+    var ut = '<p class="nr-etikett">' + T('Nyhetsrunden · uke ', 'Nyhetsrunden · week ') + s.uke + ' · ' + s.antall + T(' spørsmål', ' questions') + '</p><h2 class="nr-vinner">' + tittel + '</h2>' + pall +
+      (kaar.length ? '<ul class="nr-kaaringer">' + kaar.map(function (x, i) { return '<li style="--i:' + i + '">' + x + '</li>'; }).join('') + '</ul>' : '') +
+      (rest.length ? '<ol class="nr-rest" start="4">' + rest.map(function (x) { return '<li>' + nrPille(x.id) + '<span>' + esc(x.navn) + '</span><b>' + x.riktige + '</b></li>'; }).join('') + '</ol>' : '') +
+      (vert ? '<p class="nr-etikett">' + T('Ny runde fra uke ', 'New round from week ') + s.uke + '</p><div class="nr-lengder">' + valg.map(function (n) {
+            return '<button type="button" data-g="nr-nytt" data-n="' + n + '">' + (n === s.totalt ? T('Hele · ', 'All · ') : n <= 10 ? T('Kort · ', 'Short · ') : T('Vanlig · ', 'Usual · ')) + n + '</button>'; }).join('') + '</div>' +
+          '<p class="small">' + T('Kort og vanlig tar spørsmål dere ikke har hatt ennå.', 'Short and usual pick questions you have not had yet.') + '</p>' : '');
+    nrVist = nokkel;
+    return ut;
+  }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-g="nr-tast"],[data-g="nr-las"]'); if (!b || !tilstand || !tilstand.spill) return;
+    e.stopPropagation();
+    if (b.dataset.g === 'nr-las') { if (nrTall.v) gjorAlltid({ handling: 'nr-svar', v: nrTall.v }); return; }
+    var k = b.dataset.k;
+    if (k === '⌫') nrTall.v = nrTall.v.slice(0, -1);
+    else if (nrTall.v.length < 12) nrTall.v = (nrTall.v === '0' ? '' : nrTall.v) + k;
+    nrTall.v = nrTall.v.replace(/^0+(?=\d)/, '');
+    var ut = document.getElementById('nrTallUt'), las = document.getElementById('nrLas');
+    if (ut) ut.textContent = nrFormat(nrTall.v) || '0';
+    if (las) las.textContent = nrLasTekst(tilstand.spill.mittSvar);
+    try { navigator.vibrate && navigator.vibrate(6); } catch (x) {}
+  }, true);
 
   /* ---------- reaksjoner og «send en slurk» ---------- */
   var sisteReak = -1;
@@ -3220,6 +3347,8 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'yz-felt') return gjor({ handling: 'yz-felt', f: b.dataset.f });
     if (g === 'nr-svar') return gjorAlltid({ handling: 'nr-svar', v: b.dataset.v });
     if (g === 'nr-flipp') return gjor({ handling: 'nr-flipp', hvem: b.dataset.id });
+    if (g === 'nr-lengde') return gjor({ handling: 'nr-lengde', antall: Number(b.dataset.n) });
+    if (g === 'nr-nytt') return gjor({ handling: 'nytt', antall: Number(b.dataset.n) });
     if (['br-buss', 'br-kjor', 'yz-kast', 'nr-vis', 'nr-neste', 'nr-start'].indexOf(g) !== -1) return gjor({ handling: g });
     if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
     if (g === 'rof-makker') return gjor({ handling: 'rof-makker', paa: b.dataset.paa });

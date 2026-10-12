@@ -215,6 +215,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     if (s.type === 'forraeder') Object.assign(spill, { tekst: s.tekst, fase: s.fase, aktiv: s.aktiv, stemt: Object.keys(s.stemmer || {}).length,
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, drikker: s.drikker } : null });
     const off = offentligTekst(s, data); if (off) spill.offentlig = off;
+    if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
   }
   // Børsen: bare det som er offentlig – tavla, meldte og avgjorte aksjer og sakene. Aldri hendene til folk.
   let bors: any = null;
@@ -1677,23 +1678,60 @@ function nrRiktig(q: any, svar: any): boolean {
   const a = norm(q.svar), g = norm(svar);
   return !!g && (a === g || (g.length >= 3 && a.includes(g)) || (a.length >= 3 && g.includes(a)));
 }
+/** Hvor mange spørsmål en runde har når verten ikke velger noe annet. */
+const NR_LENGDE = 15;
+/** Velg spørsmålene til runden: de dette rommet ikke har hatt ennå først, i ukas rekkefølge. */
+function nrPlukk(data: any, n: number) {
+  const s = data.spill, alle = s.alle || [], brukt = new Set(((data.nrBrukt || {})[s.rid] || []) as number[]);
+  const ider = alle.map((_: any, i: number) => i);
+  const valgt = ider.filter((i: number) => !brukt.has(i)).concat(ider.filter((i: number) => brukt.has(i))).slice(0, Math.max(1, Math.min(n, alle.length))).sort((a: number, b: number) => a - b);
+  s.idx = valgt; s.sporsmal = valgt.map((i: number) => alle[i]); s.lengde = valgt.length;
+}
+function nrMerkBrukt(data: any) {
+  const s = data.spill; data.nrBrukt = data.nrBrukt || {};
+  const l = data.nrBrukt[s.rid] || (data.nrBrukt[s.rid] = []);
+  const i = s.idx[s.i]; if (i != null && !l.includes(i)) l.push(i);
+}
 function nrNyttSpm(s: any) {
   const q = s.sporsmal[s.i];
   s.fase = 'spm'; s.svar = {}; s.resultat = {};
   s.alt = q.type === 'valg' ? stokk((q.alt || []).slice()) : q.type === 'sant' ? ['Sant', 'Tull'] : null;
   settFrist(s, q.type === 'tall' || q.type === 'fritt' ? FRIST.nrLang : FRIST.nrKort);
 }
+/* Resultat per spiller: 2 = nærmest på et tallspørsmål (del ut to), 1 = riktig (del ut én),
+   0 = midt på treet (ingenting), -1 = feil, lengst unna eller ikke svart (drikk én). */
 function nrAvslor(data: any) {
-  const s = data.spill, q = s.sporsmal[s.i];
+  const s = data.spill, q = s.sporsmal[s.i], st = s.stat || (s.stat = { naermest: {}, tall: 0, lurt: {}, tull: 0, ingen: [] });
   s.fase = 'svar'; s.resultat = {}; s.frist = null;
-  data.spillere.forEach((p: any) => { const r = nrRiktig(q, s.svar[p.id]); s.resultat[p.id] = r; nrBrukResultat(data, p.id, r, 1); });
-  const antall = Object.values(s.resultat).filter(Boolean).length;
+  const fasit = q.type === 'tall' ? lesTall(q.svar) : NaN;
+  if (q.type === 'tall' && isFinite(fasit)) {
+    // Nærmest vinner: den (eller de) nærmest deler ut to, innen 10 % deler ut én, lengst unna drikker
+    st.tall++;
+    const gj = data.spillere.map((p: any) => ({ id: p.id, d: Math.abs(lesTall(s.svar[p.id]) - fasit) })).filter((g: any) => isFinite(g.d));
+    const best = gj.length ? Math.min(...gj.map((g: any) => g.d)) : Infinity;
+    const verst = gj.length >= 3 ? Math.max(...gj.map((g: any) => g.d)) : Infinity;
+    data.spillere.forEach((p: any) => {
+      const g = gj.find((x: any) => x.id === p.id);
+      const k = !g ? -1 : g.d === best ? 2 : g.d <= Math.abs(fasit) * 0.1 + 1e-9 ? 1 : g.d === verst ? -1 : 0;
+      s.resultat[p.id] = k; nrBrukResultat(data, p.id, k, 1);
+      if (k === 2) st.naermest[p.id] = (st.naermest[p.id] || 0) + 1;
+    });
+  } else {
+    if (q.type === 'sant' && q.svar === 'Tull') st.tull++;
+    data.spillere.forEach((p: any) => {
+      const k = nrRiktig(q, s.svar[p.id]) ? 1 : -1; s.resultat[p.id] = k; nrBrukResultat(data, p.id, k, 1);
+      if (q.type === 'sant' && q.svar === 'Tull' && s.svar[p.id] === 'Sant') st.lurt[p.id] = (st.lurt[p.id] || 0) + 1;
+    });
+  }
+  const antall = Object.values(s.resultat).filter((k: any) => k > 0).length;
+  if (!antall && data.spillere.length > 1) st.ingen.push({ q: q.q, svar: q.svar });
   melde(data, `Svaret er «${q.svar}» – ${antall} av ${data.spillere.length} hadde rett`, `The answer is “${q.svar}” – ${antall} of ${data.spillere.length} got it right`);
 }
-function nrBrukResultat(data: any, id: string, riktig: boolean, fortegn: 1 | -1) {
+function nrBrukResultat(data: any, id: string, k: number, fortegn: 1 | -1) {
   const s = data.spill;
-  if (riktig) {
-    giUtdeling(data, id, fortegn); s.riktige[id] = Math.max(0, (s.riktige[id] || 0) + fortegn);
+  if (k === 0) return;
+  if (k > 0) {
+    giUtdeling(data, id, k * fortegn); s.riktige[id] = Math.max(0, (s.riktige[id] || 0) + fortegn);
     const p = data.spillere.find((x: any) => x.id === id); if (p) p.quiz = Math.max(0, (p.quiz || 0) + fortegn);
   }
   else giSlurker(data, id, fortegn);
@@ -1713,10 +1751,13 @@ function startNye(data: any, lek: string, modus: string, ider: string[]): any {
   }
   if (lek === 'nyhetsrunden') {
     const runder = publiserteRunder();
-    const r = runder.find((x: any) => rundeId(x) === modus) || runder[0];
+    const [rid, lengdeTekst] = String(modus || '').split(':');
+    const r = runder.find((x: any) => rundeId(x) === rid) || runder[0];
     if (!r || !(r.sporsmal || []).length) return feilL('tom', 'Ingen runde er ute ennå.', 'No round is out yet.');
-    data.spill = { type: 'nyhetsrunden', lek, navn: EKSTRA_NAVN.nyhetsrunden, modus: L('uke ' + r.uke, 'week ' + r.uke), uke: r.uke, rid: rundeId(r), sporsmal: r.sporsmal, i: 0, riktige: {}, fase: 'klar', svar: {}, resultat: {}, alt: null };
-    melde(data, `Nyhetsrunden uke ${r.uke} – ${r.sporsmal.length} spørsmål`, `Nyhetsrunden week ${r.uke} – ${r.sporsmal.length} ${r.sporsmal.length === 1 ? 'question' : 'questions'} (in Norwegian)`); return { ok: true };
+    data.spill = { type: 'nyhetsrunden', lek, navn: EKSTRA_NAVN.nyhetsrunden, modus: L('uke ' + r.uke, 'week ' + r.uke), uke: r.uke, rid: rundeId(r), alle: r.sporsmal, sporsmal: [], idx: [], lengde: 0,
+      i: 0, riktige: {}, fase: 'klar', svar: {}, resultat: {}, alt: null, stat: { naermest: {}, tall: 0, lurt: {}, tull: 0, ingen: [] } };
+    nrPlukk(data, Number(lengdeTekst) || NR_LENGDE);
+    melde(data, `Nyhetsrunden uke ${r.uke} – ${data.spill.sporsmal.length} spørsmål`, `Nyhetsrunden week ${r.uke} – ${data.spill.sporsmal.length} questions (in Norwegian)`); return { ok: true };
   }
   return { feil: 'ukjent-lek' };
 }
@@ -1829,8 +1870,9 @@ function nyeHandling(data: any, meg: any, h: any): any {
       if (s.fase === 'spm' && fristUte(s)) nrAvslor(data);
       return { ok: true };
     }
-    if (!erVert && ['nr-start', 'nr-vis', 'nr-flipp', 'nr-neste', 'nytt'].includes(h.handling)) return feilL('bare-vert', 'Verten styrer runden.', 'The host runs the round.');
-    if (h.handling === 'nr-start') { if (s.fase === 'klar') { nrNyttSpm(s); melde(data, 'Første spørsmål!', 'First question!'); } return { ok: true }; }
+    if (!erVert && ['nr-start', 'nr-vis', 'nr-flipp', 'nr-neste', 'nr-lengde', 'nytt'].includes(h.handling)) return feilL('bare-vert', 'Verten styrer runden.', 'The host runs the round.');
+    if (h.handling === 'nr-lengde') { if (s.fase === 'klar') nrPlukk(data, Math.max(1, Math.min(60, Number(h.antall) || NR_LENGDE))); return { ok: true }; }
+    if (h.handling === 'nr-start') { if (s.fase === 'klar') { nrNyttSpm(s); nrMerkBrukt(data); melde(data, 'Første spørsmål!', 'First question!'); } return { ok: true }; }
     if (h.handling === 'nr-vis') {
       if (s.fase !== 'spm') return { ok: true };
       const mangler = data.spillere.filter((p: any) => s.svar[p.id] == null).length;
@@ -1840,7 +1882,7 @@ function nyeHandling(data: any, meg: any, h: any): any {
     if (h.handling === 'nr-flipp') {
       if (s.fase !== 'svar') return { ok: true };
       const id = String(h.hvem || ''); if (!(id in s.resultat)) return { ok: true };
-      nrBrukResultat(data, id, s.resultat[id], -1); s.resultat[id] = !s.resultat[id]; nrBrukResultat(data, id, s.resultat[id], 1);
+      nrBrukResultat(data, id, s.resultat[id], -1); s.resultat[id] = s.resultat[id] > 0 ? -1 : 1; nrBrukResultat(data, id, s.resultat[id], 1);
       return { ok: true };
     }
     if (h.handling === 'nr-neste') {
@@ -1851,9 +1893,9 @@ function nyeHandling(data: any, meg: any, h: any): any {
         if (liste[0]) melde(data, `${liste[0].navn} vant Nyhetsrunden med ${liste[0].riktige} riktige!`, `${liste[0].navn} won Nyhetsrunden with ${liste[0].riktige} correct!`);
         return { ok: true };
       }
-      s.i++; nrNyttSpm(s); return { ok: true };
+      s.i++; nrNyttSpm(s); nrMerkBrukt(data); return { ok: true };
     }
-    if (h.handling === 'nytt') { const r = publiserteRunder()[0]; return startNye(data, 'nyhetsrunden', r ? rundeId(r) : '', []); }
+    if (h.handling === 'nytt') { const r = publiserteRunder()[0]; return startNye(data, 'nyhetsrunden', (s.rid || (r ? rundeId(r) : '')) + ':' + (Number(h.antall) || s.lengde || NR_LENGDE), []); }
     return null;
   }
   return null;
@@ -1866,12 +1908,17 @@ function nyeVisning(s: any, meg: any, data: any) {
     blokker: s.blokker, summer: Object.fromEntries(s.ider.map((id: string) => [id, yzSum(s.blokker[id])])),
     mulige: s.kast ? Object.fromEntries(YZ_FELT.map((f) => [f, yzPoeng(f, s.terninger)])) : null };
   if (s.type === 'nyhetsrunden') {
-    const q = s.sporsmal[s.i], vert = meg && meg.id === data.vert, aapen = s.fase === 'svar' || s.fase === 'ferdig';
+    const q = s.sporsmal[s.i] || s.sporsmal[s.sporsmal.length - 1], aapen = s.fase === 'svar' || s.fase === 'ferdig';
     const liste = data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, riktige: s.riktige[p.id] || 0 })).sort((a: any, b: any) => b.riktige - a.riktige);
+    const st = s.stat || {}, fasitTall = q && q.type === 'tall' ? lesTall(q.svar) : NaN;
+    const topp = (o: any) => { let id: any = null, n = 0; Object.keys(o || {}).forEach((k) => { if (o[k] > n) { n = o[k]; id = k; } }); return id ? { id, n } : null; };
     return {
-      fase: s.fase, i: s.i, antall: s.sporsmal.length, uke: s.uke, rid: s.rid || null, qtype: q.type, alt: s.alt,
-      // Spørsmålet vises bare hos verten (som leser det høyt) til svaret er avslørt
-      q: (vert && s.fase === 'spm') || aapen ? q.q : null,
+      fase: s.fase, i: s.i, antall: s.sporsmal.length, uke: s.uke, rid: s.rid || null, qtype: q ? q.type : null, alt: s.alt, vert: data.vert,
+      lengde: s.lengde || s.sporsmal.length, totalt: (s.alle || s.sporsmal).length,
+      // Spørsmålet står på alle telefonene (og TV-en). Verten leser det fortsatt høyt.
+      q: s.fase === 'spm' || aapen ? q.q : null,
+      tall: aapen && q && q.type === 'tall' && isFinite(fasitTall) ? { fasit: fasitTall, gjett: data.spillere.map((p: any) => ({ id: p.id, v: lesTall(s.svar[p.id]) })).filter((g: any) => isFinite(g.v)) } : null,
+      kaaringer: s.fase === 'ferdig' ? { tall: topp(st.naermest), tallAntall: st.tall || 0, lurt: topp(st.lurt), tullAntall: st.tull || 0, ingen: (st.ingen || [])[0] || null } : null,
       fasit: aapen ? q.svar : null, info: aapen ? q.info || '' : null, kilde: aapen ? q.kilde || '' : null, url: aapen ? q.url || '' : null,
       harSvart: Object.keys(s.svar), mittSvar: meg ? s.svar[meg.id] ?? null : null,
       svarene: aapen ? s.svar : null, resultat: aapen ? s.resultat : null, tavle: liste,
