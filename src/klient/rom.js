@@ -2,9 +2,9 @@
 // Ligger i en egen fil i stedet for inne i HTML-en: nettleseren og service workeren lagrer den, de to
 // språkversjonene deler den, og telefonen slipper å tolke 200 kB JavaScript på nytt hver gang rommet åpnes.
 // Startes fra Rom.astro ved hver sidevisning (astro:page-load), med lekenavnene og språket som argumenter.
-import { lagStua } from './stua.js';
+import { lagStua, figurHtml, utseende, PYNT_SVG } from './stua.js';
 import { klistremerke } from '../lib/klistremerker';
-import { TEMAER, temaLov, pyntNavn } from '../lib/pynt.js';
+import { TEMAER, temaLov, pyntNavn, PYNT, EKSTRA, sesong } from '../lib/pynt.js';
 
 export function startRom(LEKNAVN, LANG) {
   // Språk: samme kode for /no/rom og /room. T('norsk', 'English') velger tekst.
@@ -2454,12 +2454,103 @@ export function startRom(LEKNAVN, LANG) {
     t.rangert = l.sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0); });
     return t;
   }
+  /* ---------- Figuren din og Rommet: arkene du åpner ved å trykke i stua ----------
+     Figuren: det kontoen har låst opp kan tas på, resten viser hva som skal til. Rommet (verten): tema og små ting.
+     Arkene bruker sidens farger (lys eller mørk modus) – stua inni rommet har sine egne farger uansett. */
+  var aapentArk = null;
+  var SLOTBOKS = { hode: '-30 -100 60 56', ansikt: '-24 -74 48 32', bryst: '-26 -52 52 36', venn: '-16 -30 44 34' };
+  var SLOTNAVN = EN ? { hode: 'On your head', ansikt: 'Glasses', bryst: 'On your chest', venn: 'Pet' } : { hode: 'På hodet', ansikt: 'Briller', bryst: 'På brystet', venn: 'Kjæledyr' };
+  function megSpiller() { return (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {}; }
+  function innlogget() { var K = window.BDKonto; return !!(K && K.les && K.les()); }
+  function lagArk(klasse, tittel) {
+    var m = document.createElement('div'); m.className = 'rom-tavle ' + klasse; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', tittel);
+    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + esc(tittel) + '</h2><button class="linkbtn" data-u="lukk" type="button">' + T('Lukk', 'Close') + '</button></div><div class="ark-kropp"></div></div>';
+    m.addEventListener('click', function (e) { if (e.target === m || e.target.closest('[data-u=lukk]')) lukkArk(); });
+    document.body.appendChild(m);
+    return m;
+  }
+  function lukkArk() { if (aapentArk) { aapentArk.el.remove(); aapentArk = null; } }
+  function figurArk() {
+    lukkArk();
+    var m = lagArk('figur-ark', T('Figuren din', 'Your figure')), kropp = m.querySelector('.ark-kropp');
+    var st = { fane: 'hode', laast: [], valgt: {}, kvelder: 0, sesong: sesong(), lastet: false, inne: innlogget() }, timer = null;
+    var megS = megSpiller();
+    st.valgt = Object.assign({}, megS.pynt || {});
+    function tegnArk() {
+      var har = {}; st.laast.forEach(function (id) { har[id] = true; });
+      var n = st.laast.length;
+      kropp.innerHTML = '<div class="figur-rad"><svg class="figur-preview" viewBox="-48 -100 96 106" aria-hidden="true">' + figurHtml(utseende(megS.figur || tilstand.meg), st.valgt) + '</svg>' +
+        '<p class="small">' + (st.inne ? (n ? n + T(' av ', ' of ') + PYNT.length + T(' låst opp · ', ' unlocked · ') : '') + st.kvelder + (st.kvelder === 1 ? T(' kveld spilt', ' night played') : T(' kvelder spilt', ' nights played'))
+          : T('Lag en bruker, så kan du låse opp alt dette ved å spille. Alt er gratis.', 'Create an account and you unlock all of this by playing. All free.') + '<br><a class="btn small gold ark-lagbruker" href="' + RUTE.konto + '">' + T('Lag bruker', 'Create an account') + '</a>') + '</p></div>' +
+        '<div class="ark-faner" role="tablist">' + ['hode', 'ansikt', 'bryst', 'venn'].map(function (sl) { return '<button type="button" class="ark-fane" role="tab" data-fane="' + sl + '" aria-selected="' + (st.fane === sl) + '">' + SLOTNAVN[sl] + '</button>'; }).join('') + '</div>' +
+        '<div class="pynt-rad">' + PYNT.filter(function (x) { return x.slot === st.fane; }).map(function (x) {
+          var kan = st.inne && !!har[x.id] && (!x.sesong || x.sesong === st.sesong), paa = st.valgt[st.fane] === x.id;
+          var hint = !har[x.id] ? x.laas[EN ? 1 : 0] : (x.sesong && x.sesong !== st.sesong ? T('Kommer tilbake i sesongen', 'Back in season') : (paa ? T('På', 'Wearing') : T('Trykk for å ta på', 'Tap to wear')));
+          return '<button type="button" class="pynt-valg' + (kan ? '' : ' laast') + '" data-id="' + x.id + '" aria-pressed="' + paa + '"' + (kan ? '' : ' disabled') + '><svg viewBox="' + SLOTBOKS[x.slot] + '" aria-hidden="true">' + (PYNT_SVG[x.id] || '') + '</svg><b>' + esc(x.navn[EN ? 1 : 0]) + '</b><small>' + esc(hint) + '</small></button>';
+        }).join('') + '</div>' +
+        '<p class="small ark-fot">' + T('Alt er gratis. Du låser opp ved å spille, og alle i rommet ser det med en gang.', 'All free. You unlock by playing, and everyone in the room sees it right away.') + '</p>';
+    }
+    kropp.addEventListener('click', function (e) {
+      var f = e.target.closest('[data-fane]'); if (f) { st.fane = f.dataset.fane; tegnArk(); return; }
+      var b = e.target.closest('.pynt-valg'); if (!b || b.disabled) return;
+      var slot = st.fane, id = b.dataset.id;
+      st.valgt[slot] = st.valgt[slot] === id ? null : id; tegnArk();
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        kontoApi('/api/konto/pynt', { method: 'POST', body: JSON.stringify({ valgt: st.valgt }) }).then(function (r) { if (r.ok) gjorAlltid({ handling: 'min-pynt' }); else toast(T('Fikk ikke lagret. Prøv igjen.', 'Could not save. Try again.')); }).catch(function () { toast(T('Fikk ikke lagret. Prøv igjen.', 'Could not save. Try again.')); });
+      }, 350);
+    });
+    tegnArk();
+    if (st.inne) kontoApi('/api/konto/pynt').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (!d || !aapentArk || aapentArk.el !== m) return; st.laast = d.laast || []; st.valgt = Object.assign({}, d.valgt || {}); st.kvelder = d.kvelder || 0; st.sesong = d.sesong; tegnArk(); }).catch(function () {});
+    aapentArk = { el: m, oppdater: function () {} };
+  }
+  function romArk() {
+    lukkArk();
+    var m = lagArk('rom-ark', T('Rommet', 'The room')), kropp = m.querySelector('.ark-kropp');
+    function tegnArk() {
+      var st = tilstand.stua || {}, harPluss = !!(tilstand.pluss && tilstand.pluss.til > Date.now()), naa = st.tema || 'stue', paa = st.ekstra || [], lov = st.ekstraLov || [];
+      kropp.innerHTML = '<p class="small">' + T('Alle i rommet ser det med en gang, også på TV-en.', 'Everyone in the room sees it right away, the TV too.') + '</p>' +
+        '<div class="tema-liste" role="group" aria-label="' + T('Hvordan rommet ser ut', 'How the room looks') + '">' + TEMAER.map(function (t) {
+          var ok = temaLov(t.id, harPluss), gratisNaa = t.gratisI && t.gratisI === sesong();
+          return '<button type="button" class="tema-valg' + (ok ? '' : ' laast') + '" data-stuatema="' + t.id + '" aria-pressed="' + (naa === t.id) + '"' + (ok ? '' : ' disabled') + '>' +
+            temaBilde(t.id) + '<span class="tema-tekst"><b>' + esc(t.navn[EN ? 1 : 0]) + '</b><small>' + esc(temaOm(t.id)) + '</small></span>' +
+            (t.pluss ? '<i class="tema-merke' + (gratisNaa ? ' gratis' : '') + '">' + (gratisNaa ? T('Gratis nå', 'Free now') : 'Pluss') + '</i>' : '') + '</button>';
+        }).join('') + '</div>' +
+        '<h3 class="ark-h3">' + T('Små ting i rommet', 'Small things in the room') + '</h3>' +
+        '<div class="ekstra-rad">' + EKSTRA.map(function (e) {
+          var ok = lov.indexOf(e.id) !== -1, er = paa.indexOf(e.id) !== -1;
+          return '<button type="button" class="ekstra-valg' + (ok ? '' : ' laast') + '" data-ekstra="' + e.id + '" aria-pressed="' + er + '"' + (ok ? '' : ' disabled') + '><b>' + esc(e.navn[EN ? 1 : 0]) + '</b><small>' + esc(ok ? (er ? T('På', 'On') : T('Trykk for å slå på', 'Tap to turn on')) : e.laas[EN ? 1 : 0]) + '</small></button>';
+        }).join('') + '</div>' +
+        '<p class="small ark-fot">' + (harPluss ? T('Rommet har Pluss i kveld, så alle temaene er åpne.', 'The room has Pluss tonight, so every look is open.') : T('Takterrassen og Julebordet følger Pluss. Julebordet er gratis i desember.', 'The rooftop and the Christmas party come with Pluss. The Christmas party is free in December.')) +
+          (innlogget() ? '' : ' ' + T('De små tingene låser du opp med en bruker.', 'The small things unlock with an account.')) + '</p>';
+    }
+    kropp.addEventListener('click', function (e) {
+      var t = e.target.closest("[data-stuatema]"); if (t && !t.disabled) { gjor({ handling: "stua-tema", tema: t.dataset.stuatema }); return; }
+      var x = e.target.closest('[data-ekstra]'); if (!x || x.disabled) return;
+      var paa = ((tilstand.stua || {}).ekstra || []).slice(), id = x.dataset.ekstra, i = paa.indexOf(id);
+      if (i === -1) paa.push(id); else paa.splice(i, 1);
+      gjorAlltid({ handling: 'stua-ekstra', liste: paa });
+    });
+    tegnArk();
+    aapentArk = { el: m, oppdater: tegnArk };
+  }
+  var TEMAFARGER = { stue: ['#FFD23F', '#63E2A8', '#FFF8EE', '#FF9CC2', '#FF5B1F'], hytte: ['#D9A26A', '#B9773F', '#C98D63', '#2EA873', '#7A4A2A'], takterrasse: ['#8A8580', '#7CC6FE', '#7CC6FE', '#FFF8EE', '#1C1B1F'], julebord: ['#E2363B', '#2EA873', '#FFF8EE', '#E2363B', '#2EA873'] };
+  function temaBilde(id) {
+    var f = TEMAFARGER[id] || TEMAFARGER.stue;
+    return '<svg class="tema-bilde" viewBox="0 0 96 62" aria-hidden="true"><rect width="96" height="62" fill="' + f[2] + '"/><rect width="48" height="62" fill="' + f[1] + '"/><polygon points="0,62 48,38 96,62" fill="' + f[0] + '"/><rect x="56" y="34" width="28" height="12" fill="' + f[3] + '" stroke="#16120F" stroke-width="2.5"/><rect x="78" y="10" width="10" height="24" fill="' + f[4] + '" stroke="#16120F" stroke-width="2.5"/><rect x="10" y="12" width="22" height="14" fill="#16120F"/></svg>';
+  }
+  function temaOm(id) {
+    return { stue: T('Gul, rosa og mint. Slik den alltid har vært.', 'Yellow, pink and mint. The way it has always been.'), hytte: T('Tømmervegger og fjell i vinduet.', 'Log walls and mountains in the window.'),
+      takterrasse: T('Lyslenke, skyer og byen under.', 'String lights, clouds and the city below.'), julebord: T('Juletre, krans og snø.', 'A tree, a wreath and snow.') }[id] || '';
+  }
+  root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-g="figur-ark"]')) figurArk(); });
+
   /** Nytt i garderoben etter kvelden – eller et lite dytt om å lage bruker, så pynten kan samles på. */
   function nyPyntBoks() {
     var meg2 = (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; });
     if (tilstand.nyPynt && tilstand.nyPynt.length) {
       return '<div class="rom-nypynt">' + klistremerke('gnist', 'rom-inline-merke') + '<b>' + T('Nytt i garderoben: ', 'New in your wardrobe: ') + esc(tilstand.nyPynt.map(function (id) { return pyntNavn(id, EN ? 'en' : 'no'); }).join(', ')) + '</b>' +
-        '<a class="btn small gold" href="' + RUTE.konto + '">' + T('Ta det på figuren', 'Put it on your figure') + '</a></div>';
+        '<button class="btn small gold" type="button" data-g="figur-ark">' + T('Ta det på nå', 'Put it on now') + '</button></div>';
     }
     if (meg2 && !meg2.bruker) return '<p class="rom-nypynt-dytt">' + T('Med en bruker låser du opp luer, briller og kjæledyr til figuren din når du spiller. Alt er gratis.', 'With an account you unlock hats, glasses and pets for your figure as you play. All free.') + ' <a href="' + RUTE.konto + '">' + T('Lag bruker', 'Create an account') + '</a></p>';
     return '';
@@ -2850,24 +2941,21 @@ export function startRom(LEKNAVN, LANG) {
         lang: EN ? 'en' : 'no', navn: true, vandre: true, meg: meg.id,
         onSlipp: function (id, x, y) { gjorAlltid({ handling: 'stua-flytt', hvem: id, x: x, y: y }); },
         onFerdig: function () { if (stuaVentTegn) { stuaVentTegn = false; tegn(); } },
+        onTrykk: function (id) { if (id === meg.id) figurArk(); },
+        onRom: function () { if (erVert()) romArk(); else toast(T('Bare verten kan endre rommet.', 'Only the host can change the room.')); },
       });
+      stuaEl.appendChild(Object.assign(document.createElement('p'), { className: 'rom-stua-tips' }));
     }
+    stuaEl.querySelector('.rom-stua-tips').textContent = erVert()
+      ? T('Trykk på deg selv for figuren din. Trykk på rommet for å endre det.', 'Tap yourself for your figure. Tap the room to change it.')
+      : T('Trykk på deg selv for figuren din.', 'Tap yourself for your figure.');
     plass.appendChild(stuaEl);
     stuaEl.classList.toggle('kompakt', !!s);
     var st = tilstand.stua || {};
     stua.tema(st.tema || 'stue');
     stua.settFolk(tilstand.spillere || [], st.pos);
-    // Verten velger hvordan stua ser ut (i lobbyen). Pluss-temaene krever Pluss i rommet.
-    var tv = stuaEl.querySelector('.rom-tema');
-    if (erVert() && !s) {
-      if (!tv) { tv = document.createElement('div'); tv.className = 'rom-tema'; tv.setAttribute('role', 'group'); tv.setAttribute('aria-label', T('Hvordan stua ser ut', 'How the room looks')); stuaEl.appendChild(tv);
-        tv.addEventListener('click', function (e) { var b = e.target.closest('[data-tema]'); if (b && !b.disabled) gjor({ handling: 'stua-tema', tema: b.dataset.tema }); }); }
-      var harPluss = !!(tilstand.pluss && tilstand.pluss.til > Date.now()), naa = st.tema || 'stue';
-      tv.innerHTML = TEMAER.map(function (t) {
-        var lov = temaLov(t.id, harPluss);
-        return '<button type="button" class="rom-tema-knapp' + (lov ? '' : ' laast') + '" data-tema="' + t.id + '" aria-pressed="' + (naa === t.id) + '"' + (lov ? '' : ' disabled') + '>' + esc(t.navn[EN ? 1 : 0]) + (t.pluss && !harPluss ? ' <i>' + (lov ? T('gratis nå', 'free now') : 'Pluss') + '</i>' : '') + '</button>';
-      }).join('');
-    } else if (tv) tv.remove();
+    stua.ekstra(st.ekstra || []);
+    if (aapentArk) aapentArk.oppdater();
     var kt = stuaKort(s);
     if (kt) stua.tv(kt, s.navn); else stua.kode(kode);
     // Påskeegget: noen plaget de andre for mye og må ta en slurk – vises på alle skjermer

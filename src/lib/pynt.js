@@ -90,3 +90,20 @@ export function figurNokkel(konto) {
   for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); }
   return 'k' + (h >>> 0).toString(36);
 }
+
+/** Små ting i rommet. Verten låser dem opp – med kontoen sin, eller ved det som skjer i rommet. */
+export const EKSTRA = [
+  { id: 'plante', navn: ['Plante', 'Plant'], laas: ['Tre kvelder på kontoen din', 'Three nights on your account'], kvelder: 3 },
+  { id: 'lys', navn: ['Lyslenke', 'String lights'], laas: ['Fem kvelder på kontoen din', 'Five nights on your account'], kvelder: 5 },
+  { id: 'plakat', navn: ['Nyhetsplakat', 'News poster'], laas: ['Bli Quizmester', 'Become Quiz master'], pynt: 'nerdebriller' },
+  { id: 'platespiller', navn: ['Platespiller', 'Record player'], laas: ['Spill Låtbekjennelsen i rommet', 'Play Låtbekjennelsen in this room'], lek: 'tanken-bak-sangen' },
+];
+/** Kan verten slå på denne tingen? vert: {kvelder, laast}, historikk: lekene som er spilt i rommet. */
+export function ekstraLov(id, vert, historikk) {
+  const e = EKSTRA.find((x) => x.id === id); if (!e) return false;
+  const v = vert || {};
+  if (e.kvelder) return (v.kvelder || 0) >= e.kvelder;
+  if (e.pynt) return (v.laast || []).includes(e.pynt);
+  if (e.lek) return JSON.stringify(historikk || []).includes(e.lek);
+  return false;
+}

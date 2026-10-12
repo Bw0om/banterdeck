@@ -107,7 +107,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   // Språk før vi vet hvem spilleren er: body.lang (bli-med), ellers x-lang-headeren
   const bLang: Sprak = d.lang === 'en' || d.lang === 'no' ? d.lang : hLang;
   // Pluss sjekkes her på serveren – aldri på det nettleseren påstår
-  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble; delete d._borsFri; delete d._venter; delete d._medlem; delete d._regler; delete d._start; delete d._startKr; delete d._pynt; delete d._bruker;
+  delete d._plussTil; delete d._gjeng; delete d._konto; delete d._lov; delete d._ble; delete d._borsFri; delete d._venter; delete d._medlem; delete d._regler; delete d._start; delete d._startKr; delete d._pynt; delete d._bruker; delete d._kvelder; delete d._laast;
   // Gjengen sjekkes også her: verten må være innlogget og med i gjengen
   if (d.handling === 'gjeng' && d.gjengId) {
     try {
@@ -122,7 +122,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   if ((d.handling === 'bli-med' || d.handling === 'min-pynt' || d.handling === 'gjeng-meg' || d.handling === 'gjeng') && request.headers.get('authorization')) {
     try {
       const u = await innloggetBruker(request);
-      if (u) { d._bruker = u.id; const ph: any = await rpc('pynt_hent', { p_user: u.id }); if (ph) d._pynt = rensPynt(ph.valgt, ph.laast); }
+      if (u) { d._bruker = u.id; const ph: any = await rpc('pynt_hent', { p_user: u.id }); if (ph) { d._pynt = rensPynt(ph.valgt, ph.laast); d._kvelder = Number(ph.kvelder) || 0; d._laast = Array.isArray(ph.laast) ? ph.laast : []; } }
     } catch { /* uten pynt */ }
   }
   // Gjengkveld: medlemmer kommer rett inn, alle andre venter på å bli sluppet inn
@@ -187,7 +187,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         const r: any = blimed(data, navn, bLang);
         if (!r.feil && d._konto) { r.spiller.konto = d._konto; startSaldoFor(data, r.spiller.id, d._startKr); }
         if (!r.feil && d._pynt) r.spiller.pynt = d._pynt;
-        if (!r.feil && d._bruker) r.spiller.bruker = d._bruker;
+        if (!r.feil && d._bruker) { r.spiller.bruker = d._bruker; r.spiller.kvelder = d._kvelder || 0; r.spiller.laast = d._laast || []; }
         if (r.feil) return r;
         meg = r.spiller; ny = r.spiller;
         return { ok: true };

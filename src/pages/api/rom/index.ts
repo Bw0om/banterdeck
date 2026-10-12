@@ -27,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
         if (u) {
           const ph: any = await rpc('pynt_hent', { p_user: u.id });
           const pynt = ph ? rensPynt(ph.valgt, ph.laast) : {};
-          await endreRom(kode, (data) => { const v = data.spillere[0]; if (v) { v.bruker = u.id; v.pynt = pynt; } return { ok: true }; });
+          await endreRom(kode, (data) => { const v = data.spillere[0]; if (v) { v.bruker = u.id; v.pynt = pynt; v.kvelder = Number(ph && ph.kvelder) || 0; v.laast = ph && Array.isArray(ph.laast) ? ph.laast : []; } return { ok: true }; });
         }
       } catch { /* rommet virker uten */ }
     }

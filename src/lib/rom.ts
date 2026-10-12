@@ -13,7 +13,7 @@ import BINGO_EN from '../data/bingo.en.json';
 import PLUSSPAKKER_EN from '../data/pluss.en.json';
 import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
-import { rensPynt, temaLov, temaFor, figurNokkel } from './pynt.js';
+import { rensPynt, temaLov, temaFor, figurNokkel, ekstraLov, EKSTRA as ROM_EKSTRA } from './pynt.js';
 import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } from './kveld';
 import { MAKS_REGEL } from './lovbok';
 import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors, borsTilPluss, BUTIKK } from './bors';
@@ -250,7 +250,9 @@ function stuaVisning(data: any, meg: any) {
   const ider = new Set(data.spillere.map((p: any) => p.id));
   const pos: any = {}; Object.keys(st.pos || {}).forEach((id) => { if (ider.has(id)) pos[id] = st.pos[id]; });
   const naa = Date.now();
-  return { pos, tema: temaFor(st.tema).id, straff: st.straff || null, plager: meg && st.plag && st.plag[meg.id] ? st.plag[meg.id].filter((t: number) => naa - t < 60000).length : 0, grense: STUA_PLAG };
+  const vert = data.spillere.find((p: any) => p.id === data.vert) || {};
+  return { pos, tema: temaFor(st.tema).id, ekstra: Array.isArray(st.ekstra) ? st.ekstra : [],
+    ekstraLov: meg && meg.id === data.vert ? ROM_EKSTRA.map((e: any) => e.id).filter((id: string) => ekstraLov(id, vert, data.historikk)) : [], straff: st.straff || null, plager: meg && st.plag && st.plag[meg.id] ? st.plag[meg.id].filter((t: number) => naa - t < 60000).length : 0, grense: STUA_PLAG };
 }
 
 /* ---------- hva hver telefon får se ---------- */
@@ -292,7 +294,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     nr: data.nr, reak: data.reak || [], utdeling: data.utdeling || null, valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
-    stua: stuaVisning(data, meg), nyPynt: meg && data.nyPynt ? data.nyPynt[meg.id] || null : null,
+    stua: stuaVisning(data, meg), tvEkstra: null, nyPynt: meg && data.nyPynt ? data.nyPynt[meg.id] || null : null,
     hjulListe: data.hjulListe || (lang === 'en' ? HJUL_STANDARD_EN : HJUL_STANDARD), oppdrag: lok(oppdragVisning(data, meg), lang), bors: lok(borsVisning(data, meg), lang), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: lok(data.historikk || [], lang),
     alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode, kveld: !!data.gjengKveld, regler: data.gjeng.regler || [] } : null,
     kveld: lok(kveldVisning(data), lang), plan: data.plan || null,
@@ -710,7 +712,7 @@ function handlingInne(data: any, meg: any, h: any) {
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
     data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
   }
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut', 'stua-flytt', 'stua-tema', 'min-pynt'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut', 'stua-flytt', 'stua-tema', 'stua-ekstra', 'min-pynt'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -861,10 +863,21 @@ function handlingInne(data: any, meg: any, h: any) {
       if (data.stua.tema !== t.id) { data.stua.tema = t.id; melde(data, `Stua ble til ${t.navn[0]}`, `The room became ${t.navn[1]}`); }
       return { ok: true };
     }
+    case 'stua-ekstra': {
+      // Verten slår på og av de små tingene i rommet. Bare det kontoen (eller rommet) har låst opp.
+      if (!erVert) return { feil: 'bare-vert' };
+      const liste = (Array.isArray(h.liste) ? h.liste : []).map(String).filter((id: string, i: number, a: string[]) => a.indexOf(id) === i);
+      const ulovlig = liste.find((id: string) => !ekstraLov(id, meg, data.historikk));
+      if (ulovlig) return feilL('laast', 'Den er ikke låst opp ennå.', 'That one is not unlocked yet.');
+      data.stua = data.stua || { pos: {} };
+      data.stua.ekstra = liste;
+      return { ok: true };
+    }
     case 'min-pynt': {
       // Figuren min: det kontoen har på seg (API-ruta har hentet og renset det)
       if (h._pynt) meg.pynt = h._pynt;
       if (h._bruker) meg.bruker = h._bruker;
+      if (h._kvelder != null) { meg.kvelder = h._kvelder; meg.laast = h._laast || []; }
       return { ok: true };
     }
     case 'stua-flytt': {
