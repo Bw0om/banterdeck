@@ -886,11 +886,12 @@ export function startRom(LEKNAVN, LANG) {
       ['Jo færre kort som er igjen, jo strammere blir ringen. Ringen kan bare brytes én gang – etter det er resten trygt.', 'The fewer cards left, the tighter the ring gets. The ring can only break once – after that the rest is safe.'],
       ['Gjør det kortet sier. Hver konge fyller kongekoppen – den som trekker fjerde konge, drikker den.', 'Do what the card says. Each king fills the king’s cup – whoever draws the fourth king drinks it.']],
     aldri: [['Kortet kommer opp på alle telefonene.', 'The card shows up on every phone.'], ['Svar «Jeg har» eller «Aldri». Ingen ser svaret før alle har svart.', 'Answer “I have” or “Never”. Nobody sees the answers until everyone has answered.'], ['De som har gjort det, drikker én slurk. Så trykker noen «Neste kort».', 'Everyone who has done it drinks one sip. Then someone taps “Next card”.'], ['Bare én har gjort det? Hen forteller historien og drikker to, eller fire hvis hen nekter. Ingen? Den som trakk kortet, drikker én.', 'Only one has done it? They tell the story and drink two, or four if they refuse. Nobody? Whoever drew the card drinks one.'], ['30 kort i en runde. Så velger verten hva dere gjør nå.', '30 cards a round. Then the host picks what to do next.']],
+    rygg: [['Appen velger et par for hvert kort: A og B, B og C, C og A … Så er alle med på rundt seks kort.', 'The app picks a pair for each card: A and B, B and C, C and A … so everyone gets about six cards.'], ['De to setter seg rygg mot rygg og peker i hemmelighet på telefonen: på seg selv eller på den andre.', 'The two sit back to back and point in secret on their phones: at themselves or at the other.'], ['Alle andre gjetter: den ene, den andre eller «uenige». Gjetter du feil, drikker du én.', 'Everyone else guesses: one, the other or “disagree”. Guess wrong and you drink one.'], ['Enige: den de pekte på drikker én. Uenige: begge drikker én.', 'Agreed: the one they pointed at drinks one. Disagreed: both drink one.']],
     enten: [['Kortet har to valg. Velg side på telefonen – ingen ser hva du velger før klokka er ute.', 'The card has two options. Pick a side on your phone – nobody sees your pick until the clock runs out.'], ['Mindretallet drikker én. Like mange på hver side: ingen drikker. Alle likt: den som trakk kortet, drikker én.', 'The minority drinks one. Equal sides: nobody drinks. Everyone the same: whoever drew the card drinks one.'], ['Står én helt alene, får hen 20 sekunder til å forsvare valget. Får hen med seg én, drikker den personen – ellers drikker hen to.', 'If one person stands alone, they get 20 seconds to defend the pick. Win one person over and that person drinks – otherwise drink two.'], ['30 kort i en runde. Så velger verten hva dere gjør nå.', '30 cards a round. Then the host picks what to do next.']],
     kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Hvem som helst kan trykke «Neste kort».', 'Anyone can tap “Next card”.']],
   };
   function reglerPanel(s) {
-    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.pek ? 'pekeleken' : s.aldri || s.svarPaa ? 'aldri' : s.ee || s.lek === 'enten-eller' ? 'enten' : 'kort')) : s.type, r = REGLER[nokkel];
+    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.pek ? 'pekeleken' : s.aldri || s.svarPaa ? 'aldri' : s.ee || s.lek === 'enten-eller' ? 'enten' : s.rr || s.lek === 'rygg-mot-rygg' ? 'rygg' : 'kort')) : s.type, r = REGLER[nokkel];
     if (!r) return '';
     var sett = les('bd_regler_sett') || [], forste = sett.indexOf(nokkel) === -1;
     if (forste) { sett.push(nokkel); skriv('bd_regler_sett', sett.slice(-40)); apneRegler[nokkel] = true; }
@@ -1358,6 +1359,7 @@ export function startRom(LEKNAVN, LANG) {
     if (s.ring) return rofSpill(s);
     if (s.ferdig) return s.lek === 'jeg-har-aldri' ? aldriFerdig(s) : s.lek === 'ring-of-fire' ? rofSlutt(s) : kortFerdig(s);
     if (s.ee) return eeSpill(s);
+    if (s.rr) return rrSpill(s);
     if (s.pek && s.pek.fase !== 'hendelse') return pekSpill(s) + pekBenk(s);
     if (s.aldri) return aldriSpill(s) + aldriBryter(s);
     var k = s.kort || {};
@@ -1483,17 +1485,29 @@ export function startRom(LEKNAVN, LANG) {
   function hodeBenk(alle, o) {
     o = o || {}; var r = o.sider || null, n = alle.length, oi = o.oi || [];
     if (!n) return '';
-    var w = r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = eePlasser(alle, r);
+    var w = o.par ? (n <= 4 ? 76 : n <= 6 ? 62 : 48) : r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = o.par ? rrPlasser(alle, o.par) : eePlasser(alle, r);
     var stil = '--w:' + w + 'px' + (r && r.fa ? ';--fa:' + r.fa : '') + (r && r.fb ? ';--fb:' + r.fb : '');
     setTimeout(benkTikk, 0);
-    return '<div class="ee-benk' + (r ? ' delt' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
+    return '<div class="ee-benk' + (r ? ' delt' : '') + (o.par ? ' rygg' + (o.par.snudd ? ' snudd' : '') : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
       (r ? '<i class="ee-midt"></i>' + (r.la ? '<span class="ee-sidenavn a">' + esc(r.la) + '</span><span class="ee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') +
       (o.status && !r ? '<span class="ee-status">' + esc(o.status) + '</span>' : '') +
       alle.map(function (p, i) {
         var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1, erOi = oi.indexOf(p.id) !== -1;
         var uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
-        return '<div class="ee-hode' + (erOi ? ' alene' : '') + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' +
+        var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : '';
+        return '<div class="ee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' +
           '<span class="ee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.id === tilstand.meg ? T('Du', 'You') : p.navn) + '</span>' + eeHode(p, uttrykk) + '</div></div>'; }).join('') + '</div>';
+  }
+  /** Rygg mot rygg: paret i midten, de andre fordelt på hver side. Snudd: paret rykker litt nærmere. */
+  function rrPlasser(alle, par) {
+    var ut = {}, andre = alle.filter(function (p) { return p.id !== par.a && p.id !== par.b; }), v = Math.ceil(andre.length / 2);
+    ut[par.a] = par.snudd ? 39 : 35; ut[par.b] = par.snudd ? 61 : 65;
+    andre.forEach(function (p, i) {
+      var venstre = i < v, k = venstre ? i : i - v, m = venstre ? v : andre.length - v;
+      var fra = venstre ? 0 : 82, til = venstre ? 18 : 100;
+      ut[p.id] = m === 1 ? (venstre ? fra : til) : fra + (k / (m - 1)) * (til - fra);
+    });
+    return ut;
   }
   function eeBenk(s, e, alle, r) {
     return hodeBenk(alle, r ? { oppe: true, sider: { a: r.a, b: r.b }, oi: r.alene ? [r.alene] : [], stirr: r.alene, flat: true } : { oppe: e.harSvart || [] });
@@ -1508,10 +1522,14 @@ export function startRom(LEKNAVN, LANG) {
       var hoder = Array.prototype.slice.call(benk.querySelectorAll('.ee-hode')), stirr = benk.dataset.stirr;
       var x = function (h) { return parseFloat(h.style.getPropertyValue('--x')) || 0; };
       var mal = stirr ? hoder.find(function (o) { return o.dataset.id === stirr; }) : null;
+      var snudd = benk.classList.contains('snudd');
       hoder.forEach(function (h, i) {
         var pup = h.querySelector('.mv-pup'); if (!pup) return;
         var dx = 0, dy = -0.5;
-        if (h.classList.contains('alene')) { dy = 2.4; }
+        // Rygg mot rygg: paret ser utover (bort fra hverandre), og mot hverandre når de har snudd seg
+        if (h.classList.contains('par-a')) { dx = snudd ? 3 : -3.2; dy = 0.4; }
+        else if (h.classList.contains('par-b')) { dx = snudd ? -3 : 3.2; dy = 0.4; }
+        else if (h.classList.contains('alene')) { dy = 2.4; }
         else if (mal) { dx = Math.max(-3.2, Math.min(3.2, (x(mal) - x(h)) * 8)); dy = 0.4; }
         else if (Math.random() > 0.18 && hoder.length > 1) {
           var j = i + (Math.random() < 0.5 ? -1 : 1); if (j < 0 || j >= hoder.length || Math.random() < 0.3) j = Math.floor(Math.random() * hoder.length);
@@ -1596,6 +1614,52 @@ export function startRom(LEKNAVN, LANG) {
     else if (r.mindretall.length) dom = '<b>' + r.mindretall.map(navnA).join(T(' og ', ' and ')) + T(' er i mindretall.', r.mindretall.length === 1 ? ' is in the minority.' : ' are in the minority.') + '</b> ' + T('Én slurk hver.', 'One sip each.');
     else dom = T('Ingen valgte. Et stille rom.', 'Nobody picked. A quiet room.');
     return topp + sider + '<p class="ja-dom' + (inn ? ' inn' : '') + '" style="--n:0">' + dom + '</p>' + videre + eeBenk(s, e, alle, r);
+  }
+  /* ---------- Rygg mot rygg: to peker i hemmelighet, alle andre gjetter ----------
+     Paret står i midten av benken og lener seg fra hverandre (rygg mot rygg) med øynene utover. Når tiden er ute,
+     snur de seg mot hverandre (fjær). Uenige: begge får «OI»-fjeset. */
+  var rrVist = '';
+  function rrSpill(s) {
+    var t = tilstand, r = s.rr, alle = t.spillere || [], jeg = t.meg, iPar = jeg === r.a || jeg === r.b, annen = jeg === r.a ? r.b : r.a;
+    var nokkel = s.pos + ':' + s.antall + ':' + r.fase, inn = rrVist !== nokkel; rrVist = nokkel;
+    var k = s.kort || {}, tekst = String(k.t || ''), m = tekst.match(/^(Hvem av dere|Which of you|Who of you)\s+/i), rest = m ? tekst.slice(m[0].length) : tekst;
+    var nv = function (id) { return id === jeg ? T('Du', 'You') : esc(navn(id)); };
+    var res = r.resultat;
+    var chip = r.fase === 'svar' ? (iPar ? T('Rygg mot rygg', 'Back to back') : T('Gjett', 'Guess')) : res && res.fasit ? (res.enige ? T('Enige!', 'Agreed!') : T('Uenige!', 'Disagreed!')) : T('Snudd!', 'Flipped!');
+    var topp = jaTopp(T('Rygg mot rygg · kort ', 'Back to back · card ') + (s.pos + 1) + T(' av ', ' of ') + s.antall, chip, r.fase !== 'svar', r.fase === 'svar');
+    var kort = '<div class="pk-kort rr-kort"><span class="pk-pre">' + (iPar ? '' : esc(navn(r.a)) + T(' og ', ' and ') + esc(navn(r.b)) + ': ') + (m ? esc(m[1]) : T('Hvem av dere', 'Which of you')) + ' …</span><p>' + esc(rest) + '</p></div>';
+    var gjettere = alle.filter(function (p) { return p.id !== r.a && p.id !== r.b; });
+    if (r.fase === 'svar') {
+      var pekt = r.harPekt || [], gjettet = r.harGjettet || [];
+      var status = pekt.length + T(' av 2 har pekt', ' of 2 pointed') + (gjettere.length ? ' · ' + gjettet.length + T(' av ', ' of ') + gjettere.length + T(' har gjettet', ' guessed') : '');
+      var midt;
+      if (iPar) midt = '<p class="rr-hint">' + T('Snu ryggen til ', 'Turn your back to ') + esc(navn(annen)) + T('. Ikke se – pek i hemmelighet.', '. No peeking – point in secret.') + '</p>' +
+        '<div class="rr-valg' + (inn ? ' inn' : '') + '"><button type="button" class="rr-knapp meg" data-g="rr-pek" data-v="' + jeg + '" aria-pressed="' + (r.mitt === jeg) + '"><span>' + T('Pek på', 'Point at') + '</span><b>' + T('Meg', 'Me') + '</b></button>' +
+          '<button type="button" class="rr-knapp den" data-g="rr-pek" data-v="' + annen + '" aria-pressed="' + (r.mitt === annen) + '"><span>' + T('Pek på', 'Point at') + '</span><b>' + esc(navn(annen)) + '</b></button></div>' +
+        '<p class="nr-vent">' + (r.mitt ? T('Pekt. ', 'Pointed. ') + esc(navn(annen)) + T(' ser ikke hva du valgte – og du ser ikke hva hen valgte.', ' can’t see your pick – and you can’t see theirs.') : (gjettere.length ? T('De andre gjetter hva dere peker på.', 'The others are guessing what you point at.') : T('Blir dere enige?', 'Will you agree?'))) + '</p>';
+      else midt = '<p class="rr-hint">' + T('Hva tror du de to peker på? Gjetter du feil, drikker du én.', 'What do you think the two point at? Guess wrong and you drink one.') + '</p>' +
+        '<div class="rr-valg tre' + (inn ? ' inn' : '') + '"><button type="button" class="rr-knapp den" data-g="rr-gjett" data-v="' + r.a + '" aria-pressed="' + (r.mitt === r.a) + '"><span>' + T('Begge peker på', 'Both point at') + '</span><b>' + esc(navn(r.a)) + '</b></button>' +
+          '<button type="button" class="rr-knapp meg" data-g="rr-gjett" data-v="' + r.b + '" aria-pressed="' + (r.mitt === r.b) + '"><span>' + T('Begge peker på', 'Both point at') + '</span><b>' + esc(navn(r.b)) + '</b></button>' +
+          '<button type="button" class="rr-knapp uenig" data-g="rr-gjett" data-v="uenig" aria-pressed="' + (r.mitt === 'uenig') + '"><b>' + T('De blir uenige', 'They disagree') + '</b><span>' + T('Peker på hver sin', 'Each points at someone else') + '</span></button></div>' +
+        '<p class="nr-vent">' + (r.mitt ? T('Gjettet – hodet ditt reiser seg. Du kan bytte til tiden er ute.', 'Guessed – your head rises. You can change until time is up.') : T('Ingen ser hva du gjetter før de to har pekt.', 'Nobody sees your guess until the two have pointed.')) + '</p>';
+      return topp + kort + midt +
+        (erVert() && (pekt.length || gjettet.length) ? '<p class="ja-vis"><button type="button" class="linkbtn" data-g="avslor">' + T('Snu dem nå', 'Turn them now') + '</button></p>' : '') +
+        hodeBenk(alle, { oppe: [r.a, r.b].concat(gjettet), par: { a: r.a, b: r.b }, status: status });
+    }
+    // Snudd
+    var dom, kl;
+    if (!res.fasit) { kl = 'tom'; dom = '<span>' + T('Snudd', 'Flipped') + '</span><b>' + res.mangler.map(nv).join(T(' og ', ' and ')) + T(' pekte ikke', ' didn’t point') + '</b><small>' + T('Glemte du det? Én slurk.', 'Forgot? One sip.') + '</small>'; }
+    else if (res.enige) { kl = 'enige'; dom = '<span>' + T('Enige!', 'Agreed!') + '</span><b>' + T('Begge pekte på ', 'Both pointed at ') + (res.pa === jeg ? T('deg', 'you') : esc(navn(res.pa))) + '</b><small>' + nv(res.pa) + (res.pa === jeg ? T(' drikker én.', ' drink one.') : T(' drikker én.', ' drinks one.')) + '</small>'; }
+    else { kl = 'uenige'; var selv = function (id) { return id === jeg ? T('deg selv', 'yourself') : T('seg selv', 'themself'); }; dom = '<span>' + T('Uenige!', 'Disagreed!') + '</span><b>' + nv(r.a) + T(' pekte på ', ' pointed at ') + (res.pa === r.a ? selv(r.a) : (res.pa === jeg ? T('deg', 'you') : nv(res.pa))) + ', ' + nv(r.b) + T(' på ', ' at ') + (res.pb === r.b ? selv(r.b) : (res.pb === jeg ? T('deg', 'you') : nv(res.pb))) + '</b><small>' + T('Dere kjenner ikke hverandre så godt som dere tror. Begge drikker én.', 'You don’t know each other as well as you think. Both drink one.') + '</small>'; }
+    var g = res.gjett || {}, gNavn = function (v) { return v === 'uenig' ? T('uenige', 'disagree') : esc(navn(v)); };
+    var linjer = gjettere.filter(function (p) { return g[p.id]; }).map(function (p) {
+      var feil = res.feil.indexOf(p.id) !== -1;
+      return '<li class="' + (feil ? 'feil' : 'rett') + '"><b>' + nv(p.id) + '</b><span>' + T('gjettet ', 'guessed ') + gNavn(g[p.id]) + '</span><em>' + (res.fasit ? (feil ? T('Drikk én', 'Drink one') : T('Riktig', 'Right')) : '') + '</em></li>'; }).join('');
+    var bi = alle.findIndex(function (p) { return p.id === r.b; }), nesteB = alle.length > 2 ? alle[(bi + 1) % alle.length] : alle.find(function (p) { return p.id === r.a; });
+    var sist = s.pos + 1 >= s.antall;
+    return topp + kort + '<div class="rr-dom ' + kl + (inn ? ' inn' : '') + '">' + dom + '</div>' + (linjer ? '<ul class="rr-gjett">' + linjer + '</ul>' : '') +
+      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste par: ', 'Next pair: ') + esc(navn(r.b)) + T(' og ', ' and ') + esc(nesteB ? nesteB.navn : '')) + '</button>' +
+      hodeBenk(alle, { oppe: true, par: { a: r.a, b: r.b, snudd: true }, oi: res.fasit && !res.enige ? [r.a, r.b] : res.mangler || [] });
   }
   /** De andre kortlekene når bunken er tom: hvor mange kort dere spilte (i Pekeleken: hvem som ble pekt mest på), og så hva nå. */
   function kortFerdig(s) {
@@ -3690,7 +3754,7 @@ export function startRom(LEKNAVN, LANG) {
   // knappen det første 0,7 sekundet – ellers hopper et dobbelttrykk over kortet ingen rakk å lese.
   var sistInnhold = '', sperreTil = 0;
   function merkNyttInnhold(s) {
-    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur, s.aldri ? s.aldri.fase : '', s.ee ? s.ee.fase : '', s.ferdig ? 'f' : ''].join('|') : 'ingen';
+    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur, s.aldri ? s.aldri.fase : '', s.ee ? s.ee.fase : '', s.rr ? s.rr.fase : '', s.ferdig ? 'f' : ''].join('|') : 'ingen';
     if (k !== sistInnhold) { if (sistInnhold) sperreTil = Date.now() + 700; sistInnhold = k; }
   }
 
@@ -3803,6 +3867,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'aldri-nekt') return gjor({ handling: 'aldri-nekt' });
     if (g === 'ee-velg') { if (b.getAttribute('aria-pressed') === 'true') return; spillLyd('pop'); gjorAlltid({ handling: 'ee-velg', v: b.dataset.v }); return; }
     if (g === 'ee-med') { eeVelgMed = true; return tegn(); }
+    if (g === 'rr-pek' || g === 'rr-gjett') { if (b.getAttribute('aria-pressed') === 'true') return; spillLyd('pop'); gjorAlltid({ handling: g, v: b.dataset.v }); return; }
     if (g === 'ee-forsvar') return gjor({ handling: 'ee-forsvar', med: b.dataset.med || null });
     if (g === 'aldri-igjen' || g === 'kort-igjen') { var lekId = tilstand.spill ? tilstand.spill.lek : ''; return gjor({ handling: 'kort-igjen', sett: (settListe()[lekId] || []).slice(-1500) }); }
     if (g === 'aldri-modus') return gjorAlltid({ handling: 'aldri-modus', paa: b.dataset.paa === '1' });

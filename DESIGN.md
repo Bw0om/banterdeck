@@ -119,6 +119,14 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **Nyhetsrunden:** reiser seg når de har svart.
 - **Enten eller** bruker den samme benken. Vinnere på sluttskjermene og Skriv og drikk på TV viser også de nye hodene.
 
+### Rygg mot rygg
+
+- **Parene går i kjede:** A og B, B og C, C og A … så én person er med to kort på rad. Runden er 3 kort per spiller (6–30), så alle er med på rundt seks kort. Kortstokken har 100 kort (60 + 40 nye).
+- **De to peker i hemmelighet:** «Meg» (rosa) eller den andre (blå). **Alle andre gjetter:** den ene, den andre eller «De blir uenige» (gul, hele bredden). Ingen ser noe før klokka er ute (25 s, kortes til 3 s når alle er klare).
+- **Benken:** paret står i midten med gule navnelapper og lener seg fra hverandre (16°) med øynene utover. Tilskuerne står helt ut på sidene og reiser seg når de har gjettet. Når klokka er ute, snur paret seg mot hverandre (8°, fjær) og ser på hverandre.
+- **Enige:** den de pekte på drikker én (grønn boks). **Uenige:** begge drikker én og får «OI»-fjeset (oransje boks). Alle som gjettet feil, drikker én. Den i paret som ikke pekte, drikker én.
+- Knappen videre sier hvem som er neste par. Kåring «Tankeleseren» til den som oftest er enig med partneren sin (minst tre).
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
