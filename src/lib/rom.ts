@@ -68,7 +68,7 @@ function nyPollett() { const a = new Uint8Array(18); crypto.getRandomValues(a); 
 export function rensNavn(n: any) { return String(n || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
 
 /* ---------- hvilke leker som finnes i rom ---------- */
-const KORTLEKER = ['pekeleken', 'jeg-har-aldri', '50-50', 'kategorier', 'tanken-bak-sangen', 'sannhet-eller-drikk', 'enten-eller', 'nodt-eller-sannhet', 'rygg-mot-rygg', 'duoleken'];
+const KORTLEKER = ['pekeleken', 'jeg-har-aldri', '50-50', 'kategorier', 'tanken-bak-sangen', 'sannhet-eller-drikk', 'enten-eller', 'nodt-eller-sannhet', 'rygg-mot-rygg'];
 const NAVN_L: Record<string, [string, string]> = {
   'pekeleken': ['Pekeleken', 'Most likely to'], 'jeg-har-aldri': ['Jeg har aldri', 'Never have I ever'], 'enten-eller': ['Enten eller', 'Would you rather'], 'kategorier': ['Kategorier', 'Categories'],
   'nodt-eller-sannhet': ['Nødt eller sannhet', 'Truth or dare'], 'sannhet-eller-drikk': ['Sannhet eller drikk', 'Truth or drink'], 'tanken-bak-sangen': ['Låtbekjennelsen', 'Song confessions'], 'rygg-mot-rygg': ['Rygg mot rygg', 'Back to back'], 'duoleken': ['Duoleken', 'The couples game'], '50-50': ['50/50', '50/50'],
@@ -182,6 +182,7 @@ export function kaaringer(data: any) {
   const pekt = maks('pekt'); if (pekt && pekt.pekt >= 3) ut.push({ ikon: '👉', kode: 'pekt', tittel: L('Mest utpekt', 'Most pointed at'), id: pekt.id, navn: pekt.navn, tall: L(pekt.pekt + ' fingre', pekt.pekt + ' fingers') });
   const rrE = maks('rrEnige'); if (rrE && rrE.rrEnige >= 3) ut.push({ ikon: '🤝', kode: 'tankeleser', tittel: L('Tankeleseren', 'The mind reader'), id: rrE.id, navn: rrE.navn, tall: L('enig ' + rrE.rrEnige + ' ganger rygg mot rygg', 'agreed ' + rrE.rrEnige + ' times back to back') });
   const bo = maks('kbBom'); if (bo && bo.kbBom >= 3) ut.push({ ikon: '💣', kode: 'bombeoffer', tittel: L('Bombeofferet', 'Bomb magnet'), id: bo.id, navn: bo.navn, tall: L('sprengt ' + bo.kbBom + ' ganger', 'blown up ' + bo.kbBom + ' times') });
+  const duo = maks('duoGang'); if (duo && duo.duoGang >= 2) ut.push({ ikon: '💞', kode: 'drommeduo', tittel: L('Halve drømmeduoen', 'Half the dream duo'), id: duo.id, navn: duo.navn, tall: L('i duoen ' + duo.duoGang + ' ganger', 'in the duo ' + duo.duoGang + ' times') });
   const vh = maks('nsNodt'); if (vh && vh.nsNodt >= 3) ut.push({ ikon: '🔥', kode: 'vaghals', tittel: L('Våghalsen', 'The daredevil'), id: vh.id, navn: vh.navn, tall: L(vh.nsNodt + ' nødt gjennomført', vh.nsNodt + ' dares done') });
   const mot = maks('mindretall'); if (mot && mot.mindretall >= 3) ut.push({ ikon: '🧭', kode: 'motstrom', tittel: L('Mot strømmen', 'Against the current'), id: mot.id, navn: mot.navn, tall: L(mot.mindretall + ' ganger i mindretall', mot.mindretall + ' times in the minority') });
   const erf = maks('harGjort'); if (erf && erf.harGjort >= 5) ut.push({ ikon: '🍹', kode: 'erfaren', tittel: L('Mest erfaren', 'Most experienced'), id: erf.id, navn: erf.navn, tall: L('har gjort ' + erf.harGjort, 'has done ' + erf.harGjort) });
@@ -345,6 +346,17 @@ const KORT_LENGDE = 30;
    like mange slurker (dobbelt på vrien «Dobbel»). Hvert femte kort eller så får en vri. */
 const PEK_TELL = 2400;   // 3, 2, 1 à 800 ms – så PEK!
 const PEK_VRIER = ['lukk', 'flertall', 'forsvar', 'selv', 'dobbel'];
+/** Duo-kort i Pekeleken: «Hvem hadde …» – alle peker med begge hender, på to forskjellige. De to med flest fingre er duoen. */
+const PEK_DUO_SJANSE = 8;
+function pekDuoKort(s: any) {
+  if (!s.pekDuoBunke || !s.pekDuoBunke.length) {
+    const d = D['duoleken'], en = (DE['duoleken'] && DE['duoleken'].items) || [];
+    const ok = (m: string) => s.modus === 'droy' ? m === 'droy' : s.modus === 'snill' ? m === 'snill' : true;
+    s.pekDuoBunke = stokk(d.items.map((x: any, i: number) => [x, en[i]]).filter(([x]: any) => ok(x.m)).map(([x, e]: any) => kortL(x, e)));
+  }
+  const k = s.pekDuoBunke.shift() || { t: L('Hvem hadde startet et band sammen?', 'Which two would start a band together?'), k: '' };
+  return { ...k, duo: true };
+}
 function nyPekRunde(s: any, data: any) {
   if (s.lek !== 'pekeleken') { s.pek = null; return; }
   const k = s.rekke[s.pos] || {};
@@ -353,6 +365,13 @@ function nyPekRunde(s: any, data: any) {
   s.pekLeser = ((s.pekLeser ?? -1) + 1) % n;
   if (k.h || k.smak) { s.pek = { fase: 'hendelse', leser: data.spillere[s.pekLeser]?.id || null, vri: null }; return; }
   s.pekSidenVri = (s.pekSidenVri || 0) + 1;
+  s.pekSidenDuo = (s.pekSidenDuo || 0) + 1;
+  // Duo-kort: sjeldent og tilfeldig (ingen fast rytme), aldri to på rad og aldri samme kort som en vri
+  if (data.spillere.length >= 3 && s.pekSidenDuo >= 3 && !(forrige && forrige.duo) && tilfeldig(100) < PEK_DUO_SJANSE) {
+    s.rekke[s.pos] = pekDuoKort(s); s.kort = visKort(s, data); s.pekTekst = s.kort && s.kort.t; s.pekSidenDuo = 0;
+    s.pek = { fase: 'klar', leser: data.spillere[s.pekLeser]?.id || null, vri: null, duo: true, start: null, fingre: {}, selv: [], resultat: null };
+    return;
+  }
   let vri: string | null = null;
   if (data.spillere.length >= 3 && s.pekSidenVri >= 4 && (s.pekSidenVri >= 7 || Math.random() < 0.4) && !(forrige && forrige.vri)) {
     vri = PEK_VRIER[tilfeldig(PEK_VRIER.length)]; s.pekSidenVri = 0;
@@ -366,6 +385,17 @@ function avgjorPek(data: any) {
   const topp = maks > 0 ? ider.filter((id) => f[id] === maks) : [];
   const slurker = pk.vri === 'dobbel' ? maks * 2 : maks;
   ider.forEach((id) => { const p = data.spillere.find((x: any) => x.id === id); if (p && f[id] > 0) p.pekt = (p.pekt || 0) + f[id]; });
+  if (pk.duo) {
+    const rekke = ider.filter((id) => f[id] > 0).sort((a, b) => f[b] - f[a] || tilfeldig(3) - 1);
+    if (rekke.length >= 2) {
+      const duo = rekke.slice(0, 2);
+      duo.forEach((id) => { giSlurker(data, id, f[id]); const p = data.spillere.find((x: any) => x.id === id); if (p) p.duoGang = (p.duoGang || 0) + 1; });
+      pk.resultat = { topp: duo, duo: true, maks, slurker: f[duo[1]], hver: { [duo[0]]: f[duo[0]], [duo[1]]: f[duo[1]] }, fordeling: { ...f } };
+      pk.fase = 'ferdig';
+      melde(data, `💞 Duoen: ${duo.map((id) => navnPaa(data, id)).join(' og ')} – skål sammen!`, `💞 The duo: ${duo.map((id) => navnPaa(data, id)).join(' and ')} – cheers together!`);
+      return;
+    }
+  }
   pk.resultat = { topp, maks, slurker, fordeling: { ...f } };
   if (pk.vri === 'forsvar' && topp.length) { pk.fase = 'forsvar'; pk.forsvarFra = Date.now(); return; }
   topp.forEach((id) => giSlurker(data, id, slurker));
@@ -374,7 +404,7 @@ function avgjorPek(data: any) {
 }
 function pekVisning(s: any, meg: any) {
   const pk = s.pek;
-  return { fase: pk.fase, leser: pk.leser, vri: pk.vri, start: pk.start || null, tell: PEK_TELL, harTalt: Object.keys(pk.fingre || {}),
+  return { fase: pk.fase, leser: pk.leser, vri: pk.vri, duo: !!pk.duo, start: pk.start || null, tell: PEK_TELL, harTalt: Object.keys(pk.fingre || {}),
     mine: meg && pk.fingre ? pk.fingre[meg.id] ?? null : null, selv: pk.selv || [], forsvarFra: pk.forsvarFra || null,
     resultat: pk.fase === 'ferdig' || pk.fase === 'forsvar' ? pk.resultat : null };
 }
@@ -782,6 +812,7 @@ const LINJER: number[][] = (() => {
 function nyttBrett(s: any) { return stokk(s.sanger.map((_: any, i: number) => i)).slice(0, 16); }
 
 export function startSpill(data: any, lek: string, modus: string, sett?: Set<string> | null) {
+  if (lek === 'duoleken') lek = 'pekeleken';   // Duoleken bor nå i Pekeleken (duo-kort) – gamle lenker og planer virker fortsatt
   if (EKSTRA.includes(lek)) return startEkstra(data, lek, modus);
   const liste = lekeliste('no');
   const valgt = liste.find((x) => x.id === lek);

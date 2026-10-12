@@ -988,6 +988,19 @@ html.i-spill .rom-kode{font-size:.92em}
 .ee-hode.stol .ee-navn{background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
 @media (prefers-reduced-motion:reduce){.ns-kort.inn{animation:jaToning 240ms ease both}}
 
+/* ---------- Pekeleken: duo-kort (sjeldne, tilfeldige) ---------- */
+.pk-kort.duo .pk-vri{background:var(--rosa)}
+.pk-resultat.duo{background:var(--rosa);color:var(--blekk)}
+.ee-benk.duo .ee-hode .mv-hode{transform-origin:50% 100%;transition:transform 620ms var(--fjaer)}
+.ee-benk.duo .ee-hode.duo-a .mv-hode{transform:rotate(9deg)}
+.ee-benk.duo .ee-hode.duo-b .mv-hode{transform:rotate(-9deg)}
+.ee-benk.duo .duo-a .ee-navn,.ee-benk.duo .duo-b .ee-navn{background:var(--rosa);color:var(--blekk);border:2px solid var(--blekk)}
+.duo-hjerte{position:absolute;z-index:3;left:calc(50% - 20px);bottom:132px;width:40px;pointer-events:none}
+.duo-hjerte.inn{animation:duoHjerte 620ms var(--fjaer) 380ms both}
+.duo-hjerte svg{display:block;width:100%;height:auto}
+@keyframes duoHjerte{from{transform:translateY(16px) scale(.6);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.duo-hjerte.inn{animation:jaToning 240ms ease both}.ee-benk.duo .ee-hode .mv-hode{transition:none}}
+
 /* ---------- Kategorier: bomba går rundt ---------- */
 .rom-spill:has(.kb-kort){align-items:stretch;text-align:left;gap:0}
 .kb-kort p{font-size:clamp(26px,8vw,32px)}

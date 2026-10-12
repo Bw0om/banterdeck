@@ -1268,6 +1268,7 @@ export function startRom(LEKNAVN, LANG) {
      Nedtellingen regnes fra et felles starttidspunkt (justert for klokkeavvik), så alle telefonene og
      TV-en sier «PEK!» i samme øyeblikk. Tallene bytter med en kort fjær; resten står stille. */
   var PK_PRE = /^(Hvem er mest sannsynlig til å|Who's most likely to|Who is most likely to)\s+/i;
+  var PK_DUO_PRE = /^(Hvem hadde|Which two would)\s+/i;
   var PK_VRI = {
     lukk: [T('Lukk øynene og pek', 'Close your eyes and point'), T('Ingen ser hvem du peker på før alle åpner samtidig.', 'Nobody sees who you point at until everyone opens at once.')],
     flertall: [T('Pek der flertallet peker', 'Point where the majority points'), T('Ikke hvem det passer på – hvem du tror de andre velger. De som bommer, drikker én.', 'Not who it fits – who you think the others pick. Miss and you drink one.')],
@@ -1286,7 +1287,7 @@ export function startRom(LEKNAVN, LANG) {
       var trinn = pkTrinn(pk), nokkel = pk.start + ':' + trinn;
       if (nokkel !== pkSist) {
         pkSist = nokkel;
-        el.textContent = trinn ? trinn : T('Pek!', 'Point!');
+        el.textContent = trinn ? trinn : pk.duo ? T('Pek på to!', 'Point at two!') : T('Pek!', 'Point!');
         el.className = 'pk-tall' + (trinn ? '' : ' pek') + (trinn === 1 ? ' en' : '');
         void el.offsetWidth; el.classList.add('inn');
         if (trinn) spillLyd('tikk'); else { spillLyd('pek'); try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} }
@@ -1296,8 +1297,10 @@ export function startRom(LEKNAVN, LANG) {
     }, 60);
   }
   function pkKort(s, vri) {
-    var tekst = String((s.kort && s.kort.t) || ''), m = tekst.match(PK_PRE), rest = m ? tekst.slice(m[0].length) : tekst;
-    var v = vri && PK_VRI[vri];
+    var tekst = String((s.kort && s.kort.t) || ''), duo = s.pek && s.pek.duo, m = tekst.match(duo ? PK_DUO_PRE : PK_PRE), rest = m ? tekst.slice(m[0].length) : tekst;
+    var v = duo ? [T('Pek på to', 'Point at two'), T('Én hånd på hver.', 'One hand on each.')] : vri && PK_VRI[vri];
+    if (duo) return '<div class="pk-kort med-vri duo"><div class="pk-vri"><b>Duo</b><span>' + esc(v[0]) + '</span></div>' +
+      (m ? '<span class="pk-pre">' + esc(m[1]) + ' …</span>' : '') + '<p>' + esc(rest) + '</p><small class="pk-vri-tekst">' + esc(v[1]) + '</small></div>';
     return '<div class="pk-kort' + (v ? ' med-vri' : '') + '">' + (v ? '<div class="pk-vri"><b>' + T('Vri', 'Twist') + '</b><span>' + esc(v[0]) + '</span></div>' : '') +
       (m ? '<span class="pk-pre">' + esc(m[1]) + ' …</span>' : '') + '<p>' + esc(rest) + '</p>' + (v ? '<small class="pk-vri-tekst">' + esc(v[1]) + '</small>' : '') + '</div>';
   }
@@ -1319,7 +1322,7 @@ export function startRom(LEKNAVN, LANG) {
       var trinn = pkTrinn(pk); pkSist = pk.start + ':' + trinn; setTimeout(pkTikk, 0);
       return topp + pkKort(s, pk.vri) +
         '<div class="pk-scene" aria-live="assertive"><svg id="pkHand" class="pk-hand" viewBox="0 0 160 90" aria-hidden="true"' + (trinn ? ' hidden' : '') + '><path class="f" d="M84 40h56a10 10 0 0 1 0 20H96"/><path class="f" d="M14 34c0-6 6-10 14-10h30c10 0 16 6 26 16v34c0 6-6 10-12 10H34C22 84 14 76 14 64z"/><path class="s" d="M58 58h20M58 70h16"/></svg>' +
-        '<span id="pkTall" class="pk-tall' + (trinn ? '' : ' pek') + (trinn === 1 ? ' en' : '') + '">' + (trinn || T('Pek!', 'Point!')) + '</span></div>';
+        '<span id="pkTall" class="pk-tall' + (trinn ? '' : ' pek') + (trinn === 1 ? ' en' : '') + '">' + (trinn || (pk.duo ? T('Pek på to!', 'Point at two!') : T('Pek!', 'Point!'))) + '</span></div>';
     }
     if (pk.fase === 'teller') {
       var mine = pk.mine, har = pk.harTalt || [], maks = Math.max(1, Math.min(6, alle.length - 1));
@@ -1344,10 +1347,10 @@ export function startRom(LEKNAVN, LANG) {
     var ford = r.fordeling || {}, maksN = Math.max(1, r.maks || 0);
     var rader = alle.slice().sort(function (a, b) { return (ford[b.id] || 0) - (ford[a.id] || 0); }).filter(function (p) { return ford[p.id] > 0 || p.id === tilstand.meg; });
     var nesteL = pkNesteLeser(pk);
-    var tittel = !(r.topp || []).length ? T('Ingen fikk fingre', 'Nobody got any fingers') : r.slapp ? navnene + T(' slapp unna!', ' got away!') : navnene + T(' – drikk ', ' – drink ') + r.slurker;
+    var tittel = r.duo ? (r.topp || []).map(function (id) { return id === tilstand.meg ? T('Du', 'You') : esc(navn(id)); }).join(' & ') + T(' – skål sammen!', ' – cheers together!') : !(r.topp || []).length ? T('Ingen fikk fingre', 'Nobody got any fingers') : r.slapp ? navnene + T(' slapp unna!', ' got away!') : navnene + T(' – drikk ', ' – drink ') + r.slurker;
     return topp + pkKort(s, pk.vri) +
-      '<div class="pk-resultat' + ((r.topp || []).length && !r.slapp ? ' drikk' : '') + (inn ? ' inn' : '') + '"><div class="pk-res-topp">' + (r.topp || []).map(function (id) { return nrPille(id); }).join('') + '<b>' + tittel + '</b></div>' +
-        ((r.topp || []).length ? '<span>' + r.maks + (r.maks === 1 ? T(' finger pekte', ' finger pointed') : T(' fingre pekte', ' fingers pointed')) + (pk.vri === 'dobbel' ? T(' – dobbelt opp.', ' – doubled.') : '.') + '</span>' : '') + '</div>' +
+      '<div class="pk-resultat' + ((r.topp || []).length && !r.slapp ? ' drikk' : '') + (r.duo ? ' duo' : '') + (inn ? ' inn' : '') + '"><div class="pk-res-topp">' + (r.topp || []).map(function (id) { return nrPille(id); }).join('') + '<b>' + tittel + '</b></div>' +
+        (r.duo ? '<span>' + r.topp.map(function (id) { return (id === tilstand.meg ? T('Du', 'You') : esc(navn(id))) + ' ' + r.hver[id]; }).join(' · ') + '</span>' : (r.topp || []).length ? '<span>' + r.maks + (r.maks === 1 ? T(' finger pekte', ' finger pointed') : T(' fingre pekte', ' fingers pointed')) + (pk.vri === 'dobbel' ? T(' – dobbelt opp.', ' – doubled.') : '.') + '</span>' : '') + '</div>' +
       (pk.vri === 'flertall' && (r.topp || []).length ? '<p class="pk-merk">' + T('Pekte du ikke på ', 'Didn’t point at ') + navnene + T('? Drikk én.', '? Drink one.') + '</p>' : '') +
       (rader.length ? '<ul class="pk-soyler' + (inn ? ' inn' : '') + '">' + rader.map(function (p, i) {
         var n = ford[p.id] || 0;
@@ -1489,17 +1492,17 @@ export function startRom(LEKNAVN, LANG) {
   function hodeBenk(alle, o) {
     o = o || {}; var r = o.sider || null, n = alle.length, oi = o.oi || [];
     if (!n) return '';
-    var w = o.par ? (n <= 4 ? 76 : n <= 6 ? 62 : 48) : r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = o.par ? rrPlasser(alle, o.par) : o.stol ? stolPlasser(alle, o.stol) : eePlasser(alle, r);
+    var w = o.par || o.duo ? (n <= 4 ? 78 : n <= 6 ? 62 : 48) : r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = o.par ? rrPlasser(alle, o.par) : o.duo ? duoPlasser(alle, o.duo) : o.stol ? stolPlasser(alle, o.stol) : eePlasser(alle, r);
     var stil = '--w:' + w + 'px' + (r && r.fa ? ';--fa:' + r.fa : '') + (r && r.fb ? ';--fb:' + r.fb : '');
     setTimeout(benkTikk, 0);
     var bombe = o.bombe && plass[o.bombe.id] != null ? kbBombe(plass[o.bombe.id], o.bombe) : '';
-    return '<div class="ee-benk' + (r ? ' delt' : '') + (o.par ? ' rygg' + (o.par.snudd ? ' snudd' : '') : '') + (o.stol ? ' stolen' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
+    return '<div class="ee-benk' + (r ? ' delt' : '') + (o.par ? ' rygg' + (o.par.snudd ? ' snudd' : '') : '') + (o.stol ? ' stolen' : '') + (o.duo ? ' duo' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
       (r ? '<i class="ee-midt"></i>' + (r.la ? '<span class="ee-sidenavn a">' + esc(r.la) + '</span><span class="ee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') +
-      (o.status && !r ? '<span class="ee-status">' + esc(o.status) + '</span>' : '') + bombe +
+      (o.status && !r ? '<span class="ee-status">' + esc(o.status) + '</span>' : '') + bombe + (o.duo ? '<i class="duo-hjerte' + (o.duoInn ? ' inn' : '') + '"><svg viewBox="-20 -18 40 36" aria-hidden="true"><path d="M0 14C-22 0 -16 -16 -6 -14C-2 -13 0 -9 0 -7C0 -9 2 -13 6 -14C16 -16 22 0 0 14Z" fill="#FF9CC2" stroke="#16120F" stroke-width="3" stroke-linejoin="round"/></svg></i>' : '') +
       alle.map(function (p, i) {
         var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1 || p.id === o.stol, erOi = oi.indexOf(p.id) !== -1;
         var uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
-        var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : o.bombe && p.id === o.bombe.id ? ' holder' : '';
+        var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : o.bombe && p.id === o.bombe.id ? ' holder' : o.duo ? (p.id === o.duo[0] ? ' duo-a' : p.id === o.duo[1] ? ' duo-b' : '') : '';
         return '<div class="ee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' +
           '<span class="ee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.id === tilstand.meg ? T('Du', 'You') : p.navn) + '</span>' + eeHode(p, uttrykk) + '</div></div>'; }).join('') + '</div>';
   }
@@ -1524,6 +1527,30 @@ export function startRom(LEKNAVN, LANG) {
       ut[p.id] = m === 1 ? (venstre ? 6 : 94) : fra + (k / (m - 1)) * (til - fra);
     });
     return ut;
+  }
+  var pkDuoVist = '';
+  /** Duoen midt på benken, side om side; de andre fordelt ut mot kantene. */
+  function duoPlasser(alle, duo) {
+    var ut = {}, andre = alle.filter(function (p) { return duo.indexOf(p.id) === -1; }), v = Math.ceil(andre.length / 2);
+    ut[duo[0]] = 36; ut[duo[1]] = 64;
+    andre.forEach(function (p, i) {
+      var venstre = i < v, k = venstre ? i : i - v, m = venstre ? v : andre.length - v;
+      var fra = venstre ? 0 : 80, til = venstre ? 20 : 100;
+      ut[p.id] = m === 1 ? (venstre ? 6 : 94) : fra + (k / (m - 1)) * (til - fra);
+    });
+    return ut;
+  }
+  /** Benken tegnes på nytt hver gang: hoder som har flyttet seg, glir fra der de var (FLIP med fjær, bare transform). */
+  function benkRekter() {
+    var ut = {}; root.querySelectorAll('.ee-benk .ee-hode').forEach(function (h) { ut[h.dataset.id] = h.getBoundingClientRect().left; }); return ut;
+  }
+  function benkGli(fra) {
+    if (roligBevegelse()) return;
+    root.querySelectorAll('.ee-benk .ee-hode').forEach(function (h) {
+      var x = fra[h.dataset.id]; if (x == null || !h.animate) return;
+      var dx = x - h.getBoundingClientRect().left; if (Math.abs(dx) < 2) return;
+      h.animate([{ transform: 'translateX(' + dx + 'px)' }, { transform: 'none' }], { duration: 620, easing: KB_FJAER });
+    });
   }
   function eeBenk(s, e, alle, r) {
     return hodeBenk(alle, r ? { oppe: true, sider: { a: r.a, b: r.b }, oi: r.alene ? [r.alene] : [], stirr: r.alene, flat: true } : { oppe: e.harSvart || [] });
@@ -1562,6 +1589,7 @@ export function startRom(LEKNAVN, LANG) {
     var pk = s.pek, alle = tilstand.spillere || []; if (!pk) return '';
     if (pk.fase === 'teller' && pkTid(pk) > pk.tell + 1400) { var har = pk.harTalt || []; return hodeBenk(alle, { oppe: har, status: har.length + T(' av ', ' of ') + alle.length + T(' har talt', ' counted') }); }
     if ((pk.fase === 'ferdig' || pk.fase === 'forsvar') && pk.resultat) {
+      if (pk.resultat.duo) { var dk = s.pos + ':' + pk.resultat.topp.join(), dInn = pkDuoVist !== dk; pkDuoVist = dk; return hodeBenk(alle, { oppe: true, duo: pk.resultat.topp, duoInn: dInn }); }
       var topp = pk.resultat.slapp ? [] : pk.resultat.topp || [];
       if (pk.fase === 'forsvar') topp = pk.resultat.topp || [];
       return hodeBenk(alle, { oppe: true, oi: topp, stirr: topp.length === 1 ? topp[0] : '', flat: true });
@@ -3660,12 +3688,12 @@ export function startRom(LEKNAVN, LANG) {
     var gammelRekt = gammeltKort ? gammeltKort.getBoundingClientRect() : null;
     sistKortNokkel = nyKN;
     var stuaPlass = tilstand.ferdig ? '' : '<div class="rom-stua-plass" id="romStuaPlass"></div>';
-    var kbFra = kbRekt();
+    var kbFra = kbRekt(), benkFra = benkRekter();
     root.innerHTML = s
       ? topp + merker + borsHurtig() + innhold + stuaPlass + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + vert + forlat
       : topp + stuaPlass + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat;
     tegnStua(s);
-    kbFly(kbFra);
+    kbFly(kbFra); benkGli(benkFra);
     merkNyttInnhold(s);
     trinnEtterTegning();
     // Skjermkanten: lime når det er din tur, stripete når skjermen viser noe hemmelig

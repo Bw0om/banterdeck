@@ -144,6 +144,14 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **Få ord:** ingen forklaringstekster i leken. Tittelen sier hvem som har bomba; «Slik spiller dere» har reglene.
 - Neste kategori starter hos den som sprengte. Ingen smakebiter (det er ikke kategorier). Kortstokken har 120 kategorier (80 + 40 nye). Kåring «Bombeofferet» til den som sprengte flest ganger (minst tre).
 
+### Pekeleken: duo-kort
+
+- **Duoleken er ikke lenger en egen lek i rommet.** Kortene dukker opp som **duo-kort** i Pekeleken: sjelden og tilfeldig (8 % per kort, minst to vanlige kort imellom, aldri to på rad, aldri samtidig med en vri), så det kommer uten fast rytme. «Spill i rom» fra Duoleken-siden starter Pekeleken.
+- Kortet får et rosa «Duo · Pek på to»-merke og «Én hånd på hver.»; nedtellingen ender på «Pek på to!».
+- **De to med flest fingre er duoen.** Hver drikker fingrene sine. Bare én med fingre: vanlig resultat.
+- **Benken:** duoen glir sammen midt på og lener seg mot hverandre, rosa navnelapper, og et rosa hjerte spretter opp mellom dem (én gang per kort). Alle hoder som flytter seg på benken glir nå dit med fjær (FLIP), på telefon og TV.
+- Kåring «Halve drømmeduoen» til den som oftest har vært i duoen (minst to).
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
