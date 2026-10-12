@@ -127,6 +127,15 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **Enige:** den de pekte på drikker én (grønn boks). **Uenige:** begge drikker én og får «OI»-fjeset (oransje boks). Alle som gjettet feil, drikker én. Den i paret som ikke pekte, drikker én.
 - Knappen videre sier hvem som er neste par. Kåring «Tankeleseren» til den som oftest er enig med partneren sin (minst tre).
 
+### Nødt eller sannhet
+
+- **Én i stolen per kort, etter tur.** Verten velger bare Snill, Drøy eller Alle. Runden er 3 kort per spiller (6–30), og kortstokken har 104 kort (64 + 40 nye), delt i en nødt- og en sannhetsbunke.
+- **Den i stolen velger selv:** to store knapper, **Nødt** (oransje) og **Sannhet** (mint), 20 sekunder. Først da trekkes kortet fra den bunken og snus (rotateY med fjær). Velger hen ikke, velger appen. Verten kan velge for en som ikke er ved telefonen.
+- **Gjør det eller feig ut:** «Ferdig – la dem dømme» eller «Feig ut · drikk 3» (rosa boks, «OI»-fjeset).
+- **Alle andre er dommere:** «Godkjent» (mint) eller «Juks!» (rosa), 20 sekunder, kortes til to når alle har stemt. Flertallet bestemmer, likt er godkjent. Juks: drikk 2 (oransje boks, «OI»). Verten kan «Døm nå».
+- **Benken:** den i stolen står i midten, større, med gul navnelapp og et gult søkelys bak seg. Alle de andre ser på hen og reiser seg når de har dømt. TV-en viser det samme, med «Kasper i stolen. Nødt eller sannhet?» i stor skrift mens hen velger.
+- Kåring «Våghalsen» til den som har gjennomført flest godkjente nødt (minst tre).
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

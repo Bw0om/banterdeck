@@ -964,3 +964,26 @@ html.i-spill .rom-kode{font-size:.92em}
 .ee-benk.rygg.snudd .ee-hode.par-b .mv-hode{transform:rotate(-8deg)}
 .ee-benk.rygg .par-a .ee-navn,.ee-benk.rygg .par-b .ee-navn{background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
 @media (prefers-reduced-motion:reduce){.ee-benk.rygg .ee-hode .mv-hode{transition:none}.rr-valg.inn .rr-knapp,.rr-dom.inn{animation:jaToning 240ms ease both;animation-delay:0s}}
+
+/* ---------- Nødt eller sannhet: én i stolen, alle andre er dommere ---------- */
+.rom-spill:has(.ns-kort,.ns-stor){align-items:stretch;text-align:left;gap:0}
+.ns-stor{margin:4px 0 14px;font-family:var(--display);font-size:clamp(28px,8.4vw,34px);font-weight:900;font-stretch:70%;text-transform:uppercase;line-height:.95;color:var(--ink)}
+.ns-stor.liten{font-size:22px;margin-bottom:10px}
+.rr-valg.en{grid-template-columns:minmax(0,1fr);gap:14px}
+.rr-valg.en .rr-knapp{min-height:132px}
+.rr-valg.en .rr-knapp b{font-size:54px;line-height:.85}
+.rr-knapp.nodt{background:var(--oransje)}.rr-knapp.sann{background:var(--mint)}
+.rr-knapp.ja{background:var(--mint)}.rr-knapp.nei{background:var(--rosa)}
+.ns-kort.nodt,.ns-kort.sannhet{color:var(--blekk);border-color:var(--blekk)}
+.ns-kort.nodt{background:var(--oransje)}.ns-kort.sannhet{background:var(--mint)}
+.ns-kort .pk-pre{color:var(--blekk)}
+.ns-kort.liten p{font-size:20px}
+.ns-kort.inn{animation:jaSnu 520ms var(--fjaer) both}
+.ns-feig{display:block;width:100%;margin:12px 0 0;padding:13px 16px;font:inherit;font-size:15px;font-weight:800;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.ns-feig:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
+.rr-dom.feig{background:var(--rosa)}
+/* Stolen: midt på benken, større, i et gult søkelys */
+.ee-benk.stolen::before{content:'';position:absolute;left:50%;top:-50px;width:280px;height:280px;margin-left:-140px;border-radius:50%;background:radial-gradient(circle,var(--gul) 0,var(--gul) 34%,transparent 70%);opacity:.55;pointer-events:none}
+.ee-hode.stol{z-index:2;width:calc(var(--w) * 1.28);margin-left:calc(var(--w) * -.14);bottom:-58px}
+.ee-hode.stol .ee-navn{background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
+@media (prefers-reduced-motion:reduce){.ns-kort.inn{animation:jaToning 240ms ease both}}
