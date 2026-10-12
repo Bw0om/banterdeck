@@ -309,6 +309,15 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         '<span class="tvnr-teller">' + svart.length + ' / ' + alle.length + T(' har svart', ' answered') + '</span></div></div></div>';
     }
     /* De andre kortlekene når bunken er tom (Pekeleken viser hvem som ble pekt mest på i kveld) */
+    /* Ring of Fire når ringen er tom: siste kort ved siden av, og hvordan det gikk med ringen */
+    function rofSluttScene(d, s) {
+      var b = s.brudd;
+      return '<div class="tv-scene tv-rof"><div class="tvnr-hoved"><p class="tv-etikett">Ring of Fire · ' + (s.konger || 0) + T('/4 konger', '/4 kings') + '</p>' +
+        '<h1 class="tv-sporsmal">' + (s.ring ? T('Ringen er tom', 'The ring is empty') : T('Kortene er brukt opp', 'The cards are used up')) + '</h1>' +
+        (s.ring ? '<p class="tv-stor">' + (s.ringBrutt && b ? esc(b.navn || '') + T(' brøt ringen.', ' broke the ring.') : T('Ringen holdt hele veien!', 'The ring held all the way!')) + '</p>' : '') +
+        '<p class="tv-stor">' + esc(navn(d.vert)) + T(' velger hva dere gjør nå.', ' is choosing what to do next.') + '</p></div>' +
+        (s.kort ? '<div class="tv-rof-kort"><p class="tv-etikett">' + T('Siste kort', 'Last card') + (s.kort.hvem ? ' · ' + esc(s.kort.hvem) : '') + '</p>' + rofKort(s.kort) + '</div>' : '') + '</div>';
+    }
     function kortFerdigScene(d, s) {
       var pt = s.pekSlutt || [], forste = pt[0];
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + esc(s.navn || '') + ' · ' + s.antall + T(' kort', ' cards') + '</p></div>' +
@@ -463,6 +472,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       var topp = '<p class="tv-etikett">' + esc(s.navn) + '</p>';
       if (s.type === 'nyhetsrunden' && s.nr) return nrScene(d, s.nr);
+      if (s.type === 'kort' && s.ferdig && s.lek === 'ring-of-fire') return rofSluttScene(d, s);
       if (s.type === 'kort' && s.ring) {
         return '<div class="tv-scene tv-rof">' + '<div>' + topp + '<h1 class="tv-tur">' + T('Trekker: ', 'Drawing: ') + '<b>' + esc(navn(s.turId)) + '</b></h1>' + ring(s) +
           '<p class="tv-liten">' + s.igjen + T(' kort i ringen', ' cards in the ring') + (s.ringBrutt ? ' · 💥 ' + T('ringen er brutt', 'the ring is broken') : '') + '</p></div>' +

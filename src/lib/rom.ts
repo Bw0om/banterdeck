@@ -1030,6 +1030,7 @@ function handlingInne(data: any, meg: any, h: any) {
     }
     case 'rof-trekk': {
       if (!s || s.type !== 'kort' || !s.ring) return { feil: 'feil-spill' };
+      if (s.ferdig) return { ok: true };
       s.holder = null;
       // (Samme kort to ganger avvises under – så et dobbelt trykk eller en telefon som henger litt etter gjør ingen skade)
       const tur = data.spillere[s.tur % Math.max(1, data.spillere.length)];
@@ -1055,10 +1056,10 @@ function handlingInne(data: any, meg: any, h: any) {
       s.velgMakker = v === '8' && data.spillere.length >= 2 ? hvem : null;   // 8: den som trakk, velger makker
       if (h.brutt === true && s.brudd && s.brudd.nr === s.nr) { data.rekord = data.rekord || {}; const r = data.rekord.brudd || (data.rekord.brudd = {}); r[hvem] = (r[hvem] || 0) + 1; }
       s.tur = (s.tur + 1) % Math.max(1, data.spillere.length);
-      // Tomt for kort: ny ring
+      // Tomt for kort: leken er ferdig – verten velger ny ring eller noe annet
       if (s.tatt.length >= s.rekke.length) {
-        s.rekke = kortstokkFor(s.lek, s.modus); s.tatt = []; s.konger = 0; s.ringBrutt = false; s.bruddPlass = null;
-        melde(data, '🔥 Ringen er tom – en ny ring er lagt ut', '🔥 The ring is empty – a new ring is laid out');
+        s.ferdig = true; s.velgMakker = null;
+        melde(data, '🔥 Ringen er tom!', '🔥 The ring is empty!');
       }
       return { ok: true };
     }
@@ -1071,13 +1072,10 @@ function handlingInne(data: any, meg: any, h: any) {
       s.pos++;
       if (s.pos >= s.rekke.length) {
         // Kortlekene slutter når bunken er tom – så velger verten hva dere gjør nå
-        if (s.lek !== 'ring-of-fire') {
-          s.pos = s.rekke.length - 1; s.ferdig = true; s.aldri = null; s.frist = null;
-          if (s.pek && s.pek.resultat) s.pekForrige = { tekst: s.pekTekst || '', resultat: s.pek.resultat };
-          s.pek = null;
-          melde(data, 'Kortene er brukt opp!', 'The cards are used up!'); return { ok: true };
-        }
-        s.rekke = kortstokkFor(s.lek, s.modus); s.pos = 0; s.konger = 0; melde(data, 'Stokket på nytt', 'Reshuffled');
+        s.pos = s.rekke.length - 1; s.ferdig = true; s.aldri = null; s.frist = null; s.velgMakker = null;
+        if (s.pek && s.pek.resultat) s.pekForrige = { tekst: s.pekTekst || '', resultat: s.pek.resultat };
+        s.pek = null;
+        melde(data, 'Kortene er brukt opp!', 'The cards are used up!'); return { ok: true };
       }
       s.trakk = meg.id;
       // Hendelseskort: legges inn foran kortet som skulle kommet, så ingen kort går tapt
@@ -1150,8 +1148,16 @@ function handlingInne(data: any, meg: any, h: any) {
     }
     case 'kort-igjen':
     case 'aldri-igjen': {   // nye kort: de dere ikke har hatt først, også de dere nettopp spilte
-      if (!s || s.type !== 'kort' || s.lek === 'ring-of-fire' || !s.ferdig) return { ok: true };
+      if (!s || s.type !== 'kort' || !s.ferdig) return { ok: true };
       if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
+      if (s.lek === 'ring-of-fire') {   // ny ring (eller ny kortstokk uten ring): alle 52 kortene ut igjen
+        const rekke = kortstokkFor(s.lek, s.modus);
+        Object.assign(s, { rekke, pos: 0, ferdig: false, konger: 0, velgMakker: null });
+        if (s.ring) Object.assign(s, { tatt: [], brudd: null, ringBrutt: false, bruddPlass: null, kort: null, sist: null, holder: null });
+        else { if (rekke[0].v === 'K') s.konger = 1; s.kort = visKort(s, data); }
+        melde(data, s.ring ? '🔥 Ny ring!' : 'Ny kortstokk!', s.ring ? '🔥 A new ring!' : 'A new deck!');
+        return { ok: true };
+      }
       const sett = new Set<string>((Array.isArray(h.sett) ? h.sett : []).slice(0, 2000).filter((x: any) => typeof x === 'string' && /^[0-9a-z]{1,8}$/.test(x)));
       s.rekke.forEach((k: any) => { if (!k.h && !k.smak) sett.add(kortId(k)); });
       let rekke = kortstokkFor(s.lek, s.modus, sett).slice(0, KORT_LENGDE);
