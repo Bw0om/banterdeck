@@ -26,6 +26,21 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   <meta name="theme-color" content="#1C1B1F" />
   <title>{EN ? 'Big screen – mittvors' : 'Storskjerm – mittvors'}</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <script is:inline>
+    /* Hold-trykk på telefon: et tomt berøringslytt gjør at iPhone viser trykk-animasjonen (:active) med en gang,
+       og lang-trykk på knapper, kort og bilder åpner ikke telefonens egen meny (Android). Tekstlenker i avsnitt beholder menyen. */
+    (function () {
+      if (window.__mvTrykk) return; window.__mvTrykk = true;
+      document.addEventListener('touchstart', function () {}, { passive: true });
+      document.addEventListener('contextmenu', function (e) {
+        var t = e.target; if (!t || !t.closest) return;
+        if (t.closest('input, textarea, [contenteditable="true"]')) return;
+        var lenke = t.closest('a');
+        if (lenke && lenke.closest('p, li') && !lenke.querySelector('img, svg') && !lenke.matches('.btn, [class*="knapp"]')) return;
+        if (t.closest('button, [role=button], [data-g], summary, img, svg, a')) e.preventDefault();
+      });
+    })();
+  </script>
 </head>
 <body class="tv">
   <main id="tv" class="tv-rot"></main>
