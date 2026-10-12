@@ -403,7 +403,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + kort + bunn + '</div></div>';
     }
-    var tvDuoVist = '';
+    var tvDuoVist = '', tvMsVist = '';
     function tvDuoPlasser(alle, duo) {
       var ut = {}, andre = alle.filter(function (p) { return duo.indexOf(p.id) === -1; }), v = Math.ceil(andre.length / 2);
       ut[duo[0]] = 41; ut[duo[1]] = 59;
@@ -503,7 +503,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         alle.map(function (p, i) {
           var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1 || p.id === o.stol, erOi = oi.indexOf(p.id) !== -1, uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
           var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : o.bombe && p.id === o.bombe.id ? ' holder' : o.duo ? (p.id === o.duo[0] ? ' duo-a' : p.id === o.duo[1] ? ' duo-b' : '') : '';
-          return '<div class="tvee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="tvee-hev' + (oppe ? ' oppe' : '') + '"><span class="tvee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.navn) + '</span>' + (window.mvHodeSvg ? window.mvHodeSvg(p, uttrykk) : '') + '</div></div>'; }).join('') + '</div>';
+          var tvTall = o.tall && o.tall[p.id] ? '<b class="tvee-tall' + (o.tallInn ? ' inn' : '') + '" style="--i:' + i + '">' + o.tall[p.id] + '</b>' : '';
+          return '<div class="tvee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="tvee-hev' + (oppe ? ' oppe' : '') + '">' + tvTall + '<span class="tvee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.navn) + '</span>' + (window.mvHodeSvg ? window.mvHodeSvg(p, uttrykk) : '') + '</div></div>'; }).join('') + '</div>';
     }
     var tvBenkTimer = null;
     function tvBenkTikk() {
@@ -749,12 +750,19 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       if (s.type === 'kort') return '<div class="tv-scene tv-sentrert">' + topp + '<div class="tv-kort' + (s.kort && s.kort.h ? ' hendelse' : '') + '">' + (s.kort && s.kort.k ? '<span class="tv-etikett">' + esc(s.kort.k) + '</span>' : '') + '<p>' + esc(s.kort ? s.kort.t : '') + '</p></div><p class="tv-liten">' + (s.pos + 1) + ' / ' + s.antall + '</p></div>';
       if (s.type === 'mest') {
+        var msTekst = String(s.tekst || ''), msM = msTekst.match(/^(Hvem er mest sannsynlig til å|Who's most likely to|Who is most likely to)\s+/i), msRest = msM ? msTekst.slice(msM[0].length) : msTekst;
+        var msHode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Pekeleken · på mobilen · runde ', 'Most likely to · round ') + (s.runde || 1) + '</p></div>';
+        var msKort = (msM ? '<p class="tvpk-pre">' + esc(msM[1]) + ' …</p>' : '') + '<h1 class="tv-sporsmal">' + esc(msRest) + '</h1>';
         if (s.fase === 'resultat' && s.resultat) {
-          var maks = s.resultat.length ? s.resultat[0].stemmer : 1;
-          return '<div class="tv-scene tv-sentrert">' + topp + '<h1 class="tv-sporsmal">' + esc(s.tekst) + '</h1><ol class="tv-stolper">' + s.resultat.map(function (r, i) {
-            return '<li style="animation-delay:' + (i * 0.35) + 's"><span>' + esc(r.navn) + '</span><i style="width:' + Math.round(100 * r.stemmer / maks) + '%"></i><b>' + r.stemmer + '</b></li>'; }).join('') + '</ol></div>';
+          var msRes = s.resultat, msMaks = msRes.length ? msRes[0].stemmer : 0, msTopp = msRes.filter(function (r) { return r.stemmer === msMaks; }).map(function (r) { return r.id; });
+          var msTall = {}; msRes.forEach(function (r) { msTall[r.id] = r.stemmer; });
+          var msVk = (s.runde || 0) + ':res', msInn = tvMsVist !== msVk; tvMsVist = msVk;
+          var msBunn = msTopp.length ? '<p class="tvja-dom' + (msInn ? ' inn' : '') + '" style="--n:2">' + msTopp.map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and ')) + T(' drikker ', ' drinks ') + msMaks + '</p>' : '';
+          return tvMedBenk('<div class="tv-scene tvnr"><div class="tvnr-hoved">' + msHode + msKort + msBunn + '</div></div>', tvBenk(d, d.spillere || [], { oppe: true, oi: msTopp, stirr: msTopp.length === 1 ? msTopp[0] : '', flat: true, tall: msTall, tallInn: msInn }));
         }
-        return '<div class="tv-scene tv-sentrert">' + topp + '<h1 class="tv-sporsmal">' + esc(s.tekst) + '</h1><p class="tv-stor">' + T('Stem på telefonen', 'Vote on your phone') + ' · ' + (s.stemt || 0) + ' / ' + (d.spillere || []).length + '</p></div>';
+        tvMsVist = '';
+        return tvMedBenk('<div class="tv-scene tvnr"><div class="tvnr-hoved">' + msHode + msKort + '<p class="tv-stor">' + T('Stem på telefonen', 'Vote on your phone') + ' · ' + (s.stemt || 0) + ' / ' + (d.spillere || []).length + '</p></div></div>',
+          tvBenk(d, d.spillere || [], { oppe: s.harStemt || [] }));
       }
       if (s.type === 'forraeder') {
         var lhAndre = (d.spillere || []).filter(function (p) { return p.id !== s.aktiv; }), lhB = '';
@@ -1158,6 +1166,13 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .med-benk:has(.tvee-benk.stolen) .tvnr-hoved{padding-bottom:15.5vw}
     .tvrr-chip{font-family:var(--display);font-size:1.6em;font-weight:900;font-stretch:62%;text-transform:uppercase;padding:.08em .4em .12em;color:#16120F;background:#FFF8EE;border:4px solid #FFF8EE;box-shadow:6px 6px 0 #FF5B1F;transform:rotate(-2deg)}
     .tvrr-chip.gul{background:#FFD23F}
+    .tvee-tall{display:grid;place-items:center;min-width:2.4vw;height:2.4vw;padding:0 .5vw;font-family:var(--display);font-size:1.6vw;font-weight:900;color:#16120F;background:#FFD23F;border:3px solid #16120F;border-radius:999px}
+    .tvee-hode.alene .tvee-tall{background:#FF5B1F}
+    .med-benk .tvee-benk:has(.tvee-tall){height:15vw}
+    .med-benk:has(.tvee-tall) .tvnr-hoved{padding-bottom:15.5vw}
+    .tvee-tall.inn{animation:tveeTall 560ms cubic-bezier(.23,1,.32,1) both;animation-delay:calc(300ms + var(--i) * 80ms)}
+    @keyframes tveeTall{from{transform:translateY(.8vw) scale(.7);opacity:0}to{transform:none;opacity:1}}
+    @media (prefers-reduced-motion:reduce){.tvee-tall.inn{animation:none}}
     .tvpk-vri.duo{background:#FF9CC2}
     .tvee-benk.duo .tvee-hode .mv-hode{transform-origin:50% 100%;transition:transform 620ms cubic-bezier(.23,1,.32,1)}
     .tvee-benk.duo .tvee-hode.duo-a .mv-hode{transform:rotate(9deg)}

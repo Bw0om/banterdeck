@@ -152,6 +152,15 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **Benken:** duoen glir sammen midt på og lener seg mot hverandre, rosa navnelapper, og et rosa hjerte spretter opp mellom dem (én gang per kort). Alle hoder som flytter seg på benken glir nå dit med fjær (FLIP), på telefon og TV.
 - Kåring «Halve drømmeduoen» til den som oftest har vært i duoen (minst to).
 
+### Færre leker, tydeligere leker
+
+- **50/50 er borte fra rommet.** «Jeg har aldri»-kortene fantes allerede i Jeg har aldri; de 120 «Hvem …»-kortene (Snusboksen) er nå i Pekeleken (243 kort).
+- **Sannhet eller drikk er slått sammen med Nødt eller sannhet.** De 60 sannhetskortene ligger i sannhetsbunken (164 kort); «drikk i stedet» finnes allerede som «Feig ut».
+- **Mest sannsynlig er Pekeleken på mobilen.** Pekeleken-kortet i lobbyen har en bryter: **Pek i rommet** (fingre, nedtelling) eller **Stem på mobilen**. Valget huskes på telefonen. Spillet heter «Pekeleken · på mobilen».
+- **Stem på mobilen:** du trykker på hodet til den det passer best på (store hode-knapper, 2 kolonner opp til fire spillere). Hodene på benken reiser seg når folk har stemt; når alle har stemt, går det to sekunder før resultatet. Resultatet: stemmetall spretter opp over hodene med en liten forsinkelse etter hverandre, den med flest får «OI» og alle stirrer. Hver stemme er én slurk. TV-en viser det samme.
+- Gamle lenker og planer virker: 50/50 og Duoleken starter Pekeleken, Sannhet eller drikk starter Nødt eller sannhet (snill/drøy følger med).
+- Lobbyen har én kort linje per kortlek om hva som skjer («Bomba går rundt. Ingen vet når den smeller.»).
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

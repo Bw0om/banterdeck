@@ -731,14 +731,15 @@ export function startRom(LEKNAVN, LANG) {
       '<h2 class="rom-h2 rom-steg"><span>3</span>' + T('Velg en lek', 'Pick a game') + '</h2>' +
       '<p class="small rom-steg-forklaring">' + T('Én lek om gangen – den dukker opp på alle telefonene. Dere kan bytte når som helst.', 'One game at a time – it shows up on every phone. You can switch whenever you like.') + '</p>' + kveldKort() + reglerKort() + anbefalteLeker() +
       '<p class="small rom-nivahint">' + T('Mange leker har nivåer: <b>Snill</b> passer for alle, <b>Frekk</b> og <b>Drøy</b> er for de som tåler mer, og <b>Alle</b> blander.', 'Many games have levels: <b>Mild</b> suits everyone, <b>Cheeky</b> and <b>Wild</b> are for those who can take more, and <b>All</b> mixes them.') + '</p>' +
-      lekeGrupper(t.leker.filter(function (l) { return !l.pluss; }), function (l) {
+      lekeGrupper(t.leker.filter(function (l) { return !l.pluss && !l.skjult; }), function (l) {
         var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
         var min = forFa(l);
         if (min) return '<div class="rom-lek for-fa">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><p class="small">👥 ' + T('Trenger minst ' + min + ' spillere – dere er ' + t.spillere.length + '.', 'Needs at least ' + min + ' players – you’re ' + t.spillere.length + '.') + '</p></div>';
-        return '<div class="rom-lek">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' +
+        var lekId = l.id === 'pekeleken' && pkMobil ? 'mest' : l.id;
+        return '<div class="rom-lek">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' + (l.id === 'pekeleken' ? pkVariant() : '') +
           '<div class="rom-mod">' + (mod.length
-            ? mod.slice(0, l.type === 'nyhetsrunden' ? 4 : 99).map(function (m) { return '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') +
-              (l.type !== 'bingo' && l.type !== 'nyhetsrunden' ? '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">' + T('Alle', 'All') + '</button>' : '') +
+            ? mod.slice(0, l.type === 'nyhetsrunden' ? 4 : 99).map(function (m) { return '<button type="button" data-g="start" data-lek="' + lekId + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') +
+              (l.type !== 'bingo' && l.type !== 'nyhetsrunden' ? '<button type="button" data-g="start" data-lek="' + lekId + '" data-modus="*">' + T('Alle', 'All') + '</button>' : '') +
               (l.type === 'nyhetsrunden' && mod.length > 4 ? '<select class="rom-nr-arkiv" data-nr-arkiv aria-label="' + T('Eldre uker', 'Older weeks') + '"><option value="">' + T('Eldre uker …', 'Older weeks …') + '</option>' +
                 mod.slice(4).map(function (m) { return '<option value="' + esc(m.v) + '">' + esc(m.t) + (nrSpilt().indexOf(m.v) !== -1 ? ' ✓' : '') + '</option>'; }).join('') + '</select>' : '')
             : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
@@ -866,7 +867,7 @@ export function startRom(LEKNAVN, LANG) {
     spion: [['Alle ser samme sted på skjermen – bortsett fra muldvarpen.', 'Everyone sees the same location on screen – except the mole.'], ['Still hverandre spørsmål om stedet på omgang, uten å røpe det.', 'Take turns asking each other questions about the place, without giving it away.'], ['Stem på hvem som er muldvarpen. Blir hen tatt, kan hen fortsatt vinne ved å gjette stedet.', 'Vote for who the mole is. If caught, the mole can still win by guessing the location.']],
     pannekort: [['Du skriver et ord (en person, ting eller et dyr) til den du får tildelt.', 'You write a word (a person, thing or animal) for the player you’re assigned.'], ['Du ser alles ord – bortsett fra ditt eget.', 'You see everyone’s word – except your own.'], ['Still ja/nei-spørsmål og gjett hva du er.', 'Ask yes/no questions and guess what you are.']],
     skal: [['Vent til det står SKÅL! på skjermen.', 'Wait until it says CHEERS! on screen.'], ['Trykk så fort du kan.', 'Tap as fast as you can.'], ['Tregest drikker – trykker du for tidlig, drikker du dobbelt.', 'Slowest drinks – tap too early and you drink double.']],
-    mest: [['Et «Hvem er mest sannsynlig til …»-spørsmål dukker opp.', 'A “Who’s most likely to …” question appears.'], ['Alle stemmer i hemmelighet på den det passer best på.', 'Everyone secretly votes for who it fits best.'], ['Hver stemme du får, er én slurk.', 'Every vote you get is one sip.']],
+    mest: [['Ett «Hvem er mest sannsynlig …»-kort om gangen.', 'One “Who’s most likely …” card at a time.'], ['Trykk på hodet til den det passer best på. Ingen ser hva du stemte.', 'Tap the head of whoever it fits best. Nobody sees your vote.'], ['Hver stemme er én slurk.', 'Every vote is one sip.']],
     forraeder: [['Den som har tur, holder på kortet for å se om hen skal lyve eller si sannheten – og fullfører setningen høyt.', 'Whoever’s turn it is holds the card to see whether to lie or tell the truth – and finishes the sentence out loud.'], ['Grill hen med oppfølgingsspørsmål. Så stemmer resten: sant eller løgn?', 'Grill them with follow-up questions. Then everyone else votes: true or lie?'], ['Feil: drikk to (helt sikker: fire). Den som forteller deler ut én per person som ble lurt.', 'Wrong: drink two (absolutely sure: four). The teller hands out one per person fooled.']],
     tosannheter: [['Én skriver tre påstander om seg selv – to sanne og én løgn.', 'One player writes three statements about themselves – two true, one lie.'], ['Resten stemmer på løgnen fra sin telefon.', 'Everyone else votes for the lie on their phone.'], ['Så avsløres løgnen – de som bommet, drikker.', 'Then the lie is revealed – those who missed drink.']],
     regelfabrikken: [['Alle skriver så mange drikkekort de rekker før tiden går ut.', 'Everyone writes as many drinking cards as they can before time runs out.'], ['Kortene stokkes og trekkes ett og ett.', 'The cards are shuffled and drawn one by one.'], ['Gjør det kortet sier!', 'Do what the card says!']],
@@ -912,6 +913,13 @@ export function startRom(LEKNAVN, LANG) {
   var apneGrupper = {};
   function erApen(n, standard) { return n in apneGrupper ? apneGrupper[n] : standard; }
   root.addEventListener('toggle', function (e) { var d = e.target; if (d && d.dataset && d.dataset.gruppe) apneGrupper[d.dataset.gruppe] = d.open; }, true);
+  /** Pekeleken har to måter: pek med fingeren i rommet, eller stem i det stille på mobilen (det som før var «Mest sannsynlig»). */
+  var pkMobil = false; try { pkMobil = localStorage.getItem('bd_pk_mobil') === '1'; } catch (e) {}
+  function pkVariant() {
+    return '<div class="pk-variant" role="group" aria-label="' + T('Hvordan peker dere?', 'How do you point?') + '">' +
+      '<button type="button" data-g="pk-variant" data-v="rom" aria-pressed="' + !pkMobil + '">' + T('Pek i rommet', 'Point in the room') + '</button>' +
+      '<button type="button" data-g="pk-variant" data-v="mobil" aria-pressed="' + pkMobil + '">' + T('Stem på mobilen', 'Vote on phones') + '</button></div>';
+  }
   function lekeGrupper(leker, tegnLek) {
     var brukt = {}, ut = '';
     GRUPPER.forEach(function (g, i) {
@@ -1503,7 +1511,8 @@ export function startRom(LEKNAVN, LANG) {
         var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1 || p.id === o.stol, erOi = oi.indexOf(p.id) !== -1;
         var uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
         var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : o.bombe && p.id === o.bombe.id ? ' holder' : o.duo ? (p.id === o.duo[0] ? ' duo-a' : p.id === o.duo[1] ? ' duo-b' : '') : '';
-        return '<div class="ee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' +
+        var tall = o.tall && o.tall[p.id] ? '<b class="ee-tall' + (o.tallInn ? ' inn' : '') + '">' + o.tall[p.id] + '</b>' : '';
+        return '<div class="ee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' + tall +
           '<span class="ee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.id === tilstand.meg ? T('Du', 'You') : p.navn) + '</span>' + eeHode(p, uttrykk) + '</div></div>'; }).join('') + '</div>';
   }
   /** Rygg mot rygg: paret i midten, de andre fordelt på hver side. Snudd: paret rykker litt nærmere. */
@@ -1843,25 +1852,33 @@ export function startRom(LEKNAVN, LANG) {
       lekSlutt([['aldri-igjen', T('Nye kort', 'New cards'), T('Kort dere ikke har hatt', 'Cards you haven’t had')]]);
   }
 
+  /* ---------- Pekeleken på mobilen: trykk på hodet til den det passer best på ----------
+     Hodene reiser seg på benken når folk har stemt. Resultatet: stemmetall spretter opp over hodene,
+     den med flest får «OI» og alle stirrer. Hver stemme er én slurk. */
+  var msVist = '';
   function mestSpill(s) {
-    var t = tilstand;
+    var t = tilstand, alle = t.spillere || [], jeg = t.meg, nokkel = (s.runde || 0) + ':' + s.fase, inn = msVist !== nokkel; msVist = nokkel;
+    var tekst = String(s.tekst || ''), m = tekst.match(PK_PRE), rest = m ? tekst.slice(m[0].length) : tekst;
+    var kort = '<div class="pk-kort ms-kort">' + (m ? '<span class="pk-pre">' + esc(m[1]) + ' …</span>' : '') + '<p>' + esc(rest) + '</p></div>';
+    var nv = function (id) { return id === jeg ? T('Du', 'You') : esc(navn(id)); };
     if (s.fase === 'resultat') {
-      var maks = s.resultat.length ? s.resultat[0].stemmer : 1;
-      return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
-        '<ol class="rom-resultat">' + s.resultat.map(function (r) {
-          return '<li><span>' + esc(r.navn) + '</span><i style="width:' + Math.round(100 * r.stemmer / maks) + '%"></i><b>' + r.stemmer + ' ' + (r.stemmer === 1 ? T('slurk', 'sip') : T('slurker', 'sips')) + '</b></li>';
-        }).join('') + '</ol>' +
-        '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste spørsmål', 'Next question') + '</button>';
+      var res = s.resultat || [], maks = res.length ? res[0].stemmer : 0, topp = res.filter(function (r) { return r.stemmer === maks; }).map(function (r) { return r.id; });
+      var tall = {}; res.forEach(function (r) { tall[r.id] = r.stemmer; });
+      var resten = res.filter(function (r) { return topp.indexOf(r.id) === -1; });
+      var chip = topp.length ? topp.map(nv).join(' & ') : T('Ingen stemmer', 'No votes');
+      return jaTopp(T('Pekeleken · på mobilen · runde ', 'Most likely to · round ') + (s.runde || 1), chip, true, false) + kort +
+        (topp.length ? '<div class="rr-dom uenige' + (inn ? ' inn' : '') + '"><span>' + T('Flest stemmer · ', 'Most votes · ') + maks + '</span><b>' + topp.map(nv).join(T(' og ', ' and ')) + (topp.length === 1 && topp[0] === jeg ? T(' drikker ', ' drink ') : T(' drikker ', ' drinks ')) + maks + '</b>' +
+          (resten.length ? '<small>' + resten.map(function (r) { return nv(r.id) + ' ' + r.stemmer; }).join(' · ') + '</small>' : '') + '</div>' : '') +
+        '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste spørsmål', 'Next question') + '</button>' +
+        hodeBenk(alle, { oppe: true, oi: topp, stirr: topp.length === 1 ? topp[0] : '', flat: true, tall: tall, tallInn: inn });
     }
-    var stemt = s.harStemt.length, alle = t.spillere.length;
-    return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
-      '<p class="small">' + T('Stem på hvem det passer best på. Hver stemme er én slurk.', 'Vote for who it fits best. Every vote is one sip.') + '</p>' +
-      '<div class="rom-valg">' + t.spillere.map(function (p) {
-        return '<button type="button" data-g="stem" data-paa="' + p.id + '" aria-pressed="' + (s.minStemme === p.id) + '">' + esc(p.navn) + (p.id === t.meg ? T(' (deg)', ' (you)') : '') + '</button>';
+    var har = s.harStemt || [];
+    return jaTopp(T('Pekeleken · på mobilen · runde ', 'Most likely to · round ') + (s.runde || 1), s.minStemme ? T('Stemt', 'Voted') : T('Trykk på én', 'Tap someone'), !s.minStemme, true) + kort +
+      '<div class="ms-valg' + (inn ? ' inn' : '') + '" style="--kol:' + (alle.length <= 4 ? 2 : 3) + '">' + alle.map(function (p, i) {
+        return '<button type="button" class="ms-hode" style="--i:' + i + '" data-g="stem" data-paa="' + p.id + '" aria-pressed="' + (s.minStemme === p.id) + '">' + eeHode(p, 'vanlig') + '<span>' + (p.id === jeg ? T('Meg', 'Me') : esc(p.navn)) + '</span></button>';
       }).join('') + '</div>' +
-      '<p class="rom-status">' + stemt + T(' av ', ' of ') + alle + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder til resultatet vises', 'seconds until the results'));
+      hodeBenk(alle, { oppe: har, status: har.length + T(' av ', ' of ') + alle.length + T(' har stemt', ' voted') });
   }
-
   /* ---------- Løgnhalsen: hold for å se rollen, grill og stem, avsløring med stempel ----------
      Rollen ligger under et nøytralt kort og vises bare mens du holder fingeren på det; lyv og sannhet
      ser like ut, så ingen kan lese rollen på fargen fra sofaen. Den som forteller kan få en idé og
@@ -4025,6 +4042,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'aldri-nekt') return gjor({ handling: 'aldri-nekt' });
     if (g === 'ee-velg') { if (b.getAttribute('aria-pressed') === 'true') return; spillLyd('pop'); gjorAlltid({ handling: 'ee-velg', v: b.dataset.v }); return; }
     if (g === 'ee-med') { eeVelgMed = true; return tegn(); }
+    if (g === 'pk-variant') { pkMobil = b.dataset.v === 'mobil'; try { localStorage.setItem('bd_pk_mobil', pkMobil ? '1' : '0'); } catch (e) {} spillLyd('pop'); return tegn(); }
     if (g === 'kb-send') { spillLyd('pop'); gjorAlltid({ handling: 'kb-send', fra: b.dataset.fra }); return; }
     if (g === 'kb-protest') { spillLyd('womp'); gjorAlltid({ handling: 'kb-protest' }); return; }
     if (g === 'ns-velg' || g === 'ns-stem') { if (b.getAttribute('aria-pressed') === 'true') return; spillLyd('pop'); gjorAlltid({ handling: g, v: b.dataset.v }); return; }

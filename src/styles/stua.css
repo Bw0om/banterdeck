@@ -988,6 +988,26 @@ html.i-spill .rom-kode{font-size:.92em}
 .ee-hode.stol .ee-navn{background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
 @media (prefers-reduced-motion:reduce){.ns-kort.inn{animation:jaToning 240ms ease both}}
 
+/* ---------- Pekeleken: to måter å peke på, og «stem på mobilen» ---------- */
+.pk-variant{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin:8px 0 6px;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden}
+.pk-variant button{min-height:40px;padding:6px 8px;font:inherit;font-size:13px;font-weight:900;color:var(--ink);background:var(--card);border:0;cursor:pointer;transition:background-color 160ms ease,color 160ms ease}
+.pk-variant button+button{border-left:2.5px solid var(--ink)}
+.pk-variant button[aria-pressed=true]{background:var(--gul);color:var(--blekk)}
+.rom-spill:has(.ms-kort){align-items:stretch;text-align:left;gap:0}
+.ms-valg{display:grid;grid-template-columns:repeat(var(--kol,3),minmax(0,1fr));gap:10px;margin:0 0 12px}
+.ms-hode{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px 8px;font:inherit;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:10px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer),opacity .2s}
+.ms-hode .mv-hode{width:58px;height:auto;margin-bottom:-6px}
+.ms-hode span{font-size:14px;font-weight:900;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-hode:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
+.ms-hode[aria-pressed=true]{background:var(--gul);color:var(--blekk);border-color:var(--blekk);transform:translate(2px,2px) rotate(-2deg);box-shadow:2px 2px 0 var(--hard)}
+.ms-valg:has([aria-pressed=true]) .ms-hode[aria-pressed=false]{opacity:.6}
+.ms-valg.inn .ms-hode{animation:nrInn 420ms var(--fjaer) both;animation-delay:calc(var(--i) * 45ms)}
+.ee-tall{display:grid;place-items:center;min-width:30px;height:30px;padding:0 6px;font-family:var(--display);font-size:20px;font-weight:900;color:var(--blekk);background:var(--gul);border:2.5px solid var(--blekk);border-radius:999px;box-shadow:2px 2px 0 var(--blekk)}
+.ee-hode.alene .ee-tall{background:var(--oransje)}
+.ee-tall.inn{animation:eeTall 520ms var(--fjaer) both;animation-delay:calc(260ms + var(--i) * 70ms)}
+@keyframes eeTall{from{transform:translateY(10px) scale(.7);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.ms-valg.inn .ms-hode,.ee-tall.inn{animation:jaToning 240ms ease both}.ms-hode,.pk-variant button{transition:none}}
+
 /* ---------- Pekeleken: duo-kort (sjeldne, tilfeldige) ---------- */
 .pk-kort.duo .pk-vri{background:var(--rosa)}
 .pk-resultat.duo{background:var(--rosa);color:var(--blekk)}
