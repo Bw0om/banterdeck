@@ -766,6 +766,21 @@ export function startRom(LEKNAVN, LANG) {
     return '<p class="rom-mester' + (jeg ? ' meg' : '') + '">❓ ' + (jeg ? T('<b>Du er spørsmålsmester!</b> Får du noen til å svare på et spørsmål, drikker de.', '<b>You’re the question master!</b> Get someone to answer one of your questions and they drink.')
       : T('Spørsmålsmester: <b>' + esc(navn(m.id)) + '</b> – svar på et spørsmål fra hen, så drikker du.', 'Question master: <b>' + esc(navn(m.id)) + '</b> – answer one of their questions and you drink.')) + '</p>';
   }
+  /** Når en lek er ferdig: hva nå? Verten velger – neste lek i planen (hvis dere har en), spill igjen,
+      en annen lek, eller avslutt kvelden. De andre ser hva verten holder på å velge. Planen beholdes uansett. */
+  function lekSlutt(igjen) {
+    var t = tilstand, neste = t.plan && t.plan.length ? nestePlan() : null, gjeng = !!t.gjeng;
+    if (!erVert()) return '<p class="nr-vent">' + esc(navn(t.vert)) + T(' velger hva dere gjør nå …', ' is choosing what to do next …') + '</p>';
+    var valg = '';
+    if (neste) valg += '<button class="rom-stor-knapp slutt-plan" data-g="plan-start" type="button">' + T('Neste i planen', 'Next in the plan') + '<small>' + esc(neste.navn) + '</small></button>';
+    var igjenListe = (igjen || []).filter(Boolean);
+    valg += '<div class="slutt-valg">' + igjenListe.map(function (v, i) {
+      return '<button type="button" class="slutt-knapp' + (!neste && i === 0 ? ' hoved' : '') + '" data-g="' + v[0] + '"><b>' + esc(v[1]) + '</b><small>' + esc(v[2]) + '</small></button>'; }).join('') +
+      '<button type="button" class="slutt-knapp" data-g="avslutt"><b>' + T('Velg en annen lek', 'Pick another game') + '</b><small>' + (neste ? T('Utenom planen', 'Outside the plan') : T('Tilbake til lekene', 'Back to the games')) + '</small></button>' +
+      '<button type="button" class="slutt-knapp" data-g="avslutt-kvelden"><b>' + (gjeng ? T('Avslutt gjengkvelden', 'End the crew night') : T('Avslutt kvelden', 'End the night')) + '</b><small>' + (gjeng ? T('Lagres i gjengens sesong', 'Saved to the crew’s season') : T('Kåringer og oppsummering', 'Awards and recap')) + '</small></button>' +
+    '</div>';
+    return '<div class="lek-slutt"><p class="nr-etikett">' + T('Hva nå?', 'What now?') + '</p>' + valg + '</div>';
+  }
   /** Verktøy for verten: raske knapper under leken, og resten forklart i en liste. */
   function vertVerktoy(s) {
     if (!erVert()) return '';
@@ -870,7 +885,7 @@ export function startRom(LEKNAVN, LANG) {
       ['Hold på det gule kortet og følg sporet ut av ringen. Går du utenfor sporet, bygger spenningen seg opp – ryker ringen, drikker du opp glasset ditt!', 'Hold the yellow card and follow the lane out of the ring. Leave the lane and the tension builds – if the ring breaks, finish your drink!'],
       ['Jo færre kort som er igjen, jo strammere blir ringen. Ringen kan bare brytes én gang – etter det er resten trygt.', 'The fewer cards left, the tighter the ring gets. The ring can only break once – after that the rest is safe.'],
       ['Gjør det kortet sier. Hver konge fyller kongekoppen – den som trekker fjerde konge, drikker den.', 'Do what the card says. Each king fills the king’s cup – whoever draws the fourth king drinks it.']],
-    aldri: [['Kortet kommer opp på alle telefonene.', 'The card shows up on every phone.'], ['Svar «Jeg har» eller «Aldri». Ingen ser svaret før alle har svart.', 'Answer “I have” or “Never”. Nobody sees the answers until everyone has answered.'], ['De som har gjort det, drikker én slurk. Så trykker noen «Neste kort».', 'Everyone who has done it drinks one sip. Then someone taps “Next card”.']],
+    aldri: [['Kortet kommer opp på alle telefonene.', 'The card shows up on every phone.'], ['Svar «Jeg har» eller «Aldri». Ingen ser svaret før alle har svart.', 'Answer “I have” or “Never”. Nobody sees the answers until everyone has answered.'], ['De som har gjort det, drikker én slurk. Så trykker noen «Neste kort».', 'Everyone who has done it drinks one sip. Then someone taps “Next card”.'], ['Bare én har gjort det? Hen forteller historien og drikker to, eller fire hvis hen nekter. Ingen? Den som trakk kortet, drikker én.', 'Only one has done it? They tell the story and drink two, or four if they refuse. Nobody? Whoever drew the card drinks one.'], ['30 kort i en runde. Så velger verten hva dere gjør nå.', '30 cards a round. Then the host picks what to do next.']],
     kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Hvem som helst kan trykke «Neste kort».', 'Anyone can tap “Next card”.']],
   };
   function reglerPanel(s) {
@@ -1340,6 +1355,7 @@ export function startRom(LEKNAVN, LANG) {
   function kortSpill(s) {
     if (s.ring) return rofSpill(s);
     if (s.pek && s.pek.fase !== 'hendelse') return pekSpill(s);
+    if (s.ferdig && s.lek === 'jeg-har-aldri') return aldriFerdig(s);
     if (s.aldri) return aldriSpill(s) + aldriBryter(s);
     var k = s.kort || {};
     if (k.id) merkSett(s.lek, k.id);
@@ -1358,51 +1374,89 @@ export function startRom(LEKNAVN, LANG) {
   /* ---------- Alle svarer (Jeg har aldri): hver telefon svarer i hemmelighet, så vises det samtidig ----------
      Bevegelse bare når noe skjer: et nytt svar fyller én prikk, avsløringen toner inn én gang.
      Klassene settes bare ved endring, ellers ville hver ny tegning spilt dem på nytt. */
-  var aldriSett = { nokkel: '', svart: null }, aldriAvslort = '', aldriEndre = '';
+  var aldriAvslort = '', aldriSvartFor = { nokkel: '', svart: null };
+  var JA_PRE = /^(Jeg har aldri|Never have I ever)\s+/i;
   function slurkOrd(n) { return tilstand && tilstand.alkoholfri ? T('straffepoeng', n === 1 ? 'penalty point' : 'penalty points') : (n === 1 ? T('slurk', 'sip') : T('slurker', 'sips')); }
   function initialer(p) { return p.id === tilstand.meg ? T('Du', 'You') : String(p.navn || '?').slice(0, 2); }
   function aldriBryter(s) {
-    if (!erVert() || !s.kanSvar) return '';
+    if (!erVert() || !s.kanSvar || s.ferdig) return '';
     return '<p class="aldri-bryter"><button class="linkbtn" data-g="aldri-modus" data-paa="' + (s.svarPaa ? '0' : '1') + '" type="button">' +
       (s.svarPaa ? T('Bare trekk kort, uten svar', 'Just draw cards, no answers') : T('La alle svare på telefonen', 'Let everyone answer on their phone')) + '</button></p>';
   }
+  function jaTopp(tekst, chip, gul, klokke) {
+    return '<div class="nr-topp ja-topp"><div class="nr-topp-tekst"><span>' + tekst + '</span><b' + (gul ? ' class="gul"' : '') + '>' + chip + '</b></div>' + (klokke ? nrKlokke() : '') + '</div>';
+  }
+  function jaNr(s) { return T('Jeg har aldri · kort ', 'Never have I ever · card ') + (s.pos + 1) + T(' av ', ' of ') + s.antall; }
+  /** Kortet uten «Jeg har aldri» foran – det står over teksten i stedet, så selve påstanden blir stor. */
+  function jaKort(s, liten) {
+    var k = s.kort || {}, tekst = String(k.t || ''), m = tekst.match(JA_PRE), rest = m ? tekst.slice(m[0].length) : tekst;
+    return '<div class="pk-kort ja-kort' + (liten ? ' liten' : '') + '">' + (k.k ? '<span class="ja-tag">' + esc(k.k) + '</span>' : '') +
+      '<span class="pk-pre">' + (m ? esc(m[1]) : T('Jeg har aldri', 'Never have I ever')) + ' …</span><p>' + esc(rest) + '</p></div>';
+  }
+  function jaNavn(id) { return id === tilstand.meg ? T('Du', 'You') : esc(navn(id)); }
+  /* ---------- Jeg har aldri: svar i hemmelighet, så snus ett kort per person ----------
+     Bevegelse bare når noe skjer: et nytt svar spretter inn i raden, kortene snus ett om gangen når alle har svart,
+     og den ensomme ulven får søkelyset. Klassen «inn» settes bare første gang, ellers ville hver tegning spilt det på nytt. */
   function aldriSpill(s) {
     var t = tilstand, a = s.aldri, k = s.kort || {}, alle = t.spillere || [], nokkel = s.pos + ':' + s.antall;
     if (k.id) merkSett(s.lek, k.id);
-    var kort = '<div class="rom-kort' + (a.fase === 'avslort' ? ' aldri-liten' : '') + '">' + (k.k ? '<span class="sw-tag">' + esc(k.k) + '</span>' : '<span></span>') + '<p>' + esc(k.t) + '</p><span class="rom-teller">' + (s.pos + 1) + ' / ' + s.antall + '</span></div>';
     if (a.fase === 'avslort') {
       var inn = aldriAvslort !== nokkel; aldriAvslort = nokkel;
-      var har = a.har || [], fri = alle.filter(function (p) { return har.indexOf(p.id) === -1; });
-      return kort + '<div class="aldri-avslort' + (inn ? ' inn' : '') + '">' +
-        '<h2 class="aldri-tall">' + har.length + T(' av ', ' of ') + alle.length + ' <em>' + T('har gjort det', 'have done it') + '</em></h2>' +
-        (har.length ? '<ul class="aldri-liste">' + har.map(function (id, i) {
-          return '<li style="--i:' + i + '"' + (id === t.meg ? ' class="meg"' : '') + '><span>' + (id === t.meg ? T('Du', 'You') : esc(navn(id))) + '</span><b>1 ' + slurkOrd(1) + '</b></li>'; }).join('') + '</ul>'
-          : '<p class="aldri-ingen">' + T('Ingen har gjort det. Et uskyldig rom!', 'Nobody has. What an innocent room!') + '</p>') +
-        (fri.length ? '<p class="aldri-fri"><b>' + T('Aldri:', 'Never:') + '</b> ' + fri.map(function (p) { return p.id === t.meg ? T('du', 'you') : esc(p.navn); }).join(', ') + '</p>' : '') +
-        (a.mest ? '<p class="aldri-mest">' + esc(navn(a.mest.id)) + T(' har gjort det ', ' has done it ') + a.mest.n + T(' ganger i kveld. Mest av alle.', ' times tonight. More than anyone.') + '</p>' : '') +
-        '</div><button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + '</button>';
+      var har = a.har || [], n = alle.length, sist = s.pos + 1 >= s.antall;
+      var videre = '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste kort', 'Next card')) + '</button>';
+      if (a.ulv) {
+        var jeg = a.ulv === t.meg, kan = jeg || erVert();
+        return jaTopp(jaNr(s), T('Snudd!', 'Flipped!'), true) + jaKort(s, true) +
+          '<div class="ja-ulv' + (inn ? ' inn' : '') + '"><span class="ja-ulv-etikett">' + T('Bare én har gjort det', 'Only one has done it') + '</span>' + nrPille(a.ulv, 'stor') +
+            '<b class="ja-ulv-navn">' + jaNavn(a.ulv) + '</b><span class="ja-ulv-be">' + T('Fortell historien!', 'Tell the story!') + '</span>' +
+            '<p>' + (a.nektet ? (jeg ? T('Du nektet. Fire ', 'You refused. Four ') : esc(navn(a.ulv)) + T(' nektet. Fire ', ' refused. Four ')) + slurkOrd(4) + '.'
+              : (jeg ? T('Du drikker to. Nekter du å fortelle, blir det fire.', 'You drink two. Refuse to tell and it’s four.') : esc(navn(a.ulv)) + T(' drikker to. Nekter hen å fortelle, blir det fire.', ' drinks two. Refuse to tell and it’s four.'))) + '</p>' +
+            (kan && !a.nektet ? '<button type="button" class="ja-nekt" data-g="aldri-nekt">' + (jeg ? T('Jeg nekter (+2)', 'I refuse (+2)') : T('Nekter å fortelle (+2)', 'Refuses to tell (+2)')) + '</button>' : '') + '</div>' +
+          videre;
+      }
+      var kortene = '<div class="ja-svarene' + (inn ? ' inn' : '') + '">' + alle.map(function (p, i) {
+        var h = har.indexOf(p.id) !== -1;
+        return '<div class="ja-svar' + (h ? ' har' : '') + (p.id === t.meg ? ' meg' : '') + '" style="--i:' + i + '">' + nrPille(p.id) + '<b>' + jaNavn(p.id) + '</b><span>' + (h ? T('Har', 'Have') : T('Aldri', 'Never')) + '</span></div>'; }).join('') + '</div>';
+      var dom;
+      if (!har.length) dom = '<b>' + T('Ingen har gjort det.', 'Nobody has.') + '</b> ' + T('Et uskyldig rom.', 'What an innocent room.') +
+        (a.kjedelig ? ' ' + (a.kjedelig === t.meg ? T('Du trakk kortet og drikker én for å ha valgt et kjedelig kort.', 'You drew it, so you drink one for picking a boring card.') : esc(navn(a.kjedelig)) + T(' trakk kortet og drikker én for å ha valgt et kjedelig kort.', ' drew it and drinks one for picking a boring card.')) : '');
+      else if (har.length === n && n > 1) dom = '<b>' + T('Alle har gjort det.', 'Everyone has.') + '</b> ' + T('Skål – dere er like ille alle sammen.', 'Cheers – you’re all as bad as each other.');
+      else dom = '<b>' + har.length + T(' av ', ' of ') + n + T(' har gjort det', ' have done it') + '</b> – ' + (har.indexOf(t.meg) !== -1 ? T('dere drikker én.', 'you drink one.') : T('de drikker én.', 'they drink one.'));
+      return jaTopp(jaNr(s), T('Snudd!', 'Flipped!'), true) + jaKort(s, true) + kortene +
+        '<p class="ja-dom' + (inn ? ' inn' : '') + '" style="--n:' + n + '">' + dom + '</p>' +
+        (a.mest ? '<p class="ja-mest">' + esc(navn(a.mest.id)) + T(' har gjort det ', ' has done it ') + a.mest.n + T(' ganger i kveld. Mest av alle.', ' times tonight. More than anyone.') + '</p>' : '') +
+        videre;
     }
-    // Svarrunden: hvem som har svart (ikke hva). Nye svar siden forrige tegning får en liten markering.
-    if (aldriSett.nokkel !== nokkel) aldriSett = { nokkel: nokkel, svart: null };
-    var forrige = aldriSett.svart, svart = a.harSvart || [], naa = {};
+    // Svarrunden: hvem som har svart (ikke hva). Et nytt svar spretter inn i raden.
+    if (aldriSvartFor.nokkel !== nokkel) aldriSvartFor = { nokkel: nokkel, svart: null };
+    var forrige = aldriSvartFor.svart, svart = a.harSvart || [], naa = {};
     var folk = alle.map(function (p) {
-      var har = svart.indexOf(p.id) !== -1; if (har) naa[p.id] = 1;
-      var ny = har && forrige && !forrige[p.id];
-      return '<span class="' + (har ? 'svart' : '') + (ny ? ' ny' : '') + '" title="' + esc(p.navn) + (har ? T(' har svart', ' has answered') : T(' har ikke svart', ' hasn’t answered')) + '">' + esc(initialer(p)) + '</span>';
+      var h = svart.indexOf(p.id) !== -1; if (h) naa[p.id] = 1;
+      return nrPille(p.id, (h ? 'svart' : 'mangler') + (h && forrige && !forrige[p.id] ? ' ny' : ''));
     }).join('');
-    aldriSett.svart = naa;
+    aldriSvartFor.svart = naa;
     var mangler = alle.filter(function (p) { return !naa[p.id]; });
-    var velger = !a.mitt || aldriEndre === nokkel;
-    var midt = velger
-      ? '<div class="aldri-valg"><button type="button" class="aldri-har" data-g="aldri-svar" data-v="har"' + (a.mitt === 'har' ? ' aria-pressed="true"' : '') + '><b>' + T('Jeg har', 'I have') + '</b><small>' + T('og drikker', 'and drink') + '</small></button>' +
-        '<button type="button" class="aldri-aldri" data-g="aldri-svar" data-v="aldri"' + (a.mitt === 'aldri' ? ' aria-pressed="true"' : '') + '><b>' + T('Aldri', 'Never') + '</b><small>' + T('går fri', 'off the hook') + '</small></button></div>' +
-        '<p class="aldri-hint">' + T('Ingen ser hva du svarer før alle har svart.', 'Nobody sees your answer until everyone has answered.') + '</p>'
-      : '<div class="aldri-mitt"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' +
-        T('Du svarte ', 'You answered ') + '<b>«' + (a.mitt === 'har' ? T('Jeg har', 'I have') : T('Aldri', 'Never')) + '»</b></span><button class="linkbtn" data-g="aldri-endre" type="button">' + T('Endre', 'Change') + '</button></div>' +
-        (mangler.length ? '<p class="aldri-hint">' + T('Venter på ', 'Waiting for ') + mangler.slice(0, 3).map(function (p) { return esc(p.navn); }).join(', ') + (mangler.length > 3 ? T(' og ', ' and ') + (mangler.length - 3) + T(' til', ' more') : '') + ' …</p>' : '');
-    return kort + midt +
-      (erVert() && svart.length ? '<button type="button" class="aldri-vis" data-g="avslor">' + T('Vis svarene nå', 'Show the answers now') + '</button>' : '') +
-      '<div class="aldri-status">' + fristHtml(s, T('sekunder igjen', 'seconds left')) + '<p class="rom-status">' + svart.length + T(' av ', ' of ') + alle.length + T(' har svart', ' have answered') + '</p><div class="aldri-folk">' + folk + '</div></div>';
+    var hint = !a.mitt ? T('Ingen ser hva du svarer før alle har svart.', 'Nobody sees your answer until everyone has answered.')
+      : mangler.length ? T('Venter på ', 'Waiting for ') + mangler.slice(0, 3).map(function (p) { return esc(p.navn); }).join(', ') + (mangler.length > 3 ? T(' og ', ' and ') + (mangler.length - 3) + T(' til', ' more') : '') + T('. Du kan bytte svar så lenge.', '. You can still change your answer.') : '';
+    return jaTopp(jaNr(s), T('Svar i hemmelighet', 'Answer in secret'), false, true) + jaKort(s) +
+      '<div class="aldri-valg ja-valg"><button type="button" class="aldri-har" data-g="aldri-svar" data-v="har" aria-pressed="' + (a.mitt === 'har') + '"><b>' + T('Jeg har', 'I have') + '</b><small>' + T('og drikker', 'and drink') + '</small></button>' +
+        '<button type="button" class="aldri-aldri" data-g="aldri-svar" data-v="aldri" aria-pressed="' + (a.mitt === 'aldri') + '"><b>' + T('Aldri', 'Never') + '</b><small>' + T('går fri', 'off the hook') + '</small></button></div>' +
+      '<div class="ja-folk">' + folk + '<span>' + svart.length + T(' av ', ' of ') + alle.length + T(' har svart', ' answered') + '</span></div>' +
+      (hint ? '<p class="nr-vent">' + hint + '</p>' : '') +
+      (erVert() && svart.length ? '<p class="ja-vis"><button type="button" class="linkbtn" data-g="avslor">' + T('Vis svarene nå', 'Show the answers now') + '</button></p>' : '');
+  }
+  /** Når kortene er brukt opp: hvem som har gjort mest, og så hva dere gjør nå. */
+  function aldriFerdig(s) {
+    var l = s.jaTavle || [], forste = l[0], maks = Math.max(1, forste ? forste.n : 0), sist = l[l.length - 1];
+    var tavle = forste && forste.n
+      ? '<div class="ja-tavle"><p class="nr-etikett">' + T('Mest erfaren', 'Most experienced') + '</p>' +
+          '<div class="ja-vinner">' + nrPille(forste.id, 'stor') + '<b>' + jaNavn(forste.id) + '</b><em>' + forste.n + '</em></div>' +
+          (l.length > 1 ? '<ul class="pk-soyler inn">' + l.slice(1).map(function (x, i) {
+            return '<li style="--i:' + i + '"><span>' + jaNavn(x.id) + '</span><i><b style="transform:scaleX(' + (x.n / maks).toFixed(3) + ');background:' + nrFarge(x.id) + '"></b></i><em>' + x.n + '</em></li>'; }).join('') + '</ul>' : '') +
+          (l.length > 2 && sist.n < forste.n ? '<p class="ja-kommentar">' + jaNavn(sist.id) + T(': «Et uskyldig liv.» Eller en god løgner.', ': “An innocent life.” Or a good liar.') + '</p>' : '') + '</div>'
+      : '<p class="nr-vent">' + T('Ingen har gjort noe av det. Et uskyldig rom – eller en gjeng gode løgnere.', 'Nobody has done any of it. An innocent room – or a bunch of good liars.') + '</p>';
+    return jaTopp(T('Jeg har aldri · ', 'Never have I ever · ') + s.antall + T(' kort', ' cards'), T('Kortene er brukt opp', 'The cards are used up'), true) + tavle +
+      lekSlutt([['aldri-igjen', T('Nye kort', 'New cards'), T('Kort dere ikke har hatt', 'Cards you haven’t had')]]);
   }
 
   function mestSpill(s) {
@@ -1730,7 +1784,12 @@ export function startRom(LEKNAVN, LANG) {
         '<p class="sd-straff">' + T('Straff: én slurk for hvert forsøk.', 'Penalty: one sip per attempt.') + '</p>' +
         '<button class="rom-stor-knapp" data-g="neste" type="button">' + T('Stokk og spill videre', 'Shuffle and play on') + '</button>';
     }
-    if (s.fase === 'ferdig') return topp(T('Ferdig', 'Done'), false) + '<p class="nr-vent">' + T('Alle kortene er brukt opp.', 'All the cards are used up.') + '</p>' + (vert ? '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny skriverunde', 'New writing round') + '</button>' : '');
+    if (s.fase === 'ferdig') return topp(T('Bunken er tom', 'The pile is empty'), true) +
+      '<div class="pk-kort sd-ferdig"><b>' + (s.trukket || 0) + '</b><p>' + T('kort trukket. Det var det.', 'cards drawn. That was it.') + '</p></div>' +
+      lekSlutt([
+        !s.egen ? ['nytt', T('Ny skriverunde', 'New writing round'), T('Alle skriver nye kort', 'Everyone writes new cards')] : null,
+        ['rf-igjen', T('Samme bunke igjen', 'Same pile again'), T('Stokk de samme kortene', 'Shuffle the same cards')],
+      ]);
     // Trekk
     var tilMeg = (s.mottakere || []).indexOf(tilstand.meg) !== -1, kn = s.pos + ':' + s.totalt + ':' + s.kortet;
     var innK = sdVist !== kn; sdVist = kn;
@@ -3468,7 +3527,7 @@ export function startRom(LEKNAVN, LANG) {
   // knappen det første 0,7 sekundet – ellers hopper et dobbelttrykk over kortet ingen rakk å lese.
   var sistInnhold = '', sperreTil = 0;
   function merkNyttInnhold(s) {
-    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur, s.aldri ? s.aldri.fase : ''].join('|') : 'ingen';
+    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur, s.aldri ? s.aldri.fase : '', s.ferdig ? 'f' : ''].join('|') : 'ingen';
     if (k !== sistInnhold) { if (sistInnhold) sperreTil = Date.now() + 700; sistInnhold = k; }
   }
 
@@ -3541,6 +3600,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'rf-kast') return gjor({ handling: 'rf-kast' });
     if (g === 'rf-kast-stem') return gjorAlltid({ handling: 'rf-kast-stem', ja: b.dataset.ja === '1' });
     if (g === 'rf-kast-avbryt') return gjor({ handling: 'rf-kast-avbryt' });
+    if (g === 'rf-igjen') return gjor({ handling: 'rf-igjen' });
     if (g === 'rf-velg') {
       if (!window.BDVelgKort) return;
       return window.BDVelgKort({ maks: 60 }).then(function (kort) {
@@ -3576,8 +3636,9 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'reager') { if (!les('bd_intro_reak')) { skriv('bd_intro_reak', 1); var hh = document.querySelector('.reak-hint'); if (hh) hh.remove(); } return gjorAlltid({ handling: 'reager', e: b.dataset.e }); }
     if (g === 'intro-lukk') { skriv(b.dataset.k, 1); return tegn(); }
     if (g === 'send-velg' || g === 'del-ut') return delUtArk();
-    if (g === 'aldri-svar') { aldriEndre = ''; gjorAlltid({ handling: 'aldri-svar', v: b.dataset.v }); return; }
-    if (g === 'aldri-endre') { aldriEndre = tilstand.spill ? tilstand.spill.pos + ':' + tilstand.spill.antall : ''; return tegn(); }
+    if (g === 'aldri-svar') { if (b.getAttribute('aria-pressed') === 'true') return; gjorAlltid({ handling: 'aldri-svar', v: b.dataset.v }); return; }
+    if (g === 'aldri-nekt') return gjor({ handling: 'aldri-nekt' });
+    if (g === 'aldri-igjen') return gjor({ handling: 'aldri-igjen', sett: (settListe()['jeg-har-aldri'] || []).slice(-1500) });
     if (g === 'aldri-modus') return gjorAlltid({ handling: 'aldri-modus', paa: b.dataset.paa === '1' });
     if (g === 'br-svar') return gjor({ handling: 'br-svar', v: b.dataset.v });
     if (g === 'br-snu') return gjor({ handling: 'br-snu', pos: Number(b.dataset.pos) });

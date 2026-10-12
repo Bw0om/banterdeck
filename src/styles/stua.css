@@ -792,3 +792,73 @@ html.i-spill .rom-kode{font-size:.92em}
 .sd-skam p{margin:0;font-size:14px;font-weight:800}
 .sd-straff{margin:0 0 12px;padding:10px 12px;font-family:var(--display);font-size:17px;font-weight:900;font-stretch:70%;text-transform:uppercase;color:var(--blekk);background:var(--gul);border:var(--strek) solid var(--blekk);border-radius:6px}
 @media (prefers-reduced-motion:reduce){.sd-bunke-kort.inn,.sd-tall b.inn,.sd-til-deg-stempel.inn,.sd-kortet.inn,.sd-skam-stempel.inn,.sd-skam li.inn{animation:none}}
+
+/* ---------- Når en lek er ferdig: hva nå? ---------- */
+.sd-ferdig{display:flex;align-items:baseline;gap:12px}
+.sd-ferdig b{font-family:var(--display);font-size:64px;font-weight:900;font-stretch:62%;line-height:.85}
+.sd-ferdig p{margin:0;font-size:18px}
+.lek-slutt{display:flex;flex-direction:column;gap:10px}
+.lek-slutt .nr-etikett{margin:4px 0 0}
+.slutt-plan{display:flex;flex-direction:column;align-items:center;gap:2px}
+.slutt-plan small{font-family:var(--sans);font-size:13px;font-weight:800;text-transform:none;opacity:.85}
+.slutt-valg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.slutt-knapp{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px;text-align:left;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.slutt-knapp:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+.slutt-knapp b{font-family:var(--display);font-size:16px;font-weight:900;font-stretch:78%;text-transform:uppercase;line-height:1.05}
+.slutt-knapp small{font-size:12px;font-weight:700;color:var(--muted)}
+.slutt-knapp.hoved{grid-column:1/-1;background:var(--gul);color:var(--blekk)}
+.slutt-knapp.hoved small{color:var(--blekk)}
+.slutt-valg > .slutt-knapp:last-child:nth-child(odd){grid-column:1/-1}
+@media (prefers-reduced-motion:reduce){.slutt-knapp{transition:none}}
+
+/* ---------- Jeg har aldri: svar i hemmelighet, så snus kortene ett om gangen ---------- */
+.rom-spill:has(.ja-topp){align-items:stretch;text-align:left;gap:0}
+.rom-spill:has(.ja-topp) .rom-stor-knapp{align-self:stretch}
+.rom-spill:has(.ja-topp) .rom-spillnavn{display:none}
+.ja-kort.liten{padding:12px 14px 14px;box-shadow:4px 4px 0 var(--hard)}
+.ja-kort.liten p{font-size:19px}
+.ja-tag{display:inline-block;margin:0 0 8px;padding:2px 8px;font-size:12px;font-weight:900;color:var(--blekk);background:var(--gul);border:2px solid var(--blekk)}
+.ja-valg{max-width:none;margin:0 0 14px}
+.ja-valg button{min-height:112px;cursor:pointer}
+.ja-valg b{font-size:30px;font-stretch:62%;line-height:.95}
+.ja-folk{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px}
+.ja-folk > span{margin-left:auto;font-size:12px;font-weight:800;color:var(--muted)}
+.ja-folk .nr-p.mangler{background:transparent;color:var(--muted);border-style:dashed;border-color:var(--muted)}
+.ja-folk .nr-p.ny{animation:jaPopp 420ms var(--fjaer) both}
+@keyframes jaPopp{from{transform:scale(.7)}to{transform:none}}
+.ja-vis{margin:4px 0 0;text-align:center}
+.ja-svarene{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 12px;perspective:700px}
+.ja-svar{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:10px 12px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:4px 4px 0 var(--hard);min-width:0}
+.ja-svar b{max-width:100%;font-size:15px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ja-svar span:not(.nr-p){font-family:var(--display);font-size:24px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:1}
+.ja-svar.har{background:var(--oransje);color:var(--blekk);border-color:var(--blekk)}
+.ja-svarene.inn .ja-svar{animation:jaSnu 560ms var(--fjaer) both;animation-delay:calc(var(--i) * 160ms)}
+@keyframes jaSnu{from{transform:rotateY(-90deg) scale(.92);opacity:0}to{transform:none;opacity:1}}
+.ja-dom{margin:0 0 12px;font-size:15px;font-weight:700;color:var(--ink)}
+.ja-dom b{font-weight:900}
+.ja-dom.inn{animation:nrInn 420ms var(--fjaer) both;animation-delay:calc(var(--n) * 160ms + 200ms)}
+.ja-mest{margin:0 0 12px;font-size:13px;font-weight:800;color:var(--muted)}
+.ja-ulv{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 16px 20px;margin:0 0 16px;text-align:center;color:#FFF8EE;background:#16120F;border:var(--strek) solid #16120F;border-radius:10px;box-shadow:8px 8px 0 var(--oransje)}
+.ja-ulv-etikett{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--gul)}
+.ja-ulv .nr-p.stor{min-width:76px;height:76px;border-radius:38px;font-size:26px;border:4px solid #FFF8EE}
+.ja-ulv-navn{font-family:var(--display);font-size:52px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9;overflow-wrap:anywhere}
+.ja-ulv-be{display:inline-block;font-size:20px;font-weight:900;padding:6px 12px;color:#16120F;background:var(--oransje);border:3px solid #FFF8EE;transform:rotate(-2deg)}
+.ja-ulv p{margin:0;font-size:14px;font-weight:700;color:#D9D2C7}
+.ja-nekt{margin-top:4px;padding:8px 14px;font:900 14px var(--sans);color:#FFF8EE;background:transparent;border:2.5px solid #FFF8EE;border-radius:4px;cursor:pointer;transition:transform 90ms ease-out}
+.ja-nekt:active{transform:translate(2px,2px)}
+.ja-ulv.inn{animation:nrInn 420ms var(--fjaer) both}
+.ja-ulv.inn .ja-ulv-be{animation:jaStempel 460ms var(--fjaer) 260ms both}
+@keyframes jaStempel{from{transform:rotate(-2deg) scale(1.6);opacity:0}to{transform:rotate(-2deg);opacity:1}}
+.ja-tavle{display:flex;flex-direction:column;gap:8px;padding:14px;margin:0 0 16px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:8px;box-shadow:6px 6px 0 var(--hard)}
+.ja-tavle .nr-etikett{margin:0}
+.ja-tavle .pk-soyler{margin:0}
+.ja-vinner{display:flex;align-items:center;gap:10px}
+.ja-vinner .nr-p.stor{min-width:44px;height:44px;border-radius:22px;font-size:15px;border-width:3px}
+.ja-vinner b{flex:1;min-width:0;font-family:var(--display);font-size:30px;font-weight:900;font-stretch:62%;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ja-vinner em{font-style:normal;font-size:26px;font-weight:900;font-variant-numeric:tabular-nums}
+.ja-kommentar{margin:0;font-size:13px;font-weight:700;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){
+  .ja-svarene.inn .ja-svar,.ja-ulv.inn,.ja-dom.inn{animation:jaToning 240ms ease both;animation-delay:0s}
+  .ja-ulv.inn .ja-ulv-be,.ja-folk .nr-p.ny{animation:none}
+}
+@keyframes jaToning{from{opacity:0}to{opacity:1}}
