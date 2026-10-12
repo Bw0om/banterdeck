@@ -239,6 +239,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var gml = tilstand;
       if (d.versjon) versjon = d.versjon;
       tilstand = d;
+      if (d && d.naa) tvAvvik = d.naa - Date.now();
       try { if (startet) hendelser(gml, d); } catch (e) {}
       tegn();
     }
@@ -306,6 +307,41 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var tvnrVist = '';
     /* ---------- Løgnhalsen: kortet, hvem som forteller, stempelet og hvem som trodde hva ---------- */
     var tvlhVist = '';
+    /* ---------- Pekeleken: kortet, nedtellingen og hvem som ble pekt mest på ---------- */
+    var tvAvvik = 0, tvPekTimer = null, tvPekSist = '';
+    var TV_VRI = { lukk: T('Lukk øynene og pek', 'Close your eyes and point'), flertall: T('Pek der flertallet peker', 'Point where the majority points'), forsvar: T('Forsvarstale', 'Defence speech'), selv: T('Pek på deg selv hvis det stemmer', 'Point at yourself if it is true'), dobbel: T('Dobbel – fingrene teller dobbelt', 'Double – fingers count double') };
+    function tvPekTrinn(pk) { var t = Date.now() + tvAvvik - (pk.start || 0); return t < 800 ? 3 : t < 1600 ? 2 : t < pk.tell ? 1 : 0; }
+    function tvPekTikk() {
+      clearInterval(tvPekTimer);
+      tvPekTimer = setInterval(function () {
+        var el = document.getElementById('tvPekTall'), sp = tilstand && tilstand.spill, pk = sp && sp.pek;
+        if (!el || !pk || pk.fase !== 'teller') { clearInterval(tvPekTimer); return; }
+        var tr = tvPekTrinn(pk), k = pk.start + ':' + tr;
+        if (k !== tvPekSist) { tvPekSist = k; el.textContent = tr || T('Pek!', 'Point!'); el.className = 'tvpk-tall' + (tr ? '' : ' pek') + (tr === 1 ? ' en' : ''); void el.offsetWidth; el.classList.add('inn'); }
+        if (Date.now() + tvAvvik - pk.start > pk.tell + 1500) clearInterval(tvPekTimer);
+      }, 60);
+    }
+    function pekScene(d, s) {
+      var pk = s.pek, tekst = String((s.kort && s.kort.t) || ''), m = tekst.match(/^(Hvem er mest sannsynlig til å|Who's most likely to|Who is most likely to)\s+/i), rest = m ? tekst.slice(m[0].length) : tekst;
+      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Pekeleken · kort ', 'Most likely to · card ') + (s.pos + 1) + '</p>' + (pk.vri ? '<span class="tvpk-vri">' + T('Vri: ', 'Twist: ') + esc(TV_VRI[pk.vri] || '') + '</span>' : '') +
+        ((s.pektTavle || []).length ? '<ol class="tvnr-stilling" aria-label="' + T('Mest utpekt i kveld', 'Most pointed at tonight') + '">' + s.pektTavle.map(function (x) { return '<li>' + nrPille(d, x.id) + '<b>' + x.n + '</b></li>'; }).join('') + '</ol>' : '') + '</div>';
+      var kort = (m ? '<p class="tvpk-pre">' + esc(m[1]) + ' …</p>' : '') + '<h1 class="tv-sporsmal">' + esc(rest) + '</h1>';
+      var bunn = '';
+      if (pk.fase === 'klar') bunn = '<p class="tv-stor">' + esc(navn(pk.leser)) + T(' leser høyt. Gjør dere klare til å peke.', ' reads it out. Get ready to point.') + '</p>'
+      if (pk.fase === 'klar' && s.pekForrige && s.pekForrige.resultat && (s.pekForrige.resultat.topp || []).length) {
+        var fr = s.pekForrige.resultat;
+        bunn += '<p class="tvpk-forrige"><b>' + T('Forrige kort: ', 'Last card: ') + '</b>' + fr.topp.map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and ')) + (fr.slapp ? T(' slapp unna', ' got away') : T(' drakk ', ' drank ') + fr.slurker) + (s.pekForrige.tekst ? ' – «' + esc(String(s.pekForrige.tekst).replace(/^(Hvem er mest sannsynlig til å|Who's most likely to)\s+/i, '')) + '»' : '') + '</p>';
+      }
+      else if (pk.fase === 'teller') {
+        var tr = tvPekTrinn(pk);
+        if (Date.now() + tvAvvik - pk.start <= pk.tell + 1500) { tvPekSist = pk.start + ':' + tr; setTimeout(tvPekTikk, 0); bunn = '<div class="tvpk-bunn"><span id="tvPekTall" class="tvpk-tall' + (tr ? '' : ' pek') + (tr === 1 ? ' en' : '') + '">' + (tr || T('Pek!', 'Point!')) + '</span></div>'; }
+        else bunn = '<p class="tv-stor">' + T('Trykk inn hvor mange som pekte på deg', 'Tap how many pointed at you') + ' · ' + (pk.harTalt || []).length + ' / ' + (d.spillere || []).length + '</p>';
+      } else if (pk.resultat) {
+        var r = pk.resultat, navnene = (r.topp || []).map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and '));
+        bunn = '<div class="tvpk-bunn"><span class="tvpk-tall pek">' + (r.topp && r.topp.length ? (pk.fase === 'forsvar' ? navnene + T(' forsvarer seg', ' defends') : r.slapp ? navnene + T(' slapp unna', ' got away') : navnene + T(' drikker ', ' drinks ') + r.slurker) : T('Ingen fingre', 'No fingers')) + '</span></div>';
+      }
+      return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + kort + bunn + '</div></div>';
+    }
     function lhScene(d, s) {
       var alle = d.spillere || [], han = navn(s.aktiv), andre = alle.filter(function (p) { return p.id !== s.aktiv; }), har = s.harStemt || [];
       var tavle = (s.lurtTavle || []).length ? '<ol class="tvnr-stilling" aria-label="' + T('Flest lurt', 'Most fooled') + '">' + s.lurtTavle.map(function (x) {
@@ -380,6 +416,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       if (s.type === 'kort' && s.lek === 'ring-of-fire') return '<div class="tv-scene tv-sentrert">' + topp + (s.turId ? '<h1 class="tv-tur">' + T('Trekker: ', 'Drawing: ') + '<b>' + esc(navn(s.turId)) + '</b></h1>' : '') + rofKort(s.kort) + makkere(s) + '</div>';
       if (s.type === 'kort' && s.aldri) return aldriScene(d, s, topp);
+      if (s.type === 'kort' && s.pek && s.pek.fase !== 'hendelse') return pekScene(d, s);
       if (s.type === 'kort') return '<div class="tv-scene tv-sentrert">' + topp + '<div class="tv-kort' + (s.kort && s.kort.h ? ' hendelse' : '') + '">' + (s.kort && s.kort.k ? '<span class="tv-etikett">' + esc(s.kort.k) + '</span>' : '') + '<p>' + esc(s.kort ? s.kort.t : '') + '</p></div><p class="tv-liten">' + (s.pos + 1) + ' / ' + s.antall + '</p></div>';
       if (s.type === 'mest') {
         if (s.fase === 'resultat' && s.resultat) {
@@ -701,7 +738,17 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvlh-kol p{margin:0 0 .5em;font-weight:900;text-transform:uppercase;font-size:1.1em}
     .tvlh-kol div{display:flex;gap:.4em;flex-wrap:wrap;font-size:1.3em}
     .tvlh-kol .sikker .tvnr-p{box-shadow:0 0 0 4px #FF5B1F}
-    @media (prefers-reduced-motion:reduce){.tvlh-stempel.inn{animation:none}}
+    .tvpk-pre{margin:0;font-size:1.3em;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:#D9D2C7}
+    .tvpk-vri{font-weight:900;padding:.2em .6em;background:#FFD23F;color:#16120F;border:3px solid #16120F;transform:rotate(-2deg)}
+    .tvpk-forrige{margin:2vh 0 0;font-size:1.15em;color:#D9D2C7;max-width:60ch}
+    .tvpk-forrige b{color:#FFD23F}
+    .tvpk-bunn{display:flex;align-items:center;margin-top:2vh}
+    .tvpk-tall{display:inline-block;font-family:var(--display);font-size:clamp(90px,12vw,220px);font-weight:900;font-stretch:62%;line-height:.9;color:#FFF8EE}
+    .tvpk-tall.en{color:#FF5B1F}
+    .tvpk-tall.pek{font-size:clamp(48px,6vw,110px);text-transform:uppercase;padding:.08em .3em .14em;color:#16120F;background:#FF5B1F;border:6px solid #FFF8EE;box-shadow:14px 14px 0 #FFD23F;transform:rotate(-3deg)}
+    .tvpk-tall.inn{animation:tvpkInn .52s cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvpkInn{from{scale:1.45;opacity:0}to{scale:1;opacity:1}}
+    @media (prefers-reduced-motion:reduce){.tvlh-stempel.inn,.tvpk-tall.inn{animation:none}}
     @media (prefers-reduced-motion:reduce){.tvnr-alt.inn .tvnr-a em{animation:none}}
     .tv-toast,.tv-banner{border:3px solid #FFF8EE!important;border-radius:6px!important;box-shadow:6px 6px 0 #FFD23F!important;background:#16120F!important}
 </style>
