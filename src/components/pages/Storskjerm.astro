@@ -279,7 +279,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
        og «Har gjort det» står i svart på oransje, så det kan leses fra sofaen. */
     var tvjaVist = '';
     function tvjaSpiller(d, id) { return (d.spillere || []).find(function (p) { return p.id === id; }) || { id: id, navn: '?' }; }
-    function tvjaFigur(d, id) { return window.mvFigurSvg ? window.mvFigurSvg(tvjaSpiller(d, id)) : nrPille(d, id); }
+    function tvjaFigur(d, id, uttrykk) { return window.mvHodeSvg ? window.mvHodeSvg(tvjaSpiller(d, id), uttrykk) : nrPille(d, id); }
     function aldriScene(d, s, topp) {
       var a = s.aldri, alle = d.spillere || [], svart = a.harSvart || [], tekst = String((s.kort && s.kort.t) || ''), m = tekst.match(/^(Jeg har aldri|Never have I ever)\s+/i), rest = m ? tekst.slice(m[0].length) : tekst;
       var avsl = a.fase === 'avslort';
@@ -289,15 +289,12 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         var vk = s.pos + ':' + s.antall, inn = vk !== tvjaVist; tvjaVist = vk;
         var har = a.har || [], n = alle.length;
         if (a.ulv) return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + kort +
-          '<div class="tvja-ulv' + (inn ? ' inn' : '') + '">' + tvjaFigur(d, a.ulv) + '<div><span>' + T('Bare én har gjort det', 'Only one has done it') + '</span><b>' + esc(navn(a.ulv)) + '</b><em>' + T('Fortell historien!', 'Tell the story!') + '</em>' +
+          '<div class="tvja-ulv' + (inn ? ' inn' : '') + '"><div><span>' + T('Bare én har gjort det', 'Only one has done it') + '</span><b>' + esc(navn(a.ulv)) + '</b><em>' + T('Fortell historien!', 'Tell the story!') + '</em>' +
           '<p>' + (a.nektet ? T('Nektet. Fire slurker.', 'Refused. Four sips.') : T('Drikker to. Nekter hen å fortelle, blir det fire.', 'Drinks two. Refuse to tell and it’s four.')) + '</p></div></div></div></div>';
         var dom = !har.length ? T('Ingen har gjort det. Et uskyldig rom.', 'Nobody has. What an innocent room.') + (a.kjedelig ? ' ' + esc(navn(a.kjedelig)) + T(' drikker én for et kjedelig kort.', ' drinks one for a boring card.') : '')
           : har.length === n && n > 1 ? T('Alle har gjort det. Skål – dere er like ille alle sammen.', 'Everyone has. Cheers – you’re all as bad as each other.')
           : har.length + T(' av ', ' of ') + n + T(' har gjort det – de drikker én.', ' have done it – they drink one.');
         return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + kort +
-          '<div class="tvja-svarene' + (n > 4 ? ' mange' : '') + (inn ? ' inn' : '') + '">' + alle.map(function (p, i) {
-            var h = har.indexOf(p.id) !== -1;
-            return '<div class="tvja-svar' + (h ? ' har' : '') + '" style="--i:' + i + '">' + tvjaFigur(d, p.id) + '<b>' + esc(p.navn) + '</b><span>' + (h ? T('Har gjort det', 'Has done it') : T('Aldri', 'Never')) + '</span></div>'; }).join('') + '</div>' +
           '<p class="tvja-dom' + (inn ? ' inn' : '') + '" style="--n:' + n + '">' + dom + '</p>' +
           (a.mest ? '<p class="tvja-mest">' + esc(navn(a.mest.id)) + T(' har gjort det ', ' has done it ') + a.mest.n + T(' ganger i kveld. Mest av alle.', ' times tonight. More than anyone.') + '</p>' : '') + '</div></div>';
       }
@@ -306,8 +303,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var lunte = igjen ? '<div class="tvja-lunte"><i style="--fra:' + Math.min(1, igjen / 30).toFixed(3) + ';animation-duration:' + igjen.toFixed(1) + 's"></i></div>' : '';
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + kort + lunte +
         '<p class="tv-stor">' + T('Svar på telefonen. Ingen ser svaret før alle har svart.', 'Answer on your phone. Nobody sees the answers until everyone has answered.') + '</p>' +
-        '<div class="tvnr-folk">' + alle.map(function (p) { return '<span class="' + (svart.indexOf(p.id) !== -1 ? 'har' : 'mangler') + '">' + nrPille(d, p.id) + '</span>'; }).join('') +
-        '<span class="tvnr-teller">' + svart.length + ' / ' + alle.length + T(' har svart', ' answered') + '</span></div></div></div>';
+        '<p class="tvnr-teller">' + svart.length + ' / ' + alle.length + T(' har svart', ' answered') + '</p></div></div>';
     }
     /* De andre kortlekene når bunken er tom (Pekeleken viser hvem som ble pekt mest på i kveld) */
     /* Ring of Fire når ringen er tom: siste kort ved siden av, og hvordan det gikk med ringen */
@@ -358,9 +354,49 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       };
       se(); tvEeTimer = setInterval(se, 1400);
     }
+    /** Benken på TV-en: samme hoder som på telefonen. o som hodeBenk på telefonen. */
+    function tvBenk(d, alle, o) {
+      o = o || {}; var r = o.sider || null, n = alle.length, oi = o.oi || [];
+      if (!n) return '';
+      var plass = tvEePlasser(alle, r), w = n <= 6 ? 7.5 : n <= 10 ? 6 : 4.8;
+      var stil = '--w:' + w + 'vw' + (r && r.fa ? ';--fa:' + r.fa : '') + (r && r.fb ? ';--fb:' + r.fb : '');
+      setTimeout(tvBenkTikk, 0);
+      return '<div class="tvee-benk' + (r ? ' delt' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
+        (r ? '<i class="tvee-midt"></i>' + (r.la ? '<span class="tvee-sidenavn a">' + esc(r.la) + '</span><span class="tvee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') +
+        alle.map(function (p, i) {
+          var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1, erOi = oi.indexOf(p.id) !== -1, uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
+          return '<div class="tvee-hode' + (erOi ? ' alene' : '') + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="tvee-hev' + (oppe ? ' oppe' : '') + '"><span class="tvee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.navn) + '</span>' + (window.mvHodeSvg ? window.mvHodeSvg(p, uttrykk) : '') + '</div></div>'; }).join('') + '</div>';
+    }
+    var tvBenkTimer = null;
+    function tvBenkTikk() {
+      clearInterval(tvBenkTimer);
+      var se = function () {
+        var benk = document.querySelector('.tvee-benk');
+        if (!benk) { clearInterval(tvBenkTimer); return; }
+        var hoder = Array.prototype.slice.call(benk.querySelectorAll('.tvee-hode')), stirr = benk.dataset.stirr;
+        var x = function (h) { return parseFloat(h.style.getPropertyValue('--x')) || 0; };
+        var mal = stirr ? hoder.find(function (o) { return o.dataset.id === stirr; }) : null;
+        hoder.forEach(function (h, i) {
+          var pup = h.querySelector('.mv-pup'); if (!pup) return;
+          var dx = 0, dy = -0.5;
+          if (h.classList.contains('alene')) dy = 2.4;
+          else if (mal) { dx = Math.max(-3.2, Math.min(3.2, (x(mal) - x(h)) * 8)); dy = 0.4; }
+          else if (Math.random() > 0.18 && hoder.length > 1) {
+            var j = i + (Math.random() < 0.5 ? -1 : 1); if (j < 0 || j >= hoder.length || Math.random() < 0.3) j = Math.floor(Math.random() * hoder.length);
+            if (j !== i) { dx = Math.max(-3, Math.min(3, (x(hoder[j]) - x(h)) * 8)); dy = 0.6; }
+          }
+          pup.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)';
+        });
+      };
+      se(); tvBenkTimer = setInterval(se, 1400);
+    }
+    /** Legg benken nederst i en scene (scenen må være '<div class="tv-scene …">…</div>'). */
+    function tvMedBenk(html, benk) {
+      if (!benk) return html;
+      return html.replace('class="tv-scene tvnr"', 'class="tv-scene tvnr med-benk' + (benk.indexOf('tvee-benk delt') !== -1 ? ' delt-benk' : '') + '"').replace(/<\/div>$/, benk + '</div>');
+    }
     function eeScene(d, s) {
       var e = s.ee, alle = d.spillere || [], r = e.resultat, svart = e.harSvart || [], vk = s.pos + ':' + s.antall + ':' + e.fase, inn = vk !== tvEeVist; tvEeVist = vk;
-      setTimeout(tvEeTikk, 0);
       var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Enten eller · kort ', 'Would you rather · card ') + (s.pos + 1) + T(' av ', ' of ') + s.antall + '</p>' +
         (e.fase !== 'svar' ? '<span class="tvja-snudd">' + (e.fase === 'forsvar' ? T('Én alene!', 'One alone!') : T('Snudd!', 'Flipped!')) + '</span>' : '') + '</div>';
       var side = function (k, tittel, tekst, ider) {
@@ -385,10 +421,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
           : T('Ingen valgte.', 'Nobody picked.');
         bunn = '<p class="tvja-dom' + (inn ? ' inn' : '') + '" style="--n:0">' + dom + '</p>';
       }
-      var plass = tvEePlasser(alle, r), n = alle.length, w = n <= 6 ? 7.5 : n <= 10 ? 6 : 4.8;
-      var benk = '<div class="tvee-benk' + (r ? ' delt' : '') + '" style="--w:' + w + 'vw">' + (r ? '<i class="tvee-midt"></i>' : '') + alle.map(function (p, i) {
-        var oppe = r || svart.indexOf(p.id) !== -1, alene = r && r.alene === p.id, uttrykk = alene ? 'oi' : r && r.alene ? 'flat' : 'vanlig';
-        return '<div class="tvee-hode' + (alene ? ' alene' : '') + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="tvee-hev' + (oppe ? ' oppe' : '') + '"><span class="tvee-navn' + (oppe ? ' har' : '') + '">' + esc(p.navn) + '</span>' + (window.mvHodeSvg ? window.mvHodeSvg(p, uttrykk) : '') + '</div></div>'; }).join('') + '</div>';
+      var benk = tvBenk(d, alle, r ? { oppe: true, sider: { a: r.a, b: r.b }, oi: r.alene ? [r.alene] : [], stirr: r.alene, flat: true } : { oppe: svart });
       return '<div class="tv-scene tvnr tvee' + (e.fase === 'forsvar' ? ' kompakt' : '') + '"><div class="tvnr-hoved">' + hode + sider + bunn + '</div>' + benk + '</div>';
     }
     function aldriFerdigScene(d, s) {
@@ -431,7 +464,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         '<ul class="tvsd-skam">' + (rf.skam || []).map(function (k) { return '<li>' + nrPille(d, k.fra) + '<div><b>' + esc(navn(k.fra)) + T(' skrev ', ' wrote ') + '<s>«' + esc(k.t) + '»</s></b><span>' + esc(k.kommentar) + '</span></div></li>'; }).join('') + '</ul></div></div>';
       if (rf.fase !== 'trekk') return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<h1 class="tv-sporsmal">' + T('Bunken er tom', 'The pile is empty') + '</h1><p class="tv-stor">' + (rf.trukket || 0) + T(' kort trukket. ', ' cards drawn. ') + esc(navn(d.vert)) + T(' velger hva dere gjør nå.', ' is choosing what to do next.') + '</p></div></div>';
       var mott = rf.mottakere || [];
-      var til = mott.length ? '<div class="tvsd-til">' + mott.map(function (id) { return window.mvFigurSvg ? window.mvFigurSvg(spiller(id)) : ''; }).join('') +
+      var til = mott.length ? '<div class="tvsd-til">' + mott.map(function (id) { return window.mvHodeSvg ? window.mvHodeSvg(spiller(id)) : ''; }).join('') +
           '<div><span>' + T('Kortet er til', 'This card is for') + '</span><b>' + mott.map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and ')) + '</b></div></div>'
         : '<p class="tvsd-alle">' + (rf.til === 'trekker' ? T('Til den som trekker', 'For whoever draws') : T('Til alle', 'For everyone')) + '</p>';
       var kast = rf.kast ? '<p class="tvsd-kast">' + T('Kaste kortet i Skammekroken? ', 'Bin the card? ') + rf.kast.ja + ' / ' + rf.kast.stemmere + T(' har sagt ja', ' said yes') + '</p>' : '';
@@ -486,11 +519,10 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         };
         return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + hvem + kort +
           '<div class="tvlh-bunn"><em class="tvlh-stempel ' + (lyv ? 'logn' : 'sant') + (inn ? ' inn' : '') + '">' + (lyv ? T('Løgn!', 'Lie!') : T('Sant!', 'True!')) + '</em>' +
-          '<div class="tvlh-kolonner">' + kol('sannhet', T('Trodde sant', 'Believed it')) + kol('lyv', T('Trodde løgn', 'Called the lie')) + '</div></div></div></div>';
+          '</div></div></div>';
       }
       var bunn = s.fase === 'stem'
-        ? '<p class="tv-stor">' + T('Sant eller løgn? Stem på telefonen', 'True or lie? Vote on your phone') + '</p><div class="tvnr-folk">' + andre.map(function (p) { return '<span class="' + (har.indexOf(p.id) !== -1 ? 'har' : 'mangler') + '">' + nrPille(d, p.id) + '</span>'; }).join('') +
-          '<span class="tvnr-teller">' + har.length + ' / ' + andre.length + T(' har stemt', ' voted') + '</span></div>'
+        ? '<p class="tv-stor">' + T('Sant eller løgn? Stem på telefonen', 'True or lie? Vote on your phone') + '</p>'
         : '<p class="tv-stor">' + T('Hør godt etter – og grill ', 'Listen closely – then grill ') + esc(han) + T(' etterpå.', ' afterwards.') + '</p>';
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + hvem + kort + bunn + '</div></div>';
     }
@@ -520,7 +552,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
             (k === 2 ? T('Nærmest', 'Closest') : k === 1 ? (n.qtype === 'tall' ? T('Innen 10 %', 'Within 10%') : T('Riktig', 'Right')) : k === 0 ? '' : T('Drikk', 'Drink')) + '</b></li>'; }).join('') + '</ul>';
       }
       var svart = aapen ? (n.info ? '<p class="tvnr-info">' + esc(n.info) + (n.kilde ? ' · ' + esc(n.kilde) : '') + '</p>' : '')
-        : '<div class="tvnr-folk">' + alle.map(function (p) { return '<span class="' + (har.indexOf(p.id) !== -1 ? 'har' : 'mangler') + '">' + nrPille(d, p.id) + '</span>'; }).join('') + '<span class="tvnr-teller">' + har.length + ' / ' + alle.length + T(' har svart', ' answered') + '</span></div>';
+        : '<p class="tvnr-teller">' + har.length + ' / ' + alle.length + T(' har svart', ' answered') + '</p>';
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + topp + '<h1 class="tv-sporsmal">' + esc(n.q || '') + '</h1>' + midt + svart + '</div></div>';
     }
     function scene(d) {
@@ -536,7 +568,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
           '<div class="tv-chips">' + (d.spillere || []).map(function (p) { return '<span>' + (p.id === d.vert ? '👑 ' : '') + esc(p.navn) + '</span>'; }).join('') + '</div></div></div><div class="tv-stua-plass" id="tvStuaPlass"></div></div>';
       }
       var topp = '<p class="tv-etikett">' + esc(s.navn) + '</p>';
-      if (s.type === 'nyhetsrunden' && s.nr) return nrScene(d, s.nr);
+      if (s.type === 'nyhetsrunden' && s.nr) return tvMedBenk(nrScene(d, s.nr), s.nr.fase === 'spm' ? tvBenk(d, d.spillere || [], { oppe: s.nr.harSvart || [] }) : '');
       if (s.type === 'kort' && s.ferdig && s.lek === 'ring-of-fire') return rofSluttScene(d, s);
       if (s.type === 'kort' && s.ring) {
         return '<div class="tv-scene tv-rof">' + '<div>' + topp + '<h1 class="tv-tur">' + T('Trekker: ', 'Drawing: ') + '<b>' + esc(navn(s.turId)) + '</b></h1>' + ring(s) +
@@ -546,9 +578,20 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       if (s.type === 'kort' && s.lek === 'ring-of-fire') return '<div class="tv-scene tv-sentrert">' + topp + (s.turId ? '<h1 class="tv-tur">' + T('Trekker: ', 'Drawing: ') + '<b>' + esc(navn(s.turId)) + '</b></h1>' : '') + rofKort(s.kort) + makkere(s) + '</div>';
       if (s.type === 'kort' && s.ferdig && !s.ring) return s.lek === 'jeg-har-aldri' ? aldriFerdigScene(d, s) : kortFerdigScene(d, s);
-      if (s.type === 'kort' && s.aldri) return aldriScene(d, s, topp);
+      if (s.type === 'kort' && s.aldri) {
+        var ja = s.aldri, jaAlle = d.spillere || [], jaHar = ja.har || [];
+        return tvMedBenk(aldriScene(d, s, topp), ja.fase === 'avslort'
+          ? tvBenk(d, jaAlle, { oppe: true, sider: { a: jaHar, b: jaAlle.filter(function (p) { return jaHar.indexOf(p.id) === -1; }).map(function (p) { return p.id; }), la: T('Har gjort det', 'Has done it'), lb: T('Aldri', 'Never'), fa: '#FF5B1F', fb: '#FFF8EE' },
+              oi: ja.ulv ? [ja.ulv] : ja.kjedelig ? [ja.kjedelig] : [], stirr: ja.ulv || ja.kjedelig || '', flat: true })
+          : tvBenk(d, jaAlle, { oppe: ja.harSvart || [] }));
+      }
       if (s.type === 'kort' && s.ee) return eeScene(d, s);
-      if (s.type === 'kort' && s.pek && s.pek.fase !== 'hendelse') return pekScene(d, s);
+      if (s.type === 'kort' && s.pek && s.pek.fase !== 'hendelse') {
+        var pk = s.pek, pkAlle = d.spillere || [], pkBenk = '';
+        if (pk.fase === 'teller' && Date.now() + tvAvvik - pk.start > pk.tell + 1500) pkBenk = tvBenk(d, pkAlle, { oppe: pk.harTalt || [] });
+        else if ((pk.fase === 'ferdig' || pk.fase === 'forsvar') && pk.resultat) { var pkTopp = pk.resultat.slapp && pk.fase === 'ferdig' ? [] : pk.resultat.topp || []; pkBenk = tvBenk(d, pkAlle, { oppe: true, oi: pkTopp, stirr: pkTopp.length === 1 ? pkTopp[0] : '', flat: true }); }
+        return tvMedBenk(pekScene(d, s), pkBenk);
+      }
       if (s.type === 'kort') return '<div class="tv-scene tv-sentrert">' + topp + '<div class="tv-kort' + (s.kort && s.kort.h ? ' hendelse' : '') + '">' + (s.kort && s.kort.k ? '<span class="tv-etikett">' + esc(s.kort.k) + '</span>' : '') + '<p>' + esc(s.kort ? s.kort.t : '') + '</p></div><p class="tv-liten">' + (s.pos + 1) + ' / ' + s.antall + '</p></div>';
       if (s.type === 'mest') {
         if (s.fase === 'resultat' && s.resultat) {
@@ -558,7 +601,16 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         }
         return '<div class="tv-scene tv-sentrert">' + topp + '<h1 class="tv-sporsmal">' + esc(s.tekst) + '</h1><p class="tv-stor">' + T('Stem på telefonen', 'Vote on your phone') + ' · ' + (s.stemt || 0) + ' / ' + (d.spillere || []).length + '</p></div>';
       }
-      if (s.type === 'forraeder') return lhScene(d, s);
+      if (s.type === 'forraeder') {
+        var lhAndre = (d.spillere || []).filter(function (p) { return p.id !== s.aktiv; }), lhB = '';
+        if (s.fase === 'stem') lhB = tvBenk(d, lhAndre, { oppe: s.harStemt || [] });
+        else if (s.fase === 'avslort' && s.resultat) {
+          var lr = s.resultat, lst = lr.stemmer || {}, lsk = lr.sikker || {};
+          var lSant = lhAndre.filter(function (p) { return lst[p.id] === 'sannhet'; }).map(function (p) { return p.id; }), lLogn = lhAndre.filter(function (p) { return lst[p.id] === 'lyv'; }).map(function (p) { return p.id; });
+          lhB = tvBenk(d, lhAndre, { oppe: true, sider: { a: lSant, b: lLogn, la: T('Trodde sant', 'Believed it'), lb: T('Trodde løgn', 'Called the lie'), fa: '#63E2A8', fb: '#FF9CC2' }, oi: lr.svar === 'lyv' ? lSant : lLogn, merk: lhAndre.filter(function (p) { return lsk[p.id]; }).map(function (p) { return p.id; }) });
+        }
+        return tvMedBenk(lhScene(d, s), lhB);
+      }
       if (s.type === 'regelfabrikken' && s.rf) return rfScene(d, s.rf);
       if (s.offentlig && (s.offentlig.tekst || (s.offentlig.valg && s.offentlig.valg.length))) {
         var o = s.offentlig, ant = (d.spillere || []).length;
@@ -922,7 +974,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     @keyframes tvjaInn{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
     .tvja-mest{margin:1vh 0 0;font-size:1.15em;font-weight:800;color:#D9D2C7}
     .tvja-ulv{display:flex;align-items:flex-end;gap:2.4vw;margin-top:2vh}
-    .tvja-ulv .tvsd-figur{width:9vw;min-width:100px}
+    .tvja-ulv .tvsd-figur,.tvja-ulv .mv-hode{width:9vw;min-width:100px}
+    .tvsd-til .mv-hode{width:7vw;min-width:80px}
     .tvja-ulv div{display:flex;flex-direction:column;align-items:flex-start;gap:.5em;padding-bottom:.6em}
     .tvja-ulv span{font-size:1.3em;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#FFD23F}
     .tvja-ulv b{font-family:var(--display);font-size:clamp(60px,7vw,130px);font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.85;padding:.04em .2em .1em;color:#16120F;background:#FFD23F;border:5px solid #16120F;box-shadow:12px 12px 0 #FF5B1F;transform:rotate(-2deg)}
@@ -935,8 +988,17 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvja-rest{margin:2vh 0 0}
     @media (prefers-reduced-motion:reduce){.tvlh-stempel.inn,.tvpk-tall.inn,.tvja-ulv.inn em{animation:none}.tvja-svarene.inn .tvja-svar,.tvja-dom.inn,.tvja-ulv.inn{animation:tvjaToning .3s ease both;animation-delay:0s}}
     @keyframes tvjaToning{from{opacity:0}to{opacity:1}}
-    .tvee{position:relative;flex-direction:column}
-    .tvee .tvnr-hoved{padding-bottom:13vw}
+    .tvee,.med-benk{position:relative;flex-direction:column}
+    .tvee .tvnr-hoved,.med-benk .tvnr-hoved{padding-bottom:13vw}
+    .tvee-benk.delt{background:linear-gradient(90deg,color-mix(in srgb,var(--fa,#FF5B1F) 28%,#2A292E) 50%,color-mix(in srgb,var(--fb,#63E2A8) 28%,#2A292E) 50%)}
+    .tvee-sidenavn{position:absolute;top:1vh;z-index:1;padding:.15em .6em;font-size:.95em;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#16120F;border:3px solid #16120F;border-radius:6px}
+    .tvee-sidenavn.a{left:1.5vw;background:var(--fa,#FF5B1F)}
+    .tvee-sidenavn.b{right:1.5vw;background:var(--fb,#63E2A8)}
+    .tvee-navn.sikker{box-shadow:0 0 0 4px #FF5B1F}
+    .med-benk .tvlh-bunn{margin-top:1vh}
+    .med-benk .tvee-benk.delt{height:15vw}
+    .med-benk.delt-benk .tvnr-hoved{padding-bottom:15.5vw}
+    .med-benk.delt-benk .tvja-ulv b{font-size:clamp(40px,4.4vw,80px)}
     .tvee-sider{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2.6vw;margin-top:1vh}
     .tvee-side{display:flex;flex-direction:column;gap:1.2vh;padding:2.2vh 2vw;color:#16120F;border:5px solid #16120F;border-radius:12px;box-shadow:10px 10px 0 #FFD23F}
     .tvee-side.a{background:#FF5B1F}.tvee-side.b{background:#63E2A8}
@@ -956,7 +1018,6 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvee.kompakt .tvee-side b{font-size:clamp(20px,2vw,36px)}
     .tvee.kompakt .tvee-folk{font-size:1.05em}
     .tvee-benk{position:absolute;left:0;right:0;bottom:0;height:12vw;border-top:4px solid #FFF8EE;background:#2A292E;overflow:hidden}
-    .tvee-benk.delt{background:linear-gradient(90deg,rgb(255 91 31 / .28) 50%,rgb(99 226 168 / .28) 50%)}
     .tvee-midt{position:absolute;left:50%;top:0;bottom:0;border-left:3px dashed #FFF8EE;opacity:.5}
     .tvee-hode{position:absolute;left:calc(2vw + (100% - 4vw - var(--w)) * var(--x));bottom:-3.6vw;width:var(--w);transition:left 560ms cubic-bezier(.23,1,.32,1)}
     .tvee-hev{display:flex;flex-direction:column;align-items:center;gap:.3em;transform:translateY(2.8vw);transition:transform 680ms cubic-bezier(.23,1,.32,1)}

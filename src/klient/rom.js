@@ -1326,7 +1326,6 @@ export function startRom(LEKNAVN, LANG) {
         '<p class="pk-sporsmal">' + (pk.vri === 'dobbel' ? T('Hvor mange pekte på deg? (Teller dobbelt)', 'How many pointed at you? (Counts double)') : T('Hvor mange pekte på deg?', 'How many pointed at you?')) + '</p>' +
         '<div class="pk-fingre" style="--n:' + (maks + 1) + '">' + knapper.join('') + '</div>' +
         (pk.vri === 'selv' ? '<button type="button" class="pk-selv" data-g="pek-selv"' + (pk.selv.indexOf(tilstand.meg) !== -1 ? ' disabled' : '') + '>' + (pk.selv.indexOf(tilstand.meg) !== -1 ? T('Ærlig – du deler ut én', 'Honest – you hand out one') : T('Jeg pekte på meg selv – del ut én', 'I pointed at myself – hand out one')) + '</button>' : '') +
-        '<div class="nr-folk">' + alle.map(function (p) { return nrPille(p.id, har.indexOf(p.id) !== -1 ? 'har' : ''); }).join('') + '<span>' + har.length + T(' av ', ' of ') + alle.length + T(' har talt', ' counted') + '</span></div>' +
         (kan && mangler > 0 ? '<button class="btn ghost small pk-videre" data-g="pek-tell-ferdig" type="button">' + T('Gå videre uten de siste', 'Move on without the rest') + '</button>' : '');
     }
     var r = pk.resultat || {}, inn = pkVist !== s.pos + ':' + pk.fase; pkVist = s.pos + ':' + pk.fase;
@@ -1359,7 +1358,7 @@ export function startRom(LEKNAVN, LANG) {
     if (s.ring) return rofSpill(s);
     if (s.ferdig) return s.lek === 'jeg-har-aldri' ? aldriFerdig(s) : s.lek === 'ring-of-fire' ? rofSlutt(s) : kortFerdig(s);
     if (s.ee) return eeSpill(s);
-    if (s.pek && s.pek.fase !== 'hendelse') return pekSpill(s);
+    if (s.pek && s.pek.fase !== 'hendelse') return pekSpill(s) + pekBenk(s);
     if (s.aldri) return aldriSpill(s) + aldriBryter(s);
     var k = s.kort || {};
     if (k.id) merkSett(s.lek, k.id);
@@ -1397,10 +1396,17 @@ export function startRom(LEKNAVN, LANG) {
     return '<div class="pk-kort ja-kort' + (liten ? ' liten' : '') + '">' + (k.k ? '<span class="ja-tag">' + esc(k.k) + '</span>' : '') +
       '<span class="pk-pre">' + (m ? esc(m[1]) : T('Jeg har aldri', 'Never have I ever')) + ' …</span><p>' + esc(rest) + '</p></div>';
   }
+  /** Et stort hode i stedet for initialer (søkelys og vinnere). */
+  function hodeMerke(id, uttrykk) { var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }) || { id: id }; return '<span class="hode-merke">' + eeHode(p, uttrykk) + '</span>'; }
   function jaNavn(id) { return id === tilstand.meg ? T('Du', 'You') : esc(navn(id)); }
   /* ---------- Jeg har aldri: svar i hemmelighet, så snus ett kort per person ----------
      Bevegelse bare når noe skjer: et nytt svar spretter inn i raden, kortene snus ett om gangen når alle har svart,
      og den ensomme ulven får søkelyset. Klassen «inn» settes bare første gang, ellers ville hver tegning spilt det på nytt. */
+  /** Benken etter avsløringen i Jeg har aldri: «Har gjort det» til venstre, «Aldri» til høyre. fokus får «OI»-fjeset og alles blikk. */
+  function jaBenk(alle, har, fokus) {
+    return hodeBenk(alle, { oppe: true, sider: { a: har, b: alle.filter(function (p) { return har.indexOf(p.id) === -1; }).map(function (p) { return p.id; }), la: T('Har gjort det', 'Has done it'), lb: T('Aldri', 'Never'), fa: 'var(--oransje)', fb: 'var(--card)' },
+      oi: fokus ? [fokus] : [], stirr: fokus || '', flat: true });
+  }
   function aldriSpill(s) {
     var t = tilstand, a = s.aldri, k = s.kort || {}, alle = t.spillere || [], nokkel = s.pos + ':' + s.antall;
     if (k.id) merkSett(s.lek, k.id);
@@ -1411,25 +1417,22 @@ export function startRom(LEKNAVN, LANG) {
       if (a.ulv) {
         var jeg = a.ulv === t.meg, kan = jeg || erVert();
         return jaTopp(jaNr(s), T('Snudd!', 'Flipped!'), true) + jaKort(s, true) +
-          '<div class="ja-ulv' + (inn ? ' inn' : '') + '"><span class="ja-ulv-etikett">' + T('Bare én har gjort det', 'Only one has done it') + '</span>' + nrPille(a.ulv, 'stor') +
+          '<div class="ja-ulv' + (inn ? ' inn' : '') + '"><span class="ja-ulv-etikett">' + T('Bare én har gjort det', 'Only one has done it') + '</span>' + hodeMerke(a.ulv, 'oi') +
             '<b class="ja-ulv-navn">' + jaNavn(a.ulv) + '</b><span class="ja-ulv-be">' + T('Fortell historien!', 'Tell the story!') + '</span>' +
             '<p>' + (a.nektet ? (jeg ? T('Du nektet. Fire ', 'You refused. Four ') : esc(navn(a.ulv)) + T(' nektet. Fire ', ' refused. Four ')) + slurkOrd(4) + '.'
               : (jeg ? T('Du drikker to. Nekter du å fortelle, blir det fire.', 'You drink two. Refuse to tell and it’s four.') : esc(navn(a.ulv)) + T(' drikker to. Nekter hen å fortelle, blir det fire.', ' drinks two. Refuse to tell and it’s four.'))) + '</p>' +
             (kan && !a.nektet ? '<button type="button" class="ja-nekt" data-g="aldri-nekt">' + (jeg ? T('Jeg nekter (+2)', 'I refuse (+2)') : T('Nekter å fortelle (+2)', 'Refuses to tell (+2)')) + '</button>' : '') + '</div>' +
-          videre;
+          videre + jaBenk(alle, har, a.ulv);
       }
-      var kortene = '<div class="ja-svarene' + (inn ? ' inn' : '') + '">' + alle.map(function (p, i) {
-        var h = har.indexOf(p.id) !== -1;
-        return '<div class="ja-svar' + (h ? ' har' : '') + (p.id === t.meg ? ' meg' : '') + '" style="--i:' + i + '">' + nrPille(p.id) + '<b>' + jaNavn(p.id) + '</b><span>' + (h ? T('Har', 'Have') : T('Aldri', 'Never')) + '</span></div>'; }).join('') + '</div>';
       var dom;
       if (!har.length) dom = '<b>' + T('Ingen har gjort det.', 'Nobody has.') + '</b> ' + T('Et uskyldig rom.', 'What an innocent room.') +
         (a.kjedelig ? ' ' + (a.kjedelig === t.meg ? T('Du trakk kortet og drikker én for å ha valgt et kjedelig kort.', 'You drew it, so you drink one for picking a boring card.') : esc(navn(a.kjedelig)) + T(' trakk kortet og drikker én for å ha valgt et kjedelig kort.', ' drew it and drinks one for picking a boring card.')) : '');
       else if (har.length === n && n > 1) dom = '<b>' + T('Alle har gjort det.', 'Everyone has.') + '</b> ' + T('Skål – dere er like ille alle sammen.', 'Cheers – you’re all as bad as each other.');
       else dom = '<b>' + har.length + T(' av ', ' of ') + n + T(' har gjort det', ' have done it') + '</b> – ' + (har.indexOf(t.meg) !== -1 ? T('dere drikker én.', 'you drink one.') : T('de drikker én.', 'they drink one.'));
-      return jaTopp(jaNr(s), T('Snudd!', 'Flipped!'), true) + jaKort(s, true) + kortene +
-        '<p class="ja-dom' + (inn ? ' inn' : '') + '" style="--n:' + n + '">' + dom + '</p>' +
+      return jaTopp(jaNr(s), T('Snudd!', 'Flipped!'), true) + jaKort(s, true) +
+        '<p class="ja-dom' + (inn ? ' inn' : '') + '" style="--n:0">' + dom + '</p>' +
         (a.mest ? '<p class="ja-mest">' + esc(navn(a.mest.id)) + T(' har gjort det ', ' has done it ') + a.mest.n + T(' ganger i kveld. Mest av alle.', ' times tonight. More than anyone.') + '</p>' : '') +
-        videre;
+        videre + jaBenk(alle, har, a.kjedelig);
     }
     // Svarrunden: hvem som har svart (ikke hva). Et nytt svar spretter inn i raden.
     if (aldriSvartFor.nokkel !== nokkel) aldriSvartFor = { nokkel: nokkel, svart: null };
@@ -1445,9 +1448,9 @@ export function startRom(LEKNAVN, LANG) {
     return jaTopp(jaNr(s), T('Svar i hemmelighet', 'Answer in secret'), false, true) + jaKort(s) +
       '<div class="aldri-valg ja-valg"><button type="button" class="aldri-har" data-g="aldri-svar" data-v="har" aria-pressed="' + (a.mitt === 'har') + '"><b>' + T('Jeg har', 'I have') + '</b><small>' + T('og drikker', 'and drink') + '</small></button>' +
         '<button type="button" class="aldri-aldri" data-g="aldri-svar" data-v="aldri" aria-pressed="' + (a.mitt === 'aldri') + '"><b>' + T('Aldri', 'Never') + '</b><small>' + T('går fri', 'off the hook') + '</small></button></div>' +
-      '<div class="ja-folk">' + folk + '<span>' + svart.length + T(' av ', ' of ') + alle.length + T(' har svart', ' answered') + '</span></div>' +
       (hint ? '<p class="nr-vent">' + hint + '</p>' : '') +
-      (erVert() && svart.length ? '<p class="ja-vis"><button type="button" class="linkbtn" data-g="avslor">' + T('Vis svarene nå', 'Show the answers now') + '</button></p>' : '');
+      (erVert() && svart.length ? '<p class="ja-vis"><button type="button" class="linkbtn" data-g="avslor">' + T('Vis svarene nå', 'Show the answers now') + '</button></p>' : '') +
+      hodeBenk(alle, { oppe: svart, status: svart.length + T(' av ', ' of ') + alle.length + T(' har svart', ' answered') });
   }
   /** Ring of Fire når kortene er brukt opp: hvordan det gikk med ringen, og så ny ring eller noe annet. */
   function rofSlutt(s) {
@@ -1473,26 +1476,43 @@ export function startRom(LEKNAVN, LANG) {
     side(a, 0, 38); side(b, 62, 100); side(rest, 46, 54);
     return ut;
   }
-  function eeBenk(s, e, alle, r) {
-    var n = alle.length, w = r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = eePlasser(alle, r), svart = e.harSvart || [];
-    return '<div class="ee-benk' + (r ? ' delt' : '') + '" style="--w:' + w + 'px">' + (r ? '<i class="ee-midt"></i>' : '') + alle.map(function (p, i) {
-      var oppe = r || svart.indexOf(p.id) !== -1, alene = r && r.alene === p.id;
-      var uttrykk = alene ? 'oi' : r && r.alene ? 'flat' : 'vanlig';
-      return '<div class="ee-hode' + (alene ? ' alene' : '') + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' +
-        '<span class="ee-navn' + (oppe ? ' har' : '') + '">' + esc(p.id === tilstand.meg ? T('Du', 'You') : p.navn) + '</span>' + eeHode(p, uttrykk) + '</div></div>'; }).join('') + '</div>';
+  /* ---------- Benken: de søte hodene nederst, brukt i alle leker der folk svarer eller stemmer ----------
+     o.oppe: ider som har reist seg (eller true for alle) · o.sider: { a, b, la, lb, fa, fb } – del benken i to
+     o.oi: ider med «OI»-fjes · o.stirr: id alle stirrer på · o.flat: de andre får en flau munn når noen får «OI»
+     o.merk: ider med ekstra ring rundt navnet (f.eks. «helt sikker») · o.status: liten tekst øverst til venstre */
+  function hodeBenk(alle, o) {
+    o = o || {}; var r = o.sider || null, n = alle.length, oi = o.oi || [];
+    if (!n) return '';
+    var w = r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = eePlasser(alle, r);
+    var stil = '--w:' + w + 'px' + (r && r.fa ? ';--fa:' + r.fa : '') + (r && r.fb ? ';--fb:' + r.fb : '');
+    setTimeout(benkTikk, 0);
+    return '<div class="ee-benk' + (r ? ' delt' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
+      (r ? '<i class="ee-midt"></i>' + (r.la ? '<span class="ee-sidenavn a">' + esc(r.la) + '</span><span class="ee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') +
+      (o.status && !r ? '<span class="ee-status">' + esc(o.status) + '</span>' : '') +
+      alle.map(function (p, i) {
+        var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1, erOi = oi.indexOf(p.id) !== -1;
+        var uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
+        return '<div class="ee-hode' + (erOi ? ' alene' : '') + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' +
+          '<span class="ee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.id === tilstand.meg ? T('Du', 'You') : p.navn) + '</span>' + eeHode(p, uttrykk) + '</div></div>'; }).join('') + '</div>';
   }
-  /** Øynene: hvert 1,4 s ser hvert hode på et annet (oftest naboen). Etter avsløringen stirrer alle på den som er alene. */
-  function eeTikk() {
-    clearInterval(eeTimer);
+  function eeBenk(s, e, alle, r) {
+    return hodeBenk(alle, r ? { oppe: true, sider: { a: r.a, b: r.b }, oi: r.alene ? [r.alene] : [], stirr: r.alene, flat: true } : { oppe: e.harSvart || [] });
+  }
+  /** Øynene: hvert 1,4 s ser hvert hode på et annet (oftest naboen). Står noen i fokus, stirrer alle på hen. */
+  var benkTimer = null;
+  function benkTikk() {
+    clearInterval(benkTimer);
     var se = function () {
-      var sp = tilstand && tilstand.spill, e = sp && sp.ee, benk = document.querySelector('.ee-benk');
-      if (!e || !benk) { clearInterval(eeTimer); return; }
-      var hoder = Array.prototype.slice.call(benk.querySelectorAll('.ee-hode')), r = e.resultat, alene = r && r.alene;
+      var benk = document.querySelector('.ee-benk');
+      if (!benk) { clearInterval(benkTimer); return; }
+      var hoder = Array.prototype.slice.call(benk.querySelectorAll('.ee-hode')), stirr = benk.dataset.stirr;
       var x = function (h) { return parseFloat(h.style.getPropertyValue('--x')) || 0; };
+      var mal = stirr ? hoder.find(function (o) { return o.dataset.id === stirr; }) : null;
       hoder.forEach(function (h, i) {
         var pup = h.querySelector('.mv-pup'); if (!pup) return;
         var dx = 0, dy = -0.5;
-        if (alene) { if (h.dataset.id === alene) { dx = 0; dy = 2.4; } else { dx = Math.max(-3.2, Math.min(3.2, (x(hoder.find(function (o) { return o.dataset.id === alene; })) - x(h)) * 8)); dy = 0.4; } }
+        if (h.classList.contains('alene')) { dy = 2.4; }
+        else if (mal) { dx = Math.max(-3.2, Math.min(3.2, (x(mal) - x(h)) * 8)); dy = 0.4; }
         else if (Math.random() > 0.18 && hoder.length > 1) {
           var j = i + (Math.random() < 0.5 ? -1 : 1); if (j < 0 || j >= hoder.length || Math.random() < 0.3) j = Math.floor(Math.random() * hoder.length);
           if (j !== i) { dx = Math.max(-3, Math.min(3, (x(hoder[j]) - x(h)) * 8)); dy = 0.6; }
@@ -1500,7 +1520,37 @@ export function startRom(LEKNAVN, LANG) {
         pup.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)';
       });
     };
-    se(); eeTimer = setInterval(se, 1400);
+    se(); benkTimer = setInterval(se, 1400);
+  }
+  function eeTikk() { benkTikk(); }
+  /** Benken i Pekeleken: reiser seg når de har talt fingre, og etterpå stirrer alle på den som fikk flest. */
+  function pekBenk(s) {
+    var pk = s.pek, alle = tilstand.spillere || []; if (!pk) return '';
+    if (pk.fase === 'teller' && pkTid(pk) > pk.tell + 1400) { var har = pk.harTalt || []; return hodeBenk(alle, { oppe: har, status: har.length + T(' av ', ' of ') + alle.length + T(' har talt', ' counted') }); }
+    if ((pk.fase === 'ferdig' || pk.fase === 'forsvar') && pk.resultat) {
+      var topp = pk.resultat.slapp ? [] : pk.resultat.topp || [];
+      if (pk.fase === 'forsvar') topp = pk.resultat.topp || [];
+      return hodeBenk(alle, { oppe: true, oi: topp, stirr: topp.length === 1 ? topp[0] : '', flat: true });
+    }
+    return '';
+  }
+  /** Benken i Løgnhalsen: de som stemmer reiser seg; etterpå deles benken i «Trodde sant» og «Trodde løgn». De som tok feil, får «OI». */
+  function lhBenk(s) {
+    var alle = (tilstand.spillere || []).filter(function (p) { return p.id !== s.aktiv; });
+    if (s.fase === 'stem') { var har = s.harStemt || []; return hodeBenk(alle, { oppe: har, status: har.length + T(' av ', ' of ') + alle.length + T(' har stemt', ' voted') }); }
+    if (s.fase !== 'avslort' || !s.resultat) return '';
+    var r = s.resultat, st = r.stemmer || {}, sk = r.sikker || {}, lyv = r.svar === 'lyv';
+    var sant = alle.filter(function (p) { return st[p.id] === 'sannhet'; }).map(function (p) { return p.id; });
+    var logn = alle.filter(function (p) { return st[p.id] === 'lyv'; }).map(function (p) { return p.id; });
+    var feil = lyv ? sant : logn;
+    return hodeBenk(alle, { oppe: true, sider: { a: sant, b: logn, la: T('Trodde sant', 'Believed it'), lb: T('Trodde løgn', 'Called the lie'), fa: 'var(--mint)', fb: 'var(--rosa)' },
+      oi: feil, merk: alle.filter(function (p) { return sk[p.id]; }).map(function (p) { return p.id; }) });
+  }
+  /** Benken i Nyhetsrunden: hodene reiser seg når de har svart. */
+  function nrBenk(s) {
+    if (s.fase !== 'spm') return '';
+    var alle = tilstand.spillere || [], har = s.harSvart || [];
+    return hodeBenk(alle, { oppe: har, status: har.length + T(' av ', ' of ') + alle.length + T(' har svart', ' answered') });
   }
   function eeSpill(s) {
     var t = tilstand, e = s.ee, alle = t.spillere || [], r = e.resultat, nokkel = s.pos + ':' + s.antall + ':' + e.fase;
@@ -1552,7 +1602,7 @@ export function startRom(LEKNAVN, LANG) {
     var pt = s.pekSlutt || [], forste = pt[0], maks = Math.max(1, forste ? forste.n : 0);
     var midt = s.lek === 'pekeleken' && forste
       ? '<div class="ja-tavle"><p class="nr-etikett">' + T('Mest utpekt i kveld', 'Most pointed at tonight') + '</p>' +
-          '<div class="ja-vinner">' + nrPille(forste.id, 'stor') + '<b>' + jaNavn(forste.id) + '</b><em>' + forste.n + '</em></div>' +
+          '<div class="ja-vinner">' + hodeMerke(forste.id) + '<b>' + jaNavn(forste.id) + '</b><em>' + forste.n + '</em></div>' +
           (pt.length > 1 ? '<ul class="pk-soyler inn">' + pt.slice(1).map(function (x, i) {
             return '<li style="--i:' + i + '"><span>' + jaNavn(x.id) + '</span><i><b style="transform:scaleX(' + (x.n / maks).toFixed(3) + ');background:' + nrFarge(x.id) + '"></b></i><em>' + x.n + '</em></li>'; }).join('') + '</ul>' : '') + '</div>'
       : '<div class="pk-kort sd-ferdig"><b>' + s.antall + '</b><p>' + T('kort spilt. Det var det.', 'cards played. That was it.') + '</p></div>';
@@ -1564,7 +1614,7 @@ export function startRom(LEKNAVN, LANG) {
     var l = s.jaTavle || [], forste = l[0], maks = Math.max(1, forste ? forste.n : 0), sist = l[l.length - 1];
     var tavle = forste && forste.n
       ? '<div class="ja-tavle"><p class="nr-etikett">' + T('Mest erfaren', 'Most experienced') + '</p>' +
-          '<div class="ja-vinner">' + nrPille(forste.id, 'stor') + '<b>' + jaNavn(forste.id) + '</b><em>' + forste.n + '</em></div>' +
+          '<div class="ja-vinner">' + hodeMerke(forste.id) + '<b>' + jaNavn(forste.id) + '</b><em>' + forste.n + '</em></div>' +
           (l.length > 1 ? '<ul class="pk-soyler inn">' + l.slice(1).map(function (x, i) {
             return '<li style="--i:' + i + '"><span>' + jaNavn(x.id) + '</span><i><b style="transform:scaleX(' + (x.n / maks).toFixed(3) + ');background:' + nrFarge(x.id) + '"></b></i><em>' + x.n + '</em></li>'; }).join('') + '</ul>' : '') +
           (l.length > 2 && sist.n < forste.n ? '<p class="ja-kommentar">' + jaNavn(sist.id) + T(': «Et uskyldig liv.» Eller en god løgner.', ': “An innocent life.” Or a good liar.') + '</p>' : '') + '</div>'
@@ -1615,6 +1665,7 @@ export function startRom(LEKNAVN, LANG) {
     return '<div class="nr-kort lh-kort">' + (merke ? '<span class="nr-type lh-merke">' + merke + '</span>' : '') + '<p>' + esc(s.tekst) + '</p></div>';
   }
   function lhStemte(s) {
+    return '';   // hvem som har stemt vises nå av hodene på benken (lhBenk)
     var andre = (tilstand.spillere || []).filter(function (p) { return p.id !== s.aktiv; }), har = s.harStemt || [];
     return '<div class="nr-folk">' + andre.map(function (p) { return nrPille(p.id, har.indexOf(p.id) !== -1 ? 'har' : ''); }).join('') + '<span>' + har.length + T(' av ', ' of ') + andre.length + T(' har stemt', ' voted') + '</span></div>';
   }
@@ -1669,7 +1720,6 @@ export function startRom(LEKNAVN, LANG) {
     var ut = '<p class="nr-etikett lh-etikett">' + T('Løgnhalsen · runde ', 'The liar · round ') + (s.runde || 1) + '</p>' +
       '<div class="lh-avslor"><span>' + esc(han) + T(' fullførte', ' finished') + '</span><p>' + esc(s.tekst) + '</p>' +
         '<em class="lh-stempel ' + (lyv ? 'logn' : 'sant') + (inn ? ' inn' : '') + '">' + esc(han) + ' ' + (lyv ? T('løy!', 'lied!') : T('sa sannheten!', 'told the truth!')) + '</em></div>' +
-      '<div class="lh-kolonner">' + kol('sannhet', T('Trodde sant', 'Believed it')) + kol('lyv', T('Trodde løgn', 'Called the lie')) + '</div>' +
       (linjer.length ? '<ul class="lh-utfall">' + linjer.join('') + '</ul>' : '') +
       '<p class="small lh-regel">' + T('Feil: drikk to (helt sikker: fire). Den som forteller deler ut én per person som ble lurt, og drikker tre hvis ingen ble lurt.', 'Wrong: drink two (absolutely sure: four). The teller hands out one per person fooled, and drinks three if nobody was fooled.') + '</p>' +
       '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste runde', 'Next round') + '</button>';
@@ -2105,7 +2155,6 @@ export function startRom(LEKNAVN, LANG) {
         '<button type="submit">' + (mitt ? T('Endre', 'Change') : T('Svar', 'Answer')) + '</button></div>' + (mitt ? '<small>' + T('Du svarte: ', 'You answered: ') + '<b>' + esc(mitt) + '</b></small>' : '') + '</form>';
       var mangler = alle.length - har.length;
       return topp +
-        '<div class="nr-folk">' + alle.map(function (p) { return nrPille(p.id, har.indexOf(p.id) !== -1 ? 'har' : ''); }).join('') + '<span>' + har.length + T(' av ', ' of ') + alle.length + T(' har svart', ' answered') + '</span></div>' +
         nrSporsmal(s) + input +
         (vert ? '<button class="rom-stor-knapp nr-vis" data-g="nr-vis" type="button"' + (mangler > 0 ? ' data-vent="1"' : '') + '>' + (mangler > 0 ? T('Vis svaret nå', 'Show the answer now') + ' <small>(' + mangler + T(' mangler', ' missing') + ')</small>' : T('Vis svaret', 'Show the answer')) + '</button>'
           : '<p class="nr-vent">' + (mitt ? T('Låst inn. Du kan bytte til svaret vises.', 'Locked in. You can change until the answer shows.') : T('Velg et svar før klokka går ut.', 'Answer before the clock runs out.')) + '</p>');
@@ -3394,8 +3443,8 @@ export function startRom(LEKNAVN, LANG) {
     else if (!s) innhold = lobby();
     else {
       innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' && s.lek !== 'ring-of-fire' ? ' · ' + esc(s.modus) : '') + '</p>' +
-        ({ kort: kortSpill, mest: mestSpill, forraeder: forraederSpill, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
-           veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: nyhetsrundenSpill, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + slurkelinje() + reglerPanel(s) + '</div>';
+        ({ kort: kortSpill, mest: mestSpill, forraeder: function (s) { return forraederSpill(s) + lhBenk(s); }, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
+           veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: function (s) { return nyhetsrundenSpill(s) + nrBenk(s); }, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + slurkelinje() + reglerPanel(s) + '</div>';
       // Nyhetsrunden finnes bare på norsk
       if (EN && s.type === 'nyhetsrunden') innhold = innhold.replace('</p>', '</p><p class="small">🇳🇴 ' + T('', 'Questions are in Norwegian') + '</p>');
     }
