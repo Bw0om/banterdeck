@@ -258,7 +258,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var tatt = s.tatt || [], kort = '', steg = 360 / 52;
       for (var i = 0; i < 52; i++) if (tatt.indexOf(i) === -1) kort += '<span class="rofr-k" style="--v:' + (i * steg).toFixed(2) + 'deg"></span>';
       if (s.ringBrutt && s.bruddPlass != null) kort += '<span class="rofr-sprekk" style="--v:' + (s.bruddPlass * steg).toFixed(2) + 'deg">💥</span>';
-      return '<div class="rofr-bord tv-ring"><div class="rofr-rotor">' + kort + '</div><div class="rofr-glass"><i style="height:' + Math.min(4, s.konger || 0) * 25 + '%"></i><span>👑 ' + (s.konger || 0) + '/4</span></div></div>';
+      var h = s.holder && s.holder.t > 0 ? s.holder : null, sp = h ? Math.min(1, s.holder.sp) : 0;
+      return '<div class="rofr-bord tv-ring"><div class="rofr-rotor">' + kort + '</div><div class="rofr-glass"><i style="height:' + Math.min(4, s.konger || 0) * 25 + '%"></i><span>👑 ' + (s.konger || 0) + '/4</span></div></div>' +
+        '<div class="tv-spenning' + (h ? ' paa' : '') + '"><span>' + (h ? esc(navn(h.hvem)) + T(' drar …', ' is pulling …') : '') + '</span><i><b style="width:' + Math.round(sp * 100) + '%;background:' + (sp < .5 ? '#63E2A8' : sp < .8 ? '#FFD23F' : '#FF5B1F') + '"></b></i></div>';
     }
     function rofKort(k) {
       if (!k) return '';

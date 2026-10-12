@@ -210,7 +210,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
       aldri: aldriVisning(s, null), fase: s.aldri ? 'aldri-' + s.aldri.fase : undefined,
       turId: s.tur !== null && s.tur !== undefined ? (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null : null },
-      s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, igjen: s.rekke.length - s.tatt.length } : {});
+      s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
     if (s.type === 'mest') Object.assign(spill, { tekst: s.tekst, fase: s.fase, stemt: Object.keys(s.stemmer || {}).length, resultat: s.fase === 'resultat' ? s.resultat : null });
     if (s.type === 'forraeder') Object.assign(spill, { tekst: s.tekst, fase: s.fase, aktiv: s.aktiv, stemt: Object.keys(s.stemmer || {}).length,
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, drikker: s.drikker } : null });
@@ -265,7 +265,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     spill = { type: s.type, lek: s.lek, navn: s.navn, modus: modusNavn(s, lang), runde: s.runde, frist: s.frist || null, turStart: s.turNokkel ? s.turStart || null : null };
     if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
       aldri: aldriVisning(s, meg), svarPaa: !!s.svarPaa, kanSvar: SVAR_LEKER.includes(s.lek) },
-      s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, sist: s.sist, turId: (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null, igjen: s.rekke.length - s.tatt.length } : {});
+      s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, sist: s.sist, turId: (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
     if (s.type === 'mest') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase,
       harStemt: Object.keys(s.stemmer),
@@ -547,7 +547,7 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
     data.spill = { type: 'kort', lek, navn, modus, rekke, pos: 0, tur: lek === 'ring-of-fire' ? 0 : null, konger: 0, tilHendelse: nesteHendelse() };
     if (lek === 'ring-of-fire' && modus !== 'enkel') {
       // Ringen: alle 52 kortene ligger rundt glasset, og den som har tur drar ut et hvilket som helst kort
-      Object.assign(data.spill, { ring: true, tatt: [], nr: 0, brudd: null, kort: null, sist: null });
+      Object.assign(data.spill, { ring: true, tatt: [], nr: 0, brudd: null, kort: null, sist: null, holder: null });
     } else {
       if (lek === 'ring-of-fire' && rekke[0].v === 'K') data.spill.konger = 1;
       data.spill.kort = visKort(data.spill, data);
@@ -942,8 +942,19 @@ function handlingInne(data: any, meg: any, h: any) {
       s.velgMakker = null;
       return { ok: true };
     }
+    case 'rof-holder': {
+      // Den som trekker forteller hvor langt kortet er kommet (t 0–1) og hvor stram ringen er (sp 0–1), så de andre kan se på
+      if (!s || s.type !== 'kort' || !s.ring) return { feil: 'feil-spill' };
+      const tur = data.spillere[s.tur % Math.max(1, data.spillere.length)];
+      if (tur && tur.id !== meg.id && !erVert) return { ok: true };
+      if (Number(h.nr) !== s.nr) return { ok: true };
+      const t = Math.max(0, Math.min(1, Number(h.t) || 0)), sp = Math.max(0, Math.min(1, Number(h.sp) || 0));
+      s.holder = t > 0 || sp > 0 ? { hvem: tur ? tur.id : meg.id, t, sp, tid: Date.now() } : null;
+      return { ok: true };
+    }
     case 'rof-trekk': {
       if (!s || s.type !== 'kort' || !s.ring) return { feil: 'feil-spill' };
+      s.holder = null;
       // (Samme kort to ganger avvises under – så et dobbelt trykk eller en telefon som henger litt etter gjør ingen skade)
       const tur = data.spillere[s.tur % Math.max(1, data.spillere.length)];
       if (tur && tur.id !== meg.id && !erVert) return feilL('ikke-tur', 'Det er ikke din tur å trekke.', "It's not your turn to draw.");

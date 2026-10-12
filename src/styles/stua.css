@@ -420,3 +420,58 @@ html.i-spill .rom-kode{font-size:.92em}
 .ekstra-valg:not(:disabled):active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
 .ekstra-valg.laast{cursor:default;box-shadow:none;background:var(--bg2);color:var(--muted)}
 .rom-tema{display:none}
+
+/* ---------- Ring of Fire på telefonen: ringen, sporet og kortet som dekker ringen ---------- */
+.ring-topp{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:0 0 10px}
+.ring-tur{display:flex;flex-direction:column;gap:3px}
+.ring-tur span{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ring-tur b{display:inline-block;align-self:flex-start;font-family:var(--display);font-stretch:62%;font-weight:900;text-transform:uppercase;font-size:28px;line-height:.95;padding:4px 8px;background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);box-shadow:var(--skygge-liten)}
+.ring-tur.min b{background:var(--gul);color:var(--blekk)}
+.ring-merker{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ring-merker span{padding:3px 8px;border:2.5px solid var(--ink);border-radius:4px;background:var(--card);color:var(--ink)}
+.ring-merker .rosa{background:var(--rosa);color:var(--blekk)}
+.ring-boks{position:relative;width:min(100%,358px);aspect-ratio:358/500;margin:0 auto;border:var(--strek) solid var(--ink);border-radius:8px;background:#FFFFFF;box-shadow:var(--skygge);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+:root[data-theme="dark"] .ring-boks{background:#2A292E}
+.ring-svg{display:block;width:100%;height:100%}
+.ring-k{fill:#FF5B1F;stroke:#16120F;stroke-width:2;transition:y .18s var(--fjaer)}
+.ring-k.valgt{fill:#FFD23F;stroke-width:2.5;filter:drop-shadow(3px 3px 0 #16120F)}
+.ring-k.drar{opacity:0}
+.ring-rotor.laas{transition:transform .22s cubic-bezier(.23,1,.32,1)}
+.ring-spor-bred{fill:none;stroke-linecap:round;opacity:.5;transition:stroke .12s}
+.ring-spor{fill:none;stroke:#16120F;stroke-width:2.5;stroke-dasharray:2 7;stroke-linecap:round}
+:root[data-theme="dark"] .ring-spor{stroke:#FFF8EE}
+.ring-slot rect{fill:#FFF8EE;stroke:#16120F;stroke-width:2.5;stroke-dasharray:5 4}
+.ring-slot text{font-family:var(--display);font-weight:900;font-size:11px;fill:#16120F;text-anchor:middle}
+.ring-kopp path:first-child{fill:#FFF8EE;stroke:#16120F;stroke-width:3;stroke-linejoin:round}
+.ring-kopp-fyll{fill:#FFD23F;transition:y .6s var(--fjaer),height .6s var(--fjaer)}
+.ring-krone{fill:#16120F}
+.ring-tall{font-size:12px;font-weight:800;fill:#4A3F37;text-anchor:middle}
+:root[data-theme="dark"] .ring-tall{fill:#D9D2C7}
+.ring-holdt{fill:#FFD23F;stroke:#16120F;stroke-width:2.5;filter:drop-shadow(3px 3px 0 #16120F)}
+.ring-holdt.ute{transition:transform .22s cubic-bezier(.23,1,.32,1),opacity .22s;transform:translateY(-60px) scale(1.5);transform-origin:179px 50px;opacity:0}
+.ring-maaler text{font-family:var(--display);font-weight:900;font-size:11px;letter-spacing:.06em;fill:#16120F}
+:root[data-theme="dark"] .ring-maaler text{fill:#FFF8EE}
+.ring-maaler-bak{fill:#FFF1DE;stroke:#16120F;stroke-width:2.5}
+.ring-maaler-i{transition:width .08s linear}
+.ring-sprekk{font-size:22px;text-anchor:middle}
+.ring-boks.skjelv .ring-rist{animation:ringSkjelv .09s linear infinite}
+@keyframes ringSkjelv{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.ring-boks.brutt .ring-rist{animation:ringRist .08s linear 6}
+@keyframes ringRist{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.ring-over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;background:rgba(22,18,15,.78);color:#FFF8EE}
+.ring-over .rom-etikett{margin:0;color:#FFF8EE}
+.ring-over .rof-kort{margin:0;width:min(230px,62%);transform:rotate(-2deg)}
+.ring-over .ring-neste{margin:0;font-size:13px;font-weight:700}
+.rof-inn{animation:rofInn 420ms var(--fjaer)}
+@keyframes rofInn{from{transform:rotate(-2deg) scale(.86) translateY(26px);opacity:0}to{transform:rotate(-2deg);opacity:1}}
+.ring-hint{margin:10px 0 0;font-size:14px;font-weight:700;line-height:1.3;text-align:center}
+.ring-knapper{margin:8px 0 0;text-align:center}
+@media (prefers-reduced-motion:reduce){.ring-boks.skjelv .ring-rist,.ring-boks.brutt .ring-rist,.rof-inn{animation:none}.ring-k,.ring-rotor.laas,.ring-holdt.ute{transition:none}}
+/* TV-en: hvem som drar, og hvor stram ringen er */
+.tv-spenning{display:flex;align-items:center;gap:12px;margin:10px auto 0;max-width:420px;min-height:22px;opacity:0;transition:opacity .2s}
+.tv-spenning.paa{opacity:1}
+.tv-spenning span{font-size:15px;font-weight:800;white-space:nowrap}
+.tv-spenning i{flex:1;display:block;height:14px;border:2.5px solid #16120F;border-radius:3px;background:#FFF1DE;overflow:hidden}
+.tv-spenning b{display:block;height:100%;transition:width .3s linear}
+/* I ringen sier chippen alt: ikke tittel og turbanner i tillegg */
+#rom:has(.ring-topp) .tur-merke,.rom-spill:has(.ring-topp) .rom-spillnavn{display:none}

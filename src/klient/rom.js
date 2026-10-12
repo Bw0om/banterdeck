@@ -175,12 +175,13 @@ export function startRom(LEKNAVN, LANG) {
   document.addEventListener('pointerdown', function () { if (lyd.paa) lydCtx(); }, { passive: true });
   function tone(f, t0, varighet, type, volum, tilF, vibrato) {
     var c = lyd.ctx; if (!c) return;
-    var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+    var o = c.createOscillator(), g = c.createGain(), lp = c.createBiquadFilter(), t = c.currentTime + t0;
+    lp.type = 'lowpass'; lp.frequency.value = 1800; lp.Q.value = 0.7;   // runder av alt: ingen skarpe overtoner
     o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
     if (tilF) o.frequency.exponentialRampToValueAtTime(tilF, t + varighet);
     if (vibrato) { var l = c.createOscillator(), lg = c.createGain(); l.frequency.value = vibrato; lg.gain.value = f * 0.025; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t + varighet + 0.05); }
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(volum || 0.2, t + 0.012); g.gain.setValueAtTime(volum || 0.2, t + Math.max(0.013, varighet * 0.6)); g.gain.exponentialRampToValueAtTime(0.0001, t + varighet);
-    o.connect(g); g.connect(lyd.ut || c.destination); o.start(t); o.stop(t + varighet + 0.02);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(volum || 0.2, t + 0.018); g.gain.setValueAtTime(volum || 0.2, t + Math.max(0.019, varighet * 0.5)); g.gain.exponentialRampToValueAtTime(0.0001, t + varighet * 1.5);
+    o.connect(lp); lp.connect(g); g.connect(lyd.ut || c.destination); o.start(t); o.stop(t + varighet * 1.5 + 0.05);
   }
   /** Støy (klirr, kortstokk, trommeslag) – filtrert rundt en frekvens. */
   function stoy(t0, varighet, volum, frekvens, filtertype) {
@@ -193,24 +194,27 @@ export function startRom(LEKNAVN, LANG) {
   }
   /** Lufthorn: flere skurrende toner litt ved siden av hverandre – skjærer gjennom musikk. */
   function horn(t0, varighet) {
-    [466, 470, 587, 592, 698].forEach(function (f) { tone(f * 0.97, t0, varighet, 'sawtooth', 0.06, f); });
+    [392, 396, 494, 498, 587].forEach(function (f) { tone(f * 0.97, t0, varighet, 'sawtooth', 0.06, f); });
   }
   function spillLyd(navn) {
     if (!lyd.paa || !lydCtx()) return;
-    if (navn === 'tikk') tone(1800, 0, 0.03, 'square', 0.05);
-    if (navn === 'ding') { tone(880, 0, 0.35, 'triangle', 0.25); tone(1320, 0.12, 0.5, 'triangle', 0.2); }
+    if (navn === 'tikk') { tone(440, 0, 0.035, 'sine', 0.12, 300); stoy(0, 0.02, 0.08, 900); }
+    if (navn === 'grip') tone(180, 0, 0.06, 'sine', 0.14, 140);
+    // Utenfor sporet: et lavt knirk
+    if (navn === 'knirk') { tone(110, 0, 0.3, 'sawtooth', 0.06, 150); stoy(0, 0.25, 0.1, 400); }
+    if (navn === 'ding') { tone(440, 0, 0.35, 'triangle', 0.25); tone(660, 0.12, 0.5, 'triangle', 0.2); }
     // Din tur: tre lyse toner og en høy «pling» på slutten
-    if (navn === 'tur') { tone(784, 0, 0.12, 'square', 0.09); tone(1047, 0.11, 0.12, 'square', 0.09); tone(1568, 0.22, 0.35, 'triangle', 0.25); tone(2093, 0.22, 0.35, 'sine', 0.12); }
+    if (navn === 'tur') { tone(392, 0, 0.14, 'triangle', 0.16); tone(523, 0.13, 0.14, 'triangle', 0.16); tone(659, 0.26, 0.4, 'triangle', 0.22); tone(330, 0.26, 0.5, 'sine', 0.14); }
     // Du må drikke: to lufthorn-støt og så «glugg glugg»
     if (navn === 'slurk') {
       horn(0, 0.28); horn(0.36, 0.6);
       [1.05, 1.25, 1.45].forEach(function (t) { tone(260, t, 0.13, 'sine', 0.35, 780); });
     }
-    if (navn === 'pop') tone(600, 0, 0.08, 'sine', 0.14, 900);
-    if (navn === 'svar') { tone(523, 0, 0.12, 'triangle', 0.18); tone(784, 0.1, 0.25, 'triangle', 0.18); }
+    if (navn === 'pop') { tone(220, 0, 0.12, 'sine', 0.3, 330); tone(165, 0.02, 0.18, 'triangle', 0.14); }
+    if (navn === 'svar') { tone(262, 0, 0.12, 'triangle', 0.18); tone(392, 0.1, 0.25, 'triangle', 0.18); }
     // Kassaapparat: klikk + to lyse bjeller
-    if (navn === 'kaching') { stoy(0, 0.06, 0.4, 5000, 'highpass'); tone(2093, 0.05, 0.25, 'triangle', 0.22); tone(2637, 0.13, 0.6, 'triangle', 0.22); tone(3136, 0.13, 0.6, 'sine', 0.08); }
-    if (navn === 'mynt') { tone(1760, 0, 0.07, 'square', 0.06); tone(2637, 0.06, 0.2, 'triangle', 0.14); }
+    if (navn === 'kaching') { stoy(0, 0.06, 0.3, 2500, 'bandpass'); tone(1047, 0.05, 0.25, 'triangle', 0.22); tone(1319, 0.13, 0.6, 'triangle', 0.22); tone(1568, 0.13, 0.6, 'sine', 0.08); }
+    if (navn === 'mynt') { tone(880, 0, 0.07, 'triangle', 0.08); tone(1319, 0.06, 0.2, 'triangle', 0.14); }
     // Tap: trist trombone «womp womp womp wooomp»
     if (navn === 'womp') { tone(311, 0, 0.28, 'sawtooth', 0.09); tone(294, 0.3, 0.28, 'sawtooth', 0.09); tone(277, 0.6, 0.28, 'sawtooth', 0.09); tone(262, 0.9, 0.9, 'sawtooth', 0.09, 247, 6); }
     // Dramatisk «dun dun DUNN» når noe blir meldt
@@ -218,11 +222,11 @@ export function startRom(LEKNAVN, LANG) {
     // Seier: fanfare
     if (navn === 'fanfare') { [523, 659, 784].forEach(function (f, i) { tone(f, i * 0.13, 0.14, 'square', 0.08); }); tone(1047, 0.42, 0.7, 'square', 0.09, null, 6); tone(1319, 0.42, 0.7, 'triangle', 0.12); tone(784, 0.42, 0.7, 'triangle', 0.1); }
     // Glass som knuses (ringen røk)
-    if (navn === 'knus') { stoy(0, 0.35, 0.7, 4000, 'highpass'); stoy(0, 0.15, 0.6, 900, 'bandpass'); [3100, 4200, 2600, 5200, 3700].forEach(function (f, i) { tone(f, 0.03 + i * 0.05, 0.25, 'triangle', 0.08); }); stoy(0.45, 0.5, 0.3, 6000, 'highpass'); }
+    if (navn === 'knus') { stoy(0, 0.12, 0.9, 120, 'lowpass'); stoy(0.02, 0.4, 0.35, 1400, 'bandpass'); [980, 1300, 820, 1600].forEach(function (f, i) { tone(f, 0.04 + i * 0.05, 0.3, 'triangle', 0.07); }); tone(80, 0, 0.5, 'sine', 0.35, 45); stoy(0.45, 0.5, 0.3, 6000, 'highpass'); }
     // Kortstokk som stokkes
-    if (navn === 'bytt') { for (var i = 0; i < 5; i++) stoy(i * 0.045, 0.04, 0.35, 2500 + i * 300); tone(900, 0.25, 0.1, 'triangle', 0.1, 1400); }
+    if (navn === 'bytt') { for (var i = 0; i < 5; i++) stoy(i * 0.045, 0.04, 0.35, 1200 + i * 150); tone(450, 0.25, 0.1, 'triangle', 0.1, 700); }
     // Vannrunde: tre rolige dråper («plopp» med stigende tone) – ikke en alarm
-    if (navn === 'vann') { tone(520, 0, 0.11, 'sine', 0.32, 1400); tone(700, 0.24, 0.1, 'sine', 0.24, 1800); tone(460, 0.52, 0.15, 'sine', 0.3, 1250); }
+    if (navn === 'vann') { tone(260, 0, 0.11, 'sine', 0.32, 700); tone(350, 0.24, 0.1, 'sine', 0.24, 900); tone(230, 0.52, 0.15, 'sine', 0.3, 625); }
   }
   /** Stor beskjed over hele skjermen når du må drikke – synes og høres selv med musikk på. */
   var drikkEl = null, drikkN = 0, drikkTimer = null, egenSlurkT = 0;
@@ -1058,47 +1062,85 @@ export function startRom(LEKNAVN, LANG) {
     if (s.makkere && s.makkere.length) ut += '<p class="rof-makkere">🤝 ' + s.makkere.map(function (m) { return esc(navn(m[0])) + ' ↔ ' + esc(navn(m[1])); }).join(' · ') + '</p>';
     return ut;
   }
-  /* ---------- Ring of Fire: ringen rundt glasset ---------- */
-  var rofFor = -2, rofA = 0, rofDrar = null, rofVentTegn = false, rofBruddSett = null, rofValgt = -1;
-  var ROF_N = 52, ROF_STEG = 360 / 52;
+  /* ---------- Ring of Fire: ringen rundt koppen, og trekket med stø hånd ----------
+     Snurr: sveip rundt ringen. Trekk: hold på det gule kortet øverst og følg sporet ut av ringen.
+     Fart er umulig å dosere med tommelen, så det er presisjonen som teller: utenfor sporet bygger spenningen
+     seg opp (ringen skjelver, telefonen surrer), innenfor slipper den sakte. Sporet blir smalere for hvert kort.
+     Alt tegnes i én SVG (358×500), så det skalerer med telefonen. De andre ser kortet ditt på vei ut. */
+  var rofFor = -2, rofA = 0, rofDrar = null, rofVentTegn = false, rofBruddSett = null, rofValgt = -1, rofVistNr = -1, rofSkjult = -1, rofSendt = 0, rofKnirk = 0;
+  var ROF_N = 52, ROF_STEG = 360 / 52, ROF_CX = 179, ROF_CY = 318, ROF_R = 118;
+  var ROF_SPOR = [[179, 190], [212, 150], [146, 110], [179, 50]];
+  var ROF_D = 'M179 190 C 212 150, 146 110, 179 50';
   function rofNorm(a) { a = a % 360; if (a > 180) a -= 360; if (a < -180) a += 360; return a; }
+  /** Punktet på sporet ved t (0 = i ringen, 1 = ute). */
+  function rofSpor(t) {
+    var P = ROF_SPOR, u = 1 - t;
+    return [u * u * u * P[0][0] + 3 * u * u * t * P[1][0] + 3 * u * t * t * P[2][0] + t * t * t * P[3][0],
+      u * u * u * P[0][1] + 3 * u * u * t * P[1][1] + 3 * u * t * t * P[2][1] + t * t * t * P[3][1]];
+  }
+  /** Nærmeste t på sporet, og avstanden dit. */
+  function rofNaermest(px, py) {
+    var best = 0, bd = 1e9;
+    for (var i = 0; i <= 60; i++) { var t = i / 60, p = rofSpor(t), d = (p[0] - px) * (p[0] - px) + (p[1] - py) * (p[1] - py); if (d < bd) { bd = d; best = t; } }
+    return [best, Math.sqrt(bd)];
+  }
+  /** Sporets halvbredde: romslig i første runde, smalere jo færre kort som er igjen. Brutt ring = kan ikke ryke. */
+  function rofHalv(s) {
+    if (s.ringBrutt) return 999;
+    var igjen = ROF_N - (s.tatt || []).length, forste = (s.nr || 0) < (tilstand.spillere || []).length;
+    return (forste ? 30 : 26) - 14 * (1 - igjen / ROF_N);
+  }
   /** Kortet som ligger nærmest toppen av ringen (av dem som er igjen). */
   function rofTopp(tatt) {
     var best = -1, bestA = 999;
     for (var i = 0; i < ROF_N; i++) { if (tatt.indexOf(i) !== -1) continue; var a = Math.abs(rofNorm(i * ROF_STEG + rofA)); if (a < bestA) { bestA = a; best = i; } }
     return best;
   }
-  var rofVistNr = -1;
+  function rofFarge(sp) { return sp < 0.5 ? '#63E2A8' : (sp < 0.8 ? '#FFD23F' : '#FF5B1F'); }
   function rofKortHtml(k, nr) {
-    var snu = nr !== rofVistNr; rofVistNr = nr;   // snu-animasjonen bare første gang kortet vises
-    return '<div class="rof-kort rom-rof' + (snu ? ' rof-snu' : '') + (k.rod ? ' rod' : '') + '"><div class="rof-hj"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div>' +
+    var snu = nr !== rofVistNr; rofVistNr = nr;   // inn-animasjonen bare første gang kortet vises
+    return '<div class="rof-kort rom-rof' + (snu ? ' rof-inn' : '') + (k.rod ? ' rod' : '') + '"><div class="rof-hj"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div>' +
       '<div class="rof-midt"><b class="rof-regel">' + esc(k.regel) + '</b><span class="rof-tekst">' + esc(k.tekst) + '</span></div>' +
       '<div class="rof-hj rof-hj2"><b>' + esc(k.v) + '</b><span>' + esc(k.s) + '</span></div></div>';
   }
   function rofSpill(s) {
     // Verten kan trekke for den som har tur (f.eks. hvis telefonen er borte) – gjelder bare dette trekket
     var tatt = s.tatt || [], min = s.turId === tilstand.meg || (erVert() && rofFor === s.nr), k = s.kort;
+    var igjen = s.igjen != null ? s.igjen : ROF_N - tatt.length, konger = s.konger || 0;
+    var holder = s.holder && s.holder.hvem !== tilstand.meg && s.holder.t > 0 ? s.holder : null;   // noen andre er i gang med et trekk
     rofValgt = rofTopp(tatt);
     var kort = '';
     for (var i = 0; i < ROF_N; i++) {
       if (tatt.indexOf(i) !== -1) continue;
-      kort += '<span class="rofr-k' + (i === rofValgt && min ? ' valgt' : '') + '" data-p="' + i + '" style="--v:' + (i * ROF_STEG).toFixed(2) + 'deg"></span>';
+      var valgt = i === rofValgt && (min || holder);
+      kort += '<rect class="ring-k' + (valgt ? ' valgt' : '') + (valgt && holder ? ' drar' : '') + '" data-p="' + i + '" x="168" y="' + (valgt ? 175 : 183) + '" width="22" height="34" rx="3" transform="rotate(' + (i * ROF_STEG).toFixed(2) + ' ' + ROF_CX + ' ' + ROF_CY + ')"/>';
     }
-    var fyll = Math.min(4, s.konger || 0) * 25;
-    return '<div class="rof-tur' + (min ? ' min' : '') + '"><span>' + (min ? T('Din tur!', 'Your turn!') : T('Trekker', 'Drawing')) + '</span><b>' + esc(min ? T('Snurr ringen og dra ut et kort', 'Spin the ring and pull out a card') : navn(s.turId)) + '</b></div>' +
-      '<p class="rom-status">' + (s.igjen != null ? s.igjen : ROF_N - tatt.length) + T(' kort i ringen · ', ' cards in the ring · ') + (s.konger || 0) + T(' av 4 konger', ' of 4 kings') + '</p>' +
-      lunte((s.igjen != null ? s.igjen : ROF_N - tatt.length) / ROF_N) +
-      '<div class="rofr-bord' + (min ? ' aktiv' : '') + '" data-nr="' + s.nr + '">' +
-        '<div class="rofr-rotor" style="transform:rotate(' + rofA + 'deg)">' + kort +
-          (s.ringBrutt && s.bruddPlass != null ? '<span class="rofr-sprekk" style="--v:' + (s.bruddPlass * ROF_STEG).toFixed(2) + 'deg">💥</span>' : '') + '</div>' +
-        '<div class="rofr-glass" title="' + T('Kongekoppen', 'The king’s cup') + '"><i style="height:' + fyll + '%"></i><span>👑 ' + (s.konger || 0) + '/4</span></div>' +
-        (min ? '<div class="rofr-pil">▼</div>' : '') +
+    var halv = rofHalv(s), sp = holder ? holder.sp : 0, hp = holder ? rofSpor(holder.t) : null;
+    var visSpor = (min || holder) && !s.ringBrutt;
+    var visKort = k && rofSkjult !== s.nr && !holder;   // kortet ligger over ringen til neste trekk begynner (eller du legger det bort)
+    return '<div class="ring-topp"><div class="ring-tur' + (min ? ' min' : '') + '"><span>Ring of Fire</span><b>' + (min ? T('Din tur', 'Your turn') : esc(navn(s.turId)) + T(' trekker', ' draws')) + '</b></div>' +
+      '<div class="ring-merker"><span>' + igjen + T(' igjen', ' left') + '</span><span class="rosa">' + T('Konger', 'Kings') + ' ' + konger + '/4</span></div></div>' +
+      '<div class="ring-boks' + (min ? ' aktiv' : '') + '" data-nr="' + s.nr + '">' +
+        '<svg class="ring-svg" viewBox="0 0 358 500" role="img" aria-label="' + T('Ringen av kort rundt kongekoppen', 'The ring of cards around the king’s cup') + '">' +
+          (visSpor ? '<path class="ring-spor-bred" d="' + ROF_D + '" stroke-width="' + Math.min(80, halv * 2) + '" stroke="' + rofFarge(sp) + '"/><path class="ring-spor" d="' + ROF_D + '"/>' : '') +
+          (min && !s.ringBrutt ? '<g class="ring-slot"><rect x="153" y="22" width="52" height="34" rx="4"/><text x="179" y="44">' + T('UT HER', 'OUT HERE') + '</text></g>' : '') +
+          '<g class="ring-rist"><g class="ring-rotor" transform="rotate(' + rofA + ' ' + ROF_CX + ' ' + ROF_CY + ')">' + kort +
+            (s.ringBrutt && s.bruddPlass != null ? '<text class="ring-sprekk" x="179" y="186" transform="rotate(' + (s.bruddPlass * ROF_STEG).toFixed(2) + ' ' + ROF_CX + ' ' + ROF_CY + ')">💥</text>' : '') + '</g></g>' +
+          '<g class="ring-kopp" transform="translate(147 276)"><path d="M8 4h48l-6 72a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z"/><rect class="ring-kopp-fyll" x="13" y="' + (78 - Math.min(4, konger) * 17) + '" width="38" height="' + (Math.min(4, konger) * 17) + '"/><path class="ring-krone" d="M22 28l6 8 4-12 4 12 6-8-2 16H24z"/></g>' +
+          '<text class="ring-tall" x="179" y="396">' + igjen + T(' kort i ringen', ' cards in the ring') + '</text>' +
+          '<rect class="ring-holdt" x="' + ((hp ? hp[0] : 179) - 14) + '" y="' + ((hp ? hp[1] : 190) - 22) + '" width="28" height="44" rx="4"' + (hp ? '' : ' visibility="hidden"') + '/>' +
+          '<g class="ring-maaler"><text x="14" y="482">' + (holder ? esc(navn(holder.hvem)).toUpperCase() : T('SPENNING', 'TENSION')) + '</text><rect class="ring-maaler-bak" x="100" y="470" width="244" height="14" rx="3"/><rect class="ring-maaler-i" x="100" y="470" width="' + Math.round(244 * Math.min(1, sp)) + '" height="14" rx="3" fill="' + rofFarge(sp) + '"/></g>' +
+        '</svg>' +
+        (visKort ? '<div class="ring-over"><p class="rom-etikett">' + esc(k.hvem || '') + T(' trakk', ' drew') + '</p>' + rofKortHtml(k, s.nr) +
+          '<button class="btn gold" data-g="rof-lukk" type="button">' + (min ? T('Greit – din tur', 'Got it – your turn') : T('Greit', 'Got it')) + '</button>' +
+          (!min && s.turId ? '<p class="ring-neste">' + T('Neste: ', 'Next: ') + esc(navn(s.turId)) + '</p>' : '') + '</div>' : '') +
       '</div>' +
-      (s.ringBrutt ? '<p class="small rofr-hint">💥 ' + T('Ringen er brutt av ', 'The ring was broken by ') + esc((s.brudd && s.brudd.navn) || '') + T(' – nå kan den ikke ryke igjen. Bare trekk!', ' – it can’t break again. Just draw!') + '</p>'
-        : min ? '<div class="rofr-spenning" aria-hidden="true"><i></i></div><p class="small rofr-hint">' + T('Snurr: sveip rundt ringen. Trekk: hold på det lyse kortet og dra det <b>sakte</b> oppover.', 'Spin: swipe around the ring. Draw: hold the glowing card and pull it <b>slowly</b> upward.') + '</p>'
-        : '<p class="small rofr-hint">' + T('Følg med – ryker ringen, må ', 'Watch – if the ring breaks, ') + esc(navn(s.turId)) + T(' drikke opp.', ' finishes their drink.') + '</p>') +
-      (k ? '<p class="rom-etikett">' + esc(k.hvem || '') + T(' trakk', ' drew') + '</p>' + rofKortHtml(k, s.nr) : '') + makkerHtml(s) +
-      (!min && erVert() ? '<p class="small"><button class="linkbtn" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button></p>' : '');
+      '<p class="ring-hint">' + (s.ringBrutt ? '💥 ' + T('Ringen er brutt av ', 'The ring was broken by ') + esc((s.brudd && s.brudd.navn) || '') + T('. Nå kan den ikke ryke igjen – bare trekk.', '. It can’t break again – just draw.')
+        : min ? T('Snurr ringen. Hold på det gule kortet og følg sporet ut – stø hånd.', 'Spin the ring. Hold the yellow card and follow the lane out – steady hand.')
+        : holder ? esc(navn(holder.hvem)) + T(' drar … ryker ringen, drikker de opp.', ' is pulling … if the ring breaks, they finish their drink.')
+        : T('Ryker ringen, drikker ', 'If the ring breaks, ') + esc(navn(s.turId)) + T(' opp glasset.', ' finishes their drink.')) + '</p>' +
+      makkerHtml(s) +
+      (!min && erVert() ? '<p class="ring-knapper"><button class="btn ghost small" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button></p>' : '');
   }
   /** Ringen røk: alle telefonene får vite det. */
   function rofSjekkBrudd(d) {
@@ -1113,49 +1155,61 @@ export function startRom(LEKNAVN, LANG) {
     document.body.appendChild(el); setTimeout(function () { el.remove(); }, 2800);
     try { navigator.vibrate && navigator.vibrate([400, 100, 400]); } catch (e) {}
   }
-  function rofOppdaterValgt(bord) {
+  function rofOppdaterValgt(boks) {
     var s = tilstand.spill, ny = rofTopp(s.tatt || []);
     if (ny === rofValgt) return;
     rofValgt = ny; spillLyd('tikk');
-    bord.querySelectorAll('.rofr-k').forEach(function (e) { e.classList.toggle('valgt', Number(e.dataset.p) === ny); });
+    boks.querySelectorAll('.ring-k').forEach(function (e) { var v = Number(e.dataset.p) === ny; e.classList.toggle('valgt', v); e.setAttribute('y', v ? 175 : 183); });
   }
-  function rofVinkel(bord, e) { var r = bord.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; }
+  /** Fingeren i SVG-ens koordinater (358×500), uansett hvor stor telefonen er. */
+  function rofPunkt(svg, e) { var p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; var m = svg.getScreenCTM(); if (!m) return [0, 0]; var q = p.matrixTransform(m.inverse()); return [q.x, q.y]; }
+  function rofVinkel(svg, e) { var p = rofPunkt(svg, e); return Math.atan2(p[1] - ROF_CY, p[0] - ROF_CX) * 180 / Math.PI; }
   function rofFerdig(sendTegn) { rofDrar = null; if (rofVentTegn || sendTegn) { rofVentTegn = false; tegn(); } }
+  /** De andre får se kortet på vei ut: først med en gang, så høyst hvert 400 ms. */
+  function rofMeld(d, naa, tving) {
+    if (!tving && naa - rofSendt < 400) return;
+    rofSendt = naa; gjorAlltid({ handling: 'rof-holder', t: Math.round(d.t * 100) / 100, sp: Math.round(d.sp * 100) / 100, nr: d.nr });
+  }
   document.addEventListener('pointerdown', function (e) {
-    var bord = e.target.closest && e.target.closest('.rofr-bord.aktiv'); if (!bord || !tilstand || !tilstand.spill || !tilstand.spill.ring) return;
+    var boks = e.target.closest && e.target.closest('.ring-boks.aktiv'); if (!boks || !tilstand || !tilstand.spill || !tilstand.spill.ring) return;
+    if (e.target.closest('.ring-over')) return;
     e.preventDefault();
-    var kortEl = e.target.closest('.rofr-k.valgt'), s = tilstand.spill;
-    try { bord.setPointerCapture(e.pointerId); } catch (x) {}
+    var svg = boks.querySelector('.ring-svg'), s = tilstand.spill, p = rofPunkt(svg, e), n = rofNaermest(p[0], p[1]);
+    try { boks.setPointerCapture(e.pointerId); } catch (x) {}
+    var kortEl = e.target.closest('.ring-k.valgt') || (n[0] < 0.12 && n[1] < 34 ? boks.querySelector('.ring-k.valgt') : null);
     if (kortEl) {
-      var igjen = ROF_N - (s.tatt || []).length;
-      // Hvor fort du kan dra før ringen ryker: strammere jo færre kort som er igjen, snillere i første runde, og litt ulikt fra kort til kort
-      // Ringen er allerede brutt: da kan den ikke ryke igjen
-      var grense = s.ringBrutt ? Infinity : (0.16 + 0.42 * (igjen / ROF_N)) * (0.8 + Math.random() * 0.4) * ((s.nr || 0) < (tilstand.spillere || []).length ? 1.5 : 1);
-      rofDrar = { type: 'dra', bord: bord, el: kortEl, p: Number(kortEl.dataset.p), y0: e.clientY, sistY: e.clientY, t: performance.now(), fart: 0, spenning: 0, grense: grense, maal: Math.max(100, bord.clientWidth * 0.38), nr: s.nr };
+      rofDrar = { type: 'dra', boks: boks, svg: svg, el: kortEl, p: Number(kortEl.dataset.p), t: 0, sp: 0, halv: rofHalv(s), nr: s.nr, tid: performance.now() };
       kortEl.classList.add('drar');
+      var h = svg.querySelector('.ring-holdt'); h.removeAttribute('visibility');
+      spillLyd('grip');
+      rofMeld(rofDrar, performance.now(), true);
     } else {
-      rofDrar = { type: 'snurr', bord: bord, a0: rofA, v0: rofVinkel(bord, e) };
-      bord.querySelector('.rofr-rotor').style.transition = 'none';
+      rofDrar = { type: 'snurr', boks: boks, svg: svg, a0: rofA, v0: rofVinkel(svg, e) };
     }
   });
   window.addEventListener('pointermove', function (e) {
     var d = rofDrar; if (!d) return;
     if (e.cancelable) e.preventDefault();
     if (d.type === 'snurr') {
-      rofA = d.a0 + rofNorm(rofVinkel(d.bord, e) - d.v0);
-      d.bord.querySelector('.rofr-rotor').style.transform = 'rotate(' + rofA + 'deg)';
-      rofOppdaterValgt(d.bord);
+      rofA = d.a0 + rofNorm(rofVinkel(d.svg, e) - d.v0);
+      d.svg.querySelector('.ring-rotor').setAttribute('transform', 'rotate(' + rofA + ' ' + ROF_CX + ' ' + ROF_CY + ')');
+      rofOppdaterValgt(d.boks);
       return;
     }
-    var naa = performance.now(), dt = Math.max(1, naa - d.t), dy = d.sistY - e.clientY;
-    d.fart = d.fart * 0.6 + (Math.max(0, dy) / dt) * 0.4; d.t = naa; d.sistY = e.clientY;
-    // Spenningen bygger seg opp når du drar fortere enn ringen tåler, og slipper sakte når du roer ned
-    d.spenning = Math.max(0, d.spenning + Math.max(0, d.fart - d.grense) * dt * 0.06 - dt * 0.0003);
-    var ut = Math.max(0, d.y0 - e.clientY), maaler = Math.min(1, Math.max(d.spenning, d.fart / d.grense * 0.55));
-    d.el.style.setProperty('--ut', ut + 'px');
-    var m = document.querySelector('.rofr-spenning i'); if (m) { m.style.width = Math.round(maaler * 100) + '%'; m.style.background = 'hsl(' + Math.round(120 - 120 * maaler) + ',85%,50%)'; }
-    if (d.spenning >= 1) { rofTrekk(d, true); return; }
-    if (ut >= d.maal) rofTrekk(d, false);
+    var p = rofPunkt(d.svg, e), n = rofNaermest(p[0], p[1]), t = n[0], avstand = n[1], naa = performance.now();
+    // Utenfor sporet bygger spenningen seg opp, innenfor slipper den sakte
+    var over = Math.max(0, avstand - d.halv) / d.halv;
+    d.sp = Math.max(0, d.sp + over * 0.14 - 0.012);
+    d.t = Math.max(d.t, t);
+    var sx = rofSpor(d.t), vri = Math.max(-18, Math.min(18, (p[0] - sx[0]) * 0.8));
+    var h = d.svg.querySelector('.ring-holdt'); h.setAttribute('x', sx[0] - 14); h.setAttribute('y', sx[1] - 22); h.setAttribute('transform', 'rotate(' + vri.toFixed(1) + ' ' + sx[0] + ' ' + sx[1] + ')');
+    var f = rofFarge(d.sp), m = d.svg.querySelector('.ring-maaler-i'); m.setAttribute('width', Math.round(244 * Math.min(1, d.sp))); m.setAttribute('fill', f);
+    var bred = d.svg.querySelector('.ring-spor-bred'); if (bred) bred.setAttribute('stroke', f);
+    d.boks.classList.toggle('skjelv', d.sp > 0.6);
+    if (over > 0) { try { navigator.vibrate && navigator.vibrate(8); } catch (x) {} if (naa - rofKnirk > 240) { rofKnirk = naa; spillLyd('knirk'); } }
+    if (d.sp >= 1) { rofTrekk(d, true); return; }
+    if (d.t >= 0.97) { rofTrekk(d, false); return; }
+    rofMeld(d, naa, false);
   });
   function rofSlipp() {
     var d = rofDrar; if (!d) return;
@@ -1163,23 +1217,31 @@ export function startRom(LEKNAVN, LANG) {
       // Lås ringen slik at det valgte kortet står rett øverst
       var s = tilstand.spill, p = rofTopp(s.tatt || []);
       if (p >= 0) rofA = rofA + rofNorm(-(p * ROF_STEG + rofA));
-      var rotor = d.bord.querySelector('.rofr-rotor'); rotor.style.transition = 'transform .2s ease-out'; rotor.style.transform = 'rotate(' + rofA + 'deg)';
+      var rotor = d.svg.querySelector('.ring-rotor'); rotor.classList.add('laas'); rotor.setAttribute('transform', 'rotate(' + rofA + ' ' + ROF_CX + ' ' + ROF_CY + ')');
       return rofFerdig(false);
     }
-    d.el.classList.remove('drar'); d.el.style.setProperty('--ut', '0px');
-    var m = document.querySelector('.rofr-spenning i'); if (m) m.style.width = '0';
+    // Slapp taket før kortet var ute: kortet glir tilbake i ringen
+    d.el.classList.remove('drar'); d.boks.classList.remove('skjelv');
+    d.svg.querySelector('.ring-holdt').setAttribute('visibility', 'hidden');
+    d.svg.querySelector('.ring-maaler-i').setAttribute('width', 0);
+    d.t = 0; d.sp = 0; rofMeld(d, performance.now(), true);
     rofFerdig(false);
   }
   window.addEventListener('pointerup', rofSlipp); window.addEventListener('pointercancel', rofSlipp);
   function rofTrekk(d, brutt) {
     rofDrar = null;
-    d.el.classList.remove('drar');
-    if (brutt) { d.bord.classList.add('brutt'); spillLyd('knus'); }
-    else { d.el.classList.add('ute'); spillLyd('pop'); }
+    d.boks.classList.remove('skjelv');
+    if (brutt) { d.boks.classList.add('brutt'); spillLyd('knus'); }
+    else { d.svg.querySelector('.ring-holdt').classList.add('ute'); spillLyd('pop'); }
     rofBruddSett = null;   // vårt eget brudd vises av knus-effekten over, ikke to ganger
+    rofSkjult = -1;
     gjorAlltid({ handling: 'rof-trekk', plass: d.p, brutt: brutt, nr: d.nr });
-    setTimeout(function () { rofFerdig(true); }, brutt ? 700 : 250);
+    setTimeout(function () { rofFerdig(true); }, brutt ? 700 : 220);
   }
+  root.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('[data-g="rof-lukk"]')) return;
+    rofSkjult = tilstand && tilstand.spill ? tilstand.spill.nr : -1; tegn();
+  });
   function kortSpill(s) {
     if (s.ring) return rofSpill(s);
     if (s.aldri) return aldriSpill(s) + aldriBryter(s);
