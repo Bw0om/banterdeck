@@ -217,7 +217,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     spill = { type: s.type, lek: s.lek, navn: s.navn, runde: s.runde || null, frist: s.frist || null, antallLeker: (data.historikk || []).length };
     if (s.type === 'kort' && s.pek) Object.assign(spill, { pek: pekVisning(s, null), pektTavle: pektTavle(data), pekForrige: s.pekForrige || null });
     if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
-      aldri: aldriVisning(s, null), fase: s.ferdig ? 'aldri-ferdig' : s.aldri ? 'aldri-' + s.aldri.fase : undefined, ferdig: !!s.ferdig, jaTavle: s.ferdig ? aldriTavle(s, data) : null,
+      aldri: aldriVisning(s, null), fase: s.ferdig ? 'kort-ferdig' : s.aldri ? 'aldri-' + s.aldri.fase : undefined, ferdig: !!s.ferdig, jaTavle: s.ferdig && s.lek === 'jeg-har-aldri' ? aldriTavle(s, data) : null, pekSlutt: s.ferdig && s.lek === 'pekeleken' ? pektTavle(data) : null,
       turId: s.tur !== null && s.tur !== undefined ? (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null : null },
       s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
     if (s.type === 'mest') Object.assign(spill, { tekst: s.tekst, fase: s.fase, stemt: Object.keys(s.stemmer || {}).length, resultat: s.fase === 'resultat' ? s.resultat : null });
@@ -277,7 +277,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     spill = { type: s.type, lek: s.lek, navn: s.navn, modus: modusNavn(s, lang), runde: s.runde, frist: s.frist || null, turStart: s.turNokkel ? s.turStart || null : null };
     if (s.type === 'kort' && s.pek) Object.assign(spill, { pek: pekVisning(s, meg), pektTavle: pektTavle(data), pekForrige: s.pekForrige || null });
     if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
-      aldri: aldriVisning(s, meg), svarPaa: !!s.svarPaa, kanSvar: SVAR_LEKER.includes(s.lek), ferdig: !!s.ferdig, jaTavle: s.ferdig ? aldriTavle(s, data) : null },
+      aldri: aldriVisning(s, meg), svarPaa: !!s.svarPaa, kanSvar: SVAR_LEKER.includes(s.lek), ferdig: !!s.ferdig, jaTavle: s.ferdig && s.lek === 'jeg-har-aldri' ? aldriTavle(s, data) : null, pekSlutt: s.ferdig && s.lek === 'pekeleken' ? pektTavle(data) : null },
       s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, sist: s.sist, turId: (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
     if (s.type === 'mest') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase,
@@ -332,8 +332,8 @@ const FRIST = { mest: 30, forraeder: 30, tosannheter: 45, veddelopet: 45, nrKort
    Først Jeg har aldri: «Jeg har» eller «Aldri». Når alle har svart (eller tiden er ute) vises hvem som har,
    og de får én slurk hver. Den som ikke svarte, regnes som «Aldri». Verten kan slå det av og bare trekke kort. */
 const SVAR_LEKER = ['jeg-har-aldri'];
-/** Jeg har aldri: så mange kort i en runde. Kort dere ikke har hatt, kommer først. Så er leken ferdig. */
-const JA_LENGDE = 30;
+/** Kortlekene (ikke Ring of Fire): så mange kort i en runde. Kort dere ikke har hatt, kommer først. Så er leken ferdig. */
+const KORT_LENGDE = 30;
 /* ---------- Pekeleken: 3 · 2 · 1 · PEK! og fingertelling ----------
    Den som leser går på rundgang. Nedtellingen har et felles starttidspunkt, så alle telefoner og TV-en
    viser «PEK!» samtidig. Etterpå trykker hver person inn hvor mange som pekte på dem. Flest fingre drikker
@@ -616,7 +616,7 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
     const plussRom = !!(data.pluss && data.pluss.til > Date.now());
     if ((valgt as any).pluss && !plussRom) return feilL('pluss', 'Denne pakken krever mittvors pluss.', 'This pack needs mittvors pluss.');
     let rekke = kortstokkFor(lek, modus, sett);
-    if (lek === 'jeg-har-aldri') rekke = rekke.slice(0, JA_LENGDE);
+    if (lek !== 'ring-of-fire') rekke = rekke.slice(0, KORT_LENGDE);
     if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && rekke.length > 12) rekke = medSmakebiter(rekke);
     if (!rekke.length) return { feil: 'tom' };
     data.spill = { type: 'kort', lek, navn, modus, rekke, pos: 0, tur: lek === 'ring-of-fire' ? 0 : null, konger: 0, tilHendelse: nesteHendelse() };
@@ -1070,8 +1070,13 @@ function handlingInne(data: any, meg: any, h: any) {
       if (s.ferdig) return { ok: true };
       s.pos++;
       if (s.pos >= s.rekke.length) {
-        // Jeg har aldri slutter når bunken er tom – så velger verten hva dere gjør nå
-        if (s.lek === 'jeg-har-aldri') { s.pos = s.rekke.length - 1; s.ferdig = true; s.aldri = null; s.frist = null; melde(data, 'Kortene er brukt opp!', 'The cards are used up!'); return { ok: true }; }
+        // Kortlekene slutter når bunken er tom – så velger verten hva dere gjør nå
+        if (s.lek !== 'ring-of-fire') {
+          s.pos = s.rekke.length - 1; s.ferdig = true; s.aldri = null; s.frist = null;
+          if (s.pek && s.pek.resultat) s.pekForrige = { tekst: s.pekTekst || '', resultat: s.pek.resultat };
+          s.pek = null;
+          melde(data, 'Kortene er brukt opp!', 'The cards are used up!'); return { ok: true };
+        }
         s.rekke = kortstokkFor(s.lek, s.modus); s.pos = 0; s.konger = 0; melde(data, 'Stokket på nytt', 'Reshuffled');
       }
       s.trakk = meg.id;
@@ -1143,15 +1148,17 @@ function handlingInne(data: any, meg: any, h: any) {
       melde(data, `${navnPaa(data, a.ulv)} nekter å fortelle – fire slurker`, `${navnPaa(data, a.ulv)} won't tell – four sips`);
       return { ok: true };
     }
+    case 'kort-igjen':
     case 'aldri-igjen': {   // nye kort: de dere ikke har hatt først, også de dere nettopp spilte
-      if (!s || s.type !== 'kort' || s.lek !== 'jeg-har-aldri' || !s.ferdig) return { ok: true };
+      if (!s || s.type !== 'kort' || s.lek === 'ring-of-fire' || !s.ferdig) return { ok: true };
       if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
       const sett = new Set<string>((Array.isArray(h.sett) ? h.sett : []).slice(0, 2000).filter((x: any) => typeof x === 'string' && /^[0-9a-z]{1,8}$/.test(x)));
       s.rekke.forEach((k: any) => { if (!k.h && !k.smak) sett.add(kortId(k)); });
-      let rekke = kortstokkFor(s.lek, s.modus, sett).slice(0, JA_LENGDE);
+      let rekke = kortstokkFor(s.lek, s.modus, sett).slice(0, KORT_LENGDE);
       if (!romHarPluss(data)) rekke = medSmakebiter(rekke);
       Object.assign(s, { rekke, pos: 0, ferdig: false, konger: 0, aldriTeller: {}, tilHendelse: nesteHendelse(), trakk: meg.id });
       s.kort = visKort(s, data); nyAldriRunde(s);
+      if (s.lek === 'pekeleken') { s.pekTekst = s.kort && s.kort.t; nyPekRunde(s, data); }
       melde(data, 'Nye kort!', 'New cards!');
       return { ok: true };
     }

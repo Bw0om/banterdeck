@@ -809,6 +809,7 @@ html.i-spill .rom-kode{font-size:.92em}
 .slutt-knapp.hoved{grid-column:1/-1;background:var(--gul);color:var(--blekk)}
 .slutt-knapp.hoved small{color:var(--blekk)}
 .slutt-valg > .slutt-knapp:last-child:nth-child(odd){grid-column:1/-1}
+.slutt-valg:has(.hoved) > .slutt-knapp:last-child{grid-column:auto}
 @media (prefers-reduced-motion:reduce){.slutt-knapp{transition:none}}
 
 /* ---------- Jeg har aldri: svar i hemmelighet, så snus kortene ett om gangen ---------- */

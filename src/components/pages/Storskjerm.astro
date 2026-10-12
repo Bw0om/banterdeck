@@ -308,6 +308,15 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         '<div class="tvnr-folk">' + alle.map(function (p) { return '<span class="' + (svart.indexOf(p.id) !== -1 ? 'har' : 'mangler') + '">' + nrPille(d, p.id) + '</span>'; }).join('') +
         '<span class="tvnr-teller">' + svart.length + ' / ' + alle.length + T(' har svart', ' answered') + '</span></div></div></div>';
     }
+    /* De andre kortlekene når bunken er tom (Pekeleken viser hvem som ble pekt mest på i kveld) */
+    function kortFerdigScene(d, s) {
+      var pt = s.pekSlutt || [], forste = pt[0];
+      return '<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + esc(s.navn || '') + ' · ' + s.antall + T(' kort', ' cards') + '</p></div>' +
+        '<h1 class="tv-sporsmal">' + T('Kortene er brukt opp', 'The cards are used up') + '</h1>' +
+        (s.lek === 'pekeleken' && forste ? '<div class="tvja-ulv tvja-vinner">' + tvjaFigur(d, forste.id) + '<div><span>' + T('Mest utpekt i kveld', 'Most pointed at tonight') + '</span><b>' + esc(navn(forste.id)) + '</b><em>' + forste.n + T(' fingre', ' fingers') + '</em></div></div>' +
+          (pt.length > 1 ? '<ol class="tvnr-stilling tvja-rest">' + pt.slice(1).map(function (x) { return '<li>' + nrPille(d, x.id) + '<b>' + x.n + '</b></li>'; }).join('') + '</ol>' : '') : '') +
+        '<p class="tv-stor">' + esc(navn(d.vert)) + T(' velger hva dere gjør nå.', ' is choosing what to do next.') + '</p></div></div>';
+    }
     function aldriFerdigScene(d, s) {
       var l = s.jaTavle || [], forste = l[0];
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + T('Jeg har aldri · ', 'Never have I ever · ') + s.antall + T(' kort', ' cards') + '</p></div>' +
@@ -461,7 +470,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
           (s.velgMakker ? '<p class="tv-stor">🤝 ' + esc(navn(s.velgMakker)) + T(' velger makker …', ' is picking a mate …') + '</p>' : '') + makkere(s) + '</div></div>';
       }
       if (s.type === 'kort' && s.lek === 'ring-of-fire') return '<div class="tv-scene tv-sentrert">' + topp + (s.turId ? '<h1 class="tv-tur">' + T('Trekker: ', 'Drawing: ') + '<b>' + esc(navn(s.turId)) + '</b></h1>' : '') + rofKort(s.kort) + makkere(s) + '</div>';
-      if (s.type === 'kort' && s.ferdig && s.lek === 'jeg-har-aldri') return aldriFerdigScene(d, s);
+      if (s.type === 'kort' && s.ferdig && !s.ring) return s.lek === 'jeg-har-aldri' ? aldriFerdigScene(d, s) : kortFerdigScene(d, s);
       if (s.type === 'kort' && s.aldri) return aldriScene(d, s, topp);
       if (s.type === 'kort' && s.pek && s.pek.fase !== 'hendelse') return pekScene(d, s);
       if (s.type === 'kort') return '<div class="tv-scene tv-sentrert">' + topp + '<div class="tv-kort' + (s.kort && s.kort.h ? ' hendelse' : '') + '">' + (s.kort && s.kort.k ? '<span class="tv-etikett">' + esc(s.kort.k) + '</span>' : '') + '<p>' + esc(s.kort ? s.kort.t : '') + '</p></div><p class="tv-liten">' + (s.pos + 1) + ' / ' + s.antall + '</p></div>';

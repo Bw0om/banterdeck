@@ -1354,8 +1354,8 @@ export function startRom(LEKNAVN, LANG) {
 
   function kortSpill(s) {
     if (s.ring) return rofSpill(s);
+    if (s.ferdig) return s.lek === 'jeg-har-aldri' ? aldriFerdig(s) : kortFerdig(s);
     if (s.pek && s.pek.fase !== 'hendelse') return pekSpill(s);
-    if (s.ferdig && s.lek === 'jeg-har-aldri') return aldriFerdig(s);
     if (s.aldri) return aldriSpill(s) + aldriBryter(s);
     var k = s.kort || {};
     if (k.id) merkSett(s.lek, k.id);
@@ -1444,6 +1444,18 @@ export function startRom(LEKNAVN, LANG) {
       '<div class="ja-folk">' + folk + '<span>' + svart.length + T(' av ', ' of ') + alle.length + T(' har svart', ' answered') + '</span></div>' +
       (hint ? '<p class="nr-vent">' + hint + '</p>' : '') +
       (erVert() && svart.length ? '<p class="ja-vis"><button type="button" class="linkbtn" data-g="avslor">' + T('Vis svarene nå', 'Show the answers now') + '</button></p>' : '');
+  }
+  /** De andre kortlekene når bunken er tom: hvor mange kort dere spilte (i Pekeleken: hvem som ble pekt mest på), og så hva nå. */
+  function kortFerdig(s) {
+    var pt = s.pekSlutt || [], forste = pt[0], maks = Math.max(1, forste ? forste.n : 0);
+    var midt = s.lek === 'pekeleken' && forste
+      ? '<div class="ja-tavle"><p class="nr-etikett">' + T('Mest utpekt i kveld', 'Most pointed at tonight') + '</p>' +
+          '<div class="ja-vinner">' + nrPille(forste.id, 'stor') + '<b>' + jaNavn(forste.id) + '</b><em>' + forste.n + '</em></div>' +
+          (pt.length > 1 ? '<ul class="pk-soyler inn">' + pt.slice(1).map(function (x, i) {
+            return '<li style="--i:' + i + '"><span>' + jaNavn(x.id) + '</span><i><b style="transform:scaleX(' + (x.n / maks).toFixed(3) + ');background:' + nrFarge(x.id) + '"></b></i><em>' + x.n + '</em></li>'; }).join('') + '</ul>' : '') + '</div>'
+      : '<div class="pk-kort sd-ferdig"><b>' + s.antall + '</b><p>' + T('kort spilt. Det var det.', 'cards played. That was it.') + '</p></div>';
+    return jaTopp(esc(s.navn || '') + ' · ' + s.antall + T(' kort', ' cards'), T('Kortene er brukt opp', 'The cards are used up'), true) + midt +
+      lekSlutt([['kort-igjen', T('Nye kort', 'New cards'), T('Kort dere ikke har hatt', 'Cards you haven’t had')]]);
   }
   /** Når kortene er brukt opp: hvem som har gjort mest, og så hva dere gjør nå. */
   function aldriFerdig(s) {
@@ -3638,7 +3650,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'send-velg' || g === 'del-ut') return delUtArk();
     if (g === 'aldri-svar') { if (b.getAttribute('aria-pressed') === 'true') return; gjorAlltid({ handling: 'aldri-svar', v: b.dataset.v }); return; }
     if (g === 'aldri-nekt') return gjor({ handling: 'aldri-nekt' });
-    if (g === 'aldri-igjen') return gjor({ handling: 'aldri-igjen', sett: (settListe()['jeg-har-aldri'] || []).slice(-1500) });
+    if (g === 'aldri-igjen' || g === 'kort-igjen') { var lekId = tilstand.spill ? tilstand.spill.lek : ''; return gjor({ handling: 'kort-igjen', sett: (settListe()[lekId] || []).slice(-1500) }); }
     if (g === 'aldri-modus') return gjorAlltid({ handling: 'aldri-modus', paa: b.dataset.paa === '1' });
     if (g === 'br-svar') return gjor({ handling: 'br-svar', v: b.dataset.v });
     if (g === 'br-snu') return gjor({ handling: 'br-snu', pos: Number(b.dataset.pos) });
