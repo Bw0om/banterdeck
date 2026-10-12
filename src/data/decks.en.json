@@ -3274,6 +3274,10 @@
    {
     "v": "droy",
     "t": "Wild"
+   },
+   {
+    "v": "rommet",
+    "t": "About the room"
    }
   ],
   "items": [
@@ -3676,6 +3680,198 @@
    {
     "t": "The thing I’m most ashamed of from my final year of school is …",
     "m": "droy"
+   },
+   {
+    "t": "The dumbest reason I have been late for work was …",
+    "m": "snill"
+   },
+   {
+    "t": "The weirdest thing I have googled in the middle of the night was …",
+    "m": "snill"
+   },
+   {
+    "t": "The most over-the-top lie I have told my mum was …",
+    "m": "snill"
+   },
+   {
+    "t": "The most embarrassing thing I did in front of a school crush was …",
+    "m": "snill"
+   },
+   {
+    "t": "Something I have taken home from a hotel room is …",
+    "m": "snill"
+   },
+   {
+    "t": "The strangest thing I have said in a job interview was …",
+    "m": "snill"
+   },
+   {
+    "t": "The worst idea I have had after midnight was …",
+    "m": "snill"
+   },
+   {
+    "t": "The most creative excuse I have used to get out of a party was …",
+    "m": "snill"
+   },
+   {
+    "t": "The most embarrassing username I have had was …",
+    "m": "snill"
+   },
+   {
+    "t": "For a whole day I walked around with … and nobody told me",
+    "m": "snill"
+   },
+   {
+    "t": "My least impressive talent is …",
+    "m": "snill"
+   },
+   {
+    "t": "The most absurd argument I have ever won was about …",
+    "m": "snill"
+   },
+   {
+    "t": "The worst thing I have tasted at my in-laws was …",
+    "m": "snill"
+   },
+   {
+    "t": "The silliest celebrity I had a poster of in my room was …",
+    "m": "snill"
+   },
+   {
+    "t": "The most embarrassing thing I have said out loud on a full train was …",
+    "m": "snill"
+   },
+   {
+    "t": "What I cried about the most as a kid was that …",
+    "m": "snill"
+   },
+   {
+    "t": "Once I was stopped at customs because …",
+    "m": "snill"
+   },
+   {
+    "t": "The most pointless thing I have bought online was …",
+    "m": "snill"
+   },
+   {
+    "t": "The first time I got drunk ended with …",
+    "m": "droy"
+   },
+   {
+    "t": "The strangest match I have had on Tinder worked as …",
+    "m": "droy"
+   },
+   {
+    "t": "The message I sent to the wrong person was about …",
+    "m": "droy"
+   },
+   {
+    "t": "The worst thing I have done to get out of paying was …",
+    "m": "droy"
+   },
+   {
+    "t": "The most surprising thing I found out about an ex after the breakup was …",
+    "m": "droy"
+   },
+   {
+    "t": "The time I got caught red-handed, I was …",
+    "m": "droy"
+   },
+   {
+    "t": "The silliest reason I have been dumped was …",
+    "m": "droy"
+   },
+   {
+    "t": "The most indecent thing I have done in a public place was …",
+    "m": "droy"
+   },
+   {
+    "t": "My worst night out started innocently with …",
+    "m": "droy"
+   },
+   {
+    "t": "Something I have done at work that would have got me fired is …",
+    "m": "droy"
+   },
+   {
+    "t": "The strangest person I have kissed was …",
+    "m": "droy"
+   },
+   {
+    "t": "The dumbest thing I have done to make someone like me was …",
+    "m": "droy"
+   },
+   {
+    "t": "The thing I did at a party that I still hear about is …",
+    "m": "droy"
+   },
+   {
+    "t": "The most embarrassing reason I have had to see a doctor was …",
+    "m": "droy"
+   },
+   {
+    "t": "The biggest secret I have kept from my best friend was about …",
+    "m": "droy"
+   },
+   {
+    "t": "I once picked someone up by …",
+    "m": "droy"
+   },
+   {
+    "t": "The strangest thing I have heard about myself through gossip was …",
+    "m": "droy"
+   },
+   {
+    "t": "The worst thing I have said to someone I had a crush on was …",
+    "m": "droy"
+   },
+   {
+    "t": "The first thing I thought when I met someone in this room was …",
+    "m": "rommet"
+   },
+   {
+    "t": "The last thing I lied about to someone in this room was …",
+    "m": "rommet"
+   },
+   {
+    "t": "The person here I would call if I got arrested is … because …",
+    "m": "rommet"
+   },
+   {
+    "t": "The person here I have talked about behind their back the most is … because …",
+    "m": "rommet"
+   },
+   {
+    "t": "Something I borrowed from someone here and never gave back is …",
+    "m": "rommet"
+   },
+   {
+    "t": "The person here with the darkest search history is … because …",
+    "m": "rommet"
+   },
+   {
+    "t": "The time I was most jealous of someone here was when …",
+    "m": "rommet"
+   },
+   {
+    "t": "Something someone here said that I have never forgotten is …",
+    "m": "rommet"
+   },
+   {
+    "t": "The person here I would swap lives with for a day is … because …",
+    "m": "rommet"
+   },
+   {
+    "t": "The most embarrassing thing I know about someone here, which they think I have forgotten, is …",
+    "m": "rommet"
+   },
+   {
+    "t": "The person here I would take to a desert island is … because …",
+    "m": "rommet"
+   },
+   {
+    "t": "The first time I met someone here, I almost …",
+    "m": "rommet"
    }
   ]
  },

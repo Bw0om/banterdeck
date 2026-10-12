@@ -304,6 +304,31 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     }
     function nrTall(v) { var n = Number(v); return isFinite(n) ? n.toLocaleString(T('nb-NO', 'en-GB')) : esc(v); }
     var tvnrVist = '';
+    /* ---------- Løgnhalsen: kortet, hvem som forteller, stempelet og hvem som trodde hva ---------- */
+    var tvlhVist = '';
+    function lhScene(d, s) {
+      var alle = d.spillere || [], han = navn(s.aktiv), andre = alle.filter(function (p) { return p.id !== s.aktiv; }), har = s.harStemt || [];
+      var tavle = (s.lurtTavle || []).length ? '<ol class="tvnr-stilling" aria-label="' + T('Flest lurt', 'Most fooled') + '">' + s.lurtTavle.map(function (x) {
+        return '<li>' + nrPille(d, x.id) + '<b>' + T('lurte ', 'fooled ') + x.n + '</b></li>'; }).join('') + '</ol>' : '';
+      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Løgnhalsen · runde ', 'The liar · round ') + (s.runde || 1) + '</p>' + tavle + '</div>';
+      var hvem = '<div class="tvlh-hvem">' + nrPille(d, s.aktiv) + '<p>' + esc(han) + (s.fase === 'avslort' ? T(' fullførte kortet', ' finished the card') : T(' forteller', ' is telling')) + '</p></div>';
+      var kort = '<h1 class="tv-sporsmal">' + esc(s.tekst || '') + '</h1>';
+      if (s.fase === 'avslort' && s.resultat) {
+        var r = s.resultat, lyv = r.svar === 'lyv', st = r.stemmer || {}, sk = r.sikker || {}, vk = s.aktiv + ':' + s.runde, inn = vk !== tvlhVist; tvlhVist = vk;
+        var kol = function (svar, tittel) {
+          var folk = alle.filter(function (p) { return st[p.id] === svar; }), rett = (svar === 'lyv') === lyv;
+          return '<div class="tvlh-kol' + (rett ? ' rett' : '') + '"><p>' + tittel + '</p><div>' + (folk.length ? folk.map(function (p) { return '<span class="' + (sk[p.id] ? 'sikker' : '') + '">' + nrPille(d, p.id) + '</span>'; }).join('') : '<small>' + T('Ingen', 'Nobody') + '</small>') + '</div></div>';
+        };
+        return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + hvem + kort +
+          '<div class="tvlh-bunn"><em class="tvlh-stempel ' + (lyv ? 'logn' : 'sant') + (inn ? ' inn' : '') + '">' + (lyv ? T('Løgn!', 'Lie!') : T('Sant!', 'True!')) + '</em>' +
+          '<div class="tvlh-kolonner">' + kol('sannhet', T('Trodde sant', 'Believed it')) + kol('lyv', T('Trodde løgn', 'Called the lie')) + '</div></div></div></div>';
+      }
+      var bunn = s.fase === 'stem'
+        ? '<p class="tv-stor">' + T('Sant eller løgn? Stem på telefonen', 'True or lie? Vote on your phone') + '</p><div class="tvnr-folk">' + andre.map(function (p) { return '<span class="' + (har.indexOf(p.id) !== -1 ? 'har' : 'mangler') + '">' + nrPille(d, p.id) + '</span>'; }).join('') +
+          '<span class="tvnr-teller">' + har.length + ' / ' + andre.length + T(' har stemt', ' voted') + '</span></div>'
+        : '<p class="tv-stor">' + T('Hør godt etter – og grill ', 'Listen closely – then grill ') + esc(han) + T(' etterpå.', ' afterwards.') + '</p>';
+      return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + hvem + kort + bunn + '</div></div>';
+    }
     function nrScene(d, n) {
       var alle = d.spillere || [], uke = '<p class="tv-etikett">' + T('Nyhetsrunden · uke ', 'Nyhetsrunden · week ') + n.uke + '</p>';
       var stilling = '<ol class="tvnr-stilling" aria-label="' + T('Stillingen', 'Standings') + '">' + (n.tavle || []).map(function (x) {
@@ -364,11 +389,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         }
         return '<div class="tv-scene tv-sentrert">' + topp + '<h1 class="tv-sporsmal">' + esc(s.tekst) + '</h1><p class="tv-stor">' + T('Stem på telefonen', 'Vote on your phone') + ' · ' + (s.stemt || 0) + ' / ' + (d.spillere || []).length + '</p></div>';
       }
-      if (s.type === 'forraeder') {
-        if (s.fase === 'avslort' && s.resultat) return '<div class="tv-scene tv-sentrert">' + topp + '<h1 class="tv-sporsmal">' + esc(navn(s.aktiv)) + ' ' + (s.resultat.svar === 'lyv' ? T('LØY!', 'LIED!') : T('sa sannheten!', 'told the truth!')) + '</h1>' +
-          ((s.resultat.drikker || []).length ? '<ul class="tv-chips">' + s.resultat.drikker.map(function (x) { return '<span>🍺 ' + esc(x.navn) + ' · ' + x.slurker + '</span>'; }).join('') + '</ul>' : '') + '</div>';
-        return '<div class="tv-scene tv-sentrert">' + topp + '<p class="tv-stor">' + esc(navn(s.aktiv)) + T(' fullfører:', ' finishes:') + '</p><h1 class="tv-sporsmal">' + esc(s.tekst) + '</h1>' + (s.fase === 'stem' ? '<p class="tv-stor">' + T('Sannhet eller løgn? Stem på telefonen', 'Truth or lie? Vote on your phone') + '</p>' : '') + '</div>';
-      }
+      if (s.type === 'forraeder') return lhScene(d, s);
       if (s.offentlig && (s.offentlig.tekst || (s.offentlig.valg && s.offentlig.valg.length))) {
         var o = s.offentlig, ant = (d.spillere || []).length;
         return '<div class="tv-scene tv-sentrert">' + topp +
@@ -666,6 +687,21 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvnr-stilling li{display:flex;align-items:center;gap:.35em;padding:.2em .5em .2em .25em;background:#2A292E;border:3px solid #FFF8EE;border-radius:999px;font-weight:900}
     .tvnr-stilling li:first-child{box-shadow:4px 4px 0 #FFD23F}
     .tvnr-stilling b{font-variant-numeric:tabular-nums}
+    .tvlh-hvem{display:flex;align-items:center;gap:.6em;font-size:1.4em}
+    .tvlh-hvem p{margin:0;font-weight:800}
+    .tvlh-bunn{display:flex;align-items:center;gap:3vw;margin-top:2vh}
+    .tvlh-stempel{flex:none;display:inline-block;font-style:normal;font-family:var(--display);font-size:clamp(48px,6vw,110px);font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9;padding:.08em .25em .12em;color:#16120F;border:5px solid #FFF8EE;box-shadow:12px 12px 0 #FF5B1F;transform:rotate(-4deg)}
+    .tvlh-stempel.logn{background:#FF9CC2}
+    .tvlh-stempel.sant{background:#63E2A8}
+    .tvlh-stempel.inn{animation:tvlhStempel .46s cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvlhStempel{from{transform:rotate(-4deg) scale(1.7);opacity:0}to{transform:rotate(-4deg);opacity:1}}
+    .tvlh-kolonner{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.4vw}
+    .tvlh-kol{padding:.7em .9em;background:#2A292E;border:3px solid #FFF8EE;border-radius:8px;opacity:.6}
+    .tvlh-kol.rett{opacity:1;background:#63E2A8;color:#16120F;box-shadow:8px 8px 0 #FFD23F}
+    .tvlh-kol p{margin:0 0 .5em;font-weight:900;text-transform:uppercase;font-size:1.1em}
+    .tvlh-kol div{display:flex;gap:.4em;flex-wrap:wrap;font-size:1.3em}
+    .tvlh-kol .sikker .tvnr-p{box-shadow:0 0 0 4px #FF5B1F}
+    @media (prefers-reduced-motion:reduce){.tvlh-stempel.inn{animation:none}}
     @media (prefers-reduced-motion:reduce){.tvnr-alt.inn .tvnr-a em{animation:none}}
     .tv-toast,.tv-banner{border:3px solid #FFF8EE!important;border-radius:6px!important;box-shadow:6px 6px 0 #FFD23F!important;background:#16120F!important}
 </style>
