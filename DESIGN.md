@@ -93,6 +93,12 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **TV-en** viser figuren til hver person i kortene, og «Har gjort det» i svart på oransje, aldri gult på gult.
 - Kåringen «Mest erfaren» går til den som har sagt «Jeg har» flest ganger (minst fem).
 
+### Når kortene er brukt opp (alle kortleker)
+
+- Alle kortlekene unntatt Ring of Fire har 30 kort i en runde, de dere ikke har hatt først. Når bunken er tom, stokkes den ikke på nytt.
+- Verten får «Hva nå?»: neste i planen (hvis dere har en), **Nye kort** (30 dere ikke har hatt), en annen lek eller avslutt kvelden. De andre ser at verten velger.
+- Pekeleken viser hvem som er mest utpekt i kveld. De andre viser hvor mange kort dere spilte. TV-en viser det samme, med figuren til den som ble pekt mest på.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
