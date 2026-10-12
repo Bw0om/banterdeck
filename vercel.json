@@ -14,6 +14,51 @@
   ],
   "redirects": [
     {
+      "source": "/no/drinking-games/50-50",
+      "destination": "/no/drinking-games/jeg-har-aldri",
+      "permanent": true
+    },
+    {
+      "source": "/drinking-games/50-50",
+      "destination": "/drinking-games/jeg-har-aldri",
+      "permanent": true
+    },
+    {
+      "source": "/drikkeleker/50-50",
+      "destination": "/no/drinking-games/jeg-har-aldri",
+      "permanent": true
+    },
+    {
+      "source": "/no/drinking-games/duoleken",
+      "destination": "/no/drinking-games/pekeleken",
+      "permanent": true
+    },
+    {
+      "source": "/drinking-games/duoleken",
+      "destination": "/drinking-games/pekeleken",
+      "permanent": true
+    },
+    {
+      "source": "/drikkeleker/duoleken",
+      "destination": "/no/drinking-games/pekeleken",
+      "permanent": true
+    },
+    {
+      "source": "/no/drinking-games/sannhet-eller-drikk",
+      "destination": "/no/drinking-games/nodt-eller-sannhet",
+      "permanent": true
+    },
+    {
+      "source": "/drinking-games/sannhet-eller-drikk",
+      "destination": "/drinking-games/nodt-eller-sannhet",
+      "permanent": true
+    },
+    {
+      "source": "/drikkeleker/sannhet-eller-drikk",
+      "destination": "/no/drinking-games/nodt-eller-sannhet",
+      "permanent": true
+    },
+    {
       "source": "/",
       "has": [
         {
