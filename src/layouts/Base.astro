@@ -154,6 +154,21 @@ const isCurrent = (href: string) => {
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="mittvors" />
   <script is:inline>
+    /* Hold-trykk på telefon: et tomt berøringslytt gjør at iPhone viser trykk-animasjonen (:active) med en gang,
+       og lang-trykk på knapper, kort og bilder åpner ikke telefonens egen meny (Android). Tekstlenker i avsnitt beholder menyen. */
+    (function () {
+      if (window.__mvTrykk) return; window.__mvTrykk = true;
+      document.addEventListener('touchstart', function () {}, { passive: true });
+      document.addEventListener('contextmenu', function (e) {
+        var t = e.target; if (!t || !t.closest) return;
+        if (t.closest('input, textarea, [contenteditable="true"]')) return;
+        var lenke = t.closest('a');
+        if (lenke && lenke.closest('p, li') && !lenke.querySelector('img, svg') && !lenke.matches('.btn, [class*="knapp"]')) return;
+        if (t.closest('button, [role=button], [data-g], summary, img, svg, a')) e.preventDefault();
+      });
+    })();
+  </script>
+  <script is:inline>
     /* Lys eller mørk modus: settes før siden tegnes, og på nytt ved hvert sidebytte */
     (function () {
       /* Lys er standard; mørk bare når noen har valgt det selv */

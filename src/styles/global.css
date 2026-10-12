@@ -1993,3 +1993,12 @@ button,a,[role=button]{touch-action:manipulation}
 .rom-bg-pluss{font-family:var(--body,inherit);font-size:12px;font-weight:700;color:var(--gold-t);margin-left:4px}
 .rom-mester{margin:8px 0;padding:10px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);font-size:14px;line-height:1.4}
 .rom-mester.meg{border-color:var(--gold);background:rgb(var(--volt-rgb) / .1)}
+
+/* ---------- Hold-trykk på telefon ----------
+   Holder man fingeren på en knapp, et kort eller et bilde, viser telefonen ellers sin egen meny eller
+   forhåndsvisning (iPhone og Android). Da avbrytes trykk-animasjonen og klikket kommer aldri.
+   Her slås det av for alt som er knapper, kort, bilder og navigasjon. Vanlige tekstlenker inne i avsnitt
+   og lister beholder menyen, så folk fortsatt kan kopiere en lenke. Ingen innstillinger hos brukeren trengs. */
+a,button,[role=button],[data-g],summary,label,input[type=button],input[type=submit]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button,[role=button],[data-g],summary,img,svg,a:not(p a):not(li a):not(.lenke){-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+img,svg,a{-webkit-user-drag:none}
