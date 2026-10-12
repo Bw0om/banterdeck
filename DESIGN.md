@@ -100,6 +100,15 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - Verten får «Hva nå?»: neste i planen (hvis dere har en), **Nye kort** (30 dere ikke har hatt), en annen lek eller avslutt kvelden. De andre ser at verten velger.
 - Pekeleken viser hvem som er mest utpekt i kveld. De andre viser hvor mange kort dere spilte. TV-en viser det samme, med figuren til den som ble pekt mest på.
 
+### Enten eller
+
+- **Kortet deles i to valg**: «Enten» (oransje) og «Eller» (mint) som to store knapper med et «eller»-merke i midten. Kortstokken har 100 kort (65 + 35 nye), 30 per runde.
+- **Velg side i hemmelighet.** Klokka står på 20 sekunder. Har alle valgt, kortes den til tre sekunder, men ingen ser noe før den er ute. Du kan bytte valg så lenge klokka går. Verten kan «Snu nå».
+- **Hodene.** Ny figurstil i `hodeHtml` i stua.js: samme hår, hud og genserfarge som figuren, men rundt hode, store øyne med glans, rødme og skuldre. De står på en benk nederst med skuldrene under kanten. Før du har valgt stikker bare toppen av hodet opp; når du velger, reiser hodet seg (fjær). Øynene kikker på hverandre (pupillene flyttes hvert 1,4 s, blunker av og til). Brukes foreløpig bare i Enten eller, på telefon og TV.
+- **Snudd!** Sidene får antall og piller, benken deles i to farger og hodene glir til hver sin side. Mindretallet drikker én. Like mange: «Uavgjort! Skål.» Alle likt: den som trakk kortet drikker én for et for lett kort.
+- **Én alene** (minst tre som valgte): alle hodene stirrer på personen, som får «OI»-fjeset (hevede bryn, store øyne, åpen munn, svettedråpe). Søkelys med «Forsvar valget ditt!» og 20 sekunder. Personen eller verten trykker «Fikk med én» (velg hvem, som drikker én) eller «Drikk to».
+- Kåring «Mot strømmen» til den som har vært i mindretall flest ganger (minst tre).
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

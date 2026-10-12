@@ -39,9 +39,10 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   </script>
   <script>
     // Stua (src/klient/stua.js): de samme figurene som på telefonene
-    import { lagStua, figurHtml, utseende } from '../../klient/stua.js';
+    import { lagStua, figurHtml, utseende, hodeHtml } from '../../klient/stua.js';
     (window as any).mvLagStua = lagStua;
     // Figuren til en spiller (samme som i stua), til «kortet er til»-visningen
+    (window as any).mvHodeSvg = (p: any, uttrykk?: string) => '<svg class="mv-hode" viewBox="-30 -42 60 92" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id), uttrykk) + '</svg>';
     (window as any).mvFigurSvg = (p: any) => '<svg class="tvsd-figur" viewBox="-36 -106 72 112" aria-hidden="true">' + figurHtml(utseende(p.figur || p.id), p.pynt || null) + '</svg>';
     document.dispatchEvent(new CustomEvent('mv-stua-klar'));
   </script>
@@ -156,7 +157,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var drikk = [];
       (d.spillere || []).forEach(function (p) { var f = sett.slurker[p.id]; if (f != null && na.slurker[p.id] > f) drikk.push({ navn: p.navn, n: na.slurker[p.id] - f }); });
       // Når resultatet av en avstemning vises, står det allerede hvem som drikker – da holder det med resultatskjermen
-      var resultatNaa = na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort/.test(na.fase);
+      var resultatNaa = na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar/.test(na.fase);
       var nyUt = na.ut && na.ut !== sett.ut && d.utdeling;
       if (nyUt) visUtdeling(d.utdeling, d.alkoholfri);
       var knust = na.brudd && na.brudd !== sett.brudd;
@@ -171,7 +172,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (na.ferdig) stoppIntro();
       if ((na.vinner && na.vinner !== sett.vinner) || (na.ferdig && !sett.ferdig)) spill('fanfare');
       else if (na.kortNr && na.kortNr !== sett.kortNr) spill('pop');
-      if (na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort/.test(na.fase)) spill('svar');
+      if (na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar/.test(na.fase)) spill('svar');
       if (na.spillere > sett.spillere) spill('inn');
       if (na.hend && na.hend !== sett.hend && d.hendelse) toast(d.hendelse.tekst);
       if (na.reak !== sett.reak) flyReak(d.reak || [], sett.reak);
@@ -325,6 +326,70 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         (s.lek === 'pekeleken' && forste ? '<div class="tvja-ulv tvja-vinner">' + tvjaFigur(d, forste.id) + '<div><span>' + T('Mest utpekt i kveld', 'Most pointed at tonight') + '</span><b>' + esc(navn(forste.id)) + '</b><em>' + forste.n + T(' fingre', ' fingers') + '</em></div></div>' +
           (pt.length > 1 ? '<ol class="tvnr-stilling tvja-rest">' + pt.slice(1).map(function (x) { return '<li>' + nrPille(d, x.id) + '<b>' + x.n + '</b></li>'; }).join('') + '</ol>' : '') : '') +
         '<p class="tv-stor">' + esc(navn(d.vert)) + T(' velger hva dere gjør nå.', ' is choosing what to do next.') + '</p></div></div>';
+    }
+    /* ---------- Enten eller: to sider, og hodene som kikker på hverandre nederst ---------- */
+    var tvEeTimer = null, tvEeVist = '';
+    function tvEePlasser(alle, r) {
+      var n = alle.length, ut = {};
+      if (!r) { alle.forEach(function (p, i) { ut[p.id] = n === 1 ? 50 : (i / (n - 1)) * 100; }); return ut; }
+      var a = alle.filter(function (p) { return (r.a || []).indexOf(p.id) !== -1; }), b = alle.filter(function (p) { return (r.b || []).indexOf(p.id) !== -1; });
+      var rest = alle.filter(function (p) { return a.indexOf(p) === -1 && b.indexOf(p) === -1; });
+      var side = function (liste, fra, til) { liste.forEach(function (p, i) { ut[p.id] = liste.length === 1 ? (fra + til) / 2 : fra + (i / (liste.length - 1)) * (til - fra); }); };
+      side(a, 0, 40); side(b, 60, 100); side(rest, 46, 54);
+      return ut;
+    }
+    function tvEeTikk() {
+      clearInterval(tvEeTimer);
+      var se = function () {
+        var sp = tilstand && tilstand.spill, e = sp && sp.ee, benk = document.querySelector('.tvee-benk');
+        if (!e || !benk) { clearInterval(tvEeTimer); return; }
+        var hoder = Array.prototype.slice.call(benk.querySelectorAll('.tvee-hode')), r = e.resultat, alene = r && r.alene;
+        var x = function (h) { return parseFloat(h.style.getPropertyValue('--x')) || 0; };
+        hoder.forEach(function (h, i) {
+          var pup = h.querySelector('.mv-pup'); if (!pup) return;
+          var dx = 0, dy = -0.5;
+          if (alene) { if (h.dataset.id === alene) { dx = 0; dy = 2.4; } else { var m = hoder.find(function (o) { return o.dataset.id === alene; }); dx = Math.max(-3.2, Math.min(3.2, (x(m) - x(h)) * 8)); dy = 0.4; } }
+          else if (Math.random() > 0.18 && hoder.length > 1) {
+            var j = i + (Math.random() < 0.5 ? -1 : 1); if (j < 0 || j >= hoder.length || Math.random() < 0.3) j = Math.floor(Math.random() * hoder.length);
+            if (j !== i) { dx = Math.max(-3, Math.min(3, (x(hoder[j]) - x(h)) * 8)); dy = 0.6; }
+          }
+          pup.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)';
+        });
+      };
+      se(); tvEeTimer = setInterval(se, 1400);
+    }
+    function eeScene(d, s) {
+      var e = s.ee, alle = d.spillere || [], r = e.resultat, svart = e.harSvart || [], vk = s.pos + ':' + s.antall + ':' + e.fase, inn = vk !== tvEeVist; tvEeVist = vk;
+      setTimeout(tvEeTikk, 0);
+      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Enten eller · kort ', 'Would you rather · card ') + (s.pos + 1) + T(' av ', ' of ') + s.antall + '</p>' +
+        (e.fase !== 'svar' ? '<span class="tvja-snudd">' + (e.fase === 'forsvar' ? T('Én alene!', 'One alone!') : T('Snudd!', 'Flipped!')) + '</span>' : '') + '</div>';
+      var side = function (k, tittel, tekst, ider) {
+        return '<div class="tvee-side ' + k + '"><div class="tvee-topp"><span>' + tittel + (r ? ' · ' + ider.length : '') + '</span></div><b>' + esc(tekst) + '</b>' +
+          (r ? '<div class="tvee-folk">' + ider.map(function (id) { return nrPille(d, id); }).join('') + '</div>' : '') + '</div>';
+      };
+      var sider = '<div class="tvee-sider' + (inn ? ' inn' : '') + '">' + side('a', T('Enten', 'Either'), e.a, r ? r.a : []) + '<i class="tvee-eller">' + T('eller', 'or') + '</i>' + side('b', T('Eller', 'Or'), e.b, r ? r.b : []) + '</div>';
+      var bunn = '';
+      if (e.fase === 'svar') {
+        var igjen = s.frist ? Math.max(0, (s.frist - 1500 - (Date.now() + tvAvvik)) / 1000) : 0;
+        bunn = (igjen ? '<div class="tvja-lunte"><i style="--fra:' + Math.min(1, igjen / 20).toFixed(3) + ';animation-duration:' + igjen.toFixed(1) + 's"></i></div>' : '') +
+          '<p class="tv-stor">' + T('Velg side på telefonen. Ingen ser noe før klokka er ute.', 'Pick a side on your phone. Nobody sees anything until the clock runs out.') + ' · ' + svart.length + ' / ' + alle.length + '</p>';
+      } else if (e.fase === 'forsvar') {
+        var valgA = r.a.indexOf(r.alene) !== -1;
+        bunn = '<div class="tvja-ulv tvee-alene' + (inn ? ' inn' : '') + '"><div><span>' + T('Alene om ', 'Alone on ') + '«' + esc(valgA ? e.a : e.b) + '»</span><b>' + esc(navn(r.alene)) + '</b><em>' + T('Forsvar valget!', 'Defend the pick!') + '</em>' +
+          '<p>' + T('20 sekunder. Får hen med seg én, drikker den personen. Ellers drikker hen to.', '20 seconds. Win one person over and that person drinks. Otherwise drink two.') + '</p></div></div>';
+      } else {
+        var dom = r.uavgjort ? T('Uavgjort! Skål, alle sammen.', 'A tie! Cheers, everyone.')
+          : r.kjedelig ? T('Enstemmig. For lett kort – ', 'Unanimous. Too easy a card – ') + esc(navn(r.kjedelig)) + T(' trakk det og drikker én.', ' drew it and drinks one.')
+          : r.alene ? (r.med ? esc(navn(r.alene)) + T(' fikk med seg ', ' won over ') + esc(navn(r.med)) + T(', som drikker én.', ', who drinks one.') : esc(navn(r.alene)) + T(' sto alene og drikker to.', ' stood alone and drinks two.'))
+          : r.mindretall.length ? r.mindretall.map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and ')) + T(' er i mindretall – én slurk hver.', r.mindretall.length === 1 ? ' is in the minority – one sip.' : ' are in the minority – one sip each.')
+          : T('Ingen valgte.', 'Nobody picked.');
+        bunn = '<p class="tvja-dom' + (inn ? ' inn' : '') + '" style="--n:0">' + dom + '</p>';
+      }
+      var plass = tvEePlasser(alle, r), n = alle.length, w = n <= 6 ? 7.5 : n <= 10 ? 6 : 4.8;
+      var benk = '<div class="tvee-benk' + (r ? ' delt' : '') + '" style="--w:' + w + 'vw">' + (r ? '<i class="tvee-midt"></i>' : '') + alle.map(function (p, i) {
+        var oppe = r || svart.indexOf(p.id) !== -1, alene = r && r.alene === p.id, uttrykk = alene ? 'oi' : r && r.alene ? 'flat' : 'vanlig';
+        return '<div class="tvee-hode' + (alene ? ' alene' : '') + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="tvee-hev' + (oppe ? ' oppe' : '') + '"><span class="tvee-navn' + (oppe ? ' har' : '') + '">' + esc(p.navn) + '</span>' + (window.mvHodeSvg ? window.mvHodeSvg(p, uttrykk) : '') + '</div></div>'; }).join('') + '</div>';
+      return '<div class="tv-scene tvnr tvee' + (e.fase === 'forsvar' ? ' kompakt' : '') + '"><div class="tvnr-hoved">' + hode + sider + bunn + '</div>' + benk + '</div>';
     }
     function aldriFerdigScene(d, s) {
       var l = s.jaTavle || [], forste = l[0];
@@ -482,6 +547,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (s.type === 'kort' && s.lek === 'ring-of-fire') return '<div class="tv-scene tv-sentrert">' + topp + (s.turId ? '<h1 class="tv-tur">' + T('Trekker: ', 'Drawing: ') + '<b>' + esc(navn(s.turId)) + '</b></h1>' : '') + rofKort(s.kort) + makkere(s) + '</div>';
       if (s.type === 'kort' && s.ferdig && !s.ring) return s.lek === 'jeg-har-aldri' ? aldriFerdigScene(d, s) : kortFerdigScene(d, s);
       if (s.type === 'kort' && s.aldri) return aldriScene(d, s, topp);
+      if (s.type === 'kort' && s.ee) return eeScene(d, s);
       if (s.type === 'kort' && s.pek && s.pek.fase !== 'hendelse') return pekScene(d, s);
       if (s.type === 'kort') return '<div class="tv-scene tv-sentrert">' + topp + '<div class="tv-kort' + (s.kort && s.kort.h ? ' hendelse' : '') + '">' + (s.kort && s.kort.k ? '<span class="tv-etikett">' + esc(s.kort.k) + '</span>' : '') + '<p>' + esc(s.kort ? s.kort.t : '') + '</p></div><p class="tv-liten">' + (s.pos + 1) + ' / ' + s.antall + '</p></div>';
       if (s.type === 'mest') {
@@ -869,6 +935,44 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvja-rest{margin:2vh 0 0}
     @media (prefers-reduced-motion:reduce){.tvlh-stempel.inn,.tvpk-tall.inn,.tvja-ulv.inn em{animation:none}.tvja-svarene.inn .tvja-svar,.tvja-dom.inn,.tvja-ulv.inn{animation:tvjaToning .3s ease both;animation-delay:0s}}
     @keyframes tvjaToning{from{opacity:0}to{opacity:1}}
+    .tvee{position:relative;flex-direction:column}
+    .tvee .tvnr-hoved{padding-bottom:13vw}
+    .tvee-sider{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2.6vw;margin-top:1vh}
+    .tvee-side{display:flex;flex-direction:column;gap:1.2vh;padding:2.2vh 2vw;color:#16120F;border:5px solid #16120F;border-radius:12px;box-shadow:10px 10px 0 #FFD23F}
+    .tvee-side.a{background:#FF5B1F}.tvee-side.b{background:#63E2A8}
+    .tvee-topp span{font-size:1.2em;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+    .tvee-side b{font-family:var(--display);font-size:clamp(26px,2.9vw,52px);font-weight:900;font-stretch:78%;line-height:1.04}
+    .tvee-folk{display:flex;flex-wrap:wrap;gap:.4em;font-size:1.3em;min-height:1.6em}
+    .tvee-eller{position:absolute;left:50%;top:50%;z-index:2;transform:translate(-50%,-50%) rotate(-4deg);padding:.3em .7em;font-style:normal;font-size:1.6em;font-weight:900;text-transform:uppercase;color:#FFF8EE;background:#16120F;border:4px solid #FFF8EE}
+    .tvee-sider.inn .tvee-side{animation:tvjaInn .5s cubic-bezier(.23,1,.32,1) both}
+    .tvee-sider.inn .tvee-side.b{animation-delay:90ms}
+    .tvee-alene{margin-top:1vh;align-items:center}
+    .tvee-alene div{flex-direction:row;align-items:center;flex-wrap:wrap;padding-bottom:0;gap:.6em 1em}
+    .tvee-alene b{font-size:clamp(30px,3vw,52px)}
+    .tvee-alene em{font-size:1.1em}
+    .tvee-alene p{flex-basis:100%;font-size:.95em}
+    .tvee-alene span{flex-basis:100%;font-size:.9em}
+    .tvee.kompakt .tvee-side{padding:1.4vh 1.6vw;gap:.6vh}
+    .tvee.kompakt .tvee-side b{font-size:clamp(20px,2vw,36px)}
+    .tvee.kompakt .tvee-folk{font-size:1.05em}
+    .tvee-benk{position:absolute;left:0;right:0;bottom:0;height:12vw;border-top:4px solid #FFF8EE;background:#2A292E;overflow:hidden}
+    .tvee-benk.delt{background:linear-gradient(90deg,rgb(255 91 31 / .28) 50%,rgb(99 226 168 / .28) 50%)}
+    .tvee-midt{position:absolute;left:50%;top:0;bottom:0;border-left:3px dashed #FFF8EE;opacity:.5}
+    .tvee-hode{position:absolute;left:calc(2vw + (100% - 4vw - var(--w)) * var(--x));bottom:-3.6vw;width:var(--w);transition:left 560ms cubic-bezier(.23,1,.32,1)}
+    .tvee-hev{display:flex;flex-direction:column;align-items:center;gap:.3em;transform:translateY(2.8vw);transition:transform 680ms cubic-bezier(.23,1,.32,1)}
+    .tvee-hev.oppe{transform:translateY(0)}
+    .tvee-hode.alene .tvee-hev{animation:tveeOi 520ms cubic-bezier(.23,1,.32,1) both}
+    @keyframes tveeOi{0%{transform:translateY(0)}35%{transform:translateY(-1vw) rotate(-5deg)}100%{transform:translateY(0) rotate(0)}}
+    .tvee-navn{padding:.1em .6em;font-size:.95em;font-weight:900;color:#D9D2C7;background:#2A292E;border:2px dashed #D9D2C7;border-radius:999px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+    .tvee-navn.har{color:#16120F;background:#63E2A8;border:2px solid #16120F}
+    .tvee-hode.alene .tvee-navn{background:#FFD23F}
+    .mv-hode{display:block;width:100%;height:auto;overflow:visible}
+    .mv-pup{transition:transform 300ms cubic-bezier(.23,1,.32,1)}
+    .mv-lokk{transform-origin:0 4px;animation:mvBlunk 5.2s infinite;animation-delay:calc(var(--i,0) * 1.3s)}
+    @keyframes mvBlunk{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.06)}}
+    .mv-svette{animation:mvSvette 1.1s cubic-bezier(.23,1,.32,1) infinite}
+    @keyframes mvSvette{0%{transform:translateY(-4px);opacity:0}30%{opacity:1}100%{transform:translateY(8px);opacity:0}}
+    @media (prefers-reduced-motion:reduce){.mv-lokk,.mv-svette,.tvee-hode.alene .tvee-hev{animation:none}.mv-pup,.tvee-hev,.tvee-hode{transition:none}.tvee-sider.inn .tvee-side{animation:tvjaToning .3s ease both}}
     @media (prefers-reduced-motion:reduce){.tvnr-alt.inn .tvnr-a em{animation:none}}
     .tv-toast,.tv-banner{border:3px solid #FFF8EE!important;border-radius:6px!important;box-shadow:6px 6px 0 #FFD23F!important;background:#16120F!important}
 </style>

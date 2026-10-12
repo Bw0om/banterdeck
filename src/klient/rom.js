@@ -2,7 +2,7 @@
 // Ligger i en egen fil i stedet for inne i HTML-en: nettleseren og service workeren lagrer den, de to
 // språkversjonene deler den, og telefonen slipper å tolke 200 kB JavaScript på nytt hver gang rommet åpnes.
 // Startes fra Rom.astro ved hver sidevisning (astro:page-load), med lekenavnene og språket som argumenter.
-import { lagStua, figurHtml, utseende, PYNT_SVG } from './stua.js';
+import { lagStua, figurHtml, utseende, PYNT_SVG, hodeHtml } from './stua.js';
 import { klistremerke } from '../lib/klistremerker';
 import { TEMAER, temaLov, pyntNavn, PYNT, EKSTRA, sesong } from '../lib/pynt.js';
 
@@ -886,10 +886,11 @@ export function startRom(LEKNAVN, LANG) {
       ['Jo færre kort som er igjen, jo strammere blir ringen. Ringen kan bare brytes én gang – etter det er resten trygt.', 'The fewer cards left, the tighter the ring gets. The ring can only break once – after that the rest is safe.'],
       ['Gjør det kortet sier. Hver konge fyller kongekoppen – den som trekker fjerde konge, drikker den.', 'Do what the card says. Each king fills the king’s cup – whoever draws the fourth king drinks it.']],
     aldri: [['Kortet kommer opp på alle telefonene.', 'The card shows up on every phone.'], ['Svar «Jeg har» eller «Aldri». Ingen ser svaret før alle har svart.', 'Answer “I have” or “Never”. Nobody sees the answers until everyone has answered.'], ['De som har gjort det, drikker én slurk. Så trykker noen «Neste kort».', 'Everyone who has done it drinks one sip. Then someone taps “Next card”.'], ['Bare én har gjort det? Hen forteller historien og drikker to, eller fire hvis hen nekter. Ingen? Den som trakk kortet, drikker én.', 'Only one has done it? They tell the story and drink two, or four if they refuse. Nobody? Whoever drew the card drinks one.'], ['30 kort i en runde. Så velger verten hva dere gjør nå.', '30 cards a round. Then the host picks what to do next.']],
+    enten: [['Kortet har to valg. Velg side på telefonen – ingen ser hva du velger før klokka er ute.', 'The card has two options. Pick a side on your phone – nobody sees your pick until the clock runs out.'], ['Mindretallet drikker én. Like mange på hver side: ingen drikker. Alle likt: den som trakk kortet, drikker én.', 'The minority drinks one. Equal sides: nobody drinks. Everyone the same: whoever drew the card drinks one.'], ['Står én helt alene, får hen 20 sekunder til å forsvare valget. Får hen med seg én, drikker den personen – ellers drikker hen to.', 'If one person stands alone, they get 20 seconds to defend the pick. Win one person over and that person drinks – otherwise drink two.'], ['30 kort i en runde. Så velger verten hva dere gjør nå.', '30 cards a round. Then the host picks what to do next.']],
     kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Hvem som helst kan trykke «Neste kort».', 'Anyone can tap “Next card”.']],
   };
   function reglerPanel(s) {
-    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.pek ? 'pekeleken' : s.aldri || s.svarPaa ? 'aldri' : 'kort')) : s.type, r = REGLER[nokkel];
+    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.pek ? 'pekeleken' : s.aldri || s.svarPaa ? 'aldri' : s.ee || s.lek === 'enten-eller' ? 'enten' : 'kort')) : s.type, r = REGLER[nokkel];
     if (!r) return '';
     var sett = les('bd_regler_sett') || [], forste = sett.indexOf(nokkel) === -1;
     if (forste) { sett.push(nokkel); skriv('bd_regler_sett', sett.slice(-40)); apneRegler[nokkel] = true; }
@@ -1357,6 +1358,7 @@ export function startRom(LEKNAVN, LANG) {
     if (s.ring && s.ferdig && rofSkjult === s.nr) return rofSlutt(s);
     if (s.ring) return rofSpill(s);
     if (s.ferdig) return s.lek === 'jeg-har-aldri' ? aldriFerdig(s) : s.lek === 'ring-of-fire' ? rofSlutt(s) : kortFerdig(s);
+    if (s.ee) return eeSpill(s);
     if (s.pek && s.pek.fase !== 'hendelse') return pekSpill(s);
     if (s.aldri) return aldriSpill(s) + aldriBryter(s);
     var k = s.kort || {};
@@ -1454,6 +1456,96 @@ export function startRom(LEKNAVN, LANG) {
       (s.ring ? (s.ringBrutt && b ? esc(b.navn || '') + T(' brøt ringen.', ' broke the ring.') : T('Ringen holdt hele veien!', 'The ring held all the way!')) : T('Alle kortene er trukket.', 'Every card has been drawn.')) + '</p></div>';
     return jaTopp('Ring of Fire · 52 ' + T('kort', 'cards'), s.ring ? T('Ringen er tom', 'The ring is empty') : T('Kortene er brukt opp', 'The cards are used up'), true) + midt +
       lekSlutt([['kort-igjen', s.ring ? T('Ny ring', 'New ring') : T('Ny kortstokk', 'New deck'), T('Alle 52 kortene ut igjen', 'All 52 cards out again')]]);
+  }
+  /* ---------- Enten eller: velg side i hemmelighet, så ser alle hvem som valgte hva ----------
+     Hodene står med skuldrene nederst i ruta. Før du har valgt stikker bare toppen av hodet opp; når du velger,
+     reiser hodet seg (fjær). Øynene kikker på hverandre (eeTikk flytter pupillene, uten å tegne på nytt).
+     Når klokka er ute glir hodene til hver sin side. Er én alene, stirrer alle på hen – og hen får «OI»-fjeset. */
+  var eeVist = '', eeTimer = null, eeVelgMed = false;
+  function eeHode(p, uttrykk) { return '<svg class="mv-hode" viewBox="-30 -42 60 92" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id), uttrykk) + '</svg>'; }
+  /** Plassen til hvert hode: på rekke, eller samlet på hver sin side (Enten til venstre, Eller til høyre). */
+  function eePlasser(alle, r) {
+    var n = alle.length, ut = {};
+    if (!r) { alle.forEach(function (p, i) { ut[p.id] = n === 1 ? 50 : (i / (n - 1)) * 100; }); return ut; }
+    var a = alle.filter(function (p) { return (r.a || []).indexOf(p.id) !== -1; }), b = alle.filter(function (p) { return (r.b || []).indexOf(p.id) !== -1; });
+    var rest = alle.filter(function (p) { return a.indexOf(p) === -1 && b.indexOf(p) === -1; });
+    var side = function (liste, fra, til) { liste.forEach(function (p, i) { ut[p.id] = liste.length === 1 ? (fra + til) / 2 : fra + (i / (liste.length - 1)) * (til - fra); }); };
+    side(a, 0, 38); side(b, 62, 100); side(rest, 46, 54);
+    return ut;
+  }
+  function eeBenk(s, e, alle, r) {
+    var n = alle.length, w = r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = eePlasser(alle, r), svart = e.harSvart || [];
+    return '<div class="ee-benk' + (r ? ' delt' : '') + '" style="--w:' + w + 'px">' + (r ? '<i class="ee-midt"></i>' : '') + alle.map(function (p, i) {
+      var oppe = r || svart.indexOf(p.id) !== -1, alene = r && r.alene === p.id;
+      var uttrykk = alene ? 'oi' : r && r.alene ? 'flat' : 'vanlig';
+      return '<div class="ee-hode' + (alene ? ' alene' : '') + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' +
+        '<span class="ee-navn' + (oppe ? ' har' : '') + '">' + esc(p.id === tilstand.meg ? T('Du', 'You') : p.navn) + '</span>' + eeHode(p, uttrykk) + '</div></div>'; }).join('') + '</div>';
+  }
+  /** Øynene: hvert 1,4 s ser hvert hode på et annet (oftest naboen). Etter avsløringen stirrer alle på den som er alene. */
+  function eeTikk() {
+    clearInterval(eeTimer);
+    var se = function () {
+      var sp = tilstand && tilstand.spill, e = sp && sp.ee, benk = document.querySelector('.ee-benk');
+      if (!e || !benk) { clearInterval(eeTimer); return; }
+      var hoder = Array.prototype.slice.call(benk.querySelectorAll('.ee-hode')), r = e.resultat, alene = r && r.alene;
+      var x = function (h) { return parseFloat(h.style.getPropertyValue('--x')) || 0; };
+      hoder.forEach(function (h, i) {
+        var pup = h.querySelector('.mv-pup'); if (!pup) return;
+        var dx = 0, dy = -0.5;
+        if (alene) { if (h.dataset.id === alene) { dx = 0; dy = 2.4; } else { dx = Math.max(-3.2, Math.min(3.2, (x(hoder.find(function (o) { return o.dataset.id === alene; })) - x(h)) * 8)); dy = 0.4; } }
+        else if (Math.random() > 0.18 && hoder.length > 1) {
+          var j = i + (Math.random() < 0.5 ? -1 : 1); if (j < 0 || j >= hoder.length || Math.random() < 0.3) j = Math.floor(Math.random() * hoder.length);
+          if (j !== i) { dx = Math.max(-3, Math.min(3, (x(hoder[j]) - x(h)) * 8)); dy = 0.6; }
+        }
+        pup.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)';
+      });
+    };
+    se(); eeTimer = setInterval(se, 1400);
+  }
+  function eeSpill(s) {
+    var t = tilstand, e = s.ee, alle = t.spillere || [], r = e.resultat, nokkel = s.pos + ':' + s.antall + ':' + e.fase;
+    var inn = eeVist !== nokkel; if (inn) { eeVist = nokkel; eeVelgMed = false; }
+    setTimeout(eeTikk, 0);
+    var topp = jaTopp(T('Enten eller · kort ', 'Would you rather · card ') + (s.pos + 1) + T(' av ', ' of ') + s.antall,
+      e.fase === 'svar' ? T('Velg side', 'Pick a side') : e.fase === 'forsvar' ? T('Én alene!', 'One alone!') : T('Snudd!', 'Flipped!'), e.fase !== 'svar', e.fase === 'svar');
+    if (e.fase === 'svar') {
+      var svart = e.harSvart || [], mangler = alle.filter(function (p) { return svart.indexOf(p.id) === -1; });
+      return topp + '<div class="ee-valg' + (inn ? ' inn' : '') + '">' +
+        '<button type="button" class="ee-knapp a" data-g="ee-velg" data-v="a" aria-pressed="' + (e.mitt === 'a') + '"><span>' + T('Enten', 'Either') + '</span><b>' + esc(e.a) + '</b></button>' +
+        '<i class="ee-eller">' + T('eller', 'or') + '</i>' +
+        '<button type="button" class="ee-knapp b" data-g="ee-velg" data-v="b" aria-pressed="' + (e.mitt === 'b') + '"><span>' + T('Eller', 'Or') + '</span><b>' + esc(e.b) + '</b></button></div>' +
+        '<p class="nr-vent">' + (e.mitt ? (mangler.length ? T('Valgt. Ingen ser noe før klokka er ute – du kan bytte så lenge.', 'Picked. Nobody sees anything until the clock runs out – you can still change.') : T('Alle har valgt. Snus om et øyeblikk …', 'Everyone has picked. Flipping in a moment …'))
+          : T('Velg, så reiser hodet ditt seg. Ingen ser hva du velger før klokka er ute. Mindretallet drikker.', 'Pick, and your head rises. Nobody sees your pick until the clock runs out. The minority drinks.')) + '</p>' +
+        (erVert() && svart.length && mangler.length ? '<p class="ja-vis"><button type="button" class="linkbtn" data-g="avslor">' + T('Snu nå', 'Flip now') + '</button></p>' : '') +
+        eeBenk(s, e, alle, null);
+    }
+    var sist = s.pos + 1 >= s.antall, videre = '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste kort', 'Next card')) + '</button>';
+    var navnA = function (id) { return id === t.meg ? T('Du', 'You') : esc(navn(id)); };
+    var sider = '<div class="ee-sider' + (inn ? ' inn' : '') + '"><div class="ee-side a"><span>' + T('Enten', 'Either') + ' · ' + r.a.length + '</span><b>' + esc(e.a) + '</b><div>' + r.a.map(function (id) { return nrPille(id); }).join('') + '</div></div>' +
+      '<div class="ee-side b"><span>' + T('Eller', 'Or') + ' · ' + r.b.length + '</span><b>' + esc(e.b) + '</b><div>' + r.b.map(function (id) { return nrPille(id); }).join('') + '</div></div></div>';
+    if (e.fase === 'forsvar') {
+      var jeg = r.alene === t.meg, kan = jeg || erVert(), igjen = Math.max(0, e.forsvar - Math.floor((Date.now() + klokkeAvvik - (e.forsvarFra || Date.now())) / 1000));
+      var andre = alle.filter(function (p) { return p.id !== r.alene; });
+      var valgA = r.a.indexOf(r.alene) !== -1;
+      return topp + sider +
+        '<div class="ja-ulv ee-alene' + (inn ? ' inn' : '') + '"><span class="ja-ulv-etikett">' + T('Alene om ', 'Alone on ') + '«' + esc(valgA ? e.a : e.b) + '»</span>' +
+          '<b class="ja-ulv-navn">' + navnA(r.alene) + '</b><span class="ja-ulv-be">' + (jeg ? T('Forsvar valget ditt!', 'Defend your pick!') : T('Forsvar valget!', 'Defend the pick!')) + '</span>' +
+          '<p>' + T('20 sekunder. Får ', '20 seconds. If ') + (jeg ? T('du', 'you') : esc(navn(r.alene))) + T(' med seg én, drikker den personen. Ellers ', ' wins one person over, that person drinks. Otherwise ') + (jeg ? T('drikker du to.', 'you drink two.') : T('drikker hen to.', 'they drink two.')) + '</p>' +
+          '<i class="pk-forsvar-tid" style="--s:' + igjen + 's"></i></div>' +
+        (kan ? (eeVelgMed
+          ? '<p class="nr-etikett">' + T('Hvem byttet side?', 'Who switched?') + '</p><div class="ee-med">' + andre.map(function (p) { return '<button type="button" data-g="ee-forsvar" data-med="' + p.id + '">' + nrPille(p.id) + '<span>' + esc(p.navn) + '</span></button>'; }).join('') + '</div>'
+          : '<div class="pk-forsvar-valg"><button type="button" data-g="ee-med">' + T('Fikk med én', 'Won one over') + '</button><button type="button" class="drikk" data-g="ee-forsvar">' + T('Drikk to', 'Drink two') + '</button></div>')
+          : '<p class="nr-vent">' + esc(navn(r.alene)) + T(' (eller verten) trykker når talen er holdt.', ' (or the host) taps once the speech is done.') + '</p>') +
+        eeBenk(s, e, alle, r);
+    }
+    // Avslørt
+    var dom;
+    if (r.uavgjort) dom = '<b>' + T('Uavgjort!', 'A tie!') + '</b> ' + T('Skål, alle sammen.', 'Cheers, everyone.');
+    else if (r.kjedelig) dom = '<b>' + T('Enstemmig.', 'Unanimous.') + '</b> ' + T('For lett kort – ', 'Too easy a card – ') + navnA(r.kjedelig) + T(' trakk det og drikker én.', ' drew it and drinks one.');
+    else if (r.alene) dom = r.med ? '<b>' + navnA(r.alene) + T(' fikk med seg ', ' won over ') + navnA(r.med) + '.</b> ' + navnA(r.med) + T(' drikker én.', ' drinks one.') : '<b>' + navnA(r.alene) + T(' sto alene.', ' stood alone.') + '</b> ' + T('Drikker to.', 'Drinks two.');
+    else if (r.mindretall.length) dom = '<b>' + r.mindretall.map(navnA).join(T(' og ', ' and ')) + T(' er i mindretall.', r.mindretall.length === 1 ? ' is in the minority.' : ' are in the minority.') + '</b> ' + T('Én slurk hver.', 'One sip each.');
+    else dom = T('Ingen valgte. Et stille rom.', 'Nobody picked. A quiet room.');
+    return topp + sider + '<p class="ja-dom' + (inn ? ' inn' : '') + '" style="--n:0">' + dom + '</p>' + videre + eeBenk(s, e, alle, r);
   }
   /** De andre kortlekene når bunken er tom: hvor mange kort dere spilte (i Pekeleken: hvem som ble pekt mest på), og så hva nå. */
   function kortFerdig(s) {
@@ -3549,7 +3641,7 @@ export function startRom(LEKNAVN, LANG) {
   // knappen det første 0,7 sekundet – ellers hopper et dobbelttrykk over kortet ingen rakk å lese.
   var sistInnhold = '', sperreTil = 0;
   function merkNyttInnhold(s) {
-    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur, s.aldri ? s.aldri.fase : '', s.ferdig ? 'f' : ''].join('|') : 'ingen';
+    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur, s.aldri ? s.aldri.fase : '', s.ee ? s.ee.fase : '', s.ferdig ? 'f' : ''].join('|') : 'ingen';
     if (k !== sistInnhold) { if (sistInnhold) sperreTil = Date.now() + 700; sistInnhold = k; }
   }
 
@@ -3660,6 +3752,9 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'send-velg' || g === 'del-ut') return delUtArk();
     if (g === 'aldri-svar') { if (b.getAttribute('aria-pressed') === 'true') return; gjorAlltid({ handling: 'aldri-svar', v: b.dataset.v }); return; }
     if (g === 'aldri-nekt') return gjor({ handling: 'aldri-nekt' });
+    if (g === 'ee-velg') { if (b.getAttribute('aria-pressed') === 'true') return; spillLyd('pop'); gjorAlltid({ handling: 'ee-velg', v: b.dataset.v }); return; }
+    if (g === 'ee-med') { eeVelgMed = true; return tegn(); }
+    if (g === 'ee-forsvar') return gjor({ handling: 'ee-forsvar', med: b.dataset.med || null });
     if (g === 'aldri-igjen' || g === 'kort-igjen') { var lekId = tilstand.spill ? tilstand.spill.lek : ''; return gjor({ handling: 'kort-igjen', sett: (settListe()[lekId] || []).slice(-1500) }); }
     if (g === 'aldri-modus') return gjorAlltid({ handling: 'aldri-modus', paa: b.dataset.paa === '1' });
     if (g === 'br-svar') return gjor({ handling: 'br-svar', v: b.dataset.v });

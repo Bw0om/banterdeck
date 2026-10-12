@@ -84,6 +84,48 @@ export function figurHtml(p, pynt) {
     `<circle cx="-9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/><circle cx="9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/>` +
     HAAR[p.haar].replace(/\{h\}/g, p.h) + OYNE[p.oyne] + MUNN[p.munn] + pyntHtml(pynt) + '<g class="boble-plass"></g></g>';
 }
+/* ---------- Hodene: søte, runde hoder med store øyne som kan se rundt seg ----------
+   Samme hår, hud og farge som figuren (utseende(id)), men større og rundere. Brukes der folk skal se på
+   hverandre: de står med skuldrene nederst i ruta og reiser seg når de har svart. Øynene flyttes utenfra
+   (gruppa .mv-pup får en transform), så telefonen og TV-en styrer blikket uten å tegne på nytt. */
+const HODE_HAAR = {
+  kort: `<path d="M-22 -4a22 22 0 0 1 44 0q-6-9-14-9q-4 6-10 6q-6-7-12 0q-5-2-8 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  lang: `<path d="M-22 -4a22 22 0 0 1 44 0q-9-6-22-6t-22 6z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  lue: `<path d="M-22 -6a22 22 0 0 1 44 0z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><rect x="-24" y="-9" width="48" height="7" rx="3.5" fill="{h}" stroke="${B}" stroke-width="3"/><circle cx="0" cy="-30" r="5" fill="{h}" stroke="${B}" stroke-width="3"/>`,
+  krus: `<path d="M-22 -4a22 22 0 0 1 44 0q-9-6-22-6t-22 6z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  hestehale: `<path d="M-22 -4a22 22 0 0 1 44 0q-9-6-22-6t-22 6z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+};
+const HODE_BAK = {
+  lang: `<path d="M-24 18v-20a24 24 0 0 1 48 0v20h-8v-16q-16-6-32 0v16z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  krus: `<g fill="{h}" stroke="${B}" stroke-width="3"><circle cx="-17" cy="-13" r="8"/><circle cx="17" cy="-13" r="8"/><circle cx="-7" cy="-22" r="8"/><circle cx="7" cy="-22" r="8"/><circle cx="0" cy="-26" r="7"/></g>`,
+  hestehale: `<path d="M18 -12q14 2 13 22q-8-5-11-14" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+};
+const HODE_MUNN = {
+  smil: `<path d="M-5 15q5 4 10 0" fill="none" stroke="${B}" stroke-width="2.6" stroke-linecap="round"/>`,
+  glis: `<path d="M-6 13h12q-1 7-6 7t-6-7z" fill="${B}"/><path d="M-4 13h8v2h-8z" fill="#FFF8EE"/>`,
+  o: `<ellipse cx="0" cy="15" rx="2.6" ry="3" fill="${B}"/>`,
+  tunge: `<path d="M-5 14q5 4 10 0" fill="none" stroke="${B}" stroke-width="2.6" stroke-linecap="round"/><path d="M1 16q2 4 5 0" fill="#FF5B1F" stroke="${B}" stroke-width="2"/>`,
+  sur: `<path d="M-5 16q5-3 10 0" fill="none" stroke="${B}" stroke-width="2.6" stroke-linecap="round"/>`,
+  flat: `<path d="M-5 15q5-2 10 0" fill="none" stroke="${B}" stroke-width="2.6" stroke-linecap="round"/>`,
+  oi: `<ellipse cx="0" cy="16" rx="4.5" ry="5.5" fill="${B}"/><ellipse cx="0" cy="18" rx="2.5" ry="2" fill="#FF5B1F"/>`,
+};
+/** Innholdet i et hode. uttrykk: 'vanlig' | 'oi' (store øyne, hevede bryn, åpen munn, svettedråpe) | 'flat' (litt flau munn). */
+export function hodeHtml(p, uttrykk) {
+  const oi = uttrykk === 'oi', h = p.h || B, haar = HODE_HAAR[p.haar] ? p.haar : 'kort';
+  const munn = oi ? HODE_MUNN.oi : uttrykk === 'flat' ? HODE_MUNN.flat : (HODE_MUNN[p.munn] || HODE_MUNN.smil);
+  const ry = oi ? 8 : 6.5, r = oi ? 2.2 : 3.2;
+  return (HODE_BAK[haar] || '').replace(/\{h\}/g, h) +
+    `<path d="M-27 50q1-26 27-26t27 26z" fill="${p.topp}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><path d="M-7 25q7 6 14 0" fill="none" stroke="${B}" stroke-width="2.6" stroke-linecap="round"/>` +
+    `<circle cx="0" cy="0" r="22" fill="${p.hud}" stroke="${B}" stroke-width="3"/>` +
+    HODE_HAAR[haar].replace(/\{h\}/g, h) +
+    `<circle cx="-15" cy="9" r="4" fill="#FF9CC2" opacity=".8"/><circle cx="15" cy="9" r="4" fill="#FF9CC2" opacity=".8"/>` +
+    (oi ? `<path d="M-14 -7q6-4 11-1M3 -8q5-3 11 1" fill="none" stroke="${B}" stroke-width="2.4" stroke-linecap="round"/>` : '') +
+    `<g class="mv-lokk"><ellipse cx="-8" cy="4" rx="6" ry="${ry}" fill="#FFFFFF" stroke="${B}" stroke-width="2.5"/><ellipse cx="8" cy="4" rx="6" ry="${ry}" fill="#FFFFFF" stroke="${B}" stroke-width="2.5"/>` +
+    `<g class="mv-pup"><circle cx="-8" cy="4" r="${r}" fill="${B}"/><circle cx="8" cy="4" r="${r}" fill="${B}"/><circle cx="-6.8" cy="2.6" r="1.1" fill="#FFFFFF"/><circle cx="9.2" cy="2.6" r="1.1" fill="#FFFFFF"/></g></g>` +
+    munn + (oi ? `<path class="mv-svette" d="M25 -12q4 5 0 8q-4-3 0-8z" fill="#7CC6FE" stroke="${B}" stroke-width="2"/>` : '');
+}
+/** Hodet med skuldre som SVG (60 bred, 92 høy). Skuldrene er ment å gå under kanten av ruta. */
+export function hodeSvgNy(p, uttrykk, klasse) { return `<svg class="mv-hode${klasse ? ' ' + klasse : ''}" viewBox="-30 -42 60 92" aria-hidden="true">${hodeHtml(p, uttrykk)}</svg>`; }
 /** Bare hodet, til små fjes (f.eks. «Hvor mange er dere?»). */
 export function hodeSvg(p) { return `<svg viewBox="-19 -80 38 40" aria-hidden="true">${figurHtml(p)}</svg>`; }
 
