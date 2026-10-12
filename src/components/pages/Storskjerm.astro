@@ -403,6 +403,26 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + kort + bunn + '</div></div>';
     }
+    var tvDuoVist = '';
+    function tvDuoPlasser(alle, duo) {
+      var ut = {}, andre = alle.filter(function (p) { return duo.indexOf(p.id) === -1; }), v = Math.ceil(andre.length / 2);
+      ut[duo[0]] = 41; ut[duo[1]] = 59;
+      andre.forEach(function (p, i) {
+        var venstre = i < v, k = venstre ? i : i - v, m = venstre ? v : andre.length - v, fra = venstre ? 2 : 74, til = venstre ? 26 : 98;
+        ut[p.id] = m === 1 ? (venstre ? 12 : 88) : fra + (k / (m - 1)) * (til - fra);
+      });
+      return ut;
+    }
+    /** Hoder som har flyttet seg siden forrige tegning, glir dit (FLIP med fjær, bare transform). */
+    function tvBenkRekter() { var ut = {}; rot.querySelectorAll('.tvee-benk .tvee-hode').forEach(function (h) { ut[h.dataset.id] = h.getBoundingClientRect().left; }); return ut; }
+    function tvBenkGli(fra) {
+      try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (x) {}
+      rot.querySelectorAll('.tvee-benk .tvee-hode').forEach(function (h) {
+        var x = fra[h.dataset.id]; if (x == null || !h.animate) return;
+        var dx = x - h.getBoundingClientRect().left; if (Math.abs(dx) < 2) return;
+        h.animate([{ transform: 'translateX(' + dx + 'px)' }, { transform: 'none' }], { duration: 680, easing: TVKB_FJAER });
+      });
+    }
     function tvStolPlasser(alle, stol) {
       var ut = {}, andre = alle.filter(function (p) { return p.id !== stol; }), v = Math.ceil(andre.length / 2);
       ut[stol] = 50;
@@ -474,15 +494,15 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     function tvBenk(d, alle, o) {
       o = o || {}; var r = o.sider || null, n = alle.length, oi = o.oi || [];
       if (!n) return '';
-      var plass = o.par ? tvRrPlasser(alle, o.par) : o.stol ? tvStolPlasser(alle, o.stol) : tvEePlasser(alle, r), w = n <= 6 ? 7.5 : n <= 10 ? 6 : 4.8;
+      var plass = o.par ? tvRrPlasser(alle, o.par) : o.duo ? tvDuoPlasser(alle, o.duo) : o.stol ? tvStolPlasser(alle, o.stol) : tvEePlasser(alle, r), w = n <= 6 ? 7.5 : n <= 10 ? 6 : 4.8;
       var stil = '--w:' + w + 'vw' + (r && r.fa ? ';--fa:' + r.fa : '') + (r && r.fb ? ';--fb:' + r.fb : '');
       setTimeout(tvBenkTikk, 0);
       var bombe = o.bombe && plass[o.bombe.id] != null ? tvKbBombe(plass[o.bombe.id], o.bombe) : '';
-      return '<div class="tvee-benk' + (r ? ' delt' : '') + (o.par ? ' rygg' + (o.par.snudd ? ' snudd' : '') : '') + (o.stol ? ' stolen' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
-        (r ? '<i class="tvee-midt"></i>' + (r.la ? '<span class="tvee-sidenavn a">' + esc(r.la) + '</span><span class="tvee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') + bombe +
+      return '<div class="tvee-benk' + (r ? ' delt' : '') + (o.par ? ' rygg' + (o.par.snudd ? ' snudd' : '') : '') + (o.stol ? ' stolen' : '') + (o.duo ? ' duo' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
+        (r ? '<i class="tvee-midt"></i>' + (r.la ? '<span class="tvee-sidenavn a">' + esc(r.la) + '</span><span class="tvee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') + bombe + (o.duo ? '<i class="tvduo-hjerte' + (o.duoInn ? ' inn' : '') + '"><svg viewBox="-20 -18 40 36" aria-hidden="true"><path d="M0 14C-22 0 -16 -16 -6 -14C-2 -13 0 -9 0 -7C0 -9 2 -13 6 -14C16 -16 22 0 0 14Z" fill="#FF9CC2" stroke="#16120F" stroke-width="3" stroke-linejoin="round"/></svg></i>' : '') +
         alle.map(function (p, i) {
           var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1 || p.id === o.stol, erOi = oi.indexOf(p.id) !== -1, uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
-          var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : o.bombe && p.id === o.bombe.id ? ' holder' : '';
+          var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : o.bombe && p.id === o.bombe.id ? ' holder' : o.duo ? (p.id === o.duo[0] ? ' duo-a' : p.id === o.duo[1] ? ' duo-b' : '') : '';
           return '<div class="tvee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="tvee-hev' + (oppe ? ' oppe' : '') + '"><span class="tvee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.navn) + '</span>' + (window.mvHodeSvg ? window.mvHodeSvg(p, uttrykk) : '') + '</div></div>'; }).join('') + '</div>';
     }
     var tvBenkTimer = null;
@@ -600,13 +620,13 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         var el = document.getElementById('tvPekTall'), sp = tilstand && tilstand.spill, pk = sp && sp.pek;
         if (!el || !pk || pk.fase !== 'teller') { clearInterval(tvPekTimer); return; }
         var tr = tvPekTrinn(pk), k = pk.start + ':' + tr;
-        if (k !== tvPekSist) { tvPekSist = k; el.textContent = tr || T('Pek!', 'Point!'); el.className = 'tvpk-tall' + (tr ? '' : ' pek') + (tr === 1 ? ' en' : ''); void el.offsetWidth; el.classList.add('inn'); }
+        if (k !== tvPekSist) { tvPekSist = k; el.textContent = tr || (pk.duo ? T('Pek på to!', 'Point at two!') : T('Pek!', 'Point!')); el.className = 'tvpk-tall' + (tr ? '' : ' pek') + (tr === 1 ? ' en' : ''); void el.offsetWidth; el.classList.add('inn'); }
         if (Date.now() + tvAvvik - pk.start > pk.tell + 1500) clearInterval(tvPekTimer);
       }, 60);
     }
     function pekScene(d, s) {
-      var pk = s.pek, tekst = String((s.kort && s.kort.t) || ''), m = tekst.match(/^(Hvem er mest sannsynlig til å|Who's most likely to|Who is most likely to)\s+/i), rest = m ? tekst.slice(m[0].length) : tekst;
-      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Pekeleken · kort ', 'Most likely to · card ') + (s.pos + 1) + '</p>' + (pk.vri ? '<span class="tvpk-vri">' + T('Vri: ', 'Twist: ') + esc(TV_VRI[pk.vri] || '') + '</span>' : '') +
+      var pk = s.pek, tekst = String((s.kort && s.kort.t) || ''), m = tekst.match(pk.duo ? /^(Hvem hadde|Which two would)\s+/i : /^(Hvem er mest sannsynlig til å|Who's most likely to|Who is most likely to)\s+/i), rest = m ? tekst.slice(m[0].length) : tekst;
+      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Pekeleken · kort ', 'Most likely to · card ') + (s.pos + 1) + '</p>' + (pk.duo ? '<span class="tvpk-vri duo">' + T('Duo: pek på to', 'Duo: point at two') + '</span>' : pk.vri ? '<span class="tvpk-vri">' + T('Vri: ', 'Twist: ') + esc(TV_VRI[pk.vri] || '') + '</span>' : '') +
         ((s.pektTavle || []).length ? '<ol class="tvnr-stilling" aria-label="' + T('Mest utpekt i kveld', 'Most pointed at tonight') + '">' + s.pektTavle.map(function (x) { return '<li>' + nrPille(d, x.id) + '<b>' + x.n + '</b></li>'; }).join('') + '</ol>' : '') + '</div>';
       var kort = (m ? '<p class="tvpk-pre">' + esc(m[1]) + ' …</p>' : '') + '<h1 class="tv-sporsmal">' + esc(rest) + '</h1>';
       var bunn = '';
@@ -621,7 +641,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         else bunn = '<p class="tv-stor">' + T('Trykk inn hvor mange som pekte på deg', 'Tap how many pointed at you') + ' · ' + (pk.harTalt || []).length + ' / ' + (d.spillere || []).length + '</p>';
       } else if (pk.resultat) {
         var r = pk.resultat, navnene = (r.topp || []).map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and '));
-        bunn = '<div class="tvpk-bunn"><span class="tvpk-tall pek">' + (r.topp && r.topp.length ? (pk.fase === 'forsvar' ? navnene + T(' forsvarer seg', ' defends') : r.slapp ? navnene + T(' slapp unna', ' got away') : navnene + T(' drikker ', ' drinks ') + r.slurker) : T('Ingen fingre', 'No fingers')) + '</span></div>';
+        bunn = '<div class="tvpk-bunn"><span class="tvpk-tall pek">' + (r.duo ? r.topp.map(function (id) { return esc(navn(id)); }).join(' & ') + T(' – skål!', ' – cheers!') : r.topp && r.topp.length ? (pk.fase === 'forsvar' ? navnene + T(' forsvarer seg', ' defends') : r.slapp ? navnene + T(' slapp unna', ' got away') : navnene + T(' drikker ', ' drinks ') + r.slurker) : T('Ingen fingre', 'No fingers')) + '</span></div>';
       }
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + kort + bunn + '</div></div>';
     }
@@ -723,6 +743,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (s.type === 'kort' && s.pek && s.pek.fase !== 'hendelse') {
         var pk = s.pek, pkAlle = d.spillere || [], pkBenk = '';
         if (pk.fase === 'teller' && Date.now() + tvAvvik - pk.start > pk.tell + 1500) pkBenk = tvBenk(d, pkAlle, { oppe: pk.harTalt || [] });
+        else if (pk.fase === 'ferdig' && pk.resultat && pk.resultat.duo) { var tdk = s.pos + ':' + pk.resultat.topp.join(), tdInn = tvDuoVist !== tdk; tvDuoVist = tdk; pkBenk = tvBenk(d, pkAlle, { oppe: true, duo: pk.resultat.topp, duoInn: tdInn }); }
         else if ((pk.fase === 'ferdig' || pk.fase === 'forsvar') && pk.resultat) { var pkTopp = pk.resultat.slapp && pk.fase === 'ferdig' ? [] : pk.resultat.topp || []; pkBenk = tvBenk(d, pkAlle, { oppe: true, oi: pkTopp, stirr: pkTopp.length === 1 ? pkTopp[0] : '', flat: true }); }
         return tvMedBenk(pekScene(d, s), pkBenk);
       }
@@ -790,12 +811,12 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       // Nytt kort eller nytt spørsmål? Da deles det ut på TV-en også – alle ser mot skjermen samtidig
       var sp = d.spill, nokkel = sp ? [sp.type, sp.lek, sp.pos, sp.fase, sp.tekst, sp.kort ? (sp.kort.t || '') + (sp.kort.v || '') + (sp.kort.s || '') : ''].join('|') : '';
       var nyttKort = !!(nokkel && nokkel !== sistTvKort); sistTvKort = nokkel;
-      var kbFra = tvKbRekt();
+      var kbFra = tvKbRekt(), benkFra = tvBenkRekter();
       rot.innerHTML = '<header class="tv-hode"><span class="tv-logo">mitt<b>vors</b></span>' + (d.gjeng ? '<span class="tv-gjeng">' + esc(d.gjeng.navn) + '</span>' : '') +
         '<span class="tv-kode">' + T('Bli med: ', 'Join: ') + '<b>' + esc(lenkeTekst()) + '</b></span></header>' +
         '<div class="tv-hoved' + (side ? '' : ' uten-side') + '"><div class="tv-scenebox">' + scene(d) + '</div>' + (side ? '<aside class="tv-side">' + side + '</aside>' : '') + '</div>' + meldt;
       tegnTvStua(d);
-      tvKbFly(kbFra);
+      tvKbFly(kbFra); tvBenkGli(benkFra);
       if (nyttKort) { var inn = rot.querySelector('.tv-kort, .tv-sporsmal, .tv-rof-kort .rof-kort'); if (inn) inn.classList.add('kort-inn'); }
       var avsl = rot.querySelector('.tv-aldri-avslort');
       if (avsl && avsl.dataset.nokkel !== aldriVist) { aldriVist = avsl.dataset.nokkel; avsl.classList.add('inn'); }
@@ -1137,6 +1158,18 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .med-benk:has(.tvee-benk.stolen) .tvnr-hoved{padding-bottom:15.5vw}
     .tvrr-chip{font-family:var(--display);font-size:1.6em;font-weight:900;font-stretch:62%;text-transform:uppercase;padding:.08em .4em .12em;color:#16120F;background:#FFF8EE;border:4px solid #FFF8EE;box-shadow:6px 6px 0 #FF5B1F;transform:rotate(-2deg)}
     .tvrr-chip.gul{background:#FFD23F}
+    .tvpk-vri.duo{background:#FF9CC2}
+    .tvee-benk.duo .tvee-hode .mv-hode{transform-origin:50% 100%;transition:transform 620ms cubic-bezier(.23,1,.32,1)}
+    .tvee-benk.duo .tvee-hode.duo-a .mv-hode{transform:rotate(9deg)}
+    .tvee-benk.duo .tvee-hode.duo-b .mv-hode{transform:rotate(-9deg)}
+    .tvee-benk.duo .duo-a .tvee-navn,.tvee-benk.duo .duo-b .tvee-navn{color:#16120F;background:#FF9CC2;border:2px solid #16120F}
+    .tvduo-hjerte{position:absolute;z-index:3;left:calc(50% - 2vw);bottom:11vw;width:4vw;pointer-events:none}
+    .tvduo-hjerte svg{display:block;width:100%;height:auto}
+    .tvduo-hjerte.inn{animation:tvduoHjerte 680ms cubic-bezier(.23,1,.32,1) 420ms both}
+    @keyframes tvduoHjerte{from{transform:translateY(1.2vw) scale(.6);opacity:0}to{transform:none;opacity:1}}
+    .med-benk .tvee-benk.duo{height:15vw}
+    .med-benk:has(.tvee-benk.duo) .tvnr-hoved{padding-bottom:15.5vw}
+    @media (prefers-reduced-motion:reduce){.tvduo-hjerte.inn{animation:none}.tvee-benk.duo .tvee-hode .mv-hode{transition:none}}
     .tvkb-kat{font-size:5vw}
     .tvkb-protest{padding:.1em .5em;color:#16120F;background:#FF9CC2;border:3px solid #16120F;border-radius:999px;font-weight:900}
     .tvkb-bombe{position:absolute;z-index:3;width:5vw;left:calc(2vw + (100% - 4vw - var(--w)) * var(--x) + var(--w) / 2 - 2.5vw);bottom:11.8vw;pointer-events:none}
