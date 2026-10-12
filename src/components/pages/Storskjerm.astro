@@ -356,6 +356,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       plass.appendChild(tvStuaEl);
       var st = d.stua || {};
       tvStua.tema(st.tema || 'stue');
+      tvStua.ekstra(st.ekstra || []);
       tvStua.settFolk(d.spillere || [], st.pos);
       var s = d.spill, kt = '';
       if (s) kt = s.kort ? (s.kort.regel ? s.kort.regel : (s.kort.t || '')) : (s.tekst || (s.offentlig && s.offentlig.tekst) || '');

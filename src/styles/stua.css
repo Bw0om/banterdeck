@@ -384,3 +384,39 @@ html.i-spill .rom-kode{font-size:.92em}
 .rom-nypynt{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 14px;padding:14px 16px;background:var(--mint);color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:6px;box-shadow:var(--skygge)}
 .rom-nypynt b{flex:1 1 200px;font-family:var(--display);font-stretch:85%;font-weight:850}
 .rom-nypynt-dytt{margin:0 0 14px;padding:12px 14px;border:2.5px dashed var(--ink);border-radius:6px;font-size:15px}
+
+/* ---------- Figuren din og Rommet: arkene i rommet (følger lys/mørk modus via tokens) ---------- */
+.rom-stua-tips{margin:8px 0 0;font-size:12.5px;font-weight:700;color:var(--blekk);opacity:.85}
+.figur-ark .rom-tavle-innhold,.rom-ark .rom-tavle-innhold{background:var(--card);border:var(--strek) solid var(--ink);border-radius:8px 8px 0 0;box-shadow:var(--skygge-stor)}
+.figur-ark h2,.rom-ark h2{font-family:var(--display);font-stretch:62%;font-weight:900;text-transform:uppercase;font-size:28px}
+.ark-kropp{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.ark-kropp .figur-rad{margin:0}
+.ark-faner{display:flex;gap:8px;flex-wrap:wrap}
+.ark-fane{appearance:none;cursor:pointer;font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:13px;padding:8px 11px;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:4px;box-shadow:3px 3px 0 var(--hard);transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.ark-fane[aria-selected="true"]{background:var(--gul);color:var(--blekk)}
+.ark-fane:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
+.ark-kropp .pynt-rad{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ark-h3{margin:6px 0 0;font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:14px;letter-spacing:.03em}
+.ark-fot{margin:0;color:var(--muted)}
+.ark-lagbruker{display:inline-block;margin-top:8px}
+.tema-liste{display:flex;flex-direction:column;gap:10px}
+.tema-valg{appearance:none;cursor:pointer;display:grid;grid-template-columns:84px 1fr auto;gap:12px;align-items:center;padding:8px 10px;text-align:left;font:inherit;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:6px;box-shadow:var(--skygge-liten);transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.tema-valg[aria-pressed="true"]{background:var(--gul);color:var(--blekk)}
+.tema-valg[aria-pressed="true"] small{color:var(--blekk)}
+.tema-valg:not(:disabled):active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
+.tema-valg.laast{cursor:default;box-shadow:none;background:var(--bg2);color:var(--muted)}
+.tema-valg.laast .tema-bilde{opacity:.5;filter:grayscale(.6)}
+.tema-bilde{width:84px;height:54px;display:block;border:2px solid var(--ink);border-radius:4px}
+.tema-tekst b{display:block;font-family:var(--display);font-stretch:78%;font-weight:900;text-transform:uppercase;font-size:17px;line-height:1}
+.tema-tekst small{display:block;font-size:12.5px;color:var(--muted);line-height:1.25;margin-top:2px}
+.tema-merke{font-style:normal;font-family:var(--display);font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:3px 7px;border:2px solid var(--blekk);background:var(--rosa);color:var(--blekk)}
+.tema-merke.gratis{background:var(--mint)}
+.ekstra-rad{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ekstra-valg{appearance:none;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:10px 12px;text-align:left;font:inherit;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:6px;box-shadow:var(--skygge-liten);transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.ekstra-valg b{font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:13.5px}
+.ekstra-valg small{font-size:12px;color:var(--muted);line-height:1.25}
+.ekstra-valg[aria-pressed="true"]{background:var(--gul);color:var(--blekk)}
+.ekstra-valg[aria-pressed="true"] small{color:var(--blekk)}
+.ekstra-valg:not(:disabled):active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
+.ekstra-valg.laast{cursor:default;box-shadow:none;background:var(--bg2);color:var(--muted)}
+.rom-tema{display:none}

@@ -160,8 +160,10 @@ export function lagStua(svg, valg = {}) {
   const romG = el('g', { class: 'stua-rom' });
   const ref = { dor: null, handtak: null, tvTekst: null };
   let temaNaa = null;
-  function tegnRom(id) {
-    const t = TEMA[id] || TEMA.stue; temaNaa = TEMA[id] ? id : 'stue';
+  let ekstraNaa = [];
+  function tegnRom(id, ekstra) {
+    const t = TEMA[id] || TEMA.stue; temaNaa = TEMA[id] ? id : 'stue'; if (ekstra) ekstraNaa = ekstra.slice();
+    const har = (x) => ekstraNaa.includes(x);
     romG.innerHTML = '';
     const r = (p, f, ekstra) => flate(p, f, romG, ekstra);
     r([I(0, 6, 0), I(6, 6, 0), I(6, 6, -16), I(0, 6, -16)], B);
@@ -186,7 +188,7 @@ export function lagStua(svg, valg = {}) {
     el('line', { x1: I(1.75, 0, 40)[0], y1: I(1.75, 0, 40)[1], x2: I(1.75, 0, 86)[0], y2: I(1.75, 0, 86)[1], stroke: '#FFF8EE', 'stroke-width': 3 }, romG);
     // Plakat (eller lyslenke)
     if (t.plakat) { r([I(3.0, 0, 44), I(3.9, 0, 44), I(3.9, 0, 88), I(3.0, 0, 88)], t.plakat); const pp = I(3.45, 0, 66); if (t.stjerne) el('path', { d: `M${pp[0]} ${pp[1] - 10}l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z`, fill: '#FFD23F', stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, romG); else el('circle', { cx: pp[0], cy: pp[1], r: 8, fill: t.plakatPrikk, stroke: B, 'stroke-width': 2.5 }, romG); }
-    if (t.lyskjede) { const pkt = []; for (let x = 0; x <= 6; x += 0.5) pkt.push(I(x, 0, 94 - Math.abs(Math.sin(x * 2.1)) * 4)); for (let y = 0.5; y <= 6; y += 0.5) pkt.unshift(I(0, y, 94 - Math.abs(Math.sin(y * 2.1)) * 4)); el('polyline', { points: pts(pkt), fill: 'none', stroke: B, 'stroke-width': 2 }, romG); pkt.forEach((q, n) => el('circle', { cx: q[0], cy: q[1] + 3, r: 2.6, fill: ['#FFD23F', '#FF5B1F', '#63E2A8', '#FF9CC2'][n % 4], stroke: B, 'stroke-width': 1.5 }, romG)); }
+    if (t.lyskjede || har('lys')) { const pkt = []; for (let x = 0; x <= 6; x += 0.5) pkt.push(I(x, 0, 94 - Math.abs(Math.sin(x * 2.1)) * 4)); for (let y = 0.5; y <= 6; y += 0.5) pkt.unshift(I(0, y, 94 - Math.abs(Math.sin(y * 2.1)) * 4)); el('polyline', { points: pts(pkt), fill: 'none', stroke: B, 'stroke-width': 2 }, romG); pkt.forEach((q, n) => el('circle', { cx: q[0], cy: q[1] + 3, r: 2.6, fill: ['#FFD23F', '#FF5B1F', '#63E2A8', '#FF9CC2'][n % 4], stroke: B, 'stroke-width': 1.5 }, romG)); }
     // Døra
     r([I(4.5, 0, 0), I(5.6, 0, 0), I(5.6, 0, 74), I(4.5, 0, 74)], B);
     ref.dor = r([I(4.5, 0, 0), I(5.6, 0, 0), I(5.6, 0, 74), I(4.5, 0, 74)], t.dor);
@@ -195,6 +197,10 @@ export function lagStua(svg, valg = {}) {
     if (t.krans) { const k = I(5.05, 0, 52); el('circle', { cx: k[0], cy: k[1], r: 9, fill: 'none', stroke: '#2EA873', 'stroke-width': 6 }, romG); el('circle', { cx: k[0], cy: k[1], r: 9, fill: 'none', stroke: B, 'stroke-width': 1.5 }, romG); el('circle', { cx: k[0], cy: k[1] + 9, r: 2.5, fill: '#E2363B', stroke: B, 'stroke-width': 1.5 }, romG); }
     // Juletre i hjørnet
     if (t.juletre) { const b0 = I(0.6, 0.6, 0); [[0, 26, 30], [16, 22, 52], [30, 17, 72]].forEach(([z, w, h]) => el('path', { d: `M${b0[0] - w} ${b0[1] - z}L${b0[0]} ${b0[1] - h}L${b0[0] + w} ${b0[1] - z}z`, fill: '#2EA873', stroke: B, 'stroke-width': 3, 'stroke-linejoin': 'round' }, romG)); el('rect', { x: b0[0] - 4, y: b0[1] - 2, width: 8, height: 8, fill: '#7A4A2A', stroke: B, 'stroke-width': 2.5 }, romG); [[-10, 22], [8, 38], [-6, 54], [6, 14]].forEach(([dx, dz], n) => el('circle', { cx: b0[0] + dx, cy: b0[1] - dz, r: 3.5, fill: ['#E2363B', '#FFD23F', '#FF9CC2', '#7CC6FE'][n], stroke: B, 'stroke-width': 2 }, romG)); el('path', { d: `M${b0[0]} ${b0[1] - 82}l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z`, fill: '#FFD23F', stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, romG); }
+    // Små ting verten har låst opp
+    if (har('plakat')) { r([I(0, 5.7, 48), I(0, 5.0, 48), I(0, 5.0, 82), I(0, 5.7, 82)], '#FFF8EE'); const q = I(0, 5.6, 76); el('polygon', { points: pts([I(0, 5.6, 77), I(0, 5.1, 77), I(0, 5.1, 70), I(0, 5.6, 70)]), fill: '#FF5B1F', stroke: B, 'stroke-width': 1.5 }, romG); [62, 56].forEach((z) => el('line', { x1: I(0, 5.6, z)[0], y1: I(0, 5.6, z)[1], x2: I(0, 5.1, z)[0], y2: I(0, 5.1, z)[1], stroke: B, 'stroke-width': 2 }, romG)); el('polygon', { points: pts([I(0, 5.35, 64), I(0, 5.1, 64), I(0, 5.1, 54), I(0, 5.35, 54)]), fill: '#63E2A8', stroke: B, 'stroke-width': 1.5 }, romG); void q; }
+    if (har('plante')) { const b0 = I(5.45, 5.55, 0); el('path', { d: `M${b0[0] - 9} ${b0[1] - 2}h18l-3 14h-12z`, fill: '#FF5B1F', stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, romG); [[-10, -14, -4], [0, -22, 0], [10, -14, 4]].forEach(([dx, dz, lean]) => el('path', { d: `M${b0[0]} ${b0[1] - 2}q${dx * .6 + lean} ${dz * .5} ${dx} ${dz}q${-dx * .3} ${-dz * .2} ${-dx} ${-dz}z`, fill: '#2EA873', stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, romG)); }
+    if (har('platespiller')) { const g = el('g', {}, romG); boks(1.4, 0.35, 0, 0.9, 0.6, 10, '#FFF8EE', '#D9A26A', '#B9773F', g); const c = I(1.85, 0.65, 10); el('circle', { cx: c[0], cy: c[1] + 1, r: 7, fill: '#1C1B1F', stroke: B, 'stroke-width': 2 }, g); el('circle', { cx: c[0], cy: c[1] + 1, r: 2, fill: '#FF5B1F' }, g); el('line', { x1: c[0] + 9, y1: c[1] - 6, x2: c[0] + 2, y2: c[1], stroke: B, 'stroke-width': 2, 'stroke-linecap': 'round' }, g); }
     // TV-en på venstre vegg: viser romkoden, eller kortet som spilles nå
     const tvG = el('g', { class: 'stua-tv', style: 'cursor:pointer' }, romG);
     flate([I(0, 4.6, 32), I(0, 1.4, 32), I(0, 1.4, 88), I(0, 4.6, 88)], B, tvG);
@@ -227,6 +233,14 @@ export function lagStua(svg, valg = {}) {
     el('text', { x: 0, y: 0, transform: skjev(tk[0], tk[1]), 'font-family': f, 'font-weight': 900, 'font-size': v.stor ? 26 : 21, fill: v.stor ? '#FF9CC2' : '#FFE07A', 'letter-spacing': 2.5, 'font-stretch': '75%' }, tvTekst).textContent = v.kode;
   }
   let tvTimer = null;
+  // Et kort trykk på rommet (ikke på TV-en, lampa eller folk) åpner «Rommet»
+  let romTrykk = null;
+  romG.addEventListener('pointerdown', (e) => { if (e.target.closest('.stua-tv')) return; romTrykk = { x: e.clientX, y: e.clientY, t: Date.now() }; });
+  romG.addEventListener('pointerup', (e) => {
+    if (!romTrykk || e.target.closest('.stua-tv')) { romTrykk = null; return; }
+    const ok = Date.now() - romTrykk.t < 400 && Math.hypot(e.clientX - romTrykk.x, e.clientY - romTrykk.y) < 8; romTrykk = null;
+    if (ok && valg.onRom) valg.onRom();
+  });
   tegnRom(valg.tema || 'stue');
   tegnTv();
 
@@ -288,7 +302,7 @@ export function lagStua(svg, valg = {}) {
 
   function Figur(p, x, y, info) {
     this.p = Object.assign({}, p); this.info = info || {};
-    this.g = ny(x + y, el('g', { class: 'figur' }, lag));
+    this.g = ny(x + y, el('g', { class: 'figur', 'data-id': this.info.id || '' }, lag));
     this.hjem = [x, y];
     this.x = new Verdi(x); this.y = new Verdi(y); this.z = new Verdi(0, RASK); this.s = new Verdi(1, RASK); this.r = new Verdi(0);
     this.vei = []; this.drar = false; this.ut = false;
@@ -374,7 +388,7 @@ export function lagStua(svg, valg = {}) {
       if (lag.lastChild !== f.g) lag.appendChild(f.g);   // øverst mens den holdes – før grepet tas
       sist = '';
       f.g.setPointerCapture(e.pointerId);
-      f.drar = true; f.vei = []; forrige = punkt(e); fra = [f.x.v, f.y.v]; risting = 0;
+      f.drar = true; f.vei = []; forrige = punkt(e); fra = [f.x.v, f.y.v]; risting = 0; f.trykkT = Date.now();
       f.x.f = f.y.f = MYK; f.z.mal = 26; f.s.mal = 1.06; start(f);
       document.documentElement.classList.add('stua-drar');
       if (f.info.id && f.info.id !== valg.meg) f.si(SI_LOFT[Math.random() * SI_LOFT.length | 0]);
@@ -396,7 +410,7 @@ export function lagStua(svg, valg = {}) {
       const x = f.x.mal, y = f.y.mal;
       // Til døra? Ingen går hjem før vorset er over
       if (x > 4.3 && y < 1.1) { f.si(SI_DOR[Math.random() * SI_DOR.length | 0], 1800); f.gaaTil(f.hjem); return; }
-      if (Math.hypot(x - fra[0], y - fra[1]) < 0.15) return;
+      if (Math.hypot(x - fra[0], y - fra[1]) < 0.15) { if (Date.now() - f.trykkT < 400 && valg.onTrykk) valg.onTrykk(f.info.id); return; }
       let mal = [x, y];
       if (!ledig(x, y)) { mal = naermesteLedig(x, y); f.gaaTil(mal); }
       f.hjem = mal; f.planleggRusling();
@@ -491,6 +505,8 @@ export function lagStua(svg, valg = {}) {
     tvKode() { tegnTv(); },
     /** Bytt hvordan stua ser ut (stue, hytte, takterrasse, julebord). Folka blir stående. */
     tema(id) { if ((TEMA[id] ? id : 'stue') === temaNaa) return; tegnRom(id); tegnTv(); tegnBord(); tegnSofa(); svg.appendChild(morke); svg.appendChild(lag); },
+    /** Små ting i rommet (lys, plante, plakat, platespiller) */
+    ekstra(liste) { liste = Array.isArray(liste) ? liste : []; if (liste.slice().sort().join() === ekstraNaa.slice().sort().join()) return; tegnRom(temaNaa, liste); tegnTv(); svg.appendChild(morke); svg.appendChild(lag); },
     temaNaa() { return temaNaa; },
   };
 }
