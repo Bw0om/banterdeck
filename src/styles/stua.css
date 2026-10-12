@@ -893,7 +893,14 @@ html.i-spill .rom-kode{font-size:.92em}
 .ee-med button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
 /* Benken: hodene med skuldrene under kanten. Før valget stikker bare toppen opp; etter avsløringen er sidene farget. */
 .ee-benk{position:relative;height:190px;margin:4px -16px 0;background:var(--card);border-top:var(--strek) solid var(--ink);border-bottom:var(--strek) solid var(--ink);overflow:hidden}
-.ee-benk.delt{background:linear-gradient(90deg,color-mix(in srgb,var(--oransje) 22%,var(--card)) 50%,color-mix(in srgb,var(--mint) 26%,var(--card)) 50%)}
+.ee-benk.delt{background:linear-gradient(90deg,color-mix(in srgb,var(--fa,var(--oransje)) 22%,var(--card)) 50%,color-mix(in srgb,var(--fb,var(--mint)) 26%,var(--card)) 50%)}
+.ee-benk{margin-top:14px}
+.ee-status,.ee-sidenavn{position:absolute;top:10px;z-index:1;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ee-status{left:16px}
+.ee-sidenavn{padding:2px 8px;color:var(--blekk);border:2px solid var(--blekk);border-radius:4px}
+.ee-sidenavn.a{left:12px;background:var(--fa,var(--oransje))}
+.ee-sidenavn.b{right:12px;background:var(--fb,var(--mint))}
+.ee-navn.sikker{box-shadow:0 0 0 3px var(--oransje)}
 .ee-midt{position:absolute;left:50%;top:0;bottom:0;border-left:3px dashed var(--ink);opacity:.5}
 .ee-hode{position:absolute;left:calc(12px + (100% - 24px - var(--w)) * var(--x));bottom:-46px;width:var(--w);transition:left 560ms var(--fjaer),width 560ms var(--fjaer)}
 .ee-hev{display:flex;flex-direction:column;align-items:center;gap:4px;transform:translateY(50px);transition:transform 680ms var(--fjaer)}
@@ -914,3 +921,9 @@ html.i-spill .rom-kode{font-size:.92em}
   .mv-pup,.ee-hev,.ee-hode{transition:none}
   .ee-valg.inn .ee-knapp,.ee-sider.inn .ee-side{animation:jaToning 240ms ease both;animation-delay:0s}
 }
+
+/* Store hoder i søkelys og på vinnere */
+.hode-merke{display:block;width:84px;height:92px;overflow:hidden;flex:none}
+.hode-merke .mv-hode{width:84px}
+.ja-vinner .hode-merke{width:52px;height:56px}
+.ja-vinner .hode-merke .mv-hode{width:52px}

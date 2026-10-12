@@ -109,6 +109,16 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **Én alene** (minst tre som valgte): alle hodene stirrer på personen, som får «OI»-fjeset (hevede bryn, store øyne, åpen munn, svettedråpe). Søkelys med «Forsvar valget ditt!» og 20 sekunder. Personen eller verten trykker «Fikk med én» (velg hvem, som drikker én) eller «Drikk to».
 - Kåring «Mot strømmen» til den som har vært i mindretall flest ganger (minst tre).
 
+### Benken med hodene (alle leker der folk svarer eller stemmer)
+
+- `hodeBenk` (telefon) og `tvBenk` (TV) er felles: hodene står med skuldrene under kanten, bare toppen av hodet synes før personen har svart, og så reiser hodet seg. Øynene kikker på hverandre (`benkTikk`).
+- Valg: `oppe` (hvem som har svart), `sider` (del benken i to, med farge og navn på hver side), `oi` («OI»-fjes), `stirr` (alle ser på én), `flat` (de andre får en flau munn), `merk` (ring rundt navnet), `status` (f.eks. «2 av 4 har svart»).
+- **Jeg har aldri:** reiser seg når de har svart. Etter avsløringen: «Har gjort det» (oransje) og «Aldri». Ensom ulv eller den som trakk et kjedelig kort får «OI», og alle stirrer. Søkelyset viser det store hodet med «OI» i stedet for initialer.
+- **Løgnhalsen:** de som stemmer reiser seg (den som forteller står ikke på benken). Etterpå: «Trodde sant» (mint) og «Trodde løgn» (rosa). De som tok feil får «OI»; «helt sikker» får ring rundt navnet. Erstatter kolonnene.
+- **Pekeleken:** reiser seg når de har talt fingre. Etterpå får den med flest fingre «OI», og alle stirrer.
+- **Nyhetsrunden:** reiser seg når de har svart.
+- **Enten eller** bruker den samme benken. Vinnere på sluttskjermene og Skriv og drikk på TV viser også de nye hodene.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
