@@ -172,7 +172,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var drikk = [];
       (d.spillere || []).forEach(function (p) { var f = sett.slurker[p.id]; if (f != null && na.slurker[p.id] > f) drikk.push({ navn: p.navn, n: na.slurker[p.id] - f }); });
       // Når resultatet av en avstemning vises, står det allerede hvem som drikker – da holder det med resultatskjermen
-      var resultatNaa = na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar/.test(na.fase);
+      var resultatNaa = na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar|kort:rr-avslort/.test(na.fase);
       var nyUt = na.ut && na.ut !== sett.ut && d.utdeling;
       if (nyUt) visUtdeling(d.utdeling, d.alkoholfri);
       var knust = na.brudd && na.brudd !== sett.brudd;
@@ -187,7 +187,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (na.ferdig) stoppIntro();
       if ((na.vinner && na.vinner !== sett.vinner) || (na.ferdig && !sett.ferdig)) spill('fanfare');
       else if (na.kortNr && na.kortNr !== sett.kortNr) spill('pop');
-      if (na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar/.test(na.fase)) spill('svar');
+      if (na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar|kort:rr-avslort/.test(na.fase)) spill('svar');
       if (na.spillere > sett.spillere) spill('inn');
       if (na.hend && na.hend !== sett.hend && d.hendelse) toast(d.hendelse.tekst);
       if (na.reak !== sett.reak) flyReak(d.reak || [], sett.reak);
@@ -370,17 +370,50 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       se(); tvEeTimer = setInterval(se, 1400);
     }
     /** Benken på TV-en: samme hoder som på telefonen. o som hodeBenk på telefonen. */
+    function tvRrPlasser(alle, par) {
+      var ut = {}, andre = alle.filter(function (p) { return p.id !== par.a && p.id !== par.b; }), v = Math.ceil(andre.length / 2);
+      ut[par.a] = par.snudd ? 41 : 37; ut[par.b] = par.snudd ? 59 : 63;
+      andre.forEach(function (p, i) {
+        var venstre = i < v, k = venstre ? i : i - v, m = venstre ? v : andre.length - v, fra = venstre ? 0 : 82, til = venstre ? 18 : 100;
+        ut[p.id] = m === 1 ? (venstre ? fra : til) : fra + (k / (m - 1)) * (til - fra);
+      });
+      return ut;
+    }
+    /* ---------- Rygg mot rygg: paret i midten rygg mot rygg, de andre gjetter ---------- */
+    var tvRrVist = '';
+    function rrScene(d, s) {
+      var r = s.rr, alle = d.spillere || [], res = r.resultat, vk = s.pos + ':' + s.antall + ':' + r.fase, inn = vk !== tvRrVist; tvRrVist = vk;
+      var tekst = String((s.kort && s.kort.t) || ''), m = tekst.match(/^(Hvem av dere|Which of you|Who of you)\s+/i), rest = m ? tekst.slice(m[0].length) : tekst;
+      var chip = r.fase === 'svar' ? T('Rygg mot rygg', 'Back to back') : res && res.fasit ? (res.enige ? T('Enige!', 'Agreed!') : T('Uenige!', 'Disagreed!')) : T('Snudd!', 'Flipped!');
+      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Rygg mot rygg · kort ', 'Back to back · card ') + (s.pos + 1) + T(' av ', ' of ') + s.antall + '</p><span class="tvrr-chip ' + (r.fase === 'svar' ? '' : res && res.fasit ? (res.enige ? 'enige' : 'uenige') : '') + '">' + chip + '</span></div>';
+      var kort = '<p class="tvpk-pre">' + esc(navn(r.a)) + T(' og ', ' and ') + esc(navn(r.b)) + ': ' + (m ? esc(m[1]) : T('Hvem av dere', 'Which of you')) + ' …</p><h1 class="tv-sporsmal">' + esc(rest) + '</h1>';
+      var gjettere = alle.filter(function (p) { return p.id !== r.a && p.id !== r.b; }), bunn;
+      if (r.fase === 'svar') {
+        var igjen = s.frist ? Math.max(0, (s.frist - 1500 - (Date.now() + tvAvvik)) / 1000) : 0;
+        bunn = (igjen ? '<div class="tvja-lunte"><i style="--fra:' + Math.min(1, igjen / 25).toFixed(3) + ';animation-duration:' + igjen.toFixed(1) + 's"></i></div>' : '') +
+          '<p class="tv-stor">' + esc(navn(r.a)) + T(' og ', ' and ') + esc(navn(r.b)) + T(' peker i hemmelighet.', ' point in secret.') + (gjettere.length ? ' ' + T('Alle andre gjetter på telefonen.', 'Everyone else guesses on their phone.') : '') + ' · ' + (r.harPekt || []).length + ' / 2</p>';
+      } else {
+        var nv = function (id) { return esc(navn(id)); };
+        var dom = !res.fasit ? res.mangler.map(nv).join(T(' og ', ' and ')) + T(' pekte ikke – én slurk.', ' didn’t point – one sip.')
+          : res.enige ? T('Begge pekte på ', 'Both pointed at ') + nv(res.pa) + T(' – drikker én.', ' – drinks one.')
+          : nv(r.a) + T(' pekte på ', ' pointed at ') + (res.pa === r.a ? T('seg selv', 'themself') : nv(res.pa)) + ', ' + nv(r.b) + T(' på ', ' at ') + (res.pb === r.b ? T('seg selv', 'themself') : nv(res.pb)) + T('. Begge drikker én.', '. Both drink one.');
+        var feil = (res.feil || []).map(nv);
+        bunn = '<p class="tvja-dom' + (inn ? ' inn' : '') + '" style="--n:2">' + dom + '</p>' + (res.fasit && gjettere.length ? '<p class="tv-stor">' + (feil.length ? feil.join(T(' og ', ' and ')) + T(' gjettet feil og drikker én.', ' guessed wrong and drink one.') : T('Alle som gjettet, hadde rett!', 'Everyone who guessed was right!')) + '</p>' : '');
+      }
+      return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + kort + bunn + '</div></div>';
+    }
     function tvBenk(d, alle, o) {
       o = o || {}; var r = o.sider || null, n = alle.length, oi = o.oi || [];
       if (!n) return '';
-      var plass = tvEePlasser(alle, r), w = n <= 6 ? 7.5 : n <= 10 ? 6 : 4.8;
+      var plass = o.par ? tvRrPlasser(alle, o.par) : tvEePlasser(alle, r), w = n <= 6 ? 7.5 : n <= 10 ? 6 : 4.8;
       var stil = '--w:' + w + 'vw' + (r && r.fa ? ';--fa:' + r.fa : '') + (r && r.fb ? ';--fb:' + r.fb : '');
       setTimeout(tvBenkTikk, 0);
-      return '<div class="tvee-benk' + (r ? ' delt' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
+      return '<div class="tvee-benk' + (r ? ' delt' : '') + (o.par ? ' rygg' + (o.par.snudd ? ' snudd' : '') : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
         (r ? '<i class="tvee-midt"></i>' + (r.la ? '<span class="tvee-sidenavn a">' + esc(r.la) + '</span><span class="tvee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') +
         alle.map(function (p, i) {
           var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1, erOi = oi.indexOf(p.id) !== -1, uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
-          return '<div class="tvee-hode' + (erOi ? ' alene' : '') + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="tvee-hev' + (oppe ? ' oppe' : '') + '"><span class="tvee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.navn) + '</span>' + (window.mvHodeSvg ? window.mvHodeSvg(p, uttrykk) : '') + '</div></div>'; }).join('') + '</div>';
+          var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : '';
+          return '<div class="tvee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="tvee-hev' + (oppe ? ' oppe' : '') + '"><span class="tvee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.navn) + '</span>' + (window.mvHodeSvg ? window.mvHodeSvg(p, uttrykk) : '') + '</div></div>'; }).join('') + '</div>';
     }
     var tvBenkTimer = null;
     function tvBenkTikk() {
@@ -394,7 +427,10 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         hoder.forEach(function (h, i) {
           var pup = h.querySelector('.mv-pup'); if (!pup) return;
           var dx = 0, dy = -0.5;
-          if (h.classList.contains('alene')) dy = 2.4;
+          var snudd = benk.classList.contains('snudd');
+          if (h.classList.contains('par-a')) { dx = snudd ? 3 : -3.2; dy = 0.4; }
+          else if (h.classList.contains('par-b')) { dx = snudd ? -3 : 3.2; dy = 0.4; }
+          else if (h.classList.contains('alene')) dy = 2.4;
           else if (mal) { dx = Math.max(-3.2, Math.min(3.2, (x(mal) - x(h)) * 8)); dy = 0.4; }
           else if (Math.random() > 0.18 && hoder.length > 1) {
             var j = i + (Math.random() < 0.5 ? -1 : 1); if (j < 0 || j >= hoder.length || Math.random() < 0.3) j = Math.floor(Math.random() * hoder.length);
@@ -601,6 +637,11 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
           : tvBenk(d, jaAlle, { oppe: ja.harSvart || [] }));
       }
       if (s.type === 'kort' && s.ee) return eeScene(d, s);
+      if (s.type === 'kort' && s.rr) {
+        var rrR = s.rr.resultat, rrSnudd = s.rr.fase !== 'svar';
+        return tvMedBenk(rrScene(d, s), tvBenk(d, d.spillere || [], { oppe: rrSnudd ? true : [s.rr.a, s.rr.b].concat(s.rr.harGjettet || []), par: { a: s.rr.a, b: s.rr.b, snudd: rrSnudd },
+          oi: rrSnudd && rrR ? (rrR.fasit && !rrR.enige ? [s.rr.a, s.rr.b] : rrR.mangler || []) : [] }));
+      }
       if (s.type === 'kort' && s.pek && s.pek.fase !== 'hendelse') {
         var pk = s.pek, pkAlle = d.spillere || [], pkBenk = '';
         if (pk.fase === 'teller' && Date.now() + tvAvvik - pk.start > pk.tell + 1500) pkBenk = tvBenk(d, pkAlle, { oppe: pk.harTalt || [] });
@@ -1012,6 +1053,15 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvee-navn.sikker{box-shadow:0 0 0 4px #FF5B1F}
     .med-benk .tvlh-bunn{margin-top:1vh}
     .med-benk .tvee-benk.delt{height:15vw}
+    .tvrr-chip{font-family:var(--display);font-size:1.6em;font-weight:900;font-stretch:62%;text-transform:uppercase;padding:.08em .4em .12em;color:#16120F;background:#FFF8EE;border:4px solid #FFF8EE;box-shadow:6px 6px 0 #FF5B1F;transform:rotate(-2deg)}
+    .tvrr-chip.enige{background:#63E2A8}.tvrr-chip.uenige{background:#FF5B1F;box-shadow:6px 6px 0 #FFD23F}
+    .tvee-benk.rygg .tvee-hode .mv-hode{transform-origin:50% 100%;transition:transform 620ms cubic-bezier(.23,1,.32,1)}
+    .tvee-benk.rygg .tvee-hode.par-a .mv-hode{transform:rotate(-16deg)}
+    .tvee-benk.rygg .tvee-hode.par-b .mv-hode{transform:rotate(16deg)}
+    .tvee-benk.rygg.snudd .tvee-hode.par-a .mv-hode{transform:rotate(8deg)}
+    .tvee-benk.rygg.snudd .tvee-hode.par-b .mv-hode{transform:rotate(-8deg)}
+    .tvee-benk.rygg .par-a .tvee-navn,.tvee-benk.rygg .par-b .tvee-navn{color:#16120F;background:#FFD23F;border:2px solid #16120F}
+    @media (prefers-reduced-motion:reduce){.tvee-benk.rygg .tvee-hode .mv-hode{transition:none}}
     .med-benk.delt-benk .tvnr-hoved{padding-bottom:15.5vw}
     .med-benk.delt-benk .tvja-ulv b{font-size:clamp(40px,4.4vw,80px)}
     .tvee-sider{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2.6vw;margin-top:1vh}

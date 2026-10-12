@@ -927,3 +927,40 @@ html.i-spill .rom-kode{font-size:.92em}
 .hode-merke .mv-hode{width:84px}
 .ja-vinner .hode-merke{width:52px;height:56px}
 .ja-vinner .hode-merke .mv-hode{width:52px}
+
+/* ---------- Rygg mot rygg: to peker i hemmelighet, alle andre gjetter ---------- */
+.rom-spill:has(.rr-kort){align-items:stretch;text-align:left;gap:0}
+.rr-hint{margin:0 0 10px;font-size:14px;font-weight:800;color:var(--ink)}
+.rr-valg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 12px}
+.rr-knapp{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:4px;min-height:120px;padding:14px 16px;text-align:left;color:var(--blekk);font-family:inherit;border:var(--strek) solid var(--blekk);border-radius:8px;box-shadow:6px 6px 0 var(--hard);cursor:pointer;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer),opacity .2s}
+.rr-knapp.meg{background:var(--rosa)}.rr-knapp.den{background:#7CC6FE}.rr-knapp.uenig{grid-column:1/-1;min-height:64px;background:var(--gul)}
+.rr-knapp span{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.rr-knapp.uenig span{font-size:12px;font-weight:700;letter-spacing:0;text-transform:none}
+.rr-knapp b{font-family:var(--display);font-size:32px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rr-knapp.uenig b{font-size:22px}
+.rr-valg.tre .rr-knapp:not(.uenig){min-height:100px}
+.rr-knapp:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
+.rr-knapp[aria-pressed=true]{transform:translate(3px,3px) rotate(-1deg);box-shadow:2px 2px 0 var(--hard);outline:3px solid var(--ink);outline-offset:3px}
+.rr-valg:has([aria-pressed=true]) .rr-knapp[aria-pressed=false]{opacity:.55}
+.rr-valg.inn .rr-knapp{animation:nrInn 420ms var(--fjaer) both}
+.rr-valg.inn .rr-knapp:nth-child(2){animation-delay:70ms}
+.rr-valg.inn .rr-knapp:nth-child(3){animation-delay:140ms}
+.rr-dom{display:flex;flex-direction:column;gap:6px;padding:16px;margin:0 0 12px;color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:8px;box-shadow:6px 6px 0 var(--hard);background:var(--card)}
+.rr-dom.enige{background:var(--mint)}.rr-dom.uenige{background:var(--oransje)}
+.rr-dom span{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.rr-dom b{font-family:var(--display);font-size:28px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.95}
+.rr-dom small{font-size:14px;font-weight:700}
+.rr-dom.inn{animation:nrInn 460ms var(--fjaer) both;animation-delay:420ms}
+.rr-gjett{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:6px}
+.rr-gjett li{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:14px;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:6px}
+.rr-gjett li span{flex:1;font-weight:700;color:var(--muted)}
+.rr-gjett li em{font-style:normal;font-size:12px;font-weight:900;text-transform:uppercase;padding:2px 8px;border:2px solid var(--blekk);border-radius:4px;color:var(--blekk);background:var(--mint)}
+.rr-gjett li.feil em{background:var(--rosa)}
+/* Paret på benken: rygg mot rygg = lener seg fra hverandre; snudd = mot hverandre */
+.ee-benk.rygg .ee-hode .mv-hode{transform-origin:50% 100%;transition:transform 620ms var(--fjaer)}
+.ee-benk.rygg .ee-hode.par-a .mv-hode{transform:rotate(-16deg)}
+.ee-benk.rygg .ee-hode.par-b .mv-hode{transform:rotate(16deg)}
+.ee-benk.rygg.snudd .ee-hode.par-a .mv-hode{transform:rotate(8deg)}
+.ee-benk.rygg.snudd .ee-hode.par-b .mv-hode{transform:rotate(-8deg)}
+.ee-benk.rygg .par-a .ee-navn,.ee-benk.rygg .par-b .ee-navn{background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
+@media (prefers-reduced-motion:reduce){.ee-benk.rygg .ee-hode .mv-hode{transition:none}.rr-valg.inn .rr-knapp,.rr-dom.inn{animation:jaToning 240ms ease both;animation-delay:0s}}
