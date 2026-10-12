@@ -766,6 +766,21 @@ export function startRom(LEKNAVN, LANG) {
     return '<p class="rom-mester' + (jeg ? ' meg' : '') + '">❓ ' + (jeg ? T('<b>Du er spørsmålsmester!</b> Får du noen til å svare på et spørsmål, drikker de.', '<b>You’re the question master!</b> Get someone to answer one of your questions and they drink.')
       : T('Spørsmålsmester: <b>' + esc(navn(m.id)) + '</b> – svar på et spørsmål fra hen, så drikker du.', 'Question master: <b>' + esc(navn(m.id)) + '</b> – answer one of their questions and you drink.')) + '</p>';
   }
+  /** Når en lek er ferdig: hva nå? Verten velger – neste lek i planen (hvis dere har en), spill igjen,
+      en annen lek, eller avslutt kvelden. De andre ser hva verten holder på å velge. Planen beholdes uansett. */
+  function lekSlutt(igjen) {
+    var t = tilstand, neste = t.plan && t.plan.length ? nestePlan() : null, gjeng = !!t.gjeng;
+    if (!erVert()) return '<p class="nr-vent">' + esc(navn(t.vert)) + T(' velger hva dere gjør nå …', ' is choosing what to do next …') + '</p>';
+    var valg = '';
+    if (neste) valg += '<button class="rom-stor-knapp slutt-plan" data-g="plan-start" type="button">' + T('Neste i planen', 'Next in the plan') + '<small>' + esc(neste.navn) + '</small></button>';
+    var igjenListe = (igjen || []).filter(Boolean);
+    valg += '<div class="slutt-valg">' + igjenListe.map(function (v, i) {
+      return '<button type="button" class="slutt-knapp' + (!neste && i === 0 ? ' hoved' : '') + '" data-g="' + v[0] + '"><b>' + esc(v[1]) + '</b><small>' + esc(v[2]) + '</small></button>'; }).join('') +
+      '<button type="button" class="slutt-knapp" data-g="avslutt"><b>' + T('Velg en annen lek', 'Pick another game') + '</b><small>' + (neste ? T('Utenom planen', 'Outside the plan') : T('Tilbake til lekene', 'Back to the games')) + '</small></button>' +
+      '<button type="button" class="slutt-knapp" data-g="avslutt-kvelden"><b>' + (gjeng ? T('Avslutt gjengkvelden', 'End the crew night') : T('Avslutt kvelden', 'End the night')) + '</b><small>' + (gjeng ? T('Lagres i gjengens sesong', 'Saved to the crew’s season') : T('Kåringer og oppsummering', 'Awards and recap')) + '</small></button>' +
+    '</div>';
+    return '<div class="lek-slutt"><p class="nr-etikett">' + T('Hva nå?', 'What now?') + '</p>' + valg + '</div>';
+  }
   /** Verktøy for verten: raske knapper under leken, og resten forklart i en liste. */
   function vertVerktoy(s) {
     if (!erVert()) return '';
@@ -1730,7 +1745,12 @@ export function startRom(LEKNAVN, LANG) {
         '<p class="sd-straff">' + T('Straff: én slurk for hvert forsøk.', 'Penalty: one sip per attempt.') + '</p>' +
         '<button class="rom-stor-knapp" data-g="neste" type="button">' + T('Stokk og spill videre', 'Shuffle and play on') + '</button>';
     }
-    if (s.fase === 'ferdig') return topp(T('Ferdig', 'Done'), false) + '<p class="nr-vent">' + T('Alle kortene er brukt opp.', 'All the cards are used up.') + '</p>' + (vert ? '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny skriverunde', 'New writing round') + '</button>' : '');
+    if (s.fase === 'ferdig') return topp(T('Bunken er tom', 'The pile is empty'), true) +
+      '<div class="pk-kort sd-ferdig"><b>' + (s.trukket || 0) + '</b><p>' + T('kort trukket. Det var det.', 'cards drawn. That was it.') + '</p></div>' +
+      lekSlutt([
+        !s.egen ? ['nytt', T('Ny skriverunde', 'New writing round'), T('Alle skriver nye kort', 'Everyone writes new cards')] : null,
+        ['rf-igjen', T('Samme bunke igjen', 'Same pile again'), T('Stokk de samme kortene', 'Shuffle the same cards')],
+      ]);
     // Trekk
     var tilMeg = (s.mottakere || []).indexOf(tilstand.meg) !== -1, kn = s.pos + ':' + s.totalt + ':' + s.kortet;
     var innK = sdVist !== kn; sdVist = kn;
@@ -3541,6 +3561,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'rf-kast') return gjor({ handling: 'rf-kast' });
     if (g === 'rf-kast-stem') return gjorAlltid({ handling: 'rf-kast-stem', ja: b.dataset.ja === '1' });
     if (g === 'rf-kast-avbryt') return gjor({ handling: 'rf-kast-avbryt' });
+    if (g === 'rf-igjen') return gjor({ handling: 'rf-igjen' });
     if (g === 'rf-velg') {
       if (!window.BDVelgKort) return;
       return window.BDVelgKort({ maks: 60 }).then(function (kort) {

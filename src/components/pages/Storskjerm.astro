@@ -328,7 +328,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       if (rf.fase === 'skam') return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<span class="tvpk-tall pek">' + T('Skammekroken', 'Corner of shame') + '</span>' +
         '<ul class="tvsd-skam">' + (rf.skam || []).map(function (k) { return '<li>' + nrPille(d, k.fra) + '<div><b>' + esc(navn(k.fra)) + T(' skrev ', ' wrote ') + '<s>«' + esc(k.t) + '»</s></b><span>' + esc(k.kommentar) + '</span></div></li>'; }).join('') + '</ul></div></div>';
-      if (rf.fase !== 'trekk') return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<h1 class="tv-sporsmal">' + T('Alle kortene er brukt opp', 'All the cards are used up') + '</h1></div></div>';
+      if (rf.fase !== 'trekk') return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<h1 class="tv-sporsmal">' + T('Bunken er tom', 'The pile is empty') + '</h1><p class="tv-stor">' + (rf.trukket || 0) + T(' kort trukket. ', ' cards drawn. ') + esc(navn(d.vert)) + T(' velger hva dere gjør nå.', ' is choosing what to do next.') + '</p></div></div>';
       var mott = rf.mottakere || [];
       var til = mott.length ? '<div class="tvsd-til">' + mott.map(function (id) { return window.mvFigurSvg ? window.mvFigurSvg(spiller(id)) : ''; }).join('') +
           '<div><span>' + T('Kortet er til', 'This card is for') + '</span><b>' + mott.map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and ')) + '</b></div></div>'

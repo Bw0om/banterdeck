@@ -792,3 +792,20 @@ html.i-spill .rom-kode{font-size:.92em}
 .sd-skam p{margin:0;font-size:14px;font-weight:800}
 .sd-straff{margin:0 0 12px;padding:10px 12px;font-family:var(--display);font-size:17px;font-weight:900;font-stretch:70%;text-transform:uppercase;color:var(--blekk);background:var(--gul);border:var(--strek) solid var(--blekk);border-radius:6px}
 @media (prefers-reduced-motion:reduce){.sd-bunke-kort.inn,.sd-tall b.inn,.sd-til-deg-stempel.inn,.sd-kortet.inn,.sd-skam-stempel.inn,.sd-skam li.inn{animation:none}}
+
+/* ---------- Når en lek er ferdig: hva nå? ---------- */
+.sd-ferdig{display:flex;align-items:baseline;gap:12px}
+.sd-ferdig b{font-family:var(--display);font-size:64px;font-weight:900;font-stretch:62%;line-height:.85}
+.sd-ferdig p{margin:0;font-size:18px}
+.lek-slutt{display:flex;flex-direction:column;gap:10px}
+.lek-slutt .nr-etikett{margin:4px 0 0}
+.slutt-plan{display:flex;flex-direction:column;align-items:center;gap:2px}
+.slutt-plan small{font-family:var(--sans);font-size:13px;font-weight:800;text-transform:none;opacity:.85}
+.slutt-valg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.slutt-knapp{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px;text-align:left;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.slutt-knapp:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+.slutt-knapp b{font-family:var(--display);font-size:16px;font-weight:900;font-stretch:78%;text-transform:uppercase;line-height:1.05}
+.slutt-knapp small{font-size:12px;font-weight:700;color:var(--muted)}
+.slutt-knapp.hoved{grid-column:1/-1;background:var(--gul);color:var(--blekk)}
+.slutt-knapp.hoved small{color:var(--blekk)}
+@media (prefers-reduced-motion:reduce){.slutt-knapp{transition:none}}

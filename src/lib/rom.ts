@@ -1589,16 +1589,17 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         if (s.fase === 'skam') {   // videre fra Skammekroken: stokk og spill videre
           (s.skam || []).forEach((k: any) => giSlurker(data, k.fra, 1));
           s.skamVist = (s.skamVist || []).concat(s.skam || []); s.skam = [];
-          if (!s.rekke.length) { s.fase = 'ferdig'; return { ok: true }; }
-          s.rekke = stokk(s.rekke); s.pos = 0; s.fase = 'trekk'; s.trekker = meg.id; s.kast = null; s.mottakere = rfMottakere(data, rfKortObj(s.rekke[0]), meg.id);
+          s.fase = 'ferdig'; s.trukket = s.rekke.length;
           return { ok: true };
         }
         if (s.fase !== 'trekk') return { ok: true };
         if (typeof h.pos === 'number' && h.pos !== s.pos) return { ok: true };
         s.pos++; s.trekker = meg.id; s.kast = null;
         if (s.pos >= s.rekke.length) {
+          // Bunken er tom: Skammekroken først (hvis noen prøvde seg), så er leken ferdig
           if ((s.skam || []).length) { s.fase = 'skam'; melde(data, 'Skammekroken!', 'The corner of shame!'); return { ok: true }; }
-          s.rekke = stokk(s.rekke); s.pos = 0; melde(data, 'Alle kortene er trukket – stokket på nytt.', 'All the cards have been drawn – reshuffled.');
+          s.fase = 'ferdig'; s.trukket = s.rekke.length; s.pos = s.rekke.length - 1; melde(data, 'Bunken er tom!', 'The pile is empty!');
+          return { ok: true };
         }
         s.mottakere = rfMottakere(data, rfKortObj(s.rekke[s.pos]), meg.id);
         return { ok: true };
@@ -1622,12 +1623,18 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
           rfTilSkam(data, { ...k, grunn: 'stemt' });
           s.rekke.splice(s.pos, 1); s.kast = null;
           melde(data, 'Kortet er kastet i Skammekroken.', 'The card went to the corner of shame.');
-          if (s.pos >= s.rekke.length) { s.fase = 'skam'; return { ok: true }; }
+          if (s.pos >= s.rekke.length) { if (s.skam.length) s.fase = 'skam'; else { s.fase = 'ferdig'; s.trukket = s.rekke.length; } return { ok: true }; }
           s.mottakere = rfMottakere(data, rfKortObj(s.rekke[s.pos]), s.trekker);
         }
         return { ok: true };
       }
       if (h.handling === 'rf-kast-avbryt') { if (meg.id === data.vert) s.kast = null; return { ok: true }; }
+      if (h.handling === 'rf-igjen') {   // spill de samme kortene en gang til
+        if (meg.id !== data.vert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
+        if (s.fase !== 'ferdig' || !s.rekke.length) return { ok: true };
+        s.rekke = stokk(s.rekke); s.pos = 0; s.fase = 'trekk'; s.trekker = meg.id; s.kast = null; s.mottakere = rfMottakere(data, rfKortObj(s.rekke[0]), meg.id);
+        melde(data, 'Samme bunke, ny runde!', 'Same pile, new round!'); return { ok: true };
+      }
       if (h.handling === 'nytt') {
         if (s.egen) { s.rekke = stokk(s.rekke); s.pos = 0; melde(data, 'Stokket på nytt.', 'Reshuffled.'); return { ok: true }; }
         return startEkstra(data, 'regelfabrikken', String(s.sek));
@@ -1818,6 +1825,7 @@ export function ekstraVisning(s: any, meg: any, data: any) {
       pos: s.pos, egen: !!s.egen, alleKort: s.fase === 'trekk' && meg ? s.rekke.map((x: any) => rfKortObj(x).t) : null,
       totalt: s.fase === 'trekk' ? s.rekke.length : Object.values(s.kort).concat(Object.values(s.med || {})).reduce((n: number, l: any) => n + l.length, 0),
       kast: kk ? { ja: kk.ja.length, nei: kk.nei.length, stemmere: data.spillere.filter((p: any) => p.id !== kk.fra).length, kanStemme: !!meg && meg.id !== kk.fra, mitt: meg ? (kk.ja.includes(meg.id) ? 'ja' : kk.nei.includes(meg.id) ? 'nei' : null) : null } : null,
+      trukket: s.trukket || 0,
       skam: s.fase === 'skam' ? (s.skam || []).map((k: any) => ({ fra: k.fra, t: k.t, kommentar: k.kommentar, grunn: k.grunn })) : null };
   }
   if (s.type === 'opus') return { holder: s.holder, kast: s.kast, antall: s.antall, nr: s.nr, fra: s.fra || null };
