@@ -851,7 +851,7 @@ export function startRom(LEKNAVN, LANG) {
     pannekort: [['Du skriver et ord (en person, ting eller et dyr) til den du får tildelt.', 'You write a word (a person, thing or animal) for the player you’re assigned.'], ['Du ser alles ord – bortsett fra ditt eget.', 'You see everyone’s word – except your own.'], ['Still ja/nei-spørsmål og gjett hva du er.', 'Ask yes/no questions and guess what you are.']],
     skal: [['Vent til det står SKÅL! på skjermen.', 'Wait until it says CHEERS! on screen.'], ['Trykk så fort du kan.', 'Tap as fast as you can.'], ['Tregest drikker – trykker du for tidlig, drikker du dobbelt.', 'Slowest drinks – tap too early and you drink double.']],
     mest: [['Et «Hvem er mest sannsynlig til …»-spørsmål dukker opp.', 'A “Who’s most likely to …” question appears.'], ['Alle stemmer i hemmelighet på den det passer best på.', 'Everyone secretly votes for who it fits best.'], ['Hver stemme du får, er én slurk.', 'Every vote you get is one sip.']],
-    forraeder: [['Én spiller får i hemmelighet beskjed om å lyve eller si sannheten.', 'One player is secretly told to lie or tell the truth.'], ['Hen svarer høyt på spørsmålet på skjermen.', 'They answer the question on screen out loud.'], ['Resten stemmer: sannhet eller løgn? Tar du feil, drikker du.', 'Everyone else votes: truth or lie? Get it wrong and you drink.']],
+    forraeder: [['Den som har tur, holder på kortet for å se om hen skal lyve eller si sannheten – og fullfører setningen høyt.', 'Whoever’s turn it is holds the card to see whether to lie or tell the truth – and finishes the sentence out loud.'], ['Grill hen med oppfølgingsspørsmål. Så stemmer resten: sant eller løgn?', 'Grill them with follow-up questions. Then everyone else votes: true or lie?'], ['Feil: drikk to (helt sikker: fire). Den som forteller deler ut én per person som ble lurt.', 'Wrong: drink two (absolutely sure: four). The teller hands out one per person fooled.']],
     tosannheter: [['Én skriver tre påstander om seg selv – to sanne og én løgn.', 'One player writes three statements about themselves – two true, one lie.'], ['Resten stemmer på løgnen fra sin telefon.', 'Everyone else votes for the lie on their phone.'], ['Så avsløres løgnen – de som bommet, drikker.', 'Then the lie is revealed – those who missed drink.']],
     regelfabrikken: [['Alle skriver så mange drikkekort de rekker før tiden går ut.', 'Everyone writes as many drinking cards as they can before time runs out.'], ['Kortene stokkes og trekkes ett og ett.', 'The cards are shuffled and drawn one by one.'], ['Gjør det kortet sier!', 'Do what the card says!']],
     bussruta: [['Alle svarer på fire spørsmål om kortene sine på sin telefon.', 'Everyone answers four questions about their cards on their phone.'], ['Så snus pyramiden – har du kortet, deler du ut slurker.', 'Then the pyramid is turned – if you have the card, you hand out sips.'], ['Den med flest kort igjen, kjører bussen.', 'Whoever has the most cards left rides the bus.']],
@@ -1329,37 +1329,101 @@ export function startRom(LEKNAVN, LANG) {
       '<p class="rom-status">' + stemt + T(' av ', ' of ') + alle + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder til resultatet vises', 'seconds until the results'));
   }
 
+  /* ---------- Løgnhalsen: hold for å se rollen, grill og stem, avsløring med stempel ----------
+     Rollen ligger under et nøytralt kort og vises bare mens du holder fingeren på det; lyv og sannhet
+     ser like ut, så ingen kan lese rollen på fargen fra sofaen. Den som forteller kan få en idé og
+     bytte kort én gang. De andre kan være «helt sikre» (dobbel innsats). Løgneren deler ut én per lurt. */
+  var lhSikker = { k: '', v: false }, lhVist = '', lhIdeNr = 0;
+  var LH_STED = EN ? ['in Gran Canaria', 'on a cabin trip', 'at a Christmas party', 'in Copenhagen', 'at a petrol station by the airport', 'at a wedding', 'at a festival', 'in a lift at work']
+    : ['på Gran Canaria', 'på en hyttetur på Geilo', 'på et julebord i Bergen', 'i Kiel', 'på en bensinstasjon på Gardermoen', 'i et bryllup', 'på Roskilde', 'i en heis på jobb'];
+  var LH_HVEM = EN ? ['with a colleague', 'with my brother-in-law', 'with someone I had just met', 'with three friends from school', 'all alone', 'with a former teacher']
+    : ['med en kollega', 'med svogeren min', 'med en jeg nettopp hadde møtt', 'med tre venner fra videregående', 'helt alene', 'med en tidligere lærer'];
+  var LH_DETALJ = EN ? ['mention a dog', 'say it cost 4,000', 'say the police showed up', 'say your mum still does not know', 'say it ended up on Snapchat', 'say you still have the receipt']
+    : ['nevn en hund', 'si at det kostet 4 000 kroner', 'si at politiet kom innom', 'si at mamma fortsatt ikke vet om det', 'si at det havnet på Snapchat', 'si at du fortsatt har kvitteringen'];
+  function lhIde() {
+    lhIdeNr++;
+    var v = function (l, n) { return l[(Math.floor(Math.random() * 997) + n) % l.length]; };
+    return T('Si at det skjedde ', 'Say it happened ') + v(LH_STED, lhIdeNr) + ' ' + v(LH_HVEM, lhIdeNr) + ', og ' + v(LH_DETALJ, lhIdeNr) + T('. Hold deg til detaljene når de griller deg.', '. Stick to the details when they grill you.');
+  }
+  function lhTopp(s, tekst, gul, klokke) {
+    return '<div class="nr-topp lh-topp"><div class="nr-topp-tekst"><span>' + T('Løgnhalsen · runde ', 'The liar · round ') + (s.runde || 1) + '</span><b' + (gul ? ' class="gul"' : '') + '>' + tekst + '</b></div>' + (klokke ? nrKlokke() : '') + '</div>';
+  }
+  function lhKort(s, merke) {
+    return '<div class="nr-kort lh-kort">' + (merke ? '<span class="nr-type lh-merke">' + merke + '</span>' : '') + '<p>' + esc(s.tekst) + '</p></div>';
+  }
+  function lhStemte(s) {
+    var andre = (tilstand.spillere || []).filter(function (p) { return p.id !== s.aktiv; }), har = s.harStemt || [];
+    return '<div class="nr-folk">' + andre.map(function (p) { return nrPille(p.id, har.indexOf(p.id) !== -1 ? 'har' : ''); }).join('') + '<span>' + har.length + T(' av ', ' of ') + andre.length + T(' har stemt', ' voted') + '</span></div>';
+  }
   function forraederSpill(s) {
-    var t = tilstand, jeg = t.meg === s.aktiv, han = navn(s.aktiv);
+    var t = tilstand, jeg = t.meg === s.aktiv, han = navn(s.aktiv), nokkel = s.aktiv + ':' + s.runde;
+    if (lhSikker.k !== nokkel) lhSikker = { k: nokkel, v: false };
     if (s.fase === 'svar') {
-      if (jeg) return '<p class="rom-etikett">' + T('Din tur – bare du ser dette', 'Your turn – only you can see this') + '</p>' +
-        '<div data-hemmelig class="rom-hemmelig ' + (s.hemmelig === 'lyv' ? 'lyv' : 'sann') + '"><b>' + (s.hemmelig === 'lyv' ? T('LYV!', 'LIE!') : T('Si sannheten', 'Tell the truth')) + '</b></div>' +
-        '<p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
-        '<p class="small">' + T('Fullfør setningen høyt. Hold masken.', 'Finish the sentence out loud. Keep a straight face.') + '</p>' +
-        '<button class="rom-stor-knapp" data-g="svart" type="button">' + T('Jeg har svart', 'I\'ve answered') + '</button>';
-      return '<p class="rom-etikett">' + esc(han) + T(' fullfører', ' finishes the sentence') + '</p><p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
-        '<p class="rom-stor">' + T('Hør godt etter …', 'Listen closely …') + '</p>' +
-        (erVert() ? '<button class="btn ghost" data-g="svart" type="button">' + T('Gå til stemming', 'Go to voting') + '</button>' : '');
+      if (jeg) return lhTopp(s, T('Din tur, ', 'Your turn, ') + esc(han), true) +
+        lhKort(s, T('Fullfør høyt', 'Finish it out loud')) +
+        '<button type="button" class="lh-kikk" aria-label="' + T('Hold for å se om du skal lyve eller si sannheten', 'Hold to see whether to lie or tell the truth') + '">' +
+          '<span class="lh-bak"><svg viewBox="0 0 64 40" aria-hidden="true"><path d="M4 8c8-6 20-6 28 2 8-8 20-8 28-2-2 14-10 26-28 28C14 34 6 22 4 8z"/><ellipse cx="20" cy="18" rx="5" ry="4"/><ellipse cx="44" cy="18" rx="5" ry="4"/></svg>' +
+            '<b>' + T('Hold for å se', 'Hold to see') + '</b><small>' + T('Slipp, så er det skjult igjen', 'Let go and it hides again') + '</small></span>' +
+          '<span class="lh-forside" aria-hidden="true"><b>' + (s.hemmelig === 'lyv' ? T('Lyv', 'Lie') : T('Si sannheten', 'Tell the truth')) + '</b><small>' +
+            (s.hemmelig === 'lyv' ? T('Finn på noe. Gjør det troverdig.', 'Make something up. Make it believable.') : T('Fortell det som faktisk skjedde.', 'Tell what actually happened.')) + '</small></span>' +
+        '</button>' +
+        '<div class="lh-hjelp"><button type="button" data-g="lh-ide">' + T('Gi meg en idé', 'Give me an idea') + '</button>' +
+          '<button type="button" data-g="lh-bytt"' + (s.byttet ? ' disabled' : '') + '>' + (s.byttet ? T('Kortet er byttet', 'Card swapped') : T('Bytt kort (1 gang)', 'Swap card (once)')) + '</button></div>' +
+        '<p class="lh-ide" id="lhIde" hidden></p>' +
+        '<button class="rom-stor-knapp" data-g="svart" type="button">' + T('Jeg er ferdig – la dem grille meg', 'Done – let them grill me') + '</button>';
+      return lhTopp(s, esc(han) + T(' forteller', ' is telling'), false) + lhKort(s, T('Hør godt etter', 'Listen closely')) +
+        '<div class="lh-grill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path class="q" d="M10 9.5a2 2 0 1 1 2.6 1.9c-.5.2-.6.5-.6 1.1M12 14h.01"/></svg><p><b>' + T('Grill dem etterpå.', 'Grill them afterwards.') + '</b> ' +
+          T('Prøv: «Hvem var med?» · «Hvor skjedde det?» · «Hva sa du da?»', 'Try: “Who was there?” · “Where was it?” · “What did you say?”') + '</p></div>' +
+        (erVert() ? '<button class="rom-stor-knapp" data-g="svart" type="button">' + T('Gå til stemming', 'Go to voting') + '</button>' : '<p class="nr-vent">' + esc(han) + T(' sier fra når det er tid for å stemme.', ' will say when it is time to vote.') + '</p>');
     }
     if (s.fase === 'stem') {
-      if (jeg) return '<p class="rom-sporsmal">' + esc(s.tekst) + '</p><p class="rom-stor">' + T('De andre stemmer nå …', 'The others are voting …') + '</p>' +
-        '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + (t.spillere.length - 1) + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder til avsløringen', 'seconds to the reveal'));
-      return '<p class="rom-etikett">' + esc(han) + T(' sa', ' said') + '</p><p class="rom-sporsmal">' + esc(s.tekst) + '</p>' +
-        '<div class="rom-valg to">' +
-          '<button type="button" data-g="stem" data-paa="sannhet" aria-pressed="' + (s.minStemme === 'sannhet') + '">' + T('Sannhet', 'Truth') + '</button>' +
-          '<button type="button" data-g="stem" data-paa="lyv" aria-pressed="' + (s.minStemme === 'lyv') + '">' + T('Løgn', 'Lie') + '</button>' +
-        '</div>' +
-        '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + (t.spillere.length - 1) + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder til avsløringen', 'seconds to the reveal'));
+      if (jeg) return lhTopp(s, T('De stemmer nå', 'They are voting'), false, true) + lhKort(s) + lhStemte(s) +
+        '<p class="nr-vent">' + T('Hold masken. Avsløringen kommer når alle har stemt.', 'Keep a straight face. The reveal comes when everyone has voted.') + '</p>';
+      var mitt = s.minStemme, sikker = mitt ? s.minSikker : lhSikker.v;
+      return lhTopp(s, esc(han) + T(' forteller', ' is telling'), false, true) + lhKort(s) +
+        '<div class="lh-grill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path class="q" d="M10 9.5a2 2 0 1 1 2.6 1.9c-.5.2-.6.5-.6 1.1M12 14h.01"/></svg><p><b>' + T('Grill ', 'Grill ') + esc(han) + T(' først.', ' first.') + '</b> ' +
+          T('«Hvem var med?» · «Hvor er den nå?» · «Hvor mye kostet det?»', '“Who was there?” · “Where is it now?” · “How much was it?”') + '</p></div>' +
+        '<div class="lh-stem"><button type="button" class="sant" data-g="stem" data-paa="sannhet" aria-pressed="' + (mitt === 'sannhet') + '">' + T('Sant', 'True') + '</button>' +
+          '<button type="button" class="logn" data-g="stem" data-paa="lyv" aria-pressed="' + (mitt === 'lyv') + '">' + T('Løgn', 'Lie') + '</button></div>' +
+        '<button type="button" class="lh-sikker" data-g="lh-sikker" aria-pressed="' + !!sikker + '"><i aria-hidden="true">' + (sikker ? '✓' : '') + '</i><span><b>' + T('Jeg er helt sikker', 'I am absolutely sure') + '</b><small>' +
+          T('Rett: del ut én. Feil: drikk fire i stedet for to.', 'Right: hand out one. Wrong: drink four instead of two.') + '</small></span></button>' +
+        lhStemte(s);
     }
-    var r = s.resultat || {};
-    return '<p class="rom-etikett">' + T('Fasit', 'The answer') + '</p>' +
-      '<div class="rom-hemmelig ' + (r.svar === 'lyv' ? 'lyv' : 'sann') + '"><b>' + esc(han) + ' ' + (r.svar === 'lyv' ? T('løy!', 'lied!') : T('sa sannheten!', 'told the truth!')) + '</b></div>' +
-      (r.drikker && r.drikker.length
-        ? '<ul class="rom-drikker">' + r.drikker.map(function (x) { return '<li><b>' + esc(x.navn) + '</b>' + T(' drikker ', ' drinks ') + x.slurker + '</li>'; }).join('') + '</ul>'
-        : '<p class="rom-stor">' + T('Ingen drikker denne gangen.', 'Nobody drinks this time.') + '</p>') +
-      '<p class="small">' + T('Gjettet du feil: 2 slurker. Gjettet alle riktig: den som svarte drikker 3.', 'Guessed wrong: 2 sips. If everyone guessed right, the one who answered drinks 3.') + '</p>' +
+    // Avsløringen
+    var r = s.resultat || {}, inn = lhVist !== nokkel, lyv = r.svar === 'lyv', st = r.stemmer || {}, sk = r.sikker || {};
+    var kol = function (svar, tittel) {
+      var folk = (t.spillere || []).filter(function (p) { return st[p.id] === svar; }), rett = (svar === 'lyv') === lyv;
+      return '<div class="lh-kol' + (rett ? ' rett' : '') + (inn ? ' inn' : '') + '"><b>' + tittel + '</b><div>' + (folk.length ? folk.map(function (p, i) { return '<span style="--i:' + i + '">' + nrPille(p.id, sk[p.id] ? 'sikker' : '') + '</span>'; }).join('') : '<small>' + T('Ingen', 'Nobody') + '</small>') + '</div>' +
+        (folk.some(function (p) { return sk[p.id]; }) ? '<small>' + folk.filter(function (p) { return sk[p.id]; }).map(function (p) { return esc(p.navn); }).join(', ') + T(' var helt sikker', ' was absolutely sure') + '</small>' : '') + '</div>';
+    };
+    var linjer = [];
+    (r.utdeling || []).forEach(function (x) {
+      linjer.push('<li class="rett"><b>' + (x.id === s.aktiv ? esc(navn(x.id)) + T(' lurte ', ' fooled ') + x.n : esc(navn(x.id)) + T(', helt sikker – og riktig', ', absolutely sure – and right')) + '</b><span>' + T('Del ut ', 'Hand out ') + x.n + '</span></li>');
+    });
+    (r.drikker || []).forEach(function (x) {
+      linjer.push('<li><b>' + esc(x.navn) + (x.id === s.aktiv ? T(' lurte ingen', ' fooled nobody') : x.sikker ? T(', helt sikker – og feil', ', absolutely sure – and wrong') : '') + '</b><span>' + T('Drikk ', 'Drink ') + x.slurker + '</span></li>');
+    });
+    var ut = '<p class="nr-etikett lh-etikett">' + T('Løgnhalsen · runde ', 'The liar · round ') + (s.runde || 1) + '</p>' +
+      '<div class="lh-avslor"><span>' + esc(han) + T(' fullførte', ' finished') + '</span><p>' + esc(s.tekst) + '</p>' +
+        '<em class="lh-stempel ' + (lyv ? 'logn' : 'sant') + (inn ? ' inn' : '') + '">' + esc(han) + ' ' + (lyv ? T('løy!', 'lied!') : T('sa sannheten!', 'told the truth!')) + '</em></div>' +
+      '<div class="lh-kolonner">' + kol('sannhet', T('Trodde sant', 'Believed it')) + kol('lyv', T('Trodde løgn', 'Called the lie')) + '</div>' +
+      (linjer.length ? '<ul class="lh-utfall">' + linjer.join('') + '</ul>' : '') +
+      '<p class="small lh-regel">' + T('Feil: drikk to (helt sikker: fire). Den som forteller deler ut én per person som ble lurt, og drikker tre hvis ingen ble lurt.', 'Wrong: drink two (absolutely sure: four). The teller hands out one per person fooled, and drinks three if nobody was fooled.') + '</p>' +
       '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste runde', 'Next round') + '</button>';
+    lhVist = nokkel;
+    return ut;
   }
+  // Hold for å se: rollen vises bare mens fingeren ligger på kortet
+  function lhSkjul() { document.querySelectorAll('.lh-kikk.vis').forEach(function (e) { e.classList.remove('vis'); }); }
+  document.addEventListener('pointerdown', function (e) {
+    var k = e.target.closest && e.target.closest('.lh-kikk'); if (!k) return;
+    e.preventDefault(); try { k.setPointerCapture(e.pointerId); } catch (x) {}
+    k.classList.add('vis'); try { navigator.vibrate && navigator.vibrate(10); } catch (x) {}
+  });
+  window.addEventListener('pointerup', lhSkjul); window.addEventListener('pointercancel', lhSkjul); window.addEventListener('blur', lhSkjul);
+  document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.lh-kikk')) e.preventDefault(); });
+  document.addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && e.target.classList && e.target.classList.contains('lh-kikk')) { e.preventDefault(); e.target.classList.add('vis'); } });
+  document.addEventListener('keyup', function (e) { if (e.target.classList && e.target.classList.contains('lh-kikk')) lhSkjul(); });
 
   function bingoSpill(s) {
     var b = s.mittBrett || [], m = s.mineMerker || [];
@@ -3353,7 +3417,18 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
     if (g === 'rof-makker') return gjor({ handling: 'rof-makker', paa: b.dataset.paa });
     if (g === 'rof-for') { rofFor = tilstand.spill ? tilstand.spill.nr : -1; return tegn(); }
-    if (g === 'stem') return gjor({ handling: 'stem', paa: b.dataset.paa });
+    if (g === 'stem') {
+      var sp0 = tilstand && tilstand.spill;
+      if (sp0 && sp0.type === 'forraeder') return gjor({ handling: 'stem', paa: b.dataset.paa, sikker: sp0.minStemme ? !!sp0.minSikker : lhSikker.v });
+      return gjor({ handling: 'stem', paa: b.dataset.paa });
+    }
+    if (g === 'lh-sikker') {
+      var sp1 = tilstand.spill;
+      if (sp1.minStemme) return gjorAlltid({ handling: 'stem', paa: sp1.minStemme, sikker: !sp1.minSikker });
+      lhSikker.v = !lhSikker.v; return tegn();
+    }
+    if (g === 'lh-bytt') return gjor({ handling: 'lh-bytt' });
+    if (g === 'lh-ide') { var ide = document.getElementById('lhIde'); if (ide) { ide.textContent = lhIde(); ide.hidden = false; ide.classList.remove('inn'); void ide.offsetWidth; ide.classList.add('inn'); } return; }
     if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
     if (g === 'fjern') return gjor({ handling: 'fjern', hvem: b.dataset.id });
     if (g === 'gjett') return gjor({ handling: 'gjett', paa: b.dataset.paa });

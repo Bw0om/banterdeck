@@ -597,3 +597,72 @@ html.i-spill .rom-kode{font-size:.92em}
 .nr-rest li{display:flex;align-items:center;gap:8px;font-weight:800}
 .nr-rest li b{margin-left:auto;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.nr-stempel.inn,.nr-resultat.inn,.nr-linje.inn .nr-pinne,.nr-pall.inn .nr-pall-blokk{animation:none}.nr-a,.nr-lengder button,.nr-taster button,.nr-las{transition:none}}
+
+/* ---------- Løgnhalsen: hold for å se, grill, stem og avsløring ---------- */
+.rom-spill:has(.lh-topp,.lh-avslor){align-items:stretch;text-align:left;gap:0}
+.rom-spill:has(.lh-topp,.lh-avslor) .rom-stor-knapp{align-self:stretch}
+.rom-spill:has(.lh-topp,.lh-avslor) .rom-spillnavn,#rom:has(.lh-topp,.lh-avslor) .tur-merke,#rom:has(.lh-topp,.lh-avslor) .hemmelig-merke{display:none}
+.nr-topp-tekst b.gul{background:var(--gul);color:var(--blekk)}
+.lh-kort p{font-size:23px;line-height:1.15}
+.lh-merke{background:var(--rosa)}
+.lh-kikk{position:relative;display:block;width:100%;height:190px;margin:0 0 12px;padding:0;border:var(--strek) solid var(--blekk);border-radius:8px;box-shadow:6px 6px 0 var(--hard);background:#16120F;overflow:hidden;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.lh-bak{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#FFF8EE;background:repeating-linear-gradient(45deg,#2A292E 0 10px,#232227 10px 20px)}
+.lh-bak svg{width:64px;height:40px}
+.lh-bak svg path{fill:#FFF8EE;stroke:#16120F;stroke-width:3;stroke-linejoin:round}
+.lh-bak svg ellipse{fill:#16120F}
+.lh-bak b{font-family:var(--display);font-size:22px;font-weight:900;font-stretch:70%;text-transform:uppercase}
+.lh-bak small{font-size:13px;font-weight:700;opacity:.8}
+/* Begge rollene har samme farge, så ingen kan lese rollen på avstand */
+.lh-forside{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 16px;text-align:center;background:#FFF8EE;color:#16120F;transform:translateY(101%);transition:transform 180ms cubic-bezier(.23,1,.32,1)}
+.lh-kikk.vis .lh-forside{transform:none;transition:transform 420ms var(--fjaer)}
+.lh-forside b{font-family:var(--display);font-size:52px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9}
+.lh-forside small{font-size:14px;font-weight:700}
+.lh-hjelp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 10px}
+.lh-hjelp button{font:900 14px var(--display);font-stretch:78%;text-transform:uppercase;padding:12px 8px;background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);border-radius:4px;box-shadow:var(--skygge-liten);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.lh-hjelp button:active:not(:disabled){transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+.lh-hjelp button:disabled{opacity:.5;box-shadow:none;cursor:default}
+.lh-ide{margin:0 0 12px;padding:10px 12px;font-size:14px;line-height:1.35;color:var(--ink);background:var(--bg2);border:2.5px dashed var(--ink);border-radius:6px}
+.lh-ide.inn{animation:nrInn 380ms var(--fjaer) both}
+.lh-grill{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;margin:0 0 12px;background:var(--gul);color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:6px}
+.lh-grill svg{flex:none;width:24px;height:24px;margin-top:1px}
+.lh-grill svg path{fill:#FFF8EE;stroke:#16120F;stroke-width:2.4;stroke-linejoin:round}
+.lh-grill svg path.q{fill:none;stroke-linecap:round;stroke-width:2.2}
+.lh-grill p{margin:0;font-size:14px;line-height:1.35}
+.lh-stem{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 12px}
+.lh-stem button{min-height:104px;font:900 30px var(--display);font-stretch:62%;text-transform:uppercase;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:5px 5px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out,background-color .15s}
+.lh-stem button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+.lh-stem .sant[aria-pressed="true"]{background:var(--mint);color:var(--blekk);transform:translate(2px,2px);box-shadow:2px 2px 0 var(--hard)}
+.lh-stem .logn[aria-pressed="true"]{background:var(--rosa);color:var(--blekk);transform:translate(2px,2px);box-shadow:2px 2px 0 var(--hard)}
+.lh-sikker{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;margin:0 0 12px;text-align:left;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;box-shadow:4px 4px 0 var(--hard);cursor:pointer;transition:transform 380ms var(--fjaer),background-color .15s}
+.lh-sikker i{flex:none;display:grid;place-items:center;width:28px;height:28px;font-style:normal;font-weight:900;border:var(--strek) solid var(--ink);border-radius:4px;background:var(--bg2)}
+.lh-sikker span{display:flex;flex-direction:column;gap:2px}
+.lh-sikker b{font-family:var(--display);font-size:16px;font-weight:900;font-stretch:80%;text-transform:uppercase}
+.lh-sikker small{font-size:13px;font-weight:600}
+.lh-sikker[aria-pressed="true"]{background:var(--oransje);color:var(--blekk);transform:rotate(-1.2deg)}
+.lh-sikker[aria-pressed="true"] i{background:var(--blekk);color:#FFF8EE;border-color:var(--blekk)}
+.nr-p.sikker{box-shadow:0 0 0 3px var(--oransje)}
+.lh-etikett{margin:0 0 8px}
+.lh-avslor{position:relative;padding:18px 16px 20px;margin:0 0 14px;text-align:center;background:#16120F;color:#FFF8EE;border:var(--strek) solid #16120F;border-radius:8px;box-shadow:6px 6px 0 var(--oransje)}
+.lh-avslor>span{display:block;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#D9D2C7}
+.lh-avslor p{margin:4px 0 12px;font-size:17px;font-weight:800;line-height:1.25}
+.lh-stempel{display:inline-block;font-style:normal;font-family:var(--display);font-size:clamp(38px,12vw,56px);font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9;padding:4px 12px 6px;color:#16120F;border:4px solid #FFF8EE;transform:rotate(-4deg)}
+.lh-stempel.logn{background:var(--rosa)}
+.lh-stempel.sant{background:var(--mint)}
+.lh-stempel.inn{animation:lhStempel 460ms var(--fjaer) both}
+@keyframes lhStempel{from{transform:rotate(-4deg) scale(1.7);opacity:0}to{transform:rotate(-4deg);opacity:1}}
+.lh-kolonner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 12px}
+.lh-kol{display:flex;flex-direction:column;gap:8px;padding:12px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:6px;opacity:.72}
+.lh-kol.rett{opacity:1;background:var(--mint);color:var(--blekk);box-shadow:4px 4px 0 var(--hard)}
+.lh-kol>b{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.lh-kol>div{display:flex;flex-wrap:wrap;gap:6px}
+.lh-kol .nr-p{min-width:34px;height:34px;border-radius:17px;font-size:12px}
+.lh-kol small{font-size:12px;font-weight:700}
+.lh-kol.inn>div>span{display:inline-block;animation:nrInn 380ms var(--fjaer) both;animation-delay:calc(260ms + var(--i) * 60ms)}
+.lh-utfall{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:8px}
+.lh-utfall li{display:flex;align-items:center;gap:10px;padding:10px 12px;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:6px}
+.lh-utfall li.rett{background:var(--mint);color:var(--blekk)}
+.lh-utfall b{flex:1;font-size:15px;font-weight:900}
+.lh-utfall span{font-size:12px;font-weight:900;text-transform:uppercase;padding:3px 8px;color:var(--blekk);background:var(--rosa);border:2px solid var(--blekk)}
+.lh-utfall li.rett span{background:#FFF8EE}
+.lh-regel{margin:0 0 12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.lh-forside,.lh-kikk.vis .lh-forside,.lh-sikker{transition:none}.lh-stempel.inn,.lh-kol.inn>div>span,.lh-ide.inn{animation:none}}

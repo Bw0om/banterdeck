@@ -178,8 +178,14 @@ export function kaaringer(data: any) {
   }
   const gav = maks('sendt'); if (gav) ut.push({ ikon: '🎁', kode: 'gavmild', tittel: L('Mest gavmild', 'Most generous'), id: gav.id, navn: gav.navn, tall: L(gav.sendt + ' 🍺 sendt', gav.sendt + ' 🍺 sent') });
   const mob = maks('mottatt'); if (mob) ut.push({ ikon: '🎯', kode: 'mobbet', tittel: L('Mest mobbet', 'Most picked on'), id: mob.id, navn: mob.navn, tall: L(mob.mottatt + ' 🍺 fått', mob.mottatt + ' 🍺 received') });
+  const logn = maks('lurt'); if (logn && logn.lurt >= 2) ut.push({ ikon: '🎭', kode: 'logn', tittel: L('Kveldens løgnhals', 'Liar of the night'), id: logn.id, navn: logn.navn, tall: L('lurte ' + logn.lurt, 'fooled ' + logn.lurt) });
   const quiz = maks('quiz'); if (quiz) ut.push({ ikon: '🧠', kode: 'quiz', tittel: L('Quizmester', 'Quiz master'), id: quiz.id, navn: quiz.navn, tall: L(quiz.quiz + ' riktige', quiz.quiz + ' correct') });
   return ut;
+}
+
+/** Løgnhalsen: hvem som har lurt flest i kveld (bare de som har lurt noen). */
+function lurtTavle(data: any) {
+  return (data.spillere || []).filter((p: any) => p.lurt).map((p: any) => ({ id: p.id, n: p.lurt })).sort((a: any, b: any) => b.n - a.n).slice(0, 4);
 }
 
 /* ---------- storskjerm (TV) ---------- */
@@ -212,8 +218,9 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
       turId: s.tur !== null && s.tur !== undefined ? (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null : null },
       s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
     if (s.type === 'mest') Object.assign(spill, { tekst: s.tekst, fase: s.fase, stemt: Object.keys(s.stemmer || {}).length, resultat: s.fase === 'resultat' ? s.resultat : null });
-    if (s.type === 'forraeder') Object.assign(spill, { tekst: s.tekst, fase: s.fase, aktiv: s.aktiv, stemt: Object.keys(s.stemmer || {}).length,
-      resultat: s.fase === 'avslort' ? { svar: s.hemmelig, drikker: s.drikker } : null });
+    if (s.type === 'forraeder') Object.assign(spill, { tekst: s.tekst, fase: s.fase, aktiv: s.aktiv, stemt: Object.keys(s.stemmer || {}).length, harStemt: Object.keys(s.stemmer || {}),
+      runde: s.runde || 1, lurtTavle: lurtTavle(data),
+      resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, sikker: s.sikker || {}, drikker: s.drikker, utdeling: s.utdeling || [], lurte: s.lurte || 0 } : null });
     const off = offentligTekst(s, data); if (off) spill.offentlig = off;
     if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
   }
@@ -276,9 +283,10 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     if (s.type === 'forraeder') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase, aktiv: s.aktiv,
       harStemt: Object.keys(s.stemmer),
-      minStemme: meg ? s.stemmer[meg.id] || null : null,
-      hemmelig: meg && meg.id === s.aktiv ? s.hemmelig : null,
-      resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, drikker: s.drikker } : null,
+      minStemme: meg ? s.stemmer[meg.id] || null : null, minSikker: !!(meg && s.sikker && s.sikker[meg.id]),
+      hemmelig: meg && meg.id === s.aktiv ? s.hemmelig : null, byttet: !!s.byttet, runde: s.runde || 1,
+      lurtTavle: lurtTavle(data),
+      resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, sikker: s.sikker || {}, drikker: s.drikker, utdeling: s.utdeling || [], lurte: s.lurte || 0 } : null,
     });
     if (EKSTRA.includes(s.type)) Object.assign(spill, ekstraVisning(s, meg, data));
     if (s.type === 'bingo') Object.assign(spill, {
@@ -516,7 +524,7 @@ function nyForraederRunde(s: any, data: any) {
   const ider = data.spillere.map((p: any) => p.id);
   const idx = ider.indexOf(s.aktiv);
   s.aktiv = ider[(idx + 1) % ider.length];
-  s.tekst = s.kø.pop(); s.fase = 'svar'; s.stemmer = {}; s.drikker = []; s.hemmelig = tilfeldig(2) ? 'sannhet' : 'lyv';
+  s.tekst = s.kø.pop(); s.fase = 'svar'; s.stemmer = {}; s.sikker = {}; s.drikker = []; s.utdeling = []; s.lurte = 0; s.byttet = false; s.hemmelig = tilfeldig(2) ? 'sannhet' : 'lyv';
   s.runde = (s.runde || 0) + 1;
 }
 const LINJER: number[][] = (() => {
@@ -1059,10 +1067,18 @@ function handlingInne(data: any, meg: any, h: any) {
         if (s.fase !== 'stem' || meg.id === s.aktiv) return { ok: true };
         if (h.paa !== 'sannhet' && h.paa !== 'lyv') return { feil: 'ukjent' };
         s.stemmer[meg.id] = h.paa;
+        s.sikker = s.sikker || {}; if (h.sikker === true) s.sikker[meg.id] = true; else if (h.sikker === false) delete s.sikker[meg.id];
         if (Object.keys(s.stemmer).length >= data.spillere.length - 1) avgjorForraeder(data);
         return { ok: true };
       }
       return { feil: 'feil-spill' };
+    }
+    case 'lh-bytt': {  // Løgnhalsen: den som har tur kan bytte kort én gang (f.eks. et kort de aldri har opplevd)
+      if (!s || s.type !== 'forraeder' || s.fase !== 'svar' || s.byttet) return { ok: true };
+      if (meg.id !== s.aktiv) return { feil: 'ikke-din-tur' };
+      if (!s.kø.length) s.kø = stokk(s.alle.slice());
+      s.tekst = s.kø.pop(); s.byttet = true;
+      return { ok: true };
     }
     case 'svart': {  // Forræder: den aktive har svart, nå kan resten stemme
       if (!s || s.type !== 'forraeder' || s.fase !== 'svar') return { ok: true };
@@ -1134,10 +1150,15 @@ function avgjorMest(data: any) {
 function avgjorForraeder(data: any) {
   const s = data.spill;
   const feil = Object.entries(s.stemmer).filter(([, v]) => v !== s.hemmelig).map(([id]) => id);
-  const antallStemmer = Object.keys(s.stemmer).length;
-  s.drikker = [];
+  const antallStemmer = Object.keys(s.stemmer).length, sikker = s.sikker || {};
+  s.drikker = []; s.utdeling = []; s.lurte = feil.length;
   if (antallStemmer && feil.length === 0) { giSlurker(data, s.aktiv, 3); s.drikker.push({ id: s.aktiv, navn: navnPaa(data, s.aktiv), slurker: 3 }); }
-  feil.forEach((id) => { giSlurker(data, id, 2); s.drikker.push({ id, navn: navnPaa(data, id), slurker: 2 }); });
+  if (feil.length) {
+    giUtdeling(data, s.aktiv, feil.length); s.utdeling.push({ id: s.aktiv, n: feil.length });
+    const a = data.spillere.find((p: any) => p.id === s.aktiv); if (a) a.lurt = (a.lurt || 0) + feil.length;
+  }
+  feil.forEach((id) => { const n = sikker[id] ? 4 : 2; giSlurker(data, id, n); s.drikker.push({ id, navn: navnPaa(data, id), slurker: n, sikker: !!sikker[id] }); });
+  Object.keys(s.stemmer).forEach((id) => { if (sikker[id] && !feil.includes(id)) { giUtdeling(data, id, 1); s.utdeling.push({ id, n: 1, sikker: true }); } });
   s.fase = 'avslort';
   melde(data, `${navnPaa(data, s.aktiv)} ${s.hemmelig === 'lyv' ? 'løy' : 'sa sannheten'}!`, `${navnPaa(data, s.aktiv)} ${s.hemmelig === 'lyv' ? 'lied' : 'told the truth'}!`);
 }
