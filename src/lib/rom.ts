@@ -68,11 +68,20 @@ function nyPollett() { const a = new Uint8Array(18); crypto.getRandomValues(a); 
 export function rensNavn(n: any) { return String(n || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
 
 /* ---------- hvilke leker som finnes i rom ---------- */
-const KORTLEKER = ['pekeleken', 'jeg-har-aldri', '50-50', 'kategorier', 'tanken-bak-sangen', 'sannhet-eller-drikk', 'enten-eller', 'nodt-eller-sannhet', 'rygg-mot-rygg'];
+const KORTLEKER = ['pekeleken', 'jeg-har-aldri', 'kategorier', 'tanken-bak-sangen', 'enten-eller', 'nodt-eller-sannhet', 'rygg-mot-rygg'];
+/** Én kort linje om hver kortlek i lobbyen – hva som skjer, ikke hvordan knappene virker. */
+const OM_L: Record<string, [string, string]> = {
+  'pekeleken': ['Hvem passer kortet på? Pek i rommet – eller stem på mobilen.', 'Who fits the card? Point in the room – or vote on your phones.'],
+  'jeg-har-aldri': ['Svar i hemmelighet. Så snus kortene.', 'Answer in secret. Then the cards flip.'],
+  'kategorier': ['Bomba går rundt. Ingen vet når den smeller.', 'The bomb goes around. Nobody knows when it goes off.'],
+  'enten-eller': ['Velg side i hemmelighet. Mindretallet drikker.', 'Pick a side in secret. The minority drinks.'],
+  'nodt-eller-sannhet': ['Én i stolen. Alle andre er dommere.', 'One in the hot seat. Everyone else judges.'],
+  'rygg-mot-rygg': ['To peker i hemmelighet. Resten gjetter.', 'Two point in secret. The rest guess.'],
+};
 const NAVN_L: Record<string, [string, string]> = {
   'pekeleken': ['Pekeleken', 'Most likely to'], 'jeg-har-aldri': ['Jeg har aldri', 'Never have I ever'], 'enten-eller': ['Enten eller', 'Would you rather'], 'kategorier': ['Kategorier', 'Categories'],
   'nodt-eller-sannhet': ['Nødt eller sannhet', 'Truth or dare'], 'sannhet-eller-drikk': ['Sannhet eller drikk', 'Truth or drink'], 'tanken-bak-sangen': ['Låtbekjennelsen', 'Song confessions'], 'rygg-mot-rygg': ['Rygg mot rygg', 'Back to back'], 'duoleken': ['Duoleken', 'The couples game'], '50-50': ['50/50', '50/50'],
-  'ring-of-fire': ['Ring of Fire', 'Ring of Fire'], 'forraeder': ['Løgnhalsen', 'The liar'], 'mest': ['Mest sannsynlig', 'Most likely to (vote)'], 'bingo': ['Drikke-bingo', 'Drinking bingo'],
+  'ring-of-fire': ['Ring of Fire', 'Ring of Fire'], 'forraeder': ['Løgnhalsen', 'The liar'], 'mest': ['Pekeleken · på mobilen', 'Most likely to · on phones'], 'bingo': ['Drikke-bingo', 'Drinking bingo'],
 };
 /** Lekene som kan spilles i rom, med navn, beskrivelse og moduser på valgt språk (standard norsk). */
 export function lekeliste(lang: Lang | string = 'no') {
@@ -97,13 +106,13 @@ function lekelisteRa(lang: Lang) {
   const nv = (id: string) => (NAVN_L[id] ? NAVN_L[id][en ? 1 : 0] : id);
   const kort = KORTLEKER.filter((s) => D[s]).map((s) => ({ id: s, navn: nv(s), type: 'kort', moduser: moduserFor(s, lang) }));
   return [
-    { id: 'mest', navn: nv('mest'), type: 'mest', moduser: moduserFor('pekeleken', lang), om: en ? 'Everyone votes for who it fits best. Every vote is one sip.' : 'Alle stemmer på hvem det passer best på. Hver stemme er én slurk.' },
+    { id: 'mest', skjult: true, navn: nv('mest'), type: 'mest', moduser: moduserFor('pekeleken', lang), om: en ? 'Everyone votes for who it fits best. Every vote is one sip.' : 'Alle stemmer på hvem det passer best på. Hver stemme er én slurk.' },
     { id: 'forraeder', navn: nv('forraeder'), type: 'forraeder', moduser: moduserFor('forraeder', lang), om: en ? 'One player is secretly told to lie or tell the truth. Everyone else votes.' : 'Én får i hemmelighet beskjed om å lyve eller si sannheten. Resten stemmer.' },
     { id: 'bingo', navn: nv('bingo'), type: 'bingo', moduser: B.eras.map((e: any) => ({ v: e.id, t: eraTittel(e.id, lang) })), om: en ? 'Everyone gets their own board. The page calls it out when someone gets a line or bingo.' : 'Hver får sitt eget brett. Siden roper når noen får rekke eller bingo.' },
     { id: 'ring-of-fire', navn: nv('ring-of-fire'), type: 'kort', moduser: [{ v: 'ring', t: en ? '🔥 The ring – pull the cards out' : '🔥 Ringen – dra ut kortene' }, { v: 'enkel', t: en ? 'Simple – tap for the next card' : 'Enkel – trykk for neste kort' }],
       om: en ? 'The cards lie in a ring around a glass. Spin the ring and pull a card out slowly – pull too hard and the ring breaks, and you finish your drink.' : 'Kortene ligger i en ring rundt et glass. Snurr ringen og dra ut et kort forsiktig – drar du for hardt, ryker ringen og du må drikke opp.' },
     ...ekstraLeker(lang),
-    ...kort.map((k) => ({ ...k, om: en ? 'Everyone sees the same card. Anyone can draw the next one.' : 'Alle ser samme kort. Hvem som helst kan trekke neste.' })),
+    ...kort.map((k) => ({ ...k, om: OM_L[k.id] ? OM_L[k.id][en ? 1 : 0] : en ? 'Everyone sees the same card. Anyone can draw the next one.' : 'Alle ser samme kort. Hvem som helst kan trekke neste.' })),
     ...PAKKER.map((p) => ({ id: p.id, navn: en ? p.en.navn : p.navn, type: 'kort', moduser: [], pluss: true, om: en ? p.en.om + ' ' + p.antall + ' cards.' : p.om + ' ' + p.antall + ' kort.' })),
   ];
 }
@@ -226,7 +235,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
       aldri: aldriVisning(s, null), ee: eeVisning(s, null), rr: rrVisning(s, null), ns: nsVisning(s, null), kb: kbVisning(s), fase: s.ferdig ? 'kort-ferdig' : s.aldri ? 'aldri-' + s.aldri.fase : s.ee ? 'ee-' + s.ee.fase : s.rr ? 'rr-' + s.rr.fase : s.ns ? 'ns-' + s.ns.fase : s.kb ? 'kb-' + s.kb.fase : undefined, ferdig: !!s.ferdig, jaTavle: s.ferdig && s.lek === 'jeg-har-aldri' ? aldriTavle(s, data) : null, pekSlutt: s.ferdig && s.lek === 'pekeleken' ? pektTavle(data) : null,
       turId: s.tur !== null && s.tur !== undefined ? (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null : null },
       s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
-    if (s.type === 'mest') Object.assign(spill, { tekst: s.tekst, fase: s.fase, stemt: Object.keys(s.stemmer || {}).length, resultat: s.fase === 'resultat' ? s.resultat : null });
+    if (s.type === 'mest') Object.assign(spill, { tekst: s.tekst, fase: s.fase, stemt: Object.keys(s.stemmer || {}).length, harStemt: Object.keys(s.stemmer || {}), resultat: s.fase === 'resultat' ? s.resultat : null });
     if (s.type === 'forraeder') Object.assign(spill, { tekst: s.tekst, fase: s.fase, aktiv: s.aktiv, stemt: Object.keys(s.stemmer || {}).length, harStemt: Object.keys(s.stemmer || {}),
       runde: s.runde || 1, lurtTavle: lurtTavle(data),
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, sikker: s.sikker || {}, drikker: s.drikker, utdeling: s.utdeling || [], lurte: s.lurte || 0 } : null });
@@ -812,7 +821,9 @@ const LINJER: number[][] = (() => {
 function nyttBrett(s: any) { return stokk(s.sanger.map((_: any, i: number) => i)).slice(0, 16); }
 
 export function startSpill(data: any, lek: string, modus: string, sett?: Set<string> | null) {
-  if (lek === 'duoleken') lek = 'pekeleken';   // Duoleken bor nå i Pekeleken (duo-kort) – gamle lenker og planer virker fortsatt
+  // Leker som er slått sammen med andre – gamle lenker og planer virker fortsatt
+  if (lek === 'duoleken' || lek === '50-50') lek = 'pekeleken';   // duo-kort og «Hvem …»-kort bor i Pekeleken, «Jeg har aldri»-kortene i Jeg har aldri
+  if (lek === 'sannhet-eller-drikk') { lek = 'nodt-eller-sannhet'; modus = modus === 'sd' ? 'droy' : modus === 'ss' ? 'snill' : modus; }
   if (EKSTRA.includes(lek)) return startEkstra(data, lek, modus);
   const liste = lekeliste('no');
   const valgt = liste.find((x) => x.id === lek);
@@ -1511,7 +1522,7 @@ function handlingInne(data: any, meg: any, h: any) {
         if (s.fase !== 'stem') return { ok: true };
         if (!data.spillere.some((p: any) => p.id === h.paa)) return { feil: 'ukjent' };
         s.stemmer[meg.id] = h.paa;
-        if (Object.keys(s.stemmer).length >= data.spillere.length) avgjorMest(data);
+        if (Object.keys(s.stemmer).length >= data.spillere.length) { const kort = Date.now() + 2000 + 1500; if (!s.frist || s.frist > kort) s.frist = kort; }
         return { ok: true };
       }
       if (s.type === 'forraeder') {
