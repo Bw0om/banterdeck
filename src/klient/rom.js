@@ -1136,7 +1136,7 @@ export function startRom(LEKNAVN, LANG) {
     var halv = rofHalv(s), sp = holder ? holder.sp : 0, hp = holder ? rofSpor(holder.t) : null;
     var visSpor = (min || holder) && !s.ringBrutt;
     var visKort = k && rofSkjult !== s.nr && !holder;   // kortet ligger over ringen til neste trekk begynner (eller du legger det bort)
-    return '<div class="ring-topp"><div class="ring-tur' + (min ? ' min' : '') + '"><span>Ring of Fire</span><b>' + (min ? T('Din tur', 'Your turn') : esc(navn(s.turId)) + T(' trekker', ' draws')) + '</b></div>' +
+    return '<div class="ring-topp"><div class="ring-tur' + (min ? ' min' : '') + '"><span>Ring of Fire</span><b>' + (s.ferdig ? T('Siste kort', 'Last card') : min ? T('Din tur', 'Your turn') : esc(navn(s.turId)) + T(' trekker', ' draws')) + '</b></div>' +
       '<div class="ring-merker"><span>' + igjen + T(' igjen', ' left') + '</span><span class="rosa">' + T('Konger', 'Kings') + ' ' + konger + '/4</span></div></div>' +
       '<div class="ring-boks' + (min ? ' aktiv' : '') + '" data-nr="' + s.nr + '">' +
         '<svg class="ring-svg" viewBox="0 0 358 500" role="img" aria-label="' + T('Ringen av kort rundt kongekoppen', 'The ring of cards around the king’s cup') + '">' +

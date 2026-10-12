@@ -96,6 +96,7 @@ Writing is three things only: the pie clock, the card you write on and your pile
 ### Når kortene er brukt opp (alle kortleker)
 
 - Alle kortlekene unntatt Ring of Fire har 30 kort i en runde, de dere ikke har hatt først. Når bunken er tom, stokkes den ikke på nytt.
+- Ring of Fire har alle 52 kortene. Når ringen er tom, vises siste kort først. Når det er lagt bort, kommer «Hva nå?» med **Ny ring** (eller **Ny kortstokk** uten ring). TV-en viser siste kort og hvem som brøt ringen.
 - Verten får «Hva nå?»: neste i planen (hvis dere har en), **Nye kort** (30 dere ikke har hatt), en annen lek eller avslutt kvelden. De andre ser at verten velger.
 - Pekeleken viser hvem som er mest utpekt i kveld. De andre viser hvor mange kort dere spilte. TV-en viser det samme, med figuren til den som ble pekt mest på.
 
