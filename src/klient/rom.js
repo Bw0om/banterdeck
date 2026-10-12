@@ -886,13 +886,14 @@ export function startRom(LEKNAVN, LANG) {
       ['Jo færre kort som er igjen, jo strammere blir ringen. Ringen kan bare brytes én gang – etter det er resten trygt.', 'The fewer cards left, the tighter the ring gets. The ring can only break once – after that the rest is safe.'],
       ['Gjør det kortet sier. Hver konge fyller kongekoppen – den som trekker fjerde konge, drikker den.', 'Do what the card says. Each king fills the king’s cup – whoever draws the fourth king drinks it.']],
     aldri: [['Kortet kommer opp på alle telefonene.', 'The card shows up on every phone.'], ['Svar «Jeg har» eller «Aldri». Ingen ser svaret før alle har svart.', 'Answer “I have” or “Never”. Nobody sees the answers until everyone has answered.'], ['De som har gjort det, drikker én slurk. Så trykker noen «Neste kort».', 'Everyone who has done it drinks one sip. Then someone taps “Next card”.'], ['Bare én har gjort det? Hen forteller historien og drikker to, eller fire hvis hen nekter. Ingen? Den som trakk kortet, drikker én.', 'Only one has done it? They tell the story and drink two, or four if they refuse. Nobody? Whoever drew the card drinks one.'], ['30 kort i en runde. Så velger verten hva dere gjør nå.', '30 cards a round. Then the host picks what to do next.']],
+    kategori: [['Bomba går rundt. Har du den, sier du noe i kategorien og trykker «Sagt!».', 'The bomb goes around. When you have it, say something in the category and tap “Said it!”.'], ['Ingen vet når den smeller. Den som har den da, drikker 2.', 'Nobody knows when it goes off. Whoever has it then drinks 2.'], ['Gjentar noen seg, trykker de andre «Sagt før!».', 'If someone repeats, the others tap “Said before!”.']],
     nodt: [['Appen setter én i stolen for hvert kort, etter tur.', 'The app puts one person in the hot seat for each card, in turn.'], ['Den i stolen velger nødt eller sannhet på telefonen. Så snus kortet.', 'The person in the hot seat picks truth or dare on their phone. Then the card flips.'], ['Gjør det eller svar ærlig – eller feig ut og drikk 3.', 'Do it or answer honestly – or chicken out and drink 3.'], ['Alle andre dømmer: «Godkjent» eller «Juks!». Flertallet bestemmer, likt er godkjent. Juks: drikk 2.', 'Everyone else judges: “Approved” or “Cheat!”. The majority decides, a tie is approved. Cheat: drink 2.']],
     rygg: [['Appen velger et par for hvert kort: A og B, B og C, C og A … Så er alle med på rundt seks kort.', 'The app picks a pair for each card: A and B, B and C, C and A … so everyone gets about six cards.'], ['De to setter seg rygg mot rygg og peker i hemmelighet på telefonen: på seg selv eller på den andre.', 'The two sit back to back and point in secret on their phones: at themselves or at the other.'], ['Alle andre gjetter: den ene, den andre eller «uenige». Gjetter du feil, drikker du én.', 'Everyone else guesses: one, the other or “disagree”. Guess wrong and you drink one.'], ['Enige: den de pekte på drikker én. Uenige: begge drikker én.', 'Agreed: the one they pointed at drinks one. Disagreed: both drink one.']],
     enten: [['Kortet har to valg. Velg side på telefonen – ingen ser hva du velger før klokka er ute.', 'The card has two options. Pick a side on your phone – nobody sees your pick until the clock runs out.'], ['Mindretallet drikker én. Like mange på hver side: ingen drikker. Alle likt: den som trakk kortet, drikker én.', 'The minority drinks one. Equal sides: nobody drinks. Everyone the same: whoever drew the card drinks one.'], ['Står én helt alene, får hen 20 sekunder til å forsvare valget. Får hen med seg én, drikker den personen – ellers drikker hen to.', 'If one person stands alone, they get 20 seconds to defend the pick. Win one person over and that person drinks – otherwise drink two.'], ['30 kort i en runde. Så velger verten hva dere gjør nå.', '30 cards a round. Then the host picks what to do next.']],
     kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Hvem som helst kan trykke «Neste kort».', 'Anyone can tap “Next card”.']],
   };
   function reglerPanel(s) {
-    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.pek ? 'pekeleken' : s.aldri || s.svarPaa ? 'aldri' : s.ee || s.lek === 'enten-eller' ? 'enten' : s.rr || s.lek === 'rygg-mot-rygg' ? 'rygg' : s.ns || s.lek === 'nodt-eller-sannhet' ? 'nodt' : 'kort')) : s.type, r = REGLER[nokkel];
+    var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.pek ? 'pekeleken' : s.aldri || s.svarPaa ? 'aldri' : s.ee || s.lek === 'enten-eller' ? 'enten' : s.rr || s.lek === 'rygg-mot-rygg' ? 'rygg' : s.ns || s.lek === 'nodt-eller-sannhet' ? 'nodt' : s.kb || s.lek === 'kategorier' ? 'kategori' : 'kort')) : s.type, r = REGLER[nokkel];
     if (!r) return '';
     var sett = les('bd_regler_sett') || [], forste = sett.indexOf(nokkel) === -1;
     if (forste) { sett.push(nokkel); skriv('bd_regler_sett', sett.slice(-40)); apneRegler[nokkel] = true; }
@@ -1362,6 +1363,7 @@ export function startRom(LEKNAVN, LANG) {
     if (s.ee) return eeSpill(s);
     if (s.rr) return rrSpill(s);
     if (s.ns) return nsSpill(s);
+    if (s.kb) return kbSpill(s);
     if (s.pek && s.pek.fase !== 'hendelse') return pekSpill(s) + pekBenk(s);
     if (s.aldri) return aldriSpill(s) + aldriBryter(s);
     var k = s.kort || {};
@@ -1490,13 +1492,14 @@ export function startRom(LEKNAVN, LANG) {
     var w = o.par ? (n <= 4 ? 76 : n <= 6 ? 62 : 48) : r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = o.par ? rrPlasser(alle, o.par) : o.stol ? stolPlasser(alle, o.stol) : eePlasser(alle, r);
     var stil = '--w:' + w + 'px' + (r && r.fa ? ';--fa:' + r.fa : '') + (r && r.fb ? ';--fb:' + r.fb : '');
     setTimeout(benkTikk, 0);
+    var bombe = o.bombe && plass[o.bombe.id] != null ? kbBombe(plass[o.bombe.id], o.bombe) : '';
     return '<div class="ee-benk' + (r ? ' delt' : '') + (o.par ? ' rygg' + (o.par.snudd ? ' snudd' : '') : '') + (o.stol ? ' stolen' : '') + '" data-stirr="' + (o.stirr || '') + '" style="' + stil + '">' +
       (r ? '<i class="ee-midt"></i>' + (r.la ? '<span class="ee-sidenavn a">' + esc(r.la) + '</span><span class="ee-sidenavn b">' + esc(r.lb) + '</span>' : '') : '') +
-      (o.status && !r ? '<span class="ee-status">' + esc(o.status) + '</span>' : '') +
+      (o.status && !r ? '<span class="ee-status">' + esc(o.status) + '</span>' : '') + bombe +
       alle.map(function (p, i) {
         var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1 || p.id === o.stol, erOi = oi.indexOf(p.id) !== -1;
         var uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
-        var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : '';
+        var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : o.bombe && p.id === o.bombe.id ? ' holder' : '';
         return '<div class="ee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' +
           '<span class="ee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.id === tilstand.meg ? T('Du', 'You') : p.navn) + '</span>' + eeHode(p, uttrykk) + '</div></div>'; }).join('') + '</div>';
   }
@@ -1733,6 +1736,58 @@ export function startRom(LEKNAVN, LANG) {
     return topp + kort(true) + '<div class="rr-dom ' + kl + (inn ? ' inn' : '') + '">' + dom + '</div>' + (linjer ? '<ul class="rr-gjett">' + linjer + '</ul>' : '') +
       '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste i stolen: ', 'Next in the hot seat: ') + esc(neste ? (neste.id === jeg ? T('deg', 'you') : neste.navn) : '')) + '</button>' +
       benk({ oppe: true, oi: res.feig || res.juks ? [r.hvem] : [], flat: false });
+  }
+  /* ---------- Kategorier: bomba går rundt ----------
+     Bomba sitter ved hodet til den som har den, og flyr i en bue med fjær til neste (kbFly). Gnisten blafrer,
+     og bomba skjelver raskere jo nærmere smellet. BOM: stjerne, skjermen rister, «OI» på den som satt med den. */
+  var kbVist = '', kbTimer = null, kbIntervall = null;
+  var KB_FJAER = 'linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1)';
+  var KB_SVG = '<svg viewBox="-34 -46 68 80" aria-hidden="true"><path class="kb-lunte" d="M10 -22q8 -14 20 -16" fill="none" stroke-width="4" stroke-linecap="round"/>' +
+    '<g class="kb-gnist"><circle cx="31" cy="-39" r="7" fill="#FFD23F"/><circle cx="31" cy="-39" r="3.5" fill="#FF5B1F"/><path d="M31 -50v-5M42 -39h5M38 -47l4-4M24 -47l-4-4" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/></g>' +
+    '<rect x="-2" y="-27" width="18" height="10" rx="2" transform="rotate(30 7 -22)" fill="#4A3F37" stroke="#16120F" stroke-width="3"/><circle class="kb-kropp" cx="0" cy="2" r="28" stroke-width="3.5"/>' +
+    '<path d="M-15 -12a18 18 0 0 1 12 -7" fill="none" stroke="#FFF8EE" stroke-width="4" stroke-linecap="round" opacity=".7"/></svg>';
+  var KB_BOM = '<svg viewBox="-60 -60 120 120" aria-hidden="true"><path d="M0 -56L12 -22L46 -36L26 -6L56 12L20 16L28 52L0 26L-28 52L-20 16L-56 12L-26 -6L-46 -36L-12 -22Z" fill="#FFD23F" stroke="#16120F" stroke-width="4" stroke-linejoin="round"/>' +
+    '<path d="M0 -30L7 -12L26 -18L14 0L30 10L10 10L14 30L0 16L-14 30L-10 10L-30 10L-14 0L-26 -18L-7 -12Z" fill="#FF5B1F"/></svg>';
+  /** Hvor langt bomba har brent (0–1): bestemmer hvor fort den skjelver. */
+  function kbBrent(b) { var naa = Date.now() + klokkeAvvik; return Math.max(0, Math.min(1, (naa - b.start) / Math.max(1, b.smell - b.start))); }
+  function kbFart(b) { return Math.round(700 - 560 * kbBrent(b)) + 'ms'; }
+  function kbBombe(x, o) {
+    return '<div class="kb-bombe' + (o.bom ? ' bom' : '') + '" style="--x:' + (x / 100).toFixed(3) + '">' + (o.bom ? '<i class="kb-smell">' + KB_BOM + '<b>BOM!</b></i>' : '<i class="kb-rist" style="--fart:' + o.fart + '">' + KB_SVG + '</i>') + '</div>';
+  }
+  /** Bomba flyr fra der den var til der den er nå: en bue med fjær (FLIP, bare transform). */
+  function kbRekt() { var e = root.querySelector('.kb-bombe:not(.bom)'); return e ? e.getBoundingClientRect() : null; }
+  function kbFly(fra) {
+    var e = root.querySelector('.kb-bombe:not(.bom)'); if (!e || !fra || !e.animate || roligBevegelse()) return;
+    var til = e.getBoundingClientRect(), dx = fra.left - til.left, dy = fra.top - til.top;
+    if (Math.abs(dx) < 2 && Math.abs(dy) < 2) return;
+    e.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'translate(' + (dx / 2) + 'px,' + (dy / 2 - 46) + 'px) rotate(' + (dx > 0 ? -160 : 160) + 'deg)', offset: 0.45 }, { transform: 'none' }],
+      { duration: 520, easing: KB_FJAER });
+  }
+  function kbSpill(s) {
+    var t = tilstand, b = s.kb, alle = t.spillere || [], jeg = t.meg, har = b.holder === jeg, han = esc(navn(b.holder));
+    var nokkel = s.pos + ':' + s.antall + ':' + b.fase + ':' + b.holder, ny = kbVist !== nokkel, varFase = kbVist.split(':')[2]; kbVist = nokkel;
+    if (ny && b.fase === 'gaar' && har) { spillLyd('tur'); try { navigator.vibrate && navigator.vibrate(60); } catch (e) {} }
+    if (ny && b.fase === 'bom' && varFase === 'gaar') { spillLyd('dundun'); if (har) { try { navigator.vibrate && navigator.vibrate([90, 50, 160]); } catch (e) {} } }
+    clearTimeout(kbTimer); clearInterval(kbIntervall);
+    if (b.fase === 'gaar') {
+      kbTimer = setTimeout(function () { gjorAlltid({ handling: 'kb-smell' }); }, Math.max(0, b.smell - (Date.now() + klokkeAvvik)) + 250 + Math.random() * 600);
+      kbIntervall = setInterval(function () { var r = root.querySelector('.kb-rist'); if (!r) return clearInterval(kbIntervall); r.style.setProperty('--fart', kbFart(b)); }, 1000);
+    }
+    var chip = b.fase === 'bom' ? 'BOM!' : har ? T('Din tur!', 'Your turn!') : han + T(' har bomba', ' has the bomb');
+    var topp = jaTopp(T('Kategorier · kort ', 'Categories · card ') + (s.pos + 1) + T(' av ', ' of ') + s.antall, chip, b.fase === 'gaar' && !har, false);
+    var kort = '<div class="pk-kort kb-kort"><span class="pk-pre">' + T('Kategori', 'Category') + '</span><p>' + esc((s.kort && s.kort.t) || '') + '</p></div>';
+    var protest = (b.protest || []).length ? '<p class="kb-protest">' + T('Sagt før!', 'Said before!') + ' <span>' + b.protest.map(function (id) { return esc(id === jeg ? T('du', 'you') : navn(id)); }).join(', ') + '</span></p>' : '';
+    var benk = hodeBenk(alle, { oppe: true, stirr: b.holder, bombe: { id: b.holder, fart: kbFart(b), bom: b.fase === 'bom' }, oi: b.fase === 'bom' ? [b.holder] : [], flat: false, status: b.svar ? b.svar + T(' svar', ' answers') : '' });
+    if (b.fase === 'gaar') {
+      var midt = har
+        ? '<button type="button" class="kb-knapp" data-g="kb-send" data-fra="' + b.holder + '"><b>' + T('Sagt!', 'Said it!') + '</b><span>' + T('Send bomba →', 'Pass the bomb →') + '</span></button>' + protest
+        : protest + ((b.protest || []).indexOf(jeg) === -1 ? '<button type="button" class="ns-feig kb-sagt" data-g="kb-protest">' + T('Sagt før!', 'Said before!') + '</button>' : '') +
+          (erVert() ? '<p class="ja-vis"><button type="button" class="linkbtn" data-g="kb-send" data-fra="' + b.holder + '">' + T('Send for ', 'Pass for ') + han + '</button></p>' : '');
+      return topp + kort + midt + benk;
+    }
+    var sist = s.pos + 1 >= s.antall;
+    return '<div class="kb-skjelv' + (ny ? ' na' : '') + '">' + topp + kort + '<div class="rr-dom uenige' + (ny ? ' inn' : '') + '"><span>BOM! · ' + b.resultat.svar + T(' svar', ' answers') + '</span><b>' + (har ? T('Du drikker 2', 'You drink 2') : han + T(' drikker 2', ' drinks 2')) + '</b></div>' +
+      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Ny kategori', 'New category')) + '</button></div>' + benk;
   }
   /** De andre kortlekene når bunken er tom: hvor mange kort dere spilte (i Pekeleken: hvem som ble pekt mest på), og så hva nå. */
   function kortFerdig(s) {
@@ -3605,10 +3660,12 @@ export function startRom(LEKNAVN, LANG) {
     var gammelRekt = gammeltKort ? gammeltKort.getBoundingClientRect() : null;
     sistKortNokkel = nyKN;
     var stuaPlass = tilstand.ferdig ? '' : '<div class="rom-stua-plass" id="romStuaPlass"></div>';
+    var kbFra = kbRekt();
     root.innerHTML = s
       ? topp + merker + borsHurtig() + innhold + stuaPlass + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + vert + forlat
       : topp + stuaPlass + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat;
     tegnStua(s);
+    kbFly(kbFra);
     merkNyttInnhold(s);
     trinnEtterTegning();
     // Skjermkanten: lime når det er din tur, stripete når skjermen viser noe hemmelig
@@ -3827,7 +3884,7 @@ export function startRom(LEKNAVN, LANG) {
   // knappen det første 0,7 sekundet – ellers hopper et dobbelttrykk over kortet ingen rakk å lese.
   var sistInnhold = '', sperreTil = 0;
   function merkNyttInnhold(s) {
-    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur, s.aldri ? s.aldri.fase : '', s.ee ? s.ee.fase : '', s.rr ? s.rr.fase : '', s.ns ? s.ns.fase : '', s.ferdig ? 'f' : ''].join('|') : 'ingen';
+    var k = s ? [s.type, s.lek, s.pos, s.fase, s.runde, s.i, s.kast, s.tur, s.aldri ? s.aldri.fase : '', s.ee ? s.ee.fase : '', s.rr ? s.rr.fase : '', s.ns ? s.ns.fase : '', s.kb ? s.kb.fase : '', s.ferdig ? 'f' : ''].join('|') : 'ingen';
     if (k !== sistInnhold) { if (sistInnhold) sperreTil = Date.now() + 700; sistInnhold = k; }
   }
 
@@ -3940,6 +3997,8 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'aldri-nekt') return gjor({ handling: 'aldri-nekt' });
     if (g === 'ee-velg') { if (b.getAttribute('aria-pressed') === 'true') return; spillLyd('pop'); gjorAlltid({ handling: 'ee-velg', v: b.dataset.v }); return; }
     if (g === 'ee-med') { eeVelgMed = true; return tegn(); }
+    if (g === 'kb-send') { spillLyd('pop'); gjorAlltid({ handling: 'kb-send', fra: b.dataset.fra }); return; }
+    if (g === 'kb-protest') { spillLyd('womp'); gjorAlltid({ handling: 'kb-protest' }); return; }
     if (g === 'ns-velg' || g === 'ns-stem') { if (b.getAttribute('aria-pressed') === 'true') return; spillLyd('pop'); gjorAlltid({ handling: g, v: b.dataset.v }); return; }
     if (g === 'ns-ferdig' || g === 'ns-feig') { spillLyd('pop'); gjorAlltid({ handling: g }); return; }
     if (g === 'rr-pek' || g === 'rr-gjett') { if (b.getAttribute('aria-pressed') === 'true') return; spillLyd('pop'); gjorAlltid({ handling: g, v: b.dataset.v }); return; }

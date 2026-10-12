@@ -987,3 +987,32 @@ html.i-spill .rom-kode{font-size:.92em}
 .ee-hode.stol{z-index:2;width:calc(var(--w) * 1.28);margin-left:calc(var(--w) * -.14);bottom:-58px}
 .ee-hode.stol .ee-navn{background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
 @media (prefers-reduced-motion:reduce){.ns-kort.inn{animation:jaToning 240ms ease both}}
+
+/* ---------- Kategorier: bomba går rundt ---------- */
+.rom-spill:has(.kb-kort){align-items:stretch;text-align:left;gap:0}
+.kb-kort p{font-size:clamp(26px,8vw,32px)}
+.kb-knapp{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:2px;width:100%;min-height:150px;margin:0 0 12px;padding:16px 18px;text-align:left;font-family:inherit;color:var(--blekk);background:var(--oransje);border:var(--strek) solid var(--blekk);border-radius:8px;box-shadow:6px 6px 0 var(--hard);cursor:pointer;touch-action:manipulation;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.kb-knapp b{font-family:var(--display);font-size:68px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.85}
+.kb-knapp span{font-size:14px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.kb-knapp:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--hard)}
+.kb-sagt{background:var(--rosa);color:var(--blekk);border-color:var(--blekk)}
+.kb-sagt:disabled{opacity:.55;cursor:default}
+.kb-protest{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 12px;font-family:var(--display);font-size:22px;font-weight:900;font-stretch:70%;text-transform:uppercase;color:var(--ink)}
+.kb-protest span{padding:2px 8px;font-family:inherit;font-size:13px;font-weight:900;font-stretch:100%;text-transform:none;color:var(--blekk);background:var(--rosa);border:2px solid var(--blekk);border-radius:10px}
+.kb-skjelv.na{animation:kbRist 420ms cubic-bezier(.23,1,.32,1) both}
+@keyframes kbRist{0%,100%{transform:none}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-4px)}60%{transform:translate(-3px,2px)}80%{transform:translate(2px,-1px)}}
+/* Bomba over hodet til den som har den */
+.ee-benk:has(.kb-bombe){height:236px}
+.kb-bombe{position:absolute;z-index:3;width:48px;left:calc(12px + (100% - 24px - var(--w)) * var(--x) + var(--w) / 2 - 24px);bottom:146px;pointer-events:none}
+.kb-bombe svg{display:block;width:100%;height:auto;overflow:visible}
+.kb-kropp{fill:#3A3940;stroke:var(--ink)}.kb-lunte{stroke:var(--ink)}
+.kb-rist{display:block;transform-origin:50% 80%;animation:kbVipp var(--fart,700ms) ease-in-out infinite}
+@keyframes kbVipp{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.kb-gnist{transform-origin:31px -39px;transform-box:view-box;animation:kbGnist 180ms steps(2) infinite}
+@keyframes kbGnist{0%{transform:scale(1) rotate(0)}50%{transform:scale(1.25) rotate(25deg)}100%{transform:scale(.9) rotate(-10deg)}}
+.kb-bombe.bom{width:120px;left:calc(12px + (100% - 24px - var(--w)) * var(--x) + var(--w) / 2 - 60px);bottom:100px}
+.kb-smell{position:relative;display:block;animation:kbSmell 600ms cubic-bezier(.23,1,.32,1) both}
+.kb-smell b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:24px;font-weight:900;font-stretch:62%;color:var(--blekk)}
+@keyframes kbSmell{0%{transform:scale(.4) rotate(-20deg);opacity:0}35%{transform:scale(1.12) rotate(4deg);opacity:1}100%{transform:none;opacity:1}}
+.ee-hode.holder .ee-navn{background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
+@media (prefers-reduced-motion:reduce){.kb-rist,.kb-gnist,.kb-skjelv.na{animation:none}.kb-smell{animation:jaToning 240ms ease both}}
