@@ -17,6 +17,19 @@ const ROMDATA = JSON.stringify({ LEKNAVN, LANG }).replace(/</g, '\\u003c');
   <div id="rom" class="rom">
     <noscript><p>{EN ? 'The room needs JavaScript.' : 'Rommet trenger JavaScript.'}</p></noscript>
   </div>
+  <script is:inline define:vars={{ EN }}>
+    // Skjelettet av rommet med en gang siden kommer – før selve romkoden (100 kB) er lastet. Samme
+    // skjelett som rom.js tegner; den tar over når den er klar. Bare når man har en romkode og er med.
+    (function () {
+      var k = (new URLSearchParams(location.search).get('k') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+      var r = document.getElementById('rom');
+      try { if (!k || !r || !localStorage.getItem('bd_rom_' + k)) return; } catch (e) { return; }
+      document.documentElement.classList.add('i-rom');
+      r.innerHTML = '<div class="rom-laster" aria-busy="true"><div class="rom-hode"><div class="rom-hode-v"><div><span class="rom-etikett">' + (EN ? 'Room' : 'Rom') + '</span><b class="rom-kode">' + k + '</b></div></div>' +
+        '<span class="rom-hodeknapper"><i></i><i></i><i></i><i></i></span></div><div class="skj-rad"><i></i><i></i><i></i></div><div class="skj-kort"></div>' +
+        '<p class="rom-laster-tekst" role="status">' + (EN ? 'Connecting to room ' : 'Kobler til rom ') + k + ' …</p></div>';
+    })();
+  </script>
 
   <script>
     import qrcode from 'qrcode-generator';
