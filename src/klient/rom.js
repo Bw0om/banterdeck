@@ -871,7 +871,7 @@ export function startRom(LEKNAVN, LANG) {
     skal: [['Vent til det står SKÅL! på skjermen.', 'Wait until it says CHEERS! on screen.'], ['Trykk så fort du kan.', 'Tap as fast as you can.'], ['Tregest drikker – trykker du for tidlig, drikker du dobbelt.', 'Slowest drinks – tap too early and you drink double.']],
     mest: [['Ett «Hvem er mest sannsynlig …»-kort om gangen.', 'One “Who’s most likely …” card at a time.'], ['Trykk på hodet til den det passer best på. Ingen ser hva du stemte.', 'Tap the head of whoever it fits best. Nobody sees your vote.'], ['Hver stemme er én slurk.', 'Every vote is one sip.']],
     forraeder: [['Den som har tur, holder på kortet for å se om hen skal lyve eller si sannheten – og fullfører setningen høyt.', 'Whoever’s turn it is holds the card to see whether to lie or tell the truth – and finishes the sentence out loud.'], ['Grill hen med oppfølgingsspørsmål. Så stemmer resten: sant eller løgn?', 'Grill them with follow-up questions. Then everyone else votes: true or lie?'], ['Feil: drikk to (helt sikker: fire). Den som forteller deler ut én per person som ble lurt.', 'Wrong: drink two (absolutely sure: four). The teller hands out one per person fooled.']],
-    tosannheter: [['Én skriver tre påstander om seg selv – to sanne og én løgn.', 'One player writes three statements about themselves – two true, one lie.'], ['Resten stemmer på løgnen fra sin telefon.', 'Everyone else votes for the lie on their phone.'], ['Så avsløres løgnen – de som bommet, drikker.', 'Then the lie is revealed – those who missed drink.']],
+    tosannheter: [['Én sitter i stolen og skriver tre ting om seg selv – to sanne og én løgn.', 'One player sits in the chair and writes three things about themselves – two true, one lie.'], ['De andre trykker på kortet de tror er løgnen. Når alle har stemt, snus kortene.', 'Everyone else taps the card they think is the lie. When everyone has voted, the cards flip.'], ['Bommet eller ikke stemt: drikk 1. Stolen drikker 1 per person som så løgnen. Alle sitter i stolen én gang.', 'Missed or didn’t vote: drink 1. The chair drinks 1 per person who saw the lie. Everyone takes the chair once.']],
     regelfabrikken: [['Alle skriver så mange drikkekort de rekker før tiden går ut.', 'Everyone writes as many drinking cards as they can before time runs out.'], ['Kortene stokkes og trekkes ett og ett.', 'The cards are shuffled and drawn one by one.'], ['Gjør det kortet sier!', 'Do what the card says!']],
     bussruta: [['Alle svarer på fire spørsmål om kortene sine på sin telefon.', 'Everyone answers four questions about their cards on their phone.'], ['Så snus pyramiden – har du kortet, deler du ut slurker.', 'Then the pyramid is turned – if you have the card, you hand out sips.'], ['Den med flest kort igjen, kjører bussen.', 'Whoever has the most cards left rides the bus.']],
     yatzy: [['Trill på din telefon når det er din tur – opptil tre kast.', 'Roll on your phone when it’s your turn – up to three throws.'], ['Hold terningene du vil beholde, og velg hvor poengene føres.', 'Hold the dice you want to keep and pick where the score goes.'], ['Alle ser blokka. Den med minst til slutt, drikker opp.', 'Everyone sees the scorecard. Lowest score at the end finishes their drink.']],
@@ -880,7 +880,7 @@ export function startRom(LEKNAVN, LANG) {
     pyramiden: [['Alle får fire skjulte kort på telefonen sin.', 'Everyone gets four hidden cards on their phone.'], ['Kort snus i pyramiden. Har du samme verdi, deler du ut slurker – eller bløffer.', 'Cards are turned in the pyramid. Have the same value? Hand out sips – or bluff.'], ['Blir du utfordret og bløffet, drikker du dobbelt.', 'Get called out while bluffing and you drink double.']],
     gris: [['Alle får fire kort. Send ett kort videre samtidig.', 'Everyone gets four cards. Pass one card on at the same time.'], ['Får noen fire like, tar hen seg på nesa – og alle må gjøre det samme.', 'When someone gets four of a kind, they touch their nose – and everyone must follow.'], ['Sistemann får en bokstav. G-R-I-S = ta en shot.', 'The last one gets a letter. P-I-G-S = take a shot.']],
     president: [['Bli kvitt kortene dine først – legg likt eller høyere enn det som ligger.', 'Get rid of your cards first – play equal or higher than what’s on the table.'], ['Toere er høyest og rydder bordet.', 'Twos are highest and clear the table.'], ['Først ut blir president, sist ut blir rævkjører.', 'First out is President, last out is the Scumbag.']],
-    bingo: [['Alle får sitt eget bingobrett med sanger.', 'Everyone gets their own bingo card with songs.'], ['Spill spillelista og kryss av sangene du hører.', 'Play the playlist and mark the songs you hear.'], ['Rekke: del ut to slurker. Fullt brett: BINGO – alle andre drikker opp.', 'A line: hand out two sips. Full card: BINGO – everyone else finishes their drink.']],
+    bingo: [['Alle får sitt eget bingobrett med sanger.', 'Everyone gets their own bingo card with songs.'], ['Spill spillelista og kryss av sangene du hører.', 'Play the playlist and mark the songs you hear.'], ['Rekke: del ut to slurker. Fullt brett: BINGO – alle andre drikker opp, og leken er ferdig.', 'A line: hand out two sips. Full card: BINGO – everyone else finishes their drink, and the game is over.']],
     pekeleken: [['Den som leser, leser kortet høyt og starter nedtellingen. Alle telefonene sier PEK! samtidig.', 'The reader reads the card out loud and starts the countdown. Every phone says POINT! at the same time.'], ['Pek på den det passer best på. Trykk inn hvor mange som pekte på deg.', 'Point at who it fits best. Then tap how many pointed at you.'], ['Flest fingre drikker like mange slurker. Av og til kommer en vri.', 'Most fingers drinks that many sips. Now and then there is a twist.']],
     nyhetsrunden: [['Spørsmålet dukker opp på alle telefonene – verten leser det høyt.', 'The question appears on every phone – the host reads it out loud.'], ['Svar før klokka går ut. Du kan bytte svar helt til svaret vises.', 'Answer before the clock runs out. You can change your answer until it is shown.'], ['Riktig: del ut én. Feil: drikk én. Tallspørsmål: den nærmest deler ut to, lengst unna drikker.', 'Right: hand out one. Wrong: drink one. Number questions: closest hands out two, furthest off drinks.']],
     ring: [['Telefonene er kortstokken – alle ser samme kort.', 'The phones are the deck – everyone sees the same card.'], ['Den som har tur, trekker og gjør det kortet sier.', 'Whoever’s turn it is draws and does what the card says.'], ['Den som trekker fjerde konge, drikker opp!', 'Whoever draws the fourth king finishes their drink!']],
@@ -2102,18 +2102,48 @@ export function startRom(LEKNAVN, LANG) {
     if (b && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); gjorAlltid({ handling: 'stem', paa: b.dataset.paa, sikker: false }); }
   });
 
+  /* ---------- Drikke-bingo: bingotusjen ----------
+     Trykk når låta går: en klatt lander på ruta. Fire på rad tegner en strek. Fullt brett: BINGO, og leken er ferdig.
+     Klatter og streker spretter bare inn første gang de dukker opp (husket per runde). */
+  var BG_LINJER = (function () { var l = []; for (var r = 0; r < 4; r++) { l.push([r * 4, r * 4 + 1, r * 4 + 2, r * 4 + 3]); l.push([r, r + 4, r + 8, r + 12]); } l.push([0, 5, 10, 15]); l.push([3, 6, 9, 12]); return l; })();
+  var bgSett = {}, bgAntall = {}, bgRekkeTid = 0;
+  var BG_KLATT = '<svg class="bg-klatt" viewBox="0 0 60 60" aria-hidden="true"><path d="M30 4c9 0 13 6 19 9s8 11 6 18-1 13-8 18-15 6-22 4-13-7-16-14-2-15 2-22 10-13 19-13z"/></svg>';
+  function bgFont(t) {
+    var l = Math.max.apply(null, String(t || '').split(/\s+/).map(function (w) { return w.length; }).concat([1]));
+    return Math.max(8, Math.min(15, Math.floor(60 / (l * 0.72)), Math.floor(170 / (String(t || '').length * 0.66))));
+  }
   function bingoSpill(s) {
-    var b = s.mittBrett || [], m = s.mineMerker || [];
-    return '<p class="rom-etikett">' + T('Ditt brett · ', 'Your board · ') + esc(s.tittel) + '</p>' +
-      '<div class="rom-bingo">' + b.map(function (x, i) {
-        // Lange ord (som «Watchtower») får litt mindre skrift i stedet for å deles midt i ordet
-        var lengst = Math.max.apply(null, String(x[1]).split(/\s+/).map(function (w) { return w.length; }));
-        return '<button type="button" data-g="merk" data-i="' + i + '" aria-pressed="' + !!m[i] + '"><b' + (lengst > 12 ? ' class="xlang"' : lengst > 9 ? ' class="lang"' : '') + '>' + esc(x[1]) + '</b><span>' + esc(x[0]) + '</span></button>';
-      }).join('') + '</div>' +
-      '<div class="gt-row">' + (s.spotify ? '<a class="btn gold" href="' + esc(s.spotify) + '" target="_blank" rel="noopener">' + T('Åpne spillelista ↗', 'Open the playlist ↗') + '</a>' : '') +
-      '<button class="btn ghost" data-g="nytt-brett" type="button">' + T('Nytt brett', 'New board') + '</button></div>' +
-      (s.bingo && s.bingo.length ? '<p class="rom-status">BINGO: ' + s.bingo.map(function (id) { return esc(navn(id)); }).join(', ') + '</p>' : '') +
-      '<p class="small">' + T('Merk en låt når den spilles. Rekke: del ut to slurker. Fullt brett: alle andre drikker opp.', 'Mark a song when it plays. Line: hand out two sips. Full board: everyone else finishes their drink.') + '</p>';
+    var b = s.mittBrett || [], m = s.mineMerker || [], r = s.runde || 1, meg = tilstand.meg, jegBingo = (s.bingo || []).indexOf(meg) !== -1;
+    var ut = '<div class="bg-topp">' + jaTopp(T('Drikke-bingo', 'Drinking bingo'), s.ferdig ? 'Bingo!' : esc(s.tittel), !s.ferdig, false) +
+      (erVert() && s.spotify ? '<a class="bg-lista" href="' + esc(s.spotify) + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>' + T('Lista', 'Playlist') + '</a>' : '') + '</div>';
+    var fulle = BG_LINJER.map(function (l, k) { return l.every(function (x) { return m[x]; }) ? k : -1; }).filter(function (k) { return k !== -1; });
+    var forr = bgAntall[r] == null ? fulle.length : bgAntall[r];
+    if (fulle.length > forr && !s.ferdig) bgRekkeTid = Date.now();
+    bgAntall[r] = fulle.length;
+    ut += '<div class="bg-brett' + (s.ferdig && jegBingo && !bgSett[r + ':bingo'] ? ' hopp' : '') + '"><div class="bg-ruter">' + b.map(function (x, i) {
+      var k = r + ':' + i, ny = m[i] && !bgSett[k]; if (m[i]) bgSett[k] = 1; else delete bgSett[k];
+      return '<button type="button" data-g="merk" data-i="' + i + '" aria-pressed="' + !!m[i] + '"' + (s.ferdig ? ' disabled' : '') + '>' +
+        (m[i] ? BG_KLATT.replace('class="bg-klatt"', 'class="bg-klatt' + (ny ? ' inn' : '') + '" style="--r:' + ((i * 47) % 50 - 25) + 'deg"') : '') +
+        '<b style="font-size:' + bgFont(x[1]) + 'px' + (Math.max.apply(null, String(x[1]).split(/\s+/).map(function (w) { return w.length; })) > 12 ? ';overflow-wrap:anywhere' : '') + '">' + esc(x[1]) + '</b><span>' + esc(x[0]) + '</span></button>';
+    }).join('') + '</div><svg class="bg-streker" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + (s.ferdig && jegBingo ? [] : fulle).map(function (k) {
+      var l = BG_LINJER[k], a = l[0], z = l[3], ax = (a % 4 + .5) * 25, ay = (Math.floor(a / 4) + .5) * 25, zx = (z % 4 + .5) * 25, zy = (Math.floor(z / 4) + .5) * 25;
+      var dx = Math.sign(zx - ax) * 4, dy = Math.sign(zy - ay) * 4, nk = r + ':l' + k, ny = !bgSett[nk]; bgSett[nk] = 1;
+      return '<path' + (ny ? ' class="inn"' : '') + ' d="M' + (ax - dx) + ' ' + (ay - dy) + 'L' + (zx + dx) + ' ' + (zy + dy) + '"/>';
+    }).join('') + '</svg>' + (s.ferdig && jegBingo ? '<span class="bg-bingo' + (bgSett[r + ':bingo'] ? '' : ' inn') + '">Bingo!</span>' : '') + '</div>';
+    if (s.ferdig) bgSett[r + ':bingo'] = 1;
+    var siden = Date.now() - bgRekkeTid;
+    if (!s.ferdig && siden < 4000) ut += '<div class="bg-rekke" style="animation-delay:-' + siden + 'ms"><b>' + T('Rekke!', 'Line!') + '</b><span>' + T('Del ut 2 slurker', 'Hand out 2 sips') + '</span></div>';
+    if (s.ferdig) {
+      var vinner = (s.bingo || [])[0];
+      ut += '<div class="hs-dom ' + (jegBingo ? 'rett' : 'feil') + ' inn"><b>' + (jegBingo ? T('Alle andre drikker opp', 'Everyone else finishes their drink') : 'Bingo ' + T('for ', 'for ') + esc(navn(vinner)) + T(' – drikk opp!', ' – finish your drink!')) + '</b></div>';
+      return ut + lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye brett – teller i kvelden', 'New boards – counts tonight')]]);
+    }
+    var andre = (s.andre || []).slice().sort(function (a, c) { return c.n - a.n; });
+    ut += '<p class="nr-etikett">' + T('Hvor nærme er de?', 'How close are they?') + '</p><ul class="bg-andre">' + andre.map(function (a) {
+      return '<li' + (a.id === meg ? ' class="meg"' : '') + '>' + nrHode(a.id, '', '') + '<b>' + jaNavn(a.id) + '</b><span class="bg-stripe"><i style="transform:scaleX(' + (a.n / 16) + ')"></i></span><b>' + a.n + '/16</b></li>';
+    }).join('') + '</ul>';
+    if (!m.some(Boolean)) ut += '<button class="bg-bytt" data-g="nytt-brett" type="button">' + T('Bytt brett', 'New board') + '</button>';
+    return ut;
   }
 
 
@@ -2337,27 +2367,78 @@ export function startRom(LEKNAVN, LANG) {
         (!s.egen && s.alleKort ? '<button class="linkbtn" data-g="lagrestokk" type="button">' + T('Lagre kortene', 'Save the cards') + '</button>' : '') + '</p>';
   }
 
-  function tosannheterSpill(s) {
-    var jeg = s.aktiv === tilstand.meg, han = esc(navn(s.aktiv));
-    if (s.fase === 'skriv') {
-      if (!jeg) return '<p class="rom-stor">' + han + T(' skriver tre påstander …', ' is writing three statements …') + '</p><p class="small">' + T('To er sanne, én er løgn. Gjør deg klar til å avsløre.', 'Two are true, one is a lie. Get ready to call it.') + '</p>';
-      return '<p class="rom-etikett">' + T('Din tur – bare du ser dette', 'Your turn – only you can see this') + '</p><p>' + T('Skriv tre påstander om deg selv og merk løgnen.', 'Write three statements about yourself and mark the lie.') + '</p>' +
-        '<form id="tsSkjema" class="ts-skjema">' + [0, 1, 2].map(function (i) {
-          return '<div class="ts-rad"><input id="tsR' + i + '" maxlength="120" placeholder="' + T('Påstand ', 'Statement ') + (i + 1) + '"><label><input type="radio" name="tsL" value="' + i + '"> ' + T('Løgn', 'Lie') + '</label></div>';
-        }).join('') + '<button class="rom-stor-knapp" type="submit">' + T('Send til de andre', 'Send to the others') + '</button></form>';
-    }
-    var liste = '<div class="ts-valg">' + s.pastander.map(function (t, i) {
-      var kl = s.fase === 'avslort' ? (i === s.logn ? 'logn' : 'sann') : '';
-      var ant = s.stemmer ? Object.keys(s.stemmer).filter(function (k) { return s.stemmer[k] === i; }).length : 0;
-      var knapp = s.fase === 'stem' && !jeg;
-      return (knapp ? '<button type="button" data-g="stem" data-paa="' + i + '" aria-pressed="' + (s.minStemme === i) + '"' : '<div') + ' class="' + kl + '"><b>' + (i + 1) + '</b><span>' + esc(t) + '</span>' +
-        (s.fase === 'avslort' ? '<small>' + ant + T(' stemmer', ant === 1 ? ' vote' : ' votes') + '</small>' : '') + (knapp ? '</button>' : '</div>');
+  /* ---------- To sannheter og en løgn: stolen ----------
+     Én sitter i stolen og skriver tre kort, stempler løgnen. De andre trykker på kortet de tror er løgnen – hodet lander der.
+     Fasiten står mens neste i stolen allerede skriver, så ingen trenger å trykke «neste». Animasjonene spilles bare første gang. */
+  var tsSett = {};
+  var TS_STOL = '<svg class="ts-stolsvg" viewBox="0 0 92 112" aria-hidden="true"><path d="M18 30h56v40h-56z"/><path d="M10 70h72v12h-72z"/><path class="bein" d="M16 82v26M76 82v26"/></svg>';
+  function tsFont(t) {
+    var l = Math.max.apply(null, String(t || '').split(/\s+/).map(function (w) { return w.length; }).concat([1]));
+    return Math.max(14, Math.min(21, Math.floor(210 / (l * 0.56)), Math.floor(420 / (String(t || '').length * 0.5))));
+  }
+  function tsStol(id, under, oi, prikker) {
+    return '<div class="ts-stolrad"><span class="ts-stol">' + TS_STOL + nrHode(id, '', oi ? 'oi' : '') + '</span><div class="ts-stoltekst"><b>' +
+      (id === tilstand.meg ? T('Du i stolen', 'You’re in the chair') : esc(navn(id)) + T(' i stolen', ' in the chair')) + '</b>' +
+      (prikker ? '<span class="ts-prikker" aria-label="' + T('skriver', 'writing') + '"><i></i><i></i><i></i></span>' : '') + (under ? '<span>' + under + '</span>' : '') + '</div></div>';
+  }
+  /** De tre kortene. o: { logn, stemmer, valgt, kan, dinLogn, aapen, ny } */
+  function tsKort(past, o) {
+    var meg = tilstand.meg;
+    return '<div class="ts-bord">' + (past || []).map(function (t, i) {
+      var logn = o.aapen && i === o.logn, forsink = o.aapen ? (logn ? 760 : i * 260) : 0;
+      var hoder = o.aapen ? Object.keys(o.stemmer || {}).filter(function (id) { return o.stemmer[id] === i; }) : (o.valgt === i ? [meg] : []);
+      var kl = 'ts-kort' + (o.aapen ? (logn ? ' logn' : ' sann') : '') + (!o.aapen && o.valgt === i ? ' valgt' : '') + (o.ny ? ' ny' : '');
+      var inn = '<span class="ts-nr">' + (i + 1) + '</span><span class="ts-tekst" style="font-size:' + tsFont(t) + 'px">' + esc(t) + '</span><span class="ts-hoder">' +
+        hoder.map(function (id, j) { return '<span class="ts-land' + (o.ny || !o.aapen ? ' inn' : '') + '" style="--f:' + (o.aapen ? forsink + 200 + j * 70 : 0) + 'ms">' + nrHode(id, '', o.aapen && !logn ? 'oi' : '') + '</span>'; }).join('') + '</span>';
+      return '<div class="ts-plass' + (logn && o.ny ? ' rist' : '') + '" style="--f:' + forsink + 'ms">' +
+        (o.kan ? '<button type="button" class="' + kl + '" data-g="stem" data-paa="' + i + '" aria-pressed="' + (o.valgt === i) + '">' + inn + '</button>' : '<div class="' + kl + '">' + inn + '</div>') +
+        (o.aapen ? '<span class="ts-stempel' + (logn ? ' logn' : '') + (o.ny ? ' inn' : '') + '">' + (logn ? T('Løgn', 'Lie') : T('Sann', 'True')) + '</span>' : '') +
+        (o.dinLogn === i ? '<span class="ts-din">' + T('Din løgn', 'Your lie') + '</span>' : '') + '</div>';
     }).join('') + '</div>';
-    if (s.fase === 'stem') return '<p class="rom-etikett">' + (jeg ? T('De andre stemmer', 'The others are voting') : T('Hvilken er ' + han + ' sin løgn?', 'Which one is ' + han + '\'s lie?')) + '</p>' + liste +
-      '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + (tilstand.spillere.length - 1) + T(' har stemt', ' have voted') + '</p>' + fristHtml(tilstand.spill, T('sekunder til avsløringen', 'seconds to the reveal'));
-    return '<p class="rom-etikett">' + T('Fasit', 'The answer') + '</p>' + liste +
-      (s.drikker && s.drikker.length ? '<ul class="rom-drikker">' + s.drikker.map(function (x) { return '<li><b>' + esc(x.navn) + '</b>' + T(' drikker ', ' drinks ') + x.slurker + '</li>'; }).join('') + '</ul>' : '') +
-      '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste spiller', 'Next player') + '</button>';
+  }
+  function tsFasit(fr, ny) {
+    var velgere = Object.keys(fr.stemmer || {}).length;
+    return tsStol(fr.aktiv, fr.riktige + T(' så løgnen', ' saw the lie'), fr.riktige > 0) +
+      tsKort(fr.pastander, { aapen: true, logn: fr.logn, stemmer: fr.stemmer, ny: ny }) +
+      ((fr.drikker || []).length ? '<div class="ts-drikk">' + fr.drikker.map(function (x, j) {
+        return '<span class="' + (ny ? 'inn' : '') + '" style="--f:' + (1200 + j * 80) + 'ms">' + jaNavn(x.id) + (x.id === tilstand.meg ? T(' drikker ', ' drink ') : T(' drikker ', ' drinks ')) + x.slurker + '</span>';
+      }).join('') + '</div>' : '') + (velgere ? '' : '');
+  }
+  function tosannheterSpill(s) {
+    var meg = tilstand.meg, jeg = s.aktiv === meg, f = s.fase, fr = s.forrige, topp = T('To sannheter og en løgn', 'Two truths and a lie');
+    var frNy = fr && !tsSett[fr.n]; if (fr) tsSett[fr.n] = 1;
+    if (f === 'ferdig') {
+      var l = (s.lurt || []).slice(0, 3), rek = [l[1], l[0], l[2]];
+      return jaTopp(topp, T('Alle har sittet', 'Everyone’s had a go'), false, false) + (fr ? tsFasit(fr, frNy) : '') +
+        '<p class="ts-pall-tittel">' + T('Beste løgner', 'Best liar') + '</p><div class="ts-pall">' + rek.map(function (x, j) {
+          if (!x) return '';
+          var plass = [2, 1, 3][j];
+          return '<div class="ts-pallplass p' + plass + '" style="--f:' + [240, 480, 0][j] + 'ms">' + nrHode(x.id, '', '') + '<b>' + jaNavn(x.id) + '</b><span><b>' + x.n + '</b><small>' + T('lurt', 'fooled') + '</small></span></div>';
+        }).join('') + '</div>' +
+        lekSlutt([['runde', T('Spill igjen', 'Play again'), T('En ny runde i stolen – teller i kvelden', 'Another round in the chair – counts tonight')]]);
+    }
+    if (f === 'skriv') {
+      var ut = jaTopp(topp, jeg ? T('Din tur', 'Your turn') : esc(navn(s.aktiv)) + T(' skriver', ' is writing'), true, false);
+      if (jeg) {
+        ut += '<p class="ts-du">' + T('Du sitter i stolen', 'You’re in the chair') + '</p><p class="ts-hjelp">' + T('Tre ting om deg. Stemple løgnen.', 'Three things about you. Stamp the lie.') + '</p>' +
+          '<form id="tsSkjema" class="ts-skjema">' + [0, 1, 2].map(function (i) {
+            return '<div class="ts-rad" style="--f:' + i * 70 + 'ms"><label><span>' + T('Kort ', 'Card ') + (i + 1) + '</span><input id="tsR' + i + '" maxlength="120" autocomplete="off" placeholder="' +
+              [T('Noe sant …', 'Something true …'), T('Noe sant til …', 'Something else true …'), T('Eller en løgn …', 'Or a lie …')][i] + '"></label>' +
+              '<label class="ts-stempelvalg"><input type="radio" name="tsL" value="' + i + '"><span>' + T('Løgn', 'Lie') + '</span></label></div>';
+          }).join('') + '<button class="rom-stor-knapp" type="submit">' + T('Legg dem på bordet', 'Put them on the table') + '</button></form>';
+        if (fr) ut += '<p class="nr-etikett">' + T('Forrige runde', 'Last round') + '</p>' + tsFasit(fr, frNy);
+        return ut;
+      }
+      if (fr) return ut + tsFasit(fr, frNy) + '<div class="ts-neste"><span>' + T('Neste i stolen', 'Next in the chair') + '</span><span class="ts-prikker"><i></i><i></i><i></i></span><b>' + esc(navn(s.aktiv)) + '</b></div>';
+      return ut + tsStol(s.aktiv, T('Gjør deg klar til å avsløre.', 'Get ready to call it.'), false, true);
+    }
+    var velgere = s.velgere || [], stemt = s.harStemt || [], alleStemt = velgere.length && stemt.length >= velgere.length;
+    var chip = alleStemt ? T('Alle har stemt', 'Everyone voted') : jeg ? T('Hold pokerfjes', 'Poker face') : T('Finn løgnen', 'Find the lie');
+    return jaTopp(topp, chip, true, false) + tsStol(s.aktiv, jeg ? T('Ikke avslør deg.', 'Don’t give yourself away.') : T('Trykk på løgnen.', 'Tap the lie.'), false, false) +
+      tsKort(s.pastander, { kan: !jeg, valgt: s.minStemme, dinLogn: jeg ? s.logn : null }) +
+      '<div class="ts-status"><span class="ts-stemt">' + stemt.map(function (id) { return nrHode(id, 'inn', ''); }).join('') + '</span><b>' +
+      (alleStemt ? T('Snur kortene …', 'Flipping the cards …') : stemt.length + T(' av ', ' of ') + velgere.length + T(' har stemt', ' have voted')) + '</b></div>' +
+      fristHtml(tilstand.spill, T('sekunder til avsløringen', 'seconds to the reveal'));
   }
   /* ---------- Bussruta ---------- */
   function bussrutaSpill(s) {
@@ -3950,6 +4031,7 @@ export function startRom(LEKNAVN, LANG) {
     if (s && s.turStart && erVert()) innhold += '<p class="rom-hopp" data-turstart="' + s.turStart + '" hidden><button class="btn ghost small" data-g="hopp-over" type="button">' + T('Hopp over den som har tur', 'Skip whoever\'s turn it is') + '</button></p>';
     var vert = vertVerktoy(s);
     var tsLagret = [0, 1, 2].map(function (i) { var e = document.getElementById('tsR' + i); return e ? e.value : null; }), tsValgt = (document.querySelector('input[name=tsL]:checked') || {}).value;
+    var tsFokus = document.activeElement && /^tsR\d$/.test(document.activeElement.id) ? document.activeElement.id : null;
     var y = window.scrollY, gammel = document.getElementById('rfInput'), gVerdi = gammel ? gammel.value : null, gFokus = gammel && document.activeElement === gammel;
     var nrGammel = document.getElementById('nrInput'), nrVerdi = nrGammel ? nrGammel.value : null, nrFokus = nrGammel && document.activeElement === nrGammel;
     var lbGammel = document.getElementById('lbInput'), lbVerdi = lbGammel ? lbGammel.value : null, lbFokus = lbGammel && document.activeElement === lbGammel;
@@ -3993,6 +4075,7 @@ export function startRom(LEKNAVN, LANG) {
     spillInn();
     tsLagret.forEach(function (v, i) { var e = document.getElementById('tsR' + i); if (e && v !== null) e.value = v; });
     if (tsValgt !== undefined) { var r = document.querySelector('input[name=tsL][value="' + tsValgt + '"]'); if (r) r.checked = true; }
+    if (tsFokus) { var tf = document.getElementById(tsFokus); if (tf) { tf.focus({ preventScroll: true }); tf.setSelectionRange(tf.value.length, tf.value.length); } }
     var nrNy = document.getElementById('nrInput');
     if (nrNy && nrVerdi !== null) { nrNy.value = nrVerdi; if (nrFokus) nrNy.focus({ preventScroll: true }); }
     var lbNy = document.getElementById('lbInput');
