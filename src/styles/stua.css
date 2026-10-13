@@ -1273,3 +1273,81 @@ button.lh-grill b{font-family:var(--display);font-size:20px;font-weight:900;font
 .sm-vert .rom-stor-knapp{flex:1.4;min-width:0;margin:0;padding:12px 8px;font-size:18px;white-space:normal}
 .sm-vert .btn{min-width:0;white-space:normal}
 @media (prefers-reduced-motion:reduce){.hs-sendt.inn .hs-lapp,.hs-sendt.inn .hs-klaff,.hs-sendt.inn p,.hs-avatar.inn,.hs-hvem b.inn,.hs-prikker i,.hs-valg.inn button,.hs-dom.inn,.hs-gjett.inn li,.hs-alle li,.sm-sau,.sm-sendt.inn,.sm-flokk.inn,.sm-hoder.hopp>span,.sm-stempel{animation:none}.hs-melding.ny .hs-boble{animation:hsBoble 1ms linear 1100ms both}}
+
+/* ---------- Muldvarpen: kortet, ringen og kortene som snus ---------- */
+.lh-kikk.mv-kikk{height:116px;background:var(--mint)}
+.lh-kikk.mv-kikk.muldvarp{background:#3A3940}
+.mv-innhold{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;padding:0 14px;color:var(--blekk)}
+.mv-kikk.muldvarp .mv-innhold{color:#FFF8EE}
+.mv-innhold>b{font-family:var(--display);font-size:30px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9;text-align:left}
+.mv-sted{display:flex;flex-direction:column;align-items:center;gap:4px;max-width:100%}
+.mv-sted small{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.mv-sted b{font-family:var(--display);font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9;text-align:center;overflow-wrap:anywhere}
+.mv-dekk{position:absolute;inset:0;display:grid;place-items:center;background:repeating-linear-gradient(45deg,#2A292E 0 10px,#232227 10px 20px);transition:transform 160ms ease-in}
+.mv-dekk b{font-family:var(--display);font-size:22px;font-weight:900;font-stretch:62%;text-transform:uppercase;color:#FFF8EE}
+.lh-kikk.vis .mv-dekk{transform:translateY(-101%);transition:transform 420ms var(--fjaer)}
+.mv-dyr{width:92px;height:69px;flex:none}
+.mv-dyr .kropp{transform-origin:60px 40px;animation:mvSnus 1.6s ease-in-out infinite}
+.mv-dyr .kropp path:first-child{fill:#5B4A41;stroke:#16120F;stroke-width:3}
+.mv-dyr .snute{fill:var(--rosa);stroke:#16120F;stroke-width:3}
+.mv-dyr .oye{fill:#16120F}
+.mv-dyr .klo{fill:none;stroke:#FFF8EE;stroke-width:3;stroke-linecap:round}
+.mv-dyr .jord{fill:#8B5A3C;stroke:#16120F;stroke-width:3;stroke-linejoin:round}
+@keyframes mvSnus{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.mv-hjelp{min-height:40px;margin:12px 0 10px;font-family:var(--display);font-size:19px;font-weight:900;font-stretch:80%;line-height:1.1}
+.mv-hjelp.liten{min-height:0;font-family:var(--sans);font-size:14px;font-weight:800;color:var(--muted)}
+.mv-ring{position:relative;width:100%;aspect-ratio:1/.92;margin:0 0 14px;border:var(--strek) solid var(--ink);border-radius:50%;background:var(--card)}
+.mv-ring svg{position:absolute;inset:0;width:100%;height:100%}
+.mv-ring path{fill:none;stroke:var(--border2);stroke-width:1.2;stroke-linecap:round}
+.mv-ring path.siste{stroke:var(--ink);stroke-dasharray:200;animation:mvPil 600ms cubic-bezier(.23,1,.32,1) both}
+.mv-ring marker path{fill:var(--ink);stroke:none}
+@keyframes mvPil{from{stroke-dashoffset:200}to{stroke-dashoffset:0}}
+.mv-plass{position:absolute;width:80px;margin:-44px 0 0 -40px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.mv-plass>b{font-size:13px;font-weight:900;color:var(--ink)}
+.mv-ringhode{display:block;padding:0;border:3px solid var(--blekk);border-radius:50%;overflow:hidden;background:#FFF1DE;line-height:0}
+.mv-ringhode{box-sizing:border-box;width:62px;height:62px;flex:none}
+.mv-ringhode .nr-h,.mv-ringhode .nr-h svg{width:56px;height:56px}
+.pk-hode .nr-h svg,.pk-stor .nr-h svg{width:100%;height:100%}
+button.mv-ringhode{cursor:pointer;box-shadow:0 0 0 3px var(--ink),0 0 0 6px var(--gul);transition:transform 90ms ease-out}
+button.mv-ringhode:active{transform:scale(.94)}
+.mv-ringhode.tur{box-shadow:0 0 0 4px var(--gul);animation:mvTur 1.4s ease-in-out infinite}
+@keyframes mvTur{0%,100%{box-shadow:0 0 0 4px var(--gul)}50%{box-shadow:0 0 0 9px var(--gul)}}
+.mv-kort{position:relative;display:block;width:74px;height:28px;perspective:400px}
+.mv-kort .snu{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 620ms var(--fjaer)}
+.mv-kort.snudd .snu{transform:rotateY(180deg)}
+.mv-kort.inn .snu{animation:mvSnu 620ms var(--fjaer) both}
+@keyframes mvSnu{from{transform:none}to{transform:rotateY(180deg)}}
+.mv-kort i{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;border:2.5px solid #16120F;border-radius:6px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.mv-kort .bak{background:repeating-linear-gradient(45deg,#8B5A3C 0 6px,#7A4E33 6px 12px);color:#FFF8EE}
+.mv-kort .fram{transform:rotateY(180deg);background:var(--mint);color:#16120F}
+.mv-kort.muldvarp .fram{background:#3A3940;color:#FFF8EE}
+.mv-hake{position:absolute;top:-6px;right:4px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font-style:normal;font-size:13px;font-weight:900;color:#16120F;background:var(--mint);border:2.5px solid #16120F;animation:nrInn 380ms var(--fjaer) both}
+/* ---------- Hvem er jeg?: lappen i panna ---------- */
+.pk-skriv{display:flex;flex-direction:column;align-items:center;gap:6px;margin:6px 0 12px}
+.pk-skriv>p{margin:0;font-family:var(--display);font-size:26px;font-weight:900;font-stretch:66%;text-transform:uppercase}
+.pk-stor{position:relative;display:block;width:168px;height:168px}
+.pk-stor .nr-h{width:168px;height:168px}
+.pk-lapp{position:absolute;left:50%;top:8%;box-sizing:border-box;min-height:34%;display:grid;place-items:center;padding:4px 5px;text-align:center;font-weight:900;line-height:1.05;color:#16120F;background:var(--gul);border:2px solid #16120F;box-shadow:2px 2px 0 rgba(22,18,15,.35);transform:translateX(-50%) rotate(-4deg);overflow-wrap:anywhere}
+.pk-lapp.tom{color:#62564C}
+.pk-lapp.klask{animation:pkKlask 450ms var(--fjaer) both}
+@keyframes pkKlask{from{transform:translateX(-50%) rotate(-14deg) scale(1.5);opacity:0}to{transform:translateX(-50%) rotate(-4deg);opacity:1}}
+.pk-lapp.meg{background:#FFF1DE;border-style:dashed;animation:pkVipp 1.8s ease-in-out infinite}
+@keyframes pkVipp{0%,100%{transform:translateX(-50%) rotate(-6deg)}50%{transform:translateX(-50%) rotate(4deg)}}
+.pk-lapp.fall{animation:pkFall 900ms cubic-bezier(.55,0,.7,.4) forwards}
+@keyframes pkFall{from{transform:translateX(-50%) rotate(-4deg);opacity:1}to{transform:translateX(-50%) translateY(120px) rotate(40deg);opacity:0}}
+.pk-lapp.snupp{animation:pkSnupp 600ms var(--fjaer) both}
+@keyframes pkSnupp{from{transform:translateX(-50%) rotateY(90deg)}to{transform:translateX(-50%) rotate(-4deg)}}
+.pk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 14px}
+.pk-kort2{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px 10px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:12px;box-shadow:5px 5px 0 var(--hard)}
+.pk-kort2.gjettet{background:color-mix(in srgb,var(--mint) 22%,var(--card))}
+.pk-kort2.sist{background:color-mix(in srgb,var(--rosa) 35%,var(--card))}
+.pk-kort2>b{font-size:16px;font-weight:900}
+.pk-hode{position:relative;display:block;width:108px;height:108px}
+.pk-hode .nr-h{width:108px;height:108px}
+.pk-hode .mv-hake{right:-4px;top:auto;bottom:4px;width:30px;height:30px;font-size:16px}
+.pk-merke{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;padding:4px 8px;border-radius:10px;border:2px solid var(--ink);background:var(--card)}
+.pk-merke.rett{background:var(--mint);color:var(--blekk);border-color:var(--blekk)}
+.pk-knapp{width:100%;min-height:42px;font:900 15px var(--sans);text-transform:uppercase;color:var(--blekk);background:var(--gul);border:var(--strek) solid var(--blekk);border-radius:8px;box-shadow:3px 3px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.pk-knapp:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+.pk-knapp.hvit{background:var(--card);color:var(--ink);border-color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.mv-dyr .kropp,.mv-ring path.siste,.mv-ringhode.tur,.mv-kort.inn .snu,.mv-hake,.pk-lapp.klask,.pk-lapp.meg,.pk-lapp.snupp{animation:none}.pk-lapp.fall{animation:pkFall 1ms linear forwards}.mv-kort .snu,.lh-kikk.vis .mv-dekk{transition:none}}
