@@ -1469,3 +1469,92 @@ button.ts-kort:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ha
 .bg-andre li.meg .bg-stripe i{background:var(--oransje)}
 .bg-bytt{display:block;margin:0 auto 12px;min-height:44px;font:800 14px var(--sans);color:var(--muted);background:none;border:0;text-decoration:underline;cursor:pointer}
 @media (prefers-reduced-motion:reduce){.ts-prikker i,.ts-rad,.ts-plass.rist,.ts-land.inn,.ts-stempel.inn,.ts-stemt .nr-h.inn,.ts-drikk span.inn,.ts-pallplass,.ts-kort.ny,.bg-brett.hopp,.bg-streker path.inn,.bg-bingo.inn{animation:none}.bg-klatt.inn{animation:nrInn 200ms ease both}.bg-rekke{animation:none}.ts-kort,.ts-stempelvalg span,.bg-stripe i{transition:none}}
+/* ---------- Over eller under: potten ---------- */
+.ou-folk{display:flex;justify-content:space-between;gap:6px;margin:4px 0 6px}
+.ou-folk>div{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;flex:1}
+.ou-folk .nr-h{width:48px;height:48px;transition:transform 420ms var(--fjaer),box-shadow 200ms ease-out}
+.ou-folk .tur .nr-h{transform:translateY(-6px);box-shadow:0 0 0 5px var(--gul)}
+.ou-folk b{max-width:100%;font-size:14px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ou-folk span{padding:1px 8px;font-size:13px;font-weight:900;color:#16120F;background:var(--rosa);border:2.5px solid #16120F;border-radius:999px}
+.ou-folk span.inn{animation:nrInn 380ms var(--fjaer) both}
+.ou-bord{display:flex;align-items:center;justify-content:center;gap:26px;min-height:250px;margin:4px 0 8px}
+.ou-bunke{position:relative;width:150px;height:210px;perspective:900px}
+.ou-lag{position:absolute;inset:0;background:var(--card);border:3px solid var(--ink);border-radius:12px;transform:translate(var(--x),var(--y)) rotate(var(--r))}
+.ou-lag.sklir{animation:ouSklir 700ms cubic-bezier(.77,0,.175,1) both}
+@keyframes ouSklir{to{transform:translate(var(--x),-260px) scale(.4);opacity:0}}
+.ou-kort{position:absolute;inset:0;display:flex;flex-direction:column;padding:12px 14px;box-sizing:border-box;color:#16120F;background:#FFFFFF;border:4px solid #16120F;border-radius:12px;box-shadow:6px 6px 0 var(--hard)}
+.ou-kort.rod{color:#D7263D}
+.ou-kort>b{font-size:30px;font-weight:900;line-height:1}
+.ou-kort>b:last-child{align-self:flex-end;transform:rotate(180deg)}
+.ou-kort>span{align-self:center;margin:auto 0;font-size:88px;line-height:1}
+.ou-kort.snu{animation:ouSnu 620ms var(--fjaer) both}
+@keyframes ouSnu{from{transform:translate(120px,-30px) rotateY(180deg) rotate(8deg)}to{transform:none}}
+.ou-kort.liten{position:relative;inset:auto;width:46px;height:62px;padding:4px 6px;border-width:3px;border-radius:6px;box-shadow:3px 3px 0 var(--hard)}
+.ou-kort.liten>b{font-size:14px}.ou-kort.liten>b:last-child{display:none}.ou-kort.liten>span{font-size:26px}
+.ou-pott{display:flex;flex-direction:column;align-items:center;gap:6px}
+.ou-pott>span{display:grid;place-items:center;width:88px;height:88px;box-sizing:border-box;border-radius:50%;color:#16120F;background:var(--gul);border:4px solid #16120F;box-shadow:4px 4px 0 var(--hard)}
+.ou-pott b{font-family:var(--display);font-size:44px;font-weight:900;font-stretch:62%;line-height:1}
+.ou-pott small{font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.ou-sjanse{margin:0 0 12px}
+.ou-sjanse>div{position:relative;height:16px;overflow:hidden;background:var(--rosa);border:3px solid var(--ink);border-radius:999px}
+.ou-sjanse i{position:absolute;inset:0;transform-origin:left;background:var(--mint);border-right:3px solid #16120F;transition:transform 420ms cubic-bezier(.23,1,.32,1)}
+.ou-sjanse p{display:flex;justify-content:space-between;margin:6px 0 0;font-size:13px;font-weight:900}
+.ou-svar{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 14px;color:#16120F;border:3px solid #16120F;border-radius:10px;box-shadow:4px 4px 0 var(--hard)}
+.ou-svar.rett{background:var(--mint)}.ou-svar.feil{background:var(--rosa)}
+.ou-svar.inn{animation:nrInn 380ms var(--fjaer) both}
+.ou-svar b{font-family:var(--display);font-size:24px;font-weight:900;font-stretch:66%;text-transform:uppercase}
+.ou-svar span{font-size:15px;font-weight:800}
+.ou-for{margin:0 0 8px;font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ou-knapper{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 12px}
+.ou-knapper button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:108px;font-family:var(--sans);color:#16120F;border:4px solid #16120F;border-radius:10px;box-shadow:6px 6px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.ou-knapper button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+.ou-over{background:var(--mint)}.ou-under{background:var(--rosa)}
+.ou-knapper svg{width:36px;height:36px}
+.ou-knapper path{fill:none;stroke:#16120F;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.ou-knapper b{font-family:var(--display);font-size:32px;font-weight:900;font-stretch:62%;line-height:1;text-transform:uppercase}
+.ou-hopp{display:block;margin:0 auto 12px;min-height:44px;font:800 14px var(--sans);color:var(--muted);background:none;border:0;text-decoration:underline;cursor:pointer}
+/* ---------- Veddeløpet: travbanen ---------- */
+.vl-hjelp{min-height:20px;margin:0 0 10px;font-size:15px;font-weight:800;color:var(--muted)}
+.vl-banen{container-type:inline-size;position:relative;margin:0 0 12px;padding:10px;background:#2F6B3A;border:3px solid #16120F;border-radius:12px;box-shadow:5px 5px 0 var(--hard)}
+.vl-sider{position:relative;height:40px;margin:0 0 8px}
+.vl-side{position:absolute;top:0;left:calc(9px + var(--i) * (100cqw - 80px) / 8);width:26px;height:38px;perspective:300px}
+.vl-side>span{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 520ms var(--fjaer)}
+.vl-side.snudd>span{transform:rotateY(180deg)}
+.vl-side.ny>span{animation:vlSnu 520ms var(--fjaer) both}
+@keyframes vlSnu{from{transform:none}to{transform:rotateY(180deg)}}
+.vl-side i{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:15px;font-weight:900;border:2.5px solid #16120F;border-radius:5px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.vl-side .bak{background:repeating-linear-gradient(45deg,#D7263D 0 5px,#B81F33 5px 10px)}
+.vl-side .fram{transform:rotateY(180deg);color:#16120F;background:#FFFFFF}
+.vl-side .fram.rod{color:#D7263D}
+.vl-baner{display:flex;flex-direction:column;gap:6px}
+.vl-bane{position:relative;display:block;width:100%;height:56px;padding:0;box-sizing:border-box;background:#E9DFC9;border:3px solid #16120F;border-radius:8px;transition:background-color 200ms ease-out,box-shadow 200ms ease-out}
+button.vl-bane{cursor:pointer}
+button.vl-bane:active{transform:translate(2px,2px)}
+.vl-bane.valgt{background:#FFF1B8;box-shadow:0 0 0 4px var(--gul)}
+.vl-bane.vant{background:var(--mint)}
+.vl-mal{position:absolute;top:4px;bottom:4px;right:40px;width:4px;background:repeating-linear-gradient(#FFF8EE 0 5px,#16120F 5px 10px)}
+.vl-hest{position:absolute;left:6px;top:50%;margin-top:-22px;display:block;transform:translateX(calc(var(--p) * (100cqw - 80px) / 8));transition:transform 520ms var(--fjaer)}
+.vl-hest>span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:32px;height:44px;box-sizing:border-box;font-weight:900;color:#16120F;background:#FFFFFF;border:2.5px solid #16120F;border-radius:5px;box-shadow:2px 2px 0 #16120F}
+.vl-hest>span.rod{color:#D7263D}
+.vl-hest b{font-size:13px;line-height:1}.vl-hest span span{font-size:20px;line-height:1}
+.vl-hest.flytt{animation:vlFlytt 520ms var(--fjaer) both}
+@keyframes vlFlytt{from{transform:translateX(calc(var(--fra) * (100cqw - 80px) / 8))}}
+.vl-hest .galopp{animation:vlGalopp 500ms ease-in-out infinite}
+@keyframes vlGalopp{0%,100%{translate:0 0}50%{translate:0 -3px}}
+.vl-rosett{position:absolute;right:48px;top:50%;margin-top:-17px;display:grid;place-items:center;width:34px;height:34px;box-sizing:border-box;border-radius:50%;font-weight:900;color:#16120F;background:var(--gul);border:3px solid #16120F;animation:vlRosett 500ms var(--fjaer) 300ms both}
+@keyframes vlRosett{from{transform:scale(.4) rotate(-30deg);opacity:0}to{transform:none;opacity:1}}
+.vl-hoder{position:absolute;right:4px;top:50%;display:flex;flex-direction:column;translate:0 -50%}
+.vl-hoder .nr-h{width:24px;height:24px}
+.vl-hoder .nr-h+.nr-h{margin-top:-10px}
+.vl-hoder .nr-h.inn{animation:tsLand 450ms var(--fjaer) both}
+.vl-sats{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:10px 12px;background:var(--card);border:3px solid var(--ink);border-radius:10px;box-shadow:4px 4px 0 var(--hard)}
+.vl-sats>span{flex:1;font-size:15px;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
+.vl-sats button{width:48px;height:48px;font:900 26px var(--sans);color:#16120F;background:#FFF8EE;border:3px solid #16120F;border-radius:8px;box-shadow:3px 3px 0 #16120F;cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.vl-sats button.pluss{background:var(--gul)}
+.vl-sats button:active{transform:translate(3px,3px);box-shadow:0 0 0 #16120F}
+.vl-sats>b{width:52px;text-align:center;font-family:var(--display);font-size:40px;font-weight:900;font-stretch:62%;line-height:1}
+.vl-trekk{display:flex;align-items:center;gap:14px;margin:0 0 12px}
+.vl-trekk>span{display:block}
+.vl-trekk>span.inn{animation:tsLand 450ms var(--fjaer) both}
+.vl-trekk>b{font-family:var(--display);font-size:20px;font-weight:900;font-stretch:70%;text-transform:uppercase}
+@media (prefers-reduced-motion:reduce){.ou-folk span.inn,.ou-lag.sklir,.ou-kort.snu,.ou-svar.inn,.vl-side.ny>span,.vl-hest.flytt,.vl-hest .galopp,.vl-rosett,.vl-hoder .nr-h.inn,.vl-trekk>span.inn{animation:none}.ou-folk .nr-h,.ou-sjanse i,.vl-side>span,.vl-hest,.vl-bane{transition:none}}

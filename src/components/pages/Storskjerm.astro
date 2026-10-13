@@ -876,6 +876,61 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         (!b.ferdig && siden < 4000 && sisteRekke ? '<div class="tvbg-rekke" style="animation-delay:-' + siden + 'ms"><b>' + T('Rekke for ', 'Line for ') + esc(navn(sisteRekke)) + '!</b><span>' + T('Deler ut 2', 'Hands out 2') + '</span></div>' : '') +
         (b.ferdig && vinner ? '<div class="tvbg-slutt' + (bingoNy ? ' inn' : '') + '"><span class="tvbg-bingo">Bingo!</span><p>' + esc(navn(vinner)) + T(' – alle andre drikker opp', ' – everyone else finishes their drink') + '</p><small>' + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</small></div>' : '') + '</div>';
     }
+    /* ---------- Over eller under: kortet, potten og hvem som har tur ---------- */
+    var tvOuSett = {};
+    function tvOuVn(v) { return v <= 10 ? String(v) : (LANG === 'en' ? { 11: 'J', 12: 'Q', 13: 'K', 14: 'A' } : { 11: 'Kn', 12: 'D', 13: 'K', 14: 'A' })[v]; }
+    function tvOuKort(k, kl) {
+      var rod = k && (k.f === '♥' || k.f === '♦');
+      return '<div class="tvou-kort' + (rod ? ' rod' : '') + (kl ? ' ' + kl : '') + '"><b>' + (k ? tvOuVn(k.v) : '') + '</b><span>' + (k ? k.f : '') + '</span><b>' + (k ? tvOuVn(k.v) : '') + '</b></div>';
+    }
+    function ouScene(d, s) {
+      var o = s.ou, si = o.sist, r = o.runde || 1, nk = r + ':' + (o.n || 0), ny = !tvOuSett[nk]; tvOuSett[nk] = 1;
+      var bom = si && !si.riktig, lag = '', ant = Math.min(6, (bom && ny ? si.bunke : o.bunke) - 1);
+      for (var i = ant; i >= 1; i--) lag += '<i class="tvou-lag' + (bom && ny ? ' sklir' : '') + '" style="--x:' + (-i * 6) + 'px;--y:' + (i * 6) + 'px;--r:' + ((i % 2 ? 1 : -1) * i * 1.2) + 'deg"></i>';
+      var tot = (o.over || 0) + (o.under || 0);
+      var folk = (o.ider || []).map(function (id) {
+        var oi = bom && ny && si.hvem === id;
+        return '<div class="' + (id === o.tur && !o.ferdig ? 'tur' : '') + '">' + tvHode(d, id, '', oi ? 'oi' : '') + '<b>' + esc(navn(id)) + '</b><span' + (oi ? ' class="feil"' : '') + '>' + ((o.drukket || {})[id] || 0) + T(' drukket', ' drunk') + '</span></div>';
+      }).join('');
+      var hoyre = o.ferdig
+        ? '<h1 class="tv-sporsmal">' + T('Stokken er tom', 'The deck is empty') + '</h1><p class="tv-stor">' + (o.storst ? T('Største pott drukket: ', 'Biggest pot drunk: ') + '<b class="tvou-gul">' + esc(navn(o.storst.id)) + ' – ' + o.storst.n + '</b>. ' : '') + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</p>'
+        : '<div class="tvou-pott"><span><b>' + o.bunke + '</b></span><div><b>' + T('slurker i potten', 'sips in the pot') + '</b><small>' + T('Bommer du, drikker du alt.', 'Miss and you drink it all.') + '</small></div></div>' +
+          '<div class="tvou-sjanse"><div><i style="transform:scaleX(' + (tot ? o.over / tot : .5).toFixed(3) + ')"></i></div><p><span>' + (o.over || 0) + T(' høyere igjen', ' higher left') + '</span><span>' + (o.under || 0) + T(' lavere igjen', ' lower left') + '</span></p></div>' +
+          (si ? '<div class="tvou-svar ' + (si.riktig ? 'rett' : 'feil') + (ny ? ' inn' : '') + '"><b>' + (si.riktig ? T('Riktig!', 'Right!') : esc(navn(si.hvem)) + T(' bommet', ' missed')) + '</b><span>' +
+            (si.riktig ? esc(navn(si.hvem)) + (si.paa === 'over' ? T(' gjettet over. ', ' said higher. ') : T(' gjettet under. ', ' said lower. ')) + T('Potten vokser.', 'The pot grows.') : esc(navn(si.hvem)) + T(' drikker ', ' drinks ') + si.bunke + T('. Potten starter på 1.', '. The pot starts at 1.')) + '</span></div>' : '');
+      return '<div class="tv-scene tvnr"><div class="tvou"><div class="tvou-bunke">' + lag + tvOuKort(o.kort, ny && o.n ? 'snu' : '') + '</div><div class="tvou-hoyre"><div class="tvnr-hode"><p class="tv-etikett">' + T('Over eller under', 'Higher or lower') + '</p>' +
+        '<span class="tvlh-chip">' + (o.ferdig ? T('Ferdig', 'Done') : esc(navn(o.tur)) + T(' gjetter', ' is guessing')) + '</span></div>' + hoyre + '<div class="tvou-folk">' + folk + '</div></div></div></div>';
+    }
+    /* ---------- Veddeløpet: travbanen ---------- */
+    var tvVlSett = {}, tvVlPos = {};
+    function vlScene(d, s) {
+      var v = s.vl, f = v.fase, r = v.runde || 1, vm = v.veddemaal || {}, alle = d.spillere || [];
+      var NAVN = LANG === 'en' ? { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' } : { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' };
+      var antV = Object.keys(vm).length;
+      var linje = f === 'vedd' ? antV + T(' av ', ' of ') + alle.length + T(' har veddet – vedd på telefonen', ' have bet – bet on your phone') : f === 'lop' ? (v.sist ? NAVN[v.sist.f] + T(' rykker fram', ' moves up') : T('Og de er i gang …', 'And they’re off …')) : T('Fotofinish!', 'Photo finish!');
+      var nk = r + ':t' + (v.n || 0), nyT = !tvVlSett[nk]; tvVlSett[nk] = 1;
+      var sider = (v.bane || []).map(function (k, i) {
+        var snudd = !!k, ny = snudd && !tvVlSett[r + ':s' + i]; if (snudd) tvVlSett[r + ':s' + i] = 1;
+        return '<span class="tvvl-side' + (snudd ? ' snudd' : '') + (ny ? ' ny' : '') + '" style="--i:' + (i + 1) + '"><span><i class="bak"></i><i class="fram' + (k && (k.f === '♥' || k.f === '♦') ? ' rod' : '') + '">' + (k ? k.f : '') + '</i></span></span>';
+      }).join('');
+      var baner = ['♥', '♠', '♦', '♣'].map(function (x) {
+        var vant = v.vinner === x, rod = x === '♥' || x === '♦';
+        var p = Math.min(8, (v.pos || {})[x] || 0), fra = tvVlPos[r + ':' + x], flytt = fra != null && fra !== p; tvVlPos[r + ':' + x] = p;
+        var hoder = Object.keys(vm).filter(function (id) { return vm[id].farge === x; }).map(function (id) {
+          return '<span>' + tvHode(d, id, '', f === 'ferdig' && !vant ? 'oi' : '') + '<b>' + vm[id].slurker + '</b></span>'; }).join('');
+        return '<div class="tvvl-bane' + (vant ? ' vant' : '') + '"><i class="tvvl-mal"></i><span class="tvvl-hest' + (flytt ? ' flytt' : '') + '" style="--p:' + p + ';--fra:' + (flytt ? fra : p) + '"><span class="' + (f === 'lop' ? 'galopp' : '') + (rod ? ' rod' : '') + '"><b>A</b><span>' + x + '</span></span></span>' +
+          (vant ? '<span class="tvvl-rosett">1</span>' : '') + '<span class="tvvl-hoder">' + hoder + '</span></div>';
+      }).join('');
+      var bunn = '';
+      if (f === 'ferdig') bunn = '<div class="tvvl-bunn">' + Object.keys(vm).map(function (id, j) {
+        var vant = vm[id].farge === v.vinner;
+        return '<span class="' + (vant ? 'rett' : 'feil') + '" style="--f:' + (400 + j * 80) + 'ms">' + esc(navn(id)) + (vant ? T(' deler ut ', ' hands out ') + vm[id].slurker * 2 : T(' drikker ', ' drinks ') + vm[id].slurker) + '</span>';
+      }).join('') + '<em>' + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</em></div>';
+      return '<div class="tv-scene tvnr"><div class="tvvl"><div class="tvnr-hode"><p class="tv-etikett">' + T('Veddeløpet', 'The horse race') + '</p><span class="tvlh-chip' + (f === 'ferdig' ? ' hvit' : '') + '">' +
+        (f === 'vedd' ? T('Vedd på telefonen', 'Bet on your phone') : f === 'lop' ? T('Løpet går!', 'They’re off!') : NAVN[v.vinner] + T(' vant!', ' won!')) + '</span><span class="tvvl-linje">' + linje + '</span>' +
+        (v.sist ? '<span class="tvvl-trekk' + (nyT ? ' inn' : '') + '">' + tvOuKort(v.sist, 'liten') + '</span>' : '') + '</div>' +
+        '<div class="tvvl-banen"><div class="tvvl-sider">' + sider + '</div><div class="tvvl-baner">' + baner + '</div></div>' + bunn + '</div></div>';
+    }
     function lhScene(d, s) {
       var han = esc(navn(s.aktiv)), vk = s.aktiv + ':' + s.runde, avsl = s.fase === 'avslort' && s.resultat;
       var tavle = (s.lurtTavle || []).length ? '<ol class="tvlh-tavle" aria-label="' + T('Flest lurt', 'Most fooled') + '">' + s.lurtTavle.slice(0, 3).map(function (x, i) {
@@ -1050,6 +1105,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (s.type === 'hvemskrev' && s.sos) return hsScene(d, s);
       if (s.type === 'tosannheter' && s.ts) return tsScene(d, s);
       if (s.type === 'bingo' && s.bingoTv) return bgScene(d, s);
+      if (s.type === 'overunder' && s.ou) return ouScene(d, s);
+      if (s.type === 'veddelopet' && s.vl) return vlScene(d, s);
       if (s.type === 'regelfabrikken' && s.rf) return rfScene(d, s.rf);
       if (s.offentlig && (s.offentlig.tekst || (s.offentlig.valg && s.offentlig.valg.length))) {
         var o = s.offentlig, ant = (d.spillere || []).length;
@@ -1808,6 +1865,85 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvbg-slutt small{font-size:2vw;font-weight:800;color:#D9D2C7}
     .tvbg-slutt.inn p,.tvbg-slutt.inn small{animation:tvtsInn 460ms cubic-bezier(.23,1,.32,1) 400ms both}
     @media (prefers-reduced-motion:reduce){.tvts-prikker i,.tvts-plass.inn,.tvts-plass.rist,.tvts-kort.ny,.tvts-land.inn,.tvts-stempel.inn,.tvts-drikk.inn,.tvts-neste.inn,.tvts-pallplass,.tvbg-plate,.tvbg-prikker i.inn,.tvbg-prikker path.inn,.tvbg-slutt.inn .tvbg-bingo,.tvbg-slutt.inn p,.tvbg-slutt.inn small{animation:none}.tvbg-rekke{animation:none}.tvbg-prikker i{transition:none}}
+    /* Over eller under */
+    .tvou{display:flex;gap:5vw;align-items:center;min-height:74vh}
+    .tvou-bunke{position:relative;flex:none;width:22vw;height:31vw;perspective:1200px}
+    .tvou-lag{position:absolute;inset:0;background:#FFF8EE;border:4px solid #16120F;border-radius:16px;transform:translate(var(--x),var(--y)) rotate(var(--r))}
+    .tvou-lag.sklir{animation:tvouSklir 700ms cubic-bezier(.77,0,.175,1) both}
+    @keyframes tvouSklir{to{transform:translate(var(--x),-40vh) scale(.4);opacity:0}}
+    .tvou-kort{position:absolute;inset:0;display:flex;flex-direction:column;padding:1.6vw 1.8vw;box-sizing:border-box;color:#16120F;background:#FFFFFF;border:5px solid #16120F;border-radius:16px;box-shadow:10px 10px 0 #000}
+    .tvou-kort.rod{color:#D7263D}
+    .tvou-kort>b{font-size:4.4vw;font-weight:900;line-height:1}
+    .tvou-kort>b:last-child{align-self:flex-end;transform:rotate(180deg)}
+    .tvou-kort>span{align-self:center;margin:auto 0;font-size:13vw;line-height:1}
+    .tvou-kort.snu{animation:tvouSnu 620ms linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1) both}
+    @keyframes tvouSnu{from{transform:translate(18vw,-3vw) rotateY(180deg) rotate(8deg)}to{transform:none}}
+    .tvou-kort.liten{position:relative;inset:auto;width:4.4vw;height:6vw;padding:.4vw .5vw;border-width:4px;border-radius:8px;box-shadow:4px 4px 0 #000}
+    .tvou-kort.liten>b{font-size:1.8vw}.tvou-kort.liten>b:last-child{display:none}.tvou-kort.liten>span{font-size:2.8vw}
+    .tvou-hoyre{flex:1;display:flex;flex-direction:column;gap:2.6vh;min-width:0}
+    .tvou-pott{display:flex;align-items:center;gap:2vw}
+    .tvou-pott>span{display:grid;place-items:center;width:12vw;height:12vw;box-sizing:border-box;border-radius:50%;color:#16120F;background:#FFD23F;border:6px solid #16120F;box-shadow:8px 8px 0 #000}
+    .tvou-pott>span b{font-family:var(--display);font-size:7vw;font-weight:900;font-stretch:62%;line-height:1}
+    .tvou-pott>div{display:flex;flex-direction:column;gap:.6vh}
+    .tvou-pott>div b{font-family:var(--display);font-size:2.4vw;font-weight:900;font-stretch:70%;text-transform:uppercase}
+    .tvou-pott small{font-size:1.7vw;font-weight:800;color:#D9D2C7}
+    .tvou-sjanse>div{position:relative;height:2vw;overflow:hidden;background:#FF9CC2;border:4px solid #FFF8EE;border-radius:999px}
+    .tvou-sjanse i{position:absolute;inset:0;transform-origin:left;background:#63E2A8;border-right:4px solid #16120F}
+    .tvou-sjanse p{display:flex;justify-content:space-between;margin:.8vh 0 0;font-size:1.7vw;font-weight:900}
+    .tvou-svar{align-self:flex-start;display:flex;align-items:center;gap:1.2vw;padding:1vh 1.6vw;color:#16120F;border:4px solid #16120F;border-radius:12px;box-shadow:6px 6px 0 #000}
+    .tvou-svar.rett{background:#63E2A8}.tvou-svar.feil{background:#FF9CC2}
+    .tvou-svar.inn{animation:tvtsInn 380ms cubic-bezier(.23,1,.32,1) both}
+    .tvou-svar b{font-family:var(--display);font-size:3vw;font-weight:900;font-stretch:62%;text-transform:uppercase}
+    .tvou-svar span{font-size:1.8vw;font-weight:800}
+    .tvou-gul{color:#FFD23F}
+    .tvou-folk{display:flex;gap:2vw;flex-wrap:wrap;margin-top:auto}
+    .tvou-folk>div{display:flex;flex-direction:column;align-items:center;gap:.6vh}
+    .tvou-folk .tvnr-h{width:6vw;height:6vw}
+    .tvou-folk .tvnr-h svg,.tvvl-hoder .tvnr-h svg{width:100%!important;height:100%!important}
+    .tvou-folk .tur .tvnr-h{transform:translateY(-10px);box-shadow:0 0 0 7px #FFD23F}
+    .tvou-folk b{font-size:1.7vw;font-weight:900}
+    .tvou-folk span{padding:.1em .8em;font-size:1.3vw;font-weight:900;color:#16120F;background:#FFF8EE;border:3px solid #16120F;border-radius:999px}
+    .tvou-folk span.feil{background:#FF9CC2}
+    /* Veddeløpet */
+    .tvvl{display:flex;flex-direction:column;gap:2vh}
+    .tvvl .tvnr-hode{flex-wrap:nowrap}
+    .tvvl-linje{margin-left:auto;font-size:1.8vw;font-weight:800;color:#D9D2C7}
+    .tvvl-trekk{display:block}
+    .tvvl-trekk.inn{animation:tvtsLand 450ms linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1) both}
+    .tvvl-banen{container-type:inline-size;padding:1.4vh 1.4vw;background:#2F6B3A;border:4px solid #16120F;border-radius:18px;box-shadow:8px 8px 0 #000}
+    .tvvl-sider{position:relative;height:5vw;margin:0 0 1.2vh}
+    .tvvl-side{position:absolute;top:0;left:calc(1vw + var(--i) * (100cqw - 15vw) / 8);width:3.6vw;height:5vw;perspective:500px}
+    .tvvl-side>span{position:absolute;inset:0;transform-style:preserve-3d}
+    .tvvl-side.snudd>span{transform:rotateY(180deg)}
+    .tvvl-side.ny>span{animation:tvvlSnu 560ms linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1) both}
+    @keyframes tvvlSnu{from{transform:none}to{transform:rotateY(180deg)}}
+    .tvvl-side i{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:2vw;font-weight:900;border:3px solid #16120F;border-radius:7px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+    .tvvl-side .bak{background:repeating-linear-gradient(45deg,#D7263D 0 8px,#B81F33 8px 16px)}
+    .tvvl-side .fram{transform:rotateY(180deg);color:#16120F;background:#FFFFFF}.tvvl-side .fram.rod{color:#D7263D}
+    .tvvl-baner{display:flex;flex-direction:column;gap:1vh}
+    .tvvl-bane{position:relative;height:6.6vw;box-sizing:border-box;background:#E9DFC9;border:4px solid #16120F;border-radius:12px}
+    .tvvl-bane.vant{background:#63E2A8}
+    .tvvl-mal{position:absolute;top:6px;bottom:6px;right:10vw;width:8px;background:repeating-linear-gradient(#FFF8EE 0 8px,#16120F 8px 16px)}
+    .tvvl-hest{position:absolute;left:1vw;top:50%;margin-top:-2.6vw;display:block;transform:translateX(calc(var(--p) * (100cqw - 15vw) / 8))}
+    .tvvl-hest.flytt{animation:tvvlFlytt 560ms linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1) both}
+    @keyframes tvvlFlytt{from{transform:translateX(calc(var(--fra) * (100cqw - 15vw) / 8))}}
+    .tvvl-hest>span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:3.8vw;height:5.2vw;box-sizing:border-box;font-weight:900;color:#16120F;background:#FFFFFF;border:3.5px solid #16120F;border-radius:8px;box-shadow:3px 3px 0 #16120F}
+    .tvvl-hest>span.rod{color:#D7263D}
+    .tvvl-hest b{font-size:1.6vw;line-height:1}.tvvl-hest span span{font-size:2.6vw;line-height:1}
+    .tvvl-hest .galopp{animation:tvvlGalopp 500ms ease-in-out infinite}
+    @keyframes tvvlGalopp{0%,100%{translate:0 0}50%{translate:0 -5px}}
+    .tvvl-rosett{position:absolute;right:11.5vw;top:50%;margin-top:-2.2vw;display:grid;place-items:center;width:4.4vw;height:4.4vw;box-sizing:border-box;border-radius:50%;font-size:2vw;font-weight:900;color:#16120F;background:#FFD23F;border:4px solid #16120F;animation:tvvlRosett 500ms linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1) 300ms both}
+    @keyframes tvvlRosett{from{transform:scale(.4) rotate(-30deg);opacity:0}to{transform:none;opacity:1}}
+    .tvvl-hoder{position:absolute;right:.6vw;top:50%;display:flex;gap:2px;translate:0 -50%}
+    .tvvl-hoder>span{display:flex;flex-direction:column;align-items:center}
+    .tvvl-hoder .tvnr-h{width:3.4vw;height:3.4vw}
+    .tvvl-hoder b{font-size:1vw;font-weight:900;color:#16120F}
+    .tvvl-hoder>span:nth-child(n+4){display:none}
+    .tvvl-bunn{display:flex;align-items:center;flex-wrap:wrap;gap:1vw}
+    .tvvl-bunn>span{padding:.2em .8em;font-family:var(--display);font-size:2.2vw;font-weight:900;font-stretch:78%;text-transform:uppercase;color:#16120F;border:3px solid #16120F;border-radius:999px;animation:tvtsInn 380ms cubic-bezier(.23,1,.32,1) both;animation-delay:var(--f,0ms)}
+    .tvvl-bunn>span.rett{background:#63E2A8}.tvvl-bunn>span.feil{background:#FF9CC2}
+    .tvvl-bunn em{margin-left:auto;font-style:normal;font-size:1.7vw;font-weight:800;color:#D9D2C7}
+    @media (prefers-reduced-motion:reduce){.tvou-lag.sklir,.tvou-kort.snu,.tvou-svar.inn,.tvvl-trekk.inn,.tvvl-side.ny>span,.tvvl-hest.flytt,.tvvl-hest .galopp,.tvvl-rosett,.tvvl-bunn>span{animation:none}}
     @media (prefers-reduced-motion:reduce){.tvmv-ring path.siste,.tvmv-hode.tur,.tvmv-kort.inn .snu,.tvpk-lapp.inn{animation:none}.tvmv-kort .snu{transition:none}}
 </style>
 </body>

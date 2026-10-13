@@ -212,6 +212,19 @@ Writing is three things only: the pie clock, the card you write on and your pile
   - Song titles shrink by their longest word so they always fit the square.
   - **On the TV:** a spinning record, everyone's board as dots (never the songs), who marked last, and a big BINGO! at the end.
 
+## Over eller under and Veddeløpet
+
+- **Over eller under: the pot.** One big card on the table. Whoever has the turn taps OVER or UNDER; the next card flips in from the deck and lands on the pot.
+  - **Right:** the pot grows by one sip and the turn moves on by itself. **Wrong or equal:** the pot slides off to that player, who drinks it all, and the pot starts at 1.
+  - A stripe under the card shows how many higher and lower cards are left in the deck.
+  - **The host's phone** always has OVER/UNDER ("Svarer for Sara") and "Hopp over", so nobody else needs their phone out. Only the host can skip or answer for others.
+  - When the deck is empty: "Største pott drukket", then "Hva nå?".
+- **Veddeløpet: the racetrack.** Four aces are the horses on a green track. Tap a lane to bet and set the stake with − and +; your head appears in the lane.
+  - When everyone has bet there is a 2 s pause, then the race runs itself. The host can also press "Start løpet nå"; anyone who has not bet sits out.
+  - **Only the host's phone drives the race:** one card a second, and the server ignores faster or non-host flips. The horse of that suit gallops one step. Side cards flip when every horse has passed them, and that suit steps back.
+  - The winner gets a rosette. Winning bets hand out double; the rest drink their stake. Then "Hva nå?".
+  - Moves animate from the previous position, since every redraw replaces the elements.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
