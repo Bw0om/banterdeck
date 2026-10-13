@@ -378,7 +378,15 @@ const SVAR_LEKER = ['jeg-har-aldri'];
 /** Kortlekene (ikke Ring of Fire): så mange kort i en runde. Kort dere ikke har hatt, kommer først. Så er leken ferdig. */
 const KORT_LENGDE = 30;
 /** Leker som spilles på én telefon (verten + sofaen). */
-const EN_LEKER = ['jeg-har-aldri', 'pekeleken', 'nodt-eller-sannhet'];
+// Lese-spill (leses høyt, verten teller ned) og sende-rundt-spill (Kategorier, Ring of Fire). Ingen trykker for andre.
+const EN_LEKER = ['jeg-har-aldri', 'pekeleken', 'nodt-eller-sannhet', 'enten-eller', 'samme', 'kategorier', 'ring-of-fire'];
+const EN_SAMME = 10;
+function enRekke(lek: string) {
+  if (lek === 'samme') return stokk(sosListe('samme')).slice(0, EN_SAMME).map((t: any) => ({ t }));
+  if (lek === 'ring-of-fire') return kortstokkFor(lek, '*');
+  if (lek === 'enten-eller') return kortstokkFor(lek, '*').filter((k: any) => eeDel(k.t)).slice(0, KORT_LENGDE);
+  return kortstokkFor(lek, '*').slice(0, KORT_LENGDE);
+}
 /** Plassene i sofaen i stua (samme rutenett som stua på telefonen og TV-en). */
 // Fylles fra midten og utover, så tre stykker sprer seg i sofaen i stedet for å klumpe seg i den ene enden
 const SOFA_SETER: [number, number][] = [[4.9, 3.3], [4.9, 2.1], [4.9, 4.5], [4.9, 2.7], [4.9, 3.9], [4.9, 1.75]];
@@ -386,8 +394,14 @@ function enVisning(s: any, data: any, lang: string) {
   const k = s.rekke[s.pos];
   // Den som leser, går på rundgang: verten først, så sofaen
   const lesere = [data.vert].concat((data.sofa || []).map((p: any) => p.id));
-  return { lek: s.lek, pos: s.pos, antall: s.rekke.length, ferdig: !!s.ferdig, runde: s.runde || 1,
-    kort: k && !s.ferdig ? { t: tr(k.t, lang), k: k.k ? tr(k.k, lang) : null } : null, leser: lesere[s.pos % lesere.length] };
+  const ut: any = { lek: s.lek, pos: s.pos, antall: s.rekke.length, ferdig: !!s.ferdig, runde: s.runde || 1, konger: s.konger || 0,
+    kort: k && !s.ferdig ? { t: tr(k.t, lang), k: k.k ? tr(k.k, lang) : null } : null, leser: lesere[s.pos % lesere.length], neste: lesere[(s.pos + 1) % lesere.length], lesere };
+  if (k && !s.ferdig && s.lek === 'enten-eller') { const d = eeDel(k.t); if (d) { ut.a = tr(d.a, lang); ut.b = tr(d.b, lang); } }
+  if (k && !s.ferdig && s.lek === 'ring-of-fire') {
+    const vk: any = visKort({ lek: 'ring-of-fire', rekke: s.rekke, pos: s.pos, konger: s.konger || 0, tur: null }, data);
+    ut.kort = { v: tr(vk.v, lang), s: vk.s, rod: !!vk.rod, regel: tr(vk.regel, lang), tekst: tr(vk.tekst, lang), konge: k.v === 'K' };
+  }
+  return ut;
 }
 /* ---------- Pekeleken: 3 · 2 · 1 · PEK! og fingertelling ----------
    Den som leser går på rundgang. Nedtellingen har et felles starttidspunkt, så alle telefoner og TV-en
@@ -1317,23 +1331,26 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!erVert) return { feil: 'bare-vert' };
       const lek = String(h.lek || '');
       if (!EN_LEKER.includes(lek)) return { feil: 'ukjent-lek' };
-      const rekke = kortstokkFor(lek, '*').slice(0, KORT_LENGDE);
+      const rekke = enRekke(lek);
       if (!rekke.length) return { feil: 'tom' };
-      data.spill = { type: 'en', lek, navn: lekNavnL(lek), rekke, pos: 0, ferdig: false, runde: 1 };
+      data.spill = { type: 'en', lek, navn: lekNavnL(lek), rekke, pos: 0, ferdig: false, runde: 1, konger: rekke[0] && rekke[0].v === 'K' ? 1 : 0 };
       melde(data, `Nytt spill: ${tr(data.spill.navn, 'no')}`, `New game: ${tr(data.spill.navn, 'en')}`);
       return { ok: true };
     }
     case 'en-neste': {
       if (!erVert) return { feil: 'bare-vert' };
       if (!s || s.type !== 'en' || s.ferdig) return { ok: true };
-      // De som ble trykket på, drikker 1 (sofafolket får slurken notert i sofaen)
-      const har = Array.isArray(h.har) ? h.har.map(String).slice(0, 20) : [];
+      // Bare det appen selv avgjør (bomba smalt hos noen) noteres – verten trykker ikke for andre
+      const har = Array.isArray(h.har) ? h.har.map(String).slice(0, 20) : [], n = Math.max(1, Math.min(5, Number(h.n) || 1));
       har.forEach((id: string) => {
-        if (data.spillere.some((p: any) => p.id === id)) giSlurker(data, id, 1);
-        const sp = (data.sofa || []).find((p: any) => p.id === id); if (sp) sp.slurker = (sp.slurker || 0) + 1;
+        if (data.spillere.some((p: any) => p.id === id)) giSlurker(data, id, n);
+        const sp = (data.sofa || []).find((p: any) => p.id === id); if (sp) sp.slurker = (sp.slurker || 0) + n;
       });
+      // Ring of Fire: fjerde konge avslutter leken
+      if (s.lek === 'ring-of-fire' && (s.konger || 0) >= 4) { s.ferdig = true; return { ok: true }; }
       s.pos++;
       if (s.pos >= s.rekke.length) s.ferdig = true;
+      else if (s.lek === 'ring-of-fire' && s.rekke[s.pos].v === 'K') s.konger = (s.konger || 0) + 1;
       return { ok: true };
     }
     case 'stua-flytt': {
@@ -1795,7 +1812,8 @@ function handlingInne(data: any, meg: any, h: any) {
       if (s.type === 'forraeder' && s.fase === 'avslort') { if ((s.runde || 0) >= (s.antall || data.spillere.length)) { s.fase = 'ferdig'; s.frist = null; } else nyForraederRunde(s, data); }
       if (s.type === 'en' && s.ferdig) {
         if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
-        Object.assign(s, { rekke: kortstokkFor(s.lek, '*').slice(0, KORT_LENGDE), pos: 0, ferdig: false, runde: (s.runde || 1) + 1 });
+        const rekke = enRekke(s.lek);
+        Object.assign(s, { rekke, pos: 0, ferdig: false, runde: (s.runde || 1) + 1, konger: rekke[0] && rekke[0].v === 'K' ? 1 : 0 });
       }
       if (s.type === 'bingo' && s.ferdig) {
         // Spill igjen: nye brett til alle (teller i kvelden)

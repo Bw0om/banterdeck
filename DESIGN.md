@@ -284,6 +284,14 @@ Two games that must not look alike, so each gets its own world.
 - **Hvem skrev:** everyone can press «Neste melding», guarded against two taps arriving at the same time.
 - **Regelfabrikken:** «Stokk på nytt» and «Ny skriverunde» are gone from the draw. They are only on the end screen.
 
+
+## More games on the sofa (one phone)
+
+The rule is that the host never taps for other people. There are two kinds of game.
+- **Read-aloud games** (Jeg har aldri, Pekeleken, Enten eller, Saueflokken, Nødt eller sannhet): the card is read out loud. A large yellow round button, «Les høyt, så tell ned», shows 3 – 2 – 1 and then a stamp: «PEK!», «SI DET!» or «DRIKK!». Under it is the drinking rule, and people take their own drinks. «Neste kort – Sara leser» stays faded until the countdown has finished, but it still works if you want to skip. Enten eller shows the two options as a pink and green card. Nødt eller sannhet has no countdown.
+- **Pass-around games** (Kategorier, Ring of Fire): the phone goes from hand to hand. In Kategorier the phone is the bomb. It ticks faster and faster and goes off after 20–50 s, decided on the phone. The app logs that whoever was holding it drinks 2. In Ring of Fire whoever holds the phone draws their own card, a king fills the king's cup, and the fourth king ends the game.
+The bench of heads where the host tapped who was drinking is gone.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
