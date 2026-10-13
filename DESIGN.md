@@ -292,6 +292,13 @@ The rule is that the host never taps for other people. There are two kinds of ga
 - **Pass-around games** (Kategorier, Ring of Fire): the phone goes from hand to hand. In Kategorier the phone is the bomb. It ticks faster and faster and goes off after 20–50 s, decided on the phone. The app logs that whoever was holding it drinks 2. In Ring of Fire whoever holds the phone draws their own card, a king fills the king's cup, and the fourth king ends the game.
 The bench of heads where the host tapped who was drinking is gone.
 
+
+## Show on TV
+
+- **QR pairing:** /tv (and /no/tv) with no code shows a large QR code and three steps. You open the camera on the host's phone and scan, and the TV joins the room. The TV gets its own 4-character code in the room table (`tvKobling`, 15 min). The QR points to the room page with `?tv=`. The host's phone goes to the room it is in and sends `skjerm-kobl`, and the server puts the room code and PIN on the pairing, which the TV polls for every 2 s. «Got a room code and PIN instead?» stays as a fold-out.
+- **«📺 Vis på TV»** is now a quick button for the host in both the lobby and a game. The box shows two ways in. One is «Alle har telefon?», where you open the TV's browser and scan. The other is «Bare din telefon?», where you mirror the phone with AirPlay or Smart View. Sofa mode shows mirroring first.
+- **The sofa on its side:** when the phone is in landscape (for mirroring), sofa games fill the screen. The card is on the left and the countdown or bomb plus the button are on the right. The reactions bar and the rest of the page are hidden.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

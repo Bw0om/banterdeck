@@ -23,6 +23,12 @@ export function startRom(LEKNAVN, LANG) {
   if (!EN && kode && les('bd_romsprak') === 'en') { location.replace('/room' + location.search); return; }
   var qs = new URLSearchParams(location.search);
   var onsketLek = LEKNAVN[qs.get('lek') || ''] ? qs.get('lek') : '', onsketModus = (qs.get('modus') || '').slice(0, 20), visAlle = false;
+  // Skannet QR-koden på TV-en: husk TV-koden, og gå til rommet du er i (verten kobler den når rommet er lastet)
+  var tvKobl = (qs.get('tv') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  if (tvKobl) {
+    try { sessionStorage.setItem('mv_tv_kobl', tvKobl); } catch (e) {}
+    if (!kode) { var tvRom = sistRom(); if (tvRom) { location.replace(location.pathname + '?k=' + tvRom); return; } setTimeout(function () { toast(T('Lag et rom først – så kobles TV-en til det.', 'Create a room first – then the TV connects to it.')); }, 900); }
+  }
   // Kommer man fra en gjengside, telles rommet for den gjengen
   var onsketGjeng = /^[0-9a-f-]{36}$/i.test(qs.get('gjeng') || '') ? qs.get('gjeng') : '';
   var vervSjekket = false, sisteSkjerm = '';
@@ -796,7 +802,8 @@ export function startRom(LEKNAVN, LANG) {
     }, 250);
     tegn();
   }
-  function enSpill(s) {
+  function enSpill(s) { return '<div class="en-flate">' + enSpillInnhold(s) + '</div>'; }
+  function enSpillInnhold(s) {
     var nk = (s.runde || 1) + ':' + s.pos, ny = !enSett[nk]; enSett[nk] = 1;
     var lek = EN_LEKER.find(function (l) { return l[0] === s.lek; }) || [s.lek, 'leser', s.navn];
     var rundt = lek[1] === 'rundt';
@@ -926,6 +933,7 @@ export function startRom(LEKNAVN, LANG) {
     var t = tilstand, rask = '';
     if (s && t.plan && nestePlan()) rask += '<button class="btn gold small" data-g="plan-start" type="button">⏭ ' + T('Neste: ', 'Next: ') + esc(nestePlan().navn) + '</button>';
     if (s) rask += '<button class="btn ghost small" data-g="avslutt" type="button">' + T('↩︎ Bytt lek', '↩︎ Switch game') + '</button>';
+    if (!visSkjerm) rask += '<button class="btn ghost small" data-g="skjerm" type="button">📺 ' + T('Vis på TV', 'Show on TV') + '</button>';
     var rader = [];
     // I lobbyen står bakgrunnslekene som eget steg. Under en lek kan verten slå dem av og på herfra.
     if (s) {
@@ -948,16 +956,30 @@ export function startRom(LEKNAVN, LANG) {
       '<details class="rom-verktoy" data-gruppe="' + (s ? 'verktoy-spill' : 'verktoy-lobby') + '"' + (erApen(s ? 'verktoy-spill' : 'verktoy-lobby', !s) ? ' open' : '') + '><summary>⚙️ ' + (s ? T('Mer for verten', 'More for the host') : T('Mer til kvelden', 'More for the night')) + '</summary>' +
       rader.map(function (r) { return '<button type="button" class="rom-verktoy-rad" data-g="' + r[0] + '"><span aria-hidden="true">' + r[1] + '</span><b>' + r[2] + '</b><small>' + r[3] + '</small></button>'; }).join('') + '</details></div>';
   }
+  /** Verten skannet QR-koden på TV-en (eller laget rommet etterpå): koble TV-en til dette rommet. */
+  function tvKoblSjekk() {
+    var tk = null; try { tk = sessionStorage.getItem('mv_tv_kobl'); } catch (e) {}
+    if (!tk || !tilstand || !meg) return;
+    try { sessionStorage.removeItem('mv_tv_kobl'); } catch (e) {}
+    if (!erVert()) return toast(T('Bare verten kan koble TV-en til rommet.', 'Only the host can connect the TV to the room.'));
+    gjorAlltid({ handling: 'skjerm-kobl', tv: tk });
+    toast(T('TV-en kobles til rommet 📺', 'Connecting the TV to the room 📺'));
+  }
   /** Storskjerm: hvor verten finner adressen og PIN-en til TV-en. */
   var visSkjerm = false;
   function skjermAdresse() { return (kortDomene ? 'https://mittvors.no' : location.origin) + (EN ? '/tv' : '/no/tv'); }
   function skjermLenke() { return skjermAdresse() + '?k=' + kode + '&p=' + tilstand.skjermPin; }
   function skjermBoks() {
     var adr = skjermAdresse().replace(/^https?:\/\//, '');
-    return '<div class="rom-skjerm"><p class="rom-etikett">📺 ' + T('Storskjerm', 'Big screen') + '</p>' +
-      '<ol><li>' + T('På PC-en eller nettbrettet ved TV-en: gå til ', 'On the laptop or tablet by the TV: go to ') + '<b>' + esc(adr) + '</b></li>' +
-      '<li>' + T('Skriv inn', 'Enter') + ' <b>' + esc(kode) + '</b> ' + T('og PIN', 'and PIN') + ' <b class="rom-skjerm-pin">' + esc(tilstand.skjermPin) + '</b></li>' +
-      '<li>' + T('Trykk «Start» der, så kommer lyden fra TV-en.', 'Tap “Start” there, and the sound comes from the TV.') + '</li></ol>' +
+    var speil = '<div class="rom-skjerm-vei"><b>' + T('Bare din telefon? Speil den', 'Just your phone? Mirror it') + '</b>' +
+      '<ol><li>' + T('iPhone: åpne Kontrollsenter → Skjermspeiling → velg TV-en.', 'iPhone: open Control Center → Screen Mirroring → pick the TV.') + '</li>' +
+      '<li>' + T('Android: dra ned fra toppen → Smart View (eller Cast) → velg TV-en.', 'Android: swipe down from the top → Smart View (or Cast) → pick the TV.') + '</li>' +
+      '<li>' + T('Legg telefonen på siden – da blir bildet stort på TV-en.', 'Turn the phone on its side – the picture fills the TV.') + '</li></ol></div>';
+    var nett = '<div class="rom-skjerm-vei"><b>' + T('Alle har telefon? Åpne nettleseren på TV-en', 'Everyone has a phone? Open the browser on the TV') + '</b>' +
+      '<ol><li>' + T('På TV-en (eller en PC ved TV-en): gå til ', 'On the TV (or a laptop by it): go to ') + '<b>' + esc(adr) + '</b></li>' +
+      '<li>' + T('Skann QR-koden som kommer opp, med kameraet på telefonen din.', 'Scan the QR code that appears with your phone’s camera.') + '</li>' +
+      '<li>' + T('Ferdig! Eller skriv inn ', 'Done! Or enter ') + '<b>' + esc(kode) + '</b> ' + T('og PIN', 'and PIN') + ' <b class="rom-skjerm-pin">' + esc(tilstand.skjermPin) + '</b></li></ol></div>';
+    return '<div class="rom-skjerm"><p class="rom-etikett">📺 ' + T('Vis på TV', 'Show on TV') + '</p>' + (sofaModus() ? speil + nett : nett + speil) +
       '<div class="gt-row"><button class="btn small gold" data-g="skjerm-del" type="button">' + T('Send lenken til PC-en', 'Send the link to the laptop') + '</button>' +
       '<button class="btn small ghost" data-g="skjerm-ny" type="button">' + T('Ny PIN', 'New PIN') + '</button>' +
       '<button class="linkbtn" data-g="skjerm-lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
@@ -4595,6 +4617,7 @@ export function startRom(LEKNAVN, LANG) {
   }
 
   function tegn() {
+    tvKoblSjekk();
     if (tavle && tilstand) tavle.innerHTML = tavleHtml();
     if (!tilstand) return;
     if (rofDrar) { rofVentTegn = true; return; }   // ikke tegn ringen på nytt midt i et drag

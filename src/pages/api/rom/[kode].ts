@@ -1,7 +1,7 @@
 // Ett rom: hente tilstanden (GET) eller gjøre noe i det (POST).
 // Telefonen identifiserer seg med spiller-id og pollett i egne felt, aldri i adressen.
 import type { APIRoute } from 'astro';
-import { kaaringer, hentRom, endreRom, visning, skjermVisning, skjermPinOk, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
+import { kobleTv, kaaringer, hentRom, endreRom, visning, skjermVisning, skjermPinOk, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
 import { rpc } from '../../../lib/spilt';
 import { etterpaa } from '../../../lib/etterpaa';
 import { innloggetBruker } from '../../../lib/konto';
@@ -197,6 +197,12 @@ export const POST: APIRoute = async ({ params, request }) => {
       return handling(data, meg, d);
     });
     if (res.feil === 'fullt-gratis') etterpaa(varsle(kode, 0));
+    // Verten skannet QR-koden på TV-en: legg romkode + PIN på TV-koblingen
+    if (!res.feil && d.handling === 'skjerm-kobl') {
+      const tv = String(d.tv || '').toUpperCase();
+      const koblet = gyldigKode(tv) && res.data && res.data.skjerm ? await kobleTv(tv, kode, res.data.skjerm.pin) : false;
+      if (!koblet) return json({ feil: 'tv-utlopt', melding: 'Fant ikke TV-en. Last siden på TV-en på nytt og skann igjen.', en: 'Couldn’t find the TV. Reload the page on the TV and scan again.' }, 404);
+    }
     if (vent && !res.feil) { etterpaa(varsle(kode, res.versjon)); return json(venterSvar(res.data, res.versjon, vent, kode)); }   // verten får se at noen prøvde å bli med
     if (res.feil) {
       const status = res.feil === 'finnes-ikke' ? 404 : res.feil === 'ikke-med' ? 403 : res.feil === 'opptatt' ? 409 : 400;
