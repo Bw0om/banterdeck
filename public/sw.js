@@ -1,5 +1,5 @@
 /* Mitt vors som app: virker uten nett for sider du har besøkt, og tar imot varsler. */
-const CACHE = 'mittvors-v34';
+const CACHE = 'mittvors-v35';
 // Bare det aller nødvendigste på forhånd – resten lagres etter hvert som sidene besøkes
 const START = ['/no/', '/manifest.webmanifest', '/icon-192.png'];
 

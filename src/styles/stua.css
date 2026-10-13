@@ -1156,3 +1156,120 @@ button.lh-grill b{font-family:var(--display);font-size:20px;font-weight:900;font
 @keyframes kbSmell{0%{transform:scale(.4) rotate(-20deg);opacity:0}35%{transform:scale(1.12) rotate(4deg);opacity:1}100%{transform:none;opacity:1}}
 .ee-hode.holder .ee-navn{background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
 @media (prefers-reduced-motion:reduce){.kb-rist,.kb-gnist,.kb-skjelv.na{animation:none}.kb-smell{animation:jaToning 240ms ease both}}
+
+/* ---------- Ukjent avsender: konvolutten, meldingen og hodene ---------- */
+.hs-oppgave p{font-size:26px}
+.hs-oppgave.liten{padding:10px 14px}
+.hs-oppgave.liten p{font-size:17px}
+.hs-skjema{display:flex;flex-direction:column;gap:10px;margin:0 0 12px}
+.hs-skjema label{font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.hs-skjema textarea{font:700 19px var(--sans);padding:12px 14px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:8px;resize:none}
+.hs-sendt{display:flex;flex-direction:column;align-items:center;gap:8px;margin:6px 0 14px}
+.hs-sendt p{margin:0;font-family:var(--display);font-size:30px;font-weight:900;font-stretch:62%;text-transform:uppercase}
+.hs-konv{width:150px;height:115px;overflow:visible}
+.hs-konv .hs-lapp{fill:#FFFFFF;stroke:#16120F;stroke-width:3}
+.hs-konv .hs-linjer{fill:none;stroke-linecap:round}
+.hs-konv .hs-kropp{fill:var(--gul);stroke:#16120F;stroke-width:3}
+.hs-konv .hs-fold{fill:none;stroke:#16120F;stroke-width:3;stroke-linejoin:round}
+.hs-konv .hs-klaff{fill:var(--rosa);stroke:#16120F;stroke-width:3;stroke-linejoin:round;transform-origin:50% 0;transform-box:fill-box}
+.hs-sendt.inn .hs-lapp{animation:hsLapp 450ms cubic-bezier(.23,1,.32,1) both}
+.hs-sendt.inn .hs-klaff{animation:hsKlaff 500ms var(--fjaer) 350ms both}
+.hs-sendt.inn p{animation:nrInn 380ms var(--fjaer) 650ms both}
+@keyframes hsLapp{from{transform:translateY(-34px)}to{transform:none}}
+@keyframes hsKlaff{from{transform:scaleY(-1)}to{transform:none}}
+.hs-endre{font:800 14px var(--sans);color:var(--ink);background:none;border:0;text-decoration:underline;cursor:pointer;padding:8px}
+.hs-melding{display:flex;flex-direction:column;gap:10px;padding:12px;margin:0 0 12px;background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);border-radius:12px;box-shadow:6px 6px 0 var(--hard)}
+.hs-kontakt{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+.hs-ukjent{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:50%;background:#3A3940;color:#FFF8EE;font-size:24px;font-weight:900;border:3px solid #16120F}
+.hs-avatar{display:block;flex:none;width:44px;height:44px;border-radius:50%;overflow:hidden;background:var(--gul);border:3px solid #16120F}
+.hs-avatar .nr-h{width:100%;height:100%;border-radius:0}
+.hs-avatar.inn{animation:hsAvatar 550ms var(--fjaer) both}
+@keyframes hsAvatar{from{transform:scale(.4) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
+.hs-hvem{display:flex;flex-direction:column;overflow:hidden}
+.hs-hvem b{font-size:17px;font-weight:900}
+.hs-hvem b.inn{animation:hsNavn 500ms var(--fjaer) 150ms both}
+@keyframes hsNavn{from{transform:translateY(100%);opacity:0}to{transform:none;opacity:1}}
+.hs-hvem small{font-size:12px;font-weight:700;color:var(--muted)}
+.hs-boble{align-self:flex-start;max-width:92%;margin:0;padding:10px 14px;font-size:20px;font-weight:800;line-height:1.2;background:var(--bg2);border:2px solid var(--ink);border-radius:16px 16px 16px 4px;transform-origin:0 100%}
+.hs-prikker{display:none}
+.hs-innhold{display:grid;justify-items:start;align-items:end}
+.hs-innhold>*{grid-area:1/1}
+.hs-melding.ny .hs-prikker{display:flex;gap:5px;padding:12px 16px;background:var(--bg2);border-radius:16px 16px 16px 4px;animation:hsBort 160ms ease-out 1000ms forwards}
+.hs-prikker i{width:9px;height:9px;border-radius:50%;background:var(--ink);animation:hsPrikk 900ms ease-in-out infinite}
+.hs-prikker i:nth-child(2){animation-delay:.15s}.hs-prikker i:nth-child(3){animation-delay:.3s}
+@keyframes hsPrikk{0%,60%,100%{transform:none;opacity:.35}30%{transform:translateY(-5px);opacity:1}}
+@keyframes hsBort{to{opacity:0;visibility:hidden}}
+.hs-melding.ny .hs-boble{animation:hsBoble 500ms var(--fjaer) 1100ms both}
+@keyframes hsBoble{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.hs-valg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin:0 0 10px}
+.hs-valg button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;font:900 15px var(--sans);color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:10px;box-shadow:5px 5px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.hs-valg button .nr-h{width:56px;height:56px}
+.hs-valg button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+.hs-valg button[aria-pressed="true"]{background:var(--gul);color:var(--blekk);transform:translate(3px,3px);box-shadow:2px 2px 0 var(--hard)}
+.hs-valg.inn button{animation:nrInn 380ms var(--fjaer) both;animation-delay:calc(1100ms + var(--i) * 50ms)}
+.hs-status{margin:0 0 12px;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.hs-dom{padding:10px 14px;margin:0 0 10px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:8px;box-shadow:4px 4px 0 var(--hard)}
+.hs-dom b{font-family:var(--display);font-size:20px;font-weight:900;font-stretch:78%;text-transform:uppercase}
+.hs-dom.rett{background:var(--mint);color:var(--blekk)}.hs-dom.feil{background:var(--rosa);color:var(--blekk)}.hs-dom.gul{background:var(--gul);color:var(--blekk)}
+.hs-dom.inn{animation:nrInn 380ms var(--fjaer) both;animation-delay:var(--f,400ms)}
+.hs-gjett{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:6px}
+.hs-gjett li{display:flex;align-items:center;gap:6px;padding:6px 10px;font-size:15px;font-weight:800;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:6px}
+.hs-gjett li.rett{background:var(--mint);color:var(--blekk)}
+.hs-gjett li .nr-h{width:28px;height:28px}
+.hs-gjett small{color:var(--muted);font-size:13px}
+.hs-gjett li.rett small{color:var(--blekk)}
+.hs-gjett em{margin-left:auto;font-style:normal;font-size:12px;font-weight:900;text-transform:uppercase}
+.hs-gjett.inn li{animation:nrInn 380ms var(--fjaer) both;animation-delay:calc(600ms + var(--i) * 70ms)}
+.hs-info{margin:0 0 12px;font-weight:800}
+.hs-best{padding:14px 16px;margin:0 0 12px;color:var(--blekk);background:var(--gul);border:var(--strek) solid var(--blekk);border-radius:10px;box-shadow:6px 6px 0 var(--hard)}
+.hs-best span{display:block;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.hs-best b{display:block;font-family:var(--display);font-size:34px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.95}
+.hs-best small{font-size:14px;font-weight:800}
+.hs-alle{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+.hs-alle li{display:flex;align-items:flex-start;gap:8px;animation:nrInn 380ms var(--fjaer) both;animation-delay:calc(150ms + var(--i) * 80ms)}
+.hs-alle li .nr-h{width:32px;height:32px;margin-top:2px}
+.hs-alle li>span:last-child{display:flex;flex-direction:column;gap:2px;padding:8px 12px;font-size:15px;font-weight:700;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:12px 12px 12px 4px}
+.hs-alle li b{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+/* ---------- Saueflokken: flokkene og de svarte fårene ---------- */
+.sm-oppgave p{font-size:30px}
+.sm-oppgave.liten{padding:10px 14px}
+.sm-oppgave.liten p{font-size:18px}
+.sm-skjema{display:flex;gap:8px;margin:0 0 12px}
+.sm-skjema.stor{flex-direction:column;gap:8px}
+.sm-skjema label{font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.sm-skjema input{flex:1;min-width:0;font:800 22px var(--sans);padding:12px 14px;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:8px}
+.sm-skjema:not(.stor) input{font-size:16px;padding:10px 12px}
+.sm-sendt{display:flex;align-items:center;gap:14px;margin:6px 0 12px}
+.sm-sendt p{margin:0;font-size:15px;font-weight:700;color:var(--muted)}
+.sm-sendt p b{display:block;font-family:var(--display);font-size:30px;font-weight:900;font-stretch:66%;text-transform:uppercase;line-height:.95;color:var(--ink)}
+.sm-sau{flex:none;width:76px;height:57px;transform-origin:50% 90%;animation:smMae 2.6s ease-in-out infinite}
+.sm-sau .ull circle{fill:#FFFFFF;stroke:#16120F;stroke-width:3}
+.sm-sau .fjes{fill:#16120F}.sm-sau .oye{fill:#FFFFFF}
+.sm-sau .bein{stroke:#16120F;stroke-width:3;stroke-linecap:round}
+@keyframes smMae{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.sm-sendt.inn{animation:nrInn 420ms var(--fjaer) both}
+.sm-flokker{display:flex;flex-direction:column;gap:10px;margin:0 0 12px}
+.sm-flokk{position:relative;display:flex;flex-direction:column;gap:8px;width:100%;padding:10px 12px;text-align:left;font:inherit;color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:10px;box-shadow:5px 5px 0 var(--hard)}
+.sm-flokk.trygg{background:var(--mint)}.sm-flokk.stor{background:var(--gul)}.sm-flokk.alene{background:var(--rosa)}
+.sm-flokk.inn{animation:smKort 550ms var(--fjaer) both;animation-delay:var(--f)}
+@keyframes smKort{from{transform:translateY(24px) scale(.95);opacity:0}to{transform:none;opacity:1}}
+.sm-flokk.velg{cursor:pointer;outline:3px dashed var(--ink);outline-offset:3px}
+.sm-flokk.valgt{outline-style:solid;box-shadow:0 0 0 4px var(--bg),0 0 0 7px var(--ink)}
+.sm-topp{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sm-topp b{font-family:var(--display);font-size:26px;font-weight:900;font-stretch:66%;text-transform:uppercase;line-height:.95;min-width:0;overflow-wrap:anywhere}
+.sm-topp small{flex:none;font-size:11px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border:2px solid var(--blekk);border-radius:10px;background:#FFF8EE}
+.sm-flokk.alene .sm-topp small{background:var(--blekk);color:#FFF8EE}
+.sm-hoder{display:flex;flex-wrap:wrap;gap:4px}
+.sm-hoder>span{display:inline-block;line-height:0}
+.sm-hoder .nr-h{width:40px;height:40px}
+.sm-hoder.hopp>span{animation:smHopp 600ms var(--fjaer) both;animation-delay:calc(var(--f, 0ms) + 150ms + var(--h) * 70ms)}
+@keyframes smHopp{from{transform:translateY(-26px) scale(.85);opacity:0}40%{opacity:1}to{transform:none;opacity:1}}
+.sm-stempel{position:absolute;top:-14px;right:10px;font-style:normal;font-family:var(--display);font-size:18px;font-weight:900;text-transform:uppercase;padding:2px 10px;color:var(--blekk);background:#FFF8EE;border:3px solid var(--blekk);border-radius:4px;transform:rotate(-6deg)}
+.sm-flokk.inn .sm-stempel{animation:smStempel 500ms var(--fjaer) both;animation-delay:calc(var(--f, 0ms) + 350ms)}
+@keyframes smStempel{from{transform:rotate(-6deg) scale(1.6);opacity:0}to{transform:rotate(-6deg) scale(1);opacity:1}}
+.sm-vert{display:flex;gap:10px;align-items:stretch}
+.sm-vert .btn{flex:1}
+.sm-vert .btn.paa{background:var(--ink);color:var(--bg)}
+.sm-vert .rom-stor-knapp{flex:1.4;min-width:0;margin:0;padding:12px 8px;font-size:18px;white-space:normal}
+.sm-vert .btn{min-width:0;white-space:normal}
+@media (prefers-reduced-motion:reduce){.hs-sendt.inn .hs-lapp,.hs-sendt.inn .hs-klaff,.hs-sendt.inn p,.hs-avatar.inn,.hs-hvem b.inn,.hs-prikker i,.hs-valg.inn button,.hs-dom.inn,.hs-gjett.inn li,.hs-alle li,.sm-sau,.sm-sendt.inn,.sm-flokk.inn,.sm-hoder.hopp>span,.sm-stempel{animation:none}.hs-melding.ny .hs-boble{animation:hsBoble 1ms linear 1100ms both}}
