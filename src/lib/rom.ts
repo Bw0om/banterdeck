@@ -245,6 +245,8 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     if (s.type === 'pannekort') spill.sos = pkOffentlig(s);
     if (s.type === 'tosannheter') spill.ts = ekstraVisning(s, null, data);
     if (s.type === 'bingo') spill.bingoTv = bingoOffentlig(s, data);
+    if (s.type === 'overunder') spill.ou = ekstraVisning(s, null, data);
+    if (s.type === 'veddelopet') spill.vl = ekstraVisning(s, null, data);
     if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
     if (s.type === 'regelfabrikken') spill.rf = ekstraVisning(s, null, data);
   }
@@ -1974,10 +1976,10 @@ export function startEkstra(data: any, lek: string, modus = ''): any {
     data.spill = { type: 'opus', lek, navn: EKSTRA_NAVN.opus, holder: ider[0], kast: null, antall: 0, nr: 0 };
   } else if (lek === 'overunder') {
     const st = kortstokk52();
-    data.spill = { type: 'overunder', lek, navn: EKSTRA_NAVN.overunder, stokk: st, kort: st.pop(), bunke: 1, tur: 0, sist: null };
+    data.spill = { type: 'overunder', lek, navn: EKSTRA_NAVN.overunder, stokk: st, kort: st.pop(), bunke: 1, tur: 0, sist: null, n: 0, drukket: {}, storst: null, ferdig: false, runde: 1 };
   } else if (lek === 'veddelopet') {
     const st = kortstokk52().filter((k: any) => k.v !== 14);
-    data.spill = { type: 'veddelopet', lek, navn: EKSTRA_NAVN.veddelopet, fase: 'vedd', veddemaal: {}, stokk: st, bane: st.splice(0, 7), snudd: [], pos: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, sist: null, vinner: null };
+    data.spill = { type: 'veddelopet', lek, navn: EKSTRA_NAVN.veddelopet, fase: 'vedd', veddemaal: {}, stokk: st, bane: st.splice(0, 7), snudd: [], pos: { '♥': 0, '♠': 0, '♦': 0, '♣': 0 }, sist: null, vinner: null, n: 0, sistSnu: 0, runde: (data.spill && data.spill.type === 'veddelopet' ? (data.spill.runde || 1) + 1 : 1) };
     settFrist(data.spill, FRIST.veddelopet);
   } else if (lek === 'pyramiden') {
     if (n < 2) return feilL('for-faa', 'Pyramiden trenger minst to spillere.', 'Pyramid needs at least two players.');
@@ -2174,28 +2176,68 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
       return null;
     }
     case 'overunder': {
+      const erVert = meg.id === data.vert;
+      if (h.handling === 'runde') {
+        // Spill igjen: ny stokk (teller i kvelden)
+        if (!s.ferdig) return { ok: true };
+        if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
+        const st = kortstokk52();
+        Object.assign(s, { stokk: st, kort: st.pop(), bunke: 1, sist: null, drukket: {}, storst: null, ferdig: false, runde: (s.runde || 1) + 1 });
+        return { ok: true };
+      }
+      if (h.handling === 'ou-hopp') {
+        // Bare verten kan hoppe over den som har tur (ingen drikker)
+        if (!erVert) return feilL('bare-vert', 'Bare verten kan hoppe over.', 'Only the host can skip.');
+        if (!s.ferdig) s.tur = (s.tur + 1) % ider.length;
+        return { ok: true };
+      }
       if (h.handling !== 'gjett') return null;
-      if (ider[s.tur % ider.length] !== meg.id) return feilL('ikke-din-tur', 'Vent på tur.', 'Wait for your turn.');
-      if (!s.stokk.length) s.stokk = kortstokk52();
+      if (s.ferdig) return { ok: true };
+      const hvem = ider[s.tur % ider.length];
+      // Den som har tur svarer – eller verten svarer for hen (så ikke alle trenger telefonen oppe)
+      if (hvem !== meg.id && !erVert) return feilL('ikke-din-tur', 'Vent på tur.', 'Wait for your turn.');
+      if (h.paa !== 'over' && h.paa !== 'under') return { feil: 'ukjent' };
+      if (!s.stokk.length) { s.ferdig = true; return { ok: true }; }
       const nytt = s.stokk.pop(), riktig = h.paa === 'over' ? nytt.v > s.kort.v : nytt.v < s.kort.v;
-      s.sist = { fra: s.kort, til: nytt, riktig, hvem: meg.id, bunke: s.bunke };
+      s.sist = { fra: s.kort, til: nytt, riktig, hvem, bunke: s.bunke, paa: h.paa };
+      s.n = (s.n || 0) + 1;
       if (riktig) s.bunke++;
-      else { giSlurker(data, meg.id, s.bunke); melde(data, `${meg.navn} bommet – drikk ${s.bunke}!`, `${meg.navn} missed – drink ${s.bunke}!`); s.bunke = 1; }
+      else {
+        giSlurker(data, hvem, s.bunke); s.drukket = s.drukket || {}; s.drukket[hvem] = (s.drukket[hvem] || 0) + s.bunke;
+        if (!s.storst || s.bunke > s.storst.n) s.storst = { id: hvem, n: s.bunke };
+        melde(data, `${navnPaa(data, hvem)} bommet – drikk ${s.bunke}!`, `${navnPaa(data, hvem)} missed – drink ${s.bunke}!`); s.bunke = 1;
+      }
       s.kort = nytt; s.tur = (s.tur + 1) % ider.length;
+      if (!s.stokk.length) s.ferdig = true;
       return { ok: true };
     }
     case 'veddelopet': {
+      const erVert = meg.id === data.vert;
       if (h.handling === 'vedd' && s.fase === 'vedd') {
         if (!['♥', '♠', '♦', '♣'].includes(h.farge)) return { feil: 'ukjent' };
-        s.veddemaal[meg.id] = { farge: h.farge, slurker: Math.max(1, Math.min(10, Number(h.slurker) || 2)) }; return { ok: true };
+        s.veddemaal[meg.id] = { farge: h.farge, slurker: Math.max(1, Math.min(10, Number(h.slurker) || 2)) };
+        // Alle har veddet: 2 sekunder pust, så starter løpet av seg selv
+        if (data.spillere.every((p: any) => s.veddemaal[p.id])) sosPust(s);
+        return { ok: true };
+      }
+      if (h.handling === 'vl-start' && s.fase === 'vedd') {
+        // Verten starter uten å vente – de som ikke har veddet, står over dette løpet
+        if (!erVert) return feilL('bare-vert', 'Verten starter løpet.', 'The host starts the race.');
+        if (!Object.keys(s.veddemaal).length) return feilL('ingen-vedd', 'Noen må vedde først.', 'Someone has to bet first.');
+        s.fase = 'lop'; s.frist = null; s.sistSnu = Date.now(); melde(data, 'Løpet er i gang!', "And they're off!"); return { ok: true };
       }
       if ((h.handling === 'lop' || h.handling === 'tid-ute') && s.fase === 'vedd') {
         const mangler = data.spillere.length - Object.keys(s.veddemaal).length;
         if (mangler > 0 && !fristUte(s)) return h.handling === 'tid-ute' ? { ok: true } : venter(s, mangler);
-        if (h.handling === 'tid-ute' && !Object.keys(s.veddemaal).length) return { ok: true };
-        s.fase = 'lop'; s.frist = null; melde(data, 'Løpet er i gang!', "And they're off!"); return { ok: true };
+        if (!fristUte(s)) return { ok: true };
+        if (!Object.keys(s.veddemaal).length) return { ok: true };
+        s.fase = 'lop'; s.frist = null; s.sistSnu = Date.now(); melde(data, 'Løpet er i gang!', "And they're off!"); return { ok: true };
       }
       if (h.handling === 'snu' && s.fase === 'lop') {
+        // Bare telefonen til verten driver løpet, ett kort i sekundet (ingen andre trenger telefonen oppe)
+        if (!erVert) return { ok: true };
+        if (Date.now() - (s.sistSnu || 0) < 700) return { ok: true };
+        s.sistSnu = Date.now(); s.n = (s.n || 0) + 1;
         if (!s.stokk.length) s.stokk = kortstokk52().filter((k: any) => k.v !== 14);
         const k = s.stokk.pop(); s.sist = k; s.pos[k.f]++;
         const minst = Math.min(...(['♥', '♠', '♦', '♣'] as const).map((f) => s.pos[f]));
@@ -2208,7 +2250,11 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         }
         return { ok: true };
       }
-      if (h.handling === 'nytt') { return startEkstra(data, 'veddelopet'); }
+      if (h.handling === 'nytt' || h.handling === 'runde') {
+        if (s.fase !== 'ferdig') return { ok: true };
+        if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
+        return startEkstra(data, 'veddelopet');
+      }
       return null;
     }
     case 'pyramiden': {
@@ -2366,9 +2412,11 @@ export function ekstraVisning(s: any, meg: any, data: any) {
       skam: s.fase === 'skam' ? (s.skam || []).map((k: any) => ({ fra: k.fra, t: k.t, kommentar: k.kommentar, grunn: k.grunn })) : null };
   }
   if (s.type === 'opus') return { holder: s.holder, kast: s.kast, antall: s.antall, nr: s.nr, fra: s.fra || null };
-  if (s.type === 'overunder') return { kort: s.kort, bunke: s.bunke, tur: ider[s.tur % ider.length], sist: s.sist, igjen: s.stokk.length };
+  if (s.type === 'overunder') return { kort: s.kort, bunke: s.bunke, tur: ider[s.tur % ider.length], sist: s.sist, igjen: s.stokk.length, n: s.n || 0,
+    over: s.stokk.filter((k: any) => k.v > s.kort.v).length, under: s.stokk.filter((k: any) => k.v < s.kort.v).length,
+    drukket: s.drukket || {}, storst: s.storst || null, ferdig: !!s.ferdig, runde: s.runde || 1, ider };
   if (s.type === 'veddelopet') return { fase: s.fase, pos: s.pos, sist: s.sist, vinner: s.vinner, bane: s.bane.map((k: any, i: number) => (s.snudd[i] ? k : null)),
-    veddemaal: s.veddemaal, mittVeddemaal: meg ? s.veddemaal[meg.id] || null : null };
+    veddemaal: s.veddemaal, mittVeddemaal: meg ? s.veddemaal[meg.id] || null : null, n: s.n || 0, runde: s.runde || 1, snudd: s.snudd || [] };
   if (s.type === 'pyramiden') return { pos: s.pos, pyr: s.pyr.slice(0, s.pos), minHand: meg ? s.hender[meg.id] : null,
     antall: Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h.length])),
     pastander: s.pastander.filter((p: any) => p.pos === s.pos - 1).map((p: any) => ({ id: p.id, rad: p.rad, avgjort: p.avgjort })) };

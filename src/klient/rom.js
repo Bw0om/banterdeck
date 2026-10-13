@@ -875,8 +875,8 @@ export function startRom(LEKNAVN, LANG) {
     regelfabrikken: [['Alle skriver så mange drikkekort de rekker før tiden går ut.', 'Everyone writes as many drinking cards as they can before time runs out.'], ['Kortene stokkes og trekkes ett og ett.', 'The cards are shuffled and drawn one by one.'], ['Gjør det kortet sier!', 'Do what the card says!']],
     bussruta: [['Alle svarer på fire spørsmål om kortene sine på sin telefon.', 'Everyone answers four questions about their cards on their phone.'], ['Så snus pyramiden – har du kortet, deler du ut slurker.', 'Then the pyramid is turned – if you have the card, you hand out sips.'], ['Den med flest kort igjen, kjører bussen.', 'Whoever has the most cards left rides the bus.']],
     yatzy: [['Trill på din telefon når det er din tur – opptil tre kast.', 'Roll on your phone when it’s your turn – up to three throws.'], ['Hold terningene du vil beholde, og velg hvor poengene føres.', 'Hold the dice you want to keep and pick where the score goes.'], ['Alle ser blokka. Den med minst til slutt, drikker opp.', 'Everyone sees the scorecard. Lowest score at the end finishes their drink.']],
-    overunder: [['Den som har tur, gjetter om neste kort er over eller under.', 'Whoever’s turn it is guesses if the next card is higher or lower.'], ['Riktig: bunken vokser og går videre.', 'Right: the pile grows and moves on.'], ['Feil: du drikker hele bunken.', 'Wrong: you drink the whole pile.']],
-    veddelopet: [['Alle vedder på en kortfarge.', 'Everyone bets on a suit.'], ['Kortene trekkes, og hestene rykker fram.', 'Cards are drawn and the horses move forward.'], ['Vinnerne deler ut slurker – de andre drikker.', 'The winners hand out sips – everyone else drinks.']],
+    overunder: [['Den som har tur, gjetter om neste kort er over eller under. Verten kan trykke for den som ikke har telefonen oppe.', 'Whoever’s turn it is guesses if the next card is higher or lower. The host can tap for anyone without their phone out.'], ['Riktig: potten vokser med én slurk, og turen går videre.', 'Right: the pot grows by one sip and the turn moves on.'], ['Feil eller likt: du drikker hele potten. Når stokken er tom, er leken over.', 'Wrong or equal: you drink the whole pot. When the deck runs out, the game is over.']],
+    veddelopet: [['Trykk på banen til hesten du tror vinner, og velg innsats.', 'Tap the lane of the horse you think wins and pick your stake.'], ['Når alle har veddet, går løpet av seg selv – ett kort i sekundet. Sidekortene sender en hest ett steg tilbake.', 'When everyone has bet, the race runs itself – one card a second. Side cards send a horse one step back.'], ['Vinnerne deler ut dobbelt – de andre drikker innsatsen.', 'The winners hand out double – everyone else drinks their stake.']],
     pyramiden: [['Alle får fire skjulte kort på telefonen sin.', 'Everyone gets four hidden cards on their phone.'], ['Kort snus i pyramiden. Har du samme verdi, deler du ut slurker – eller bløffer.', 'Cards are turned in the pyramid. Have the same value? Hand out sips – or bluff.'], ['Blir du utfordret og bløffet, drikker du dobbelt.', 'Get called out while bluffing and you drink double.']],
     gris: [['Alle får fire kort. Send ett kort videre samtidig.', 'Everyone gets four cards. Pass one card on at the same time.'], ['Får noen fire like, tar hen seg på nesa – og alle må gjøre det samme.', 'When someone gets four of a kind, they touch their nose – and everyone must follow.'], ['Sistemann får en bokstav. G-R-I-S = ta en shot.', 'The last one gets a letter. P-I-G-S = take a shot.']],
     president: [['Bli kvitt kortene dine først – legg likt eller høyere enn det som ligger.', 'Get rid of your cards first – play equal or higher than what’s on the table.'], ['Toere er høyest og rydder bordet.', 'Twos are highest and clear the table.'], ['Først ut blir president, sist ut blir rævkjører.', 'First out is President, last out is the Scumbag.']],
@@ -2169,34 +2169,99 @@ export function startRom(LEKNAVN, LANG) {
       '<p class="rom-status">' + s.antall + T(' kast', ' rolls') + '</p>' +
       (erVert() ? '<button class="btn ghost" data-g="drop" type="button">' + T('Droppet kom!', 'The drop hit!') + '</button>' : '');
   }
+  /* ---------- Over eller under: potten ----------
+     Den som har tur trykker OVER eller UNDER – eller verten svarer for hen, så ikke alle trenger telefonen oppe.
+     Bare verten kan hoppe over. Kortet snus inn bare når det er nytt (husket per trekk). */
+  var ouSett = {};
+  function ouKort(k, kl) {
+    var rod = k && (k.f === '♥' || k.f === '♦');
+    return '<div class="ou-kort' + (rod ? ' rod' : '') + (kl ? ' ' + kl : '') + '"><b>' + (k ? vn(k.v) : '') + '</b><span>' + (k ? k.f : '') + '</span><b>' + (k ? vn(k.v) : '') + '</b></div>';
+  }
   function overunderSpill(s) {
-    var jeg = s.tur === tilstand.meg, si = s.sist;
-    return '<p class="rom-etikett">' + (jeg ? T('Din tur', 'Your turn') : esc(navn(s.tur)) + T(' gjetter', ' is guessing')) + '</p>' +
-      '<div class="dl-bord">' + kk(s.kort, 'stor inn') + '</div>' +
-      (si ? '<p class="dl-melding">' + esc(navn(si.hvem)) + ': ' + vn(si.fra.v) + si.fra.f + ' → ' + vn(si.til.v) + si.til.f + ' – ' + (si.riktig ? T('riktig!', 'right!') : T('feil, drakk ', 'wrong, drank ') + si.bunke + '.') + '</p>' : '') +
-      '<p class="rom-status">' + T('Bunken: ', 'Pile: ') + s.bunke + T(' kort', ' cards') + '</p>' +
-      (jeg ? '<div class="rom-valg to"><button type="button" data-g="gjett" data-paa="over">' + T('Høyere ↑', 'Higher ↑') + '</button><button type="button" data-g="gjett" data-paa="under">' + T('Lavere ↓', 'Lower ↓') + '</button></div>' : '');
+    var meg = tilstand.meg, vert = erVert(), jeg = s.tur === meg, si = s.sist, r = s.runde || 1;
+    var nokkel = r + ':' + (s.n || 0), ny = !ouSett[nokkel]; ouSett[nokkel] = 1;
+    var bom = si && !si.riktig, topp = T('Over eller under', 'Higher or lower');
+    var chip = s.ferdig ? T('Stokken er tom', 'Deck’s empty') : jeg ? T('Din tur', 'Your turn') : esc(navn(s.tur)) + T(' gjetter', ' is guessing');
+    var folk = '<div class="ou-folk">' + (s.ider || tilstand.spillere.map(function (p) { return p.id; })).map(function (id) {
+      var d = (s.drukket || {})[id], oi = bom && ny && si.hvem === id;
+      return '<div class="' + (id === s.tur && !s.ferdig ? 'tur' : '') + '">' + nrHode(id, '', oi ? 'oi' : '') + '<b>' + jaNavn(id) + '</b>' + (d ? '<span' + (oi ? ' class="inn"' : '') + '>−' + d + '</span>' : '') + '</div>';
+    }).join('') + '</div>';
+    var lag = '', antLag = Math.min(6, (bom && ny ? si.bunke : s.bunke) - 1);
+    for (var i = antLag; i >= 1; i--) lag += '<i class="ou-lag' + (bom && ny ? ' sklir' : '') + '" style="--x:' + (-i * 4) + 'px;--y:' + (i * 4) + 'px;--r:' + ((i % 2 ? 1 : -1) * i * 1.2) + 'deg"></i>';
+    var bord = '<div class="ou-bord"><div class="ou-bunke">' + lag + ouKort(s.kort, ny && s.n ? 'snu' : '') + '</div>' +
+      '<div class="ou-pott"><span><b>' + s.bunke + '</b></span><small>' + T('I potten', 'In the pot') + '</small></div></div>';
+    var tot = (s.over || 0) + (s.under || 0);
+    var stripe = '<div class="ou-sjanse"><div><i style="transform:scaleX(' + (tot ? s.over / tot : .5).toFixed(3) + ')"></i></div><p><span>' + (s.over || 0) + T(' høyere igjen', ' higher left') + '</span><span>' + (s.under || 0) + T(' lavere igjen', ' lower left') + '</span></p></div>';
+    var svar = si ? '<div class="ou-svar ' + (si.riktig ? 'rett' : 'feil') + (ny ? ' inn' : '') + '"><b>' + (si.riktig ? T('Riktig!', 'Right!') : jaNavn(si.hvem) + T(' bommet', ' missed')) + '</b><span>' +
+      (si.riktig ? T('Potten vokser.', 'The pot grows.') : T('Drikker ', 'Drinks ') + si.bunke + T('. Potten starter på nytt.', '. The pot starts over.')) + '</span></div>' : '';
+    var ut = jaTopp(topp, chip, jeg && !s.ferdig, false) + folk + bord + stripe + svar;
+    if (s.ferdig) {
+      return ut + (s.storst ? '<div class="hs-dom gul inn"><b>' + T('Største pott drukket: ', 'Biggest pot drunk: ') + jaNavn(s.storst.id) + ' – ' + s.storst.n + '</b></div>' : '') +
+        lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny stokk – teller i kvelden', 'New deck – counts tonight')]]);
+    }
+    var knapper = '<div class="ou-knapper"><button type="button" class="ou-over" data-g="ou-gjett" data-paa="over"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M5 11l7-7 7 7"/></svg><b>' + T('Over', 'Higher') + '</b></button>' +
+      '<button type="button" class="ou-under" data-g="ou-gjett" data-paa="under"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M5 13l7 7 7-7"/></svg><b>' + T('Under', 'Lower') + '</b></button></div>';
+    if (jeg) return ut + knapper;
+    if (vert) return ut + '<p class="ou-for">' + T('Svarer for ', 'Answering for ') + esc(navn(s.tur)) + '</p>' + knapper + '<button class="ou-hopp" data-g="ou-hopp" type="button">' + T('Hopp over ', 'Skip ') + esc(navn(s.tur)) + '</button>';
+    return ut + '<p class="nr-vent">' + esc(navn(s.tur)) + T(' svarer – rop det høyt, så kan ', ' answers – shout it out and ') + esc(navn(tilstand.vert)) + T(' trykke.', ' can tap it.') + '</p>';
+  }
+  /* ---------- Veddeløpet: travbanen ----------
+     Trykk på en bane for å vedde. Når alle har veddet (eller verten starter), går løpet av seg selv:
+     telefonen til verten snur ett kort i sekundet, så ingen andre trenger telefonen oppe. */
+  var VL_F = ['♥', '♠', '♦', '♣'], vlSats = 2, vlTimer = null, vlSett = {}, vlPos = {};
+  function vlNavn(f) { return (EN ? { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' } : { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' })[f]; }
+  function vlDriv() {
+    // Bare verten driver løpet. Stopper av seg selv når leken er over eller byttet.
+    if (vlTimer) return;
+    vlTimer = setInterval(function () {
+      var sp = tilstand && tilstand.spill;
+      if (!sp || sp.type !== 'veddelopet' || sp.fase !== 'lop' || !erVert()) { clearInterval(vlTimer); vlTimer = null; return; }
+      if (document.hidden) return;
+      gjorAlltid({ handling: 'snu' });
+    }, 1000);
   }
   function veddelopetSpill(s) {
-    var F = ['♥', '♠', '♦', '♣'], NAVN = EN ? { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' } : { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' };
-    var bane = '<div class="dl-bane" style="--lengde:9">' + F.map(function (f) {
-      var c = ''; for (var i = 0; i <= 8; i++) c += '<span class="dl-celle' + (i === 8 ? ' mal' : '') + '">' + (s.pos[f] === i ? kk({ v: 14, f: f }, 'liten' + (s.vinner === f ? ' vinner' : '')) : '') + '</span>';
-      return '<div class="dl-rad">' + c + '</div>';
-    }).join('') + '<div class="dl-rad banekort"><span class="dl-celle"></span>' + s.bane.map(function (k) { return '<span class="dl-celle">' + kk(k, 'liten') + '</span>'; }).join('') + '<span class="dl-celle"></span></div></div>';
-    var vedd = Object.keys(s.veddemaal).map(function (id) { var v = s.veddemaal[id]; return esc(navn(id)) + ': ' + v.farge + ' ' + v.slurker; }).join(' · ');
-    if (s.fase === 'vedd') {
-      var mv = s.mittVeddemaal || {};
-      return bane + '<p class="rom-etikett">' + T('Vedd på en hest', 'Bet on a horse') + '</p>' +
-        '<div class="rom-valg fire">' + F.map(function (f) { return '<button type="button" data-g="vedd" data-farge="' + f + '" aria-pressed="' + (mv.farge === f) + '">' + f + ' ' + NAVN[f] + '</button>'; }).join('') + '</div>' +
-        '<label class="rof-lab" for="veddSl">' + T('Slurker du vedder', 'Sips you bet') + '</label><input class="rof-inp" id="veddSl" type="number" min="1" max="10" value="' + (mv.slurker || 2) + '">' +
-        '<p class="rom-status">' + (vedd || T('Ingen har veddet ennå', 'Nobody has bet yet')) + '</p>' + fristHtml(tilstand.spill, T('sekunder til løpet starter', 'seconds until the race starts')) +
-        (erVert() ? (function () { var mangler = tilstand.spillere.length - Object.keys(s.veddemaal).length;
-          return '<button class="rom-stor-knapp" data-g="lop" type="button">' + (mangler > 0 ? T('Venter på ' + mangler + ' veddemål …', 'Waiting for ' + mangler + (mangler === 1 ? ' bet …' : ' bets …')) : T('Start løpet', 'Start the race')) + '</button>'; })() : '');
+    var meg = tilstand.meg, vert = erVert(), f = s.fase, mv = s.mittVeddemaal, vm = s.veddemaal || {}, r = s.runde || 1;
+    if (mv && f === 'vedd') vlSats = mv.slurker;
+    if (f === 'lop' && vert) vlDriv();
+    var antVeddet = Object.keys(vm).length, alle = (tilstand.spillere || []).length;
+    var chip = f === 'vedd' ? (antVeddet >= alle ? T('Klar … ferdig …', 'Ready … set …') : T('Vedd på en hest', 'Bet on a horse')) : f === 'lop' ? T('Løpet går!', 'They’re off!') : vlNavn(s.vinner) + T(' vant!', ' won!');
+    var jegVant = mv && s.vinner === mv.farge;
+    var ut = jaTopp(T('Veddeløpet', 'The horse race'), chip, f === 'vedd', false);
+    ut += '<p class="vl-hjelp">' + (f === 'vedd' ? T('Trykk på banen du tror vinner.', 'Tap the lane you think wins.') : f === 'lop' ? T('Ett kort i sekundet. Sidekortene sender en hest ett steg tilbake.', 'One card a second. Side cards send a horse one step back.') : '') + '</p>';
+    var sider = '<div class="vl-sider">' + s.bane.map(function (k, i) {
+      var snudd = !!(s.snudd || [])[i] || !!k, ny = snudd && !vlSett[r + ':s' + i]; if (snudd) vlSett[r + ':s' + i] = 1;
+      return '<span class="vl-side' + (snudd ? ' snudd' : '') + (ny ? ' ny' : '') + '" style="--i:' + (i + 1) + '"><span><i class="bak"></i><i class="fram' + (k && (k.f === '♥' || k.f === '♦') ? ' rod' : '') + '">' + (k ? k.f : '') + '</i></span></span>';
+    }).join('') + '</div>';
+    var baner = VL_F.map(function (x) {
+      var hoder = Object.keys(vm).filter(function (id) { return vm[id].farge === x; });
+      var vant = s.vinner === x, valgt = mv && mv.farge === x, rod = x === '♥' || x === '♦';
+      var pNa = Math.min(8, s.pos[x] || 0), pFra = vlPos[r + ':' + x], flytt = pFra != null && pFra !== pNa; vlPos[r + ':' + x] = pNa;
+      var inn = '<i class="vl-mal"></i><span class="vl-hest' + (flytt ? ' flytt' : '') + '" style="--p:' + pNa + ';--fra:' + (flytt ? pFra : pNa) + '"><span class="' + (f === 'lop' ? 'galopp' : '') + (rod ? ' rod' : '') + '"><b>A</b><span>' + x + '</span></span></span>' +
+        (vant ? '<span class="vl-rosett">1</span>' : '') +
+        '<span class="vl-hoder">' + hoder.map(function (id) { return nrHode(id, f === 'vedd' ? 'inn' : '', f === 'ferdig' && !vant ? 'oi' : ''); }).join('') + '</span>';
+      var kl = 'vl-bane' + (valgt ? ' valgt' : '') + (vant ? ' vant' : '');
+      return f === 'vedd' ? '<button type="button" class="' + kl + '" data-g="vl-vedd" data-farge="' + x + '" aria-pressed="' + !!valgt + '" aria-label="' + vlNavn(x) + '">' + inn + '</button>' : '<div class="' + kl + '">' + inn + '</div>';
+    }).join('');
+    ut += '<div class="vl-banen">' + sider + '<div class="vl-baner">' + baner + '</div></div>';
+    if (f === 'vedd') {
+      ut += '<div class="vl-sats"><span>' + T('Innsats', 'Stake') + '</span><button type="button" data-g="vl-sats" data-d="-1" aria-label="' + T('Færre slurker', 'Fewer sips') + '">−</button><b>' + vlSats + '</b>' +
+        '<button type="button" class="pluss" data-g="vl-sats" data-d="1" aria-label="' + T('Flere slurker', 'More sips') + '">+</button></div>' +
+        '<div class="ts-status"><span class="ts-stemt">' + Object.keys(vm).map(function (id) { return nrHode(id, 'inn', ''); }).join('') + '</span><b>' +
+        (antVeddet >= alle ? T('Alle har veddet – løpet starter …', 'Everyone’s in – the race starts …') : antVeddet + T(' av ', ' of ') + alle + T(' har veddet', ' have bet')) + '</b></div>' +
+        fristHtml(tilstand.spill, T('sekunder til løpet starter', 'seconds until the race starts'));
+      if (vert && antVeddet && antVeddet < alle) ut += '<button class="rom-stor-knapp" data-g="vl-start" type="button">' + T('Start løpet nå', 'Start the race now') + '</button>';
+      return ut;
     }
-    return bane + '<div class="dl-bord">' + (s.sist ? kk(s.sist, 'stor inn') : '') + '</div>' +
-      (s.vinner ? '<p class="dl-melding dl-stor">' + NAVN[s.vinner] + T(' vant! Riktig veddemål: del ut det dobbelte.', ' won! Winning bets: hand out double.') + '</p>' : '') +
-      '<p class="rom-status">' + vedd + '</p>' +
-      (s.fase === 'lop' ? '<button class="rom-stor-knapp" data-g="snu" type="button">' + T('Snu kort', 'Flip card') + '</button>' : '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Nytt løp', 'New race') + '</button>');
+    if (s.sist) {
+      var nk = r + ':t' + s.n, nyT = !vlSett[nk]; vlSett[nk] = 1;
+      ut += '<div class="vl-trekk"><span class="' + (nyT ? 'inn' : '') + '">' + ouKort(s.sist, 'liten') + '</span><b>' + vlNavn(s.sist.f) + T(' rykker fram', ' moves up') + '</b></div>';
+    }
+    if (f === 'ferdig') {
+      ut += mv ? '<div class="hs-dom ' + (jegVant ? 'rett' : 'feil') + ' inn"><b>' + (jegVant ? T('Du vant! Del ut ', 'You won! Hand out ') + mv.slurker * 2 : T('Du tapte – drikk ', 'You lost – drink ') + mv.slurker) + '</b></div>' : '';
+      return ut + lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nytt løp – teller i kvelden', 'New race – counts tonight')]]);
+    }
+    return ut;
   }
   function pyramidenSpill(s) {
     var rader = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
@@ -4449,6 +4514,16 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'pek-forsvar') return gjor({ handling: 'pek-forsvar', slapp: b.dataset.slapp === '1' });
     if (g === 'lh-ide') { var ide = document.getElementById('lhIde'); if (ide) { ide.textContent = lhIde(); ide.hidden = false; ide.classList.remove('inn'); void ide.offsetWidth; ide.classList.add('inn'); } return; }
     if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
+    if (g === 'ou-gjett') return gjor({ handling: 'gjett', paa: b.dataset.paa });
+    if (g === 'ou-hopp') return gjor({ handling: 'ou-hopp' });
+    if (g === 'vl-vedd') return gjorAlltid({ handling: 'vedd', farge: b.dataset.farge, slurker: vlSats });
+    if (g === 'vl-sats') {
+      vlSats = Math.max(1, Math.min(10, vlSats + Number(b.dataset.d)));
+      var vs0 = tilstand.spill && tilstand.spill.mittVeddemaal;
+      if (vs0) return gjorAlltid({ handling: 'vedd', farge: vs0.farge, slurker: vlSats });
+      return tegn();
+    }
+    if (g === 'vl-start') return gjor({ handling: 'vl-start' });
     if (g === 'fjern') return gjor({ handling: 'fjern', hvem: b.dataset.id });
     if (g === 'gjett') return gjor({ handling: 'gjett', paa: b.dataset.paa });
     if (g === 'vedd') { var sl = document.getElementById('veddSl'); return gjor({ handling: 'vedd', farge: b.dataset.farge, slurker: sl ? Number(sl.value) : 2 }); }
