@@ -2045,3 +2045,60 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .pr-titler em{padding:3px 8px;font-style:normal;font-weight:900;font-size:14px;background:#16120F;color:#FFF8EE;border-radius:6px;white-space:nowrap}
 .pr-titler em:empty{display:none}
 @media (prefers-reduced-motion:reduce){.pr-paa.hopp,.pr-bunke .pr-kort.smell{animation:grFade 200ms ease both}.pr-bunke.fei{animation:grFade 200ms ease reverse forwards}.pr-hand .pr-hk{transition:none}}
+
+/* ---------- Sofaen: lese-spill med nedtelling, og sende-rundt-spill ---------- */
+.en-lest,.en-ee{margin:10px 0 4px;border:4px solid #16120F;border-radius:18px;box-shadow:5px 5px 0 #16120F;overflow:hidden}
+.en-lest{display:flex;flex-direction:column;gap:8px;padding:20px;background:var(--gul,#FFD23F);color:#16120F}
+.en-lest small,.en-ee small{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.en-lest b{font-family:var(--display);font-weight:900;font-stretch:78%;line-height:1.02;overflow-wrap:normal}
+.en-ee{display:grid;grid-template-rows:auto auto}
+.en-ee>span{display:flex;flex-direction:column;gap:4px;padding:16px;color:#16120F;background:#FF9CC2}
+.en-ee>span+span{background:#63E2A8;border-top:3px solid #16120F}
+.en-ee b{font-size:24px;font-weight:900;line-height:1.08}
+.en-lest.inn,.en-ee.inn{animation:enTrekk2 380ms cubic-bezier(.23,1,.32,1) both}
+@keyframes enTrekk2{from{transform:translateX(40px) rotate(3deg);opacity:0}}
+.en-midt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:230px;text-align:center}
+#rom .en-tell{width:190px;height:190px;margin:0;padding:0;border-radius:50%;border:4px solid #16120F;background:#FFD23F;color:#16120F;box-shadow:6px 6px 0 #16120F;font-family:var(--display);font-size:26px;font-weight:900;font-stretch:70%;line-height:1.05;text-transform:uppercase;cursor:pointer}
+.en-tall{font-family:var(--display);font-size:170px;font-weight:900;font-stretch:62%;line-height:1;animation:enTall 800ms cubic-bezier(.23,1,.32,1) both}
+@keyframes enTall{0%{transform:scale(1.5);opacity:0}25%{transform:none;opacity:1}}
+.en-si{display:inline-block;padding:8px 22px;font-family:var(--display);font-size:60px;font-weight:900;font-stretch:62%;line-height:1;text-transform:uppercase;color:#FFF8EE;background:#FF5B1F;border:4px solid #16120F;box-shadow:6px 6px 0 #16120F;transform:rotate(-2deg);animation:enSi 420ms cubic-bezier(.23,1,.32,1) both}
+@keyframes enSi{0%{transform:scale(.7) rotate(-6deg);opacity:0}60%{transform:scale(1.06) rotate(-2deg)}100%{transform:rotate(-2deg);opacity:1}}
+.en-regel{margin:0;max-width:300px;font-size:16px;font-weight:800}
+#rom .en-neste.svak{background:#EFE6D8;color:#7A6E65;box-shadow:none}
+.en-kat{margin:10px 0 4px;padding:14px 16px;background:#FFFFFF;border:3px solid #16120F;border-radius:14px;box-shadow:4px 4px 0 #16120F;display:flex;flex-direction:column;gap:4px}
+.en-kat small{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#4A3F37}
+.en-kat b{font-family:var(--display);font-size:26px;font-weight:900;font-stretch:80%;line-height:1.05}
+.en-bombe{display:flex;flex-direction:column;align-items:center;gap:8px;margin:8px 0 12px;text-align:center}
+.en-bombe svg{width:200px;height:200px;transform-origin:96px 124px}
+.en-bombe.gaar svg{animation:enTikk var(--d,1s) ease-in-out infinite}
+@keyframes enTikk{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.en-bombe .lunte{fill:none;stroke:#16120F;stroke-width:6;stroke-linecap:round}
+.en-bombe .hals{fill:#3A3940;stroke:#16120F;stroke-width:5}
+.en-bombe .kule{fill:#2A292E;stroke:#16120F;stroke-width:6}
+.en-bombe .glans{fill:none;stroke:#FFF8EE;stroke-width:8;stroke-linecap:round;opacity:.35}
+.en-bombe .gnist{transform-origin:178px 24px;animation:enGnist 180ms steps(2) infinite}
+.en-bombe .gnist circle{fill:#FFD23F;stroke:#16120F;stroke-width:3}.en-bombe .gnist path{stroke:#FF5B1F;stroke-width:4;stroke-linecap:round}
+@keyframes enGnist{50%{transform:scale(1.3) rotate(20deg)}}
+.en-bombe b{font-family:var(--display);font-size:30px;font-weight:900;font-stretch:66%;text-transform:uppercase}
+.en-bombe span{max-width:300px;font-size:14px;font-weight:700;color:#4A3F37}
+#rom .rom-stor-knapp.en-send{background:#63E2A8}
+.en-bom{display:flex;flex-direction:column;align-items:center;gap:6px;margin:12px 0;padding:22px 12px;color:#FFF8EE;background:#D7263D;border:4px solid #16120F;border-radius:18px;box-shadow:5px 5px 0 #16120F;animation:enBom 520ms cubic-bezier(.23,1,.32,1) both}
+.en-bom b{font-family:var(--display);font-size:100px;font-weight:900;font-stretch:62%;line-height:.85;text-shadow:5px 5px 0 #16120F}
+.en-bom span{font-size:24px;font-weight:900}
+@keyframes enBom{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.05)}100%{transform:none;opacity:1}}
+.en-kopp{display:flex;align-items:center;justify-content:space-between;margin:8px 0 4px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.en-kopp-prikker{display:flex;gap:4px}
+.en-kopp-prikker i{display:block;width:14px;height:14px;border-radius:4px;border:2.5px solid #16120F;background:#FFF8EE}
+.en-kopp-prikker i.paa{background:#FFB020}
+#rom .en-rof{display:block;width:100%;height:440px;margin:6px 0 14px;padding:0;border:0;background:none;box-shadow:none;cursor:pointer;perspective:900px;font-family:var(--sans);transform:none}
+.en-rof>span{display:flex;flex-direction:column;height:100%;box-sizing:border-box;padding:18px;text-align:left;color:#16120F;background:#FFFFFF;border:4px solid #16120F;border-radius:22px;box-shadow:6px 6px 0 #16120F}
+.en-rof.rod .en-rof-hj{color:#D7263D}
+.en-rof>span.snu{animation:enSnu 420ms cubic-bezier(.23,1,.32,1) both}
+@keyframes enSnu{from{transform:rotateY(90deg) translateY(-10px)}}
+.en-rof-hj{display:flex;flex-direction:column;align-items:flex-start;line-height:.9}
+.en-rof-hj b{font-size:46px;font-weight:900}.en-rof-hj i{font-style:normal;font-size:34px}
+.en-rof-midt{margin:auto 0;display:flex;flex-direction:column;gap:10px}
+.en-rof-midt b{font-family:var(--display);font-size:38px;font-weight:900;font-stretch:66%;line-height:.95;text-transform:uppercase}
+.en-rof-midt span{font-size:18px;font-weight:700;line-height:1.3}
+.en-rof em{align-self:center;font-style:normal;font-size:12px;font-weight:800;color:#4A3F37;text-align:center}
+@media (prefers-reduced-motion:reduce){.en-lest.inn,.en-ee.inn,.en-tall,.en-si,.en-bom,.en-rof>span.snu{animation:none}.en-bombe.gaar svg,.en-bombe .gnist{animation:none}}

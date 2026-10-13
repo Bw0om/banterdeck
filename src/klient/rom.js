@@ -719,18 +719,23 @@ export function startRom(LEKNAVN, LANG) {
      Blir ingen med etter et minutt, kommer et kort: «Start med bare min telefon». Da skriver verten navnene på dem som er her,
      og de setter seg i sofaen i stua (de er ikke spillere i rommet, så de vanlige lekene påvirkes ikke).
      Lekene her spilles på én telefon: kortet går rundt, og verten trykker hvem som drakk. */
-  var sofaFane = 'rundt', aleneFra = 0, aleneLukket = 0, aleneTimer = null;
+  var sofaFane = 'leser', aleneFra = 0, aleneLukket = 0, aleneTimer = null;
   function sofaNokkel() { return 'bd_sofa_' + kode; }
   function sofaModus() {
     if (sofaFolk().length) return true;
     try { return localStorage.getItem(sofaNokkel()) === '1'; } catch (e) { return false; }
   }
+  // «Verten leser»: kortet leses høyt, verten teller ned, og alle svarer høyt samtidig. «Send rundt»: telefonen går fra hånd til hånd.
   var EN_LEKER = [
-    ['jeg-har-aldri', 'rundt', T('Jeg har aldri', 'Never have I ever'), T('Kortet går rundt. Trykk på dem som har gjort det.', 'The card goes around. Tap those who have done it.'), 'kort'],
-    ['pekeleken', 'rundt', T('Pekeleken', 'Most likely to'), T('Les høyt – pek. Trykk på dem som ble pekt på.', 'Read it out – point. Tap who got pointed at.'), 'pek'],
-    ['nodt-eller-sannhet', 'leser', T('Nødt eller sannhet', 'Truth or dare'), T('Du trekker – den som leser, velger. Nekter noen, drikker de.', 'You draw – the reader picks. Refuse and you drink.'), 'kort'],
+    ['jeg-har-aldri', 'leser', T('Jeg har aldri', 'Never have I ever'), T('Les høyt, tell ned – har du gjort det, drikker du.', 'Read it out, count down – done it? Drink.'), 'kort'],
+    ['pekeleken', 'leser', T('Pekeleken', 'Most likely to'), T('Les høyt, tell ned – alle peker samtidig.', 'Read it out, count down – everyone points at once.'), 'pek'],
+    ['enten-eller', 'leser', T('Enten eller', 'Would you rather'), T('Les høyt, tell ned – alle sier sitt valg samtidig.', 'Read it out, count down – everyone says their pick at once.'), 'kort'],
+    ['samme', 'leser', T('Saueflokken', 'The herd'), T('Les høyt, tell ned – alle roper ett ord. Står du alene, drikker du.', 'Read it out, count down – everyone shouts one word. Alone? Drink.'), 'kort'],
+    ['nodt-eller-sannhet', 'leser', T('Nødt eller sannhet', 'Truth or dare'), T('Den i stolen velger – gjør det, eller drikk.', 'Whoever is in the chair picks – do it, or drink.'), 'kort'],
+    ['kategorier', 'rundt', T('Kategorier', 'Categories'), T('Telefonen er bomba. Si et ord og gi den videre før den smeller.', 'The phone is the bomb. Say a word and pass it on before it blows.'), 'bombe'],
+    ['ring-of-fire', 'rundt', T('Ring of Fire', 'Ring of Fire'), T('Trekk ditt eget kort, les regelen og gi telefonen videre.', 'Draw your own card, read the rule and pass the phone on.'), 'kort'],
   ];
-  var EN_IKON = { kort: 'M6 3h12v18h-12zM9 8h6M9 12h6', pek: 'M12 21v-9M8 12l4-9 4 9' };
+  var EN_IKON = { kort: 'M6 3h12v18h-12zM9 8h6M9 12h6', pek: 'M12 21v-9M8 12l4-9 4 9', bombe: 'M11 21a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM15 8l3-3M18 5h2' };
   function sofaLobby() {
     var folk = sofaFolk(), n = folk.length;
     var ut = '<div class="sofa-lobby"><p class="nr-etikett">' + T('Bare din telefon', 'Just your phone') + '</p><h2 class="sofa-tittel">' + T('Hvem er her?', 'Who’s here?') + '</h2>' +
@@ -763,27 +768,86 @@ export function startRom(LEKNAVN, LANG) {
       '<button class="rom-stor-knapp" data-g="sofa-start" type="button">' + T('Start med bare min telefon', 'Start with just my phone') + '</button>' +
       '<button class="linkbtn" data-g="sofa-vent" type="button">' + T('Vent litt til', 'Wait a bit longer') + '</button></div>';
   }
-  /** Lekene på én telefon: kortet, og hodene til verten og sofaen som verten trykker på. */
-  var enHar = {}, enPos = null, enSett = {};
+  /** Lekene på én telefon. Lese-spill: kortet leses høyt, verten teller ned 3 – 2 – 1, og alle svarer samtidig. Ingen trykker
+      for andre – dere tar drikkingen selv. Sende-rundt-spill: telefonen går fra hånd til hånd (bomba i Kategorier, kortet i Ring of Fire). */
+  var enSett = {}, enTell = { k: '', fase: 'klar', tall: 3, t: [] }, enBombe = { k: '', fase: 'klar', holder: 0, start: 0, lengde: 0, timer: null };
+  var EN_TELL = {
+    'jeg-har-aldri': [T('Drikk!', 'Drink!'), T('Har du gjort det? Drikk – alle samtidig.', 'Done it? Drink – all at once.')],
+    'pekeleken': [T('Pek!', 'Point!'), T('Flest fingre drikker like mange slurker.', 'Most fingers drinks that many sips.')],
+    'enten-eller': [T('Si det!', 'Say it!'), T('Færrest på sin side? Drikk 1. Likt? Alle drikker.', 'Fewest on your side? Drink 1. A tie? Everyone drinks.')],
+    'samme': [T('Si det!', 'Say it!'), T('Sa du noe ingen andre sa? Du er et svart får – drikk 1.', 'Said something nobody else did? Black sheep – drink 1.')]
+  };
+  function enFolk(s) { return (s.lesere || [tilstand.vert]).concat((tilstand.spillere || []).filter(function (p) { return (s.lesere || []).indexOf(p.id) === -1; }).map(function (p) { return p.id; })); }
+  function enNavn(id) { return id === tilstand.meg ? T('du', 'you') : esc(navn(id)); }
+  function enNedtelling(k) {
+    enTell.t.forEach(clearTimeout);
+    enTell = { k: k, fase: 'teller', tall: 3, t: [] };
+    enTell.t = [setTimeout(function () { enTell.tall = 2; tegn(); }, 800), setTimeout(function () { enTell.tall = 1; tegn(); }, 1600),
+      setTimeout(function () { enTell.fase = 'sagt'; try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} tegn(); }, 2400)];
+    tegn();
+  }
+  function enBombeStart(k) {
+    clearInterval(enBombe.timer);
+    enBombe = { k: k, fase: 'gaar', holder: 0, start: Date.now(), lengde: 20000 + Math.random() * 30000, timer: null };
+    enBombe.timer = setInterval(function () {
+      var el = document.querySelector('.en-bombe svg'), a = (Date.now() - enBombe.start) / enBombe.lengde;
+      if (a >= 1) { clearInterval(enBombe.timer); enBombe.fase = 'bom'; try { navigator.vibrate && navigator.vibrate([200, 80, 300]); } catch (e) {} spillLyd('ding'); return tegn(); }
+      if (el) el.style.setProperty('--d', (a < .5 ? 1000 : a < .8 ? 600 : 320) + 'ms');
+    }, 250);
+    tegn();
+  }
   function enSpill(s) {
-    var nk = (s.runde || 1) + ':' + s.pos; if (enPos !== nk) { enPos = nk; enHar = {}; }
-    var ny = !enSett[nk]; enSett[nk] = 1;
-    var lek = EN_LEKER.find(function (l) { return l[0] === s.lek; }) || [s.lek, '', s.navn];
-    var topp = jaTopp(esc(lek[2]) + T(' · én telefon', ' · one phone'), s.ferdig ? T('Bunken er tom', 'Deck done') : esc(navn(s.leser)) + T(' leser', ' reads'), !s.ferdig, false);
-    if (s.ferdig) return topp + lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny bunke – teller i kvelden', 'New deck – counts tonight')]]);
+    var nk = (s.runde || 1) + ':' + s.pos, ny = !enSett[nk]; enSett[nk] = 1;
+    var lek = EN_LEKER.find(function (l) { return l[0] === s.lek; }) || [s.lek, 'leser', s.navn];
+    var rundt = lek[1] === 'rundt';
+    var chip = s.ferdig ? T('Bunken er tom', 'Deck done') : rundt ? enNavn(s.leser).replace(/^./, function (c) { return c.toUpperCase(); }) + T(' har telefonen', ' has the phone') : esc(navn(s.leser)) + T(' leser', ' reads');
+    var topp = jaTopp(esc(lek[2]) + T(' · én telefon', ' · one phone'), chip, !s.ferdig, false);
+    if (s.ferdig) {
+      enTell.t.forEach(clearTimeout); clearInterval(enBombe.timer);
+      return topp + (s.lek === 'ring-of-fire' && s.konger >= 4 ? '<p class="en-regel">' + T('Fjerde konge er trukket – leken er over.', 'The fourth king is drawn – the game is over.') + '</p>' : '') +
+        lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny bunke – teller i kvelden', 'New deck – counts tonight')]]);
+    }
     var k = s.kort || {}, t = String(k.t || '');
-    var l = Math.max.apply(null, t.split(/\s+/).map(function (w) { return w.length; }).concat([1]));
-    var str = Math.max(22, Math.min(36, Math.floor(290 / (l * 0.56)), Math.floor(1000 / (t.length * 0.55))));
-    var sporsmal = s.lek === 'pekeleken' ? T('Hvem ble pekt på? Trykk på dem.', 'Who got pointed at? Tap them.') : s.lek === 'nodt-eller-sannhet' ? T('Nektet noen? Trykk på dem.', 'Did someone refuse? Tap them.') : T('Hvem har gjort det? Trykk på dem.', 'Who has done it? Tap them.');
-    var ider = [tilstand.vert].concat(sofaFolk().map(function (p) { return p.id; })).concat((tilstand.spillere || []).filter(function (p) { return p.id !== tilstand.vert; }).map(function (p) { return p.id; }));
-    var slurk = function (id) { var sp = sofaFolk().find(function (p) { return p.id === id; }); if (sp) return sp.slurker || 0; var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }); return p ? p.slurker || 0 : 0; };
-    return topp + '<button type="button" class="en-kort" data-g="en-neste" aria-label="' + T('Neste kort', 'Next card') + '"><i></i><i></i><span class="' + (ny && s.pos ? 'inn' : '') + '">' +
-      (k.k ? '<small>' + esc(k.k) + '</small>' : '') + '<b style="font-size:' + str + 'px">' + esc(t) + '</b><em>' + T('Trykk på kortet for neste – og send telefonen videre', 'Tap the card for the next one – and pass the phone on') + '</em></span></button>' +
-      '<p class="en-sporsmal">' + sporsmal + '</p><div class="en-benk">' + ider.map(function (id) {
-        var har = !!enHar[id];
-        return '<button type="button" data-g="en-har" data-paa="' + esc(id) + '" aria-pressed="' + har + '">' + (har ? '<span class="en-drikk">' + T('Drikk', 'Drink') + '</span>' : '') +
-          nrHode(id, har ? 'oppe' : '', har ? 'oi' : '') + '<b>' + (id === tilstand.meg ? T('Du', 'You') : esc(navn(id))) + '</b><small>' + slurk(id) + T(' sl.', ' sips') + '</small></button>';
-      }).join('') + '</div>';
+    var str = function (tekst, maks, min) { var l = Math.max.apply(null, tekst.split(/\s+/).map(function (w) { return w.length; }).concat([1])); return Math.max(min, Math.min(maks, Math.floor(290 / (l * 0.56)), Math.floor(1000 / (Math.max(1, tekst.length) * 0.55)))); };
+    var neste = enNavn(s.neste);
+    // ---- Kategorier: telefonen er bomba
+    if (s.lek === 'kategorier') {
+      if (enBombe.k !== nk) { clearInterval(enBombe.timer); enBombe = { k: nk, fase: 'klar', holder: enBombe.holder || 0, start: 0, lengde: 0, timer: null }; }
+      var folk = enFolk(s), h = folk[enBombe.holder % folk.length], hn = folk[(enBombe.holder + 1) % folk.length];
+      var kat = '<div class="en-kat"><small>' + T('Kategori', 'Category') + '</small><b>' + esc(t) + '</b></div>';
+      topp = jaTopp(esc(lek[2]) + T(' · én telefon', ' · one phone'), enBombe.fase === 'gaar' ? esc(navn(h)) + T(' har bomba', ' has the bomb') : enBombe.fase === 'bom' ? T('Bomba smalt!', 'The bomb went off!') : T('Les kategorien høyt', 'Read the category out'), true, false);
+      if (enBombe.fase === 'bom') return topp.replace('ja-topp', 'ja-topp en-bom-topp') + kat + '<div class="en-bom"><b>' + T('BOM!', 'BOOM!') + '</b><span>' + esc(navn(h)) + T(' drikker 2', ' drinks 2') + '</span></div>' +
+        '<button type="button" class="rom-stor-knapp" data-g="en-bom-neste" data-paa="' + esc(h) + '">' + T('Ny kategori', 'New category') + '</button>';
+      var gaar = enBombe.fase === 'gaar';
+      return topp + kat + '<div class="en-bombe' + (gaar ? ' gaar' : '') + '"><svg viewBox="0 0 210 210" aria-hidden="true"><path d="M128 52 C140 30 160 22 176 24" class="lunte"/><rect x="104" y="44" width="34" height="26" rx="6" transform="rotate(30 121 57)" class="hals"/><circle cx="96" cy="124" r="70" class="kule"/><path d="M58 98 C66 80 82 70 100 68" class="glans"/>' +
+          (gaar ? '<g class="gnist"><circle cx="178" cy="24" r="10"/><path d="M178 4 V12 M198 24 H190 M178 44 V36 M158 24 H166"/></g>' : '') + '</svg>' +
+          '<b>' + (gaar ? esc(navn(h)) + T(' har bomba', ' has the bomb') : T('Klar?', 'Ready?')) + '</b><span>' + (gaar ? T('Si et ord som passer, og gi telefonen videre. Ingen vet når den smeller.', 'Say a word that fits and pass the phone on. Nobody knows when it blows.') : T('Les kategorien høyt, trykk start og gi telefonen til ', 'Read the category out, press start and hand the phone to ') + esc(navn(h)) + '.') + '</span></div>' +
+        '<button type="button" class="rom-stor-knapp en-send" data-g="' + (gaar ? 'en-bombe-send' : 'en-bombe-start') + '">' + (gaar ? T('Sagt! Gi til ', 'Said it! Pass to ') + esc(navn(hn)) + ' →' : T('Start bomba', 'Start the bomb')) + '</button>';
+    }
+    // ---- Ring of Fire: den som har telefonen, trekker
+    if (s.lek === 'ring-of-fire') {
+      var kopp = ''; for (var q = 0; q < 4; q++) kopp += '<i class="' + (q < s.konger ? 'paa' : '') + '"></i>';
+      var siste = k.konge && s.konger >= 4;
+      return topp + '<div class="en-kopp" aria-label="' + s.konger + T(' av 4 konger', ' of 4 kings') + '"><span>' + T('Kongekoppen', 'King’s cup') + '</span><span class="en-kopp-prikker">' + kopp + '</span></div>' +
+        '<button type="button" class="en-rof' + (k.rod ? ' rod' : '') + '" data-g="en-neste" aria-label="' + T('Trekk neste kort', 'Draw the next card') + '"><span class="' + (ny && s.pos ? 'snu' : '') + '">' +
+          '<span class="en-rof-hj"><b>' + esc(k.v || '') + '</b><i>' + esc(k.s || '') + '</i></span>' +
+          '<span class="en-rof-midt"><b>' + esc(siste ? T('Fjerde konge!', 'Fourth king!') : k.regel || '') + '</b><span>' + esc(siste ? enNavn(s.leser).replace(/^./, function (c) { return c.toUpperCase(); }) + T(' drikker opp koppen.', ' finishes the cup.') : k.tekst || '') + '</span></span>' +
+          '<em>' + (siste ? T('Trykk for å avslutte', 'Tap to finish') : T('Les regelen høyt – gi telefonen til ', 'Read the rule out – pass the phone to ') + neste + T(', som trykker for neste kort', ', who taps for the next card')) + '</em></span></button>';
+    }
+    // ---- Lese-spillene: kortet, så 3 – 2 – 1
+    if (enTell.k !== nk) { enTell.t.forEach(clearTimeout); enTell = { k: nk, fase: 'klar', tall: 3, t: [] }; }
+    var kortHtml;
+    if (s.lek === 'enten-eller' && s.a) kortHtml = '<div class="en-ee' + (ny && s.pos ? ' inn' : '') + '"><span><small>' + T('Enten', 'Either') + '</small><b>' + esc(s.a) + '</b></span><span><small>' + T('Eller', 'Or') + '</small><b>' + esc(s.b) + '</b></span></div>';
+    else kortHtml = '<div class="en-lest' + (ny && s.pos ? ' inn' : '') + '">' + (k.k ? '<small>' + esc(k.k) + '</small>' : s.lek === 'samme' ? '<small>' + T('Tenk som flokken', 'Think like the herd') + '</small>' : '') + '<b style="font-size:' + str(t, 34, 22) + 'px">' + esc(t) + '</b></div>';
+    var tell = EN_TELL[s.lek], midt = '';
+    if (tell) {
+      if (enTell.fase === 'klar') midt = '<button type="button" class="en-tell" data-g="en-tell">' + T('Les høyt,', 'Read it out,') + '<br>' + T('så tell ned', 'then count down') + '</button>';
+      else if (enTell.fase === 'teller') midt = '<b class="en-tall t' + enTell.tall + '" aria-live="assertive">' + enTell.tall + '</b>';
+      else midt = '<b class="en-si">' + tell[0] + '</b><p class="en-regel">' + tell[1] + '</p>';
+    } else midt = '<p class="en-regel">' + (s.lek === 'nodt-eller-sannhet' ? T('Den i stolen velger, og gjør det – eller drikker.', 'Whoever is in the chair picks, and does it – or drinks.') : T('Les høyt.', 'Read it out.')) + '</p>';
+    var klar = !tell || enTell.fase === 'sagt';
+    return topp + kortHtml + '<div class="en-midt">' + midt + '</div>' +
+      '<button type="button" class="rom-stor-knapp en-neste' + (klar ? '' : ' svak') + '" data-g="en-neste">' + T('Neste kort – ', 'Next card – ') + esc(navn(s.neste)) + T(' leser', ' reads') + '</button>';
   }
   function lobby() {
     var t = tilstand;
@@ -4997,8 +5061,11 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'sofa-fane') { sofaFane = b.dataset.v === 'leser' ? 'leser' : 'rundt'; return tegn(); }
     if (g === 'sofa-fjern') return gjor({ handling: 'sofa-fjern', hvem: b.dataset.paa });
     if (g === 'en-start') return gjor({ handling: 'en-start', lek: b.dataset.lek });
-    if (g === 'en-har') { enHar[b.dataset.paa] = !enHar[b.dataset.paa]; return tegn(); }
-    if (g === 'en-neste') { var enListe = Object.keys(enHar).filter(function (id) { return enHar[id]; }); enHar = {}; return gjor({ handling: 'en-neste', har: enListe }); }
+    if (g === 'en-tell') return enNedtelling(enTell.k);
+    if (g === 'en-bombe-start') return enBombeStart(enBombe.k);
+    if (g === 'en-bombe-send') { enBombe.holder++; return tegn(); }
+    if (g === 'en-bom-neste') { enBombe.fase = 'klar'; return gjor({ handling: 'en-neste', har: [b.dataset.paa], n: 2 }); }
+    if (g === 'en-neste') { enTell.t.forEach(clearTimeout); return gjor({ handling: 'en-neste' }); }
     if (g === 'ou-gjett') return gjor({ handling: 'gjett', paa: b.dataset.paa });
     if (g === 'ou-hopp') return gjor({ handling: 'ou-hopp' });
     if (g === 'vl-vedd') return gjorAlltid({ handling: 'vedd', farge: b.dataset.farge, slurker: vlSats });
