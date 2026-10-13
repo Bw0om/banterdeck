@@ -186,6 +186,20 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **The reveal:** "Ukjent avsender" turns into the name, and the author's head pops in as the profile picture. The last screen names "Best gjemt", the player who fooled the most people.
 - **Short pause:** when everyone has written or guessed, both games wait 2 s before moving on, the same as Løgnhalsen and Nyhetsrunden.
 
+## Muldvarpen and Hvem er jeg?
+
+- **Muldvarpen has no clock.** You hold your card to see the location, or the mole peeking up from the dirt.
+- **The ring:** heads stand in a ring. Whoever has the turn taps the person they ask; an arrow is drawn and the turn passes on.
+- **The host flips the cards.** When someone calls out a name, the host flips that person's card.
+  - **Innocent:** the host ticks off who called it, and they drink 2. The ring continues.
+  - **Mole:** the host ticks off who guessed right, and whether the mole guessed the location. Then every card flips.
+  - The TV never shows the location until the end.
+- **Hvem er jeg?:** you write directly on the note on the other person's forehead; the word appears as you type, and the note slaps on. Notes always shrink the font to fit the longest word.
+  - **During play:** every head wears a yellow note. Yours is a wobbling question mark.
+  - **Guessing:** one tap on "Gjettet!" makes the note fall off, with a few seconds to undo.
+  - **On the TV:** only notes that have been guessed are shown.
+- **End of a game:** the host gets the shared "Hva nå?" screen: "Spill igjen" (counts tonight) or the next game in the plan. There are no round numbers and no countdown.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

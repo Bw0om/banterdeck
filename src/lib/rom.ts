@@ -241,7 +241,8 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
       runde: s.runde || 1, lurtTavle: lurtTavle(data),
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, sikker: s.sikker || {}, drikker: s.drikker, utdeling: s.utdeling || [], lurte: s.lurte || 0 } : null });
     const off = offentligTekst(s, data); if (off) spill.offentlig = off;
-    if (s.type === 'samme' || s.type === 'hvemskrev') spill.sos = sosVisning(s, null, data);
+    if (s.type === 'samme' || s.type === 'hvemskrev' || s.type === 'spion') spill.sos = sosVisning(s, null, data);
+    if (s.type === 'pannekort') spill.sos = pkOffentlig(s);
     if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
     if (s.type === 'regelfabrikken') spill.rf = ekstraVisning(s, null, data);
   }
@@ -2754,10 +2755,11 @@ function sosNyRunde(data: any) {
   if (s.type === 'bloff') { const q = trekkFra(s, 'q', sosListe('bloff')); s.fase = 'skriv'; s.q = q.q; s.sant = q.a; s.falske = {}; s.valg = []; s.stemmer = {}; settFrist(s, SFRIST.bloffSkriv); }
   if (s.type === 'samme') { s.fase = 'skriv'; s.oppgave = trekkFra(s, 'oppg', sosListe('samme')); s.svar = {}; s.grupper = null; settFrist(s, SFRIST.samme); }
   if (s.type === 'spion') {
-    s.fase = 'sporsmal'; s.sted = trekkFra(s, 'sted', sosListe('steder')); s.spion = ider[tilfeldig(ider.length)];
+    // Ingen klokke: den som har tur, spør noen – og så har den personen tur. Verten snur kortene.
+    s.fase = 'ring'; s.sted = trekkFra(s, 'sted', sosListe('steder')); s.spion = ider[tilfeldig(ider.length)];
     // Muldvarpen gjetter blant 24 steder (det riktige er alltid med), så lista holder seg kort selv om det finnes mange flere
     const andre = sosListe('steder').filter((x: any) => x.no !== s.sted.no); s.utvalg = stokk([s.sted, ...stokk(andre).slice(0, 23)]);
-    s.start = ider[tilfeldig(ider.length)]; s.stemmer = {}; s.utfall = null; s.spionGjett = null; settFrist(s, SFRIST.sporsmal);
+    s.tur = ider[tilfeldig(ider.length)]; s.spor = []; s.snudd = {}; s.pekt = null; s.merket = []; s.stedRett = false; s.utfall = null; s.stemmer = {};
   }
   if (s.type === 'pannekort') {
     const rekke = stokk(ider); s.tildelt = {}; rekke.forEach((id: string, i: number) => { s.tildelt[id] = rekke[(i + 1) % rekke.length]; });
@@ -2917,28 +2919,42 @@ function sosHandling(data: any, meg: any, h: any): any {
     return { ok: true };
   }
   if (s.type === 'spion') {
-    if (hd === 'sp-til-stemming') {
-      if (s.fase !== 'sporsmal') return { ok: true };
-      if (!erVert) return feilL('bare-vert', 'Verten sender dere til stemming.', 'The host sends you to the vote.');
-      s.fase = 'stem'; s.stemmer = {}; settFrist(s, SFRIST.stem); return { ok: true };
+    const finnes = (id: any) => data.spillere.some((p: any) => p.id === id);
+    if (hd === 'sp-spor') {
+      // Den som har tur, trykker på den hen spør – da går turen videre
+      if (s.fase !== 'ring' || meg.id !== s.tur) return { ok: true };
+      const til = String(h.til || ''); if (!finnes(til) || til === meg.id) return { feil: 'ukjent' };
+      s.spor = (s.spor || []).concat([[meg.id, til]]).slice(-8); s.tur = til; return { ok: true };
     }
-    if (hd === 'sp-stem') {
-      if (s.fase !== 'stem') return { ok: true };
-      if (!data.spillere.some((p: any) => p.id === h.hvem) || h.hvem === meg.id) return { feil: 'ukjent' };
-      s.stemmer[meg.id] = h.hvem; if (alleHar(data, s.stemmer)) spTelling(data); return { ok: true };
+    if (['sp-pek', 'sp-avbryt', 'sp-snu', 'sp-merk', 'sp-sted', 'sp-videre', 'sp-ferdig'].includes(hd) && !erVert) return feilL('bare-vert', 'Verten snur kortene.', 'The host flips the cards.');
+    if (hd === 'sp-pek') { if (s.fase === 'ring') { s.fase = 'peke'; s.merket = []; } return { ok: true }; }
+    if (hd === 'sp-avbryt') { if (s.fase === 'peke') s.fase = 'ring'; return { ok: true }; }
+    if (hd === 'sp-snu') {
+      if (s.fase !== 'peke') return { ok: true };
+      const hvem = String(h.hvem || ''); if (!finnes(hvem) || s.snudd[hvem]) return { ok: true };
+      s.snudd[hvem] = true; s.pekt = hvem; s.merket = [];
+      s.fase = hvem === s.spion ? 'riktige' : 'feil';
+      melde(data, hvem === s.spion ? `${navnPaa(data, hvem)} er muldvarpen!` : `${navnPaa(data, hvem)} var uskyldig!`, hvem === s.spion ? `${navnPaa(data, hvem)} is the mole!` : `${navnPaa(data, hvem)} was innocent!`);
+      return { ok: true };
     }
-    if (hd === 'sp-gjett') {
-      if (s.fase !== 'gjett' || meg.id !== s.spion) return { ok: true };
-      // Spionen velger fra lista på sitt eget språk – godta stedet på begge språk
-      const g = String(h.sted || ''), riktig = erL(s.sted) ? (g === s.sted.no || g === s.sted.en) : g === s.sted;
-      const steder = sosListe('steder'), treff = steder.find((x: any) => x.no === g || x.en === g);
-      s.spionGjett = treff || g;
-      spSlutt(data, riktig ? 'spion-gjettet' : 'fanget'); return { ok: true };
+    if (hd === 'sp-merk') {
+      // Verten haker av: hvem pekte feil (feil) eller hvem gjettet riktig (riktige)
+      if (s.fase !== 'feil' && s.fase !== 'riktige') return { ok: true };
+      const hvem = String(h.hvem || ''); if (!finnes(hvem) || hvem === s.pekt) return { ok: true };
+      s.merket = s.merket.includes(hvem) ? s.merket.filter((x: string) => x !== hvem) : s.merket.concat([hvem]); return { ok: true };
     }
-    if (hd === 'tid-ute' && fristUte(s)) {
-      if (s.fase === 'sporsmal') { s.fase = 'stem'; s.stemmer = {}; settFrist(s, SFRIST.stem); }
-      else if (s.fase === 'stem') spTelling(data);
-      else if (s.fase === 'gjett') spSlutt(data, 'fanget');
+    if (hd === 'sp-sted') { if (s.fase === 'riktige') s.stedRett = !s.stedRett; return { ok: true }; }
+    if (hd === 'sp-videre') {
+      // Uskyldig: de som pekte feil drikker 2, og ringen fortsetter
+      if (s.fase !== 'feil') return { ok: true };
+      s.merket.forEach((id: string) => giSlurker(data, id, 2)); s.merket = []; s.fase = 'ring'; return { ok: true };
+    }
+    if (hd === 'sp-ferdig') {
+      if (s.fase !== 'riktige') return { ok: true };
+      if (s.stedRett) spSlutt(data, 'spion-gjettet');
+      else { s.fase = 'fasit'; s.utfall = 'fanget'; giSlurker(data, s.spion, 3); s.merket.forEach((id: string) => giUtdeling(data, id, 1));
+        melde(data, `Muldvarpen ${navnPaa(data, s.spion)} ble tatt!`, `The mole, ${navnPaa(data, s.spion)}, got caught!`); }
+      return { ok: true };
     }
     return { ok: true };
   }
@@ -2956,11 +2972,21 @@ function sosHandling(data: any, meg: any, h: any): any {
       const hvem = String(h.hvem || '');
       if (hvem === meg.id) return feilL('ukjent', 'Det er de andre som bekrefter at du gjettet riktig.', "The others confirm that you guessed right.");
       if (!s.ord[hvem] || s.gjettet.includes(hvem)) return { ok: true };
-      s.gjettet.push(hvem);
+      s.gjettet.push(hvem); s.gjettTid = { ...(s.gjettTid || {}), [hvem]: Date.now() };
       if (s.gjettet.length === 1) giUtdeling(data, hvem, 2);
       melde(data, `${navnPaa(data, hvem)} gjettet «${tr(s.ord[hvem].t, 'no')}»!`, `${navnPaa(data, hvem)} guessed “${tr(s.ord[hvem].t, 'en')}”!`);
       const igjen = Object.keys(s.ord).filter((id) => !s.gjettet.includes(id) && data.spillere.some((p: any) => p.id === id));
       if (igjen.length <= 1) { s.fase = 'ferdig'; if (igjen[0]) { giSlurker(data, igjen[0], 3); s.sist = igjen[0]; } }
+      return { ok: true };
+    }
+    if (hd === 'pk-angre') {
+      // Feiltrykk: «Gjettet!» kan angres i noen sekunder (så lenge runden ikke er over)
+      const hvem = String(h.hvem || '');
+      if (s.fase !== 'spill' || !s.gjettet.includes(hvem) || Date.now() - ((s.gjettTid || {})[hvem] || 0) > 6000) return { ok: true };
+      const varForst = s.gjettet[0] === hvem;
+      if (varForst) giUtdeling(data, hvem, -2);
+      s.gjettet = s.gjettet.filter((x: string) => x !== hvem);
+      if (varForst && s.gjettet[0]) giUtdeling(data, s.gjettet[0], 2);   // nestemann blir først ut
       return { ok: true };
     }
     if (hd === 'pk-avslutt') {
@@ -2992,6 +3018,11 @@ function sosHandling(data: any, meg: any, h: any): any {
   return null;
 }
 
+/** Hvem er jeg? på TV-en: bare lappene som er gjettet (ellers ser du din egen), alle til slutt. */
+function pkOffentlig(s: any) {
+  const ord: any = {}; Object.entries(s.ord || {}).forEach(([id, o]: any) => { if (s.fase === 'ferdig' || (s.gjettet || []).includes(id)) ord[id] = { t: o.t }; });
+  return { fase: s.fase, harSkrevet: Object.keys(s.tildelt || {}).filter((fra) => (s.ord || {})[s.tildelt[fra]]), gjettet: s.gjettet || [], ord, sist: s.sist || null, med: Object.keys(s.tildelt || {}) };
+}
 function sosVisning(s: any, meg: any, data: any) {
   const m = meg ? meg.id : null;
   if (s.type === 'hvemskrev') return {
@@ -3011,15 +3042,17 @@ function sosVisning(s: any, meg: any, data: any) {
   };
   if (s.type === 'samme') return { fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null, grupper: s.fase === 'fasit' ? s.grupper : null, runde: s.runde || 1, slaatt: s.slaatt || 0 };
   if (s.type === 'spion') {
-    const aapen = s.fase === 'fasit';
-    return { fase: s.fase, erSpion: m === s.spion, sted: m !== s.spion || aapen ? s.sted : null, steder: s.utvalg || sosListe('steder'), start: s.start,
-      harStemt: Object.keys(s.stemmer), minStemme: m ? s.stemmer[m] || null : null,
-      spion: aapen || s.fase === 'gjett' ? s.spion : null, stemmer: aapen ? s.stemmer : null, utfall: s.utfall, spionGjett: aapen ? s.spionGjett : null };
+    const aapen = s.fase === 'fasit', kort: any = {};
+    Object.keys(s.snudd || {}).forEach((id) => { kort[id] = id === s.spion ? 'muldvarp' : 'uskyldig'; });
+    if (aapen) data.spillere.forEach((p: any) => { kort[p.id] = p.id === s.spion ? 'muldvarp' : 'uskyldig'; });
+    return { fase: s.fase, erSpion: !!m && m === s.spion, sted: (m && m !== s.spion) || aapen ? s.sted : null, steder: s.utvalg || sosListe('steder'),
+      tur: s.tur || null, spor: s.spor || [], kort, pekt: s.pekt || null, merket: s.merket || [], stedRett: !!s.stedRett,
+      spion: aapen || s.fase === 'riktige' ? s.spion : null, utfall: s.utfall || null, runde: s.runde || 1 };
   }
   if (s.type === 'pannekort') {
-    const ord: any = {}; Object.entries(s.ord).forEach(([id, o]: any) => { if (id !== m || s.fase === 'ferdig') ord[id] = { t: o.t, fra: o.fra }; });
+    const ord: any = {}; Object.entries(s.ord).forEach(([id, o]: any) => { if (id !== m || s.fase === 'ferdig' || (s.gjettet || []).includes(id)) ord[id] = { t: o.t, fra: o.fra }; });
     return { fase: s.fase, mitMaal: m ? s.tildelt[m] || null : null, harSkrevet: Object.keys(s.tildelt).filter((fra) => s.ord[s.tildelt[fra]]),
-      ord, gjettet: s.gjettet, sist: s.sist || null, mittOrdSkjult: !!(m && s.ord[m] && s.fase !== 'ferdig') };
+      ord, gjettet: s.gjettet, sist: s.sist || null, mittOrdSkjult: !!(m && s.ord[m] && s.fase !== 'ferdig'), runde: s.runde || 1, med: Object.keys(s.tildelt || {}) };
   }
   if (s.type === 'skal') return { fase: s.fase, tid: s.tid, harTrykket: Object.keys(s.trykk || {}).concat(s.tidlig || []), resultat: s.resultat };
   return {};
