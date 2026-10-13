@@ -76,14 +76,45 @@ function pyntHtml(pynt) {
 }
 export function figurHtml(p, pynt) {
   const venn = pynt && pynt.venn && PYNT_SVG[pynt.venn] ? `<g class="venn" transform="translate(23,0)">${PYNT_SVG[pynt.venn]}</g>` : '';
-  return `<ellipse class="skygge" cx="0" cy="0" rx="16" ry="5" fill="${B}" opacity=".22"/>${venn}<g class="kropp">` +
+  const arm = (x, dir) => `<path d="M0 0L${12 * dir} -26" stroke="${p.topp}" stroke-width="7" stroke-linecap="round"/>`;
+  // .beveg bæres av bevegelsene (skål, hopp, dans …), .pust av pusten. Armene ligger med skulderen i hjørnet av boksen sin,
+  // så transform-origin kan settes der. Øyne og munn finnes i flere utgaver – bare én er synlig om gangen.
+  return `<ellipse class="skygge" cx="0" cy="0" rx="16" ry="5" fill="${B}" opacity=".22"/>${venn}<g class="kropp"><g class="beveg"><g class="pust">` +
     `<rect x="-10" y="-15" width="7" height="15" rx="2" fill="${B}"/><rect x="3" y="-15" width="7" height="15" rx="2" fill="${B}"/>` +
+    `<g class="gitar"><path d="M-22 -24L18 -40" stroke="#7A4A2A" stroke-width="4" stroke-linecap="round"/><ellipse cx="-14" cy="-24" rx="9" ry="7" fill="#FF5B1F" stroke="${B}" stroke-width="2.5"/></g>` +
     `<rect x="-14" y="-42" width="28" height="30" rx="9" fill="${p.topp}" stroke="${B}" stroke-width="3"/>` +
     `<rect x="7" y="-34" width="10" height="15" rx="2.5" fill="${B}"/><rect x="9" y="-32" width="6" height="9" rx="1" fill="#FFE07A"/>` +
-    `<circle cx="0" cy="-56" r="15" fill="${p.hud}" stroke="${B}" stroke-width="3"/>` +
+    `<g class="tlf"><rect x="-8" y="-40" width="16" height="10" rx="2" fill="${B}"/><rect x="-6" y="-38" width="12" height="6" rx="1" fill="#7CC6FE"/></g>` +
+    `<g class="arm-v"><g transform="translate(-10,-36)">${arm(0, -1)}<circle cx="-12" cy="-27" r="4.5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/><path class="horn" d="M-15 -28v-8M-9 -28v-8" stroke="${B}" stroke-width="3" stroke-linecap="round"/></g></g>` +
+    `<g class="arm-h"><g transform="translate(10,-36)">${arm(0, 1)}<rect x="6" y="-44" width="12" height="15" rx="2" fill="#FFB020" stroke="${B}" stroke-width="2.5"/><g class="skum"><circle cx="10" cy="-48" r="2.6" fill="#FFF8EE" stroke="${B}" stroke-width="1.5"/><circle cx="16" cy="-51" r="2" fill="#FFF8EE" stroke="${B}" stroke-width="1.5"/></g></g></g>` +
+    `<circle cx="0" cy="-56" r="15" fill="${p.hud}" stroke="${B}" stroke-width="3"/><circle class="gronn" cx="0" cy="-56" r="13.5" fill="#7BC96F"/>` +
     `<circle cx="-9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/><circle cx="9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/>` +
-    HAAR[p.haar].replace(/\{h\}/g, p.h) + OYNE[p.oyne] + MUNN[p.munn] + pyntHtml(pynt) + '<g class="boble-plass"></g></g>';
+    `<g class="rodme"><ellipse cx="-9" cy="-50" rx="5" ry="3" fill="#FF3B5C" opacity=".7"/><ellipse cx="9" cy="-50" rx="5" ry="3" fill="#FF3B5C" opacity=".7"/></g>` +
+    HAAR[p.haar].replace(/\{h\}/g, p.h) +
+    `<g class="oyne"><g class="oyne-v"><g class="pupiller">${OYNE[p.oyne]}</g></g>` +
+    `<g class="oyne-g"><path d="M-7.5 -56q2.5-3.5 5 0M2.5 -56q2.5-3.5 5 0" fill="none" stroke="${B}" stroke-width="2.4" stroke-linecap="round"/></g>` +
+    `<g class="oyne-h"><path d="M-5 -54.5l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2zM5 -54.5l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2z" fill="#FF3B5C" stroke="${B}" stroke-width="1.2"/></g>` +
+    `<g class="oyne-s"><path d="M-8 -57a3 3 0 1 0 3-3a2 2 0 1 0 1.5 2M2 -57a3 3 0 1 0 3-3a2 2 0 1 0 1.5 2" fill="none" stroke="${B}" stroke-width="1.6"/></g></g>` +
+    `<g class="munn-s">${MUNN[p.munn]}</g>` +
+    `<ellipse class="munn-o" cx="0" cy="-48.5" rx="3.2" ry="3.8" fill="${B}"/><path class="munn-b" d="M-7 -51h14q-1 8-7 8t-7-8z" fill="${B}"/>` +
+    `<path class="munn-sur" d="M-6 -47q6-5 12 0" fill="none" stroke="${B}" stroke-width="2.6" stroke-linecap="round"/><path class="munn-kinn" d="M-4 -48h8" stroke="${B}" stroke-width="2.6" stroke-linecap="round"/>` +
+    `<path class="svette" d="M14 -66q3 5 0 7q-3-2 0-7z" fill="#7CC6FE" stroke="${B}" stroke-width="1.6"/>` +
+    `<g class="zzz"><text x="14" y="-70" font-size="11" font-weight="900" fill="${B}" font-family="Archivo Variable, Archivo, sans-serif">z</text><text x="20" y="-80" font-size="9" font-weight="900" fill="${B}" font-family="Archivo Variable, Archivo, sans-serif">z</text></g>` +
+    `<g class="stjerner"><circle cx="-14" cy="-78" r="2.5" fill="#FFD23F" stroke="${B}" stroke-width="1.2"/><circle cx="14" cy="-78" r="2.5" fill="#FFD23F" stroke="${B}" stroke-width="1.2"/><circle cx="0" cy="-84" r="2.5" fill="#FFD23F" stroke="${B}" stroke-width="1.2"/></g>` +
+    `<g class="hjerter"><path d="M-14 -80l-4-4a2.4 2.4 0 0 1 4-2.6a2.4 2.4 0 0 1 4 2.6z" fill="#FF3B5C" stroke="${B}" stroke-width="1.5"/><path d="M12 -86l-3-3a2 2 0 0 1 3-2a2 2 0 0 1 3 2z" fill="#FF3B5C" stroke="${B}" stroke-width="1.5"/></g>` +
+    `<g class="dekk"><circle cx="-6" cy="-57" r="5.5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/><circle cx="6" cy="-57" r="5.5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/></g>` +
+    `<g class="hender"><circle cx="-6" cy="-82" r="5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/><circle cx="6" cy="-82" r="5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/></g>` +
+    pyntHtml(pynt) + `<path class="krone-v" d="M-14 -64l3-14 7 7 4-12 4 12 7-7 3 14z" fill="#FFD23F" ${HS}/>` + '<g class="boble-plass"></g></g></g></g>';
 }
+/** Bevegelsene som kan låses opp (slot «beveg» i pynten): små ikoner til arket. */
+export const BEVEG_SVG = {
+  vink: `<path d="M-6 -2v-14q0-5 5-5t5 5v14" fill="none" ${HS}/><path d="M-14 -10l-5-8M14 -10l5-8" ${HS}/>`,
+  dans: `<path d="M-10 -22l10-6 10 6M-6 -2l6-12 6 12" fill="none" ${HS}/><circle cx="0" cy="-24" r="4" fill="#FFD23F" ${HS}/>`,
+  bukk: `<path d="M-12 -10q12-12 24 0" fill="none" ${HS}/><circle cx="12" cy="-8" r="4" fill="#FFD23F" ${HS}/>`,
+  snurr: `<path d="M-12 -14a12 12 0 1 1 4 9" fill="none" ${HS}/><path d="M-12 -8l0 -7 7 1" fill="none" ${HS}/>`,
+  gitar: `<path d="M-14 -4L12 -22" ${HS}/><ellipse cx="-9" cy="-6" rx="7" ry="5" fill="#FF5B1F" ${HS}/>`,
+  moon: `<path d="M-14 -4h28M-8 -4l6-14M8 -4l-6-14" fill="none" ${HS}/><circle cx="2" cy="-22" r="3.5" fill="#FFD23F" ${HS}/>`,
+};
 /* ---------- Hodene: søte, runde hoder med store øyne som kan se rundt seg ----------
    Samme hår, hud og farge som figuren (utseende(id)), men større og rundere. Brukes der folk skal se på
    hverandre: de står med skuldrene nederst i ruta og reiser seg når de har svart. Øynene flyttes utenfra
@@ -347,12 +378,56 @@ export function lagStua(svg, valg = {}) {
 
   function Figur(p, x, y, info) {
     this.p = Object.assign({}, p); this.info = info || {};
-    this.g = ny(x + y, el('g', { class: 'figur', 'data-id': this.info.id || '' }, lag));
+    this.g = ny(x + y, el('g', { class: 'figur lever', 'data-id': this.info.id || '' }, lag));
+    // Hver figur blunker i sin egen takt
+    this.g.style.setProperty('--d', (hash(String(this.info.id || x + ',' + y)) % 4000) + 'ms');
     this.hjem = [x, y];
     this.x = new Verdi(x); this.y = new Verdi(y); this.z = new Verdi(0, RASK); this.s = new Verdi(1, RASK); this.r = new Verdi(0);
     this.vei = []; this.drar = false; this.ut = false;
-    this.tegnHtml(); this.tegn(); dra(this); this.planleggRusling();
+    this.tegnHtml(); this.tegn(); dra(this); this.planleggRusling(); this.planleggVane();
   }
+  /* ---------- kroppsspråk: bevegelser og ansikt ----------
+     En bevegelse er en klasse på figuren (m-skal, m-latter …) som CSS-en i stua.css spiller av én gang.
+     Klassen tas bort etterpå, så den samme bevegelsen kan spilles igjen. Ansiktet (u-glad, u-rodme …) byttes ut imens. */
+  const BEVEG_MS = { 'm-skal': 1300, 'm-latter': 1000, 'm-hopp': 800, 'm-skvett': 800, 'm-klapp': 1100, 'm-hjerte': 1600, 'm-kvalm': 1600, 'm-full': 1700, 'm-gjem': 1600, 'm-rock': 1500,
+    'm-vink': 1400, 'm-dans': 1700, 'm-snurr': 1000, 'm-bukk': 1200, 'm-gitar': 1600, 'm-moon': 1700, 'm-slurk': 1600, 'm-ooh': 1500, 'm-trekk': 1100, 'm-sulk': 1300, 'm-besvim': 1500 };
+  let sistAktiv = Date.now();
+  Figur.prototype.beveg = function (klasse, ansikt, ms) {
+    if (!klasse || !this.g.isConnected) return;
+    sistAktiv = Date.now();
+    const g = this.g, alle = Array.from(g.classList).filter((c) => /^(m|u|v)-/.test(c));
+    alle.forEach((c) => g.classList.remove(c));
+    clearTimeout(this.bevegT);
+    // Et lite pust mellom to like bevegelser, så CSS-en starter på nytt
+    void g.getBoundingClientRect();
+    g.classList.add(klasse); (ansikt || []).forEach((c) => g.classList.add(c));
+    const varer = ms || BEVEG_MS[klasse] || 1200;
+    this.bevegT = setTimeout(() => { g.classList.remove(klasse); (ansikt || []).forEach((c) => g.classList.remove(c)); }, varer);
+  };
+  Figur.prototype.ansikt = function (klasser, ms) {
+    const g = this.g; (klasser || []).forEach((c) => g.classList.add(c));
+    clearTimeout(this.ansiktT); this.ansiktT = setTimeout(() => (klasser || []).forEach((c) => g.classList.remove(c)), ms || 1500);
+  };
+  // Blikket: pupillene ser mot en annen i rommet
+  Figur.prototype.seMot = function (annen, ms) {
+    const pup = this.g.querySelector('.pupiller'); if (!pup) return;
+    if (annen && annen !== this) {
+      const dx = (annen.x.v - annen.y.v) - (this.x.v - this.y.v), dy = (annen.x.v + annen.y.v) - (this.x.v + this.y.v);
+      pup.style.transform = 'translate(' + (Math.sign(dx) * 2) + 'px,' + (Math.sign(dy) * 1.2 - 0.6) + 'px)';
+    } else pup.style.transform = '';
+    clearTimeout(this.blikkT); if (annen) this.blikkT = setTimeout(() => { pup.style.transform = ''; }, ms || 2600);
+  };
+  // Hvilevaner: hver figur har sin egen lille greie når ingenting skjer – sjelden, så det ikke maser
+  const VANER = ['v-gjesp', 'v-tlf', 'v-klo', 'v-nynn'];
+  Figur.prototype.planleggVane = function () {
+    if (REDUSERT) return;
+    clearTimeout(this.vaneT);
+    this.vaneT = setTimeout(() => {
+      if (!svg.isConnected) return;
+      if (!this.drar && !document.hidden && !/(^| )m-/.test(this.g.className.baseVal || '')) this.beveg(VANER[hash(String(this.info.id || this.hjem.join())) % VANER.length], [], 2300);
+      this.planleggVane();
+    }, 22000 + Math.random() * 18000);
+  };
   Figur.prototype.tegnHtml = function () {
     this.g.innerHTML = figurHtml(this.p, this.info.pynt) + (valg.navn && this.info.navn
       ? `<text class="stua-navn" y="17" text-anchor="middle" font-family="Archivo Variable, Archivo, sans-serif" font-weight="850" font-size="11" fill="${B}" stroke="#FFF8EE" stroke-width="4" paint-order="stroke" stroke-linejoin="round">${esc(this.info.navn)}</text>` : '');
@@ -418,7 +493,7 @@ export function lagStua(svg, valg = {}) {
     const i = folk.indexOf(f); if (i !== -1) folk.splice(i, 1);
     const j = ting.indexOf(f.g); if (j !== -1) ting.splice(j, 1);
     if (f.info.id) kart.delete(f.info.id);
-    clearTimeout(f.ruslT); f.g.remove(); aktive.delete(f);
+    clearTimeout(f.ruslT); clearTimeout(f.vaneT); clearTimeout(f.bevegT); f.g.remove(); aktive.delete(f);
   }
 
   const SI_LOFT = en ? ['Wheee!', 'Put me down!', 'Hey!', 'Not again …', 'Careful!'] : ['Wheee!', 'Slipp meg!', 'Hei!', 'Ikke igjen …', 'Forsiktig!'];
@@ -526,10 +601,72 @@ export function lagStua(svg, valg = {}) {
       // Noen har flyttet personen på en annen skjerm: gå dit
       if (lagret && !f.drar && Math.hypot(lagret[0] - f.hjem[0], lagret[1] - f.hjem[1]) > 0.05) { f.hjem = lagret; f.gaaTil(lagret); }
     });
-    if (nye) { aapneDor(); hopp(); }
+    if (nye) { aapneDor(); hopp(); sistAktiv = Date.now(); }
     forste = false; sorter();
   }
   function personSi(id, tekst, ms) { const f = kart.get(id); if (f) f.si(tekst, ms); }
+  /* ---------- rommet lever ---------- */
+  // Reaksjonene: emoji → bevegelse og ansikt. De tre første smitter: de andre gjør det samme like etter.
+  const REAK_BEVEG = { '🍻': ['m-skal', ['u-glad'], true], '😂': ['m-latter', ['u-glad', 'u-bred'], true], '🔥': ['m-hopp', ['u-bred']], '😱': ['m-skvett', ['u-o']], '👏': ['m-klapp', ['u-glad'], true],
+    '😍': ['m-hjerte', ['u-hjerte', 'u-rodme']], '🤢': ['m-kvalm', ['u-gronn', 'u-kinn']], '🥴': ['m-full', ['u-spiral', 'u-bred']], '🙈': ['m-gjem', ['u-rodme']], '🤘': ['m-rock', ['u-bred']] };
+  let dansere = [], discoT = null;
+  function reaksjon(id, emoji, bevegId) {
+    const f = kart.get(id); if (!f) return;
+    sistAktiv = Date.now();
+    if (bevegId) { f.beveg('m-' + bevegId, ['u-glad']); if (bevegId === 'dans') dans(f); folk.forEach((o) => { if (o !== f) o.seMot(f); }); return; }
+    const r = REAK_BEVEG[emoji]; if (!r) return;
+    f.beveg(r[0], r[1]);
+    folk.forEach((o) => { if (o !== f) o.seMot(f); });
+    if (r[2] && !REDUSERT) folk.filter((o) => o !== f && !o.drar).forEach((o, i) => setTimeout(() => o.beveg(r[0], r[1]), 240 + i * 90));
+  }
+  // Habbo-nikket: danser to samtidig, kommer diskokula ned – og hele rommet blir med
+  function dans(f) {
+    const naa = Date.now(); dansere = dansere.filter((d) => naa - d.t < 3000 && d.f !== f).concat([{ f, t: naa }]);
+    if (dansere.length >= 2) disco();
+  }
+  let discoG = null;
+  function disco(ms) {
+    if (REDUSERT) return;
+    sistAktiv = Date.now();
+    if (!discoG) {
+      discoG = el('g', { class: 'stua-disco' }, lag); discoG.dataset.d = 0;
+      const t = I(3, 3, 112);
+      el('line', { x1: t[0], y1: t[1] - 60, x2: t[0], y2: t[1], stroke: B, 'stroke-width': 3 }, discoG);
+      el('circle', { cx: t[0], cy: t[1] + 14, r: 15, fill: '#FFF8EE', stroke: B, 'stroke-width': 3, class: 'disco-kule' }, discoG);
+      [[-7, -7], [0, -9], [7, -7], [-9, 0], [9, 0], [-7, 7], [0, 9], [7, 7], [0, 0]].forEach(([x, y]) => el('rect', { x: t[0] + x - 3, y: t[1] + 14 + y - 3, width: 6, height: 6, fill: '#C9CFD8', stroke: B, 'stroke-width': 1 }, discoG));
+      el('polygon', { points: pts([I(0, 0), I(6, 0), I(6, 6), I(0, 6)]), fill: '#7CC6FE', opacity: 0.28, class: 'disco-lys', 'pointer-events': 'none' }, discoG);
+      lag.insertBefore(discoG, lag.firstChild);
+    }
+    discoG.classList.add('paa');
+    folk.forEach((f, i) => { if (!f.drar) setTimeout(() => f.beveg('m-dans', ['u-glad'], (ms || 6000) - i * 120), i * 120); });
+    clearTimeout(discoT); discoT = setTimeout(() => { if (discoG) discoG.classList.remove('paa'); }, ms || 6000);
+  }
+  // Spillet styrer ansiktet: det som skjer deg, vises på figuren – og de andre reagerer som et publikum
+  function hendelse(type, ider) {
+    ider = ider || [];
+    const mine = ider.map((id) => kart.get(id)).filter(Boolean), andre = folk.filter((f) => !mine.includes(f));
+    if (!mine.length) return;
+    sistAktiv = Date.now();
+    if (type === 'drikk') { mine.forEach((f) => f.beveg('m-slurk', ['u-kinn'])); const l = andre[hash(String(Date.now())) % Math.max(1, andre.length)]; if (l) setTimeout(() => l.beveg('m-latter', ['u-glad', 'u-bred']), 500); }
+    if (type === 'bom') { mine.forEach((f) => f.beveg('m-skvett', ['u-o', 'u-rodme', 'u-svette'], 2200)); andre.forEach((f, i) => { f.seMot(mine[0]); setTimeout(() => f.beveg(i % 3 === 1 ? 'm-latter' : 'm-ooh', i % 3 === 1 ? ['u-glad', 'u-bred'] : ['u-o']), 150 + i * 60); }); }
+    if (type === 'pekt') { mine.forEach((f) => f.beveg('m-skvett', ['u-rodme', 'u-svette', 'u-o'], 2200)); andre.forEach((f) => f.seMot(mine[0])); }
+    if (type === 'vinner') { mine.forEach((f) => f.beveg('m-trekk', ['u-glad'])); andre.forEach((f, i) => setTimeout(() => f.beveg('m-klapp', ['u-glad']), 80 * i)); }
+  }
+  // Pallen når kvelden er over: vinneren hopper opp på bordet og danser, sistemann besvimer, resten klapper
+  function pall(vinnerId, taperId) {
+    const v = kart.get(vinnerId), t = kart.get(taperId);
+    sistAktiv = Date.now();
+    if (v) { v.hjem = [2.9, 3.3]; v.vei = []; v.x.mal = 2.9; v.y.mal = 3.3; v.gaaTil([2.9, 3.3]); setTimeout(() => { v.z.mal = 20; v.g.classList.add('vinner'); v.beveg('m-dans', ['u-glad'], 60000); }, REDUSERT ? 0 : 900); }
+    if (t && t !== v) setTimeout(() => t.beveg('m-besvim', ['u-spiral'], 60000), 1200);
+    folk.filter((f) => f !== v && f !== t).forEach((f, i) => setTimeout(() => f.beveg('m-klapp', ['u-glad'], 2400), 1400 + i * 90));
+  }
+  // Har ingenting skjedd på to minutter, gjesper alle – et hint til verten
+  const gjespT = setInterval(() => {
+    if (!svg.isConnected) { clearInterval(gjespT); return; }
+    if (REDUSERT || document.hidden || Date.now() - sistAktiv < 120000) return;
+    sistAktiv = Date.now();
+    folk.forEach((f, i) => setTimeout(() => f.beveg('v-gjesp', [], 2300), i * 400));
+  }, 15000);
   function straff(id, tekst) {
     const f = kart.get(id); if (!f) return;
     f.si(tekst, 2600); f.svimmel();
@@ -537,7 +674,7 @@ export function lagStua(svg, valg = {}) {
   }
 
   return {
-    nyGjest, settFolk, personSi, straff,
+    nyGjest, settFolk, personSi, straff, reaksjon, hendelse, pall, disco,
     kode(k) { tvInnhold = { etikett: T('ROMKODE', 'ROOM CODE'), kode: k, linjer: null }; tegnTv(); },
     /** Kortet eller spørsmålet som spilles nå, på TV-en i stua (tre linjer, kuttet pent) */
     tv(tekst, etikett) {

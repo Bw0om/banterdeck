@@ -13,7 +13,7 @@ import BINGO_EN from '../data/bingo.en.json';
 import PLUSSPAKKER_EN from '../data/pluss.en.json';
 import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
-import { rensPynt, temaLov, temaFor, figurNokkel, ekstraLov, EKSTRA as ROM_EKSTRA } from './pynt.js';
+import { BEVEG_GRATIS, rensPynt, temaLov, temaFor, figurNokkel, ekstraLov, EKSTRA as ROM_EKSTRA } from './pynt.js';
 import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } from './kveld';
 import { MAKS_REGEL } from './lovbok';
 import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors, borsTilPluss, BUTIKK } from './bors';
@@ -320,7 +320,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, slurker: p.slurker || 0 })),
     spill: lok(spill, lang), valgt: data.valgt ? { lek: data.valgt.lek, navn: tr(lekNavnL(data.valgt.lek), lang) } : null,
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
-    reak: data.reak || [], utdeling: data.utdeling || null, kveld: lok(kveldVisning(data), lang), bors: lok(bors, lang),
+    reak: data.reak || [], stuaHend: data.stuaHend || null, utdeling: data.utdeling || null, kveld: lok(kveldVisning(data), lang), bors: lok(bors, lang),
     stua: stuaVisning(data, null),
     alkoholfri: !!data.alkoholfri, ferdig: data.ferdig || null, kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null,
     gjeng: data.gjeng ? { navn: data.gjeng.navn } : null,
@@ -382,7 +382,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, bruker: !!(p.konto || p.bruker), medlem: !!p.konto, invitert: !!p.invitert, immun: p.immun || 0, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
-    nr: data.nr, reak: data.reak || [], utdeling: data.utdeling || null, valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
+    nr: data.nr, reak: data.reak || [], stuaHend: data.stuaHend || null, utdeling: data.utdeling || null, valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
     stua: stuaVisning(data, meg), tvEkstra: null, nyPynt: meg && data.nyPynt ? data.nyPynt[meg.id] || null : null,
     hjulListe: data.hjulListe || (lang === 'en' ? HJUL_STANDARD_EN : HJUL_STANDARD), oppdrag: lok(oppdragVisning(data, meg), lang), bors: lok(borsVisning(data, meg), lang), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: lok(data.historikk || [], lang),
     alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode, kveld: !!data.gjengKveld, regler: data.gjeng.regler || [] } : null,
@@ -797,6 +797,7 @@ function giSlurker(data: any, id: string, n: number, viaMakker = false) {
   // Immunitet fra butikken: slipp neste gang du får slurker
   if (n > 0 && (p.immun || 0) > 0) { p.immun--; melde(data, `🛡️ ${p.navn} brukte immunitet og slapp ${n} ${n === 1 ? 'slurk' : 'slurker'}!`, `🛡️ ${p.navn} used immunity and skipped ${n} ${n === 1 ? 'sip' : 'sips'}!`); return; }
   p.slurker = Math.max(0, (p.slurker || 0) + n);
+  if (n > 0 && !viaMakker) stuaHendelse(data, 'drikk', [id]);
   // Makkere (8 i Ring of Fire): drikker du, drikker makkeren din også – og makkeren til makkeren
   if (!viaMakker && n > 0) makkereTil(data, id).forEach((m) => giSlurker(data, m, n, true));
 }
@@ -1379,6 +1380,7 @@ function handlingInne(data: any, meg: any, h: any) {
         if (data.spillere.some((p: any) => p.id === id)) giSlurker(data, id, n);
         const sp = (data.sofa || []).find((p: any) => p.id === id); if (sp) sp.slurker = (sp.slurker || 0) + n;
       });
+      if (s.lek === 'kategorier' && har.length) stuaHendelse(data, 'bom', har);
       // Ring of Fire: fjerde konge avslutter leken
       if (s.lek === 'ring-of-fire' && (s.konger || 0) >= 4) { s.ferdig = true; return { ok: true }; }
       s.pos++;
@@ -1412,13 +1414,19 @@ function handlingInne(data: any, meg: any, h: any) {
       return { ok: true };
     }
     case 'reager':
+    case 'beveg':
     case 'send': {
       const naa = Date.now();
-      if (meg.sistR && naa - meg.sistR < 900) return feilL('for-fort', 'Rolig nå 😄', 'Easy there 😄');
+      if (meg.sistR && naa - meg.sistR < 2000) return feilL('for-fort', 'Rolig nå 😄', 'Easy there 😄');
       const reak: any = { fra: meg.id };
       if (h.handling === 'reager') {
         if (!REAKSJONER.includes(h.e)) return { feil: 'ukjent' };
         reak.e = h.e;
+      } else if (h.handling === 'beveg') {
+        // «Din» bevegelse: den du har valgt på kontoen (vink er gratis for alle)
+        const b = String(h.b || ''); const min = (meg.pynt && meg.pynt.beveg) || BEVEG_GRATIS;
+        if (b !== min && b !== BEVEG_GRATIS) return { feil: 'ukjent' };
+        reak.e = '✨'; reak.b = b;
       } else {
         const til = data.spillere.find((x: any) => x.id === h.hvem);
         if (!til || til.id === meg.id) return { feil: 'ukjent' };
@@ -2056,7 +2064,13 @@ function rfMottakere(data: any, k: any, trekker: string | null): string[] {
 const PY_VINDU = 10000;
 function pyRad(pos: number) { return pos < 5 ? 1 : pos < 9 ? 2 : pos < 12 ? 3 : pos < 14 ? 4 : 5; }
 export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
-export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '🫡'];
+export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '😍', '🤢', '🥴', '🙈', '🤘', '🫡'];
+/** Noe skjedde i rommet som figurene reagerer på (drikk, bom, pekt, vinner). Siste gjelder; telefonene spiller den av én gang. */
+function stuaHendelse(data: any, type: string, ider: string[]) {
+  if (!ider.length) return;
+  data.stuaHendNr = (data.stuaHendNr || 0) + 1;
+  data.stuaHend = { nr: data.stuaHendNr, type, ider: ider.slice(0, 8) };
+}
 type EkstraInfo = [id: string, navnNo: string, navnEn: string, omNo: string, omEn: string];
 const EKSTRA_INFO: EkstraInfo[] = [
   ['hvemskrev', 'Ukjent avsender', 'Unknown sender', 'Alle svarer anonymt på samme spørsmål. Så gjetter dere hvem som skrev hva.', 'Everyone answers the same question anonymously. Then you guess who wrote what.'],
