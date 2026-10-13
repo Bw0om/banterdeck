@@ -225,6 +225,16 @@ Writing is three things only: the pie clock, the card you write on and your pile
   - The winner gets a rosette. Winning bets hand out double; the rest drink their stake. Then "Hva nå?".
   - Moves animate from the previous position, since every redraw replaces the elements.
 
+## Skålsprinten
+
+- **The whole surface is the button.** A glass fizzes while everyone waits; there is no countdown.
+- **SKÅL!:** the surface turns yellow, a second glass slides in and clinks, and "SKÅL!" fills the screen. The class is set directly on the button at the planned moment (no redraw), so the reaction time is measured on the phone itself.
+  - A tap shows your time ("231 ms"). **Too early:** the glass tips over into a puddle, the surface turns pink, and you drink 2.
+- **Reveal:** everyone in a list with head and a bar for their time; the slowest turns pink and drinks 1. No tap counts as a loss (drink 1).
+- **A sprint is five cheers**, shown as five small glasses that fill up. There is no round number and no "new round" button: after the reveal the next cheers starts by itself.
+- **End:** "Raskest i stua" by total time (too early or no tap counts as one second), then "Hva nå?".
+- **On the TV:** the glass while waiting, yellow with SKÅL! at the same moment, heads popping up with their time as people tap, and the list afterwards.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

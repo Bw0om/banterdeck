@@ -241,7 +241,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
       runde: s.runde || 1, lurtTavle: lurtTavle(data),
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, sikker: s.sikker || {}, drikker: s.drikker, utdeling: s.utdeling || [], lurte: s.lurte || 0 } : null });
     const off = offentligTekst(s, data); if (off) spill.offentlig = off;
-    if (s.type === 'samme' || s.type === 'hvemskrev' || s.type === 'spion') spill.sos = sosVisning(s, null, data);
+    if (s.type === 'samme' || s.type === 'hvemskrev' || s.type === 'spion' || s.type === 'skal') spill.sos = sosVisning(s, null, data);
     if (s.type === 'pannekort') spill.sos = pkOffentlig(s);
     if (s.type === 'tosannheter') spill.ts = ekstraVisning(s, null, data);
     if (s.type === 'bingo') spill.bingoTv = bingoOffentlig(s, data);
@@ -2851,7 +2851,7 @@ function sosNyRunde(data: any) {
     const rekke = stokk(ider); s.tildelt = {}; rekke.forEach((id: string, i: number) => { s.tildelt[id] = rekke[(i + 1) % rekke.length]; });
     s.fase = 'skriv'; s.ord = {}; s.gjettet = []; settFrist(s, SFRIST.pannekort);
   }
-  if (s.type === 'skal') { s.fase = 'klar'; s.tid = null; s.trykk = {}; s.tidlig = []; s.resultat = null; }
+  if (s.type === 'skal') { s.nr = 0; s.sum = {}; skalNy(s, 4000); }
 }
 function hsFasit(data: any) {
   const s = data.spill, forfatter = s.ko[s.i];
@@ -2908,6 +2908,11 @@ function pkStartSpill(data: any) {
   Object.keys(s.tildelt).forEach((fra) => { const til = s.tildelt[fra]; if (!s.ord[til]) s.ord[til] = { t: trekkFra(s, 'ord', sosListe('ord')), fra: null }; });
   s.fase = 'spill'; s.frist = null;
 }
+const SKAL_ANTALL = 5;
+/** Neste skål: SKÅL kommer etter en tilfeldig pause (ingen nedtelling). */
+function skalNy(s: any, minst = 2500) {
+  s.fase = 'vent'; s.tid = Date.now() + minst + tilfeldig(5000); s.trykk = {}; s.tidlig = []; s.resultat = null; s.frist = s.tid + 6000;
+}
 function skalFasit(data: any) {
   const s = data.spill, tider = Object.entries(s.trykk).sort((a: any, b: any) => a[1] - b[1]);
   const deltakere = data.spillere.map((p: any) => p.id).filter((id: string) => !s.tidlig.includes(id));
@@ -2917,11 +2922,21 @@ function skalFasit(data: any) {
   if (!ikke.length && tider.length) { treigest = tider[tider.length - 1][0] as string; giSlurker(data, treigest, 1); }
   if (tider.length) giUtdeling(data, tider[0][0] as string, 1);
   s.resultat = { tider, tidlig: s.tidlig, ikke, treigest, raskest: tider.length ? tider[0][0] : null };
-  s.fase = 'fasit'; s.frist = null;
+  // Samlet tid for sprinten: for tidlig eller ikke trykket teller som ett sekund
+  s.sum = s.sum || {};
+  data.spillere.forEach((p: any) => { s.sum[p.id] = (s.sum[p.id] || 0) + (s.trykk[p.id] != null ? s.trykk[p.id] : 1000); });
+  // Ingen «ny runde»-knapp: neste skål kommer av seg selv (telefonene sier fra når pausen er over)
+  s.fase = 'fasit'; s.frist = Date.now() + 4000;
 }
 
 function sosHandling(data: any, meg: any, h: any): any {
   const s = data.spill, erVert = meg.id === data.vert, hd = h.handling;
+  if (s.type === 'skal' && (hd === 'nytt' || hd === 'runde')) {
+    // Spill igjen etter sprinten: bare verten (teller i kvelden)
+    if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
+    if (s.fase !== 'ferdig') return { ok: true };
+    s.runde++; sosNyRunde(data); return { ok: true };
+  }
   if (hd === 'nytt' || hd === 'runde') {
     if (!erVert && s.fase !== 'fasit' && s.fase !== 'ferdig') return { feil: 'bare-vert' };
     s.runde++; sosNyRunde(data); return { ok: true };
@@ -3084,11 +3099,7 @@ function sosHandling(data: any, meg: any, h: any): any {
     return { ok: true };
   }
   if (s.type === 'skal') {
-    if (hd === 'sk-start') {
-      if (s.fase === 'vent') return { ok: true };
-      s.fase = 'vent'; s.tid = Date.now() + 2500 + tilfeldig(5000); s.trykk = {}; s.tidlig = []; s.resultat = null; s.frist = s.tid + 6000;
-      return { ok: true };
-    }
+    if (hd === 'sk-start') return { ok: true };   // gamle klienter: sprinten går av seg selv nå
     if (hd === 'sk-trykk') {
       if (s.fase !== 'vent' || s.trykk[meg.id] != null || s.tidlig.includes(meg.id)) return { ok: true };
       // Telefonen måler selv reaksjonstiden (rettferdig uansett nett); serveren sjekker at den er rimelig
@@ -3099,6 +3110,11 @@ function sosHandling(data: any, meg: any, h: any): any {
       return { ok: true };
     }
     if (hd === 'tid-ute' && s.fase === 'vent' && fristUte(s)) skalFasit(data);
+    else if (hd === 'tid-ute' && s.fase === 'fasit' && fristUte(s)) {
+      s.nr = (s.nr || 0) + 1;
+      if (s.nr >= SKAL_ANTALL) { s.fase = 'ferdig'; s.frist = null; }
+      else skalNy(s);
+    }
     return { ok: true };
   }
   return null;
@@ -3140,7 +3156,8 @@ function sosVisning(s: any, meg: any, data: any) {
     return { fase: s.fase, mitMaal: m ? s.tildelt[m] || null : null, harSkrevet: Object.keys(s.tildelt).filter((fra) => s.ord[s.tildelt[fra]]),
       ord, gjettet: s.gjettet, sist: s.sist || null, mittOrdSkjult: !!(m && s.ord[m] && s.fase !== 'ferdig'), runde: s.runde || 1, med: Object.keys(s.tildelt || {}) };
   }
-  if (s.type === 'skal') return { fase: s.fase, tid: s.tid, harTrykket: Object.keys(s.trykk || {}).concat(s.tidlig || []), resultat: s.resultat };
+  if (s.type === 'skal') return { fase: s.fase, tid: s.tid, harTrykket: Object.keys(s.trykk || {}).concat(s.tidlig || []), resultat: s.resultat,
+    trykk: s.trykk || {}, tidlig: s.tidlig || [], nr: s.nr || 0, antall: SKAL_ANTALL, sum: s.sum || {}, runde: s.runde || 1 };
   return {};
 }
 

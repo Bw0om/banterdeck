@@ -868,7 +868,7 @@ export function startRom(LEKNAVN, LANG) {
     samme: [['Alle skriver ett ord i hemmelighet som passer oppgaven.', 'Everyone secretly writes one word that fits the prompt.'], ['Målet er å svare det samme som de andre.', 'The goal is to answer the same as the others.'], ['Står du alene med svaret ditt, drikker du.', 'If nobody else wrote your answer, you drink.']],
     spion: [['Hold kortet for å se stedet. Én av dere er muldvarpen og vet det ikke.', 'Hold your card to see the location. One of you is the mole and doesn’t know it.'], ['Den som har tur, spør noen og trykker på hodet deres – så har den personen tur.', 'Whoever’s turn it is asks someone and taps their head – then it’s their turn.'], ['Tror du at du vet hvem det er? Si det høyt – verten snur kortet. Feil: de som pekte drikker 2. Tatt: muldvarpen drikker 3.', 'Think you know? Say it out loud – the host flips the card. Wrong: those who called it drink 2. Caught: the mole drinks 3.']],
     pannekort: [['Skriv en person, figur eller ting på lappen til den du har fått.', 'Write a person, character or thing on the note for the person you got.'], ['Alle ser lappene til de andre – bare ikke sin egen. Still ja/nei-spørsmål på omgang.', 'Everyone sees the other notes – just not their own. Take turns asking yes/no questions.'], ['Trykk «Gjettet!» når noen klarer det. Først ut deler ut 2, sistemann drikker 3.', 'Tap “Got it!” when someone gets it. First out hands out 2, the last one drinks 3.']],
-    skal: [['Vent til det står SKÅL! på skjermen.', 'Wait until it says CHEERS! on screen.'], ['Trykk så fort du kan.', 'Tap as fast as you can.'], ['Tregest drikker – trykker du for tidlig, drikker du dobbelt.', 'Slowest drinks – tap too early and you drink double.']],
+    skal: [['Glasset bobler – vent til det står SKÅL! Trykk hvor som helst så fort du kan.', 'The glass fizzes – wait until it says CHEERS! Tap anywhere as fast as you can.'], ['Treigest drikker 1. Trykker du for tidlig, drikker du 2.', 'Slowest drinks 1. Tap too early and you drink 2.'], ['Fem skåler i en sprint – neste kommer av seg selv. Raskest samlet vinner.', 'Five cheers in a sprint – the next comes by itself. Fastest total wins.']],
     mest: [['Ett «Hvem er mest sannsynlig …»-kort om gangen.', 'One “Who’s most likely …” card at a time.'], ['Trykk på hodet til den det passer best på. Ingen ser hva du stemte.', 'Tap the head of whoever it fits best. Nobody sees your vote.'], ['Hver stemme er én slurk.', 'Every vote is one sip.']],
     forraeder: [['Den som har tur, holder på kortet for å se om hen skal lyve eller si sannheten – og fullfører setningen høyt.', 'Whoever’s turn it is holds the card to see whether to lie or tell the truth – and finishes the sentence out loud.'], ['Grill hen med oppfølgingsspørsmål. Så stemmer resten: sant eller løgn?', 'Grill them with follow-up questions. Then everyone else votes: true or lie?'], ['Feil: drikk to (helt sikker: fire). Den som forteller deler ut én per person som ble lurt.', 'Wrong: drink two (absolutely sure: four). The teller hands out one per person fooled.']],
     tosannheter: [['Én sitter i stolen og skriver tre ting om seg selv – to sanne og én løgn.', 'One player sits in the chair and writes three things about themselves – two true, one lie.'], ['De andre trykker på kortet de tror er løgnen. Når alle har stemt, snus kortene.', 'Everyone else taps the card they think is the lie. When everyone has voted, the cards flip.'], ['Bommet eller ikke stemt: drikk 1. Stolen drikker 1 per person som så løgnen. Alle sitter i stolen én gang.', 'Missed or didn’t vote: drink 1. The chair drinks 1 per person who saw the lie. Everyone takes the chair once.']],
@@ -3104,33 +3104,69 @@ export function startRom(LEKNAVN, LANG) {
       lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye lapper – teller i kvelden', 'New notes – counts tonight')]]);
   }
 
-  var skalVist = null, skalTid = null, skalTimer = null;
+  var skalVist = null, skalTid = null, skalTimer = null, skalMitt = {}, skalSett = {};
+  /* ---------- Skålsprinten: glasset ----------
+     Hele flaten er knappen. Glasset bobler mens dere venter (ingen nedtelling). Når SKÅL kommer, settes klassen «naa»
+     direkte på knappen (uten ny tegning), så reaksjonstiden måles presist. Fem skåler i en sprint; neste kommer av seg selv. */
+  var SK_GLASS = '<svg class="sk-glass" viewBox="0 0 150 210" aria-hidden="true"><path class="kant" d="M10 8h130l-15 194h-100z"/><path class="ol" d="M17 50h116l-11 144h-94z"/>' +
+    '<circle class="sk-boble" style="--d:0s" cx="50" cy="180" r="4"/><circle class="sk-boble" style="--d:.8s" cx="80" cy="186" r="3"/><circle class="sk-boble" style="--d:1.5s" cx="104" cy="178" r="4.5"/>' +
+    '<path class="skum" d="M12 18q19-18 38 0q19-18 38 0q19-18 38 0q10-10 15 3l-3 32h-125z"/></svg>';
+  var SK_MOT = '<svg class="sk-mot" viewBox="0 0 120 170" aria-hidden="true"><path class="kant" d="M8 6h104l-12 156h-80z"/><path class="ol" d="M14 40h92l-9 116h-74z"/><path class="skum" d="M10 14q15-14 30 0q15-14 30 0q15-14 30 0q8-8 12 2l-2 26h-96z"/></svg>';
+  function skSma(s) {
+    var ut = '', nr = s.nr || 0, ant = s.antall || 5;
+    for (var i = 0; i < ant; i++) ut += '<i class="' + (s.fase === 'ferdig' || i < nr ? 'full' : i === nr ? 'naa' : '') + '"></i>';
+    return '<span class="sk-sma" aria-label="' + T('Skål ', 'Cheers ') + Math.min(ant, nr + 1) + T(' av ', ' of ') + ant + '">' + ut + '</span>';
+  }
+  function skRader(rader, ny) {
+    return '<div class="sk-liste">' + rader.map(function (r, j) {
+      return '<div class="sk-rad' + (r.kl ? ' ' + r.kl : '') + (ny ? ' inn' : '') + '" style="--f:' + j * 90 + 'ms">' + nrHode(r.id, '', r.oi ? 'oi' : '') + '<b>' + jaNavn(r.id) + '</b>' +
+        '<span class="sk-stolpe"><i class="' + (r.stripe ? 'stripe' : '') + (ny ? ' inn' : '') + '" style="--f:' + (j * 90 + 150) + 'ms;width:' + r.bredde + '%"></i></span><b>' + r.tekst + '</b></div>';
+    }).join('') + '</div>';
+  }
   function skalSpill(s) {
+    var meg = tilstand.meg, r = s.runde || 1, topp = '<div class="sk-topp">';
+    var chip = s.fase === 'vent' ? T('Hold fingeren klar', 'Finger ready') : s.fase === 'fasit' ? T('Treigest drikker', 'Slowest drinks') : T('Raskest i stua', 'Fastest in the room');
+    topp += jaTopp(T('Skålsprinten', 'Cheers sprint'), chip, s.fase !== 'fasit', false) + skSma(s) + '</div>';
+    var skjult = s.frist ? '<span class="sk-frist" hidden><span data-frist="' + s.frist + '"></span></span>' : '';
     if (s.fase === 'vent') {
-      if (skalTid !== s.tid) {   // ny runde: planlegg når SKÅL vises på denne telefonen
+      if (skalTid !== s.tid) {   // ny skål: planlegg når SKÅL vises på denne telefonen
         skalTid = s.tid; skalVist = null; clearTimeout(skalTimer);
         var om = s.tid - (Date.now() + klokkeAvvik);
         skalTimer = setTimeout(function () {
           skalVist = performance.now();
-          var b = document.getElementById('skalKnapp'); if (b) { b.classList.add('naa'); b.textContent = T('SKÅL!', 'CHEERS!'); }
+          var b = document.getElementById('skalKnapp'); if (b && !b.disabled) b.classList.add('naa');
           try { navigator.vibrate && navigator.vibrate(80); } catch (e) {}
         }, Math.max(0, om));
       }
-      var trykket = s.harTrykket.indexOf(tilstand.meg) !== -1;
-      return '<button class="skal-knapp' + (skalVist ? ' naa' : '') + '" id="skalKnapp" data-g="sk-trykk" type="button"' + (trykket ? ' disabled' : '') + '>' +
-        (trykket ? T('Trykket!', 'Tapped!') : skalVist ? T('SKÅL!', 'CHEERS!') : T('Vent …', 'Wait …')) + '</button>' +
-        '<p class="rom-status">' + s.harTrykket.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har trykket', ' have tapped') + '</p>';
+      var mitt = skalMitt[s.tid] || (s.harTrykket.indexOf(meg) !== -1 ? { tidlig: (s.tidlig || []).indexOf(meg) !== -1, ms: (s.trykk || {})[meg] } : null);
+      var kl = 'sk-flate' + (mitt ? (mitt.tidlig ? ' tidlig' : ' trykket naa') : skalVist ? ' naa' : '');
+      return topp + '<button class="' + kl + '" id="skalKnapp" data-g="sk-trykk" type="button"' + (mitt ? ' disabled' : '') + '>' +
+        '<span class="sk-scene">' + SK_GLASS + SK_MOT + '<i class="sk-dam"></i></span>' +
+        '<b class="sk-vent">' + T('Vent …', 'Wait …') + '</b><b class="sk-skal">' + T('Skål!', 'Cheers!') + '</b>' +
+        '<span class="sk-tall">' + (mitt ? (mitt.tidlig ? T('Drikk 2', 'Drink 2') : mitt.ms + ' ms') : '') + '</span>' +
+        '<small class="sk-hint">' + ((s.nr || 0) ? T('Neste skål kommer når du minst venter det.', 'The next cheers comes when you least expect it.') : T('Trykk hvor som helst når det står SKÅL.', 'Tap anywhere when it says CHEERS.')) + '</small></button>' +
+        '<div class="ts-status"><span class="ts-stemt">' + s.harTrykket.map(function (id) { return nrHode(id, 'inn', ''); }).join('') + '</span><b>' +
+        s.harTrykket.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har trykket', ' have tapped') + '</b></div>' + skjult;
     }
+    var nk = r + ':' + (s.nr || 0) + ':' + s.fase, ny = !skalSett[nk]; skalSett[nk] = 1;
     if (s.fase === 'fasit' && s.resultat) {
-      var r = s.resultat;
-      return '<p class="dl-melding dl-stor">' + (r.treigest ? esc(navn(r.treigest)) + T(' var treigest – drikk!', ' was slowest – drink!') : T('Runden er over', 'The round is over')) + '</p>' +
-        '<ol class="rom-resultat">' + r.tider.map(function (x) { return '<li><span>' + esc(navn(x[0])) + '</span><b>' + x[1] + ' ms</b></li>'; }).join('') + '</ol>' +
-        (r.tidlig.length ? '<p>' + T('For tidlig (drikk 2): ', 'Too early (drink 2): ') + hvem(r.tidlig) + '</p>' : '') +
-        (r.ikke.length ? '<p>' + T('Trykket ikke (drikk 1): ', 'Didn\'t tap (drink 1): ') + hvem(r.ikke) + '</p>' : '') +
-        '<button class="rom-stor-knapp" data-g="sk-start" type="button">' + T('Ny runde', 'New round') + '</button>';
+      var res = s.resultat, tider = res.tider || [], maks = Math.max.apply(null, tider.map(function (x) { return x[1]; }).concat([1]));
+      var rader = tider.map(function (x) { var sist = x[0] === res.treigest; return { id: x[0], tekst: x[1] + ' ms', bredde: Math.round(100 * x[1] / maks), kl: sist ? 'feil' : x[0] === res.raskest ? 'rett' : '', oi: sist }; })
+        .concat((res.tidlig || []).map(function (id) { return { id: id, tekst: T('For tidlig', 'Too early'), bredde: 100, stripe: true, kl: 'feil', oi: true }; }))
+        .concat((res.ikke || []).map(function (id) { return { id: id, tekst: T('Trykket ikke', 'No tap'), bredde: 100, stripe: true, kl: 'feil', oi: true }; }));
+      var tittel = res.treigest ? jaNavn(res.treigest) + (res.treigest === meg ? T(' var treigest', ' were slowest') : T(' var treigest', ' was slowest')) : T('Ingen treigest', 'No slowest');
+      return topp + '<p class="sk-tittel' + (ny ? ' inn' : '') + '">' + tittel + '</p>' + skRader(rader, ny) +
+        '<p class="sk-neste"><span class="sk-fyll"><svg viewBox="0 0 20 28" aria-hidden="true"><path class="kant" d="M2 2h16l-2 24h-12z"/><path class="ol" d="M3.2 9h13.6l-1.4 16h-10.8z"/></svg></span>' +
+        ((s.nr || 0) + 1 >= (s.antall || 5) ? T('Siste skål er tatt …', 'That was the last cheers …') : T('Neste skål kommer av seg selv.', 'The next cheers comes by itself.')) + '</p>' + skjult;
     }
-    return '<p class="dl-melding dl-stor">' + T('Klar?', 'Ready?') + '</p><p>' + T('Når det står <b>SKÅL!</b>, trykker alle så fort de kan. Treigest drikker. Trykker du for tidlig, drikker du dobbelt.', 'When it says <b>CHEERS!</b>, everyone taps as fast as they can. Slowest drinks. Tap too early and you drink double.') + '</p>' +
-      '<button class="rom-stor-knapp" data-g="sk-start" type="button">Start</button>';
+    if (s.fase === 'ferdig') {
+      var sum = s.sum || {}, ider = Object.keys(sum).sort(function (a, b) { return sum[a] - sum[b]; }), mx = Math.max.apply(null, ider.map(function (id) { return sum[id]; }).concat([1]));
+      return topp + '<p class="sk-tittel' + (ny ? ' inn' : '') + '">' + (ider[0] ? jaNavn(ider[0]) + (ider[0] === meg ? T(' er raskest', ' are fastest') : T(' er raskest', ' is fastest')) : '') + '</p>' +
+        skRader(ider.map(function (id, j) { return { id: id, tekst: (sum[id] / 1000).toFixed(2) + ' s', bredde: Math.round(100 * sum[id] / mx), kl: j === 0 ? 'rett' : '' }; }), ny) +
+        '<p class="sk-neste">' + T('Samlet tid for fem skåler.', 'Total time for five cheers.') + '</p>' +
+        lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Fem nye skåler – teller i kvelden', 'Five new cheers – counts tonight')]]);
+    }
+    return topp;
   }
 
   /* ---------- hemmelige oppdrag ---------- */
@@ -4396,11 +4432,13 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'sp-snu' || g === 'sp-merk') return gjor({ handling: g, hvem: b.dataset.paa });
     if (['sp-pek', 'sp-avbryt', 'sp-sted', 'sp-videre', 'sp-ferdig'].indexOf(g) !== -1) return gjor({ handling: g });
     if (g === 'sk-trykk') {
-      var tidlig = !skalVist, ms = skalVist ? Math.round(performance.now() - skalVist) : null;
-      b.disabled = true; b.textContent = tidlig ? T('For tidlig! 🍺🍺', 'Too early! 🍺🍺') : ms + ' ms';
+      var tidlig = !skalVist, ms = skalVist ? Math.round(performance.now() - skalVist) : null, skSp = tilstand.spill;
+      if (skSp) skalMitt[skSp.tid] = { tidlig: tidlig, ms: ms };
+      b.disabled = true; b.classList.add(tidlig ? 'tidlig' : 'trykket');
+      var skT = b.querySelector('.sk-tall'); if (skT) skT.textContent = tidlig ? T('Drikk 2', 'Drink 2') : ms + ' ms';
       return gjorAlltid({ handling: 'sk-trykk', tidlig: tidlig, ms: ms });
     }
-    if (['hs-neste', 'sp-til-stemming', 'pk-avslutt', 'sk-start'].indexOf(g) !== -1) return gjor({ handling: g });
+    if (['hs-neste', 'sp-til-stemming', 'pk-avslutt'].indexOf(g) !== -1) return gjor({ handling: g });
     if (g === 'hopp-over') return gjor({ handling: 'hopp-over' });
     if (g === 'lov-del') return delLov();
     if (g === 'lov-opphev') return gjor({ handling: 'lov-valg', type: 'opphev', regel: b.dataset.id });

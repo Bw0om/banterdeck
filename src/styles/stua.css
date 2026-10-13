@@ -1558,3 +1558,71 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .vl-trekk>span.inn{animation:tsLand 450ms var(--fjaer) both}
 .vl-trekk>b{font-family:var(--display);font-size:20px;font-weight:900;font-stretch:70%;text-transform:uppercase}
 @media (prefers-reduced-motion:reduce){.ou-folk span.inn,.ou-lag.sklir,.ou-kort.snu,.ou-svar.inn,.vl-side.ny>span,.vl-hest.flytt,.vl-hest .galopp,.vl-rosett,.vl-hoder .nr-h.inn,.vl-trekk>span.inn{animation:none}.ou-folk .nr-h,.ou-sjanse i,.vl-side>span,.vl-hest,.vl-bane{transition:none}}
+/* ---------- Skålsprinten: glasset ---------- */
+.sk-topp{position:relative}
+.sk-topp .nr-topp{padding-right:120px}
+.sk-sma{position:absolute;right:0;top:4px;display:flex;gap:5px}
+.sk-sma i{display:block;width:16px;height:23px;box-sizing:border-box;background:#FFFFFF;border:2.5px solid #16120F;border-top-width:2px;clip-path:polygon(0 0,100% 0,88% 100%,12% 100%)}
+.sk-sma i.naa{background:linear-gradient(#FFFFFF 30%,#FFE29A 30%)}
+.sk-sma i.full{background:linear-gradient(#FFF8EE 30%,#FFB020 30%)}
+.sk-flate{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;width:100%;min-height:min(64dvh,540px);margin:0 0 12px;padding:18px 14px 20px;box-sizing:border-box;font-family:var(--sans);color:var(--ink);background:var(--card);border:4px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--hard);cursor:pointer;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:background-color 120ms ease-out}
+.sk-flate.naa,.sk-flate.tidlig{color:#16120F;border-color:#16120F}
+.sk-flate.naa{background:var(--gul)}
+.sk-flate.tidlig{background:var(--rosa)}
+.sk-flate:disabled{cursor:default}
+.sk-scene{position:relative;display:block;width:260px;height:260px;flex:none}
+.sk-glass{position:absolute;left:40px;top:20px;width:150px;height:210px;transform-origin:50% 100%;overflow:visible}
+.sk-glass .kant,.sk-mot .kant{fill:#FFFFFF;stroke:#16120F;stroke-width:6;stroke-linejoin:round}
+.sk-glass .ol,.sk-mot .ol{fill:#FFB020}
+.sk-glass .skum,.sk-mot .skum{fill:#FFF8EE;stroke:#16120F;stroke-width:5;stroke-linejoin:round}
+.sk-glass .skum{animation:skPust 2.8s ease-in-out infinite}
+@keyframes skPust{0%,100%{transform:none}50%{transform:translateY(-3px)}}
+.sk-boble{fill:#FFF1B8;animation:skBoble 2.4s ease-in infinite;animation-delay:var(--d)}
+@keyframes skBoble{0%{transform:translateY(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-120px);opacity:0}}
+.sk-mot{position:absolute;left:150px;top:30px;width:100px;height:142px;transform-origin:50% 100%;opacity:0}
+.sk-dam{position:absolute;left:40px;top:216px;display:block;width:210px;height:30px;box-sizing:border-box;border-radius:50%;background:#FFB020;border:4px solid #16120F;transform-origin:left;opacity:0}
+.sk-flate.naa .sk-glass{animation:skKlink 500ms var(--fjaer) both}
+@keyframes skKlink{to{transform:translateX(16px) rotate(14deg)}}
+.sk-flate.naa .sk-mot{opacity:1;animation:skMot 500ms var(--fjaer) both}
+@keyframes skMot{from{transform:translateX(200px)}to{transform:rotate(-14deg)}}
+.sk-flate.trykket .sk-glass,.sk-flate.trykket .sk-mot{animation:none}
+.sk-flate.trykket .sk-glass{transform:translateX(16px) rotate(14deg)}
+.sk-flate.trykket .sk-mot{opacity:1;transform:rotate(-14deg)}
+.sk-flate.tidlig .sk-glass{animation:skVelt 700ms cubic-bezier(.55,0,.7,.4) forwards}
+@keyframes skVelt{to{transform:translate(40px,50px) rotate(96deg)}}
+.sk-flate.tidlig .sk-dam{opacity:1;animation:skDam 600ms cubic-bezier(.23,1,.32,1) 450ms both}
+@keyframes skDam{from{transform:scaleX(.1);opacity:0}to{transform:none;opacity:1}}
+.sk-vent,.sk-skal{font-family:var(--display);font-weight:900;font-stretch:62%;line-height:.9;text-transform:uppercase}
+.sk-vent{font-size:44px}
+.sk-skal{display:none;font-size:110px}
+.sk-flate.naa .sk-vent,.sk-flate.tidlig .sk-vent{display:none}
+.sk-flate.naa .sk-skal{display:block}
+.sk-flate.trykket .sk-skal{font-size:64px}
+.sk-tall{display:none;padding:4px 16px;font-family:var(--display);font-size:52px;font-weight:900;font-stretch:62%;line-height:1;color:#16120F;background:var(--mint);border:4px solid #16120F;border-radius:8px;box-shadow:6px 6px 0 #16120F;transform:rotate(-3deg)}
+.sk-flate.tidlig .sk-tall{background:#FFFFFF}
+.sk-flate.trykket .sk-tall,.sk-flate.tidlig .sk-tall{display:inline-block;animation:skTall 450ms var(--fjaer) both}
+@keyframes skTall{from{transform:scale(1.4) rotate(-6deg);opacity:0}to{transform:rotate(-3deg);opacity:1}}
+.sk-hint{margin-top:auto;font-size:15px;font-weight:800;color:var(--muted)}
+.sk-flate.naa .sk-hint,.sk-flate.tidlig .sk-hint{visibility:hidden}
+.sk-tittel{margin:6px 0 10px;font-family:var(--display);font-size:40px;font-weight:900;font-stretch:62%;line-height:.92;text-transform:uppercase}
+.sk-tittel.inn{animation:nrInn 380ms var(--fjaer) both}
+.sk-liste{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
+.sk-rad{display:flex;align-items:center;gap:10px;padding:6px 10px;color:var(--ink);background:var(--card);border:3px solid var(--ink);border-radius:10px}
+.sk-rad.rett{color:#16120F;background:var(--mint);border-color:#16120F}
+.sk-rad.feil{color:#16120F;background:var(--rosa);border-color:#16120F}
+.sk-rad.inn{animation:nrInn 380ms var(--fjaer) both;animation-delay:var(--f,0ms)}
+.sk-rad .nr-h{width:36px;height:36px}
+.sk-rad>b:nth-of-type(1){width:56px;font-size:15px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-rad>b:last-child{width:84px;text-align:right;font-size:15px;font-weight:900;white-space:nowrap}
+.sk-stolpe{position:relative;flex:1;height:20px}
+.sk-stolpe i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:currentColor;transform-origin:left}
+.sk-stolpe i.stripe{background:repeating-linear-gradient(45deg,currentColor 0 6px,transparent 6px 12px)}
+.sk-stolpe i.inn{animation:skStolpe 550ms cubic-bezier(.23,1,.32,1) both;animation-delay:var(--f,0ms)}
+@keyframes skStolpe{from{transform:scaleX(0)}to{transform:none}}
+.sk-neste{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:15px;font-weight:800;color:var(--muted)}
+.sk-fyll{display:block;width:20px;height:28px;flex:none}
+.sk-fyll svg{width:20px;height:28px}
+.sk-fyll .kant{fill:#FFFFFF;stroke:#16120F;stroke-width:2.4;stroke-linejoin:round}
+.sk-fyll .ol{fill:#FFB020;transform-origin:50% 100%;animation:skFyll 3.6s cubic-bezier(.23,1,.32,1) both}
+@keyframes skFyll{from{transform:scaleY(0)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.sk-glass .skum,.sk-boble,.sk-flate.naa .sk-glass,.sk-flate.naa .sk-mot,.sk-flate.tidlig .sk-glass,.sk-flate.tidlig .sk-dam,.sk-flate.trykket .sk-tall,.sk-flate.tidlig .sk-tall,.sk-tittel.inn,.sk-rad.inn,.sk-stolpe i.inn,.sk-fyll .ol{animation:none}.sk-flate.naa .sk-glass{transform:translateX(16px) rotate(14deg)}.sk-flate.naa .sk-mot{transform:rotate(-14deg)}.sk-flate.tidlig .sk-glass{transform:translate(40px,50px) rotate(96deg)}.sk-flate{transition:none}}

@@ -931,6 +931,46 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         (v.sist ? '<span class="tvvl-trekk' + (nyT ? ' inn' : '') + '">' + tvOuKort(v.sist, 'liten') + '</span>' : '') + '</div>' +
         '<div class="tvvl-banen"><div class="tvvl-sider">' + sider + '</div><div class="tvvl-baner">' + baner + '</div></div>' + bunn + '</div></div>';
     }
+    /* ---------- Skålsprinten: glasset, SKÅL! over hele skjermen, og hodene som spretter opp med tiden sin ---------- */
+    var tvSkTid = null, tvSkTimer = null, tvSkVist = false, tvSkSett = {};
+    var TVSK_GLASS = '<svg class="tvsk-glass" viewBox="0 0 150 210" aria-hidden="true"><path class="kant" d="M10 8h130l-15 194h-100z"/><path class="ol" d="M17 50h116l-11 144h-94z"/><circle class="b" style="--d:0s" cx="50" cy="180" r="4"/><circle class="b" style="--d:.8s" cx="80" cy="186" r="3"/><circle class="b" style="--d:1.5s" cx="104" cy="178" r="4.5"/><path class="skum" d="M12 18q19-18 38 0q19-18 38 0q19-18 38 0q10-10 15 3l-3 32h-125z"/></svg>';
+    function skScene(d, s) {
+      var m = s.sos, alle = d.spillere || [], r = m.runde || 1, nr = m.nr || 0, ant = m.antall || 5;
+      var sma = ''; for (var i = 0; i < ant; i++) sma += '<i class="' + (m.fase === 'ferdig' || i < nr ? 'full' : i === nr ? 'naa' : '') + '"></i>';
+      var hode = function (chip, rosa) { return '<div class="tvnr-hode"><p class="tv-etikett">' + T('Skålsprinten', 'Cheers sprint') + '</p><span class="tvlh-chip' + (rosa ? ' rosa' : '') + '">' + chip + '</span><span class="tvsk-sma">' + sma + '</span></div>'; };
+      if (m.fase === 'vent') {
+        if (tvSkTid !== m.tid) {
+          tvSkTid = m.tid; tvSkVist = false; clearTimeout(tvSkTimer);
+          tvSkTimer = setTimeout(function () { tvSkVist = true; var el = document.getElementById('tvSkal'); if (el) el.classList.add('naa'); }, Math.max(0, m.tid - (Date.now() + tvAvvik)));
+        }
+        var trykk = m.trykk || {}, tidlig = m.tidlig || [];
+        var benk = alle.map(function (p) {
+          var t = trykk[p.id], ti = tidlig.indexOf(p.id) !== -1;
+          return '<div class="' + (t != null ? 'har' : '') + '"><span class="tvsk-tid' + (ti ? ' feil' : t != null ? ' rett' : '') + '">' + (ti ? T('For tidlig', 'Too early') : t != null ? t + ' ms' : '') + '</span>' + tvHode(d, p.id, '', ti ? 'oi' : '') + '<b>' + esc(p.navn) + '</b></div>';
+        }).join('');
+        return '<div class="tv-scene tvnr tvsk' + (tvSkVist ? ' naa' : '') + '" id="tvSkal"><div class="tvsk-inn">' + hode(T('Hold fingeren klar', 'Finger ready')) +
+          '<div class="tvsk-midt">' + TVSK_GLASS + '<b class="tvsk-vent">' + T('Vent …', 'Wait …') + '</b><b class="tvsk-skal">' + T('Skål!', 'Cheers!') + '</b></div><div class="tvsk-benk">' + benk + '</div></div></div>';
+      }
+      var nk = r + ':' + nr + ':' + m.fase, ny = !tvSkSett[nk]; tvSkSett[nk] = 1;
+      var rader = [], tittel = '', bunn = '';
+      if (m.fase === 'fasit' && m.resultat) {
+        var res = m.resultat, tider = res.tider || [], maks = Math.max.apply(null, tider.map(function (x) { return x[1]; }).concat([1]));
+        rader = tider.map(function (x) { return { id: x[0], tekst: x[1] + ' ms', b: Math.round(100 * x[1] / maks), kl: x[0] === res.treigest ? 'feil' : x[0] === res.raskest ? 'rett' : '', oi: x[0] === res.treigest }; })
+          .concat((res.tidlig || []).map(function (id) { return { id: id, tekst: T('For tidlig', 'Too early'), b: 100, stripe: true, kl: 'feil', oi: true }; }))
+          .concat((res.ikke || []).map(function (id) { return { id: id, tekst: T('Trykket ikke', 'No tap'), b: 100, stripe: true, kl: 'feil', oi: true }; }));
+        tittel = res.treigest ? esc(navn(res.treigest)) + T(' var treigest', ' was slowest') : T('Ingen treigest', 'No slowest');
+        bunn = (res.treigest ? esc(navn(res.treigest)) + T(' drikker 1. ', ' drinks 1. ') : '') + (nr + 1 >= ant ? T('Det var siste skål.', 'That was the last cheers.') : T('Neste skål kommer av seg selv.', 'The next cheers comes by itself.'));
+      } else if (m.fase === 'ferdig') {
+        var sum = m.sum || {}, ider = Object.keys(sum).sort(function (a, b) { return sum[a] - sum[b]; }), mx = Math.max.apply(null, ider.map(function (id) { return sum[id]; }).concat([1]));
+        rader = ider.map(function (id, j) { return { id: id, tekst: (sum[id] / 1000).toFixed(2) + ' s', b: Math.round(100 * sum[id] / mx), kl: j === 0 ? 'rett' : '' }; });
+        tittel = ider[0] ? esc(navn(ider[0])) + T(' er raskest', ' is fastest') : '';
+        bunn = T('Samlet tid for fem skåler. ', 'Total time for five cheers. ') + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.');
+      }
+      return '<div class="tv-scene tvnr tvsk"><div class="tvsk-inn">' + hode(m.fase === 'ferdig' ? T('Raskest i stua', 'Fastest in the room') : T('Treigest drikker', 'Slowest drinks'), m.fase === 'fasit') +
+        '<h1 class="tv-sporsmal' + (ny ? ' tvsk-ny' : '') + '">' + tittel + '</h1><div class="tvsk-liste">' + rader.map(function (x, j) {
+          return '<div class="tvsk-rad ' + x.kl + (ny ? ' ny' : '') + '" style="--f:' + j * 100 + 'ms">' + tvHode(d, x.id, '', x.oi ? 'oi' : '') + '<b>' + esc(navn(x.id)) + '</b><span><i class="' + (x.stripe ? 'stripe' : '') + (ny ? ' ny' : '') + '" style="--f:' + (j * 100 + 200) + 'ms;width:' + x.b + '%"></i></span><b>' + x.tekst + '</b></div>';
+        }).join('') + '</div><p class="tv-stor">' + bunn + '</p></div></div>';
+    }
     function lhScene(d, s) {
       var han = esc(navn(s.aktiv)), vk = s.aktiv + ':' + s.runde, avsl = s.fase === 'avslort' && s.resultat;
       var tavle = (s.lurtTavle || []).length ? '<ol class="tvlh-tavle" aria-label="' + T('Flest lurt', 'Most fooled') + '">' + s.lurtTavle.slice(0, 3).map(function (x, i) {
@@ -1106,6 +1146,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (s.type === 'tosannheter' && s.ts) return tsScene(d, s);
       if (s.type === 'bingo' && s.bingoTv) return bgScene(d, s);
       if (s.type === 'overunder' && s.ou) return ouScene(d, s);
+      if (s.type === 'skal' && s.sos) return skScene(d, s);
       if (s.type === 'veddelopet' && s.vl) return vlScene(d, s);
       if (s.type === 'regelfabrikken' && s.rf) return rfScene(d, s.rf);
       if (s.offentlig && (s.offentlig.tekst || (s.offentlig.valg && s.offentlig.valg.length))) {
@@ -1944,6 +1985,52 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvvl-bunn>span.rett{background:#63E2A8}.tvvl-bunn>span.feil{background:#FF9CC2}
     .tvvl-bunn em{margin-left:auto;font-style:normal;font-size:1.7vw;font-weight:800;color:#D9D2C7}
     @media (prefers-reduced-motion:reduce){.tvou-lag.sklir,.tvou-kort.snu,.tvou-svar.inn,.tvvl-trekk.inn,.tvvl-side.ny>span,.tvvl-hest.flytt,.tvvl-hest .galopp,.tvvl-rosett,.tvvl-bunn>span{animation:none}}
+    /* Skålsprinten */
+    .tv-scene.tvsk{transition:background-color 120ms ease-out}
+    .tv-scene.tvsk.naa{background:#FFD23F;color:#16120F}
+    .tvsk.naa .tv-etikett{color:#16120F}
+    .tvsk-inn{display:flex;flex-direction:column;gap:2vh;min-height:74vh}
+    .tvsk .tvnr-hode{flex-wrap:nowrap}
+    .tvsk-sma{display:flex;gap:.6vw;margin-left:auto}
+    .tvsk-sma i{display:block;width:1.9vw;height:2.7vw;box-sizing:border-box;background:#FFFFFF;border:3px solid #16120F;clip-path:polygon(0 0,100% 0,88% 100%,12% 100%)}
+    .tvsk-sma i.naa{background:linear-gradient(#FFFFFF 30%,#FFE29A 30%)}.tvsk-sma i.full{background:linear-gradient(#FFF8EE 30%,#FFB020 30%)}
+    .tvsk-midt{flex:1;display:flex;align-items:center;justify-content:center;gap:4vw}
+    .tvsk-glass{width:13vw;height:18vw;overflow:visible;transform-origin:50% 100%}
+    .tvsk-glass .kant{fill:#FFFFFF;stroke:#16120F;stroke-width:6;stroke-linejoin:round}.tvsk-glass .ol{fill:#FFB020}
+    .tvsk-glass .skum{fill:#FFF8EE;stroke:#16120F;stroke-width:5;stroke-linejoin:round}
+    .tvsk-glass .b{fill:#FFF1B8;animation:tvskBoble 2.4s ease-in infinite;animation-delay:var(--d)}
+    @keyframes tvskBoble{0%{transform:translateY(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-150px);opacity:0}}
+    .tvsk-vent,.tvsk-skal{font-family:var(--display);font-weight:900;font-stretch:62%;line-height:.85;text-transform:uppercase}
+    .tvsk-vent{font-size:6vw}
+    .tvsk-skal{display:none;font-size:15vw;color:#16120F}
+    .tvsk.naa .tvsk-vent{display:none}
+    .tvsk.naa .tvsk-skal{display:block;animation:tvskSkal 450ms linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1) both}
+    @keyframes tvskSkal{from{transform:scale(1.5) rotate(-8deg);opacity:0}to{transform:rotate(-3deg);opacity:1}}
+    .tvsk.naa .tvsk-glass{animation:tvskKlink 500ms linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1) both}
+    @keyframes tvskKlink{to{transform:rotate(14deg)}}
+    .tvsk-benk{display:flex;justify-content:center;flex-wrap:wrap;gap:2.6vw}
+    .tvsk-benk>div{display:flex;flex-direction:column;align-items:center;gap:.6vh;width:8vw}
+    .tvsk-benk .tvnr-h{width:6vw;height:6vw}
+    .tvsk-benk .tvnr-h svg,.tvsk-rad .tvnr-h svg{width:100%!important;height:100%!important}
+    .tvsk-benk>div.har .tvnr-h{animation:tvskOpp 420ms linear(0, 0.0249, 0.0878, 0.1741, 0.2724, 0.3744, 0.4742, 0.5677, 0.6526, 0.7275, 0.792, 0.8462, 0.8909, 0.9269, 0.9552, 0.9768, 0.9928, 1.0042, 1.0119, 1.0166, 1.0191, 1.0199, 1.0195, 1.0184, 1.0167, 1.0148, 1.0127, 1.0107, 1.0089, 1.0071, 1.0056, 1.0043, 1.0032, 1.0023, 1.0015, 1.001, 1.0005, 1.0002, 1) both}
+    @keyframes tvskOpp{from{transform:translateY(24px)}to{transform:translateY(-1vh)}}
+    .tvsk-benk b{font-size:1.6vw;font-weight:900}
+    .tvsk-tid{white-space:nowrap;min-height:2.6vw;padding:.1em .8em;font-size:1.4vw;font-weight:900;color:#16120F;border:3px solid transparent;border-radius:999px}
+    .tvsk-tid.rett{background:#63E2A8;border-color:#16120F}.tvsk-tid.feil{background:#FF9CC2;border-color:#16120F}
+    .tvsk-ny{animation:tvtsInn 380ms cubic-bezier(.23,1,.32,1) both}
+    .tvsk-liste{display:flex;flex-direction:column;gap:1.4vh}
+    .tvsk-rad{display:flex;align-items:center;gap:1.4vw;padding:.8vh 1.4vw;color:#16120F;background:#FFF8EE;border:4px solid #16120F;border-radius:14px}
+    .tvsk-rad.rett{background:#63E2A8}.tvsk-rad.feil{background:#FF9CC2}
+    .tvsk-rad.ny{animation:tvtsInn 380ms cubic-bezier(.23,1,.32,1) both;animation-delay:var(--f,0ms)}
+    .tvsk-rad .tvnr-h{width:4.4vw;height:4.4vw}
+    .tvsk-rad>b:nth-of-type(1){width:11vw;font-size:2.2vw;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .tvsk-rad>b:last-child{width:12vw;text-align:right;font-size:2.2vw;font-weight:900;white-space:nowrap}
+    .tvsk-rad>span{position:relative;flex:1;height:2.4vw}
+    .tvsk-rad i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:#16120F;transform-origin:left}
+    .tvsk-rad i.stripe{background:repeating-linear-gradient(45deg,#16120F 0 8px,transparent 8px 16px)}
+    .tvsk-rad i.ny{animation:tvskStolpe 600ms cubic-bezier(.23,1,.32,1) both;animation-delay:var(--f,0ms)}
+    @keyframes tvskStolpe{from{transform:scaleX(0)}to{transform:none}}
+    @media (prefers-reduced-motion:reduce){.tvsk-glass .b,.tvsk.naa .tvsk-skal,.tvsk.naa .tvsk-glass,.tvsk-benk>div.har .tvnr-h,.tvsk-ny,.tvsk-rad.ny,.tvsk-rad i.ny{animation:none}.tv-scene.tvsk{transition:none}}
     @media (prefers-reduced-motion:reduce){.tvmv-ring path.siste,.tvmv-hode.tur,.tvmv-kort.inn .snu,.tvpk-lapp.inn{animation:none}.tvmv-kort .snu{transition:none}}
 </style>
 </body>
