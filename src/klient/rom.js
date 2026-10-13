@@ -2732,25 +2732,59 @@ export function startRom(LEKNAVN, LANG) {
   }
   function nyRundeKnapp(tekst) { return '<button class="rom-stor-knapp" data-g="runde" type="button">' + esc(tekst) + '</button>'; }
 
+  /* ---------- Ukjent avsender: svarene kommer som meldinger fra et ukjent nummer ---------- */
+  var hsEndre = false, hsSist = null, hsVist = '', hsSendtVist = '';
+  var HS_KONVOLUTT = '<svg class="hs-konv" viewBox="0 0 120 92" aria-hidden="true"><rect class="hs-lapp" x="22" y="4" width="76" height="52" rx="4"/><path class="hs-lapp hs-linjer" d="M32 18h56M32 28h40"/><rect class="hs-kropp" x="6" y="30" width="108" height="58" rx="6"/><path class="hs-fold" d="M6 88l44-32h20l44 32"/><path class="hs-klaff" d="M6 30l54 38 54-38z"/></svg>';
+  function hsTopp(s, chip, gul, klokke) {
+    var et = s.fase === 'gjett' || s.fase === 'fasit' ? T('Ukjent avsender · melding ', 'Unknown sender · message ') + (s.i + 1) + T(' av ', ' of ') + s.antallSvar : T('Ukjent avsender · runde ', 'Unknown sender · round ') + (s.runde || 1);
+    return jaTopp(et, chip, gul, klokke);
+  }
+  function hsNavn(id) { return id === tilstand.meg ? T('Du', 'You') : esc(navn(id)); }
+  function hsMelding(s, inn) {
+    var fasit = s.fase === 'fasit';
+    var kontakt = fasit ? '<span class="hs-avatar' + (inn ? ' inn' : '') + '">' + nrHode(s.forfatter) + '</span><span class="hs-hvem"><b' + (inn ? ' class="inn"' : '') + '>' + (s.forfatter === tilstand.meg ? T('Deg', 'You') : esc(navn(s.forfatter))) + '</b>'
+      : '<span class="hs-ukjent" aria-hidden="true">?</span><span class="hs-hvem"><b>' + T('Ukjent avsender', 'Unknown sender') + '</b>';
+    return '<div class="hs-melding' + (inn && !fasit ? ' ny' : '') + '"><div class="hs-kontakt">' + kontakt + '<small>' + T('Melding ', 'Message ') + (s.i + 1) + T(' av ', ' of ') + s.antallSvar + '</small></span></div>' +
+      '<div class="hs-innhold">' + (inn && !fasit ? '<span class="hs-prikker" aria-hidden="true"><i></i><i></i><i></i></span>' : '') + '<p class="hs-boble">' + esc(s.tekst || '') + '</p></div></div>';
+  }
+  function hsStatus(s, n) { return '<p class="hs-status">' + (s.harStemt || []).length + T(' av ', ' of ') + Math.max(0, n - 1) + T(' har gjettet', ' guessed') + '</p>'; }
   function hvemskrevSpill(s) {
-    var n = tilstand.spillere.length;
-    if (s.fase === 'skriv') return '<p class="rom-etikett">' + T('Svar anonymt', 'Answer anonymously') + '</p><p class="rom-sporsmal">' + esc(s.oppgave) + '</p>' +
-      (s.mittSvar ? '<p class="small">' + T('Du skrev: <b>', 'You wrote: <b>') + esc(s.mittSvar) + T('</b> – du kan endre til alle har svart.', '</b> – you can change it until everyone has answered.') + '</p>' : '<p class="small">' + T('Ingen får vite at det var deg – før de gjetter det.', 'Nobody will know it was you – until they guess it.') + '</p>') +
-      skriveFelt(T('Skriv svaret ditt …', 'Type your answer …'), s.mittSvar ? T('Endre', 'Change') : 'Send', 160) +
-      '<p class="rom-status">' + s.harSkrevet.length + T(' av ', ' of ') + n + T(' har svart', ' have answered') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
-    if (s.fase === 'gjett' || s.fase === 'fasit') {
-      var kort = '<p class="gt-count">' + T('Svar ', 'Answer ') + (s.i + 1) + T(' av ', ' of ') + s.antallSvar + '</p><div class="rom-kort rf-kort"><span class="sw-tag">' + esc(s.oppgave) + '</span><p>«' + esc(s.tekst) + '»</p><span></span></div>';
-      if (s.fase === 'gjett') return kort + (s.erMitt ? '<p class="rom-stor">' + T('Dette er ditt svar 🤫 Hold masken!', 'This is your answer 🤫 Keep a straight face!') + '</p>' :
-        '<p class="rom-etikett">' + T('Hvem skrev dette?', 'Who wrote this?') + '</p>' + spillerKnapper('hs-stem', [tilstand.meg], s.minStemme)) +
-        '<p class="rom-status">' + s.harStemt.length + T(' av ', ' of ') + (n - 1) + T(' har gjettet', ' have guessed') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
-      var riktige = Object.keys(s.stemmer || {}).filter(function (id) { return s.stemmer[id] === s.forfatter; });
-      var feil = Object.keys(s.stemmer || {}).filter(function (id) { return s.stemmer[id] !== s.forfatter; });
-      return kort + '<p class="dl-melding dl-stor">' + T('Det var ', 'It was ') + esc(navn(s.forfatter)) + '!</p>' +
-        (riktige.length ? '<p>' + T('🎯 Riktig: ', '🎯 Right: ') + hvem(riktige) + '</p>' : '<p>' + T('Ingen gjettet det – ', 'Nobody guessed it – ') + esc(navn(s.forfatter)) + T(' deler ut 2.', ' hands out 2.') + '</p>') +
-        (feil.length ? '<p>' + T('🍺 Feil (drikk 1): ', '🍺 Wrong (drink 1): ') + hvem(feil) + '</p>' : '') +
-        (erVert() ? '<button class="rom-stor-knapp" data-g="hs-neste" type="button">' + (s.i + 1 < s.antallSvar ? T('Neste svar', 'Next answer') : T('Ferdig med runden', 'Finish the round')) + '</button>' : '');
+    var alle = tilstand.spillere || [], n = alle.length, meg = tilstand.meg;
+    var oppg = function (liten) { return '<div class="nr-kort hs-oppgave' + (liten ? ' liten' : '') + '"><p>' + esc(s.oppgave) + '</p></div>'; };
+    if (s.fase === 'skriv') {
+      if (s.mittSvar !== hsSist) { hsSist = s.mittSvar; hsEndre = false; }
+      var skjema = !s.mittSvar || hsEndre, sk = (s.runde || 1) + ':' + (s.mittSvar || ''), sInn = hsSendtVist !== sk; if (!skjema) hsSendtVist = sk;
+      return hsTopp(s, T('Svar anonymt', 'Answer anonymously'), true, true) + oppg(false) +
+        (skjema ? '<form class="hs-skjema" id="sosSkjema"><label for="sosInput">' + T('Ingen får vite at det var deg', 'Nobody will know it was you') + '</label>' +
+            '<textarea id="sosInput" rows="3" maxlength="160" placeholder="' + T('Svaret ditt …', 'Your answer …') + '">' + (hsEndre ? esc(s.mittSvar || '') : '') + '</textarea>' +
+            '<button class="rom-stor-knapp" type="submit">' + T('Send anonymt', 'Send anonymously') + '</button></form>'
+          : '<div class="hs-sendt' + (sInn ? ' inn' : '') + '">' + HS_KONVOLUTT + '<p>' + T('Sendt anonymt', 'Sent anonymously') + '</p><button type="button" class="hs-endre" data-g="hs-endre">' + T('Endre svaret', 'Edit your answer') + '</button></div>') +
+        hodeBenk(alle, { oppe: s.harSkrevet || [], status: (s.harSkrevet || []).length + T(' av ', ' of ') + n + T(' har svart', ' answered') });
     }
-    return '<p class="dl-melding dl-stor">' + T('Alle svarene er avslørt!', 'All the answers are revealed!') + '</p>' + (erVert() ? nyRundeKnapp(T('Nytt spørsmål', 'New question')) : '<p class="small">' + T('Venter på at verten tar et nytt spørsmål …', 'Waiting for the host to pick a new question …') + '</p>');
+    if (s.fase === 'gjett' || s.fase === 'fasit') {
+      var k = (s.runde || 1) + ':' + s.i + ':' + s.fase, inn = hsVist !== k; hsVist = k;
+      var ut = hsTopp(s, s.fase === 'gjett' ? T('Hvem sendte den?', 'Who sent it?') : T('Avslørt', 'Revealed'), s.fase === 'gjett', s.fase === 'gjett') + oppg(true) + hsMelding(s, inn);
+      if (s.fase === 'gjett') {
+        if (s.erMitt) return ut + '<p class="lh-maske">' + T('Det er din.<br>Hold masken.', 'It’s yours.<br>Keep a straight face.') + '</p>' + hsStatus(s, n);
+        return ut + '<div class="hs-valg' + (inn ? ' inn' : '') + '">' + alle.filter(function (p) { return p.id !== meg; }).map(function (p, i) {
+          return '<button type="button" data-g="hs-stem" data-paa="' + p.id + '" aria-pressed="' + (s.minStemme === p.id) + '" style="--i:' + i + '">' + nrHode(p.id) + '<span>' + esc(p.navn) + '</span></button>'; }).join('') + '</div>' + hsStatus(s, n);
+      }
+      var st = s.stemmer || {}, ider = Object.keys(st), riktige = ider.filter(function (id) { return st[id] === s.forfatter; }), mitt = st[meg], erMin = s.forfatter === meg;
+      var dom = erMin ? (riktige.length ? ['', T('Avslørt – ', 'Caught – ') + riktige.length + T(' gjettet deg', ' guessed you')] : ['gul', T('Ingen gjettet deg – del ut 2', 'Nobody guessed you – hand out 2')])
+        : !mitt ? ['', T('Du gjettet ikke', 'You didn’t guess')] : mitt === s.forfatter ? ['rett', T('Riktig gjettet', 'Right guess')] : ['feil', T('Feil – drikk 1', 'Wrong – drink 1')];
+      ut += '<div class="hs-dom ' + dom[0] + (inn ? ' inn' : '') + '"><b>' + dom[1] + '</b></div>' +
+        '<ul class="hs-gjett' + (inn ? ' inn' : '') + '">' + ider.map(function (id, i) {
+          var r = st[id] === s.forfatter;
+          return '<li class="' + (r ? 'rett' : '') + '" style="--i:' + i + '">' + nrHode(id, '', r ? '' : 'flat') + '<span>' + hsNavn(id) + '</span><small>' + T('gjettet', 'guessed') + '</small><b>' + (st[id] === meg ? T('deg', 'you') : esc(navn(st[id]))) + '</b><em>' + (r ? T('Riktig', 'Right') : T('Drikk 1', 'Drink 1')) + '</em></li>';
+        }).join('') + '</ul>' +
+        (!erMin && !riktige.length && ider.length ? '<p class="hs-info">' + esc(navn(s.forfatter)) + T(' lurte alle – deler ut 2', ' fooled everyone – hands out 2') + '</p>' : '');
+      return ut + (erVert() ? '<button class="rom-stor-knapp" data-g="hs-neste" type="button">' + (s.i + 1 < s.antallSvar ? T('Neste melding', 'Next message') : T('Se hvem som gjemte seg best', 'See who hid best')) + '</button>' : '');
+    }
+    var logg = s.logg || [], best = logg.slice().sort(function (a, b) { return b.lurte - a.lurte; })[0];
+    return hsTopp(s, T('Alle avslørt', 'All revealed'), false) +
+      (best && best.lurte ? '<div class="hs-best"><span>' + T('Best gjemt', 'Hid best') + '</span><b>' + hsNavn(best.av) + '</b><small>' + T('lurte ', 'fooled ') + best.lurte + '</small></div>' : '') +
+      '<ul class="hs-alle">' + logg.map(function (x, i) { return '<li style="--i:' + i + '">' + nrHode(x.av) + '<span><b>' + hsNavn(x.av) + '</b>' + esc(x.t) + '</span></li>'; }).join('') + '</ul>' +
+      (erVert() ? nyRundeKnapp(T('Nytt spørsmål', 'New question')) : '<p class="nr-vent">' + esc(navn(tilstand.vert)) + T(' tar neste spørsmål.', ' picks the next question.') + '</p>');
   }
 
   function bloffSpill(s) {
@@ -2771,17 +2805,47 @@ export function startRom(LEKNAVN, LANG) {
       (erVert() ? nyRundeKnapp(T('Neste spørsmål', 'Next question')) : '');
   }
 
+  /* ---------- Saueflokken: finn flokken din. Står du alene, er du et svart får. ---------- */
+  var smVist = '', smSlaa = null, smSendtVist = '';
+  var SM_SAU = '<svg class="sm-sau" viewBox="0 0 64 48" aria-hidden="true"><g class="ull"><circle cx="20" cy="22" r="10"/><circle cx="32" cy="16" r="11"/><circle cx="44" cy="22" r="10"/><circle cx="26" cy="30" r="10"/><circle cx="40" cy="30" r="10"/></g><ellipse class="fjes" cx="12" cy="26" rx="7" ry="8"/><circle class="oye" cx="10" cy="24" r="1.6"/><path class="bein" d="M24 38v8M40 38v8"/></svg>';
   function sammeSpill(s) {
-    var n = tilstand.spillere.length;
-    if (s.fase === 'skriv') return '<p class="rom-etikett">' + T('Skriv ett svar – tenk som de andre', 'Write one answer – think like the others') + '</p><p class="rom-sporsmal">' + esc(s.oppgave) + '</p>' +
-      (s.mittSvar ? '<p class="small">' + T('Du skrev: <b>', 'You wrote: <b>') + esc(s.mittSvar) + '</b></p>' : '') + skriveFelt(T('Ditt svar …', 'Your answer …'), s.mittSvar ? T('Endre', 'Change') : 'Send', 40) +
-      '<p class="rom-status">' + s.harSkrevet.length + T(' av ', ' of ') + n + T(' har svart', ' have answered') + '</p>' + fristHtml(tilstand.spill, T('sekunder igjen', 'seconds left'));
-    var med = {}; (s.grupper || []).forEach(function (g) { g.ider.forEach(function (id) { med[id] = 1; }); });
-    var uten = tilstand.spillere.filter(function (p) { return !med[p.id]; }).map(function (p) { return p.id; });
-    return '<p class="rom-sporsmal">' + esc(s.oppgave) + '</p><ul class="sm-grupper">' + (s.grupper || []).map(function (g) {
-        return '<li class="' + (g.ider.length > 1 ? 'trygg' : 'alene') + '"><b>' + esc(g.t) + '</b><span>' + hvem(g.ider) + '</span><small>' + (g.ider.length > 1 ? T('Trygge ✓', 'Safe ✓') : T('Alene – drikk 1', 'Alone – drink 1')) + '</small></li>';
-      }).join('') + (uten.length ? '<li class="alene"><b>' + T('Ingen svar', 'No answer') + '</b><span>' + hvem(uten) + '</span><small>' + T('Drikk 1', 'Drink 1') + '</small></li>' : '') + '</ul>' +
-      (erVert() ? nyRundeKnapp(T('Nytt spørsmål', 'New question')) : '');
+    var alle = tilstand.spillere || [], n = alle.length, meg = tilstand.meg, vert = erVert();
+    var et = T('Saueflokken · runde ', 'The herd · round ') + (s.runde || 1);
+    var opp = '<div class="nr-kort sm-oppgave' + (s.fase === 'fasit' ? ' liten' : '') + '"><p>' + esc(s.oppgave) + '</p></div>';
+    if (s.fase === 'skriv') {
+      smSlaa = null;
+      var sk = (s.runde || 1) + ':' + (s.mittSvar || ''), sInn = smSendtVist !== sk; if (s.mittSvar) smSendtVist = sk;
+      return jaTopp(et, T('Tenk som flokken', 'Think like the herd'), true, true) + opp +
+        (s.mittSvar ? '<div class="sm-sendt' + (sInn ? ' inn' : '') + '">' + SM_SAU + '<p><b>«' + esc(s.mittSvar) + '»</b>' + T('ligger i flokken', 'is in the herd') + '</p></div>' +
+            '<form class="sm-skjema" id="sosSkjema"><input id="sosInput" maxlength="40" autocomplete="off" enterkeyhint="send" aria-label="' + T('Bytt ord', 'Change word') + '" placeholder="' + T('Bytt ord …', 'Change word …') + '"><button class="btn ghost" type="submit">' + T('Bytt', 'Change') + '</button></form>'
+          : '<form class="sm-skjema stor" id="sosSkjema"><label for="sosInput">' + T('Ett ord', 'One word') + '</label><input id="sosInput" maxlength="40" autocomplete="off" enterkeyhint="send" placeholder="' + T('Det flokken tenker', 'What the herd thinks') + '"><button class="rom-stor-knapp" type="submit">Send</button></form>') +
+        hodeBenk(alle, { oppe: s.harSkrevet || [], status: (s.harSkrevet || []).length + T(' av ', ' of ') + n + T(' har skrevet', ' wrote') });
+    }
+    // Flokkene kommer én og én: de som står alene først, den største flokken sist (øverst)
+    var k = (s.runde || 1) + ':' + (s.slaatt || 0), forste = smVist.split(':')[0] !== String(s.runde || 1), inn = smVist !== k; smVist = k;
+    var gr = (s.grupper || []).map(function (g, i) { return { g: g, i: i }; }), med = {};
+    gr.forEach(function (x) { x.g.ider.forEach(function (id) { med[id] = 1; }); });
+    var uten = alle.filter(function (p) { return !med[p.id]; }).map(function (p) { return p.id; });
+    var maks = gr.reduce(function (m, x) { return Math.max(m, x.g.ider.length); }, 0), flere = gr.filter(function (x) { return x.g.ider.length === maks; }).length;
+    var vis = gr.slice().sort(function (a, b) { return b.g.ider.length - a.g.ider.length; }), antall = vis.length + (uten.length ? 1 : 0), STEG = 700;
+    var kan = !!(smSlaa && vert);
+    var flokk = function (tekst, ider, alene, stor, i, j) {
+      var valgt = kan && smSlaa.valgt === i, tag = kan && i != null ? 'button' : 'div';
+      return '<' + tag + (tag === 'button' ? ' type="button" data-g="sm-kort" data-i="' + i + '" aria-pressed="' + valgt + '"' : '') +
+        ' class="sm-flokk ' + (alene ? 'alene' : stor ? 'stor' : 'trygg') + (forste && inn ? ' inn' : '') + (kan && i != null ? ' velg' : '') + (valgt ? ' valgt' : '') + '" style="--f:' + (forste ? (antall - 1 - j) * STEG : 0) + 'ms">' +
+        '<span class="sm-topp"><b>' + esc(tekst) + '</b><small>' + (i == null ? T('Ingen svar · drikk 1', 'No answer · drink 1') : alene ? T('Svart får · drikk 1', 'Black sheep · drink 1') : stor ? ider.length + T(' i flokken', ' in the herd') : T('Trygge', 'Safe')) + '</small></span>' +
+        '<span class="sm-hoder' + (inn ? ' hopp' : '') + '">' + ider.map(function (id, h) { return '<span style="--h:' + h + '">' + nrHode(id, '', alene ? 'oi' : '') + '</span>'; }).join('') + '</span>' +
+        (stor ? '<em class="sm-stempel">' + T('Flokken!', 'The herd!') + '</em>' : '') + '</' + tag + '>';
+    };
+    var kort = vis.map(function (x, j) { var alene = x.g.ider.length === 1; return flokk(x.g.t, x.g.ider, alene, !alene && x.g.ider.length === maks && flere === 1, x.i, j); }).join('') +
+      (uten.length ? flokk(T('Ingen svar', 'No answer'), uten, true, false, null, vis.length) : '');
+    var minG = gr.find(function (x) { return x.g.ider.indexOf(meg) !== -1; });
+    var dom = !alle.some(function (p) { return p.id === meg; }) ? null : !minG ? ['feil', T('Ingen svar – drikk 1', 'No answer – drink 1')] : minG.g.ider.length === 1 ? ['feil', T('Svart får – drikk 1', 'Black sheep – drink 1')] : ['rett', T('Du er trygg', 'You’re safe')];
+    return jaTopp(et, T('Flokkene', 'The herds'), false) + opp + '<div class="sm-flokker">' + kort + '</div>' +
+      (dom ? '<div class="hs-dom ' + dom[0] + (forste && inn ? ' inn' : '') + '" style="--f:' + (forste ? antall * STEG : 0) + 'ms"><b>' + dom[1] + '</b></div>' : '') +
+      (vert ? '<div class="sm-vert"><button type="button" class="btn ghost' + (smSlaa ? ' paa' : '') + '" data-g="sm-slaa-modus">' + (!smSlaa ? T('Slå sammen', 'Merge') : smSlaa.valgt == null ? T('Trykk på et svar', 'Tap an answer') : T('Trykk på det andre', 'Tap the other one')) + '</button>' +
+          '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Nytt spørsmål', 'New question') + '</button></div>'
+        : '<p class="nr-vent">' + esc(navn(tilstand.vert)) + T(' tar neste spørsmål.', ' picks the next question.') + '</p>');
   }
 
   function spionSpill(s) {
@@ -4095,6 +4159,14 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'vann-naa') return gjor({ handling: 'vann-naa' });
     if (g === 'vann-auto') return gjor({ handling: tilstand.vannAv ? 'vann-paa' : 'vann-av' });
     if (g === 'hs-stem') return gjor({ handling: 'hs-stem', hvem: b.dataset.paa });
+    if (g === 'hs-endre') { hsEndre = true; tegn(); var hi = document.getElementById('sosInput'); if (hi) hi.focus(); return; }
+    if (g === 'sm-slaa-modus') { smSlaa = smSlaa ? null : { valgt: null }; return tegn(); }
+    if (g === 'sm-kort') {
+      if (!smSlaa) return;
+      var ix = Number(b.dataset.i);
+      if (smSlaa.valgt == null || smSlaa.valgt === ix) { smSlaa.valgt = smSlaa.valgt === ix ? null : ix; return tegn(); }
+      var fraI = smSlaa.valgt; smSlaa = null; return gjor({ handling: 'sm-slaa', fra: fraI, til: ix });
+    }
     if (g === 'sp-stem') return gjor({ handling: 'sp-stem', hvem: b.dataset.paa });
     if (g === 'sp-gjett') return gjor({ handling: 'sp-gjett', sted: b.dataset.sted });
     if (g === 'bf-stem') return gjor({ handling: 'bf-stem', i: Number(b.dataset.i) });

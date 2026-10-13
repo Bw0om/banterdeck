@@ -178,6 +178,14 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **Nyhetsrunden:** the top is a newspaper masthead (NYHETSRUNDEN, week and question number). Real heads replace the initial pills everywhere: on the answer options, as pins on the number line, in the lists and on the podium. On the reveal the heads hop into the answer they chose, and the answer flag drops in last. The podium rises and the winner gets the crown.
 - **Short pause before the reveal:** when everyone has answered or voted, the clock drops to 2 s, the same as Pekeleken on the phones. Players can still change their answer, and the reveal feels like a moment.
 
+## Saueflokken and Ukjent avsender
+
+- **Saueflokken:** everyone writes one word while the heads rise on the bench. The herds are revealed one at a time, 700 ms apart: the lone answers come first as "black sheep" (pink, with the OI face, drink 1), then the herds, and the biggest herd last with the FLOKKEN! stamp. The heads hop into their herd.
+- **Merging herds:** the host can tap "Slå sammen", then two answer cards, to merge answers that are really the same ("pepperoni" and "peperoni"). Anyone who stood alone and is now in a herd gets their sip back.
+- **Ukjent avsender:** your answer folds into an envelope. The answers then arrive one by one as a message from "Ukjent avsender", with typing dots first. Everyone taps the head of the person they think wrote it. The bench is hidden while guessing, because a head that never rises would give the author away.
+- **The reveal:** "Ukjent avsender" turns into the name, and the author's head pops in as the profile picture. The last screen names "Best gjemt", the player who fooled the most people.
+- **Short pause:** when everyone has written or guessed, both games wait 2 s before moving on, the same as Løgnhalsen and Nyhetsrunden.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

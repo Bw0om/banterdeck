@@ -241,6 +241,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
       runde: s.runde || 1, lurtTavle: lurtTavle(data),
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, sikker: s.sikker || {}, drikker: s.drikker, utdeling: s.utdeling || [], lurte: s.lurte || 0 } : null });
     const off = offentligTekst(s, data); if (off) spill.offentlig = off;
+    if (s.type === 'samme' || s.type === 'hvemskrev') spill.sos = sosVisning(s, null, data);
     if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
     if (s.type === 'regelfabrikken') spill.rf = ekstraVisning(s, null, data);
   }
@@ -2749,7 +2750,7 @@ function startSos(data: any, lek: string, ider: string[]): any {
 function sosNyRunde(data: any) {
   const s = data.spill, ider = data.spillere.map((p: any) => p.id);
   s.frist = null;
-  if (s.type === 'hvemskrev') { s.fase = 'skriv'; s.oppgave = trekkFra(s, 'oppg', sosListe('hvemskrev')); s.svar = {}; s.ko = []; s.i = 0; s.stemmer = {}; settFrist(s, SFRIST.skriv); }
+  if (s.type === 'hvemskrev') { s.fase = 'skriv'; s.oppgave = trekkFra(s, 'oppg', sosListe('hvemskrev')); s.svar = {}; s.ko = []; s.i = 0; s.stemmer = {}; s.logg = []; settFrist(s, SFRIST.skriv); }
   if (s.type === 'bloff') { const q = trekkFra(s, 'q', sosListe('bloff')); s.fase = 'skriv'; s.q = q.q; s.sant = q.a; s.falske = {}; s.valg = []; s.stemmer = {}; settFrist(s, SFRIST.bloffSkriv); }
   if (s.type === 'samme') { s.fase = 'skriv'; s.oppgave = trekkFra(s, 'oppg', sosListe('samme')); s.svar = {}; s.grupper = null; settFrist(s, SFRIST.samme); }
   if (s.type === 'spion') {
@@ -2769,8 +2770,11 @@ function hsFasit(data: any) {
   const riktige = Object.keys(s.stemmer).filter((id) => s.stemmer[id] === forfatter);
   Object.keys(s.stemmer).forEach((id) => { if (s.stemmer[id] !== forfatter) giSlurker(data, id, 1); });
   if (!riktige.length && Object.keys(s.stemmer).length) giUtdeling(data, forfatter, 2);
+  (s.logg = s.logg || []).push({ av: forfatter, t: s.svar[forfatter], lurte: Object.keys(s.stemmer).length - riktige.length });
   s.fase = 'fasit'; s.frist = null;
 }
+/** Alle har svart eller stemt: klokka kortes ned til 2 s, så avsløringen blir et øyeblikk (og man rekker å angre). */
+function sosPust(s: any) { const kort = Date.now() + 2000 + 1500; if (!s.frist || s.frist > kort) s.frist = kort; }
 function hsStartGjett(data: any) {
   const s = data.spill; s.ko = stokk(Object.keys(s.svar)); s.i = 0; s.fase = 'gjett'; s.stemmer = {}; settFrist(s, SFRIST.stem);
 }
@@ -2839,14 +2843,14 @@ function sosHandling(data: any, meg: any, h: any): any {
       if (s.fase !== 'skriv') return feilL('for-sent', 'Skrivetiden er ute.', 'Writing time is up.');
       const t = rens(h.tekst, 160); if (!t) return { ok: true };
       s.svar[meg.id] = t;
-      if (alleHar(data, s.svar)) hsStartGjett(data);
+      if (alleHar(data, s.svar)) sosPust(s);   // alle har svart: et lite pust, så starter gjettingen
       return { ok: true };
     }
     if (hd === 'hs-stem') {
       if (s.fase !== 'gjett' || s.ko[s.i] === meg.id) return { ok: true };
       if (!data.spillere.some((p: any) => p.id === h.hvem) || h.hvem === meg.id) return { feil: 'ukjent' };
       s.stemmer[meg.id] = h.hvem;
-      if (alleHar(data, s.stemmer, [s.ko[s.i]])) hsFasit(data);
+      if (alleHar(data, s.stemmer, [s.ko[s.i]])) sosPust(s);
       return { ok: true };
     }
     if (hd === 'hs-neste') {
@@ -2894,7 +2898,20 @@ function sosHandling(data: any, meg: any, h: any): any {
     if (hd === 'sm-skriv') {
       if (s.fase !== 'skriv') return feilL('for-sent', 'Tiden er ute.', "Time's up.");
       const t = rens(h.tekst, 40); if (!t) return { ok: true };
-      s.svar[meg.id] = t; if (alleHar(data, s.svar)) smFasit(data); return { ok: true };
+      s.svar[meg.id] = t; if (alleHar(data, s.svar)) sosPust(s); return { ok: true };
+    }
+    if (hd === 'sm-slaa') {
+      // Verten slår sammen to svar som egentlig er like («pepperoni» og «peperoni»)
+      if (s.fase !== 'fasit' || !s.grupper) return { ok: true };
+      if (!erVert) return feilL('bare-vert', 'Verten slår sammen svar.', 'The host merges answers.');
+      const fra = s.grupper[Number(h.fra)], til = s.grupper[Number(h.til)];
+      if (!fra || !til || fra === til) return { ok: true };
+      // De som stod alene og nå er i en flokk, slipper slurken likevel
+      [fra, til].forEach((g: any) => { if (g.ider.length === 1) giSlurker(data, g.ider[0], -1); });
+      til.ider.push(...fra.ider);
+      s.grupper = s.grupper.filter((g: any) => g !== fra).sort((a: any, b: any) => b.ider.length - a.ider.length);
+      s.slaatt = (s.slaatt || 0) + 1;
+      return { ok: true };
     }
     if (hd === 'tid-ute' && fristUte(s) && s.fase === 'skriv') smFasit(data);
     return { ok: true };
@@ -2984,6 +3001,7 @@ function sosVisning(s: any, meg: any, data: any) {
     erMitt: (s.fase === 'gjett' || s.fase === 'fasit') && s.ko[s.i] === m,
     harStemt: Object.keys(s.stemmer || {}), minStemme: m ? (s.stemmer || {})[m] || null : null,
     forfatter: s.fase === 'fasit' ? s.ko[s.i] : null, stemmer: s.fase === 'fasit' ? s.stemmer : null,
+    runde: s.runde || 1, logg: s.fase === 'ferdig' ? s.logg || [] : null,
   };
   if (s.type === 'bloff') return {
     fase: s.fase, q: s.q, harSkrevet: Object.keys(s.falske), mittSvar: m ? s.falske[m] || null : null,
@@ -2991,7 +3009,7 @@ function sosVisning(s: any, meg: any, data: any) {
     harStemt: Object.keys(s.stemmer), minStemme: m ? s.stemmer[m] ?? null : null, stemmer: s.fase === 'fasit' ? s.stemmer : null,
     sant: s.fase === 'fasit' ? s.sant : null,
   };
-  if (s.type === 'samme') return { fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null, grupper: s.fase === 'fasit' ? s.grupper : null };
+  if (s.type === 'samme') return { fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null, grupper: s.fase === 'fasit' ? s.grupper : null, runde: s.runde || 1, slaatt: s.slaatt || 0 };
   if (s.type === 'spion') {
     const aapen = s.fase === 'fasit';
     return { fase: s.fase, erSpion: m === s.spion, sted: m !== s.spion || aapen ? s.sted : null, steder: s.utvalg || sosListe('steder'), start: s.start,
