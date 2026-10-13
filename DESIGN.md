@@ -242,6 +242,17 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **Pick a game:** "Send rundt" (the phone goes hand to hand) or "Verten leser" (the host reads out loud). One-phone games: Jeg har aldri, Pekeleken, Nødt eller sannhet.
 - **Playing:** a big card, the reader rotates (host, then the sofa). The host taps the heads of those who drink (they rise with "Drikk"), then taps the card for the next one; sips are counted per person, also for the sofa. The room stays open: anyone joining later lands straight in the game.
 
+## Skrøna and Bussruta
+
+- **Skrøna: the encyclopedia that lies.** The question sits as an entry on an encyclopedia page (pink margin line, "LEKSIKON · OPPSLAG n" up the margin). Everyone makes up a fake answer; it is typed onto the page in a typewriter face as you write. The app adds the real answer itself and stops anyone who writes the real one.
+  - **Picking:** all suggestions stand as numbered meanings; your pick gets a yellow highlighter stroke. You can switch until everyone has picked (then 2 s).
+  - **Answer:** fibs are struck through with a red pen, the author's head appears in the margin with a handwritten note (Fraunces italic) saying who it fooled, and the real one is circled in green. Fooled or no pick = drink 1; the author hands out 1 per person fooled.
+  - Deliberately no cards or stamps, so it does not look like To sannheter. Five entries per round (five small books), the next comes by itself, then "Beste skrønemaker". "Visste du at …" shows only when an entry has a fact.
+- **Bussruta: ticket, pyramid, bus.** A line map shows where you are instead of "round 1 of 3".
+  - **The ticket:** four questions on your turn; the cards flip into your fan.
+  - **The pyramid** flips by itself: only the host's phone drives it, one card every three seconds (the server ignores faster or non-host flips), then the bus starts. If you have the card, "Du har den! Del ut n".
+  - **The bus** drives one stop per safe card and rolls back to the start on a face card or ace. At the finish: "Hva nå?".
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
