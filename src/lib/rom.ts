@@ -1782,7 +1782,7 @@ function handlingInne(data: any, meg: any, h: any) {
     }
     case 'lh-bytt': {  // Løgnhalsen: den som har tur kan bytte kort én gang (f.eks. et kort de aldri har opplevd)
       if (!s || s.type !== 'forraeder' || s.fase !== 'svar' || s.byttet) return { ok: true };
-      if (meg.id !== s.aktiv) return { feil: 'ikke-din-tur' };
+      if (meg.id !== s.aktiv && !erVert) return { feil: 'ikke-din-tur' };
       if (!s.kø.length) s.kø = stokk(s.alle.slice());
       s.tekst = s.kø.pop(); s.byttet = true;
       return { ok: true };
@@ -2357,7 +2357,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
     }
     case 'opus': {
       if (h.handling === 'kast') {
-        if (meg.id !== s.holder) return feilL('ikke-din-tur', 'Det er ikke du som har terningen.', "You don't have the die.");
+        if (meg.id !== s.holder && !erVert) return feilL('ikke-din-tur', 'Det er ikke du som har terningen.', "You don't have the die.");
         s.kast = 1 + tilfeldig(6); s.antall++; s.nr++;
         if (s.kast === 6) { const i = ider.indexOf(s.holder); s.holder = ider[(i + 1) % ider.length]; s.fra = meg.id; }
         return { ok: true };
@@ -2424,8 +2424,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         s.fase = 'lop'; s.frist = null; s.sistSnu = Date.now(); melde(data, 'Løpet er i gang!', "And they're off!"); return { ok: true };
       }
       if (h.handling === 'snu' && s.fase === 'lop') {
-        // Bare telefonen til verten driver løpet, ett kort i sekundet (ingen andre trenger telefonen oppe)
-        if (!erVert) return { ok: true };
+        // Løpet drives av den telefonen som er våken (verten først), ett kort i sekundet – serveren holder takten
         if (Date.now() - (s.sistSnu || 0) < 700) return { ok: true };
         s.sistSnu = Date.now(); s.n = (s.n || 0) + 1;
         if (!s.stokk.length) s.stokk = kortstokk52().filter((k: any) => k.v !== 14);
@@ -2449,8 +2448,8 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
     }
     case 'pyramiden': {
       if (h.handling === 'snu') {
-        // Bare vertens telefon snur – ett kort hvert tiende sekund. Påstander ingen ropte løgn på, står.
-        if (meg.id !== data.vert || s.ferdig) return { ok: true };
+        // Ett kort hvert tiende sekund, drevet av den telefonen som er våken. Påstander ingen ropte løgn på, står.
+        if (s.ferdig) return { ok: true };
         if (Date.now() - (s.snuddVed || 0) < PY_VINDU - 600) return { ok: true };
         s.pastander.filter((p: any) => p.pos === s.pos - 1 && !p.avgjort).forEach((p: any) => {
           p.avgjort = 'godtatt'; if (p.kort.v !== s.pyr[p.pos].v) s.lurt[p.id] = (s.lurt[p.id] || 0) + 1;
@@ -2492,7 +2491,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
       const gi = ider.filter((id: string) => s.hender && s.hender[id]);
       if (h.handling === 'nytt' || h.handling === 'runde') { if (meg.id !== data.vert) return { feil: 'bare-vert' }; return startEkstra(data, 'gris'); }
       if (h.handling === 'gr-tikk') {
-        if (meg.id !== data.vert) return { ok: true };
+        if (!s.hender || !s.hender[meg.id] && meg.id !== data.vert) return { ok: true };
         const naa = Date.now();
         if (s.fase === 'send' && naa - (s.sendVed || 0) >= GR_BYTT - 300) {
           // Valgte du ikke, sendes kortet lengst til venstre
@@ -2544,7 +2543,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
       const turId = ider[s.tur];
       if (h.handling === 'pr-tikk') {
         // Vertens telefon: 20 s per tur. Ute? Da passes det – eller laveste kort legges om du starter.
-        if (meg.id !== data.vert || s.fase === 'ferdig' || !turId) return { ok: true };
+        if (s.fase === 'ferdig' || !turId) return { ok: true };
         if (Date.now() - (s.turVed || 0) < PR_TUR - 300) return { ok: true };
         const p = data.spillere.find((x: any) => x.id === turId) || { id: turId, navn: navnPaa(data, turId) };
         return ekstraHandling(data, p, s.bord.length ? { handling: 'pass' } : { handling: 'legg', kort: [0] });
@@ -2552,6 +2551,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
       if (h.handling === 'nytt' || h.handling === 'runde') { if (meg.id !== data.vert) return { feil: 'bare-vert' }; nyPresidentRunde(data, s); return { ok: true }; }
       if (h.handling === 'legg' || h.handling === 'pass') {
         if (s.fase === 'ferdig') return { ok: true };
+        if (turId !== meg.id && meg.id === data.vert && h.handling === 'pass') { const p = data.spillere.find((x: any) => x.id === turId) || { id: turId, navn: navnPaa(data, turId) }; return ekstraHandling(data, p, { handling: 'pass' }); }
         if (turId !== meg.id) return feilL('ikke-din-tur', 'Vent på tur.', 'Wait for your turn.');
         const hand = s.hender[meg.id];
         if (h.handling === 'pass') {
@@ -2839,7 +2839,7 @@ function nyeHandling(data: any, meg: any, h: any): any {
     const aktiv = s.ider[s.tur];
     if (h.handling === 'br-svar') {
       if (s.fase !== 1) return { ok: true };
-      if (meg.id !== aktiv && !(erVert && !data.spillere.some((p: any) => p.id === aktiv))) return feilL('ikke-din-tur', 'Det er ikke din tur.', "It's not your turn.");
+      if (meg.id !== aktiv && !erVert) return feilL('ikke-din-tur', 'Det er ikke din tur.', "It's not your turn.");
       const v = String(h.v || ''), k = brTrekk(s), hand = s.hender[aktiv];
       let ok = false;
       if (s.steg === 0) ok = (v === 'rod') === (k.f === '♥' || k.f === '♦');
@@ -2858,8 +2858,7 @@ function nyeHandling(data: any, meg: any, h: any): any {
     }
     if (h.handling === 'br-snu') {
       if (s.fase !== 2 || s.pyrPos >= 15) return { ok: true };
-      // Pyramiden snus av seg selv: bare telefonen til verten driver den, ett kort hvert tredje sekund
-      if (!erVert) return { ok: true };
+      // Pyramiden snus av seg selv, ett kort hvert tredje sekund – den telefonen som er våken driver den
       if (Date.now() - (s.sistSnu || 0) < 2200) return { ok: true };
       if (typeof h.pos === 'number' && h.pos !== s.pyrPos) return { ok: true };
       s.sistSnu = Date.now();
@@ -2874,7 +2873,6 @@ function nyeHandling(data: any, meg: any, h: any): any {
     }
     if (h.handling === 'br-buss') {
       if (s.fase !== 2 || s.pyrPos < 15) return { ok: true };
-      if (!erVert) return { ok: true };
       if (Date.now() - (s.sistSnu || 0) < 2200) return { ok: true };
       const maks = Math.max(...s.ider.map((id: string) => s.hender[id].length));
       const kand = s.ider.filter((id: string) => s.hender[id].length === maks);
@@ -2898,7 +2896,7 @@ function nyeHandling(data: any, meg: any, h: any): any {
     return null;
   }
   if (s.type === 'yatzy') {
-    const aktiv = s.ider[s.tur], kanStyre = meg.id === aktiv || (erVert && !data.spillere.some((p: any) => p.id === aktiv));
+    const aktiv = s.ider[s.tur], kanStyre = meg.id === aktiv || erVert;
     if (h.handling === 'yz-kast') {
       if (s.ferdig) return { ok: true };
       if (!kanStyre) return feilL('ikke-din-tur', 'Det er ikke din tur.', "It's not your turn.");

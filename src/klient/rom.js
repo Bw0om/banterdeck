@@ -856,6 +856,15 @@ export function startRom(LEKNAVN, LANG) {
     return topp + kortHtml + '<div class="en-midt">' + midt + '</div>' +
       '<button type="button" class="rom-stor-knapp en-neste' + (klar ? '' : ' svak') + '" data-g="en-neste">' + T('Neste kort – ', 'Next card – ') + esc(navn(s.neste)) + T(' leser', ' reads') + '</button>';
   }
+  /** Første gang som vert: tre ting som ellers er lette å gå glipp av. Lukkes én gang per telefon. */
+  function vertIntro() {
+    if (les('bd_vert_intro')) return '';
+    var rad = function (g, ikon, tittel, tekst) { return '<button type="button" class="vert-intro-rad" data-g="' + g + '"><span aria-hidden="true">' + ikon + '</span><b>' + tittel + '</b><small>' + tekst + '</small></button>'; };
+    return '<div class="vert-intro"><div class="vert-intro-topp"><b>' + T('Første gang som vert?', 'First time hosting?') + '</b><button type="button" class="linkbtn" data-g="vert-intro-lukk">' + T('Skjønner', 'Got it') + '</button></div>' +
+      rad('skjerm', '📺', T('Få rommet opp på TV-en', 'Get the room on the TV'), T('Åpne mittvors.no/tv på TV-en og skann QR-koden – eller speil telefonen.', 'Open mittvors.no/tv on the TV and scan the QR code – or mirror your phone.')) +
+      rad('sofa-start', '🛋️', T('Ingen andre telefoner?', 'No other phones?'), T('Spill med bare din: skriv inn hvem som er her, så får de plass i sofaen.', 'Play with just yours: type in who’s here and they get a seat on the sofa.')) +
+      rad('figur-ark', '🧢', T('Figuren din i stua', 'Your figure in the room'), T('Trykk på deg selv for å vinke. Lås opp luer, briller og bevegelser ved å spille.', 'Tap yourself to wave. Unlock hats, glasses and moves by playing.')) + '</div>';
+  }
   function lobby() {
     var t = tilstand;
     if (t.valgt && !visAlle) return valgtLobby();
@@ -866,7 +875,7 @@ export function startRom(LEKNAVN, LANG) {
     }
     if (sofaModus()) return sofaLobby();
     var borsFull = t.bors && t.bors.paa && !t.bors.fokus ? '<p><button class="btn ghost" data-g="bs-fokus" type="button">' + T('📈 Gjør Vorsbørsen til hovedspill', '📈 Make the Exchange the main game') + '</button></p>' : '';
-    return plassInfo() + planBoks() +
+    return plassInfo() + planBoks() + vertIntro() +
       '<h2 class="rom-h2 rom-steg"><span>1</span>' + T('Få med alle', 'Get everyone in') + '</h2>' + qrBoks() +
       '<p class="small rom-antall">' + (t.spillere.length > 1 ? '👥 ' + t.spillere.length + T(' er med: ', ' are in: ') + t.spillere.map(function (p) { return esc(p.navn); }).join(', ') : T('👤 Bare du er med ennå – vis dem QR-koden eller trykk «Inviter» øverst.', '👤 Just you so far – show them the QR code or tap “Invite” at the top.')) + '</p>' +
       romValg() + gjengBoks() +
@@ -999,16 +1008,6 @@ export function startRom(LEKNAVN, LANG) {
         var mod = l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*';
         return '<button type="button" class="rom-anbefalt-lek" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(mod) + '">' + klistremerke(l.id, 'rom-anbefalt-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><i aria-hidden="true">▶</i></button>';
       }).join('') + '</div>';
-  }
-  /** Første gang som vert: tre steg som forklarer hvordan rommet funker. */
-  function vertIntro() {
-    if (les('bd_intro_vert')) return '';
-    var n = tilstand.spillere.length;
-    return '<div class="rom-intro"><p class="rom-etikett">' + T('Første gang? Slik funker det', 'First time? Here’s how it works') + '</p><ol>' +
-      '<li class="' + (n > 1 ? 'ok' : '') + '"><b>' + T('Få med vennene', 'Get your friends in') + '</b><span>' + T('De skanner QR-koden under, eller går til mittvors.no og skriver koden <b>' + esc(kode) + '</b>.', 'They scan the QR code below, or go to mittvors.no and enter the code <b>' + esc(kode) + '</b>.') + (n > 1 ? ' <b>' + n + T(' er med ✓', ' are in ✓') + '</b>' : '') + '</span></li>' +
-      '<li><b>' + T('Velg en lek', 'Pick a game') + '</b><span>' + T('Usikker? Trykk på en av de anbefalte lekene.', 'Not sure? Tap one of the suggested games.') + '</span></li>' +
-      '<li><b>' + T('Alle spiller på sin egen telefon', 'Everyone plays on their own phone') + '</b><span>' + T('Du er verten og bestemmer når det er ny lek. De andre følger med på skjermen sin.', 'You’re the host and decide when it’s time for a new game. Everyone else follows along on their screen.') + '</span></li></ol>' +
-      '<button class="linkbtn" data-g="intro-lukk" data-k="bd_intro_vert" type="button">' + T('Skjønner – skjul dette', 'Got it – hide this') + '</button></div>';
   }
   /** Første gang som gjest: hva som skjer nå. */
   function gjestIntro() {
@@ -2391,15 +2390,17 @@ export function startRom(LEKNAVN, LANG) {
      telefonen til verten snur ett kort i sekundet, så ingen andre trenger telefonen oppe. */
   var VL_F = ['♥', '♠', '♦', '♣'], vlSats = 2, vlTimer = null, vlSett = {}, vlPos = {};
   function vlNavn(f) { return (EN ? { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' } : { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' })[f]; }
+  /** Klokkene i lekene drives av den telefonen som er våken: verten først, de andre halvannet sekund etter.
+      Da stopper ikke leken om vertens telefon ligger i lomma. Serveren holder takten uansett. */
+  function driverVent() { return erVert() ? 0 : 1500; }
   function vlDriv() {
-    // Bare verten driver løpet. Stopper av seg selv når leken er over eller byttet.
     if (vlTimer) return;
     vlTimer = setInterval(function () {
       var sp = tilstand && tilstand.spill;
-      if (!sp || sp.type !== 'veddelopet' || sp.fase !== 'lop' || !erVert()) { clearInterval(vlTimer); vlTimer = null; return; }
+      if (!sp || sp.type !== 'veddelopet' || sp.fase !== 'lop') { clearInterval(vlTimer); vlTimer = null; return; }
       if (document.hidden) return;
       gjorAlltid({ handling: 'snu' });
-    }, 1000);
+    }, 1000 + driverVent());
   }
   function veddelopetSpill(s) {
     var meg = tilstand.meg, vert = erVert(), f = s.fase, mv = s.mittVeddemaal, vm = s.veddemaal || {}, r = s.runde || 1;
@@ -2460,9 +2461,9 @@ export function startRom(LEKNAVN, LANG) {
     if (pyDriver) return;
     pyDriver = setInterval(function () {
       var sp = tilstand && tilstand.spill;
-      if (!sp || sp.type !== 'pyramiden' || sp.ferdig || !erVert()) { clearInterval(pyDriver); pyDriver = null; return; }
+      if (!sp || sp.type !== 'pyramiden' || sp.ferdig) { clearInterval(pyDriver); pyDriver = null; return; }
       if (document.hidden) return;
-      if (Date.now() + klokkeAvvik - sp.snuddVed >= sp.vindu) gjorAlltid({ handling: 'snu' });
+      if (Date.now() + klokkeAvvik - sp.snuddVed >= sp.vindu + driverVent()) gjorAlltid({ handling: 'snu' });
     }, 1000);
   }
   function pyKikk() {
@@ -2478,7 +2479,7 @@ export function startRom(LEKNAVN, LANG) {
     var meg = tilstand.meg, vert = erVert(), naaI = s.pos - 1, naa = s.pyr[naaI], rad = pyRad(naaI), past = s.pastander || [];
     if (s.pos < pySistPos) pySett = {};
     pySistPos = s.pos;
-    if (vert && !s.ferdig) pyDriv();
+    if (!s.ferdig) pyDriv();
     pyKikk();
     var topp = '<div class="py-topp"><span>' + T('Pyramiden', 'The pyramid') + '</span><b>' + (s.ferdig ? T('Toppen er snudd', 'The top is flipped') : T('Rad ', 'Row ') + rad + T(' · del ut ', ' · hand out ') + rad) + '</b>' +
       (s.ferdig ? '' : '<small>' + (15 - s.pos) + T(' kort igjen', ' cards left') + '</small>') + '</div>';
@@ -2537,9 +2538,9 @@ export function startRom(LEKNAVN, LANG) {
     if (grDriver) return;
     grDriver = setInterval(function () {
       var sp = tilstand && tilstand.spill;
-      if (!sp || sp.type !== 'gris' || sp.fase === 'slutt' || !erVert()) { clearInterval(grDriver); grDriver = null; return; }
+      if (!sp || sp.type !== 'gris' || sp.fase === 'slutt') { clearInterval(grDriver); grDriver = null; return; }
       if (document.hidden || !sp.vinduer) return;
-      var naa = Date.now() + klokkeAvvik, v = sp.vinduer;
+      var naa = Date.now() + klokkeAvvik - driverVent(), v = sp.vinduer;
       if ((sp.fase === 'send' && naa - sp.sendVed >= v.bytt) || (sp.fase === 'nese' && naa - sp.neseVed >= v.nese) || (sp.fase === 'ferdig' && naa - sp.ferdigVed >= v.pause)) gjorAlltid({ handling: 'gr-tikk' });
     }, 700);
   }
@@ -2553,7 +2554,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   function grisSpill(s) {
     var meg = tilstand.meg, vert = erVert(), ider = s.ider || [], start = !!grSett.start;
-    if (vert && s.fase !== 'slutt') grDriv();
+    if (s.fase !== 'slutt') grDriv();
     var naa = Date.now() + klokkeAvvik, tatt = s.neser.indexOf(meg) !== -1, valgt = s.mittValg != null;
     var folk = '<div class="gr-folk">' + ider.map(function (id) {
       var klar = s.fase === 'send' ? s.harValgt.indexOf(id) !== -1 : s.neser.indexOf(id) !== -1, nr = s.neser.indexOf(id);
@@ -2600,9 +2601,9 @@ export function startRom(LEKNAVN, LANG) {
     if (prDriver) return;
     prDriver = setInterval(function () {
       var sp = tilstand && tilstand.spill;
-      if (!sp || sp.type !== 'president' || sp.fase === 'ferdig' || !erVert()) { clearInterval(prDriver); prDriver = null; return; }
+      if (!sp || sp.type !== 'president' || sp.fase === 'ferdig') { clearInterval(prDriver); prDriver = null; return; }
       if (document.hidden) return;
-      if (Date.now() + klokkeAvvik - sp.turVed >= sp.turTid) gjorAlltid({ handling: 'pr-tikk' });
+      if (Date.now() + klokkeAvvik - sp.turVed >= sp.turTid + driverVent()) gjorAlltid({ handling: 'pr-tikk' });
     }, 1000);
   }
   function prKort(k, kl, stil) {
@@ -2626,7 +2627,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   function presidentSpill(s) {
     var meg = tilstand.meg, vert = erVert(), start = !!prSett.start, ferdig = s.fase === 'ferdig';
-    if (vert && !ferdig) prDriv();
+    if (!ferdig) prDriv();
     var hand = s.minHand || [], jeg = s.tur === meg && !ferdig, naa = Date.now() + klokkeAvvik;
     presValg = presValg.filter(function (i) { return i < hand.length; });
     if (!jeg) presValg = [];
@@ -2667,7 +2668,8 @@ export function startRom(LEKNAVN, LANG) {
     var gyldig = sv.length && sv.every(function (k) { return k.v === sv[0].v; }) && (!b.length || (sv.length === b.length && prRang(sv[0].v) > prRang(b[0].v)));
     var leggT = gyldig ? T('Legg ', 'Play ') + sv.length + ' × ' + vn(sv[0].v) : sv.length ? T('Ikke gyldig', 'Not valid') : b.length ? T('Velg ', 'Pick ') + b.length + T(' like over ', ' alike over ') + vn(b[0].v) : T('Velg kort', 'Pick cards');
     var knapper = jeg ? '<div class="pr-knapper"><button type="button" class="pr-legg' + (gyldig ? ' klar' : '') + '" data-g="legg"' + (gyldig ? '' : ' disabled') + '>' + leggT + '</button>' +
-      '<button type="button" class="pr-pass" data-g="pass"' + (b.length ? '' : ' disabled') + '>Pass</button></div>' : '<p class="nr-vent">' + T('Vent på ', 'Wait for ') + esc(navn(s.tur)) + '.</p>';
+      '<button type="button" class="pr-pass" data-g="pass"' + (b.length ? '' : ' disabled') + '>Pass</button></div>'
+      : '<p class="nr-vent">' + T('Vent på ', 'Wait for ') + esc(navn(s.tur)) + '.' + (vert && b.length ? ' <button type="button" class="linkbtn" data-g="pass">' + T('Pass for ', 'Pass for ') + esc(navn(s.tur)) + '</button>' : '') + '</p>';
     var chip = jeg ? (b.length ? T('Din tur – over ', 'Your turn – beat ') + b.length + ' × ' + vn(b[0].v) + '?' : T('Din tur – legg ut noe', 'Your turn – play anything')) : esc(navn(s.tur)) + T(' har tur', ' to play');
     return jaTopp(T('President · runde ', 'President · round ') + s.runde, chip, jeg, false) + trapp + folk + bord + handHtml + knapper;
   }
@@ -2889,10 +2891,10 @@ export function startRom(LEKNAVN, LANG) {
     if (brDriver) return;
     brDriver = setInterval(function () {
       var sp = tilstand && tilstand.spill;
-      if (!sp || sp.type !== 'bussruta' || sp.fase !== 2 || !erVert()) { clearInterval(brDriver); brDriver = null; return; }
+      if (!sp || sp.type !== 'bussruta' || sp.fase !== 2) { clearInterval(brDriver); brDriver = null; return; }
       if (document.hidden) return;
       if (sp.pyrPos < 15) gjorAlltid({ handling: 'br-snu', pos: sp.pyrPos }); else gjorAlltid({ handling: 'br-buss' });
-    }, 3000);
+    }, 3000 + driverVent());
   }
   function bussrutaSpill(s) {
     var meg = tilstand.meg, vert = erVert(), jeg = s.aktiv === meg;
@@ -2904,13 +2906,13 @@ export function startRom(LEKNAVN, LANG) {
       chip = jeg ? T('Din tur · kort ', 'Your turn · card ') + (s.steg + 1) : esc(navn(s.aktiv)) + T(' svarer', ' is answering');
       var VALG = [[['rod', T('Rød', 'Red'), 'rosa'], ['svart', T('Svart', 'Black'), 'svart']], [['over', T('Over', 'Higher'), 'mint'], ['under', T('Under', 'Lower'), 'rosa']],
         [['inn', T('Innenfor', 'Inside'), 'gul'], ['ut', T('Utenfor', 'Outside'), 'hvit']], [['♥', '♥', 'hvit rod'], ['♦', '♦', 'hvit rod'], ['♠', '♠', 'hvit'], ['♣', '♣', 'hvit']]];
-      var kanSvare = jeg || (vert && !tilstand.spillere.some(function (p) { return p.id === s.aktiv; }));
+      var kanSvare = jeg || vert;
       ut = '<p class="br-sporsmal">' + esc(s.sporsmal || '') + '</p>' + brVifte(hand, nySv && sv.id === s.aktiv ? 1 : 0) +
         (sv ? '<div class="br-svar ' + (sv.ok ? 'rett' : 'feil') + (nySv ? ' inn' : '') + '"><b>' + jaNavn(sv.id) + ': ' + (sv.ok ? T('riktig!', 'right!') : T('feil!', 'wrong!')) + '</b><span>' + (sv.ok ? T('Del ut ', 'Hand out ') : T('Drikk ', 'Drink ')) + sv.n + '.</span></div>' : '') +
         (kanSvare ? '<div class="br-knapper' + (s.steg === 3 ? ' fire' : '') + '">' + VALG[s.steg].map(function (v) { return '<button type="button" class="' + v[2] + '" data-g="br-svar" data-v="' + v[0] + '">' + v[1] + '</button>'; }).join('') + '</div>'
           : '<p class="nr-vent">' + T('Vent på ', 'Wait for ') + esc(navn(s.aktiv)) + '.</p>');
     } else if (s.fase === 2) {
-      if (vert) brDriv();
+      brDriv();
       var tr = s.treff, nyTr = tr && tr.pos === s.pyrPos - 1 && !brSett['p' + tr.pos]; if (tr) brSett['p' + tr.pos] = 1;
       chip = s.pyrPos < 15 ? T('Pyramiden snus', 'The pyramid flips') : T('Bussen kommer …', 'The bus is coming …');
       var rader = [[0, 5], [5, 9], [9, 12], [12, 14], [14, 15]];
@@ -2968,7 +2970,7 @@ export function startRom(LEKNAVN, LANG) {
       sum('Total', 'total', function (b, id) { return (s.summer || {})[id] || 0; }) + '</div>';
   }
   function yatzySpill(s) {
-    var meg = tilstand.meg, vert = erVert(), borte = !tilstand.spillere.some(function (p) { return p.id === s.aktiv; });
+    var meg = tilstand.meg, vert = erVert(), borte = true;
     var tittel = T('Drikke-Yatzy', 'Drinking Yahtzee');
     if (s.ferdig) {
       var fe = s.ferdig;
@@ -5038,6 +5040,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'velg-annen') { visAlle = true; if (erVert()) gjor({ handling: 'velg-annen' }); return tegn(); }
     if (g === 'lyd') { lyd.paa = !lyd.paa; skriv('bd_lyd', lyd.paa); if (lyd.paa) { lydCtx(); spillLyd('tur'); } return tegn(); }
     if (g === 'reak-mer') { reakMer = !reakMer; return tegn(); }
+    if (g === 'vert-intro-lukk') { skriv('bd_vert_intro', 1); return tegn(); }
     if (g === 'reager') { if (!les('bd_intro_reak')) { skriv('bd_intro_reak', 1); var hh = document.querySelector('.reak-hint'); if (hh) hh.remove(); } return gjorAlltid({ handling: 'reager', e: b.dataset.e }); }
     if (g === 'intro-lukk') { skriv(b.dataset.k, 1); return tegn(); }
     if (g === 'send-velg' || g === 'del-ut') return delUtArk();

@@ -313,6 +313,14 @@ Everything happens in the existing living room (`src/klient/stua.js`), on every 
 - **Idle habits:** every 20–40 s a figure yawns, checks their phone, scratches their head or hums. Two minutes with nothing happening, and everyone yawns.
 - **Reduced motion:** no moves, only the emoji bubble; the crown still shows.
 
+## No game waits for one phone
+
+The clocks in the timed games (Veddeløpet, Pyramiden, Gris, President, Bussruta) used to run only from the host's phone. If the host put it in a pocket, the whole room froze. Now every awake phone drives the clock: the host first, the others 1.5 s later, and the server validates the time so nothing fires twice. The host can also act for whoever has the turn (Yatzy, Bussruta, Opus, Løgnhalsen, and «Pass for X» in President), which is the one case where the host moves another player – when a phone has gone dark.
+
+## First time hosting
+
+A yellow card sits in the host lobby the first time someone hosts on a phone: three rows that are easy to miss otherwise – getting the room on the TV, playing with only one phone (the sofa), and the figure in the room. Each row is a button that opens the matching sheet. «Skjønner» closes it for good (`bd_vert_intro` in localStorage). Hard shadows, ink border, Archivo condensed heading: the same language as the rest of the app, with the yellow accent so it reads as a nudge rather than a warning.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
