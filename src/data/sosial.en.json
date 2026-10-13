@@ -158,7 +158,7 @@
    "fakta": "The tune is the 19th-century folk song “Korobeiniki”, about a travelling pedlar."
   },
   {
-   "q": "Which animal can't throw up?",
+   "q": "Which riding animal can’t throw up?",
    "a": "The horse",
    "fakta": "The muscles at the entrance to the stomach are so strong that food only goes one way."
   },
@@ -198,7 +198,7 @@
    "fakta": "Bergen was the capital in the 1200s, before King Haakon V moved power to Oslo around 1300."
   },
   {
-   "q": "Which mammal lays eggs?",
+   "q": "Which mammal with a bill lays eggs?",
    "a": "The platypus",
    "fakta": "The platypus has no stomach either – its gullet goes straight to the gut."
   },
@@ -218,8 +218,8 @@
    "fakta": "Botanically, a strawberry is not a berry – its seeds are on the outside."
   },
   {
-   "q": "Which animal has blue blood?",
-   "a": "The octopus",
+   "q": "What colour is an octopus’s blood?",
+   "a": "Blue",
    "fakta": "The blood uses copper instead of iron to carry oxygen, which makes it blue."
   },
   {
