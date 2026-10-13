@@ -276,6 +276,14 @@ Two games that must not look alike, so each gets its own world.
 
 **Natural endings.** The games that used to run forever end by themselves. Mest sannsynlig, Løgnhalsen and Saueflokken have one round per player. Hvem skrev is over when every message is revealed. The last button reads «Se kåringen», «Se hvem som lurte flest» or «Avslutt», and then the end screen comes with «Spill igjen» (host only) or the next game. The round numbers are gone from the headings.
 
+
+## Small fixes after the round of passes
+
+- **Skrøna:** every one of the 75 questions has a short «Visste du at …» line (in `sosial.json` and `sosial.en.json`). On the phone it sits under the answer. On the TV it is a yellow sticky note in the corner of the encyclopedia page, so it always shows, and the list is tighter during the reveal.
+- **Drinking Yatzy:** the full scorecard stays. Scratching a box (0 points) means drink 2, and the note says so.
+- **Hvem skrev:** everyone can press «Neste melding», guarded against two taps arriving at the same time.
+- **Regelfabrikken:** «Stokk på nytt» and «Ny skriverunde» are gone from the draw. They are only on the end screen.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
