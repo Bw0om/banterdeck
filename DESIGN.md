@@ -325,6 +325,12 @@ A yellow card sits in the host lobby the first time someone hosts on a phone: th
 
 The one-phone games are played with the phone on the table, so sound carries the timing. The 3 – 2 – 1 countdown in the read-aloud games steps down in pitch from 3 to 1 and ends in a short, bright «NÅ!» so everyone answers together without looking at the screen. The bomb in Kategorier ticks like a clock in step with its pulse (slow, faster, fastest) and ends in a deep boom instead of a bell. All of it is synthesised in the browser like the other room sounds and follows the same sound toggle.
 
+## Decks that warm up, and cards with names on
+
+Two things the best party games do, now in the decks. In mixed mode («Blandet») a round no longer comes in random order: it starts with the mild cards and gets spicier towards the end, with enough random overlap that it never feels sorted. Nobody gets the heaviest card before the first sip. Picking a level still gives only that level.
+
+In Nødt eller sannhet, «personen til venstre» becomes a name from the room – «Lag et dikt om Sara» lands harder than a card about a neighbour, and on phones there is no obvious left. Left, right and opposite become three different people when there are enough players, never the person in the chair. The original text is kept on the card so it still counts as seen.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
