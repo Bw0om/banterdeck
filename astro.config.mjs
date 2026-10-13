@@ -17,8 +17,9 @@ export default defineConfig({
   adapter: vercel(),
   vite: { define: { __MV_BYGG__: JSON.stringify(BYGG) } },
   build: {
-    // Legger CSS-en rett inn i hver side i stedet for en egen fil.
-    // Da kan ikke stilene "forsvinne" underveis, og siden slipper et ekstra nedlastingskall.
-    inlineStylesheets: 'always',
+    // Små stilark legges rett inn i siden, det store felles stilarket blir en egen fil med versjonsnavn.
+    // Før lå 430 kB CSS inne i hver eneste side og ble lastet ned på nytt ved hver sidevisning;
+    // nå lagres den én gang (også av appens service worker, så den virker uten nett).
+    inlineStylesheets: 'auto',
   },
 });
