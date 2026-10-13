@@ -126,7 +126,39 @@ function lekNavnL(id: string): L | string {
 export async function hentRom(kode: string): Promise<{ data: any; versjon: number } | null> {
   const r = await rpc('rom_hent', { p_kode: kode });
   const rad = Array.isArray(r) ? r[0] : r;
-  return rad ? { data: rad.data, versjon: rad.versjon } : null;
+  // En TV-kobling ligger i samme tabell, men er ikke et rom
+  return rad && !(rad.data && rad.data.tvKobling) ? { data: rad.data, versjon: rad.versjon } : null;
+}
+
+/* ---------- TV-kobling: TV-en viser en QR-kode, verten skanner den ----------
+   TV-en får en egen kode (samme alfabet som romkodene, i samme tabell). Verten åpner lenken i QR-koden,
+   telefonen sender koden til rommet sitt, og serveren legger romkode + PIN på TV-koblingen. TV-en spør
+   etter den hvert par sekunder. Koblingen varer i 15 minutter. */
+const TV_LEVETID = 15 * 60 * 1000;
+export async function lagTvKobling() {
+  for (let i = 0; i < 6; i++) {
+    const kode = nyKode();
+    const ok = await rpc('rom_lag', { p_kode: kode, p_data: { tvKobling: true, laget: Date.now(), kobling: null } });
+    if (ok === true) return kode;
+  }
+  throw new Error('Fant ingen ledig kode');
+}
+export async function hentTvKobling(kode: string) {
+  const r = await rpc('rom_hent', { p_kode: kode });
+  const rad = Array.isArray(r) ? r[0] : r;
+  if (!rad || !rad.data || !rad.data.tvKobling || Date.now() - (rad.data.laget || 0) > TV_LEVETID) return null;
+  return { kobling: rad.data.kobling || null };
+}
+export async function kobleTv(tvKode: string, romKode: string, pin: string) {
+  for (let forsok = 0; forsok < 4; forsok++) {
+    const r = await rpc('rom_hent', { p_kode: tvKode });
+    const rad = Array.isArray(r) ? r[0] : r;
+    if (!rad || !rad.data || !rad.data.tvKobling || Date.now() - (rad.data.laget || 0) > TV_LEVETID) return false;
+    const data = { ...rad.data, kobling: { k: romKode, p: pin } };
+    const ny = await rpc('rom_lagre', { p_kode: tvKode, p_versjon: rad.versjon, p_data: data });
+    if (ny !== null && ny !== undefined) return true;
+  }
+  return false;
 }
 /** Leser, endrer og lagrer. Prøver igjen hvis en annen telefon lagret samtidig. */
 export async function endreRom(kode: string, endring: (data: any) => any) {
@@ -1153,7 +1185,8 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!(r as any).feil && data.spill) { data.valgt = null; data.ferdig = null; data.historikk = (data.historikk || []).concat([data.spill.navn]).slice(-40); lekStartet(data); }
       return r;
     }
-    case 'skjerm-lag': {
+    case 'skjerm-lag':
+    case 'skjerm-kobl': {
       if (!erVert) return { feil: 'bare-vert' };
       if (!data.skjerm || h.ny) { let pin = ''; for (let i = 0; i < 6; i++) pin += tilfeldig(10); data.skjerm = { pin, laget: Date.now() }; }
       return { ok: true };

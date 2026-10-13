@@ -1482,21 +1482,42 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var vekkLaas = null;
     function vekk() { try { if (navigator.wakeLock && !vekkLaas) navigator.wakeLock.request('screen').then(function (l) { vekkLaas = l; l.addEventListener('release', function () { vekkLaas = null; }); }).catch(function () {}); } catch (e) {} }
     document.addEventListener('visibilitychange', function () { if (!document.hidden && startet) { vekk(); hent(); } });
+    /* QR-kobling: TV-en viser en QR-kode, verten skanner den med kameraet – ingen koder å taste med fjernkontrollen */
+    var parKode = '', parTimer = null;
+    function startPar() {
+      clearInterval(parTimer);
+      var lag = parKode ? Promise.resolve(parKode) : fetch('/api/tv', { method: 'POST' }).then(function (r) { return r.json(); }).then(function (d) { if (!d.kode) throw new Error('kode'); parKode = d.kode; return parKode; });
+      lag.then(function (k) {
+        var url = (kortDomene ? 'https://mittvors.no' : location.origin) + (EN ? '/room' : '/no/rom') + '?tv=' + k;
+        // QR-tegneren lastes som modul og kan komme litt etter – prøv igjen til den er der
+        (function visQr(n) { var el = document.getElementById('tvParQr'); if (!el) return; if (window.BDqr) el.innerHTML = window.BDqr(url); else if (n < 40) setTimeout(function () { visQr(n + 1); }, 250); })(0);
+        parTimer = setInterval(function () {
+          fetch('/api/tv?k=' + k, { cache: 'no-store' }).then(function (r) { return r.status === 404 ? { utlopt: true } : r.json(); }).then(function (d) {
+            if (d.utlopt) { clearInterval(parTimer); parKode = ''; return startPar(); }
+            if (d.kobling) { clearInterval(parTimer); parKode = ''; kode = d.kobling.k; pin = d.kobling.p; kobleTil(); }
+          }).catch(function () {});
+        }, 2000);
+      }).catch(function () { var el = document.getElementById('tvParQr'); if (el) el.innerHTML = '<span class="tv-par-laster">' + T('Fikk ikke laget QR-kode – bruk romkode og PIN under.', 'Couldn’t make a QR code – use the room code and PIN below.') + '</span>'; });
+    }
     function tegnKobling(feilmelding) {
-      rot.innerHTML = '<form class="tv-kobling" id="tvSkjema"><h1>📺 ' + T('Storskjerm', 'Big screen') + '</h1>' +
-        '<p class="tv-stor">' + T('Vis rommet på TV-en. Verten finner koden og PIN-en under «Mer til kvelden» → «Storskjerm».', 'Show the room on the TV. The host finds the code and PIN under “More for the night” → “Big screen”.') + '</p>' +
+      rot.innerHTML = '<div class="tv-par"><div class="tv-par-qr" id="tvParQr"><span class="tv-par-laster">' + T('Lager kode …', 'Making a code …') + '</span></div>' +
+        '<div class="tv-par-tekst"><h1>' + T('Vis rommet på TV-en', 'Show the room on the TV') + '</h1>' +
+        '<ol class="tv-par-steg"><li>' + T('Åpne kameraet på telefonen til verten', 'Open the camera on the host’s phone') + '</li><li>' + T('Skann QR-koden', 'Scan the QR code') + '</li><li>' + T('Ferdig – TV-en kobler seg til rommet', 'Done – the TV joins the room') + '</li></ol>' +
         (feilmelding ? '<p class="tv-feil">' + esc(feilmelding) + '</p>' : '') +
+        '<details class="tv-manuell"><summary>' + T('Har du romkode og PIN i stedet?', 'Got a room code and PIN instead?') + '</summary><form class="tv-kobling" id="tvSkjema">' +
         '<div class="tv-felt"><label>' + T('Romkode', 'Room code') + '<input id="tvKode" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" value="' + esc(kode) + '" required></label>' +
         '<label>PIN<input id="tvPin" inputmode="numeric" maxlength="6" autocomplete="off" value="' + esc(pin) + '" required></label></div>' +
-        '<button class="btn gold tv-start" type="submit">' + T('Koble til', 'Connect') + '</button></form>';
+        '<button class="btn gold tv-start" type="submit">' + T('Koble til', 'Connect') + '</button></form></details></div></div>';
       document.getElementById('tvSkjema').onsubmit = function (e) {
         e.preventDefault();
         kode = document.getElementById('tvKode').value.trim().toUpperCase(); pin = document.getElementById('tvPin').value.trim();
         kobleTil();
       };
+      startPar();
     }
     function kobleTil() {
       if (!kode || !pin) return tegnKobling('');
+      clearInterval(parTimer);
       versjon = 0;
       api().then(function (d) {
         try { localStorage.setItem('mv_tv', JSON.stringify({ k: kode, p: pin })); } catch (e) {}
@@ -1510,6 +1531,17 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   <style is:global>
     body.tv{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#2A1A22,#0A0609 70%);color:var(--ink);overflow:hidden;font-size:clamp(16px,1.6vw,26px)}
     .tv-rot{height:100vh;display:flex;flex-direction:column}
+    .tv-par{flex:1;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:5vw;padding:6vh 7vw}
+    .tv-par-qr{display:grid;place-items:center;width:min(62vh,38vw);aspect-ratio:1;padding:2.4vh;box-sizing:border-box;background:#FFFFFF;border:6px solid #16120F;border-radius:24px;box-shadow:10px 10px 0 #000}
+    .tv-par-qr svg{width:100%;height:100%}
+    .tv-par-laster{color:#16120F;font-size:1.4em;font-weight:800;text-align:center}
+    .tv-par-tekst h1{margin:0 0 3vh;font-family:var(--display);font-size:3.2em;font-weight:900;font-stretch:66%;line-height:.95;text-transform:uppercase;color:#FFF8EE}
+    .tv-par-steg{margin:0;padding:0;list-style:none;counter-reset:steg;display:flex;flex-direction:column;gap:2.2vh}
+    .tv-par-steg li{counter-increment:steg;display:flex;align-items:center;gap:1.2vw;font-size:1.6em;font-weight:800;color:#FFF8EE}
+    .tv-par-steg li::before{content:counter(steg);flex:none;display:grid;place-items:center;width:1.8em;height:1.8em;border-radius:50%;background:#FFD23F;color:#16120F;font-weight:900;border:4px solid #16120F}
+    .tv-manuell{margin-top:5vh;color:#D9D2C7}
+    .tv-manuell summary{cursor:pointer;font-weight:800}
+    .tv-manuell .tv-kobling{margin-top:2vh;max-width:none;padding:0;background:none;border:0;box-shadow:none}
     .tv-hode{display:flex;align-items:center;gap:24px;padding:1.2vh 2.5vw;font-size:1em}
     .tv-logo{font-family:var(--display);font-weight:800;font-size:1.5em}.tv-logo b{color:var(--gold)}
     .tv-gjeng{padding:4px 14px;border-radius:999px;background:var(--card2);font-weight:700}
