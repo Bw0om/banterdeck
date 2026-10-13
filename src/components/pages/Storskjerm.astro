@@ -700,7 +700,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var tvSmVist = '';
     function smScene(d, s) {
       var m = s.sos, alle = d.spillere || [], n = alle.length;
-      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Saueflokken · runde ', 'The herd · round ') + (m.runde || 1) + '</p><span class="tvlh-chip' + (m.fase === 'fasit' ? ' hvit' : '') + '">' + (m.fase === 'fasit' ? T('Flokkene', 'The herds') : T('Tenk som flokken', 'Think like the herd')) + '</span></div>';
+      if (m.fase === 'slutt') return '<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + T('Saueflokken', 'The herd') + '</p><span class="tvlh-chip">' + T('Flokken er samlet', 'The herd is home') + '</span></div>' +
+        '<h1 class="tv-sporsmal">' + T('Ferdig for denne gang!', 'That’s it for now!') + '</h1><p class="tv-stor">' + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</p></div></div>';
+      var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Saueflokken', 'The herd') + '</p><span class="tvlh-chip' + (m.fase === 'fasit' ? ' hvit' : '') + '">' + (m.fase === 'fasit' ? T('Flokkene', 'The herds') : T('Tenk som flokken', 'Think like the herd')) + '</span></div>';
       if (m.fase !== 'fasit') return tvMedBenk('<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<h1 class="tv-sporsmal">' + esc(m.oppgave || '') + '</h1>' +
         '<p class="tv-stor">' + T('Skriv ett ord på telefonen. Står du alene, drikker du. · ', 'Write one word on your phone. Alone? You drink. · ') + (m.harSkrevet || []).length + ' / ' + n + '</p></div></div>',
         tvBenk(d, alle, { oppe: m.harSkrevet || [] }));
@@ -1219,7 +1221,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var tavle = (s.lurtTavle || []).length ? '<ol class="tvlh-tavle" aria-label="' + T('Flest lurt', 'Most fooled') + '">' + s.lurtTavle.slice(0, 3).map(function (x, i) {
         return '<li' + (i ? '' : ' class="forst"') + '><span>' + (i + 1) + '</span>' + esc(navn(x.id)) + ' · ' + T('lurte ', 'fooled ') + x.n + '</li>'; }).join('') + '</ol>' : '';
       var chip = avsl ? T('Avslørt', 'Revealed') : s.fase === 'stem' ? T('Stem nå', 'Vote now') : han + T(' forteller', ' is telling');
-      var hode = '<div class="tvnr-hode tvlh-hode"><p class="tv-etikett">' + T('Løgnhalsen · runde ', 'The liar · round ') + (s.runde || 1) + '</p><span class="tvlh-chip' + (avsl ? ' rosa' : '') + '">' + chip + '</span>' + tavle + '</div>';
+      var hode = '<div class="tvnr-hode tvlh-hode"><p class="tv-etikett">' + T('Løgnhalsen', 'The liar') + '</p><span class="tvlh-chip' + (avsl ? ' rosa' : '') + '">' + chip + '</span>' + tavle + '</div>';
       var kort = '<h1 class="tv-sporsmal' + (avsl ? ' tvlh-liten' : '') + '">' + esc(s.tekst || '') + '</h1>', bunn;
       if (avsl) {
         var r = s.resultat, lyv = r.svar === 'lyv', inn = vk !== tvlhVist, lurte = r.lurte || 0; tvlhVist = vk;
@@ -1355,7 +1357,13 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (s.type === 'kort') return '<div class="tv-scene tv-sentrert">' + topp + '<div class="tv-kort' + (s.kort && s.kort.h ? ' hendelse' : '') + '">' + (s.kort && s.kort.k ? '<span class="tv-etikett">' + esc(s.kort.k) + '</span>' : '') + '<p>' + esc(s.kort ? s.kort.t : '') + '</p></div><p class="tv-liten">' + (s.pos + 1) + ' / ' + s.antall + '</p></div>';
       if (s.type === 'mest') {
         var msTekst = String(s.tekst || ''), msM = msTekst.match(/^(Hvem er mest sannsynlig til å|Who's most likely to|Who is most likely to)\s+/i), msRest = msM ? msTekst.slice(msM[0].length) : msTekst;
-        var msHode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Pekeleken · på mobilen · runde ', 'Most likely to · round ') + (s.runde || 1) + '</p></div>';
+        var msHode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Pekeleken · på mobilen', 'Most likely to') + '</p></div>';
+        if (s.fase === 'ferdig') {
+          var msTot = s.tot || {}, msRang = (d.spillere || []).slice().sort(function (a, b) { return (msTot[b.id] || 0) - (msTot[a.id] || 0); }), msV = msRang[0] && msTot[msRang[0].id] ? msRang[0] : null;
+          return tvMedBenk('<div class="tv-scene tvnr"><div class="tvnr-hoved">' + msHode + '<p class="tvpk-pre">' + T('Kveldens mest sannsynlige', 'Tonight’s most likely') + '</p><h1 class="tv-sporsmal">' + (msV ? esc(msV.navn) : T('Ingen', 'Nobody')) + '</h1>' +
+            '<p class="tv-stor">' + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</p></div></div>',
+            tvBenk(d, d.spillere || [], { oppe: true, oi: msV ? [msV.id] : [], stirr: msV ? msV.id : '', flat: true, tall: msTot, tallInn: true }));
+        }
         var msKort = (msM ? '<p class="tvpk-pre">' + esc(msM[1]) + ' …</p>' : '') + '<h1 class="tv-sporsmal">' + esc(msRest) + '</h1>';
         if (s.fase === 'resultat' && s.resultat) {
           var msRes = s.resultat, msMaks = msRes.length ? msRes[0].stemmer : 0, msTopp = msRes.filter(function (r) { return r.stemmer === msMaks; }).map(function (r) { return r.id; });
@@ -1367,6 +1375,13 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         tvMsVist = '';
         return tvMedBenk('<div class="tv-scene tvnr"><div class="tvnr-hoved">' + msHode + msKort + '<p class="tv-stor">' + T('Stem på telefonen', 'Vote on your phone') + ' · ' + (s.stemt || 0) + ' / ' + (d.spillere || []).length + '</p></div></div>',
           tvBenk(d, d.spillere || [], { oppe: s.harStemt || [] }));
+      }
+      if (s.type === 'forraeder' && s.fase === 'ferdig') {
+        var lt = s.lurtTavle || [];
+        return '<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + T('Løgnhalsen', 'The liar') + '</p><span class="tvlh-chip">' + T('Alle har sittet i stolen', 'Everyone has been in the chair') + '</span></div>' +
+          '<p class="tvpk-pre">' + T('Beste løgnhals', 'Best liar') + '</p><h1 class="tv-sporsmal">' + (lt[0] ? esc(navn(lt[0].id)) : T('Ingen lurte noen', 'Nobody fooled anyone')) + '</h1>' +
+          (lt.length ? '<p class="tv-stor">' + lt.map(function (x) { return esc(navn(x.id)) + T(' lurte ', ' fooled ') + x.n; }).join(' · ') + '</p>' : '') +
+          '<p class="tv-stor">' + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</p></div></div>';
       }
       if (s.type === 'forraeder') {
         var la = d.spillere || [], lid = s.aktiv, lhB = '', lfin = la.some(function (p) { return p.id === lid; });

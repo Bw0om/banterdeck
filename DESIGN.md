@@ -269,6 +269,13 @@ Two games that must not look alike, so each gets its own world.
 
 **President: the staircase.** The app's own colours on purpose: no purple and no serif. A staircase in yellow, mint, blue and lilac sits at the top. Whoever runs out of cards jumps onto their step, and the President gets a crown. Cards are slapped down slightly crooked on the dark table, and the pile is swept off when nobody can go higher. Your hand lies as a fan, and tapping a card lifts it. The button says exactly what you need to play («Velg 2 like over 9», «Legg 2 × 10»). Each turn lasts 20 s, shown as a ring around the head (`@property --p`). After that the host's phone passes for you, or plays your lowest card if you are starting. At the end of the round the Scumbag drinks 3, the Vice Scumbag drinks 2 and the President hands out 3. The next round starts with the Scumbag's best card going to the President.
 
+
+## Moving on and ending the older games
+
+**Card games.** No game shows «Neste kort» to everyone any more. In the games you play out in real life (Pekeleken, Nødt eller sannhet, ordinary decks and the Regelfabrikken draw), only the host and whoever has the turn (or is next) see the button. Everyone else sees «Kasper eller Sara går videre», so they can put their phones away. The server checks the same thing (`kortVidere`). In the games where everyone answers on their phone (Jeg har aldri, Enten eller, Rygg mot rygg, Kategorier, Låtbekjennelsen), anyone can still move on once the answer is revealed.
+
+**Natural endings.** The games that used to run forever end by themselves. Mest sannsynlig, Løgnhalsen and Saueflokken have one round per player. Hvem skrev is over when every message is revealed. The last button reads «Se kåringen», «Se hvem som lurte flest» or «Avslutt», and then the end screen comes with «Spill igjen» (host only) or the next game. The round numbers are gone from the headings.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

@@ -966,7 +966,7 @@ export function startRom(LEKNAVN, LANG) {
     nodt: [['Appen setter én i stolen for hvert kort, etter tur.', 'The app puts one person in the hot seat for each card, in turn.'], ['Den i stolen velger nødt eller sannhet på telefonen. Så snus kortet.', 'The person in the hot seat picks truth or dare on their phone. Then the card flips.'], ['Gjør det eller svar ærlig – eller feig ut og drikk 3.', 'Do it or answer honestly – or chicken out and drink 3.'], ['Alle andre dømmer: «Godkjent» eller «Juks!». Flertallet bestemmer, likt er godkjent. Juks: drikk 2.', 'Everyone else judges: “Approved” or “Cheat!”. The majority decides, a tie is approved. Cheat: drink 2.']],
     rygg: [['Appen velger et par for hvert kort: A og B, B og C, C og A … Så er alle med på rundt seks kort.', 'The app picks a pair for each card: A and B, B and C, C and A … so everyone gets about six cards.'], ['De to setter seg rygg mot rygg og peker i hemmelighet på telefonen: på seg selv eller på den andre.', 'The two sit back to back and point in secret on their phones: at themselves or at the other.'], ['Alle andre gjetter: den ene, den andre eller «uenige». Gjetter du feil, drikker du én.', 'Everyone else guesses: one, the other or “disagree”. Guess wrong and you drink one.'], ['Enige: den de pekte på drikker én. Uenige: begge drikker én.', 'Agreed: the one they pointed at drinks one. Disagreed: both drink one.']],
     enten: [['Kortet har to valg. Velg side på telefonen – ingen ser hva du velger før klokka er ute.', 'The card has two options. Pick a side on your phone – nobody sees your pick until the clock runs out.'], ['Mindretallet drikker én. Like mange på hver side: ingen drikker. Alle likt: den som trakk kortet, drikker én.', 'The minority drinks one. Equal sides: nobody drinks. Everyone the same: whoever drew the card drinks one.'], ['Står én helt alene, får hen 20 sekunder til å forsvare valget. Får hen med seg én, drikker den personen – ellers drikker hen to.', 'If one person stands alone, they get 20 seconds to defend the pick. Win one person over and that person drinks – otherwise drink two.'], ['30 kort i en runde. Så velger verten hva dere gjør nå.', '30 cards a round. Then the host picks what to do next.']],
-    kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Hvem som helst kan trykke «Neste kort».', 'Anyone can tap “Next card”.']],
+    kort: [['Alle ser samme kort på skjermen.', 'Everyone sees the same card on screen.'], ['Les det høyt og gjør det kortet sier.', 'Read it out loud and do what it says.'], ['Verten og den som har tur trykker «Neste kort».', 'Anyone can tap “Next card”.']],
   };
   function reglerPanel(s) {
     var nokkel = s.type === 'kort' ? (s.lek === 'ring-of-fire' ? (s.ring ? 'ringr' : 'ring') : (s.pek ? 'pekeleken' : s.aldri || s.svarPaa ? 'aldri' : s.ee || s.lek === 'enten-eller' ? 'enten' : s.rr || s.lek === 'rygg-mot-rygg' ? 'rygg' : s.ns || s.lek === 'nodt-eller-sannhet' ? 'nodt' : s.kb || s.lek === 'kategorier' ? 'kategori' : s.lb || s.lek === 'tanken-bak-sangen' ? 'lat' : 'kort')) : s.type, r = REGLER[nokkel];
@@ -1387,6 +1387,12 @@ export function startRom(LEKNAVN, LANG) {
     return '<div class="pk-kort' + (v ? ' med-vri' : '') + '">' + (v ? '<div class="pk-vri"><b>' + T('Vri', 'Twist') + '</b><span>' + esc(v[0]) + '</span></div>' : '') +
       (m ? '<span class="pk-pre">' + esc(m[1]) + ' …</span>' : '') + '<p>' + esc(rest) + '</p>' + (v ? '<small class="pk-vri-tekst">' + esc(v[1]) + '</small>' : '') + '</div>';
   }
+  /** «Videre» i kortlekene. I lekene dere gjør i virkeligheten får bare verten og den som har tur knappen – resten kan legge bort telefonen. */
+  function videreKnapp(s, tekst) {
+    if (!s.videre || s.videre.indexOf(tilstand.meg) !== -1) return '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + tekst + '</button>';
+    var navnene = s.videre.filter(function (id, i, a) { return a.indexOf(id) === i; }).map(function (id) { return esc(navn(id)); });
+    return '<p class="nr-vent">' + navnene.join(T(' eller ', ' or ')) + T(' går videre.', ' moves on.') + '</p>';
+  }
   function pkNesteLeser(pk) {
     var l = tilstand.spillere || [], i = l.findIndex(function (p) { return p.id === pk.leser; });
     return l.length ? l[(i + 1) % l.length] : null;
@@ -1438,7 +1444,7 @@ export function startRom(LEKNAVN, LANG) {
       (rader.length ? '<ul class="pk-soyler' + (inn ? ' inn' : '') + '">' + rader.map(function (p, i) {
         var n = ford[p.id] || 0;
         return '<li style="--i:' + i + '"><span>' + (p.id === tilstand.meg ? T('Du', 'You') : esc(p.navn)) + '</span><i><b style="transform:scaleX(' + (n / maksN).toFixed(3) + ');background:' + nrFarge(p.id) + '"></b></i><em>' + n + '</em></li>'; }).join('') + '</ul>' : '') +
-      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + (nesteL ? ' – ' + (nesteL.id === tilstand.meg ? T('du leser', 'you read') : esc(nesteL.navn) + T(' leser', ' reads')) : '') + '</button>';
+      videreKnapp(s, T('Neste kort', 'Next card') + (nesteL ? ' – ' + (nesteL.id === tilstand.meg ? T('du leser', 'you read') : esc(nesteL.navn) + T(' leser', ' reads')) : ''));
   }
 
   function kortSpill(s) {
@@ -1464,7 +1470,7 @@ export function startRom(LEKNAVN, LANG) {
     return (rof && k.hvem ? '<div class="rof-tur"><span>' + T('Trekker', 'Drawing') + '</span><b>' + esc(k.hvem) + '</b></div>' : '') +
       (rof ? '<p class="rom-status">' + (s.antall - s.pos - 1) + T(' kort igjen · ', ' cards left · ') + (s.konger || 0) + T(' konger', ' kings') + '</p>' : '') +
       kortHtml + lunte((s.antall - s.pos - 1) / Math.max(1, s.antall)) + (rof ? makkerHtml(s) : '') +
-      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Neste kort', 'Next card') + '</button>' + aldriBryter(s);
+      videreKnapp(s, T('Neste kort', 'Next card')) + aldriBryter(s);
   }
 
   /* ---------- Alle svarer (Jeg har aldri): hver telefon svarer i hemmelighet, så vises det samtidig ----------
@@ -1506,7 +1512,7 @@ export function startRom(LEKNAVN, LANG) {
     if (a.fase === 'avslort') {
       var inn = aldriAvslort !== nokkel; aldriAvslort = nokkel;
       var har = a.har || [], n = alle.length, sist = s.pos + 1 >= s.antall;
-      var videre = '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste kort', 'Next card')) + '</button>';
+      var videre = videreKnapp(s, (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste kort', 'Next card')));
       if (a.ulv) {
         var jeg = a.ulv === t.meg, kan = jeg || erVert();
         return jaTopp(jaNr(s), T('Snudd!', 'Flipped!'), true) + jaKort(s, true) +
@@ -1741,7 +1747,7 @@ export function startRom(LEKNAVN, LANG) {
         (erVert() && svart.length && mangler.length ? '<p class="ja-vis"><button type="button" class="linkbtn" data-g="avslor">' + T('Snu nå', 'Flip now') + '</button></p>' : '') +
         eeBenk(s, e, alle, null);
     }
-    var sist = s.pos + 1 >= s.antall, videre = '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste kort', 'Next card')) + '</button>';
+    var sist = s.pos + 1 >= s.antall, videre = videreKnapp(s, (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste kort', 'Next card')));
     var navnA = function (id) { return id === t.meg ? T('Du', 'You') : esc(navn(id)); };
     var sider = '<div class="ee-sider' + (inn ? ' inn' : '') + '"><div class="ee-side a"><span>' + T('Enten', 'Either') + ' · ' + r.a.length + '</span><b>' + esc(e.a) + '</b><div>' + r.a.map(function (id) { return nrPille(id); }).join('') + '</div></div>' +
       '<div class="ee-side b"><span>' + T('Eller', 'Or') + ' · ' + r.b.length + '</span><b>' + esc(e.b) + '</b><div>' + r.b.map(function (id) { return nrPille(id); }).join('') + '</div></div></div>';
@@ -1812,7 +1818,7 @@ export function startRom(LEKNAVN, LANG) {
     var bi = alle.findIndex(function (p) { return p.id === r.b; }), nesteB = alle.length > 2 ? alle[(bi + 1) % alle.length] : alle.find(function (p) { return p.id === r.a; });
     var sist = s.pos + 1 >= s.antall;
     return topp + kort + '<div class="rr-dom ' + kl + (inn ? ' inn' : '') + '">' + dom + '</div>' + (linjer ? '<ul class="rr-gjett">' + linjer + '</ul>' : '') +
-      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste par: ', 'Next pair: ') + esc(navn(r.b)) + T(' og ', ' and ') + esc(nesteB ? nesteB.navn : '')) + '</button>' +
+      videreKnapp(s, (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste par: ', 'Next pair: ') + esc(navn(r.b)) + T(' og ', ' and ') + esc(nesteB ? nesteB.navn : ''))) +
       hodeBenk(alle, { oppe: true, par: { a: r.a, b: r.b, snudd: true }, oi: res.fasit && !res.enige ? [r.a, r.b] : res.mangler || [] });
   }
   /* ---------- Nødt eller sannhet: én i stolen, alle andre er dommere ----------
@@ -1872,7 +1878,7 @@ export function startRom(LEKNAVN, LANG) {
     var hi = alle.findIndex(function (p) { return p.id === r.hvem; }), neste = alle[(hi + 1) % alle.length];
     var sist = s.pos + 1 >= s.antall;
     return topp + kort(true) + '<div class="rr-dom ' + kl + (inn ? ' inn' : '') + '">' + dom + '</div>' + (linjer ? '<ul class="rr-gjett">' + linjer + '</ul>' : '') +
-      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste i stolen: ', 'Next in the hot seat: ') + esc(neste ? (neste.id === jeg ? T('deg', 'you') : neste.navn) : '')) + '</button>' +
+      videreKnapp(s, (sist ? T('Til oppsummeringen', 'To the recap') : T('Neste i stolen: ', 'Next in the hot seat: ') + esc(neste ? (neste.id === jeg ? T('deg', 'you') : neste.navn) : ''))) +
       benk({ oppe: true, oi: res.feig || res.juks ? [r.hvem] : [], flat: false });
   }
   /* ---------- Kategorier: bomba går rundt ----------
@@ -1925,7 +1931,7 @@ export function startRom(LEKNAVN, LANG) {
     }
     var sist = s.pos + 1 >= s.antall;
     return '<div class="kb-skjelv' + (ny ? ' na' : '') + '">' + topp + kort + '<div class="rr-dom uenige' + (ny ? ' inn' : '') + '"><span>BOM! · ' + b.resultat.svar + T(' svar', ' answers') + '</span><b>' + (har ? T('Du drikker 2', 'You drink 2') : han + T(' drikker 2', ' drinks 2')) + '</b></div>' +
-      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sist ? T('Til oppsummeringen', 'To the recap') : T('Ny kategori', 'New category')) + '</button></div>' + benk;
+      videreKnapp(s, (sist ? T('Til oppsummeringen', 'To the recap') : T('Ny kategori', 'New category'))) + '</div>' + benk;
   }
   /* ---------- Låtbekjennelsen: hvem valgte låta? ----------
      Platen glir ut og snurrer mens låta spilles (bare verten har Spotify-knappen), og hodene vugger i takt.
@@ -1994,7 +2000,7 @@ export function startRom(LEKNAVN, LANG) {
     return jaTopp(tittel, vinn.length ? T('Vinner!', 'Winner!') : T('Ferdig', 'Done'), true, false) + kort +
       (vinn.length ? '<div class="rr-dom lb-gul' + (inn ? ' inn' : '') + '"><span>' + T('Beste historie · ', 'Best story · ') + r.stemmer + (r.stemmer === 1 ? T(' stemme', ' vote') : T(' stemmer', ' votes')) + '</span><b>' + vinn.map(nv).join(' & ') + '</b><small>' + T('Deler ut 3.', 'Hands out 3.') + '</small></div>' : '') +
       (logg ? '<ul class="lb-logg">' + logg + '</ul>' : '') +
-      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + (sisteKat ? T('Til oppsummeringen', 'To the recap') : T('Neste kategori', 'Next category')) + '</button>' +
+      videreKnapp(s, (sisteKat ? T('Til oppsummeringen', 'To the recap') : T('Neste kategori', 'Next category'))) +
       hodeBenk(alle, { oppe: true, oi: [], stirr: vinn.length === 1 ? vinn[0] : '', gul: vinn[0] });
   }
   /** De andre kortlekene når bunken er tom: hvor mange kort dere spilte (i Pekeleken: hvem som ble pekt mest på), og så hva nå. */
@@ -2032,15 +2038,24 @@ export function startRom(LEKNAVN, LANG) {
     var tekst = String(s.tekst || ''), m = tekst.match(PK_PRE), rest = m ? tekst.slice(m[0].length) : tekst;
     var kort = '<div class="pk-kort ms-kort">' + (m ? '<span class="pk-pre">' + esc(m[1]) + ' …</span>' : '') + '<p>' + esc(rest) + '</p></div>';
     var nv = function (id) { return id === jeg ? T('Du', 'You') : esc(navn(id)); };
+    if (s.fase === 'ferdig') {
+      var tot = s.tot || {}, rang = alle.slice().sort(function (a, b) { return (tot[b.id] || 0) - (tot[a.id] || 0); });
+      var vinner = rang[0] && tot[rang[0].id] ? rang[0] : null;
+      return jaTopp(T('Pekeleken · på mobilen', 'Most likely to'), T('Kåringen', 'The verdict'), true, false) +
+        '<div class="rr-dom uenige inn"><span>' + T('Flest stemmer i kveld', 'Most votes tonight') + '</span><b>' + (vinner ? nv(vinner.id) : T('Ingen', 'Nobody')) + '</b><small>' +
+          rang.map(function (p) { return nv(p.id) + ' ' + (tot[p.id] || 0); }).join(' · ') + '</small></div>' +
+        hodeBenk(alle, { oppe: true, oi: vinner ? [vinner.id] : [], stirr: vinner ? vinner.id : '', flat: true, tall: tot, tallInn: true }) +
+        lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye spørsmål – teller i kvelden', 'New questions – counts tonight')]]);
+    }
     if (s.fase === 'resultat') {
       var res = s.resultat || [], maks = res.length ? res[0].stemmer : 0, topp = res.filter(function (r) { return r.stemmer === maks; }).map(function (r) { return r.id; });
       var tall = {}; res.forEach(function (r) { tall[r.id] = r.stemmer; });
       var resten = res.filter(function (r) { return topp.indexOf(r.id) === -1; });
       var chip = topp.length ? topp.map(nv).join(' & ') : T('Ingen stemmer', 'No votes');
-      return jaTopp(T('Pekeleken · på mobilen · runde ', 'Most likely to · round ') + (s.runde || 1), chip, true, false) + kort +
+      return jaTopp(T('Pekeleken · på mobilen', 'Most likely to'), chip, true, false) + kort +
         (topp.length ? '<div class="rr-dom uenige' + (inn ? ' inn' : '') + '"><span>' + T('Flest stemmer · ', 'Most votes · ') + maks + '</span><b>' + topp.map(nv).join(T(' og ', ' and ')) + (topp.length === 1 && topp[0] === jeg ? T(' drikker ', ' drink ') : T(' drikker ', ' drinks ')) + maks + '</b>' +
           (resten.length ? '<small>' + resten.map(function (r) { return nv(r.id) + ' ' + r.stemmer; }).join(' · ') + '</small>' : '') + '</div>' : '') +
-        '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste spørsmål', 'Next question') + '</button>' +
+        '<button class="rom-stor-knapp" data-g="runde" type="button">' + ((s.runde || 1) >= (s.antall || alle.length) ? T('Se kåringen', 'See the verdict') : T('Neste spørsmål', 'Next question')) + '</button>' +
         hodeBenk(alle, { oppe: true, oi: topp, stirr: topp.length === 1 ? topp[0] : '', flat: true, tall: tall, tallInn: inn });
     }
     var har = s.harStemt || [];
@@ -2090,7 +2105,14 @@ export function startRom(LEKNAVN, LANG) {
   var LH_NESE = '<svg viewBox="0 0 80 40" aria-hidden="true"><circle cx="22" cy="20" r="15"/><rect x="22" y="17" width="54" height="7" rx="3.5"/><circle class="o" cx="18" cy="16" r="2.5"/></svg>';
   function forraederSpill(s) {
     var t = tilstand, jeg = t.meg === s.aktiv, han = esc(navn(s.aktiv)), nokkel = s.aktiv + ':' + s.runde, lyvRolle = s.hemmelig === 'lyv';
-    var rTekst = T('Løgnhalsen · runde ', 'The liar · round ') + (s.runde || 1);
+    var rTekst = T('Løgnhalsen', 'The liar');
+    if (s.fase === 'ferdig') {
+      var tavle = s.lurtTavle || [], best = tavle[0];
+      return lhTopp(rTekst, T('Alle har sittet i stolen', 'Everyone has been in the chair'), true) +
+        '<div class="rr-dom uenige inn"><span>' + T('Beste løgnhals', 'Best liar') + '</span><b>' + (best ? jaNavn(best.id) : T('Ingen lurte noen', 'Nobody fooled anyone')) + '</b>' +
+          (tavle.length ? '<small>' + tavle.map(function (x) { return jaNavn(x.id) + T(' lurte ', ' fooled ') + x.n; }).join(' · ') + '</small>' : '') + '</div>' +
+        lekSlutt([['runde', T('Spill igjen', 'Play again'), T('En ny runde i stolen – teller i kvelden', 'Another round in the chair – counts tonight')]]);
+    }
     if (lhGrillK !== nokkel) { lhGrillK = nokkel; lhGrillI = Math.floor(Math.random() * LH_GRILL.length); }
     if (s.fase === 'svar') {
       if (jeg) return lhTopp(rTekst, T('Din tur', 'Your turn'), true) +
@@ -2130,7 +2152,7 @@ export function startRom(LEKNAVN, LANG) {
       '<div class="lh-avslor ' + (lyv ? 'logn' : 'sant') + '"><span>' + esc(s.tekst) + '</span>' +
         '<em class="lh-stempel' + (inn ? ' inn' : '') + '">' + (jeg ? (lyv ? T('Du løy!', 'You lied!') : T('Du sa sant!', 'You told the truth!')) : han + ' ' + (lyv ? T('løy!', 'lied!') : T('sa sant!', 'told the truth!'))) + '</em></div>' +
       '<ul class="lh-utfall' + (inn ? ' inn' : '') + '">' + rader.map(function (x, i) { return '<li class="' + x[0] + '" style="--i:' + i + '"><b>' + x[1] + '</b><span>' + x[2] + '</span></li>'; }).join('') + '</ul>' +
-      '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste runde', 'Next round') + '</button>';
+      '<button class="rom-stor-knapp" data-g="runde" type="button">' + ((s.runde || 1) >= (s.antall || (t.spillere || []).length) ? T('Se hvem som lurte flest', 'See who fooled the most') : T('Neste i stolen', 'Next in the chair')) + '</button>';
     lhVist = nokkel;
     return ut;
   }
@@ -2685,7 +2707,7 @@ export function startRom(LEKNAVN, LANG) {
       '<div class="sd-trekk' + (tilMeg ? ' til-deg' : '') + '">' + (tilMeg ? '<span class="sd-til-deg-stempel' + (innK ? ' inn' : '') + '">' + T('Til deg!', 'For you!') + '</span>' : '') +
         '<div class="sd-stabel"><div class="sd-kortet' + (innK ? ' inn' : '') + '"><div class="sd-til-rad">' + sdTilPiller(s) + '</div><p>' + esc(s.kortet) + '</p><small>' + (s.egen ? '' : T('Skrevet av en av dere', 'Written by one of you')) + '</small></div></div>' +
       '</div>' + kast +
-      '<button class="rom-stor-knapp" data-g="neste" data-pos="' + s.pos + '" type="button">' + T('Trekk neste', 'Draw next') + '</button>' +
+      videreKnapp(s, T('Trekk neste', 'Draw next')) +
       '<p class="sd-med">' + (vert && !s.egen && !kk ? '<button class="linkbtn" data-g="rf-kast" type="button">' + T('Kast i Skammekroken', 'Bin to the corner of shame') + '</button> · ' : '') +
         (vert ? '<button class="linkbtn" data-g="nytt" type="button">' + (s.egen ? T('Stokk på nytt', 'Shuffle again') : T('Ny skriverunde', 'New writing round')) + '</button> · ' : '') +
         (!s.egen && s.alleKort ? '<button class="linkbtn" data-g="lagrestokk" type="button">' + T('Lagre kortene', 'Save the cards') + '</button>' : '') + '</p>';
@@ -3287,7 +3309,7 @@ export function startRom(LEKNAVN, LANG) {
     return hsTopp(s, T('Alle avslørt', 'All revealed'), false) +
       (best && best.lurte ? '<div class="hs-best"><span>' + T('Best gjemt', 'Hid best') + '</span><b>' + hsNavn(best.av) + '</b><small>' + T('lurte ', 'fooled ') + best.lurte + '</small></div>' : '') +
       '<ul class="hs-alle">' + logg.map(function (x, i) { return '<li style="--i:' + i + '">' + nrHode(x.av) + '<span><b>' + hsNavn(x.av) + '</b>' + esc(x.t) + '</span></li>'; }).join('') + '</ul>' +
-      (erVert() ? nyRundeKnapp(T('Nytt spørsmål', 'New question')) : '<p class="nr-vent">' + esc(navn(tilstand.vert)) + T(' tar neste spørsmål.', ' picks the next question.') + '</p>');
+      lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nytt spørsmål – teller i kvelden', 'New question – counts tonight')]]);
   }
 
   /* ---------- Skrøna: leksikonet som lyver ----------
@@ -3356,7 +3378,12 @@ export function startRom(LEKNAVN, LANG) {
   var SM_SAU = '<svg class="sm-sau" viewBox="0 0 64 48" aria-hidden="true"><g class="ull"><circle cx="20" cy="22" r="10"/><circle cx="32" cy="16" r="11"/><circle cx="44" cy="22" r="10"/><circle cx="26" cy="30" r="10"/><circle cx="40" cy="30" r="10"/></g><ellipse class="fjes" cx="12" cy="26" rx="7" ry="8"/><circle class="oye" cx="10" cy="24" r="1.6"/><path class="bein" d="M24 38v8M40 38v8"/></svg>';
   function sammeSpill(s) {
     var alle = tilstand.spillere || [], n = alle.length, meg = tilstand.meg, vert = erVert();
-    var et = T('Saueflokken · runde ', 'The herd · round ') + (s.runde || 1);
+    var et = T('Saueflokken', 'The herd');
+    if (s.fase === 'slutt') {
+      return jaTopp(et, T('Flokken er samlet', 'The herd is home'), true, false) +
+        '<div class="rr-dom enige inn"><span>' + (s.antall || n) + T(' spørsmål', ' questions') + '</span><b>' + T('Ferdig for denne gang!', 'That’s it for now!') + '</b><small>' + T('Svarte får drakk underveis.', 'The black sheep drank along the way.') + '</small></div>' +
+        lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye spørsmål – teller i kvelden', 'New questions – counts tonight')]]);
+    }
     var opp = '<div class="nr-kort sm-oppgave' + (s.fase === 'fasit' ? ' liten' : '') + '"><p>' + esc(s.oppgave) + '</p></div>';
     if (s.fase === 'skriv') {
       smSlaa = null;
@@ -3390,7 +3417,7 @@ export function startRom(LEKNAVN, LANG) {
     return jaTopp(et, T('Flokkene', 'The herds'), false) + opp + '<div class="sm-flokker">' + kort + '</div>' +
       (dom ? '<div class="hs-dom ' + dom[0] + (forste && inn ? ' inn' : '') + '" style="--f:' + (forste ? antall * STEG : 0) + 'ms"><b>' + dom[1] + '</b></div>' : '') +
       (vert ? '<div class="sm-vert"><button type="button" class="btn ghost' + (smSlaa ? ' paa' : '') + '" data-g="sm-slaa-modus">' + (!smSlaa ? T('Slå sammen', 'Merge') : smSlaa.valgt == null ? T('Trykk på et svar', 'Tap an answer') : T('Trykk på det andre', 'Tap the other one')) + '</button>' +
-          '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Nytt spørsmål', 'New question') + '</button></div>'
+          '<button class="rom-stor-knapp" data-g="runde" type="button">' + ((s.nr || 0) + 1 >= (s.antall || n) ? T('Avslutt', 'Finish') : T('Nytt spørsmål', 'New question')) + '</button></div>'
         : '<p class="nr-vent">' + esc(navn(tilstand.vert)) + T(' tar neste spørsmål.', ' picks the next question.') + '</p>');
   }
 
