@@ -321,6 +321,10 @@ The clocks in the timed games (Veddeløpet, Pyramiden, Gris, President, Bussruta
 
 A yellow card sits in the host lobby the first time someone hosts on a phone: three rows that are easy to miss otherwise – getting the room on the TV, playing with only one phone (the sofa), and the figure in the room. Each row is a button that opens the matching sheet. «Skjønner» closes it for good (`bd_vert_intro` in localStorage). Hard shadows, ink border, Archivo condensed heading: the same language as the rest of the app, with the yellow accent so it reads as a nudge rather than a warning.
 
+## Sofa sounds
+
+The one-phone games are played with the phone on the table, so sound carries the timing. The 3 – 2 – 1 countdown in the read-aloud games steps down in pitch from 3 to 1 and ends in a short, bright «NÅ!» so everyone answers together without looking at the screen. The bomb in Kategorier ticks like a clock in step with its pulse (slow, faster, fastest) and ends in a deep boom instead of a bell. All of it is synthesised in the browser like the other room sounds and follows the same sound toggle.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
