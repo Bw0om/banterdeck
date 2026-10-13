@@ -1351,3 +1351,121 @@ button.mv-ringhode:active{transform:scale(.94)}
 .pk-knapp:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
 .pk-knapp.hvit{background:var(--card);color:var(--ink);border-color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.mv-dyr .kropp,.mv-ring path.siste,.mv-ringhode.tur,.mv-kort.inn .snu,.mv-hake,.pk-lapp.klask,.pk-lapp.meg,.pk-lapp.snupp{animation:none}.pk-lapp.fall{animation:pkFall 1ms linear forwards}.mv-kort .snu,.lh-kikk.vis .mv-dekk{transition:none}}
+/* ---------- To sannheter og en løgn: stolen ---------- */
+.ts-stolrad{display:flex;align-items:flex-end;gap:14px;margin:4px 0 12px}
+.ts-stol{position:relative;display:block;flex:none;width:92px;height:112px}
+.ts-stolsvg{position:absolute;inset:0;width:92px;height:112px}
+.ts-stolsvg path{fill:var(--oransje);stroke:var(--ink);stroke-width:3.5;stroke-linejoin:round}
+.ts-stolsvg path.bein{fill:none;stroke-width:5;stroke-linecap:round}
+.ts-stol .nr-h{position:absolute;left:14px;top:2px;width:64px;height:64px}
+.ts-stoltekst{display:flex;flex-direction:column;gap:6px;padding-bottom:6px;min-width:0}
+.ts-stoltekst>b{font-family:var(--display);font-size:30px;font-weight:900;font-stretch:66%;line-height:.95;text-transform:uppercase;overflow-wrap:anywhere}
+.ts-stoltekst>span:last-child:not(.ts-prikker){font-size:15px;font-weight:800;color:var(--muted)}
+.ts-prikker{display:inline-flex;align-self:flex-start;gap:6px;padding:8px 12px;background:var(--card);border:var(--strek) solid var(--ink);border-radius:14px 14px 14px 2px}
+.ts-prikker i{display:block;width:8px;height:8px;border-radius:50%;background:var(--ink);animation:tsPrikk 1.1s ease-in-out infinite}
+.ts-prikker i:nth-child(2){animation-delay:160ms}.ts-prikker i:nth-child(3){animation-delay:320ms}
+@keyframes tsPrikk{0%,60%,100%{transform:none;opacity:.35}30%{transform:translateY(-5px);opacity:1}}
+.ts-du{margin:0;font-family:var(--display);font-size:26px;font-weight:900;font-stretch:66%;line-height:.95;text-transform:uppercase}
+.ts-hjelp{margin:2px 0 10px;font-size:15px;font-weight:800;color:var(--muted)}
+.ts-skjema{display:flex;flex-direction:column;gap:12px;margin:0 0 14px}
+.ts-rad{display:flex;align-items:flex-end;gap:10px;padding:12px;background:var(--card);border:var(--strek) solid var(--ink);border-radius:10px;box-shadow:4px 4px 0 var(--hard);transition:background-color 200ms ease-out;animation:nrInn 380ms var(--fjaer) both;animation-delay:var(--f,0ms)}
+.ts-rad:has(.ts-stempelvalg input:checked){background:var(--rosa)}
+.ts-rad>label:first-child{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.ts-rad>label:first-child>span{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ts-rad:has(input:checked)>label:first-child>span{color:var(--blekk)}
+.ts-rad input[type=text],.ts-rad input:not([type]){width:100%;box-sizing:border-box;padding:10px 12px;font:800 17px var(--sans);color:var(--blekk);background:#FFFFFF;border:var(--strek) solid var(--blekk);border-radius:8px}
+.ts-stempelvalg{position:relative;flex:none;cursor:pointer}
+.ts-stempelvalg input{position:absolute;opacity:0;width:1px;height:1px}
+.ts-stempelvalg span{display:grid;place-items:center;min-width:64px;min-height:46px;padding:0 10px;box-sizing:border-box;font-family:var(--display);font-size:17px;font-weight:900;font-stretch:70%;text-transform:uppercase;color:var(--muted);border:3px dashed var(--muted);border-radius:4px;transition:transform 200ms var(--fjaer),background-color 150ms ease-out}
+.ts-stempelvalg input:checked+span{color:#FFF8EE;background:#16120F;border:3px solid #16120F;transform:rotate(-7deg);box-shadow:3px 3px 0 #16120F}
+.ts-stempelvalg input:focus-visible+span{outline:3px solid var(--oransje);outline-offset:2px}
+.ts-bord{display:flex;flex-direction:column;gap:14px;margin:0 0 12px}
+.ts-plass{position:relative}
+.ts-plass.rist{animation:tsRist 420ms ease-in-out both;animation-delay:900ms}
+@keyframes tsRist{0%,100%{transform:none}25%{transform:translateX(-5px) rotate(-.6deg)}50%{transform:translateX(5px) rotate(.6deg)}75%{transform:translateX(-3px)}}
+.ts-kort{display:flex;align-items:center;gap:12px;width:100%;min-height:92px;box-sizing:border-box;padding:12px;text-align:left;font-family:var(--sans);color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:10px;box-shadow:5px 5px 0 var(--hard);transition:transform 120ms ease-out,box-shadow 120ms ease-out,background-color 260ms ease-out}
+button.ts-kort{cursor:pointer}
+button.ts-kort:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--hard)}
+.ts-kort.valgt{color:var(--blekk);background:var(--gul);transform:translate(3px,3px);box-shadow:2px 2px 0 var(--hard)}
+.ts-kort.sann,.ts-kort.logn{color:var(--blekk);border-color:var(--blekk)}
+.ts-kort.sann{background:var(--mint)}.ts-kort.logn{background:var(--rosa)}
+.ts-kort.ny{animation:tsFarge 1ms linear both;animation-delay:var(--f,0ms)}
+@keyframes tsFarge{from{color:var(--ink);background:var(--card);border-color:var(--ink)}}
+.ts-nr{display:grid;place-items:center;flex:none;width:34px;height:34px;box-sizing:border-box;border-radius:50%;font-size:17px;font-weight:900;color:#16120F;background:#FFF8EE;border:3px solid #16120F}
+.ts-tekst{flex:1;min-width:0;font-weight:850;line-height:1.12;overflow-wrap:anywhere}
+.ts-hoder{display:flex;flex:none;min-width:34px;justify-content:flex-end}
+.ts-hoder .nr-h{width:34px;height:34px}
+.ts-land+.ts-land{margin-left:-12px}
+.ts-land.inn{display:block;animation:tsLand 500ms var(--fjaer) both;animation-delay:var(--f,0ms)}
+@keyframes tsLand{from{transform:translateY(-34px) scale(.92);opacity:0}to{transform:none;opacity:1}}
+.ts-stempel{position:absolute;right:62px;top:-14px;padding:2px 10px;font-family:var(--display);font-size:20px;font-weight:900;font-stretch:66%;text-transform:uppercase;letter-spacing:.04em;color:#16120F;background:#FFF8EE;border:3px solid #16120F;border-radius:4px;transform:rotate(-7deg);pointer-events:none}
+.ts-stempel.logn{right:54px;font-size:26px;color:#FFF8EE;background:#16120F}
+.ts-stempel.inn{animation:tsKlask 450ms var(--fjaer) both;animation-delay:var(--f,0ms)}
+@keyframes tsKlask{from{transform:rotate(-16deg) scale(1.6);opacity:0}to{transform:rotate(-7deg) scale(1);opacity:1}}
+.ts-din{position:absolute;right:10px;top:-11px;padding:2px 8px;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#16120F;background:var(--rosa);border:2.5px solid #16120F;border-radius:4px}
+.ts-status{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.ts-stemt{display:flex}
+.ts-stemt .nr-h{width:30px;height:30px}
+.ts-stemt .nr-h+.nr-h{margin-left:-8px}
+.ts-stemt .nr-h.inn{animation:tsLand 500ms var(--fjaer) both}
+.ts-status>b{font-size:15px;font-weight:900}
+.ts-drikk{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.ts-drikk span{padding:6px 12px;font-size:17px;font-weight:900;color:#16120F;background:var(--rosa);border:3px solid #16120F;border-radius:999px}
+.ts-drikk span.inn{animation:nrInn 380ms var(--fjaer) both;animation-delay:var(--f,0ms)}
+.ts-neste{display:flex;align-items:center;gap:10px;margin:4px 0 12px;padding:12px 14px;background:var(--card);border:var(--strek) solid var(--ink);border-radius:10px;box-shadow:4px 4px 0 var(--hard)}
+.ts-neste>span:first-child{font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ts-neste .ts-prikker{padding:5px 8px;border-width:2px}
+.ts-neste .ts-prikker i{width:6px;height:6px}
+.ts-neste>b{margin-left:auto;font-family:var(--display);font-size:22px;font-weight:900;font-stretch:66%;text-transform:uppercase}
+.ts-pall-tittel{margin:16px 0 4px;font-family:var(--display);font-size:34px;font-weight:900;font-stretch:62%;line-height:.92;text-transform:uppercase}
+.ts-pall{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:0 0 16px}
+.ts-pallplass{display:flex;flex-direction:column;align-items:center;gap:4px;width:96px;animation:nrInn 420ms var(--fjaer) both;animation-delay:var(--f,0ms)}
+.ts-pallplass .nr-h{width:64px;height:64px}
+.ts-pallplass>b{font-size:15px;font-weight:900;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ts-pallplass>span{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;box-sizing:border-box;color:#16120F;background:var(--card);border:3px solid var(--ink);border-bottom:0;border-radius:6px 6px 0 0}
+.ts-pallplass>span b{font-size:26px;font-weight:900;line-height:1;color:var(--ink)}
+.ts-pallplass>span small{font-size:11px;font-weight:900;text-transform:uppercase;color:var(--ink)}
+.ts-pallplass.p1>span{min-height:96px;background:var(--gul)}.ts-pallplass.p1>span b,.ts-pallplass.p1>span small{color:#16120F}
+.ts-pallplass.p2>span{min-height:62px}.ts-pallplass.p3>span{min-height:40px}
+/* ---------- Drikke-bingo: bingotusjen ---------- */
+.bg-topp{position:relative}
+.bg-lista{position:absolute;right:0;top:0;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;box-sizing:border-box;font-size:15px;font-weight:900;text-transform:uppercase;color:#16120F;text-decoration:none;background:var(--mint);border:3px solid #16120F;border-radius:999px;box-shadow:3px 3px 0 var(--hard)}
+.bg-lista svg{width:18px;height:18px;flex:none}
+.bg-lista path{fill:none;stroke:#16120F;stroke-width:2.6;stroke-linejoin:round}.bg-lista circle{fill:#16120F}
+.bg-topp:has(.bg-lista) .nr-topp{padding-right:110px}
+.bg-brett{position:relative;margin:0 0 12px}
+.bg-brett.hopp{animation:bgHopp 600ms cubic-bezier(.23,1,.32,1) both}
+@keyframes bgHopp{0%{transform:none}30%{transform:translateY(-14px) rotate(-1deg)}100%{transform:none}}
+.bg-ruter{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.bg-ruter button{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:4px;height:92px;box-sizing:border-box;padding:8px 7px 7px;overflow:hidden;text-align:left;font-family:var(--sans);color:var(--ink);background:var(--card);border:3px solid var(--ink);border-radius:8px;box-shadow:3px 3px 0 var(--hard);cursor:pointer;transition:transform 100ms ease-out,box-shadow 100ms ease-out}
+.bg-ruter button[aria-pressed=true]{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--hard)}
+.bg-ruter button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+.bg-ruter button:disabled{cursor:default}
+.bg-ruter b{position:relative;z-index:1;font-family:var(--display);font-weight:900;font-stretch:78%;line-height:1.02;text-transform:uppercase;overflow-wrap:normal;word-break:normal}
+.bg-ruter span{position:relative;z-index:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:10px;font-weight:800;line-height:1.15;color:var(--muted)}
+.bg-klatt{position:absolute;left:50%;top:50%;width:74px;height:74px;transform:translate(-50%,-50%) rotate(var(--r,0deg));opacity:.8;pointer-events:none}
+.bg-klatt path{fill:var(--oransje)}
+:root:not([data-theme="dark"]) .bg-klatt{mix-blend-mode:multiply}
+.bg-klatt.inn{animation:bgKlatt 420ms var(--fjaer) both}
+@keyframes bgKlatt{from{transform:translate(-50%,-50%) scale(1.35) rotate(var(--r,0deg));opacity:0}to{transform:translate(-50%,-50%) rotate(var(--r,0deg));opacity:.8}}
+.bg-streker{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.bg-streker path{fill:none;stroke:var(--ink);stroke-width:6;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.bg-streker path.inn{stroke-dasharray:140;animation:bgStrek 500ms cubic-bezier(.23,1,.32,1) both}
+@keyframes bgStrek{from{stroke-dashoffset:140}to{stroke-dashoffset:0}}
+.bg-bingo{position:absolute;left:50%;top:50%;width:280px;margin:-50px 0 0 -140px;padding:6px 0;text-align:center;font-family:var(--display);font-size:80px;font-weight:900;font-stretch:62%;line-height:1;text-transform:uppercase;color:#FFF8EE;background:#16120F;border:4px solid #16120F;border-radius:8px;box-shadow:6px 6px 0 var(--oransje);transform:rotate(-8deg)}
+.bg-bingo.inn{animation:bgBingo 450ms var(--fjaer) 260ms both}
+@keyframes bgBingo{from{transform:rotate(-16deg) scale(1.6);opacity:0}to{transform:rotate(-8deg);opacity:1}}
+.bg-rekke{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 14px;color:#16120F;background:var(--gul);border:3px solid #16120F;border-radius:10px;box-shadow:4px 4px 0 var(--hard);animation:bgRekke 4s linear both}
+.bg-rekke b{font-family:var(--display);font-size:24px;font-weight:900;font-stretch:66%;text-transform:uppercase}
+.bg-rekke span{font-size:15px;font-weight:800}
+@keyframes bgRekke{0%{transform:translateY(14px) scale(.96);opacity:0}8%{transform:none;opacity:1}88%{opacity:1}100%{opacity:0}}
+.bg-andre{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;padding:0;list-style:none}
+.bg-andre li{display:flex;align-items:center;gap:10px}
+.bg-andre .nr-h{width:34px;height:34px}
+.bg-andre li>b:nth-of-type(1){width:60px;font-size:15px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bg-andre li>b:last-child{width:44px;text-align:right;font-size:15px;font-weight:900}
+.bg-stripe{position:relative;flex:1;height:14px;overflow:hidden;background:var(--card);border:3px solid var(--ink);border-radius:999px}
+.bg-stripe i{position:absolute;inset:0;transform-origin:left;background:var(--ink);transition:transform 420ms var(--fjaer)}
+.bg-andre li.meg .bg-stripe i{background:var(--oransje)}
+.bg-bytt{display:block;margin:0 auto 12px;min-height:44px;font:800 14px var(--sans);color:var(--muted);background:none;border:0;text-decoration:underline;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.ts-prikker i,.ts-rad,.ts-plass.rist,.ts-land.inn,.ts-stempel.inn,.ts-stemt .nr-h.inn,.ts-drikk span.inn,.ts-pallplass,.ts-kort.ny,.bg-brett.hopp,.bg-streker path.inn,.bg-bingo.inn{animation:none}.bg-klatt.inn{animation:nrInn 200ms ease both}.bg-rekke{animation:none}.ts-kort,.ts-stempelvalg span,.bg-stripe i{transition:none}}

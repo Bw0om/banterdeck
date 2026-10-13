@@ -200,6 +200,18 @@ Writing is three things only: the pie clock, the card you write on and your pile
   - **On the TV:** only notes that have been guessed are shown.
 - **End of a game:** the host gets the shared "Hva nå?" screen: "Spill igjen" (counts tonight) or the next game in the plan. There are no round numbers and no countdown.
 
+## To sannheter og en løgn and Drikke-bingo
+
+- **To sannheter: the chair.** One player sits in an orange chair and writes three cards, then stamps "Løgn" on one. The cards are shuffled onto the table.
+  - **Voting:** the others tap the card they think is the lie, and their head lands on it. Nobody sees other votes until the reveal, so nobody follows the herd.
+  - **Reveal:** when everyone has voted there is a 2 s pause, then the cards flip: SANN, SANN, and the LØGN stamp last with a shake. Every head lands on its card. Missed or no vote: drink 1. The chair drinks 1 per person who saw the lie.
+  - **No "next" button:** the reveal stays on screen while the next person in the chair is already writing. When everyone has sat in the chair, a "Beste løgner" podium appears, then "Hva nå?".
+- **Drikke-bingo: the dabber.** Tapping a song drops an ink blot on the square (tap again to remove). Four in a row draws a line and "Rekke! Del ut 2" pops up.
+  - **Full board:** the board jumps, BINGO! is stamped over it, everyone else finishes their drink, and the game ends on "Hva nå?".
+  - Under the board, "Hvor nærme er de?" shows a progress stripe per player. "Bytt brett" only works before the first blot.
+  - Song titles shrink by their longest word so they always fit the square.
+  - **On the TV:** a spinning record, everyone's board as dots (never the songs), who marked last, and a big BINGO! at the end.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
