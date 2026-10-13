@@ -250,6 +250,8 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     if (s.type === 'bussruta') spill.br = ekstraVisning(s, null, data);
     if (s.type === 'yatzy') spill.yz = ekstraVisning(s, null, data);
     if (s.type === 'pyramiden') spill.py = ekstraVisning(s, null, data);
+    if (s.type === 'gris') spill.gr = ekstraVisning(s, null, data);
+    if (s.type === 'president') spill.pr = ekstraVisning(s, null, data);
     if (s.type === 'en') spill.en = enVisning(s, data, lang);
     if (s.type === 'veddelopet') spill.vl = ekstraVisning(s, null, data);
     if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
@@ -2075,18 +2077,48 @@ function nyGrisRunde(data: any) {
   const bl = stokk(kort);
   s.hender = {}; ider.forEach((id: string) => { s.hender[id] = bl.splice(0, 4); if (s.bokstaver[id] === undefined) s.bokstaver[id] = 0; });
   s.valgt = {}; s.fase = 'send'; s.neser = []; s.runde = (s.runde || 0) + 1;
+  s.sendVed = Date.now(); s.byttNr = 0; s.taper = null; s.neseVed = 0; s.ferdigVed = 0;
+}
+// Gris går av seg selv: 10 s per bytte, 5 s på nesa, 4 s pause før neste runde. Vertens telefon driver klokka.
+const GR_BYTT = 10000, GR_NESE = 5000, GR_PAUSE = 4000;
+function grBytt(s: any, ider: string[]) {
+  const sendt = ider.map((id: string) => s.hender[id].splice(s.valgt[id], 1)[0]);
+  ider.forEach((id: string, j: number) => { s.hender[id].push(sendt[(j - 1 + ider.length) % ider.length]); });
+  s.valgt = {}; s.byttNr = (s.byttNr || 0) + 1; s.sendVed = Date.now();
+}
+/** En bokstav til. Fire bokstaver = GRIS: spillet er over. */
+function grBokstav(data: any, s: any, id: string) {
+  s.bokstaver[id] = (s.bokstaver[id] || 0) + 1;
+  if (s.bokstaver[id] >= 4 && !s.gris) {
+    s.gris = id; s.fase = 'slutt';
+    melde(data, `${navnPaa(data, id)} er GRIS! Ta en shot.`, `${navnPaa(data, id)} spelled PIGS! Take a shot.`);
+  }
 }
 function fireLike(h: any[]) { return h.length === 4 && h.every((k) => k.v === h[0].v); }
 
 /* ---------- President ---------- */
 const RANG = (v: number) => (v === 2 ? 15 : v);
+const PR_TUR = 20000;
 function nyPresidentRunde(data: any, forrige: any) {
   const ider = aktiveIder(data, true), st = kortstokk52();
   const hender: any = {}; ider.forEach((id: string) => { hender[id] = []; });
   st.forEach((k: any, i: number) => hender[ider[i % ider.length]].push(k));
-  ider.forEach((id: string) => hender[id].sort((a: any, b: any) => RANG(a.v) - RANG(b.v)));
+  const sorter = (id: string) => hender[id].sort((a: any, b: any) => RANG(a.v) - RANG(b.v));
+  ider.forEach(sorter);
+  // Rævkjøreren gir sitt beste kort til Presidenten, og får Presidentens laveste tilbake
+  let bytte: any = null;
+  const fe = forrige && forrige.ferdige || [];
+  if (fe.length >= 2) {
+    const pres = fe[0], raev = fe[fe.length - 1];
+    if (hender[pres] && hender[raev] && pres !== raev) {
+      const best = hender[raev].pop(), lav = hender[pres].shift();
+      hender[pres].push(best); hender[raev].push(lav); sorter(pres); sorter(raev);
+      bytte = { fra: raev, til: pres, kort: best, tilbake: lav };
+    }
+  }
   data.spill = { type: 'president', lek: 'president', navn: EKSTRA_NAVN.president, hender, bord: [], bordAv: null, pass: [], tur: 0,
-    ferdige: [], titler: forrige || {}, runde: ((data.spill && data.spill.runde) || 0) + 1 };
+    ferdige: [], titler: (forrige && forrige.titler) || {}, runde: forrige ? (forrige.runde || 1) + 1 : 1,
+    turVed: Date.now(), leggNr: 0, feiNr: 0, sist: null, bytte, drikk: null };
 }
 function presTurVidere(data: any) {
   const s = data.spill, ider = aktiveIder(data);
@@ -2368,50 +2400,75 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
       return null;
     }
     case 'gris': {
-      if (s.hender && !s.hender[meg.id] && h.handling !== 'nytt') return { ok: true };  // kom inn midt i runden
+      const gi = ider.filter((id: string) => s.hender && s.hender[id]);
+      if (h.handling === 'nytt' || h.handling === 'runde') { if (meg.id !== data.vert) return { feil: 'bare-vert' }; return startEkstra(data, 'gris'); }
+      if (h.handling === 'gr-tikk') {
+        if (meg.id !== data.vert) return { ok: true };
+        const naa = Date.now();
+        if (s.fase === 'send' && naa - (s.sendVed || 0) >= GR_BYTT - 300) {
+          // Valgte du ikke, sendes kortet lengst til venstre
+          gi.forEach((id: string) => { if (s.valgt[id] === undefined) s.valgt[id] = 0; });
+          grBytt(s, gi);
+        } else if (s.fase === 'nese' && naa - (s.neseVed || 0) >= GR_NESE - 300) {
+          const mangler = gi.filter((id: string) => !s.neser.includes(id));
+          mangler.forEach((id: string) => grBokstav(data, s, id));
+          s.taper = mangler[0] || null;
+          if (mangler.length) melde(data, `${mangler.map((id: string) => navnPaa(data, id)).join(', ')} rakk ikke nesa – bokstav!`, `${mangler.map((id: string) => navnPaa(data, id)).join(', ')} missed the nose – a letter!`);
+          if (s.fase !== 'slutt') { s.fase = 'ferdig'; s.ferdigVed = naa; }
+        } else if (s.fase === 'ferdig' && naa - (s.ferdigVed || 0) >= GR_PAUSE - 300) nyGrisRunde(data);
+        return { ok: true };
+      }
+      if (!s.hender[meg.id] || s.fase === 'slutt') return { ok: true };  // kom inn midt i runden
       if (h.handling === 'velg' && s.fase === 'send') {
         const i = Number(h.i); if (!(i >= 0 && i < 4)) return { feil: 'ukjent' };
         s.valgt[meg.id] = i;
-        if (ider.every((id: string) => s.valgt[id] !== undefined)) {
-          const sendt = ider.map((id: string) => s.hender[id].splice(s.valgt[id], 1)[0]);
-          ider.forEach((id: string, j: number) => { s.hender[id].push(sendt[(j - 1 + ider.length) % ider.length]); });
-          s.valgt = {};
-        }
+        if (gi.every((id: string) => s.valgt[id] !== undefined)) grBytt(s, gi);
         return { ok: true };
       }
       if (h.handling === 'nese') {
         if (s.fase === 'ferdig' || s.neser.includes(meg.id)) return { ok: true };
         if (s.fase === 'send') {
           if (!fireLike(s.hender[meg.id])) {
-            s.bokstaver[meg.id]++; melde(data, `${meg.navn} tok seg på nesa for tidlig – får en bokstav!`, `${meg.navn} touched their nose too early – gets a letter!`);
-            if (s.bokstaver[meg.id] >= 4) { melde(data, `${meg.navn} er GRIS! Ta en shot.`, `${meg.navn} spelled PIGS! Take a shot.`); s.bokstaver[meg.id] = 0; }
+            melde(data, `${meg.navn} tok seg på nesa for tidlig – får en bokstav!`, `${meg.navn} touched their nose too early – gets a letter!`);
+            s.tNr = (s.tNr || 0) + 1; s.tidlig = { id: meg.id, nr: s.tNr };
+            grBokstav(data, s, meg.id);
             return { ok: true };
           }
-          s.fase = 'nese';
+          s.fase = 'nese'; s.neseVed = Date.now();
         }
         s.neser.push(meg.id);
-        if (s.neser.length >= ider.length - 1) {
-          const taper = ider.find((id: string) => !s.neser.includes(id));
-          s.bokstaver[taper]++;
-          const b = 'GRIS'.slice(0, s.bokstaver[taper]), bEn = 'PIGS'.slice(0, s.bokstaver[taper]);
-          melde(data, `${navnPaa(data, taper)} var sist på nesa – ${b}!` + (s.bokstaver[taper] >= 4 ? ' Ta en shot!' : ''),
-            `${navnPaa(data, taper)} was last to touch their nose – ${bEn}!` + (s.bokstaver[taper] >= 4 ? ' Take a shot!' : ''));
-          if (s.bokstaver[taper] >= 4) s.bokstaver[taper] = 0;
-          s.fase = 'ferdig'; s.taper = taper;
+        if (s.neser.length >= gi.length - 1) {
+          const taper = gi.find((id: string) => !s.neser.includes(id));
+          if (taper) {
+            grBokstav(data, s, taper);
+            const n = Math.min(4, s.bokstaver[taper]), b = 'GRIS'.slice(0, n), bEn = 'PIGS'.slice(0, n);
+            melde(data, `${navnPaa(data, taper)} var sist på nesa – ${b}!`, `${navnPaa(data, taper)} was last to touch their nose – ${bEn}!`);
+          }
+          s.taper = taper || null;
+          if (s.fase !== 'slutt') { s.fase = 'ferdig'; s.ferdigVed = Date.now(); }
         }
         return { ok: true };
       }
-      if (h.handling === 'nytt') { nyGrisRunde(data); return { ok: true }; }
       return null;
     }
     case 'president': {
       const turId = ider[s.tur];
+      if (h.handling === 'pr-tikk') {
+        // Vertens telefon: 20 s per tur. Ute? Da passes det – eller laveste kort legges om du starter.
+        if (meg.id !== data.vert || s.fase === 'ferdig' || !turId) return { ok: true };
+        if (Date.now() - (s.turVed || 0) < PR_TUR - 300) return { ok: true };
+        const p = data.spillere.find((x: any) => x.id === turId) || { id: turId, navn: navnPaa(data, turId) };
+        return ekstraHandling(data, p, s.bord.length ? { handling: 'pass' } : { handling: 'legg', kort: [0] });
+      }
+      if (h.handling === 'nytt' || h.handling === 'runde') { if (meg.id !== data.vert) return { feil: 'bare-vert' }; nyPresidentRunde(data, s); return { ok: true }; }
       if (h.handling === 'legg' || h.handling === 'pass') {
+        if (s.fase === 'ferdig') return { ok: true };
         if (turId !== meg.id) return feilL('ikke-din-tur', 'Vent på tur.', 'Wait for your turn.');
         const hand = s.hender[meg.id];
         if (h.handling === 'pass') {
           if (!s.bord.length) return feilL('ugyldig', 'Du starter – legg ut noe.', "You're starting – play something.");
           if (!s.pass.includes(meg.id)) s.pass.push(meg.id);
+          s.turVed = Date.now(); s.sistNr = (s.sistNr || 0) + 1; s.sist = { id: meg.id, pass: true, nr: s.sistNr };
         } else {
           const valg: number[] = Array.isArray(h.kort) ? [...new Set(h.kort.map(Number))].filter((i: number) => i >= 0 && i < hand.length) as number[] : [];
           if (!valg.length) return feilL('ugyldig', 'Velg kort.', 'Pick some cards.');
@@ -2420,8 +2477,9 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
           if (s.bord.length && (kort.length !== s.bord.length || RANG(kort[0].v) <= RANG(s.bord[0].v))) return feilL('ugyldig', `Legg ${s.bord.length} kort som er høyere.`, `Play ${s.bord.length} ${s.bord.length === 1 ? 'card' : 'cards'} that ${s.bord.length === 1 ? 'is' : 'are'} higher.`);
           s.hender[meg.id] = hand.filter((_: any, i: number) => !valg.includes(i));
           s.bord = kort; s.bordAv = meg.id; s.pass = [];
+          s.turVed = Date.now(); s.leggNr = (s.leggNr || 0) + 1; s.sistNr = (s.sistNr || 0) + 1; s.sist = { id: meg.id, kort, nr: s.sistNr };
           if (!s.hender[meg.id].length) { s.ferdige.push(meg.id); melde(data, `${meg.navn} er tom for kort!`, `${meg.navn} is out of cards!`); }
-          if (kort[0].v === 2) { s.bord = []; s.pass = []; melde(data, `${meg.navn} la toer og rydder bordet.`, `${meg.navn} played a two and clears the table.`);
+          if (kort[0].v === 2) { s.bord = []; s.pass = []; s.feiNr = (s.feiNr || 0) + 1; melde(data, `${meg.navn} la toer og rydder bordet.`, `${meg.navn} played a two and clears the table.`);
             if (s.hender[meg.id].length) return { ok: true }; }
         }
         const igjen = ider.filter((id: string) => !s.ferdige.includes(id));
@@ -2430,13 +2488,18 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
           const t: any = {}; t[s.ferdige[0]] = L('President', 'President'); t[s.ferdige[s.ferdige.length - 1]] = L('Rævkjører', 'Scumbag');
           if (s.ferdige.length > 3) { t[s.ferdige[1]] = L('Visepresident', 'Vice President'); t[s.ferdige[s.ferdige.length - 2]] = L('Viserævkjører', 'Vice Scumbag'); }
           s.titler = t; s.fase = 'ferdig';
+          // Drikking: Rævkjøreren 3, Viserævkjøreren 2, Presidenten deler ut 3
+          const fe = s.ferdige, drikk: any[] = [{ id: fe[fe.length - 1], n: 3 }];
+          if (fe.length > 3) drikk.push({ id: fe[fe.length - 2], n: 2 });
+          drikk.forEach((d: any) => giSlurker(data, d.id, d.n)); giUtdeling(data, fe[0], 3);
+          s.drikk = { pres: fe[0], deler: 3, drikker: drikk };
           melde(data, `${navnPaa(data, s.ferdige[0])} er President! ${navnPaa(data, s.ferdige[s.ferdige.length - 1])} er rævkjører.`, `${navnPaa(data, s.ferdige[0])} is President! ${navnPaa(data, s.ferdige[s.ferdige.length - 1])} is the Scumbag.`);
           return { ok: true };
         }
         // Har alle andre sagt pass siden siste legg? Da rydder den som la sist.
         const maaSvare = igjen.filter((id: string) => id !== s.bordAv);
         if (s.bord.length && maaSvare.every((id: string) => s.pass.includes(id))) {
-          s.bord = []; s.pass = [];
+          s.bord = []; s.pass = []; s.feiNr = (s.feiNr || 0) + 1;
           const idx = ider.indexOf(s.bordAv);
           if (!s.ferdige.includes(s.bordAv)) { s.tur = idx; melde(data, `Ingen gikk over – ${navnPaa(data, s.bordAv)} starter på nytt.`, `Nobody went higher – ${navnPaa(data, s.bordAv)} starts again.`); return { ok: true }; }
           s.tur = idx;
@@ -2444,7 +2507,6 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         presTurVidere(data);
         return { ok: true };
       }
-      if (h.handling === 'nytt') { nyPresidentRunde(data, s.titler); return { ok: true }; }
       return null;
     }
   }
@@ -2503,11 +2565,14 @@ export function ekstraVisning(s: any, meg: any, data: any) {
       kort: (p.avgjort === 'sant' || p.avgjort === 'bløff' || (meg && p.id === meg.id)) ? p.kort : null })),
     snuddVed: s.snuddVed || 0, vindu: PY_VINDU, avsl: s.avsl || null, ferdig: !!s.ferdig, lurt: s.lurt || {}, tatt: s.tatt || {},
     fasit: s.ferdig ? s.hender : null };
-  if (s.type === 'gris') return { fase: s.fase, minHand: meg ? s.hender[meg.id] : null, harValgt: Object.keys(s.valgt), mittValg: meg ? s.valgt[meg.id] ?? null : null,
-    neser: s.neser, bokstaver: s.bokstaver, taper: s.taper || null, harFire: meg ? fireLike(s.hender[meg.id] || []) : false,
-    fasit: s.fase === 'ferdig' ? Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h])) : null };
+  if (s.type === 'gris') return { fase: s.fase, minHand: meg ? s.hender[meg.id] || null : null, harValgt: Object.keys(s.valgt), mittValg: meg ? s.valgt[meg.id] ?? null : null,
+    neser: s.neser, bokstaver: s.bokstaver, taper: s.taper || null, harFire: meg ? fireLike(s.hender[meg.id] || []) : false, ider: Object.keys(s.hender || {}),
+    runde: s.runde || 1, byttNr: s.byttNr || 0, sendVed: s.sendVed || 0, neseVed: s.neseVed || 0, ferdigVed: s.ferdigVed || 0, gris: s.gris || null, tidlig: s.tidlig || null,
+    vinduer: { bytt: GR_BYTT, nese: GR_NESE, pause: GR_PAUSE },
+    fasit: s.fase === 'ferdig' || s.fase === 'slutt' ? Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h])) : null };
   if (s.type === 'president') return { fase: s.fase || 'spill', bord: s.bord, bordAv: s.bordAv, tur: ider[s.tur], pass: s.pass, ferdige: s.ferdige, titler: s.titler,
-    minHand: meg ? s.hender[meg.id] : null, antall: Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h.length])) };
+    minHand: meg ? s.hender[meg.id] || null : null, antall: Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h.length])), ider: Object.keys(s.hender),
+    turVed: s.turVed || 0, turTid: PR_TUR, leggNr: s.leggNr || 0, feiNr: s.feiNr || 0, sist: s.sist || null, bytte: s.bytte || null, drikk: s.drikk || null, runde: s.runde || 1 };
   return {};
 }
 
