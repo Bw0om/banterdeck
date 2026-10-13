@@ -6,7 +6,7 @@
 const { slug, lang = 'no' } = Astro.props as { slug: string; lang?: string };
 const en = lang === 'en';
 const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer', '21-med-terninger', 'opus', 'regelfabrikken',
-  'power-hour', 'snurr-flasken', 'drikke-yatzy', 'beer-pong', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', '14-sporsmal', 'bossen-sier', 'stilleleken'];
+  'power-hour', 'snurr-flasken', 'drikke-yatzy', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', '14-sporsmal', 'bossen-sier', 'stilleleken'];
 const RomLeker = ['regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris', 'to-sannheter-og-en-logn', 'bussruta', 'drikke-yatzy'];
 const har = DIGITALE.includes(slug);
 import { romLenke } from '../lib/romlenke';
@@ -14,8 +14,8 @@ import KortVelger from './KortVelger.astro';
 import { games, t } from '../lib/content';
 const romHref = romLenke(slug, '', en ? 'en' : 'no');
 const bareRom = ['pyramiden', 'president', 'gris'].includes(slug);
-const OVERSKRIFT_NO: Record<string, string> = { 'terningen-bestemmer': 'Telefonen er terningen', '21-med-terninger': 'Telefonen er terningen', 'opus': 'Telefonen er terningen', 'drikke-yatzy': 'Telefonen er terningene og blokka', 'regelfabrikken': 'Skriv kortene', 'power-hour': 'Klokka', 'snurr-flasken': 'Telefonen er flaska', 'beer-pong': 'Koppteller', 'rask-fakta': 'Fem sekunder', 'to-sannheter-og-en-logn': 'Skriv og avslør', 'jug': 'Vertens hemmelige trekk', '14-sporsmal': 'Regeltavla', 'bossen-sier': 'Boss-maskinen', 'stilleleken': 'Telefonen lytter' };
-const OVERSKRIFT_EN: Record<string, string> = { 'terningen-bestemmer': 'The phone is the die', '21-med-terninger': 'The phone is the dice', 'opus': 'The phone is the die', 'drikke-yatzy': 'The phone is the dice and the scorecard', 'regelfabrikken': 'Write the cards', 'power-hour': 'The clock', 'snurr-flasken': 'The phone is the bottle', 'beer-pong': 'Cup counter', 'rask-fakta': 'Five seconds', 'to-sannheter-og-en-logn': 'Write and reveal', 'jug': "The host's secret draw", '14-sporsmal': 'The rule board', 'bossen-sier': 'The boss machine', 'stilleleken': 'The phone is listening' };
+const OVERSKRIFT_NO: Record<string, string> = { 'terningen-bestemmer': 'Telefonen er terningen', '21-med-terninger': 'Telefonen er terningen', 'opus': 'Telefonen er terningen', 'drikke-yatzy': 'Telefonen er terningene og blokka', 'regelfabrikken': 'Skriv kortene', 'power-hour': 'Klokka', 'snurr-flasken': 'Telefonen er flaska', 'rask-fakta': 'Fem sekunder', 'to-sannheter-og-en-logn': 'Skriv og avslør', 'jug': 'Vertens hemmelige trekk', '14-sporsmal': 'Regeltavla', 'bossen-sier': 'Boss-maskinen', 'stilleleken': 'Telefonen lytter' };
+const OVERSKRIFT_EN: Record<string, string> = { 'terningen-bestemmer': 'The phone is the die', '21-med-terninger': 'The phone is the dice', 'opus': 'The phone is the die', 'drikke-yatzy': 'The phone is the dice and the scorecard', 'regelfabrikken': 'Write the cards', 'power-hour': 'The clock', 'snurr-flasken': 'The phone is the bottle', 'rask-fakta': 'Five seconds', 'to-sannheter-og-en-logn': 'Write and reveal', 'jug': "The host's secret draw", '14-sporsmal': 'The rule board', 'bossen-sier': 'The boss machine', 'stilleleken': 'The phone is listening' };
 const overskrift = bareRom ? (en ? 'Play without a deck of cards' : 'Spill uten kortstokk') : ((en ? OVERSKRIFT_EN : OVERSKRIFT_NO)[slug] || (en ? 'The phone is the deck' : 'Telefonen er kortstokken'));
 const romNavn = en ? t((games.find((g) => g.slug === slug) || {}).name, 'en') : (slug === 'pyramiden' ? 'Pyramiden' : slug === 'president' ? 'President' : 'Gris');
 ---
@@ -768,45 +768,6 @@ if (!window.BDK) window.BDK = (function () {
     var b = e.target.closest('[data-a]'); if (!b) return;
     if (b.dataset.a === 'start') { var inp = root.querySelector('#yzNavn'); var ns = K.navn(inp); if (!ns.length) ns = T(['Spiller 1', 'Spiller 2'], ['Player 1', 'Player 2']); K.husk('bd_spillere', inp.value); spillere = ns.map(function (n) { return { navn: n, blokk: {} }; }); tur = 0; kast = 0; tegn(); }
     if (b.dataset.a === 'kast') trill();
-    if (b.dataset.a === 'ny') oppsett();
-  });
-  oppsett();
-})();
-</script>
-)}
-
-{slug === 'beer-pong' && (
-<script is:inline data-astro-rerun>
-(function () {
-  var root = document.querySelector('[data-dl="beer-pong"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, T = K.T, antall = 10, lag = [];
-  var RADER = { 6: [3, 2, 1], 10: [4, 3, 2, 1] };
-  function oppsett() {
-    root.innerHTML = '<div class="rom-mod">' + [6, 10].map(function (n) { return '<button type="button" data-n="' + n + '" aria-pressed="' + (n === antall) + '">' + n + T(' kopper', ' cups') + '</button>'; }).join('') + '</div>' +
-      '<div class="dl-navn"><label for="bpA">' + T('Lag 1', 'Team 1') + '</label><input id="bpA" maxlength="20" autocomplete="off" placeholder="' + T('Lagnavn', 'Team name') + '"><label for="bpB">' + T('Lag 2', 'Team 2') + '</label><input id="bpB" maxlength="20" autocomplete="off" placeholder="' + T('Lagnavn', 'Team name') + '"></div>' +
-      '<button class="btn gold" data-a="start">' + T('Start kampen', 'Start the match') + '</button>';
-  }
-  function stativ(l, li) {
-    var i = 0;
-    return '<div class="bp-stativ">' + RADER[antall].map(function (n) {
-      var s = '<div>'; for (var k = 0; k < n; k++, i++) s += '<button type="button" data-l="' + li + '" data-k="' + i + '" aria-pressed="' + !!l.truffet[i] + '" aria-label="' + T('Kopp ', 'Cup ') + (i + 1) + '"></button>'; return s + '</div>';
-    }).join('') + '</div>';
-  }
-  function tegn(melding) {
-    var igjen = lag.map(function (l) { return antall - Object.keys(l.truffet).length; });
-    var vinner = igjen[0] === 0 ? 1 : igjen[1] === 0 ? 0 : -1;
-    root.innerHTML = lag.map(function (l, li) { return '<div class="bp-lag"><p class="dl-spiller">' + K.esc(l.navn) + ' · ' + igjen[li] + T(' kopper igjen', ' cups left') + '</p>' + stativ(l, li) + '</div>'; }).join('<p class="bp-mot">' + T('mot', 'vs') + '</p>') +
-      '<p class="dl-melding" aria-live="polite">' + K.esc(vinner >= 0 ? lag[vinner].navn + T(' vant! Taperne får ett siste forsøk på å redde seg.', ' won! The losers get one last shot at redemption.') : (melding || T('Trykk på en kopp når den blir truffet.', 'Tap a cup when it gets hit.'))) + '</p>' +
-      '<div class="dl-knapper"><button class="btn ghost" data-a="angre">' + T('Angre', 'Undo') + '</button><button class="btn ghost" data-a="ny">' + T('Ny kamp', 'New match') + '</button></div>';
-  }
-  var logg = [];
-  root.addEventListener('click', function (e) {
-    var n = e.target.closest('[data-n]'); if (n) { antall = +n.dataset.n; return oppsett(); }
-    var k = e.target.closest('[data-k]');
-    if (k) { var l = lag[+k.dataset.l], i = +k.dataset.k; if (l.truffet[i]) { delete l.truffet[i]; } else { l.truffet[i] = true; logg.push([+k.dataset.l, i]); } return tegn(l.navn + T(' drikker koppen!', ' drinks the cup!')); }
-    var b = e.target.closest('[data-a]'); if (!b) return;
-    if (b.dataset.a === 'start') { lag = [{ navn: root.querySelector('#bpA').value.trim() || T('Lag 1', 'Team 1'), truffet: {} }, { navn: root.querySelector('#bpB').value.trim() || T('Lag 2', 'Team 2'), truffet: {} }]; logg = []; tegn(); }
-    if (b.dataset.a === 'angre') { var s = logg.pop(); if (s) delete lag[s[0]].truffet[s[1]]; tegn(); }
     if (b.dataset.a === 'ny') oppsett();
   });
   oppsett();
