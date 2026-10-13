@@ -202,6 +202,18 @@ export function kaaringer(data: any) {
 }
 
 /** Løgnhalsen: hvem som har lurt flest i kveld (bare de som har lurt noen). */
+/** Hvem kan gå videre i kortlekene. I lekene dere gjør i virkeligheten (Pekeleken, Nødt eller sannhet, vanlige kortstokker)
+    er det verten og den som har tur (og den som står for tur). I lekene der alle svarer på telefonen: alle (null). */
+function kortVidere(s: any, data: any): string[] | null {
+  if (!s || s.type !== 'kort' || s.ring || s.aldri || s.ee || s.rr || s.kb || s.lb) return null;
+  const sp = data.spillere || [], n = sp.length, ut: any[] = [data.vert];
+  if (n) {
+    if (s.pek) { const i = s.pekLeser ?? 0; ut.push(sp[i % n] && sp[i % n].id, sp[(i + 1) % n] && sp[(i + 1) % n].id); }
+    else if (s.ns) { const j = (s.nsNr || 0) % n; ut.push(s.ns.hvem, sp[j] && sp[j].id); }
+    else if (s.tur !== null && s.tur !== undefined) { const t = s.tur % n; ut.push(sp[t] && sp[t].id, sp[(t + 1) % n] && sp[(t + 1) % n].id); }
+  }
+  return ut.filter(Boolean);
+}
 function lurtTavle(data: any) {
   return (data.spillere || []).filter((p: any) => p.lurt).map((p: any) => ({ id: p.id, n: p.lurt })).sort((a: any, b: any) => b.n - a.n).slice(0, 4);
 }
@@ -233,11 +245,11 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
   if (s) {
     spill = { type: s.type, lek: s.lek, navn: s.navn, runde: s.runde || null, frist: s.frist || null, antallLeker: (data.historikk || []).length };
     if (s.type === 'kort' && s.pek) Object.assign(spill, { pek: pekVisning(s, null), pektTavle: pektTavle(data), pekForrige: s.pekForrige || null });
-    if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
+    if (s.type === 'kort') Object.assign(spill, { videre: kortVidere(s, data), kort: s.kort, pos: s.pos, antall: s.rekke.length, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
       aldri: aldriVisning(s, null), ee: eeVisning(s, null), rr: rrVisning(s, null), ns: nsVisning(s, null), kb: kbVisning(s), lb: lbVisning(s, null), fase: s.ferdig ? 'kort-ferdig' : s.aldri ? 'aldri-' + s.aldri.fase : s.ee ? 'ee-' + s.ee.fase : s.rr ? 'rr-' + s.rr.fase : s.ns ? 'ns-' + s.ns.fase : s.kb ? 'kb-' + s.kb.fase : s.lb ? 'lb-' + s.lb.fase + (s.lb.fase === 'gjett' || s.lb.fase === 'avslort' ? s.lb.nr : '') : undefined, ferdig: !!s.ferdig, jaTavle: s.ferdig && s.lek === 'jeg-har-aldri' ? aldriTavle(s, data) : null, pekSlutt: s.ferdig && s.lek === 'pekeleken' ? pektTavle(data) : null,
       turId: s.tur !== null && s.tur !== undefined ? (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null : null },
       s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
-    if (s.type === 'mest') Object.assign(spill, { tekst: s.tekst, fase: s.fase, stemt: Object.keys(s.stemmer || {}).length, harStemt: Object.keys(s.stemmer || {}), resultat: s.fase === 'resultat' ? s.resultat : null });
+    if (s.type === 'mest') Object.assign(spill, { tot: s.tot || {}, tekst: s.tekst, fase: s.fase, stemt: Object.keys(s.stemmer || {}).length, harStemt: Object.keys(s.stemmer || {}), resultat: s.fase === 'resultat' ? s.resultat : null });
     if (s.type === 'forraeder') Object.assign(spill, { tekst: s.tekst, fase: s.fase, aktiv: s.aktiv, stemt: Object.keys(s.stemmer || {}).length, harStemt: Object.keys(s.stemmer || {}),
       runde: s.runde || 1, lurtTavle: lurtTavle(data),
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, sikker: s.sikker || {}, drikker: s.drikker, utdeling: s.utdeling || [], lurte: s.lurte || 0 } : null });
@@ -305,20 +317,20 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
   if (s) {
     spill = { type: s.type, lek: s.lek, navn: s.navn, modus: modusNavn(s, lang), runde: s.runde, frist: s.frist || null, turStart: s.turNokkel ? s.turStart || null : null };
     if (s.type === 'kort' && s.pek) Object.assign(spill, { pek: pekVisning(s, meg), pektTavle: pektTavle(data), pekForrige: s.pekForrige || null });
-    if (s.type === 'kort') Object.assign(spill, { kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
+    if (s.type === 'kort') Object.assign(spill, { videre: kortVidere(s, data), kort: s.kort, pos: s.pos, antall: s.rekke.length, tur: s.tur, konger: s.konger, makkere: s.makkere || [], velgMakker: s.velgMakker || null,
       aldri: aldriVisning(s, meg), ee: eeVisning(s, meg), rr: rrVisning(s, meg), ns: nsVisning(s, meg), kb: kbVisning(s), lb: lbVisning(s, meg), svarPaa: !!s.svarPaa, kanSvar: SVAR_LEKER.includes(s.lek), ferdig: !!s.ferdig, jaTavle: s.ferdig && s.lek === 'jeg-har-aldri' ? aldriTavle(s, data) : null, pekSlutt: s.ferdig && s.lek === 'pekeleken' ? pektTavle(data) : null },
       s.ring ? { ring: true, tatt: s.tatt, nr: s.nr, brudd: s.brudd, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? null : s.bruddPlass, sist: s.sist, turId: (data.spillere[s.tur % Math.max(1, data.spillere.length)] || {}).id || null, igjen: s.rekke.length - s.tatt.length, holder: s.holder || null } : {});
     if (s.type === 'mest') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase,
       harStemt: Object.keys(s.stemmer),
       minStemme: meg ? s.stemmer[meg.id] || null : null,
-      resultat: s.fase === 'resultat' ? s.resultat : null,
+      resultat: s.fase === 'resultat' ? s.resultat : null, runde: s.runde || 1, antall: s.antall || data.spillere.length, tot: s.tot || {},
     });
     if (s.type === 'forraeder') Object.assign(spill, {
       tekst: s.tekst, fase: s.fase, aktiv: s.aktiv,
       harStemt: Object.keys(s.stemmer),
       minStemme: meg ? s.stemmer[meg.id] || null : null, minSikker: !!(meg && s.sikker && s.sikker[meg.id]),
-      hemmelig: meg && meg.id === s.aktiv ? s.hemmelig : null, byttet: !!s.byttet, runde: s.runde || 1,
+      hemmelig: meg && meg.id === s.aktiv ? s.hemmelig : null, byttet: !!s.byttet, runde: s.runde || 1, antall: s.antall || data.spillere.length,
       lurtTavle: lurtTavle(data),
       resultat: s.fase === 'avslort' ? { svar: s.hemmelig, stemmer: s.stemmer, sikker: s.sikker || {}, drikker: s.drikker, utdeling: s.utdeling || [], lurte: s.lurte || 0 } : null,
     });
@@ -956,13 +968,13 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
   }
   if (valgt.type === 'mest') {
     const alle = teksterL('pekeleken');
-    data.spill = { type: 'mest', lek, navn, modus, alle, kø: [] };
+    data.spill = { type: 'mest', lek, navn, modus, alle, kø: [], antall: Math.max(2, data.spillere.length), tot: {} };
     nyMestRunde(data.spill);
   }
   if (valgt.type === 'forraeder') {
     if (data.spillere.length < 3) return feilL('for-faa', 'Løgnhalsen trenger minst tre spillere.', 'The liar needs at least three players.');
     const alle = teksterL('forraeder');
-    data.spill = { type: 'forraeder', lek, navn, modus, alle, kø: [], aktiv: data.spillere[data.spillere.length - 1].id };
+    data.spill = { type: 'forraeder', lek, navn, modus, alle, kø: [], aktiv: data.spillere[data.spillere.length - 1].id, antall: Math.max(2, data.spillere.length) };
     nyForraederRunde(data.spill, data);
   }
   if (valgt.type === 'bingo') {
@@ -1435,6 +1447,8 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!s || s.type !== 'kort') return { feil: 'feil-spill' };
       if (s.ring) return { ok: true };
       if (typeof h.pos === 'number' && h.pos !== s.pos) return { ok: true }; // noen andre trykket samtidig
+      const videre = kortVidere(s, data);
+      if (videre && !videre.includes(meg.id)) return feilL('ikke-din-tur', 'Verten eller den som har tur går videre.', 'The host or whoever’s turn it is moves on.');
       if (s.aldri && s.aldri.fase === 'svar' && !erVert) return { ok: true }; // alle svarer: bare verten kan hoppe over kortet
       if (s.ee && s.ee.fase !== 'avslort' && !erVert) return { ok: true };   // Enten eller: bare verten kan hoppe over valget
       if (s.rr && s.rr.fase === 'svar' && !erVert) return { ok: true };       // Rygg mot rygg: det samme
@@ -1770,8 +1784,15 @@ function handlingInne(data: any, meg: any, h: any) {
     }
     case 'runde': {
       if (!s) return { ok: true };
-      if (s.type === 'mest' && s.fase === 'resultat') nyMestRunde(s);
-      if (s.type === 'forraeder' && s.fase === 'avslort') nyForraederRunde(s, data);
+      // Én runde per spiller, så er leken ferdig – verten velger spill igjen eller neste lek
+      if ((s.type === 'mest' || s.type === 'forraeder') && s.fase === 'ferdig') {
+        if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
+        s.runde = 0; s.antall = Math.max(2, data.spillere.length);
+        if (s.type === 'mest') { s.tot = {}; nyMestRunde(s); } else nyForraederRunde(s, data);
+        return { ok: true };
+      }
+      if (s.type === 'mest' && s.fase === 'resultat') { if ((s.runde || 0) >= (s.antall || data.spillere.length)) { s.fase = 'ferdig'; s.frist = null; } else nyMestRunde(s); }
+      if (s.type === 'forraeder' && s.fase === 'avslort') { if ((s.runde || 0) >= (s.antall || data.spillere.length)) { s.fase = 'ferdig'; s.frist = null; } else nyForraederRunde(s, data); }
       if (s.type === 'en' && s.ferdig) {
         if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
         Object.assign(s, { rekke: kortstokkFor(s.lek, '*').slice(0, KORT_LENGDE), pos: 0, ferdig: false, runde: (s.runde || 1) + 1 });
@@ -1814,6 +1835,7 @@ function avgjorMest(data: any) {
   Object.values(s.stemmer).forEach((id: any) => { telling[id] = (telling[id] || 0) + 1; });
   const liste = Object.entries(telling).map(([id, n]) => ({ id, navn: navnPaa(data, id), stemmer: n })).sort((a, b) => b.stemmer - a.stemmer);
   liste.forEach((x) => giSlurker(data, x.id, x.stemmer));
+  s.tot = s.tot || {}; liste.forEach((x) => { s.tot[x.id] = (s.tot[x.id] || 0) + x.stemmer; });
   s.resultat = liste; s.fase = 'resultat';
   if (liste[0]) melde(data, `${liste[0].navn} fikk flest stemmer (${liste[0].stemmer})`, `${liste[0].navn} got the most votes (${liste[0].stemmer})`);
 }
@@ -2219,6 +2241,8 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
         }
         if (s.fase !== 'trekk') return { ok: true };
         if (typeof h.pos === 'number' && h.pos !== s.pos) return { ok: true };
+        // Dere gjør kortene i virkeligheten: verten og den som trakk sist går videre
+        if (meg.id !== data.vert && meg.id !== s.trekker) return feilL('ikke-din-tur', 'Verten eller den som trakk sist går videre.', 'The host or whoever drew last moves on.');
         s.pos++; s.trekker = meg.id; s.kast = null;
         if (s.pos >= s.rekke.length) {
           // Bunken er tom: Skammekroken først (hvis noen prøvde seg), så er leken ferdig
@@ -2546,7 +2570,7 @@ export function ekstraVisning(s: any, meg: any, data: any) {
       mineKort: meg ? (s.kort[meg.id] || []).map((x: any) => rfKortObj(x).t) : [], mineMed: meg && s.med ? (s.med[meg.id] || []).length : 0,
       antall: Object.fromEntries(data.spillere.map((p: any) => [p.id, ((s.kort[p.id] || []).length + ((s.med || {})[p.id] || []).length)])),
       kortet: kortet ? kortet.t : null, til: kortet ? (kortet.til || 'alle') : null, mottakere: s.fase === 'trekk' ? s.mottakere || [] : [], trekker: s.trekker || null,
-      pos: s.pos, egen: !!s.egen, alleKort: s.fase === 'trekk' && meg ? s.rekke.map((x: any) => rfKortObj(x).t) : null,
+      pos: s.pos, videre: s.fase === 'trekk' ? [data.vert, s.trekker].filter(Boolean) : null, egen: !!s.egen, alleKort: s.fase === 'trekk' && meg ? s.rekke.map((x: any) => rfKortObj(x).t) : null,
       totalt: s.fase === 'trekk' ? s.rekke.length : Object.values(s.kort).concat(Object.values(s.med || {})).reduce((n: number, l: any) => n + l.length, 0),
       kast: kk ? { ja: kk.ja.length, nei: kk.nei.length, stemmere: data.spillere.filter((p: any) => p.id !== kk.fra).length, kanStemme: !!meg && meg.id !== kk.fra, mitt: meg ? (kk.ja.includes(meg.id) ? 'ja' : kk.nei.includes(meg.id) ? 'nei' : null) : null } : null,
       trukket: s.trukket || 0,
@@ -3111,6 +3135,22 @@ function sosHandling(data: any, meg: any, h: any): any {
     if (s.fase !== 'ferdig') return { ok: true };
     s.runde++; sosNyRunde(data); return { ok: true };
   }
+  // Hvem skrev: ett spørsmål der alle sine svar avsløres – så er leken ferdig. Saueflokken: én runde per spiller.
+  if ((s.type === 'hvemskrev' || s.type === 'samme') && (hd === 'nytt' || hd === 'runde')) {
+    const ferdig = s.type === 'hvemskrev' ? s.fase === 'ferdig' : s.fase === 'slutt';
+    if (ferdig) {
+      if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
+      s.runde++; s.nr = 0; s.poeng = {}; sosNyRunde(data); return { ok: true };
+    }
+    if (s.type === 'samme') {
+      if (!erVert && s.fase !== 'fasit') return { feil: 'bare-vert' };
+      s.nr = (s.nr || 0) + 1;
+      if (s.nr >= Math.max(2, data.spillere.length)) { s.fase = 'slutt'; s.frist = null; return { ok: true }; }
+      s.runde++; sosNyRunde(data); return { ok: true };
+    }
+    if (!erVert) return { feil: 'bare-vert' };
+    s.runde++; sosNyRunde(data); return { ok: true };
+  }
   if (hd === 'nytt' || hd === 'runde') {
     if (!erVert && s.fase !== 'fasit' && s.fase !== 'ferdig') return { feil: 'bare-vert' };
     s.runde++; sosNyRunde(data); return { ok: true };
@@ -3324,7 +3364,7 @@ function sosVisning(s: any, meg: any, data: any) {
     nr: s.nr || 0, antall: BF_ANTALL, runde: s.runde || 1,
     lurt: Object.entries(s.lurt || {}).map(([id, n]: any) => ({ id, n })).sort((a: any, b: any) => b.n - a.n),
   };
-  if (s.type === 'samme') return { fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null, grupper: s.fase === 'fasit' ? s.grupper : null, runde: s.runde || 1, slaatt: s.slaatt || 0 };
+  if (s.type === 'samme') return { fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null, grupper: s.fase === 'fasit' ? s.grupper : null, runde: s.runde || 1, slaatt: s.slaatt || 0, nr: s.nr || 0, antall: Math.max(2, data.spillere.length) };
   if (s.type === 'spion') {
     const aapen = s.fase === 'fasit', kort: any = {};
     Object.keys(s.snudd || {}).forEach((id) => { kort[id] = id === s.spion ? 'muldvarp' : 'uskyldig'; });
