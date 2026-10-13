@@ -202,8 +202,14 @@ export function startRom(LEKNAVN, LANG) {
   function horn(t0, varighet) {
     [392, 396, 494, 498, 587].forEach(function (f) { tone(f * 0.97, t0, varighet, 'sawtooth', 0.06, f); });
   }
-  function spillLyd(navn) {
+  function spillLyd(navn, n) {
     if (!lyd.paa || !lydCtx()) return;
+    // Sofa-nedtelling: 3 – 2 – 1 stiger i tone, og «NÅ!» er et kort, lyst støt alle hører
+    if (navn === 'tell') { var f = [0, 784, 659, 523][n] || 523; tone(f, 0, 0.12, 'square', 0.07); tone(f / 2, 0, 0.16, 'sine', 0.22); }
+    if (navn === 'naa') { tone(1047, 0, 0.32, 'square', 0.08); tone(1568, 0, 0.32, 'triangle', 0.14); stoy(0, 0.06, 0.25, 3000, 'bandpass'); }
+    // Bomben: et tørt klokketikk, og til slutt et dypt smell
+    if (navn === 'lunte') { stoy(0, 0.018, 0.22, 3200, 'bandpass'); tone(1800, 0, 0.02, 'square', 0.04); }
+    if (navn === 'bom') { stoy(0, 0.9, 0.9, 140, 'lowpass'); tone(90, 0, 0.7, 'sine', 0.5, 35); stoy(0.02, 0.3, 0.4, 900, 'bandpass'); }
     if (navn === 'tikk') { tone(440, 0, 0.035, 'sine', 0.12, 300); stoy(0, 0.02, 0.08, 900); }
     if (navn === 'grip') tone(180, 0, 0.06, 'sine', 0.14, 140);
     if (navn === 'pek') { tone(150, 0, 0.14, 'sine', 0.4, 80); stoy(0, 0.08, 0.3, 500); tone(330, 0.02, 0.2, 'triangle', 0.14); }
@@ -788,18 +794,22 @@ export function startRom(LEKNAVN, LANG) {
   function enNedtelling(k) {
     enTell.t.forEach(clearTimeout);
     enTell = { k: k, fase: 'teller', tall: 3, t: [] };
-    enTell.t = [setTimeout(function () { enTell.tall = 2; tegn(); }, 800), setTimeout(function () { enTell.tall = 1; tegn(); }, 1600),
-      setTimeout(function () { enTell.fase = 'sagt'; try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} tegn(); }, 2400)];
+    spillLyd('tell', 3);
+    enTell.t = [setTimeout(function () { enTell.tall = 2; spillLyd('tell', 2); tegn(); }, 800), setTimeout(function () { enTell.tall = 1; spillLyd('tell', 1); tegn(); }, 1600),
+      setTimeout(function () { enTell.fase = 'sagt'; spillLyd('naa'); try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} tegn(); }, 2400)];
     tegn();
   }
   function enBombeStart(k) {
     clearInterval(enBombe.timer);
-    enBombe = { k: k, fase: 'gaar', holder: 0, start: Date.now(), lengde: 20000 + Math.random() * 30000, timer: null };
+    enBombe = { k: k, fase: 'gaar', holder: 0, start: Date.now(), lengde: 20000 + Math.random() * 30000, timer: null, tikk: 0 };
     enBombe.timer = setInterval(function () {
-      var el = document.querySelector('.en-bombe svg'), a = (Date.now() - enBombe.start) / enBombe.lengde;
-      if (a >= 1) { clearInterval(enBombe.timer); enBombe.fase = 'bom'; try { navigator.vibrate && navigator.vibrate([200, 80, 300]); } catch (e) {} spillLyd('ding'); return tegn(); }
-      if (el) el.style.setProperty('--d', (a < .5 ? 1000 : a < .8 ? 600 : 320) + 'ms');
-    }, 250);
+      var el = document.querySelector('.en-bombe svg'), naa = Date.now(), a = (naa - enBombe.start) / enBombe.lengde;
+      if (a >= 1) { clearInterval(enBombe.timer); enBombe.fase = 'bom'; try { navigator.vibrate && navigator.vibrate([200, 80, 300]); } catch (e) {} spillLyd('bom'); return tegn(); }
+      // Lunta tikker i samme takt som bomben pulserer – raskere mot slutten
+      var d = a < .5 ? 1000 : a < .8 ? 600 : 320;
+      if (el) el.style.setProperty('--d', d + 'ms');
+      if (naa - enBombe.tikk >= d - 20) { enBombe.tikk = naa; spillLyd('lunte'); }
+    }, 80);
     tegn();
   }
   function enSpill(s) { return '<div class="en-flate">' + enSpillInnhold(s) + '</div>'; }
