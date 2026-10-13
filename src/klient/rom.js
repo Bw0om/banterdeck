@@ -946,10 +946,10 @@ export function startRom(LEKNAVN, LANG) {
     tosannheter: [['Én sitter i stolen og skriver tre ting om seg selv – to sanne og én løgn.', 'One player sits in the chair and writes three things about themselves – two true, one lie.'], ['De andre trykker på kortet de tror er løgnen. Når alle har stemt, snus kortene.', 'Everyone else taps the card they think is the lie. When everyone has voted, the cards flip.'], ['Bommet eller ikke stemt: drikk 1. Stolen drikker 1 per person som så løgnen. Alle sitter i stolen én gang.', 'Missed or didn’t vote: drink 1. The chair drinks 1 per person who saw the lie. Everyone takes the chair once.']],
     regelfabrikken: [['Alle skriver så mange drikkekort de rekker før tiden går ut.', 'Everyone writes as many drinking cards as they can before time runs out.'], ['Kortene stokkes og trekkes ett og ett.', 'The cards are shuffled and drawn one by one.'], ['Gjør det kortet sier!', 'Do what the card says!']],
     bussruta: [['Billetten: på din tur svarer du fire ganger om kortene dine – riktig = del ut, feil = drikk.', 'The ticket: on your turn you answer four questions about your cards – right = hand out, wrong = drink.'], ['Pyramiden snus av seg selv. Har du kortet, legger du det på og deler ut like mange som raden.', 'The pyramid flips by itself. Have the card? Play it and hand out as many as the row number.'], ['Bussen: den med flest kort igjen kjører. Fem trygge kort på rad, ellers drikk og tilbake til start.', 'The bus: whoever has the most cards left rides it. Five safe cards in a row, or drink and back to the start.']],
-    yatzy: [['Trill på din telefon når det er din tur – opptil tre kast.', 'Roll on your phone when it’s your turn – up to three throws.'], ['Hold terningene du vil beholde, og velg hvor poengene føres.', 'Hold the dice you want to keep and pick where the score goes.'], ['Alle ser blokka. Den med minst til slutt, drikker opp.', 'Everyone sees the scorecard. Lowest score at the end finishes their drink.']],
+    yatzy: [['Trykk på begeret når det er din tur – opptil tre kast. Trykk på en terning for å holde den.', 'Tap the cup on your turn – up to three rolls. Tap a die to hold it.'], ['Trykk på en rad i blokka for å føre. Ener i kastet = drikk 2, fire like = drikk summen, Yatzy = del ut 5.', 'Tap a row on the scorecard to score. A one in the roll = drink 2, four of a kind = drink the sum, Yahtzee = hand out 5.'], ['Den med minst til slutt drikker opp. Verten kan stryke et felt for den som somler.', 'Lowest score at the end finishes their drink. The host can scratch a box for anyone who stalls.']],
     overunder: [['Den som har tur, gjetter om neste kort er over eller under. Verten kan trykke for den som ikke har telefonen oppe.', 'Whoever’s turn it is guesses if the next card is higher or lower. The host can tap for anyone without their phone out.'], ['Riktig: potten vokser med én slurk, og turen går videre.', 'Right: the pot grows by one sip and the turn moves on.'], ['Feil eller likt: du drikker hele potten. Når stokken er tom, er leken over.', 'Wrong or equal: you drink the whole pot. When the deck runs out, the game is over.']],
     veddelopet: [['Trykk på banen til hesten du tror vinner, og velg innsats.', 'Tap the lane of the horse you think wins and pick your stake.'], ['Når alle har veddet, går løpet av seg selv – ett kort i sekundet. Sidekortene sender en hest ett steg tilbake.', 'When everyone has bet, the race runs itself – one card a second. Side cards send a horse one step back.'], ['Vinnerne deler ut dobbelt – de andre drikker innsatsen.', 'The winners hand out double – everyone else drinks their stake.']],
-    pyramiden: [['Alle får fire skjulte kort på telefonen sin.', 'Everyone gets four hidden cards on their phone.'], ['Kort snus i pyramiden. Har du samme verdi, deler du ut slurker – eller bløffer.', 'Cards are turned in the pyramid. Have the same value? Hand out sips – or bluff.'], ['Blir du utfordret og bløffet, drikker du dobbelt.', 'Get called out while bluffing and you drink double.']],
+    pyramiden: [['Fire kort med baksiden opp – hold fingeren på dem for å kikke. Pyramiden snus av seg selv, ett kort hvert tiende sekund.', 'Four face-down cards – hold your finger on them to peek. The pyramid flips by itself, one card every ten seconds.'], ['Legg et kort med baksiden opp på det som er snudd, og del ut radens slurker. Riktig verdi er sant, feil er bløff.', 'Lay a card face down on the flipped one and hand out the row’s sips. Same value is true, anything else is a bluff.'], ['Rop LØGN! Bløff = den som la på drikker dobbelt og får kortet tilbake. Sant = du drikker dobbelt. Ingen roper: kortet er borte.', 'Call LIAR! Bluff = they drink double and take the card back. True = you drink double. Nobody calls: the card is gone.']],
     gris: [['Alle får fire kort. Send ett kort videre samtidig.', 'Everyone gets four cards. Pass one card on at the same time.'], ['Får noen fire like, tar hen seg på nesa – og alle må gjøre det samme.', 'When someone gets four of a kind, they touch their nose – and everyone must follow.'], ['Sistemann får en bokstav. G-R-I-S = ta en shot.', 'The last one gets a letter. P-I-G-S = take a shot.']],
     president: [['Bli kvitt kortene dine først – legg likt eller høyere enn det som ligger.', 'Get rid of your cards first – play equal or higher than what’s on the table.'], ['Toere er høyest og rydder bordet.', 'Twos are highest and clear the table.'], ['Først ut blir president, sist ut blir rævkjører.', 'First out is President, last out is the Scumbag.']],
     bingo: [['Alle får sitt eget bingobrett med sanger.', 'Everyone gets their own bingo card with songs.'], ['Spill spillelista og kryss av sangene du hører.', 'Play the playlist and mark the songs you hear.'], ['Rekke: del ut to slurker. Fullt brett: BINGO – alle andre drikker opp, og leken er ferdig.', 'A line: hand out two sips. Full card: BINGO – everyone else finishes their drink, and the game is over.']],
@@ -2336,21 +2336,89 @@ export function startRom(LEKNAVN, LANG) {
     }
     return ut;
   }
+  /* ---------- Pyramiden: pokerfjes i halvmørket ----------
+     Mørk filt og messing, så den ikke ligner den lyse pyramiden i Bussruta. Kortene dine ligger med baksiden opp; hold
+     fingeren på dem for å kikke. Vertens telefon snur ett kort hvert tiende sekund. Legg på et kort med baksiden opp –
+     riktig verdi er sant, feil er bløff. LØGN! snur kortet. Bevegelse bare når noe skjer første gang. */
+  var pySett = {}, pyDriver = null, pyVelg = false, pyAvsl = null, pyAvslTil = 0, pyLytt = false, pySistPos = 0;
+  function pyKort(k, kl) {
+    if (!k) return '<span class="py-kort bak' + (kl ? ' ' + kl : '') + '"></span>';
+    var rod = k.f === '♥' || k.f === '♦';
+    return '<span class="py-kort' + (rod ? ' rod' : '') + (kl ? ' ' + kl : '') + '"><b>' + vn(k.v) + '</b><i>' + k.f + '</i></span>';
+  }
+  function pyRad(pos) { return pos < 5 ? 1 : pos < 9 ? 2 : pos < 12 ? 3 : pos < 14 ? 4 : 5; }
+  function pyDriv() {
+    // Bare verten: ett kort hvert tiende sekund, så ingen trenger å trykke «snu»
+    if (pyDriver) return;
+    pyDriver = setInterval(function () {
+      var sp = tilstand && tilstand.spill;
+      if (!sp || sp.type !== 'pyramiden' || sp.ferdig || !erVert()) { clearInterval(pyDriver); pyDriver = null; return; }
+      if (document.hidden) return;
+      if (Date.now() + klokkeAvvik - sp.snuddVed >= sp.vindu) gjorAlltid({ handling: 'snu' });
+    }, 1000);
+  }
+  function pyKikk() {
+    // Kikk uten ny tegning: klassen settes rett på hånda mens fingeren ligger på
+    if (pyLytt) return; pyLytt = true;
+    var av = function () { var h = document.querySelector('.py-hand.kikk:not(.velg)'); if (h) h.classList.remove('kikk'); };
+    document.addEventListener('pointerdown', function (e) { var h = e.target.closest && e.target.closest('.py-hand'); if (h) h.classList.add('kikk'); });
+    document.addEventListener('pointerup', av); document.addEventListener('pointercancel', av);
+    document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.py-hand')) e.preventDefault(); });
+  }
+  function pyDrikker(id, n) { return (id === tilstand.meg ? T('Du drikker ', 'You drink ') : esc(navn(id)) + T(' drikker ', ' drinks ')) + n + '.'; }
   function pyramidenSpill(s) {
-    var rader = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
-    var pyr = '<div class="dl-pyramide">' + rader.map(function (r) { return '<div>' + r.map(function (i) { return i < s.pos ? kk(s.pyr[i], 'liten' + (i === s.pos - 1 ? ' vinner' : '')) : kk(null, 'liten'); }).join('') + '</div>'; }).join('') + '</div>';
-    var siste = s.pos ? s.pyr[s.pos - 1] : null, rad = s.pos ? (s.pos - 1 < 5 ? 1 : s.pos - 1 < 9 ? 2 : s.pos - 1 < 12 ? 3 : s.pos - 1 < 14 ? 4 : 5) : 0;
-    var minPast = s.pastander.some(function (p) { return p.id === tilstand.meg; });
-    var past = s.pastander.map(function (p) {
-      return '<li><b>' + esc(navn(p.id)) + '</b>' + T(' sier de har ', ' says they have ') + (siste ? vn(siste.v) : '') + T(' (del ut ', ' (hand out ') + p.rad + ')' +
-        (p.avgjort ? ' – <em>' + (p.avgjort === 'bløff' ? T('bløffet!', 'bluffed!') : p.avgjort === 'sant' ? T('hadde den!', 'had it!') : T('godtatt', 'accepted')) + '</em>'
-          : (p.id !== tilstand.meg ? ' <button class="btn ghost small" type="button" data-g="utfordre" data-paa="' + p.id + '">' + T('Utfordre', 'Challenge') + '</button>' : '')) + '</li>';
+    var meg = tilstand.meg, vert = erVert(), naaI = s.pos - 1, naa = s.pyr[naaI], rad = pyRad(naaI), past = s.pastander || [];
+    if (s.pos < pySistPos) pySett = {};
+    pySistPos = s.pos;
+    if (vert && !s.ferdig) pyDriv();
+    pyKikk();
+    var topp = '<div class="py-topp"><span>' + T('Pyramiden', 'The pyramid') + '</span><b>' + (s.ferdig ? T('Toppen er snudd', 'The top is flipped') : T('Rad ', 'Row ') + rad + T(' · del ut ', ' · hand out ') + rad) + '</b>' +
+      (s.ferdig ? '' : '<small>' + (15 - s.pos) + T(' kort igjen', ' cards left') + '</small>') + '</div>';
+    var RADER = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
+    var pyr = '<div class="py-pyr">' + RADER.map(function (r, ri) {
+      return '<div><em' + (5 - ri === rad && !s.ferdig ? ' class="naa"' : '') + '>' + (5 - ri) + '</em>' + r.map(function (i) {
+        if (i >= s.pos) return pyKort(null, 'liten');
+        var er = i === naaI && !s.ferdig, ny = er && pySett.start && !pySett['k' + i];
+        return '<span class="py-plass' + (er ? ' naa' : '') + '">' + pyKort(s.pyr[i], 'liten' + (ny ? ' snu' : '')) + (er && past.length ? '<small>' + past.length + '</small>' : '') + '</span>';
+      }).join('') + '</div>'; }).join('') + '</div>';
+    for (var q = 0; q < s.pos; q++) pySett['k' + q] = 1;
+    // LØGN!: kortet snus stort et lite øyeblikk, for alle
+    var av = s.avsl;
+    if (av && !pySett['a' + av.nr]) { pySett['a' + av.nr] = 1; if (pySett.start) { pyAvsl = av; pyAvslTil = Date.now() + 2800; setTimeout(tegn, 2900); } }
+    pySett.start = 1;
+    var avsl = pyAvsl && Date.now() < pyAvslTil ? '<div class="py-avsl" role="status"><span class="py-avsl-over">' + jaNavn(pyAvsl.av) + T(' ropte løgn på ', ' called out ') + (pyAvsl.id === meg ? T('deg', 'you') : esc(navn(pyAvsl.id))) + '</span>' +
+      '<span class="py-avsl-kort">' + pyKort(pyAvsl.kort, 'stor snu') + '<em class="' + (pyAvsl.sant ? 'sant' : 'bloff') + '">' + (pyAvsl.sant ? T('Sant', 'True') : T('Bløff', 'Bluff')) + '</em></span>' +
+      '<b>' + (pyAvsl.sant ? jaNavn(pyAvsl.id) + T(' hadde den. ', ' had it. ') + pyDrikker(pyAvsl.av, pyAvsl.n) : jaNavn(pyAvsl.id) + T(' bløffet! ', ' bluffed! ') + pyDrikker(pyAvsl.id, pyAvsl.n)) + '</b></div>' : '';
+    if (s.ferdig) {
+      pyVelg = false;
+      var lurt = s.lurt || {}, best = Object.keys(lurt).sort(function (a, b) { return lurt[b] - lurt[a]; })[0], hender = s.fasit || {};
+      return '<div class="py-bord ferdig">' + topp + pyr + '<div class="py-slutt"><p class="py-etikett">' + T('Største bløffer', 'Biggest bluffer') + '</p><b>' + (best ? jaNavn(best) : T('Ingen – for ærlige folk!', 'Nobody – too honest!')) + '</b>' +
+        (best ? '<small>' + lurt[best] + (lurt[best] === 1 ? T(' bløff', ' bluff') : T(' bløffer', ' bluffs')) + T(' uten å bli tatt', ' without getting caught') + '</small>' : '') + '</div>' +
+        '<div class="py-hender">' + Object.keys(hender).map(function (id) { return '<div>' + nrHode(id) + '<b>' + jaNavn(id) + '</b><span>' + (hender[id].length ? hender[id].map(function (k) { return pyKort(k, 'mini'); }).join('') : T('tom hånd', 'empty hand')) + '</span></div>'; }).join('') + '</div></div>' +
+        avsl + lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny pyramide – teller i kvelden', 'New pyramid – counts tonight')]]);
+    }
+    var NAVN = EN ? { 11: 'jack', 12: 'queen', 13: 'king', 14: 'ace' } : { 11: 'knekt', 12: 'dame', 13: 'konge', 14: 'ess' };
+    var vindu = Math.max(0, Math.min(s.vindu, Date.now() + klokkeAvvik - s.snuddVed));
+    var liste = past.map(function (p) {
+      var min = p.id === meg, nk = 'p' + naaI + p.id, ny = !pySett[nk]; pySett[nk] = 1;
+      var domm = p.avgjort === 'sant' ? '<span class="py-domm sant">' + T('Sant', 'True') + '</span>' : p.avgjort === 'bløff' ? '<span class="py-domm bloff">' + T('Bløff', 'Bluff') + '</span>' : '';
+      return '<div class="py-past' + (ny ? ' inn' : '') + '">' + nrHode(p.id) + '<span><b>' + jaNavn(p.id) + '</b><small>' +
+        (min ? T('Du la på ', 'You laid ') + (p.kort ? vn(p.kort.v) + p.kort.f : '') + T(' – delte ut ', ' – handed out ') + p.rad : T('la på et kort og deler ut ', 'laid a card and hands out ') + p.rad) +
+        (p.av ? ' · ' + jaNavn(p.av) + T(' ropte løgn', ' called it') : '') + '</small></span>' +
+        (domm || (min ? '' : '<button type="button" class="py-logn" data-g="utfordre" data-paa="' + p.id + '">' + T('LØGN!', 'LIAR!') + '</button>')) + '</div>';
     }).join('');
-    return pyr + (siste ? '<p class="dl-melding">' + T('Snudd: ', 'Flipped: ') + vn(siste.v) + siste.f + T(' · rad ', ' · row ') + rad + '</p>' : '<p class="dl-melding">' + T('Snu første kort nederst til venstre.', 'Flip the first card at the bottom left.') + '</p>') +
-      '<p class="rom-etikett">' + T('Din hånd – bare du ser den', 'Your hand – only you can see it') + '</p><div class="dl-hand">' + (s.minHand || []).map(function (k) { return kk(k); }).join('') + '</div>' +
-      (siste && !minPast ? '<button class="btn gold" data-g="pastand" type="button">' + T('Jeg har den! (eller bløffer …)', 'I have it! (or I\'m bluffing …)') + '</button>' : '') +
-      (past ? '<ul class="rom-past">' + past + '</ul>' : '') +
-      (s.pos < 15 ? '<button class="rom-stor-knapp" data-g="snu" type="button">' + T('Snu neste kort', 'Flip next card') + '</button>' : '<p class="dl-melding dl-stor">' + T('Toppen er snudd – runden er ferdig!', 'The top card is flipped – the round is over!') + '</p><button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny runde', 'New round') + '</button>');
+    var hand = s.minHand, minPast = past.some(function (p) { return p.id === meg; });
+    if (minPast || !hand || !hand.length) pyVelg = false;
+    var handHtml = !hand ? '<p class="py-etikett">' + T('Du er med fra neste pyramide.', 'You’re in from the next pyramid.') + '</p>'
+      : !hand.length ? '<p class="py-etikett">' + T('Tom hånd – fint spilt!', 'Empty hand – well played!') + '</p>'
+      : '<p class="py-etikett">' + (pyVelg ? T('Velg kortet du legger på', 'Pick the card to lay') : T('Hold fingeren på kortene for å kikke', 'Hold your finger on the cards to peek')) + '</p>' +
+        '<div class="py-hand' + (pyVelg ? ' kikk velg' : '') + '" style="--n:' + hand.length + '">' + hand.map(function (k, i) {
+          return '<button type="button" class="py-hk" data-g="py-velg" data-i="' + i + '" style="--i:' + i + '"' + (pyVelg ? '' : ' tabindex="-1"') + ' aria-label="' + (pyVelg ? vn(k.v) + k.f : T('Skjult kort', 'Hidden card')) + '">' + pyKort(k) + '</button>'; }).join('') + '</div>' +
+        '<button type="button" class="py-legg' + (minPast ? ' brukt' : pyVelg ? ' avbryt' : '') + '" data-g="py-modus"' + (minPast ? ' disabled' : '') + '>' +
+          (minPast ? T('Du har lagt på', 'You’ve laid a card') : pyVelg ? T('Avbryt', 'Cancel') : T('Legg på et kort', 'Lay a card')) + '</button>';
+    return '<div class="py-bord">' + topp + pyr + '<div class="py-vindu" aria-hidden="true"><i style="animation-duration:' + s.vindu + 'ms;animation-delay:-' + vindu + 'ms"></i></div>' +
+      '<div class="py-liste">' + (liste || '<p class="py-tom">' + T('Ingen har lagt på ennå. Har du en ', 'Nobody has laid a card yet. Got a ') + (naa ? (NAVN[naa.v] || naa.v) : '') + '?</p>') + '</div>' +
+      handHtml + '</div>' + avsl;
   }
   function grisSpill(s) {
     var bok = function (id) { var n = s.bokstaver[id] || 0; return n ? T('GRIS', 'PIGS').slice(0, n) : '–'; };
@@ -2647,29 +2715,88 @@ export function startRom(LEKNAVN, LANG) {
   }
   /* ---------- Drikke-Yatzy ---------- */
   var YZF = EN ? [['1', 'Ones'], ['2', 'Twos'], ['3', 'Threes'], ['4', 'Fours'], ['5', 'Fives'], ['6', 'Sixes'], ['p', 'One pair'], ['pp', 'Two pairs'], ['3l', 'Three of a kind'], ['4l', 'Four of a kind'], ['ls', 'Small straight'], ['ss', 'Large straight'], ['hus', 'Full house'], ['sj', 'Chance'], ['y', 'Yatzy']] : [['1', 'Enere'], ['2', 'Toere'], ['3', 'Treere'], ['4', 'Firere'], ['5', 'Femmere'], ['6', 'Seksere'], ['p', 'Ett par'], ['pp', 'To par'], ['3l', 'Tre like'], ['4l', 'Fire like'], ['ls', 'Liten straight'], ['ss', 'Stor straight'], ['hus', 'Hus'], ['sj', 'Sjanse'], ['y', 'Yatzy']];
-  var sisteYzNr = 0;
-  function yatzySpill(s) {
-    if (s.ferdig) {
-      return '<p class="dl-melding dl-stor">' + esc(s.ferdig[0].navn) + T(' vant med ', ' won with ') + s.ferdig[0].sum + T(' poeng!', ' points!') + '</p><ol class="rom-resultat">' +
-        s.ferdig.map(function (x) { return '<li><span>' + esc(x.navn) + '</span><b>' + x.sum + '</b></li>'; }).join('') + '</ol>' +
-        '<p class="dl-melding">' + esc(s.ferdig[s.ferdig.length - 1].navn) + T(' tapte og drikker opp. Vinneren deler ut 5.', ' lost and finishes their drink. The winner hands out 5.') + '</p>' +
-        (erVert() ? '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Nytt spill', 'New game') + '</button>' : '');
-    }
-    var jeg = s.aktiv === tilstand.meg, nyttKast = s.nr !== sisteYzNr; sisteYzNr = s.nr;
-    var b = s.blokker[s.aktiv] || {};
-    return '<p class="rom-etikett">' + (jeg ? T('Din tur', 'Your turn') : esc(navn(s.aktiv)) + T(' sin tur', '\'s turn')) + T(' · kast ', ' · roll ') + s.kast + T(' av 3', ' of 3') + '</p>' +
-      '<div class="yz-terninger' + (nyttKast && s.kast ? ' landet' : '') + '">' + s.terninger.map(function (t, i) {
-        return '<button type="button" data-g="yz-hold" data-i="' + i + '" aria-pressed="' + !!s.hold[i] + '"' + (jeg && s.kast && s.kast < 3 ? '' : ' disabled') + ' aria-label="' + T('Hold terning ', 'Hold die ') + (i + 1) + '">' + terning(t) + '</button>';
-      }).join('') + '</div>' +
-      (s.melding ? '<p class="dl-melding" aria-live="polite">' + esc(s.melding) + '</p>' : '') +
-      (jeg ? '<button class="rom-stor-knapp" data-g="yz-kast" type="button"' + (s.kast >= 3 ? ' disabled' : '') + '>' + (s.kast ? T('Trill igjen', 'Roll again') : T('Trill', 'Roll')) + '</button>' : '') +
-      '<div class="yz-blokk">' + YZF.map(function (f) {
-        var v = b[f[0]], mulig = s.mulige && v == null ? s.mulige[f[0]] : null;
-        return '<button type="button" data-g="yz-felt" data-f="' + f[0] + '"' + (!jeg || v != null || !s.kast ? ' disabled' : '') + '><span>' + f[1] + '</span><b>' + (v != null ? v : (mulig != null ? '+' + mulig : '')) + '</b></button>';
-      }).join('') + '</div>' +
-      '<p class="dl-info">' + s.ider.map(function (id) { return esc(navn(id)) + ': ' + (s.summer[id] || 0); }).join(' · ') + '</p>';
+  /* ---------- Drikke-Yatzy: raflebegeret og blokka ----------
+     Terninger på grønn filt og den kjente blokka med blyant. Begeret rister og terningene triller bare når et nytt kast
+     kommer (s.nr), en holdt terning glir opp på kanten, og et nytt tall skrives inn med blyant én gang. */
+  var YZ_HVILE = [[5, 100, -10], [24, 158, 12], [42, 96, -5], [59, 154, 16], [6, 166, 8]];
+  var yzSett = {}, yzHoldF = null, yzSomleT = 0;
+  function yzT(n) { var h = '<span class="yz-t' + (n === 1 ? ' en' : '') + '">'; for (var i = 1; i <= 9; i++) h += '<i' + (PRIKKER[n].indexOf(i) !== -1 ? ' class="p"' : '') + '></i>'; return h + '</span>'; }
+  function yzFeltNavn(f) { var x = YZF.find(function (y) { return y[0] === f; }); return x ? x[1] : f; }
+  function yzBlokk(s, kan, megId) {
+    var ider = s.ider || [], cols = 'grid-template-columns:minmax(84px,1.5fr) repeat(' + ider.length + ',minmax(0,1fr))';
+    var sf = s.sistFelt, nyF = sf && !yzSett['f' + sf.nr]; if (sf) yzSett['f' + sf.nr] = 1;
+    var ov = function (b) { return ['1', '2', '3', '4', '5', '6'].reduce(function (a, f) { return a + (b[f] || 0); }, 0); };
+    var aktiv = function (id) { return id === s.aktiv && !s.ferdig ? ' aktiv' : ''; };
+    var rad = function (navnTekst, kl, celle) { return '<div class="yz-rad' + (kl ? ' ' + kl : '') + '" style="' + cols + '"><span>' + navnTekst + '</span>' + ider.map(celle).join('') + '</div>'; };
+    var felt = function (f, navnTekst) {
+      return rad(navnTekst, '', function (id) {
+        var v = (s.blokker[id] || {})[f];
+        if (kan && id === s.aktiv && v == null) { var m = s.mulige ? s.mulige[f] : 0; return '<button type="button" class="yz-c mulig" data-g="yz-felt" data-f="' + f + '" aria-label="' + T('Før ', 'Score ') + m + T(' på ', ' in ') + esc(navnTekst) + '">' + (m ? '+' + m : T('stryk', 'scratch')) + '</button>'; }
+        return '<span class="yz-c' + aktiv(id) + (nyF && sf.id === id && sf.f === f ? ' skriv' : '') + '">' + (v == null ? '' : v === 0 ? '–' : v) + '</span>';
+      });
+    };
+    var sum = function (navnTekst, kl, fn) { return rad(navnTekst, 'sum' + (kl ? ' ' + kl : ''), function (id) { return '<span class="yz-c' + aktiv(id) + '">' + fn(s.blokker[id] || {}, id) + '</span>'; }); };
+    return '<div class="yz-blokk2"><div class="yz-rad hode" style="' + cols + '"><span>Yatzy</span>' + ider.map(function (id) { return '<span class="yz-c' + aktiv(id) + '">' + (id === megId ? T('Du', 'You') : esc(navn(id))) + '</span>'; }).join('') + '</div>' +
+      YZF.slice(0, 6).map(function (x) { return felt(x[0], x[1]); }).join('') +
+      sum(T('Sum', 'Sum'), '', function (b) { return ov(b); }) + sum('Bonus', 'bonus', function (b) { return ov(b) >= 63 ? 50 : ''; }) +
+      YZF.slice(6).map(function (x) { return felt(x[0], x[1]); }).join('') +
+      sum('Total', 'total', function (b, id) { return (s.summer || {})[id] || 0; }) + '</div>';
   }
-
+  function yatzySpill(s) {
+    var meg = tilstand.meg, vert = erVert(), borte = !tilstand.spillere.some(function (p) { return p.id === s.aktiv; });
+    var tittel = T('Drikke-Yatzy', 'Drinking Yahtzee');
+    if (s.ferdig) {
+      var fe = s.ferdig;
+      return jaTopp(tittel, esc(fe[0].navn) + T(' vant!', ' won!'), true, false) +
+        '<div class="yz-slutt"><b>' + esc(fe[0].navn) + '</b><span>' + fe[0].sum + T(' poeng · deler ut 5', ' points · hands out 5') + '</span></div>' +
+        '<p class="yz-lapp rod">' + esc(fe[fe.length - 1].navn) + T(' tapte og drikker opp.', ' lost and finishes their drink.') + '</p>' +
+        yzBlokk(s, false, meg) + lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny blokk – teller i kvelden', 'New scorecard – counts tonight')]]);
+    }
+    var jeg = s.aktiv === meg || (vert && borte), hvem = s.aktiv === meg ? T('Du', 'You') : esc(navn(s.aktiv));
+    var nytt = s.kast > 0 && !yzSett['k' + s.nr]; if (s.kast > 0) yzSett['k' + s.nr] = 1;
+    var forr = yzHoldF && yzHoldF.nr === s.nr ? yzHoldF.hold : null;
+    var d = s.drikk && s.drikk.nr === s.nr && s.kast > 0 ? s.drikk : null;
+    var pos = function (i, h) { return h ? [5 + i * 17.3, 16, 0] : YZ_HVILE[i]; };
+    var naaHold = s.terninger.map(function (_, i) { return !!s.hold[i] && s.kast > 0; });
+    var terninger = s.terninger.map(function (v, i) {
+      var h = naaHold[i], p = pos(i, h), kl = '', ekstra = '';
+      if (nytt && !(s.hold[i] && s.kast > 1)) kl = ' trill';
+      else if (forr && forr[i] !== h) { var q = pos(i, !h); kl = ' flytt'; ekstra = ';--fx:' + q[0] + ';--fy:' + q[1] + ';--fr:' + q[2]; }
+      if (d && d.ener && v === 1) kl += ' ring';
+      return '<button type="button" class="yz-terning' + kl + (s.kast ? '' : ' borte') + '" data-g="yz-hold" data-i="' + i + '" aria-pressed="' + h + '" aria-label="' + T('Terning ', 'Die ') + (i + 1) + T(', viser ', ', shows ') + v + '"' +
+        ' style="--x:' + p[0] + ';--y:' + p[1] + ';--r:' + p[2] + ';--f:' + i * 45 + 'ms' + ekstra + '"' + (jeg && s.kast && s.kast < 3 ? '' : ' disabled') + '>' + yzT(v) + '</button>';
+    }).join('');
+    yzHoldF = { nr: s.nr, hold: naaHold };
+    var kanKaste = jeg && s.kast < 3;
+    var beger = '<button type="button" class="yz-beger' + (nytt ? ' rist' : '') + '" data-g="yz-kast" aria-label="' + T('Rist begeret og trill', 'Shake the cup and roll') + '"' + (kanKaste ? '' : ' disabled') + '>' +
+      '<svg viewBox="0 0 78 96" aria-hidden="true"><path d="M8 8 H70 L62 90 H16 Z" class="kropp"/><path d="M8 8 H70" class="kant"/><path d="M12 26 H66 M14 72 H64" class="baand"/><path d="M24 36 L22 64" class="glans"/></svg>' +
+      (kanKaste && !s.kast ? '<span>' + T('Trykk på begeret', 'Tap the cup') + '</span>' : '') + '</button>';
+    var prikker = '<span class="yz-prikker" aria-label="' + T('Kast ', 'Roll ') + s.kast + T(' av 3', ' of 3') + '">' + [0, 1, 2].map(function (i) { return '<i' + (i < s.kast ? ' class="paa"' : '') + '></i>'; }).join('') + '</span>';
+    var krus = d && d.yatzy ? '<div class="yz-krus' + (nytt ? ' inn' : '') + '" aria-hidden="true"><svg viewBox="0 0 300 110"><path d="M20 70 C60 20 110 18 150 50 C190 82 250 80 284 30" stroke-width="7"/><path d="M30 90 C90 70 200 100 270 76" stroke-width="5"/></svg><b>YATZY!</b></div>' : '';
+    var lapp = '';
+    if (d && (d.yatzy || d.fire || d.ener)) {
+      var deler = [];
+      if (d.yatzy) deler.push('YATZY! ' + hvem + T(' deler ut 5 – eller en shot', ' hand' + (s.aktiv === meg ? '' : 's') + ' out 5 – or a shot'));
+      else if (d.fire) deler.push(T('Fire like – ', 'Four of a kind – ') + (s.aktiv === meg ? T('drikk ', 'drink ') : hvem + T(' drikker ', ' drinks ')) + d.fire);
+      if (d.ener) deler.push(T('Ener i kastet – ', 'A one in the roll – ') + (s.aktiv === meg ? T('drikk 2', 'drink 2') : hvem + T(' drikker 2', ' drinks 2')));
+      lapp = '<p class="yz-lapp ' + (d.yatzy ? 'gull' : 'rod') + (nytt ? ' inn' : '') + '" aria-live="polite">' + deler.join(' · ') + '</p>';
+    } else if (!s.kast && s.sistFelt) {
+      var sf = s.sistFelt, sv = (s.blokker[sf.id] || {})[sf.f];
+      lapp = '<p class="yz-lapp">' + (sf.id === meg ? T('Du', 'You') : esc(navn(sf.id))) + (sf.stroket ? T(' fikk ', ' had ') + yzFeltNavn(sf.f) + T(' strøket', ' scratched') : T(' førte ', ' scored ') + sv + T(' på ', ' in ') + yzFeltNavn(sf.f)) + '</p>';
+    }
+    var chip = s.aktiv === meg ? (s.kast ? (s.kast < 3 ? T('Hold, trill igjen eller før', 'Hold, roll again or score') : T('Velg et felt', 'Pick a box')) : T('Din tur – rist begeret', 'Your turn – shake the cup'))
+      : jeg ? T('Du fører for ', 'You play for ') + esc(navn(s.aktiv)) : esc(navn(s.aktiv)) + (s.kast ? T(' · kast ', ' · roll ') + s.kast : T(' rister begeret', ' is shaking the cup'));
+    // Verten kan stryke et felt for den som somler – knappen kommer etter ett minutt
+    var stryk = '';
+    if (vert && !jeg) {
+      var igjen = s.trekkVed + s.somle - (Date.now() + klokkeAvvik);
+      if (igjen <= 0) stryk = '<button type="button" class="btn ghost small yz-stryk" data-g="yz-stryk">' + T('Stryk et felt for ', 'Scratch a box for ') + esc(navn(s.aktiv)) + '</button>';
+      else if (yzSomleT !== s.trekkVed) { yzSomleT = s.trekkVed; setTimeout(tegn, igjen + 300); }
+    }
+    return jaTopp(tittel, chip, s.aktiv === meg, false) +
+      '<div class="yz-brett"><span class="yz-kant" aria-hidden="true"><b>' + T('Holdt', 'Held') + '</b></span>' + prikker + terninger + beger + krus + '</div>' +
+      '<div class="yz-lapprad">' + lapp + '</div>' + yzBlokk(s, jeg && s.kast > 0, meg) + stryk;
+  }
   /* ---------- Nyhetsrunden: alle ser spørsmålet, verten leser det høyt, avsløringen er et øyeblikk ----------
      Valg og sant/tull: A–D-klistremerker. Tall: eget tastatur (mobiltastaturet dekker ikke spørsmålet),
      og en tallinje når svaret vises – nærmest deler ut to. Fritt: et tekstfelt. Bevegelse bare første gang
@@ -4683,6 +4810,13 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'br-snu') return gjor({ handling: 'br-snu', pos: Number(b.dataset.pos) });
     if (g === 'yz-hold') return gjor({ handling: 'yz-hold', i: Number(b.dataset.i) });
     if (g === 'yz-felt') return gjor({ handling: 'yz-felt', f: b.dataset.f });
+    if (g === 'yz-stryk') return gjor({ handling: 'yz-stryk' });
+    if (g === 'py-modus') { pyVelg = !pyVelg; return tegn(); }
+    if (g === 'py-velg') {
+      if (!pyVelg) return;
+      var pyI = Number(b.dataset.i); b.classList.add('flyr'); pyVelg = false;
+      return setTimeout(function () { gjor({ handling: 'py-legg', i: pyI }); }, 420);
+    }
     if (g === 'nr-svar') return gjorAlltid({ handling: 'nr-svar', v: b.dataset.v });
     if (g === 'nr-flipp') return gjor({ handling: 'nr-flipp', hvem: b.dataset.id });
     if (g === 'nr-lengde') return gjor({ handling: 'nr-lengde', antall: Number(b.dataset.n) });
