@@ -6,7 +6,7 @@
 const { slug, lang = 'no' } = Astro.props as { slug: string; lang?: string };
 const en = lang === 'en';
 const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer', '21-med-terninger', 'opus', 'regelfabrikken',
-  'power-hour', 'snurr-flasken', 'drikke-yatzy', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', '14-sporsmal', 'bossen-sier', 'stilleleken'];
+  'power-hour', 'snurr-flasken', 'drikke-yatzy', 'rask-fakta', 'to-sannheter-og-en-logn', 'jug', 'bossen-sier', 'stilleleken'];
 const RomLeker = ['regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris', 'to-sannheter-og-en-logn', 'bussruta', 'drikke-yatzy'];
 const har = DIGITALE.includes(slug);
 import { romLenke } from '../lib/romlenke';
@@ -14,8 +14,8 @@ import KortVelger from './KortVelger.astro';
 import { games, t } from '../lib/content';
 const romHref = romLenke(slug, '', en ? 'en' : 'no');
 const bareRom = ['pyramiden', 'president', 'gris'].includes(slug);
-const OVERSKRIFT_NO: Record<string, string> = { 'terningen-bestemmer': 'Telefonen er terningen', '21-med-terninger': 'Telefonen er terningen', 'opus': 'Telefonen er terningen', 'drikke-yatzy': 'Telefonen er terningene og blokka', 'regelfabrikken': 'Skriv kortene', 'power-hour': 'Klokka', 'snurr-flasken': 'Telefonen er flaska', 'rask-fakta': 'Fem sekunder', 'to-sannheter-og-en-logn': 'Skriv og avslør', 'jug': 'Vertens hemmelige trekk', '14-sporsmal': 'Regeltavla', 'bossen-sier': 'Boss-maskinen', 'stilleleken': 'Telefonen lytter' };
-const OVERSKRIFT_EN: Record<string, string> = { 'terningen-bestemmer': 'The phone is the die', '21-med-terninger': 'The phone is the dice', 'opus': 'The phone is the die', 'drikke-yatzy': 'The phone is the dice and the scorecard', 'regelfabrikken': 'Write the cards', 'power-hour': 'The clock', 'snurr-flasken': 'The phone is the bottle', 'rask-fakta': 'Five seconds', 'to-sannheter-og-en-logn': 'Write and reveal', 'jug': "The host's secret draw", '14-sporsmal': 'The rule board', 'bossen-sier': 'The boss machine', 'stilleleken': 'The phone is listening' };
+const OVERSKRIFT_NO: Record<string, string> = { 'terningen-bestemmer': 'Telefonen er terningen', '21-med-terninger': 'Telefonen er terningen', 'opus': 'Telefonen er terningen', 'drikke-yatzy': 'Telefonen er terningene og blokka', 'regelfabrikken': 'Skriv kortene', 'power-hour': 'Klokka', 'snurr-flasken': 'Telefonen er flaska', 'rask-fakta': 'Fem sekunder', 'to-sannheter-og-en-logn': 'Skriv og avslør', 'jug': 'Vertens hemmelige trekk', 'bossen-sier': 'Boss-maskinen', 'stilleleken': 'Telefonen lytter' };
+const OVERSKRIFT_EN: Record<string, string> = { 'terningen-bestemmer': 'The phone is the die', '21-med-terninger': 'The phone is the dice', 'opus': 'The phone is the die', 'drikke-yatzy': 'The phone is the dice and the scorecard', 'regelfabrikken': 'Write the cards', 'power-hour': 'The clock', 'snurr-flasken': 'The phone is the bottle', 'rask-fakta': 'Five seconds', 'to-sannheter-og-en-logn': 'Write and reveal', 'jug': "The host's secret draw", 'bossen-sier': 'The boss machine', 'stilleleken': 'The phone is listening' };
 const overskrift = bareRom ? (en ? 'Play without a deck of cards' : 'Spill uten kortstokk') : ((en ? OVERSKRIFT_EN : OVERSKRIFT_NO)[slug] || (en ? 'The phone is the deck' : 'Telefonen er kortstokken'));
 const romNavn = en ? t((games.find((g) => g.slug === slug) || {}).name, 'en') : (slug === 'pyramiden' ? 'Pyramiden' : slug === 'president' ? 'President' : 'Gris');
 ---
@@ -854,33 +854,6 @@ if (!window.BDK) window.BDK = (function () {
     if (b.dataset.a === 'ny') oppsett();
   });
   oppsett();
-})();
-</script>
-)}
-
-{slug === '14-sporsmal' && (
-<script is:inline data-astro-rerun>
-(function () {
-  var root = document.querySelector('[data-dl="14-sporsmal"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
-  var K = window.BDK, T = K.T, regler = { 7: T('Ikke si 7', "Don't say 7") };
-  try { regler = JSON.parse(localStorage.getItem('bd_14') || 'null') || regler; } catch (e) {}
-  function lagre() { try { localStorage.setItem('bd_14', JSON.stringify(regler)); } catch (e) {} }
-  function tegn() {
-    var ruter = ''; for (var i = 1; i <= 14; i++) ruter += '<button type="button" class="' + (regler[i] ? 'har' : '') + '" data-t="' + i + '"><b>' + i + '</b><span>' + K.esc(regler[i] || '') + '</span></button>';
-    root.innerHTML = '<div class="ft-tavle">' + ruter + '</div><p class="small">' + T('Trykk på et tall for å gi det en regel. Tavla huskes på denne telefonen.', 'Tap a number to give it a rule. The board is saved on this phone.') + '</p>' +
-      '<div class="ft-skjema" hidden><label class="rof-lab" for="ftInp">' + T('Regel for ', 'Rule for ') + '<b class="ft-nr"></b></label><div class="rf-rad"><input id="ftInp" maxlength="40" autocomplete="off" placeholder="' + T('F.eks. bytt med «hallo»', 'E.g. replace it with “hello”') + '"><button class="btn gold" data-a="lagre">' + T('Lagre', 'Save') + '</button></div><button class="btn ghost small" data-a="fjern">' + T('Fjern regelen', 'Remove the rule') + '</button></div>' +
-      '<button class="btn ghost" data-a="nullstill">' + T('Nullstill tavla', 'Reset the board') + '</button>';
-  }
-  var valgt = null;
-  root.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-t]');
-    if (t) { valgt = +t.dataset.t; var f = root.querySelector('.ft-skjema'); f.hidden = false; root.querySelector('.ft-nr').textContent = valgt; var i = root.querySelector('#ftInp'); i.value = regler[valgt] || ''; i.focus(); return; }
-    var b = e.target.closest('[data-a]'); if (!b) return;
-    if (b.dataset.a === 'lagre' && valgt) { var v = root.querySelector('#ftInp').value.trim(); if (v) regler[valgt] = v.slice(0, 40); lagre(); tegn(); }
-    if (b.dataset.a === 'fjern' && valgt) { delete regler[valgt]; lagre(); tegn(); }
-    if (b.dataset.a === 'nullstill') { regler = { 7: T('Ikke si 7', "Don't say 7") }; lagre(); tegn(); }
-  });
-  tegn();
 })();
 </script>
 )}

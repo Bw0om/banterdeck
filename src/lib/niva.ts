@@ -8,7 +8,7 @@ import { ROMLEK } from './romlenke';
 export type Niva = 'rom' | 'app' | 'regler';
 const ROM = new Set([...Object.keys(ROMLEK), 'hemmelig-oppdrag']);
 const APP = new Set(['stilleleken', ...Object.keys(DECKS as any), 'over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'terningen-bestemmer',
-  '21-med-terninger', 'opus', 'power-hour', 'snurr-flasken', 'rask-fakta', 'jug', '14-sporsmal', 'bossen-sier', 'gjett-aret',
+  '21-med-terninger', 'opus', 'power-hour', 'snurr-flasken', 'rask-fakta', 'jug', 'bossen-sier', 'gjett-aret',
   '100-sporsmal', 'nasjonal-vorsprove', 'drikkehjulet', 'tilbake-til-5-trinn']);
 
 export function niva(slug: string): Niva {
