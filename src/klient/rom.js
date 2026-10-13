@@ -676,7 +676,8 @@ export function startRom(LEKNAVN, LANG) {
   }
 
   /* ---------- selve rommet ---------- */
-  function navn(id) { var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }); return p ? p.navn : '?'; }
+  function sofaFolk() { return (tilstand && tilstand.stua && tilstand.stua.sofa) || []; }
+  function navn(id) { var p = (tilstand.spillere || []).concat(sofaFolk()).find(function (x) { return x.id === id; }); return p ? p.navn : '?'; }
   function erVert() { return tilstand && meg && tilstand.vert === meg.id; }
 
   function hode() { var rivalTopp = null, rivalBunn = null;
@@ -714,6 +715,76 @@ export function startRom(LEKNAVN, LANG) {
     return '<div class="rom-qr' + (stor ? ' stor' : '') + '">' + (svg ? '<div class="rom-qrbilde">' + svg + '</div>' : '') +
       '<div><b>' + T('Scan for å bli med', 'Scan to join') + '</b><span>' + (kortDomene ? T('Eller gå til ', 'Or go to ') + '<b>mittvors.no/' + esc(kode) + '</b>' : T('Eller gå til ', 'Or go to ') + esc(location.host) + RUTE.rom + T(' og skriv ', ' and enter ') + '<b>' + esc(kode) + '</b>') + '</span></div></div>';
   }
+  /* ---------- Bare vertens telefon: sofaen i stua ----------
+     Blir ingen med etter et minutt, kommer et kort: «Start med bare min telefon». Da skriver verten navnene på dem som er her,
+     og de setter seg i sofaen i stua (de er ikke spillere i rommet, så de vanlige lekene påvirkes ikke).
+     Lekene her spilles på én telefon: kortet går rundt, og verten trykker hvem som drakk. */
+  var sofaFane = 'rundt', aleneFra = 0, aleneLukket = 0, aleneTimer = null;
+  function sofaNokkel() { return 'bd_sofa_' + kode; }
+  function sofaModus() {
+    if (sofaFolk().length) return true;
+    try { return localStorage.getItem(sofaNokkel()) === '1'; } catch (e) { return false; }
+  }
+  var EN_LEKER = [
+    ['jeg-har-aldri', 'rundt', T('Jeg har aldri', 'Never have I ever'), T('Kortet går rundt. Trykk på dem som har gjort det.', 'The card goes around. Tap those who have done it.'), 'kort'],
+    ['pekeleken', 'rundt', T('Pekeleken', 'Most likely to'), T('Les høyt – pek. Trykk på dem som ble pekt på.', 'Read it out – point. Tap who got pointed at.'), 'pek'],
+    ['nodt-eller-sannhet', 'leser', T('Nødt eller sannhet', 'Truth or dare'), T('Du trekker – den som leser, velger. Nekter noen, drikker de.', 'You draw – the reader picks. Refuse and you drink.'), 'kort'],
+  ];
+  var EN_IKON = { kort: 'M6 3h12v18h-12zM9 8h6M9 12h6', pek: 'M12 21v-9M8 12l4-9 4 9' };
+  function sofaLobby() {
+    var folk = sofaFolk(), n = folk.length;
+    var ut = '<div class="sofa-lobby"><p class="nr-etikett">' + T('Bare din telefon', 'Just your phone') + '</p><h2 class="sofa-tittel">' + T('Hvem er her?', 'Who’s here?') + '</h2>' +
+      '<p class="small">' + T('Rommet står åpent – kode ', 'The room stays open – code ') + '<b>' + esc(kode) + '</b>. ' + T('De som kommer senere, havner rett i leken.', 'Anyone joining later goes straight into the game.') + '</p>' +
+      '<form id="sofaSkjema" class="sofa-skjema"><label><span class="sr-only">' + T('Navn', 'Name') + '</span><input id="sofaNavn" maxlength="16" autocomplete="off" placeholder="' + T('Navn på en som er her', 'Name of someone here') + '"></label>' +
+      '<button type="submit" aria-label="' + T('Sett i sofaen', 'Seat on the sofa') + '"' + (n >= 6 ? ' disabled' : '') + '>+</button></form>' +
+      '<p class="small sofa-antall">' + (n ? T('Du + ', 'You + ') + n + T(' i sofaen', ' on the sofa') + (n >= 6 ? T(' · sofaen er full', ' · the sofa is full') : '') : T('Du står i stua. Hvem andre er her?', 'You’re in the living room. Who else is here?')) + '</p>' +
+      (n ? '<div class="sofa-chips">' + folk.map(function (p) { return '<button type="button" data-g="sofa-fjern" data-paa="' + esc(p.id) + '" aria-label="' + T('Fjern ', 'Remove ') + esc(p.navn) + '">' + esc(p.navn) + ' <span aria-hidden="true">×</span></button>'; }).join('') + '</div>' : '');
+    if (n) {
+      var leser = sofaFane === 'leser';
+      ut += '<h2 class="sofa-tittel">' + T('Velg lek', 'Pick a game') + '</h2>' +
+        '<div class="sofa-faner" role="group" aria-label="' + T('Hvordan spiller dere?', 'How do you play?') + '"><i class="' + (leser ? 'h' : '') + '"></i>' +
+        '<button type="button" data-g="sofa-fane" data-v="rundt" aria-pressed="' + !leser + '">' + T('Send rundt', 'Pass it round') + '</button>' +
+        '<button type="button" data-g="sofa-fane" data-v="leser" aria-pressed="' + leser + '">' + T('Verten leser', 'Host reads') + '</button></div>' +
+        '<p class="small">' + (leser ? T('Du holder telefonen og leser høyt.', 'You hold the phone and read out loud.') : T('Telefonen går fra hånd til hånd.', 'The phone goes from hand to hand.')) + '</p>' +
+        '<div class="sofa-leker">' + EN_LEKER.filter(function (l) { return l[1] === sofaFane; }).map(function (l, i) {
+          return '<button type="button" class="sofa-lek" data-g="en-start" data-lek="' + l[0] + '" style="--f:' + i * 40 + 'ms"><span class="sofa-lek-merke"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + EN_IKON[l[4]] + '"/></svg></span><b>' + l[2] + '</b><small>' + l[3] + '</small></button>';
+        }).join('') + '</div>';
+    } else ut += '<button class="linkbtn sofa-av" data-g="sofa-av" type="button">' + T('Tilbake – vent på telefoner', 'Back – wait for phones') + '</button>';
+    return ut + '</div>';
+  }
+  function aleneArk() {
+    var t = tilstand;
+    if (!erVert() || t.spill || sofaModus() || (t.spillere || []).length > 1) { aleneFra = 0; return ''; }
+    if (!aleneFra) aleneFra = Date.now();
+    var vent = 60000 - (Date.now() - Math.max(aleneFra, aleneLukket));
+    if (vent > 0) { clearTimeout(aleneTimer); aleneTimer = setTimeout(tegn, vent + 50); return ''; }
+    return '<div class="sofa-ark" role="dialog" aria-label="' + T('Ingen telefoner oppe?', 'No phones out?') + '"><i class="sofa-ark-hank"></i><b>' + T('Ingen telefoner oppe?', 'No phones out?') + '</b>' +
+      '<p>' + T('Start med bare din. Skriv inn hvem som er her – de får plass i sofaen. Rommet står åpent for dem som kommer senere.', 'Start with just yours. Type in who’s here – they get a seat on the sofa. The room stays open for anyone coming later.') + '</p>' +
+      '<button class="rom-stor-knapp" data-g="sofa-start" type="button">' + T('Start med bare min telefon', 'Start with just my phone') + '</button>' +
+      '<button class="linkbtn" data-g="sofa-vent" type="button">' + T('Vent litt til', 'Wait a bit longer') + '</button></div>';
+  }
+  /** Lekene på én telefon: kortet, og hodene til verten og sofaen som verten trykker på. */
+  var enHar = {}, enPos = null, enSett = {};
+  function enSpill(s) {
+    var nk = (s.runde || 1) + ':' + s.pos; if (enPos !== nk) { enPos = nk; enHar = {}; }
+    var ny = !enSett[nk]; enSett[nk] = 1;
+    var lek = EN_LEKER.find(function (l) { return l[0] === s.lek; }) || [s.lek, '', s.navn];
+    var topp = jaTopp(esc(lek[2]) + T(' · én telefon', ' · one phone'), s.ferdig ? T('Bunken er tom', 'Deck done') : esc(navn(s.leser)) + T(' leser', ' reads'), !s.ferdig, false);
+    if (s.ferdig) return topp + lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny bunke – teller i kvelden', 'New deck – counts tonight')]]);
+    var k = s.kort || {}, t = String(k.t || '');
+    var l = Math.max.apply(null, t.split(/\s+/).map(function (w) { return w.length; }).concat([1]));
+    var str = Math.max(22, Math.min(36, Math.floor(290 / (l * 0.56)), Math.floor(1000 / (t.length * 0.55))));
+    var sporsmal = s.lek === 'pekeleken' ? T('Hvem ble pekt på? Trykk på dem.', 'Who got pointed at? Tap them.') : s.lek === 'nodt-eller-sannhet' ? T('Nektet noen? Trykk på dem.', 'Did someone refuse? Tap them.') : T('Hvem har gjort det? Trykk på dem.', 'Who has done it? Tap them.');
+    var ider = [tilstand.vert].concat(sofaFolk().map(function (p) { return p.id; })).concat((tilstand.spillere || []).filter(function (p) { return p.id !== tilstand.vert; }).map(function (p) { return p.id; }));
+    var slurk = function (id) { var sp = sofaFolk().find(function (p) { return p.id === id; }); if (sp) return sp.slurker || 0; var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }); return p ? p.slurker || 0 : 0; };
+    return topp + '<button type="button" class="en-kort" data-g="en-neste" aria-label="' + T('Neste kort', 'Next card') + '"><i></i><i></i><span class="' + (ny && s.pos ? 'inn' : '') + '">' +
+      (k.k ? '<small>' + esc(k.k) + '</small>' : '') + '<b style="font-size:' + str + 'px">' + esc(t) + '</b><em>' + T('Trykk på kortet for neste – og send telefonen videre', 'Tap the card for the next one – and pass the phone on') + '</em></span></button>' +
+      '<p class="en-sporsmal">' + sporsmal + '</p><div class="en-benk">' + ider.map(function (id) {
+        var har = !!enHar[id];
+        return '<button type="button" data-g="en-har" data-paa="' + esc(id) + '" aria-pressed="' + har + '">' + (har ? '<span class="en-drikk">' + T('Drikk', 'Drink') + '</span>' : '') +
+          nrHode(id, har ? 'oppe' : '', har ? 'oi' : '') + '<b>' + (id === tilstand.meg ? T('Du', 'You') : esc(navn(id))) + '</b><small>' + slurk(id) + T(' sl.', ' sips') + '</small></button>';
+      }).join('') + '</div>';
+  }
   function lobby() {
     var t = tilstand;
     if (t.valgt && !visAlle) return valgtLobby();
@@ -722,6 +793,7 @@ export function startRom(LEKNAVN, LANG) {
         '<p class="small">' + T('Du trenger ikke gjøre noe – leken dukker opp her av seg selv.', 'You don’t need to do anything – the game shows up here by itself.') + '</p>' +
         '<p class="small">' + t.spillere.length + T(' med i rommet. Flere? Del koden <b>', ' in the room. More people? Share the code <b>') + esc(kode) + '</b>.</p>' + romMerker() + '</div>' + gjengBoks() + kveldKort() + reglerKort();
     }
+    if (sofaModus()) return sofaLobby();
     var borsFull = t.bors && t.bors.paa && !t.bors.fokus ? '<p><button class="btn ghost" data-g="bs-fokus" type="button">' + T('📈 Gjør Vorsbørsen til hovedspill', '📈 Make the Exchange the main game') + '</button></p>' : '';
     return plassInfo() + planBoks() +
       '<h2 class="rom-h2 rom-steg"><span>1</span>' + T('Få med alle', 'Get everyone in') + '</h2>' + qrBoks() +
@@ -746,7 +818,7 @@ export function startRom(LEKNAVN, LANG) {
                 mod.slice(4).map(function (m) { return '<option value="' + esc(m.v) + '">' + esc(m.t) + (nrSpilt().indexOf(m.v) !== -1 ? ' ✓' : '') + '</option>'; }).join('') + '</select>' : '')
             : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
           '</div></div>';
-      }) + plussLeker() + egneStokker();
+      }) + plussLeker() + egneStokker() + aleneArk();
   }
   /** Bakgrunnslekene: går hele kvelden, uansett hvilken hovedlek dere spiller. Verten slår dem av og på. */
   function bakgrunnBoks() {
@@ -2577,7 +2649,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   /** Det lille hodet til en spiller (samme figur som på benken) – brukes i stedet for initialer. */
   function nrHode(id, klasse, uttrykk) {
-    var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }) || { id: id, navn: '?' };
+    var p = (tilstand.spillere || []).concat(sofaFolk()).find(function (x) { return x.id === id; }) || { id: id, navn: '?' };
     return '<span class="nr-h' + (klasse ? ' ' + klasse : '') + (id === tilstand.meg ? ' meg' : '') + '" title="' + esc(p.navn) + '"><svg viewBox="-28 -36 56 62" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id), uttrykk) + '</svg></span>';
   }
   function nrFormat(v) { var n = Number(v); return isFinite(n) && String(v) !== '' ? n.toLocaleString(EN ? 'en-GB' : 'nb-NO') : String(v || ''); }
@@ -4124,7 +4196,7 @@ export function startRom(LEKNAVN, LANG) {
     else if (!s) innhold = lobby();
     else {
       innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' && s.lek !== 'ring-of-fire' ? ' · ' + esc(s.modus) : '') + '</p>' +
-        ({ kort: kortSpill, mest: mestSpill, forraeder: function (s) { return forraederSpill(s) + lhBenk(s); }, bingo: bingoSpill, opus: opusSpill, overunder: overunderSpill,
+        ({ kort: kortSpill, mest: mestSpill, forraeder: function (s) { return forraederSpill(s) + lhBenk(s); }, bingo: bingoSpill, en: enSpill, opus: opusSpill, overunder: overunderSpill,
            veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: function (s) { return nyhetsrundenSpill(s) + nrBenk(s); }, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + slurkelinje() + reglerPanel(s) + '</div>';
       // Nyhetsrunden finnes bare på norsk
       if (EN && s.type === 'nyhetsrunden') innhold = innhold.replace('</p>', '</p><p class="small">🇳🇴 ' + T('', 'Questions are in Norwegian') + '</p>');
@@ -4231,6 +4303,14 @@ export function startRom(LEKNAVN, LANG) {
     if (document.querySelector('[data-frist]')) fristTikk(); else clearInterval(fristTimer);
     var ny = document.getElementById('rfInput');
     if (ny && gVerdi !== null) { ny.value = gVerdi; if (gFokus) ny.focus({ preventScroll: true }); }
+    var sofaSk = document.getElementById('sofaSkjema');
+    if (sofaSk) sofaSk.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var inp = document.getElementById('sofaNavn'), v = inp ? inp.value.trim() : '';
+      if (!v) return;
+      inp.value = ''; gjorAlltid({ handling: 'sofa-ny', navn: v });
+      setTimeout(function () { var i2 = document.getElementById('sofaNavn'); if (i2) i2.focus({ preventScroll: true }); }, 60);
+    });
     var ts = document.getElementById('tsSkjema');
     if (ts) ts.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -4290,7 +4370,7 @@ export function startRom(LEKNAVN, LANG) {
     stuaEl.classList.toggle('kompakt', !!s);
     var st = tilstand.stua || {};
     stua.tema(st.tema || 'stue');
-    stua.settFolk(tilstand.spillere || [], st.pos);
+    stua.settFolk((tilstand.spillere || []).concat(st.sofa || []), st.pos);
     stua.ekstra(st.ekstra || []);
     if (aapentArk) aapentArk.oppdater();
     var kt = stuaKort(s);
@@ -4552,6 +4632,14 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'pek-forsvar') return gjor({ handling: 'pek-forsvar', slapp: b.dataset.slapp === '1' });
     if (g === 'lh-ide') { var ide = document.getElementById('lhIde'); if (ide) { ide.textContent = lhIde(); ide.hidden = false; ide.classList.remove('inn'); void ide.offsetWidth; ide.classList.add('inn'); } return; }
     if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
+    if (g === 'sofa-start') { try { localStorage.setItem(sofaNokkel(), '1'); } catch (e) {} return tegn(); }
+    if (g === 'sofa-vent') { aleneLukket = Date.now(); return tegn(); }
+    if (g === 'sofa-av') { try { localStorage.removeItem(sofaNokkel()); } catch (e) {} aleneFra = Date.now(); return tegn(); }
+    if (g === 'sofa-fane') { sofaFane = b.dataset.v === 'leser' ? 'leser' : 'rundt'; return tegn(); }
+    if (g === 'sofa-fjern') return gjor({ handling: 'sofa-fjern', hvem: b.dataset.paa });
+    if (g === 'en-start') return gjor({ handling: 'en-start', lek: b.dataset.lek });
+    if (g === 'en-har') { enHar[b.dataset.paa] = !enHar[b.dataset.paa]; return tegn(); }
+    if (g === 'en-neste') { var enListe = Object.keys(enHar).filter(function (id) { return enHar[id]; }); enHar = {}; return gjor({ handling: 'en-neste', har: enListe }); }
     if (g === 'ou-gjett') return gjor({ handling: 'gjett', paa: b.dataset.paa });
     if (g === 'ou-hopp') return gjor({ handling: 'ou-hopp' });
     if (g === 'vl-vedd') return gjorAlltid({ handling: 'vedd', farge: b.dataset.farge, slurker: vlSats });

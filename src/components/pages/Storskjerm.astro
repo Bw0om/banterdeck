@@ -255,7 +255,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     }
 
     /* ---------- tegning ---------- */
-    function navn(id) { var p = tilstand && (tilstand.spillere || []).find(function (x) { return x.id === id; }); return p ? p.navn : (id === 'ja' ? T('Ja', 'Yes') : id === 'nei' ? T('Nei', 'No') : '?'); }
+    function navn(id) { var p = tilstand && (tilstand.spillere || []).concat((tilstand.stua && tilstand.stua.sofa) || []).find(function (x) { return x.id === id; }); return p ? p.navn : (id === 'ja' ? T('Ja', 'Yes') : id === 'nei' ? T('Nei', 'No') : '?'); }
     function lenke() { return kortDomene ? 'https://mittvors.no/' + kode : location.origin + (EN ? '/room' : '/no/rom') + '?k=' + kode; }
     function lenkeTekst() { return kortDomene ? 'mittvors.no/' + kode : location.host + (EN ? '/room' : '/no/rom') + ' · ' + kode; }
     function ta(d) {
@@ -1177,7 +1177,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var st = d.stua || {};
       tvStua.tema(st.tema || 'stue');
       tvStua.ekstra(st.ekstra || []);
-      tvStua.settFolk(d.spillere || [], st.pos);
+      tvStua.settFolk((d.spillere || []).concat(st.sofa || []), st.pos);
       var s = d.spill, kt = '';
       if (s) kt = s.kort ? (s.kort.regel ? s.kort.regel : (s.kort.t || '')) : (s.tekst || (s.offentlig && s.offentlig.tekst) || '');
       if (kt) tvStua.tv(kt, s.navn); else tvStua.kode(kode);

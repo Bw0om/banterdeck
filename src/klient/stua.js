@@ -169,6 +169,9 @@ function ledig(x, y) {
   return x > 0.4 && x < 5.6 && y > 0.4 && y < 5.7;
 }
 const DOR = [5.05, 0.25];
+/** Sofaen: de som sitter der, sitter litt høyere (på setet) og rusler ikke rundt. */
+function paaSofa(p) { return p && p[0] > 4.3 && p[1] > 1.3 && p[1] < 5.3; }
+const SETE_HOYDE = 15;
 /** Hvordan stua ser ut. Fargene følger stua-paletten; hvert tema har én liten ting som er sin egen. */
 export const TEMA = {
   stue: { gulv: '#FFD23F', teppe: '#FF9CC2', veggV: '#63E2A8', veggH: '#FFF8EE', sofa: ['#FF9CC2', '#ff7fb0', '#f06a9e', '#FFB3D1'], bord: ['#FFF8EE', '#FF5B1F', '#E04A12'], plakat: '#FF5B1F', plakatPrikk: '#FFD23F', dor: '#FF5B1F', vindu: 'natt' },
@@ -360,7 +363,8 @@ export function lagStua(svg, valg = {}) {
     this.g.setAttribute('transform', 'translate(' + p[0].toFixed(1) + ',' + p[1].toFixed(1) + ')');
     this.kropp.setAttribute('transform', 'translate(0,' + (-z).toFixed(1) + ') rotate(' + this.r.v.toFixed(2) + ') scale(' + (2 - s).toFixed(3) + ',' + s.toFixed(3) + ')');
     this.skygge.setAttribute('rx', (16 - Math.min(8, z * 0.25)).toFixed(1));
-    this.g.dataset.d = this.x.v + this.y.v;
+    // I sofaen tegnes man foran sofaen (den ligger som én bit i dybderekkefølgen)
+    this.g.dataset.d = this.x.v + this.y.v + (paaSofa([this.x.v, this.y.v]) ? 3 : 0);
   };
   Figur.prototype.steg = function (dt) {
     if (this.vei.length && !this.drar) {
@@ -372,7 +376,7 @@ export function lagStua(svg, valg = {}) {
         if (this.ut) { fjern(this); return true; }
       }
       this.z.mal = Math.min(10, Math.hypot(this.x.fart, this.y.fart) * 3.2);
-    } else if (!this.drar) this.z.mal = 0;
+    } else if (!this.drar) this.z.mal = paaSofa(this.hjem) ? SETE_HOYDE : 0;
     const ro = [this.x, this.y, this.z, this.s, this.r].map((v) => v.tikk(dt)).every(Boolean);
     this.tegn(); sorter();
     return ro && !this.vei.length && !this.drar;
@@ -385,7 +389,7 @@ export function lagStua(svg, valg = {}) {
   };
   // Litt rusling: et lite steg rundt plassen sin, med jevne mellomrom
   Figur.prototype.planleggRusling = function () {
-    if (!valg.vandre || REDUSERT) return;
+    if (!valg.vandre || REDUSERT || paaSofa(this.hjem)) return;
     clearTimeout(this.ruslT);
     this.ruslT = setTimeout(() => {
       if (!svg.isConnected) return;
@@ -454,7 +458,9 @@ export function lagStua(svg, valg = {}) {
       if (x > 4.3 && y < 1.1) { f.si(SI_DOR[Math.random() * SI_DOR.length | 0], 1800); f.gaaTil(f.hjem); return; }
       if (Math.hypot(x - fra[0], y - fra[1]) < 0.15) { if (Date.now() - f.trykkT < 400 && valg.onTrykk) valg.onTrykk(f.info.id); return; }
       let mal = [x, y];
-      if (!ledig(x, y)) { mal = naermesteLedig(x, y); f.gaaTil(mal); }
+      // Sluppet i sofaen: sett deg ned på setet
+      if (paaSofa([x, y])) { mal = [4.9, Math.max(2.0, Math.min(4.6, y))]; f.gaaTil(mal); }
+      else if (!ledig(x, y)) { mal = naermesteLedig(x, y); f.gaaTil(mal); }
       f.hjem = mal; f.planleggRusling();
       if (valg.onSlipp && f.info.id) valg.onSlipp(f.info.id, +mal[0].toFixed(2), +mal[1].toFixed(2));
     }
