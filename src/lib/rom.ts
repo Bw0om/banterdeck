@@ -1625,7 +1625,8 @@ function handlingInne(data: any, meg: any, h: any) {
         if (h.paa !== 'sannhet' && h.paa !== 'lyv') return { feil: 'ukjent' };
         s.stemmer[meg.id] = h.paa;
         s.sikker = s.sikker || {}; if (h.sikker === true) s.sikker[meg.id] = true; else if (h.sikker === false) delete s.sikker[meg.id];
-        if (Object.keys(s.stemmer).length >= data.spillere.length - 1) avgjorForraeder(data);
+        // Alle har stemt: avsløringen kommer etter et lite pust (så man rekker å holde for «helt sikker»)
+        if (Object.keys(s.stemmer).length >= data.spillere.length - 1) { const kort = Date.now() + 2000 + 1500; if (!s.frist || s.frist > kort) s.frist = kort; }
         return { ok: true };
       }
       return { feil: 'feil-spill' };
@@ -2606,8 +2607,8 @@ function nyeHandling(data: any, meg: any, h: any): any {
       if (s.alt && !s.alt.includes(v)) return { feil: 'ukjent' };
       if (!v) { delete s.svar[meg.id]; return { ok: true }; }
       s.svar[meg.id] = v;
-      // Alle har svart: vis svaret med én gang
-      if (data.spillere.every((p: any) => s.svar[p.id] != null)) nrAvslor(data);
+      // Alle har svart: svaret vises etter et lite pust
+      if (data.spillere.every((p: any) => s.svar[p.id] != null)) { const kort = Date.now() + 2000 + 1500; if (!s.frist || s.frist > kort) s.frist = kort; }
       return { ok: true };
     }
     if (h.handling === 'tid-ute') {
