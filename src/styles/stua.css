@@ -1793,3 +1793,142 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .br-bunke span{inset:0;display:grid;place-items:center;font-size:20px;font-weight:900;text-transform:uppercase;color:#FFF8EE;box-shadow:4px 4px 0 var(--hard);transition:transform 90ms ease-out,box-shadow 90ms ease-out}
 .br-bunke:active span{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
 @media (prefers-reduced-motion:reduce){.bf-markor,.bf-penn.inn,.bf-marg.inn,.bf-liste>li.inn,.bf-tusj,.bf-strek.inn path,.bf-ring.inn path,.bf-dom.inn,.bf-best li,.br-vifte .br-kort.snu,.br-svar.inn,.br-pyramide .br-kort.snu,.br-buss.kjor,.br-buss svg{animation:none}}
+
+/* ---------- Drikke-Yatzy: raflebegeret og blokka ---------- */
+.yz-brett{container-type:inline-size;position:relative;height:232px;margin:10px 0 4px;box-sizing:border-box;border:3px solid #16120F;border-radius:14px;background:radial-gradient(120% 90% at 40% 60%,#2C7A4E 0%,#1E5C3A 70%,#174A2F 100%);box-shadow:inset 0 0 0 7px #8A5A2B,inset 0 0 0 10px #16120F,4px 4px 0 #16120F;overflow:hidden}
+.yz-kant{position:absolute;left:10px;right:10px;top:10px;height:64px;border-radius:8px;background:rgba(0,0,0,.18);border:2px dashed rgba(255,248,238,.28)}
+.yz-kant b{position:absolute;left:6px;bottom:-21px;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,248,238,.6)}
+.yz-prikker{position:absolute;left:14px;bottom:12px;display:flex;gap:5px}
+.yz-prikker i{display:block;width:12px;height:12px;box-sizing:border-box;border-radius:4px;border:2.5px solid #FFF8EE}
+.yz-prikker i.paa{background:#FFF8EE}
+.yz-brett .yz-terning{position:absolute;left:0;top:0;width:52px;height:52px;min-height:0;margin:0;padding:0;border:0;border-radius:10px;background:none;box-shadow:none;cursor:pointer;transform:translate(calc(var(--x) * 1cqw),calc(var(--y) * 1px)) rotate(calc(var(--r) * 1deg))}
+.yz-brett .yz-terning:disabled{cursor:default;opacity:1}
+.yz-terning.borte{visibility:hidden}
+.yz-terning.trill{animation:yzTrill 520ms cubic-bezier(.23,1,.32,1) both;animation-delay:calc(260ms + var(--f))}
+@keyframes yzTrill{from{transform:translate(75cqw,150px) rotate(220deg) scale(.9);opacity:0}}
+.yz-terning.flytt{animation:yzFlytt 240ms cubic-bezier(.23,1,.32,1) both}
+@keyframes yzFlytt{from{transform:translate(calc(var(--fx) * 1cqw),calc(var(--fy) * 1px)) rotate(calc(var(--fr) * 1deg))}}
+.yz-t{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);place-items:center;box-sizing:border-box;width:52px;height:52px;padding:8px;gap:2px;border-radius:10px;background:#FFFDF6;border:2.5px solid #16120F;box-shadow:3px 3px 0 #0E2E1D}
+.yz-t i{width:9px;height:9px;border-radius:50%}
+.yz-t i.p{background:#16120F}.yz-t.en i.p{background:#D7263D}
+.yz-terning[aria-pressed="true"] .yz-t{box-shadow:0 0 0 3px #FFD23F,3px 3px 0 #0E2E1D}
+.yz-terning.ring .yz-t{box-shadow:0 0 0 4px #D7263D,3px 3px 0 #0E2E1D}
+.yz-brett .yz-beger{position:absolute;right:12px;bottom:10px;width:96px;height:124px;min-height:0;margin:0;padding:0;border:0;background:none;box-shadow:none;display:flex;flex-direction:column-reverse;align-items:center;gap:4px;cursor:pointer;transition:transform 120ms ease-out}
+.yz-beger svg{width:74px;height:92px;flex:none;transform-origin:50% 90%}
+.yz-beger .kropp{fill:#6B3A1E;stroke:#16120F;stroke-width:3;stroke-linejoin:round}.yz-beger .kant{stroke:#16120F;stroke-width:7;stroke-linecap:round}
+.yz-beger .baand{stroke:#C8924A;stroke-width:4;fill:none}.yz-beger .glans{stroke:#8E5330;stroke-width:5;stroke-linecap:round}
+.yz-beger span{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:#FFF8EE;text-align:center;line-height:1.1}
+.yz-brett .yz-beger:active:not(:disabled){transform:scale(.96)}
+.yz-brett .yz-beger:disabled{opacity:.45;cursor:default}
+.yz-beger.rist svg{animation:yzRist 420ms ease-in-out}
+@keyframes yzRist{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg) translateY(-4px)}45%{transform:rotate(8deg)}70%{transform:rotate(-6deg) translateY(-2px)}}
+.yz-krus{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.yz-krus svg{position:absolute;left:6%;top:26%;width:84%;height:auto}
+.yz-krus path{fill:none;stroke:#FFD23F;stroke-linecap:round}
+.yz-krus b{position:relative;font-family:'Fraunces Variable',Georgia,serif;font-style:italic;font-weight:700;font-size:52px;color:#FFF8EE;text-shadow:3px 3px 0 #16120F}
+.yz-krus.inn path{stroke-dasharray:900;animation:yzKrus 900ms cubic-bezier(.23,1,.32,1) both;animation-delay:700ms}
+.yz-krus.inn b{animation:yzKrusB 300ms cubic-bezier(.23,1,.32,1) both;animation-delay:700ms}
+@keyframes yzKrus{from{stroke-dashoffset:900}}
+@keyframes yzKrusB{from{transform:scale(.9);opacity:0}}
+.yz-lapprad{min-height:40px;display:flex;align-items:center}
+.yz-lapp{display:inline-block;margin:4px 0 8px;padding:6px 12px;font-weight:900;font-size:15px;line-height:1.2;background:#FFF8EE;color:#16120F;border:2.5px solid #16120F;box-shadow:3px 3px 0 #16120F;transform:rotate(-1.5deg)}
+.yz-lapp.rod{background:#D7263D;color:#FFF8EE}.yz-lapp.gull{background:#FFD23F}
+.yz-lapp.inn{animation:yzLapp 260ms cubic-bezier(.23,1,.32,1) both;animation-delay:600ms}
+@keyframes yzLapp{from{transform:translateY(-8px) rotate(-3deg);opacity:0}}
+.yz-blokk2{border:3px solid #16120F;border-radius:4px;background:#FBFAF4;box-shadow:4px 4px 0 #16120F;overflow:hidden;font-size:12px;color:#16120F}
+.yz-rad{display:grid;height:21px;align-items:center;border-bottom:1px solid #B9C3CF}
+.yz-rad>span:first-child{padding-left:8px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yz-rad.hode{height:26px;background:#16120F;color:#FFF8EE;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.04em;border:0}
+.yz-rad.hode .yz-c{font:inherit;color:inherit;display:block;line-height:26px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;border-left-color:#3A3940}
+.yz-rad.hode .yz-c.aktiv{background:#FFD23F;color:#16120F}
+.yz-c{height:100%;display:grid;place-items:center;border-left:1px solid #B9C3CF;font-family:'Fraunces Variable',Georgia,serif;font-style:italic;font-weight:500;font-size:14px;color:#3A3D44;min-width:0}
+.yz-c.aktiv{background:#FFF6D2}
+.yz-blokk2 button.yz-c{width:100%;height:100%;min-height:0;margin:0;padding:0;border:0;border-left:1px solid #B9C3CF;border-radius:0;box-shadow:none;background:#FFF0B8;color:#7A7F88;text-decoration:underline dotted;font-family:'Fraunces Variable',Georgia,serif;font-style:italic;font-weight:600;font-size:13px;cursor:pointer;transform:none}
+.yz-blokk2 button.yz-c:active{background:#FFD23F;color:#16120F}
+.yz-c.skriv{animation:yzSkriv 340ms cubic-bezier(.23,1,.32,1) both}
+@keyframes yzSkriv{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+.yz-rad.sum{background:#EEF1F4}.yz-rad.sum>span:first-child{font-weight:900}.yz-rad.sum .yz-c{font-weight:700}
+.yz-rad.bonus{border-bottom:2px solid #16120F}
+.yz-rad.total{height:26px;border-top:2px solid #16120F;border-bottom:0}.yz-rad.total .yz-c{font-size:16px}
+.yz-slutt{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:10px 0 2px}.yz-slutt b{font-size:32px;font-weight:900;font-stretch:66%;text-transform:uppercase;line-height:1}.yz-slutt span{font-weight:800}
+.yz-stryk{margin-top:12px}
+@media (prefers-reduced-motion:reduce){.yz-terning.trill,.yz-terning.flytt,.yz-beger.rist svg,.yz-krus.inn path,.yz-krus.inn b,.yz-lapp.inn{animation:none}.yz-c.skriv{animation:yzFade 200ms ease both}}
+@keyframes yzFade{from{opacity:0}}
+
+/* ---------- Pyramiden: pokerfjes i halvmørket ---------- */
+.py-bord{margin:8px 0 0;padding:14px 14px 18px;border-radius:18px;background:radial-gradient(90% 46% at 50% 22%,#5A1B26 0%,#34101A 55%,#1A0A0E 100%);color:#F4EBDD;display:flex;flex-direction:column;gap:12px;border:3px solid #16120F;box-shadow:4px 4px 0 #16120F}
+.py-topp{display:flex;flex-direction:column;gap:2px}
+.py-topp span{font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#C9A24A}
+.py-topp b{font-family:'Fraunces Variable',Georgia,serif;font-size:28px;font-weight:800;line-height:1.05}
+.py-topp small{font-family:'Fraunces Variable',Georgia,serif;font-style:italic;font-size:13px;color:#C9A24A}
+.py-pyr{display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 0}
+.py-pyr>div{position:relative;display:flex;gap:5px}
+.py-pyr em{position:absolute;left:-26px;top:14px;font-family:'Fraunces Variable',Georgia,serif;font-style:normal;font-weight:900;font-size:15px;color:rgba(201,162,74,.4)}
+.py-pyr em.naa{color:#C9A24A}
+.py-kort{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;box-sizing:border-box;width:70px;height:104px;border-radius:9px;font-weight:900;background:#F4EBDD;color:#1A0A0E;border:2px solid #1A0A0E}
+.py-kort.rod{color:#B3192E}
+.py-kort b{font-size:24px;line-height:1}.py-kort i{font-style:normal;font-size:40px;line-height:1}
+.py-kort.bak,.py-hand:not(.kikk) .py-kort{background:repeating-linear-gradient(45deg,transparent 0 7px,rgba(201,162,74,.4) 7px 8px),repeating-linear-gradient(-45deg,transparent 0 7px,rgba(201,162,74,.4) 7px 8px),#2A0A12;border-color:#C9A24A;color:transparent}
+.py-kort.liten{width:36px;height:50px;border-radius:6px;border-width:1.5px}
+.py-kort.liten b{font-size:13px}.py-kort.liten i{font-size:16px}
+.py-kort.liten.bak{border-color:rgba(201,162,74,.5)}
+.py-pyr .py-kort.liten:not(.bak){opacity:.55}
+.py-bord.ferdig .py-pyr .py-kort.liten{opacity:1}
+.py-plass{position:relative;border-radius:6px}
+.py-plass.naa{box-shadow:0 0 0 3px #C9A24A,0 0 28px 8px rgba(255,214,140,.35)}
+.py-pyr .py-plass.naa .py-kort{opacity:1}
+.py-plass small{position:absolute;right:-9px;top:-8px;min-width:20px;height:20px;padding:0 4px;box-sizing:border-box;border-radius:10px;background:#C9A24A;color:#1A0A0E;font-size:11px;font-weight:900;display:grid;place-items:center;border:2px solid #1A0A0E}
+.py-kort.snu{animation:pySnu 380ms cubic-bezier(.23,1,.32,1) both}
+@keyframes pySnu{from{transform:rotateY(90deg)}}
+.py-vindu{height:4px;border-radius:2px;background:rgba(201,162,74,.22);overflow:hidden}
+.py-vindu i{display:block;height:100%;background:#C9A24A;transform-origin:left;animation-name:pyVindu;animation-timing-function:linear;animation-fill-mode:both}
+@keyframes pyVindu{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.py-liste{display:flex;flex-direction:column;gap:8px;min-height:48px}
+.py-past{text-align:left;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(244,235,221,.07);border:1.5px solid rgba(201,162,74,.4)}
+.py-past.inn{animation:pyInn 260ms cubic-bezier(.23,1,.32,1) both}
+@keyframes pyInn{from{transform:translateY(10px);opacity:0}}
+.py-past .nr-h,.py-hender .nr-h{width:38px;height:38px;flex:none}
+.py-past>.py-domm{flex:none}
+.py-past>span:not(.py-domm){flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.py-past b{font-size:16px;font-weight:900}.py-past small{font-size:13px;color:#D9CBB5}
+.py-bord .py-logn{width:auto;flex:none;min-height:44px;margin:0;padding:0 14px;border:2.5px solid #F4EBDD;border-radius:10px;background:#D7263D;color:#FFF8EE;font-weight:900;font-size:17px;font-stretch:70%;letter-spacing:.04em;box-shadow:none;cursor:pointer;transition:transform 100ms ease-out}
+.py-bord .py-logn:active{transform:translate(2px,2px)}
+.py-domm{flex:none;padding:5px 10px;border-radius:8px;font-weight:900;font-size:14px;text-transform:uppercase}
+.py-domm.bloff{background:#D7263D;color:#FFF8EE}.py-domm.sant{background:#C9A24A;color:#1A0A0E}
+.py-tom{margin:6px 0;font-family:'Fraunces Variable',Georgia,serif;font-style:italic;font-size:16px;color:#D9CBB5;text-align:center}
+.py-etikett{margin:0;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#C9A24A;text-align:center}
+.py-hand{position:relative;height:124px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.py-bord .py-hk{position:absolute;left:50%;top:12px;width:auto;min-height:0;margin:0 0 0 -35px;padding:0;border:0;border-radius:9px;background:none;box-shadow:0 8px 18px rgba(0,0,0,.45);cursor:default;transform:translateX(calc((var(--i) - (var(--n) - 1) / 2) * 80px)) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 5deg));transition:transform 200ms cubic-bezier(.23,1,.32,1)}
+.py-bord .py-hand.kikk .py-hk{transform:translateX(calc((var(--i) - (var(--n) - 1) / 2) * 80px)) translateY(-8px) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 5deg))}
+.py-hand.velg .py-hk{cursor:pointer}
+.py-hand.velg .py-kort{border-color:#C9A24A}
+.py-hk.flyr .py-kort{animation:pyFly 420ms cubic-bezier(.23,1,.32,1) forwards}
+@keyframes pyFly{to{transform:translateY(-58vh) rotate(8deg) scale(.42);opacity:.2}}
+.py-bord .py-legg{width:100%;min-height:54px;margin:0;border:3px solid #1A0A0E;border-radius:14px;background:#C9A24A;color:#1A0A0E;font-weight:900;font-size:19px;font-stretch:80%;text-transform:uppercase;letter-spacing:.03em;box-shadow:0 4px 0 #6E5420;cursor:pointer;transition:transform 100ms ease-out}
+.py-bord .py-legg:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #6E5420}
+.py-bord .py-legg.avbryt{background:#F4EBDD;box-shadow:none}
+.py-bord .py-legg.brukt,.py-bord .py-legg:disabled{background:rgba(244,235,221,.12);color:#D9CBB5;border-color:rgba(244,235,221,.2);box-shadow:none;opacity:1;cursor:default}
+.py-avsl{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;background:rgba(16,6,9,.9);color:#F4EBDD;text-align:center;animation:pyFade 200ms ease-out both}
+@keyframes pyFade{from{opacity:0}}
+.py-avsl-over{font-size:15px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#C9A24A}
+.py-avsl-kort{position:relative;perspective:600px}
+.py-kort.stor{width:130px;height:186px;border-radius:14px;border-width:3px;box-shadow:0 0 60px 10px rgba(255,214,140,.25)}
+.py-kort.stor b{font-size:32px}.py-kort.stor i{font-size:66px}
+.py-avsl-kort em{position:absolute;left:-28px;bottom:26px;padding:6px 14px;border:4px solid;border-radius:8px;font-style:normal;font-weight:900;font-size:34px;font-stretch:70%;text-transform:uppercase;background:rgba(26,10,14,.75);transform:rotate(-8deg);animation:pyStempel 300ms cubic-bezier(.23,1,.32,1) both;animation-delay:340ms}
+.py-avsl-kort em.sant{color:#C9A24A}.py-avsl-kort em.bloff{color:#FF4A5E}
+@keyframes pyStempel{from{transform:scale(1.25) rotate(-12deg);opacity:0}}
+.py-avsl>b{font-family:'Fraunces Variable',Georgia,serif;font-size:26px;font-weight:800;max-width:300px;line-height:1.15}
+.py-slutt{text-align:center;display:flex;flex-direction:column;gap:4px}
+.py-slutt b{font-family:'Fraunces Variable',Georgia,serif;font-size:30px;font-weight:900;line-height:1.1}
+.py-slutt small{color:#D9CBB5}
+.py-hender{display:flex;flex-direction:column;gap:8px}
+.py-hender>div{display:flex;align-items:center;gap:8px}
+.py-hender>div>b{min-width:64px;font-weight:900}
+.py-hender span{display:flex;gap:4px;flex-wrap:wrap;color:#D9CBB5}
+.py-kort.mini{width:28px;height:40px;border-radius:5px;border-width:1.5px}.py-kort.mini b{font-size:11px}.py-kort.mini i{font-size:13px}
+@media (prefers-reduced-motion:reduce){.py-kort.snu,.py-past.inn,.py-avsl,.py-avsl-kort em{animation:pyFade 200ms ease both}.py-hk.flyr .py-kort{animation:pyUt 200ms ease forwards}.py-bord .py-hk{transition:none}}
+@keyframes pyUt{to{opacity:0}}
+/* #rom button:active skalerer alle knapper – terningene og vifta må beholde plassen sin */
+#rom .yz-brett .yz-terning:active{transform:translate(calc(var(--x) * 1cqw),calc(var(--y) * 1px)) rotate(calc(var(--r) * 1deg)) scale(.96)}
+#rom .py-bord .py-hk:active{transform:translateX(calc((var(--i) - (var(--n) - 1) / 2) * 80px)) translateY(-8px) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 5deg))}
+#rom .py-bord .py-legg:active:not(:disabled){transform:translateY(3px)}

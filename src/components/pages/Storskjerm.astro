@@ -1048,6 +1048,115 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       return '<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + T('Bussruta', 'Ride the bus') + '</p><span class="tvlh-chip">' + chip + '</span></div>' + linje + ut + '</div></div>';
     }
+    /* ---------- Drikke-Yatzy: begeret på filten og blokka med blyant ---------- */
+    var tvYzSett = {}, tvYzHold = null;
+    var TV_YZ_HVILE = [[4, 42, -10], [20, 66, 12], [36, 40, -5], [52, 66, 16], [66, 42, 8]];
+    var TVYZF = [['1', T('Enere', 'Ones')], ['2', T('Toere', 'Twos')], ['3', T('Treere', 'Threes')], ['4', T('Firere', 'Fours')], ['5', T('Femmere', 'Fives')], ['6', T('Seksere', 'Sixes')],
+      ['p', T('Ett par', 'One pair')], ['pp', T('To par', 'Two pairs')], ['3l', T('Tre like', 'Three of a kind')], ['4l', T('Fire like', 'Four of a kind')], ['ls', T('Liten straight', 'Small straight')],
+      ['ss', T('Stor straight', 'Large straight')], ['hus', T('Hus', 'Full house')], ['sj', T('Sjanse', 'Chance')], ['y', 'Yatzy']];
+    function tvYzT(n) { var P = { 1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] }, h = '<span class="tvyz-t' + (n === 1 ? ' en' : '') + '">'; for (var i = 1; i <= 9; i++) h += '<i' + (P[n].indexOf(i) !== -1 ? ' class="p"' : '') + '></i>'; return h + '</span>'; }
+    function tvYzBlokk(y) {
+      var ider = y.ider || [], cols = 'grid-template-columns:minmax(9vw,1.5fr) repeat(' + ider.length + ',minmax(0,1fr))';
+      var sf = y.sistFelt, nyF = sf && !tvYzSett['f' + sf.nr]; if (sf) tvYzSett['f' + sf.nr] = 1;
+      var ov = function (b) { return ['1', '2', '3', '4', '5', '6'].reduce(function (a, f) { return a + (b[f] || 0); }, 0); };
+      var akt = function (id) { return id === y.aktiv && !y.ferdig ? ' aktiv' : ''; };
+      var rad = function (t, kl, celle) { return '<div class="tvyz-rad' + (kl ? ' ' + kl : '') + '" style="' + cols + '"><span>' + t + '</span>' + ider.map(celle).join('') + '</div>'; };
+      var felt = function (x) { return rad(x[1], '', function (id) { var v = (y.blokker[id] || {})[x[0]]; return '<span class="tvyz-c' + akt(id) + (nyF && sf.id === id && sf.f === x[0] ? ' skriv' : '') + '">' + (v == null ? '' : v === 0 ? '–' : v) + '</span>'; }); };
+      var sum = function (t, kl, fn) { return rad(t, 'sum' + (kl ? ' ' + kl : ''), function (id) { return '<span class="tvyz-c' + akt(id) + '">' + fn(y.blokker[id] || {}, id) + '</span>'; }); };
+      return '<div class="tvyz-blokk"><div class="tvyz-rad hode" style="' + cols + '"><span>Yatzy</span>' + ider.map(function (id) { return '<span class="tvyz-c' + akt(id) + '">' + esc(navn(id)) + '</span>'; }).join('') + '</div>' +
+        TVYZF.slice(0, 6).map(felt).join('') + sum('Sum', '', function (b) { return ov(b); }) + sum('Bonus', 'bonus', function (b) { return ov(b) >= 63 ? 50 : ''; }) +
+        TVYZF.slice(6).map(felt).join('') + sum('Total', 'total', function (b, id) { return (y.summer || {})[id] || 0; }) + '</div>';
+    }
+    function yzScene(d, s) {
+      var y = s.yz, hode = function (chip) { return '<div class="tvnr-hode"><p class="tv-etikett">' + T('Drikke-Yatzy', 'Drinking Yahtzee') + '</p><span class="tvlh-chip">' + chip + '</span></div>'; };
+      if (y.ferdig) {
+        var fe = y.ferdig;
+        return '<div class="tv-scene tvyz"><div class="tvyz-v">' + hode(esc(fe[0].navn) + T(' vant!', ' won!')) + '<h1 class="tv-sporsmal">' + esc(fe[0].navn) + ' · ' + fe[0].sum + T(' poeng', ' points') + '</h1>' +
+          '<p class="tvyz-lapp rod">' + esc(fe[fe.length - 1].navn) + T(' tapte og drikker opp', ' lost and finishes their drink') + '</p>' +
+          '<p class="tv-stor">' + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</p></div>' + tvYzBlokk(y) + '</div>';
+      }
+      var nytt = y.kast > 0 && !tvYzSett['k' + y.nr]; if (y.kast > 0) tvYzSett['k' + y.nr] = 1;
+      var forr = tvYzHold && tvYzHold.nr === y.nr ? tvYzHold.hold : null, dr = y.drikk && y.drikk.nr === y.nr && y.kast > 0 ? y.drikk : null;
+      var pos = function (i, h) { return h ? [4 + i * 15, 6, 0] : TV_YZ_HVILE[i]; };
+      var holdt = y.terninger.map(function (_, i) { return !!y.hold[i] && y.kast > 0; });
+      var terninger = y.terninger.map(function (v, i) {
+        var h = holdt[i], p = pos(i, h), kl = '', ekstra = '';
+        if (nytt && !(y.hold[i] && y.kast > 1)) kl = ' trill';
+        else if (forr && forr[i] !== h) { var q = pos(i, !h); kl = ' flytt'; ekstra = ';--fx:' + q[0] + ';--fy:' + q[1] + ';--fr:' + q[2]; }
+        if (dr && dr.ener && v === 1) kl += ' ring';
+        if (h) kl += ' holdt';
+        return '<span class="tvyz-terning' + kl + (y.kast ? '' : ' borte') + '" style="--x:' + p[0] + ';--y:' + p[1] + ';--r:' + p[2] + ';--f:' + i * 50 + 'ms' + ekstra + '">' + tvYzT(v) + '</span>';
+      }).join('');
+      tvYzHold = { nr: y.nr, hold: holdt };
+      var han = esc(navn(y.aktiv)), lapp = '';
+      if (dr && (dr.yatzy || dr.fire || dr.ener)) {
+        var deler = [];
+        if (dr.yatzy) deler.push('YATZY! ' + han + T(' deler ut 5 – eller en shot', ' hands out 5 – or a shot'));
+        else if (dr.fire) deler.push(T('Fire like – ', 'Four of a kind – ') + han + T(' drikker ', ' drinks ') + dr.fire);
+        if (dr.ener) deler.push(T('Ener i kastet – ', 'A one in the roll – ') + han + T(' drikker 2', ' drinks 2'));
+        lapp = '<p class="tvyz-lapp ' + (dr.yatzy ? 'gull' : 'rod') + (nytt ? ' inn' : '') + '">' + deler.join(' · ') + '</p>';
+      } else if (!y.kast && y.sistFelt) {
+        var sf = y.sistFelt, sv = (y.blokker[sf.id] || {})[sf.f], fn = (TVYZF.find(function (x) { return x[0] === sf.f; }) || [0, sf.f])[1];
+        lapp = '<p class="tvyz-lapp">' + esc(navn(sf.id)) + (sf.stroket ? T(' fikk ', ' had ') + fn + T(' strøket', ' scratched') : T(' førte ', ' scored ') + sv + T(' på ', ' in ') + fn) + '</p>';
+      }
+      var krus = dr && dr.yatzy ? '<div class="tvyz-krus' + (nytt ? ' inn' : '') + '"><svg viewBox="0 0 300 110" aria-hidden="true"><path d="M20 70 C60 20 110 18 150 50 C190 82 250 80 284 30" stroke-width="6"/><path d="M30 90 C90 70 200 100 270 76" stroke-width="4"/></svg><b>YATZY!</b></div>' : '';
+      var prikker = '<span class="tvyz-prikker">' + [0, 1, 2].map(function (i) { return '<i' + (i < y.kast ? ' class="paa"' : '') + '></i>'; }).join('') + '</span>';
+      return '<div class="tv-scene tvyz"><div class="tvyz-v">' + hode(y.kast ? han + T(' · kast ', ' · roll ') + y.kast : han + T(' rister begeret', ' shakes the cup')) +
+        '<div class="tvyz-brett"><span class="tvyz-kant"></span>' + prikker + terninger +
+        '<svg class="tvyz-beger' + (nytt ? ' rist' : '') + '" viewBox="0 0 78 96" aria-hidden="true"><path d="M8 8 H70 L62 90 H16 Z" class="kropp"/><path d="M8 8 H70" class="kant"/><path d="M12 26 H66 M14 72 H64" class="baand"/><path d="M24 36 L22 64" class="glans"/></svg>' + krus + '</div>' +
+        '<div class="tvyz-lapprad">' + lapp + '</div></div>' + tvYzBlokk(y) + '</div>';
+    }
+    /* ---------- Pyramiden: spotlyset på kortet, lagte kort med baksiden opp ---------- */
+    var tvPySett = {}, tvPyAvsl = null, tvPyAvslTil = 0, tvPySistPos = 0;
+    function tvPyKort(k, kl) {
+      if (!k) return '<span class="tvpy-kort bak' + (kl ? ' ' + kl : '') + '"></span>';
+      var rod = k.f === '♥' || k.f === '♦';
+      return '<span class="tvpy-kort' + (rod ? ' rod' : '') + (kl ? ' ' + kl : '') + '"><b>' + tvOuVn(k.v) + '</b><i>' + k.f + '</i></span>';
+    }
+    function pyScene(d, s) {
+      var p = s.py, naaI = p.pos - 1, rad = naaI < 5 ? 1 : naaI < 9 ? 2 : naaI < 12 ? 3 : naaI < 14 ? 4 : 5, past = p.pastander || [];
+      if (p.pos < tvPySistPos) tvPySett = {};
+      tvPySistPos = p.pos;
+      var RADER = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
+      var pyr = '<div class="tvpy-pyr">' + RADER.map(function (r, ri) {
+        return '<div><em' + (5 - ri === rad && !p.ferdig ? ' class="naa"' : '') + '>' + (5 - ri) + '</em>' + r.map(function (i) {
+          if (i >= p.pos) return tvPyKort(null, '');
+          var er = i === naaI && !p.ferdig, ny = er && tvPySett.start && !tvPySett['k' + i];
+          var lagt = er ? past.map(function (c, j) {
+            var nk = 'l' + i + c.id, nyL = !tvPySett[nk]; tvPySett[nk] = 1;
+            return '<span class="tvpy-lagt' + (nyL ? ' inn' : '') + (c.kort ? ' apen' : '') + '" style="--j:' + j + '">' + (c.kort ? tvPyKort(c.kort, 'lagt') : '<span class="tvpy-kort bak lagt"></span>') + tvHode(d, c.id, 'tvpy-h') +
+              (c.avgjort === 'sant' || c.avgjort === 'bløff' ? '<em class="' + (c.avgjort === 'sant' ? 'sant' : 'bloff') + '">' + (c.avgjort === 'sant' ? T('Sant', 'True') : T('Bløff', 'Bluff')) + '</em>' : '') + '</span>';
+          }).join('') : '';
+          return '<span class="tvpy-plass' + (er ? ' naa' : '') + '">' + tvPyKort(p.pyr[i], ny ? 'snu' : '') + lagt + '</span>';
+        }).join('') + '</div>'; }).join('') + '</div>';
+      for (var q = 0; q < p.pos; q++) tvPySett['k' + q] = 1;
+      var av = p.avsl;
+      if (av && !tvPySett['a' + av.nr]) { tvPySett['a' + av.nr] = 1; if (tvPySett.start) { tvPyAvsl = av; tvPyAvslTil = Date.now() + 3000; setTimeout(tegn, 3100); } }
+      tvPySett.start = 1;
+      var avsl = tvPyAvsl && Date.now() < tvPyAvslTil ? '<div class="tvpy-avsl"><span class="tvpy-avsl-kort">' + tvPyKort(tvPyAvsl.kort, 'stor') + '<em class="' + (tvPyAvsl.sant ? 'sant' : 'bloff') + '">' + (tvPyAvsl.sant ? T('Sant', 'True') : T('Bløff', 'Bluff')) + '</em></span>' +
+        '<span class="tvpy-avsl-tekst"><small>' + esc(navn(tvPyAvsl.av)) + T(' ropte løgn på ', ' called out ') + esc(navn(tvPyAvsl.id)) + '</small><b>' +
+        (tvPyAvsl.sant ? esc(navn(tvPyAvsl.id)) + T(' hadde den. ', ' had it. ') + esc(navn(tvPyAvsl.av)) + T(' drikker ', ' drinks ') : esc(navn(tvPyAvsl.id)) + T(' bløffet! Drikker ', ' bluffed! Drinks ')) + tvPyAvsl.n + '.</b></span></div>' : '';
+      var ider = p.ider || [];
+      var bord = '<p class="tvpy-etikett">' + T('Ved bordet', 'At the table') + '</p><div class="tvpy-folk">' + ider.map(function (id) {
+        var n = (p.antall || {})[id] || 0, bak = ''; for (var k = 0; k < n; k++) bak += '<i></i>';
+        return '<div>' + tvHode(d, id, 'tvpy-h') + '<b>' + esc(navn(id)) + '</b><span>' + (p.ferdig && p.fasit ? (p.fasit[id] || []).map(function (k) { return tvPyKort(k, 'mini'); }).join('') : bak) + '</span></div>'; }).join('') + '</div>';
+      var topp = '<div class="tvpy-topp"><span>' + T('Pyramiden', 'The pyramid') + '</span>' + (p.ferdig ? '' : '<small>' + (15 - p.pos) + T(' kort igjen', ' cards left') + '</small>') + '</div>' +
+        '<b class="tvpy-tittel">' + (p.ferdig ? T('Toppen er snudd', 'The top is flipped') : T('Rad ', 'Row ') + rad + T(' · del ut ', ' · hand out ') + rad) + '</b>';
+      var hoyre;
+      if (p.ferdig) {
+        var lurt = p.lurt || {}, best = Object.keys(lurt).sort(function (a, b) { return lurt[b] - lurt[a]; })[0];
+        hoyre = '<div class="tvpy-slutt"><p class="tvpy-etikett">' + T('Største bløffer', 'Biggest bluffer') + '</p><b>' + (best ? esc(navn(best)) : T('Ingen – for ærlige folk!', 'Nobody – too honest!')) + '</b>' +
+          (best ? '<small>' + lurt[best] + (lurt[best] === 1 ? T(' bløff', ' bluff') : T(' bløffer', ' bluffs')) + T(' uten å bli tatt', ' without getting caught') + '</small>' : '') + '</div>' + bord +
+          '<p class="tvpy-vent">' + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</p>';
+      } else {
+        var vindu = Math.max(0, Math.min(p.vindu, Date.now() + tvAvvik - p.snuddVed));
+        var logg = past.length ? past.map(function (c) {
+          return '<li>' + esc(navn(c.id)) + T(' la på et kort – deler ut ', ' laid a card – hands out ') + c.rad + (c.av ? '<b class="' + (c.avgjort === 'sant' ? 'sant' : 'bloff') + '"> · ' + esc(navn(c.av)) + ': ' + T('LØGN!', 'LIAR!') + ' ' + (c.avgjort === 'sant' ? T('Sant', 'True') : T('Bløff', 'Bluff')) + '</b>' : '') + '</li>'; }).join('')
+          : '<li class="tom">' + T('Ingen har lagt på ennå …', 'Nobody has laid a card yet …') + '</li>';
+        hoyre = bord + '<div class="tvpy-vindu"><i style="animation-duration:' + p.vindu + 'ms;animation-delay:-' + vindu + 'ms"></i></div><ul class="tvpy-logg">' + logg + '</ul>';
+      }
+      return '<div class="tv-scene tvpy' + (p.ferdig ? ' ferdig' : '') + '"><div class="tvpy-v">' + topp + pyr + '</div><div class="tvpy-h-kol">' + hoyre + '</div>' + avsl + '</div>';
+    }
     function lhScene(d, s) {
       var han = esc(navn(s.aktiv)), vk = s.aktiv + ':' + s.runde, avsl = s.fase === 'avslort' && s.resultat;
       var tavle = (s.lurtTavle || []).length ? '<ol class="tvlh-tavle" aria-label="' + T('Flest lurt', 'Most fooled') + '">' + s.lurtTavle.slice(0, 3).map(function (x, i) {
@@ -1226,6 +1335,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (s.type === 'skal' && s.sos) return skScene(d, s);
       if (s.type === 'bloff' && s.sos) return bfScene(d, s);
       if (s.type === 'bussruta' && s.br) return brScene(d, s);
+      if (s.type === 'yatzy' && s.yz) return yzScene(d, s);
+      if (s.type === 'pyramiden' && s.py) return pyScene(d, s);
       if (s.type === 'veddelopet' && s.vl) return vlScene(d, s);
       if (s.type === 'regelfabrikken' && s.rf) return rfScene(d, s.rf);
       if (s.offentlig && (s.offentlig.tekst || (s.offentlig.valg && s.offentlig.valg.length))) {
@@ -2178,6 +2289,113 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvbr-hender.liten{grid-template-columns:repeat(2,minmax(0,1fr))}
     .tvbr-hender.liten>div{flex-direction:row;justify-content:space-between;align-items:center}
     .tvbr-hender.liten span{font-size:1.6vw;font-weight:900;color:#D9D2C7}
+    /* ---------- Drikke-Yatzy på TV-en ---------- */
+    .tv-scene.tvyz{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,30vw);gap:2.6vw;width:100%;align-self:stretch;align-items:start}
+    .tvyz-v{display:flex;flex-direction:column;gap:1.6vh;min-width:0}
+    .tvyz-brett{container-type:size;position:relative;height:50vh;box-sizing:border-box;border:5px solid #16120F;border-radius:22px;background:radial-gradient(120% 90% at 40% 60%,#2C7A4E 0%,#1E5C3A 70%,#174A2F 100%);box-shadow:inset 0 0 0 12px #8A5A2B,inset 0 0 0 16px #16120F,6px 6px 0 #000;overflow:hidden}
+    .tvyz-kant{position:absolute;left:3cqw;right:3cqw;top:4cqh;height:34cqh;border-radius:12px;background:rgba(0,0,0,.18);border:3px dashed rgba(255,248,238,.28)}
+    .tvyz-prikker{position:absolute;left:3.5cqw;bottom:5cqh;display:flex;gap:.6vw}
+    .tvyz-prikker i{display:block;width:1.3vw;height:1.3vw;box-sizing:border-box;border-radius:.3vw;border:4px solid #FFF8EE}.tvyz-prikker i.paa{background:#FFF8EE}
+    .tvyz-terning{position:absolute;left:0;top:0;transform:translate(calc(var(--x) * 1cqw),calc(var(--y) * 1cqh)) rotate(calc(var(--r) * 1deg))}
+    .tvyz-terning.borte{visibility:hidden}
+    .tvyz-terning.trill{animation:tvyzTrill 600ms cubic-bezier(.23,1,.32,1) both;animation-delay:calc(260ms + var(--f))}
+    @keyframes tvyzTrill{from{transform:translate(78cqw,70cqh) rotate(240deg) scale(.9);opacity:0}}
+    .tvyz-terning.flytt{animation:tvyzFlytt 260ms cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvyzFlytt{from{transform:translate(calc(var(--fx) * 1cqw),calc(var(--fy) * 1cqh)) rotate(calc(var(--fr) * 1deg))}}
+    .tvyz-t{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);place-items:center;box-sizing:border-box;width:min(12cqw,27cqh);height:min(12cqw,27cqh);padding:16%;gap:4%;border-radius:18%;background:#FFFDF6;border:4px solid #16120F;box-shadow:5px 5px 0 #0E2E1D}
+    .tvyz-t i{width:70%;height:70%;border-radius:50%}.tvyz-t i.p{background:#16120F}.tvyz-t.en i.p{background:#D7263D}
+    .tvyz-terning.holdt .tvyz-t{box-shadow:0 0 0 5px #FFD23F,5px 5px 0 #0E2E1D}
+    .tvyz-terning.ring .tvyz-t{box-shadow:0 0 0 7px #D7263D,5px 5px 0 #0E2E1D}
+    .tvyz-beger{position:absolute;right:3cqw;bottom:5cqh;width:14cqw;height:auto;max-height:50cqh;transform-origin:50% 90%}
+    .tvyz-beger .kropp{fill:#6B3A1E;stroke:#16120F;stroke-width:3;stroke-linejoin:round}.tvyz-beger .kant{stroke:#16120F;stroke-width:7;stroke-linecap:round}.tvyz-beger .baand{stroke:#C8924A;stroke-width:4;fill:none}.tvyz-beger .glans{stroke:#8E5330;stroke-width:5;stroke-linecap:round}
+    .tvyz-beger.rist{animation:tvyzRist 420ms ease-in-out}
+    @keyframes tvyzRist{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg) translateY(-6px)}45%{transform:rotate(8deg)}70%{transform:rotate(-6deg) translateY(-3px)}}
+    .tvyz-krus{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+    .tvyz-krus svg{position:absolute;left:6%;top:24%;width:84%}.tvyz-krus path{fill:none;stroke:#FFD23F;stroke-linecap:round}
+    .tvyz-krus b{position:relative;font-family:'Fraunces Variable',Georgia,serif;font-style:italic;font-weight:700;font-size:8vw;color:#FFF8EE;text-shadow:6px 6px 0 #16120F}
+    .tvyz-krus.inn path{stroke-dasharray:900;animation:tvyzKrus 1000ms cubic-bezier(.23,1,.32,1) both;animation-delay:760ms}
+    .tvyz-krus.inn b{animation:tvyzKrusB 320ms cubic-bezier(.23,1,.32,1) both;animation-delay:760ms}
+    @keyframes tvyzKrus{from{stroke-dashoffset:900}}@keyframes tvyzKrusB{from{transform:scale(.9);opacity:0}}
+    .tvyz-lapprad{min-height:6vh}
+    .tvyz-lapp{display:inline-block;margin:0;padding:.6vh 1.2vw;font-weight:900;font-size:1.5vw;color:#16120F;background:#FFF8EE;border:4px solid #16120F;box-shadow:5px 5px 0 #000;transform:rotate(-2deg)}
+    .tvyz-lapp.rod{background:#D7263D;color:#FFF8EE}.tvyz-lapp.gull{background:#FFD23F}
+    .tvyz-lapp.inn{animation:tvyzLapp 280ms cubic-bezier(.23,1,.32,1) both;animation-delay:620ms}
+    @keyframes tvyzLapp{from{transform:translateY(-12px) rotate(-3deg);opacity:0}}
+    .tvyz-blokk{border:4px solid #16120F;border-radius:4px;background:#FBFAF4;box-shadow:6px 6px 0 #000;overflow:hidden;color:#16120F}
+    .tvyz-rad{display:grid;height:3.55vh;align-items:center;border-bottom:1px solid #B9C3CF;font-size:1.15vw}
+    .tvyz-rad>span:first-child{padding-left:.7vw;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tvyz-rad.hode{height:4.4vh;background:#16120F;color:#FFF8EE;font-weight:900;text-transform:uppercase;letter-spacing:.04em;border:0}
+    .tvyz-rad.hode .tvyz-c{font:inherit;color:inherit;display:block;line-height:4.4vh;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 .2vw;border-left-color:#3A3940}
+    .tvyz-rad.hode .tvyz-c.aktiv{background:#FFD23F;color:#16120F}
+    .tvyz-c{height:100%;display:grid;place-items:center;border-left:1px solid #B9C3CF;font-family:'Fraunces Variable',Georgia,serif;font-style:italic;font-weight:500;font-size:1.45vw;color:#3A3D44;min-width:0}
+    .tvyz-c.aktiv{background:#FFF6D2}
+    .tvyz-c.skriv{animation:tvyzSkriv 380ms cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvyzSkriv{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+    .tvyz-rad.sum{background:#EEF1F4}.tvyz-rad.sum>span:first-child{font-weight:900}.tvyz-rad.sum .tvyz-c{font-weight:700}
+    .tvyz-rad.bonus{border-bottom:3px solid #16120F}
+    .tvyz-rad.total{height:4.4vh;border-top:3px solid #16120F;border-bottom:0}.tvyz-rad.total .tvyz-c{font-size:1.8vw}
+    /* ---------- Pyramiden på TV-en ---------- */
+    .tv-scene.tvpy{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,24vw);gap:2.6vw;width:100%;align-self:stretch;align-items:start;padding:2.4vh 2.4vw;box-sizing:border-box;border-radius:24px;background:radial-gradient(70% 70% at 36% 46%,#5A1B26 0%,#34101A 50%,#160809 100%);color:#F4EBDD;overflow:hidden}
+    .tvpy-v{display:flex;flex-direction:column;min-width:0}
+    .tvpy-topp{display:flex;align-items:baseline;justify-content:space-between}
+    .tvpy-topp span{font-size:1.1vw;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#C9A24A}
+    .tvpy-topp small{font-family:'Fraunces Variable',Georgia,serif;font-style:italic;font-size:1.3vw;color:#C9A24A}
+    .tvpy-tittel{font-family:'Fraunces Variable',Georgia,serif;font-size:4vw;font-weight:900;line-height:1}
+    .tvpy-pyr{display:flex;flex-direction:column;align-items:center;gap:1.2vh;padding:2.6vh 0 1vh}
+    .tvpy-pyr>div{position:relative;display:flex;gap:.8vw}
+    .tvpy-pyr em{position:absolute;left:-3.6vw;top:2.2vh;font-family:'Fraunces Variable',Georgia,serif;font-style:normal;font-weight:900;font-size:1.8vw;color:rgba(201,162,74,.35)}
+    .tvpy-pyr em.naa{color:#C9A24A}
+    .tvpy-kort{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-sizing:border-box;width:4.4vw;height:6.1vw;max-height:10.5vh;border-radius:9px;font-weight:900;background:#F4EBDD;color:#1A0A0E;border:2px solid #1A0A0E}
+    .tvpy-kort.rod{color:#B3192E}
+    .tvpy-kort b{font-size:1.5vw;line-height:1}.tvpy-kort i{font-style:normal;font-size:1.8vw;line-height:1}
+    .tvpy-kort.bak{background:repeating-linear-gradient(45deg,transparent 0 7px,rgba(201,162,74,.32) 7px 8px),repeating-linear-gradient(-45deg,transparent 0 7px,rgba(201,162,74,.32) 7px 8px),#2A0A12;border-color:rgba(201,162,74,.45)}
+    .tvpy-pyr .tvpy-plass>.tvpy-kort:not(.bak){opacity:.5}
+    .tvpy-plass{position:relative;border-radius:9px}
+    .tvpy-plass.naa{box-shadow:0 0 0 4px #C9A24A,0 0 70px 24px rgba(255,214,140,.32)}
+    .tvpy-pyr .tvpy-plass.naa>.tvpy-kort{opacity:1}
+    .tvpy-kort.snu{animation:tvpySnu 420ms cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvpySnu{from{transform:rotateY(90deg)}}
+    .tvpy-lagt{position:absolute;left:calc(2.4vw + var(--j) * 2vw);top:calc(-1.4vh + var(--j) * .8vh);z-index:2;transform:rotate(calc(10deg + var(--j) * 8deg))}
+    .tvpy-lagt .tvpy-kort{box-shadow:0 10px 20px rgba(0,0,0,.5)}
+    .tvpy-lagt .tvpy-kort.bak{border-color:#C9A24A;background-color:#2A0A12}
+    .tvpy-lagt .tvnr-h{position:absolute;left:50%;top:50%;width:2.6vw;height:2.6vw;margin:-1.3vw 0 0 -1.3vw}
+    .tvpy-lagt.apen .tvnr-h{top:100%}
+    .tvpy-lagt em{position:absolute;left:-.6vw;top:30%;padding:.2vh .5vw;border:3px solid;border-radius:6px;font-style:normal;font-weight:900;font-size:1.1vw;text-transform:uppercase;background:rgba(26,10,14,.85);transform:rotate(-14deg)}
+    .tvpy-lagt em.sant{color:#C9A24A}.tvpy-lagt em.bloff{color:#FF4A5E}
+    .tvpy-lagt.inn{animation:tvpyLegg 420ms cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvpyLegg{from{transform:translate(16vw,10vh) rotate(30deg);opacity:0}}
+    .tvpy-h-kol{display:flex;flex-direction:column;gap:1.4vh;padding-top:1vh;min-width:0}
+    .tvpy-etikett{margin:0;font-size:1vw;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#C9A24A}
+    .tvpy-folk{display:flex;flex-direction:column;gap:1.2vh}
+    .tvpy-folk>div{display:flex;align-items:center;gap:.8vw}
+    .tvpy-folk .tvnr-h{width:3vw;height:3vw;flex:none}
+    .tvpy-folk b{flex:1;font-size:1.6vw;font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .tvpy-folk span{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+    .tvpy-folk span i{display:block;width:1vw;height:1.45vw;border-radius:3px;border:1.5px solid #C9A24A;background:#2A0A12}
+    .tvpy-kort.mini{width:2.5vw;height:3.5vw;border-radius:5px;border-width:1.5px}.tvpy-kort.mini b{font-size:1.05vw}.tvpy-kort.mini i{font-size:1.2vw}
+    .tvpy.ferdig .tvpy-pyr .tvpy-plass>.tvpy-kort{opacity:1}
+    .tvpy-vindu{height:5px;border-radius:3px;background:rgba(201,162,74,.22);overflow:hidden;margin-top:1vh}
+    .tvpy-vindu i{display:block;height:100%;background:#C9A24A;transform-origin:left;animation-name:tvpyVindu;animation-timing-function:linear;animation-fill-mode:both}
+    @keyframes tvpyVindu{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+    .tvpy-logg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.9vh;font-size:1.35vw;font-weight:700}
+    .tvpy-logg li.tom{font-family:'Fraunces Variable',Georgia,serif;font-style:italic;font-weight:500;color:#D9CBB5}
+    .tvpy-logg b.bloff{color:#FF6B7C}.tvpy-logg b.sant{color:#C9A24A}
+    .tvpy-slutt{display:flex;flex-direction:column;gap:.4vh}
+    .tvpy-slutt b{font-family:'Fraunces Variable',Georgia,serif;font-size:3.4vw;font-weight:900;line-height:1}
+    .tvpy-slutt small{font-size:1.2vw;color:#D9CBB5}
+    .tvpy-vent{margin:1vh 0 0;font-size:1.3vw;font-weight:800;color:#D9CBB5}
+    .tvpy-avsl{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;gap:4vw;background:rgba(16,6,9,.88);animation:tvpyFade 200ms ease-out both}
+    @keyframes tvpyFade{from{opacity:0}}
+    .tvpy-avsl-kort{position:relative;perspective:900px}
+    .tvpy-kort.stor{width:15vw;height:21vw;max-height:none;border-radius:20px;border-width:4px;box-shadow:0 0 120px 20px rgba(255,214,140,.22);animation:tvpySnu 420ms cubic-bezier(.23,1,.32,1) both}
+    .tvpy-kort.stor b{font-size:3.4vw}.tvpy-kort.stor i{font-size:7vw}
+    .tvpy-avsl-kort em{position:absolute;left:-2.6vw;bottom:3vw;padding:.6vh 1.4vw;border:6px solid;border-radius:12px;font-style:normal;font-weight:900;font-size:4.4vw;font-stretch:70%;text-transform:uppercase;background:rgba(26,10,14,.75);transform:rotate(-8deg);animation:tvpyStempel 320ms cubic-bezier(.23,1,.32,1) both;animation-delay:380ms}
+    .tvpy-avsl-kort em.sant{color:#C9A24A}.tvpy-avsl-kort em.bloff{color:#FF4A5E}
+    @keyframes tvpyStempel{from{transform:scale(1.3) rotate(-14deg);opacity:0}}
+    .tvpy-avsl-tekst{display:flex;flex-direction:column;gap:1.4vh;max-width:34vw}
+    .tvpy-avsl-tekst small{font-size:1.4vw;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#C9A24A}
+    .tvpy-avsl-tekst b{font-family:'Fraunces Variable',Georgia,serif;font-size:4vw;font-weight:900;line-height:1.02}
+    @media (prefers-reduced-motion:reduce){.tvyz-terning.trill,.tvyz-terning.flytt,.tvyz-beger.rist,.tvyz-krus.inn path,.tvyz-krus.inn b,.tvyz-lapp.inn,.tvpy-kort.snu,.tvpy-lagt.inn,.tvpy-avsl-kort em,.tvpy-kort.stor{animation:none}.tvyz-c.skriv{animation:tvpyFade 200ms ease both}}
     .tvbr-pyr-rad{display:flex;gap:3vw;align-items:center}
     .tvbr-pyramide{display:flex;flex-direction:column-reverse;align-items:center;gap:.8vw;flex:none}
     .tvbr-pyramide>div{display:flex;gap:.8vw}

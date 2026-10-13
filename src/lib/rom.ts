@@ -248,6 +248,8 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     if (s.type === 'bingo') spill.bingoTv = bingoOffentlig(s, data);
     if (s.type === 'overunder') spill.ou = ekstraVisning(s, null, data);
     if (s.type === 'bussruta') spill.br = ekstraVisning(s, null, data);
+    if (s.type === 'yatzy') spill.yz = ekstraVisning(s, null, data);
+    if (s.type === 'pyramiden') spill.py = ekstraVisning(s, null, data);
     if (s.type === 'en') spill.en = enVisning(s, data, lang);
     if (s.type === 'veddelopet') spill.vl = ekstraVisning(s, null, data);
     if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
@@ -1976,6 +1978,8 @@ function rfMottakere(data: any, k: any, trekker: string | null): string[] {
   if (k.til === 'to') return stokk(ider.slice()).slice(0, 2);
   return ider.includes(k.til) ? [k.til] : [];
 }
+const PY_VINDU = 10000;
+function pyRad(pos: number) { return pos < 5 ? 1 : pos < 9 ? 2 : pos < 12 ? 3 : pos < 14 ? 4 : 5; }
 export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
 export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '🫡'];
 type EkstraInfo = [id: string, navnNo: string, navnEn: string, omNo: string, omEn: string];
@@ -2049,7 +2053,8 @@ export function startEkstra(data: any, lek: string, modus = ''): any {
     if (n < 2) return feilL('for-faa', 'Pyramiden trenger minst to spillere.', 'Pyramid needs at least two players.');
     const st = kortstokk52();
     const hender: any = {}; ider.forEach((id: string) => { hender[id] = st.splice(0, 4); });
-    data.spill = { type: 'pyramiden', lek, navn: EKSTRA_NAVN.pyramiden, hender, pyr: st.splice(0, 15), pos: 0, pastander: [] };
+    // Første kort snus med en gang; vertens telefon snur resten, ett hvert tiende sekund
+    data.spill = { type: 'pyramiden', lek, navn: EKSTRA_NAVN.pyramiden, hender, pyr: st.splice(0, 15), pos: 1, snuddVed: Date.now(), pastander: [], lurt: {}, tatt: {}, avsl: null, n: 0, ferdig: false };
   } else if (lek === 'gris') {
     if (n < 3) return feilL('for-faa', 'Gris trenger minst tre spillere.', 'Pig needs at least three players.');
     data.spill = { type: 'gris', lek, navn: EKSTRA_NAVN.gris, bokstaver: {} };
@@ -2323,33 +2328,43 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
     }
     case 'pyramiden': {
       if (h.handling === 'snu') {
-        if (s.pos >= 15) return { ok: true };
-        // Påstander fra forrige kort som ikke ble utfordret, gjelder nå: kortet legges på
+        // Bare vertens telefon snur – ett kort hvert tiende sekund. Påstander ingen ropte løgn på, står.
+        if (meg.id !== data.vert || s.ferdig) return { ok: true };
+        if (Date.now() - (s.snuddVed || 0) < PY_VINDU - 600) return { ok: true };
         s.pastander.filter((p: any) => p.pos === s.pos - 1 && !p.avgjort).forEach((p: any) => {
-          const hand = s.hender[p.id] || []; const i = hand.findIndex((k: any) => k.v === s.pyr[p.pos].v);
-          if (i !== -1) hand.splice(i, 1); p.avgjort = 'godtatt';
+          p.avgjort = 'godtatt'; if (p.kort.v !== s.pyr[p.pos].v) s.lurt[p.id] = (s.lurt[p.id] || 0) + 1;
         });
-        s.pos++; return { ok: true };
+        if (s.pos >= 15) { s.ferdig = true; melde(data, 'Toppen er snudd! Hendene vises.', 'The top is flipped! Hands are shown.'); return { ok: true }; }
+        s.pos++; s.snuddVed = Date.now(); return { ok: true };
       }
-      if (h.handling === 'pastand') {
-        if (!s.hender[meg.id]) return { feil: 'ikke-med', melding: 'Du kom inn midt i runden – du er med fra neste.', en: 'You joined mid-round – you’re in from the next one.' };
-        if (s.pos < 1) return { ok: true };
+      if (h.handling === 'py-legg') {
+        if (s.ferdig || s.pos < 1) return { ok: true };
+        const hand = s.hender[meg.id];
+        if (!hand) return { feil: 'ikke-med', melding: 'Du kom inn midt i runden – du er med fra neste.', en: 'You joined mid-round – you’re in from the next one.' };
         const pos = s.pos - 1;
         if (s.pastander.some((p: any) => p.pos === pos && p.id === meg.id)) return { ok: true };
-        const rad = pos < 5 ? 1 : pos < 9 ? 2 : pos < 12 ? 3 : pos < 14 ? 4 : 5;
-        s.pastander.push({ id: meg.id, pos, rad, avgjort: null });
-        melde(data, `${meg.navn} sier de har ${vnavn(s.pyr[pos].v)} – deler ut ${rad}!`, `${meg.navn} says they have ${vnavnEn(s.pyr[pos].v)} – giving out ${rad}!`);
+        const i = Number(h.i); if (!(i >= 0 && i < hand.length)) return { feil: 'ukjent' };
+        const kort = hand.splice(i, 1)[0], rad = pyRad(pos);
+        s.pastander.push({ id: meg.id, pos, rad, kort, avgjort: null, av: null });
+        giUtdeling(data, meg.id, rad);
+        melde(data, `${meg.navn} la på et kort – deler ut ${rad}!`, `${meg.navn} laid a card – giving out ${rad}!`);
         return { ok: true };
       }
       if (h.handling === 'utfordre') {
         const p = s.pastander.find((x: any) => x.id === h.paa && x.pos === s.pos - 1 && !x.avgjort);
-        if (!p || p.id === meg.id) return { ok: true };
-        const hand = s.hender[p.id] || [], i = hand.findIndex((k: any) => k.v === s.pyr[p.pos].v);
-        if (i !== -1) { hand.splice(i, 1); giSlurker(data, meg.id, p.rad * 2); p.avgjort = 'sant'; melde(data, `${navnPaa(data, p.id)} hadde kortet! ${meg.navn} drikker ${p.rad * 2}.`, `${navnPaa(data, p.id)} had the card! ${meg.navn} drinks ${p.rad * 2}.`); }
-        else { giSlurker(data, p.id, p.rad * 2); p.avgjort = 'bløff'; melde(data, `${navnPaa(data, p.id)} bløffet! Drikk ${p.rad * 2}.`, `${navnPaa(data, p.id)} was bluffing! Drink ${p.rad * 2}.`); }
+        if (!p || p.id === meg.id || s.ferdig) return { ok: true };
+        const sant = p.kort.v === s.pyr[p.pos].v, n = p.rad * 2;
+        p.av = meg.id; p.avgjort = sant ? 'sant' : 'bløff';
+        if (sant) { giSlurker(data, meg.id, n); melde(data, `${navnPaa(data, p.id)} hadde kortet! ${meg.navn} drikker ${n}.`, `${navnPaa(data, p.id)} had the card! ${meg.navn} drinks ${n}.`); }
+        else {
+          // Tatt i bløff: kortet går tilbake på hånda, og du drikker dobbelt
+          giSlurker(data, p.id, n); (s.hender[p.id] = s.hender[p.id] || []).push(p.kort); s.tatt[p.id] = (s.tatt[p.id] || 0) + 1;
+          melde(data, `${navnPaa(data, p.id)} bløffet! Drikk ${n}.`, `${navnPaa(data, p.id)} was bluffing! Drink ${n}.`);
+        }
+        s.n = (s.n || 0) + 1; s.avsl = { id: p.id, av: meg.id, kort: p.kort, sant, n, nr: s.n };
         return { ok: true };
       }
-      if (h.handling === 'nytt') return startEkstra(data, 'pyramiden');
+      if (h.handling === 'nytt' || h.handling === 'runde') { if (meg.id !== data.vert) return { feil: 'bare-vert' }; return startEkstra(data, 'pyramiden'); }
       return null;
     }
     case 'gris': {
@@ -2481,9 +2496,13 @@ export function ekstraVisning(s: any, meg: any, data: any) {
     drukket: s.drukket || {}, storst: s.storst || null, ferdig: !!s.ferdig, runde: s.runde || 1, ider };
   if (s.type === 'veddelopet') return { fase: s.fase, pos: s.pos, sist: s.sist, vinner: s.vinner, bane: s.bane.map((k: any, i: number) => (s.snudd[i] ? k : null)),
     veddemaal: s.veddemaal, mittVeddemaal: meg ? s.veddemaal[meg.id] || null : null, n: s.n || 0, runde: s.runde || 1, snudd: s.snudd || [] };
-  if (s.type === 'pyramiden') return { pos: s.pos, pyr: s.pyr.slice(0, s.pos), minHand: meg ? s.hender[meg.id] : null,
-    antall: Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h.length])),
-    pastander: s.pastander.filter((p: any) => p.pos === s.pos - 1).map((p: any) => ({ id: p.id, rad: p.rad, avgjort: p.avgjort })) };
+  if (s.type === 'pyramiden') return { pos: s.pos, pyr: s.pyr.slice(0, s.pos), minHand: meg ? s.hender[meg.id] || null : null,
+    antall: Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h.length])), ider: Object.keys(s.hender),
+    // Et kort som ligger med baksiden opp, ser bare den som la det – til noen roper løgn
+    pastander: s.pastander.filter((p: any) => p.pos === s.pos - 1).map((p: any) => ({ id: p.id, rad: p.rad, avgjort: p.avgjort, av: p.av || null,
+      kort: (p.avgjort === 'sant' || p.avgjort === 'bløff' || (meg && p.id === meg.id)) ? p.kort : null })),
+    snuddVed: s.snuddVed || 0, vindu: PY_VINDU, avsl: s.avsl || null, ferdig: !!s.ferdig, lurt: s.lurt || {}, tatt: s.tatt || {},
+    fasit: s.ferdig ? s.hender : null };
   if (s.type === 'gris') return { fase: s.fase, minHand: meg ? s.hender[meg.id] : null, harValgt: Object.keys(s.valgt), mittValg: meg ? s.valgt[meg.id] ?? null : null,
     neser: s.neser, bokstaver: s.bokstaver, taper: s.taper || null, harFire: meg ? fireLike(s.hender[meg.id] || []) : false,
     fasit: s.fase === 'ferdig' ? Object.fromEntries(Object.entries(s.hender).map(([id, h]: any) => [id, h])) : null };
@@ -2538,6 +2557,7 @@ export function startEgen(data: any, kort: any, navn: any) {
 const BR_SPM = [L('Rød eller svart?', 'Red or black?'), L('Over eller under forrige kort?', 'Higher or lower than the last card?'), L('Innenfor eller utenfor de to første?', 'Inside or outside the first two?'), L('Hvilken kortfarge?', 'Which suit?')];
 function brTrekk(s: any) { if (!s.stokk.length) s.stokk = kortstokk52(); return s.stokk.pop(); }
 function brRad(i: number) { return i < 5 ? 1 : i < 9 ? 2 : i < 12 ? 3 : i < 14 ? 4 : 5; }
+const YZ_SOMLE = 60000;
 const YZ_FELT = ['1', '2', '3', '4', '5', '6', 'p', 'pp', '3l', '4l', 'ls', 'ss', 'hus', 'sj', 'y'];
 function yzTell(t: number[]) { const c = [0, 0, 0, 0, 0, 0, 0]; t.forEach((x) => c[x]++); return c; }
 function yzPoeng(f: string, t: number[]) {
@@ -2643,7 +2663,7 @@ function startNye(data: any, lek: string, modus: string, ider: string[]): any {
   }
   if (lek === 'yatzy') {
     const blokker: any = {}; ider.forEach((id) => { blokker[id] = {}; });
-    data.spill = { type: 'yatzy', lek, navn: EKSTRA_NAVN.yatzy, ider: ider.slice(), tur: 0, terninger: [1, 2, 3, 4, 5], hold: [false, false, false, false, false], kast: 0, nr: 0, blokker, melding: '', ferdig: null };
+    data.spill = { type: 'yatzy', lek, navn: EKSTRA_NAVN.yatzy, ider: ider.slice(), tur: 0, terninger: [1, 2, 3, 4, 5], hold: [false, false, false, false, false], kast: 0, nr: 0, blokker, melding: '', ferdig: null, trekkVed: Date.now(), drikk: null, sistFelt: null, fNr: 0 };
     melde(data, 'Nytt spill: Drikke-Yatzy', 'New game: Drinking Yahtzee'); return { ok: true };
   }
   if (lek === 'nyhetsrunden') {
@@ -2732,9 +2752,10 @@ function nyeHandling(data: any, meg: any, h: any): any {
       s.terninger = s.terninger.map((t: number, i: number) => (s.hold[i] && s.kast ? t : 1 + tilfeldig(6)));
       s.kast++; s.nr++;
       const c = yzTell(s.terninger), deler: string[] = [], delerEn: string[] = [];
+      s.drikk = { ener: c[1] > 0, fire: 0, yatzy: c.some((x) => x === 5), nr: s.nr };
       if (c[1] > 0) { giSlurker(data, aktiv, 2); deler.push('Ener i kastet – drikk 2.'); delerEn.push('A one in the roll – drink 2.'); }
       if (c.some((x) => x === 5)) { giUtdeling(data, aktiv, 5); deler.push('YATZY! Del ut 5 – eller en shot.'); delerEn.push('YAHTZEE! Give out 5 – or a shot.'); }
-      else if (c.some((x) => x >= 4)) { const sum = s.terninger.reduce((a: number, b: number) => a + b, 0); giSlurker(data, aktiv, sum); deler.push('Fire like – drikk ' + sum + ' slurker.'); delerEn.push('Four of a kind – drink ' + sum + ' sips.'); }
+      else if (c.some((x) => x >= 4)) { const sum = s.terninger.reduce((a: number, b: number) => a + b, 0); giSlurker(data, aktiv, sum); s.drikk.fire = sum; deler.push('Fire like – drikk ' + sum + ' slurker.'); delerEn.push('Four of a kind – drink ' + sum + ' sips.'); }
       s.melding = L(deler.join(' ') || (s.kast < 3 ? 'Hold og trill igjen, eller velg et felt.' : 'Velg et felt.'),
         delerEn.join(' ') || (s.kast < 3 ? 'Hold and roll again, or pick a box.' : 'Pick a box.'));
       return { ok: true };
@@ -2744,11 +2765,14 @@ function nyeHandling(data: any, meg: any, h: any): any {
       const i = Number(h.i); if (i >= 0 && i < 5) s.hold[i] = !s.hold[i];
       return { ok: true };
     }
-    if (h.handling === 'yz-felt') {
-      if (!kanStyre || !s.kast || s.ferdig) return { ok: true };
-      const f = String(h.f || ''), b = s.blokker[aktiv];
+    // Verten kan stryke et felt for den som somler (etter ett minutt uten trekk)
+    const stryk = h.handling === 'yz-stryk' && erVert && !s.ferdig && Date.now() - (s.trekkVed || 0) >= YZ_SOMLE;
+    if (h.handling === 'yz-felt' || stryk) {
+      if (!stryk && (!kanStyre || !s.kast || s.ferdig)) return { ok: true };
+      const b = s.blokker[aktiv], f = stryk ? YZ_FELT.find((x) => b[x] == null) || '' : String(h.f || '');
       if (!YZ_FELT.includes(f) || b[f] != null) return { ok: true };
-      b[f] = yzPoeng(f, s.terninger);
+      b[f] = stryk ? 0 : yzPoeng(f, s.terninger);
+      s.fNr = (s.fNr || 0) + 1; s.sistFelt = { id: aktiv, f, nr: s.fNr, stroket: stryk }; s.trekkVed = Date.now(); s.drikk = null;
       s.tur = (s.tur + 1) % s.ider.length; s.kast = 0; s.hold = [false, false, false, false, false]; s.melding = '';
       if (s.ider.every((id: string) => YZ_FELT.every((x) => s.blokker[id][x] != null))) {
         const liste = s.ider.map((id: string) => ({ id, navn: navnPaa(data, id), sum: yzSum(s.blokker[id]) })).sort((a: any, c: any) => c.sum - a.sum);
@@ -2758,7 +2782,7 @@ function nyeHandling(data: any, meg: any, h: any): any {
       }
       return { ok: true };
     }
-    if (h.handling === 'nytt') { if (!erVert) return { feil: 'bare-vert' }; return startNye(data, 'yatzy', '', aktiveIder(data, true)); }
+    if (h.handling === 'nytt' || h.handling === 'runde') { if (!erVert) return { feil: 'bare-vert' }; return startNye(data, 'yatzy', '', aktiveIder(data, true)); }
     return null;
   }
   if (s.type === 'nyhetsrunden') {
@@ -2814,7 +2838,8 @@ function nyeVisning(s: any, meg: any, data: any) {
     n: s.n || 0, sistSvar: s.sistSvar || null, treff: s.treff || null, bussSist: s.bussSist || null, ferdig: !!s.ferdig };
   if (s.type === 'yatzy') return { aktiv: s.ider[s.tur], ider: s.ider, terninger: s.terninger, hold: s.hold, kast: s.kast, nr: s.nr, melding: s.melding, ferdig: s.ferdig,
     blokker: s.blokker, summer: Object.fromEntries(s.ider.map((id: string) => [id, yzSum(s.blokker[id])])),
-    mulige: s.kast ? Object.fromEntries(YZ_FELT.map((f) => [f, yzPoeng(f, s.terninger)])) : null };
+    mulige: s.kast ? Object.fromEntries(YZ_FELT.map((f) => [f, yzPoeng(f, s.terninger)])) : null,
+    trekkVed: s.trekkVed || 0, somle: YZ_SOMLE, drikk: s.drikk || null, sistFelt: s.sistFelt || null };
   if (s.type === 'nyhetsrunden') {
     const q = s.sporsmal[s.i] || s.sporsmal[s.sporsmal.length - 1], aapen = s.fase === 'svar' || s.fase === 'ferdig';
     const liste = data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, riktige: s.riktige[p.id] || 0 })).sort((a: any, b: any) => b.riktige - a.riktige);
