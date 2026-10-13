@@ -1157,6 +1157,63 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       return '<div class="tv-scene tvpy' + (p.ferdig ? ' ferdig' : '') + '"><div class="tvpy-v">' + topp + pyr + '</div><div class="tvpy-h-kol">' + hoyre + '</div>' + avsl + '</div>';
     }
+    /* ---------- Gris på TV-en: fjøsveggen, trynet og brettene ---------- */
+    var tvGrSett = {};
+    function grScene(d, s) {
+      var g = s.gr, ider = g.ider || [], start = !!tvGrSett.start, naa = Date.now() + tvAvvik, ord = T('GRIS', 'PIGS');
+      var bk = 'k' + g.runde + ':' + g.byttNr, nyBytt = start && g.byttNr > 0 && !tvGrSett[bk]; tvGrSett[bk] = 1;
+      var folk = ider.map(function (id, i) {
+        var klar = g.fase === 'send' ? (g.harValgt || []).indexOf(id) !== -1 : g.neser.indexOf(id) !== -1, nr = g.neser.indexOf(id);
+        var status = g.fase === 'send' ? (klar ? T('Valgt', 'Picked') : '') : nr !== -1 ? T('Nr ', 'No. ') + (nr + 1) : (g.taper === id && g.fase !== 'nese' ? T('Sist!', 'Last!') : '');
+        var kort = ''; for (var j = 0; j < 4; j++) kort += '<i class="' + (nyBytt && j === 3 ? 'bytt' : '') + (klar && j === 3 && g.fase === 'send' ? ' opp' : '') + '" style="--j:' + j + ';--f:' + i * 60 + 'ms"></i>';
+        return '<div class="tvgr-p' + (g.taper === id && g.fase !== 'send' ? ' taper' : '') + '"><span class="tvgr-kort">' + kort + '</span><span class="tvgr-navn">' + tvHode(d, id, '') + '<b>' + esc(navn(id)) + '</b>' + (status ? '<em>' + status + '</em>' : '') + '</span></div>';
+      }).join('');
+      var brett = ider.map(function (id) {
+        var n = (g.bokstaver || {})[id] || 0, nk = 'b' + id + ':' + n, ny = start && n && !tvGrSett[nk]; tvGrSett[nk] = 1;
+        return '<div class="tvgr-brett' + (g.taper === id && g.fase !== 'send' ? ' taper' : '') + '"><b>' + esc(navn(id)) + '</b><span>' + ord.split('').map(function (t, j) { return '<i class="' + (j < n ? 'paa' : '') + (ny && j === n - 1 ? ' mal' : '') + '">' + t + '</i>'; }).join('') + '</span></div>';
+      }).join('');
+      tvGrSett.start = 1;
+      var rekke = g.neser.length ? '<ol class="tvgr-rekke">' + g.neser.map(function (id) { return '<li>' + esc(navn(id)) + '</li>'; }).join('') + (g.taper && g.fase !== 'nese' ? '<li class="sist">' + esc(navn(g.taper)) + T(' – sist', ' – last') + '</li>' : '') + '</ol>' : '';
+      var chip = g.fase === 'slutt' ? esc(navn(g.gris)) + T(' er GRIS!', ' is the PIG!') : g.fase === 'send' ? (g.harValgt || []).length + T(' av ', ' of ') + ider.length + T(' har valgt', ' have picked')
+        : g.fase === 'nese' ? T('NESA!', 'NOSE!') : g.taper ? esc(navn(g.taper)) + T(' var sist!', ' was last!') : T('Alle rakk nesa', 'Everyone made it');
+      var halm = '';
+      if (g.fase === 'send' || g.fase === 'nese') { var l = g.fase === 'send' ? g.vinduer.bytt : g.vinduer.nese, ved = g.fase === 'send' ? g.sendVed : g.neseVed; halm = '<div class="tvgr-halm' + (g.fase === 'nese' ? ' nese' : '') + '"><i style="animation-duration:' + l + 'ms;animation-delay:-' + Math.max(0, Math.min(l, naa - ved)) + 'ms"></i></div>'; }
+      var midt = g.fase === 'slutt' ? '<div class="tvgr-slutt"><b>' + T('GRIS!', 'PIGS!') + '</b><span>' + esc(navn(g.gris)) + T(' tar en shot', ' takes a shot') + '</span><small>' + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</small></div>'
+        : '<span class="tvgr-tryne' + (g.fase === 'nese' ? ' pust' : '') + '"><i></i><i></i></span>';
+      return '<div class="tv-scene tvgr' + (g.fase === 'nese' ? ' nese' : '') + '"><div class="tvgr-v"><div class="tvnr-hode"><p class="tv-etikett">' + T('Gris · runde ', 'Pigs · round ') + g.runde + '</p><span class="tvlh-chip' + (g.fase === 'nese' ? ' rosa' : '') + '">' + chip + '</span></div>' + halm +
+        '<div class="tvgr-fjos"><div class="tvgr-folk">' + folk + '</div>' + midt + '</div></div><div class="tvgr-h"><p class="tv-etikett">' + T('Brettene', 'The boards') + '</p>' + brett + rekke + '</div></div>';
+    }
+    /* ---------- President på TV-en: bordet og trappa ---------- */
+    var tvPrSett = {}, tvPrForrige = [];
+    var TV_PR_FARGER = ['#FFD23F', '#63E2A8', '#7CC6FE', '#C9B3FF', '#FF9CC2', '#FFB38A'];
+    function tvPrPlass(i, n) { return i === 0 ? 'President' : i === n - 1 ? T('Rævkjører', 'Scumbag') : n > 3 && i === 1 ? T('Visepresident', 'Vice President') : n > 3 && i === n - 2 ? T('Viserævkjører', 'Vice Scumbag') : T('Folket', 'People'); }
+    function prScene(d, s) {
+      var p = s.pr, ider = p.ider || [], n = ider.length, start = !!tvPrSett.start, naa = Date.now() + tvAvvik, ferdig = p.fase === 'ferdig';
+      var trapp = '<div class="tvpr-trapp" style="--n:' + n + '">' + ider.map(function (_, i) {
+        var plass = n - 1 - i, hvem = p.ferdige[plass], hk = 'f' + p.runde + ':' + hvem, ny = hvem && start && !tvPrSett[hk]; if (hvem) tvPrSett[hk] = 1;
+        return '<div style="--i:' + i + ';--f:' + TV_PR_FARGER[Math.min(plass, TV_PR_FARGER.length - 1)] + '"' + (plass === 0 ? ' class="topp"' : '') + '><small>' + tvPrPlass(plass, n) + '</small>' + (hvem ? '<span class="tvpr-paa' + (ny ? ' hopp' : '') + '">' + tvHode(d, hvem, '') + '</span>' : '') + '</div>';
+      }).join('') + '</div>';
+      var folk = '<div class="tvpr-folk">' + ider.map(function (id) {
+        var ute = p.ferdige.indexOf(id) !== -1, tur = p.tur === id && !ferdig, dr = ferdig && p.drikk ? (p.drikk.drikker || []).find(function (x) { return x.id === id; }) : null;
+        var merk = ferdig ? (p.ferdige[0] === id ? T('Deler ut ', 'Hands out ') + p.drikk.deler : dr ? T('Drikker ', 'Drinks ') + dr.n : '') : ute ? T('ute', 'out') : p.pass.indexOf(id) !== -1 ? 'pass' : tur ? T('tur', 'to play') : '';
+        var ring = tur ? ' style="animation-duration:' + p.turTid + 'ms;animation-delay:-' + Math.max(0, Math.min(p.turTid, naa - p.turVed)) + 'ms"' : '';
+        return '<div class="' + (tur ? 'tur' : '') + (ute && !ferdig ? ' ute' : '') + '"><span class="tvpr-ring"' + ring + '>' + tvHode(d, id, '') + '</span><b>' + esc(navn(id)) + '</b>' + (merk ? '<em>' + merk + '</em>' : '') + '<span class="tvpr-ant">' + (ferdig ? '' : (p.antall[id] || 0)) + '</span></div>';
+      }).join('') + '</div>';
+      var lk = 'l' + p.runde + ':' + p.leggNr, nyLegg = start && p.leggNr && !tvPrSett[lk]; tvPrSett[lk] = 1;
+      var fk = 'e' + p.runde + ':' + p.feiNr, nyFei = start && p.feiNr && !tvPrSett[fk]; tvPrSett[fk] = 1;
+      var bunke = p.bord.length ? p.bord : (nyFei ? tvPrForrige : []), bn = bunke.length;
+      if (p.bord.length) tvPrForrige = p.bord.slice();
+      tvPrSett.start = 1;
+      var x = p.sist, tekst = ferdig ? esc(navn(p.ferdige[0])) + T(' er President!', ' is President!') : !p.bord.length ? T('Bordet er tomt – ', 'The table is empty – ') + esc(navn(p.tur)) + T(' starter', ' starts')
+        : x ? (x.pass ? esc(navn(x.id)) + T(' passer', ' passes') : esc(navn(x.id)) + T(' la ', ' played ') + x.kort.length + ' × ' + tvOuVn(x.kort[0].v)) : '';
+      var bord = '<div class="tvpr-bord"><span class="tvpr-bord-t">' + tekst + '</span><div class="tvpr-bunke' + (!p.bord.length && nyFei ? ' fei' : '') + '">' + bunke.map(function (k, i) {
+        var rod = k.f === '♥' || k.f === '♦';
+        return '<span class="tvpr-kort' + (rod ? ' rod' : '') + (p.bord.length && nyLegg ? ' smell' : '') + '" style="--r:' + ((i - (bn - 1) / 2) * 12 + (p.leggNr % 3 - 1) * 4) + 'deg;--x:' + ((i - (bn - 1) / 2) * 4.4) + 'vw"><b>' + tvOuVn(k.v) + '</b><i>' + k.f + '</i></span>';
+      }).join('') + '</div>' + (p.bytte && !p.sist && !ferdig ? '<p class="tvpr-bytte">' + esc(navn(p.bytte.fra)) + T(' ga ', ' gave ') + tvOuVn(p.bytte.kort.v) + p.bytte.kort.f + T(' til ', ' to ') + esc(navn(p.bytte.til)) + '</p>' : '') +
+        (ferdig ? '<p class="tvpr-bytte">' + esc(navn(d.vert)) + T(' velger: neste runde eller neste lek.', ' picks: next round or the next game.') + '</p>' : '') + '</div>';
+      var chip = ferdig ? T('Runden er over', 'Round over') : esc(navn(p.tur)) + T(' har tur', ' to play');
+      return '<div class="tv-scene tvpr"><div class="tvpr-v"><div class="tvnr-hode"><p class="tv-etikett">' + T('President · runde ', 'President · round ') + p.runde + '</p><span class="tvlh-chip">' + chip + '</span></div>' + bord + '</div><div class="tvpr-h">' + trapp + folk + '</div></div>';
+    }
     function lhScene(d, s) {
       var han = esc(navn(s.aktiv)), vk = s.aktiv + ':' + s.runde, avsl = s.fase === 'avslort' && s.resultat;
       var tavle = (s.lurtTavle || []).length ? '<ol class="tvlh-tavle" aria-label="' + T('Flest lurt', 'Most fooled') + '">' + s.lurtTavle.slice(0, 3).map(function (x, i) {
@@ -1337,6 +1394,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (s.type === 'bussruta' && s.br) return brScene(d, s);
       if (s.type === 'yatzy' && s.yz) return yzScene(d, s);
       if (s.type === 'pyramiden' && s.py) return pyScene(d, s);
+      if (s.type === 'gris' && s.gr) return grScene(d, s);
+      if (s.type === 'president' && s.pr) return prScene(d, s);
       if (s.type === 'veddelopet' && s.vl) return vlScene(d, s);
       if (s.type === 'regelfabrikken' && s.rf) return rfScene(d, s.rf);
       if (s.offentlig && (s.offentlig.tekst || (s.offentlig.valg && s.offentlig.valg.length))) {
@@ -2396,6 +2455,83 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvpy-avsl-tekst small{font-size:1.4vw;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#C9A24A}
     .tvpy-avsl-tekst b{font-family:'Fraunces Variable',Georgia,serif;font-size:4vw;font-weight:900;line-height:1.02}
     @media (prefers-reduced-motion:reduce){.tvyz-terning.trill,.tvyz-terning.flytt,.tvyz-beger.rist,.tvyz-krus.inn path,.tvyz-krus.inn b,.tvyz-lapp.inn,.tvpy-kort.snu,.tvpy-lagt.inn,.tvpy-avsl-kort em,.tvpy-kort.stor{animation:none}.tvyz-c.skriv{animation:tvpyFade 200ms ease both}}
+    /* ---------- Gris på TV-en ---------- */
+    .tv-scene.tvgr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,24vw);gap:2.6vw;width:100%;align-self:stretch;align-items:start}
+    .tvgr-v{display:flex;flex-direction:column;gap:1.6vh;min-width:0}
+    .tvgr-halm{height:8px;border-radius:4px;background:rgba(246,231,184,.2);overflow:hidden}
+    .tvgr-halm i{display:block;height:100%;background:#F6E7B8;transform-origin:left;animation-name:tvgrHalm;animation-timing-function:linear;animation-fill-mode:both}
+    .tvgr-halm.nese i{background:#F07A95}
+    @keyframes tvgrHalm{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+    .tvgr-fjos{position:relative;min-height:58vh;box-sizing:border-box;padding:3vh 3vw;border-radius:24px;background:#F6E7B8;background-image:repeating-linear-gradient(100deg,rgba(178,120,40,.12) 0 3px,transparent 3px 12px);border:5px solid #16120F;box-shadow:8px 8px 0 #000;color:#2B1A12;display:grid;place-items:center;transition:background-color 200ms ease-out}
+    .tvgr.nese .tvgr-fjos{background-color:#FCE3E9}
+    .tvgr-folk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6vh 15vw;width:100%}
+    .tvgr-p{display:flex;flex-direction:column;align-items:center;gap:1.2vh}
+    .tvgr-kort{display:flex;gap:.4vw;height:6.4vw;align-items:flex-end}
+    .tvgr-kort i{display:block;width:3.4vw;height:4.8vw;border-radius:7px;border:3px solid #2B1A12;background:repeating-linear-gradient(45deg,#F07A95 0 7px,#E2627F 7px 14px);transform:rotate(calc((var(--j) - 1.5) * 6deg));transition:transform 220ms cubic-bezier(.23,1,.32,1)}
+    .tvgr-kort i.opp{transform:rotate(calc((var(--j) - 1.5) * 6deg)) translateY(-1vw)}
+    .tvgr-kort i.bytt{animation:tvgrBytt 700ms cubic-bezier(.77,0,.175,1) both;animation-delay:var(--f)}
+    @keyframes tvgrBytt{from{transform:translateX(16vw) rotate(14deg)}}
+    .tvgr-navn{display:flex;align-items:center;gap:.8vw}
+    .tvgr-navn .tvnr-h{width:3.4vw;height:3.4vw}
+    .tvgr-navn b{font-size:1.9vw;font-weight:900}
+    .tvgr-navn em{padding:.2vh .7vw;font-style:normal;font-size:1.2vw;font-weight:900;text-transform:uppercase;background:#FFF4DE;border:3px solid #2B1A12}
+    .tvgr-p.taper .tvgr-navn em{background:#B23A2E;color:#FFF4DE}
+    .tvgr-tryne{position:absolute;left:50%;top:50%;width:11vw;height:7.8vw;margin:-3.9vw 0 0 -5.5vw;display:flex;align-items:center;justify-content:center;gap:1.4vw;border-radius:50%;background:#F4B9C6;border:5px solid #2B1A12;box-shadow:6px 6px 0 #2B1A12;opacity:.55}
+    .tvgr-tryne i{display:block;width:1.8vw;height:2.5vw;border-radius:50%;background:#7A2E3E}
+    .tvgr-tryne i:first-child{transform:rotate(-12deg)}.tvgr-tryne i:last-child{transform:rotate(12deg)}
+    .tvgr-tryne.pust{opacity:1;background:#F07A95;animation:tvgrPust 900ms ease-in-out infinite;box-shadow:6px 6px 0 #2B1A12,0 0 0 16px rgba(240,122,149,.35)}
+    @keyframes tvgrPust{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .tvgr-slutt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1vh;background:rgba(178,58,46,.94);color:#FFF4DE;border-radius:18px;text-align:center}
+    .tvgr-slutt b{font-family:var(--display);font-size:11vw;font-weight:900;font-stretch:62%;line-height:.85}
+    .tvgr-slutt span{font-size:2.6vw;font-weight:900}.tvgr-slutt small{font-size:1.3vw;font-weight:800}
+    .tvgr-h{display:flex;flex-direction:column;gap:1.4vh}
+    .tvgr-brett{display:flex;align-items:center;gap:1vw;padding:1.2vh 1vw;background:#5E3A22;background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.12) 0 2px,transparent 2px 14px);border:4px solid #16120F;box-shadow:5px 5px 0 #000}
+    .tvgr-brett.taper{outline:4px solid #F07A95}
+    .tvgr-brett b{width:7vw;font-size:1.6vw;font-weight:900;color:#F6E7B8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .tvgr-brett span{display:flex;gap:.5vw}
+    .tvgr-brett i{display:grid;place-items:center;box-sizing:border-box;width:2.9vw;height:3.3vw;font-style:normal;font-weight:900;font-size:2vw;border-radius:5px;color:rgba(246,231,184,.25);border:2px dashed rgba(246,231,184,.35)}
+    .tvgr-brett i.paa{background:#F6E7B8;color:#B23A2E;border:0}
+    .tvgr-brett i.mal{animation:tvgrMal 480ms cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvgrMal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+    .tvgr-rekke{margin:1vh 0 0;padding:1.4vh 1.4vw 1.4vh 3vw;background:#F6E7B8;color:#2B1A12;border:4px solid #16120F;box-shadow:5px 5px 0 #000;font-size:1.5vw;font-weight:800}
+    .tvgr-rekke li.sist{color:#B23A2E;font-weight:900}
+    /* ---------- President på TV-en ---------- */
+    .tv-scene.tvpr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,30vw);gap:2.6vw;width:100%;align-self:stretch;align-items:start}
+    .tvpr-v{display:flex;flex-direction:column;gap:1.6vh;min-width:0}
+    .tvpr-bord{position:relative;height:60vh;border-radius:24px;background:#3A3940;border:5px solid #FFF8EE;box-shadow:8px 8px 0 #000;overflow:hidden}
+    .tvpr-bord-t{position:absolute;left:1.6vw;right:1.6vw;top:2vh;font-size:1.8vw;font-weight:900;color:#FFD23F}
+    .tvpr-bunke{position:absolute;left:50%;top:55%;width:0;height:0}
+    .tvpr-kort{position:absolute;left:calc(-4.4vw + var(--x));top:-6.2vw;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;width:8.8vw;height:12.4vw;padding:1vw;border-radius:14px;font-weight:900;background:#FFFFFF;color:#16120F;border:4px solid #16120F;box-shadow:6px 6px 0 #000;transform:rotate(var(--r))}
+    .tvpr-kort.rod{color:#D7263D}
+    .tvpr-kort b{align-self:flex-start;font-size:2.8vw;line-height:1}.tvpr-kort i{margin:auto 0;font-style:normal;font-size:4.4vw;line-height:1}
+    .tvpr-kort.smell{animation:tvprSmell 340ms cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvprSmell{from{transform:translateY(20vh) scale(1.2) rotate(var(--r));opacity:0}}
+    .tvpr-bunke.fei{animation:tvprFei 460ms cubic-bezier(.23,1,.32,1) forwards}
+    @keyframes tvprFei{to{transform:translateX(30vw) rotate(30deg);opacity:0}}
+    .tvpr-bytte{position:absolute;left:1.6vw;right:1.6vw;bottom:2vh;margin:0;padding:1vh 1vw;background:#FFD23F;color:#16120F;font-size:1.6vw;font-weight:900;text-align:center;border:4px solid #16120F}
+    .tvpr-h{display:flex;flex-direction:column;gap:2vh}
+    .tvpr-trapp{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));align-items:end;height:30vh;padding-top:7vh;box-sizing:border-box}
+    .tvpr-trapp>div{position:relative;height:calc(6vh + var(--i) * 16vh / max(1, var(--n) - 1));box-sizing:border-box;background:var(--f);border:4px solid #16120F;border-left-width:0;box-shadow:5px 5px 0 #000}
+    .tvpr-trapp>div:first-child{border-left-width:4px}
+    .tvpr-trapp small{position:absolute;left:0;right:0;bottom:.8vh;text-align:center;font-size:.85vw;font-weight:900;text-transform:uppercase;color:#16120F;white-space:nowrap;overflow:hidden}
+    .tvpr-paa{position:absolute;left:50%;top:-4.6vw;width:4vw;height:4vw;margin-left:-2vw}
+    .tvpr-paa .tvnr-h{width:4vw;height:4vw}
+    .tvpr-trapp>div.topp .tvpr-paa::before{content:'';position:absolute;left:.7vw;right:.7vw;top:-1vw;height:1vw;background:#FFD23F;clip-path:polygon(0 100%,0 0,25% 60%,50% 0,75% 60%,100% 0,100% 100%)}
+    .tvpr-paa.hopp{animation:tvprHopp 560ms cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvprHopp{0%{transform:translateY(6vh) scale(.9);opacity:0}60%{transform:translateY(-1.4vh);opacity:1}}
+    .tvpr-folk{display:flex;flex-direction:column;gap:1vh}
+    .tvpr-folk>div{display:flex;align-items:center;gap:.8vw;padding:.8vh 1vw;border-radius:14px;border:3px solid transparent}
+    .tvpr-folk>div.tur{background:#FFF8EE;color:#16120F;border-color:#16120F}
+    .tvpr-folk>div.ute{opacity:.45}
+    .tvpr-ring{display:grid;place-items:center;width:3.8vw;height:3.8vw;border-radius:50%;flex:none}
+    .tvpr-ring .tvnr-h{width:3.2vw;height:3.2vw}
+    .tvpr-folk>div.tur .tvpr-ring{background:conic-gradient(#16120F calc(var(--p) * 1%),rgba(22,18,15,.12) 0);animation-name:tvprRing;animation-timing-function:linear;animation-fill-mode:both}
+    @property --p{syntax:'<number>';inherits:false;initial-value:100}
+    @keyframes tvprRing{from{--p:100}to{--p:0}}
+    .tvpr-folk b{flex:1;font-size:1.7vw;font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .tvpr-folk em{padding:.2vh .6vw;font-style:normal;font-size:1.1vw;font-weight:900;text-transform:uppercase;background:#FFD23F;color:#16120F;border-radius:6px}
+    .tvpr-ant{width:3vw;text-align:right;font-family:var(--display);font-size:2vw;font-weight:900;font-stretch:70%}
+    @media (prefers-reduced-motion:reduce){.tvgr-kort i.bytt,.tvgr-brett i.mal,.tvpr-kort.smell,.tvpr-paa.hopp{animation:none}.tvgr-tryne.pust{animation:none}.tvpr-bunke.fei{animation:tvpyFade 200ms ease reverse forwards}}
     .tvbr-pyr-rad{display:flex;gap:3vw;align-items:center}
     .tvbr-pyramide{display:flex;flex-direction:column-reverse;align-items:center;gap:.8vw;flex:none}
     .tvbr-pyramide>div{display:flex;gap:.8vw}

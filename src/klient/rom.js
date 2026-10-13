@@ -950,8 +950,8 @@ export function startRom(LEKNAVN, LANG) {
     overunder: [['Den som har tur, gjetter om neste kort er over eller under. Verten kan trykke for den som ikke har telefonen oppe.', 'Whoever’s turn it is guesses if the next card is higher or lower. The host can tap for anyone without their phone out.'], ['Riktig: potten vokser med én slurk, og turen går videre.', 'Right: the pot grows by one sip and the turn moves on.'], ['Feil eller likt: du drikker hele potten. Når stokken er tom, er leken over.', 'Wrong or equal: you drink the whole pot. When the deck runs out, the game is over.']],
     veddelopet: [['Trykk på banen til hesten du tror vinner, og velg innsats.', 'Tap the lane of the horse you think wins and pick your stake.'], ['Når alle har veddet, går løpet av seg selv – ett kort i sekundet. Sidekortene sender en hest ett steg tilbake.', 'When everyone has bet, the race runs itself – one card a second. Side cards send a horse one step back.'], ['Vinnerne deler ut dobbelt – de andre drikker innsatsen.', 'The winners hand out double – everyone else drinks their stake.']],
     pyramiden: [['Fire kort med baksiden opp – hold fingeren på dem for å kikke. Pyramiden snus av seg selv, ett kort hvert tiende sekund.', 'Four face-down cards – hold your finger on them to peek. The pyramid flips by itself, one card every ten seconds.'], ['Legg et kort med baksiden opp på det som er snudd, og del ut radens slurker. Riktig verdi er sant, feil er bløff.', 'Lay a card face down on the flipped one and hand out the row’s sips. Same value is true, anything else is a bluff.'], ['Rop LØGN! Bløff = den som la på drikker dobbelt og får kortet tilbake. Sant = du drikker dobbelt. Ingen roper: kortet er borte.', 'Call LIAR! Bluff = they drink double and take the card back. True = you drink double. Nobody calls: the card is gone.']],
-    gris: [['Alle får fire kort. Send ett kort videre samtidig.', 'Everyone gets four cards. Pass one card on at the same time.'], ['Får noen fire like, tar hen seg på nesa – og alle må gjøre det samme.', 'When someone gets four of a kind, they touch their nose – and everyone must follow.'], ['Sistemann får en bokstav. G-R-I-S = ta en shot.', 'The last one gets a letter. P-I-G-S = take a shot.']],
-    president: [['Bli kvitt kortene dine først – legg likt eller høyere enn det som ligger.', 'Get rid of your cards first – play equal or higher than what’s on the table.'], ['Toere er høyest og rydder bordet.', 'Twos are highest and clear the table.'], ['Først ut blir president, sist ut blir rævkjører.', 'First out is President, last out is the Scumbag.']],
+    gris: [['Trykk på kortet du vil sende til venstre – 10 sekunder per bytte, ellers sendes kortet lengst til venstre.', 'Tap the card to pass left – 10 seconds per swap, or your leftmost card goes.'], ['Fire like? Trykk på trynet. Da har resten 5 sekunder – sistemann får en bokstav. For tidlig = bokstav.', 'Four of a kind? Tap the snout. The rest get 5 seconds – the last one gets a letter. Too early = a letter.'], ['Den som staver G-R-I-S først, er grisen og tar en shot.', 'The first to spell P-I-G-S is the pig and takes a shot.']],
+    president: [['Bli kvitt kortene først: legg like mange som ligger, men høyere. Toer er høyest og feier bordet.', 'Get rid of your cards first: play as many as lie there, but higher. Twos are highest and clear the table.'], ['20 sekunder per tur – ellers passes det for deg.', '20 seconds per turn – otherwise you pass.'], ['Rævkjøreren drikker 3, Viserævkjøreren 2, Presidenten deler ut 3. Neste runde gir Rævkjøreren sitt beste kort til Presidenten.', 'The Scumbag drinks 3, the Vice Scumbag 2, the President hands out 3. Next round the Scumbag gives their best card to the President.']],
     bingo: [['Alle får sitt eget bingobrett med sanger.', 'Everyone gets their own bingo card with songs.'], ['Spill spillelista og kryss av sangene du hører.', 'Play the playlist and mark the songs you hear.'], ['Rekke: del ut to slurker. Fullt brett: BINGO – alle andre drikker opp, og leken er ferdig.', 'A line: hand out two sips. Full card: BINGO – everyone else finishes their drink, and the game is over.']],
     pekeleken: [['Den som leser, leser kortet høyt og starter nedtellingen. Alle telefonene sier PEK! samtidig.', 'The reader reads the card out loud and starts the countdown. Every phone says POINT! at the same time.'], ['Pek på den det passer best på. Trykk inn hvor mange som pekte på deg.', 'Point at who it fits best. Then tap how many pointed at you.'], ['Flest fingre drikker like mange slurker. Av og til kommer en vri.', 'Most fingers drinks that many sips. Now and then there is a twist.']],
     nyhetsrunden: [['Spørsmålet dukker opp på alle telefonene – verten leser det høyt.', 'The question appears on every phone – the host reads it out loud.'], ['Svar før klokka går ut. Du kan bytte svar helt til svaret vises.', 'Answer before the clock runs out. You can change your answer until it is shown.'], ['Riktig: del ut én. Feil: drikk én. Tallspørsmål: den nærmest deler ut to, lengst unna drikker.', 'Right: hand out one. Wrong: drink one. Number questions: closest hands out two, furthest off drinks.']],
@@ -2420,36 +2420,154 @@ export function startRom(LEKNAVN, LANG) {
       '<div class="py-liste">' + (liste || '<p class="py-tom">' + T('Ingen har lagt på ennå. Har du en ', 'Nobody has laid a card yet. Got a ') + (naa ? (NAVN[naa.v] || naa.v) : '') + '?</p>') + '</div>' +
       handHtml + '</div>' + avsl;
   }
+  /* ---------- Gris: fjøset og trynet ----------
+     Halmgult og låverødt. Kortet du sender sklir ut til venstre, det nye kommer inn fra høyre. Det rosa trynet pulserer
+     når noen har fire like. Bokstavene males på brettet ditt én gang. Vertens telefon driver klokka (10 s per bytte,
+     5 s på nesa, 4 s pause) – ingen trenger å trykke «neste». */
+  var grSett = {}, grDriver = null;
+  function grDriv() {
+    if (grDriver) return;
+    grDriver = setInterval(function () {
+      var sp = tilstand && tilstand.spill;
+      if (!sp || sp.type !== 'gris' || sp.fase === 'slutt' || !erVert()) { clearInterval(grDriver); grDriver = null; return; }
+      if (document.hidden || !sp.vinduer) return;
+      var naa = Date.now() + klokkeAvvik, v = sp.vinduer;
+      if ((sp.fase === 'send' && naa - sp.sendVed >= v.bytt) || (sp.fase === 'nese' && naa - sp.neseVed >= v.nese) || (sp.fase === 'ferdig' && naa - sp.ferdigVed >= v.pause)) gjorAlltid({ handling: 'gr-tikk' });
+    }, 700);
+  }
+  function grKort(k, kl) {
+    var rod = k.f === '♥' || k.f === '♦';
+    return '<span class="gr-kort' + (rod ? ' rod' : '') + (kl ? ' ' + kl : '') + '"><b>' + vn(k.v) + '</b><i>' + k.f + '</i></span>';
+  }
+  function grBrett(s, id, start) {
+    var n = (s.bokstaver || {})[id] || 0, ord = T('GRIS', 'PIGS'), nk = 'b' + id + ':' + n, ny = start && n && !grSett[nk]; grSett[nk] = 1;
+    return '<span class="gr-bokst">' + ord.split('').map(function (t, j) { return '<i class="' + (j < n ? 'paa' : '') + (ny && j === n - 1 ? ' mal' : '') + '">' + t + '</i>'; }).join('') + '</span>';
+  }
   function grisSpill(s) {
-    var bok = function (id) { var n = s.bokstaver[id] || 0; return n ? T('GRIS', 'PIGS').slice(0, n) : '–'; };
-    var tavle = '<div class="rom-gris-tavle">' + tilstand.spillere.map(function (p) { return '<span>' + esc(p.navn) + ' <b>' + bok(p.id) + '</b></span>'; }).join('') + '</div>';
-    var nese = '<button class="rom-nese' + (s.fase === 'nese' ? ' blink' : '') + '" data-g="nese" type="button" aria-pressed="' + (s.neser.indexOf(tilstand.meg) !== -1) + '"><b>' + T('NESA!', 'NOSE!') + '</b><span>' + T('Trykk når noen har fire like', 'Tap when someone has four of a kind') + '</span></button>';
-    if (s.fase === 'ferdig') {
-      return tavle + '<p class="dl-melding dl-stor">' + esc(navn(s.taper)) + T(' var sist på nesa!', ' was last to the nose!') + '</p>' +
-        '<div class="dl-hender">' + Object.keys(s.fasit || {}).map(function (id) { return '<div><b>' + esc(navn(id)) + '</b><span>' + s.fasit[id].map(function (k) { return kk(k, 'mini'); }).join('') + '</span></div>'; }).join('') + '</div>' +
-        '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny runde', 'New round') + '</button>';
+    var meg = tilstand.meg, vert = erVert(), ider = s.ider || [], start = !!grSett.start;
+    if (vert && s.fase !== 'slutt') grDriv();
+    var naa = Date.now() + klokkeAvvik, tatt = s.neser.indexOf(meg) !== -1, valgt = s.mittValg != null;
+    var folk = '<div class="gr-folk">' + ider.map(function (id) {
+      var klar = s.fase === 'send' ? s.harValgt.indexOf(id) !== -1 : s.neser.indexOf(id) !== -1, nr = s.neser.indexOf(id);
+      var status = s.fase === 'send' ? (klar ? T('valgt', 'picked') : '') : nr !== -1 ? T('nr ', 'no. ') + (nr + 1) : ((s.fase === 'ferdig' || s.fase === 'slutt') && s.taper === id ? T('sist!', 'last!') : '');
+      return '<div class="' + (s.taper === id && s.fase !== 'send' ? 'taper' : '') + (klar ? ' klar' : '') + '">' + nrHode(id) + '<span><b>' + jaNavn(id) + '</b>' + grBrett(s, id, start) + '</span><small>' + status + '</small></div>';
+    }).join('') + '</div>';
+    grSett.start = 1;
+    if (s.fase === 'slutt') {
+      return jaTopp(T('Gris', 'Pigs'), jaNavn(s.gris) + T(' er GRIS!', ' is the PIG!'), true, false) +
+        '<div class="gr-slutt"><b>' + T('GRIS!', 'PIGS!') + '</b><span>' + jaNavn(s.gris) + T(' tar en shot.', ' takes a shot.') + '</span></div>' + folk +
+        lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye brett – teller i kvelden', 'New boards – counts tonight')]]);
     }
-    var hand = s.minHand || [];
-    return tavle + '<p class="rom-etikett">' + T('Din hånd – velg et kort å sende til venstre', 'Your hand – pick a card to pass left') + '</p>' +
-      '<div class="dl-hand gris">' + hand.map(function (k, i) { return '<button type="button" data-g="velg" data-i="' + i + '" aria-pressed="' + (s.mittValg === i) + '">' + kk(k) + '</button>'; }).join('') + '</div>' +
-      '<p class="rom-status">' + s.harValgt.length + T(' av ', ' of ') + tilstand.spillere.length + T(' har valgt', ' have picked') + (s.harFire ? ' · <b class="dl-hint">' + T('Du har fire like!', 'You have four of a kind!') + '</b>' : '') + '</p>' +
-      nese + '<p class="small">' + T('Tar du deg på nesa uten fire like, får du en bokstav.', 'Touch your nose without four of a kind and you get a letter.') + '</p>';
+    var halm = '';
+    if (s.fase === 'send' || s.fase === 'nese') {
+      var lengde = s.fase === 'send' ? s.vinduer.bytt : s.vinduer.nese, ved = s.fase === 'send' ? s.sendVed : s.neseVed;
+      halm = '<div class="gr-halm' + (s.fase === 'nese' ? ' nese' : '') + '" aria-hidden="true"><i style="animation-duration:' + lengde + 'ms;animation-delay:-' + Math.max(0, Math.min(lengde, naa - ved)) + 'ms"></i></div>';
+    }
+    var hand = s.minHand || [], bk = 'k' + s.runde + ':' + s.byttNr, nyBytt = start && s.byttNr > 0 && !grSett[bk]; grSett[bk] = 1;
+    var balle = !s.minHand ? '<p class="gr-hjelp">' + T('Du er med fra neste runde.', 'You’re in from the next round.') + '</p>' :
+      '<div class="gr-balle"><span class="gr-merke">' + (s.fase === 'send' ? (valgt ? T('Sendt!', 'Sent!') : T('Trykk på kortet du sender', 'Tap the card to pass')) : T('Hånda di', 'Your hand')) + '</span><div class="gr-hand">' +
+        hand.map(function (k, i) {
+          var kl = (valgt && s.mittValg === i ? ' ut' : '') + (nyBytt && i === 3 ? ' inn' : '') + (s.harFire && s.fase === 'send' ? ' fire' : '');
+          return '<button type="button" class="gr-hk' + kl + '" data-g="velg" data-i="' + i + '" style="--i:' + i + '"' + (s.fase !== 'send' || valgt ? ' disabled' : '') + ' aria-label="' + T('Send ', 'Pass ') + vn(k.v) + k.f + '">' + grKort(k) + '</button>';
+        }).join('') + '</div></div>';
+    var pust = (s.fase === 'nese' && !tatt) || (s.harFire && s.fase === 'send');
+    var tryne = '<button type="button" class="gr-tryne' + (pust ? ' pust' : '') + (s.fase === 'nese' || s.harFire ? ' paa' : '') + '" data-g="nese" aria-pressed="' + tatt + '" aria-label="' + T('Ta deg på nesa', 'Touch your nose') + '"' + (s.fase === 'ferdig' || tatt ? ' disabled' : '') + '><span><i></i><i></i></span></button>' +
+      '<b class="gr-tryne-t">' + (s.fase === 'nese' ? (tatt ? T('Tatt!', 'Got it!') : T('NESA!', 'NOSE!')) : T('Nesa', 'The nose')) + '</b>' +
+      '<p class="gr-hjelp">' + (s.fase === 'nese' ? (tatt ? T('Vent på de andre – sistemann får en bokstav.', 'Wait for the others – the last one gets a letter.') : T('Noen har fire like. Trykk før det er for sent!', 'Someone has four of a kind. Tap before it’s too late!'))
+        : s.fase === 'ferdig' ? T('Ny runde kommer straks …', 'A new round is coming …') : T('Har du fire like? Trykk. Trykker du for tidlig, får du en bokstav.', 'Four of a kind? Tap. Tap too early and you get a letter.')) + '</p>';
+    var bokst = function (id) { var n = Math.min(4, (s.bokstaver || {})[id] || 0); return T('GRIS', 'PIGS').slice(n - 1, n); };
+    var chip = s.fase === 'send' ? (s.harFire ? T('Fire like! Trykk på trynet', 'Four of a kind! Tap the snout') : valgt ? T('Venter på de andre …', 'Waiting for the others …') : T('Send et kort til venstre', 'Pass a card to the left'))
+      : s.fase === 'nese' ? (tatt ? T('Du var nr ', 'You were no. ') + (s.neser.indexOf(meg) + 1) : T('NESA! Fort!', 'NOSE! Quick!'))
+      : s.taper ? jaNavn(s.taper) + T(' var sist – ', ' was last – ') + bokst(s.taper) + '!' : T('Alle rakk nesa', 'Everyone made it');
+    return jaTopp(T('Gris · runde ', 'Pigs · round ') + s.runde, chip, s.fase === 'nese' && !tatt, false) +
+      '<div class="gr-fjos' + (s.fase === 'nese' ? ' nese' : '') + '">' + folk + halm + balle + '<div class="gr-tryne-boks">' + tryne + '</div></div>';
+  }
+  /* ---------- President: trappa ----------
+     Appens egne farger. Trappa øverst: den som går tom, hopper opp på sitt trinn. Kortene smelles ned på bordet og
+     feies av når ingen går over. 20 s per tur – vertens telefon passer for den som somler. */
+  var prSett = {}, prDriver = null, prForrigeBord = [];
+  var PR_FARGER = ['#FFD23F', '#63E2A8', '#7CC6FE', '#C9B3FF', '#FF9CC2', '#FFB38A'];
+  function prRang(v) { return v === 2 ? 15 : v; }
+  function prDriv() {
+    if (prDriver) return;
+    prDriver = setInterval(function () {
+      var sp = tilstand && tilstand.spill;
+      if (!sp || sp.type !== 'president' || sp.fase === 'ferdig' || !erVert()) { clearInterval(prDriver); prDriver = null; return; }
+      if (document.hidden) return;
+      if (Date.now() + klokkeAvvik - sp.turVed >= sp.turTid) gjorAlltid({ handling: 'pr-tikk' });
+    }, 1000);
+  }
+  function prKort(k, kl, stil) {
+    var rod = k.f === '♥' || k.f === '♦';
+    return '<span class="pr-kort' + (rod ? ' rod' : '') + (kl ? ' ' + kl : '') + '"' + (stil ? ' style="' + stil + '"' : '') + '><b>' + vn(k.v) + '</b><i>' + k.f + '</i></span>';
+  }
+  function prPlassNavn(i, n) {
+    if (i === 0) return T('President', 'President');
+    if (i === n - 1) return T('Rævkjører', 'Scumbag');
+    if (n > 3 && i === 1) return T('Visepres.', 'Vice pres.');
+    if (n > 3 && i === n - 2) return T('Vise-ræv', 'Vice scum');
+    return T('Folket', 'People');
+  }
+  function prTrapp(s, start) {
+    var ider = s.ider || [], n = ider.length;
+    return '<div class="pr-trapp" style="--n:' + n + '">' + ider.map(function (_, i) {
+      var plass = n - 1 - i, hvem = s.ferdige[plass], hk = 'f' + s.runde + ':' + hvem, ny = hvem && start && !prSett[hk]; if (hvem) prSett[hk] = 1;
+      return '<div style="--i:' + i + ';--f:' + PR_FARGER[Math.min(plass, PR_FARGER.length - 1)] + '"' + (plass === 0 ? ' class="topp"' : '') + '><small>' + prPlassNavn(plass, n) + '</small>' +
+        (hvem ? '<span class="pr-paa' + (ny ? ' hopp' : '') + '">' + nrHode(hvem) + '</span>' : '') + '</div>';
+    }).join('') + '</div>';
   }
   function presidentSpill(s) {
-    var jeg = s.tur === tilstand.meg, hand = s.minHand || [];
+    var meg = tilstand.meg, vert = erVert(), start = !!prSett.start, ferdig = s.fase === 'ferdig';
+    if (vert && !ferdig) prDriv();
+    var hand = s.minHand || [], jeg = s.tur === meg && !ferdig, naa = Date.now() + klokkeAvvik;
     presValg = presValg.filter(function (i) { return i < hand.length; });
-    var tavle = '<div class="rom-gris-tavle">' + tilstand.spillere.map(function (p) {
-      var t = s.titler && s.titler[p.id];
-      return '<span class="' + (p.id === s.tur ? 'tur' : '') + '">' + esc(p.navn) + ' <b>' + (s.antall[p.id] !== undefined ? s.antall[p.id] : '–') + '</b>' + (t ? ' <em>' + t + '</em>' : '') + (s.pass.indexOf(p.id) !== -1 ? ' <small>pass</small>' : '') + '</span>';
+    if (!jeg) presValg = [];
+    var trapp = prTrapp(s, start);
+    var folk = '<div class="pr-folk">' + (s.ider || []).map(function (id) {
+      var ute = s.ferdige.indexOf(id) !== -1, tur = s.tur === id && !ferdig;
+      var ring = tur ? ' style="animation-duration:' + s.turTid + 'ms;animation-delay:-' + Math.max(0, Math.min(s.turTid, naa - s.turVed)) + 'ms"' : '';
+      return '<span class="' + (ute ? 'ute' : '') + (tur ? ' tur' : '') + '"><span class="pr-ring"' + ring + '>' + nrHode(id) + '</span><b>' + jaNavn(id) + '</b><small>' +
+        (ute ? T('ute', 'out') : s.pass.indexOf(id) !== -1 ? 'pass' : tur ? T('har tur', 'to play') : (s.antall[id] || 0) + T(' kort', ' cards')) + '</small></span>';
     }).join('') + '</div>';
-    if (s.fase === 'ferdig') return tavle + '<p class="dl-melding dl-stor">' + T('Runden er over!', 'The round is over!') + '</p><p class="small">' + T('Presidenten bestemmer når andre skal drikke. Rævkjøreren henter drikke og gir sitt beste kort til presidenten.', 'The president decides when others drink. The scum fetches drinks and gives their best card to the president.') + '</p>' +
-      '<button class="rom-stor-knapp" data-g="nytt" type="button">' + T('Ny runde', 'New round') + '</button>';
-    return tavle + '<p class="rom-etikett">' + T('På bordet', 'On the table') + (s.bordAv ? T(' – lagt av ', ' – played by ') + esc(navn(s.bordAv)) : '') + '</p>' +
-      '<div class="dl-bord">' + (s.bord.length ? s.bord.map(function (k) { return kk(k, 'inn'); }).join('') : '<span class="small">' + T('Tomt – ', 'Empty – ') + esc(navn(s.tur)) + T(' starter', ' starts') + '</span>') + '</div>' +
-      '<p class="rom-etikett">' + (jeg ? T('Din tur – velg like kort', 'Your turn – pick matching cards') : T('Venter på ', 'Waiting for ') + esc(navn(s.tur))) + '</p>' +
-      '<div class="dl-hand pres">' + hand.map(function (k, i) { return '<button type="button" data-g="pvelg" data-i="' + i + '" aria-pressed="' + (presValg.indexOf(i) !== -1) + '"' + (jeg ? '' : ' disabled') + '>' + kk(k, 'liten') + '</button>'; }).join('') + '</div>' +
-      (jeg ? '<div class="dl-knapper"><button class="btn gold" data-g="legg" type="button">' + T('Legg ut', 'Play') + '</button>' + (s.bord.length ? '<button class="btn ghost" data-g="pass" type="button">Pass</button>' : '') + '</div>' : '') +
-      '<p class="small">' + T('Toere er høyest og rydder bordet.', 'Twos are highest and clear the table.') + '</p>';
+    if (ferdig) {
+      prSett.start = 1;
+      var d = s.drikk || { drikker: [] }, n = s.ferdige.length;
+      return jaTopp(T('President · runde ', 'President · round ') + s.runde, jaNavn(s.ferdige[0]) + T(' er President!', ' is President!'), true, false) + trapp +
+        '<ol class="pr-titler">' + s.ferdige.map(function (id, i) {
+          var dr = d.drikker.find(function (x) { return x.id === id; });
+          return '<li style="--f:' + PR_FARGER[Math.min(i, PR_FARGER.length - 1)] + '">' + nrHode(id) + '<span><b>' + jaNavn(id) + '</b><small>' + prPlassNavn(i, n) + '</small></span><em>' +
+            (i === 0 ? T('Deler ut ', 'Hands out ') + d.deler : dr ? T('Drikk ', 'Drink ') + dr.n : '') + '</em></li>';
+        }).join('') + '</ol>' +
+        lekSlutt([['runde', T('Neste runde', 'Next round'), T('Rævkjøreren gir beste kort til Presidenten', 'The Scumbag gives their best card to the President')]]);
+    }
+    // Bordet: kortene smelles ned én gang; en feid bunke sklir av bordet
+    var lk = 'l' + s.runde + ':' + s.leggNr, nyLegg = start && s.leggNr && !prSett[lk]; prSett[lk] = 1;
+    var fk = 'e' + s.runde + ':' + s.feiNr, nyFei = start && s.feiNr && !prSett[fk]; prSett[fk] = 1;
+    var bunke = s.bord.length ? s.bord : (nyFei ? prForrigeBord : []), bn = bunke.length;
+    var bord = '<div class="pr-bord"><span class="pr-bord-t">' + prBordTekst(s) + '</span><div class="pr-bunke' + (!s.bord.length && nyFei ? ' fei' : '') + '">' +
+      bunke.map(function (k, i) { var r = ((i - (bn - 1) / 2) * 12 + (s.leggNr % 3 - 1) * 4); return prKort(k, s.bord.length && nyLegg ? 'smell' : '', '--r:' + r + 'deg;--x:' + ((i - (bn - 1) / 2) * 30) + 'px'); }).join('') + '</div>' +
+      (s.bytte && !s.sist ? '<p class="pr-bytte">' + jaNavn(s.bytte.fra) + T(' ga ', ' gave ') + vn(s.bytte.kort.v) + s.bytte.kort.f + T(' til ', ' to ') + jaNavn(s.bytte.til) + '</p>' : '') + '</div>';
+    if (s.bord.length) prForrigeBord = s.bord.slice();
+    prSett.start = 1;
+    var hn = hand.length, steg = hn > 1 ? Math.min(31, (300 - 52) / (hn - 1)) : 0;
+    var handHtml = !s.minHand ? '<p class="gr-hjelp">' + T('Du er med fra neste runde.', 'You’re in from the next round.') + '</p>' :
+      '<div class="pr-hand">' + hand.map(function (k, i) {
+        var v = presValg.indexOf(i) !== -1;
+        return '<button type="button" class="pr-hk' + (v ? ' valgt' : '') + '" data-g="pvelg" data-i="' + i + '" aria-pressed="' + v + '" style="--x:' + ((i - (hn - 1) / 2) * steg).toFixed(1) + 'px;--r:' + ((i - (hn - 1) / 2) * 2.5).toFixed(1) + 'deg"' + (jeg ? '' : ' disabled') + '>' + prKort(k) + '</button>';
+      }).join('') + '</div>';
+    var sv = presValg.map(function (i) { return hand[i]; }), b = s.bord;
+    var gyldig = sv.length && sv.every(function (k) { return k.v === sv[0].v; }) && (!b.length || (sv.length === b.length && prRang(sv[0].v) > prRang(b[0].v)));
+    var leggT = gyldig ? T('Legg ', 'Play ') + sv.length + ' × ' + vn(sv[0].v) : sv.length ? T('Ikke gyldig', 'Not valid') : b.length ? T('Velg ', 'Pick ') + b.length + T(' like over ', ' alike over ') + vn(b[0].v) : T('Velg kort', 'Pick cards');
+    var knapper = jeg ? '<div class="pr-knapper"><button type="button" class="pr-legg' + (gyldig ? ' klar' : '') + '" data-g="legg"' + (gyldig ? '' : ' disabled') + '>' + leggT + '</button>' +
+      '<button type="button" class="pr-pass" data-g="pass"' + (b.length ? '' : ' disabled') + '>Pass</button></div>' : '<p class="nr-vent">' + T('Vent på ', 'Wait for ') + esc(navn(s.tur)) + '.</p>';
+    var chip = jeg ? (b.length ? T('Din tur – over ', 'Your turn – beat ') + b.length + ' × ' + vn(b[0].v) + '?' : T('Din tur – legg ut noe', 'Your turn – play anything')) : esc(navn(s.tur)) + T(' har tur', ' to play');
+    return jaTopp(T('President · runde ', 'President · round ') + s.runde, chip, jeg, false) + trapp + folk + bord + handHtml + knapper;
+  }
+  function prBordTekst(s) {
+    var x = s.sist;
+    if (!s.bord.length) return x && x.kort && x.kort[0].v === 2 ? jaNavn(x.id) + T(' la toer – bordet er feid', ' played a two – table cleared') : T('Bordet er tomt – ', 'The table is empty – ') + jaNavn(s.tur) + T(' starter', ' starts');
+    if (!x) return '';
+    return x.pass ? jaNavn(x.id) + T(' passer', ' passes') : jaNavn(x.id) + T(' la ', ' played ') + x.kort.length + ' × ' + vn(x.kort[0].v);
   }
 
   var rfOffset = 0, rfTimer = null;
@@ -4867,7 +4985,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'vedd') { var sl = document.getElementById('veddSl'); return gjor({ handling: 'vedd', farge: b.dataset.farge, slurker: sl ? Number(sl.value) : 2 }); }
     if (g === 'utfordre') return gjor({ handling: 'utfordre', paa: b.dataset.paa });
     if (g === 'velg') return gjor({ handling: 'velg', i: Number(b.dataset.i) });
-    if (g === 'pvelg') { var i = Number(b.dataset.i), j = presValg.indexOf(i); if (j === -1) presValg.push(i); else presValg.splice(j, 1); b.setAttribute('aria-pressed', j === -1); return; }
+    if (g === 'pvelg') { var i = Number(b.dataset.i), j = presValg.indexOf(i); if (j === -1) presValg.push(i); else presValg.splice(j, 1); return tegn(); }
     if (g === 'legg') { var valgte = presValg.slice(); presValg = []; return gjor({ handling: 'legg', kort: valgte }); }
     if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass', 'stokk', 'startklokke'].indexOf(g) !== -1) return gjor({ handling: g });
     if (['avslutt', 'nullstill', 'svart', 'avslor', 'runde', 'nytt-brett'].indexOf(g) !== -1) return gjor({ handling: g });
