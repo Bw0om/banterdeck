@@ -17,7 +17,7 @@ const L = ui(lang);
 // Verktøy, rom og Pluss finnes på norsk og engelsk – men ikke for rent norske leker på engelsk side.
 const verktoySprak = lang === 'no' || (lang === 'en' && !game.only && !(game.group && game.group.only));
 const iRom = verktoySprak && ['pekeleken','jeg-har-aldri','enten-eller','kategorier','nodt-eller-sannhet','rygg-mot-rygg','ring-of-fire','forraeder','drikke-bingo','regelfabrikken','to-sannheter-og-en-logn','sannhet-eller-drikk','tanken-bak-sangen','over-eller-under','veddelopet','pyramiden','president','gris','bussruta','drikke-yatzy','nyhetsrunden','hvem-skrev-det','bloffquizen','samme-svar','spionen','hvem-er-jeg','skal-refleksen','hemmelig-oppdrag'].includes(game.slug);
-const DIGITAL = ['stilleleken','power-hour','snurr-flasken','drikke-yatzy','beer-pong','rask-fakta','to-sannheter-og-en-logn','jug','14-sporsmal','bossen-sier','over-eller-under','fuck-the-dealer','krig','veddelopet','bussruta','terningen-bestemmer','21-med-terninger','opus','regelfabrikken','pyramiden','president','gris'];
+const DIGITAL = ['stilleleken','power-hour','snurr-flasken','drikke-yatzy','rask-fakta','to-sannheter-og-en-logn','jug','14-sporsmal','bossen-sier','over-eller-under','fuck-the-dealer','krig','veddelopet','bussruta','terningen-bestemmer','21-med-terninger','opus','regelfabrikken','pyramiden','president','gris'];
 const harVerktoy = verktoySprak && (!!(DECKS as any)[game.slug] || game.slug === 'drikke-bingo' || DIGITAL.includes(game.slug));
 const name = t(game.name, lang);
 const plussLek = verktoySprak && PLUSS_SLUGS.includes(game.slug);
