@@ -579,10 +579,10 @@ html.i-spill .rom-kode{font-size:.92em}
 .nr-liste li.feil b,.nr-liste li.feil button{background:var(--rosa)}
 /* Pallen */
 .nr-vinner{margin:2px 0 6px;font-family:var(--display);font-size:38px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.92}
-.nr-pall{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end;height:240px;margin:6px 0 14px}
+.nr-pall{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end;min-height:240px;margin:6px 0 14px}
 .nr-pall-plass{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
-.nr-pall-plass svg{width:40px;height:26px}
-.nr-pall-plass svg path{fill:var(--gul);stroke:var(--blekk);stroke-width:3;stroke-linejoin:round}
+.nr-pall-plass>svg{width:40px;height:26px}
+.nr-pall-plass>svg path{fill:var(--gul);stroke:var(--blekk);stroke-width:3;stroke-linejoin:round}
 .nr-pall-plass .nr-p{min-width:40px;height:40px;border-radius:20px;font-size:14px;border-width:3px}
 .nr-pall-plass>b{font-size:15px;font-weight:900;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nr-pall-blokk{width:100%;height:calc(var(--h) * 140px);display:grid;place-items:center;background:var(--card);color:var(--ink);border:var(--strek) solid var(--ink);border-bottom:0;border-radius:6px 6px 0 0;box-shadow:4px 0 0 var(--hard);transform-origin:bottom}
@@ -665,6 +665,84 @@ html.i-spill .rom-kode{font-size:.92em}
 .lh-utfall span{font-size:12px;font-weight:900;text-transform:uppercase;padding:3px 8px;color:var(--blekk);background:var(--rosa);border:2px solid var(--blekk)}
 .lh-utfall li.rett span{background:#FFF8EE}
 .lh-regel{margin:0 0 12px;color:var(--muted)}
+/* ---------- Løgnhalsen: stolen, nesa og «hold for helt sikker» ---------- */
+.lh-kort.liten{padding:10px 14px}
+.lh-kort.liten p{font-size:18px}
+.lh-bak svg{width:88px;height:44px}
+.lh-bak svg circle,.lh-bak svg rect{fill:#F2C6A0;stroke:#FFF8EE;stroke-width:3}
+.lh-bak svg .o{fill:#16120F;stroke:none}
+.lh-forside.logn{background:var(--rosa);color:var(--blekk)}
+.lh-forside.sant{background:var(--mint);color:var(--blekk)}
+button.lh-grill{width:100%;align-items:center;gap:12px;padding:10px 14px;font:inherit;text-align:left;cursor:pointer;box-shadow:4px 4px 0 var(--hard);transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+button.lh-grill:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+button.lh-grill svg{width:30px;height:30px;margin:0}
+button.lh-grill span{display:flex;flex-direction:column;gap:2px;min-width:0}
+button.lh-grill small{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+button.lh-grill b{font-family:var(--display);font-size:20px;font-weight:900;font-stretch:80%;line-height:1.05}
+.rom-stor-knapp.lh-hvit{background:var(--card);color:var(--ink)}
+.lh-maske{margin:8px 0 12px;font-family:var(--display);font-size:44px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9}
+.lh-stem .lh-stemknapp{position:relative;min-height:120px;font-size:38px;overflow:visible;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.lh-stemknapp b{position:relative;font:inherit}
+.lh-fyll{position:absolute;inset:0;border-radius:3px;opacity:.6;transform:scaleX(0);transform-origin:0 50%;pointer-events:none}
+.lh-stemknapp.sant .lh-fyll{background:var(--mint)}
+.lh-stemknapp.logn .lh-fyll{background:var(--rosa)}
+.lh-stemknapp.holder{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--hard)}
+.lh-stemknapp.holder .lh-fyll{animation:lhFyll 700ms linear forwards;animation-delay:var(--hold,0ms)}
+@keyframes lhFyll{to{transform:scaleX(1)}}
+.lh-x2{position:absolute;top:-12px;right:-8px;font-style:normal;font-family:var(--display);font-size:18px;font-weight:900;padding:2px 8px;background:var(--oransje);color:#FFF8EE;border:3px solid var(--blekk);border-radius:6px;transform:rotate(-4deg);animation:lhX2 420ms var(--fjaer) both}
+@keyframes lhX2{from{transform:rotate(-4deg) scale(1.6);opacity:0}to{transform:rotate(-4deg) scale(1);opacity:1}}
+.lh-holdhint{margin:0 0 10px;font-size:13px;font-weight:800;color:var(--muted);text-align:center}
+.lh-avslor.logn,.lh-avslor.sant{text-align:left;color:var(--blekk);border-color:var(--blekk);box-shadow:6px 6px 0 var(--hard)}
+.lh-avslor.logn{background:var(--rosa)}
+.lh-avslor.sant{background:var(--mint)}
+.lh-avslor.logn>span,.lh-avslor.sant>span{margin:0 0 10px;color:var(--blekk);font-size:14px;font-weight:800;text-transform:none;letter-spacing:0}
+.lh-avslor .lh-stempel{background:#FFF8EE;border-color:#16120F}
+.lh-utfall li.feil{background:var(--rosa);color:var(--blekk)}
+.lh-utfall li.feil span{background:#FFF8EE}
+.lh-utfall li:not(.rett):not(.feil) span{background:var(--bg2);color:var(--ink);border-color:var(--ink)}
+.lh-utfall.inn li{animation:nrInn 380ms var(--fjaer) both;animation-delay:calc(700ms + var(--i) * 90ms)}
+/* Nesa ligger oppå hodet på benken. Løy fortelleren, vokser den (fjær, litt etter stempelet). */
+.ee-hode .mv-hode{overflow:visible}
+.lh-nese{transform-origin:-3px 11.5px;transform:scaleX(.2)}
+.lh-nese.lang{transform:none}
+.lh-nese.vokser{animation:lhNese 900ms var(--fjaer) 350ms both}
+@keyframes lhNese{from{transform:scaleX(.2)}to{transform:none}}
+.lh-svette path{fill:#7CC6FE;stroke:#16120F;stroke-width:1.6;animation:lhSvette 1.4s cubic-bezier(.23,1,.32,1) infinite}
+.lh-svette path+path{animation-delay:.7s}
+@keyframes lhSvette{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(14px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.lh-nese.vokser,.lh-svette path,.lh-x2,.lh-utfall.inn li{animation:none}.lh-nese.vokser{transform:none}}
+
+/* ---------- Nyhetsrunden: avisforside og ekte hoder ---------- */
+.nr-avis{align-items:flex-end;padding:0 0 8px;border-bottom:var(--strek) solid var(--ink)}
+.nr-avis-tekst{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nr-avis-tekst b{font-family:var(--display);font-size:30px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.9}
+.nr-avis-tekst span{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.nr-forside{margin:6px 0 14px;font-family:var(--display);font-size:clamp(40px,13vw,56px);font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.86}
+.nr-folk-h{gap:4px}
+.nr-folk-h>span:last-child{margin-left:0}
+.nr-folk-h .nr-h{width:46px;height:46px}
+.nr-lengder button{display:flex;flex-direction:column;align-items:center;gap:2px}
+.nr-lengder button b{font-size:28px;line-height:.9}
+.nr-lengder button small{font:900 11px var(--sans);letter-spacing:.06em}
+.nr-h{display:inline-block;flex:none;width:34px;height:34px;border-radius:50%;line-height:0;vertical-align:middle}
+.nr-h svg{width:100%;height:100%;overflow:hidden}
+.nr-h.meg{box-shadow:0 0 0 3px var(--gul)}
+.nr-h.beste{box-shadow:0 0 0 3px var(--gul),0 0 0 5.5px var(--blekk)}
+.nr-hvem .nr-h{width:30px;height:30px}
+.nr-hvem>span{display:inline-block}
+.nr-alt.inn .nr-hvem>span{animation:nrHopp 620ms var(--fjaer) both;animation-delay:calc(250ms + var(--i) * 60ms)}
+@keyframes nrHopp{from{transform:translateY(90px) scale(.9);opacity:0}30%{opacity:1}to{transform:none;opacity:1}}
+.nr-pinne .nr-h{width:36px;height:36px}
+.nr-linje.inn .nr-fasit-flagg{animation:nrFlagg 600ms var(--fjaer) both;animation-delay:calc(var(--n, 4) * 70ms + 350ms)}
+@keyframes nrFlagg{from{transform:translate(-50%,-60px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.nr-liste .nr-h,.nr-rest .nr-h{width:30px;height:30px}
+.nr-pall-plass .nr-h.stor{width:58px;height:58px}
+.nr-pall-plass.forst .nr-h.stor{width:68px;height:68px}
+.nr-pall.inn .nr-h.stor{animation:nrHopp 620ms var(--fjaer) both;animation-delay:calc(var(--i) * 140ms + 420ms)}
+.nr-pall-plass>svg.nr-krone{width:46px;height:30px;margin-bottom:-6px;transform:rotate(-8deg)}
+.nr-pall.inn .nr-krone{animation:nrKrone 550ms var(--fjaer) 1.2s both}
+@keyframes nrKrone{from{transform:translateY(-50px) rotate(-14deg);opacity:0}to{transform:rotate(-8deg);opacity:1}}
+@media (prefers-reduced-motion:reduce){.nr-alt.inn .nr-hvem>span,.nr-linje.inn .nr-fasit-flagg,.nr-pall.inn .nr-h.stor,.nr-pall.inn .nr-krone{animation:none}}
 @media (prefers-reduced-motion:reduce){.lh-forside,.lh-kikk.vis .lh-forside,.lh-sikker{transition:none}.lh-stempel.inn,.lh-kol.inn>div>span,.lh-ide.inn{animation:none}}
 
 /* ---------- Pekeleken: kortet, nedtellingen, fingrene og resultatet ---------- */

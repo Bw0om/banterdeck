@@ -1504,7 +1504,7 @@ export function startRom(LEKNAVN, LANG) {
   function hodeBenk(alle, o) {
     o = o || {}; var r = o.sider || null, n = alle.length, oi = o.oi || [];
     if (!n) return '';
-    var w = o.par || o.duo ? (n <= 4 ? 78 : n <= 6 ? 62 : 48) : r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = o.par ? rrPlasser(alle, o.par) : o.duo ? duoPlasser(alle, o.duo) : o.stol ? stolPlasser(alle, o.stol) : eePlasser(alle, r);
+    var w = o.par || o.duo ? (n <= 4 ? 78 : n <= 6 ? 62 : 48) : r ? (n <= 4 ? 84 : n <= 7 ? 64 : 50) : (n <= 5 ? 96 : n <= 8 ? 72 : 56), plass = o.par ? rrPlasser(alle, o.par) : o.duo ? duoPlasser(alle, o.duo) : o.stol && r ? stolSider(alle, o.stol, r) : o.stol ? stolPlasser(alle, o.stol) : eePlasser(alle, r);
     var stil = '--w:' + w + 'px' + (r && r.fa ? ';--fa:' + r.fa : '') + (r && r.fb ? ';--fb:' + r.fb : '');
     setTimeout(benkTikk, 0);
     var bombe = o.bombe && plass[o.bombe.id] != null ? kbBombe(plass[o.bombe.id], o.bombe) : '';
@@ -1513,11 +1513,11 @@ export function startRom(LEKNAVN, LANG) {
       (o.status && !r ? '<span class="ee-status">' + esc(o.status) + '</span>' : '') + bombe + (o.duo ? '<i class="duo-hjerte' + (o.duoInn ? ' inn' : '') + '"><svg viewBox="-20 -18 40 36" aria-hidden="true"><path d="M0 14C-22 0 -16 -16 -6 -14C-2 -13 0 -9 0 -7C0 -9 2 -13 6 -14C16 -16 22 0 0 14Z" fill="#FF9CC2" stroke="#16120F" stroke-width="3" stroke-linejoin="round"/></svg></i>' : '') +
       alle.map(function (p, i) {
         var oppe = o.oppe === true || (o.oppe || []).indexOf(p.id) !== -1 || p.id === o.stol, erOi = oi.indexOf(p.id) !== -1;
-        var uttrykk = erOi ? 'oi' : o.flat && oi.length ? 'flat' : 'vanlig';
+        var uttrykk = erOi ? 'oi' : o.uttrykk && o.uttrykk[p.id] ? o.uttrykk[p.id] : o.flat && oi.length ? 'flat' : 'vanlig';
         var parKl = o.par ? (p.id === o.par.a ? ' par-a' : p.id === o.par.b ? ' par-b' : '') : p.id === o.stol ? ' stol' : o.bombe && p.id === o.bombe.id ? ' holder' : o.duo ? (p.id === o.duo[0] ? ' duo-a' : p.id === o.duo[1] ? ' duo-b' : '') : o.gul === p.id ? ' holder' : '';
         var tall = o.tall && o.tall[p.id] ? '<b class="ee-tall' + (o.tallInn ? ' inn' : '') + '">' + o.tall[p.id] + '</b>' : '';
         return '<div class="ee-hode' + (erOi ? ' alene' : '') + parKl + '" data-id="' + p.id + '" style="--x:' + (plass[p.id] / 100).toFixed(3) + ';--i:' + i + '"><div class="ee-hev' + (oppe ? ' oppe' : '') + '">' + tall +
-          '<span class="ee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.id === tilstand.meg ? T('Du', 'You') : p.navn) + '</span>' + eeHode(p, uttrykk) + '</div></div>'; }).join('') + '</div>';
+          '<span class="ee-navn' + (oppe ? ' har' : '') + ((o.merk || []).indexOf(p.id) !== -1 ? ' sikker' : '') + '">' + esc(p.id === tilstand.meg ? T('Du', 'You') : p.navn) + '</span>' + lhHodeEkstra(eeHode(p, uttrykk), p, o) + '</div></div>'; }).join('') + '</div>';
   }
   /** Rygg mot rygg: paret i midten, de andre fordelt på hver side. Snudd: paret rykker litt nærmere. */
   function rrPlasser(alle, par) {
@@ -1609,17 +1609,42 @@ export function startRom(LEKNAVN, LANG) {
     }
     return '';
   }
-  /** Benken i Løgnhalsen: de som stemmer reiser seg; etterpå deles benken i «Trodde sant» og «Trodde løgn». De som tok feil, får «OI». */
+  /** Benken i Løgnhalsen: den som forteller sitter i stolen midt på, og alle stirrer på hen. Mens de stemmer, svetter hen.
+      Avsløringen: løy hen, vokser nesa. De andre går til hver sin side, og de som ble lurt får «OI». */
+  var lhBenkVist = '';
   function lhBenk(s) {
-    var alle = (tilstand.spillere || []).filter(function (p) { return p.id !== s.aktiv; });
-    if (s.fase === 'stem') { var har = s.harStemt || []; return hodeBenk(alle, { oppe: har, status: har.length + T(' av ', ' of ') + alle.length + T(' har stemt', ' voted') }); }
+    var alle = tilstand.spillere || [], a = s.aktiv, ant = alle.length - 1;
+    if (!alle.some(function (p) { return p.id === a; })) return '';
+    if (s.fase === 'svar') return hodeBenk(alle, { oppe: [a], stol: a, stirr: a, nese: a });
+    if (s.fase === 'stem') {
+      var har = s.harStemt || [], u = {}; u[a] = 'flat';
+      return hodeBenk(alle, { oppe: har, stol: a, stirr: a, nese: a, svett: a, uttrykk: u, status: har.length + T(' av ', ' of ') + ant + T(' har stemt', ' voted') });
+    }
     if (s.fase !== 'avslort' || !s.resultat) return '';
-    var r = s.resultat, st = r.stemmer || {}, sk = r.sikker || {}, lyv = r.svar === 'lyv';
-    var sant = alle.filter(function (p) { return st[p.id] === 'sannhet'; }).map(function (p) { return p.id; });
-    var logn = alle.filter(function (p) { return st[p.id] === 'lyv'; }).map(function (p) { return p.id; });
-    var feil = lyv ? sant : logn;
-    return hodeBenk(alle, { oppe: true, sider: { a: sant, b: logn, la: T('Trodde sant', 'Believed it'), lb: T('Trodde løgn', 'Called the lie'), fa: 'var(--mint)', fb: 'var(--rosa)' },
-      oi: feil, merk: alle.filter(function (p) { return sk[p.id]; }).map(function (p) { return p.id; }) });
+    var r = s.resultat, st = r.stemmer || {}, sk = r.sikker || {}, lyv = r.svar === 'lyv', k = a + ':' + s.runde, inn = lhBenkVist !== k; lhBenkVist = k;
+    var ider = function (svar) { return alle.filter(function (p) { return p.id !== a && st[p.id] === svar; }).map(function (p) { return p.id; }); };
+    var sant = ider('sannhet'), logn = ider('lyv');
+    return hodeBenk(alle, { oppe: true, stol: a, stirr: a, nese: a, neseLang: lyv, neseInn: inn,
+      sider: { a: sant, b: logn, la: T('Trodde sant', 'Believed it'), lb: T('Trodde løgn', 'Called the lie'), fa: 'var(--mint)', fb: 'var(--rosa)' },
+      oi: lyv ? sant : logn, merk: alle.filter(function (p) { return sk[p.id]; }).map(function (p) { return p.id; }) });
+  }
+  /** Løgnhalsen: nese (vokser når fortelleren løy) og svettedråper, lagt oppå hodet. */
+  function lhHodeEkstra(svg, p, o) {
+    var x = '';
+    if (o.nese === p.id) x += '<g class="lh-nese' + (o.neseLang ? (o.neseInn ? ' vokser' : ' lang') : '') + '"><rect x="-3" y="8" width="40" height="7" rx="3.5" fill="' + utseende(p.figur || p.id).hud + '" stroke="#16120F" stroke-width="2.5" vector-effect="non-scaling-stroke"/></g>';
+    if (o.svett === p.id) x += '<g class="lh-svette"><path d="M17 -16q3 5 0 7q-3-2 0-7z"/><path d="M-19 -10q3 5 0 7q-3-2 0-7z"/></g>';
+    return x ? svg.replace('</svg>', x + '</svg>') : svg;
+  }
+  /** Stolen i midten og benken delt i to: hver side samler seg ytterst, de som ikke har stemt står nærmere stolen. */
+  function stolSider(alle, stol, r) {
+    var ut = {}; ut[stol] = 50;
+    var side = function (l, fra, til, en) { l.forEach(function (id, i) { ut[id] = l.length === 1 ? en : fra + (i / (l.length - 1)) * (til - fra); }); };
+    var a = alle.filter(function (p) { return p.id !== stol && (r.a || []).indexOf(p.id) !== -1; }).map(function (p) { return p.id; });
+    var b = alle.filter(function (p) { return p.id !== stol && (r.b || []).indexOf(p.id) !== -1; }).map(function (p) { return p.id; });
+    var rest = alle.filter(function (p) { return p.id !== stol && a.indexOf(p.id) === -1 && b.indexOf(p.id) === -1; });
+    side(a, 0, 24, 6); side(b, 76, 100, 94);
+    rest.forEach(function (p, i) { ut[p.id] = i % 2 ? 70 : 30; });
+    return ut;
   }
   /** Benken i Nyhetsrunden: hodene reiser seg når de har svart. */
   function nrBenk(s) {
@@ -1969,70 +1994,70 @@ export function startRom(LEKNAVN, LANG) {
     var v = function (l, n) { return l[(Math.floor(Math.random() * 997) + n) % l.length]; };
     return T('Si at det skjedde ', 'Say it happened ') + v(LH_STED, lhIdeNr) + ' ' + v(LH_HVEM, lhIdeNr) + ', og ' + v(LH_DETALJ, lhIdeNr) + T('. Hold deg til detaljene når de griller deg.', '. Stick to the details when they grill you.');
   }
-  function lhTopp(s, tekst, gul, klokke) {
-    return '<div class="nr-topp lh-topp"><div class="nr-topp-tekst"><span>' + T('Løgnhalsen · runde ', 'The liar · round ') + (s.runde || 1) + '</span><b' + (gul ? ' class="gul"' : '') + '>' + tekst + '</b></div>' + (klokke ? nrKlokke() : '') + '</div>';
+  function lhTopp(tekst, chip, gul, klokke) { return jaTopp(tekst, chip, gul, klokke).replace('ja-topp', 'ja-topp lh-topp'); }
+  function lhKort(s, merke, liten) {
+    return '<div class="nr-kort lh-kort' + (liten ? ' liten' : '') + '">' + (merke ? '<span class="nr-type lh-merke">' + merke + '</span>' : '') + '<p>' + esc(s.tekst) + '</p></div>';
   }
-  function lhKort(s, merke) {
-    return '<div class="nr-kort lh-kort">' + (merke ? '<span class="nr-type lh-merke">' + merke + '</span>' : '') + '<p>' + esc(s.tekst) + '</p></div>';
+  /** Grillspørsmål: ett om gangen – trykk for et nytt. */
+  var LH_GRILL = [['Hvem var med?', 'Who was there?'], ['Hvor skjedde det?', 'Where was it?'], ['Hva sa du da?', 'What did you say?'], ['Hvor gammel var du?', 'How old were you?'],
+    ['Hvor er den nå?', 'Where is it now?'], ['Hva skjedde rett etterpå?', 'What happened right after?'], ['Hvem andre vet om det?', 'Who else knows?'], ['Hvordan endte det?', 'How did it end?']];
+  var lhGrillI = 0, lhGrillK = '';
+  function lhGrill(han) {
+    var g = LH_GRILL[lhGrillI % LH_GRILL.length];
+    return '<button type="button" class="lh-grill" data-g="lh-grill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path class="q" d="M10 9.5a2 2 0 1 1 2.6 1.9c-.5.2-.6.5-.6 1.1M12 14h.01"/></svg>' +
+      '<span><small>' + T('Grill ', 'Grill ') + han + '</small><b>«' + esc(T(g[0], g[1])) + '»</b></span></button>';
   }
-  function lhStemte(s) {
-    return '';   // hvem som har stemt vises nå av hodene på benken (lhBenk)
-    var andre = (tilstand.spillere || []).filter(function (p) { return p.id !== s.aktiv; }), har = s.harStemt || [];
-    return '<div class="nr-folk">' + andre.map(function (p) { return nrPille(p.id, har.indexOf(p.id) !== -1 ? 'har' : ''); }).join('') + '<span>' + har.length + T(' av ', ' of ') + andre.length + T(' har stemt', ' voted') + '</span></div>';
+  /** Stem: trykk = vanlig stemme, hold = helt sikker (dobbel innsats). Holdet overlever at skjermen tegnes på nytt. */
+  var LH_HOLD_MS = 700, lhHold = null, lhHoldT = null;
+  function lhStemKnapp(s, paa, tekst) {
+    var valgt = s.minStemme === paa, h = lhHold && lhHold.paa === paa;
+    return '<button type="button" class="lh-stemknapp ' + (paa === 'lyv' ? 'logn' : 'sant') + (h ? ' holder' : '') + '" data-paa="' + paa + '" aria-pressed="' + valgt + '"' +
+      (h ? ' style="--hold:-' + Math.min(LH_HOLD_MS, Date.now() - lhHold.t0) + 'ms"' : '') + '><i class="lh-fyll" aria-hidden="true"></i><b>' + tekst + '</b>' +
+      (valgt && s.minSikker ? '<em class="lh-x2">×2</em>' : '') + '</button>';
   }
+  var LH_NESE = '<svg viewBox="0 0 80 40" aria-hidden="true"><circle cx="22" cy="20" r="15"/><rect x="22" y="17" width="54" height="7" rx="3.5"/><circle class="o" cx="18" cy="16" r="2.5"/></svg>';
   function forraederSpill(s) {
-    var t = tilstand, jeg = t.meg === s.aktiv, han = navn(s.aktiv), nokkel = s.aktiv + ':' + s.runde;
-    if (lhSikker.k !== nokkel) lhSikker = { k: nokkel, v: false };
+    var t = tilstand, jeg = t.meg === s.aktiv, han = esc(navn(s.aktiv)), nokkel = s.aktiv + ':' + s.runde, lyvRolle = s.hemmelig === 'lyv';
+    var rTekst = T('Løgnhalsen · runde ', 'The liar · round ') + (s.runde || 1);
+    if (lhGrillK !== nokkel) { lhGrillK = nokkel; lhGrillI = Math.floor(Math.random() * LH_GRILL.length); }
     if (s.fase === 'svar') {
-      if (jeg) return lhTopp(s, T('Din tur, ', 'Your turn, ') + esc(han), true) +
+      if (jeg) return lhTopp(rTekst, T('Din tur', 'Your turn'), true) +
         lhKort(s, T('Fullfør høyt', 'Finish it out loud')) +
         '<button type="button" class="lh-kikk" aria-label="' + T('Hold for å se om du skal lyve eller si sannheten', 'Hold to see whether to lie or tell the truth') + '">' +
-          '<span class="lh-bak"><svg viewBox="0 0 64 40" aria-hidden="true"><path d="M4 8c8-6 20-6 28 2 8-8 20-8 28-2-2 14-10 26-28 28C14 34 6 22 4 8z"/><ellipse cx="20" cy="18" rx="5" ry="4"/><ellipse cx="44" cy="18" rx="5" ry="4"/></svg>' +
-            '<b>' + T('Hold for å se', 'Hold to see') + '</b><small>' + T('Slipp, så er det skjult igjen', 'Let go and it hides again') + '</small></span>' +
-          '<span class="lh-forside" aria-hidden="true"><b>' + (s.hemmelig === 'lyv' ? T('Lyv', 'Lie') : T('Si sannheten', 'Tell the truth')) + '</b><small>' +
-            (s.hemmelig === 'lyv' ? T('Finn på noe. Gjør det troverdig.', 'Make something up. Make it believable.') : T('Fortell det som faktisk skjedde.', 'Tell what actually happened.')) + '</small></span>' +
+          '<span class="lh-bak">' + LH_NESE + '<b>' + T('Hold for å se', 'Hold to see') + '</b></span>' +
+          '<span class="lh-forside ' + (lyvRolle ? 'logn' : 'sant') + '" aria-hidden="true"><b>' + (lyvRolle ? T('Lyv', 'Lie') : T('Sannhet', 'Truth')) + '</b><small>' +
+            (lyvRolle ? T('Gjør det troverdig.', 'Make it believable.') : T('Fortell det som skjedde.', 'Tell what happened.')) + '</small></span>' +
         '</button>' +
-        '<div class="lh-hjelp"><button type="button" data-g="lh-ide">' + T('Gi meg en idé', 'Give me an idea') + '</button>' +
-          '<button type="button" data-g="lh-bytt"' + (s.byttet ? ' disabled' : '') + '>' + (s.byttet ? T('Kortet er byttet', 'Card swapped') : T('Bytt kort (1 gang)', 'Swap card (once)')) + '</button></div>' +
+        '<div class="lh-hjelp"><button type="button" data-g="lh-ide">' + T('Idé', 'Idea') + '</button>' +
+          '<button type="button" data-g="lh-bytt"' + (s.byttet ? ' disabled' : '') + '>' + (s.byttet ? T('Byttet', 'Swapped') : T('Bytt kort', 'Swap card')) + '</button></div>' +
         '<p class="lh-ide" id="lhIde" hidden></p>' +
-        '<button class="rom-stor-knapp" data-g="svart" type="button">' + T('Jeg er ferdig – la dem grille meg', 'Done – let them grill me') + '</button>';
-      return lhTopp(s, esc(han) + T(' forteller', ' is telling'), false) + lhKort(s, T('Hør godt etter', 'Listen closely')) +
-        '<div class="lh-grill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path class="q" d="M10 9.5a2 2 0 1 1 2.6 1.9c-.5.2-.6.5-.6 1.1M12 14h.01"/></svg><p><b>' + T('Grill dem etterpå.', 'Grill them afterwards.') + '</b> ' +
-          T('Prøv: «Hvem var med?» · «Hvor skjedde det?» · «Hva sa du da?»', 'Try: “Who was there?” · “Where was it?” · “What did you say?”') + '</p></div>' +
-        (erVert() ? '<button class="rom-stor-knapp" data-g="svart" type="button">' + T('Gå til stemming', 'Go to voting') + '</button>' : '<p class="nr-vent">' + esc(han) + T(' sier fra når det er tid for å stemme.', ' will say when it is time to vote.') + '</p>');
+        '<button class="rom-stor-knapp" data-g="svart" type="button">' + T('Ferdig – grill meg', 'Done – grill me') + '</button>';
+      return lhTopp(rTekst, han + T(' forteller', ' is telling'), true) + lhKort(s) + lhGrill(han) +
+        (erVert() ? '<button class="rom-stor-knapp lh-hvit" data-g="svart" type="button">' + T('Til stemming', 'Go to voting') + '</button>' : '');
     }
     if (s.fase === 'stem') {
-      if (jeg) return lhTopp(s, T('De stemmer nå', 'They are voting'), false, true) + lhKort(s) + lhStemte(s) +
-        '<p class="nr-vent">' + T('Hold masken. Avsløringen kommer når alle har stemt.', 'Keep a straight face. The reveal comes when everyone has voted.') + '</p>';
-      var mitt = s.minStemme, sikker = mitt ? s.minSikker : lhSikker.v;
-      return lhTopp(s, esc(han) + T(' forteller', ' is telling'), false, true) + lhKort(s) +
-        '<div class="lh-grill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path class="q" d="M10 9.5a2 2 0 1 1 2.6 1.9c-.5.2-.6.5-.6 1.1M12 14h.01"/></svg><p><b>' + T('Grill ', 'Grill ') + esc(han) + T(' først.', ' first.') + '</b> ' +
-          T('«Hvem var med?» · «Hvor er den nå?» · «Hvor mye kostet det?»', '“Who was there?” · “Where is it now?” · “How much was it?”') + '</p></div>' +
-        '<div class="lh-stem"><button type="button" class="sant" data-g="stem" data-paa="sannhet" aria-pressed="' + (mitt === 'sannhet') + '">' + T('Sant', 'True') + '</button>' +
-          '<button type="button" class="logn" data-g="stem" data-paa="lyv" aria-pressed="' + (mitt === 'lyv') + '">' + T('Løgn', 'Lie') + '</button></div>' +
-        '<button type="button" class="lh-sikker" data-g="lh-sikker" aria-pressed="' + !!sikker + '"><i aria-hidden="true">' + (sikker ? '✓' : '') + '</i><span><b>' + T('Jeg er helt sikker', 'I am absolutely sure') + '</b><small>' +
-          T('Rett: del ut én. Feil: drikk fire i stedet for to.', 'Right: hand out one. Wrong: drink four instead of two.') + '</small></span></button>' +
-        lhStemte(s);
+      if (jeg) return lhTopp(rTekst, T('De stemmer', 'They are voting'), true, true) + lhKort(s, '', true) +
+        '<p class="lh-maske">' + T('Hold<br>masken.', 'Keep a<br>straight face.') + '</p>';
+      return lhTopp(rTekst, han + T(' forteller', ' is telling'), true, true) + lhKort(s, '', true) + lhGrill(han) +
+        '<div class="lh-stem">' + lhStemKnapp(s, 'sannhet', T('Sant', 'True')) + lhStemKnapp(s, 'lyv', T('Løgn', 'Lie')) + '</div>' +
+        '<p class="lh-holdhint">' + T('Hold = helt sikker. Rett: del ut 1 · feil: drikk 4', 'Hold = absolutely sure. Right: hand out 1 · wrong: drink 4') + '</p>';
     }
-    // Avsløringen
-    var r = s.resultat || {}, inn = lhVist !== nokkel, lyv = r.svar === 'lyv', st = r.stemmer || {}, sk = r.sikker || {};
-    var kol = function (svar, tittel) {
-      var folk = (t.spillere || []).filter(function (p) { return st[p.id] === svar; }), rett = (svar === 'lyv') === lyv;
-      return '<div class="lh-kol' + (rett ? ' rett' : '') + (inn ? ' inn' : '') + '"><b>' + tittel + '</b><div>' + (folk.length ? folk.map(function (p, i) { return '<span style="--i:' + i + '">' + nrPille(p.id, sk[p.id] ? 'sikker' : '') + '</span>'; }).join('') : '<small>' + T('Ingen', 'Nobody') + '</small>') + '</div>' +
-        (folk.some(function (p) { return sk[p.id]; }) ? '<small>' + folk.filter(function (p) { return sk[p.id]; }).map(function (p) { return esc(p.navn); }).join(', ') + T(' var helt sikker', ' was absolutely sure') + '</small>' : '') + '</div>';
-    };
-    var linjer = [];
-    (r.utdeling || []).forEach(function (x) {
-      linjer.push('<li class="rett"><b>' + (x.id === s.aktiv ? esc(navn(x.id)) + T(' lurte ', ' fooled ') + x.n : esc(navn(x.id)) + T(', helt sikker – og riktig', ', absolutely sure – and right')) + '</b><span>' + T('Del ut ', 'Hand out ') + x.n + '</span></li>');
-    });
-    (r.drikker || []).forEach(function (x) {
-      linjer.push('<li><b>' + esc(x.navn) + (x.id === s.aktiv ? T(' lurte ingen', ' fooled nobody') : x.sikker ? T(', helt sikker – og feil', ', absolutely sure – and wrong') : '') + '</b><span>' + T('Drikk ', 'Drink ') + x.slurker + '</span></li>');
-    });
-    var ut = '<p class="nr-etikett lh-etikett">' + T('Løgnhalsen · runde ', 'The liar · round ') + (s.runde || 1) + '</p>' +
-      '<div class="lh-avslor"><span>' + esc(han) + T(' fullførte', ' finished') + '</span><p>' + esc(s.tekst) + '</p>' +
-        '<em class="lh-stempel ' + (lyv ? 'logn' : 'sant') + (inn ? ' inn' : '') + '">' + esc(han) + ' ' + (lyv ? T('løy!', 'lied!') : T('sa sannheten!', 'told the truth!')) + '</em></div>' +
-      (linjer.length ? '<ul class="lh-utfall">' + linjer.join('') + '</ul>' : '') +
-      '<p class="small lh-regel">' + T('Feil: drikk to (helt sikker: fire). Den som forteller deler ut én per person som ble lurt, og drikker tre hvis ingen ble lurt.', 'Wrong: drink two (absolutely sure: four). The teller hands out one per person fooled, and drinks three if nobody was fooled.') + '</p>' +
+    // Avsløringen: stempel, og bare det som gjelder deg
+    var r = s.resultat || {}, inn = lhVist !== nokkel, lyv = r.svar === 'lyv', st = r.stemmer || {}, sk = r.sikker || {}, lurte = r.lurte || 0, rader = [];
+    if (jeg) rader.push(lurte ? ['rett', lurte + T(' ble lurt', ' fooled'), T('Del ut ', 'Hand out ') + lurte] : ['feil', T('Ingen ble lurt', 'Nobody fooled'), T('Drikk 3', 'Drink 3')]);
+    else {
+      var mitt = st[t.meg];
+      if (mitt) rader.push(mitt === r.svar
+        ? ['rett', sk[t.meg] ? T('Helt sikker – og rett', 'Sure – and right') : T('Du så det', 'You saw it'), sk[t.meg] ? T('Del ut 1', 'Hand out 1') : T('Slipper', 'Safe')]
+        : ['feil', sk[t.meg] ? T('Helt sikker – og lurt', 'Sure – and fooled') : T('Du ble lurt', 'You were fooled'), T('Drikk ', 'Drink ') + (sk[t.meg] ? 4 : 2)]);
+      rader.push(lurte ? ['', han + T(' lurte ', ' fooled ') + lurte, T('Deler ut ', 'Hands out ') + lurte] : ['', han + T(' lurte ingen', ' fooled nobody'), T('Drikker 3', 'Drinks 3')]);
+    }
+    var andre = (r.drikker || []).filter(function (x) { return x.id !== s.aktiv && x.id !== t.meg; });
+    if (andre.length) rader.push(['', andre.map(function (x) { return esc(x.navn) + ' ' + x.slurker; }).join(' · '), T('Drikker', 'Drink')]);
+    var ut = lhTopp(rTekst, T('Avslørt', 'Revealed'), false) +
+      '<div class="lh-avslor ' + (lyv ? 'logn' : 'sant') + '"><span>' + esc(s.tekst) + '</span>' +
+        '<em class="lh-stempel' + (inn ? ' inn' : '') + '">' + (jeg ? (lyv ? T('Du løy!', 'You lied!') : T('Du sa sant!', 'You told the truth!')) : han + ' ' + (lyv ? T('løy!', 'lied!') : T('sa sant!', 'told the truth!'))) + '</em></div>' +
+      '<ul class="lh-utfall' + (inn ? ' inn' : '') + '">' + rader.map(function (x, i) { return '<li class="' + x[0] + '" style="--i:' + i + '"><b>' + x[1] + '</b><span>' + x[2] + '</span></li>'; }).join('') + '</ul>' +
       '<button class="rom-stor-knapp" data-g="runde" type="button">' + T('Neste runde', 'Next round') + '</button>';
     lhVist = nokkel;
     return ut;
@@ -2045,9 +2070,32 @@ export function startRom(LEKNAVN, LANG) {
     k.classList.add('vis'); try { navigator.vibrate && navigator.vibrate(10); } catch (x) {}
   });
   window.addEventListener('pointerup', lhSkjul); window.addEventListener('pointercancel', lhSkjul); window.addEventListener('blur', lhSkjul);
-  document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.lh-kikk')) e.preventDefault(); });
+  document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.lh-kikk,.lh-stemknapp')) e.preventDefault(); });
   document.addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && e.target.classList && e.target.classList.contains('lh-kikk')) { e.preventDefault(); e.target.classList.add('vis'); } });
   document.addEventListener('keyup', function (e) { if (e.target.classList && e.target.classList.contains('lh-kikk')) lhSkjul(); });
+  // Sant / Løgn: kort trykk stemmer, hold i 0,7 s = helt sikker
+  document.addEventListener('pointerdown', function (e) {
+    var b = e.target.closest && e.target.closest('.lh-stemknapp'); if (!b || e.button > 0) return;
+    e.preventDefault(); clearTimeout(lhHoldT);
+    lhHold = { paa: b.dataset.paa, t0: Date.now() }; b.style.removeProperty('--hold'); b.classList.add('holder');
+    lhHoldT = setTimeout(function () {
+      var p = lhHold && lhHold.paa; lhHold = null; if (!p) return;
+      try { navigator.vibrate && navigator.vibrate(20); } catch (x) {}
+      gjorAlltid({ handling: 'stem', paa: p, sikker: true });
+    }, LH_HOLD_MS);
+  });
+  function lhSlipp(avbryt) {
+    if (!lhHold) return;
+    var p = lhHold.paa; lhHold = null; clearTimeout(lhHoldT);
+    if (avbryt) { document.querySelectorAll('.lh-stemknapp.holder').forEach(function (b) { b.classList.remove('holder'); }); return; }
+    gjorAlltid({ handling: 'stem', paa: p, sikker: false });
+  }
+  window.addEventListener('pointerup', function () { lhSlipp(false); });
+  window.addEventListener('pointercancel', function () { lhSlipp(true); });
+  document.addEventListener('keydown', function (e) {
+    var b = e.target.classList && e.target.classList.contains('lh-stemknapp') ? e.target : null;
+    if (b && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); gjorAlltid({ handling: 'stem', paa: b.dataset.paa, sikker: false }); }
+  });
 
   function bingoSpill(s) {
     var b = s.mittBrett || [], m = s.mineMerker || [];
@@ -2376,6 +2424,11 @@ export function startRom(LEKNAVN, LANG) {
     var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }) || { id: id, navn: '?' };
     return '<span class="nr-p' + (klasse ? ' ' + klasse : '') + (id === tilstand.meg ? ' meg' : '') + '" style="--f:' + nrFarge(id) + '" title="' + esc(p.navn) + '">' + esc(initialer(p)) + '</span>';
   }
+  /** Det lille hodet til en spiller (samme figur som på benken) – brukes i stedet for initialer. */
+  function nrHode(id, klasse, uttrykk) {
+    var p = (tilstand.spillere || []).find(function (x) { return x.id === id; }) || { id: id, navn: '?' };
+    return '<span class="nr-h' + (klasse ? ' ' + klasse : '') + (id === tilstand.meg ? ' meg' : '') + '" title="' + esc(p.navn) + '"><svg viewBox="-28 -36 56 62" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id), uttrykk) + '</svg></span>';
+  }
   function nrFormat(v) { var n = Number(v); return isFinite(n) && String(v) !== '' ? n.toLocaleString(EN ? 'en-GB' : 'nb-NO') : String(v || ''); }
   function nrPai(andel) {
     if (!(andel > 0)) return '';
@@ -2391,7 +2444,7 @@ export function startRom(LEKNAVN, LANG) {
       '<span data-frist="' + sp.frist + '" aria-label="' + T('sekunder igjen', 'seconds left') + '">' + igjen + '</span></div>';
   }
   function nrTopp(s, tekst, klokke) {
-    return '<div class="nr-topp"><div class="nr-topp-tekst"><span>' + T('Nyhetsrunden · uke ', 'Nyhetsrunden · week ') + s.uke + '</span><b>' + tekst + '</b></div>' + (klokke ? nrKlokke() : '') + '</div>';
+    return '<div class="nr-topp nr-avis"><div class="nr-avis-tekst"><b>Nyhetsrunden</b><span>' + T('Uke ', 'Week ') + s.uke + ' · ' + tekst + '</span></div>' + (klokke ? nrKlokke() : '') + '</div>';
   }
   function nrSporsmal(s, liten) {
     return '<div class="nr-kort' + (liten ? ' liten' : '') + '"><span class="nr-type">' + esc(TYPER[s.qtype] || '') + '</span>' + (erVert() && s.fase === 'spm' ? '<span class="nr-les">' + T('Les det høyt', 'Read it out loud') + '</span>' : '') +
@@ -2428,11 +2481,11 @@ export function startRom(LEKNAVN, LANG) {
       var x = Number(pos(g.v)), rad = 0;
       while (rader[rad] != null && x - rader[rad] < 17) rad++;
       rader[rad] = x;
-      return '<div class="nr-pinne" style="left:' + x + '%;--i:' + i + ';--h:' + (14 + rad * 46) + 'px;z-index:' + (10 - rad) + '">' + nrPille(g.id, s.resultat[g.id] === 2 ? 'beste' : '') + '<small>' + esc(nrFormat(g.v)) + '</small><i></i></div>';
+      return '<div class="nr-pinne" style="left:' + x + '%;--i:' + i + ';--h:' + (14 + rad * 46) + 'px;z-index:' + (10 - rad) + '">' + nrHode(g.id, s.resultat[g.id] === 2 ? 'beste' : '', s.resultat[g.id] < 0 ? 'flat' : '') + '<small>' + esc(nrFormat(g.v)) + '</small><i></i></div>';
     }).join('');
     var hoyde = 96 + Math.max(0, rader.length - 1) * 46;
     return '<div class="nr-linje' + (nrVist !== s.rid + ':' + s.i ? ' inn' : '') + '" style="height:' + (hoyde + 56) + 'px" role="img" aria-label="' + T('Svaret er ', 'The answer is ') + esc(nrFormat(t.fasit)) + '">' + pinner +
-      '<div class="nr-fasit-flagg" style="left:' + pos(t.fasit) + '%"><i></i><b>' + esc(nrFormat(t.fasit)) + '</b></div><div class="nr-akse"></div></div>';
+      '<div class="nr-fasit-flagg" style="left:' + pos(t.fasit) + '%;--n:' + sortert.length + '"><i></i><b>' + esc(nrFormat(t.fasit)) + '</b></div><div class="nr-akse"></div></div>';
   }
   function nrResultat(s, k) {
     var tall = s.qtype === 'tall', mitt = s.mittSvar;
@@ -2446,11 +2499,10 @@ export function startRom(LEKNAVN, LANG) {
     if (s.fase === 'klar') {
       var valg = [10, 15, 30].filter(function (n) { return n < s.totalt; }).concat([s.totalt]).filter(function (n, i, a) { return a.indexOf(n) === i; });
       return nrTopp(s, s.lengde + T(' spørsmål', ' questions'), false) +
-        '<div class="nr-kort"><span class="nr-type">' + T('Slik spiller dere', 'How it works') + '</span><p>' + esc(navn(s.vert)) + T(' leser spørsmålene høyt. Alle ser dem og svarer på sin egen telefon.', ' reads the questions out loud. Everyone sees them and answers on their own phone.') + '</p>' +
-        '<ul class="nr-regler-kort"><li>' + T('Riktig: del ut én. Feil: drikk én.', 'Right: hand out one. Wrong: drink one.') + '</li><li>' + T('Tall: den nærmest deler ut to, lengst unna drikker.', 'Numbers: closest hands out two, furthest off drinks.') + '</li></ul></div>' +
-        '<div class="nr-folk">' + alle.map(function (p) { return nrPille(p.id, 'har'); }).join('') + '<span>' + alle.length + T(' med', ' in') + '</span></div>' +
-        (vert ? '<p class="nr-etikett">' + T('Hvor lang runde?', 'How long a round?') + '</p><div class="nr-lengder">' + valg.map(function (n) {
-              return '<button type="button" data-g="nr-lengde" data-n="' + n + '" aria-pressed="' + (s.lengde === n) + '">' + (n === s.totalt ? T('Hele · ', 'All · ') : n <= 10 ? T('Kort · ', 'Short · ') : T('Vanlig · ', 'Usual · ')) + n + '</button>'; }).join('') + '</div>' +
+        '<p class="nr-forside">' + T('Uke ', 'Week ') + s.uke + '.<br>' + T('Hva fikk dere med dere?', 'Were you paying attention?') + '</p>' +
+        '<div class="nr-folk nr-folk-h">' + alle.map(function (p, i) { return '<span style="--i:' + i + '">' + nrHode(p.id) + '</span>'; }).join('') + '</div>' +
+        (vert ? '<div class="nr-lengder">' + valg.map(function (n) {
+              return '<button type="button" data-g="nr-lengde" data-n="' + n + '" aria-pressed="' + (s.lengde === n) + '"><b>' + n + '</b><small>' + (n === s.totalt ? T('Hele', 'All') : n <= 10 ? T('Kort', 'Short') : T('Vanlig', 'Usual')) + '</small></button>'; }).join('') + '</div>' +
             '<button class="rom-stor-knapp" data-g="nr-start" type="button">' + T('Første spørsmål', 'First question') + '</button>'
           : '<p class="nr-vent">' + T('Venter på at ', 'Waiting for ') + esc(navn(s.vert)) + T(' starter …', ' to start …') + '</p>');
     }
@@ -2468,21 +2520,21 @@ export function startRom(LEKNAVN, LANG) {
       return topp +
         nrSporsmal(s) + input +
         (vert ? '<button class="rom-stor-knapp nr-vis" data-g="nr-vis" type="button"' + (mangler > 0 ? ' data-vent="1"' : '') + '>' + (mangler > 0 ? T('Vis svaret nå', 'Show the answer now') + ' <small>(' + mangler + T(' mangler', ' missing') + ')</small>' : T('Vis svaret', 'Show the answer')) + '</button>'
-          : '<p class="nr-vent">' + (mitt ? T('Låst inn. Du kan bytte til svaret vises.', 'Locked in. You can change until the answer shows.') : T('Velg et svar før klokka går ut.', 'Answer before the clock runs out.')) + '</p>');
+          : '<p class="nr-vent">' + (mitt ? T('Låst inn.', 'Locked in.') : '') + '</p>');
     }
     // Svaret er vist
     var nokkel = s.rid + ':' + s.i, inn = nrVist !== nokkel, res = s.resultat || {}, sv = s.svarene || {};
     var midt = '';
-    if (s.alt) midt = '<div class="nr-alt' + (s.alt.length === 2 ? ' to' : '') + '">' + s.alt.map(function (a, i) {
+    if (s.alt) midt = '<div class="nr-alt' + (s.alt.length === 2 ? ' to' : '') + (inn ? ' inn' : '') + '">' + s.alt.map(function (a, i) {
       var rett = a === s.fasit, minn = s.mittSvar === a, hvem = alle.filter(function (p) { return sv[p.id] === a; });
-      return '<div class="nr-a avslort' + (rett ? ' rett' : minn ? ' feil' : ' dempet') + '"><i>' + 'ABCD'.charAt(i) + '</i><span>' + esc(a) + '</span><span class="nr-hvem">' + hvem.map(function (p) { return nrPille(p.id); }).join('') + '</span>' +
+      return '<div class="nr-a avslort' + (rett ? ' rett' : minn ? ' feil' : ' dempet') + '"><i>' + 'ABCD'.charAt(i) + '</i><span>' + esc(a) + '</span><span class="nr-hvem">' + hvem.map(function (p, j) { return '<span style="--i:' + (i * 2 + j) + '">' + nrHode(p.id, '', rett ? '' : 'flat') + '</span>'; }).join('') + '</span>' +
         (rett || minn ? '<em class="nr-stempel' + (inn ? ' inn' : '') + '">' + (rett ? T('Riktig', 'Right') : T('Feil', 'Wrong')) + '</em>' : '') + '</div>'; }).join('') + '</div>';
     else if (s.qtype === 'tall' && s.tall) midt = '<div class="nr-fasit-boks"><span>' + T('Svaret', 'The answer') + '</span><b>' + esc(s.fasit) + '</b></div>' + nrTallinje(s);
     else midt = '<div class="nr-fasit-boks"><span>' + T('Svaret', 'The answer') + '</span><b>' + esc(s.fasit) + '</b></div>';
     // Fritt og tall: hva hver enkelt svarte (verten kan rette en vurdering)
     var liste = s.alt ? '' : '<ul class="nr-liste">' + alle.slice().sort(function (a, b) { return (res[b.id] || -1) - (res[a.id] || -1); }).map(function (p) {
       var k = res[p.id], merke = k === 2 ? T('Nærmest', 'Closest') : k === 1 ? (s.qtype === 'tall' ? T('Innen 10 %', 'Within 10%') : T('Riktig', 'Right')) : k === 0 ? '–' : T('Drikk', 'Drink');
-      return '<li class="' + (k > 0 ? 'rett' : k === 0 ? 'null' : 'feil') + '">' + nrPille(p.id) + '<span class="nr-navn">' + esc(p.navn) + '</span><span class="nr-hva">' + (sv[p.id] ? esc(s.qtype === 'tall' && /^\d+$/.test(sv[p.id]) ? nrFormat(sv[p.id]) : sv[p.id]) : '<i>' + T('ingen svar', 'no answer') + '</i>') + '</span>' +
+      return '<li class="' + (k > 0 ? 'rett' : k === 0 ? 'null' : 'feil') + '">' + nrHode(p.id, '', k < 0 ? 'flat' : '') + '<span class="nr-navn">' + esc(p.navn) + '</span><span class="nr-hva">' + (sv[p.id] ? esc(s.qtype === 'tall' && /^\d+$/.test(sv[p.id]) ? nrFormat(sv[p.id]) : sv[p.id]) : '<i>' + T('ingen svar', 'no answer') + '</i>') + '</span>' +
         (vert ? '<button type="button" data-g="nr-flipp" data-id="' + p.id + '" aria-label="' + T('Endre vurdering for ', 'Change the verdict for ') + esc(p.navn) + '">' + merke + '</button>' : '<b>' + merke + '</b>') + '</li>';
     }).join('') + '</ul>';
     var megMed = alle.some(function (p) { return p.id === tilstand.meg; });
@@ -2500,8 +2552,8 @@ export function startRom(LEKNAVN, LANG) {
     var plass = [l[1], l[0], l[2]], hoyde = [0.66, 1, 0.48];
     var pall = '<div class="nr-pall' + (inn ? ' inn' : '') + '">' + plass.map(function (x, i) {
       if (!x) return '<div></div>';
-      return '<div class="nr-pall-plass' + (i === 1 ? ' forst' : '') + '" style="--h:' + hoyde[i] + ';--i:' + [1, 2, 0][i] + '">' + (i === 1 ? '<svg viewBox="0 0 40 26" aria-hidden="true"><path d="M3 23l3-19 8 8 6-11 6 11 8-8 3 19z"/></svg>' : '') +
-        nrPille(x.id) + '<b>' + esc(x.navn) + '</b><div class="nr-pall-blokk"><span>' + x.riktige + '</span></div></div>';
+      return '<div class="nr-pall-plass' + (i === 1 ? ' forst' : '') + '" style="--h:' + hoyde[i] + ';--i:' + [1, 2, 0][i] + '">' + (i === 1 ? '<svg class="nr-krone" viewBox="0 0 40 26" aria-hidden="true"><path d="M3 23l3-19 8 8 6-11 6 11 8-8 3 19z"/></svg>' : '') +
+        nrHode(x.id, 'stor') + '<b>' + esc(x.navn) + '</b><div class="nr-pall-blokk"><span>' + x.riktige + '</span></div></div>';
     }).join('') + '</div>';
     var kaar = [];
     if (k.tall) kaar.push('<b>' + T('Tallgeni:', 'Number genius:') + '</b> ' + esc(navn(k.tall.id)) + T(' var nærmest på ', ' was closest on ') + k.tall.n + T(' av ', ' of ') + k.tallAntall + T(' tallspørsmål', ' number questions'));
@@ -2511,9 +2563,9 @@ export function startRom(LEKNAVN, LANG) {
     var valg = [10, 15, 30].filter(function (n) { return n < s.totalt; }).concat([s.totalt]).filter(function (n, i, a) { return a.indexOf(n) === i; });
     var ut = '<p class="nr-etikett">' + T('Nyhetsrunden · uke ', 'Nyhetsrunden · week ') + s.uke + ' · ' + s.antall + T(' spørsmål', ' questions') + '</p><h2 class="nr-vinner">' + tittel + '</h2>' + pall +
       (kaar.length ? '<ul class="nr-kaaringer">' + kaar.map(function (x, i) { return '<li style="--i:' + i + '">' + x + '</li>'; }).join('') + '</ul>' : '') +
-      (rest.length ? '<ol class="nr-rest" start="4">' + rest.map(function (x) { return '<li>' + nrPille(x.id) + '<span>' + esc(x.navn) + '</span><b>' + x.riktige + '</b></li>'; }).join('') + '</ol>' : '') +
+      (rest.length ? '<ol class="nr-rest" start="4">' + rest.map(function (x) { return '<li>' + nrHode(x.id) + '<span>' + esc(x.navn) + '</span><b>' + x.riktige + '</b></li>'; }).join('') + '</ol>' : '') +
       (vert ? '<p class="nr-etikett">' + T('Ny runde fra uke ', 'New round from week ') + s.uke + '</p><div class="nr-lengder">' + valg.map(function (n) {
-            return '<button type="button" data-g="nr-nytt" data-n="' + n + '">' + (n === s.totalt ? T('Hele · ', 'All · ') : n <= 10 ? T('Kort · ', 'Short · ') : T('Vanlig · ', 'Usual · ')) + n + '</button>'; }).join('') + '</div>' +
+            return '<button type="button" data-g="nr-nytt" data-n="' + n + '"><b>' + n + '</b><small>' + (n === s.totalt ? T('Hele', 'All') : n <= 10 ? T('Kort', 'Short') : T('Vanlig', 'Usual')) + '</small></button>'; }).join('') + '</div>' +
           '<p class="small">' + T('Kort og vanlig tar spørsmål dere ikke har hatt ennå.', 'Short and usual pick questions you have not had yet.') + '</p>' : '');
     nrVist = nokkel;
     return ut;
@@ -4158,6 +4210,7 @@ export function startRom(LEKNAVN, LANG) {
       lhSikker.v = !lhSikker.v; return tegn();
     }
     if (g === 'lh-bytt') return gjor({ handling: 'lh-bytt' });
+    if (g === 'lh-grill') { lhGrillI++; return tegn(); }
     if (g === 'pek-start') return gjor({ handling: 'pek-start' });
     if (g === 'pek-fingre') return gjorAlltid({ handling: 'pek-fingre', n: Number(b.dataset.n) });
     if (g === 'pek-selv') return gjor({ handling: 'pek-selv' });

@@ -170,6 +170,14 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - Kåring «Historiefortelleren» (beste historie minst to ganger).
 - **Klokka i alle leker:** telefonene ber om «tid ute» tidligst 0,9 s etter at klokka viser 0, så serveren alltid godtar det (før kunne en kategori bli stående hvis alle spurte for tidlig).
 
+## Løgnhalsen and Nyhetsrunden
+
+- **Løgnhalsen:** the teller sits in the chair in the middle of the bench and every head stares at them. While the others vote, the teller sweats (two drops) and keeps a flat mouth. The reveal: if they lied, their nose grows (a spring, just after the stamp). The bench splits into "Trodde sant" and "Trodde løgn", and those who were fooled get the OI face.
+- **Voting:** a tap on Sant or Løgn is a normal vote. Holding for 0.7 s fills the button and votes "absolutely sure" (×2), which replaces the separate checkbox. The hold survives a redraw because the animation continues with a negative delay.
+- **Grill:** one follow-up question at a time; tap for a new one.
+- **Nyhetsrunden:** the top is a newspaper masthead (NYHETSRUNDEN, week and question number). Real heads replace the initial pills everywhere: on the answer options, as pins on the number line, in the lists and on the podium. On the reveal the heads hop into the answer they chose, and the answer flag drops in last. The podium rises and the winner gets the crown.
+- **Short pause before the reveal:** when everyone has answered or voted, the clock drops to 2 s, the same as Pekeleken on the phones. Players can still change their answer, and the reveal feels like a moment.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
