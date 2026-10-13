@@ -417,7 +417,7 @@ function enRekke(lek: string) {
   if (lek === 'samme') return stokk(sosListe('samme')).slice(0, EN_SAMME).map((t: any) => ({ t }));
   if (lek === 'ring-of-fire') return kortstokkFor(lek, '*');
   if (lek === 'enten-eller') return kortstokkFor(lek, '*').filter((k: any) => eeDel(k.t)).slice(0, KORT_LENGDE);
-  return kortstokkFor(lek, '*').slice(0, KORT_LENGDE);
+  return trappOpp(lek, '*', kortstokkFor(lek, '*').slice(0, KORT_LENGDE));
 }
 /** Plassene i sofaen i stua (samme rutenett som stua på telefonen og TV-en). */
 // Fylles fra midten og utover, så tre stykker sprer seg i sofaen i stedet for å klumpe seg i den ene enden
@@ -607,7 +607,7 @@ function nsBunke(modus: string, type: 'nodt' | 'sannhet', sett?: Set<string> | n
   const nivaa = modus === 'snill' || modus === 'ss' || modus === 'ns' ? 's' : modus === 'droy' || modus === 'sd' || modus === 'nd' ? 'd' : '';
   const koder = (type === 'nodt' ? ['ns', 'nd'] : ['ss', 'sd']).filter((m) => !nivaa || m.endsWith(nivaa));
   const kort = d.items.map((x: any, i: number) => [x, en[i]]).filter(([x]: any) => koder.includes(x.m)).map(([x, e]: any) => ({ ...kortL(x, e), ns: type }));
-  return usetteForst(stokk(kort), sett);
+  return trappOpp('nodt-eller-sannhet', nivaa ? modus : '*', usetteForst(stokk(kort), sett));
 }
 /** Rekka er tomme plasser: kortet trekkes først når personen i stolen har valgt. */
 function nsRekke(data: any, modus: string, sett?: Set<string> | null) {
@@ -635,7 +635,20 @@ function nyNsRunde(s: any, data: any) {
 function nsVelg(s: any, data: any, valg: 'nodt' | 'sannhet', auto = false) {
   const r = s.ns; if (!r || r.fase !== 'velg') return;
   r.valg = valg; r.auto = auto; r.fase = 'gjor'; s.frist = null;
-  s.rekke[s.pos] = nsTrekk(s, valg); s.kort = visKort(s, data);
+  s.rekke[s.pos] = navnInn(nsTrekk(s, valg), data, r.hvem); s.kort = visKort(s, data);
+}
+/** «Personen til venstre» blir et navn fra rommet – et kort med navn på treffer hardere enn et om «naboen».
+    Venstre, høyre og overfor blir tre ulike personer når det er nok folk. Originalteksten beholdes i `o`, så kortet
+    telles som sett uansett navn. */
+function navnInn(k: any, data: any, hvem: string) {
+  if (!k || !k.t || typeof k.t !== 'object') return k;
+  const andre = stokk(data.spillere.filter((p: any) => p.id !== hvem)).map((p: any) => p.navn);
+  if (!andre.length) return k;
+  const n = (i: number) => andre[i % andre.length];
+  const no = k.t.no.replace(/personen til venstre/g, n(0)).replace(/personen til høyre/g, n(1)).replace(/personen overfor deg/g, n(2));
+  const en = k.t.en.replace(/the person (on|to) your left/g, n(0)).replace(/the person (on|to) your right/g, n(1)).replace(/the person opposite you/g, n(2));
+  if (no === k.t.no && en === k.t.en) return k;
+  return { ...k, o: k.t.no, t: { no, en } };
 }
 function nsDommere(s: any, data: any) { return data.spillere.filter((p: any) => p.id !== s.ns.hvem); }
 function avgjorNs(data: any) {
@@ -817,7 +830,7 @@ function giUtdeling(data: any, id: string, n: number) { const p = data.spillere.
 
 /** Kort id for et kort (fra den norske teksten) – brukes til å huske hva telefonen har sett før. */
 export function kortId(k: any) {
-  const t = String(k && k.t && typeof k.t === 'object' ? k.t.no : (k && k.t) || '');
+  const t = String((k && k.o) || (k && k.t && typeof k.t === 'object' ? k.t.no : (k && k.t) || ''));
   let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0;
   return (h >>> 0).toString(36);
 }
@@ -849,7 +862,14 @@ function kortstokkRa(lek: string, modus: string) {
 /** Ett kort på begge språk: { t: {no, en}, k: {no, en} | '' }. */
 function kortL(x: any, e: any) {
   const et = e && typeof e === 'object' ? e : null;
-  return { t: L(x.t, et && et.t), k: x.k ? L(x.k, et && et.k) : '' };
+  return { t: L(x.t, et && et.t), k: x.k ? L(x.k, et && et.k) : '', m: x.m || undefined };
+}
+/** Blandet modus trappes opp: runden begynner snill og blir drøyere utover, med litt tilfeldig overlapp
+    så den ikke blir forutsigbar. Gode selskapsleker varmer opp før de blir personlige. */
+function trappOpp(lek: string, modus: string, rekke: any[]) {
+  const d = D[lek]; if (modus !== '*' || !d || !d.modes || d.modes.length < 2) return rekke;
+  const niv = (k: any) => Math.max(0, d.modes.findIndex((m: any) => m.v === k.m));
+  return rekke.map((k) => ({ k, n: niv(k) + tilfeldig(1000) / 1000 * 1.4 })).sort((a, b) => a.n - b.n).map((x) => x.k);
 }
 /** Smakebiter: i rom uten Pluss dukker et par kort fra pakkene opp innimellom. */
 function medSmakebiter(rekke: any[]) {
@@ -992,7 +1012,7 @@ export function startSpill(data: any, lek: string, modus: string, sett?: Set<str
     if ((valgt as any).pluss && !plussRom) return feilL('pluss', 'Denne pakken krever mittvors pluss.', 'This pack needs mittvors pluss.');
     const nsR = lek === 'nodt-eller-sannhet' ? nsRekke(data, modus, sett) : null;
     let rekke = nsR ? nsR.rekke : kortstokkFor(lek, modus, sett);
-    if (lek !== 'ring-of-fire') rekke = rekke.slice(0, lek === 'rygg-mot-rygg' ? rrLengde(data.spillere.length) : lek === 'tanken-bak-sangen' ? LB_LENGDE : KORT_LENGDE);
+    if (lek !== 'ring-of-fire') rekke = trappOpp(lek, modus, rekke.slice(0, lek === 'rygg-mot-rygg' ? rrLengde(data.spillere.length) : lek === 'tanken-bak-sangen' ? LB_LENGDE : KORT_LENGDE));
     if (!plussRom && !(valgt as any).pluss && lek !== 'ring-of-fire' && lek !== 'rygg-mot-rygg' && lek !== 'nodt-eller-sannhet' && lek !== 'kategorier' && lek !== 'tanken-bak-sangen' && rekke.length > 12) rekke = medSmakebiter(rekke);
     if (!rekke.length) return { feil: 'tom' };
     data.spill = { type: 'kort', lek, navn, modus, rekke, pos: 0, tur: lek === 'ring-of-fire' ? 0 : null, konger: 0, tilHendelse: nesteHendelse() };
@@ -1726,7 +1746,7 @@ function handlingInne(data: any, meg: any, h: any) {
       s.rekke.forEach((k: any) => { if (!k.h && !k.smak) sett.add(kortId(k)); });
       const nsR = s.lek === 'nodt-eller-sannhet' ? nsRekke(data, s.modus, sett) : null;
       if (nsR) s.nsBunker = nsR.bunker;
-      let rekke = nsR ? nsR.rekke : kortstokkFor(s.lek, s.modus, sett).slice(0, s.lek === 'rygg-mot-rygg' ? rrLengde(data.spillere.length) : s.lek === 'tanken-bak-sangen' ? LB_LENGDE : KORT_LENGDE);
+      let rekke = nsR ? nsR.rekke : trappOpp(s.lek, s.modus, kortstokkFor(s.lek, s.modus, sett).slice(0, s.lek === 'rygg-mot-rygg' ? rrLengde(data.spillere.length) : s.lek === 'tanken-bak-sangen' ? LB_LENGDE : KORT_LENGDE));
       if (!romHarPluss(data) && s.lek !== 'rygg-mot-rygg' && s.lek !== 'nodt-eller-sannhet' && s.lek !== 'kategorier' && s.lek !== 'tanken-bak-sangen') rekke = medSmakebiter(rekke);
       Object.assign(s, { rekke, pos: 0, ferdig: false, konger: 0, aldriTeller: {}, tilHendelse: nesteHendelse(), trakk: meg.id });
       s.kort = visKort(s, data); nyAldriRunde(s); nyEeRunde(s); nyRrRunde(s, data); nyNsRunde(s, data); nyKbRunde(s, data); nyLbRunde(s, data);
