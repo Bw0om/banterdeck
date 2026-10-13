@@ -235,6 +235,13 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - **End:** "Raskest i stua" by total time (too early or no tap counts as one second), then "Hva nå?".
 - **On the TV:** the glass while waiting, yellow with SKÅL! at the same moment, heads popping up with their time as people tap, and the list afterwards.
 
+## Just the host's phone: the sofa
+
+- **The waiting room is the real stua**, where people can be lifted around. If the host is still alone after a minute, a sheet slides up: "Ingen telefoner oppe?" with "Start med bare min telefon" (and "Vent litt til").
+- **The sofa:** the host types the names of the people who are there. Each gets a figure that walks in through the door and sits down on the stua sofa (seats fill from the middle out, up to six). Sofa people live in `data.sofa`, not in the player list, so the regular room games are unaffected. They can be lifted like anyone; dropping someone on the sofa seats them.
+- **Pick a game:** "Send rundt" (the phone goes hand to hand) or "Verten leser" (the host reads out loud). One-phone games: Jeg har aldri, Pekeleken, Nødt eller sannhet.
+- **Playing:** a big card, the reader rotates (host, then the sofa). The host taps the heads of those who drink (they rise with "Drikk"), then taps the card for the next one; sips are counted per person, also for the sofa. The room stays open: anyone joining later lands straight in the game.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
