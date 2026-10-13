@@ -107,6 +107,12 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (!startet || !lydCtx()) return;
       if (navn === 'slurk') { horn(0, 0.28); horn(0.36, 0.6); [1.05, 1.25, 1.45].forEach(function (t) { tone(260, t, 0.13, 'sine', 0.35, 780); }); }
       if (navn === 'pop') tone(600, 0, 0.08, 'sine', 0.14, 900);
+      // Figurene: klirr ved skål, kort latter, «ooh», applaus
+      if (navn === 'klirr') { tone(1760, 0, 0.18, 'triangle', 0.12); tone(2637, 0.03, 0.4, 'sine', 0.1); tone(2093, 0.16, 0.3, 'triangle', 0.08); }
+      if (navn === 'latter') { [0, 0.12, 0.24, 0.38].forEach(function (t, i) { tone(330 - i * 20, t, 0.09, 'triangle', 0.1, 260 - i * 20); }); }
+      if (navn === 'ooh') { tone(330, 0, 0.5, 'sine', 0.12, 262); tone(392, 0.02, 0.5, 'sine', 0.06, 311); }
+      if (navn === 'applaus') { for (var ap = 0; ap < 10; ap++) stoy(ap * 0.07 + Math.random() * 0.03, 0.03, 0.12, 2200 + Math.random() * 800, 'bandpass'); }
+      if (navn === 'virvel') { for (var vi = 0; vi < 24; vi++) stoy(vi * 0.05, 0.02, 0.2, 180, 'lowpass'); tone(196, 1.25, 0.5, 'sawtooth', 0.1); }
       if (navn === 'svar') { tone(523, 0, 0.12, 'triangle', 0.18); tone(784, 0.1, 0.25, 'triangle', 0.18); }
       if (navn === 'dundun') { stoy(0, 0.25, 0.5, 120, 'lowpass'); tone(196, 0, 0.3, 'sawtooth', 0.1); tone(185, 0.35, 0.3, 'sawtooth', 0.1); stoy(0.7, 0.5, 0.6, 100, 'lowpass'); tone(156, 0.7, 1.1, 'sawtooth', 0.12, 150, 5); }
       if (navn === 'fanfare') { [523, 659, 784].forEach(function (f, i) { tone(f, i * 0.13, 0.14, 'square', 0.08); }); tone(1047, 0.42, 0.7, 'square', 0.09, null, 6); tone(1319, 0.42, 0.7, 'triangle', 0.12); tone(784, 0.42, 0.7, 'triangle', 0.1); }
@@ -195,7 +201,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (na.fase !== sett.fase && /^kort:lb-(avslort|ferdig)/.test(na.fase)) spill('svar');
       if (na.spillere > sett.spillere) spill('inn');
       if (na.hend && na.hend !== sett.hend && d.hendelse) toast(d.hendelse.tekst);
-      if (na.reak !== sett.reak) flyReak(d.reak || [], sett.reak);
+      if (na.reak !== sett.reak) { flyReak(d.reak || [], sett.reak); stuaReak(d.reak || [], sett.reak); }
       if (na.vann > sett.vann && d.vann) visVann(d.vann.t, drikk.length || knust);
       sett = na;
     }
@@ -1306,7 +1312,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var s = d.spill;
       if (d.ferdig && d.kaaringer) {
         return '<div class="tv-scene tv-slutt"><h1>' + T('Kveldens kåringer', 'Tonight’s awards') + '</h1><div class="tv-kaaringer">' + d.kaaringer.map(function (x, i) {
-          return '<div class="tv-pris" style="animation-delay:' + (i * 0.6) + 's"><span>' + x.ikon + '</span><small>' + esc(x.tittel) + '</small><b>' + esc(x.navn) + '</b><em>' + esc(x.tall) + '</em></div>'; }).join('') + '</div></div>';
+          return '<div class="tv-pris" style="animation-delay:' + (i * 0.6) + 's"><span>' + x.ikon + '</span><small>' + esc(x.tittel) + '</small><b>' + esc(x.navn) + '</b><em>' + esc(x.tall) + '</em></div>'; }).join('') + '</div><div class="tv-stua-plass tv-pall" id="tvStuaPlass"></div></div>';
       }
       if (!s) {
         var qr = window.BDqr ? window.BDqr(lenke()) : '';
@@ -1430,6 +1436,12 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     /* ---------- stua: de samme figurene som på telefonene, og TV-en i stua viser kortet ---------- */
     var tvStuaEl = null, tvStua = null, tvStraffSett = null;
     document.addEventListener('mv-stua-klar', function () { if (tilstand && startet) tegn(); });
+    var REAK_LYD = { '🍻': 'klirr', '😂': 'latter', '😱': 'ooh', '👏': 'applaus', '🤘': 'latter' };
+    function stuaReak(liste, forrige) {
+      if (!tvStua || !forrige) return;
+      liste.forEach(function (r) { if (r.nr > forrige && !r.til) { tvStua.reaksjon(r.fra, r.e, r.b || null); if (REAK_LYD[r.e]) spill(REAK_LYD[r.e]); } });
+    }
+    var tvHendSett = null, tvPallVist = false;
     function tegnTvStua(d) {
       var plass = document.getElementById('tvStuaPlass'); if (!plass || !window.mvLagStua) return;
       if (!tvStuaEl) {
@@ -1445,6 +1457,11 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var s = d.spill, kt = '';
       if (s) kt = s.kort ? (s.kort.regel ? s.kort.regel : (s.kort.t || '')) : (s.tekst || (s.offentlig && s.offentlig.tekst) || '');
       if (kt) tvStua.tv(kt, s.navn); else tvStua.kode(kode);
+      // Det som skjer i spillet, vises på figurene – og pallen når kvelden er over
+      var hn = d.stuaHend;
+      if (hn) { if (tvHendSett === null) tvHendSett = hn.nr; else if (hn.nr > tvHendSett) { tvHendSett = hn.nr; tvStua.hendelse(hn.type, hn.ider); if (hn.type === 'bom') spill('ooh'); if (hn.type === 'vinner') spill('applaus'); } }
+      if (d.ferdig && d.kaaringer && !tvPallVist) { tvPallVist = true; var kv = d.kaaringer.find(function (k) { return k.kode === 'vinner'; }) || d.kaaringer.find(function (k) { return k.kode === 'slapp'; }), kt = d.kaaringer.find(function (k) { return k.kode === 'torst'; }); if (kv) { tvStua.pall(kv.id, kt && kt.id !== kv.id ? kt.id : null); spill('virvel'); setTimeout(function () { spill('applaus'); }, 1500); } }
+      if (!d.ferdig) tvPallVist = false;
       var nr = st.straff ? st.straff.nr : 0;
       if (tvStraffSett === null) tvStraffSett = nr;
       else if (nr > tvStraffSett) { tvStraffSett = nr; tvStua.straff(st.straff.hvem, d.alkoholfri ? T('Straffepoeng!', 'Penalty!') : T('Skål da …', 'Fine, cheers …')); }

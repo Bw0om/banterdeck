@@ -2134,3 +2134,118 @@ button.vl-bane:active{transform:translate(2px,2px)}
   .en-flate>.en-midt{gap:6px;overflow:hidden}
   body:has(.en-flate) .reak-linje{display:none}
 }
+
+/* ---------- Figurene lever: pust, blunk, blikk, bevegelser og ansikt ----------
+   Bevegelsene spilles av som klasser på <g class="figur"> (se stua.js). Bare kroppen beveger seg – skjermen står stille. */
+.figur .beveg,.figur .pust{transform-box:fill-box;transform-origin:50% 100%}
+.figur .arm-h{transform-box:fill-box;transform-origin:0% 100%;opacity:0}
+.figur .arm-v{transform-box:fill-box;transform-origin:100% 100%;opacity:0}
+.figur .hender,.figur .oyne{transform-box:fill-box;transform-origin:50% 50%}
+.figur .hender,.figur .dekk,.figur .horn,.figur .gitar,.figur .tlf,.figur .zzz,.figur .stjerner,.figur .hjerter,.figur .krone-v,.figur .skum{opacity:0}
+.figur .oyne-g,.figur .oyne-h,.figur .oyne-s,.figur .munn-o,.figur .munn-b,.figur .munn-sur,.figur .munn-kinn,.figur .rodme,.figur .svette,.figur .gronn{opacity:0}
+.figur .pupiller{transition:transform 320ms cubic-bezier(.77,0,.175,1)}
+.figur.lever .pust{animation:figPust 3600ms ease-in-out infinite}
+@keyframes figPust{0%,100%{transform:none}50%{transform:scale(1.015,1.03)}}
+.figur.lever .oyne{animation:figBlunk 4300ms ease-in-out infinite;animation-delay:var(--d,0ms)}
+@keyframes figBlunk{0%,93%,100%{transform:none}95.5%{transform:scaleY(.1)}}
+/* ansikt */
+.figur.u-glad .oyne-v,.figur.u-hjerte .oyne-v,.figur.u-spiral .oyne-v{opacity:0}
+.figur.u-glad .oyne-g,.figur.u-hjerte .oyne-h,.figur.u-spiral .oyne-s{opacity:1}
+.figur.u-o .munn-s,.figur.u-bred .munn-s,.figur.u-kinn .munn-s,.figur.u-sur .munn-s{opacity:0}
+.figur.u-o .munn-o,.figur.u-bred .munn-b,.figur.u-kinn .munn-kinn,.figur.u-sur .munn-sur{opacity:1}
+.figur.u-rodme .rodme{opacity:1}.figur.u-gronn .gronn{opacity:.55}
+.figur.u-svette .svette{animation:figSvette 1400ms ease-in infinite}
+@keyframes figSvette{0%{opacity:0;transform:translateY(0)}20%{opacity:1}100%{opacity:0;transform:translateY(10px)}}
+.figur.vinner .krone-v{opacity:1}
+/* reaksjoner */
+.figur.m-skal .arm-h{animation:figArmHev 1200ms cubic-bezier(.23,1,.32,1) both}
+@keyframes figArmHev{0%{opacity:0;transform:rotate(80deg)}18%{opacity:1;transform:rotate(-6deg)}40%{transform:rotate(-16deg)}55%{transform:rotate(2deg)}85%{opacity:1;transform:rotate(0)}100%{opacity:0;transform:rotate(80deg)}}
+.figur.m-skal .skum{animation:figSkum 1200ms ease-out both}
+@keyframes figSkum{0%,38%{opacity:0;transform:translateY(0)}48%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.figur.m-slurk .arm-h{animation:figSlurk 1500ms cubic-bezier(.23,1,.32,1) both}
+@keyframes figSlurk{0%{opacity:0;transform:rotate(80deg)}20%{opacity:1;transform:rotate(-4deg)}35%,70%{transform:rotate(-58deg) translate(-6px,4px)}88%{opacity:1;transform:rotate(0)}100%{opacity:0;transform:rotate(80deg)}}
+.figur.m-latter .beveg{animation:figLatter 900ms ease-in-out both}
+@keyframes figLatter{0%,100%{transform:none}15%{transform:rotate(-6deg) translateY(-2px)}30%{transform:rotate(5deg)}45%{transform:rotate(-5deg) translateY(-2px)}60%{transform:rotate(4deg)}75%{transform:rotate(-3deg)}}
+.figur.m-hopp .beveg{animation:figHopp 720ms cubic-bezier(.23,1,.32,1) both}
+@keyframes figHopp{0%{transform:none}18%{transform:scale(1.08,.86)}45%{transform:translateY(-30px) scale(.94,1.08)}70%{transform:translateY(0) scale(1.06,.9)}100%{transform:none}}
+.figur.m-skvett .beveg{animation:figSkvett 650ms cubic-bezier(.23,1,.32,1) both}
+@keyframes figSkvett{0%{transform:none}25%{transform:translate(-6px,-12px) rotate(-10deg)}60%{transform:translate(-3px,0) rotate(-4deg)}100%{transform:none}}
+.figur.m-klapp .hender{animation:figKlapp 1000ms ease-in-out both}
+@keyframes figKlapp{0%{opacity:0;transform:scaleX(1.4)}10%{opacity:1}20%,50%,80%{transform:scaleX(.55)}35%,65%{transform:scaleX(1.25)}90%{opacity:1;transform:none}100%{opacity:0}}
+.figur.m-hjerte .hjerter{animation:figHjerter 1500ms cubic-bezier(.23,1,.32,1) both}
+@keyframes figHjerter{0%{opacity:0;transform:translateY(6px) scale(.9)}20%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-22px)}}
+.figur.m-hjerte .beveg{animation:figSvai 1500ms ease-in-out both}
+@keyframes figSvai{0%,100%{transform:none}30%{transform:rotate(-5deg)}60%{transform:rotate(4deg)}}
+.figur.m-kvalm .beveg{animation:figKvalm 1500ms ease-in-out both}
+@keyframes figKvalm{0%,100%{transform:none}25%{transform:translateX(-3px) rotate(-3deg)}50%{transform:translateX(3px) rotate(3deg) scaleY(.96)}75%{transform:translateX(-2px)}}
+.figur.m-full .beveg{animation:figFull 1600ms ease-in-out both}
+@keyframes figFull{0%,100%{transform:none}20%{transform:rotate(-12deg)}45%{transform:rotate(9deg) translateX(3px)}70%{transform:rotate(-7deg)}}
+.figur.m-gjem .dekk{animation:figGjem 1500ms ease-in-out both}
+@keyframes figGjem{0%,100%{opacity:0;transform:translateY(16px)}18%,82%{opacity:1;transform:none}}
+.figur.m-gjem .beveg{animation:figKrymp 1500ms ease-in-out both}
+@keyframes figKrymp{0%,100%{transform:none}18%,82%{transform:scaleY(.94) translateY(2px)}}
+.figur.m-rock .arm-v{animation:figRockArm 1400ms ease-in-out both}
+.figur.m-rock .horn{opacity:1}
+@keyframes figRockArm{0%,100%{opacity:0;transform:rotate(-80deg)}15%,85%{opacity:1;transform:rotate(10deg)}}
+.figur.m-rock .pust{animation:figBang 1400ms ease-in-out both}
+@keyframes figBang{0%,100%{transform:none}15%,45%,75%{transform:rotate(8deg) translateY(2px)}30%,60%{transform:rotate(-2deg)}}
+/* signaturbevegelser */
+.figur.m-vink .arm-v{animation:figVink 1300ms ease-in-out both}
+@keyframes figVink{0%{opacity:0;transform:rotate(-80deg)}15%{opacity:1;transform:rotate(0)}30%{transform:rotate(18deg)}45%{transform:rotate(-8deg)}60%{transform:rotate(18deg)}75%{transform:rotate(-4deg)}88%{opacity:1;transform:rotate(0)}100%{opacity:0;transform:rotate(-80deg)}}
+.figur.m-dans .beveg{animation:figDans 1600ms ease-in-out infinite}
+@keyframes figDans{0%,100%{transform:none}12%{transform:rotate(-10deg) translateY(-6px)}25%{transform:rotate(0)}37%{transform:rotate(10deg) translateY(-6px)}50%{transform:none}62%{transform:rotate(-10deg) translateY(-6px)}75%{transform:none}87%{transform:rotate(10deg) translateY(-6px)}}
+.figur.m-dans .arm-h,.figur.m-dans .arm-v{opacity:1;animation:figArmDans 1600ms ease-in-out infinite}
+@keyframes figArmDans{0%,100%{transform:rotate(0)}25%,75%{transform:rotate(-20deg)}50%{transform:rotate(15deg)}}
+.figur.m-snurr .beveg{animation:figSnurr 900ms cubic-bezier(.77,0,.175,1) both}
+@keyframes figSnurr{0%{transform:none}25%{transform:translateY(-14px) scaleX(.1)}50%{transform:translateY(-18px) scaleX(-1)}75%{transform:translateY(-10px) scaleX(.1)}100%{transform:none}}
+.figur.m-bukk .beveg{animation:figBukk 1100ms cubic-bezier(.77,0,.175,1) both}
+@keyframes figBukk{0%,100%{transform:none}35%,65%{transform:rotate(24deg)}}
+.figur.m-gitar .gitar{animation:figPaa 1500ms ease-out both}
+@keyframes figPaa{0%,100%{opacity:0}10%,90%{opacity:1}}
+.figur.m-gitar .beveg{animation:figGitar 1500ms ease-in-out both}
+@keyframes figGitar{0%,100%{transform:none}20%,60%{transform:rotate(-8deg) translateY(-3px)}40%,80%{transform:rotate(-2deg)}}
+.figur.m-moon .beveg{animation:figMoon 1600ms ease-in-out both}
+@keyframes figMoon{0%,100%{transform:none}25%{transform:translateX(-10px) rotate(-5deg)}50%{transform:translateX(-18px)}75%{transform:translateX(-8px) rotate(5deg)}}
+/* publikum og pallen */
+.figur.m-ooh .beveg{animation:figOoh 1500ms cubic-bezier(.23,1,.32,1) both}
+@keyframes figOoh{0%,100%{transform:none}20%,80%{transform:translateY(-4px)}}
+.figur.m-trekk .beveg{animation:figTrekk 1000ms ease-in-out both}
+@keyframes figTrekk{0%,100%{transform:none}30%,70%{transform:translateY(-3px)}}
+.figur.m-trekk .arm-h,.figur.m-trekk .arm-v{animation:figTrekkArm 1000ms ease-in-out both}
+@keyframes figTrekkArm{0%,100%{opacity:0;transform:rotate(0)}30%,70%{opacity:1;transform:rotate(-40deg)}}
+.figur.m-sulk .beveg{animation:figSulk 1200ms cubic-bezier(.77,0,.175,1) forwards}
+@keyframes figSulk{0%{transform:none}100%{transform:rotate(14deg) translateY(4px) scaleY(.94)}}
+.figur.m-besvim .beveg{animation:figBesvim 1400ms cubic-bezier(.77,0,.175,1) forwards}
+@keyframes figBesvim{0%{transform:none}30%{transform:rotate(-8deg)}60%{transform:rotate(70deg) translate(10px,-6px)}100%{transform:rotate(84deg) translate(12px,-6px)}}
+.figur.m-besvim .stjerner{transform-box:fill-box;transform-origin:50% 50%;animation:figStjerner 2200ms linear infinite;animation-delay:1200ms}
+@keyframes figStjerner{0%{opacity:1;transform:rotate(0)}100%{opacity:1;transform:rotate(360deg)}}
+/* hvilevaner */
+.figur.v-gjesp .munn-s{opacity:0}.figur.v-gjesp .munn-o{opacity:1}
+.figur.v-gjesp .beveg{animation:figGjesp 1800ms ease-in-out both}
+@keyframes figGjesp{0%,100%{transform:none}35%,65%{transform:scaleY(1.04) translateY(-2px)}}
+.figur.v-gjesp .zzz{animation:figZzz 1800ms ease-out both}
+@keyframes figZzz{0%,40%{opacity:0;transform:translateY(0)}55%{opacity:1}100%{opacity:0;transform:translate(6px,-12px)}}
+.figur.v-klo .arm-v{animation:figKlo 1600ms ease-in-out both}
+@keyframes figKlo{0%,100%{opacity:0;transform:rotate(-100deg)}20%,80%{opacity:1;transform:rotate(-168deg) translate(-2px,-4px)}35%,65%{transform:rotate(-176deg) translate(-2px,-4px)}50%{transform:rotate(-166deg) translate(-2px,-4px)}}
+.figur.v-tlf .tlf{animation:figTlf 2200ms ease-in-out both}
+@keyframes figTlf{0%,100%{opacity:0;transform:translateY(6px)}15%,85%{opacity:1;transform:none}}
+.figur.v-nynn .beveg{animation:figNynn 2000ms ease-in-out both}
+@keyframes figNynn{0%,100%{transform:none}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+/* diskokula */
+.stua-disco{opacity:0;transition:opacity 400ms ease-out;pointer-events:none}
+.stua-disco.paa{opacity:1}
+.stua-disco .disco-lys{animation:discoLys 1400ms linear infinite}
+@keyframes discoLys{0%,100%{opacity:.28;fill:#7CC6FE}33%{opacity:.18;fill:#FF9CC2}66%{opacity:.24;fill:#FFD23F}}
+.stua-disco .disco-kule{transform-box:fill-box;transform-origin:50% 50%;animation:discoSnurr 3000ms linear infinite}
+@keyframes discoSnurr{to{transform:rotate(360deg)}}
+/* reaksjonsraden: ti reaksjoner, fem bak «+» */
+.reak-linje .reak-mer{font-size:18px;font-weight:900}
+.reak-linje .reak-ekstra{display:none;gap:4px}
+.reak-linje.aapen .reak-ekstra{display:inline-flex}
+.reak-linje.aapen>button[data-g=reager]{display:none}
+.figur-preview.figur .beveg,.figur-preview.figur .pust{transform-origin:50% 100%}
+.tv-pall{margin-top:2vh;width:min(60vw,760px)}
+@media (prefers-reduced-motion:reduce){
+  .figur .beveg,.figur .pust,.figur .oyne,.figur .arm-h,.figur .arm-v,.figur .hender,.figur .dekk,.figur .hjerter,.figur .zzz,.figur .tlf,.figur .gitar,.figur .stjerner,.figur .skum,.figur .svette,.stua-disco *{animation:none !important}
+  .figur .pupiller{transition:none}
+}

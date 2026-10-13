@@ -299,6 +299,20 @@ The bench of heads where the host tapped who was drinking is gone.
 - **«📺 Vis på TV»** is now a quick button for the host in both the lobby and a game. The box shows two ways in. One is «Alle har telefon?», where you open the TV's browser and scan. The other is «Bare din telefon?», where you mirror the phone with AirPlay or Smart View. Sofa mode shows mirroring first.
 - **The sofa on its side:** when the phone is in landscape (for mirroring), sofa games fill the screen. The card is on the left and the countdown or bomb plus the button are on the right. The reactions bar and the rest of the page are hidden.
 
+
+## The figures come alive
+
+Everything happens in the existing living room (`src/klient/stua.js`), on every phone and on the TV. A move is a class on `<g class="figur">` that CSS in `stua.css` plays once. The body sits in two layers, `.beveg` for moves and `.pust` for breathing, under the `.kropp` group that the JS positions. Arms, raised hands, a glass, and alternate eyes and mouths are drawn in every figure and hidden until a class shows them.
+
+- **Always on:** everyone breathes (3.6 s) and blinks in their own rhythm (`--d` per figure). Pupils look at whoever just reacted.
+- **Ten reactions:** the five from before plus 😍 🤢 🥴 🙈 🤘, behind a «+» in the reaction row (the + swaps the set so the bar stays one row). Each one becomes a move with a face: toast, laugh, jump, startle, clap, hearts, green, dizzy, hide, headbang. Cheers, laughter and applause spread: the others do the same 90 ms apart. One reaction per person every 2 s.
+- **Your move:** tapping yourself in the room sends `beveg`. Wave is free for everyone. The others (dance, bow, spin, air guitar, moonwalk) are unlocked like the outfit, in «Figuren din» under the new Moves tab, and the server only accepts the one on your account.
+- **The game drives the face:** `stuaHendelse` on the server (`drikk` from giSlurker, `bom` from the sofa bomb). Drinking means a sip with full cheeks and one other laughs. The bomb means everyone turns with an o-mouth.
+- **The podium:** when the night ends, the winner (or whoever got away with the fewest sips) jumps onto the table with a crown and dances, the thirstiest faints with stars, the rest clap. The TV plays a drum roll and applause.
+- **Disco:** two people dancing within three seconds lowers a disco ball and the whole room dances.
+- **Idle habits:** every 20–40 s a figure yawns, checks their phone, scratches their head or hums. Two minutes with nothing happening, and everyone yawns.
+- **Reduced motion:** no moves, only the emoji bubble; the crown still shows.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

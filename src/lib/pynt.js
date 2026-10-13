@@ -18,8 +18,18 @@ export const PYNT = [
   { id: 'hund', slot: 'venn', navn: ['Hund', 'Dog'], laas: ['Bli Mest gavmild', 'Be the most generous'], kaaring: 'gavmild' },
   { id: 'katt', slot: 'venn', navn: ['Katt', 'Cat'], laas: ['Spill tre kvelder', 'Play three nights'], kvelder: 3 },
   { id: 'and', slot: 'venn', navn: ['And', 'Duck'], laas: ['Spill fem kvelder', 'Play five nights'], kvelder: 5 },
+  // Bevegelser: figuren gjør «din» bevegelse når du trykker på deg selv i stua
+  { id: 'vink', slot: 'beveg', navn: ['Vink', 'Wave'], laas: ['Spill din første kveld', 'Play your first night'], kvelder: 1 },
+  { id: 'dans', slot: 'beveg', navn: ['Dans', 'Dance'], laas: ['Spill tre kvelder', 'Play three nights'], kvelder: 3 },
+  { id: 'bukk', slot: 'beveg', navn: ['Bukk', 'Bow'], laas: ['Bli Mest gavmild', 'Be the most generous'], kaaring: 'gavmild' },
+  { id: 'snurr', slot: 'beveg', navn: ['Snurr', 'Spin'], laas: ['Vinn kvelden', 'Win the night'], kaaring: 'vinner' },
+  { id: 'gitar', slot: 'beveg', navn: ['Luftgitar', 'Air guitar'], laas: ['Spill sju kvelder', 'Play seven nights'], kvelder: 7 },
+  { id: 'moon', slot: 'beveg', navn: ['Moonwalk', 'Moonwalk'], laas: ['Spill ti kvelder', 'Play ten nights'], kvelder: 10 },
 ];
-export const SLOTS = ['hode', 'ansikt', 'bryst', 'venn'];
+export const SLOTS = ['hode', 'ansikt', 'bryst', 'venn', 'beveg'];
+/** Bevegelsen alle kan gjøre uten konto. */
+export const BEVEG_GRATIS = 'vink';
+export function erBeveg(id) { const p = AV_ID[id]; return !!p && p.slot === 'beveg'; }
 const AV_ID = Object.fromEntries(PYNT.map((p) => [p.id, p]));
 
 /** Stua kan se annerledes ut. Pluss-temaene velger verten når rommet har Pluss. Julebordstua er gratis i desember. */
