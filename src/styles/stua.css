@@ -988,6 +988,35 @@ html.i-spill .rom-kode{font-size:.92em}
 .ee-hode.stol .ee-navn{background:var(--gul);color:var(--blekk);border:2px solid var(--blekk)}
 @media (prefers-reduced-motion:reduce){.ns-kort.inn{animation:jaToning 240ms ease both}}
 
+/* ---------- Låtbekjennelsen: platen, Spotify og takt på benken ---------- */
+.rom-spill:has(.lb-kort){align-items:stretch;text-align:left;gap:0}
+.lb-kort p{font-size:clamp(23px,7vw,28px)}
+.lb-skjema{margin:0 0 12px}
+.lb-skjema div{flex-direction:column;gap:10px}
+.lb-skjema input{font-size:20px;padding:14px}
+.lb-skjema button{min-height:56px;font-size:20px;box-shadow:5px 5px 0 var(--hard)}
+.lb-min{margin:4px 0 2px;font-size:26px;text-transform:none}
+.lb-lat{display:flex;align-items:center;gap:14px;margin:0 0 14px}
+.lb-plate{flex:none;width:104px}
+.lb-plate.inn{animation:lbUt 700ms var(--fjaer) both}
+@keyframes lbUt{from{transform:translateX(-40%) rotate(-90deg);opacity:0}to{transform:none;opacity:1}}
+.lb-spinn{display:block;width:100%;height:auto;animation:lbSpinn 1.8s linear infinite}
+@keyframes lbSpinn{to{transform:rotate(360deg)}}
+.lb-lat-tekst{display:flex;flex-direction:column;gap:3px;min-width:0}
+.lb-lat-tekst b{font-family:var(--display);font-size:28px;font-weight:900;font-stretch:70%;text-transform:uppercase;line-height:.95;color:var(--ink);overflow-wrap:anywhere}
+.lb-lat-tekst span{font-size:15px;font-weight:800;color:var(--muted)}
+.lb-spotify{align-self:flex-start;margin-top:6px;padding:6px 12px;font-size:14px;font-weight:900;color:var(--blekk);background:var(--mint);border:2.5px solid var(--blekk);border-radius:999px;box-shadow:3px 3px 0 var(--hard);text-decoration:none;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.lb-spotify:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+.rr-dom.lb-gul{background:var(--gul)}
+.lb-logg{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:6px}
+.lb-logg li{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:14px;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:6px}
+.lb-logg i{flex:none;width:14px;height:14px;border-radius:50%;background:var(--f);border:2px solid var(--blekk)}
+.lb-logg span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-logg em{font-style:normal;font-weight:900}
+.ee-benk.takt .ee-hode .mv-hode{transform-origin:50% 100%;animation:lbTakt 500ms ease-in-out infinite alternate;animation-delay:calc(var(--i) * -120ms)}
+@keyframes lbTakt{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+@media (prefers-reduced-motion:reduce){.lb-spinn,.lb-plate.inn,.ee-benk.takt .ee-hode .mv-hode{animation:none}}
+
 /* ---------- Pekeleken: to måter å peke på, og «stem på mobilen» ---------- */
 .pk-variant{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin:8px 0 6px;border:2.5px solid var(--ink);border-radius:8px;overflow:hidden}
 .pk-variant button{min-height:40px;padding:6px 8px;font:inherit;font-size:13px;font-weight:900;color:var(--ink);background:var(--card);border:0;cursor:pointer;transition:background-color 160ms ease,color 160ms ease}

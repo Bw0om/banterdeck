@@ -161,6 +161,15 @@ Writing is three things only: the pie clock, the card you write on and your pile
 - Gamle lenker og planer virker: 50/50 og Duoleken starter Pekeleken, Sannhet eller drikk starter Nødt eller sannhet (snill/drøy følger med).
 - Lobbyen har én kort linje per kortlek om hva som skjer («Bomba går rundt. Ingen vet når den smeller.»).
 
+### Låtbekjennelsen
+
+- **En runde er 8 kategorier.** Alle skriver inn én låt («Låt – artist») i hemmelighet, 60 sekunder (kortes til to når alle har valgt). Hodene reiser seg når folk har valgt.
+- **Låtene kommer én og én** i tilfeldig rekkefølge. Platen glir ut med fjær og snurrer (lineært, konstant), og hodene på benken vugger i takt. **Bare verten** har «Spill på Spotify» (åpner Spotify-søket på låta), så ingen starter den samtidig.
+- **Hvem valgte den?** Alle andre trykker på et hode (ikke seg selv). Eieren ser «Din låt! Hold maska.». Feil gjett drikker én. Avsløringen: eieren får gul navnelapp, alle ser på hen, «… – fortell!».
+- **Beste historie:** etter siste låt stemmer alle (ikke på seg selv). Vinneren deler ut 3. Så vises hvem som valgte hva, med platefargen ved hver låt.
+- Kåring «Historiefortelleren» (beste historie minst to ganger).
+- **Klokka i alle leker:** telefonene ber om «tid ute» tidligst 0,9 s etter at klokka viser 0, så serveren alltid godtar det (før kunne en kategori bli stående hvis alle spurte for tidlig).
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
