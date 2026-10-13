@@ -54,303 +54,378 @@
  "bloff": [
   {
    "q": "Hva er Skottlands nasjonaldyr?",
-   "a": "Enhjørningen"
+   "a": "Enhjørningen",
+   "fakta": "Enhjørningen har vært et skotsk symbol siden 1400-tallet – i det kongelige våpenet står den i lenker."
   },
   {
    "q": "Hvor mange hjerter har en blekksprut?",
-   "a": "Tre"
+   "a": "Tre",
+   "fakta": "To av hjertene pumper blod gjennom gjellene, det tredje sender det ut i resten av kroppen."
   },
   {
    "q": "Hva ble Coca-Cola opprinnelig solgt som?",
-   "a": "Medisin"
+   "a": "Medisin",
+   "fakta": "Apotekeren John Pemberton lagde den i 1886 og solgte den som et tonikum mot blant annet hodepine."
   },
   {
    "q": "Hva kalles en flokk flamingoer på engelsk?",
-   "a": "A flamboyance"
+   "a": "A flamboyance",
+   "fakta": "Flamingoer er rosa fordi de spiser alger og små krepsdyr med fargestoffer."
   },
   {
    "q": "Hvilket land har flest innsjøer i verden?",
-   "a": "Canada"
+   "a": "Canada",
+   "fakta": "Rundt 60 prosent av alle innsjøer i verden ligger i Canada."
   },
   {
    "q": "Hva het Google før det het Google?",
-   "a": "BackRub"
+   "a": "BackRub",
+   "fakta": "Søkemotoren het BackRub fordi den telte lenker tilbake til nettsidene."
   },
   {
    "q": "Hvor lenge varte den korteste krigen i historien?",
-   "a": "Rundt 38 minutter"
+   "a": "Rundt 38 minutter",
+   "fakta": "Krigen mellom Storbritannia og Zanzibar i 1896 var over etter rundt 38 minutter."
   },
   {
    "q": "Hvilken farge har isbjørnens hud?",
-   "a": "Svart"
+   "a": "Svart",
+   "fakta": "Pelsen er egentlig gjennomsiktig – den ser hvit ut fordi den sprer lyset."
   },
   {
    "q": "Hva kalles redselen for lange ord?",
-   "a": "Hippopotomonstrosesquippedaliofobi"
+   "a": "Hippopotomonstrosesquippedaliofobi",
+   "fakta": "Ordet er laget så langt som mulig med vilje – en spøk på bekostning av dem som er redde."
   },
   {
    "q": "Hvilket land fant opp ostehøvelen?",
-   "a": "Norge"
+   "a": "Norge",
+   "fakta": "Thor Bjørklund fra Lillehammer patenterte ostehøvelen i 1925."
   },
   {
    "q": "Hva ble bindersen et symbol på i Norge under andre verdenskrig?",
-   "a": "Motstand mot okkupasjonen"
+   "a": "Motstand mot okkupasjonen",
+   "fakta": "Nordmenn bar binders på jakkeslaget som et stille tegn på samhold mot okkupantene."
   },
   {
    "q": "Hvilket dyr har firkantet bæsj?",
-   "a": "Vombaten"
+   "a": "Vombaten",
+   "fakta": "Vombaten legger de små kubene på steiner og stubber for å merke reviret sitt."
   },
   {
    "q": "Hva kalles plastbiten ytterst på en skolisse?",
-   "a": "Aglett"
+   "a": "Aglett",
+   "fakta": "Ordet kommer fra fransk aiguillette, «liten nål»."
   },
   {
    "q": "Hvilket dyr står på Wales' flagg?",
-   "a": "En rød drage"
+   "a": "En rød drage",
+   "fakta": "Den røde dragen, Y Ddraig Goch, har vært et walisisk symbol i over tusen år."
   },
   {
    "q": "Hvilken fugl kan fly baklengs?",
-   "a": "Kolibrien"
+   "a": "Kolibrien",
+   "fakta": "Kolibrien kan også stå stille i lufta – vingene slår i en åttetallsbevegelse."
   },
   {
    "q": "Hvilken planet roterer motsatt vei av de fleste andre?",
-   "a": "Venus"
+   "a": "Venus",
+   "fakta": "På Venus går sola opp i vest, og et døgn der er lengre enn et år."
   },
   {
    "q": "Hvor mange øyne har en honningbie?",
-   "a": "Fem"
+   "a": "Fem",
+   "fakta": "Bien har to store fasettøyne og tre små punktøyne på toppen av hodet."
   },
   {
    "q": "Hva er verdens dyreste krydder?",
-   "a": "Safran"
+   "a": "Safran",
+   "fakta": "Hver krokusblomst gir bare tre små arr – det trengs rundt 150 000 blomster for ett kilo."
   },
   {
    "q": "Hvor mange bein har en hummer?",
-   "a": "Ti"
+   "a": "Ti",
+   "fakta": "Hummeren er en tifotkreps – de to største beina er klørne."
   },
   {
    "q": "Hvilken amerikansk delstat har bare én stavelse i navnet?",
-   "a": "Maine"
+   "a": "Maine",
+   "fakta": "Maine er også den eneste delstaten som grenser til bare én annen delstat."
   },
   {
    "q": "Hvor kommer Tetris-melodien fra?",
-   "a": "En russisk folkesang"
+   "a": "En russisk folkesang",
+   "fakta": "Melodien er folkesangen «Korobeiniki» fra 1800-tallet, om en omreisende selger."
   },
   {
    "q": "Hvilket dyr kan ikke kaste opp?",
-   "a": "Hesten"
+   "a": "Hesten",
+   "fakta": "Musklene ved inngangen til magen er så sterke at maten bare går én vei."
   },
   {
    "q": "Hvor i kroppen sitter kroppens minste bein?",
-   "a": "I øret"
+   "a": "I øret",
+   "fakta": "Stigbøylen i mellomøret er bare rundt tre millimeter lang."
   },
   {
    "q": "Hva betyr navnet LEGO?",
-   "a": "Lek godt (på dansk)"
+   "a": "Lek godt (på dansk)",
+   "fakta": "Ole Kirk Christiansen lagde navnet av «leg godt» i 1934."
   },
   {
    "q": "Hvilket land har flest pyramider?",
-   "a": "Sudan"
+   "a": "Sudan",
+   "fakta": "Sudan har over 200 pyramider fra det gamle kongeriket Kush – flere enn Egypt."
   },
   {
    "q": "Hvilken farge hadde gulrøtter før de ble oransje?",
-   "a": "Lilla"
+   "a": "Lilla",
+   "fakta": "Oransje gulrøtter ble vanlige i Nederland på 1600-tallet."
   },
   {
    "q": "Hvilket dyr har verdens sterkeste bitt?",
-   "a": "Saltvannskrokodillen"
+   "a": "Saltvannskrokodillen",
+   "fakta": "Bittet er målt til over 16 000 newton – mer enn noe annet dyr som er målt."
   },
   {
    "q": "Hva er Norges nasjonalinstrument?",
-   "a": "Hardingfela"
+   "a": "Hardingfela",
+   "fakta": "Hardingfela har fire eller fem understrenger som klinger med når man spiller."
   },
   {
    "q": "Hvilken by var Norges hovedstad før Oslo?",
-   "a": "Bergen"
+   "a": "Bergen",
+   "fakta": "Bergen var hovedstad på 1200-tallet, før Håkon 5. flyttet makten til Oslo rundt år 1300."
   },
   {
    "q": "Hvilket pattedyr legger egg?",
-   "a": "Nebbdyret"
+   "a": "Nebbdyret",
+   "fakta": "Nebbdyret har heller ikke mage – spiserøret går rett til tarmen."
   },
   {
    "q": "Hvilket land har flest tidssoner (med alle territorier)?",
-   "a": "Frankrike"
+   "a": "Frankrike",
+   "fakta": "Med alle oversjøiske områder spenner Frankrike over 12 tidssoner."
   },
   {
    "q": "Hva het den første sauen som ble klonet?",
-   "a": "Dolly"
+   "a": "Dolly",
+   "fakta": "Dolly ble født i Skottland i 1996 og ble oppkalt etter Dolly Parton."
   },
   {
    "q": "Hvilken frukt er egentlig et bær: banan eller jordbær?",
-   "a": "Banan"
+   "a": "Banan",
+   "fakta": "Jordbær er botanisk sett ikke et bær – frøene sitter på utsiden."
   },
   {
    "q": "Hvilket dyr har blått blod?",
-   "a": "Blekkspruten"
+   "a": "Blekkspruten",
+   "fakta": "Blodet bruker kobber i stedet for jern til å frakte oksygen, og derfor er det blått."
   },
   {
    "q": "Hvilket hav er verdens største?",
-   "a": "Stillehavet"
+   "a": "Stillehavet",
+   "fakta": "Stillehavet er større enn alt landet på jorda til sammen."
   },
   {
    "q": "Hvilken bokstav finnes ikke i navnet til noen amerikansk delstat?",
-   "a": "Q"
+   "a": "Q",
+   "fakta": "Til sammenligning finnes J bare i ett delstatsnavn: New Jersey."
   },
   {
    "q": "Hvilken by får et juletre fra Oslo hvert år som takk for hjelpen under krigen?",
-   "a": "London"
+   "a": "London",
+   "fakta": "Treet hentes fra skogene rundt Oslo og har stått på Trafalgar Square hvert år siden 1947."
   },
   {
    "q": "Hvor mange tangenter har et vanlig piano?",
-   "a": "88"
+   "a": "88",
+   "fakta": "52 hvite og 36 svarte."
   },
   {
    "q": "Hva er det eneste kontinentet uten maur?",
-   "a": "Antarktis"
+   "a": "Antarktis",
+   "fakta": "Maur finnes på alle andre kontinenter, og det er kjent over 12 000 arter."
   },
   {
    "q": "Hvilke tenner mangler sjiraffer i overkjeven?",
-   "a": "Fortennene"
+   "a": "Fortennene",
+   "fakta": "Sjiraffen napper bladene med tunga mot en hard tannplate i overkjeven."
   },
   {
    "q": "Hvilket land har flest øyer i verden?",
-   "a": "Sverige"
+   "a": "Sverige",
+   "fakta": "Sverige har over 260 000 øyer, og de fleste er ubebodde."
   },
   {
    "q": "Hvor mange ganger bredere enn jorda er sola?",
-   "a": "Rundt 109 ganger"
+   "a": "Rundt 109 ganger",
+   "fakta": "Over en million jordkloder ville fått plass inni sola."
   },
   {
    "q": "Hva var den første varen som ble skannet med strekkode i en butikk?",
-   "a": "En pakke tyggegummi"
+   "a": "En pakke tyggegummi",
+   "fakta": "Det var en pakke Wrigley's tyggis i en butikk i Ohio i 1974."
   },
   {
    "q": "Hvilket dyr sover med halve hjernen om gangen?",
-   "a": "Delfinen"
+   "a": "Delfinen",
+   "fakta": "Halve hjernen hviler, mens den andre halvdelen passer på pusten og faren rundt."
   },
   {
    "q": "Hvilken farge har en flamingo når den klekkes?",
-   "a": "Grå"
+   "a": "Grå",
+   "fakta": "Den rosa fargen kommer først etter et par år, fra maten."
   },
   {
    "q": "Hvilket land drikker mest kaffe per innbygger?",
-   "a": "Finland"
+   "a": "Finland",
+   "fakta": "En finne drikker i snitt rundt 12 kilo kaffe i året."
   },
   {
    "q": "Hvor mye vann kan en tørst kamel drikke på en gang?",
-   "a": "Rundt 100 liter"
+   "a": "Rundt 100 liter",
+   "fakta": "Vannet lagres ikke i pukkelen – den er full av fett."
   },
   {
    "q": "Hva kalles en flokk kråker på engelsk?",
-   "a": "A murder"
+   "a": "A murder",
+   "fakta": "Navnet kommer fra gammel folketro om at kråker varslet død."
   },
   {
    "q": "Hva er Norges lengste fjord?",
-   "a": "Sognefjorden"
+   "a": "Sognefjorden",
+   "fakta": "Sognefjorden er over 200 kilometer lang og over 1300 meter dyp."
   },
   {
    "q": "Hva heter broren til Snoopy?",
-   "a": "Spike"
+   "a": "Spike",
+   "fakta": "Spike bor alene i ørkenen utenfor Needles i California."
   },
   {
    "q": "Hvilket land har det eldste nasjonalflagget som fortsatt er i bruk?",
-   "a": "Danmark"
+   "a": "Danmark",
+   "fakta": "Ifølge sagnet falt Dannebrog ned fra himmelen i 1219."
   },
   {
    "q": "Hva heter hesten til Pippi Langstrømpe?",
-   "a": "Lille Gubben"
+   "a": "Lille Gubben",
+   "fakta": "Pippi er så sterk at hun kan løfte hesten med bare hendene."
   },
   {
    "q": "Hva var bobleplast opprinnelig ment å være?",
-   "a": "Tapet"
+   "a": "Tapet",
+   "fakta": "To oppfinnere lagde det i 1957 som tapet med struktur – det ble først en suksess som emballasje."
   },
   {
    "q": "Hva ble Play-Doh opprinnelig solgt som?",
-   "a": "Rengjøringsmiddel for tapet"
+   "a": "Rengjøringsmiddel for tapet",
+   "fakta": "Da folk sluttet å fyre med kull, trengte ingen tapetrensen lenger – så den ble leketøy."
   },
   {
    "q": "Hvilket land produserer mest kaffe i verden?",
-   "a": "Brasil"
+   "a": "Brasil",
+   "fakta": "Brasil har vært verdens største kaffeprodusent i over 150 år."
   },
   {
    "q": "Hva heter verdens høyeste foss?",
-   "a": "Angelfallet i Venezuela"
+   "a": "Angelfallet i Venezuela",
+   "fakta": "Vannet faller 979 meter – nesten en kilometer."
   },
   {
    "q": "Hvilken planet har flest kjente måner?",
-   "a": "Saturn"
+   "a": "Saturn",
+   "fakta": "Saturn har over 270 kjente måner, og det oppdages stadig flere."
   },
   {
    "q": "Hvor lang tid bruker lyset fra sola på å nå jorda?",
-   "a": "Rundt åtte minutter"
+   "a": "Rundt åtte minutter",
+   "fakta": "Mer nøyaktig rundt 8 minutter og 20 sekunder."
   },
   {
    "q": "Hvilket indre organ kan vokse ut igjen?",
-   "a": "Leveren"
+   "a": "Leveren",
+   "fakta": "Selv om bare en fjerdedel er igjen, kan leveren vokse tilbake til nesten full størrelse."
   },
   {
    "q": "Hvilket land har ingen offisiell hovedstad?",
-   "a": "Nauru"
+   "a": "Nauru",
+   "fakta": "Nauru er en av verdens minste stater, med rundt 12 000 innbyggere."
   },
   {
    "q": "Hvor gammel kan en grønlandshai bli?",
-   "a": "Rundt 400 år"
+   "a": "Rundt 400 år",
+   "fakta": "Den blir ikke kjønnsmoden før den er rundt 150 år."
   },
   {
    "q": "Hvilket dyr har fingeravtrykk nesten helt like menneskets?",
-   "a": "Koalaen"
+   "a": "Koalaen",
+   "fakta": "Avtrykkene er så like at de i teorien kan forveksles med menneskers på et åsted."
   },
   {
    "q": "Hva het den første hunden i bane rundt jorda?",
-   "a": "Lajka"
+   "a": "Lajka",
+   "fakta": "Lajka ble sendt opp med Sputnik 2 i 1957."
   },
   {
    "q": "Hva oppfant nordmannen Erik Rotheim?",
-   "a": "Sprayboksen"
+   "a": "Sprayboksen",
+   "fakta": "Rotheim patenterte ideen til sprayboksen på 1920-tallet."
   },
   {
    "q": "Hvilket land har et flagg som ikke er firkantet?",
-   "a": "Nepal"
+   "a": "Nepal",
+   "fakta": "Flagget består av to trekanter stablet oppå hverandre."
   },
   {
    "q": "Hvor mange ganger i minuttet kan hjertet til en kolibri slå?",
-   "a": "Over tusen"
+   "a": "Over tusen",
+   "fakta": "Hjertet kan slå over 1200 ganger i minuttet."
   },
   {
    "q": "Hvilken farge har tunga til en sjiraff?",
-   "a": "Blålilla"
+   "a": "Blålilla",
+   "fakta": "Den mørke fargen tror man beskytter tunga mot solbrenthet."
   },
   {
    "q": "Hvilken plante kommer vanilje fra?",
-   "a": "En orkidé"
+   "a": "En orkidé",
+   "fakta": "Utenfor Mexico må vaniljeblomstene pollineres for hånd."
   },
   {
    "q": "Hvem er Bluetooth oppkalt etter?",
-   "a": "Harald Blåtann, en dansk konge"
+   "a": "Harald Blåtann, en dansk konge",
+   "fakta": "Logoen er Harald Blåtanns initialer skrevet med runer."
   },
   {
    "q": "Hvilket land tok i bruk papirpenger først?",
-   "a": "Kina"
+   "a": "Kina",
+   "fakta": "Kina brukte papirpenger for over tusen år siden."
   },
   {
    "q": "Hvilken mat blir i praksis aldri dårlig?",
-   "a": "Honning"
+   "a": "Honning",
+   "fakta": "Arkeologer har funnet tusenvis av år gammel honning i egyptiske graver som fortsatt var spiselig."
   },
   {
    "q": "Hvilket landdyr er lengst drektig?",
-   "a": "Elefanten – nesten to år"
+   "a": "Elefanten – nesten to år",
+   "fakta": "Elefanten går drektig i rundt 22 måneder."
   },
   {
    "q": "Hvor mange strenger har en vanlig fiolin?",
-   "a": "Fire"
+   "a": "Fire",
+   "fakta": "Strengene er stemt i G, D, A og E."
   },
   {
    "q": "Hva ville Walt Disney opprinnelig kalle Mikke Mus?",
-   "a": "Mortimer"
+   "a": "Mortimer",
+   "fakta": "Det var kona hans, Lillian, som foreslo navnet Mickey."
   },
   {
    "q": "Hvilken by har verdens eldste T-bane?",
-   "a": "London"
+   "a": "London",
+   "fakta": "Den første strekningen åpnet i 1863, med damplokomotiver."
   }
  ],
  "samme": [

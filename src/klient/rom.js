@@ -946,7 +946,7 @@ export function startRom(LEKNAVN, LANG) {
     tosannheter: [['Én sitter i stolen og skriver tre ting om seg selv – to sanne og én løgn.', 'One player sits in the chair and writes three things about themselves – two true, one lie.'], ['De andre trykker på kortet de tror er løgnen. Når alle har stemt, snus kortene.', 'Everyone else taps the card they think is the lie. When everyone has voted, the cards flip.'], ['Bommet eller ikke stemt: drikk 1. Stolen drikker 1 per person som så løgnen. Alle sitter i stolen én gang.', 'Missed or didn’t vote: drink 1. The chair drinks 1 per person who saw the lie. Everyone takes the chair once.']],
     regelfabrikken: [['Alle skriver så mange drikkekort de rekker før tiden går ut.', 'Everyone writes as many drinking cards as they can before time runs out.'], ['Kortene stokkes og trekkes ett og ett.', 'The cards are shuffled and drawn one by one.'], ['Gjør det kortet sier!', 'Do what the card says!']],
     bussruta: [['Billetten: på din tur svarer du fire ganger om kortene dine – riktig = del ut, feil = drikk.', 'The ticket: on your turn you answer four questions about your cards – right = hand out, wrong = drink.'], ['Pyramiden snus av seg selv. Har du kortet, legger du det på og deler ut like mange som raden.', 'The pyramid flips by itself. Have the card? Play it and hand out as many as the row number.'], ['Bussen: den med flest kort igjen kjører. Fem trygge kort på rad, ellers drikk og tilbake til start.', 'The bus: whoever has the most cards left rides it. Five safe cards in a row, or drink and back to the start.']],
-    yatzy: [['Trykk på begeret når det er din tur – opptil tre kast. Trykk på en terning for å holde den.', 'Tap the cup on your turn – up to three rolls. Tap a die to hold it.'], ['Trykk på en rad i blokka for å føre. Ener i kastet = drikk 2, fire like = drikk summen, Yatzy = del ut 5.', 'Tap a row on the scorecard to score. A one in the roll = drink 2, four of a kind = drink the sum, Yahtzee = hand out 5.'], ['Den med minst til slutt drikker opp. Verten kan stryke et felt for den som somler.', 'Lowest score at the end finishes their drink. The host can scratch a box for anyone who stalls.']],
+    yatzy: [['Trykk på begeret når det er din tur – opptil tre kast. Trykk på en terning for å holde den.', 'Tap the cup on your turn – up to three rolls. Tap a die to hold it.'], ['Trykk på en rad i blokka for å føre. Ener i kastet = drikk 2, fire like = drikk summen, Yatzy = del ut 5.', 'Tap a row on the scorecard to score. A one in the roll = drink 2, four of a kind = drink the sum, Yahtzee = hand out 5.'], ['Stryker du et felt, drikker du 2. Den med minst til slutt drikker opp. Verten kan stryke et felt for den som somler.', 'Scratch a box and you drink 2. Lowest score at the end finishes their drink. The host can scratch a box for anyone who stalls.']],
     overunder: [['Den som har tur, gjetter om neste kort er over eller under. Verten kan trykke for den som ikke har telefonen oppe.', 'Whoever’s turn it is guesses if the next card is higher or lower. The host can tap for anyone without their phone out.'], ['Riktig: potten vokser med én slurk, og turen går videre.', 'Right: the pot grows by one sip and the turn moves on.'], ['Feil eller likt: du drikker hele potten. Når stokken er tom, er leken over.', 'Wrong or equal: you drink the whole pot. When the deck runs out, the game is over.']],
     veddelopet: [['Trykk på banen til hesten du tror vinner, og velg innsats.', 'Tap the lane of the horse you think wins and pick your stake.'], ['Når alle har veddet, går løpet av seg selv – ett kort i sekundet. Sidekortene sender en hest ett steg tilbake.', 'When everyone has bet, the race runs itself – one card a second. Side cards send a horse one step back.'], ['Vinnerne deler ut dobbelt – de andre drikker innsatsen.', 'The winners hand out double – everyone else drinks their stake.']],
     pyramiden: [['Fire kort med baksiden opp – hold fingeren på dem for å kikke. Pyramiden snus av seg selv, ett kort hvert tiende sekund.', 'Four face-down cards – hold your finger on them to peek. The pyramid flips by itself, one card every ten seconds.'], ['Legg et kort med baksiden opp på det som er snudd, og del ut radens slurker. Riktig verdi er sant, feil er bløff.', 'Lay a card face down on the flipped one and hand out the row’s sips. Same value is true, anything else is a bluff.'], ['Rop LØGN! Bløff = den som la på drikker dobbelt og får kortet tilbake. Sant = du drikker dobbelt. Ingen roper: kortet er borte.', 'Call LIAR! Bluff = they drink double and take the card back. True = you drink double. Nobody calls: the card is gone.']],
@@ -2709,7 +2709,6 @@ export function startRom(LEKNAVN, LANG) {
       '</div>' + kast +
       videreKnapp(s, T('Trekk neste', 'Draw next')) +
       '<p class="sd-med">' + (vert && !s.egen && !kk ? '<button class="linkbtn" data-g="rf-kast" type="button">' + T('Kast i Skammekroken', 'Bin to the corner of shame') + '</button> · ' : '') +
-        (vert ? '<button class="linkbtn" data-g="nytt" type="button">' + (s.egen ? T('Stokk på nytt', 'Shuffle again') : T('Ny skriverunde', 'New writing round')) + '</button> · ' : '') +
         (!s.egen && s.alleKort ? '<button class="linkbtn" data-g="lagrestokk" type="button">' + T('Lagre kortene', 'Save the cards') + '</button>' : '') + '</p>';
   }
 
@@ -2922,7 +2921,9 @@ export function startRom(LEKNAVN, LANG) {
       lapp = '<p class="yz-lapp ' + (d.yatzy ? 'gull' : 'rod') + (nytt ? ' inn' : '') + '" aria-live="polite">' + deler.join(' · ') + '</p>';
     } else if (!s.kast && s.sistFelt) {
       var sf = s.sistFelt, sv = (s.blokker[sf.id] || {})[sf.f];
-      lapp = '<p class="yz-lapp">' + (sf.id === meg ? T('Du', 'You') : esc(navn(sf.id))) + (sf.stroket ? T(' fikk ', ' had ') + yzFeltNavn(sf.f) + T(' strøket', ' scratched') : T(' førte ', ' scored ') + sv + T(' på ', ' in ') + yzFeltNavn(sf.f)) + '</p>';
+      var hvemF = sf.id === meg ? T('Du', 'You') : esc(navn(sf.id));
+      lapp = '<p class="yz-lapp' + (sf.drakk ? ' rod' : '') + '">' + hvemF + (sf.stroket ? T(' fikk ', ' had ') + yzFeltNavn(sf.f) + T(' strøket', ' scratched') : sf.drakk ? T(' strøk ', ' scratched ') + yzFeltNavn(sf.f) : T(' førte ', ' scored ') + sv + T(' på ', ' in ') + yzFeltNavn(sf.f)) +
+        (sf.drakk ? (sf.id === meg ? T(' – drikk ', ' – drink ') : T(' – drikker ', ' – drinks ')) + sf.drakk : '') + '</p>';
     }
     var chip = s.aktiv === meg ? (s.kast ? (s.kast < 3 ? T('Hold, trill igjen eller før', 'Hold, roll again or score') : T('Velg et felt', 'Pick a box')) : T('Din tur – rist begeret', 'Your turn – shake the cup'))
       : jeg ? T('Du fører for ', 'You play for ') + esc(navn(s.aktiv)) : esc(navn(s.aktiv)) + (s.kast ? T(' · kast ', ' · roll ') + s.kast : T(' rister begeret', ' is shaking the cup'));
@@ -3303,7 +3304,7 @@ export function startRom(LEKNAVN, LANG) {
           return '<li class="' + (r ? 'rett' : '') + '" style="--i:' + i + '">' + nrHode(id, '', r ? '' : 'flat') + '<span>' + hsNavn(id) + '</span><small>' + T('gjettet', 'guessed') + '</small><b>' + (st[id] === meg ? T('deg', 'you') : esc(navn(st[id]))) + '</b><em>' + (r ? T('Riktig', 'Right') : T('Drikk 1', 'Drink 1')) + '</em></li>';
         }).join('') + '</ul>' +
         (!erMin && !riktige.length && ider.length ? '<p class="hs-info">' + esc(navn(s.forfatter)) + T(' lurte alle – deler ut 2', ' fooled everyone – hands out 2') + '</p>' : '');
-      return ut + (erVert() ? '<button class="rom-stor-knapp" data-g="hs-neste" type="button">' + (s.i + 1 < s.antallSvar ? T('Neste melding', 'Next message') : T('Se hvem som gjemte seg best', 'See who hid best')) + '</button>' : '');
+      return ut + '<button class="rom-stor-knapp" data-g="hs-neste" data-i="' + s.i + '" type="button">' + (s.i + 1 < s.antallSvar ? T('Neste melding', 'Next message') : T('Se hvem som gjemte seg best', 'See who hid best')) + '</button>';
     }
     var logg = s.logg || [], best = logg.slice().sort(function (a, b) { return b.lurte - a.lurte; })[0];
     return hsTopp(s, T('Alle avslørt', 'All revealed'), false) +
@@ -4868,7 +4869,8 @@ export function startRom(LEKNAVN, LANG) {
       var skT = b.querySelector('.sk-tall'); if (skT) skT.textContent = tidlig ? T('Drikk 2', 'Drink 2') : ms + ' ms';
       return gjorAlltid({ handling: 'sk-trykk', tidlig: tidlig, ms: ms });
     }
-    if (['hs-neste', 'sp-til-stemming', 'pk-avslutt'].indexOf(g) !== -1) return gjor({ handling: g });
+    if (g === 'hs-neste') return gjor({ handling: g, i: Number(b.dataset.i) });
+    if (['sp-til-stemming', 'pk-avslutt'].indexOf(g) !== -1) return gjor({ handling: g });
     if (g === 'hopp-over') return gjor({ handling: 'hopp-over' });
     if (g === 'lov-del') return delLov();
     if (g === 'lov-opphev') return gjor({ handling: 'lov-valg', type: 'opphev', regel: b.dataset.id });

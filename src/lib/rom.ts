@@ -2646,7 +2646,7 @@ export function startEgen(data: any, kort: any, navn: any) {
 const BR_SPM = [L('Rød eller svart?', 'Red or black?'), L('Over eller under forrige kort?', 'Higher or lower than the last card?'), L('Innenfor eller utenfor de to første?', 'Inside or outside the first two?'), L('Hvilken kortfarge?', 'Which suit?')];
 function brTrekk(s: any) { if (!s.stokk.length) s.stokk = kortstokk52(); return s.stokk.pop(); }
 function brRad(i: number) { return i < 5 ? 1 : i < 9 ? 2 : i < 12 ? 3 : i < 14 ? 4 : 5; }
-const YZ_SOMLE = 60000;
+const YZ_SOMLE = 60000, YZ_STRYK = 2;
 const YZ_FELT = ['1', '2', '3', '4', '5', '6', 'p', 'pp', '3l', '4l', 'ls', 'ss', 'hus', 'sj', 'y'];
 function yzTell(t: number[]) { const c = [0, 0, 0, 0, 0, 0, 0]; t.forEach((x) => c[x]++); return c; }
 function yzPoeng(f: string, t: number[]) {
@@ -2861,7 +2861,9 @@ function nyeHandling(data: any, meg: any, h: any): any {
       const b = s.blokker[aktiv], f = stryk ? YZ_FELT.find((x) => b[x] == null) || '' : String(h.f || '');
       if (!YZ_FELT.includes(f) || b[f] != null) return { ok: true };
       b[f] = stryk ? 0 : yzPoeng(f, s.terninger);
-      s.fNr = (s.fNr || 0) + 1; s.sistFelt = { id: aktiv, f, nr: s.fNr, stroket: stryk }; s.trekkVed = Date.now(); s.drikk = null;
+      // Stryk (0 poeng i feltet) gir slurker
+      const drakk = b[f] === 0 ? YZ_STRYK : 0; if (drakk) giSlurker(data, aktiv, drakk);
+      s.fNr = (s.fNr || 0) + 1; s.sistFelt = { id: aktiv, f, nr: s.fNr, stroket: stryk, drakk }; s.trekkVed = Date.now(); s.drikk = null;
       s.tur = (s.tur + 1) % s.ider.length; s.kast = 0; s.hold = [false, false, false, false, false]; s.melding = '';
       if (s.ider.every((id: string) => YZ_FELT.every((x) => s.blokker[id][x] != null))) {
         const liste = s.ider.map((id: string) => ({ id, navn: navnPaa(data, id), sum: yzSum(s.blokker[id]) })).sort((a: any, c: any) => c.sum - a.sum);
@@ -3172,6 +3174,7 @@ function sosHandling(data: any, meg: any, h: any): any {
     }
     if (hd === 'hs-neste') {
       if (s.fase !== 'fasit') return { ok: true };
+      if (typeof h.i === 'number' && h.i !== s.i) return { ok: true };   // noen andre trykket samtidig
       s.i++; if (s.i >= s.ko.length) { s.fase = 'ferdig'; return { ok: true }; }
       s.fase = 'gjett'; s.stemmer = {}; settFrist(s, SFRIST.stem); return { ok: true };
     }

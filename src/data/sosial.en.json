@@ -54,303 +54,378 @@
  "bloff": [
   {
    "q": "What is Scotland's national animal?",
-   "a": "The unicorn"
+   "a": "The unicorn",
+   "fakta": "The unicorn has been a Scottish symbol since the 1400s – in the royal coat of arms it is shown in chains."
   },
   {
    "q": "How many hearts does an octopus have?",
-   "a": "Three"
+   "a": "Three",
+   "fakta": "Two of the hearts pump blood through the gills, the third sends it round the rest of the body."
   },
   {
    "q": "What was Coca-Cola originally sold as?",
-   "a": "Medicine"
+   "a": "Medicine",
+   "fakta": "The pharmacist John Pemberton made it in 1886 and sold it as a tonic for things like headaches."
   },
   {
    "q": "What is a group of flamingos called?",
-   "a": "A flamboyance"
+   "a": "A flamboyance",
+   "fakta": "Flamingos are pink because they eat algae and tiny crustaceans full of pigment."
   },
   {
    "q": "Which country has the most lakes in the world?",
-   "a": "Canada"
+   "a": "Canada",
+   "fakta": "Around 60 per cent of all the world's lakes are in Canada."
   },
   {
    "q": "What was Google called before it was called Google?",
-   "a": "BackRub"
+   "a": "BackRub",
+   "fakta": "The search engine was called BackRub because it counted the links pointing back to web pages."
   },
   {
    "q": "How long did the shortest war in history last?",
-   "a": "About 38 minutes"
+   "a": "About 38 minutes",
+   "fakta": "The war between Britain and Zanzibar in 1896 was over after about 38 minutes."
   },
   {
    "q": "What colour is a polar bear's skin?",
-   "a": "Black"
+   "a": "Black",
+   "fakta": "The fur is actually see-through – it looks white because it scatters the light."
   },
   {
    "q": "What is the fear of long words called?",
-   "a": "Hippopotomonstrosesquippedaliophobia"
+   "a": "Hippopotomonstrosesquippedaliophobia",
+   "fakta": "The word was made as long as possible on purpose – a joke at the expense of those who fear it."
   },
   {
    "q": "Which country invented the cheese slicer?",
-   "a": "Norway"
+   "a": "Norway",
+   "fakta": "Thor Bjørklund from Lillehammer patented the cheese slicer in 1925."
   },
   {
    "q": "During World War II, what did Norwegians wear paper clips as a symbol of?",
-   "a": "Resistance against the Nazi occupation"
+   "a": "Resistance against the Nazi occupation",
+   "fakta": "Norwegians wore paper clips on their lapels as a quiet sign of unity against the occupiers."
   },
   {
    "q": "Which animal has cube-shaped poop?",
-   "a": "The wombat"
+   "a": "The wombat",
+   "fakta": "Wombats leave the little cubes on rocks and logs to mark their territory."
   },
   {
    "q": "What is the plastic tip at the end of a shoelace called?",
-   "a": "An aglet"
+   "a": "An aglet",
+   "fakta": "The word comes from the French aiguillette, “little needle”."
   },
   {
    "q": "What animal is on the flag of Wales?",
-   "a": "A red dragon"
+   "a": "A red dragon",
+   "fakta": "The red dragon, Y Ddraig Goch, has been a Welsh symbol for more than a thousand years."
   },
   {
    "q": "Which bird can fly backwards?",
-   "a": "The hummingbird"
+   "a": "The hummingbird",
+   "fakta": "Hummingbirds can also hover in place – their wings beat in a figure of eight."
   },
   {
    "q": "Which planet spins the opposite way to most of the others?",
-   "a": "Venus"
+   "a": "Venus",
+   "fakta": "On Venus the sun rises in the west, and a day there is longer than a year."
   },
   {
    "q": "How many eyes does a honeybee have?",
-   "a": "Five"
+   "a": "Five",
+   "fakta": "A bee has two large compound eyes and three small simple eyes on top of its head."
   },
   {
    "q": "What is the world's most expensive spice?",
-   "a": "Saffron"
+   "a": "Saffron",
+   "fakta": "Each crocus flower gives just three tiny stigmas – it takes around 150,000 flowers for one kilo."
   },
   {
    "q": "How many legs does a lobster have?",
-   "a": "Ten"
+   "a": "Ten",
+   "fakta": "The lobster is a ten-legged crustacean – the two biggest legs are the claws."
   },
   {
    "q": "Which US state has only one syllable in its name?",
-   "a": "Maine"
+   "a": "Maine",
+   "fakta": "Maine is also the only state that borders just one other state."
   },
   {
    "q": "Where does the Tetris theme come from?",
-   "a": "A Russian folk song"
+   "a": "A Russian folk song",
+   "fakta": "The tune is the 19th-century folk song “Korobeiniki”, about a travelling pedlar."
   },
   {
    "q": "Which animal can't throw up?",
-   "a": "The horse"
+   "a": "The horse",
+   "fakta": "The muscles at the entrance to the stomach are so strong that food only goes one way."
   },
   {
    "q": "Where in the body is the smallest bone?",
-   "a": "In the ear"
+   "a": "In the ear",
+   "fakta": "The stirrup bone in the middle ear is only about three millimetres long."
   },
   {
    "q": "What does the name LEGO mean?",
-   "a": "“Play well” (from the Danish “leg godt”)"
+   "a": "“Play well” (from the Danish “leg godt”)",
+   "fakta": "Ole Kirk Christiansen made up the name from “leg godt” in 1934."
   },
   {
    "q": "Which country has the most pyramids?",
-   "a": "Sudan"
+   "a": "Sudan",
+   "fakta": "Sudan has more than 200 pyramids from the ancient kingdom of Kush – more than Egypt."
   },
   {
    "q": "What colour were carrots before they were orange?",
-   "a": "Purple"
+   "a": "Purple",
+   "fakta": "Orange carrots became common in the Netherlands in the 1600s."
   },
   {
    "q": "Which animal has the strongest bite in the world?",
-   "a": "The saltwater crocodile"
+   "a": "The saltwater crocodile",
+   "fakta": "Its bite has been measured at more than 16,000 newtons – more than any other animal tested."
   },
   {
    "q": "What is Norway's national instrument?",
-   "a": "The Hardanger fiddle"
+   "a": "The Hardanger fiddle",
+   "fakta": "The Hardanger fiddle has four or five extra strings underneath that ring along as you play."
   },
   {
    "q": "Which city was Norway's capital before Oslo?",
-   "a": "Bergen"
+   "a": "Bergen",
+   "fakta": "Bergen was the capital in the 1200s, before King Haakon V moved power to Oslo around 1300."
   },
   {
    "q": "Which mammal lays eggs?",
-   "a": "The platypus"
+   "a": "The platypus",
+   "fakta": "The platypus has no stomach either – its gullet goes straight to the gut."
   },
   {
    "q": "Which country has the most time zones (counting all its territories)?",
-   "a": "France"
+   "a": "France",
+   "fakta": "With all its overseas territories, France spans 12 time zones."
   },
   {
    "q": "What was the name of the first cloned sheep?",
-   "a": "Dolly"
+   "a": "Dolly",
+   "fakta": "Dolly was born in Scotland in 1996 and named after Dolly Parton."
   },
   {
    "q": "Which fruit is actually a berry: the banana or the strawberry?",
-   "a": "The banana"
+   "a": "The banana",
+   "fakta": "Botanically, a strawberry is not a berry – its seeds are on the outside."
   },
   {
    "q": "Which animal has blue blood?",
-   "a": "The octopus"
+   "a": "The octopus",
+   "fakta": "The blood uses copper instead of iron to carry oxygen, which makes it blue."
   },
   {
    "q": "What is the largest ocean in the world?",
-   "a": "The Pacific Ocean"
+   "a": "The Pacific Ocean",
+   "fakta": "The Pacific is bigger than all the land on Earth put together."
   },
   {
    "q": "Which letter doesn't appear in the name of any US state?",
-   "a": "Q"
+   "a": "Q",
+   "fakta": "By comparison, J appears in just one state name: New Jersey."
   },
   {
    "q": "Which city gets a Christmas tree from Oslo every year as thanks for its help during WWII?",
-   "a": "London"
+   "a": "London",
+   "fakta": "The tree comes from the forests around Oslo and has stood in Trafalgar Square every year since 1947."
   },
   {
    "q": "How many keys does a standard piano have?",
-   "a": "88"
+   "a": "88",
+   "fakta": "52 white and 36 black."
   },
   {
    "q": "Which is the only continent without ants?",
-   "a": "Antarctica"
+   "a": "Antarctica",
+   "fakta": "Ants live on every other continent, and more than 12,000 species are known."
   },
   {
    "q": "Which teeth do giraffes not have in their upper jaw?",
-   "a": "Front teeth"
+   "a": "Front teeth",
+   "fakta": "Giraffes strip leaves with their tongue against a hard dental pad in the upper jaw."
   },
   {
    "q": "Which country has the most islands in the world?",
-   "a": "Sweden"
+   "a": "Sweden",
+   "fakta": "Sweden has more than 260,000 islands, and most of them are uninhabited."
   },
   {
    "q": "How many times wider than Earth is the sun?",
-   "a": "About 109 times"
+   "a": "About 109 times",
+   "fakta": "More than a million Earths would fit inside the sun."
   },
   {
    "q": "What was the first product ever scanned with a barcode in a shop?",
-   "a": "A pack of chewing gum"
+   "a": "A pack of chewing gum",
+   "fakta": "It was a pack of Wrigley's gum in a shop in Ohio in 1974."
   },
   {
    "q": "Which animal sleeps with half its brain at a time?",
-   "a": "The dolphin"
+   "a": "The dolphin",
+   "fakta": "One half of the brain rests while the other keeps it breathing and watching for danger."
   },
   {
    "q": "What colour is a flamingo when it hatches?",
-   "a": "Grey"
+   "a": "Grey",
+   "fakta": "The pink colour only arrives after a couple of years, from its food."
   },
   {
    "q": "Which country drinks the most coffee per person?",
-   "a": "Finland"
+   "a": "Finland",
+   "fakta": "The average Finn drinks around 12 kilos of coffee a year."
   },
   {
    "q": "How much water can a thirsty camel drink in one go?",
-   "a": "About 100 litres"
+   "a": "About 100 litres",
+   "fakta": "The water isn't stored in the hump – it's full of fat."
   },
   {
    "q": "What is a group of crows called in English?",
-   "a": "A murder"
+   "a": "A murder",
+   "fakta": "The name comes from old folklore that crows foretold death."
   },
   {
    "q": "What is the longest fjord in Norway?",
-   "a": "The Sognefjord"
+   "a": "The Sognefjord",
+   "fakta": "The Sognefjord is more than 200 kilometres long and over 1,300 metres deep."
   },
   {
    "q": "What is the name of Snoopy’s brother?",
-   "a": "Spike"
+   "a": "Spike",
+   "fakta": "Spike lives alone in the desert outside Needles, California."
   },
   {
    "q": "Which country has the oldest national flag still in use?",
-   "a": "Denmark"
+   "a": "Denmark",
+   "fakta": "According to legend, the Dannebrog fell from the sky in 1219."
   },
   {
    "q": "What is the name of Pippi Longstocking’s horse?",
-   "a": "Lilla Gubben"
+   "a": "Lilla Gubben",
+   "fakta": "Pippi is so strong she can lift the horse with her bare hands."
   },
   {
    "q": "What was bubble wrap originally meant to be?",
-   "a": "Wallpaper"
+   "a": "Wallpaper",
+   "fakta": "Two inventors made it in 1957 as textured wallpaper – it only took off as packaging."
   },
   {
    "q": "What was Play-Doh originally sold as?",
-   "a": "Wallpaper cleaner"
+   "a": "Wallpaper cleaner",
+   "fakta": "When people stopped heating with coal, nobody needed the wallpaper cleaner any more – so it became a toy."
   },
   {
    "q": "Which country produces the most coffee in the world?",
-   "a": "Brazil"
+   "a": "Brazil",
+   "fakta": "Brazil has been the world's biggest coffee producer for more than 150 years."
   },
   {
    "q": "What is the world’s highest waterfall?",
-   "a": "Angel Falls in Venezuela"
+   "a": "Angel Falls in Venezuela",
+   "fakta": "The water drops 979 metres – almost a kilometre."
   },
   {
    "q": "Which planet has the most known moons?",
-   "a": "Saturn"
+   "a": "Saturn",
+   "fakta": "Saturn has more than 270 known moons, and more keep being found."
   },
   {
    "q": "How long does sunlight take to reach Earth?",
-   "a": "About eight minutes"
+   "a": "About eight minutes",
+   "fakta": "More precisely, about 8 minutes and 20 seconds."
   },
   {
    "q": "Which internal organ can grow back?",
-   "a": "The liver"
+   "a": "The liver",
+   "fakta": "Even with only a quarter left, the liver can grow back to almost full size."
   },
   {
    "q": "Which country has no official capital?",
-   "a": "Nauru"
+   "a": "Nauru",
+   "fakta": "Nauru is one of the world's smallest countries, with around 12,000 people."
   },
   {
    "q": "How old can a Greenland shark get?",
-   "a": "Around 400 years"
+   "a": "Around 400 years",
+   "fakta": "It doesn't reach maturity until it's around 150 years old."
   },
   {
    "q": "Which animal has fingerprints almost identical to ours?",
-   "a": "The koala"
+   "a": "The koala",
+   "fakta": "The prints are so similar they could in theory be mistaken for human ones at a crime scene."
   },
   {
    "q": "What was the name of the first dog to orbit the Earth?",
-   "a": "Laika"
+   "a": "Laika",
+   "fakta": "Laika was launched on Sputnik 2 in 1957."
   },
   {
    "q": "What did the Norwegian Erik Rotheim invent?",
-   "a": "The aerosol spray can"
+   "a": "The aerosol spray can",
+   "fakta": "Rotheim patented the idea of the aerosol can in the 1920s."
   },
   {
    "q": "Which country has a flag that isn’t rectangular?",
-   "a": "Nepal"
+   "a": "Nepal",
+   "fakta": "The flag is made of two triangles stacked on top of each other."
   },
   {
    "q": "How many times a minute can a hummingbird’s heart beat?",
-   "a": "Over a thousand"
+   "a": "Over a thousand",
+   "fakta": "The heart can beat more than 1,200 times a minute."
   },
   {
    "q": "What colour is a giraffe’s tongue?",
-   "a": "Bluish purple"
+   "a": "Bluish purple",
+   "fakta": "The dark colour is thought to protect the tongue from sunburn."
   },
   {
    "q": "Which plant does vanilla come from?",
-   "a": "An orchid"
+   "a": "An orchid",
+   "fakta": "Outside Mexico, vanilla flowers have to be pollinated by hand."
   },
   {
    "q": "Who is Bluetooth named after?",
-   "a": "Harald Bluetooth, a Danish king"
+   "a": "Harald Bluetooth, a Danish king",
+   "fakta": "The logo is Harald Bluetooth's initials written in runes."
   },
   {
    "q": "Which country used paper money first?",
-   "a": "China"
+   "a": "China",
+   "fakta": "China was using paper money more than a thousand years ago."
   },
   {
    "q": "Which food practically never goes off?",
-   "a": "Honey"
+   "a": "Honey",
+   "fakta": "Archaeologists have found honey thousands of years old in Egyptian tombs that was still edible."
   },
   {
    "q": "Which land animal has the longest pregnancy?",
-   "a": "The elephant – almost two years"
+   "a": "The elephant – almost two years",
+   "fakta": "An elephant is pregnant for about 22 months."
   },
   {
    "q": "How many strings does a standard violin have?",
-   "a": "Four"
+   "a": "Four",
+   "fakta": "The strings are tuned to G, D, A and E."
   },
   {
    "q": "What did Walt Disney originally want to call Mickey Mouse?",
-   "a": "Mortimer"
+   "a": "Mortimer",
+   "fakta": "It was his wife, Lillian, who suggested the name Mickey."
   },
   {
    "q": "Which city has the world’s oldest underground railway?",
-   "a": "London"
+   "a": "London",
+   "fakta": "The first line opened in 1863, with steam locomotives."
   }
  ],
  "samme": [
