@@ -1680,3 +1680,116 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .en-benk small{font-size:12px;font-weight:900;color:#FFF8EE}
 .en-drikk{padding:1px 8px;font-size:12px;font-weight:900;text-transform:uppercase;color:#16120F;background:var(--rosa);border:2.5px solid #16120F;border-radius:999px;animation:nrInn 350ms var(--fjaer) both}
 @media (prefers-reduced-motion:reduce){.sofa-chips button,.sofa-lek,.sofa-ark,.en-kort>span.inn,.en-drikk,.en-benk .nr-h.oppe{animation:none}.sofa-faner i,.en-benk .nr-h{transition:none}}
+/* ---------- Skrøna: leksikonet ---------- */
+.bf-boker{position:absolute;right:0;top:4px;display:flex;gap:4px}
+.bf-boker i{display:block;width:10px;height:24px;box-sizing:border-box;border:2.5px solid #16120F;border-radius:2px;background:#FFFFFF}
+.bf-boker i.naa{background:var(--gul)}.bf-boker i.full{background:#16120F}
+.bf-side{position:relative;margin:0 0 14px;padding:16px 16px 16px 58px;color:#16120F;background:#FFFFFF;border:3px solid #16120F;border-radius:4px 14px 14px 4px;box-shadow:5px 5px 0 var(--hard)}
+.bf-side::before{content:'';position:absolute;left:46px;top:0;bottom:0;width:2px;background:var(--rosa)}
+.bf-margtekst{position:absolute;left:12px;top:14px;font-size:11px;font-weight:900;letter-spacing:.06em;color:#8A7F74;writing-mode:vertical-rl;transform:rotate(180deg)}
+.bf-ord{margin:0;font-family:var(--display);font-weight:900;font-stretch:72%;line-height:1.02;text-transform:none}
+.bf-hint{margin:6px 0 10px;font-size:13px;font-weight:800;color:#4A3F37}
+.bf-linje{margin:0 0 4px;min-height:28px;font:700 19px 'Courier New',ui-monospace,monospace;line-height:1.3;overflow-wrap:anywhere}
+.bf-markor{display:inline-block;width:2px;height:1.05em;margin-left:1px;vertical-align:-2px;background:#16120F;animation:bfBlink 1s steps(1) infinite}
+@keyframes bfBlink{50%{opacity:0}}
+.bf-penn{display:block;margin:2px 0 0 4px;font-family:'Fraunces Variable',Fraunces,Georgia,serif;font-style:italic;font-weight:700;font-size:17px;line-height:1.15;transform:rotate(-1.5deg)}
+.bf-penn.rod{color:#C81E35}.bf-penn.gronn{color:#1F8A5B}
+.bf-penn.inn,.bf-marg.inn{animation:bfMarg 450ms var(--fjaer) both;animation-delay:var(--f,0ms)}
+@keyframes bfMarg{from{transform:translateX(-14px) rotate(-8deg);opacity:0}to{transform:rotate(-1.5deg);opacity:1}}
+.bf-side .sm-skjema{margin-top:10px}
+.bf-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.bf-liste>li{position:relative;padding:6px 0}
+.bf-liste>li.inn{animation:nrInn 380ms var(--fjaer) both;animation-delay:var(--f,0ms)}
+.bf-liste button,.bf-liste li>div{position:relative;display:block;width:100%;padding:4px 2px;text-align:left;font:700 18px 'Courier New',ui-monospace,monospace;line-height:1.3;color:#16120F;background:none;border:0}
+.bf-liste button{cursor:pointer;min-height:40px;margin:0;box-shadow:none;border-radius:0;height:auto;transform:none}
+.bf-liste>li{margin:0}
+.bf-liste li>div.egen{color:#8A7F74}
+.bf-tekst{position:relative;display:inline}
+.bf-tekst>span{position:relative;z-index:1}
+.bf-tusj{position:absolute;left:-4px;right:-4px;top:2px;bottom:-1px;z-index:0;background:#FFE26A;border-radius:3px;transform-origin:left;animation:bfTusj 350ms cubic-bezier(.23,1,.32,1) both}
+.bf-tusj.fast{animation:none}
+@keyframes bfTusj{from{transform:scaleX(0)}to{transform:none}}
+.bf-strek,.bf-ring{position:absolute;overflow:visible;pointer-events:none}
+.bf-strek{left:0;top:50%;width:100%;height:20px;margin-top:-10px}
+.bf-strek path{fill:none;stroke:#C81E35;stroke-width:4;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.bf-ring{left:-10px;top:-8px;width:calc(100% + 20px);height:calc(100% + 16px)}
+.bf-ring path{fill:none;stroke:#1F8A5B;stroke-width:4;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.bf-strek.inn path{stroke-dasharray:400;animation:bfStrek 450ms cubic-bezier(.23,1,.32,1) both;animation-delay:var(--f,0ms)}
+.bf-ring.inn path{stroke-dasharray:900;animation:bfRing 700ms cubic-bezier(.23,1,.32,1) both;animation-delay:var(--f,0ms)}
+@keyframes bfStrek{from{stroke-dashoffset:400}to{stroke-dashoffset:0}}
+@keyframes bfRing{from{stroke-dashoffset:900}to{stroke-dashoffset:0}}
+.bf-marg{position:absolute;left:-52px;top:4px;display:block}
+.bf-marg .nr-h{width:34px;height:34px}
+.bf-status{margin:10px 0 0;font-size:14px;font-weight:900}
+.bf-fakta{margin-top:12px;padding-top:10px;border-top:2px dashed #16120F}
+.bf-fakta b{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.bf-fakta p{margin:4px 0 0;font-size:14px;font-weight:800;line-height:1.35}
+.bf-dom{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.bf-dom span{padding:6px 12px;font-size:15px;font-weight:900;color:#16120F;background:#FFFFFF;border:3px solid #16120F;border-radius:999px}
+.bf-dom span.rett{background:var(--mint)}.bf-dom span.feil{background:var(--rosa)}.bf-dom span.gul{background:var(--gul)}
+.bf-dom.inn{animation:nrInn 380ms var(--fjaer) 1400ms both}
+.bf-neste{margin:0 0 12px;font-size:14px;font-weight:800;color:var(--muted)}
+.bf-best{list-style:none;margin:6px 0 14px;padding:0;display:flex;flex-direction:column;gap:8px}
+.bf-best li{display:flex;align-items:center;gap:12px;padding:8px 12px;color:var(--ink);background:var(--card);border:3px solid var(--ink);border-radius:10px;animation:nrInn 380ms var(--fjaer) both;animation-delay:var(--f,0ms)}
+.bf-best li:first-child{color:#16120F;background:var(--gul);border-color:#16120F}
+.bf-best .nr-h{width:44px;height:44px}
+.bf-best b{flex:1;font-size:18px;font-weight:900}
+.bf-best span{font-size:15px;font-weight:900}
+/* ---------- Bussruta: linjekart, vifte, pyramide og buss ---------- */
+.br-linje{position:relative;display:flex;justify-content:space-between;margin:0 0 14px;padding:0 6px}
+.br-linje::before{content:'';position:absolute;left:30px;right:30px;top:11px;height:6px;background:var(--ink);border-radius:3px}
+.br-linje span{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:88px}
+.br-linje i{display:block;width:26px;height:26px;box-sizing:border-box;border-radius:50%;border:4px solid #16120F;background:var(--bg)}
+.br-linje .ferdig i{background:#16120F}.br-linje .naa i{background:var(--gul);transform:scale(1.15)}
+.br-linje b{font-size:12px;font-weight:900;text-transform:uppercase}
+.br-sporsmal{margin:0 0 6px;font-family:var(--display);font-size:28px;font-weight:900;font-stretch:66%;line-height:.95;text-transform:uppercase}
+.br-kort{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:72px;height:100px;box-sizing:border-box;font-weight:900;color:#16120F;background:#FFFFFF;border:3px solid #16120F;border-radius:8px;box-shadow:3px 3px 0 var(--hard)}
+.br-kort.rod{color:#D7263D}
+.br-kort b{font-size:22px;line-height:1}.br-kort i{font-style:normal;font-size:34px;line-height:1}
+.br-kort.bak{background:repeating-linear-gradient(45deg,#D7263D 0 6px,#B81F33 6px 12px)}
+.br-kort.liten{width:46px;height:62px;flex:none}.br-kort.liten b{font-size:15px}.br-kort.liten i{font-size:22px}
+.br-vifte{position:relative;height:150px;margin:6px 0 10px}
+.br-vifte .br-kort{position:absolute;left:50%;top:14px;margin-left:-36px;transform:translateX(var(--x)) rotate(var(--r))}
+.br-vifte .br-kort.snu{animation:brSnu 550ms var(--fjaer) both}
+@keyframes brSnu{from{transform:translateX(var(--x)) rotateY(90deg) translateY(-20px)}to{transform:translateX(var(--x)) rotate(var(--r))}}
+.br-vifte.liten{height:110px}
+.br-vifte.liten .br-kort{width:58px;height:80px;margin-left:-29px;top:6px}
+.br-vifte.liten .br-kort b{font-size:17px}.br-vifte.liten .br-kort i{font-size:26px}
+.br-svar{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:10px 14px;color:#16120F;border:3px solid #16120F;border-radius:10px;box-shadow:4px 4px 0 var(--hard)}
+.br-svar.rett{background:var(--mint)}.br-svar.feil{background:var(--rosa)}
+.br-svar.inn{animation:nrInn 380ms var(--fjaer) both}
+.br-svar b{font-family:var(--display);font-size:22px;font-weight:900;font-stretch:66%;text-transform:uppercase}
+.br-svar span{font-size:15px;font-weight:800}
+.br-knapper{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 14px}
+.br-knapper.fire{grid-template-columns:repeat(4,minmax(0,1fr))}
+.br-knapper button{min-height:96px;font:900 28px var(--display);font-stretch:66%;text-transform:uppercase;color:#16120F;border:4px solid #16120F;border-radius:10px;box-shadow:5px 5px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.br-knapper.fire button{min-height:72px;font-size:34px}
+.br-knapper button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+.br-knapper .rosa{background:var(--rosa)}.br-knapper .svart{color:#FFF8EE;background:#16120F}.br-knapper .mint{background:var(--mint)}
+.br-knapper .gul{background:var(--gul)}.br-knapper .hvit{background:#FFFFFF}.br-knapper .rod{color:#D7263D}
+.br-pyramide{display:flex;flex-direction:column-reverse;align-items:center;gap:6px;margin:0 0 12px}
+.br-pyramide>div{display:flex;gap:6px}
+.br-pyramide .br-kort{width:52px;height:70px;box-shadow:2px 2px 0 var(--hard)}
+.br-pyramide .br-kort b{font-size:15px}.br-pyramide .br-kort i{font-size:22px}
+.br-pyramide .br-kort.naa{box-shadow:0 0 0 4px var(--gul)}
+.br-pyramide .br-kort.snu{animation:brPyrSnu 550ms var(--fjaer) both}
+@keyframes brPyrSnu{from{transform:rotateY(90deg)}to{transform:none}}
+.br-etikett{margin:0;font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.br-hjelp{margin:0 0 10px;font-size:14px;font-weight:800;color:var(--muted)}
+.br-vei{container-type:inline-size;position:relative;height:110px;margin:0 0 12px;background:#3A3940;border:3px solid #16120F;border-radius:12px;overflow:hidden}
+.br-vei::before{content:'';position:absolute;left:0;right:0;top:52px;height:4px;background:repeating-linear-gradient(90deg,#FFF8EE 0 14px,transparent 14px 26px)}
+.br-vei>i{position:absolute;top:62px;left:calc(20px + var(--j) * (100cqw - 80px) / var(--maal));width:16px;height:16px;box-sizing:border-box;border-radius:50%;border:3px solid #16120F;background:#FFF8EE}
+.br-vei>i.paa{background:var(--gul)}
+.br-vei>b{position:absolute;right:8px;top:6px;font-size:12px;font-weight:900;color:#FFF8EE;text-transform:uppercase}
+.br-buss{position:absolute;left:0;top:22px;display:block;transform:translateX(calc(var(--p) * (100cqw - 80px) / var(--maal)))}
+.br-buss.kjor{animation:brKjor 700ms var(--fjaer) both}
+@keyframes brKjor{from{transform:translateX(calc(var(--fra) * (100cqw - 80px) / var(--maal)))}}
+.br-buss svg{display:block;width:64px;height:36px;animation:brDump 500ms ease-in-out infinite}
+@keyframes brDump{0%,100%{translate:0 0}50%{translate:0 -2px}}
+.br-buss rect{fill:#FFF8EE;stroke:#16120F;stroke-width:2}.br-buss rect.kropp{fill:var(--gul);stroke-width:3}.br-buss rect.rute{fill:#7CC6FE}.br-buss circle{fill:#16120F}
+.br-bunke{position:relative;display:block;width:130px;height:176px;margin:4px auto 14px;padding:0;background:none;border:0;cursor:pointer}
+.br-bunke i,.br-bunke span{position:absolute;border:3px solid #16120F;border-radius:10px;background:repeating-linear-gradient(45deg,#D7263D 0 8px,#B81F33 8px 16px)}
+.br-bunke i{inset:8px -4px -4px 8px}
+.br-bunke span{inset:0;display:grid;place-items:center;font-size:20px;font-weight:900;text-transform:uppercase;color:#FFF8EE;box-shadow:4px 4px 0 var(--hard);transition:transform 90ms ease-out,box-shadow 90ms ease-out}
+.br-bunke:active span{transform:translate(4px,4px);box-shadow:0 0 0 var(--hard)}
+@media (prefers-reduced-motion:reduce){.bf-markor,.bf-penn.inn,.bf-marg.inn,.bf-liste>li.inn,.bf-tusj,.bf-strek.inn path,.bf-ring.inn path,.bf-dom.inn,.bf-best li,.br-vifte .br-kort.snu,.br-svar.inn,.br-pyramide .br-kort.snu,.br-buss.kjor,.br-buss svg{animation:none}}
