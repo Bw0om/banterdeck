@@ -1,0 +1,53 @@
+# Bygger iPhone-appen på GitHub sine Mac-maskiner og sender den til TestFlight.
+# Hemmelighetene (Settings → Secrets and variables → Actions) står i APPSTORE.md.
+name: iPhone-app til TestFlight
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'app-shell/**'
+      - 'capacitor.config.json'
+      - '.github/workflows/ios.yml'
+
+jobs:
+  bygg:
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+      CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Pakker
+        run: npm ci --no-audit --no-fund
+      - name: Kopierer skallet inn i iOS-prosjektet
+        run: npx cap sync ios
+      - name: Codemagic CLI (signering og opplasting)
+        run: pipx install codemagic-cli-tools
+      - name: Sertifikat og profil fra Apple
+        run: |
+          keychain initialize
+          app-store-connect fetch-signing-files no.mittvors.app --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Byggnummer
+        run: cd ios/App && agvtool new-version -all "$GITHUB_RUN_NUMBER"
+      - name: Bygger
+        run: xcode-project build-ipa --workspace ios/App/App.xcworkspace --scheme App
+      - name: Til TestFlight
+        run: app-store-connect publish --path 'build/ios/ipa/*.ipa' --testflight
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mittvors-ipa
+          path: build/ios/ipa/*.ipa
+          if-no-files-found: ignore
