@@ -61,6 +61,12 @@ export function lagFigurVelger(rot, o) {
   }
 
   function tegn() {
+    const sammeDel = st.tegnet === st.slot && rot.firstChild, rull = sammeDel ? [...rot.querySelectorAll('.fv-rad,.fv-prikker')].map((e) => e.scrollLeft) : [];
+    st.tegnet = st.slot;
+    tegnInn();
+    if (sammeDel) { rot.querySelector('.fv').classList.add('stille'); rot.querySelectorAll('.fv-rad,.fv-prikker').forEach((e, i) => { if (rull[i]) e.scrollLeft = rull[i]; }); }
+  }
+  function tegnInn() {
     const h = har(), bev = st.slot === 'beveg' ? (st.valgt.beveg || 'vink') : '', p = naa();
     const n = st.laast.length;
     const deler = SLOTS.map((sl) => `<button type="button" class="fv-del${st.slot === sl ? ' valgt' : ''}${!st.slot && sl === 'hode' ? ' puls' : ''}${sl === 'deg' ? ' deg' : ''}" data-slot="${sl}" aria-label="${N[sl]}" aria-pressed="${st.slot === sl}" style="left:${PLASS[sl][0]}%;top:${PLASS[sl][1]}%"><svg viewBox="0 0 24 24" aria-hidden="true">${IKON[sl]}</svg></button>`).join('');

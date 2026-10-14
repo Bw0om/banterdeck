@@ -2516,3 +2516,6 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .eier-glimt path:nth-child(2){animation-delay:-1.2s}
 @keyframes eierGlimt{0%,100%{opacity:.2;transform:scale(.6)}50%{opacity:1;transform:scale(1.15)}}
 @media (prefers-reduced-motion:reduce){.disko-flis,.disko-kjegle,.disko-flekk,.eier-glimt path{animation:none}}
+
+/* Garderoben: tegnes samme del om (et valg), rulles ikke radene inn på nytt */
+.fv.stille .fv-rad,.fv.stille .fv-prikker,.fv.stille .fv-del.puls{animation:none}

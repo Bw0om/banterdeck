@@ -861,6 +861,14 @@ export function lagStua(svg, valg = {}) {
     uteNaa() { return uteNaa; },
   };
 }
+/** Løkkende animasjoner (disko, lys, blunk) følger sideklokka. Flyttes stua i DOM-en, fortsetter de der de var. */
+export function synkAnimasjoner(el) {
+  if (!el || !el.getAnimations || typeof document === 'undefined' || !document.timeline) return;
+  const t = document.timeline.currentTime; if (t == null) return;
+  el.getAnimations({ subtree: true }).forEach((a) => {
+    try { const tm = a.effect && a.effect.getTiming(); if (tm && tm.iterations === Infinity && a.playState === 'running' && Math.abs((a.currentTime || 0) - t) > 1) a.currentTime = t; } catch (e) {}
+  });
+}
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
 // Forsidens skript (inline) bruker disse

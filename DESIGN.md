@@ -384,6 +384,12 @@ The living room is drawn in one isometric projection (`I(x, y, z)` in `src/klien
 - **Owner crown** (`eierkrone`, hat slot): a taller gold crown with a pink diamond and two twinkling sparkles. It is never handed out and never listed for anyone else. The server adds it to the owner's unlocked list (`laastFor` in `src/lib/konto.ts`): the account in `EIER_KONTO` if set, otherwise the account whose username is Bw0om. `rensPynt` refuses it for every other account, and `synligPynt` keeps it out of every other wardrobe and count. Others in the room do see it on the owner's figure.
 - **Seal** (`sel`, pet slot): a small grey-blue seal lying down, big eyes, whiskers and pink cheeks. Unlocks after two nights, like the other pets.
 
+## Nothing restarts when you tap
+
+- **The room stays in the page.** The room page redraws on every change, but the living room is never torn out: the rest of the page is rebuilt around its placeholder (`settRot` in `src/klient/rom.js`). Disco lights, string lights, a dance in progress and the disco ball keep going when someone is moved or a button is tapped.
+- **Looping animations follow the page clock** (`synkAnimasjoner` in `src/klient/stua.js`). Where the room must move to a new spot, like on the TV, the loops continue where they were instead of starting over.
+- **The wardrobe** only slides a row in when you open a part. Equipping something keeps the row still and keeps its scroll position.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
