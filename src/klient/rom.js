@@ -970,6 +970,12 @@ export function startRom(LEKNAVN, LANG) {
   }
   /** Storskjerm: hvor verten finner adressen og PIN-en til TV-en. */
   var visSkjerm = false;
+  // iPhone-appen: en TV kobles til (AirPlay). Verten får storskjermen opp på TV-en uten å trykke noe.
+  window.addEventListener('mv-skjerm', function (e) {
+    if (!tilstand || !meg) return;
+    if (e.detail && e.detail.koblet && erVert()) { visSkjerm = true; if (!tilstand.skjermPin) gjor({ handling: 'skjerm-lag' }); }
+    tegn();
+  });
   function skjermAdresse() { return (kortDomene ? 'https://mittvors.no' : location.origin) + (EN ? '/tv' : '/no/tv'); }
   function skjermLenke() { return skjermAdresse() + '?k=' + kode + '&p=' + tilstand.skjermPin; }
   function skjermBoks() {
@@ -982,6 +988,17 @@ export function startRom(LEKNAVN, LANG) {
       '<ol><li>' + T('På TV-en (eller en PC ved TV-en): gå til ', 'On the TV (or a laptop by it): go to ') + '<b>' + esc(adr) + '</b></li>' +
       '<li>' + T('Skann QR-koden som kommer opp, med kameraet på telefonen din.', 'Scan the QR code that appears with your phone’s camera.') + '</li>' +
       '<li>' + T('Ferdig! Eller skriv inn ', 'Done! Or enter ') + '<b>' + esc(kode) + '</b> ' + T('og PIN', 'and PIN') + ' <b class="rom-skjerm-pin">' + esc(tilstand.skjermPin) + '</b></li></ol></div>';
+    // I iPhone-appen: speil via AirPlay, så tar appen over TV-en og viser storskjermen der
+    var app = window.__mvSkjerm && document.documentElement.classList.contains('is-app');
+    if (app) {
+      window.__mvSkjerm.vis(skjermLenke() + '&auto=1');
+      speil = '<div class="rom-skjerm-vei"><b>' + (window.__mvSkjerm.koblet ? T('TV-en viser rommet ✓', 'The TV is showing the room ✓') : T('Speil telefonen, så tar appen over TV-en', 'Mirror the phone and the app takes over the TV')) + '</b>' +
+        '<ol><li>' + T('Sveip ned fra øverst til høyre → Skjermspeiling → velg TV-en.', 'Swipe down from the top right → Screen Mirroring → pick the TV.') + '</li>' +
+        '<li>' + T('Storskjermen dukker opp på TV-en av seg selv. Telefonen beholder knappene dine.', 'The big screen appears on the TV by itself. Your phone keeps its buttons.') + '</li></ol></div>';
+      return '<div class="rom-skjerm"><p class="rom-etikett">📺 ' + T('Vis på TV', 'Show on TV') + '</p>' + speil + nett +
+        '<div class="gt-row"><button class="btn small ghost" data-g="skjerm-ny" type="button">' + T('Ny PIN', 'New PIN') + '</button>' +
+        '<button class="linkbtn" data-g="skjerm-lukk" type="button">' + T('Lukk', 'Close') + '</button></div></div>';
+    }
     return '<div class="rom-skjerm"><p class="rom-etikett">📺 ' + T('Vis på TV', 'Show on TV') + '</p>' + (sofaModus() ? speil + nett : nett + speil) +
       '<div class="gt-row"><button class="btn small gold" data-g="skjerm-del" type="button">' + T('Send lenken til PC-en', 'Send the link to the laptop') + '</button>' +
       '<button class="btn small ghost" data-g="skjerm-ny" type="button">' + T('Ny PIN', 'New PIN') + '</button>' +

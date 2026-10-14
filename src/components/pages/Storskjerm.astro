@@ -1534,6 +1534,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     }
     var sistTvKort = '';
     function tegnStart() {
+      // Fra iPhone-appen (AirPlay): ingen kan trykke på TV-en, så storskjermen starter av seg selv
+      if (q.get('auto')) { startet = true; lydCtx(); vekk(); sett = null; hendelser(null, tilstand); tegn(); return; }
       rot.innerHTML = '<div class="tv-kobling"><h1>📺 ' + T('Storskjerm klar', 'Big screen ready') + '</h1><p class="tv-stor">' + T('Rom', 'Room') + ' <b>' + esc(kode) + '</b> · ' + (tilstand.spillere || []).length + T(' med', ' joined') + '</p>' +
         '<button class="btn gold tv-start" id="tvStart" type="button">' + T('▶ Start storskjermen', '▶ Start the big screen') + '</button>' +
         '<p class="tv-liten">' + T('Slår på lyd og fullskjerm. Koble PC-en til TV-en og skru opp lyden.', 'Turns on sound and full screen. Hook the laptop up to the TV and turn up the volume.') + '</p></div>';
