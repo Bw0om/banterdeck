@@ -36,9 +36,22 @@ const AV_ID = Object.fromEntries(PYNT.map((p) => [p.id, p]));
 export const TEMAER = [
   { id: 'stue', navn: ['Stua', 'The living room'], pluss: false },
   { id: 'hytte', navn: ['Hytta', 'The cabin'], pluss: false },
-  { id: 'takterrasse', navn: ['Takterrassen', 'The rooftop'], pluss: true },
   { id: 'julebord', navn: ['Julebordet', 'The Christmas party'], pluss: true, gratisI: 'jul' },
 ];
+
+/** Gulv og lys i rommet. Disko krever Pluss i rommet; lyslenka låses opp som før (fem kvelder). */
+export const STIL = { gulv: ['fliser', 'disko'], lys: ['lampe', 'lys', 'diskokule'] };
+export const STIL_PLUSS = ['disko', 'diskokule'];
+export function rensStil(st) {
+  st = st && typeof st === 'object' ? st : {};
+  return { gulv: STIL.gulv.includes(st.gulv) ? st.gulv : 'fliser', lys: STIL.lys.includes(st.lys) ? st.lys : 'lampe' };
+}
+/** Rommet slik verten sist hadde det: lagres sammen med pynten på kontoen. */
+export function rensRom(r) {
+  if (!r || typeof r !== 'object') return null;
+  const st = rensStil(r);
+  return { tema: temaFor(r.tema).id, gulv: st.gulv, lys: st.lys, ekstra: (Array.isArray(r.ekstra) ? r.ekstra : []).map(String).filter((id, i, a) => EKSTRA.some((e) => e.id === id) && a.indexOf(id) === i) };
+}
 
 /** Hvilken sesong det er nå (norsk tid): 'jul' fra 24. november ut året, '17mai' 1.–17. mai, ellers null. */
 export function sesong(naa) {
@@ -76,6 +89,7 @@ export function rensPynt(valg, laast, naa) {
   });
   if (FRISYRER.includes(valg.haar)) ut.haar = valg.haar;
   Object.keys(FARGER).forEach((k) => { if (FARGER[k].includes(valg[k])) ut[k] = valg[k]; });
+  const rom = rensRom(valg.rom); if (rom) ut.rom = rom;
   return ut;
 }
 

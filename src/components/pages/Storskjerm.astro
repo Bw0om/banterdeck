@@ -1470,6 +1470,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     }
     /* ---------- stua: de samme figurene som på telefonene, og TV-en i stua viser kortet ---------- */
     var tvStuaEl = null, tvStua = null, tvStraffSett = null;
+    var tvUteEl = null, tvUte = null;
     document.addEventListener('mv-stua-klar', function () { if (tilstand && startet) tegn(); });
     var REAK_LYD = { '🍻': 'klirr', '😂': 'latter', '😱': 'ooh', '👏': 'applaus', '🤘': 'latter' };
     function stuaReak(liste, forrige) {
@@ -1486,9 +1487,21 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       plass.appendChild(tvStuaEl);
       var st = d.stua || {};
+      var ute = st.ute || [], alle = (d.spillere || []).concat(st.sofa || []);
       tvStua.tema(st.tema || 'stue');
+      tvStua.stil({ gulv: st.gulv, lys: st.lys });
       tvStua.ekstra(st.ekstra || []);
-      tvStua.settFolk((d.spillere || []).concat(st.sofa || []), st.pos);
+      tvStua.settFolk(alle.filter(function (p) { return ute.indexOf(p.id) === -1; }), st.pos);
+      // Noen ute på takterrassen? Den vises ved siden av stua
+      if (ute.length) {
+        if (!tvUteEl) {
+          tvUteEl = document.createElement('div'); tvUteEl.className = 'tv-stua tv-ute';
+          tvUteEl.innerHTML = '<svg role="img" aria-label="' + T('Takterrassen', 'The rooftop') + '"></svg>';
+          tvUte = window.mvLagStua(tvUteEl.querySelector('svg'), { lang: LANG, navn: true, vandre: true, kanDra: false }); tvUte.scene(true);
+        }
+        plass.appendChild(tvUteEl); plass.classList.add('to');
+        tvUte.settFolk(alle.filter(function (p) { return ute.indexOf(p.id) !== -1; }), st.pos);
+      } else if (tvUteEl) { tvUteEl.remove(); plass.classList.remove('to'); }
       var s = d.spill, kt = '';
       if (s) kt = s.kort ? (s.kort.regel ? s.kort.regel : (s.kort.t || '')) : (s.tekst || (s.offentlig && s.offentlig.tekst) || '');
       if (kt) tvStua.tv(kt, s.navn); else tvStua.kode(kode);
@@ -1751,6 +1764,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tv-qr{border:4px solid #16120F;box-shadow:8px 8px 0 #FFD23F;border-radius:8px!important;width:min(30vh,20vw)!important}
     .tv-stua{background:#FF5B1F;border:4px solid #FFF8EE;border-radius:8px;box-shadow:10px 10px 0 #FFD23F;padding:1vh 1vw .4vh}
     .tv-stua svg{display:block;width:100%;height:auto;overflow:visible}
+    .tv-stua-plass.to{display:grid;grid-template-columns:1fr 1fr;gap:1vw}
+    .tv-ute{background:#1C1B1F}
     .tv-stua-seksjon{padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
     .tv-stua-seksjon .tv-stua{box-shadow:6px 6px 0 #FFD23F;border-width:3px}
     .tv-chips span{border:3px solid #FFF8EE;border-radius:4px!important;background:#2A292E;box-shadow:3px 3px 0 #000;font-family:var(--display);font-stretch:85%;font-weight:850}
