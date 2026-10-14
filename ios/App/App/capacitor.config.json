@@ -1,0 +1,34 @@
+{
+	"appId": "no.mittvors.app",
+	"appName": "mittvors",
+	"webDir": "app-shell",
+	"server": {
+		"url": "https://www.mittvors.no/no/?app=1",
+		"allowNavigation": [
+			"mittvors.no",
+			"*.mittvors.no"
+		]
+	},
+	"ios": {
+		"contentInset": "never",
+		"backgroundColor": "#FF5B1F",
+		"scheme": "mittvors"
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 0,
+			"backgroundColor": "#FFF8EE"
+		},
+		"Keyboard": {
+			"resize": "native"
+		}
+	},
+	"packageClassList": [
+		"AppPlugin",
+		"HapticsPlugin",
+		"KeyboardPlugin",
+		"SharePlugin",
+		"SplashScreenPlugin",
+		"StatusBarPlugin"
+	]
+}
