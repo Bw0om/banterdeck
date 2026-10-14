@@ -10,51 +10,62 @@ Filene:
 | `capacitor.config.json` | App-ID `no.mittvors.app`, navn, adressen appen laster |
 | `app-shell/index.html` | Det eneste som ligger inni appen: «Ingen nett»-siden |
 | `ios/` | Xcode-prosjektet. Ikoner og oppstartsbilde ligger i `ios/App/App/Assets.xcassets` |
+| `ios/App/App/App.entitlements` | Lenker som åpner appen (associated domains) og push |
+| `public/.well-known/apple-app-site-association` | Forteller iPhone at mittvors.no-lenker tilhører appen |
 | `scripts/lag-app-ikoner.mjs` | Lager `assets/icon.png` og `assets/splash.png` fra `public/favicon.svg` |
-| `codemagic.yaml` | Bygger appen i skyen og sender den til TestFlight |
+| `.github/workflows/ios.yml` | Bygger appen på GitHub sine Mac-er og sender den til TestFlight |
 | `APPSTORE.md` | Denne lista |
 
 Regenerer ikonene slik: `node scripts/lag-app-ikoner.mjs && npx @capacitor/assets generate --ios`
 
-## Når Apple-kontoen er klar
+Nøkler og ID-er:
 
-Alt under gjøres i nettleseren. Du trenger ikke Mac.
+- Team ID: `685JC7R3PQ`
+- Bundle ID: `no.mittvors.app`
+- Apple ID på appen i App Store Connect: `6822843955`
+- Signeringsnøkkel (ikke i repoet): `C:\Users\jonas\Documents\mittvors-app-nokler\sertifikat-nokkel.pem`
 
-### 1. App Store Connect – appen
+## Gjort
 
-1. Gå til [developer.apple.com/account/resources/identifiers](https://developer.apple.com/account/resources/identifiers) → **+** → App IDs → App.
-   Beskrivelse «mittvors», Bundle ID **Explicit**: `no.mittvors.app`. Huk av **Associated Domains** og **Push Notifications**. Register.
-2. Gå til [appstoreconnect.apple.com/apps](https://appstoreconnect.apple.com/apps) → **+** → New App.
-   Platform iOS, navn **mittvors**, primærspråk Norwegian (Bokmål), Bundle ID `no.mittvors.app`, SKU `mittvors`.
-3. Apple ID på appen er `6822843955` (ligger i `codemagic.yaml`).
-4. Team ID er `685JC7R3PQ`. Den ligger i `public/.well-known/apple-app-site-association` og `ios/App/App/App.entitlements`,
-   slik at mittvors-lenker åpner appen.
+- [x] App-ID registrert med Associated Domains og Push Notifications
+- [x] Appen opprettet i App Store Connect
 
-### 2. Xcode Cloud (bygger appen og sender den til TestFlight)
+## Det som gjenstår
 
-Apples egen byggetjeneste, inkludert i utviklerkontoen (25 timer i måneden). Ingen Mac, ingen sertifikater.
-Skriptet `ios/App/ci_scripts/ci_post_clone.sh` installerer Node og kopierer app-skallet inn før bygget.
+Alt gjøres i nettleseren. Du trenger ikke Mac.
 
-1. App Store Connect → appen **mittvors** → fanen **Xcode Cloud** → **Get Started**.
-2. Koble til **GitHub** og velg `Bw0om/banterdeck`. (Apple ber deg installere Xcode Cloud-appen på GitHub – godta.)
-3. Velg prosjektet **ios/App/App.xcworkspace**, scheme **App**.
-4. Workflow: start med den foreslåtte. Pass på at **Start Conditions** er gren `main`, og at **Post-Actions** har
-   **TestFlight Internal Testing**. Lagre.
-5. Trykk **Start Build**. Første bygg tar 15–25 minutter. Loggen ligger under Xcode Cloud → Builds.
-6. Bygget havner i **TestFlight**. Installer TestFlight-appen på iPhonen, legg deg til under
-   TestFlight → Internal Testing → **+** gruppe → legg til deg selv, og åpne invitasjonen på telefonen.
+### 1. API-nøkkel (lar GitHub laste opp til Apple for deg)
 
-Hver gang `main` får nye endringer i `ios/`, bygger Xcode Cloud automatisk. Nettsiden oppdaterer seg selv uansett.
+1. App Store Connect → **Users and Access** → fanen **Integrations** → **App Store Connect API**.
+   Første gang: **Request Access** → godta.
+2. **+** (Generate API Key). Name `GitHub`, Access **App Manager** → Generate.
+3. **Download API Key** – `.p8`-fila kan bare lastes ned én gang. Noter **Issuer ID** (øverst på siden) og
+   **Key ID** (i raden til nøkkelen).
 
-### 3. Alternativ: Codemagic
+### 2. GitHub Actions (bygger appen og sender den til TestFlight)
 
-`codemagic.yaml` bygger det samme hos codemagic.io (500 gratis minutter i måneden), med en App Store Connect
-API-nøkkel (Users and Access → Integrations) lagt inn under Teams → Personal account → Integrations.
-Brukes bare om Xcode Cloud ikke fungerer.
+Repoet er åpent, så GitHub sine Mac-maskiner er gratis uten kvote.
 
-### 4. Skjermbilder og tekst
+1. Gå til https://github.com/Bw0om/banterdeck/settings/secrets/actions → **New repository secret**, fire ganger:
 
-Skjermbilder lages fra nettsiden i iPhone-størrelse. Si fra, så lager jeg dem (6,7" og 6,5"):
+   | Name | Secret |
+   |---|---|
+   | `APP_STORE_CONNECT_ISSUER_ID` | Issuer ID fra steg 1 |
+   | `APP_STORE_CONNECT_KEY_IDENTIFIER` | Key ID fra steg 1 |
+   | `APP_STORE_CONNECT_PRIVATE_KEY` | hele innholdet i `.p8`-fila (åpne i Notepad, Ctrl+A, Ctrl+C) |
+   | `CERTIFICATE_PRIVATE_KEY` | hele innholdet i `sertifikat-nokkel.pem` (samme måte) |
+
+2. https://github.com/Bw0om/banterdeck/actions → **iPhone-app til TestFlight** → **Run workflow** → **Run workflow**.
+   Første bygg tar 15–25 minutter. Grønt = appen ligger i TestFlight.
+3. Installer **TestFlight** fra App Store på iPhonen. App Store Connect → appen → **TestFlight** → Internal Testing
+   → **+** → gruppe «Vi» → legg til deg selv. Åpne invitasjonen på telefonen.
+
+Hver gang `main` får endringer i `ios/` eller app-skallet, bygges appen på nytt av seg selv. Nettsiden oppdaterer
+seg uansett, uten nytt bygg.
+
+### 3. Skjermbilder og tekst
+
+Skjermbilder lages fra nettsiden i iPhone-størrelse. Si fra, så lager jeg dem (6,9" og 6,5"):
 rommet, stua, en lek, poengtavla, Pluss.
 
 Tekst til App Store (kan limes rett inn):
@@ -66,13 +77,14 @@ Tekst til App Store (kan limes rett inn):
 - **Personvern:** Data used to track you: No. Data linked to you: Contact info (e-post, bare ved konto).
 - **Prisnivå:** gratis
 
-### 5. Før innsending
+### 4. Før innsending
 
-- **Demo-konto til Apple:** App Review Information → Sign-in required → lag en egen testkonto og skriv den inn.
+- **Demo-konto til Apple:** App Review → Sign-in required → lag en egen testkonto og skriv den inn.
   Skriv i Notes: «Create a room on one phone and join it with the code on another. Pluss is free the first night.»
 - **Pluss i appen:** Vipps-kjøp vises ikke inne i appen (Apple krever at kjøp i appen går gjennom Apple).
   Gratis-kvelden virker. Kjøp gjennom Apple (In-App Purchase) er neste steg etter at appen er godkjent.
 - **Alkohol:** vannrunden og alkoholfri modus er med i appen. Nevn dem i Notes til Apple.
+- **Trader status (EU):** bare nødvendig om appen skal kunne lastes ned i EU-land. Norge trenger det ikke.
 
 ### Neste steg etter godkjenning
 
