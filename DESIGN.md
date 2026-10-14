@@ -357,6 +357,16 @@ A sixth part on the figure, «Deg» (a face icon, pink so it stands apart): a ro
 
 The palettes are the app's own colours plus natural hair and skin tones, never a free colour wheel, so every figure still belongs in the room. Choices are stored with the gear (`haar`, `fh`, `fhud`, `ftopp`, `fhode`), validated against the palettes on the server, and applied everywhere a figure or head is drawn – room, TV, profile, game heads – through `utseende(id, pynt)`. A hat clips the hair at its brim; whatever hangs below (long hair, ponytail, curls at the ears) stays.
 
+## Buttons, not explanations (room flow)
+
+The room is the product, and it is operated with buttons alone. A button that says what it does needs no sentence under it.
+
+- **Start**: one name field, «Lag rom», «eller», the code field «Kode fra verten» and «Bli med». No 1-2-3 steps, no lead paragraph, no team tip.
+- **Host lobby**: code + round buttons, player chips, the living room (with a «Figuren din» pill), the QR box only while the host is alone, then two buttons «Vis på TV» / «Bare min telefon», then «Velg en lek» straight away. «Hele kvelden» sits at the bottom: background games as name + «?» + button; the «?» reveals the one-line rule only on demand.
+- **Guest lobby**: living room, then one card «<host> velger lek» with three pulsing dots. No «Du er med!» checklist.
+- Removed everywhere: «Trykk for å lukke», «Trykk på deg selv, så vinker figuren din», «Bare du er med ennå…», level explanations, night-points intro, deck tips and the sentence under every host tool.
+- Motion: only the waiting dots (1.2 s, reduced-motion → static) and the existing chip entrance.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

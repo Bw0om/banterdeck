@@ -2002,3 +2002,25 @@ button,a,[role=button]{touch-action:manipulation}
 a,button,[role=button],[data-g],summary,label,input[type=button],input[type=submit]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 button,[role=button],[data-g],summary,img,svg,a:not(p a):not(li a):not(.lenke){-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 img,svg,a{-webkit-user-drag:none}
+
+/* Enklere rom: bare knapper, ingen forklaringer */
+.rom-start.uten-kode{display:flex;flex-direction:column;gap:12px;max-width:480px;margin-inline:auto}
+.rom-start.uten-kode .rom-boks.lag{order:-2}
+.rom-eller{order:-1;display:flex;align-items:center;gap:12px;margin:0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.rom-eller::before,.rom-eller::after{content:'';flex:1;height:1px;background:var(--border2)}
+.rom-knapperad{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 6px}
+.rom-knapp-stor{min-height:58px;border:1px solid var(--border2);border-radius:18px;background:var(--card);color:var(--ink);font:inherit;font-family:var(--display);font-weight:700;font-size:16px;cursor:pointer;transition:transform .12s var(--ease-out),background .12s ease}
+.rom-knapp-stor:active{transform:scale(.97)}
+@media (hover:hover) and (pointer:fine){.rom-knapp-stor:hover{background:var(--card2)}}
+.rom-bg-rad{grid-template-columns:40px 1fr auto auto;align-items:center;gap:4px 10px;padding:10px 14px}
+.rom-bg-rad > b{display:block}
+.rom-bg-hjelp{width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:none;color:var(--muted);font:inherit;font-weight:800;cursor:pointer}
+.rom-bg-hjelp[aria-expanded="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.rom-bg-knapper{grid-column:auto;margin-top:0}
+.rom-bg-om{grid-column:2 / -1}
+.rom-verktoy-rad{grid-template-columns:34px 1fr;align-items:center}
+.rom-verktoy-rad span{grid-row:1}
+.rom-stua-tips{text-align:right;margin:8px 0 0}
+.rom-stua-tips .linkbtn{display:inline-block;padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--border2);color:var(--ink);font-weight:700;text-decoration:none}
+.rom-bg-knapper .btn{white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.rom-vent-prikker span{animation:none;opacity:.6}.rom-knapp-stor{transition:none}}
