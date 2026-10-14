@@ -30,23 +30,27 @@ Alt under gjøres i nettleseren. Du trenger ikke Mac.
 4. Team ID er `685JC7R3PQ`. Den ligger i `public/.well-known/apple-app-site-association` og `ios/App/App/App.entitlements`,
    slik at mittvors-lenker åpner appen.
 
-### 2. API-nøkkel (lar Codemagic laste opp for deg)
+### 2. Xcode Cloud (bygger appen og sender den til TestFlight)
 
-1. App Store Connect → **Users and Access** → **Integrations** → **App Store Connect API** → **+**.
-2. Navn «Codemagic», Access **App Manager**. Generate.
-3. Last ned `.p8`-fila (kan bare lastes ned én gang – ta vare på den). Noter **Issuer ID** og **Key ID**.
+Apples egen byggetjeneste, inkludert i utviklerkontoen (25 timer i måneden). Ingen Mac, ingen sertifikater.
+Skriptet `ios/App/ci_scripts/ci_post_clone.sh` installerer Node og kopierer app-skallet inn før bygget.
 
-### 3. Codemagic
+1. App Store Connect → appen **mittvors** → fanen **Xcode Cloud** → **Get Started**.
+2. Koble til **GitHub** og velg `Bw0om/banterdeck`. (Apple ber deg installere Xcode Cloud-appen på GitHub – godta.)
+3. Velg prosjektet **ios/App/App.xcworkspace**, scheme **App**.
+4. Workflow: start med den foreslåtte. Pass på at **Start Conditions** er gren `main`, og at **Post-Actions** har
+   **TestFlight Internal Testing**. Lagre.
+5. Trykk **Start Build**. Første bygg tar 15–25 minutter. Loggen ligger under Xcode Cloud → Builds.
+6. Bygget havner i **TestFlight**. Installer TestFlight-appen på iPhonen, legg deg til under
+   TestFlight → Internal Testing → **+** gruppe → legg til deg selv, og åpne invitasjonen på telefonen.
 
-1. Logg inn på [codemagic.io](https://codemagic.io) med GitHub, og legg til `Bw0om/banterdeck`.
-2. **Teams → Integrations → App Store Connect**: lim inn Issuer ID, Key ID og `.p8`-fila. Kall den «mittvors».
-3. **Team settings → Code signing identities → iOS**: velg **Automatic** med App Store Connect-nøkkelen. Codemagic lager
-   sertifikatet og profilen selv.
-4. Appen → **Start new build** → workflow «iPhone-app til TestFlight». Første bygg tar 15–25 minutter.
-5. Bygget havner i TestFlight. Installer **TestFlight** fra App Store på iPhonen, legg deg til som tester under
-   App Store Connect → TestFlight → Internal Testing, og prøv appen.
+Hver gang `main` får nye endringer i `ios/`, bygger Xcode Cloud automatisk. Nettsiden oppdaterer seg selv uansett.
 
-Hver gang du vil ha ny versjon av selve appen (ikke nettsiden – den oppdateres av seg selv): Start new build igjen.
+### 3. Alternativ: Codemagic
+
+`codemagic.yaml` bygger det samme hos codemagic.io (500 gratis minutter i måneden), med en App Store Connect
+API-nøkkel (Users and Access → Integrations) lagt inn under Teams → Personal account → Integrations.
+Brukes bare om Xcode Cloud ikke fungerer.
 
 ### 4. Skjermbilder og tekst
 
