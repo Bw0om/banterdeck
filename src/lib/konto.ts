@@ -40,6 +40,31 @@ export async function innloggetBruker(request: Request) {
 }
 
 export const BRUKERNAVN = /^[A-Za-z0-9_.-]{3,20}$/;
+
+/** Eieren av appen: kontoen i miljøvariabelen EIER_KONTO, eller brukernavnet Bw0om. Får ting ingen andre kan få. */
+const EIER_NAVN = 'bw0om';
+const eierSvar = new Map<string, boolean>();
+export async function erEier(userId: string) {
+  if (!userId) return false;
+  const env: any = (typeof process !== 'undefined' && process.env) || {};
+  const faste = String(env.EIER_KONTO || '').split(',').map((x) => x.trim()).filter(Boolean);
+  if (faste.length) return faste.includes(userId);
+  if (eierSvar.has(userId)) return eierSvar.get(userId)!;
+  try {
+    const { url, nokkel } = supabaseServer();
+    const r = await fetch(`${url}/rest/v1/profiler?select=brukernavn&user_id=eq.${encodeURIComponent(userId)}`, { headers: { apikey: nokkel, Authorization: `Bearer ${nokkel}` } });
+    const rader: any = r.ok ? await r.json() : [];
+    const ja = Array.isArray(rader) && rader.some((x: any) => String(x.brukernavn || '').toLowerCase() === EIER_NAVN);
+    eierSvar.set(userId, ja);
+    return ja;
+  } catch { return false; }
+}
+/** Pynten kontoen har låst opp, med eierens egne ting lagt til for eieren. */
+export async function laastFor(userId: string, laast: string[]) {
+  const ut = Array.isArray(laast) ? laast.slice() : [];
+  if (await erEier(userId)) ['eierkrone'].forEach((id) => { if (!ut.includes(id)) ut.push(id); });
+  return ut;
+}
 export const gyldigEpost = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e) && e.length <= 200;
 
 /** Adressene som får se statistikksiden, fra miljøvariabelen ADMIN_EPOSTER (kommaseparert). */

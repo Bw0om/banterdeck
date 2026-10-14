@@ -56,6 +56,7 @@ const HAAR = {
 const HS = `stroke="${B}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`;
 export const PYNT_SVG = {
   partyhatt: `<path d="M-11 -66L0 -94l11 28z" fill="#FF5B1F" ${HS}/><path d="M-6 -76l12-7M-3 -85l6-3" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-94" r="3.5" fill="#FFD23F" ${HS}/>`,
+  eierkrone: `<path d="M-16 -63l2-18 7 8 7-16 7 16 7-8 2 18z" fill="#FFD23F" ${HS}/><rect x="-16" y="-67" width="32" height="5" rx="1" fill="#FFD23F" stroke="${B}" stroke-width="2.5"/><path d="M0 -78l4 5-4 5-4-5z" fill="#FF9CC2" stroke="${B}" stroke-width="2"/><circle cx="-9" cy="-72" r="2" fill="#5A8DEE" stroke="${B}" stroke-width="1.5"/><circle cx="9" cy="-72" r="2" fill="#63E2A8" stroke="${B}" stroke-width="1.5"/><g class="eier-glimt"><path d="M-22 -86l1.6 3.8 3.8 1.6-3.8 1.6-1.6 3.8-1.6-3.8-3.8-1.6 3.8-1.6z" fill="#FFF8EE" stroke="${B}" stroke-width="1.4"/><path d="M20 -94l1.3 3 3 1.3-3 1.3-1.3 3-1.3-3-3-1.3 3-1.3z" fill="#FFE07A" stroke="${B}" stroke-width="1.4"/></g>`,
   krone: `<path d="M-14 -64l3-14 7 7 4-12 4 12 7-7 3 14z" fill="#FFD23F" ${HS}/><circle cx="-6" cy="-68" r="2" fill="#FF5B1F"/><circle cx="6" cy="-68" r="2" fill="#FF5B1F"/>`,
   glorie: `<ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="${B}" stroke-width="6.5"/><ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="#FFD23F" stroke-width="3.5"/>`,
   cowboyhatt: `<path d="M-15 -67q0-20 15-20t15 20z" fill="#B9773F" ${HS}/><path d="M-15 -69h30" stroke="${B}" stroke-width="3"/><path d="M-25 -68q25 5 50 0q-5 5-25 5t-25-5z" fill="#B9773F" ${HS}/>`,
@@ -69,6 +70,7 @@ export const PYNT_SVG = {
   sloyfe: `<path d="M-15 -38l-5 10 6-1 2 4 5-10zM-7 -38l5 10-6-1-2 4-5-10z" fill="#E2363B" stroke="${B}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="-11" cy="-37" r="4" fill="#7CC6FE" stroke="${B}" stroke-width="2.2"/>`,
   hund: `<ellipse cx="2" cy="0" rx="10" ry="3" fill="${B}" opacity=".22"/><path d="M-11 -8l-5-5" stroke="${B}" stroke-width="3" stroke-linecap="round"/><rect x="-11" y="-13" width="18" height="11" rx="5.5" fill="#B9773F" ${HS}/><circle cx="8" cy="-15" r="6.5" fill="#B9773F" ${HS}/><path d="M3 -20l-2-6 5 3zM13 -20l2-6-5 3z" fill="#7A4A2A" ${HS}/><circle cx="10" cy="-15" r="1.4" fill="${B}"/><path d="M-7 -2v2M3 -2v2" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
   katt: `<ellipse cx="2" cy="0" rx="10" ry="3" fill="${B}" opacity=".22"/><path d="M-11 -8q-8 2-5-7" fill="none" stroke="${B}" stroke-width="3" stroke-linecap="round"/><rect x="-11" y="-13" width="18" height="11" rx="5.5" fill="#8A8580" ${HS}/><circle cx="8" cy="-15" r="6.5" fill="#8A8580" ${HS}/><path d="M3 -19l0-7 5 3zM13 -19l0-7-5 3z" fill="#8A8580" ${HS}/><circle cx="10" cy="-15" r="1.4" fill="${B}"/><path d="M14 -13l5 1M14 -11l5 1" stroke="${B}" stroke-width="1.6" stroke-linecap="round"/><path d="M-7 -2v2M3 -2v2" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
+  sel: `<ellipse cx="0" cy="0" rx="12" ry="3" fill="${B}" opacity=".22"/><path d="M-17 -5l-5-5 1 7z" fill="#8FA0B3" stroke="${B}" stroke-width="2.2" stroke-linejoin="round"/><path d="M-15 -2q-3-9 7-12q9-3 15 1q6 4 3 11q-1 2-5 2h-17q-3 0-3-2z" fill="#A9B8C9" ${HS}/><path d="M-9 -2q4-4 10-3" fill="none" stroke="#DDE5EE" stroke-width="2.5" stroke-linecap="round"/><circle cx="-6" cy="-9" r="1.3" fill="#7F90A3"/><circle cx="-1" cy="-11" r="1" fill="#7F90A3"/><path d="M3 -3q3 3 7 1" fill="#8FA0B3" stroke="${B}" stroke-width="2" stroke-linejoin="round"/><circle cx="9" cy="-15" r="7.5" fill="#A9B8C9" ${HS}/><circle cx="7" cy="-16" r="1.9" fill="${B}"/><circle cx="12.5" cy="-16" r="1.9" fill="${B}"/><circle cx="7.6" cy="-16.7" r=".6" fill="#FFF8EE"/><circle cx="13.1" cy="-16.7" r=".6" fill="#FFF8EE"/><ellipse cx="10" cy="-12.6" rx="1.6" ry="1.1" fill="${B}"/><path d="M6 -11.5l-4 .5M6 -10.5l-4 1.5M14 -11.5l4 .5M14 -10.5l4 1.5" stroke="${B}" stroke-width="1" stroke-linecap="round"/><circle cx="5" cy="-13" r="1.4" fill="#FF9CC2" opacity=".7"/><circle cx="15" cy="-13" r="1.4" fill="#FF9CC2" opacity=".7"/>`,
   and: `<ellipse cx="2" cy="0" rx="9" ry="3" fill="${B}" opacity=".22"/><ellipse cx="0" cy="-8" rx="10" ry="6" fill="#FFD23F" ${HS}/><circle cx="8" cy="-16" r="5.5" fill="#FFD23F" ${HS}/><path d="M13 -16l7 2-7 2z" fill="#FF5B1F" ${HS}/><circle cx="9" cy="-17" r="1.3" fill="${B}"/><path d="M-3 -2v2M3 -2v2" stroke="#FF5B1F" stroke-width="3" stroke-linecap="round"/>`,
 };
 /* Luer som dekker hele toppen av hodet: håret klippes under bremmen, så det ikke stikker opp gjennom lua. Verdien er bremlinja (y). */
@@ -277,12 +279,12 @@ export function lagStua(svg, valg = {}) {
     const DISKO = ['#FF9CC2', '#63E2A8', '#FFD23F', '#5A8DEE'];
     for (let x = 0; x < 6; x++) for (let y = 0; y < 6; y++) {
       const f = disko ? DISKO[(x * 3 + y * 5) % 4] : ((x + y) % 2 ? t.gulv : (t.gulv2 || t.gulv));
-      r([I(x, y), I(x + 1, y), I(x + 1, y + 1), I(x, y + 1)], f, { 'stroke-width': 1.5, 'stroke-opacity': disko ? 0.3 : 0.22, class: disko ? 'disko-flis' : '' });
+      r([I(x, y), I(x + 1, y), I(x + 1, y + 1), I(x, y + 1)], f, disko ? { 'stroke-width': 1.5, 'stroke-opacity': 0.3, class: 'disko-flis', style: '--b:' + ((x + y) * 140 + ((x * 7 + y * 3) % 4) * 90) + 'ms' } : { 'stroke-width': 1.5, 'stroke-opacity': 0.22 });
     }
     r([I(0, 0), I(6, 0), I(6, 6), I(0, 6)], 'none');
     if (!disko) { r([I(1.3, 1.6), I(4.3, 1.6), I(4.3, 4.6), I(1.3, 4.6)], t.teppe); r([I(1.7, 2.0), I(3.9, 2.0), I(3.9, 4.2), I(1.7, 4.2)], 'none', { 'stroke-dasharray': '6 6', 'stroke-width': 2.5 }); }
     // Veggene, med gulvlist og svake tapetstriper
-    const vV = disko ? '#1C1B1F' : t.veggV, vH = disko ? '#2A292E' : t.veggH, list = disko ? '#16120F' : (t.list || t.veggV);
+    const vV = t.veggV, vH = t.veggH, list = t.list || t.veggV;
     r([I(0, 0, 0), I(0, 6, 0), I(0, 6, 100), I(0, 0, 100)], vV);
     r([I(0, 0, 0), I(6, 0, 0), I(6, 0, 100), I(0, 0, 100)], vH);
     for (let z = 20; z < 100; z += 20) { el('line', { x1: I(0, 6, z)[0], y1: I(0, 6, z)[1], x2: I(0, 0, z)[0], y2: I(0, 0, z)[1], stroke: B, 'stroke-width': 1.5, opacity: t.planker ? 0.25 : 0.12 }, romG); el('line', { x1: I(0, 0, z)[0], y1: I(0, 0, z)[1], x2: I(6, 0, z)[0], y2: I(6, 0, z)[1], stroke: B, 'stroke-width': 1.5, opacity: t.planker ? 0.25 : 0.12 }, romG); }
@@ -322,6 +324,20 @@ export function lagStua(svg, valg = {}) {
     if (har('plakat')) { r([I(0, 5.7, 48), I(0, 5.0, 48), I(0, 5.0, 82), I(0, 5.7, 82)], '#FFF8EE'); el('polygon', { points: pts([I(0, 5.6, 77), I(0, 5.1, 77), I(0, 5.1, 70), I(0, 5.6, 70)]), fill: '#FF5B1F', stroke: B, 'stroke-width': 1.5 }, romG); [62, 56].forEach((z) => el('line', { x1: I(0, 5.6, z)[0], y1: I(0, 5.6, z)[1], x2: I(0, 5.1, z)[0], y2: I(0, 5.1, z)[1], stroke: B, 'stroke-width': 2 }, romG)); el('polygon', { points: pts([I(0, 5.35, 64), I(0, 5.1, 64), I(0, 5.1, 54), I(0, 5.35, 54)]), fill: '#63E2A8', stroke: B, 'stroke-width': 1.5 }, romG); }
     if (har('platespiller')) { const g = el('g', {}, romG); boks(1.4, 0.35, 0, 0.9, 0.6, 10, '#FFF8EE', '#D9A26A', '#B9773F', g); const c = I(1.85, 0.65, 10); el('circle', { cx: c[0], cy: c[1] + 1, r: 7, fill: '#1C1B1F', stroke: B, 'stroke-width': 2 }, g); el('circle', { cx: c[0], cy: c[1] + 1, r: 2, fill: '#FF5B1F' }, g); el('line', { x1: c[0] + 9, y1: c[1] - 6, x2: c[0] + 2, y2: c[1], stroke: B, 'stroke-width': 2, 'stroke-linecap': 'round' }, g); }
     tegnTvRamme();
+    if (disko) diskoLys();
+  }
+  /** Diskogulvet: lyskjegler fra taket som sveiper over gulvet, og fargede lysflekker som vandrer på veggene */
+  function diskoLys() {
+    const g = el('g', { class: 'disko-lys', 'pointer-events': 'none' }, romG);
+    [[I(0.2, 0.2, 100), '#FF9CC2', 0], [I(5.8, 0.2, 100), '#63E2A8', 1], [I(0.2, 5.8, 100), '#5A8DEE', 2]].forEach(([o, f, n]) => {
+      const m = I(3, 3, 0), dx = m[0] - o[0], dy = m[1] - o[1];
+      const k = el('polygon', { points: pts([o, [o[0] + dx - 46, o[1] + dy + 6], [o[0] + dx + 46, o[1] + dy - 6]]), fill: f, opacity: 0.38, class: 'disko-kjegle k' + n }, g);
+      el('ellipse', { cx: o[0] + dx, cy: o[1] + dy, rx: 46, ry: 20, fill: f, opacity: 0.5, class: 'disko-kjegle k' + n, style: 'transform-origin:' + o[0].toFixed(1) + 'px ' + o[1].toFixed(1) + 'px' }, g);
+      k.style.transformOrigin = o[0].toFixed(1) + 'px ' + o[1].toFixed(1) + 'px';
+    });
+    [[0, 2.5, 60, '#FFD23F'], [0, 4.4, 40, '#FF9CC2'], [1.6, 0, 70, '#63E2A8'], [3.8, 0, 50, '#5A8DEE']].forEach(([x, y, z, f], n) => {
+      const q = I(x, y, z); el('ellipse', { cx: q[0], cy: q[1], rx: 10, ry: 7, fill: f, opacity: 0.85, stroke: '#FFF8EE', 'stroke-width': 1.5, class: 'disko-flekk f' + n }, g);
+    });
   }
   /** TV-en på venstre vegg: viser romkoden, eller kortet som spilles nå */
   function tegnTvRamme() {

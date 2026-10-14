@@ -2500,3 +2500,19 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .rs-lock{width:20px;height:20px;padding:0;border-radius:50%;background:var(--blekk);display:flex;align-items:center;justify-content:center}
 .rs-lock svg{width:11px;height:11px;fill:none;stroke:#FFF8EE;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .rom-stua.ute{background:#1C1B1F}
+
+/* Diskogulvet: flisene lyser i en bølge, lyskjegler sveiper, lysflekker vandrer. Veggene er rommets egne. */
+.disko-flis{animation:diskoFlis 1.6s ease-in-out infinite;animation-delay:var(--b,0ms)}
+@keyframes diskoFlis{0%,100%{filter:brightness(1)}45%{filter:brightness(1.35) saturate(1.2)}}
+.disko-kjegle{transform-box:view-box;animation:diskoSveip 4.2s ease-in-out infinite alternate}
+.disko-kjegle.k1{animation-duration:3.6s;animation-delay:-1.2s}
+.disko-kjegle.k2{animation-duration:5s;animation-delay:-2.4s}
+@keyframes diskoSveip{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+.disko-flekk{transform-box:fill-box;transform-origin:center;animation:diskoFlekk 3.2s ease-in-out infinite alternate}
+.disko-flekk.f1{animation-delay:-.8s}.disko-flekk.f2{animation-delay:-1.6s}.disko-flekk.f3{animation-delay:-2.4s}
+@keyframes diskoFlekk{from{transform:translate(-12px,5px);opacity:.45}to{transform:translate(12px,-5px);opacity:1}}
+/* Eierkrona glitrer */
+.eier-glimt path{transform-box:fill-box;transform-origin:center;animation:eierGlimt 2.4s ease-in-out infinite}
+.eier-glimt path:nth-child(2){animation-delay:-1.2s}
+@keyframes eierGlimt{0%,100%{opacity:.2;transform:scale(.6)}50%{opacity:1;transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.disko-flis,.disko-kjegle,.disko-flekk,.eier-glimt path{animation:none}}
