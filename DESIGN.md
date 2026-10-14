@@ -367,6 +367,17 @@ The room is the product, and it is operated with buttons alone. A button that sa
 - Removed everywhere: «Trykk for å lukke», «Trykk på deg selv, så vinker figuren din», «Bare du er med ennå…», level explanations, night-points intro, deck tips and the sentence under every host tool.
 - Motion: only the waiting dots (1.2 s, reduced-motion → static) and the existing chip entrance.
 
+## The room, Habbo in mind
+
+The living room is drawn in one isometric projection (`I(x, y, z)` in `src/klient/stua.js`). Everything on the floor is a «ting» with a depth key, sorted back to front, so nothing in front is ever hidden by something behind it.
+
+- **Floor and walls**: chequered tiles in two tones of the theme colour, a skirting board, faint wallpaper stripes. The door stands ajar with light from the hallway, and the leaf swings away while someone walks through.
+- **The sofa** stands under the TV along the left wall, back to the wall, seat facing the room: armrest, back, seat, three cushions, armrest, drawn in that order (depth 2.8, so everyone sits in front of the backrest).
+- **Themes**: Stua (bookshelf, curtains), Hytta, Julebordet. The rooftop is no longer a theme.
+- **The rooftop is a place**: tap the door → «Gå ut på takterrassen». Only those who walk out are out; the room stays as it is for everyone else. Tabs «Inne n · Ute n» above the room switch the view; your own view follows you through the door. The rooftop is the top of a building: the facade with lit windows continues below the deck, the city behind, a railing instead of walls, string lights, a parasol, a grill and the stair hut whose door leads back in. Pluss in the room opens the door.
+- **Rommet** (host): four rows of tiles, Rom · Gulv · Lys · Ting. Disco floor and disco ball are Pluss; the string lights and the things unlock as before. Locked tiles show a pink Pluss badge or a lock, and a tap shows why. The choices are saved with the host's cosmetics on the account (`valgt.rom`) and a fresh room starts the way the last one was.
+- **Motion**: string-light bulbs pulse slowly (3 s), the grill smokes, the disco ball turns. All stops under reduced motion.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

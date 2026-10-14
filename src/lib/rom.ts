@@ -13,7 +13,7 @@ import BINGO_EN from '../data/bingo.en.json';
 import PLUSSPAKKER_EN from '../data/pluss.en.json';
 import SOSIAL_EN from '../data/sosial.en.json';
 import { PLUSS_ROM, GRATIS_PLASSER } from './plussleker';
-import { BEVEG_GRATIS, rensPynt, temaLov, temaFor, figurNokkel, ekstraLov, EKSTRA as ROM_EKSTRA } from './pynt.js';
+import { BEVEG_GRATIS, rensPynt, temaLov, temaFor, figurNokkel, ekstraLov, EKSTRA as ROM_EKSTRA, rensStil, STIL_PLUSS } from './pynt.js';
 import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } from './kveld';
 import { MAKS_REGEL } from './lovbok';
 import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors, borsTilPluss, BUTIKK } from './bors';
@@ -337,7 +337,9 @@ function stuaVisning(data: any, meg: any) {
   const pos: any = {}; Object.keys(st.pos || {}).forEach((id) => { if (ider.has(id)) pos[id] = st.pos[id]; });
   const naa = Date.now();
   const vert = data.spillere.find((p: any) => p.id === data.vert) || {};
+  const stil = rensStil(st.stil);
   return { pos, sofa: (data.sofa || []).map((p: any) => ({ id: p.id, navn: p.navn, slurker: p.slurker || 0 })), tema: temaFor(st.tema).id, ekstra: Array.isArray(st.ekstra) ? st.ekstra : [],
+    gulv: stil.gulv, lys: stil.lys, ute: (Array.isArray(st.ute) ? st.ute : []).filter((id: string) => ider.has(id)),
     ekstraLov: meg && meg.id === data.vert ? ROM_EKSTRA.map((e: any) => e.id).filter((id: string) => ekstraLov(id, vert, data.historikk)) : [], straff: st.straff || null, plager: meg && st.plag && st.plag[meg.id] ? st.plag[meg.id].filter((t: number) => naa - t < 60000).length : 0, grense: STUA_PLAG };
 }
 
@@ -422,7 +424,7 @@ function enRekke(lek: string) {
 }
 /** Plassene i sofaen i stua (samme rutenett som stua på telefonen og TV-en). */
 // Fylles fra midten og utover, så tre stykker sprer seg i sofaen i stedet for å klumpe seg i den ene enden
-const SOFA_SETER: [number, number][] = [[4.9, 3.3], [4.9, 2.1], [4.9, 4.5], [4.9, 2.7], [4.9, 3.9], [4.9, 1.75]];
+const SOFA_SETER: [number, number][] = [[1.0, 3.3], [1.0, 2.1], [1.0, 4.5], [1.0, 2.7], [1.0, 3.9], [1.0, 1.9]];
 function enVisning(s: any, data: any, lang: string) {
   const k = s.rekke[s.pos];
   // Den som leser, går på rundgang: verten først, så sofaen
@@ -1192,7 +1194,7 @@ function handlingInne(data: any, meg: any, h: any) {
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
     data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
   }
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut', 'stua-flytt', 'stua-tema', 'stua-ekstra', 'min-pynt', 'sofa-ny', 'sofa-fjern', 'en-start', 'en-neste'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut', 'stua-flytt', 'stua-tema', 'stua-ekstra', 'stua-stil', 'stua-ut', 'min-pynt', 'sofa-ny', 'sofa-fjern', 'en-start', 'en-neste'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -1342,6 +1344,27 @@ function handlingInne(data: any, meg: any, h: any) {
       if (!temaLov(t.id, data.pluss && data.pluss.til > Date.now())) return feilL('pluss', 'Det temaet krever Pluss i rommet.', 'That look needs Pluss in the room.');
       data.stua = data.stua || { pos: {} };
       if (data.stua.tema !== t.id) { data.stua.tema = t.id; melde(data, `Stua ble til ${t.navn[0]}`, `The room became ${t.navn[1]}`); }
+      return { ok: true };
+    }
+    case 'stua-stil': {
+      // Verten velger gulv og lys. Disko krever Pluss i rommet, lyslenka må være låst opp.
+      if (!erVert) return { feil: 'bare-vert' };
+      const stil = rensStil(h);
+      const harPluss = !!(data.pluss && data.pluss.til > Date.now());
+      if (!harPluss && (STIL_PLUSS.includes(stil.gulv) || STIL_PLUSS.includes(stil.lys))) return feilL('pluss', 'Det krever Pluss i rommet.', 'That needs Pluss in the room.');
+      if (stil.lys === 'lys' && !ekstraLov('lys', meg, data.historikk)) return feilL('laast', 'Den er ikke låst opp ennå.', 'That one is not unlocked yet.');
+      data.stua = data.stua || { pos: {} };
+      data.stua.stil = stil;
+      return { ok: true };
+    }
+    case 'stua-ut': {
+      // Ut døra til takterrassen, eller inn igjen. Døra er åpen når rommet har Pluss.
+      const st = data.stua = data.stua || { pos: {} };
+      const ute: string[] = Array.isArray(st.ute) ? st.ute : [];
+      const er = ute.includes(meg.id);
+      if (!er && !(data.pluss && data.pluss.til > Date.now())) return feilL('pluss', 'Døra ut er låst uten Pluss.', 'The door out is locked without Pluss.');
+      st.ute = er ? ute.filter((id) => id !== meg.id) : ute.concat([meg.id]);
+      melde(data, er ? `${meg.navn} kom inn igjen` : `${meg.navn} gikk ut på takterrassen`, er ? `${meg.navn} came back in` : `${meg.navn} went out to the rooftop`);
       return { ok: true };
     }
     case 'stua-ekstra': {

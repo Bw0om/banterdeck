@@ -5,7 +5,7 @@
 import { lagStua, figurHtml, utseende, PYNT_SVG, BEVEG_SVG, hodeHtml } from './stua.js';
 import { lagFigurVelger } from './figurvelger.js';
 import { klistremerke } from '../lib/klistremerker';
-import { TEMAER, temaLov, pyntNavn, PYNT, EKSTRA, sesong } from '../lib/pynt.js';
+import { TEMAER, temaLov, pyntNavn, PYNT, EKSTRA, sesong, STIL, STIL_PLUSS } from '../lib/pynt.js';
 
 export function startRom(LEKNAVN, LANG) {
   // Språk: samme kode for /no/rom og /room. T('norsk', 'English') velger tekst.
@@ -4382,44 +4382,112 @@ export function startRom(LEKNAVN, LANG) {
     if (inne) kontoApi('/api/konto/pynt').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (!d || !aapentArk || aapentArk.el !== m) return; velger.sett({ laast: d.laast || [], valgt: d.valgt || {}, kvelder: d.kvelder || 0 }); }).catch(function () {});
     aapentArk = { el: m, oppdater: function () {} };
   }
+  /** Verten former rommet: Rom, Gulv, Lys, Ting – én rute per valg. Lagres på kontoen, så neste rom starter likt. */
+  var TEMAFARGER = { stue: ['#63E2A8', '#FFF8EE', '#FFD23F', '#FFC928'], hytte: ['#B9773F', '#C98D63', '#D9A26A', '#CF9660'], julebord: ['#2EA873', '#FFF8EE', '#E2363B', '#D32F34'] };
+  var RS_IKON = {
+    fliser: '<path d="M4 4h16v16H4zM12 4v16M4 12h16"/>', disko: '<path d="M4 4h16v16H4zM12 4v16M4 12h16"/><path d="M4 4l8 8M12 12l8 8" stroke-width="4" opacity=".4"/>',
+    lampe: '<path d="M8 3h8l3 8H5zM12 11v9M8 20h8"/>', lys: '<path d="M3 7q9 8 18 0"/><circle cx="7" cy="11" r="2"/><circle cx="12" cy="12.5" r="2"/><circle cx="17" cy="11" r="2"/>', diskokule: '<path d="M12 2v4"/><circle cx="12" cy="13" r="7"/><path d="M5 13h14M12 6v14M7 8l10 10M17 8L7 18"/>',
+    plante: '<path d="M7 20h10l1-6H6zM12 14V8M12 8q-5 0-6-5 5 0 6 5zM12 8q5 0 6-5-5 0-6 5z"/>', plakat: '<rect x="5" y="3" width="14" height="18" rx="1"/><circle cx="12" cy="12" r="3"/>', platespiller: '<rect x="3" y="7" width="18" height="12" rx="2"/><circle cx="10" cy="13" r="3.5"/><path d="M17 10v4"/>',
+  };
+  function rsIkon(id) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (RS_IKON[id] || '') + '</svg>'; }
+  function rsFlis(f) { return '<span class="rs-flis" aria-hidden="true">' + f.map(function (c) { return '<i style="background:' + c + '"></i>'; }).join('') + '</span>'; }
+  function rsRute(gruppe, v, inne, paa, laas, tekst) {
+    return '<button type="button" class="rs-rute' + (laas ? ' laast' : '') + '" data-rs="' + gruppe + '" data-v="' + v + '" aria-pressed="' + !!paa + '" aria-label="' + esc(tekst) + (laas ? ' – ' + esc(laas) : '') + '">' + inne +
+      (laas === '🔒' ? '<i class="rs-laas rs-lock" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></i>' : laas ? '<i class="rs-laas">' + esc(laas) + '</i>' : '') + '<small>' + esc(tekst) + '</small></button>';
+  }
   function romArk() {
     lukkArk();
     var m = lagArk('rom-ark', T('Rommet', 'The room')), kropp = m.querySelector('.ark-kropp');
     function tegnArk() {
       var st = tilstand.stua || {}, harPluss = !!(tilstand.pluss && tilstand.pluss.til > Date.now()), naa = st.tema || 'stue', paa = st.ekstra || [], lov = st.ekstraLov || [];
-      kropp.innerHTML = '<p class="small">' + T('Alle i rommet ser det med en gang, også på TV-en.', 'Everyone in the room sees it right away, the TV too.') + '</p>' +
-        '<div class="tema-liste" role="group" aria-label="' + T('Hvordan rommet ser ut', 'How the room looks') + '">' + TEMAER.map(function (t) {
+      var rad = function (navn, ruter) { return '<div class="rs-rad"><b>' + navn + '</b><div class="rs-ruter">' + ruter + '</div></div>'; };
+      var pl = 'Pluss';
+      kropp.innerHTML =
+        (innlogget() ? '<p class="rs-husk">' + T('Huskes til neste gang', 'Remembered for next time') + '</p>' : '') +
+        rad(T('Rom', 'Room'), TEMAER.map(function (t) {
           var ok = temaLov(t.id, harPluss), gratisNaa = t.gratisI && t.gratisI === sesong();
-          return '<button type="button" class="tema-valg' + (ok ? '' : ' laast') + '" data-stuatema="' + t.id + '" aria-pressed="' + (naa === t.id) + '"' + (ok ? '' : ' disabled') + '>' +
-            temaBilde(t.id) + '<span class="tema-tekst"><b>' + esc(t.navn[EN ? 1 : 0]) + '</b><small>' + esc(temaOm(t.id)) + '</small></span>' +
-            (t.pluss ? '<i class="tema-merke' + (gratisNaa ? ' gratis' : '') + '">' + (gratisNaa ? T('Gratis nå', 'Free now') : 'Pluss') + '</i>' : '') + '</button>';
-        }).join('') + '</div>' +
-        '<h3 class="ark-h3">' + T('Små ting i rommet', 'Small things in the room') + '</h3>' +
-        '<div class="ekstra-rad">' + EKSTRA.map(function (e) {
-          var ok = lov.indexOf(e.id) !== -1, er = paa.indexOf(e.id) !== -1;
-          return '<button type="button" class="ekstra-valg' + (ok ? '' : ' laast') + '" data-ekstra="' + e.id + '" aria-pressed="' + er + '"' + (ok ? '' : ' disabled') + '><b>' + esc(e.navn[EN ? 1 : 0]) + '</b><small>' + esc(ok ? (er ? T('På', 'On') : T('Trykk for å slå på', 'Tap to turn on')) : e.laas[EN ? 1 : 0]) + '</small></button>';
-        }).join('') + '</div>' +
-        '<p class="small ark-fot">' + (harPluss ? T('Rommet har Pluss i kveld, så alle temaene er åpne.', 'The room has Pluss tonight, so every look is open.') : T('Takterrassen og Julebordet følger Pluss. Julebordet er gratis i desember.', 'The rooftop and the Christmas party come with Pluss. The Christmas party is free in December.')) +
-          (innlogget() ? '' : ' ' + T('De små tingene låser du opp med en bruker.', 'The small things unlock with an account.')) + '</p>';
+          return rsRute('tema', t.id, rsFlis(TEMAFARGER[t.id] || TEMAFARGER.stue), naa === t.id, ok ? '' : (gratisNaa ? T('Gratis nå', 'Free now') : pl), t.navn[EN ? 1 : 0]);
+        }).join('')) +
+        rad(T('Gulv', 'Floor'), STIL.gulv.map(function (v) {
+          var laast = STIL_PLUSS.indexOf(v) !== -1 && !harPluss;
+          return rsRute('gulv', v, v === 'disko' ? rsFlis(['#FF9CC2', '#63E2A8', '#5A8DEE', '#FFD23F']) : rsIkon(v), (st.gulv || 'fliser') === v, laast ? pl : '', v === 'disko' ? T('Disko', 'Disco') : T('Fliser', 'Tiles'));
+        }).join('')) +
+        rad(T('Lys', 'Light'), STIL.lys.map(function (v) {
+          var laast = STIL_PLUSS.indexOf(v) !== -1 ? !harPluss : (v === 'lys' && lov.indexOf('lys') === -1);
+          return rsRute('lys', v, rsIkon(v), (st.lys || 'lampe') === v, laast ? (v === 'lys' ? '🔒' : pl) : '', v === 'lampe' ? T('Lampe', 'Lamp') : v === 'lys' ? T('Lyslenke', 'String lights') : T('Diskokule', 'Disco ball'));
+        }).join('')) +
+        rad(T('Ting', 'Things'), EKSTRA.filter(function (e) { return e.id !== 'lys'; }).map(function (e) {
+          var ok = lov.indexOf(e.id) !== -1;
+          return rsRute('ting', e.id, rsIkon(e.id), paa.indexOf(e.id) !== -1, ok ? '' : '🔒', e.navn[EN ? 1 : 0]);
+        }).join(''));
     }
     kropp.addEventListener('click', function (e) {
-      var t = e.target.closest("[data-stuatema]"); if (t && !t.disabled) { gjor({ handling: "stua-tema", tema: t.dataset.stuatema }); return; }
-      var x = e.target.closest('[data-ekstra]'); if (!x || x.disabled) return;
-      var paa = ((tilstand.stua || {}).ekstra || []).slice(), id = x.dataset.ekstra, i = paa.indexOf(id);
-      if (i === -1) paa.push(id); else paa.splice(i, 1);
-      gjorAlltid({ handling: 'stua-ekstra', liste: paa });
+      var b = e.target.closest('[data-rs]'); if (!b) return;
+      var st = tilstand.stua || {}, g = b.dataset.rs, v = b.dataset.v, harPluss = !!(tilstand.pluss && tilstand.pluss.til > Date.now());
+      if (b.classList.contains('laast')) {
+        if (g === 'ting' || (g === 'lys' && v === 'lys')) { var e2 = EKSTRA.find(function (x) { return x.id === (g === 'lys' ? 'lys' : v); }); return toast(e2 ? e2.laas[EN ? 1 : 0] : ''); }
+        lukkArk(); return visPlussTilbud();
+      }
+      var rom = { tema: st.tema || 'stue', gulv: st.gulv || 'fliser', lys: st.lys || 'lampe', ekstra: (st.ekstra || []).slice() };
+      if (g === 'tema') { rom.tema = v; gjor({ handling: 'stua-tema', tema: v }); }
+      else if (g === 'gulv' || g === 'lys') { rom[g] = v; gjorAlltid({ handling: 'stua-stil', gulv: rom.gulv, lys: rom.lys }); }
+      else if (g === 'ting') { var i = rom.ekstra.indexOf(v); if (i === -1) rom.ekstra.push(v); else rom.ekstra.splice(i, 1); gjorAlltid({ handling: 'stua-ekstra', liste: rom.ekstra }); }
+      void harPluss;
+      huskRom(rom);
     });
     tegnArk();
     aapentArk = { el: m, oppdater: tegnArk };
   }
-  var TEMAFARGER = { stue: ['#FFD23F', '#63E2A8', '#FFF8EE', '#FF9CC2', '#FF5B1F'], hytte: ['#D9A26A', '#B9773F', '#C98D63', '#2EA873', '#7A4A2A'], takterrasse: ['#8A8580', '#7CC6FE', '#7CC6FE', '#FFF8EE', '#1C1B1F'], julebord: ['#E2363B', '#2EA873', '#FFF8EE', '#E2363B', '#2EA873'] };
-  function temaBilde(id) {
-    var f = TEMAFARGER[id] || TEMAFARGER.stue;
-    return '<svg class="tema-bilde" viewBox="0 0 96 62" aria-hidden="true"><rect width="96" height="62" fill="' + f[2] + '"/><rect width="48" height="62" fill="' + f[1] + '"/><polygon points="0,62 48,38 96,62" fill="' + f[0] + '"/><rect x="56" y="34" width="28" height="12" fill="' + f[3] + '" stroke="#16120F" stroke-width="2.5"/><rect x="78" y="10" width="10" height="24" fill="' + f[4] + '" stroke="#16120F" stroke-width="2.5"/><rect x="10" y="12" width="22" height="14" fill="#16120F"/></svg>';
+  /** Rommet lagres sammen med pynten på kontoen, så neste rom verten lager starter likt. */
+  var huskT = null;
+  function huskRom(rom) {
+    if (!innlogget()) return;
+    clearTimeout(huskT);
+    huskT = setTimeout(function () {
+      kontoApi('/api/konto/pynt').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+        if (!d) return;
+        var valgt = d.valgt || {}; valgt.rom = rom;
+        return kontoApi('/api/konto/pynt', { method: 'POST', body: JSON.stringify({ valgt: valgt }) });
+      }).catch(function () {});
+    }, 600);
   }
-  function temaOm(id) {
-    return { stue: T('Gul, rosa og mint. Slik den alltid har vært.', 'Yellow, pink and mint. The way it has always been.'), hytte: T('Tømmervegger og fjell i vinduet.', 'Log walls and mountains in the window.'),
-      takterrasse: T('Lyslenke, skyer og byen under.', 'String lights, clouds and the city below.'), julebord: T('Juletre, krans og snø.', 'A tree, a wreath and snow.') }[id] || '';
+  // Nytt rom: verten får rommet slik det sist var (bare det som fortsatt er lov)
+  var romHusket = false;
+  function hentHusketRom() {
+    if (romHusket || !erVert() || !innlogget() || !tilstand) return; romHusket = true;
+    var st = tilstand.stua || {};
+    if ((st.tema || 'stue') !== 'stue' || (st.gulv || 'fliser') !== 'fliser' || (st.lys || 'lampe') !== 'lampe' || (st.ekstra || []).length || (tilstand.historikk || []).length) return;
+    kontoApi('/api/konto/pynt').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      var r = d && d.valgt && d.valgt.rom; if (!r) return;
+      var harPluss = !!(tilstand.pluss && tilstand.pluss.til > Date.now()), lov = (tilstand.stua || {}).ekstraLov || [];
+      if (r.tema !== 'stue' && temaLov(r.tema, harPluss)) gjorAlltid({ handling: 'stua-tema', tema: r.tema });
+      var gulv = STIL_PLUSS.indexOf(r.gulv) !== -1 && !harPluss ? 'fliser' : r.gulv, lys = (STIL_PLUSS.indexOf(r.lys) !== -1 && !harPluss) || (r.lys === 'lys' && lov.indexOf('lys') === -1) ? 'lampe' : r.lys;
+      if (gulv !== 'fliser' || lys !== 'lampe') gjorAlltid({ handling: 'stua-stil', gulv: gulv, lys: lys });
+      var ekstra = (r.ekstra || []).filter(function (id) { return lov.indexOf(id) !== -1; });
+      if (ekstra.length) gjorAlltid({ handling: 'stua-ekstra', liste: ekstra });
+    }).catch(function () {});
+  }
+  /** Døra: ut på takterrassen, eller inn igjen. Åpen når rommet har Pluss. */
+  function dorArk() {
+    lukkArk();
+    var m = lagArk('dor-ark', T('Døra', 'The door')), kropp = m.querySelector('.ark-kropp');
+    function tegnArk() {
+      var st = tilstand.stua || {}, ute = st.ute || [], harPluss = !!(tilstand.pluss && tilstand.pluss.til > Date.now()), jegUte = ute.indexOf(meg.id) !== -1;
+      kropp.innerHTML = (ute.length ? '<div class="dor-ute">' + ute.map(function (id) { return '<span>' + esc(navn(id)) + '</span>'; }).join('') + '</div>' : '') +
+        (jegUte ? '<button type="button" class="rom-stor-knapp" data-d="ut">' + T('Gå inn igjen', 'Go back in') + '</button>'
+          : harPluss ? '<button type="button" class="rom-stor-knapp dor-ut" data-d="ut">' + T('Gå ut på takterrassen', 'Go out to the rooftop') + '</button>'
+          : '<button type="button" class="rom-stor-knapp dor-laast" data-d="pluss">🔒 ' + T('Gå ut på takterrassen', 'Go out to the rooftop') + '</button>' +
+            '<button type="button" class="btn dor-pluss" data-d="pluss">' + T('Pluss åpner døra for alle', 'Pluss opens the door for everyone') + '</button>') +
+        (erVert() ? '<p class="small"><button type="button" class="linkbtn" data-d="rom">' + T('Rommet', 'The room') + '</button></p>' : '');
+    }
+    kropp.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-d]'); if (!b) return;
+      if (b.dataset.d === 'ut') { gjorAlltid({ handling: 'stua-ut' }); lukkArk(); }
+      else if (b.dataset.d === 'pluss') { lukkArk(); visPlussTilbud(); }
+      else if (b.dataset.d === 'rom') romArk();
+    });
+    tegnArk();
+    aapentArk = { el: m, oppdater: tegnArk };
   }
   root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-g="figur-ark"]')) figurArk(); });
 
@@ -4826,6 +4894,7 @@ export function startRom(LEKNAVN, LANG) {
      Elementet lever på tvers av tegningene (root tegnes på nytt hele tiden), og flyttes inn i plassholderen. */
   var stuaHendSett = null, stuaPallVist = false;
   var stuaEl = null, stua = null, stuaVentTegn = false, stuaStraffSett = null, stuaVarslet = 0, stuaDrarFra = 0;
+  var stuaVis = 'inne', stuaJegUte = false, stuaBytt = false;
   document.addEventListener('pointerdown', function (e) { if (e.target.closest && e.target.closest('.rom-stua .figur')) stuaDrarFra = Date.now(); }, true);
   function stuaKort(s) {
     if (!s) return '';
@@ -4849,16 +4918,31 @@ export function startRom(LEKNAVN, LANG) {
         // Trykk på deg selv: figuren gjør «din» bevegelse (vink er gratis). Arket åpnes fra lenka under stua.
         onTrykk: function (id) { if (id === meg.id) { var b = (megSpiller().pynt || {}).beveg || 'vink'; gjorAlltid({ handling: 'beveg', b: b }); } },
         onRom: function () { if (erVert()) romArk(); else toast(T('Bare verten kan endre rommet.', 'Only the host can change the room.')); },
+        onDor: dorArk,
       });
       stuaEl.appendChild(Object.assign(document.createElement('p'), { className: 'rom-stua-tips' }));
     }
     stuaEl.querySelector('.rom-stua-tips').innerHTML = '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>';
     plass.appendChild(stuaEl);
     stuaEl.classList.toggle('kompakt', !!s);
-    var st = tilstand.stua || {};
+    var st = tilstand.stua || {}, ute = st.ute || [], jegUte = ute.indexOf(meg.id) !== -1, alle = (tilstand.spillere || []).concat(st.sofa || []);
+    // Går du ut eller inn, følger skjermen deg
+    if (jegUte !== stuaJegUte) { stuaJegUte = jegUte; stuaVis = jegUte ? 'ute' : 'inne'; }
+    if (stuaVis === 'ute' && !ute.length) stuaVis = 'inne';
+    stua.scene(stuaVis === 'ute');
+    stuaEl.classList.toggle('ute', stuaVis === 'ute');
     stua.tema(st.tema || 'stue');
-    stua.settFolk((tilstand.spillere || []).concat(st.sofa || []), st.pos);
+    stua.stil({ gulv: st.gulv, lys: st.lys });
+    var her = alle.filter(function (p) { return (ute.indexOf(p.id) !== -1) === (stuaVis === 'ute'); });
+    if (stuaBytt) { stuaBytt = false; stua.bytt(her, st.pos); } else stua.settFolk(her, st.pos);
     stua.ekstra(st.ekstra || []);
+    var fan = stuaEl.querySelector('.stua-faner');
+    if (ute.length || tilstand.pluss) {
+      if (!fan) { fan = document.createElement('div'); fan.className = 'stua-faner'; stuaEl.insertBefore(fan, stuaEl.firstChild); }
+      fan.innerHTML = '<button type="button" data-g="stua-vis" data-v="inne" aria-pressed="' + (stuaVis === 'inne') + '">' + T('Inne', 'In') + ' <small>' + (alle.length - ute.length) + '</small></button>' +
+        '<button type="button" data-g="stua-vis" data-v="ute" aria-pressed="' + (stuaVis === 'ute') + '">' + T('Ute', 'Out') + ' <small>' + ute.length + '</small></button>';
+    } else if (fan) fan.remove();
+    hentHusketRom();
     if (aapentArk) aapentArk.oppdater();
     var kt = stuaKort(s);
     if (kt) stua.tv(kt, s.navn); else stua.kode(kode);
@@ -5080,6 +5164,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'reak-mer') { reakMer = !reakMer; return tegn(); }
     if (g === 'reager') { if (!les('bd_intro_reak')) { skriv('bd_intro_reak', 1); var hh = document.querySelector('.reak-hint'); if (hh) hh.remove(); } return gjorAlltid({ handling: 'reager', e: b.dataset.e }); }
     if (g === 'intro-lukk') { skriv(b.dataset.k, 1); return tegn(); }
+    if (g === 'stua-vis') { if (stuaVis !== b.dataset.v) { stuaVis = b.dataset.v; stuaBytt = true; tegn(); } return; }
     if (g === 'bg-hjelp') { var om = b.closest('.rom-bg-rad').querySelector('.rom-bg-om'); om.hidden = !om.hidden; b.setAttribute('aria-expanded', String(!om.hidden)); return; }
     if (g === 'send-velg' || g === 'del-ut') return delUtArk();
     if (g === 'aldri-svar') { if (b.getAttribute('aria-pressed') === 'true') return; gjorAlltid({ handling: 'aldri-svar', v: b.dataset.v }); return; }

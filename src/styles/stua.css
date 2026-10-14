@@ -2464,3 +2464,39 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .fv-prikk.paa{box-shadow:0 0 0 3px var(--card),0 0 0 6px var(--ink)}
 .fv-figur .kropp rect,.fv-figur .kropp circle,.fv-figur .kropp path{transition:fill .25s var(--fjaer)}
 @media (prefers-reduced-motion:reduce){.fv-prikker{animation:none}}
+
+/* Rommet v2: inne/ute-faner over stua, døra-arket og «Rommet» med ruter */
+.stua-faner{display:flex;gap:6px;margin:0 0 6px}
+.stua-faner button{appearance:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 11px;font:inherit;font-weight:900;font-size:12.5px;color:var(--blekk);background:#FFF8EE;border:2px solid var(--blekk);border-radius:999px;box-shadow:2px 2px 0 var(--blekk)}
+.stua-faner button[aria-pressed="true"]{background:var(--gul)}
+.stua-faner small{font-weight:800;opacity:.7}
+.rs-husk{margin:0 0 2px;font-size:12px;font-weight:800;color:var(--muted)}
+.rs-rad{display:grid;grid-template-columns:48px 1fr;align-items:center;gap:6px;margin-top:4px}
+.rs-rad>b{font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:12px;letter-spacing:.04em;color:var(--muted)}
+.rs-ruter{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 8px}
+.rs-rute{flex:0 0 64px;height:72px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;background:var(--card);border:2.5px solid var(--ink);border-radius:6px;box-shadow:var(--skygge-liten);font:inherit;color:var(--ink);cursor:pointer;transition:transform var(--fjaer-tid) var(--fjaer),box-shadow var(--fjaer-tid) var(--fjaer)}
+.rs-rute:not(.laast):active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard);transition-duration:90ms}
+.rs-rute[aria-pressed="true"]{background:var(--gul);color:var(--blekk);box-shadow:var(--skygge-liten),0 0 0 3px var(--bg),0 0 0 5px var(--ink)}
+.rs-rute.laast{background:var(--bg2);border-style:dashed;box-shadow:none;color:var(--muted);cursor:pointer}
+.rs-rute.laast>svg,.rs-rute.laast>.rs-flis{opacity:.45}
+.rs-rute>svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rs-rute small{font-size:10.5px;font-weight:800;line-height:1}
+.rs-flis{width:30px;height:30px;border:2px solid var(--ink);border-radius:4px;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
+.rs-flis i{display:block}
+.rs-laas{position:absolute;top:-8px;right:-6px;font-style:normal;font-size:9.5px;font-weight:900;text-transform:uppercase;padding:2px 5px;border:2px solid var(--blekk);background:var(--rosa);color:var(--blekk);border-radius:3px;line-height:1.1}
+.dor-ute{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.dor-ute span{padding:6px 10px;border:2px solid var(--ink);border-radius:4px;font-weight:800;font-size:13px;background:var(--card)}
+.dor-ut,html.i-spill .dor-ut{background:var(--mint)!important}
+.dor-laast,html.i-spill .dor-laast{background:var(--bg2)!important;border-style:dashed!important;box-shadow:none!important;color:var(--muted)!important}
+.dor-pluss{display:block;width:100%;max-width:420px;margin-top:8px;padding:12px;background:var(--rosa);border:2.5px solid var(--blekk);border-radius:6px;color:var(--blekk);font:inherit;font-weight:900;box-shadow:var(--skygge-liten)}
+/* rommet lever: lyslenka blinker sakte, grillen ryker, diskokula kan henge fast */
+.lys-paere{animation:lysBlink 3s ease-in-out infinite;animation-delay:calc(var(--i) * -230ms)}
+@keyframes lysBlink{0%,100%{opacity:1}50%{opacity:.45}}
+.grill-royk{animation:royk 2.4s ease-in-out infinite}
+@keyframes royk{0%{opacity:.6;transform:translateY(0)}100%{opacity:0;transform:translateY(-8px)}}
+.stua-disco.fast{opacity:1}
+.stua-disco.fast .disco-lys{animation-duration:2800ms}
+@media (prefers-reduced-motion:reduce){.lys-paere,.grill-royk{animation:none}}
+.rs-lock{width:20px;height:20px;padding:0;border-radius:50%;background:var(--blekk);display:flex;align-items:center;justify-content:center}
+.rs-lock svg{width:11px;height:11px;fill:none;stroke:#FFF8EE;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.rom-stua.ute{background:#1C1B1F}
