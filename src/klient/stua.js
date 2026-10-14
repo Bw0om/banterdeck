@@ -55,8 +55,8 @@ export const PYNT_SVG = {
   partyhatt: `<path d="M-11 -66L0 -94l11 28z" fill="#FF5B1F" ${HS}/><path d="M-6 -76l12-7M-3 -85l6-3" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-94" r="3.5" fill="#FFD23F" ${HS}/>`,
   krone: `<path d="M-14 -64l3-14 7 7 4-12 4 12 7-7 3 14z" fill="#FFD23F" ${HS}/><circle cx="-6" cy="-68" r="2" fill="#FF5B1F"/><circle cx="6" cy="-68" r="2" fill="#FF5B1F"/>`,
   glorie: `<ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="${B}" stroke-width="6.5"/><ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="#FFD23F" stroke-width="3.5"/>`,
-  cowboyhatt: `<path d="M-23 -63q23 9 46 0q-5 9-23 9t-23-9z" fill="#B9773F" ${HS}/><path d="M-12 -63q0-20 12-20t12 20z" fill="#B9773F" ${HS}/><path d="M-12 -65h24" stroke="${B}" stroke-width="3"/>`,
-  topphatt: `<ellipse cx="0" cy="-64" rx="19" ry="4.5" fill="#1C1B1F" ${HS}/><rect x="-11" y="-91" width="22" height="28" rx="2" fill="#1C1B1F" ${HS}/><rect x="-11" y="-72" width="22" height="5" fill="#FF5B1F"/>`,
+  cowboyhatt: `<path d="M-24 -63q24 9 48 0q-5 9-24 9t-24-9z" fill="#B9773F" ${HS}/><path d="M-15.5 -63q0-21 15.5-21t15.5 21z" fill="#B9773F" ${HS}/><path d="M-15.5 -65h31" stroke="${B}" stroke-width="3"/>`,
+  topphatt: `<ellipse cx="0" cy="-64" rx="21" ry="4.5" fill="#1C1B1F" ${HS}/><rect x="-15.5" y="-92" width="31" height="29" rx="2" fill="#1C1B1F" ${HS}/><rect x="-15.5" y="-72" width="31" height="5" fill="#FF5B1F"/>`,
   hjelm: `<path d="M-15 -63q0-21 15-21t15 21z" fill="#FFD23F" ${HS}/><rect x="-19" y="-65" width="38" height="5" rx="2.5" fill="#FFD23F" ${HS}/><path d="M-4 -81v12" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
   lue: `<path d="M-15 -61a15 15 0 0 1 30 0z" fill="#63E2A8" ${HS}/><rect x="-17" y="-64" width="34" height="6" rx="3" fill="#FFF8EE" ${HS}/><circle cx="0" cy="-78" r="4" fill="#FFF8EE" ${HS}/>`,
   nisselue: `<path d="M-15 -62q2-21 15-23q14-2 19 8l-4 3q-4-6-11-3q-5 9-3 15z" fill="#E2363B" ${HS}/><rect x="-17" y="-64" width="34" height="6" rx="3" fill="#FFF8EE" ${HS}/><circle cx="19" cy="-74" r="4" fill="#FFF8EE" ${HS}/>`,
@@ -68,6 +68,15 @@ export const PYNT_SVG = {
   katt: `<ellipse cx="2" cy="0" rx="10" ry="3" fill="${B}" opacity=".22"/><path d="M-11 -8q-8 2-5-7" fill="none" stroke="${B}" stroke-width="3" stroke-linecap="round"/><rect x="-11" y="-13" width="18" height="11" rx="5.5" fill="#8A8580" ${HS}/><circle cx="8" cy="-15" r="6.5" fill="#8A8580" ${HS}/><path d="M3 -19l0-7 5 3zM13 -19l0-7-5 3z" fill="#8A8580" ${HS}/><circle cx="10" cy="-15" r="1.4" fill="${B}"/><path d="M14 -13l5 1M14 -11l5 1" stroke="${B}" stroke-width="1.6" stroke-linecap="round"/><path d="M-7 -2v2M3 -2v2" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
   and: `<ellipse cx="2" cy="0" rx="9" ry="3" fill="${B}" opacity=".22"/><ellipse cx="0" cy="-8" rx="10" ry="6" fill="#FFD23F" ${HS}/><circle cx="8" cy="-16" r="5.5" fill="#FFD23F" ${HS}/><path d="M13 -16l7 2-7 2z" fill="#FF5B1F" ${HS}/><circle cx="9" cy="-17" r="1.3" fill="${B}"/><path d="M-3 -2v2M3 -2v2" stroke="#FF5B1F" stroke-width="3" stroke-linecap="round"/>`,
 };
+/* Luer som dekker hele toppen av hodet: håret klippes under bremmen, så det ikke stikker opp gjennom lua. Verdien er bremlinja (y). */
+const BREM = { cowboyhatt: -63, topphatt: -64, hjelm: -63, lue: -61, nisselue: -62 };
+let klippNr = 0;
+function haarHtml(p, pynt) {
+  const haar = HAAR[p.haar].replace(/\{h\}/g, p.h), brem = pynt && pynt.hode ? BREM[pynt.hode] : null;
+  if (brem == null) return haar;
+  const id = 'hk' + (++klippNr);
+  return `<clipPath id="${id}"><rect x="-40" y="${brem}" width="80" height="60"/></clipPath><g clip-path="url(#${id})">${haar}</g>`;
+}
 function pyntHtml(pynt) {
   if (!pynt) return '';
   let ut = '';
@@ -90,7 +99,7 @@ export function figurHtml(p, pynt) {
     `<circle cx="0" cy="-56" r="15" fill="${p.hud}" stroke="${B}" stroke-width="3"/><circle class="gronn" cx="0" cy="-56" r="13.5" fill="#7BC96F"/>` +
     `<circle cx="-9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/><circle cx="9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/>` +
     `<g class="rodme"><ellipse cx="-9" cy="-50" rx="5" ry="3" fill="#FF3B5C" opacity=".7"/><ellipse cx="9" cy="-50" rx="5" ry="3" fill="#FF3B5C" opacity=".7"/></g>` +
-    HAAR[p.haar].replace(/\{h\}/g, p.h) +
+    haarHtml(p, pynt) +
     `<g class="oyne"><g class="oyne-v"><g class="pupiller">${OYNE[p.oyne]}</g></g>` +
     `<g class="oyne-g"><path d="M-7.5 -56q2.5-3.5 5 0M2.5 -56q2.5-3.5 5 0" fill="none" stroke="${B}" stroke-width="2.4" stroke-linecap="round"/></g>` +
     `<g class="oyne-h"><path d="M-5 -54.5l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2zM5 -54.5l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2z" fill="#FF3B5C" stroke="${B}" stroke-width="1.2"/></g>` +
