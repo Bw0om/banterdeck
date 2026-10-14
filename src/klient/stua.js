@@ -343,15 +343,21 @@ export function lagStua(svg, valg = {}) {
   /** Takterrassen: taket på bygget. Rekkverk i stedet for vegger, byen bak, fasaden fortsetter nedover. */
   function tegnUte() {
     const r = (p, f, ekstra) => flate(p, f, romG, ekstra);
+    // Alt ute klippes til boksen, så byen aldri stikker utenfor
+    const kid = 'klipp' + Math.random().toString(36).slice(2, 7);
+    const cp = el('clipPath', { id: kid }, romG); el('rect', { x: 62, y: -4, width: 396, height: 416 }, cp);
+    romG.setAttribute('clip-path', 'url(#' + kid + ')');
     // Kveldshimmel i bånd, måne og stjerner
-    [['#5A8DEE', -4, 108], ['#FF9CC2', 96, 44], ['#FF5B1F', 136, 34], ['#1C1B1F', 166, 160]].forEach(([f, y, h]) => el('rect', { x: 62, y, width: 396, height: h, fill: f }, romG));
-    el('circle', { cx: 400, cy: 22, r: 14, fill: '#FFE07A', stroke: B, 'stroke-width': 2.5 }, romG);
-    [[90, 20], [130, 48], [200, 14], [330, 40], [280, 30], [440, 70]].forEach(([x, y]) => el('circle', { cx: x, cy: y, r: 2, fill: '#FFF8EE', class: 'stjerne' }, romG));
-    // Byen bak: silhuetter med lys i vinduene, står på bakken langt under
-    const bygg = (x0, x1, y0, y1, z, f) => r([I(x0, y0, -90), I(x1, y1, -90), I(x1, y1, z), I(x0, y0, z)], f, { 'stroke-width': 2.5 });
-    const vind = (x, y, z) => { const q = I(x, y, z); el('rect', { x: q[0] - 2, y: q[1] - 2, width: 4, height: 4, fill: '#FFE07A' }, romG); };
-    [[0.1, 1.2, 96], [1.4, 2.0, 70], [2.2, 3.4, 110], [3.6, 4.2, 62], [4.4, 5.4, 120], [5.6, 6.6, 84]].forEach(([a, b, h], i) => { bygg(a, b, -1.1, -1.1, h, i % 2 ? '#2A292E' : '#16120F'); for (let z = -70; z < h - 10; z += 18) for (let x = a + 0.2; x < b - 0.1; x += 0.35) if ((Math.round(x * 20) + z) % 3 < 2) vind(x, -1.1, z); });
-    [[0.1, 0.9, 80], [1.1, 2.3, 118], [2.5, 3.1, 66], [3.3, 4.5, 104], [4.7, 6.1, 72]].forEach(([a, b, h], i) => { bygg(-1.1, -1.1, a, b, h, i % 2 ? '#16120F' : '#2A292E'); for (let z = -70; z < h - 10; z += 18) for (let y = a + 0.2; y < b - 0.1; y += 0.35) if ((Math.round(y * 20) + z) % 3 < 2) vind(-1.1, y, z); });
+    [['#5A8DEE', -4, 108], ['#FF9CC2', 96, 44], ['#FF5B1F', 136, 30], ['#1C1B1F', 162, 260]].forEach(([f, y, h]) => el('rect', { x: 62, y, width: 396, height: h, fill: f }, romG));
+    el('circle', { cx: 400, cy: 24, r: 14, fill: '#FFE07A', stroke: B, 'stroke-width': 2.5 }, romG);
+    [[90, 22], [140, 50], [210, 14], [330, 42], [280, 30], [440, 72]].forEach(([x, y]) => el('circle', { cx: x, cy: y, r: 2, fill: '#FFF8EE', class: 'stjerne' }, romG));
+    // Byen bak: to lag. Bakerst lave, mørke blokker uten vinduer; foran dem høyere bygg med jevne vindusrader.
+    const bygg = (x0, x1, y0, y1, bunn, topp, f) => r([I(x0, y0, bunn), I(x1, y1, bunn), I(x1, y1, topp), I(x0, y0, topp)], f, { 'stroke-width': 2.5 });
+    const vinduer = (x0, x1, y0, y1, bunn, topp) => { for (let z = bunn + 14; z < topp - 10; z += 18) for (let t = 0.2; t < 0.95; t += 0.3) { const q = I(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, z); el('rect', { x: q[0] - 2, y: q[1] - 2, width: 4, height: 4, fill: '#FFE07A' }, romG); } };
+    [[0.2, 1.4, 50], [1.8, 3.0, 40], [3.4, 4.4, 56], [4.8, 5.5, 44]].forEach(([a, b, h]) => bygg(a, b, -1.6, -1.6, -90, h, '#2A292E'));
+    [[0.2, 1.4, 60], [1.8, 2.8, 36], [3.2, 4.4, 52], [4.8, 5.5, 46]].forEach(([a, b, h]) => bygg(-1.6, -1.6, a, b, -90, h, '#2A292E'));
+    [[0.3, 1.1, 96], [1.6, 2.4, 70], [2.9, 3.9, 110], [4.3, 5.3, 84]].forEach(([a, b, h]) => { bygg(a, b, -1.1, -1.1, -90, h, '#16120F'); vinduer(a, b, -1.1, -1.1, -70, h); });
+    [[0.3, 1.1, 80], [1.6, 2.6, 104], [3.1, 3.9, 66], [4.3, 5.3, 92]].forEach(([a, b, h]) => { bygg(-1.1, -1.1, a, b, -90, h, '#16120F'); vinduer(-1.1, -1.1, a, b, -70, h); });
     // Bygget vårt fortsetter nedover, med vinduer
     r([I(0, 6, 0), I(6, 6, 0), I(6, 6, -120), I(0, 6, -120)], '#2A292E');
     r([I(6, 0, 0), I(6, 6, 0), I(6, 6, -120), I(6, 0, -120)], '#16120F');
@@ -359,6 +365,10 @@ export function lagStua(svg, valg = {}) {
       r([I(i - 0.25, 6, z), I(i + 0.25, 6, z), I(i + 0.25, 6, z + 18), I(i - 0.25, 6, z + 18)], ((i * 7 + z) % 5 < 3) ? '#FFE07A' : '#3A3940', { 'stroke-width': 2 });
       r([I(6, i - 0.25, z), I(6, i + 0.25, z), I(6, i + 0.25, z + 18), I(6, i - 0.25, z + 18)], ((i * 3 + z) % 5 < 2) ? '#FFE07A' : '#3A3940', { 'stroke-width': 2 });
     }
+    // Lavere nabobygg på begge sider, så det ikke blir tomt under terrassen
+    const nabo = (x0, x1, y0, y1, topp) => { boks(x0, y0, -120, x1 - x0, y1 - y0, 120 + topp, '#2A292E', '#2A292E', '#16120F', romG); for (let z = -108; z < topp - 10; z += 30) for (let t = 0.25; t < 1; t += 0.5) { const q = I(x0 + (x1 - x0) * t, y1, z), q2 = I(x1, y0 + (y1 - y0) * t, z); el('rect', { x: q[0] - 3, y: q[1] - 3, width: 6, height: 6, fill: (z + t * 10) % 3 < 1.5 ? '#FFE07A' : '#3A3940' }, romG); el('rect', { x: q2[0] - 3, y: q2[1] - 3, width: 6, height: 6, fill: (z + t * 7) % 3 < 1.5 ? '#3A3940' : '#FFE07A' }, romG); } };
+    nabo(-0.2, 2.6, 6.4, 8.0, -56);
+    nabo(6.4, 8.0, -0.2, 2.6, -62);
     r([I(0, 6, 0), I(6, 6, 0), I(6, 6, -10), I(0, 6, -10)], B);
     r([I(6, 0, 0), I(6, 6, 0), I(6, 6, -10), I(6, 0, -10)], B);
     // Trappehuset bak dekket, med døra inn igjen (samme sted som døra inne)
