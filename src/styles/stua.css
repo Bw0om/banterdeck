@@ -2104,7 +2104,9 @@ button.vl-bane:active{transform:translate(2px,2px)}
 @media (prefers-reduced-motion:reduce){.en-lest.inn,.en-ee.inn,.en-tall,.en-si,.en-bom,.en-rof>span.snu{animation:none}.en-bombe.gaar svg,.en-bombe .gnist{animation:none}}
 
 /* ---------- Vis på TV ---------- */
-.rom-skjerm-vei{margin:10px 0;padding:10px 12px;border:2.5px solid #16120F;border-radius:12px;background:#FFF8EE}
+.rom-skjerm-vei{margin:10px 0;padding:10px 12px;border:2.5px solid #16120F;border-radius:12px;background:#FFF8EE;color:#16120F}
+.rom-skjerm-vei .rom-skjerm-pin{color:#16120F;background:#FFD23F;padding:0 6px;border-radius:4px}
+.rom-skjerm-vei li b{display:inline}
 .rom-skjerm-vei b{display:block;font-size:15px;font-weight:900}
 .rom-skjerm-vei ol{margin:6px 0 0;padding-left:20px;font-size:14px;line-height:1.4}
 /* Sofaen på siden (speilet til TV-en): kortet til venstre, nedtelling og knapp til høyre, uten resten av siden */

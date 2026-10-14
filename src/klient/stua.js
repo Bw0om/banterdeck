@@ -55,11 +55,11 @@ export const PYNT_SVG = {
   partyhatt: `<path d="M-11 -66L0 -94l11 28z" fill="#FF5B1F" ${HS}/><path d="M-6 -76l12-7M-3 -85l6-3" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-94" r="3.5" fill="#FFD23F" ${HS}/>`,
   krone: `<path d="M-14 -64l3-14 7 7 4-12 4 12 7-7 3 14z" fill="#FFD23F" ${HS}/><circle cx="-6" cy="-68" r="2" fill="#FF5B1F"/><circle cx="6" cy="-68" r="2" fill="#FF5B1F"/>`,
   glorie: `<ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="${B}" stroke-width="6.5"/><ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="#FFD23F" stroke-width="3.5"/>`,
-  cowboyhatt: `<path d="M-24 -63q24 9 48 0q-5 9-24 9t-24-9z" fill="#B9773F" ${HS}/><path d="M-15.5 -63q0-21 15.5-21t15.5 21z" fill="#B9773F" ${HS}/><path d="M-15.5 -65h31" stroke="${B}" stroke-width="3"/>`,
-  topphatt: `<ellipse cx="0" cy="-64" rx="21" ry="4.5" fill="#1C1B1F" ${HS}/><rect x="-15.5" y="-92" width="31" height="29" rx="2" fill="#1C1B1F" ${HS}/><rect x="-15.5" y="-72" width="31" height="5" fill="#FF5B1F"/>`,
-  hjelm: `<path d="M-15 -63q0-21 15-21t15 21z" fill="#FFD23F" ${HS}/><rect x="-19" y="-65" width="38" height="5" rx="2.5" fill="#FFD23F" ${HS}/><path d="M-4 -81v12" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
-  lue: `<path d="M-15 -61a15 15 0 0 1 30 0z" fill="#63E2A8" ${HS}/><rect x="-17" y="-64" width="34" height="6" rx="3" fill="#FFF8EE" ${HS}/><circle cx="0" cy="-78" r="4" fill="#FFF8EE" ${HS}/>`,
-  nisselue: `<path d="M-15 -62q2-21 15-23q14-2 19 8l-4 3q-4-6-11-3q-5 9-3 15z" fill="#E2363B" ${HS}/><rect x="-17" y="-64" width="34" height="6" rx="3" fill="#FFF8EE" ${HS}/><circle cx="19" cy="-74" r="4" fill="#FFF8EE" ${HS}/>`,
+  cowboyhatt: `<path d="M-15 -67q0-20 15-20t15 20z" fill="#B9773F" ${HS}/><path d="M-15 -69h30" stroke="${B}" stroke-width="3"/><path d="M-25 -68q25 5 50 0q-5 5-25 5t-25-5z" fill="#B9773F" ${HS}/>`,
+  topphatt: `<rect x="-14" y="-94" width="28" height="28" rx="2" fill="#1C1B1F" ${HS}/><rect x="-14" y="-74" width="28" height="5" fill="#FF5B1F"/><ellipse cx="0" cy="-66" rx="21" ry="3.5" fill="#1C1B1F" ${HS}/>`,
+  hjelm: `<path d="M-15 -66q0-20 15-20t15 20z" fill="#FFD23F" ${HS}/><rect x="-19" y="-68" width="38" height="5" rx="2.5" fill="#FFD23F" ${HS}/><path d="M-4 -83v12" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
+  lue: `<path d="M-15 -64a15 14 0 0 1 30 0z" fill="#63E2A8" ${HS}/><rect x="-17" y="-67" width="34" height="6" rx="3" fill="#FFF8EE" ${HS}/><circle cx="0" cy="-80" r="4" fill="#FFF8EE" ${HS}/>`,
+  nisselue: `<path d="M-15 -65q2-21 15-23q14-2 19 8l-4 3q-4-6-11-3q-5 9-3 15z" fill="#E2363B" ${HS}/><rect x="-17" y="-67" width="34" height="6" rx="3" fill="#FFF8EE" ${HS}/><circle cx="19" cy="-77" r="4" fill="#FFF8EE" ${HS}/>`,
   solbriller: `<rect x="-13" y="-61" width="11" height="8" rx="3" fill="#1C1B1F" stroke="${B}" stroke-width="2.5"/><rect x="2" y="-61" width="11" height="8" rx="3" fill="#1C1B1F" stroke="${B}" stroke-width="2.5"/><path d="M-2 -58h4M-13 -59l-3-2M13 -59l3-2" stroke="${B}" stroke-width="2.5" stroke-linecap="round"/>`,
   nerdebriller: `<circle cx="-6" cy="-57" r="5.5" fill="none" stroke="${B}" stroke-width="5.5"/><circle cx="6" cy="-57" r="5.5" fill="none" stroke="${B}" stroke-width="5.5"/><circle cx="-6" cy="-57" r="5.5" fill="none" stroke="#FF5B1F" stroke-width="2.5"/><circle cx="6" cy="-57" r="5.5" fill="none" stroke="#FF5B1F" stroke-width="2.5"/>`,
   medalje: `<path d="M4 -41l3 10M12 -41l-3 10" stroke="#FF5B1F" stroke-width="4" stroke-linecap="round"/><circle cx="8" cy="-27" r="5.5" fill="#FFD23F" stroke="${B}" stroke-width="2.5"/>`,
@@ -69,10 +69,11 @@ export const PYNT_SVG = {
   and: `<ellipse cx="2" cy="0" rx="9" ry="3" fill="${B}" opacity=".22"/><ellipse cx="0" cy="-8" rx="10" ry="6" fill="#FFD23F" ${HS}/><circle cx="8" cy="-16" r="5.5" fill="#FFD23F" ${HS}/><path d="M13 -16l7 2-7 2z" fill="#FF5B1F" ${HS}/><circle cx="9" cy="-17" r="1.3" fill="${B}"/><path d="M-3 -2v2M3 -2v2" stroke="#FF5B1F" stroke-width="3" stroke-linecap="round"/>`,
 };
 /* Luer som dekker hele toppen av hodet: håret klippes under bremmen, så det ikke stikker opp gjennom lua. Verdien er bremlinja (y). */
-const BREM = { cowboyhatt: -63, topphatt: -64, hjelm: -63, lue: -61, nisselue: -62 };
+const BREM = { cowboyhatt: -67, topphatt: -66, hjelm: -66, lue: -64, nisselue: -64 };
 let klippNr = 0;
 function haarHtml(p, pynt) {
-  const haar = HAAR[p.haar].replace(/\{h\}/g, p.h), brem = pynt && pynt.hode ? BREM[pynt.hode] : null;
+  const type = pynt && pynt.hode && p.haar === 'lue' ? 'kort' : p.haar;
+  const haar = HAAR[type].replace(/\{h\}/g, p.h), brem = pynt && pynt.hode ? BREM[pynt.hode] : null;
   if (brem == null) return haar;
   const id = 'hk' + (++klippNr);
   return `<clipPath id="${id}"><rect x="-40" y="${brem}" width="80" height="60"/></clipPath><g clip-path="url(#${id})">${haar}</g>`;
