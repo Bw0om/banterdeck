@@ -351,6 +351,12 @@ The figure picker is built like a character editor: one big figure on a mint sta
 
 Like Fall Guys and Rec Room: the profile page opens straight on the figure. Your name in condensed caps, a small yellow pill with nights and unlocks, one ≡ button, and the figure picker filling the rest. Everything else – crews, decks, lines, refer a friend, settings – sits behind ≡ in a bottom sheet of five big rows with coloured icon tiles; each row is its own view with a back arrow (`#stokker`, `#replikker`, `#verv`, `#innstillinger` in the URL, so links can land there). No hero card, no explanatory copy on the default view.
 
+## Hairstyles and colours
+
+A sixth part on the figure, «Deg» (a face icon, pink so it stands apart): a row of small heads, one per hairstyle (short, long, ponytail, curls, bun, shaved) drawn in your own hair and skin, and two rows of colour dots – hair and skin tone. The chest part became «Genser»: a row of dots for the top's colour above the badges. When the chosen hat can be coloured, a row of dots appears under the hats; crown and halo are always gold, so they get none. Hairstyles and colours are free from the start; only hats, glasses, badges, pets and moves are unlocked by playing.
+
+The palettes are the app's own colours plus natural hair and skin tones, never a free colour wheel, so every figure still belongs in the room. Choices are stored with the gear (`haar`, `fh`, `fhud`, `ftopp`, `fhode`), validated against the palettes on the server, and applied everywhere a figure or head is drawn – room, TV, profile, game heads – through `utseende(id, pynt)`. A hat clips the hair at its brim; whatever hangs below (long hair, ponytail, curls at the ears) stays.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

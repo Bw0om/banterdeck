@@ -2450,3 +2450,17 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .profil-rad.svak b{font-size:19px}
 .profil-rad-ik{width:52px;height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--papir);color:var(--blekk);border:2.5px solid var(--blekk);border-radius:12px}
 @media (prefers-reduced-motion:reduce){.profil-ark-innhold,.profil-rad{animation:none}}
+
+/* ---------- Figuren din: frisyrer og fargeprikker ---------- */
+.fv-del.deg{background:var(--rosa);color:var(--blekk);border-color:var(--blekk)}
+.fv-del.deg.valgt{background:var(--gul)}
+.fv.valgt .fv-del.deg:not(.valgt){opacity:.45}
+.fv-frisyre svg{width:62px;height:62px}
+.fv-prikker{display:flex;align-items:center;gap:10px;padding:2px 4px 6px;overflow-x:auto;animation:fv-opp .3s var(--fjaer) both}
+.fv-prikk-ik{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.fv-prikk-ik svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.fv-prikk{appearance:none;flex:0 0 36px;width:36px;height:36px;padding:0;margin:3px;border-radius:50%;border:2.5px solid var(--blekk);cursor:pointer;transition:transform 120ms var(--fjaer),box-shadow 120ms var(--fjaer)}
+.fv-prikk:active{transform:scale(.9)}
+.fv-prikk.paa{box-shadow:0 0 0 3px var(--card),0 0 0 6px var(--ink)}
+.fv-figur .kropp rect,.fv-figur .kropp circle,.fv-figur .kropp path{transition:fill .25s var(--fjaer)}
+@media (prefers-reduced-motion:reduce){.fv-prikker{animation:none}}

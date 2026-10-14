@@ -57,11 +57,11 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     import { lagStua, figurHtml, utseende, hodeHtml } from '../../klient/stua.js';
     (window as any).mvLagStua = lagStua;
     // Figuren til en spiller (samme som i stua), til «kortet er til»-visningen
-    (window as any).mvHodeSvg = (p: any, uttrykk?: string) => '<svg class="mv-hode" viewBox="-30 -42 60 92" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id), uttrykk) + '</svg>';
+    (window as any).mvHodeSvg = (p: any, uttrykk?: string) => '<svg class="mv-hode" viewBox="-30 -42 60 92" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id, p.pynt), uttrykk) + '</svg>';
     // Bare hodet (uten skuldre), i stedet for initialer – og hudfargen, til nesa i Løgnhalsen
-    (window as any).mvMiniHode = (p: any, uttrykk?: string) => '<svg class="mv-mini" viewBox="-28 -36 56 62" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id), uttrykk) + '</svg>';
-    (window as any).mvHud = (p: any) => utseende(p.figur || p.id).hud;
-    (window as any).mvFigurSvg = (p: any) => '<svg class="tvsd-figur" viewBox="-36 -106 72 112" aria-hidden="true">' + figurHtml(utseende(p.figur || p.id), p.pynt || null) + '</svg>';
+    (window as any).mvMiniHode = (p: any, uttrykk?: string) => '<svg class="mv-mini" viewBox="-28 -36 56 62" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id, p.pynt), uttrykk) + '</svg>';
+    (window as any).mvHud = (p: any) => utseende(p.figur || p.id, p.pynt).hud;
+    (window as any).mvFigurSvg = (p: any) => '<svg class="tvsd-figur" viewBox="-36 -106 72 112" aria-hidden="true">' + figurHtml(utseende(p.figur || p.id, p.pynt), p.pynt || null) + '</svg>';
     document.dispatchEvent(new CustomEvent('mv-stua-klar'));
   </script>
   <script is:inline define:vars={{ LANG, SB }}>
