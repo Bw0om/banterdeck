@@ -1,4 +1,4 @@
-// Lager delingsbildene (og:image, 1200×630) i Champagnenatt-stil: public/og/*.jpg og public/og/lek/<slug>.jpg.
+// Lager delingsbildene (og:image, 1200×630) i appens stil – oransje felt, svarte streker, harde skygger: public/og/*.jpg og public/og/lek/<slug>.jpg.
 // Dette er bildet folk ser når en romlenke eller en lek deles på Snap, Messenger eller iMessage.
 //
 // Kjør fra prosjektmappa:  node scripts/lag-delingsbilder.mjs
@@ -20,11 +20,7 @@ const decks = les('src/data/decks.json');
 const fontData = (f) => 'data:font/woff2;base64,' + fs.readFileSync(path.join(ROT, 'node_modules/@fontsource-variable/archivo/files', f)).toString('base64');
 const font = fontData('archivo-latin-wdth-normal.woff2');
 const fontExt = fontData('archivo-latin-ext-wdth-normal.woff2');
-const serifData = (f) => 'data:font/woff2;base64,' + fs.readFileSync(path.join(ROT, 'node_modules/@fontsource-variable/fraunces/files', f)).toString('base64');
-const serif = serifData('fraunces-latin-wght-normal.woff2');
-const serifExt = serifData('fraunces-latin-ext-wght-normal.woff2');
-const serifKursiv = serifData('fraunces-latin-wght-italic.woff2');
-const logo = fs.readFileSync(path.join(ROT, 'public/favicon.svg'), 'utf8').replace(/width="64" height="64"/, 'width="56" height="56"');
+const logo = fs.readFileSync(path.join(ROT, 'public/favicon.svg'), 'utf8').replace(/width="64" height="64"/, 'width="64" height="64"');
 
 const t = (x) => (x && typeof x === 'object' ? x.no || x.en || '' : x || '');
 const slugify = (s) => s.toLowerCase().replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/å/g, 'a').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -38,42 +34,34 @@ function side({ kicker, tittel, under, kortEtikett, kortTekst, merke }) {
   return `<!doctype html><html><head><meta charset="utf-8"><style>
 @font-face{font-family:A;font-weight:100 900;font-stretch:62% 125%;src:url(${font}) format('woff2-variations')}
 @font-face{font-family:A;font-weight:100 900;font-stretch:62% 125%;src:url(${fontExt}) format('woff2-variations');unicode-range:U+0100-02BA,U+1E00-1EFF}
-@font-face{font-family:S;font-weight:100 900;src:url(${serif}) format('woff2-variations')}
-@font-face{font-family:S;font-weight:100 900;src:url(${serifExt}) format('woff2-variations');unicode-range:U+0100-02BA,U+1E00-1EFF}
-@font-face{font-family:S;font-style:italic;font-weight:100 900;src:url(${serifKursiv}) format('woff2-variations')}
 *{box-sizing:border-box;margin:0}
-body{width:1200px;height:630px;overflow:hidden;font-family:A,sans-serif;color:#F7EFE3;
-  background:radial-gradient(640px 440px at 100% 0%,rgba(228,196,127,.22),transparent 70%),radial-gradient(620px 420px at -4% 104%,rgba(122,36,72,.42),transparent 70%),#0F0A10}
-body::after{content:"";position:fixed;inset:0;opacity:.12;mix-blend-mode:overlay;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-.v{position:absolute;left:72px;top:64px;bottom:64px;width:610px;display:flex;flex-direction:column}
-.k{display:flex;align-items:center;gap:16px;color:#E9CD8E;font-family:S,serif;font-style:italic;font-weight:480;font-size:30px}
-.k::before{content:"";width:40px;height:2px;background:#E4C47F}
-h1{margin-top:20px;font-family:S,serif;font-weight:560;font-size:112px;line-height:.95;letter-spacing:-.035em;color:#F7EFE3}
-.u{margin-top:26px;font-weight:500;font-stretch:100%;font-size:29px;line-height:1.3;color:#C4B5B2}
-.b{margin-top:auto;display:flex;align-items:center;gap:16px;font-family:S,serif;font-weight:620;font-size:34px;letter-spacing:-.025em}
-.b i{font-style:italic;font-weight:460;color:#E9CD8E}
-.b small{font-family:A,sans-serif;font-weight:600;font-size:24px;color:#9C8B8E;letter-spacing:0;margin-left:2px}
-.kort{position:absolute;right:70px;top:110px;width:400px;height:380px;padding:32px 32px 36px;border-radius:30px;background:#F7EFE3;color:#1A1012;
-  transform:rotate(-3deg);box-shadow:14px 14px 0 #BFA27A,0 50px 90px -30px rgba(0,0,0,.7);display:flex;flex-direction:column}
-.ke{font-family:S,serif;font-style:italic;font-weight:500;font-size:28px;color:#8A2A1D}
-.kt{margin:auto 0;font-family:S,serif;font-weight:560;font-size:42px;line-height:1.1;letter-spacing:-.02em}
-.m{position:absolute;right:46px;top:80px;transform:rotate(5deg);background:linear-gradient(180deg,#F1DAA2,#E4C47F 52%,#D2AE63);color:#1A1012;font-weight:800;font-stretch:100%;font-size:28px;
-  padding:12px 22px;border-radius:999px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 0 #8C6A2C}
+body{width:1200px;height:630px;overflow:hidden;font-family:A,sans-serif;color:#16120F;background:#FF5B1F}
+.v{position:absolute;left:72px;top:60px;bottom:60px;width:600px;display:flex;flex-direction:column}
+.logo{display:inline-flex;align-items:center;gap:14px;align-self:flex-start}
+.logo svg{width:64px;height:64px;filter:drop-shadow(5px 5px 0 #16120F)}
+.logo span{font-weight:900;font-stretch:72%;font-size:40px;letter-spacing:-.02em;background:#16120F;color:#FFF8EE;padding:4px 16px 8px;border:3px solid #FFF8EE;box-shadow:5px 5px 0 #FFD23F;transform:rotate(-2deg);display:inline-block}
+.logo span i{font-style:italic;color:#FFD23F}
+.k{margin-top:auto;font-weight:900;font-stretch:80%;font-size:24px;letter-spacing:.12em;text-transform:uppercase}
+h1{margin-top:10px;font-weight:900;font-stretch:66%;font-size:132px;line-height:.9;letter-spacing:-.02em;text-transform:uppercase}
+.u{margin-top:22px;font-weight:650;font-stretch:100%;font-size:30px;line-height:1.3;max-width:560px}
+.kort{position:absolute;right:76px;top:100px;width:400px;height:400px;padding:30px 32px 34px;border-radius:12px;background:#FFF8EE;color:#16120F;border:4px solid #16120F;
+  transform:rotate(-3deg);box-shadow:14px 14px 0 #16120F;display:flex;flex-direction:column}
+.ke{align-self:flex-start;background:#FFD23F;border:3px solid #16120F;padding:4px 12px 6px;font-weight:900;font-stretch:80%;font-size:22px;letter-spacing:.06em;text-transform:uppercase}
+.kt{margin:auto 0;font-weight:900;font-stretch:72%;font-size:44px;line-height:1.02;letter-spacing:-.01em}
+.m{position:absolute;right:48px;top:66px;transform:rotate(6deg);background:#63E2A8;color:#16120F;border:4px solid #16120F;box-shadow:6px 6px 0 #16120F;font-weight:900;font-stretch:72%;font-size:34px;text-transform:uppercase;padding:8px 20px 12px}
 </style></head><body>
-<div class="v"><div class="k">${esc(kicker)}</div><h1 id="h">${esc(tittel)}</h1><div class="u">${esc(under)}</div>
-<div class="b">${logo}<span>mitt<i>vors</i><small>.no</small></span></div></div>
+<div class="v"><div class="logo">${logo}<span>mitt<i>vors</i></span></div><div class="k">${esc(kicker)}</div><h1 id="h">${esc(tittel)}</h1><div class="u">${esc(under)}</div></div>
 <div class="kort"><div class="ke">${esc(kortEtikett)}</div><div class="kt" id="kt">${esc(kortTekst)}</div></div>
 ${merke ? `<div class="m">${esc(merke)}</div>` : ''}
 <script>
 // Krymp tittel og korttekst til de får plass
 function pass(el, maksH, min){ var s = parseFloat(getComputedStyle(el).fontSize); while ((el.scrollWidth > el.clientWidth + 1 || el.offsetHeight > maksH) && s > min){ s -= 2; el.style.fontSize = s + 'px'; } }
-document.fonts.ready.then(function(){ pass(document.getElementById('h'), 300, 54); pass(document.getElementById('kt'), 248, 22); document.body.dataset.klar = '1'; });
+document.fonts.ready.then(function(){ pass(document.getElementById('h'), 250, 54); pass(document.getElementById('kt'), 250, 24); document.body.dataset.klar = '1'; });
 </script></body></html>`;
 }
 
 const bilder = [
-  { fil: 'og/mittvors.jpg', kicker: 'Drikkeleker · rom · Nyhetsrunden', tittel: 'Mitt vors', under: 'Drikkeleker dere spiller fra hver deres telefon',
+  { fil: 'og/mittvors.jpg', kicker: 'Drikkeleker · rom · Nyhetsrunden', tittel: 'mittvors', under: 'Drikkeleker dere spiller fra hver deres telefon',
     kortEtikett: 'Mest sannsynlig', kortTekst: 'Hvem er mest sannsynlig til å kapre høyttaleren før klokka elleve i kveld?' },
   { fil: 'og/rom.jpg', kicker: 'Du er invitert', tittel: 'Bli med på vorset', under: 'Åpne lenken, skriv navnet ditt – så er du med',
     kortEtikett: 'Jeg har aldri', kortTekst: 'Jeg har aldri sendt «sorry for i går» uten å vite hva jeg beklaget.', merke: 'Din tur!' },
