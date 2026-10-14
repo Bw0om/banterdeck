@@ -1,7 +1,7 @@
 // iPhone-appen: nettsiden kjører inne i et Capacitor-skall (capacitor.config.json). Lastes bare der.
 // Her skrus det app-aktige på: vibrering når du trykker, telefonens eget delingsark, statuslinja i appens farge,
 // og lenker som åpner appen (mittvors.no/no/rom?k=…).
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Share } from '@capacitor/share';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -38,6 +38,18 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   // Statuslinja: mørk tekst, siden toppen alltid er oransje (theme-color)
   StatusBar.setStyle({ style: Style.Light }).catch(() => {});
   SplashScreen.hide().catch(() => {});
+
+  // TV-en via AirPlay: appen viser storskjermen på TV-en (ios/App/App/TvSkjerm.swift). Rommet sier hvilken lenke.
+  const Skjerm = registerPlugin('Skjerm');
+  let sistUrl = '';
+  window.__mvSkjerm = {
+    koblet: false,
+    vis(url) { if (url === sistUrl) return; sistUrl = url; Skjerm.vis({ url }).catch(() => {}); },
+    skjul() { sistUrl = ''; Skjerm.skjul().catch(() => {}); },
+  };
+  const skjermStatus = (r) => { window.__mvSkjerm.koblet = !!(r && r.koblet); window.dispatchEvent(new CustomEvent('mv-skjerm', { detail: { koblet: window.__mvSkjerm.koblet } })); };
+  Skjerm.status().then(skjermStatus).catch(() => {});
+  Skjerm.addListener('koblet', skjermStatus);
 
   // Trykker noen på en mittvors-lenke i Messenger eller Snap, åpner den her i appen
   App.addListener('appUrlOpen', ({ url }) => {

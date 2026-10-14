@@ -36,6 +36,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      configurationForConnecting connectingSceneSession: UISceneSession,
                      options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        // En ekstern skjerm (AirPlay / HDMI) får storskjermen, telefonen får appen
+        if connectingSceneSession.role != .windowApplication {
+            let tv = UISceneConfiguration(name: "TV", sessionRole: connectingSceneSession.role)
+            tv.delegateClass = TvSceneDelegate.self
+            return tv
+        }
         let config = UISceneConfiguration(name: "Default Configuration",
                                           sessionRole: connectingSceneSession.role)
         config.delegateClass = SceneDelegate.self
