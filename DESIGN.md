@@ -407,6 +407,10 @@ The living room is drawn in one isometric projection (`I(x, y, z)` in `src/klien
 - **The couple heart**: when the owner and Ida stand within about two tiles of each other in the room, a heart rises between them roughly every ten seconds; everyone and the TV see it.
 - Exclusive items come from `eksklusivFor` in `src/lib/konto.ts`: the account in `EIER_KONTO` / `IDA_KONTO`, otherwise the username Bw0om / Ida. They are refused for everyone else and hidden from every other wardrobe.
 
+## Walking in the living room
+
+A short tap on the floor moves your own figure there (Habbo style); the target tile flashes yellow with one ring pulse (1.4 s, ease-out, opacity only under reduced motion). Tapping the sofa sits you down; the table, lamp or the door's floor patch send you to the nearest free tile. The lamp still toggles. Taps on the TV, the door and figures are excluded from the floor tap, so the door's own sheet opens on phones. «Rommet» is a pill under the living room next to «Figuren din», shown to the host only.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

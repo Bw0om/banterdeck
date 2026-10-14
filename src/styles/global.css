@@ -2020,7 +2020,7 @@ img,svg,a{-webkit-user-drag:none}
 .rom-bg-om{grid-column:2 / -1}
 .rom-verktoy-rad{grid-template-columns:34px 1fr;align-items:center}
 .rom-verktoy-rad span{grid-row:1}
-.rom-stua-tips{text-align:right;margin:8px 0 0}
+.rom-stua-tips{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin:8px 0 0}
 .rom-stua-tips .linkbtn{display:inline-block;padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--border2);color:var(--ink);font-weight:700;text-decoration:none}
 .rom-bg-knapper .btn{white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.rom-vent-prikker span{animation:none;opacity:.6}.rom-knapp-stor{transition:none}}
