@@ -49,8 +49,8 @@ const T = no ? {
 };
 ---
 <Base title={L.accountTitle} description={L.accountLead} lang={lang} noindex={true}>
-  <h1>{L.accountTitle}</h1>
-  <p class="lead">{L.accountLead}</p>
+  <div id="kontoHode"><h1>{L.accountTitle}</h1>
+  <p class="lead">{L.accountLead}</p></div>
 
   {!configured && (
     <div class="notice">
@@ -124,31 +124,44 @@ const T = no ? {
       </section>
 
       <section id="dash" hidden>
-        <div class="dashbar">
-          <p class="small"><span>{L.signedInAs}</span> <strong id="who"></strong></p>
-          <span class="dashknapper">
-            <a class="btn ghost small" id="statLenke" href="/no/statistikk" hidden>{T.stats}</a>
-            <button class="btn ghost small" id="outBtn">{L.signOut}</button>
-          </span>
+        <div class="profil-topp" data-visning="profil">
+          <div><b class="profil-navn" id="figurNavn"></b><span class="profil-pille" id="figurTekst"></span></div>
+          <button type="button" class="profil-ikon" id="merBtn" aria-label={no ? 'Mer' : 'More'} aria-haspopup="dialog"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
         </div>
         <p id="plussLinje" class="konto-pluss" hidden></p>
-        <section class="figur-boks" id="figurBoks" hidden aria-labelledby="figurTittel">
-          <a class="profil-hero" href="#figurVelger" id="figurHero"><div><b id="figurNavn"></b><small id="figurTekst"></small><span class="btn small" aria-hidden="true">{no ? 'Endre figuren ↓' : 'Change your figure ↓'}</span></div><svg id="figurPreview" class="figur figur-preview" viewBox="-48 -100 96 106" aria-hidden="true"></svg></a>
-          <h2 id="figurTittel">{no ? 'Figuren din' : 'Your figure'}</h2>
+        <section id="figurBoks" data-visning="profil" hidden aria-label={no ? 'Figuren din' : 'Your figure'}>
           <div id="figurVelger" class="profil-velger"></div>
           <p id="figurMsg" class="formmsg" role="status" aria-live="polite"></p>
         </section>
-        <details class="konto-innstillinger">
-          <summary>{no ? '⚙ Innstillinger' : '⚙ Settings'}</summary>
+        <div class="profil-ark" id="merArk" hidden role="dialog" aria-modal="true" aria-label={no ? 'Mer' : 'More'}>
+          <div class="profil-ark-innhold">
+            <div class="profil-ark-topp"><span class="profil-h">{no ? 'Mer' : 'More'}</span><button type="button" class="profil-ikon" data-lukk-ark aria-label={no ? 'Lukk' : 'Close'}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+            <a class="profil-rad" href={no ? '/no/gjeng' : '/crew'}><span class="profil-rad-ik" style="background:var(--mint)"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M15 20a5 5 0 0 1 6-4"/></svg></span><b>{no ? 'Gjengene' : 'Crews'}</b><em id="gjengTall"></em></a>
+            <button type="button" class="profil-rad" data-vis="stokker"><span class="profil-rad-ik" style="background:var(--rosa)"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="11.5" height="15.5" rx="2"/><path d="M14 7.3l-9.6 2.4a2 2 0 0 0-1.4 2.4l2.4 9.6"/></svg></span><b>{no ? 'Kortstokkene' : 'Decks'}</b><em id="stokkTall"></em></button>
+            <button type="button" class="profil-rad" data-vis="replikker"><span class="profil-rad-ik" style="background:var(--gul)"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"/></svg></span><b>{no ? 'Replikkene' : 'Lines'}</b><em id="replikkTall"></em></button>
+            <button type="button" class="profil-rad" data-vis="verv"><span class="profil-rad-ik" style="background:var(--oransje)"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8h17v4h-17zM5 12h14v8H5zM12 8v12M12 8c-3-1-5-3-3.5-4.5S12 5 12 8c0-3 2-5.5 3.5-4.5S15 7 12 8"/></svg></span><b>{no ? 'Verv en venn' : 'Refer a friend'}</b></button>
+            <button type="button" class="profil-rad svak" data-vis="innstillinger"><span class="profil-rad-ik"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span><b>{no ? 'Innstillinger' : 'Settings'}</b><em>{no ? 'Brukernavn · passord · logg ut' : 'Username · password · sign out'}</em></button>
+          </div>
+        </div>
+        <section data-visning="innstillinger" hidden>
+          <div class="profil-tilbake"><button type="button" class="profil-ikon" data-vis="profil" aria-label="Tilbake"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{no ? 'Innstillinger' : 'Settings'}</span></div>
+          <div class="dashbar">
+            <p class="small"><span>{L.signedInAs}</span> <strong id="who"></strong></p>
+            <span class="dashknapper">
+              <a class="btn ghost small" id="statLenke" href="/no/statistikk" hidden>{T.stats}</a>
+              <button class="btn ghost small" id="outBtn">{L.signOut}</button>
+            </span>
+          </div>
           <div class="konto-valg">
             <button type="button" class="mini" id="endreNavnBtn">{T.changeUser}</button>
             <button type="button" class="mini" id="endrePwBtn">{T.changePw}</button>
             <button type="button" class="mini danger" id="slettBtn">{T.deleteAcc}</button>
           </div>
-        </details>
+        </section>
+        <section data-visning="verv" hidden>
+          <div class="profil-tilbake"><button type="button" class="profil-ikon" data-vis="profil" aria-label="Tilbake"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{no ? 'Verv en venn' : 'Refer a friend'}</span></div>
         {no ? (
           <div class="konto-ekstra">
-            <a class="konto-kort" href="/no/gjeng"><span>👥</span><b>Gjengene dine</b><small id="gjengTall">Sesongtabell over flere kvelder</small></a>
             <div class="konto-kort" id="vervKort"><span>🎁</span><b>Verv en venn</b>
               <small id="vervTekst">Dere får et gratis kveldspass hver når vennen har spilt sitt første rom.</small>
               <div class="dl-knapper"><button class="btn gold small" id="vervDel" type="button" disabled>Del vervelenken</button><button class="btn ghost small" id="vervBruk" type="button" hidden>Bruk et kveldspass</button></div>
@@ -156,15 +169,16 @@ const T = no ? {
           </div>
         ) : (
           <div class="konto-ekstra">
-            <a class="konto-kort" href="/crew"><span>👥</span><b>Your crews</b><small id="gjengTall">A season table across many nights</small></a>
             <div class="konto-kort" id="vervKort"><span>🎁</span><b>Refer a friend</b>
               <small id="vervTekst">You each get a free night pass once your friend has played their first room.</small>
               <div class="dl-knapper"><button class="btn gold small" id="vervDel" type="button" disabled>Share your referral link</button><button class="btn ghost small" id="vervBruk" type="button" hidden>Use a night pass</button></div>
             </div>
           </div>
         )}
+        </section>
         <p id="syncMsg" class="formmsg" role="status" aria-live="polite"></p>
 
+        <section data-visning="innstillinger" hidden>
         <form class="form konto-boks" id="pwForm" hidden novalidate>
           <h2 id="pwTittel">{T.setPw}</h2>
           <p class="small" id="pwLead">{T.setPwLead}</p>
@@ -194,8 +208,10 @@ const T = no ? {
           </div>
           <div class="dl-knapper"><button class="btn danger" type="submit">{T.deleteBtn}</button><button class="btn ghost" type="button" data-lukk="slettForm">{T.cancel}</button></div>
         </form>
+        </section>
 
-        <h2>{T.decks}</h2>
+        <section data-visning="stokker" hidden>
+        <div class="profil-tilbake"><button type="button" class="profil-ikon" data-vis="profil" aria-label="Tilbake"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{T.decks}</span></div>
         <p class="small">{T.decksLead}</p>
         <div id="utkast" class="konto-utkast" hidden></div>
         <div id="stokker" class="stokk-liste"></div>
@@ -215,8 +231,10 @@ const T = no ? {
             <button class="btn ghost" type="button" id="stAvbryt">{T.cancel}</button>
           </div>
         </form>
+        </section>
 
-        <h2>{L.myLines}</h2>
+        <section data-visning="replikker" hidden>
+        <div class="profil-tilbake"><button type="button" class="profil-ikon" data-vis="profil" aria-label="Tilbake"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{L.myLines}</span></div>
         <form class="form addform" id="addForm" novalidate>
           <div class="field">
             <label class="lab" for="aCtx">{L.fWhen}<span class="opt">{L.optional}</span></label>
@@ -229,6 +247,7 @@ const T = no ? {
           <button class="btn gold" type="submit">{L.addLine}</button>
         </form>
         <div id="mine" class="cards"></div>
+        </section>
       </section>
 
       <div id="stokkSpill" class="stokk-spill" hidden role="dialog" aria-modal="true" aria-labelledby="ssNavn">
@@ -385,6 +404,7 @@ const T = no ? {
 
         /* ---------- kortstokker ---------- */
         function tegnStokker() {
+          var st = $('stokkTall'); if (st) st.textContent = stokker.length ? String(stokker.length) : '';
           $('stokker').innerHTML = stokker.length ? stokker.map(function (s, i) {
             return '<article class="stokk-kort"><div><b>' + esc(s.navn) + '</b><span>' + (s.kort || []).length + ' ' + esc(T.cards) + (s.delt ? ' · ' + esc(T.shared) : '') + '</span></div>' +
               '<div class="stokk-knapper">' +
@@ -479,6 +499,7 @@ const T = no ? {
           K.data.lagre({ lines: mine }).then(function (ok) { say($('syncMsg'), ok ? T.synced : T.generic, ok ? 'ok' : 'err'); });
         }
         function render() {
+          var rt = $('replikkTall'); if (rt) rt.textContent = mine.length ? String(mine.length) : '';
           if (!mine.length) { $('mine').innerHTML = '<p class="small">' + T.none + '</p>'; return; }
           $('mine').innerHTML = mine.map(function (it, i) {
             return '<article class="card item" data-copy="' + esc(it.line) + '" tabindex="0" title="' + esc(T.copyHint) + '">' +
@@ -579,7 +600,6 @@ const T = no ? {
         var figur = { laast: [], valgt: {}, kvelder: 0, sesong: null }, figurTimer = null, velger = null;
         function tegnFigur() {
           if (!window.mvFigur || !bruker) return;
-          $('figurPreview').innerHTML = window.mvFigur(window.mvUtseende(window.mvFigurNokkel(bruker.id)), figur.valgt);
           $('figurNavn').textContent = bruker.brukernavn || (EN ? 'You' : 'Du');
           var n = figur.laast.length;
           $('figurTekst').textContent = figur.kvelder + (figur.kvelder === 1 ? (EN ? ' night' : ' kveld') : (EN ? ' nights' : ' kvelder')) + ' · ' + n + (EN ? ' of ' : ' av ') + PYNT.length + (EN ? ' unlocked' : ' låst opp');
@@ -597,7 +617,7 @@ const T = no ? {
           if (!window.mvFigur || !window.mvFigurVelger) { document.addEventListener('mv-figur-klar', visFigur, { once: true }); return; }
           K.api('/api/konto/pynt', EN_HODE).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
             if (!d) return;
-            figur = d; $('figurBoks').hidden = false; tegnFigur();
+            figur = d; figurKlar = true; if (!document.querySelector('[data-visning]:not([hidden]):not(.profil-topp)') || !$('figurBoks').hidden || location.hash.replace('#', '') === 'profil' || !location.hash) $('figurBoks').hidden = false; tegnFigur();
             var rot = $('figurVelger'); rot.innerHTML = '';
             velger = window.mvFigurVelger(rot, { lang: EN ? 'en' : 'no', nokkel: window.mvFigurNokkel(bruker.id), inne: true, laast: d.laast || [], valgt: d.valgt || {}, kvelder: d.kvelder || 0, onEndre: lagreFigur });
           }).catch(function () {});
@@ -605,12 +625,28 @@ const T = no ? {
 
         function visHvem() { $('who').textContent = bruker.brukernavn ? bruker.brukernavn + ' · ' + bruker.email : bruker.email; }
 
+        /* ---------- Profilen er figuren. Alt annet ligger bak Mer-knappen, som egne sider med pil tilbake ---------- */
+        var VISNINGER = ['profil', 'stokker', 'replikker', 'verv', 'innstillinger'];
+        function visning(navn) {
+          if (VISNINGER.indexOf(navn) === -1) navn = 'profil';
+          document.querySelectorAll('[data-visning]').forEach(function (el) { el.hidden = el.dataset.visning !== navn || (el.id === 'figurBoks' && !figurKlar); });
+          $('merArk').hidden = true;
+          try { history.replaceState(null, '', navn === 'profil' ? location.pathname : '#' + navn); } catch (e) {}
+          if (navn !== 'profil') window.scrollTo({ top: 0 });
+        }
+        var figurKlar = false;
+        $('merBtn').addEventListener('click', function () { $('merArk').hidden = false; });
+        $('merArk').addEventListener('click', function (e) { if (e.target === $('merArk') || e.target.closest('[data-lukk-ark]')) $('merArk').hidden = true; });
+        document.addEventListener('click', function (e) { var b = e.target.closest('[data-vis]'); if (b) visning(b.dataset.vis); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('merArk').hidden) $('merArk').hidden = true; });
+        window.addEventListener('hashchange', function () { visning(location.hash.replace('#', '')); });
+
         function start() {
           mine = loadLocal();
           K.bruker(true).then(function (u) {
             bruker = u;
             if (!u) { render(); return; }
-            $('signin').hidden = true; $('dash').hidden = false;
+            $('signin').hidden = true; $('dash').hidden = false; var kh = $('kontoHode'); if (kh) kh.hidden = true; visning(location.hash.replace('#', ''));
             visHvem();
             $('navnForm').hidden = !!u.brukernavn;
             if (erGjenoppretting) { $('pwForm').hidden = false; $('pwTittel').textContent = T.choosePw; $('pwLead').hidden = true; $('pwNy').focus(); }
