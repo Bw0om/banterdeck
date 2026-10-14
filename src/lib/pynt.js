@@ -52,7 +52,20 @@ export function sesong(naa) {
 /** Kan pynten brukes nå? Sesongpynt bare i sesongen. */
 export function kanBrukes(id, naa) { const p = AV_ID[id]; return !!p && (!p.sesong || p.sesong === sesong(naa)); }
 
-/** Rens et valg {hode, ansikt, bryst, venn}: bare kjente id-er, i riktig slot, låst opp, og i sesong. */
+/* Frisyre og farger: gratis fra start, ingenting å låse opp. Bare appens egne farger pluss naturlige hår- og hudtoner,
+   så ingen figur ser fremmed ut i stua. Lagres i samme valg som pynten: haar, fh (hår), fhud, ftopp (genser), fhode (hatten). */
+export const FRISYRER = ['kort', 'lang', 'hestehale', 'krus', 'bolle', 'snau'];
+export const FARGER = {
+  fh: ['#16120F', '#7A4A2A', '#E8C15C', '#FF5B1F', '#FF9CC2', '#63E2A8', '#5A8DEE'],
+  fhud: ['#F2C6A0', '#E9B48F', '#C98D63', '#8D5A3B', '#5E3A24'],
+  ftopp: ['#FF5B1F', '#FFD23F', '#63E2A8', '#FF9CC2', '#5A8DEE', '#1C1B1F', '#FFF8EE'],
+  fhode: ['#B9773F', '#1C1B1F', '#5A8DEE', '#FF5B1F', '#FF9CC2', '#63E2A8', '#FFD23F', '#E2363B'],
+};
+/** Hatter som kan farges, og fargen de er tegnet med (den byttes ut). Krone og glorie er alltid gull. */
+export const FARGBAR = { cowboyhatt: '#B9773F', topphatt: '#1C1B1F', hjelm: '#FFD23F', lue: '#63E2A8', partyhatt: '#FF5B1F', nisselue: '#E2363B' };
+
+/** Rens et valg {hode, ansikt, bryst, venn, beveg, haar, fh, fhud, ftopp, fhode}: kjente id-er, i riktig slot, låst opp,
+    i sesong – og frisyre og farger bare fra listene over. */
 export function rensPynt(valg, laast, naa) {
   const ut = {};
   if (!valg || typeof valg !== 'object') return ut;
@@ -61,6 +74,8 @@ export function rensPynt(valg, laast, naa) {
     const id = valg[s]; const p = typeof id === 'string' ? AV_ID[id] : null;
     if (p && p.slot === s && har.has(id) && kanBrukes(id, naa)) ut[s] = id;
   });
+  if (FRISYRER.includes(valg.haar)) ut.haar = valg.haar;
+  Object.keys(FARGER).forEach((k) => { if (FARGER[k].includes(valg[k])) ut[k] = valg[k]; });
   return ut;
 }
 

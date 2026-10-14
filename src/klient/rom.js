@@ -1661,7 +1661,7 @@ export function startRom(LEKNAVN, LANG) {
      reiser hodet seg (fjær). Øynene kikker på hverandre (eeTikk flytter pupillene, uten å tegne på nytt).
      Når klokka er ute glir hodene til hver sin side. Er én alene, stirrer alle på hen – og hen får «OI»-fjeset. */
   var eeVist = '', eeTimer = null, eeVelgMed = false;
-  function eeHode(p, uttrykk) { return '<svg class="mv-hode" viewBox="-30 -42 60 92" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id), uttrykk) + '</svg>'; }
+  function eeHode(p, uttrykk) { return '<svg class="mv-hode" viewBox="-30 -42 60 92" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id, p.pynt), uttrykk) + '</svg>'; }
   /** Plassen til hvert hode: på rekke, eller samlet på hver sin side (Enten til venstre, Eller til høyre). */
   function eePlasser(alle, r) {
     var n = alle.length, ut = {};
@@ -1806,7 +1806,7 @@ export function startRom(LEKNAVN, LANG) {
   /** Løgnhalsen: nese (vokser når fortelleren løy) og svettedråper, lagt oppå hodet. */
   function lhHodeEkstra(svg, p, o) {
     var x = '';
-    if (o.nese === p.id) x += '<g class="lh-nese' + (o.neseLang ? (o.neseInn ? ' vokser' : ' lang') : '') + '"><rect x="-3" y="8" width="40" height="7" rx="3.5" fill="' + utseende(p.figur || p.id).hud + '" stroke="#16120F" stroke-width="2.5" vector-effect="non-scaling-stroke"/></g>';
+    if (o.nese === p.id) x += '<g class="lh-nese' + (o.neseLang ? (o.neseInn ? ' vokser' : ' lang') : '') + '"><rect x="-3" y="8" width="40" height="7" rx="3.5" fill="' + utseende(p.figur || p.id, p.pynt).hud + '" stroke="#16120F" stroke-width="2.5" vector-effect="non-scaling-stroke"/></g>';
     if (o.svett === p.id) x += '<g class="lh-svette"><path d="M17 -16q3 5 0 7q-3-2 0-7z"/><path d="M-19 -10q3 5 0 7q-3-2 0-7z"/></g>';
     return x ? svg.replace('</svg>', x + '</svg>') : svg;
   }
@@ -3131,7 +3131,7 @@ export function startRom(LEKNAVN, LANG) {
   /** Det lille hodet til en spiller (samme figur som på benken) – brukes i stedet for initialer. */
   function nrHode(id, klasse, uttrykk) {
     var p = (tilstand.spillere || []).concat(sofaFolk()).find(function (x) { return x.id === id; }) || { id: id, navn: '?' };
-    return '<span class="nr-h' + (klasse ? ' ' + klasse : '') + (id === tilstand.meg ? ' meg' : '') + '" title="' + esc(p.navn) + '"><svg viewBox="-28 -36 56 62" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id), uttrykk) + '</svg></span>';
+    return '<span class="nr-h' + (klasse ? ' ' + klasse : '') + (id === tilstand.meg ? ' meg' : '') + '" title="' + esc(p.navn) + '"><svg viewBox="-28 -36 56 62" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id, p.pynt), uttrykk) + '</svg></span>';
   }
   function nrFormat(v) { var n = Number(v); return isFinite(n) && String(v) !== '' ? n.toLocaleString(EN ? 'en-GB' : 'nb-NO') : String(v || ''); }
   function nrPai(andel) {

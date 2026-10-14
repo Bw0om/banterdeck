@@ -1,3 +1,4 @@
+import { FARGBAR } from '../lib/pynt.js';
 // Stua: en isometrisk stue tegnet med tykk strek (se DESIGN.md). Brukes på forsiden, i rommet og på TV-en.
 // - Folk går inn døra når de blir med, kan dras rundt og rusler litt rundt av seg selv.
 // - Påskeegg: lampa kan slås av og på, TV-en roper SKÅL, den som dras til døra vil ikke gå,
@@ -48,6 +49,8 @@ const HAAR = {
   lue: `<path d="M-15 -60a15 15 0 0 1 30 0z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><path d="M-17 -60h34" stroke="${B}" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-76" r="3.6" fill="{h}" stroke="${B}" stroke-width="2.6"/>`,
   krus: `<g fill="{h}" stroke="${B}" stroke-width="3"><circle cx="-11" cy="-64" r="6"/><circle cx="0" cy="-69" r="7"/><circle cx="11" cy="-64" r="6"/></g>`,
   hestehale: `<path d="M-15 -58a15 15 0 0 1 30 0q-8-5-15-3t-15 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><path d="M13 -64q10 2 9 16q-6-4-8-10" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  bolle: `<circle cx="0" cy="-74" r="6" fill="{h}" stroke="${B}" stroke-width="3"/><path d="M-15 -58a15 15 0 0 1 30 0q-8-5-15-3t-15 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  snau: '',
 };
 /* Pynt: luer, briller, medaljer og kjæledyr. Tegnes over håret (hode), over øynene (ansikt), på brystet, eller ved siden av (venn). */
 const HS = `stroke="${B}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`;
@@ -81,10 +84,16 @@ function haarHtml(p, pynt) {
 function pyntHtml(pynt) {
   if (!pynt) return '';
   let ut = '';
-  ['bryst', 'hode', 'ansikt'].forEach((s) => { if (pynt[s] && PYNT_SVG[pynt[s]]) ut += PYNT_SVG[pynt[s]]; });
+  ['bryst', 'hode', 'ansikt'].forEach((s) => {
+    const id = pynt[s]; if (!id || !PYNT_SVG[id]) return;
+    let svg = PYNT_SVG[id];
+    if (s === 'hode' && pynt.fhode && FARGBAR[id]) svg = svg.split(FARGBAR[id]).join(pynt.fhode);
+    ut += svg;
+  });
   return ut;
 }
 export function figurHtml(p, pynt) {
+  p = medValg(p, pynt);
   const venn = pynt && pynt.venn && PYNT_SVG[pynt.venn] ? `<g class="venn" transform="translate(23,0)">${PYNT_SVG[pynt.venn]}</g>` : '';
   const arm = (x, dir) => `<path d="M0 0L${12 * dir} -26" stroke="${p.topp}" stroke-width="7" stroke-linecap="round"/>`;
   // .beveg bæres av bevegelsene (skål, hopp, dans …), .pust av pusten. Armene ligger med skulderen i hjørnet av boksen sin,
@@ -135,6 +144,8 @@ const HODE_HAAR = {
   lue: `<path d="M-22 -6a22 22 0 0 1 44 0z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><rect x="-24" y="-9" width="48" height="7" rx="3.5" fill="{h}" stroke="${B}" stroke-width="3"/><circle cx="0" cy="-30" r="5" fill="{h}" stroke="${B}" stroke-width="3"/>`,
   krus: `<path d="M-22 -4a22 22 0 0 1 44 0q-9-6-22-6t-22 6z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
   hestehale: `<path d="M-22 -4a22 22 0 0 1 44 0q-9-6-22-6t-22 6z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  bolle: `<circle cx="0" cy="-25" r="9" fill="{h}" stroke="${B}" stroke-width="3"/><path d="M-22 -4a22 22 0 0 1 44 0q-9-6-22-6t-22 6z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  snau: '',
 };
 const HODE_BAK = {
   lang: `<path d="M-24 18v-20a24 24 0 0 1 48 0v20h-8v-16q-16-6-32 0v16z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
@@ -152,7 +163,7 @@ const HODE_MUNN = {
 };
 /** Innholdet i et hode. uttrykk: 'vanlig' | 'oi' (store øyne, hevede bryn, åpen munn, svettedråpe) | 'flat' (litt flau munn). */
 export function hodeHtml(p, uttrykk) {
-  const oi = uttrykk === 'oi', h = p.h || B, haar = HODE_HAAR[p.haar] ? p.haar : 'kort';
+  const oi = uttrykk === 'oi', h = p.h || B, haar = HODE_HAAR[p.haar] != null ? p.haar : 'kort';
   const munn = oi ? HODE_MUNN.oi : uttrykk === 'flat' ? HODE_MUNN.flat : (HODE_MUNN[p.munn] || HODE_MUNN.smil);
   const ry = oi ? 8 : 6.5, r = oi ? 2.2 : 3.2;
   return (HODE_BAK[haar] || '').replace(/\{h\}/g, h) +
@@ -178,11 +189,21 @@ const OYETYPE = ['vanlig', 'glad', 'blunk', 'vanlig'];
 const MUNNTYPE = ['smil', 'glis', 'tunge', 'o', 'smil'];
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 /** Samme person ser lik ut på alle skjermer: utseendet regnes ut fra id-en. */
-export function utseende(id) {
+export function utseende(id, pynt) {
   const h = hash(String(id)), v = (n, s) => (h >>> s) % n;
   let topp = TOPP[v(TOPP.length, 0)], har = HAARF[v(HAARF.length, 5)];
   if (har === topp) har = B;
-  return { topp, hud: HUD[v(HUD.length, 9)], h: har, haar: HAARTYPE[v(HAARTYPE.length, 13)], oyne: OYETYPE[v(OYETYPE.length, 17)], munn: MUNNTYPE[v(MUNNTYPE.length, 21)] };
+  return medValg({ topp, hud: HUD[v(HUD.length, 9)], h: har, haar: HAARTYPE[v(HAARTYPE.length, 13)], oyne: OYETYPE[v(OYETYPE.length, 17)], munn: MUNNTYPE[v(MUNNTYPE.length, 21)] }, pynt);
+}
+/** Frisyre og farger brukeren har valgt, oppå utseendet fra id-en. Trygt å kalle flere ganger. */
+export function medValg(p, pynt) {
+  if (!pynt) return p;
+  const ut = Object.assign({}, p);
+  if (pynt.haar && (HAAR[pynt.haar] != null)) ut.haar = pynt.haar;
+  if (pynt.fh) ut.h = pynt.fh;
+  if (pynt.fhud) ut.hud = pynt.fhud;
+  if (pynt.ftopp) ut.topp = pynt.ftopp;
+  return ut;
 }
 const GJESTER = [
   { topp: '#FF9CC2', hud: '#E9B48F', h: '#FF5B1F', haar: 'lue', oyne: 'blunk', munn: 'smil' },
@@ -601,8 +622,8 @@ export function lagStua(svg, valg = {}) {
       const lagret = Array.isArray(pos[p.id]) ? pos[p.id] : null;
       if (!f) {
         const mal = lagret || ledigPlass();
-        if (forste) f = new Figur(utseende(p.figur || p.id), mal[0], mal[1], { id: p.id, navn: p.navn, pynt: p.pynt || null });
-        else { f = new Figur(utseende(p.figur || p.id), DOR[0], DOR[1], { id: p.id, navn: p.navn, pynt: p.pynt || null }); f.hjem = mal; setTimeout(() => f.gaaTil(mal, true), nye * 500); nye++; }
+        if (forste) f = new Figur(utseende(p.figur || p.id, p.pynt), mal[0], mal[1], { id: p.id, navn: p.navn, pynt: p.pynt || null });
+        else { f = new Figur(utseende(p.figur || p.id, p.pynt), DOR[0], DOR[1], { id: p.id, navn: p.navn, pynt: p.pynt || null }); f.hjem = mal; setTimeout(() => f.gaaTil(mal, true), nye * 500); nye++; }
         f.hjem = mal; kart.set(p.id, f); folk.push(f);
         if (!forste && p.id !== valg.meg) setTimeout(() => f.si(T('Hei!', 'Hi!'), 1400), 900 + nye * 500);
         return;
