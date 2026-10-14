@@ -41,7 +41,7 @@ jobs:
       - name: Byggnummer
         run: cd ios/App && agvtool new-version -all "$GITHUB_RUN_NUMBER"
       - name: Bygger
-        run: xcode-project build-ipa --workspace ios/App/App.xcworkspace --scheme App
+        run: xcode-project build-ipa --project ios/App/App.xcodeproj --scheme App
       - name: Til TestFlight
         run: app-store-connect publish --path 'build/ios/ipa/*.ipa' --testflight
       - uses: actions/upload-artifact@v4
