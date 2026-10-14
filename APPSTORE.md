@@ -27,8 +27,8 @@ Alt under gjøres i nettleseren. Du trenger ikke Mac.
 2. Gå til [appstoreconnect.apple.com/apps](https://appstoreconnect.apple.com/apps) → **+** → New App.
    Platform iOS, navn **mittvors**, primærspråk Norwegian (Bokmål), Bundle ID `no.mittvors.app`, SKU `mittvors`.
 3. Noter **Apple ID** (tallet under App Information → General Information). Det skal inn i `codemagic.yaml` som `APP_STORE_APPLE_ID`.
-4. Noter **Team ID** (øverst til høyre på developer.apple.com/account, ti tegn). Si fra, så legger jeg det inn i
-   `public/.well-known/apple-app-site-association`, slik at mittvors-lenker åpner appen.
+4. Team ID er `685JC7R3PQ`. Den ligger i `public/.well-known/apple-app-site-association` og `ios/App/App/App.entitlements`,
+   slik at mittvors-lenker åpner appen.
 
 ### 2. API-nøkkel (lar Codemagic laste opp for deg)
 

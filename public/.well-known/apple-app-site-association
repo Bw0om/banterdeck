@@ -1,0 +1,9 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      { "appID": "685JC7R3PQ.no.mittvors.app", "paths": ["/no/rom*", "/en/room*", "/no/*", "/en/*", "/"] }
+    ]
+  },
+  "webcredentials": { "apps": ["685JC7R3PQ.no.mittvors.app"] }
+}
