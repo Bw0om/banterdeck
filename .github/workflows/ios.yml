@@ -14,7 +14,7 @@ on:
 
 jobs:
   bygg:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 45
     env:
       APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
@@ -23,6 +23,11 @@ jobs:
       CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v4
+      - name: Nyeste Xcode 26 (Apple krever iOS 26-SDK)
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          [ -n "$X" ] && sudo xcode-select -s "$X"
+          xcodebuild -version
       - uses: actions/setup-node@v4
         with:
           node-version: 22
