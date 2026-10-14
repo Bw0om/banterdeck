@@ -550,7 +550,16 @@ export function lagStua(svg, valg = {}) {
     void g.getBoundingClientRect();
     g.classList.add(klasse); (ansikt || []).forEach((c) => g.classList.add(c));
     const varer = ms || BEVEG_MS[klasse] || 1200;
-    this.bevegT = setTimeout(() => { g.classList.remove(klasse); (ansikt || []).forEach((c) => g.classList.remove(c)); }, varer);
+    this.bevegFra = typeof document !== 'undefined' && document.timeline ? document.timeline.currentTime : null;
+    this.bevegT = setTimeout(() => { this.bevegFra = null; g.classList.remove(klasse); (ansikt || []).forEach((c) => g.classList.remove(c)); }, varer);
+  };
+  /** Figuren ble tegnet på nytt (ny pynt) midt i en bevegelse: fortsett der den var, ikke start på nytt */
+  Figur.prototype.fortsett = function () {
+    if (this.bevegFra == null || !this.g.getAnimations || typeof CSSAnimation === 'undefined') return;
+    const gaatt = document.timeline.currentTime - this.bevegFra;
+    this.g.getAnimations({ subtree: true }).forEach((a) => {
+      try { if (a instanceof CSSAnimation) a.currentTime = gaatt; } catch (e) {}
+    });
   };
   Figur.prototype.ansikt = function (klasser, ms) {
     const g = this.g; (klasser || []).forEach((c) => g.classList.add(c));
@@ -745,7 +754,7 @@ export function lagStua(svg, valg = {}) {
         if (!forste && p.id !== valg.meg) setTimeout(() => f.si(T('Hei!', 'Hi!'), 1400), 900 + nye * 500);
         return;
       }
-      if (f.info.navn !== p.navn || JSON.stringify(f.info.pynt || null) !== JSON.stringify(p.pynt || null)) { f.info.navn = p.navn; f.info.pynt = p.pynt || null; f.tegnHtml(); f.tegn(); }
+      if (f.info.navn !== p.navn || JSON.stringify(f.info.pynt || null) !== JSON.stringify(p.pynt || null)) { f.info.navn = p.navn; f.info.pynt = p.pynt || null; f.tegnHtml(); f.tegn(); f.fortsett(); }
       // Noen har flyttet personen på en annen skjerm: gå dit
       if (lagret && !f.drar && Math.hypot(lagret[0] - f.hjem[0], lagret[1] - f.hjem[1]) > 0.05) { f.hjem = lagret; f.gaaTil(lagret); }
     });
@@ -866,7 +875,13 @@ export function synkAnimasjoner(el) {
   if (!el || !el.getAnimations || typeof document === 'undefined' || !document.timeline) return;
   const t = document.timeline.currentTime; if (t == null) return;
   el.getAnimations({ subtree: true }).forEach((a) => {
-    try { const tm = a.effect && a.effect.getTiming(); if (tm && tm.iterations === Infinity && a.playState === 'running' && Math.abs((a.currentTime || 0) - t) > 1) a.currentTime = t; } catch (e) {}
+    try {
+      const tm = a.effect && a.effect.getTiming(); if (!tm || tm.iterations !== Infinity || a.playState !== 'running') return;
+      // En figur midt i en bevegelse (dans, klapp …) går i sin egen takt
+      const fig = a.effect.target && a.effect.target.closest ? a.effect.target.closest('.figur') : null;
+      if (fig && /(^|\s)[muv]-/.test(fig.getAttribute('class') || '')) return;
+      if (Math.abs((a.currentTime || 0) - t) > 1) a.currentTime = t;
+    } catch (e) {}
   });
 }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }

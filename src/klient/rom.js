@@ -1066,19 +1066,28 @@ export function startRom(LEKNAVN, LANG) {
       '<button type="button" data-g="pk-variant" data-v="rom" aria-pressed="' + !pkMobil + '">' + T('Pek i rommet', 'Point in the room') + '</button>' +
       '<button type="button" data-g="pk-variant" data-v="mobil" aria-pressed="' + pkMobil + '">' + T('Stem på mobilen', 'Vote on phones') + '</button></div>';
   }
+  // Kort- og terningspill som krever Pluss: står i «Kort og terninger» med lås, ikke i en egen Pluss-gruppe
+  var KORT_PLUSS = ['bussruta', 'pyramiden', 'gris', 'president', 'yatzy'];
+  function plussFlis(x) {
+    var aapen = !!tilstand.pluss;
+    return '<div class="rom-lek pluss' + (aapen ? '' : ' laast') + '">' + klistremerke(x.id || '', 'rom-lek-merke') + '<b>' + (aapen ? '' : '🔒 ') + esc(x.navn) + '</b><span>' + esc(x.om || '') + '</span>' +
+      '<div class="rom-mod"><button type="button" data-g="start" data-lek="' + x.id + '" data-modus="*">' + (aapen ? 'Start' : T('Lås opp', 'Unlock')) + '</button></div></div>';
+  }
   function lekeGrupper(leker, tegnLek) {
     var brukt = {}, ut = '';
     GRUPPER.forEach(function (g, i) {
-      var l = leker.filter(function (x) { return g[1].indexOf(x.id) !== -1; }); if (!l.length) return;
+      var l = leker.filter(function (x) { return g[1].indexOf(x.id) !== -1; });
+      var pl = i === 1 && tilstand && tilstand.leker ? tilstand.leker.filter(function (x) { return x.pluss && KORT_PLUSS.indexOf(x.id) !== -1; }) : [];
+      if (!l.length && !pl.length) return;
       l.forEach(function (x) { brukt[x.id] = 1; });
-      ut += '<details class="rom-gruppe" data-gruppe="' + i + '"' + (erApen(String(i), false) ? ' open' : '') + '><summary>' + esc(g[0]) + ' <small>' + l.length + '</small></summary><div class="rom-leker">' + l.map(tegnLek).join('') + '</div></details>';
+      ut += '<details class="rom-gruppe" data-gruppe="' + i + '"' + (erApen(String(i), false) ? ' open' : '') + '><summary>' + esc(g[0]) + ' <small>' + (l.length + pl.length) + '</small></summary><div class="rom-leker">' + l.map(tegnLek).join('') + pl.map(plussFlis).join('') + '</div></details>';
     });
     var rest = leker.filter(function (x) { return !brukt[x.id]; });
     if (rest.length) ut += '<details class="rom-gruppe" data-gruppe="rest"' + (erApen('rest', false) ? ' open' : '') + '><summary>' + T('Kortstokker med spørsmål', 'Question decks') + ' <small>' + rest.length + '</small></summary><div class="rom-leker">' + rest.map(tegnLek).join('') + '</div></details>';
     return ut;
   }
   function plussLeker() {
-    var t = tilstand, l = (t.leker || []).filter(function (x) { return x.pluss; }); if (!l.length) return '';
+    var t = tilstand, l = (t.leker || []).filter(function (x) { return x.pluss && KORT_PLUSS.indexOf(x.id) === -1; }); if (!l.length) return '';
     var aapen = !!t.pluss;
     return '<details class="rom-gruppe pluss" data-gruppe="pluss"' + (erApen('pluss', aapen) ? ' open' : '') + '><summary>' + T('✨ Med Pluss', '✨ With Pluss') + ' <small>' + l.length + '</small></summary>' + 
       '<div class="rom-leker">' + l.map(function (x) {

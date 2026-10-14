@@ -390,6 +390,15 @@ The living room is drawn in one isometric projection (`I(x, y, z)` in `src/klien
 - **Looping animations follow the page clock** (`synkAnimasjoner` in `src/klient/stua.js`). Where the room must move to a new spot, like on the TV, the loops continue where they were instead of starting over.
 - **The wardrobe** only slides a row in when you open a part. Equipping something keeps the row still and keeps its scroll position.
 
+## Profile pages and the front page: buttons, not explanations
+
+- **Decks** are piles in a two-column grid, each in its own colour (remembered per device), with a round play button. Tapping the pile opens a sheet: play here, play in a room, share, edit, delete (tap twice). A dashed «Ny stokk» tile sits last.
+- **Making a deck** is one card at a time: the name is the headline, colour dots under it, a big card in the deck colour to write on, «Legg i bunken» drops it into the pile behind. Idea chips («Alle som … drikker», «Pek på den som …») start the sentence for you. Cards made so far are listed underneath; tap to edit, × to remove. Everything saves while you type; «Spill nå» plays straight away, «Lim inn liste» keeps the old one-card-per-line paste.
+- **Lines** are speech bubbles; «Ny replikk» is a card at the bottom.
+- **Settings** are rows (username, password, email), the orange «Verv en venn» card, then sign out and delete. «Endre» opens a sheet from the bottom.
+- **Crews** (`/no/gjeng`) are colour cards with «Start kveld», a dashed «Ny gjeng» and a small «Har du en gjengkode?». Signed out: one line and «Lag gjeng».
+- **Front page**: «Klar for vors?», the living room, «Lag rom», code + «Bli med» on one row; then the games as a swipe row on phones, «Bare én telefon» with the card pile, «Denne uka», a green «Gjengen din» section, Pluss with one line and the two tickets, and the line of the day. The player counter, «Populært nå», the tool list and explanatory paragraphs are gone.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

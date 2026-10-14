@@ -3,6 +3,9 @@ import Base from '../../layouts/Base.astro';
 import { supabaseUrl, supabaseAnonKey, supabaseDebug } from '../../config';
 import { ui, type Lang } from '../../lib/i18n';
 import { PYNT } from '../../lib/pynt.js';
+import '../../styles/profil.css';
+/** Farger og ideKnapper til egne kortstokker */
+const STOKK_FARGER = ['#FF9CC2', '#FFD23F', '#63E2A8', '#5A8DEE', '#FF5B1F'];
 const { lang = 'en' } = Astro.props as { lang?: Lang };
 const L = ui(lang);
 const SUPABASE_URL = supabaseUrl();
@@ -144,18 +147,21 @@ const T = no ? {
           </div>
         </div>
         <section data-visning="innstillinger" hidden>
-          <div class="profil-tilbake"><button type="button" class="profil-ikon" data-vis="profil" aria-label="Tilbake"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{no ? 'Innstillinger' : 'Settings'}</span></div>
-          <div class="dashbar">
-            <p class="small"><span>{L.signedInAs}</span> <strong id="who"></strong></p>
-            <span class="dashknapper">
-              <a class="btn ghost small" id="statLenke" href="/no/statistikk" hidden>{T.stats}</a>
-              <button class="btn ghost small" id="outBtn">{L.signOut}</button>
-            </span>
+          <div class="profil-tilbake"><button type="button" class="profil-ikon" data-vis="profil" aria-label={no ? 'Tilbake' : 'Back'}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{no ? 'Innstillinger' : 'Settings'}</span></div>
+          <div class="inn-liste">
+            <button type="button" class="inn-rad" id="endreNavnBtn">{no ? 'Brukernavn' : 'Username'}<span class="inn-verdi" id="innBrukernavn"></span><svg aria-hidden="true" class="inn-pil" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+            <button type="button" class="inn-rad" id="endrePwBtn">{no ? 'Passord' : 'Password'}<span class="inn-verdi">••••••••</span><svg aria-hidden="true" class="inn-pil" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+            <div class="inn-rad stille">{no ? 'E-post' : 'Email'}<span class="inn-verdi" id="who"></span></div>
+            <a class="inn-rad" id="statLenke" href="/no/statistikk" hidden>{T.stats}<svg aria-hidden="true" class="inn-pil" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></a>
           </div>
-          <div class="konto-valg">
-            <button type="button" class="mini" id="endreNavnBtn">{T.changeUser}</button>
-            <button type="button" class="mini" id="endrePwBtn">{T.changePw}</button>
-            <button type="button" class="mini danger" id="slettBtn">{T.deleteAcc}</button>
+          <button type="button" class="inn-verv" data-vis="verv">
+            <span class="inn-verv-ik" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 8h17v4h-17zM5 12h14v8H5zM12 8v12M12 8c-3-1-5-3-3.5-4.5S12 5 12 8c0-3 2-5.5 3.5-4.5S15 7 12 8"/></svg></span>
+            <span class="inn-verv-tekst"><b>{no ? 'Verv en venn' : 'Refer a friend'}</b><small>{no ? 'Gratis kveld til dere begge' : 'A free night for you both'}</small></span>
+            <span class="inn-verv-del">{no ? 'Del' : 'Share'}</span>
+          </button>
+          <div class="inn-liste">
+            <button type="button" class="inn-rad" id="outBtn">{L.signOut}</button>
+            <button type="button" class="inn-rad fare" id="slettBtn">{T.deleteAcc}</button>
           </div>
         </section>
         <section data-visning="verv" hidden>
@@ -211,42 +217,67 @@ const T = no ? {
         </section>
 
         <section data-visning="stokker" hidden>
-        <div class="profil-tilbake"><button type="button" class="profil-ikon" data-vis="profil" aria-label="Tilbake"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{T.decks}</span></div>
-        <p class="small">{T.decksLead}</p>
+        <div class="profil-tilbake" id="stokkTopp"><button type="button" class="profil-ikon" data-vis="profil" aria-label={no ? 'Tilbake' : 'Back'}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{no ? 'Kortstokkene' : 'Decks'}</span></div>
         <div id="utkast" class="konto-utkast" hidden></div>
-        <div id="stokker" class="stokk-liste"></div>
-        <button class="btn" type="button" id="nyStokk">+ {T.newDeck}</button>
-        <form class="form konto-boks" id="stokkForm" hidden novalidate>
-          <div class="field">
-            <label class="lab" for="stNavn">{T.deckName}</label>
-            <input id="stNavn" maxlength="40" autocomplete="off" />
+        <div id="stokker" class="stokk-grid"></div>
+        <div id="stokkEdit" class="se" hidden>
+          <div class="se-topp">
+            <button type="button" class="profil-ikon" id="seTilbake" aria-label={no ? 'Ferdig' : 'Done'}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <label class="sr-only" for="stNavn">{no ? 'Navn på stokken' : 'Deck name'}</label>
+            <input id="stNavn" class="se-navn" maxlength="40" autocomplete="off" placeholder={no ? 'Gi stokken et navn' : 'Name your deck'} />
           </div>
-          <div class="field">
-            <label class="lab" for="stKort">{T.deckCards}</label>
-            <textarea id="stKort" rows="8" placeholder={T.deckPh}></textarea>
-            <p class="help" id="stAntall"></p>
+          <div class="se-farger" role="group" aria-label={no ? 'Farge' : 'Colour'}>
+            {STOKK_FARGER.map((f) => <button type="button" class="se-prikk" data-farge={f} style={'background:' + f} aria-label={f} aria-pressed="false"></button>)}
           </div>
-          <div class="dl-knapper">
-            <button class="btn gold" type="submit">{T.saveDeck}</button>
-            <button class="btn ghost" type="button" id="stAvbryt">{T.cancel}</button>
+          <div class="se-bunke">
+            <span class="se-bak" aria-hidden="true"></span><span class="se-bak to" aria-hidden="true"></span>
+            <div class="se-kort" id="seKort">
+              <div class="se-kort-topp"><span id="seNr"></span><span class="se-antall" id="seAntall"></span></div>
+              <label class="sr-only" for="stNytt">{no ? 'Skriv et kort' : 'Write a card'}</label>
+              <textarea id="stNytt" rows="3" maxlength="140" enterkeyhint="done" placeholder={no ? 'Skriv et kort …' : 'Write a card …'}></textarea>
+              <button type="button" class="se-legg" id="seLegg"><span id="seLeggTekst">{no ? 'Legg i bunken' : 'Add to the pile'}</span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
           </div>
-        </form>
+          <div class="se-ideer" aria-label={no ? 'Idéer' : 'Ideas'}>
+            {(no ? [['Alle som ', ', drikker 2', 'Alle som … drikker'], ['Pek på den som ', '', 'Pek på den som …'], ['Jeg har aldri ', '', 'Jeg har aldri …'], ['Del ut 2 hvis ', '', 'Del ut 2 hvis …'], ['Den som ', ', drikker 3', 'Den som … drikker 3']]
+              : [['Everyone who ', ' drinks 2', 'Everyone who … drinks'], ['Point at whoever ', '', 'Point at whoever …'], ['Never have I ever ', '', 'Never have I ever …'], ['Hand out 2 if ', '', 'Hand out 2 if …'], ['Whoever ', ' drinks 3', 'Whoever … drinks 3']]
+            ).map((i) => <button type="button" class="se-ide" data-for={i[0]} data-etter={i[1]}>{i[2]}</button>)}
+          </div>
+          <ol id="seListe" class="se-liste"></ol>
+          <div class="se-lim" id="seLim" hidden>
+            <label for="stLim">{no ? 'Ett kort per linje' : 'One card per line'}</label>
+            <textarea id="stLim" rows="6" placeholder={T.deckPh}></textarea>
+            <button type="button" class="btn gold small" id="seLimInn">{no ? 'Legg til alle' : 'Add them all'}</button>
+          </div>
+          <div class="se-fot">
+            <button type="button" class="se-spill" id="seSpill"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l11 7-11 7z"/></svg>{no ? 'Spill nå' : 'Play now'}</button>
+            <button type="button" class="se-limknapp" id="seLimVis" aria-expanded="false">{no ? 'Lim inn liste' : 'Paste a list'}</button>
+          </div>
+          <p class="se-lagret" id="seLagret" role="status" aria-live="polite"></p>
+        </div>
+        <div class="profil-ark" id="stokkMeny" hidden role="dialog" aria-modal="true" aria-labelledby="smNavn">
+          <div class="profil-ark-innhold">
+            <div class="profil-ark-topp"><span class="profil-h" id="smNavn"></span><button type="button" class="profil-ikon" data-lukk-sm aria-label={no ? 'Lukk' : 'Close'}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+            <button type="button" class="profil-rad" data-sm="spill"><span class="profil-rad-ik" style="background:var(--gul)"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l11 7-11 7z"/></svg></span><b>{no ? 'Spill på denne telefonen' : 'Play on this phone'}</b></button>
+            <button type="button" class="profil-rad" data-sm="rom"><span class="profil-rad-ik" style="background:var(--mint)"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M15 20a5 5 0 0 1 6-4"/></svg></span><b>{no ? 'Spill i et rom' : 'Play in a room'}</b></button>
+            <button type="button" class="profil-rad" data-sm="del"><span class="profil-rad-ik" style="background:var(--rosa)"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 21h14"/></svg></span><b id="smDelTekst">{T.share}</b></button>
+            <button type="button" class="profil-rad" data-sm="rediger"><span class="profil-rad-ik"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><b>{no ? 'Endre' : 'Edit'}</b></button>
+            <button type="button" class="profil-rad svak fare" data-sm="slett"><span class="profil-rad-ik"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></span><b id="smSlettTekst">{T.del}</b></button>
+          </div>
+        </div>
         </section>
 
         <section data-visning="replikker" hidden>
-        <div class="profil-tilbake"><button type="button" class="profil-ikon" data-vis="profil" aria-label="Tilbake"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{L.myLines}</span></div>
-        <form class="form addform" id="addForm" novalidate>
-          <div class="field">
-            <label class="lab" for="aCtx">{L.fWhen}<span class="opt">{L.optional}</span></label>
-            <input id="aCtx" maxlength="120" autocomplete="off" placeholder={L.fWhenPh} />
-          </div>
-          <div class="field">
-            <label class="lab" for="aLine">{L.fLine}</label>
-            <textarea id="aLine" rows="2" maxlength="300" placeholder={L.fLinePh}></textarea>
-          </div>
-          <button class="btn gold" type="submit">{L.addLine}</button>
+        <div class="profil-tilbake"><button type="button" class="profil-ikon" data-vis="profil" aria-label={no ? 'Tilbake' : 'Back'}><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span class="profil-h">{no ? 'Replikkene' : 'Lines'}</span></div>
+        <div id="mine" class="rep-liste"></div>
+        <form class="rep-ny" id="addForm" novalidate>
+          <span class="rep-ny-hank" aria-hidden="true"></span>
+          <label class="rep-ny-tittel" for="aLine">{no ? 'Ny replikk' : 'New line'}</label>
+          <textarea id="aLine" rows="2" maxlength="300" placeholder={no ? 'Skriv replikken' : 'Write the line'}></textarea>
+          <label class="sr-only" for="aCtx">{L.fWhen}</label>
+          <input id="aCtx" maxlength="120" autocomplete="off" placeholder={no ? 'Når sier man den? (valgfritt)' : 'When do you say it? (optional)'} />
+          <button class="rep-ny-knapp" type="submit">{no ? 'Legg til' : 'Add'}</button>
         </form>
-        <div id="mine" class="cards"></div>
         </section>
       </section>
 
@@ -402,20 +433,23 @@ const T = no ? {
           });
         });
 
-        /* ---------- kortstokker ---------- */
+        /* ---------- kortstokker: bunker i et rutenett, ett kort om gangen når man lager en ---------- */
+        var FARGER = ['#FF9CC2', '#FFD23F', '#63E2A8', '#5A8DEE', '#FF5B1F'], FARGE_LS = 'bd_stokk_farger';
+        function fargeFor(s) {
+          var lagret = lesLS(FARGE_LS, {}); if (s && s.id && lagret[s.id]) return lagret[s.id];
+          var t = String((s && (s.id || s.navn)) || ''), h = 0; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0;
+          return FARGER[h % FARGER.length];
+        }
+        function settFarge(id, f) { if (!id) return; var l = lesLS(FARGE_LS, {}); l[id] = f; skrivLS(FARGE_LS, l); }
+        var SPILL_IK = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg>';
         function tegnStokker() {
           var st = $('stokkTall'); if (st) st.textContent = stokker.length ? String(stokker.length) : '';
-          $('stokker').innerHTML = stokker.length ? stokker.map(function (s, i) {
-            return '<article class="stokk-kort"><div><b>' + esc(s.navn) + '</b><span>' + (s.kort || []).length + ' ' + esc(T.cards) + (s.delt ? ' · ' + esc(T.shared) : '') + '</span></div>' +
-              '<div class="stokk-knapper">' +
-                '<button class="btn gold small" data-st="spill" data-i="' + i + '" type="button">' + esc(T.play) + '</button>' +
-                '<button class="btn small" data-st="rom" data-i="' + i + '" type="button">' + esc(T.playRoom) + '</button>' +
-                '<button class="mini" data-st="del" data-i="' + i + '" type="button">' + esc(T.share) + '</button>' +
-                (s.delt ? '<button class="mini" data-st="udel" data-i="' + i + '" type="button">' + esc(T.unshare) + '</button>' : '') +
-                '<button class="mini" data-st="rediger" data-i="' + i + '" type="button">' + esc(T.edit) + '</button>' +
-                '<button class="mini danger" data-st="slett" data-i="' + i + '" type="button">' + esc(T.del) + '</button>' +
-              '</div></article>';
-          }).join('') : '<p class="small">' + esc(T.noDecks) + '</p>';
+          $('stokker').innerHTML = stokker.map(function (s, i) {
+            var f = fargeFor(s), n = (s.kort || []).length;
+            return '<div class="sg-stokk" style="--f:' + f + ';--i:' + i + '"><i aria-hidden="true"></i><i aria-hidden="true"></i>' +
+              '<button type="button" class="sg-topp" data-st="meny" data-i="' + i + '" aria-haspopup="dialog"><b>' + esc(s.navn) + '</b><small>' + n + ' ' + esc(T.cards) + (s.delt ? ' · ' + esc(T.shared) : '') + '</small></button>' +
+              '<button type="button" class="sg-spill" data-st="spill" data-i="' + i + '" aria-label="' + esc(T.play) + ' ' + esc(s.navn) + '">' + SPILL_IK + '</button></div>';
+          }).join('') + '<button type="button" class="sg-ny" data-st="ny" style="--i:' + stokker.length + '"><span aria-hidden="true">+</span>' + esc(LANG === 'no' ? 'Ny stokk' : 'New deck') + '</button>';
           var u = lesLS(UTKAST, null);
           $('utkast').hidden = !(u && u.kort && u.kort.length);
           if (u && u.kort && u.kort.length) $('utkast').innerHTML = '<p><b>' + u.kort.length + '</b> ' + esc(T.draft) + '</p><button class="btn gold small" type="button" id="lagreUtkast">' + esc(T.saveDraft) + '</button>';
@@ -424,27 +458,87 @@ const T = no ? {
           return K.stokker.liste().then(function (l) { stokker = l; tegnStokker(); })
             .catch(function (e) { say($('syncMsg'), e.message, 'err'); tegnStokker(); });
         }
+        /* Den nye stokk-skjermen. Alt lagres mens man skriver – ingen lagre-knapp. */
+        var ed = { id: null, navn: '', kort: [], farge: FARGER[0], endrer: -1 }, lagreT = null, lagrer = null;
         function aapneSkjema(s) {
-          redigerer = s || null;
-          $('stNavn').value = s ? s.navn : '';
-          $('stKort').value = s ? (s.kort || []).join('\n') : '';
-          $('stokkForm').hidden = false; $('nyStokk').hidden = true; tellKort();
-          $('stNavn').focus();
+          ed = { id: s ? s.id : null, navn: s ? s.navn : '', kort: s ? (s.kort || []).slice() : [], farge: s ? fargeFor(s) : FARGER[stokker.length % FARGER.length], endrer: -1 };
+          $('stNavn').value = ed.navn; $('stNytt').value = ''; $('stLim').value = ''; $('seLim').hidden = true; $('seLimVis').setAttribute('aria-expanded', 'false'); $('seLagret').textContent = '';
+          $('stokker').hidden = true; $('utkast').hidden = true; $('stokkTopp').hidden = true; $('stokkEdit').hidden = false;
+          tegnSkjema(); window.scrollTo(0, 0);
+          (ed.navn ? $('stNytt') : $('stNavn')).focus();
         }
-        function lukkSkjema() { $('stokkForm').hidden = true; $('nyStokk').hidden = false; redigerer = null; }
-        function kortFraFelt() { return $('stKort').value.split('\n').map(function (t) { return t.trim(); }).filter(Boolean).slice(0, 300); }
-        function tellKort() { $('stAntall').textContent = kortFraFelt().length + ' / 300 ' + T.cards; }
-        $('stKort').addEventListener('input', tellKort);
-        $('nyStokk').addEventListener('click', function () { aapneSkjema(null); });
-        $('stAvbryt').addEventListener('click', lukkSkjema);
-        $('stokkForm').addEventListener('submit', function (e) {
-          e.preventDefault();
-          var kort = kortFraFelt(), navn = $('stNavn').value.trim() || T.newDeck;
-          if (!kort.length) return say($('syncMsg'), T.fillAll, 'err');
-          K.stokker.lagre({ id: redigerer && redigerer.id, navn: navn, kort: kort }).then(function () {
-            lukkSkjema(); say($('syncMsg'), T.saved, 'ok'); return hentStokker();
-          }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
+        function lukkSkjema() {
+          clearTimeout(lagreT);
+          var ferdig = lagreNaa();
+          $('stokkEdit').hidden = true; $('stokker').hidden = false; $('stokkTopp').hidden = false;
+          (ferdig || Promise.resolve()).then(hentStokker);
+        }
+        function tegnSkjema() {
+          $('stokkEdit').style.setProperty('--f', ed.farge);
+          document.querySelectorAll('.se-prikk').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.farge === ed.farge)); });
+          var endrer = ed.endrer > -1;
+          $('seNr').textContent = (LANG === 'no' ? 'Kort ' : 'Card ') + (endrer ? ed.endrer + 1 : ed.kort.length + 1);
+          $('seAntall').textContent = ed.kort.length + (LANG === 'no' ? ' i bunken' : ' in the pile');
+          $('seAntall').hidden = !ed.kort.length;
+          $('seLeggTekst').textContent = endrer ? (LANG === 'no' ? 'Lagre kortet' : 'Save the card') : (LANG === 'no' ? 'Legg i bunken' : 'Add to the pile');
+          $('seListe').innerHTML = ed.kort.map(function (k, i) {
+            return '<li class="' + (i === ed.endrer ? 'endres' : '') + '"><button type="button" class="se-rad-tekst" data-se="endre" data-i="' + i + '">' + esc(k) + '</button>' +
+              '<button type="button" class="se-fjern" data-se="fjern" data-i="' + i + '" aria-label="' + esc(T.del) + '">×</button></li>';
+          }).slice().reverse().join('');
+          $('seSpill').disabled = !ed.kort.length;
+        }
+        function lagreSnart() { clearTimeout(lagreT); lagreT = setTimeout(lagreNaa, 600); }
+        function lagreNaa() {
+          clearTimeout(lagreT);
+          ed.navn = $('stNavn').value.trim();
+          if (!ed.kort.length) return null;
+          var data = { id: ed.id, navn: ed.navn || T.newDeck, kort: ed.kort.slice() };
+          lagrer = (lagrer || Promise.resolve()).then(function () {
+            data.id = ed.id;
+            return K.stokker.lagre(data).then(function (rad) {
+              if (rad && rad.id) { ed.id = rad.id; settFarge(rad.id, ed.farge); }
+              $('seLagret').textContent = T.saved;
+            });
+          }).catch(function (err) { $('seLagret').textContent = err.message; });
+          return lagrer;
+        }
+        function leggTil() {
+          var t = $('stNytt').value.replace(/\s+/g, ' ').trim(); if (!t) { $('stNytt').focus(); return; }
+          if (ed.endrer > -1) { ed.kort[ed.endrer] = t; ed.endrer = -1; }
+          else {
+            ed.kort.push(t);
+            // Kortet glir ned i bunken
+            var k = $('seKort');
+            if (k.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) k.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(18px) rotate(-3deg) scale(.94)', opacity: .2 }, { transform: 'none', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(.23,1,.32,1)' });
+          }
+          $('stNytt').value = ''; tegnSkjema(); lagreSnart(); $('stNytt').focus();
+        }
+        $('seLegg').addEventListener('click', leggTil);
+        $('stNytt').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); leggTil(); } });
+        $('stNavn').addEventListener('input', lagreSnart);
+        $('stNavn').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('stNytt').focus(); } });
+        $('seTilbake').addEventListener('click', lukkSkjema);
+        $('stokkEdit').addEventListener('click', function (e) {
+          var p = e.target.closest('.se-prikk');
+          if (p) { ed.farge = p.dataset.farge; if (ed.id) settFarge(ed.id, ed.farge); tegnSkjema(); return; }
+          var ideKnapp = e.target.closest('.se-ide');
+          if (ideKnapp) {
+            var f = $('stNytt'), foran = ideKnapp.dataset.for, etter = ideKnapp.dataset.etter || '';
+            f.value = foran + etter; f.focus(); f.setSelectionRange(foran.length, foran.length); return;
+          }
+          var r = e.target.closest('[data-se]'); if (!r) return;
+          var i = +r.dataset.i;
+          if (r.dataset.se === 'fjern') { ed.kort.splice(i, 1); if (ed.endrer === i) { ed.endrer = -1; $('stNytt').value = ''; } else if (ed.endrer > i) ed.endrer--; tegnSkjema(); lagreSnart(); return; }
+          if (r.dataset.se === 'endre') { ed.endrer = i; $('stNytt').value = ed.kort[i]; tegnSkjema(); $('stNytt').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
         });
+        $('seLimVis').addEventListener('click', function () { var v = $('seLim').hidden; $('seLim').hidden = !v; this.setAttribute('aria-expanded', String(v)); if (v) $('stLim').focus(); });
+        $('seLimInn').addEventListener('click', function () {
+          var nye = $('stLim').value.split('\n').map(function (t) { return t.trim(); }).filter(Boolean);
+          if (!nye.length) return;
+          ed.kort = ed.kort.concat(nye).slice(0, 300); $('stLim').value = ''; $('seLim').hidden = true; $('seLimVis').setAttribute('aria-expanded', 'false');
+          tegnSkjema(); lagreSnart();
+        });
+        $('seSpill').addEventListener('click', function () { if (!ed.kort.length) return; lagreNaa(); spill({ navn: $('stNavn').value.trim() || T.newDeck, kort: ed.kort }); });
         $('utkast').addEventListener('click', function (e) {
           if (!e.target.closest('#lagreUtkast')) return;
           var u = lesLS(UTKAST, null); if (!u) return;
@@ -452,26 +546,46 @@ const T = no ? {
             skrivLS(UTKAST, null); say($('syncMsg'), T.saved, 'ok'); return hentStokker();
           }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
         });
+        /* Trykk på en bunke: et ark med det man kan gjøre. Spill-knappen på bunken spiller med en gang. */
+        var menyStokk = null;
+        function delStokk(s) {
+          var lenke = location.origin + (LANG === 'no' ? '/no/kortstokk?s=' : '/deck?s=') + s.id;
+          var dele = function () {
+            if (navigator.share) return navigator.share({ title: s.navn, text: LANG === 'no' ? 'Spill kortstokken «' + s.navn + '» på mittvors' : 'Play the deck “' + s.navn + '” on mittvors', url: lenke }).catch(function () {});
+            if (navigator.clipboard) navigator.clipboard.writeText(lenke).then(function () { say($('syncMsg'), T.linkCopied, 'ok'); });
+          };
+          if (s.delt) return dele();
+          return K.stokker.del(s.id, true).then(function () { s.delt = true; tegnStokker(); dele(); }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
+        }
+        function aapneMeny(s) {
+          menyStokk = s;
+          $('smNavn').textContent = s.navn;
+          $('smDelTekst').textContent = T.share;
+          $('smSlettTekst').textContent = T.del; delete document.querySelector('[data-sm="slett"]').dataset.sikker;
+          $('stokkMeny').style.setProperty('--f', fargeFor(s));
+          $('stokkMeny').hidden = false;
+        }
+        function lukkMeny() { $('stokkMeny').hidden = true; menyStokk = null; }
+        $('stokkMeny').addEventListener('click', function (e) {
+          if (e.target === $('stokkMeny') || e.target.closest('[data-lukk-sm]')) return lukkMeny();
+          var b = e.target.closest('[data-sm]'); if (!b || !menyStokk) return;
+          var s = menyStokk, h = b.dataset.sm;
+          if (h === 'spill') { lukkMeny(); return spill(s); }
+          if (h === 'rom') { skrivLS('bd_stokk_rom', { id: s.id, navn: s.navn, kort: s.kort }); location.href = LANG === 'no' ? '/no/rom' : '/room'; return; }
+          if (h === 'del') { lukkMeny(); return delStokk(s); }
+          if (h === 'rediger') { lukkMeny(); return aapneSkjema(s); }
+          if (h === 'slett') {
+            if (b.dataset.sikker !== '1') { b.dataset.sikker = '1'; $('smSlettTekst').textContent = T.delConfirm; return; }
+            lukkMeny(); K.stokker.slett(s.id).then(hentStokker).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
+          }
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('stokkMeny').hidden) lukkMeny(); });
         $('stokker').addEventListener('click', function (e) {
           var b = e.target.closest('[data-st]'); if (!b) return;
+          if (b.dataset.st === 'ny') return aapneSkjema(null);
           var s = stokker[+b.dataset.i]; if (!s) return;
-          if (b.dataset.st === 'rediger') return aapneSkjema(s);
-          if (b.dataset.st === 'del') {
-            var lenke = location.origin + (LANG === 'no' ? '/no/kortstokk?s=' : '/deck?s=') + s.id;
-            var dele = function () {
-              if (navigator.share) return navigator.share({ title: s.navn, text: LANG === 'no' ? 'Spill kortstokken «' + s.navn + '» på mittvors' : 'Play the deck “' + s.navn + '” on mittvors', url: lenke }).catch(function () {});
-              if (navigator.clipboard) navigator.clipboard.writeText(lenke).then(function () { say($('syncMsg'), T.linkCopied, 'ok'); });
-            };
-            if (s.delt) return dele();
-            return K.stokker.del(s.id, true).then(function () { s.delt = true; tegnStokker(); dele(); }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
-          }
-          if (b.dataset.st === 'udel') return K.stokker.del(s.id, false).then(function () { s.delt = false; tegnStokker(); say($('syncMsg'), T.unshared, 'ok'); }).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
           if (b.dataset.st === 'spill') return spill(s);
-          if (b.dataset.st === 'rom') { skrivLS('bd_stokk_rom', { id: s.id, navn: s.navn, kort: s.kort }); location.href = LANG === 'no' ? '/no/rom' : '/room'; return; }
-          if (b.dataset.st === 'slett') {
-            if (b.dataset.sikker !== '1') { b.dataset.sikker = '1'; b.textContent = T.delConfirm; return; }
-            K.stokker.slett(s.id).then(hentStokker).catch(function (err) { say($('syncMsg'), err.message, 'err'); });
-          }
+          if (b.dataset.st === 'meny') return aapneMeny(s);
         });
 
         /* ---------- spill en kortstokk alene: send telefonen rundt ---------- */
@@ -500,13 +614,14 @@ const T = no ? {
         }
         function render() {
           var rt = $('replikkTall'); if (rt) rt.textContent = mine.length ? String(mine.length) : '';
-          if (!mine.length) { $('mine').innerHTML = '<p class="small">' + T.none + '</p>'; return; }
+          if (!mine.length) { $('mine').innerHTML = ''; return; }
+          var F = ['#FFD23F', '#FFF', '#63E2A8', '#FF9CC2', '#FFF', '#5A8DEE'];
           $('mine').innerHTML = mine.map(function (it, i) {
-            return '<article class="card item" data-copy="' + esc(it.line) + '" tabindex="0" title="' + esc(T.copyHint) + '">' +
-              (it.ctx ? '<p class="ctx">' + esc(it.ctx) + '</p>' : '') +
-              '<p class="line">«' + esc(it.line) + '»</p>' +
-              '<div class="acts"><button class="mini danger" data-del="' + i + '">' + esc(T.del) + '</button></div></article>';
-          }).join('');
+            return '<article class="rep-boble item" style="--f:' + F[i % F.length] + '" data-copy="' + esc(it.line) + '" tabindex="0" title="' + esc(T.copyHint) + '">' +
+              (it.ctx ? '<small>' + esc(it.ctx) + '</small>' : '') +
+              '<p>«' + esc(it.line) + '»</p>' +
+              '<button type="button" class="rep-fjern" data-del="' + i + '" aria-label="' + esc(T.del) + '">×</button></article>';
+          }).reverse().join('');
         }
         $('mine').addEventListener('click', function (e) {
           var d = e.target.closest('[data-del]'); if (!d) return;
@@ -623,7 +738,7 @@ const T = no ? {
           }).catch(function () {});
         }
 
-        function visHvem() { $('who').textContent = bruker.brukernavn ? bruker.brukernavn + ' · ' + bruker.email : bruker.email; }
+        function visHvem() { $('who').textContent = bruker.email || ''; $('innBrukernavn').textContent = bruker.brukernavn || ''; }
 
         /* ---------- Profilen er figuren. Alt annet ligger bak Mer-knappen, som egne sider med pil tilbake ---------- */
         var VISNINGER = ['profil', 'stokker', 'replikker', 'verv', 'innstillinger'];

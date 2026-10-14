@@ -1,0 +1,137 @@
+/* Profilens undersider: kortstokkene, den nye stokk-skjermen, replikkene og innstillingene.
+   Samme strek og harde skygger som resten av appen. Knapper, ikke forklaringer. */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Kortstokkene: bunker i et rutenett ---------- */
+.stokk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 18px;padding:6px 6px 18px}
+@media (min-width:640px){.stokk-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.sg-stokk{position:relative;height:156px;animation:sg-inn .32s var(--fjaer,cubic-bezier(.23,1,.32,1)) both;animation-delay:calc(var(--i,0) * 50ms)}
+.sg-stokk>i{position:absolute;inset:0;border:var(--strek,2.5px) solid var(--blekk);border-radius:14px;background:var(--papir)}
+.sg-stokk>i:nth-child(1){transform:rotate(-5deg) translate(-4px,4px)}
+.sg-stokk>i:nth-child(2){transform:rotate(3deg) translate(3px,2px);background:color-mix(in srgb,var(--f) 55%,#FFF8EE)}
+.sg-topp{appearance:none;position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;gap:6px;padding:14px;margin:0;text-align:left;font:inherit;color:var(--blekk);background:var(--f);border:var(--strek,2.5px) solid var(--blekk);border-radius:14px;box-shadow:3px 3px 0 var(--blekk);cursor:pointer;transition:transform 120ms var(--fjaer),box-shadow 120ms var(--fjaer)}
+.sg-topp:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--blekk)}
+.sg-topp b{font-size:18px;font-weight:900;line-height:1.1;overflow-wrap:anywhere;padding-right:4px}
+.sg-topp small{font-size:12px;font-weight:800}
+.sg-spill{appearance:none;position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:50%;border:0;padding:0;background:var(--blekk);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 120ms var(--fjaer)}
+.sg-spill:active{transform:scale(.92)}
+.sg-spill svg{width:16px;height:16px;fill:#FFF8EE;margin-left:2px}
+.sg-ny{appearance:none;height:156px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:inherit;font-weight:900;font-size:15px;color:var(--ink);background:none;border:var(--strek,2.5px) dashed var(--ink);border-radius:14px;cursor:pointer;animation:sg-inn .32s var(--fjaer) both;animation-delay:calc(var(--i,0) * 50ms)}
+.sg-ny span{font-size:36px;line-height:1}
+@keyframes sg-inn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+@media (hover:hover) and (pointer:fine){.sg-topp:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--blekk)}}
+#stokkMeny .profil-ark-topp .profil-h{display:inline-block;background:var(--f);padding:2px 8px;border:2px solid var(--blekk);border-radius:6px}
+.profil-rad.fare{color:#B4231F}
+
+/* ---------- Ny kortstokk: ett kort om gangen ---------- */
+.se{--f:#FF9CC2;display:flex;flex-direction:column;gap:14px;padding-bottom:24px}
+.se-topp{display:flex;align-items:center;gap:12px}
+.se-navn{flex:1;min-width:0;height:50px;border:0;border-bottom:3px solid var(--ink);border-radius:0;background:none;font-family:var(--display);font-stretch:66%;font-weight:900;font-size:28px;text-transform:uppercase;color:var(--ink);padding:0}
+.se-navn::placeholder{color:var(--muted);opacity:.7}
+.se-navn:focus{outline:none;border-bottom-color:var(--oransje)}
+.se-farger{display:flex;gap:10px;padding-left:60px}
+.se-prikk{appearance:none;width:32px;height:32px;border-radius:50%;border:2.5px solid var(--blekk);padding:0;cursor:pointer;transition:transform 120ms var(--fjaer),box-shadow 120ms var(--fjaer)}
+.se-prikk[aria-pressed="true"]{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--ink)}
+.se-prikk:active{transform:scale(.9)}
+.se-bunke{position:relative;margin-top:6px}
+.se-bak{position:absolute;inset:0;border:var(--strek,2.5px) solid var(--blekk);border-radius:18px;background:var(--papir);transform:rotate(-4deg) translate(-4px,6px)}
+.se-bak.to{background:color-mix(in srgb,var(--f) 50%,#FFF8EE);transform:rotate(2.5deg) translate(4px,3px)}
+.se-kort{position:relative;display:flex;flex-direction:column;gap:12px;min-height:200px;padding:18px;background:var(--f);color:var(--blekk);border:var(--strek,2.5px) solid var(--blekk);border-radius:18px;box-shadow:5px 5px 0 var(--blekk);transition:background 200ms ease}
+.se-kort-topp{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.se-antall{background:var(--blekk);color:#FFF8EE;padding:3px 8px;border-radius:6px}
+.se-kort textarea{flex:1;min-height:84px;border:0;background:none;resize:none;font:inherit;font-size:23px;font-weight:900;line-height:1.2;color:var(--blekk);padding:0;outline:none}
+.se-kort textarea::placeholder{color:rgba(22,18,15,.4)}
+.se-legg{appearance:none;align-self:flex-end;display:flex;align-items:center;gap:8px;height:50px;padding:0 18px;border:0;border-radius:12px;background:var(--blekk);color:#FFF8EE;font:inherit;font-size:16px;font-weight:900;text-transform:uppercase;cursor:pointer;transition:transform 120ms var(--fjaer)}
+.se-legg:active{transform:scale(.96)}
+.se-ideer{display:flex;gap:8px;overflow-x:auto;margin:0 -16px;padding:2px 16px 6px;scrollbar-width:none}
+.se-ideer::-webkit-scrollbar{display:none}
+.se-ide{appearance:none;flex-shrink:0;height:40px;padding:0 13px;border:2.5px solid var(--ink);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:800;white-space:nowrap;cursor:pointer}
+.se-ide:active{transform:scale(.96)}
+.se-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.se-liste li{display:flex;align-items:center;gap:4px;border:2px solid var(--ink);border-radius:12px;background:var(--card);animation:se-rad .26s var(--fjaer) both}
+.se-liste li:first-child{animation-name:se-rad-ny}
+.se-liste li.endres{background:color-mix(in srgb,var(--f) 35%,var(--card))}
+@keyframes se-rad{from{opacity:0}to{opacity:1}}
+@keyframes se-rad-ny{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.se-rad-tekst{appearance:none;flex:1;min-height:46px;padding:10px 12px;border:0;background:none;text-align:left;font:inherit;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer}
+.se-fjern{appearance:none;width:44px;height:44px;border:0;background:none;font:inherit;font-size:22px;font-weight:900;color:var(--muted);cursor:pointer}
+.se-lim{display:flex;flex-direction:column;gap:8px;padding:12px;border:2px dashed var(--ink);border-radius:12px}
+.se-lim label{font-weight:800;font-size:14px}
+.se-lim textarea{border:2px solid var(--ink);border-radius:10px;padding:10px;font:inherit;font-size:15px;background:var(--card);color:var(--ink)}
+.se-lim .btn{align-self:flex-start}
+.se-fot{display:flex;gap:10px}
+.se-spill{appearance:none;flex:1;height:56px;display:flex;align-items:center;justify-content:center;gap:8px;border:2.5px solid var(--blekk);border-radius:14px;background:var(--gul);color:var(--blekk);box-shadow:4px 4px 0 var(--blekk);font:inherit;font-size:17px;font-weight:900;text-transform:uppercase;cursor:pointer;transition:transform 120ms var(--fjaer),box-shadow 120ms var(--fjaer)}
+.se-spill:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--blekk)}
+.se-spill:disabled{opacity:.45;box-shadow:none;cursor:default}
+.se-limknapp{appearance:none;height:56px;padding:0 16px;border:2.5px solid var(--ink);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+.se-lagret{margin:0;min-height:1em;text-align:center;font-size:12px;font-weight:800;color:var(--muted)}
+
+/* ---------- Replikkene: snakkebobler ---------- */
+.rep-liste{display:flex;flex-direction:column;gap:14px;margin-bottom:22px}
+.rep-boble{position:relative;padding:14px 48px 14px 16px;background:var(--f,#FFF);color:var(--blekk);border:var(--strek,2.5px) solid var(--blekk);border-radius:16px 16px 16px 4px;box-shadow:3px 3px 0 var(--blekk);cursor:pointer;animation:sg-inn .3s var(--fjaer) both}
+.rep-boble small{display:block;margin-bottom:4px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;opacity:.75}
+.rep-boble p{margin:0;font-size:17px;font-weight:800;line-height:1.3}
+.rep-fjern{appearance:none;position:absolute;top:4px;right:4px;width:40px;height:40px;border:0;background:none;font:inherit;font-size:20px;font-weight:900;color:var(--blekk);opacity:.55;cursor:pointer}
+.rep-ny{display:flex;flex-direction:column;gap:10px;padding:12px 16px 18px;background:var(--card);border:var(--strek,2.5px) solid var(--ink);border-radius:22px;box-shadow:4px 4px 0 var(--hard,var(--blekk))}
+.rep-ny-hank{width:44px;height:5px;border-radius:3px;background:var(--ink);margin:0 auto 2px}
+.rep-ny-tittel{font-family:var(--display);font-stretch:66%;font-weight:900;text-transform:uppercase;font-size:20px}
+.rep-ny textarea,.rep-ny input{box-sizing:border-box;width:100%;border:2.5px solid var(--ink);border-radius:12px;background:var(--bg);color:var(--ink);padding:12px 14px;font:inherit;font-size:16px;font-weight:700}
+.rep-ny-knapp{appearance:none;height:56px;border:2.5px solid var(--blekk);border-radius:14px;background:var(--gul);color:var(--blekk);box-shadow:4px 4px 0 var(--blekk);font:inherit;font-size:17px;font-weight:900;text-transform:uppercase;cursor:pointer}
+.rep-ny-knapp:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--blekk)}
+
+/* ---------- Innstillinger: rader ---------- */
+.inn-liste{display:flex;flex-direction:column;background:var(--card);border:var(--strek,2.5px) solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--hard,var(--blekk));overflow:hidden;margin-bottom:18px}
+.inn-rad{appearance:none;display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;min-height:58px;padding:0 16px;margin:0;border:0;border-top:2px solid var(--border);background:none;font:inherit;font-size:16px;font-weight:800;color:var(--ink);text-align:left;text-decoration:none;cursor:pointer}
+.inn-rad:first-child{border-top:0}
+.inn-rad[hidden]{display:none}
+.inn-rad.stille{cursor:default}
+.inn-rad.fare{color:#B4231F}
+.inn-verdi{margin-left:auto;font-weight:700;font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
+.inn-pil{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.inn-rad:not(.stille):active{background:var(--bg2,rgba(0,0,0,.04))}
+.inn-verv{appearance:none;display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;padding:16px;margin:0 0 18px;border:var(--strek,2.5px) solid var(--blekk);border-radius:16px;background:var(--oransje);color:var(--blekk);box-shadow:4px 4px 0 var(--blekk);font:inherit;text-align:left;cursor:pointer;transition:transform 120ms var(--fjaer),box-shadow 120ms var(--fjaer)}
+.inn-verv:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--blekk)}
+.inn-verv-ik{width:52px;height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#FFF8EE;border:2.5px solid var(--blekk);border-radius:12px}
+.inn-verv-ik svg{width:30px;height:30px;fill:none;stroke:var(--blekk);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.inn-verv-tekst{display:flex;flex-direction:column;gap:2px;flex:1}
+.inn-verv-tekst b{font-family:var(--display);font-stretch:66%;font-weight:900;text-transform:uppercase;font-size:22px;line-height:1}
+.inn-verv-tekst small{font-size:13px;font-weight:800}
+.inn-verv-del{height:40px;padding:0 12px;display:flex;align-items:center;border:2.5px solid var(--blekk);border-radius:10px;background:#FFF8EE;font-weight:900;font-size:13px;text-transform:uppercase}
+/* «Endre» åpner et ark nedenfra i stedet for skjema midt på siden */
+[data-visning="innstillinger"] .konto-boks:not([hidden]){position:fixed;left:0;right:0;bottom:0;z-index:96;margin:0 auto;max-width:520px;box-sizing:border-box;border:var(--strek,2.5px) solid var(--ink);border-bottom:0;border-radius:22px 22px 0 0;padding:20px 18px 28px;background:var(--papir);color:var(--blekk);box-shadow:0 0 0 100vmax rgba(10,7,4,.6);animation:profil-ark .3s var(--fjaer) both}
+[data-visning="innstillinger"] .konto-boks h2{font-family:var(--display);font-stretch:66%;font-weight:900;text-transform:uppercase;font-size:24px}
+/* Verving: samme oransje kort */
+#vervKort{background:var(--oransje);color:var(--blekk);border:var(--strek,2.5px) solid var(--blekk);border-radius:16px;box-shadow:4px 4px 0 var(--blekk)}
+#vervKort small{color:var(--blekk)}
+
+@media (prefers-reduced-motion:reduce){.sg-stokk,.sg-ny,.se-liste li,.rep-boble,[data-visning="innstillinger"] .konto-boks{animation:none}.se-kort{transition:none}}
+
+/* ---------- Gjengene: fargekort med «Start kveld» ---------- */
+.gj-h1{font-family:var(--display);font-stretch:66%;font-weight:900;text-transform:uppercase;font-size:clamp(34px,9vw,48px);line-height:1;margin:6px 0 18px}
+.gj-kort-liste{display:flex;flex-direction:column;gap:16px;margin-bottom:16px}
+.gj-kort{display:flex;flex-direction:column;gap:14px;padding:16px;background:var(--f);color:var(--blekk);border:var(--strek,2.5px) solid var(--blekk);border-radius:16px;box-shadow:4px 4px 0 var(--blekk);animation:sg-inn .3s var(--fjaer) both;animation-delay:calc(var(--i,0) * 60ms)}
+.gj-kort-lenke{display:flex;flex-direction:column;gap:4px;color:var(--blekk);text-decoration:none}
+.gj-kort-lenke b{font-family:var(--display);font-stretch:66%;font-weight:900;text-transform:uppercase;font-size:28px;line-height:.95;overflow-wrap:anywhere}
+.gj-kort-lenke span{font-size:13px;font-weight:800}
+.gj-kort-start{align-self:flex-end;display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 16px;border-radius:10px;background:var(--blekk);color:#FFF8EE;font-weight:900;font-size:14px;text-transform:uppercase;text-decoration:none;transition:transform 120ms var(--fjaer)}
+.gj-kort-start:active{transform:scale(.96)}
+.gj-kort-start svg{width:14px;height:14px;fill:#FFF8EE}
+.gj-ny{appearance:none;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:64px;margin:0 0 10px;border:var(--strek,2.5px) dashed var(--ink);border-radius:14px;background:none;color:var(--ink);font:inherit;font-size:17px;font-weight:900;text-transform:uppercase;cursor:pointer}
+.gj-ny span{font-size:28px;line-height:1}
+.gj-inn{display:flex;gap:8px;margin:0 0 14px}
+.gj-inn[hidden]{display:none}
+.gj-inn input{flex:1;min-width:0;height:52px;box-sizing:border-box;border:2.5px solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink);padding:0 14px;font:inherit;font-size:16px;font-weight:700}
+.gj-inn button{appearance:none;height:52px;padding:0 18px;border:2.5px solid var(--blekk);border-radius:12px;background:var(--gul);color:var(--blekk);box-shadow:3px 3px 0 var(--blekk);font:inherit;font-weight:900;text-transform:uppercase;cursor:pointer}
+.gj-kode-lenke{appearance:none;display:block;margin:4px auto 12px;padding:10px;border:0;background:none;font:inherit;font-size:14px;font-weight:800;color:var(--ink);text-decoration:underline;cursor:pointer}
+.gj-ut{display:flex;align-items:center;gap:12px;padding:14px;border:var(--strek,2.5px) solid var(--ink);border-radius:16px;background:var(--card);box-shadow:4px 4px 0 var(--hard,var(--blekk))}
+.gj-ut b{flex:1;font-family:var(--display);font-stretch:66%;font-weight:900;text-transform:uppercase;font-size:20px;line-height:1.05}
+.gj-ut-knapp{flex-shrink:0;display:inline-flex;align-items:center;height:50px;padding:0 16px;border:2.5px solid var(--blekk);border-radius:12px;background:var(--gul);color:var(--blekk);box-shadow:3px 3px 0 var(--blekk);font-weight:900;text-transform:uppercase;text-decoration:none}
+@media (prefers-reduced-motion:reduce){.gj-kort{animation:none}}
+/* Skjemafeltene i appen har ramme og skygge – ikke her: navnet er en overskrift, kortet er et kort */
+#stokkEdit .se-navn{border:0;border-bottom:3px solid var(--ink);border-radius:0;box-shadow:none;background:none;outline:none}
+#stokkEdit .se-kort textarea{border:0;border-radius:0;box-shadow:none;background:none;outline:none}
+#stokkEdit .se-kort textarea:focus{box-shadow:none}
+[data-visning="innstillinger"] .konto-boks:not([hidden]){z-index:200;padding-bottom:calc(28px + env(safe-area-inset-bottom))}
+#stokkEdit .se-navn,#stokkEdit .se-navn:focus{border:0!important;border-bottom:3px solid var(--ink)!important;border-radius:0!important;box-shadow:none!important;background:none!important}
+#stokkEdit .se-navn:focus{border-bottom-color:var(--oransje)!important}
+#stokkEdit .se-kort textarea,#stokkEdit .se-kort textarea:focus{border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important;outline:none!important}

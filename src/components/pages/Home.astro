@@ -79,25 +79,21 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
       <h1 id="stTittel">{no ? <>Klar for <span class="st-boks">vors?</span></> : <>Ready to <span class="st-boks">pre-game?</span></>}</h1>
       <div class="st-stue"><Stua lang={lang} /></div>
       <div class="st-ingress">
-        <p>{N('Drikkeleker dere spiller fra hver deres telefon. Én lager et rom, og resten blir med på koden.', 'Drinking games you play from your own phones. One person creates a room, and everyone else joins with the code.')}</p>
         <div class="st-knapper">
-          <a class="st-knapp st-svart" href={ROM + '?lag=1'}>{N('Lag et rom', 'Create a room')}<Fragment set:html={pil} /></a>
+          <a class="st-knapp st-gul st-lag" href={ROM + '?lag=1'}>{N('Lag rom', 'Create a room')}<Fragment set:html={pil} /></a>
           <a class="st-knapp st-gul h2-rom" href={ROM} hidden><span><b>{N('Spill sammen', 'Play together')}</b><small>{N('Tilbake til rommet', 'Back to the room')}</small></span><span class="kode" aria-hidden="true">ABCD</span></a>
-        </div>
-        <div class="st-gjeng" id="h2Gjeng">
-          <a class="h2-gjeng-lenke" href={no ? '/no/gjeng' : '/crew'}>{N('Fast gjeng? Lag en gjeng, så starter dere kvelden med ett trykk', 'Same crew every time? Make a crew and start the night with one tap')}</a>
         </div>
       </div>
       <form class="st-panel" action={ROM} method="get" id="h2Kode">
-        <label for="h2KodeFelt">{N('Har du fått en kode?', 'Got a code?')}</label>
+        <label class="sr-only" for="h2KodeFelt">{N('Kode fra verten', 'Code from the host')}</label>
         <div class="st-panelrad">
           <div class="st-flappfelt" id="stFlapp">
             <span class="flapp" aria-hidden="true"> </span><span class="flapp" aria-hidden="true"> </span><span class="flapp" aria-hidden="true"> </span><span class="flapp" aria-hidden="true"> </span>
             <input id="h2KodeFelt" name="k" size="6" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" required aria-describedby="stKodeStatus" />
           </div>
-          <button type="submit" class="st-knapp st-gul">{N('Bli med', 'Join')}</button>
+          <button type="submit" class="st-knapp st-hvit">{N('Bli med', 'Join')}</button>
         </div>
-        <small id="stKodeStatus" aria-live="polite">{N('Skriv koden, så går gjestene inn døra.', 'Type the code and the guests walk in.')}</small>
+        <small id="stKodeStatus" aria-live="polite"></small>
       </form>
     </div>
   </section>
@@ -106,18 +102,8 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
   <section class="st-felt st-lekefelt" aria-labelledby="stLekerTittel">
     <div class="st-indre">
       <div class="st-hode">
-        <h2 id="stLekerTittel">{N('Spill fra hver sin telefon', 'Play from your own phones')}</h2>
-        <a href={path(lang, '/drinking-games')} class="st-alle">{N(`Alle ${alle.length} leker`, `All ${alle.length} games`)}<Fragment set:html={pil} /></a>
-      </div>
-      <div class="st-antall" id="stAntall" data-min="2" data-maks="16">
-        <span class="st-antall-tekst" id="stAntallLabel">{N('Hvor mange er dere?', 'How many are you?')}</span>
-        <div class="st-teller">
-          <button type="button" class="st-pluss-minus" data-steg="-1" aria-label={N('Én færre', 'One fewer')}>−</button>
-          <output class="st-tall" id="stTall" aria-labelledby="stAntallLabel" aria-live="polite"><span class="flapp" aria-hidden="true">0</span><span class="flapp" aria-hidden="true">4</span><span class="sr">4</span></output>
-          <button type="button" class="st-pluss-minus" data-steg="1" aria-label={N('Én til', 'One more')}>+</button>
-        </div>
-        <div class="st-fjes" id="stFjes" aria-hidden="true"></div>
-        <p class="st-passer" id="stPasser" aria-live="polite"></p>
+        <h2 id="stLekerTittel">{N('Lekene', 'The games')}</h2>
+        <a href={path(lang, '/drinking-games')} class="st-alle">{N(`Alle ${alle.length}`, `All ${alle.length}`)}<Fragment set:html={pil} /></a>
       </div>
       <ul class="st-lekegrid" id="stLeker" role="list">
         {romLeker.map((x) => (
@@ -137,14 +123,12 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
     </div>
   </section>
 
-  <div class="st-indre st-populaert"><PopulaertNaa lang={lang} /></div>
 
   <!-- Første runde på sekunder: dra et kort av bunken, uten rom og uten konto -->
   <section class="st-felt st-kortfelt" aria-labelledby="stKortTittel">
     <div class="st-indre st-kort-grid">
       <div>
-        <h2 id="stKortTittel">{N('Ingen rom ennå? Trekk et kort.', 'No room yet? Draw a card.')}</h2>
-        <p class="st-tekst">{N('Send telefonen rundt bordet. Dra kortet av bunken, eller trykk på det. Når dere vil ha poeng, stemming og hemmeligheter, lager én et rom.', 'Pass the phone round the table. Drag the card off the pile, or tap it. When you want scores, voting and secrets, one of you creates a room.')}</p>
+        <h2 id="stKortTittel">{N('Bare én telefon', 'Just one phone')}</h2>
         <div class="st-stokkvalg" role="tablist" aria-label={N('Velg kortstokk', 'Choose a deck')}>
           {trekk.map((s, i) => <button type="button" class="st-chip" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-stokk={i}><Fragment set:html={s.merke} />{s.navn}</button>)}
         </div>
@@ -164,7 +148,7 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
               <span class="st-nr-navn"><Fragment set:html={klistremerke('avis', 'st-merke')} /><b>Nyhetsrunden</b></span>
               <span class="st-nr-uke" aria-label={'Uke ' + nrBygg.uke}><small>Uke</small><span class="st-flapprad" id="nrUke" data-uke={nrBygg.uke}>{String(nrBygg.uke).padStart(2, '0').split('').map((c) => <span class="flapp" aria-hidden="true">{c}</span>)}</span></span>
             </span>
-            <span class="st-nr-meta" id="nrAntall">{nrBygg.antall} spørsmål om ukas nyheter · ny runde hver fredag</span>
+            <span class="st-nr-meta" id="nrAntall">{nrBygg.antall} spørsmål om uka som gikk</span>
             {nrBygg.smak && <span class="st-nr-smak" id="nrSmak">{nrBygg.smak}</span>}
             <span class="st-knapp st-svart st-nr-knapp">Spill quizen</span>
           </a>
@@ -183,11 +167,15 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
           <em>{N(`${ANT_JUL} kort – trygt med kolleger, men aldri kjedelig`, `${ANT_JUL} cards – safe with coworkers, never boring`)}</em>
         </a>
       </div>
-      <ul class="st-verktoy" role="list">
-        <li><a href={no ? '/no/finn-lek' : '/find-a-game'}><Fragment set:html={klistremerke('kompass', 'st-merke')} /><span><b>{N('Finn riktig lek', 'Find the right game')}</b><small>{N('Tre spørsmål, så får dere et forslag', 'Three questions, then a suggestion')}</small></span></a></li>
-        <li><a href={no ? '/no/kveld' : '/plan'}><Fragment set:html={klistremerke('kalender', 'st-merke')} /><span><b>{N('Kveldsplan', 'Plan the night')}</b><small>{N('Leker fra vors til nachspiel', 'Games from pre-drinks to afterparty')}</small></span></a></li>
-        <li><a href={path(lang, '/favourites')}><Fragment set:html={klistremerke('hjerte', 'st-merke')} /><span><b>{N('Lagret', 'Saved')}</b><small>{N('Det du har tatt vare på', 'What you’ve kept')}</small></span></a></li>
-      </ul>
+    </div>
+  </section>
+
+  <!-- Gjengen din: grupper er hovedsaken -->
+  <section class="st-felt st-gjengfelt" aria-labelledby="stGjengTittel">
+    <div class="st-indre st-gjeng-grid">
+      <h2 id="stGjengTittel">{N('Gjengen din', 'Your crew')}</h2>
+      <div class="st-gjeng-hoder" aria-hidden="true"><span style="background:#FFD23F"></span><span style="background:#FF9CC2"></span><span style="background:#5A8DEE"></span><b>{N('Poeng fra kveld til kveld', 'Points from night to night')}</b></div>
+      <div class="st-gjeng" id="h2Gjeng"><a class="st-knapp st-hvit h2-gjeng-lenke" href={no ? '/no/gjeng' : '/crew'}>{N('Lag gjeng', 'Make a crew')}</a></div>
     </div>
   </section>
 
@@ -196,13 +184,8 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
     <div class="st-indre st-pluss-grid">
       <div>
         <span class="st-plussnavn">mittvors pluss</span>
-        <h2 id="stPlussTittel">{N('Verten betaler. Hele festen spiller.', 'The host pays. The whole party plays.')}</h2>
-        <ul class="st-punkter">
-          <li>{N('Opptil 16 telefoner i rommet (gratis: 4)', 'Up to 16 phones in the room (free: 4)')}</li>
-          <li>{N('Vorsbørsen med 100 aksjer og Agent 0,5 (hemmelige oppdrag)', 'The Exchange with 100 shares, plus Agent 0.5 (secret missions)')}</li>
-          <li>{N('Bussruta, Yatzy, Pyramiden, President, Gris, Løgnhalsen og Skrøna', 'Ride the Bus, Yahtzee, Pyramid, President, Pig, The Liar and Tall Tales')}</li>
-          <li>{PAKKENAVN.length} {N('kortpakker', 'card packs')}: {PAKKELISTE}</li>
-        </ul>
+        <h2 id="stPlussTittel">{N('Pluss', 'Pluss')}</h2>
+        <p class="st-pluss-linje">{N('Verten betaler, alle spiller', 'The host pays, everyone plays')}</p>
       </div>
       <div class="st-billetter">
         <a class="st-billett" href={no ? '/no/pluss' : '/plus'}><span class="st-billett-v"><span class="st-hva">{N('Kveldspass', 'Night pass')}</span><span class="st-pris">{N('29 kr', '29 NOK')}</span><span class="st-per">{N('24 timer. Perfekt til én fest.', '24 hours. Perfect for one party.')}</span></span><span class="st-stubb" set:html={klistremerke('mane', 'st-merke')} /></a>
@@ -224,7 +207,6 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
           {no && hasDict && <a class="st-lenke" href={path(lang, '/ord')}>{L.ordTitle}</a>}
           {no && hasDict && <a class="st-lenke" href={path(lang, '/uttrykk')}>{L.uttrykkTitle}</a>}
         </div>
-        <p class="st-smaa">{N('Trykk på replikken for å kopiere den.', 'Tap the line to copy it.')}</p>
       </div>
     </div>
   </section>
@@ -534,8 +516,8 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
     if (!K || !K.les || !K.les()) return;
     K.api('/api/gjeng').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       var g = d && d.gjenger; if (!g) return;
-      if (!g.length) { boks.querySelector('a').textContent = en ? 'Make a crew – then you start the night with one tap' : 'Lag en gjeng – så starter dere kvelden med ett trykk'; return; }
-      boks.innerHTML = g.slice(0, 3).map(function (x) { return '<button type="button" class="h2-gjeng-start" data-id="' + esc(x.id) + '">' + (en ? 'Start the night with ' : 'Start kvelden med ') + '<b>' + esc(x.navn) + '</b></button>'; }).join('');
+      if (!g.length) return;
+      boks.innerHTML = g.slice(0, 3).map(function (x) { return '<button type="button" class="h2-gjeng-start" data-id="' + esc(x.id) + '">' + (en ? 'Start ' : 'Start ') + '<b>' + esc(x.navn) + '</b></button>'; }).join('');
     }).catch(function () {});
     boks.addEventListener('click', function (e) {
       var b = e.target.closest('.h2-gjeng-start'); if (!b) return;
@@ -767,4 +749,32 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
   @media (prefers-reduced-motion:reduce){
     .st-knapp,.st-lek,.st-chip,.st-billett,.st-nr,.st-ukelek,.st-verktoy a,.st-pluss-minus{transition:none}
   }
+
+/* Forsiden v2: knapper, ikke forklaringer */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.st-lag{width:100%;justify-content:center}
+.st-hvit{background:#FFF8EE;color:#16120F}
+.st-hook{display:none}
+@media (max-width:720px){
+  .st-lekegrid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0;padding:4px 4px 12px;scrollbar-width:none}
+  .st-lekegrid::-webkit-scrollbar{display:none}
+  .st-lekegrid>li{flex:0 0 150px;scroll-snap-align:start}
+}
+.st-gjengfelt{background:#63E2A8;color:#16120F}
+.st-gjeng-grid{display:flex;flex-direction:column;gap:14px}
+.st-gjeng-grid h2{margin:0}
+.st-gjeng-hoder{display:flex;align-items:center}
+.st-gjeng-hoder span{width:40px;height:40px;border-radius:50%;border:2.5px solid #16120F;margin-left:-10px}
+.st-gjeng-hoder span:first-child{margin-left:0}
+.st-gjeng-hoder b{margin-left:12px;font-size:15px;font-weight:800}
+.st-gjeng{display:flex;flex-direction:column;gap:10px}
+.st-gjeng .h2-gjeng-lenke{justify-content:center}
+.st-pluss-linje{margin:4px 0 0;font-size:16px;font-weight:800}
+.st-gjeng a.h2-gjeng-lenke{text-decoration:none}
+.st-gjeng :global(.h2-gjeng-start){margin:0;padding:14px 16px;font-size:17px;font-weight:800;border-radius:12px;box-shadow:3px 3px 0 #16120F}
+.st-panel small:empty{display:none}
+.st-panel{padding:16px}
+.st-panelrad{flex-wrap:nowrap;align-items:center}
+.st-panelrad .st-knapp{flex:1;justify-content:center;min-width:0}
+.st-panelrad .st-knapp{white-space:nowrap}
 </style>
