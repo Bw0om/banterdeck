@@ -318,7 +318,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
   const hd = data.hendelse;
   return {
     skjerm: true, versjon, vert: data.vert, lang, naa: Date.now(), laget: data.laget,
-    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, slurker: p.slurker || 0 })),
+    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, par: erPar(p), slurker: p.slurker || 0 })),
     spill: lok(spill, lang), valgt: data.valgt ? { lek: data.valgt.lek, navn: tr(lekNavnL(data.valgt.lek), lang) } : null,
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     reak: data.reak || [], stuaHend: data.stuaHend || null, utdeling: data.utdeling || null, kveld: lok(kveldVisning(data), lang), bors: lok(bors, lang),
@@ -330,6 +330,8 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
   };
 }
 
+/** Eieren og Ida: står de nær hverandre i stua, stiger et hjerte opp mellom dem. */
+function erPar(p: any) { const l = Array.isArray(p.laast) ? p.laast : []; return l.includes('eierkrone') || l.includes('idakrans'); }
 /** Stua: hvor folk står, og siste slurk for plaging. `plager` = hvor mange ganger du har flyttet de andre siste minutt. */
 function stuaVisning(data: any, meg: any) {
   const st = data.stua || {};
@@ -382,7 +384,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
   const hd = data.hendelse;
   return {
     versjon, vert: data.vert, meg: meg ? meg.id : null, lang,
-    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, bruker: !!(p.konto || p.bruker), medlem: !!p.konto, invitert: !!p.invitert, immun: p.immun || 0, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
+    spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, par: erPar(p), bruker: !!(p.konto || p.bruker), medlem: !!p.konto, invitert: !!p.invitert, immun: p.immun || 0, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     nr: data.nr, reak: data.reak || [], stuaHend: data.stuaHend || null, utdeling: data.utdeling || null, valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,

@@ -41,28 +41,42 @@ export async function innloggetBruker(request: Request) {
 
 export const BRUKERNAVN = /^[A-Za-z0-9_.-]{3,20}$/;
 
-/** Eieren av appen: kontoen i miljøvariabelen EIER_KONTO, eller brukernavnet Bw0om. Får ting ingen andre kan få. */
-const EIER_NAVN = 'bw0om';
-const eierSvar = new Map<string, boolean>();
-export async function erEier(userId: string) {
-  if (!userId) return false;
-  const env: any = (typeof process !== 'undefined' && process.env) || {};
-  const faste = String(env.EIER_KONTO || '').split(',').map((x) => x.trim()).filter(Boolean);
-  if (faste.length) return faste.includes(userId);
-  if (eierSvar.has(userId)) return eierSvar.get(userId)!;
+/** Ting bare én konto får: eieren (Bw0om) og Ida. Kontoen i miljøvariabelen, ellers brukernavnet. */
+const EKSKLUSIV = [
+  { navn: 'bw0om', env: 'EIER_KONTO', ting: ['eierkrone'] },
+  { navn: 'ida', env: 'IDA_KONTO', ting: ['idakrans', 'idapanda'] },
+];
+const navnSvar = new Map<string, string>();
+async function brukernavnFor(userId: string) {
+  if (navnSvar.has(userId)) return navnSvar.get(userId)!;
   try {
     const { url, nokkel } = supabaseServer();
     const r = await fetch(`${url}/rest/v1/profiler?select=brukernavn&user_id=eq.${encodeURIComponent(userId)}`, { headers: { apikey: nokkel, Authorization: `Bearer ${nokkel}` } });
     const rader: any = r.ok ? await r.json() : [];
-    const ja = Array.isArray(rader) && rader.some((x: any) => String(x.brukernavn || '').toLowerCase() === EIER_NAVN);
-    eierSvar.set(userId, ja);
-    return ja;
-  } catch { return false; }
+    const navn = String((Array.isArray(rader) && rader[0] && rader[0].brukernavn) || '').toLowerCase();
+    navnSvar.set(userId, navn);
+    return navn;
+  } catch { return ''; }
 }
-/** Pynten kontoen har låst opp, med eierens egne ting lagt til for eieren. */
+export async function eksklusivFor(userId: string) {
+  if (!userId) return [] as string[];
+  const env: any = (typeof process !== 'undefined' && process.env) || {};
+  let navn: string | null = null;
+  const ut: string[] = [];
+  for (const e of EKSKLUSIV) {
+    const faste = String(env[e.env] || '').split(',').map((x) => x.trim()).filter(Boolean);
+    let ja: boolean;
+    if (faste.length) ja = faste.includes(userId);
+    else { if (navn === null) navn = await brukernavnFor(userId); ja = navn === e.navn; }
+    if (ja) ut.push(...e.ting);
+  }
+  return ut;
+}
+export async function erEier(userId: string) { return (await eksklusivFor(userId)).includes('eierkrone'); }
+/** Pynten kontoen har låst opp, med de eksklusive tingene lagt til for eieren og Ida. */
 export async function laastFor(userId: string, laast: string[]) {
   const ut = Array.isArray(laast) ? laast.slice() : [];
-  if (await erEier(userId)) ['eierkrone'].forEach((id) => { if (!ut.includes(id)) ut.push(id); });
+  (await eksklusivFor(userId)).forEach((id) => { if (!ut.includes(id)) ut.push(id); });
   return ut;
 }
 export const gyldigEpost = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e) && e.length <= 200;

@@ -399,6 +399,14 @@ The living room is drawn in one isometric projection (`I(x, y, z)` in `src/klien
 - **Crews** (`/no/gjeng`) are colour cards with «Start kveld», a dashed «Ny gjeng» and a small «Har du en gjengkode?». Signed out: one line and «Lag gjeng».
 - **Front page**: «Klar for vors?», the living room, «Lag rom», code + «Bli med» on one row; then the games as a swipe row on phones, «Bare én telefon» with the card pile, «Denne uka», a green «Gjengen din» section, Pluss with one line and the two tickets, and the line of the day. The player counter, «Populært nå», the tool list and explanatory paragraphs are gone.
 
+## Hairstyles, and things only Ida has
+
+- **15 hairstyles, one row, no boy/girl tabs**: kort, sidebena, quiff, hanekam, krøller, snau, pannelugg, langt rett, langt, fletter, tuer, hestehale, bolle, afro, lange krøller. Long styles, afro, space buns and long curls have a layer **behind** the head (`HAAR_BAK` in `src/klient/stua.js`), so hair falls around the face. Hats clip both layers at the brim. The round heads used in games map the new styles to the nearest head style.
+- **Ida's flower crown** (`idakrans`, hat slot): pink and white flowers with leaves, two small hearts drifting up.
+- **Ida's panda** (`idapanda`, pet slot): big round head, smiling eyes, pink cheeks, a red heart in its paws. It stands in front of her (not behind like other pets) so it can hug her. One 24-second loop: sways, looks up at Ida, starts to smile, walks over and hugs her with a small heart popping above, walks back. When Ida dances it hops along. Reduced motion: it sits still and smiles.
+- **The couple heart**: when the owner and Ida stand within about two tiles of each other in the room, a heart rises between them roughly every ten seconds; everyone and the TV see it.
+- Exclusive items come from `eksklusivFor` in `src/lib/konto.ts`: the account in `EIER_KONTO` / `IDA_KONTO`, otherwise the username Bw0om / Ida. They are refused for everyone else and hidden from every other wardrobe.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

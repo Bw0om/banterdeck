@@ -51,12 +51,36 @@ const HAAR = {
   hestehale: `<path d="M-15 -58a15 15 0 0 1 30 0q-8-5-15-3t-15 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><path d="M13 -64q10 2 9 16q-6-4-8-10" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
   bolle: `<circle cx="0" cy="-74" r="6" fill="{h}" stroke="${B}" stroke-width="3"/><path d="M-15 -58a15 15 0 0 1 30 0q-8-5-15-3t-15 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
   snau: '',
+  sidebena: `<path d="M-15 -57a15 15 0 0 1 30 0q-4-5-12-6q-7-3-9-8q-2 8-9 14z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  quiff: `<path d="M-15 -58a15 15 0 0 1 30 0q-8-6-15-3t-15 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><path d="M-7 -69q1-13 15-11q-5 3-5 10z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  hanekam: `<path d="M-13 -63q13-7 26 0" fill="none" stroke="{h}" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="1 3"/><path d="M-5 -70l1-9 3 4 2-8 3 7 2-5 0 11z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  pannelugg: `<path d="M-15.5 -60q0-14 15.5-14t15.5 14q-15.5-2-31 0z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  langrett: `<path d="M0 -71q-14 1-15.5 13q9-2 15.5-13zM0 -71q14 1 15.5 13q-9-2-15.5-13z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  fletter: `<path d="M0 -71q-14 1-15.5 13q9-2 15.5-13zM0 -71q14 1 15.5 13q-9-2-15.5-13z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>` + [-15, 15].map((x) => [-47, -41, -35].map((y) => `<ellipse cx="${x}" cy="${y}" rx="3.6" ry="3.4" fill="{h}" stroke="${B}" stroke-width="2.4"/>`).join('') + `<circle cx="${x}" cy="-31" r="2.2" fill="#FF9CC2" stroke="${B}" stroke-width="1.8"/>`).join(''),
+  tuer: `<path d="M-15 -58a15 15 0 0 1 30 0q-8-6-15-3t-15 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><circle cx="-13" cy="-66" r="2.2" fill="#FF9CC2" stroke="${B}" stroke-width="1.8"/><circle cx="13" cy="-66" r="2.2" fill="#FF9CC2" stroke="${B}" stroke-width="1.8"/>`,
+  afro: `<path d="M-15 -58a15 15 0 0 1 30 0q-15-7-30 0z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  langkrus: `<g fill="{h}" stroke="${B}" stroke-width="3"><circle cx="-11" cy="-64" r="6"/><circle cx="0" cy="-69" r="7"/><circle cx="11" cy="-64" r="6"/></g>`,
+};
+/** Hår som ligger bak hodet: langt hår faller rundt ansiktet, ikke over det */
+const HAAR_BAK = {
+  pannelugg: `<path d="M-18 -45v-13a18 18 0 0 1 36 0v13q-9 3-18 3t-18-3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  langrett: `<path d="M-18 -38v-20a18 18 0 0 1 36 0v20q-4 2-8 0v-5h-20v5q-4 2-8 0z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  tuer: `<circle cx="-18" cy="-66" r="7" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><circle cx="18" cy="-66" r="7" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  afro: `<circle cx="0" cy="-61" r="21" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  langkrus: `<g fill="{h}" stroke="${B}" stroke-width="3">${[-64, -56, -48, -41].map((y) => `<circle cx="-17" cy="${y}" r="6"/><circle cx="17" cy="${y}" r="6"/>`).join('')}</g>`,
 };
 /* Pynt: luer, briller, medaljer og kjæledyr. Tegnes over håret (hode), over øynene (ansikt), på brystet, eller ved siden av (venn). */
 const HS = `stroke="${B}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`;
 export const PYNT_SVG = {
   partyhatt: `<path d="M-11 -66L0 -94l11 28z" fill="#FF5B1F" ${HS}/><path d="M-6 -76l12-7M-3 -85l6-3" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-94" r="3.5" fill="#FFD23F" ${HS}/>`,
   eierkrone: `<path d="M-16 -63l2-18 7 8 7-16 7 16 7-8 2 18z" fill="#FFD23F" ${HS}/><rect x="-16" y="-67" width="32" height="5" rx="1" fill="#FFD23F" stroke="${B}" stroke-width="2.5"/><path d="M0 -78l4 5-4 5-4-5z" fill="#FF9CC2" stroke="${B}" stroke-width="2"/><circle cx="-9" cy="-72" r="2" fill="#5A8DEE" stroke="${B}" stroke-width="1.5"/><circle cx="9" cy="-72" r="2" fill="#63E2A8" stroke="${B}" stroke-width="1.5"/><g class="eier-glimt"><path d="M-22 -86l1.6 3.8 3.8 1.6-3.8 1.6-1.6 3.8-1.6-3.8-3.8-1.6 3.8-1.6z" fill="#FFF8EE" stroke="${B}" stroke-width="1.4"/><path d="M20 -94l1.3 3 3 1.3-3 1.3-1.3 3-1.3-3-3-1.3 3-1.3z" fill="#FFE07A" stroke="${B}" stroke-width="1.4"/></g>`,
+  idakrans: (() => {
+    const blomst = (x, y, f) => [0, 72, 144, 216, 288].map((a) => { const r = a * Math.PI / 180; return `<circle cx="${(x + Math.cos(r) * 2.6).toFixed(1)}" cy="${(y + Math.sin(r) * 2.6).toFixed(1)}" r="2.3" fill="${f}" stroke="${B}" stroke-width="1.2"/>`; }).join('') + `<circle cx="${x}" cy="${y}" r="1.6" fill="#FFD23F" stroke="${B}" stroke-width="1"/>`;
+    const blad = (x, y, rot) => `<ellipse cx="${x}" cy="${y}" rx="3" ry="1.5" fill="#2EA873" stroke="${B}" stroke-width="1.2" transform="rotate(${rot} ${x} ${y})"/>`;
+    return blad(-9, -69, -40) + blad(3, -72, 10) + blad(9, -69, 40) + blad(-14, -63, -70) + blad(14, -63, 70) +
+      blomst(-12, -66, '#FF9CC2') + blomst(-5, -71, '#FFF8EE') + blomst(4, -72, '#FF9CC2') + blomst(11, -67, '#FFF8EE') +
+      `<g class="ida-hjerter"><path class="ih1" d="M-17 -78l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2z" fill="#FF3B5C" stroke="${B}" stroke-width="1.2"/><path class="ih2" d="M16 -84l-2.5-2.5a1.5 1.5 0 0 1 2.5-1.6a1.5 1.5 0 0 1 2.5 1.6z" fill="#FF9CC2" stroke="${B}" stroke-width="1.1"/></g>`;
+  })(),
   krone: `<path d="M-14 -64l3-14 7 7 4-12 4 12 7-7 3 14z" fill="#FFD23F" ${HS}/><circle cx="-6" cy="-68" r="2" fill="#FF5B1F"/><circle cx="6" cy="-68" r="2" fill="#FF5B1F"/>`,
   glorie: `<ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="${B}" stroke-width="6.5"/><ellipse cx="0" cy="-81" rx="13" ry="4" fill="none" stroke="#FFD23F" stroke-width="3.5"/>`,
   cowboyhatt: `<path d="M-15 -67q0-20 15-20t15 20z" fill="#B9773F" ${HS}/><path d="M-15 -69h30" stroke="${B}" stroke-width="3"/><path d="M-25 -68q25 5 50 0q-5 5-25 5t-25-5z" fill="#B9773F" ${HS}/>`,
@@ -71,14 +95,29 @@ export const PYNT_SVG = {
   hund: `<ellipse cx="2" cy="0" rx="10" ry="3" fill="${B}" opacity=".22"/><path d="M-11 -8l-5-5" stroke="${B}" stroke-width="3" stroke-linecap="round"/><rect x="-11" y="-13" width="18" height="11" rx="5.5" fill="#B9773F" ${HS}/><circle cx="8" cy="-15" r="6.5" fill="#B9773F" ${HS}/><path d="M3 -20l-2-6 5 3zM13 -20l2-6-5 3z" fill="#7A4A2A" ${HS}/><circle cx="10" cy="-15" r="1.4" fill="${B}"/><path d="M-7 -2v2M3 -2v2" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
   katt: `<ellipse cx="2" cy="0" rx="10" ry="3" fill="${B}" opacity=".22"/><path d="M-11 -8q-8 2-5-7" fill="none" stroke="${B}" stroke-width="3" stroke-linecap="round"/><rect x="-11" y="-13" width="18" height="11" rx="5.5" fill="#8A8580" ${HS}/><circle cx="8" cy="-15" r="6.5" fill="#8A8580" ${HS}/><path d="M3 -19l0-7 5 3zM13 -19l0-7-5 3z" fill="#8A8580" ${HS}/><circle cx="10" cy="-15" r="1.4" fill="${B}"/><path d="M14 -13l5 1M14 -11l5 1" stroke="${B}" stroke-width="1.6" stroke-linecap="round"/><path d="M-7 -2v2M3 -2v2" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
   sel: `<ellipse cx="0" cy="0" rx="12" ry="3" fill="${B}" opacity=".22"/><path d="M-17 -5l-5-5 1 7z" fill="#8FA0B3" stroke="${B}" stroke-width="2.2" stroke-linejoin="round"/><path d="M-15 -2q-3-9 7-12q9-3 15 1q6 4 3 11q-1 2-5 2h-17q-3 0-3-2z" fill="#A9B8C9" ${HS}/><path d="M-9 -2q4-4 10-3" fill="none" stroke="#DDE5EE" stroke-width="2.5" stroke-linecap="round"/><circle cx="-6" cy="-9" r="1.3" fill="#7F90A3"/><circle cx="-1" cy="-11" r="1" fill="#7F90A3"/><path d="M3 -3q3 3 7 1" fill="#8FA0B3" stroke="${B}" stroke-width="2" stroke-linejoin="round"/><circle cx="9" cy="-15" r="7.5" fill="#A9B8C9" ${HS}/><circle cx="7" cy="-16" r="1.9" fill="${B}"/><circle cx="12.5" cy="-16" r="1.9" fill="${B}"/><circle cx="7.6" cy="-16.7" r=".6" fill="#FFF8EE"/><circle cx="13.1" cy="-16.7" r=".6" fill="#FFF8EE"/><ellipse cx="10" cy="-12.6" rx="1.6" ry="1.1" fill="${B}"/><path d="M6 -11.5l-4 .5M6 -10.5l-4 1.5M14 -11.5l4 .5M14 -10.5l4 1.5" stroke="${B}" stroke-width="1" stroke-linecap="round"/><circle cx="5" cy="-13" r="1.4" fill="#FF9CC2" opacity=".7"/><circle cx="15" cy="-13" r="1.4" fill="#FF9CC2" opacity=".7"/>`,
+  idapanda: `<g class="pa"><ellipse cx="4" cy="0" rx="12" ry="3" fill="${B}" opacity=".22"/>` +
+    `<g class="pa-ore"><circle cx="-4.6" cy="-29.6" r="4" fill="${B}"/><circle cx="12.6" cy="-29.6" r="4" fill="${B}"/></g>` +
+    `<ellipse cx="-1.6" cy="-2.4" rx="4" ry="3" fill="${B}"/><ellipse cx="9.6" cy="-2.4" rx="4" ry="3" fill="${B}"/><ellipse cx="-1.6" cy="-2" rx="1.8" ry="1.3" fill="#FF9CC2"/><ellipse cx="9.6" cy="-2" rx="1.8" ry="1.3" fill="#FF9CC2"/>` +
+    `<ellipse cx="4" cy="-8.4" rx="8.4" ry="7.6" fill="#FFF8EE" stroke="${B}" stroke-width="2"/>` +
+    `<path d="M4 -2l-4.2-4a2.5 2.5 0 0 1 4.2-3.1a2.5 2.5 0 0 1 4.2 3.1z" fill="#FF3B5C" stroke="${B}" stroke-width="1.3" stroke-linejoin="round"/><circle cx="1.8" cy="-7.2" r=".7" fill="#FFF8EE" opacity=".85"/>` +
+    `<ellipse class="pa-arm v" cx="-2.6" cy="-6" rx="2.6" ry="2" fill="${B}" transform="rotate(-50 -2.6 -6)"/><ellipse class="pa-arm h" cx="10.6" cy="-6" rx="2.6" ry="2" fill="${B}" transform="rotate(50 10.6 -6)"/>` +
+    `<g class="pa-hode"><ellipse cx="4" cy="-21" rx="11" ry="10" fill="#FFF8EE" stroke="${B}" stroke-width="2.2"/>` +
+    `<ellipse cx="-0.4" cy="-20.8" rx="2.9" ry="3.3" fill="${B}" transform="rotate(-18 -0.4 -20.8)"/><ellipse cx="8.4" cy="-20.8" rx="2.9" ry="3.3" fill="${B}" transform="rotate(18 8.4 -20.8)"/>` +
+    `<g class="pa-rolig"><g class="pa-blikk"><circle cx="-0.2" cy="-21" r="1.1" fill="#FFF8EE"/><circle cx="7.8" cy="-21" r="1.1" fill="#FFF8EE"/></g><path d="M4 -17.3q-.7.9-1.5.4M4 -17.3q.7.9 1.5.4" fill="none" stroke="${B}" stroke-width=".9" stroke-linecap="round"/></g>` +
+    `<g class="pa-glad"><path d="M-1.9 -20.4q1.5-2.2 3 0M6.9 -20.4q1.5-2.2 3 0" fill="none" stroke="#FFF8EE" stroke-width="1.2" stroke-linecap="round"/><path d="M2.2 -17.2q1.8 3 3.6 0z" fill="${B}" stroke="${B}" stroke-width=".6" stroke-linejoin="round"/><path d="M3 -15.9q1-.9 2 0q-1 .6-2 0z" fill="#FF6B8A"/></g>` +
+    `<ellipse class="pa-kinn" cx="-3.2" cy="-16.6" rx="2.4" ry="1.5" fill="#FF9CC2"/><ellipse class="pa-kinn" cx="11.2" cy="-16.6" rx="2.4" ry="1.5" fill="#FF9CC2"/>` +
+    `<path d="M3.1 -18.6q.9-.5 1.8 0q-.2.8-.9 1q-.7-.2-.9-1z" fill="${B}"/></g>` +
+    `<path class="pa-pop" d="M-4 -34l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2z" fill="#FF3B5C" stroke="${B}" stroke-width="1.2"/></g>`,
   and: `<ellipse cx="2" cy="0" rx="9" ry="3" fill="${B}" opacity=".22"/><ellipse cx="0" cy="-8" rx="10" ry="6" fill="#FFD23F" ${HS}/><circle cx="8" cy="-16" r="5.5" fill="#FFD23F" ${HS}/><path d="M13 -16l7 2-7 2z" fill="#FF5B1F" ${HS}/><circle cx="9" cy="-17" r="1.3" fill="${B}"/><path d="M-3 -2v2M3 -2v2" stroke="#FF5B1F" stroke-width="3" stroke-linecap="round"/>`,
 };
 /* Luer som dekker hele toppen av hodet: håret klippes under bremmen, så det ikke stikker opp gjennom lua. Verdien er bremlinja (y). */
 const BREM = { cowboyhatt: -67, topphatt: -66, hjelm: -66, lue: -64, nisselue: -64 };
 let klippNr = 0;
-function haarHtml(p, pynt) {
-  const type = pynt && pynt.hode && p.haar === 'lue' ? 'kort' : p.haar;
-  const haar = HAAR[type].replace(/\{h\}/g, p.h), brem = pynt && pynt.hode ? BREM[pynt.hode] : null;
+function haarHtml(p, pynt, bak) {
+  let type = pynt && pynt.hode && p.haar === 'lue' ? 'kort' : p.haar;
+  if (HAAR[type] == null) type = 'kort';
+  const kilde = bak ? HAAR_BAK[type] : HAAR[type]; if (!kilde) return '';
+  const haar = kilde.replace(/\{h\}/g, p.h), brem = pynt && pynt.hode ? BREM[pynt.hode] : null;
   if (brem == null) return haar;
   const id = 'hk' + (++klippNr);
   return `<clipPath id="${id}"><rect x="-40" y="${brem}" width="80" height="60"/></clipPath><g clip-path="url(#${id})">${haar}</g>`;
@@ -96,11 +135,12 @@ function pyntHtml(pynt) {
 }
 export function figurHtml(p, pynt) {
   p = medValg(p, pynt);
-  const venn = pynt && pynt.venn && PYNT_SVG[pynt.venn] ? `<g class="venn" transform="translate(23,0)">${PYNT_SVG[pynt.venn]}</g>` : '';
+  const venn = pynt && pynt.venn && PYNT_SVG[pynt.venn] ? `<g class="venn venn-${pynt.venn}" transform="translate(23,0)">${PYNT_SVG[pynt.venn]}</g>` : '';
+  const foran = pynt && pynt.venn === 'idapanda';
   const arm = (x, dir) => `<path d="M0 0L${12 * dir} -26" stroke="${p.topp}" stroke-width="7" stroke-linecap="round"/>`;
   // .beveg bæres av bevegelsene (skål, hopp, dans …), .pust av pusten. Armene ligger med skulderen i hjørnet av boksen sin,
   // så transform-origin kan settes der. Øyne og munn finnes i flere utgaver – bare én er synlig om gangen.
-  return `<ellipse class="skygge" cx="0" cy="0" rx="16" ry="5" fill="${B}" opacity=".22"/>${venn}<g class="kropp"><g class="beveg"><g class="pust">` +
+  return `<ellipse class="skygge" cx="0" cy="0" rx="16" ry="5" fill="${B}" opacity=".22"/>${foran ? '' : venn}<g class="kropp"><g class="beveg"><g class="pust">` +
     `<rect x="-10" y="-15" width="7" height="15" rx="2" fill="${B}"/><rect x="3" y="-15" width="7" height="15" rx="2" fill="${B}"/>` +
     `<g class="gitar"><path d="M-22 -24L18 -40" stroke="#7A4A2A" stroke-width="4" stroke-linecap="round"/><ellipse cx="-14" cy="-24" rx="9" ry="7" fill="#FF5B1F" stroke="${B}" stroke-width="2.5"/></g>` +
     `<rect x="-14" y="-42" width="28" height="30" rx="9" fill="${p.topp}" stroke="${B}" stroke-width="3"/>` +
@@ -108,7 +148,7 @@ export function figurHtml(p, pynt) {
     `<g class="tlf"><rect x="-8" y="-40" width="16" height="10" rx="2" fill="${B}"/><rect x="-6" y="-38" width="12" height="6" rx="1" fill="#7CC6FE"/></g>` +
     `<g class="arm-v"><g transform="translate(-10,-36)">${arm(0, -1)}<circle cx="-12" cy="-27" r="4.5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/><path class="horn" d="M-15 -28v-8M-9 -28v-8" stroke="${B}" stroke-width="3" stroke-linecap="round"/></g></g>` +
     `<g class="arm-h"><g transform="translate(10,-36)">${arm(0, 1)}<rect x="6" y="-44" width="12" height="15" rx="2" fill="#FFB020" stroke="${B}" stroke-width="2.5"/><g class="skum"><circle cx="10" cy="-48" r="2.6" fill="#FFF8EE" stroke="${B}" stroke-width="1.5"/><circle cx="16" cy="-51" r="2" fill="#FFF8EE" stroke="${B}" stroke-width="1.5"/></g></g></g>` +
-    `<circle cx="0" cy="-56" r="15" fill="${p.hud}" stroke="${B}" stroke-width="3"/><circle class="gronn" cx="0" cy="-56" r="13.5" fill="#7BC96F"/>` +
+    haarHtml(p, pynt, true) + `<circle cx="0" cy="-56" r="15" fill="${p.hud}" stroke="${B}" stroke-width="3"/><circle class="gronn" cx="0" cy="-56" r="13.5" fill="#7BC96F"/>` +
     `<circle cx="-9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/><circle cx="9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/>` +
     `<g class="rodme"><ellipse cx="-9" cy="-50" rx="5" ry="3" fill="#FF3B5C" opacity=".7"/><ellipse cx="9" cy="-50" rx="5" ry="3" fill="#FF3B5C" opacity=".7"/></g>` +
     haarHtml(p, pynt) +
@@ -125,7 +165,7 @@ export function figurHtml(p, pynt) {
     `<g class="hjerter"><path d="M-14 -80l-4-4a2.4 2.4 0 0 1 4-2.6a2.4 2.4 0 0 1 4 2.6z" fill="#FF3B5C" stroke="${B}" stroke-width="1.5"/><path d="M12 -86l-3-3a2 2 0 0 1 3-2a2 2 0 0 1 3 2z" fill="#FF3B5C" stroke="${B}" stroke-width="1.5"/></g>` +
     `<g class="dekk"><circle cx="-6" cy="-57" r="5.5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/><circle cx="6" cy="-57" r="5.5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/></g>` +
     `<g class="hender"><circle cx="-6" cy="-82" r="5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/><circle cx="6" cy="-82" r="5" fill="${p.hud}" stroke="${B}" stroke-width="2.5"/></g>` +
-    pyntHtml(pynt) + `<path class="krone-v" d="M-14 -64l3-14 7 7 4-12 4 12 7-7 3 14z" fill="#FFD23F" ${HS}/>` + '<g class="boble-plass"></g></g></g></g>';
+    pyntHtml(pynt) + `<path class="krone-v" d="M-14 -64l3-14 7 7 4-12 4 12 7-7 3 14z" fill="#FFD23F" ${HS}/>` + '<g class="boble-plass"></g></g></g></g>' + (foran ? venn : '');
 }
 /** Bevegelsene som kan låses opp (slot «beveg» i pynten): små ikoner til arket. */
 export const BEVEG_SVG = {
@@ -165,7 +205,8 @@ const HODE_MUNN = {
 };
 /** Innholdet i et hode. uttrykk: 'vanlig' | 'oi' (store øyne, hevede bryn, åpen munn, svettedråpe) | 'flat' (litt flau munn). */
 export function hodeHtml(p, uttrykk) {
-  const oi = uttrykk === 'oi', h = p.h || B, haar = HODE_HAAR[p.haar] != null ? p.haar : 'kort';
+  const ALIAS = { sidebena: 'kort', quiff: 'kort', hanekam: 'kort', pannelugg: 'lang', langrett: 'lang', fletter: 'lang', tuer: 'bolle', afro: 'krus', langkrus: 'krus' };
+  const oi = uttrykk === 'oi', h = p.h || B, haar = HODE_HAAR[p.haar] != null ? p.haar : (ALIAS[p.haar] || 'kort');
   const munn = oi ? HODE_MUNN.oi : uttrykk === 'flat' ? HODE_MUNN.flat : (HODE_MUNN[p.munn] || HODE_MUNN.smil);
   const ry = oi ? 8 : 6.5, r = oi ? 2.2 : 3.2;
   return (HODE_BAK[haar] || '').replace(/\{h\}/g, h) +
@@ -748,8 +789,8 @@ export function lagStua(svg, valg = {}) {
       const lagret = Array.isArray(pos[p.id]) ? pos[p.id] : null;
       if (!f) {
         const mal = lagret || ledigPlass();
-        if (forste) f = new Figur(utseende(p.figur || p.id, p.pynt), mal[0], mal[1], { id: p.id, navn: p.navn, pynt: p.pynt || null });
-        else { f = new Figur(utseende(p.figur || p.id, p.pynt), DOR[0], DOR[1], { id: p.id, navn: p.navn, pynt: p.pynt || null }); f.hjem = mal; setTimeout(() => f.gaaTil(mal, true), nye * 500); nye++; }
+        if (forste) f = new Figur(utseende(p.figur || p.id, p.pynt), mal[0], mal[1], { id: p.id, navn: p.navn, pynt: p.pynt || null, par: !!p.par });
+        else { f = new Figur(utseende(p.figur || p.id, p.pynt), DOR[0], DOR[1], { id: p.id, navn: p.navn, pynt: p.pynt || null, par: !!p.par }); f.hjem = mal; setTimeout(() => f.gaaTil(mal, true), nye * 500); nye++; }
         f.hjem = mal; kart.set(p.id, f); folk.push(f);
         if (!forste && p.id !== valg.meg) setTimeout(() => f.si(T('Hei!', 'Hi!'), 1400), 900 + nye * 500);
         return;
@@ -761,6 +802,19 @@ export function lagStua(svg, valg = {}) {
     if (nye) { aapneDor(); hopp(); sistAktiv = Date.now(); }
     forste = false; sorter();
   }
+  // Eieren og Ida: står de nær hverandre, stiger et hjerte opp mellom dem omtrent hvert tiende sekund
+  const parT = setInterval(() => {
+    if (!svg.isConnected) { clearInterval(parT); return; }
+    if (REDUSERT || document.hidden) return;
+    const to = folk.filter((f) => f.info.par && !f.ut);
+    if (to.length !== 2 || to.some((f) => f.drar)) return;
+    const [a, b] = to;
+    if (Math.hypot(a.x.v - b.x.v, a.y.v - b.y.v) > 2.2) return;
+    const m = I((a.x.v + b.x.v) / 2, (a.y.v + b.y.v) / 2, 0);
+    const g = el('g', { class: 'par-hjerte', transform: `translate(${m[0].toFixed(1)},${(m[1] - 88).toFixed(1)})`, 'pointer-events': 'none' }, lag);
+    el('path', { d: 'M0 4l-7-7a4.2 4.2 0 0 1 7-4.6a4.2 4.2 0 0 1 7 4.6z', fill: '#FF3B5C', stroke: B, 'stroke-width': 2, 'stroke-linejoin': 'round' }, g);
+    setTimeout(() => g.remove(), 2400);
+  }, 10000);
   function personSi(id, tekst, ms) { const f = kart.get(id); if (f) f.si(tekst, ms); }
   /* ---------- rommet lever ---------- */
   // Reaksjonene: emoji → bevegelse og ansikt. De tre første smitter: de andre gjør det samme like etter.

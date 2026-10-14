@@ -2,7 +2,7 @@
 import type { APIRoute } from 'astro';
 import { lagRom, endreRom, rensNavn, lekeliste, loggRom, rensLang } from '../../../lib/rom';
 import { rpc } from '../../../lib/spilt';
-import { innloggetBruker } from '../../../lib/konto';
+import { innloggetBruker, laastFor } from '../../../lib/konto';
 import { rensPynt } from '../../../lib/pynt.js';
 export const prerender = false;
 
@@ -26,8 +26,9 @@ export const POST: APIRoute = async ({ request }) => {
         const u = await innloggetBruker(request);
         if (u) {
           const ph: any = await rpc('pynt_hent', { p_user: u.id });
-          const pynt = ph ? rensPynt(ph.valgt, ph.laast) : {};
-          await endreRom(kode, (data) => { const v = data.spillere[0]; if (v) { v.bruker = u.id; v.pynt = pynt; v.kvelder = Number(ph && ph.kvelder) || 0; v.laast = ph && Array.isArray(ph.laast) ? ph.laast : []; } return { ok: true }; });
+          const laast = await laastFor(u.id, ph && Array.isArray(ph.laast) ? ph.laast : []);
+          const pynt = ph ? rensPynt(ph.valgt, laast) : {};
+          await endreRom(kode, (data) => { const v = data.spillere[0]; if (v) { v.bruker = u.id; v.pynt = pynt; v.kvelder = Number(ph && ph.kvelder) || 0; v.laast = laast; } return { ok: true }; });
         }
       } catch { /* rommet virker uten */ }
     }
