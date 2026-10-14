@@ -5,6 +5,7 @@
 import Base from '../../layouts/Base.astro';
 import type { Lang } from '../../lib/i18n';
 import { lekeliste } from '../../lib/rom';
+import '../../styles/profil.css';
 const { lang = 'no' } = Astro.props as { lang?: Lang };
 const no = lang === 'no';
 // Lekene verten kan velge når kvelden startes fra gjengen (spilles fra hver sin telefon)
@@ -50,38 +51,34 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
 
     /* ---------- mine gjenger ---------- */
     function mine() {
+      var GF = ['#63E2A8', '#FF9CC2', '#FFD23F', '#5A8DEE', '#FF5B1F'];
+      var farge = function (k) { var h = 0; String(k).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return GF[h % GF.length]; };
       if (!innlogget()) {
-        root.innerHTML = EN
-          ? '<h1>Regular crews</h1><p class="lead">Keep score from night to night. Who’s the thirstiest of the year? Who wins the quiz most often?</p>' +
-            forklaring() +
-            '<p><a class="btn gold" href="' + KONTO + '">Log in or create a free account</a></p>' +
-            '<p class="small">Got a crew link? Open it – you can see the table without an account.</p>'
-          : '<h1>Faste gjenger</h1><p class="lead">Samle poengene fra kveld til kveld. Hvem er årets tørstigste? Hvem vinner quizen oftest?</p>' +
-            forklaring() +
-            '<p><a class="btn gold" href="/no/account">Logg inn eller lag gratis konto</a></p>' +
-            '<p class="small">Har du fått en gjenglenke? Åpne den – tabellen kan ses uten konto.</p>';
+        root.innerHTML = '<h1 class="gj-h1">' + (EN ? 'Crews' : 'Gjengene') + '</h1>' +
+          '<div class="gj-ut"><b>' + (EN ? 'Keep score from night to night' : 'Samle poengene fra kveld til kveld') + '</b><a class="gj-ut-knapp" href="' + KONTO + '">' + (EN ? 'Make a crew' : 'Lag gjeng') + '</a></div>';
         return;
       }
-      var tittel = EN ? 'Your crews' : 'Gjengene dine';
-      root.innerHTML = '<h1>' + tittel + '</h1><p class="small">' + (EN ? 'Loading …' : 'Henter …') + '</p>';
+      var tittel = EN ? 'Crews' : 'Gjengene';
+      root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1><p class="small">' + (EN ? 'Loading …' : 'Henter …') + '</p>';
       kall('/api/gjeng').then(function (d) {
-        if (!d._ok) { root.innerHTML = '<h1>' + tittel + '</h1>' + feil(d.melding || (EN ? 'Couldn’t load your crews.' : 'Fikk ikke hentet gjengene.')); return; }
+        if (!d._ok) { root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1>' + feil(d.melding || (EN ? 'Couldn’t load your crews.' : 'Fikk ikke hentet gjengene.')); return; }
         var l = d.gjenger || [];
-        root.innerHTML = '<h1>' + tittel + '</h1><p class="lead">' + (EN ? 'Points that add up over many nights – with a season table and awards.' : 'Poeng som samles over flere kvelder – med sesongtabell og kåringer.') + '</p>' +
-          (l.length ? '<ul class="gj-liste">' + l.map(function (g) {
-            return '<li><a href="' + SIDE + '?k=' + g.kode + '"><b>' + esc(g.navn) + '</b><span>' + g.kvelder + ' ' + (EN ? (g.kvelder === 1 ? 'night' : 'nights') : (g.kvelder === 1 ? 'kveld' : 'kvelder')) +
-              (g.sist ? (EN ? ' · last ' : ' · sist ') + dato(g.sist) : '') + (g.eier ? (EN ? ' · you own it' : ' · du eier') : '') + '</span></a></li>';
-          }).join('') + '</ul>' : forklaring()) +
-          (EN
-            ? '<form class="form gj-skjema" id="gjLag"><label class="lab" for="gjNavn">Create a new crew</label>' +
-              '<div class="gj-rad"><input id="gjNavn" maxlength="40" placeholder="E.g. The Usual Suspects" required><button class="btn gold" type="submit">Create crew</button></div></form>' +
-              '<form class="form gj-skjema" id="gjBli"><label class="lab" for="gjKode">Got a crew code?</label>' +
-              '<div class="gj-rad"><input id="gjKode" maxlength="8" placeholder="8 characters" autocapitalize="characters" autocomplete="off" spellcheck="false" required><button class="btn ghost" type="submit">Join</button></div></form>'
-            : '<form class="form gj-skjema" id="gjLag"><label class="lab" for="gjNavn">Lag en ny gjeng</label>' +
-              '<div class="gj-rad"><input id="gjNavn" maxlength="40" placeholder="F.eks. Gutta på tur" required><button class="btn gold" type="submit">Lag gjeng</button></div></form>' +
-              '<form class="form gj-skjema" id="gjBli"><label class="lab" for="gjKode">Har du en gjengkode?</label>' +
-              '<div class="gj-rad"><input id="gjKode" maxlength="8" placeholder="8 tegn" autocapitalize="characters" autocomplete="off" spellcheck="false" required><button class="btn ghost" type="submit">Bli med</button></div></form>') +
+        root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1>' +
+          '<div class="gj-kort-liste">' + l.map(function (g, i) {
+            return '<div class="gj-kort" style="--f:' + farge(g.kode) + ';--i:' + i + '"><a class="gj-kort-lenke" href="' + SIDE + '?k=' + g.kode + '">' +
+              '<b>' + esc(g.navn) + '</b><span>' + (EN ? 'Night ' : 'Kveld ') + (g.kvelder || 0) + (g.eier ? (EN ? ' · yours' : ' · din') : '') + '</span></a>' +
+              '<a class="gj-kort-start" href="' + SIDE + '?k=' + g.kode + '&ny=1"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg>' + (EN ? 'Start night' : 'Start kveld') + '</a></div>';
+          }).join('') + '</div>' +
+          '<button type="button" class="gj-ny" id="gjNyKnapp" aria-expanded="false"><span aria-hidden="true">+</span>' + (EN ? 'New crew' : 'Ny gjeng') + '</button>' +
+          '<form class="gj-inn" id="gjLag" hidden><label class="sr-only" for="gjNavn">' + (EN ? 'Crew name' : 'Navn på gjengen') + '</label>' +
+            '<input id="gjNavn" maxlength="40" placeholder="' + (EN ? 'E.g. The Usual Suspects' : 'F.eks. Gutta på tur') + '" required><button type="submit">' + (EN ? 'Create' : 'Lag') + '</button></form>' +
+          '<button type="button" class="gj-kode-lenke" id="gjKodeKnapp" aria-expanded="false">' + (EN ? 'Got a crew code?' : 'Har du en gjengkode?') + '</button>' +
+          '<form class="gj-inn" id="gjBli" hidden><label class="sr-only" for="gjKode">' + (EN ? 'Crew code' : 'Gjengkode') + '</label>' +
+            '<input id="gjKode" maxlength="8" placeholder="' + (EN ? '8 characters' : '8 tegn') + '" autocapitalize="characters" autocomplete="off" spellcheck="false" required><button type="submit">' + (EN ? 'Join' : 'Bli med') + '</button></form>' +
           '<p id="gjMld"></p>';
+        var vis = function (knapp, skjema, felt) { root.querySelector(knapp).addEventListener('click', function () { var f = root.querySelector(skjema), aapen = f.hidden; f.hidden = !aapen; this.setAttribute('aria-expanded', String(aapen)); if (aapen) root.querySelector(felt).focus(); }); };
+        vis('#gjNyKnapp', '#gjLag', '#gjNavn'); vis('#gjKodeKnapp', '#gjBli', '#gjKode');
+        if (!l.length) { root.querySelector('#gjLag').hidden = false; root.querySelector('#gjNyKnapp').setAttribute('aria-expanded', 'true'); }
         root.querySelector('#gjLag').addEventListener('submit', function (e) {
           e.preventDefault();
           kall('/api/gjeng', { handling: 'lag', navn: root.querySelector('#gjNavn').value }).then(function (d) {
