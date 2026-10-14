@@ -91,7 +91,7 @@ NAVN['rom:egen-kortstokk'] = 'Egen kortstokk';
         });
       }).catch(function () { root.innerHTML = '<p class="rom-feil">Fikk ikke kontakt. Prøv igjen.</p>'; });
     }
-    function ikkeInne() { root.innerHTML = '<p>Logg inn på <a href="/no/account">Min stokk</a> med admin-kontoen for å se statistikken.</p>'; }
+    function ikkeInne() { root.innerHTML = '<p>Logg inn på <a href="/no/account">Profil</a> med admin-kontoen for å se statistikken.</p>'; }
     document.getElementById('statValg').addEventListener('click', function (e) {
       var b = e.target.closest('[data-dager]'); if (!b) return;
       dager = Number(b.dataset.dager);

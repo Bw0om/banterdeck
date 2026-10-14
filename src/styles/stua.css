@@ -2371,3 +2371,54 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .ftd-rad small{font-size:12px;font-weight:700;color:#4A3F37}
 .ftd-rad strong{font-family:var(--display);font-size:24px;font-weight:900;font-stretch:66%}
 @media (prefers-reduced-motion:reduce){.ftd-kort.inn,.ftd-kort.snu,.ftd-smell.inn,.ftd-merk.inn,.ftd-rad{animation:none}.ftd-pil svg{animation:none}}
+
+/* ---------- Figuren din: stor figur på en scene, trykk på delen du vil endre ---------- */
+.fv{display:flex;flex-direction:column;gap:10px}
+.fv-scene{position:relative;height:min(52dvh,420px);display:flex;align-items:flex-end;justify-content:center}
+.fv.valgt .fv-scene{height:min(42dvh,340px)}
+.fv-gulv{position:absolute;left:14%;right:14%;bottom:14px;height:12%;background:var(--mint);border:var(--strek) solid var(--blekk);border-radius:50%;box-shadow:var(--skygge)}
+.fv-figur{position:relative;height:88%;width:auto;overflow:visible;margin-bottom:24px;animation:fv-sving 3.2s ease-in-out infinite;transform-origin:50% 100%}
+.fv.valgt .fv-figur{animation:none}
+@keyframes fv-sving{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
+.fv-del{appearance:none;position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;padding:0;border-radius:50%;background:var(--blekk);color:var(--papir);border:3px solid var(--papir);box-shadow:3px 3px 0 var(--blekk);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 140ms var(--fjaer),opacity 140ms var(--fjaer),box-shadow 140ms var(--fjaer)}
+.fv-del svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.fv-del:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--blekk)}
+.fv-del.valgt{background:var(--gul);color:var(--blekk);border-color:var(--blekk);width:50px;height:50px;margin:-25px 0 0 -25px}
+.fv.valgt .fv-del:not(.valgt){opacity:.45}
+.fv-del.puls{animation:fv-puls 1.8s ease-in-out infinite}
+@keyframes fv-puls{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.fv-hint{margin:0;text-align:center;font-family:var(--display);font-stretch:66%;font-weight:900;text-transform:uppercase;font-size:20px;color:var(--muted)}
+.fv-rad{display:flex;gap:12px;overflow-x:auto;padding:12px 4px 8px;margin:0 -4px;scroll-snap-type:x proximity;animation:fv-opp .3s var(--fjaer) both}
+@keyframes fv-opp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.fv-valg{appearance:none;flex:0 0 92px;height:100px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;scroll-snap-align:start;cursor:pointer;color:var(--ink);background:var(--card);border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--hard);font:inherit;transition:transform 140ms var(--fjaer),box-shadow 140ms var(--fjaer)}
+.fv-valg svg{width:58px;height:58px;overflow:visible}
+.fv-valg .fv-ingen{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+.fv-valg small{font-family:var(--display);font-stretch:70%;font-weight:900;text-transform:uppercase;font-size:12px;line-height:1}
+.fv-valg:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--hard)}
+.fv-valg.paa{background:var(--gul);color:var(--blekk);box-shadow:3px 3px 0 var(--hard),0 0 0 3px var(--card),0 0 0 6px var(--ink)}
+.fv-valg.laast{background:var(--bg2);border-style:dashed;box-shadow:none;color:var(--muted)}
+.fv-valg.laast svg:not(.fv-ingen){filter:grayscale(1);opacity:.4}
+.fv-laas{position:absolute;top:-10px;right:-8px;width:26px;height:26px;border-radius:50%;background:var(--blekk);color:var(--papir);display:flex;align-items:center;justify-content:center}
+.fv-laas svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;filter:none;opacity:1}
+.fv-lapp{position:absolute;left:50%;top:8px;width:min(240px,80%);transform:translateX(-50%) rotate(-2deg);display:flex;align-items:center;gap:12px;background:var(--gul);color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:12px;padding:10px 14px;box-shadow:var(--skygge);z-index:2}
+.fv-lapp.inn{animation:fv-lapp .4s var(--fjaer) both}
+@keyframes fv-lapp{from{opacity:0;transform:translateX(-50%) translateY(10px) rotate(-3deg)}to{opacity:1;transform:translateX(-50%) rotate(-2deg)}}
+.fv-lapp>svg{width:30px;height:30px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.fv-lapp div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fv-lapp b{font-family:var(--display);font-stretch:66%;font-weight:900;text-transform:uppercase;font-size:20px;line-height:1}
+.fv-lapp span{font-size:13px;font-weight:800;line-height:1.25}
+.fv-fot{margin:0;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;text-align:center;font-size:12.5px;font-weight:800;color:var(--muted)}
+.fv-fot .btn{display:inline-block;margin:0}
+.figur-ark .rom-tavle-innhold{max-height:94dvh}
+.figur-ark .ark-kropp{margin-top:0}
+@media (prefers-reduced-motion:reduce){.fv-figur,.fv-del.puls,.fv-rad,.fv-lapp.inn{animation:none}}
+
+/* Profilsiden: figuren øverst i et gult kort */
+.profil-hero{display:flex;align-items:flex-end;gap:10px;background:var(--gul);color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:16px;padding:16px 18px 0;box-shadow:var(--skygge);overflow:hidden;min-height:200px;margin:0 0 14px}
+.profil-hero>div{display:flex;flex-direction:column;gap:6px;padding-bottom:18px;flex:1;min-width:0}
+.profil-hero b{font-family:var(--display);font-stretch:66%;font-weight:900;text-transform:uppercase;font-size:32px;line-height:.95;overflow-wrap:anywhere}
+.profil-hero small{font-size:14px;font-weight:800}
+.profil-hero .btn{align-self:flex-start;margin-top:6px}
+.profil-hero svg{width:140px;height:auto;flex-shrink:0;margin-right:-6px;overflow:visible}
+.profil-velger{margin:0 0 18px}
+.konto-innstillinger summary{cursor:pointer;font-family:var(--display);font-stretch:80%;font-weight:900;text-transform:uppercase;font-size:14px;letter-spacing:.03em;padding:8px 0}

@@ -9,7 +9,7 @@ function nyKode() { const a = new Uint32Array(6); crypto.getRandomValues(a); ret
 
 export const GET: APIRoute = async ({ request }) => {
   const admin = await adminBruker(request).catch(() => null);
-  if (!admin) return json({ feil: 'nei', melding: 'Logg inn på Min stokk med admin-kontoen.' }, 403);
+  if (!admin) return json({ feil: 'nei', melding: 'Logg inn på Profil med admin-kontoen.' }, 403);
   const q = new URL(request.url).searchParams;
   try {
     if (q.get('koder')) return json({ koder: await rpc('gavekoder_liste', {}) });
@@ -23,7 +23,7 @@ export const GET: APIRoute = async ({ request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   const admin = await adminBruker(request).catch(() => null);
-  if (!admin) return json({ feil: 'nei', melding: 'Logg inn på Min stokk med admin-kontoen.' }, 403);
+  if (!admin) return json({ feil: 'nei', melding: 'Logg inn på Profil med admin-kontoen.' }, 403);
   let d: any;
   try { d = await request.json(); } catch { return json({ feil: 'ugyldig' }, 400); }
   const dager = Math.max(1, Math.min(3650, Math.round(Number(d.dager) || 0)));

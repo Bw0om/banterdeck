@@ -5,7 +5,7 @@ import { json, adminBruker } from '../../../lib/konto';
 import { vippsKlar, vippsMiljo, refunderBetaling, ryddBetalinger, registrerWebhook, fjernWebhook, webhookStatus, sjekkBetaling } from '../../../lib/pluss';
 export const prerender = false;
 
-const nei = () => json({ feil: 'nei', melding: 'Logg inn på Min stokk med admin-kontoen.' }, 403);
+const nei = () => json({ feil: 'nei', melding: 'Logg inn på Profil med admin-kontoen.' }, 403);
 const REF = /^bd-[0-9a-f]{20}$/;
 
 export const GET: APIRoute = async ({ request }) => {

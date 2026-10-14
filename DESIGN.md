@@ -341,6 +341,12 @@ The tally board is the game's own piece: thirteen columns of four slots, filled 
 
 The favicon, the home-screen icon and the og share images used to be the old champagne-gold version. They now carry the brandmark the header uses: the yellow card with two clinking glasses, ink strokes. The favicon keeps its ink border and 14px radius; the home-screen icons are flat yellow edge to edge with the mark scaled to 82 %, since iOS and Android round the corners themselves. Share images are the orange brand field with the ink-box wordmark (yellow hard shadow, −2°), a condensed uppercase title, and a tilted cream card with a yellow label and a sample card – `scripts/lag-delingsbilder.mjs`, Archivo only.
 
+## Your figure: tap the part
+
+The figure picker is built like a character editor: one big figure on a mint stage, and five small ink buttons sitting on the body – hat on the head, glasses by the face, badge on the chest, pet by the hand, move by the feet. Nothing else until you tap one; then a single horizontal row of choices appears under the figure and the thing lands on the figure at once. Locked items are dashed with a padlock; one tap shows a yellow note over the stage with the name and how to unlock it, gone after a few seconds. The moves row makes the figure perform the move while you choose. The same component (`src/klient/figurvelger.js`) runs in the room's sheet and on the profile page, so they are identical.
+
+«Min stokk» is now «Profil»: the figure sits first in a yellow hero card, and username, password and delete-account hide under a settings disclosure.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

@@ -34,7 +34,7 @@
       });
       m.addEventListener('change', tell);
       if (!K || !K.les()) {
-        body.innerHTML = T('<p>Logg inn for å bruke kortstokkene dine. Du kan også lage en kortstokk på forhånd under «Min stokk».</p>', '<p>Log in to use your decks. You can also make a deck in advance under “My deck”.</p>') + '<p><a class="btn gold" href="' + KONTO + '">' + T('Logg inn eller lag konto', 'Log in or create an account') + '</a></p>';
+        body.innerHTML = T('<p>Logg inn for å bruke kortstokkene dine. Du kan også lage en kortstokk på forhånd under «Profil».</p>', '<p>Log in to use your decks. You can also make a deck in advance under “Profile”.</p>') + '<p><a class="btn gold" href="' + KONTO + '">' + T('Logg inn eller lag konto', 'Log in or create an account') + '</a></p>';
         return;
       }
       K.stokker.liste().then(function (l) {
