@@ -1,6 +1,6 @@
 // Lager app-ikonene fra public/favicon.svg: favicon-48.png, favicon.ico (16/32/48),
 // apple-touch-icon*.png (180) og icon-192/512.png (PWA, også «maskable»).
-// Hjemskjerm-ikonene får gullflate helt ut i kantene – iOS og Android runder hjørnene selv.
+// Hjemskjerm-ikonene får gul flate helt ut i kantene – iOS og Android runder hjørnene selv.
 //
 // Kjør fra prosjektmappa:  node scripts/lag-ikoner.mjs
 // Trenger Playwright, som lag-delingsbilder.mjs (PW_MODUL / PW_CHROMIUM fungerer likt).
@@ -16,13 +16,14 @@ const ROT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUB = path.join(ROT, 'public');
 const svg = fs.readFileSync(path.join(PUB, 'favicon.svg'), 'utf8');
 const rund = svg.replace(/width="64" height="64"/, 'width="100%" height="100%"');
-const full = rund.replace(/rx="26"/, 'rx="0"');
+// Hjemskjerm: hele flaten gul, ingen svart ramme (telefonen runder hjørnene), merket litt mindre så det ikke klippes
+const full = rund.replace(/<rect x="2" y="2" width="60" height="60" rx="14" fill="#FFD23F" stroke="#16120F" stroke-width="4"\/>/, '<rect width="64" height="64" fill="#FFD23F"/>').replace(/(<g fill="#FFF8EE")/, '<g transform="translate(32 35) scale(.82) translate(-32 -32)">$1').replace(/<\/svg>$/, '</g></svg>');
 
 const nettleser = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {});
 const side = await nettleser.newPage();
 async function png(kilde, px, gjennomsiktig) {
   await side.setViewportSize({ width: px, height: px });
-  await side.setContent(`<!doctype html><style>*{margin:0}html,body{width:${px}px;height:${px}px;background:${gjennomsiktig ? 'transparent' : '#E4C47F'}}svg{display:block}</style>${kilde}`);
+  await side.setContent(`<!doctype html><style>*{margin:0}html,body{width:${px}px;height:${px}px;background:${gjennomsiktig ? 'transparent' : '#FFD23F'}}svg{display:block}</style>${kilde}`);
   return side.screenshot({ omitBackground: gjennomsiktig, type: 'png' });
 }
 

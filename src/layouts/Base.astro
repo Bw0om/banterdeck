@@ -26,7 +26,7 @@ import { ClientRouter } from 'astro:transitions';
 interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; bilde?: string; }
 const { title, description, lang = 'en', gate = false, noindex = false, bilde = '/og/mittvors.jpg' } = Astro.props;
 // ?v=… tvinger Snap, Messenger og iMessage til å hente de nye delingsbildene i stedet for gamle kopier
-const bildeUrl = new URL(bilde, Astro.site); if (bildeUrl.pathname.startsWith('/og/')) bildeUrl.searchParams.set('v', '6');
+const bildeUrl = new URL(bilde, Astro.site); if (bildeUrl.pathname.startsWith('/og/')) bildeUrl.searchParams.set('v', '7');
 const L = ui(lang);
 const desc = description || L.tagline;
 const fullTitle = title ? `${title} – ${SITE_NAME}` : `${SITE_NAME} – ${L.tagline}`;
@@ -146,7 +146,7 @@ const isCurrent = (href: string) => {
   <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
   <link rel="alternate icon" href="/favicon.ico" sizes="any" />
   <!-- Ikonet på hjemskjermen (iPhone/iPad). ?v= tvinger telefonen til å hente det nye ikonet. -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=5" />
   <link rel="sitemap" href="/sitemap-index.xml" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="mobile-web-app-capable" content="yes" />

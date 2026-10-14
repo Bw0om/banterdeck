@@ -337,6 +337,10 @@ The phone is the deck, and only the dealer holds it. Whoever wants to guesses ou
 
 The tally board is the game's own piece: thirteen columns of four slots, filled as cards are used, a column turning orange when a value is out. It sits small under the dealer's keypad, large on the other phones, and fills the TV. Cream and ink with mint as the game's accent, so it reads as its own table next to Pyramiden's felt and Bussruta's bus.
 
+## Icons and share images in the same world
+
+The favicon, the home-screen icon and the og share images used to be the old champagne-gold version. They now carry the brandmark the header uses: the yellow card with two clinking glasses, ink strokes. The favicon keeps its ink border and 14px radius; the home-screen icons are flat yellow edge to edge with the mark scaled to 82 %, since iOS and Android round the corners themselves. Share images are the orange brand field with the ink-box wordmark (yellow hard shadow, −2°), a condensed uppercase title, and a tilted cream card with a yellow label and a sample card – `scripts/lag-delingsbilder.mjs`, Archivo only.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
