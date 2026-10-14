@@ -3301,22 +3301,22 @@
       "rules": {
        "no": [
         "Én er dealer med hele stokken. Spilleren til venstre gjetter verdien på det øverste kortet.",
-        "b|Riktig på første forsøk: dealeren drikker 5 slurker.",
-        "b|Feil: dealeren sier «høyere» eller «lavere», og spilleren gjetter én gang til. Riktig nå: dealeren drikker 2.",
+        "b|Riktig på første forsøk: dealeren drikker like mange slurker som kortet er verdt (ess 1, konge 13).",
+        "b|Feil: dealeren sier «høyere» eller «lavere», og spilleren gjetter én gang til. Riktig nå: dealeren drikker halvparten av kortet.",
         "b|Feil igjen: spilleren drikker differansen mellom gjetningen og kortet.",
         "Brukte kort legges synlig på bordet sortert etter verdi, så alle kan telle. Klarer dealeren tre spillere på rad uten treff, sendes stokken videre til nestemann."
        ],
        "sv": [
         "En är dealer med hela leken. Spelaren till vänster gissar värdet på översta kortet.",
-        "b|Rätt på första försöket: dealern dricker 5 klunkar.",
-        "b|Fel: dealern säger «högre» eller «lägre», och spelaren gissar en gång till. Rätt nu: dealern dricker 2.",
+        "b|Rätt på första försöket: dealern dricker lika många klunkar som kortet är värt (ess 1, kung 13).",
+        "b|Fel: dealern säger «högre» eller «lägre», och spelaren gissar en gång till. Rätt nu: dealern dricker hälften av kortet.",
         "b|Fel igen: spelaren dricker differensen mellan gissningen och kortet.",
         "Använda kort läggs synligt på bordet sorterade efter värde, så alla kan räkna. Klarar dealern tre spelare i rad utan träff skickas leken vidare."
        ],
        "en": [
         "One player is the dealer with the whole deck. The player to the left guesses the value of the top card.",
-        "b|Right on the first try: the dealer drinks 5.",
-        "b|Wrong: the dealer says “higher” or “lower”, and the player guesses once more. Right now: the dealer drinks 2.",
+        "b|Right on the first try: the dealer drinks the card’s value (ace 1, king 13).",
+        "b|Wrong: the dealer says “higher” or “lower”, and the player guesses once more. Right now: the dealer drinks half the card.",
         "b|Wrong again: the player drinks the difference between the guess and the card.",
         "Used cards are laid face-up, sorted by value, so everyone can count. If the dealer survives three players in a row, the deck passes on."
        ]

@@ -1165,6 +1165,40 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       return '<div class="tv-scene tvpy' + (p.ferdig ? ' ferdig' : '') + '"><div class="tvpy-v">' + topp + pyr + '</div><div class="tvpy-h-kol">' + hoyre + '</div>' + avsl + '</div>';
     }
+    /* ---------- Fuck the Dealer på TV-en: tellebrettet ---------- */
+    var tvFtdSett = {};
+    function tvFtdVn(v) { return v === 1 ? 'A' : v <= 10 ? String(v) : (LANG === 'en' ? { 11: 'J', 12: 'Q', 13: 'K' } : { 11: 'Kn', 12: 'D', 13: 'K' })[v]; }
+    function ftdScene(d, s) {
+      var f = s.ftd, r = f.res;
+      if (f.runde && tvFtdSett.runde !== f.runde) tvFtdSett = { runde: f.runde };
+      var prikker = '<span class="tvftd-prikker">'; for (var i = 0; i < 3; i++) prikker += '<i' + (i < (f.bom || 0) ? ' class="paa"' : '') + '></i>'; prikker += '</span>';
+      var brett = '<div class="tvftd-brett">';
+      for (var v = 1; v <= 13; v++) {
+        var n = f.brukt[v] || 0, nyK = r && r.kort && r.kort.v === v && f.fase === 'res' && !tvFtdSett['r' + r.nr];
+        brett += '<div' + (n >= 4 ? ' class="ute"' : '') + '><b>' + tvFtdVn(v) + '</b>';
+        for (var j = 0; j < 4; j++) brett += '<i' + (j < n ? ' class="full' + (n >= 4 ? ' rod' : '') + (nyK && j === n - 1 ? ' ny' : '') + '"' : '') + '></i>';
+        brett += '</div>';
+      }
+      brett += '</div>';
+      if (r) tvFtdSett['r' + r.nr] = 1;
+      var status;
+      if (f.fase === 'ferdig') {
+        var dr = f.drukket || {}, rekke = (f.ider || []).slice().sort(function (a, b) { return (dr[b] || 0) - (dr[a] || 0); });
+        status = '<div class="tvftd-slutt"><small>' + T('Kveldens dealer', 'Dealer of the night') + '</small><b>' + (rekke[0] ? esc(navn(rekke[0])) : '–') + '</b><span>' + (rekke[0] ? (dr[rekke[0]] || 0) + T(' slurker bak stokken', ' sips behind the deck') : '') + '</span></div>';
+      } else if (f.fase === 'res' && r) {
+        var treff = r.type !== 'bom';
+        status = '<div class="tvftd-res' + (treff ? ' treff' : ' bom') + '"><span class="tvftd-kort' + ((r.kort.f === '♥' || r.kort.f === '♦') ? ' rod' : '') + '"><b>' + tvFtdVn(r.kort.v) + '</b><i>' + r.kort.f + '</i></span><div><small>' +
+          (r.type === 'treff1' ? T('Treff på første', 'First-try hit') : r.type === 'treff2' ? T('Treff på andre', 'Second-try hit') : T('Bom to ganger', 'Missed twice')) + '</small><b>' +
+          (treff ? esc(navn(f.dealer)) + T(' drikker ', ' drinks ') + r.n : T('Gjetteren drikker ', 'The guesser drinks ') + r.n) + '</b></div></div>';
+      } else {
+        status = '<div class="tvftd-gjett"><small>' + (f.fase === 'andre' ? esc(navn(f.dealer)) + T(' sier', ' says') : T('Noen gjetter', 'Someone guesses')) + '</small><b>' +
+          (f.fase === 'andre' ? (f.hint === 'hoy' ? T('«Høyere»', '“Higher”') : T('«Lavere»', '“Lower”')) + T(' enn ', ' than ') + tvFtdVn(f.g1) : T('Si en verdi høyt', 'Call a value out loud')) + '</b></div>';
+      }
+      var topp = '<div class="tvftd-topp"><div><span>Fuck the Dealer · ' + T('rom ', 'room ') + esc(kode || '') + '</span><b>' + T('Tellebrettet', 'The tally board') + '</b></div>' +
+        '<div class="tvftd-chips"><div class="tvftd-chip dealer">' + tvHode(d, f.dealer, 'tvftd-h') + '<div><small>' + T('Dealer', 'Dealer') + '</small><b>' + esc(navn(f.dealer)) + '</b>' + prikker + '</div></div>' +
+        '<div class="tvftd-chip"><div><small>' + T('Igjen i stokken', 'Left in the deck') + '</small><b>' + f.igjen + '</b></div></div></div></div>';
+      return '<div class="tv-scene tvftd">' + topp + brett + status + '</div>';
+    }
     /* ---------- Gris på TV-en: fjøsveggen, trynet og brettene ---------- */
     var tvGrSett = {};
     function grScene(d, s) {
@@ -1415,6 +1449,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (s.type === 'bussruta' && s.br) return brScene(d, s);
       if (s.type === 'yatzy' && s.yz) return yzScene(d, s);
       if (s.type === 'pyramiden' && s.py) return pyScene(d, s);
+      if (s.type === 'dealer' && s.ftd) return ftdScene(d, s);
       if (s.type === 'gris' && s.gr) return grScene(d, s);
       if (s.type === 'president' && s.pr) return prScene(d, s);
       if (s.type === 'veddelopet' && s.vl) return vlScene(d, s);
@@ -2527,6 +2562,46 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tvpy-avsl-tekst small{font-size:1.4vw;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#C9A24A}
     .tvpy-avsl-tekst b{font-family:'Fraunces Variable',Georgia,serif;font-size:4vw;font-weight:900;line-height:1.02}
     @media (prefers-reduced-motion:reduce){.tvyz-terning.trill,.tvyz-terning.flytt,.tvyz-beger.rist,.tvyz-krus.inn path,.tvyz-krus.inn b,.tvyz-lapp.inn,.tvpy-kort.snu,.tvpy-lagt.inn,.tvpy-avsl-kort em,.tvpy-kort.stor{animation:none}.tvyz-c.skriv{animation:tvpyFade 200ms ease both}}
+    /* ---------- Fuck the Dealer på TV-en ---------- */
+    .tv-scene.tvftd{display:flex;flex-direction:column;gap:2.4vh;width:100%;align-self:stretch;padding:3vh 3vw;box-sizing:border-box;border-radius:24px;background:#16120F;color:#FFF8EE;font-family:var(--display)}
+    .tvftd-topp{display:flex;align-items:flex-end;justify-content:space-between;gap:2vw}
+    .tvftd-topp>div:first-child{display:flex;flex-direction:column;gap:.4vh}
+    .tvftd-topp span{font-size:1.1vw;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#C9BFB4}
+    .tvftd-topp>div>b{font-size:4.2vw;font-weight:900;font-stretch:66%;text-transform:uppercase;line-height:.95}
+    .tvftd-chips{display:flex;gap:1vw}
+    .tvftd-chip{display:flex;align-items:center;gap:1vw;background:#FFF8EE;color:#16120F;border-radius:1.1vw;padding:1vh 1.4vw;min-width:11vw}
+    .tvftd-chip.dealer{background:#63E2A8}
+    .tvftd-chip>div{display:flex;flex-direction:column;gap:.2vh}
+    .tvftd-chip small{font-size:.9vw;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .tvftd-chip b{font-size:2.4vw;font-weight:900;font-stretch:66%;text-transform:uppercase;line-height:1}
+    .tvftd-h{width:3.6vw;height:3.6vw}
+    .tvftd-prikker{display:flex;gap:.4vw;margin-top:.3vh}
+    .tvftd-prikker i{width:1vw;height:1vw;border-radius:50%;border:.15vw solid #16120F;background:transparent}
+    .tvftd-prikker i.paa{background:#FF5B1F}
+    .tvftd-brett{flex:1;display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:1vw;background:#2A241F;border:.25vw solid #4A3F37;border-radius:1.6vw;padding:2vh 1.6vw;align-content:start}
+    .tvftd-brett>div{display:flex;flex-direction:column;align-items:center;gap:.9vh}
+    .tvftd-brett b{font-size:2.4vw;font-weight:900;font-stretch:66%;line-height:1}
+    .tvftd-brett>div.ute b{color:#9C8F84}
+    .tvftd-brett i{width:100%;height:4.8vh;border-radius:.6vw;border:.15vw dashed #4A3F37;box-sizing:border-box}
+    .tvftd-brett i.full{background:#FFF8EE;border:.15vw solid #FFF8EE}
+    .tvftd-brett i.full.rod{background:#FF5B1F;border-color:#FF5B1F}
+    .tvftd-brett i.full.ny{animation:tvftd-ny .45s cubic-bezier(.23,1,.32,1) both}
+    @keyframes tvftd-ny{from{transform:translateY(-3vh) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+    .tvftd-gjett,.tvftd-res,.tvftd-slutt{display:flex;align-items:center;gap:1.6vw;min-height:9vh;border-radius:1.4vw;padding:1.4vh 2vw}
+    .tvftd-gjett{background:#FFF8EE;color:#16120F;flex-direction:column;align-items:flex-start;gap:.3vh;justify-content:center}
+    .tvftd-gjett small,.tvftd-res small,.tvftd-slutt small{font-size:1vw;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .tvftd-gjett b,.tvftd-res b,.tvftd-slutt b{font-size:3vw;font-weight:900;font-stretch:66%;text-transform:uppercase;line-height:1}
+    .tvftd-res.treff{background:#63E2A8;color:#16120F}
+    .tvftd-res.bom{background:#FF5B1F;color:#FFF8EE}
+    .tvftd-res>div{display:flex;flex-direction:column;gap:.3vh}
+    .tvftd-kort{position:relative;display:flex;align-items:center;justify-content:center;width:4.6vw;height:6.4vw;background:#FFF;color:#16120F;border:.2vw solid #16120F;border-radius:.6vw;font-weight:900;font-stretch:66%;flex-shrink:0;animation:tvftd-snu .5s cubic-bezier(.23,1,.32,1) both}
+    .tvftd-kort.rod{color:#FF5B1F}
+    .tvftd-kort b{font-size:3vw;line-height:1}
+    .tvftd-kort i{position:absolute;top:.3vw;left:.5vw;font-style:normal;font-size:1.2vw}
+    @keyframes tvftd-snu{from{transform:rotateY(90deg) scale(.9);opacity:0}to{transform:none;opacity:1}}
+    .tvftd-slutt{background:#FFD23F;color:#16120F;flex-direction:column;align-items:flex-start;gap:.3vh;justify-content:center}
+    .tvftd-slutt span{font-size:1.3vw;font-weight:700}
+    @media (prefers-reduced-motion:reduce){.tvftd-brett i.full.ny,.tvftd-kort{animation:none}}
     /* ---------- Gris på TV-en ---------- */
     .tv-scene.tvgr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,24vw);gap:2.6vw;width:100%;align-self:stretch;align-items:start}
     .tvgr-v{display:flex;flex-direction:column;gap:1.6vh;min-width:0}
