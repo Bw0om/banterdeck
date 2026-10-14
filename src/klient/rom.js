@@ -250,7 +250,7 @@ export function startRom(LEKNAVN, LANG) {
     drikkN = drikkEl ? drikkN + n : n;
     var fri = tilstand && tilstand.alkoholfri;
     if (!drikkEl) { drikkEl = document.createElement('div'); drikkEl.className = 'drikk-alarm'; drikkEl.setAttribute('role', 'alert'); drikkEl.addEventListener('click', function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }); document.body.appendChild(drikkEl); spillLyd('slurk'); }
-    drikkEl.innerHTML = '<b>' + (fri ? '⚠️ ' + T('STRAFFEPOENG!', 'PENALTY!') : '🍺 ' + T('DRIKK!', 'DRINK!')) + '</b><span>' + drikkN + ' ' + (fri ? T(drikkN === 1 ? 'straffepoeng' : 'straffepoeng', drikkN === 1 ? 'point' : 'points') : T(drikkN === 1 ? 'slurk' : 'slurker', drikkN === 1 ? 'sip' : 'sips')) + '</span><small>' + T('Trykk for å lukke', 'Tap to close') + '</small>';
+    drikkEl.innerHTML = '<b>' + (fri ? '⚠️ ' + T('STRAFFEPOENG!', 'PENALTY!') : '🍺 ' + T('DRIKK!', 'DRINK!')) + '</b><span>' + drikkN + ' ' + (fri ? T(drikkN === 1 ? 'straffepoeng' : 'straffepoeng', drikkN === 1 ? 'point' : 'points') : T(drikkN === 1 ? 'slurk' : 'slurker', drikkN === 1 ? 'sip' : 'sips')) + '</span>';
     try { navigator.vibrate && navigator.vibrate([300, 120, 300, 120, 500]); } catch (e) {}
     clearTimeout(drikkTimer); drikkTimer = setTimeout(function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }, 3200);
   }
@@ -277,7 +277,7 @@ export function startRom(LEKNAVN, LANG) {
     if (drikkEl || document.querySelector('.rof-knust')) { setTimeout(function () { vannAlarm(tekst); }, 3400); return; }
     lukkVann();
     vannEl = document.createElement('div'); vannEl.className = 'vann-alarm'; vannEl.setAttribute('role', 'alert');
-    vannEl.innerHTML = '<i aria-hidden="true">💧</i><b>' + T('VANNRUNDE', 'WATER ROUND') + '</b><span>' + esc(tekst || '') + '</span><small>' + T('Trykk for å lukke', 'Tap to close') + '</small>';
+    vannEl.innerHTML = '<i aria-hidden="true">💧</i><b>' + T('VANNRUNDE', 'WATER ROUND') + '</b><span>' + esc(tekst || '') + '</span>';
     vannEl.addEventListener('click', lukkVann);
     document.body.appendChild(vannEl);
     spillLyd('vann');
@@ -512,32 +512,30 @@ export function startRom(LEKNAVN, LANG) {
     root.innerHTML =
       '<h1 class="rom-h1">' + (medKode ? T('Bli med i rom ', 'Join room ') + esc(kode) : ln ? T(esc(ln) + ' fra hver sin telefon', 'Play ' + esc(ln) + ' on your phones') : T('Spill sammen', 'Play together')) + '</h1>' +
       (medKode ? '<div class="rom-kikk" id="romKikk" aria-live="polite"><p class="lead">' + T('Skriv navnet ditt, så er du med.', 'Enter your name and you’re in.') + '</p></div>'
-        : '<p class="lead">' + (ln ? T('Lag et rom for ' + esc(ln) + '. Leken starter når alle har blitt med.', 'Create a room for ' + esc(ln) + '. The game starts once everyone has joined.') : T('Drikkeleker dere spiller fra hver deres telefon.', 'Drinking games you play from your own phones.')) + '</p>' +
-          '<ol class="rom-slik"><li><b>' + T('Én lager et rom', 'One person creates a room') + '</b><span>' + T('og blir vert', 'and becomes the host') + '</span></li><li><b>' + T('Resten blir med', 'Everyone else joins') + '</b><span>' + T('med QR-kode eller en kode på fire tegn', 'with a QR code or a four-letter code') + '</span></li><li><b>' + T('Alle spiller', 'Everyone plays') + '</b><span>' + T('på sin egen telefon', 'on their own phone') + '</span></li></ol>') +
+        : '') +
       '<p class="small">' + sprakLenke() + '</p>' +
       (melding ? '<p class="rom-feil" role="alert">' + esc(melding) + '</p>' : '') +
       fortsettBanner() +
       '<div class="rom-start' + (kode ? ' med-kode' : ' uten-kode') + '">' +
         '<form class="rom-boks" id="blimedSkjema">' +
-          (medKode ? '' : '<h2>' + T('Bli med', 'Join') + '</h2><p class="small">' + T('Har du fått en kode av verten? Skriv den her.', 'Got a code from the host? Enter it here.') + '</p>') +
-          '<div class="rom-koderad" id="kodeRad"' + (medKode ? ' hidden' : '') + '><label for="romKode">' + T('Kode', 'Code') + '</label>' +
+          '<div class="rom-koderad" id="kodeRad"' + (medKode ? ' hidden' : '') + '><label for="romKode">' + T('Kode fra verten', 'Code from the host') + '</label>' +
           '<input id="romKode" class="rom-kodefelt" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="next" maxlength="6" placeholder="ABCD" value="' + esc(kode) + '"></div>' +
-          '<label for="romNavn1">' + T('Navnet ditt', 'Your name') + '</label>' +
-          '<input id="romNavn1" maxlength="20" autocomplete="nickname" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="' + T('F.eks. Jonas', 'E.g. Alex') + '" value="' + esc(navn) + '">' +
+          '<label for="romNavn1"' + (medKode ? '' : ' hidden') + '>' + T('Navnet ditt', 'Your name') + '</label>' +
+          '<input id="romNavn1"' + (medKode ? '' : ' hidden') + ' maxlength="20" autocomplete="nickname" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="' + T('F.eks. Jonas', 'E.g. Alex') + '" value="' + esc(navn) + '">' +
           '<button class="btn gold rom-knapp" type="submit">' + T('Bli med', 'Join') + '</button>' +
           (medKode ? '<p class="rom-alder">' + T('Ved å bli med bekrefter du at du er over 18. Drikk med vett – og aldri kjør etterpå.', 'By joining you confirm you’re over 18. Drink responsibly – and never drive afterwards.') + '</p>' +
             '<p class="small rom-annet"><button type="button" class="linkbtn" id="visKode">' + T('Feil kode?', 'Wrong code?') + '</button> · <button type="button" class="linkbtn" id="visLag">' + T('Lag et eget rom', 'Create your own room') + '</button></p>' : '') +
         '</form>' +
+        (medKode ? '' : '<p class="rom-eller" aria-hidden="true">' + T('eller', 'or') + '</p>') +
         '<form class="rom-boks lag' + (medKode ? ' skjult-lag' : '') + '" id="lagSkjema">' +
-          '<h2>' + (ln ? T('Lag rom for ', 'Create a room for ') + esc(ln) : T('Lag et rom', 'Create a room')) + '</h2>' +
-          '<p class="small">' + (ln ? T('Du blir vert og starter når alle er med.', 'You\'ll be the host and start when everyone\'s in.') : T('Du blir vert og velger lekene.', 'You\'ll be the host and pick the games.')) + '</p>' +
+          (ln ? '<h2>' + T('Lag rom for ', 'Create a room for ') + esc(ln) + '</h2>' : '') +
           '<label for="romNavn2">' + T('Navnet ditt', 'Your name') + '</label>' +
           '<input id="romNavn2" maxlength="20" autocomplete="nickname" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="' + T('F.eks. Maria', 'E.g. Sam') + '" value="' + esc(navn) + '">' +
           '<button class="btn gold rom-knapp" type="submit">' + T('Lag rom', 'Create room') + '</button>' +
           (medKode ? '<p class="rom-alder">' + T('Ved å lage et rom bekrefter du at du er over 18.', 'By creating a room you confirm you’re over 18.') + '</p>' : '') +
         '</form>' +
       '</div>' +
-      (medKode ? '' : '<p class="small">' + T('Lag mot lag? La hvert lag bli med fra én telefon og bruk lagnavnet som navn.', 'Team vs team? Let each team join from one phone and use the team name as their name.') + '</p>');
+      '';
     var vk = document.getElementById('visKode');
     if (vk) vk.addEventListener('click', visKodefelt);
     if (medKode) kikk();
@@ -547,7 +545,7 @@ export function startRom(LEKNAVN, LANG) {
     document.getElementById('blimedSkjema').addEventListener('submit', function (e) {
       e.preventDefault();
       var k = document.getElementById('romKode').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-      var n = document.getElementById('romNavn1').value.trim();
+      var n = (document.getElementById('romNavn1').value || (document.getElementById('romNavn2') || { value: '' }).value).trim();
       if (k.length < 4) return toast(T('Skriv inn koden.', 'Enter the code.'));
       if (!n) return toast(T('Skriv inn navnet ditt.', 'Enter your name.'));
       skriv('bd_mittnavn', n);
@@ -562,7 +560,7 @@ export function startRom(LEKNAVN, LANG) {
     var kf = document.getElementById('romKode');
     if (kf) kf.addEventListener('input', function () {
       var v = kf.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== kf.value) kf.value = v;
-      var nf1 = document.getElementById('romNavn1'); if (v.length === 4 && nf1 && !nf1.value) nf1.focus();
+      var nf1 = document.getElementById(medKode ? 'romNavn1' : 'romNavn2'); if (v.length === 4 && nf1 && !nf1.value) nf1.focus();
     });
     document.getElementById('lagSkjema').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -611,14 +609,13 @@ export function startRom(LEKNAVN, LANG) {
   /** Kveldspoengene: 3–2–1 i hver lek. Verten velger vinneren av leker appen ikke kan måle. */
   function kveldKort() {
     var t = tilstand, k = t.kveld;
-    var intro = '<p class="small">🏅 ' + T('Hver lek gir 3, 2 og 1 kveldspoeng til de beste.', 'Every game gives 3, 2 and 1 night points to the best.') + (t.gjeng ? T(' Kveldens vinner velger en regel til lovboka.', ' Tonight’s winner picks a rule for the law book.') : '') + '</p>';
-    if (!k) return '<div class="gk-poeng">' + intro + '</div>';
+    if (!k) return '';
     var sp = '';
     if (k.sporsmal && erVert()) sp = '<div class="gk-sporsmal"><p><b>' + T('Hvem vant «' + esc(k.sporsmal.navn) + '»?', 'Who won “' + esc(k.sporsmal.navn) + '”?') + '</b> <small>' + T('Appen kunne ikke måle denne leken.', 'The app couldn’t measure this game.') + '</small></p><div class="rom-valg">' +
       t.spillere.map(function (p) { return '<button type="button" data-g="kv-vinner" data-id="' + p.id + '">' + esc(p.navn) + '</button>'; }).join('') +
       '<button type="button" data-g="kv-vinner" data-id="">' + T('Ingen / hopp over', 'Nobody / skip') + '</button></div></div>';
     var med = (k.stilling || []).filter(function (x) { return x.p > 0; });
-    if (!med.length) return '<div class="gk-poeng">' + sp + intro + '</div>';
+    if (!med.length) return sp ? '<div class="gk-poeng">' + sp + '</div>' : '';
     var siste = (k.runder || [])[k.runder.length - 1];
     return '<div class="gk-poeng">' + sp + '<p class="rom-etikett">🏅 ' + T('Kveldens stilling', 'Tonight’s standings') + '</p><ol class="gk-stilling">' +
       med.slice(0, 6).map(function (x, i) { return '<li class="' + (x.id === t.meg ? 'meg' : '') + '"><span>' + (i === 0 ? '👑 ' : '') + esc(navn(x.id)) + '</span><b>' + x.p + '</b></li>'; }).join('') + '</ol>' +
@@ -752,10 +749,9 @@ export function startRom(LEKNAVN, LANG) {
   function sofaLobby() {
     var folk = sofaFolk(), n = folk.length;
     var ut = '<div class="sofa-lobby"><p class="nr-etikett">' + T('Bare din telefon', 'Just your phone') + '</p><h2 class="sofa-tittel">' + T('Hvem er her?', 'Who’s here?') + '</h2>' +
-      '<p class="small">' + T('Rommet står åpent – kode ', 'The room stays open – code ') + '<b>' + esc(kode) + '</b>. ' + T('De som kommer senere, havner rett i leken.', 'Anyone joining later goes straight into the game.') + '</p>' +
       '<form id="sofaSkjema" class="sofa-skjema"><label><span class="sr-only">' + T('Navn', 'Name') + '</span><input id="sofaNavn" maxlength="16" autocomplete="off" placeholder="' + T('Navn på en som er her', 'Name of someone here') + '"></label>' +
       '<button type="submit" aria-label="' + T('Sett i sofaen', 'Seat on the sofa') + '"' + (n >= 6 ? ' disabled' : '') + '>+</button></form>' +
-      '<p class="small sofa-antall">' + (n ? T('Du + ', 'You + ') + n + T(' i sofaen', ' on the sofa') + (n >= 6 ? T(' · sofaen er full', ' · the sofa is full') : '') : T('Du står i stua. Hvem andre er her?', 'You’re in the living room. Who else is here?')) + '</p>' +
+      (n ? '<p class="small sofa-antall">' + T('Du + ', 'You + ') + n + T(' i sofaen', ' on the sofa') + (n >= 6 ? T(' · sofaen er full', ' · the sofa is full') : '') + '</p>' : '') +
       (n ? '<div class="sofa-chips">' + folk.map(function (p) { return '<button type="button" data-g="sofa-fjern" data-paa="' + esc(p.id) + '" aria-label="' + T('Fjern ', 'Remove ') + esc(p.navn) + '">' + esc(p.navn) + ' <span aria-hidden="true">×</span></button>'; }).join('') + '</div>' : '');
     if (n) {
       var leser = sofaFane === 'leser';
@@ -763,7 +759,6 @@ export function startRom(LEKNAVN, LANG) {
         '<div class="sofa-faner" role="group" aria-label="' + T('Hvordan spiller dere?', 'How do you play?') + '"><i class="' + (leser ? 'h' : '') + '"></i>' +
         '<button type="button" data-g="sofa-fane" data-v="rundt" aria-pressed="' + !leser + '">' + T('Send rundt', 'Pass it round') + '</button>' +
         '<button type="button" data-g="sofa-fane" data-v="leser" aria-pressed="' + leser + '">' + T('Verten leser', 'Host reads') + '</button></div>' +
-        '<p class="small">' + (leser ? T('Du holder telefonen og leser høyt.', 'You hold the phone and read out loud.') : T('Telefonen går fra hånd til hånd.', 'The phone goes from hand to hand.')) + '</p>' +
         '<div class="sofa-leker">' + EN_LEKER.filter(function (l) { return l[1] === sofaFane; }).map(function (l, i) {
           return '<button type="button" class="sofa-lek" data-g="en-start" data-lek="' + l[0] + '" style="--f:' + i * 40 + 'ms"><span class="sofa-lek-merke"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + EN_IKON[l[4]] + '"/></svg></span><b>' + l[2] + '</b><small>' + l[3] + '</small></button>';
         }).join('') + '</div>';
@@ -777,7 +772,6 @@ export function startRom(LEKNAVN, LANG) {
     var vent = 60000 - (Date.now() - Math.max(aleneFra, aleneLukket));
     if (vent > 0) { clearTimeout(aleneTimer); aleneTimer = setTimeout(tegn, vent + 50); return ''; }
     return '<div class="sofa-ark" role="dialog" aria-label="' + T('Ingen telefoner oppe?', 'No phones out?') + '"><i class="sofa-ark-hank"></i><b>' + T('Ingen telefoner oppe?', 'No phones out?') + '</b>' +
-      '<p>' + T('Start med bare din. Skriv inn hvem som er her – de får plass i sofaen. Rommet står åpent for dem som kommer senere.', 'Start with just yours. Type in who’s here – they get a seat on the sofa. The room stays open for anyone coming later.') + '</p>' +
       '<button class="rom-stor-knapp" data-g="sofa-start" type="button">' + T('Start med bare min telefon', 'Start with just my phone') + '</button>' +
       '<button class="linkbtn" data-g="sofa-vent" type="button">' + T('Vent litt til', 'Wait a bit longer') + '</button></div>';
   }
@@ -867,39 +861,24 @@ export function startRom(LEKNAVN, LANG) {
     return topp + kortHtml + '<div class="en-midt">' + midt + '</div>' +
       '<button type="button" class="rom-stor-knapp en-neste' + (klar ? '' : ' svak') + '" data-g="en-neste">' + T('Neste kort – ', 'Next card – ') + esc(navn(s.neste)) + T(' leser', ' reads') + '</button>';
   }
-  /** Første gang som vert: tre ting som ellers er lette å gå glipp av. Lukkes én gang per telefon. */
-  function vertIntro() {
-    if (les('bd_vert_intro')) return '';
-    var rad = function (g, ikon, tittel, tekst) { return '<button type="button" class="vert-intro-rad" data-g="' + g + '"><span aria-hidden="true">' + ikon + '</span><b>' + tittel + '</b><small>' + tekst + '</small></button>'; };
-    return '<div class="vert-intro"><div class="vert-intro-topp"><b>' + T('Første gang som vert?', 'First time hosting?') + '</b><button type="button" class="linkbtn" data-g="vert-intro-lukk">' + T('Skjønner', 'Got it') + '</button></div>' +
-      rad('skjerm', '📺', T('Få rommet opp på TV-en', 'Get the room on the TV'), T('Åpne mittvors.no/tv på TV-en og skann QR-koden – eller speil telefonen.', 'Open mittvors.no/tv on the TV and scan the QR code – or mirror your phone.')) +
-      rad('sofa-start', '🛋️', T('Ingen andre telefoner?', 'No other phones?'), T('Spill med bare din: skriv inn hvem som er her, så får de plass i sofaen.', 'Play with just yours: type in who’s here and they get a seat on the sofa.')) +
-      rad('figur-ark', '🧢', T('Figuren din i stua', 'Your figure in the room'), T('Trykk på deg selv for å vinke. Lås opp luer, briller og bevegelser ved å spille.', 'Tap yourself to wave. Unlock hats, glasses and moves by playing.')) + '</div>';
-  }
   function lobby() {
     var t = tilstand;
     if (t.valgt && !visAlle) return valgtLobby();
     if (!erVert()) {
-      return gjestIntro() + '<div class="rom-vent"><p class="rom-stor">' + (t.plan && t.plan.length ? T('Venter på at ' + esc(navn(t.vert)) + ' starter kvelden …', 'Waiting for ' + esc(navn(t.vert)) + ' to start the night …') : T('Venter på at ' + esc(navn(t.vert)) + ' velger en lek …', 'Waiting for ' + esc(navn(t.vert)) + ' to pick a game …')) + '</p>' +
-        '<p class="small">' + T('Du trenger ikke gjøre noe – leken dukker opp her av seg selv.', 'You don’t need to do anything – the game shows up here by itself.') + '</p>' +
-        '<p class="small">' + t.spillere.length + T(' med i rommet. Flere? Del koden <b>', ' in the room. More people? Share the code <b>') + esc(kode) + '</b>.</p>' + romMerker() + '</div>' + gjengBoks() + kveldKort() + reglerKort();
+      return '<div class="rom-vent"><p class="rom-stor">' + esc(navn(t.vert)) + (t.plan && t.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) + '</p>' +
+        '<div class="rom-vent-prikker" aria-hidden="true"><span></span><span></span><span></span></div>' + romMerker() + '</div>' + kveldKort() + reglerKort();
     }
     if (sofaModus()) return sofaLobby();
     var borsFull = t.bors && t.bors.paa && !t.bors.fokus ? '<p><button class="btn ghost" data-g="bs-fokus" type="button">' + T('📈 Gjør Vorsbørsen til hovedspill', '📈 Make the Exchange the main game') + '</button></p>' : '';
-    return plassInfo() + planBoks() + vertIntro() +
-      '<h2 class="rom-h2 rom-steg"><span>1</span>' + T('Få med alle', 'Get everyone in') + '</h2>' + qrBoks() +
-      '<p class="small rom-antall">' + (t.spillere.length > 1 ? '👥 ' + t.spillere.length + T(' er med: ', ' are in: ') + t.spillere.map(function (p) { return esc(p.navn); }).join(', ') : T('👤 Bare du er med ennå – vis dem QR-koden eller trykk «Inviter» øverst.', '👤 Just you so far – show them the QR code or tap “Invite” at the top.')) + '</p>' +
-      romValg() + gjengBoks() +
-      '<h2 class="rom-h2 rom-steg"><span>2</span>' + T('Noe som går hele kvelden?', 'Something for the whole night?') + ' <small>' + T('valgfritt', 'optional') + '</small></h2>' +
-      '<p class="small rom-steg-forklaring">' + T('Disse går i bakgrunnen uansett hvilken lek dere spiller, og fortsetter når dere bytter lek.', 'These run in the background whatever game you play, and keep going when you switch games.') + '</p>' +
-      bakgrunnBoks() + borsFull +
-      '<h2 class="rom-h2 rom-steg"><span>3</span>' + T('Velg en lek', 'Pick a game') + '</h2>' +
-      '<p class="small rom-steg-forklaring">' + T('Én lek om gangen – den dukker opp på alle telefonene. Dere kan bytte når som helst.', 'One game at a time – it shows up on every phone. You can switch whenever you like.') + '</p>' + kveldKort() + reglerKort() + anbefalteLeker() +
-      '<p class="small rom-nivahint">' + T('Mange leker har nivåer: <b>Snill</b> passer for alle, <b>Frekk</b> og <b>Drøy</b> er for de som tåler mer, og <b>Alle</b> blander.', 'Many games have levels: <b>Mild</b> suits everyone, <b>Cheeky</b> and <b>Wild</b> are for those who can take more, and <b>All</b> mixes them.') + '</p>' +
+    return plassInfo() + planBoks() +
+      (t.spillere.length > 1 ? '' : qrBoks()) +
+      '<div class="rom-knapperad">' + (visSkjerm ? '' : '<button type="button" class="rom-knapp-stor" data-g="skjerm">📺 ' + T('Vis på TV', 'Show on TV') + '</button>') +
+        '<button type="button" class="rom-knapp-stor" data-g="sofa-start">🛋️ ' + T('Bare min telefon', 'Just my phone') + '</button></div>' +
+      '<h2 class="rom-h2">' + T('Velg en lek', 'Pick a game') + '</h2>' + kveldKort() + reglerKort() + anbefalteLeker() +
       lekeGrupper(t.leker.filter(function (l) { return !l.pluss && !l.skjult; }), function (l) {
         var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
         var min = forFa(l);
-        if (min) return '<div class="rom-lek for-fa">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><p class="small">👥 ' + T('Trenger minst ' + min + ' spillere – dere er ' + t.spillere.length + '.', 'Needs at least ' + min + ' players – you’re ' + t.spillere.length + '.') + '</p></div>';
+        if (min) return '<div class="rom-lek for-fa">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><p class="small">👥 ' + T('Minst ' + min, 'At least ' + min) + '</p></div>';
         var lekId = l.id === 'pekeleken' && pkMobil ? 'mest' : l.id;
         return '<div class="rom-lek">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' + (l.id === 'pekeleken' ? pkVariant() : '') +
           '<div class="rom-mod">' + (mod.length
@@ -909,7 +888,8 @@ export function startRom(LEKNAVN, LANG) {
                 mod.slice(4).map(function (m) { return '<option value="' + esc(m.v) + '">' + esc(m.t) + (nrSpilt().indexOf(m.v) !== -1 ? ' ✓' : '') + '</option>'; }).join('') + '</select>' : '')
             : '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="*">Start</button>') +
           '</div></div>';
-      }) + plussLeker() + egneStokker() + aleneArk();
+      }) + plussLeker() + egneStokker() +
+      '<h2 class="rom-h2">' + T('Hele kvelden', 'All night') + '</h2>' + bakgrunnBoks() + borsFull + romValg() + gjengBoks() + aleneArk();
   }
   /** Bakgrunnslekene: går hele kvelden, uansett hvilken hovedlek dere spiller. Verten slår dem av og på. */
   function bakgrunnBoks() {
@@ -922,7 +902,8 @@ export function startRom(LEKNAVN, LANG) {
     rader.push({ ikon: klistremerke('agent'), navn: T('Agent 0,5', 'Agent 0.5') + (t.pluss ? '' : ' <span class="rom-bg-pluss">✨ Pluss</span>'), om: T('Hemmelige oppdrag: alle får ett, som å få noen til å si «sykt». Klarer du det, deler du ut slurker.', 'Everyone gets a secret mission, like getting someone to say “insane”. Pull it off and you hand out sips.'),
       paa: !!t.oppdrag, knapp: t.oppdrag ? '<button class="linkbtn" data-g="op-av" type="button">' + T('Slå av', 'Turn off') + '</button>' : '<button class="btn small gold" data-g="op-paa" type="button">' + T('Slå på', 'Turn on') + '</button>' });
     return '<div class="rom-bg">' + rader.map(function (r) {
-      return '<div class="rom-bg-rad' + (r.paa ? ' paa' : '') + '"><span class="rom-bg-ikon" aria-hidden="true">' + r.ikon + '</span><div><b>' + r.navn + (r.paa ? ' <span class="rom-bg-status">' + T('På', 'On') + '</span>' : '') + '</b><small>' + r.om + '</small></div><div class="rom-bg-knapper">' + r.knapp + '</div></div>';
+      return '<div class="rom-bg-rad' + (r.paa ? ' paa' : '') + '"><span class="rom-bg-ikon" aria-hidden="true">' + r.ikon + '</span><b>' + r.navn + (r.paa ? ' <span class="rom-bg-status">' + T('På', 'On') + '</span>' : '') + '</b>' +
+        '<button type="button" class="rom-bg-hjelp" data-g="bg-hjelp" aria-expanded="false" aria-label="' + T('Hva er dette?', 'What is this?') + '">?</button><div class="rom-bg-knapper">' + r.knapp + '</div><small class="rom-bg-om" hidden>' + r.om + '</small></div>';
     }).join('') + '</div>';
   }
   /** Hvem som er spørsmålsmester – vises for alle, både i lobbyen og under lekene. */
@@ -953,7 +934,7 @@ export function startRom(LEKNAVN, LANG) {
     var t = tilstand, rask = '';
     if (s && t.plan && nestePlan()) rask += '<button class="btn gold small" data-g="plan-start" type="button">⏭ ' + T('Neste: ', 'Next: ') + esc(nestePlan().navn) + '</button>';
     if (s) rask += '<button class="btn ghost small" data-g="avslutt" type="button">' + T('↩︎ Bytt lek', '↩︎ Switch game') + '</button>';
-    if (!visSkjerm) rask += '<button class="btn ghost small" data-g="skjerm" type="button">📺 ' + T('Vis på TV', 'Show on TV') + '</button>';
+    if (s && !visSkjerm) rask += '<button class="btn ghost small" data-g="skjerm" type="button">📺 ' + T('Vis på TV', 'Show on TV') + '</button>';
     var rader = [];
     // I lobbyen står bakgrunnslekene som eget steg. Under en lek kan verten slå dem av og på herfra.
     if (s) {
@@ -969,12 +950,12 @@ export function startRom(LEKNAVN, LANG) {
       rader.push(t.vannAv ? ['vann-auto', '⏱️', T('Slå på vannrunde hver time', 'Turn on the hourly water round'), T('Av nå. Rommet kan minne alle på et glass vann omtrent én gang i timen.', 'Off now. The room can remind everyone to drink some water about once an hour.')]
         : ['vann-auto', '⏱️', T('Slå av vannrunde hver time', 'Turn off the hourly water round'), vannIgjen()]);
     }
-    rader.unshift(['skjerm', '📺', T('Storskjerm på TV-en', 'Big screen on the TV'), T('Vis rommet stort på en PC eller et nettbrett koblet til TV-en – med lyd over musikken.', 'Show the room big on a laptop or tablet hooked up to the TV – with sound over the music.')]);
+    if (s) rader.unshift(['skjerm', '📺', T('Storskjerm på TV-en', 'Big screen on the TV'), T('Vis rommet stort på en PC eller et nettbrett koblet til TV-en – med lyd over musikken.', 'Show the room big on a laptop or tablet hooked up to the TV – with sound over the music.')]);
     rader.push(['nullstill', '🔄', T('Nullstill slurker', 'Reset sips'), T('Starter tellingen på poengtavla på nytt.', 'Restarts the count on the scoreboard.')]);
     if (!t.ferdig) rader.push(['avslutt-kvelden', '🏁', T('Avslutt kvelden', 'End the night'), T('Kårer kveldens vinner og viser oppsummeringen.', 'Crowns tonight’s winner and shows the recap.')]);
     return '<div class="rom-vert">' + (visSkjerm && t.skjermPin ? skjermBoks() : '') + (rask ? '<div class="rom-vert-rask">' + rask + '</div>' : '') +
       '<details class="rom-verktoy" data-gruppe="' + (s ? 'verktoy-spill' : 'verktoy-lobby') + '"' + (erApen(s ? 'verktoy-spill' : 'verktoy-lobby', !s) ? ' open' : '') + '><summary>⚙️ ' + (s ? T('Mer for verten', 'More for the host') : T('Mer til kvelden', 'More for the night')) + '</summary>' +
-      rader.map(function (r) { return '<button type="button" class="rom-verktoy-rad" data-g="' + r[0] + '"><span aria-hidden="true">' + r[1] + '</span><b>' + r[2] + '</b><small>' + r[3] + '</small></button>'; }).join('') + '</details></div>';
+      rader.map(function (r) { return '<button type="button" class="rom-verktoy-rad" data-g="' + r[0] + '"><span aria-hidden="true">' + r[1] + '</span><b>' + r[2] + '</b></button>'; }).join('') + '</details></div>';
   }
   /** Verten skannet QR-koden på TV-en (eller laget rommet etterpå): koble TV-en til dette rommet. */
   function tvKoblSjekk() {
@@ -1014,20 +995,11 @@ export function startRom(LEKNAVN, LANG) {
     var ider = n >= 3 ? ['hvemskrev', 'mest', 'spion'] : ['mest', 'ring-of-fire', 'skal'];
     var liste = ider.map(function (id) { return (t.leker || []).find(function (x) { return x.id === id; }); }).filter(function (l) { return l && !l.pluss && !forFa(l); });
     if (!liste.length) return '';
-    return '<div class="rom-anbefalt"><p class="rom-etikett">⭐ ' + (n >= 3 ? T('Usikker? Start med en av disse', 'Not sure? Start with one of these') : T('Dere er få – disse funker fint', 'Just a few of you – these work great')) + '</p>' +
+    return '<div class="rom-anbefalt">' +
       liste.map(function (l) {
         var mod = l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*';
         return '<button type="button" class="rom-anbefalt-lek" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(mod) + '">' + klistremerke(l.id, 'rom-anbefalt-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><i aria-hidden="true">▶</i></button>';
       }).join('') + '</div>';
-  }
-  /** Første gang som gjest: hva som skjer nå. */
-  function gjestIntro() {
-    if (les('bd_intro_gjest')) return '';
-    return '<div class="rom-intro"><p class="rom-etikett">' + T('Du er med! 🎉', 'You’re in! 🎉') + '</p><ol>' +
-      '<li><b>' + T('Verten velger lek', 'The host picks a game') + '</b><span>' + T('Den dukker opp på skjermen din av seg selv.', 'It shows up on your screen by itself.') + '</span></li>' +
-      '<li><b>' + T('Noen leker har hemmeligheter', 'Some games have secrets') + '</b><span>' + T('Står det «Bare du ser dette», så ikke vis skjermen til de andre 🤫', 'If it says “Only you can see this”, don’t show your screen to the others 🤫') + '</span></li>' +
-      '<li><b>' + T('Usikker på reglene?', 'Unsure of the rules?') + '</b><span>' + T('Trykk «❓ Slik spiller dere» under hver lek.', 'Tap “❓ How to play” under each game.') + '</span></li></ol>' +
-      '<button class="linkbtn" data-g="intro-lukk" data-k="bd_intro_gjest" type="button">' + T('Skjønner – skjul dette', 'Got it – hide this') + '</button></div>';
   }
   /** Kort forklaring av hver lek i rommet – åpen første gang du ser leken. */
   var REGLER = {
@@ -1106,7 +1078,7 @@ export function startRom(LEKNAVN, LANG) {
   function plussLeker() {
     var t = tilstand, l = (t.leker || []).filter(function (x) { return x.pluss; }); if (!l.length) return '';
     var aapen = !!t.pluss;
-    return '<details class="rom-gruppe pluss" data-gruppe="pluss"' + (erApen('pluss', aapen) ? ' open' : '') + '><summary>' + T('✨ Med Pluss', '✨ With Pluss') + ' <small>' + l.length + '</small></summary>' + (aapen ? '' : '<p class="small">' + T('Har verten Pluss, er disse åpne for alle i rommet – og dere kan være opptil 16 telefoner.', 'If the host has Pluss, these are open to everyone in the room – and you can have up to 16 phones.') + ' <a href="' + RUTE.pluss + '">' + T('Første kveld er gratis.', 'Your first night is free.') + '</a></p>') +
+    return '<details class="rom-gruppe pluss" data-gruppe="pluss"' + (erApen('pluss', aapen) ? ' open' : '') + '><summary>' + T('✨ Med Pluss', '✨ With Pluss') + ' <small>' + l.length + '</small></summary>' + 
       '<div class="rom-leker">' + l.map(function (x) {
         return '<div class="rom-lek pluss' + (aapen ? '' : ' laast') + '">' + klistremerke(x.id || '', 'rom-lek-merke') + '<b>' + (aapen ? '' : '🔒 ') + esc(x.navn) + '</b><span>' + esc(x.om || '') + '</span>' +
           '<div class="rom-mod"><button type="button" data-g="start" data-lek="' + x.id + '" data-modus="*">' + (aapen ? 'Start' : T('Lås opp', 'Unlock')) + '</button></div></div>';
@@ -1183,7 +1155,7 @@ export function startRom(LEKNAVN, LANG) {
       : '<button class="rom-stor-knapp" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(valgtMod || (mod[0] && l.type === 'nyhetsrunden' ? mod[0].v : '*')) + '" type="button">Start ' + esc(l.navn) + '</button>';
     return '<p class="rom-etikett">' + T('Dere skal spille', 'You\'re playing') + '</p><h2 class="rom-h2" style="margin-top:0">' + esc(l.navn) + '</h2>' +
       plassInfo() + qrBoks() + romValg() + '<p class="rom-status">' + t.spillere.length + T(' med i rommet', ' in the room') + '</p>' + liste +
-      '<p class="small">' + T('Start når alle har blitt med – ingen ser noe fra leken før du trykker.', 'Start once everyone has joined – nobody sees anything from the game until you tap.') + '</p>' + startKnapper +
+      startKnapper +
       '<p><button class="linkbtn" data-g="velg-annen" type="button">' + T('Velg en annen lek', 'Pick another game') + '</button></p>';
   }
 
@@ -1201,9 +1173,9 @@ export function startRom(LEKNAVN, LANG) {
     if (t.gjeng) gj = '<p class="rom-gjeng">' + T('🏆 Kvelden telles i sesongen til ', '🏆 Tonight counts toward the season for ') + '<a href="' + RUTE.gjeng + '?k=' + esc(t.gjeng.kode) + '" target="_blank" rel="noopener"><b>' + esc(t.gjeng.navn) + '</b></a>' + (t.gjeng.kveld ? '' : ' · <button class="linkbtn" data-g="gjeng-av" type="button">' + T('Fjern', 'Remove') + '</button>') + '</p>';
     else if (mineGjenger && mineGjenger.length) gj = '<label class="rom-gjeng">' + T('🏆 Fast gjeng? ', '🏆 Regular crew? ') + '<select id="romGjeng"><option value="">' + T('Velg gjeng …', 'Pick a crew …') + '</option>' +
       mineGjenger.map(function (g) { return '<option value="' + esc(g.id) + '">' + esc(g.navn) + '</option>'; }).join('') + '</select></label>';
-    else if (inne && mineGjenger) gj = '<p class="rom-gjeng small">' + T('Spiller dere ofte sammen?', 'Play together often?') + ' <a href="' + RUTE.gjeng + '" target="_blank" rel="noopener">' + T('Lag en fast gjeng', 'Make a crew') + '</a> ' + T('og få sesongtabell.', 'and get a season table.') + '</p>';
+    else if (inne && mineGjenger) gj = '<p class="rom-gjeng small"><a href="' + RUTE.gjeng + '" target="_blank" rel="noopener">🏆 ' + T('Lag en fast gjeng', 'Make a crew') + '</a></p>';
     return '<div class="rom-innst"><button type="button" class="alkfri-bryter" data-g="alkoholfri" aria-pressed="' + !!t.alkoholfri + '"><span class="alkfri-knott" aria-hidden="true"></span>' + T('🥤 Alkoholfri for alle', '🥤 Alcohol-free for everyone') + '</button>' +
-      (t.alkoholfri ? '<span class="small">' + T('Alle telefonene viser straffepoeng. Den med flest til slutt spinner straffehjulet!', 'Every phone shows penalty points. Whoever has the most at the end spins the penalty wheel!') + '</span>' : '') + gj + '</div>';
+      gj + '</div>';
   }
   /** Det gjestene ser: at kvelden er alkoholfri eller telles for en gjeng. */
   function romMerker() {
@@ -1228,11 +1200,11 @@ export function startRom(LEKNAVN, LANG) {
     var klar = les('bd_stokk_rom'), liste = (mineStokker || []).slice();
     if (klar && klar.kort) liste = [klar].concat(liste.filter(function (x) { return x.id !== klar.id; }));
     var logget = window.BDKonto && window.BDKonto.les();
-    if (!liste.length) return '<p class="small rom-egnetips">' + T('Egne drikkekort? Lag kortstokker på', 'Your own drinking cards? Make decks under') + ' <a href="' + RUTE.konto + '">' + T('Profil', 'Profile') + '</a> ' + T('og spill dem her.', 'and play them here.') + '</p>';
+    if (!liste.length) return '';
     return '<h2 class="rom-h2">' + T('Dine kortstokker', 'Your decks') + '</h2><div class="rom-leker">' + liste.map(function (x, i) {
-      return '<div class="rom-lek' + (klar && i === 0 ? ' klar' : '') + '"><b>' + esc(x.navn) + '</b><span>' + (x.kort || []).length + T(' egne kort. Alle ser samme kort.', ' custom cards. Everyone sees the same card.') + '</span>' +
+      return '<div class="rom-lek' + (klar && i === 0 ? ' klar' : '') + '"><b>' + esc(x.navn) + '</b><span>' + (x.kort || []).length + T(' kort', ' cards') + '</span>' +
         '<div class="rom-mod"><button type="button" data-g="egen" data-i="' + i + '">Start</button></div></div>';
-    }).join('') + '</div>' + (logget ? '' : '<p class="small">' + T('Logg inn på', 'Log in at') + ' <a href="' + RUTE.konto + '">' + T('Profil', 'Profile') + '</a> ' + T('for å se alle kortstokkene dine.', 'to see all your decks.') + '</p>');
+    }).join('') + '</div>';
   }
   function egenListe() {
     var klar = les('bd_stokk_rom'), liste = (mineStokker || []).slice();
@@ -4880,9 +4852,7 @@ export function startRom(LEKNAVN, LANG) {
       });
       stuaEl.appendChild(Object.assign(document.createElement('p'), { className: 'rom-stua-tips' }));
     }
-    stuaEl.querySelector('.rom-stua-tips').innerHTML = (erVert()
-      ? T('Trykk på deg selv, så vinker figuren din. Trykk på rommet for å endre det. ', 'Tap yourself and your figure waves. Tap the room to change it. ')
-      : T('Trykk på deg selv, så vinker figuren din. ', 'Tap yourself and your figure waves. ')) + '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>';
+    stuaEl.querySelector('.rom-stua-tips').innerHTML = '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>';
     plass.appendChild(stuaEl);
     stuaEl.classList.toggle('kompakt', !!s);
     var st = tilstand.stua || {};
@@ -5108,9 +5078,9 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'velg-annen') { visAlle = true; if (erVert()) gjor({ handling: 'velg-annen' }); return tegn(); }
     if (g === 'lyd') { lyd.paa = !lyd.paa; skriv('bd_lyd', lyd.paa); if (lyd.paa) { lydCtx(); spillLyd('tur'); } return tegn(); }
     if (g === 'reak-mer') { reakMer = !reakMer; return tegn(); }
-    if (g === 'vert-intro-lukk') { skriv('bd_vert_intro', 1); return tegn(); }
     if (g === 'reager') { if (!les('bd_intro_reak')) { skriv('bd_intro_reak', 1); var hh = document.querySelector('.reak-hint'); if (hh) hh.remove(); } return gjorAlltid({ handling: 'reager', e: b.dataset.e }); }
     if (g === 'intro-lukk') { skriv(b.dataset.k, 1); return tegn(); }
+    if (g === 'bg-hjelp') { var om = b.closest('.rom-bg-rad').querySelector('.rom-bg-om'); om.hidden = !om.hidden; b.setAttribute('aria-expanded', String(!om.hidden)); return; }
     if (g === 'send-velg' || g === 'del-ut') return delUtArk();
     if (g === 'aldri-svar') { if (b.getAttribute('aria-pressed') === 'true') return; gjorAlltid({ handling: 'aldri-svar', v: b.dataset.v }); return; }
     if (g === 'aldri-nekt') return gjor({ handling: 'aldri-nekt' });
