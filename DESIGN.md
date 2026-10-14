@@ -347,6 +347,10 @@ The figure picker is built like a character editor: one big figure on a mint sta
 
 «Min stokk» is now «Profil»: the figure sits first in a yellow hero card, and username, password and delete-account hide under a settings disclosure.
 
+## The profile is the figure
+
+Like Fall Guys and Rec Room: the profile page opens straight on the figure. Your name in condensed caps, a small yellow pill with nights and unlocks, one ≡ button, and the figure picker filling the rest. Everything else – crews, decks, lines, refer a friend, settings – sits behind ≡ in a bottom sheet of five big rows with coloured icon tiles; each row is its own view with a back arrow (`#stokker`, `#replikker`, `#verv`, `#innstillinger` in the URL, so links can land there). No hero card, no explanatory copy on the default view.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.

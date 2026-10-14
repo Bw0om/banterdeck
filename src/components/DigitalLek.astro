@@ -515,7 +515,7 @@ if (!window.BDK) window.BDK = (function () {
         ut.innerHTML = T('Kortene er lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre dem.', 'The cards have been set aside. <a href="/account">Log in or create an account</a> to save them.');
         return;
       }
-      return KO.stokker.lagre({ navn: navn, kort: kort }).then(function () { ut.innerHTML = T('Lagret ✓ Finn den under <a href="/no/account">Profil</a>.', 'Saved ✓ Find it under <a href="/account">Profile</a>.'); });
+      return KO.stokker.lagre({ navn: navn, kort: kort }).then(function () { ut.innerHTML = T('Lagret ✓ Finn den under <a href="/no/account#stokker">Profil</a>.', 'Saved ✓ Find it under <a href="/account#stokker">Profile</a>.'); });
     }).catch(function (e) { ut.textContent = e.message || T('Fikk ikke lagret.', "Couldn't save."); });
   }
   root.addEventListener('click', function (e) {
@@ -536,7 +536,7 @@ if (!window.BDK) window.BDK = (function () {
       var fk2 = forhandKort(), ut = root.querySelector('#rfFMsg'), nv = (root.querySelector('#rfFNavn').value.trim() || T('Mine kort', 'My cards')).slice(0, 40);
       if (!fk2.length) { ut.textContent = T('Skriv minst ett kort.', 'Write at least one card.'); return; }
       window.BDLagreKort(nv, fk2).then(function (r) {
-        ut.innerHTML = r === 'lagret' ? T('Lagret ✓ Du finner den under <a href="/no/account">Profil</a> – og kan ta den med i neste runde.', 'Saved ✓ You\'ll find it under <a href="/account">Profile</a> – and can bring it into the next round.') : T('Lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre den.', 'Set aside. <a href="/account">Log in or create an account</a> to save it.');
+        ut.innerHTML = r === 'lagret' ? T('Lagret ✓ Du finner den under <a href="/no/account#stokker">Profil</a> – og kan ta den med i neste runde.', 'Saved ✓ You\'ll find it under <a href="/account#stokker">Profile</a> – and can bring it into the next round.') : T('Lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre den.', 'Set aside. <a href="/account">Log in or create an account</a> to save it.');
       }).catch(function (e) { ut.textContent = e.message || T('Fikk ikke lagret.', "Couldn't save."); });
     }
   });
