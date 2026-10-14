@@ -2,7 +2,7 @@
 // Ligger i en egen fil i stedet for inne i HTML-en: nettleseren og service workeren lagrer den, de to
 // språkversjonene deler den, og telefonen slipper å tolke 200 kB JavaScript på nytt hver gang rommet åpnes.
 // Startes fra Rom.astro ved hver sidevisning (astro:page-load), med lekenavnene og språket som argumenter.
-import { lagStua, figurHtml, utseende, PYNT_SVG, BEVEG_SVG, hodeHtml } from './stua.js';
+import { lagStua, figurHtml, utseende, PYNT_SVG, BEVEG_SVG, hodeHtml, synkAnimasjoner } from './stua.js';
 import { lagFigurVelger } from './figurvelger.js';
 import { klistremerke } from '../lib/klistremerker';
 import { TEMAER, temaLov, pyntNavn, PYNT, EKSTRA, sesong, STIL, STIL_PLUSS } from '../lib/pynt.js';
@@ -4777,11 +4777,11 @@ export function startRom(LEKNAVN, LANG) {
     var gammeltKort = kortByttet ? root.querySelector('.rom-kort, .rof-kort.rom-rof') : null;
     var gammelRekt = gammeltKort ? gammeltKort.getBoundingClientRect() : null;
     sistKortNokkel = nyKN;
-    var stuaPlass = tilstand.ferdig ? '' : '<div class="rom-stua-plass" id="romStuaPlass"></div>';
+    var stuaPlass = tilstand.ferdig ? '' : STUA_PLASS;
     var kbFra = kbRekt(), benkFra = benkRekter();
-    root.innerHTML = s
+    settRot(s
       ? topp + merker + borsHurtig() + innhold + stuaPlass + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + vert + forlat
-      : topp + stuaPlass + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat;
+      : topp + stuaPlass + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat);
     tegnStua(s);
     kbFly(kbFra); benkGli(benkFra);
     merkNyttInnhold(s);
@@ -4905,6 +4905,16 @@ export function startRom(LEKNAVN, LANG) {
     if (s.kortet) return s.kortet;
     return '';
   }
+  /* Stua blir stående i siden mens resten tegnes om rundt den. Ellers starter alt som beveger seg der
+     (diskolys, lyslenke, figurer som danser) på nytt hver gang noen trykker på noe. */
+  var STUA_PLASS = '<div class="rom-stua-plass" id="romStuaPlass"></div>';
+  function settRot(html) {
+    var plassEl = document.getElementById('romStuaPlass'), i = html.indexOf(STUA_PLASS);
+    if (!plassEl || plassEl.parentNode !== root || i === -1 || !stuaEl || stuaEl.parentNode !== plassEl) { root.innerHTML = html; return; }
+    Array.prototype.slice.call(root.childNodes).forEach(function (n) { if (n !== plassEl) root.removeChild(n); });
+    plassEl.insertAdjacentHTML('beforebegin', html.slice(0, i));
+    plassEl.insertAdjacentHTML('afterend', html.slice(i + STUA_PLASS.length));
+  }
   function tegnStua(s) {
     var plass = root.querySelector('#romStuaPlass'); if (!plass || !meg) return;
     if (!stuaEl) {
@@ -4923,7 +4933,7 @@ export function startRom(LEKNAVN, LANG) {
       stuaEl.appendChild(Object.assign(document.createElement('p'), { className: 'rom-stua-tips' }));
     }
     stuaEl.querySelector('.rom-stua-tips').innerHTML = '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>';
-    plass.appendChild(stuaEl);
+    if (stuaEl.parentNode !== plass) plass.appendChild(stuaEl);
     stuaEl.classList.toggle('kompakt', !!s);
     var st = tilstand.stua || {}, ute = st.ute || [], jegUte = ute.indexOf(meg.id) !== -1, alle = (tilstand.spillere || []).concat(st.sofa || []);
     // Går du ut eller inn, følger skjermen deg
@@ -4944,6 +4954,7 @@ export function startRom(LEKNAVN, LANG) {
     } else if (fan) fan.remove();
     hentHusketRom();
     if (aapentArk) aapentArk.oppdater();
+    synkAnimasjoner(stuaEl);
     var kt = stuaKort(s);
     if (kt) stua.tv(kt, s.navn); else stua.kode(kode);
     // Det som skjer i spillet, vises på figurene: slurker, bomba, hvem som vant

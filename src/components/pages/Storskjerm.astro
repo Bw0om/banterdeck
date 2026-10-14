@@ -54,8 +54,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
   </script>
   <script>
     // Stua (src/klient/stua.js): de samme figurene som på telefonene
-    import { lagStua, figurHtml, utseende, hodeHtml } from '../../klient/stua.js';
-    (window as any).mvLagStua = lagStua;
+    import { lagStua, figurHtml, utseende, hodeHtml, synkAnimasjoner } from '../../klient/stua.js';
+    (window as any).mvLagStua = lagStua; (window as any).mvSynk = synkAnimasjoner;
     // Figuren til en spiller (samme som i stua), til «kortet er til»-visningen
     (window as any).mvHodeSvg = (p: any, uttrykk?: string) => '<svg class="mv-hode" viewBox="-30 -42 60 92" aria-hidden="true">' + hodeHtml(utseende(p.figur || p.id, p.pynt), uttrykk) + '</svg>';
     // Bare hodet (uten skuldre), i stedet for initialer – og hudfargen, til nesa i Løgnhalsen
@@ -1526,7 +1526,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       rot.innerHTML = '<header class="tv-hode"><span class="tv-logo">mitt<b>vors</b></span>' + (d.gjeng ? '<span class="tv-gjeng">' + esc(d.gjeng.navn) + '</span>' : '') +
         '<span class="tv-kode">' + T('Bli med: ', 'Join: ') + '<b>' + esc(lenkeTekst()) + '</b></span></header>' +
         '<div class="tv-hoved' + (side ? '' : ' uten-side') + '"><div class="tv-scenebox">' + scene(d) + '</div>' + (side ? '<aside class="tv-side">' + side + '</aside>' : '') + '</div>' + meldt;
-      tegnTvStua(d);
+      tegnTvStua(d); if (window.mvSynk) window.mvSynk(document.getElementById('tvStuaPlass'));
       tvKbFly(kbFra); tvBenkGli(benkFra);
       if (nyttKort) { var inn = rot.querySelector('.tv-kort, .tv-sporsmal, .tv-rof-kort .rof-kort'); if (inn) inn.classList.add('kort-inn'); }
       var avsl = rot.querySelector('.tv-aldri-avslort');
