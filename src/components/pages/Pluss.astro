@@ -68,9 +68,10 @@ const antKort = pakker.reduce((sum, p) => sum + p.antall, 0);
       <button class="btn gold" type="button" data-kjop="aar">{no ? 'Kjøp med Vipps' : 'Buy with Vipps'}</button>
     </article>
     {no
-      ? <label class="pluss-samtykke"><input type="checkbox" id="samtykke"><span>Jeg vil at Pluss starter med en gang, og forstår at angreretten da faller bort. Jeg har lest <a href="/no/vilkar">salgsvilkårene</a>.</span></label>
-      : <label class="pluss-samtykke"><input type="checkbox" id="samtykke"><span>I want Pluss to start right away, and I understand that I then lose my right of withdrawal. I have read the <a href="/terms">terms of sale</a>.</span></label>}
-    <p class="small">{no ? 'Engangskjøp – ingenting fornyes av seg selv. Tiden legges til hvis du allerede har Pluss.' : 'One-off purchase – nothing renews automatically. The time is added on if you already have Pluss.'}</p>
+      ? <label class="pluss-samtykke bare-nett"><input type="checkbox" id="samtykke"><span>Jeg vil at Pluss starter med en gang, og forstår at angreretten da faller bort. Jeg har lest <a href="/no/vilkar">salgsvilkårene</a>.</span></label>
+      : <label class="pluss-samtykke bare-nett"><input type="checkbox" id="samtykke"><span>I want Pluss to start right away, and I understand that I then lose my right of withdrawal. I have read the <a href="/terms">terms of sale</a>.</span></label>}
+    <p class="small bare-app">{no ? 'Kjøp av Pluss kommer i appen. Prøv gratis-kvelden virker som før.' : 'Buying Pluss is coming to the app. The free night works as before.'}</p>
+    <p class="small bare-nett">{no ? 'Engangskjøp – ingenting fornyes av seg selv. Tiden legges til hvis du allerede har Pluss.' : 'One-off purchase – nothing renews automatically. The time is added on if you already have Pluss.'}</p>
     {!no && <p class="small">Payment is by Vipps, the Norwegian mobile payment app – it requires a Norwegian Vipps account. Gift codes and free nights from referrals work for everyone.</p>}
     <p class="formmsg" id="kjopMsg" role="status" aria-live="polite"></p>
     <p><a class="btn ghost" id="kvLenke" href="#" hidden>{no ? 'Se kvitteringen (lagre som PDF)' : 'See the receipt (save as PDF)'}</a></p>

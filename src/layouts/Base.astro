@@ -265,6 +265,11 @@ const isCurrent = (href: string) => {
     })();
   </script>
   <ClientRouter />
+  <script>
+    // Bare inne i iPhone-appen (Capacitor legger inn window.Capacitor før siden lastes)
+    const c = (window as any).Capacitor;
+    if (c && c.isNativePlatform && c.isNativePlatform()) import('../klient/app.js');
+  </script>
   <slot name="head" />
 </head>
 <body class={erHumor ? 'humor' : undefined}>
