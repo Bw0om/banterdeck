@@ -2519,3 +2519,34 @@ button.vl-bane:active{transform:translate(2px,2px)}
 
 /* Garderoben: tegnes samme del om (et valg), rulles ikke radene inn på nytt */
 .fv.stille .fv-rad,.fv.stille .fv-prikker,.fv.stille .fv-del.puls{animation:none}
+
+/* Idas blomsterkrans: hjertene stiger sakte opp */
+.ida-hjerter path{transform-box:fill-box;transform-origin:center;animation:idaHjerte 3.6s ease-in-out infinite}
+.ida-hjerter .ih2{animation-delay:-1.8s}
+@keyframes idaHjerte{0%{opacity:0;transform:translateY(4px) scale(.6)}25%,70%{opacity:1;transform:translateY(-2px) scale(1)}100%{opacity:0;transform:translateY(-8px) scale(.8)}}
+/* Idas panda, en løkke på 24 sekunder: vugger, ser opp på Ida, begynner å smile, går bort og klemmer henne */
+.venn-idapanda .pa{transform-box:fill-box;transform-origin:50% 100%;animation:paTur 24s cubic-bezier(.45,0,.25,1) infinite}
+@keyframes paTur{0%,58%{transform:none}62%{transform:translateX(-6px) rotate(-6deg)}66%,82%{transform:translateX(-13px)}70%{transform:translateX(-13px) scale(1.04,.96)}74%{transform:translateX(-13px)}86%{transform:translateX(-6px) rotate(5deg)}90%,100%{transform:none}}
+.venn-idapanda .pa-hode{transform-box:fill-box;transform-origin:50% 90%;animation:paHode 24s cubic-bezier(.45,0,.25,1) infinite}
+@keyframes paHode{0%,8%{transform:rotate(0)}12%,16%{transform:rotate(-3deg)}20%,26%{transform:rotate(3deg)}30%{transform:rotate(0)}34%,46%{transform:rotate(-12deg) translateY(-1px)}50%,64%{transform:rotate(0)}68%,80%{transform:rotate(-8deg)}86%,100%{transform:rotate(0)}}
+.venn-idapanda .pa-blikk{transform-box:fill-box;animation:paBlikk 24s ease-in-out infinite}
+@keyframes paBlikk{0%,32%{transform:none}34%,46%{transform:translate(-1px,-.6px)}48%,100%{transform:none}}
+.venn-idapanda .pa-glad{opacity:0;animation:paGlad 24s ease-in-out infinite}
+.venn-idapanda .pa-rolig{animation:paRolig 24s ease-in-out infinite}
+@keyframes paGlad{0%,38%{opacity:0}40%,52%{opacity:1}54%,64%{opacity:0}66%,86%{opacity:1}88%,100%{opacity:0}}
+@keyframes paRolig{0%,38%{opacity:1}40%,52%{opacity:0}54%,64%{opacity:1}66%,86%{opacity:0}88%,100%{opacity:1}}
+.venn-idapanda .pa-kinn{transform-box:fill-box;transform-origin:center;animation:paKinn 24s ease-in-out infinite}
+@keyframes paKinn{0%,38%{transform:scale(1)}42%,50%{transform:scale(1.25)}54%,66%{transform:scale(1)}70%,84%{transform:scale(1.3)}88%,100%{transform:scale(1)}}
+.venn-idapanda .pa-arm{transform-box:fill-box;transform-origin:50% 50%;animation:paArm 24s cubic-bezier(.45,0,.25,1) infinite}
+.venn-idapanda .pa-arm.h{animation-name:paArmH}
+@keyframes paArm{0%,64%{transform:none}68%,82%{transform:translate(-2px,-5px) rotate(40deg)}86%,100%{transform:none}}
+@keyframes paArmH{0%,64%{transform:none}68%,82%{transform:translate(-4px,-4px) rotate(-30deg)}86%,100%{transform:none}}
+.venn-idapanda .pa-pop{opacity:0;transform-box:fill-box;transform-origin:center;animation:paPop 24s ease-out infinite}
+@keyframes paPop{0%,68%{opacity:0;transform:translateY(4px) scale(.4)}71%{opacity:1;transform:translateY(0) scale(1.15)}74%,78%{opacity:1;transform:translateY(-3px) scale(1)}84%,100%{opacity:0;transform:translateY(-9px) scale(.8)}}
+/* Danser Ida, hopper pandaen med */
+.figur.m-dans .venn-idapanda .pa{animation:paHopp 640ms cubic-bezier(.23,1,.32,1) infinite}
+@keyframes paHopp{0%,100%{transform:none}40%{transform:translateY(-7px) scale(.96,1.04)}70%{transform:scale(1.05,.95)}}
+/* Hjertet mellom eieren og Ida */
+.par-hjerte path{transform-box:fill-box;transform-origin:center;animation:parHjerte 2.4s cubic-bezier(.23,1,.32,1) both}
+@keyframes parHjerte{0%{opacity:0;transform:translateY(10px) scale(.4)}18%{opacity:1;transform:translateY(0) scale(1.15)}30%{transform:scale(1)}80%{opacity:1;transform:translateY(-14px) scale(1)}100%{opacity:0;transform:translateY(-22px) scale(.85)}}
+@media (prefers-reduced-motion:reduce){.ida-hjerter path,.venn-idapanda .pa,.venn-idapanda .pa-hode,.venn-idapanda .pa-blikk,.venn-idapanda .pa-kinn,.venn-idapanda .pa-arm,.venn-idapanda .pa-rolig,.par-hjerte path{animation:none}.venn-idapanda .pa-glad{animation:none;opacity:1}.venn-idapanda .pa-rolig{opacity:0}.venn-idapanda .pa-pop{animation:none;opacity:0}}

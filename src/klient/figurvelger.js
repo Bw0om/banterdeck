@@ -14,7 +14,7 @@ const NAVN = {
 const FARGENAVN = {
   fh: ['Hårfarge', 'Hair colour'], fhud: ['Hudtone', 'Skin tone'], ftopp: ['Farge på genseren', 'Top colour'], fhode: ['Farge på hatten', 'Hat colour'],
 };
-const FRISYRENAVN = { kort: ['Kort', 'Short'], lang: ['Langt', 'Long'], hestehale: ['Hestehale', 'Ponytail'], krus: ['Krøller', 'Curls'], bolle: ['Bolle', 'Bun'], snau: ['Snau', 'Shaved'] };
+const FRISYRENAVN = { kort: ['Kort', 'Short'], sidebena: ['Sidebena', 'Side part'], quiff: ['Quiff', 'Quiff'], hanekam: ['Hanekam', 'Mohawk'], krus: ['Krøller', 'Curls'], snau: ['Snau', 'Shaved'], pannelugg: ['Pannelugg', 'Bangs'], langrett: ['Langt rett', 'Long straight'], lang: ['Langt', 'Long'], fletter: ['Fletter', 'Braids'], tuer: ['Tuer', 'Space buns'], hestehale: ['Hestehale', 'Ponytail'], bolle: ['Bolle', 'Bun'], afro: ['Afro', 'Afro'], langkrus: ['Lange krøller', 'Long curls'] };
 // Hvor knappene sitter på figuren (prosent av figurboksen, viewBox -48 -100 96 106)
 const PLASS = { hode: [31, 13], deg: [21, 35], ansikt: [74, 33], bryst: [28, 58], venn: [76, 71], beveg: [66, 93] };
 const IKON = {
@@ -32,7 +32,7 @@ const FARGEIKON = {
   fhode: '<path d="M12 3q6 8 6 12a6 6 0 0 1-12 0q0-4 6-12z"/>',
 };
 const LAAS = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
-const BOKS = { hode: '-30 -100 60 56', ansikt: '-24 -74 48 32', bryst: '-26 -52 52 36', venn: '-16 -30 44 34', beveg: '-24 -34 48 40' };
+const BOKS = { hode: '-30 -100 60 56', ansikt: '-24 -74 48 32', bryst: '-26 -52 52 36', venn: '-16 -36 44 40', beveg: '-24 -34 48 40' };
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 /**
@@ -55,7 +55,7 @@ export function lagFigurVelger(rot, o) {
     // Små hoder med hver frisyre, i ditt hår og din hud
     return `<div class="fv-rad" aria-label="${T('Frisyre', 'Hairstyle')}">` + FRISYRER.map((f) => {
       const paa = p.haar === f;
-      return `<button type="button" class="fv-valg fv-frisyre${paa ? ' paa' : ''}" data-frisyre="${f}" aria-pressed="${paa}" aria-label="${FRISYRENAVN[f][en ? 1 : 0]}">` +
+      return `<button type="button" class="fv-valg fv-frisyre${paa ? ' paa' : ''}" data-frisyre="${f}" aria-pressed="${paa}" aria-label="${(FRISYRENAVN[f] || [f, f])[en ? 1 : 0]}">` +
         `<svg class="figur" viewBox="-24 -84 48 44" aria-hidden="true">${figurHtml(Object.assign({}, p, { haar: f }), {})}</svg></button>`;
     }).join('') + '</div>';
   }

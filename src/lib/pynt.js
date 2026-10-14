@@ -21,6 +21,9 @@ export const PYNT = [
   { id: 'sel', slot: 'venn', navn: ['Sel', 'Seal'], laas: ['Spill to kvelder', 'Play two nights'], kvelder: 2 },
   // Eierens egen: deles aldri ut, vises ikke i andres garderobe. Serveren legger den til for eierkontoen (se konto.ts).
   { id: 'eierkrone', slot: 'hode', navn: ['Eierkrona', 'Owner crown'], laas: ['', ''], eier: true },
+  // Bare til Ida
+  { id: 'idakrans', slot: 'hode', navn: ['Idas blomsterkrans', 'Ida’s flower crown'], laas: ['', ''], eier: true },
+  { id: 'idapanda', slot: 'venn', navn: ['Idas panda', 'Ida’s panda'], laas: ['', ''], eier: true },
   // Bevegelser: figuren gjør «din» bevegelse når du trykker på deg selv i stua
   { id: 'vink', slot: 'beveg', navn: ['Vink', 'Wave'], laas: ['Spill din første kveld', 'Play your first night'], kvelder: 1 },
   { id: 'dans', slot: 'beveg', navn: ['Dans', 'Dance'], laas: ['Spill tre kvelder', 'Play three nights'], kvelder: 3 },
@@ -72,7 +75,7 @@ export function kanBrukes(id, naa) { const p = AV_ID[id]; return !!p && (!p.seso
 
 /* Frisyre og farger: gratis fra start, ingenting å låse opp. Bare appens egne farger pluss naturlige hår- og hudtoner,
    så ingen figur ser fremmed ut i stua. Lagres i samme valg som pynten: haar, fh (hår), fhud, ftopp (genser), fhode (hatten). */
-export const FRISYRER = ['kort', 'lang', 'hestehale', 'krus', 'bolle', 'snau'];
+export const FRISYRER = ['kort', 'sidebena', 'quiff', 'hanekam', 'krus', 'snau', 'pannelugg', 'langrett', 'lang', 'fletter', 'tuer', 'hestehale', 'bolle', 'afro', 'langkrus'];
 export const FARGER = {
   fh: ['#16120F', '#7A4A2A', '#E8C15C', '#FF5B1F', '#FF9CC2', '#63E2A8', '#5A8DEE'],
   fhud: ['#F2C6A0', '#E9B48F', '#C98D63', '#8D5A3B', '#5E3A24'],
