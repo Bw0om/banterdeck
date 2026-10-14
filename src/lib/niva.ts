@@ -37,6 +37,7 @@ export const HOOK: Record<string, [string, string]> = {
   'drikke-yatzy': ['Trill på din telefon, alle ser blokka.', 'Roll on your phone, everyone sees the scorecard.'],
   'veddelopet': ['Vedd på en kortfarge og se løpet.', 'Bet on a suit and watch the race.'],
   'over-eller-under': ['Gjett over eller under – feil, og du drikker bunken.', 'Guess higher or lower – wrong, and you drink the pile.'],
+  'fuck-the-dealer': ['Telefonen er stokken – bare dealeren holder den. Treff, og dealeren drikker kortet.', 'The phone is the deck – only the dealer holds it. A hit, and the dealer drinks the card.'],
   'drikke-bingo': ['Hver sitt brett, samme spilleliste.', 'Everyone gets their own card, same playlist.'],
   'ring-of-fire': ['Klassikeren – kortene ligger i en ring rundt glasset. Dra ut et kort uten å bryte ringen.', 'The classic – the cards lie in a ring around the glass. Pull one out without breaking the ring.'],
   'pekeleken': ['«Hvem er mest sannsynlig til …» – pek på telefonen.', '“Who’s most likely to …” – point on your phone.'],

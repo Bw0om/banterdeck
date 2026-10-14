@@ -296,6 +296,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     if (s.type === 'pyramiden') spill.py = ekstraVisning(s, null, data);
     if (s.type === 'gris') spill.gr = ekstraVisning(s, null, data);
     if (s.type === 'president') spill.pr = ekstraVisning(s, null, data);
+    if (s.type === 'dealer') spill.ftd = ekstraVisning(s, null, data);
     if (s.type === 'en') spill.en = enVisning(s, data, lang);
     if (s.type === 'veddelopet') spill.vl = ekstraVisning(s, null, data);
     if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
@@ -2083,7 +2084,7 @@ function rfMottakere(data: any, k: any, trekker: string | null): string[] {
 }
 const PY_VINDU = 10000;
 function pyRad(pos: number) { return pos < 5 ? 1 : pos < 9 ? 2 : pos < 12 ? 3 : pos < 14 ? 4 : 5; }
-export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', ...SOS];
+export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', 'dealer', ...SOS];
 export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '😍', '🤢', '🥴', '🙈', '🤘', '🫡'];
 /** Noe skjedde i rommet som figurene reagerer på (drikk, bom, pekt, vinner). Siste gjelder; telefonene spiller den av én gang. */
 function stuaHendelse(data: any, type: string, ider: string[]) {
@@ -2108,6 +2109,7 @@ const EKSTRA_INFO: EkstraInfo[] = [
   ['pyramiden', 'Pyramiden', 'Pyramid', 'Fire skjulte kort hver. Bløff eller si sannheten – og utfordre de andre.', 'Four hidden cards each. Bluff or tell the truth – and call out the others.'],
   ['gris', 'Gris', 'Pig', 'Send kort til venstre til noen har fire like. Sistemann på nesa drikker.', 'Pass cards to the left until someone has four of a kind. Last one to touch their nose drinks.'],
   ['president', 'President', 'President', 'Bli kvitt kortene først. Toere er høyest og rydder bordet.', 'Get rid of your cards first. Twos are highest and clear the table.'],
+  ['dealer', 'Fuck the Dealer', 'Fuck the Dealer', 'Bare dealeren har kortstokken. De andre gjetter høyt – treff, og dealeren drikker kortet.', 'Only the dealer holds the deck. The others guess out loud – a hit, and the dealer drinks the card.'],
   ['opus', 'Opus', 'Opus', '', ''],
 ];
 const EKSTRA_NAVN: Record<string, L> = Object.fromEntries(EKSTRA_INFO.map((x) => [x[0], L(x[1], x[2])]));
@@ -2126,9 +2128,11 @@ export function ekstraLeker(lang: Lang | string = 'no') {
       om: en ? "The host reads out this week's questions and everyone answers on their own phone – then you see who missed. The questions are in Norwegian." : 'Verten leser opp ukas spørsmål. Alle svarer på sin egen telefon – så ser dere hvem som bommet.' }] : []),
     info('hvemskrev'), info('bloff'), info('samme'), info('spion'), info('pannekort'), info('skal'), info('bussruta'), info('yatzy'), info('tosannheter'),
     info('regelfabrikken', [{ v: '45', t: '45 ' + sek }, { v: '60', t: '60 ' + sek }, { v: '90', t: '90 ' + sek }]),
-    info('overunder'), info('veddelopet'), info('pyramiden'), info('gris'), info('president'),
+    info('overunder'), info('veddelopet'), info('pyramiden'), info('gris'), info('president'), info('dealer'),
   ];
 }
+function ftdVn(v: number) { return v === 1 ? 'A' : v <= 10 ? String(v) : ({ 11: 'Kn', 12: 'D', 13: 'K' } as any)[v]; }
+function ftdVnEn(v: number) { return v === 1 ? 'A' : v <= 10 ? String(v) : ({ 11: 'J', 12: 'Q', 13: 'K' } as any)[v]; }
 function kortstokk52() { const s: any[] = []; ['♥', '♦', '♠', '♣'].forEach((f) => { for (let v = 2; v <= 14; v++) s.push({ v, f }); }); return stokk(s); }
 function vnavn(v: number) { return v <= 10 ? String(v) : ({ 11: 'Kn', 12: 'D', 13: 'K', 14: 'A' } as any)[v]; }
 function vnavnEn(v: number) { return v <= 10 ? String(v) : ({ 11: 'J', 12: 'Q', 13: 'K', 14: 'A' } as any)[v]; }
@@ -2171,6 +2175,14 @@ export function startEkstra(data: any, lek: string, modus = ''): any {
   } else if (lek === 'president') {
     if (n < 3) return feilL('for-faa', 'President trenger minst tre spillere.', 'President needs at least three players.');
     nyPresidentRunde(data, null);
+  } else if (lek === 'dealer') {
+    if (n < 2) return feilL('for-faa', 'Fuck the Dealer trenger minst to spillere.', 'Fuck the Dealer needs at least two players.');
+    // Ess er 1 og konge 13 – både for «høyere/lavere» og for hvor mange slurker kortet er verdt
+    const st: any[] = []; ['♥', '♦', '♠', '♣'].forEach((f) => { for (let v = 1; v <= 13; v++) st.push({ v, f }); });
+    const forrige = data.spill && data.spill.type === 'dealer' ? data.spill : null;
+    const dealer = forrige && ider.includes(forrige.dealer) ? ider[(ider.indexOf(forrige.dealer) + 1) % n] : ider[0];
+    data.spill = { type: 'dealer', lek, navn: EKSTRA_NAVN.dealer, stokk: stokk(st), pos: 0, dealer, bom: 0, fase: 'gjett', g1: null, hint: null, res: null,
+      brukt: {}, drukket: {}, dealt: {}, n: 0, runde: forrige ? (forrige.runde || 1) + 1 : 1 };
   } else return { feil: 'ukjent-lek' };
   melde(data, `Nytt spill: ${tr(data.spill.navn, 'no')}`, `New game: ${tr(data.spill.navn, 'en')}`);
   return { ok: true };
@@ -2507,6 +2519,47 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
       if (h.handling === 'nytt' || h.handling === 'runde') { if (meg.id !== data.vert) return { feil: 'bare-vert' }; return startEkstra(data, 'pyramiden'); }
       return null;
     }
+    case 'dealer': {
+      /* Bare dealeren trykker (verten kan trykke for en dealer som har lagt fra seg telefonen). Hvem som gjetter er likegyldig:
+         noen sier en verdi høyt, dealeren trykker den. Treff på første: dealeren drikker kortets verdi. Bom: dealeren sier
+         høyere/lavere, ett forsøk til. Treff nå: halve kortet, rundet opp. Bom igjen: gjetteren drikker avstanden.
+         Tre bom på rad gir stokken videre til nestemann rundt bordet; et treff nullstiller. Tom stokk = ferdig. */
+      const kanStyre = meg.id === s.dealer || meg.id === data.vert;
+      if (h.handling === 'ftd-gjett') {
+        if (!kanStyre || (s.fase !== 'gjett' && s.fase !== 'andre')) return { ok: true };
+        const v = Number(h.v), k = s.stokk[s.pos];
+        if (!(v >= 1 && v <= 13) || (s.brukt[v] || 0) >= 4) return { feil: 'ukjent' };
+        if (s.fase === 'andre' && ((s.hint === 'hoy' && v <= s.g1) || (s.hint === 'lav' && v >= s.g1))) return { feil: 'ukjent' };
+        const treff = v === k.v;
+        if (!treff && s.fase === 'gjett') { s.g1 = v; s.hint = v < k.v ? 'hoy' : 'lav'; s.fase = 'andre'; return { ok: true }; }
+        s.n = (s.n || 0) + 1; s.brukt[k.v] = (s.brukt[k.v] || 0) + 1; s.dealt[s.dealer] = (s.dealt[s.dealer] || 0) + 1;
+        if (treff) {
+          const n = s.fase === 'gjett' ? k.v : Math.ceil(k.v / 2);
+          giSlurker(data, s.dealer, n); s.drukket[s.dealer] = (s.drukket[s.dealer] || 0) + n; s.bom = 0;
+          s.res = { type: s.fase === 'gjett' ? 'treff1' : 'treff2', n, kort: k, g: v, nr: s.n };
+          stuaHendelse(data, 'drikk', [s.dealer]);
+          melde(data, `Treff! ${navnPaa(data, s.dealer)} drikker ${n}.`, `Hit! ${navnPaa(data, s.dealer)} drinks ${n}.`);
+        } else {
+          const n = Math.abs(v - k.v); s.bom = (s.bom || 0) + 1;
+          s.res = { type: 'bom', n, kort: k, g: v, g1: s.g1, nr: s.n };
+          melde(data, `Bom – kortet var ${ftdVn(k.v)}. Gjetteren drikker ${n}.`, `Miss – the card was ${ftdVnEn(k.v)}. The guesser drinks ${n}.`);
+        }
+        s.fase = 'res'; return { ok: true };
+      }
+      if (h.handling === 'ftd-neste') {
+        if (!kanStyre || s.fase !== 'res') return { ok: true };
+        s.pos++; s.g1 = null; s.hint = null; s.bytt = null;
+        if (s.pos >= s.stokk.length) { s.fase = 'ferdig'; melde(data, 'Stokken er tom!', 'The deck is empty!'); return { ok: true }; }
+        if (s.bom >= 3) {
+          const alle = aktiveIder(data), i = alle.indexOf(s.dealer), ny = alle[(i + 1) % alle.length] || s.dealer;
+          s.bytt = { fra: s.dealer, til: ny }; s.dealer = ny; s.bom = 0;
+          melde(data, `Tre bom på rad – ${navnPaa(data, ny)} deler nå.`, `Three misses in a row – ${navnPaa(data, ny)} deals now.`);
+        }
+        s.fase = 'gjett'; return { ok: true };
+      }
+      if (h.handling === 'nytt' || h.handling === 'runde') { if (meg.id !== data.vert) return { feil: 'bare-vert' }; return startEkstra(data, 'dealer'); }
+      return null;
+    }
     case 'gris': {
       const gi = ider.filter((id: string) => s.hender && s.hender[id]);
       if (h.handling === 'nytt' || h.handling === 'runde') { if (meg.id !== data.vert) return { feil: 'bare-vert' }; return startEkstra(data, 'gris'); }
@@ -2674,6 +2727,12 @@ export function ekstraVisning(s: any, meg: any, data: any) {
       kort: (p.avgjort === 'sant' || p.avgjort === 'bløff' || (meg && p.id === meg.id)) ? p.kort : null })),
     snuddVed: s.snuddVed || 0, vindu: PY_VINDU, avsl: s.avsl || null, ferdig: !!s.ferdig, lurt: s.lurt || {}, tatt: s.tatt || {},
     fasit: s.ferdig ? s.hender : null };
+  if (s.type === 'dealer') {
+    const k = s.stokk[s.pos] || null, apen = s.fase === 'res' || s.fase === 'ferdig';
+    return { fase: s.fase, dealer: s.dealer, bom: s.bom || 0, pos: s.pos, igjen: s.stokk.length - s.pos - (s.fase === 'res' ? 1 : 0), g1: s.g1, hint: s.hint, res: s.res || null, bytt: s.bytt || null,
+      // Kortet ser bare dealeren – til det er avgjort, da ser alle det
+      kort: k && (apen || (meg && meg.id === s.dealer)) ? k : null, brukt: s.brukt || {}, drukket: s.drukket || {}, dealt: s.dealt || {}, ider, runde: s.runde || 1, n: s.n || 0 };
+  }
   if (s.type === 'gris') return { fase: s.fase, minHand: meg ? s.hender[meg.id] || null : null, harValgt: Object.keys(s.valgt), mittValg: meg ? s.valgt[meg.id] ?? null : null,
     neser: s.neser, bokstaver: s.bokstaver, taper: s.taper || null, harFire: meg ? fireLike(s.hender[meg.id] || []) : false, ider: Object.keys(s.hender || {}),
     runde: s.runde || 1, byttNr: s.byttNr || 0, sendVed: s.sendVed || 0, neseVed: s.neseVed || 0, ferdigVed: s.ferdigVed || 0, gris: s.gris || null, tidlig: s.tidlig || null,

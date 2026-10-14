@@ -7,7 +7,7 @@ const { slug, lang = 'no' } = Astro.props as { slug: string; lang?: string };
 const en = lang === 'en';
 const DIGITALE = ['over-eller-under', 'fuck-the-dealer', 'krig', 'veddelopet', 'bussruta', 'terningen-bestemmer', '21-med-terninger', 'opus', 'regelfabrikken',
   'power-hour', 'snurr-flasken', 'drikke-yatzy', 'to-sannheter-og-en-logn'];
-const RomLeker = ['regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris', 'to-sannheter-og-en-logn', 'bussruta', 'drikke-yatzy'];
+const RomLeker = ['regelfabrikken', 'over-eller-under', 'veddelopet', 'pyramiden', 'president', 'gris', 'to-sannheter-og-en-logn', 'bussruta', 'drikke-yatzy', 'fuck-the-dealer'];
 const har = DIGITALE.includes(slug);
 import { romLenke } from '../lib/romlenke';
 import KortVelger from './KortVelger.astro';

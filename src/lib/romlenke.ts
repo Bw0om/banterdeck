@@ -2,7 +2,7 @@
 // så rommet lages med riktig lek valgt på forhånd.
 export const ROMLEK: Record<string, string> = {
   'nyhetsrunden': 'nyhetsrunden', 'bussruta': 'bussruta', 'drikke-yatzy': 'yatzy', 'over-eller-under': 'overunder',
-  'veddelopet': 'veddelopet', 'pyramiden': 'pyramiden', 'president': 'president', 'gris': 'gris',
+  'veddelopet': 'veddelopet', 'pyramiden': 'pyramiden', 'president': 'president', 'gris': 'gris', 'fuck-the-dealer': 'dealer',
   'to-sannheter-og-en-logn': 'tosannheter', 'regelfabrikken': 'regelfabrikken', 'forraeder': 'forraeder',
   'drikke-bingo': 'bingo', 'ring-of-fire': 'ring-of-fire', 'pekeleken': 'pekeleken', 'jeg-har-aldri': 'jeg-har-aldri',
   'enten-eller': 'enten-eller', 'kategorier': 'kategorier', 'nodt-eller-sannhet': 'nodt-eller-sannhet',

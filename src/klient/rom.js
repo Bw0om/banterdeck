@@ -1005,7 +1005,7 @@ export function startRom(LEKNAVN, LANG) {
       '<p class="small">' + T('Storskjermen er ingen spiller: den ser aldri hemmelige roller eller hendene på børsen.', 'The big screen isn’t a player: it never sees secret roles or anyone’s hand on the Exchange.') + '</p></div>';
   }
   /** Hvor mange spillere lekene trenger (samme regler som serveren). */
-  var MIN_SPILLERE = { hvemskrev: 3, bloff: 3, samme: 3, spion: 3, pannekort: 3, forraeder: 3, gris: 3, president: 3, skal: 2, pyramiden: 2, bussruta: 2, tosannheter: 2, mest: 2 };
+  var MIN_SPILLERE = { hvemskrev: 3, bloff: 3, samme: 3, spion: 3, pannekort: 3, forraeder: 3, gris: 3, president: 3, skal: 2, pyramiden: 2, bussruta: 2, tosannheter: 2, mest: 2, dealer: 2 };
   function forFa(l) { var min = MIN_SPILLERE[l.id] || MIN_SPILLERE[l.type] || 0; return min && tilstand.spillere.length < min ? min : 0; }
   /** Tre leker som er lette å starte med – ut fra hvor mange dere er. */
   function anbefalteLeker() {
@@ -1044,6 +1044,7 @@ export function startRom(LEKNAVN, LANG) {
     yatzy: [['Trykk på begeret når det er din tur – opptil tre kast. Trykk på en terning for å holde den.', 'Tap the cup on your turn – up to three rolls. Tap a die to hold it.'], ['Trykk på en rad i blokka for å føre. Ener i kastet = drikk 2, fire like = drikk summen, Yatzy = del ut 5.', 'Tap a row on the scorecard to score. A one in the roll = drink 2, four of a kind = drink the sum, Yahtzee = hand out 5.'], ['Stryker du et felt, drikker du 2. Den med minst til slutt drikker opp. Verten kan stryke et felt for den som somler.', 'Scratch a box and you drink 2. Lowest score at the end finishes their drink. The host can scratch a box for anyone who stalls.']],
     overunder: [['Den som har tur, gjetter om neste kort er over eller under. Verten kan trykke for den som ikke har telefonen oppe.', 'Whoever’s turn it is guesses if the next card is higher or lower. The host can tap for anyone without their phone out.'], ['Riktig: potten vokser med én slurk, og turen går videre.', 'Right: the pot grows by one sip and the turn moves on.'], ['Feil eller likt: du drikker hele potten. Når stokken er tom, er leken over.', 'Wrong or equal: you drink the whole pot. When the deck runs out, the game is over.']],
     veddelopet: [['Trykk på banen til hesten du tror vinner, og velg innsats.', 'Tap the lane of the horse you think wins and pick your stake.'], ['Når alle har veddet, går løpet av seg selv – ett kort i sekundet. Sidekortene sender en hest ett steg tilbake.', 'When everyone has bet, the race runs itself – one card a second. Side cards send a horse one step back.'], ['Vinnerne deler ut dobbelt – de andre drikker innsatsen.', 'The winners hand out double – everyone else drinks their stake.']],
+    dealer: [['Bare dealeren bruker telefonen og ser kortet. Noen sier en verdi høyt – dealeren trykker den.', 'Only the dealer uses the phone and sees the card. Someone calls a value out loud – the dealer taps it.'], ['Treff på første: dealeren drikker kortets verdi. Bom: dealeren sier «høyere» eller «lavere», ett forsøk til. Treff nå: halve kortet.', 'Hit on the first try: the dealer drinks the card’s value. Miss: the dealer says “higher” or “lower”, one more try. Hit now: half the card.'], ['Bom igjen: gjetteren drikker avstanden til kortet. Tre bom på rad, og stokken går videre. Brukte kort ligger på tellebrettet – tell!', 'Miss again: the guesser drinks the distance to the card. Three misses in a row and the deck moves on. Used cards sit on the tally board – count them!']],
     pyramiden: [['Fire kort med baksiden opp – hold fingeren på dem for å kikke. Pyramiden snus av seg selv, ett kort hvert tiende sekund.', 'Four face-down cards – hold your finger on them to peek. The pyramid flips by itself, one card every ten seconds.'], ['Legg et kort med baksiden opp på det som er snudd, og del ut radens slurker. Riktig verdi er sant, feil er bløff.', 'Lay a card face down on the flipped one and hand out the row’s sips. Same value is true, anything else is a bluff.'], ['Rop LØGN! Bløff = den som la på drikker dobbelt og får kortet tilbake. Sant = du drikker dobbelt. Ingen roper: kortet er borte.', 'Call LIAR! Bluff = they drink double and take the card back. True = you drink double. Nobody calls: the card is gone.']],
     gris: [['Trykk på kortet du vil sende til venstre – 10 sekunder per bytte, ellers sendes kortet lengst til venstre.', 'Tap the card to pass left – 10 seconds per swap, or your leftmost card goes.'], ['Fire like? Trykk på trynet. Da har resten 5 sekunder – sistemann får en bokstav. For tidlig = bokstav.', 'Four of a kind? Tap the snout. The rest get 5 seconds – the last one gets a letter. Too early = a letter.'], ['Den som staver G-R-I-S først, er grisen og tar en shot.', 'The first to spell P-I-G-S is the pig and takes a shot.']],
     president: [['Bli kvitt kortene først: legg like mange som ligger, men høyere. Toer er høyest og feier bordet.', 'Get rid of your cards first: play as many as lie there, but higher. Twos are highest and clear the table.'], ['20 sekunder per tur – ellers passes det for deg.', '20 seconds per turn – otherwise you pass.'], ['Rævkjøreren drikker 3, Viserævkjøreren 2, Presidenten deler ut 3. Neste runde gir Rævkjøreren sitt beste kort til Presidenten.', 'The Scumbag drinks 3, the Vice Scumbag 2, the President hands out 3. Next round the Scumbag gives their best card to the President.']],
@@ -2538,6 +2539,84 @@ export function startRom(LEKNAVN, LANG) {
     return '<div class="py-bord">' + topp + pyr + '<div class="py-vindu" aria-hidden="true"><i style="animation-duration:' + s.vindu + 'ms;animation-delay:-' + vindu + 'ms"></i></div>' +
       '<div class="py-liste">' + (liste || '<p class="py-tom">' + T('Ingen har lagt på ennå. Har du en ', 'Nobody has laid a card yet. Got a ') + (naa ? (NAVN[naa.v] || naa.v) : '') + '?</p>') + '</div>' +
       handHtml + '</div>' + avsl;
+  }
+  /* ---------- Fuck the Dealer: tastaturet og tellebrettet ----------
+     Krem og mint, hard skygge. Bare dealeren ser kortet og tastaturet; de andre ser tellebrettet og hvem som deler.
+     Ett kort på brettet per avgjørelse. Kortet snus for alle når det er avgjort, slurkene smeller inn under. */
+  var ftdSett = {};
+  function ftdVn(v) { return v === 1 ? 'A' : v <= 10 ? String(v) : (EN ? { 11: 'J', 12: 'Q', 13: 'K' } : { 11: 'Kn', 12: 'D', 13: 'K' })[v]; }
+  function ftdKort(k, kl) {
+    if (!k) return '<span class="ftd-kort bak' + (kl ? ' ' + kl : '') + '"></span>';
+    var rod = k.f === '♥' || k.f === '♦';
+    return '<span class="ftd-kort' + (rod ? ' rod' : '') + (kl ? ' ' + kl : '') + '"><b>' + ftdVn(k.v) + '<i>' + k.f + '</i></b><em>' + ftdVn(k.v) + '</em></span>';
+  }
+  function ftdPrikker(n, kl) {
+    var ut = '<span class="ftd-prikker' + (kl ? ' ' + kl : '') + '" aria-label="' + n + T(' av 3 bom', ' of 3 misses') + '">';
+    for (var i = 0; i < 3; i++) ut += '<i' + (i < n ? ' class="paa"' : '') + '></i>';
+    return ut + '</span>';
+  }
+  function ftdBrett(s, stort) {
+    var ut = '<div class="ftd-brett' + (stort ? ' stor' : '') + '" aria-label="' + T('Tellebrettet', 'The tally board') + '">';
+    for (var v = 1; v <= 13; v++) {
+      var n = s.brukt[v] || 0;
+      ut += '<div' + (n >= 4 ? ' class="ute"' : '') + '><b>' + ftdVn(v) + '</b>';
+      for (var i = 0; i < 4; i++) ut += '<i' + (i < n ? ' class="full' + (n >= 4 ? ' rod' : '') + '"' : '') + '></i>';
+      ut += '</div>';
+    }
+    return ut + '</div>';
+  }
+  function dealerSpill(s) {
+    var meg = tilstand.meg, vert = erVert(), jeg = s.dealer === meg, styrer = jeg || vert, k = s.kort, r = s.res;
+    if (s.runde && ftdSett.runde !== s.runde) ftdSett = { runde: s.runde };
+    var topp = '<div class="ftd-topp"><div><span>Fuck the Dealer · ' + (s.pos + (s.fase === 'ferdig' ? 0 : 1)) + ' / 52</span><b>' +
+      (s.fase === 'ferdig' ? T('Stokken er tom', 'The deck is empty') : jeg ? T('Du deler', 'You deal') : esc(navn(s.dealer)) + T(' deler', ' deals')) + '</b></div>' +
+      (s.fase === 'ferdig' ? '' : ftdPrikker(s.bom)) + '</div>';
+    if (s.fase === 'ferdig') {
+      var dr = s.drukket || {}, dt = s.dealt || {}, rekke = (s.ider || []).slice().sort(function (a, b) { return (dr[b] || 0) - (dr[a] || 0); }), topp1 = rekke[0];
+      return '<div class="ftd">' + topp + '<div class="ftd-dealer"><span class="ftd-visir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11c0-2 2-3 9-3s9 1 9 3l-2 4H5z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg></span>' +
+        '<div><small>' + T('Kveldens dealer', 'Dealer of the night') + '</small><b>' + (topp1 ? jaNavn(topp1) : '–') + '</b><span>' + (topp1 ? T('Drakk ', 'Drank ') + (dr[topp1] || 0) + T(' slurker bak stokken.', ' sips behind the deck.') : '') + '</span></div></div>' +
+        '<p class="ftd-etikett">' + T('Slurker som dealer', 'Sips as dealer') + '</p><div class="ftd-liste">' + rekke.map(function (id, i) {
+          return '<div class="ftd-rad' + (i === 0 ? ' topp' : '') + '"><em>' + (i + 1) + '</em>' + nrHode(id) + '<b>' + jaNavn(id) + '</b><small>' + (dt[id] || 0) + T(' kort delt', ' cards dealt') + '</small><strong>' + (dr[id] || 0) + '</strong></div>'; }).join('') + '</div>' +
+        lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny stokk – nestemann deler', 'New deck – next one deals')]]) + '</div>';
+    }
+    // Avgjort: kortet snus for alle, slurkene smeller inn
+    if (s.fase === 'res' && r) {
+      var ny = !ftdSett['r' + r.nr]; ftdSett['r' + r.nr] = 1;
+      var treff = r.type !== 'bom';
+      var smell = treff
+        ? '<div class="ftd-smell treff' + (ny ? ' inn' : '') + '"><small>' + (r.type === 'treff1' ? T('Treff på første · dealeren drikker kortet', 'First-try hit · the dealer drinks the card') : T('Treff på andre · dealeren drikker halve', 'Second-try hit · the dealer drinks half')) + '</small><b>' + r.n + '</b><span>' + (jeg ? T('Fuck the dealer 🍻', 'Fuck the dealer 🍻') : esc(navn(s.dealer)) + T(' drikker', ' drinks')) + '</span></div>'
+        : '<div class="ftd-smell bom' + (ny ? ' inn' : '') + '"><small>' + T('Avstanden ', 'The distance ') + ftdVn(r.g) + '–' + ftdVn(r.kort.v) + T(' · gjetteren drikker', ' · the guesser drinks') + '</small><b>' + r.n + '</b></div>';
+      var gjett = treff ? '' : '<div class="ftd-gjettet"><span><small>' + T('Gjettet', 'Guessed') + '</small><b>' + ftdVn(r.g1) + '</b><b>' + ftdVn(r.g) + '</b></span><i>→</i></div>';
+      var videre = s.bom >= 3 ? '<p class="ftd-merk">' + T('Tre bom på rad – stokken går videre.', 'Three misses in a row – the deck moves on.') + '</p>' : '';
+      return '<div class="ftd' + (treff ? ' morkt' : '') + '">' + topp + '<div class="ftd-res">' + gjett + ftdKort(r.kort, 'stor' + (ny ? ' snu' : '')) + smell + '</div>' + videre +
+        (styrer ? '<button type="button" class="rom-stor-knapp ftd-neste" data-g="ftd-neste">' + T('Neste kort →', 'Next card →') + '</button>' : '<p class="nr-vent">' + esc(navn(s.dealer)) + T(' trykker neste.', ' taps next.') + '</p>') +
+        ftdBrett(s) + '</div>';
+    }
+    var andre = s.fase === 'andre';
+    var hint = andre ? '<div class="ftd-hint"><span class="ftd-pil' + (s.hint === 'hoy' ? '' : ' ned') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V4"/><path d="M5 11l7-7 7 7"/></svg></span><div><small>' + (jeg ? T('Si høyt', 'Say it out loud') : esc(navn(s.dealer)) + T(' sier', ' says')) + '</small><b>' + (s.hint === 'hoy' ? T('«Høyere»', '“Higher”') : T('«Lavere»', '“Lower”')) + '</b><span>' + T('enn ', 'than ') + ftdVn(s.g1) + '</span></div></div>' : '';
+    var bytt = s.bytt && !ftdSett['b' + s.pos] ? '<p class="ftd-merk inn">' + (s.bytt.fra === meg ? T('Tre bom på rad – stokken gikk til ', 'Three misses in a row – the deck went to ') + esc(navn(s.bytt.til)) + '.' : jeg ? T('Tre bom på rad hos ', 'Three misses in a row for ') + esc(navn(s.bytt.fra)) + T(' – du deler nå!', ' – you deal now!') : T('Stokken gikk til ', 'The deck went to ') + esc(navn(s.bytt.til)) + '.') + '</p>' : '';
+    if (!styrer) {
+      // De andre: hvem som deler, hva som ble sagt, og tellebrettet
+      return '<div class="ftd">' + topp + bytt + '<div class="ftd-vent"><span class="ftd-visir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11c0-2 2-3 9-3s9 1 9 3l-2 4H5z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg></span>' +
+        '<div><b>' + (andre ? T('Ett forsøk til', 'One more try') : T('Noen gjetter', 'Someone guesses')) + '</b><span>' + (andre ? esc(navn(s.dealer)) + T(' sa «', ' said “') + (s.hint === 'hoy' ? T('høyere', 'higher') : T('lavere', 'lower')) + T('» enn ', '” than ') + ftdVn(s.g1) : T('Si en verdi høyt – ', 'Call a value out loud – ') + esc(navn(s.dealer)) + T(' trykker den.', ' taps it.')) + '</span></div></div>' +
+        ftdBrett(s, true) + '</div>';
+    }
+    // Dealeren (eller verten for en dealer som er borte): kortet og tastaturet
+    var nyttKort = !ftdSett['k' + s.pos]; ftdSett['k' + s.pos] = 1;
+    var taster = '';
+    for (var v = 1; v <= 13; v++) {
+      var ute = (s.brukt[v] || 0) >= 4, feilSide = andre && ((s.hint === 'hoy' && v <= s.g1) || (s.hint === 'lav' && v >= s.g1));
+      taster += '<button type="button" class="ftd-tast' + (ute ? ' ute' : feilSide ? ' ute' : andre ? ' mulig' : '') + (andre && v === s.g1 ? ' streket' : '') + (v === 13 ? ' bred' : '') + '" data-g="ftd-gjett" data-v="' + v + '"' + (ute || feilSide ? ' disabled' : '') + '>' + ftdVn(v) + '</button>';
+    }
+    var treffN = andre ? Math.ceil(k.v / 2) : k.v;
+    return '<div class="ftd">' + topp + bytt + '<div class="ftd-hode">' + ftdKort(k, nyttKort ? 'inn' : '') + '<div class="ftd-hode-t">' +
+      (jeg ? '<span class="ftd-bare"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10 10 0 0 1 21 12a10.7 10.7 0 0 1-2.2 3.2"/><path d="M6.6 6.6A10.6 10.6 0 0 0 3 12a10 10 0 0 0 13.4 4.4"/></svg>' + T('Bare du', 'Only you') + '</span>' : '<span class="ftd-bare">' + T('Du trykker for ', 'You tap for ') + esc(navn(s.dealer)) + '</span>') +
+      (andre ? '' : '<b>' + T('Noen gjetter', 'Someone guesses') + '</b><span>' + T('Trykk det som sies ↓', 'Tap what they say ↓') + '</span>') + '</div></div>' + hint +
+      (andre ? '<p class="ftd-etikett">' + T('Ett forsøk til – trykk det som sies ↓', 'One more try – tap what they say ↓') + '</p>' : '') +
+      '<div class="ftd-taster" aria-label="' + T('Trykk det som sies', 'Tap what they say') + '">' + taster + '</div>' +
+      '<div class="ftd-info"><div class="treff"><b>' + treffN + '</b><span>' + (andre ? T('treff<br>du drikker halve', 'hit<br>you drink half') : T('treff<br>du drikker kortet', 'hit<br>you drink the card')) + '</span></div>' +
+      (andre ? '<div class="bom"><b>|' + ftdVn(k.v) + '–?|</b><span>' + T('bom<br>gjetteren drikker', 'miss<br>the guesser drinks') + '</span></div>' : '<div class="hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l4-4 4 4"/><path d="M12 3v8"/><path d="M8 17l4 4 4-4"/><path d="M12 13v8"/></svg><span>' + T('bom<br>si høyere/lavere', 'miss<br>say higher/lower') + '</span></div>') + '</div>' +
+      ftdBrett(s) + '</div>';
   }
   /* ---------- Gris: fjøset og trynet ----------
      Halmgult og låverødt. Kortet du sender sklir ut til venstre, det nye kommer inn fra høyre. Det rosa trynet pulserer
@@ -4654,7 +4733,7 @@ export function startRom(LEKNAVN, LANG) {
     else {
       innhold = '<div class="rom-spill"><p class="rom-spillnavn">' + esc(s.navn) + (s.modus && s.modus !== '*' && s.type !== 'bingo' && s.lek !== 'ring-of-fire' ? ' · ' + esc(s.modus) : '') + '</p>' +
         ({ kort: kortSpill, mest: mestSpill, forraeder: function (s) { return forraederSpill(s) + lhBenk(s); }, bingo: bingoSpill, en: enSpill, opus: opusSpill, overunder: overunderSpill,
-           veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: function (s) { return nyhetsrundenSpill(s) + nrBenk(s); }, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + slurkelinje() + reglerPanel(s) + '</div>';
+           veddelopet: veddelopetSpill, pyramiden: pyramidenSpill, dealer: dealerSpill, gris: grisSpill, president: presidentSpill, regelfabrikken: regelfabrikkenSpill, tosannheter: tosannheterSpill, bussruta: bussrutaSpill, yatzy: yatzySpill, nyhetsrunden: function (s) { return nyhetsrundenSpill(s) + nrBenk(s); }, hvemskrev: hvemskrevSpill, bloff: bloffSpill, samme: sammeSpill, spion: spionSpill, pannekort: pannekortSpill, skal: skalSpill }[s.type] || function () { return ''; })(s) + slurkelinje() + reglerPanel(s) + '</div>';
       // Nyhetsrunden finnes bare på norsk
       if (EN && s.type === 'nyhetsrunden') innhold = innhold.replace('</p>', '</p><p class="small">🇳🇴 ' + T('', 'Questions are in Norwegian') + '</p>');
     }
@@ -5113,6 +5192,8 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'sofa-fane') { sofaFane = b.dataset.v === 'leser' ? 'leser' : 'rundt'; return tegn(); }
     if (g === 'sofa-fjern') return gjor({ handling: 'sofa-fjern', hvem: b.dataset.paa });
     if (g === 'en-start') return gjor({ handling: 'en-start', lek: b.dataset.lek });
+    if (g === 'ftd-gjett') return gjor({ handling: 'ftd-gjett', v: Number(b.dataset.v) });
+    if (g === 'ftd-neste') return gjor({ handling: 'ftd-neste' });
     if (g === 'en-tell') return enNedtelling(enTell.k);
     if (g === 'en-bombe-start') return enBombeStart(enBombe.k);
     if (g === 'en-bombe-send') { enBombe.holder++; return tegn(); }

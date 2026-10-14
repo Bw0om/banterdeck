@@ -331,6 +331,12 @@ Two things the best party games do, now in the decks. In mixed mode («Blandet»
 
 In Nødt eller sannhet, «personen til venstre» becomes a name from the room – «Lag et dikt om Sara» lands harder than a card about a neighbour, and on phones there is no obvious left. Left, right and opposite become three different people when there are enough players, never the person in the chair. The original text is kept on the card so it still counts as seen.
 
+## Fuck the Dealer
+
+The phone is the deck, and only the dealer holds it. Whoever wants to guesses out loud; the dealer taps the value on an ace-to-king keypad with hard shadows. A miss turns the keypad into a yellow «Si høyt: HØYERE» card and greys out the impossible half. When the card is decided it flips for everyone on a dark panel: mint for a hit (the dealer drinks the card's value, or half of it rounded up on the second try), orange for a double miss (the guesser drinks the distance). Three misses in a row pass the deck to the next player; a hit resets the three dots that sit in the corner of every screen.
+
+The tally board is the game's own piece: thirteen columns of four slots, filled as cards are used, a column turning orange when a value is out. It sits small under the dealer's keypad, large on the other phones, and fills the TV. Cream and ink with mint as the game's accent, so it reads as its own table next to Pyramiden's felt and Bussruta's bus.
+
 ## Game images
 
 `scripts/lag-lekebilder.mjs` draws all 63 game images and the 10 shared motifs as small sticker scenes: the same vector stickers as the room (`src/lib/klistremerker.js`), plus scene-only shapes defined in the script (cards in four suits, dice, cups, beer, bottles, phones, speech bubbles, people, faces, ball, microphone, controller, flags and more). In scenes the ink stroke is thinned to 2.4 (the room stickers keep 3.5) so fills stay visible at 240 px; each sticker gets a hard 3 px offset shadow and a slight tilt, and each game has its own colour field (mint, pink, blue, paper, peach or lilac) with a few sparkles. Scenes are a row of stickers, bottom-aligned and centred; wide scenes scale down to fit. Run `node scripts/lag-lekebilder.mjs` after changing it, and bump the service worker cache.
