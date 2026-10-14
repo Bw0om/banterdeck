@@ -4500,7 +4500,11 @@ export function startRom(LEKNAVN, LANG) {
     tegnArk();
     aapentArk = { el: m, oppdater: tegnArk };
   }
-  root.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-g="figur-ark"]')) figurArk(); });
+  root.addEventListener('click', function (e) {
+    if (!e.target.closest) return;
+    if (e.target.closest('[data-g="figur-ark"]')) figurArk();
+    else if (e.target.closest('[data-g="rom-ark"]') && erVert()) romArk();
+  });
 
   /** Nytt i garderoben etter kvelden – eller et lite dytt om å lage bruker, så pynten kan samles på. */
   function nyPyntBoks() {
@@ -4930,20 +4934,20 @@ export function startRom(LEKNAVN, LANG) {
     var plass = root.querySelector('#romStuaPlass'); if (!plass || !meg) return;
     if (!stuaEl) {
       stuaEl = document.createElement('div'); stuaEl.className = 'rom-stua';
-      stuaEl.innerHTML = '<svg role="img" aria-label="' + T('Stua: alle i rommet som tegnede figurer. Dra i folka for å flytte dem.', 'The living room: everyone in the room as drawn figures. Drag people to move them.') + '"></svg>' +
-        '<span class="rom-stua-hint" aria-hidden="true">' + T('Dra i folka', 'Drag the people') + '</span>';
+      stuaEl.innerHTML = '<svg role="img" aria-label="' + T('Stua: alle i rommet som tegnede figurer. Trykk på gulvet for å gå dit, dra i folka for å flytte dem.', 'The living room: everyone in the room as drawn figures. Tap the floor to walk there, drag people to move them.') + '"></svg>' +
+        '<span class="rom-stua-hint" aria-hidden="true">' + T('Trykk for å gå', 'Tap to walk') + '</span>';
       stua = lagStua(stuaEl.querySelector('svg'), {
         lang: EN ? 'en' : 'no', navn: true, vandre: true, meg: meg.id,
         onSlipp: function (id, x, y) { gjorAlltid({ handling: 'stua-flytt', hvem: id, x: x, y: y }); },
         onFerdig: function () { if (stuaVentTegn) { stuaVentTegn = false; tegn(); } },
         // Trykk på deg selv: figuren gjør «din» bevegelse (vink er gratis). Arket åpnes fra lenka under stua.
         onTrykk: function (id) { if (id === meg.id) { var b = (megSpiller().pynt || {}).beveg || 'vink'; gjorAlltid({ handling: 'beveg', b: b }); } },
-        onRom: function () { if (erVert()) romArk(); else toast(T('Bare verten kan endre rommet.', 'Only the host can change the room.')); },
         onDor: dorArk,
       });
       stuaEl.appendChild(Object.assign(document.createElement('p'), { className: 'rom-stua-tips' }));
     }
-    stuaEl.querySelector('.rom-stua-tips').innerHTML = '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>';
+    stuaEl.querySelector('.rom-stua-tips').innerHTML = (erVert() ? '<button type="button" class="linkbtn" data-g="rom-ark">' + T('Rommet', 'The room') + '</button>' : '') +
+      '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>';
     if (stuaEl.parentNode !== plass) plass.appendChild(stuaEl);
     stuaEl.classList.toggle('kompakt', !!s);
     var st = tilstand.stua || {}, ute = st.ute || [], jegUte = ute.indexOf(meg.id) !== -1, alle = (tilstand.spillere || []).concat(st.sofa || []);

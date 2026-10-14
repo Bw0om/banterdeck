@@ -478,13 +478,14 @@ export function lagStua(svg, valg = {}) {
     el('text', { x: 0, y: 0, transform: skjev(tk[0], tk[1]), 'font-family': f, 'font-weight': 900, 'font-size': v.stor ? 26 : 21, fill: v.stor ? '#FF9CC2' : '#FFE07A', 'letter-spacing': 2.5, 'font-stretch': '75%' }, tvTekst).textContent = v.kode;
   }
   let tvTimer = null;
-  // Et kort trykk på rommet (ikke på TV-en, lampa eller folk) åpner «Rommet»
+  // Et kort trykk i rommet (ikke på TV-en, døra eller folk): figuren din går dit. Lampa slås av og på som før.
   let romTrykk = null;
-  romG.addEventListener('pointerdown', (e) => { if (e.target.closest('.stua-tv')) return; romTrykk = { x: e.clientX, y: e.clientY, t: Date.now() }; });
-  romG.addEventListener('pointerup', (e) => {
-    if (!romTrykk || e.target.closest('.stua-tv')) { romTrykk = null; return; }
+  const forbi = (e) => e.target.closest && e.target.closest('.stua-tv, .stua-dor, .figur');
+  svg.addEventListener('pointerdown', (e) => { romTrykk = forbi(e) ? null : { x: e.clientX, y: e.clientY, t: Date.now() }; });
+  svg.addEventListener('pointerup', (e) => {
+    if (!romTrykk || forbi(e)) { romTrykk = null; return; }
     const ok = Date.now() - romTrykk.t < 400 && Math.hypot(e.clientX - romTrykk.x, e.clientY - romTrykk.y) < 8; romTrykk = null;
-    if (ok && valg.onRom) valg.onRom();
+    if (ok) gaaHit(e);
   });
   tegnRom(valg.tema || 'stue');
   tegnTv();
@@ -745,6 +746,33 @@ export function lagStua(svg, valg = {}) {
   // så rommet aldri blir stående og vente på et drag som er over
   function slippAlle() { folk.forEach((f) => { if (f.drar && f.slipp) f.slipp(); }); }
   ['pointerup', 'pointercancel', 'touchend', 'touchcancel', 'blur'].forEach((t) => window.addEventListener(t, () => setTimeout(slippAlle, 0)));
+  // Trykk på gulvet: din egen figur går dit. Sofaen = sett deg; bordet, lampa og døra = nærmeste ledige rute.
+  let merke = null;
+  function gaaHit(e) {
+    const f = valg.meg && kart.get(valg.meg);
+    if (!f || f.ut || f.drar || valg.kanDra === false) return;
+    const q = punkt(e), a = (q.x - 260) / 30, b = (q.y - 112) / 15;
+    let x = Math.max(0.4, Math.min(5.6, (a + b) / 2)), y = Math.max(0.4, Math.min(5.7, (b - a) / 2));
+    const iSofa = e.target.closest && sofa.contains(e.target);
+    let mal;
+    if (iSofa || paaSofa([x, y])) mal = [1.0, Math.max(1.9, Math.min(4.5, iSofa ? y + 0.6 : y))];
+    else if (!ledig(x, y) || (x > 4.3 && y < 1.1)) mal = naermesteLedig(x, y);
+    else mal = [x, y];
+    if (x > 4.3 && y < 1.1 && !ledig(mal[0], mal[1])) mal = [4.0, 1.4];
+    if (Math.hypot(mal[0] - f.x.v, mal[1] - f.y.v) < 0.1) return;
+    visMerke(mal);
+    f.gaaTil(mal); f.hjem = mal; f.planleggRusling();
+    if (valg.onSlipp) valg.onSlipp(f.info.id, +mal[0].toFixed(2), +mal[1].toFixed(2));
+  }
+  function visMerke(m) {
+    if (merke) merke.remove();
+    const c = I(m[0], m[1]), r = [[c[0], c[1] - 15], [c[0] + 30, c[1]], [c[0], c[1] + 15], [c[0] - 30, c[1]]];
+    merke = el('g', { class: 'stua-merke', 'pointer-events': 'none' });
+    lag.insertBefore(merke, lag.firstChild);
+    el('polygon', { points: pts(r), fill: '#FFD23F', 'fill-opacity': 0.6, stroke: B, 'stroke-width': 2.5, 'stroke-linejoin': 'round', class: 'merke-flis' }, merke);
+    el('polygon', { points: pts(r), fill: 'none', stroke: B, 'stroke-width': 2, 'stroke-linejoin': 'round', class: 'merke-ring' }, merke);
+    const g = merke; setTimeout(() => { if (merke === g) { g.remove(); merke = null; } }, REDUSERT ? 900 : 1400);
+  }
   function naermesteLedig(x, y) {
     let best = null, bd = 1e9;
     for (let gx = 0.5; gx <= 5.5; gx += 0.25) for (let gy = 0.5; gy <= 5.6; gy += 0.25) {
