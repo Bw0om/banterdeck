@@ -108,7 +108,7 @@ import Base from '../../layouts/Base.astro';
         root.innerHTML = '<p class="rom-feil">' + esc(d.melding || 'Fikk ikke hentet salget.') + '</p>';
       }).catch(function () { root.innerHTML = '<p class="rom-feil">Fikk ikke kontakt. Prøv igjen.</p>'; });
     }
-    function ikkeInne() { root.innerHTML = '<p>Logg inn på <a href="/no/account">Min stokk</a> med admin-kontoen for å se salget.</p>'; }
+    function ikkeInne() { root.innerHTML = '<p>Logg inn på <a href="/no/account">Profil</a> med admin-kontoen for å se salget.</p>'; }
 
     root.addEventListener('click', function (e) {
       var r = e.target.closest('[data-refunder]');

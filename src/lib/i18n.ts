@@ -35,7 +35,7 @@ export const UI = {
     locale: 'en',
     htmlLang: 'en',
     tagline: 'Drinking games and pre-party fun – everyone plays from their own phone.',
-    nav: { home: 'Home', games: 'Drinking games', suggest: 'Submit', about: 'About', privacy: 'Privacy', account: 'My deck' },
+    nav: { home: 'Home', games: 'Drinking games', suggest: 'Submit', about: 'About', privacy: 'Privacy', account: 'Profile' },
     openApp: 'Open the app',
     heroTitle: 'Never be lost for words again.',
     heroSub: (l: number, w: number, g: number) =>
@@ -99,7 +99,7 @@ export const UI = {
     desktopSteps: 'You are on a computer. Open mittvors.no on your phone to add it to your home screen.',
     standalone: 'You are running the installed app. Nice.',
     // Konto
-    accountTitle: 'My deck',
+    accountTitle: 'Profile',
     accountLead: 'Sign in to save your own lines and favourites, and get them on every device.',
     email: 'Email address',
     sendLink: 'Send me a sign-in link',
@@ -173,7 +173,7 @@ export const UI = {
     locale: 'nb_NO',
     htmlLang: 'no',
     tagline: 'Drikkeleker og vorsmoro – alle spiller fra sin egen telefon.',
-    nav: { home: 'Forside', games: 'Drikkeleker', suggest: 'Send inn', about: 'Om', privacy: 'Personvern', account: 'Min stokk' },
+    nav: { home: 'Forside', games: 'Drikkeleker', suggest: 'Send inn', about: 'Om', privacy: 'Personvern', account: 'Profil' },
     openApp: 'Åpne appen',
     heroTitle: 'Aldri stå tom for svar igjen.',
     heroSub: (l: number, w: number, g: number) =>
@@ -234,7 +234,7 @@ export const UI = {
     androidSteps: 'I Chrome: trykk menyen, så «Installer app» eller «Legg til på startskjerm».',
     desktopSteps: 'Du er på en datamaskin. Åpne mittvors.no på telefonen for å legge den til på hjem-skjermen.',
     standalone: 'Du kjører den installerte appen. Fint.',
-    accountTitle: 'Min stokk',
+    accountTitle: 'Profil',
     accountLead: 'Logg inn for å lagre egne replikker og favoritter, og få dem på alle enheter.',
     email: 'E-postadresse',
     sendLink: 'Send meg en innloggingslenke',

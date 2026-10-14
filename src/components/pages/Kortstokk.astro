@@ -53,7 +53,7 @@ const no = lang === 'no';
             try { localStorage.setItem('bd_stokk_utkast', JSON.stringify({ navn: st.navn, kort: st.kort })); } catch (x) {}
             msg.innerHTML = EN ? 'Set aside. <a href="' + KONTO + '">Log in or create an account</a> to save it.' : 'Lagt til side. <a href="/no/account">Logg inn eller lag konto</a> for å lagre den.'; return;
           }
-          return K.stokker.lagre({ navn: st.navn, kort: st.kort }).then(function () { msg.innerHTML = EN ? 'Saved ✓ Find it under <a href="' + KONTO + '">My deck</a>.' : 'Lagret ✓ Finn den under <a href="/no/account">Min stokk</a>.'; msg.className = 'formmsg ok'; });
+          return K.stokker.lagre({ navn: st.navn, kort: st.kort }).then(function () { msg.innerHTML = EN ? 'Saved ✓ Find it under <a href="' + KONTO + '">Profile</a>.' : 'Lagret ✓ Finn den under <a href="/no/account">Profil</a>.'; msg.className = 'formmsg ok'; });
         }).catch(function (err) { msg.textContent = err.message || (EN ? 'Couldn’t save it.' : 'Fikk ikke lagret.'); });
       }
     });

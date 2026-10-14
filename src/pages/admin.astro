@@ -62,7 +62,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
 
     <!-- Fane: gi Pluss -->
     <div id="tab-pluss" hidden>
-      <div id="plussInnlogg" class="small" hidden>For å gi Pluss må du også være logget inn på <a href="/no/account">Min stokk</a> med admin-kontoen (e-posten i ADMIN_EPOSTER).</div>
+      <div id="plussInnlogg" class="small" hidden>For å gi Pluss må du også være logget inn på <a href="/no/account">Profil</a> med admin-kontoen (e-posten i ADMIN_EPOSTER).</div>
       <section class="konto-boks">
         <h2>Gi Pluss til en konto</h2>
         <div class="pickrow">
@@ -511,7 +511,7 @@ const SITS = allSituations.map((x: any) => ({ id: x.id, label: `${x.emoji} ${x.t
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
     function dato(iso) { return iso ? new Date(iso).toLocaleString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–'; }
     function api(sti, opts) {
-      if (!K || !K.les()) { $('plussInnlogg').hidden = false; return Promise.reject(new Error('Logg inn på Min stokk først.')); }
+      if (!K || !K.les()) { $('plussInnlogg').hidden = false; return Promise.reject(new Error('Logg inn på Profil først.')); }
       return K.api(sti, opts).then(function (r) { return r.json().then(function (d) { if (!r.ok) { if (r.status === 403) $('plussInnlogg').hidden = false; throw new Error(d.melding || 'Feil'); } return d; }); });
     }
     function sok() {

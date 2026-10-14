@@ -3,6 +3,7 @@
 // språkversjonene deler den, og telefonen slipper å tolke 200 kB JavaScript på nytt hver gang rommet åpnes.
 // Startes fra Rom.astro ved hver sidevisning (astro:page-load), med lekenavnene og språket som argumenter.
 import { lagStua, figurHtml, utseende, PYNT_SVG, BEVEG_SVG, hodeHtml } from './stua.js';
+import { lagFigurVelger } from './figurvelger.js';
 import { klistremerke } from '../lib/klistremerker';
 import { TEMAER, temaLov, pyntNavn, PYNT, EKSTRA, sesong } from '../lib/pynt.js';
 
@@ -1227,11 +1228,11 @@ export function startRom(LEKNAVN, LANG) {
     var klar = les('bd_stokk_rom'), liste = (mineStokker || []).slice();
     if (klar && klar.kort) liste = [klar].concat(liste.filter(function (x) { return x.id !== klar.id; }));
     var logget = window.BDKonto && window.BDKonto.les();
-    if (!liste.length) return '<p class="small rom-egnetips">' + T('Egne drikkekort? Lag kortstokker på', 'Your own drinking cards? Make decks under') + ' <a href="' + RUTE.konto + '">' + T('Min stokk', 'My decks') + '</a> ' + T('og spill dem her.', 'and play them here.') + '</p>';
+    if (!liste.length) return '<p class="small rom-egnetips">' + T('Egne drikkekort? Lag kortstokker på', 'Your own drinking cards? Make decks under') + ' <a href="' + RUTE.konto + '">' + T('Profil', 'Profile') + '</a> ' + T('og spill dem her.', 'and play them here.') + '</p>';
     return '<h2 class="rom-h2">' + T('Dine kortstokker', 'Your decks') + '</h2><div class="rom-leker">' + liste.map(function (x, i) {
       return '<div class="rom-lek' + (klar && i === 0 ? ' klar' : '') + '"><b>' + esc(x.navn) + '</b><span>' + (x.kort || []).length + T(' egne kort. Alle ser samme kort.', ' custom cards. Everyone sees the same card.') + '</span>' +
         '<div class="rom-mod"><button type="button" data-g="egen" data-i="' + i + '">Start</button></div></div>';
-    }).join('') + '</div>' + (logget ? '' : '<p class="small">' + T('Logg inn på', 'Log in at') + ' <a href="' + RUTE.konto + '">' + T('Min stokk', 'My decks') + '</a> ' + T('for å se alle kortstokkene dine.', 'to see all your decks.') + '</p>');
+    }).join('') + '</div>' + (logget ? '' : '<p class="small">' + T('Logg inn på', 'Log in at') + ' <a href="' + RUTE.konto + '">' + T('Profil', 'Profile') + '</a> ' + T('for å se alle kortstokkene dine.', 'to see all your decks.') + '</p>');
   }
   function egenListe() {
     var klar = les('bd_stokk_rom'), liste = (mineStokker || []).slice();
@@ -1245,7 +1246,7 @@ export function startRom(LEKNAVN, LANG) {
     (K ? K.bruker() : Promise.resolve(null)).then(function (u) {
       if (!u) {
         skriv('bd_stokk_utkast', { navn: navn, kort: s.alleKort });
-        toast(T('Kortene er lagt til side. Logg inn på Min stokk for å lagre dem.', 'The cards are set aside. Log in under My decks to save them.'));
+        toast(T('Kortene er lagt til side. Logg inn på Profil for å lagre dem.', 'The cards are set aside. Log in under Profiles to save them.'));
         return;
       }
       return K.stokker.lagre({ navn: navn, kort: s.alleKort }).then(function () { toast(T('Lagret som kortstokk på kontoen din ✓', 'Saved as a deck on your account ✓')); stokkerHentet = false; mineStokker = null; });
@@ -4398,37 +4399,15 @@ export function startRom(LEKNAVN, LANG) {
   function figurArk() {
     lukkArk();
     var m = lagArk('figur-ark', T('Figuren din', 'Your figure')), kropp = m.querySelector('.ark-kropp');
-    var st = { fane: 'hode', laast: [], valgt: {}, kvelder: 0, sesong: sesong(), lastet: false, inne: innlogget() }, timer = null;
-    var megS = megSpiller();
-    st.valgt = Object.assign({}, megS.pynt || {});
-    function tegnArk() {
-      var har = {}; st.laast.forEach(function (id) { har[id] = true; });
-      var n = st.laast.length;
-      var bev = st.fane === 'beveg' ? (st.valgt.beveg || 'vink') : '';
-      kropp.innerHTML = '<div class="figur-rad"><svg class="figur-preview figur' + (bev ? ' m-' + bev : '') + '" viewBox="-48 -100 96 106" aria-hidden="true">' + figurHtml(utseende(megS.figur || tilstand.meg), st.valgt) + '</svg>' +
-        '<p class="small">' + (st.inne ? (n ? n + T(' av ', ' of ') + PYNT.length + T(' låst opp · ', ' unlocked · ') : '') + st.kvelder + (st.kvelder === 1 ? T(' kveld spilt', ' night played') : T(' kvelder spilt', ' nights played'))
-          : T('Lag en bruker, så kan du låse opp alt dette ved å spille. Alt er gratis.', 'Create an account and you unlock all of this by playing. All free.') + '<br><a class="btn small gold ark-lagbruker" href="' + RUTE.konto + '">' + T('Lag bruker', 'Create an account') + '</a>') + '</p></div>' +
-        '<div class="ark-faner" role="tablist">' + ['hode', 'ansikt', 'bryst', 'venn', 'beveg'].map(function (sl) { return '<button type="button" class="ark-fane" role="tab" data-fane="' + sl + '" aria-selected="' + (st.fane === sl) + '">' + SLOTNAVN[sl] + '</button>'; }).join('') + '</div>' +
-        '<div class="pynt-rad">' + PYNT.filter(function (x) { return x.slot === st.fane; }).map(function (x) {
-          var kan = st.inne && !!har[x.id] && (!x.sesong || x.sesong === st.sesong), paa = st.valgt[st.fane] === x.id;
-          var hint = !har[x.id] ? x.laas[EN ? 1 : 0] : (x.sesong && x.sesong !== st.sesong ? T('Kommer tilbake i sesongen', 'Back in season') : (paa ? (x.slot === 'beveg' ? T('Din', 'Yours') : T('På', 'Wearing')) : (x.slot === 'beveg' ? T('Trykk for å prøve', 'Tap to try') : T('Trykk for å ta på', 'Tap to wear'))));
-          return '<button type="button" class="pynt-valg' + (kan ? '' : ' laast') + '" data-id="' + x.id + '" aria-pressed="' + paa + '"' + (kan ? '' : ' disabled') + '><svg viewBox="' + SLOTBOKS[x.slot] + '" aria-hidden="true">' + (PYNT_SVG[x.id] || BEVEG_SVG[x.id] || '') + '</svg><b>' + esc(x.navn[EN ? 1 : 0]) + '</b><small>' + esc(hint) + '</small></button>';
-        }).join('') + '</div>' +
-        (st.fane === 'beveg' ? '<p class="small">' + T('Trykk på deg selv i stua, så gjør figuren bevegelsen din – hos alle. Reaksjonene (skål, latter …) har alle.', 'Tap yourself in the living room and your figure does your move – for everyone. The reactions (cheers, laughter …) are free for all.') + '</p>' : '') +
-        '<p class="small ark-fot">' + T('Alt er gratis. Du låser opp ved å spille, og alle i rommet ser det med en gang.', 'All free. You unlock by playing, and everyone in the room sees it right away.') + '</p>';
-    }
-    kropp.addEventListener('click', function (e) {
-      var f = e.target.closest('[data-fane]'); if (f) { st.fane = f.dataset.fane; tegnArk(); return; }
-      var b = e.target.closest('.pynt-valg'); if (!b || b.disabled) return;
-      var slot = st.fane, id = b.dataset.id;
-      st.valgt[slot] = st.valgt[slot] === id ? null : id; tegnArk();
-      clearTimeout(timer);
-      timer = setTimeout(function () {
-        kontoApi('/api/konto/pynt', { method: 'POST', body: JSON.stringify({ valgt: st.valgt }) }).then(function (r) { if (r.ok) gjorAlltid({ handling: 'min-pynt' }); else toast(T('Fikk ikke lagret. Prøv igjen.', 'Could not save. Try again.')); }).catch(function () { toast(T('Fikk ikke lagret. Prøv igjen.', 'Could not save. Try again.')); });
-      }, 350);
-    });
-    tegnArk();
-    if (st.inne) kontoApi('/api/konto/pynt').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (!d || !aapentArk || aapentArk.el !== m) return; st.laast = d.laast || []; st.valgt = Object.assign({}, d.valgt || {}); st.kvelder = d.kvelder || 0; st.sesong = d.sesong; tegnArk(); }).catch(function () {});
+    var megS = megSpiller(), timer = null, inne = innlogget();
+    var velger = lagFigurVelger(kropp, { lang: EN ? 'en' : 'no', nokkel: megS.figur || tilstand.meg, inne: inne, laast: [], valgt: Object.assign({}, megS.pynt || {}), kvelder: 0, kontoHref: RUTE.konto,
+      onEndre: function (valgt) {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          kontoApi('/api/konto/pynt', { method: 'POST', body: JSON.stringify({ valgt: valgt }) }).then(function (r) { if (r.ok) gjorAlltid({ handling: 'min-pynt' }); else toast(T('Fikk ikke lagret. Prøv igjen.', 'Could not save. Try again.')); }).catch(function () { toast(T('Fikk ikke lagret. Prøv igjen.', 'Could not save. Try again.')); });
+        }, 350);
+      } });
+    if (inne) kontoApi('/api/konto/pynt').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (!d || !aapentArk || aapentArk.el !== m) return; velger.sett({ laast: d.laast || [], valgt: d.valgt || {}, kvelder: d.kvelder || 0 }); }).catch(function () {});
     aapentArk = { el: m, oppdater: function () {} };
   }
   function romArk() {
@@ -5105,7 +5084,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'rf-lagre-mine') {
       var sp = tilstand.spill, d = new Date(), nv = T('Mine kort ' + d.getDate() + '.' + (d.getMonth() + 1) + '.', 'My cards ' + d.getDate() + '/' + (d.getMonth() + 1));
       return window.BDLagreKort(nv, sp.mineKort || []).then(function (r) {
-        toast(r === 'lagret' ? T('Kortene dine er lagret på kontoen ✓', 'Your cards are saved to your account ✓') : T('Kortene er lagt til side. Logg inn på Min stokk for å lagre dem.', 'The cards are set aside. Log in under My decks to save them.'));
+        toast(r === 'lagret' ? T('Kortene dine er lagret på kontoen ✓', 'Your cards are saved to your account ✓') : T('Kortene er lagt til side. Logg inn på Profil for å lagre dem.', 'The cards are set aside. Log in under Profiles to save them.'));
       }).catch(function (e) { toast(e.message || T('Fikk ikke lagret.', 'Couldn\'t save.')); });
     }
     if (g === 'del-kveld') return delKveld();
