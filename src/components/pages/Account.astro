@@ -602,7 +602,7 @@ const T = no ? {
           if (!window.mvFigur || !bruker) return;
           $('figurNavn').textContent = bruker.brukernavn || (EN ? 'You' : 'Du');
           var n = figur.laast.length;
-          $('figurTekst').textContent = figur.kvelder + (figur.kvelder === 1 ? (EN ? ' night' : ' kveld') : (EN ? ' nights' : ' kvelder')) + ' · ' + n + (EN ? ' of ' : ' av ') + PYNT.length + (EN ? ' unlocked' : ' låst opp');
+          $('figurTekst').textContent = figur.kvelder + (figur.kvelder === 1 ? (EN ? ' night' : ' kveld') : (EN ? ' nights' : ' kvelder')) + ' · ' + n + (EN ? ' of ' : ' av ') + PYNT.filter(function (p) { return !p.eier || figur.laast.indexOf(p.id) !== -1; }).length + (EN ? ' unlocked' : ' låst opp');
         }
         function lagreFigur(valgt) {
           figur.valgt = valgt; tegnFigur();

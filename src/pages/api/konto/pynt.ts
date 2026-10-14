@@ -1,13 +1,13 @@
 // Figuren din: hva kontoen har låst opp av pynt, og hva den har på seg. Alt er gratis – man låser opp ved å spille.
 import type { APIRoute } from 'astro';
 import { rpc } from '../../../lib/spilt';
-import { json, innloggetBruker } from '../../../lib/konto';
+import { json, innloggetBruker, laastFor } from '../../../lib/konto';
 import { rensPynt, sesong } from '../../../lib/pynt.js';
 export const prerender = false;
 
 async function hent(userId: string) {
   const ph: any = (await rpc('pynt_hent', { p_user: userId })) || {};
-  const laast: string[] = Array.isArray(ph.laast) ? ph.laast : [];
+  const laast: string[] = await laastFor(userId, Array.isArray(ph.laast) ? ph.laast : []);
   return { laast, valgt: rensPynt(ph.valgt, laast), kvelder: Number(ph.kvelder) || 0, sesong: sesong() };
 }
 

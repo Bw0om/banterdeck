@@ -4,7 +4,7 @@ import type { APIRoute } from 'astro';
 import { kobleTv, kaaringer, hentRom, endreRom, visning, skjermVisning, skjermPinOk, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
 import { rpc } from '../../../lib/spilt';
 import { etterpaa } from '../../../lib/etterpaa';
-import { innloggetBruker } from '../../../lib/konto';
+import { innloggetBruker, laastFor } from '../../../lib/konto';
 import { plussStatus } from '../../../lib/pluss';
 import { rensPynt, laasOppForKveld } from '../../../lib/pynt.js';
 import { kveldInn, vinnerValg, reglerForRom, startSaldo } from '../../../lib/lovbok';
@@ -122,7 +122,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   if ((d.handling === 'bli-med' || d.handling === 'min-pynt' || d.handling === 'gjeng-meg' || d.handling === 'gjeng') && request.headers.get('authorization')) {
     try {
       const u = await innloggetBruker(request);
-      if (u) { d._bruker = u.id; const ph: any = await rpc('pynt_hent', { p_user: u.id }); if (ph) { d._pynt = rensPynt(ph.valgt, ph.laast); d._kvelder = Number(ph.kvelder) || 0; d._laast = Array.isArray(ph.laast) ? ph.laast : []; } }
+      if (u) { d._bruker = u.id; const ph: any = await rpc('pynt_hent', { p_user: u.id }); if (ph) { const laast = await laastFor(u.id, Array.isArray(ph.laast) ? ph.laast : []); d._pynt = rensPynt(ph.valgt, laast); d._kvelder = Number(ph.kvelder) || 0; d._laast = laast; } }
     } catch { /* uten pynt */ }
   }
   // Gjengkveld: medlemmer kommer rett inn, alle andre venter på å bli sluppet inn

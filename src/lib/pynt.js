@@ -18,6 +18,9 @@ export const PYNT = [
   { id: 'hund', slot: 'venn', navn: ['Hund', 'Dog'], laas: ['Bli Mest gavmild', 'Be the most generous'], kaaring: 'gavmild' },
   { id: 'katt', slot: 'venn', navn: ['Katt', 'Cat'], laas: ['Spill tre kvelder', 'Play three nights'], kvelder: 3 },
   { id: 'and', slot: 'venn', navn: ['And', 'Duck'], laas: ['Spill fem kvelder', 'Play five nights'], kvelder: 5 },
+  { id: 'sel', slot: 'venn', navn: ['Sel', 'Seal'], laas: ['Spill to kvelder', 'Play two nights'], kvelder: 2 },
+  // Eierens egen: deles aldri ut, vises ikke i andres garderobe. Serveren legger den til for eierkontoen (se konto.ts).
+  { id: 'eierkrone', slot: 'hode', navn: ['Eierkrona', 'Owner crown'], laas: ['', ''], eier: true },
   // Bevegelser: figuren gjør «din» bevegelse når du trykker på deg selv i stua
   { id: 'vink', slot: 'beveg', navn: ['Vink', 'Wave'], laas: ['Spill din første kveld', 'Play your first night'], kvelder: 1 },
   { id: 'dans', slot: 'beveg', navn: ['Dans', 'Dance'], laas: ['Spill tre kvelder', 'Play three nights'], kvelder: 3 },
@@ -27,6 +30,8 @@ export const PYNT = [
   { id: 'moon', slot: 'beveg', navn: ['Moonwalk', 'Moonwalk'], laas: ['Spill ti kvelder', 'Play ten nights'], kvelder: 10 },
 ];
 export const SLOTS = ['hode', 'ansikt', 'bryst', 'venn', 'beveg'];
+/** Det en konto kan se i garderoben: alt, unntatt eierens egne ting (med mindre kontoen har dem). */
+export function synligPynt(laast) { const har = new Set(laast || []); return PYNT.filter((p) => !p.eier || har.has(p.id)); }
 /** Bevegelsen alle kan gjøre uten konto. */
 export const BEVEG_GRATIS = 'vink';
 export function erBeveg(id) { const p = AV_ID[id]; return !!p && p.slot === 'beveg'; }

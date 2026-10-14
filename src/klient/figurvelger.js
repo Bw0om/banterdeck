@@ -4,7 +4,7 @@
 // Låste ting har hengelås; ett trykk viser hvordan du låser den opp – én linje, så forsvinner den.
 // Brukes både i rommet (arket «Figuren din») og på profilsiden, så de ser helt like ut.
 import { figurHtml, utseende, PYNT_SVG, BEVEG_SVG } from './stua.js';
-import { PYNT, sesong, FRISYRER, FARGER, FARGBAR } from '../lib/pynt.js';
+import { PYNT, sesong, FRISYRER, FARGER, FARGBAR, synligPynt } from '../lib/pynt.js';
 
 const SLOTS = ['hode', 'deg', 'ansikt', 'bryst', 'venn', 'beveg'];
 const NAVN = {
@@ -69,7 +69,7 @@ export function lagFigurVelger(rot, o) {
     if (st.slot === 'deg') {
       rad = frisyrer(p) + prikker('fh', p.h) + prikker('fhud', p.hud);
     } else if (st.slot) {
-      const liste = PYNT.filter((x) => x.slot === st.slot);
+      const liste = synligPynt(st.laast).filter((x) => x.slot === st.slot);
       const ingen = st.slot === 'beveg' ? '' : `<button type="button" class="fv-valg${!st.valgt[st.slot] ? ' paa' : ''}" data-id="" aria-label="${T('Ingenting', 'Nothing')}" aria-pressed="${!st.valgt[st.slot]}"><svg viewBox="0 0 24 24" class="fv-ingen" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>`;
       const valg = `<div class="fv-rad" aria-label="${N[st.slot]}">` + ingen + liste.map((x) => {
         const kan = st.inne && !!h[x.id] && (!x.sesong || x.sesong === st.sesong), paa = st.valgt[st.slot] === x.id;
@@ -87,8 +87,8 @@ export function lagFigurVelger(rot, o) {
     const fot = st.slot
       ? (st.slot === 'beveg' ? T('Trykk på deg selv i stua, så gjør figuren bevegelsen – hos alle.', 'Tap yourself in the living room and your figure does the move – for everyone.')
         : st.slot === 'deg' ? T('Frisyre og farger er gratis', 'Hairstyles and colours are free')
-        : (st.inne ? `${PYNT.filter((x) => x.slot === st.slot && h[x.id]).length} ${T('av', 'of')} ${PYNT.filter((x) => x.slot === st.slot).length} ${T('låst opp', 'unlocked')}` : ''))
-      : (st.inne ? `${n} ${T('av', 'of')} ${PYNT.length} ${T('låst opp', 'unlocked')} · ${st.kvelder} ${st.kvelder === 1 ? T('kveld spilt', 'night played') : T('kvelder spilt', 'nights played')}` : '');
+        : (st.inne ? `${synligPynt(st.laast).filter((x) => x.slot === st.slot && h[x.id]).length} ${T('av', 'of')} ${synligPynt(st.laast).filter((x) => x.slot === st.slot).length} ${T('låst opp', 'unlocked')}` : ''))
+      : (st.inne ? `${n} ${T('av', 'of')} ${synligPynt(st.laast).length} ${T('låst opp', 'unlocked')} · ${st.kvelder} ${st.kvelder === 1 ? T('kveld spilt', 'night played') : T('kvelder spilt', 'nights played')}` : '');
     rot.innerHTML = `<div class="fv${st.slot ? ' valgt' : ''}">` +
       `<div class="fv-scene"><i class="fv-gulv"></i><svg class="fv-figur figur${bev ? ' m-' + bev : ''}" viewBox="-48 -100 96 106" aria-hidden="true">${figurHtml(p, st.valgt)}</svg>${deler}${lapp}</div>` +
       (st.slot ? '' : `<p class="fv-hint">${T('Trykk på en del', 'Tap a part')}</p>`) + rad +
