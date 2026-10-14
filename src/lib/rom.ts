@@ -3003,13 +3003,18 @@ function nyeHandling(data: any, meg: any, h: any): any {
       if (s.ferdig) return { ok: true };
       if (!kanStyre) return feilL('ikke-din-tur', 'Det er ikke din tur.', "It's not your turn.");
       if (s.kast >= 3) return { ok: true };
-      s.terninger = s.terninger.map((t: number, i: number) => (s.hold[i] && s.kast ? t : 1 + tilfeldig(6)));
+      // Bare terningene som faktisk ble kastet nå, teller. Holdte enere eller fire like som allerede lå der, gir ikke slurker på nytt.
+      const kastet = s.terninger.map((_: number, i: number) => !(s.hold[i] && s.kast));
+      s.terninger = s.terninger.map((t: number, i: number) => (kastet[i] ? 1 + tilfeldig(6) : t));
       s.kast++; s.nr++;
       const c = yzTell(s.terninger), deler: string[] = [], delerEn: string[] = [];
-      s.drikk = { ener: c[1] > 0, fire: 0, yatzy: c.some((x) => x === 5), nr: s.nr };
-      if (c[1] > 0) { giSlurker(data, aktiv, 2); deler.push('Ener i kastet – drikk 2.'); delerEn.push('A one in the roll – drink 2.'); }
-      if (c.some((x) => x === 5)) { giUtdeling(data, aktiv, 5); deler.push('YATZY! Del ut 5 – eller en shot.'); delerEn.push('YAHTZEE! Give out 5 – or a shot.'); }
-      else if (c.some((x) => x >= 4)) { const sum = s.terninger.reduce((a: number, b: number) => a + b, 0); giSlurker(data, aktiv, sum); s.drikk.fire = sum; deler.push('Fire like – drikk ' + sum + ' slurker.'); delerEn.push('Four of a kind – drink ' + sum + ' sips.'); }
+      const nyEner = s.terninger.some((t: number, i: number) => kastet[i] && t === 1);
+      const nyttAv = (v: number) => s.terninger.some((t: number, i: number) => kastet[i] && t === v);
+      const yatzy = c.some((x, v) => x === 5 && nyttAv(v)), fireLike = c.some((x, v) => x >= 4 && nyttAv(v));
+      s.drikk = { ener: nyEner, fire: 0, yatzy, nr: s.nr };
+      if (nyEner) { giSlurker(data, aktiv, 2); deler.push('Ener i kastet – drikk 2.'); delerEn.push('A one in the roll – drink 2.'); }
+      if (yatzy) { giUtdeling(data, aktiv, 5); deler.push('YATZY! Del ut 5 – eller en shot.'); delerEn.push('YAHTZEE! Give out 5 – or a shot.'); }
+      else if (fireLike) { const sum = s.terninger.reduce((a: number, b: number) => a + b, 0); giSlurker(data, aktiv, sum); s.drikk.fire = sum; deler.push('Fire like – drikk ' + sum + ' slurker.'); delerEn.push('Four of a kind – drink ' + sum + ' sips.'); }
       s.melding = L(deler.join(' ') || (s.kast < 3 ? 'Hold og trill igjen, eller velg et felt.' : 'Velg et felt.'),
         delerEn.join(' ') || (s.kast < 3 ? 'Hold and roll again, or pick a box.' : 'Pick a box.'));
       return { ok: true };
