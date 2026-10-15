@@ -83,6 +83,9 @@ Repoet er åpent, så GitHub sine Mac-maskiner er gratis uten kvote.
 
 Appen bygges bare når du trykker **Run workflow**. Ingenting bygges av seg selv. Nettsiden oppdaterer seg uansett.
 
+Appen er bare for iPhone (`TARGETED_DEVICE_FAMILY = 1` i Xcode-prosjektet). Da krever Apple ingen iPad-skjermbilder,
+og ingen får et strukket telefonoppsett på iPad.
+
 ### 3. Skjermbilder og tekst
 
 Skjermbilder lages fra nettsiden i iPhone-størrelse. Si fra, så lager jeg dem (6,9" og 6,5"):
