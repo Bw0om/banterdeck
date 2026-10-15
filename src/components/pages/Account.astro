@@ -52,8 +52,30 @@ const T = no ? {
 };
 ---
 <Base title={L.accountTitle} description={L.accountLead} lang={lang} noindex={true}>
-  <div id="kontoHode"><h1>{L.accountTitle}</h1>
-  <p class="lead">{L.accountLead}</p></div>
+  <div id="kontoHode"><h1 class="bare-nett">{L.accountTitle}</h1><h1 class="bare-app">{no ? 'Deg' : 'You'}</h1>
+  <p class="lead bare-nett">{L.accountLead}</p></div>
+
+  <!-- Appen, ikke innlogget: figuren er det første du ser. Logg inn, så blir den din. -->
+  <section class="app-figur bare-app" id="appFigur" aria-label={no ? 'Figuren din' : 'Your figure'}>
+    <svg class="app-figur-bilde" viewBox="-48 -100 96 106" aria-hidden="true"></svg>
+    <div>
+      <b id="appFigurNavn">{no ? 'Figuren din' : 'Your figure'}</b>
+      <span>{no ? 'Logg inn, så får du en fast figur du kan kle på, og ting du låser opp ved å spille.' : 'Sign in to get a figure of your own to dress up, and gear you unlock by playing.'}</span>
+      <a class="btn gold small" href="#signin">{no ? 'Logg inn' : 'Sign in'}</a>
+    </div>
+  </section>
+  <script is:inline data-astro-rerun>
+    (function () {
+      var el = document.getElementById('appFigur'); if (!el || el.dataset.bound) return; el.dataset.bound = '1';
+      function tegn() {
+        if (!window.mvFigur || !window.mvUtseende) { document.addEventListener('mv-figur-klar', tegn, { once: true }); return; }
+        var navn = ''; try { navn = JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (e) {}
+        var n = document.getElementById('appFigurNavn'); if (n && navn) n.textContent = navn;
+        el.querySelector('.app-figur-bilde').innerHTML = '<g class="figur" transform="translate(0,0)">' + window.mvFigur(window.mvUtseende(navn || 'deg'), {}) + '</g>';
+      }
+      tegn();
+    })();
+  </script>
 
   <!-- Appen: det som ellers ligger i toppen av nettsiden. Navnet brukes i rommet (huskes på telefonen, ingen konto). -->
   <section class="app-innstillinger bare-app" aria-label={no ? 'Innstillinger' : 'Settings'}>
@@ -779,6 +801,7 @@ const T = no ? {
             bruker = u;
             if (!u) { render(); return; }
             $('signin').hidden = true; $('dash').hidden = false; var kh = $('kontoHode'); if (kh) kh.hidden = true; visning(location.hash.replace('#', ''));
+            var af = $('appFigur'); if (af) af.hidden = true; var ai = document.querySelector('.app-innstillinger'); if (ai) $('dash').after(ai);   // appen: figuren først, innstillingene under
             visHvem();
             $('navnForm').hidden = !!u.brukernavn;
             if (erGjenoppretting) { $('pwForm').hidden = false; $('pwTittel').textContent = T.choosePw; $('pwLead').hidden = true; $('pwNy').focus(); }

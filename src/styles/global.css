@@ -2071,6 +2071,7 @@ html.is-app.hud-lukket.hud-apen .app-vifte{pointer-events:auto}
 html.is-app.hud-lukket.hud-apen .app-vifte a{opacity:1;transform:none}
 html.is-app.hud-lukket.hud-apen .app-vifte a:nth-child(2){transition-delay:30ms}
 html.is-app.hud-lukket.hud-apen .app-vifte a:nth-child(3){transition-delay:60ms}
+html.is-app.hud-lukket.hud-apen .app-vifte a:nth-child(4){transition-delay:90ms}
 html.is-app.hud-apen .app-hud{transform:rotate(-8deg) scale(1.04)}
 /* Under en lek og på bli med-skjermen finnes verken linja eller vifta */
 html.is-app.i-spill .app-vifte,html.is-app.bli-med .app-vifte,html.is-app.i-spill .app-hud,html.is-app.bli-med .app-hud{display:none}
@@ -2086,7 +2087,34 @@ html.is-app body::before{content:"";position:fixed;top:0;left:0;right:0;height:e
 /* Hold-trykk på lenker, knapper og kort skal aldri vise iPhone-menyen med nettadressen */
 a,button,[role=button],summary,label,img,svg,.btn,[data-g],[class*="knapp"],[class*="kort"]{-webkit-touch-callout:none}
 /* Nettside-ting som ikke hører hjemme i appen: «legg på hjemskjermen», nettvarsler (iPhone-appen får egne varsler), forsidelenka i rommet */
-html.is-app .nr-varsel,html.is-app .standalone-only{display:none!important}
+html.is-app .nr-varsel,html.is-app .standalone-only,html.is-app .bare-nett{display:none!important}
+/* Hjem-fanen er forsiden, men bare det som hører appen til: stua med lag rom / bli med, lekene, én telefon, denne uka og gjengen.
+   Pluss-prisene (Apple krever kjøp gjennom App Store), humoren, «ha vorset på hjemskjermen» og annonsene er borte. */
+html.is-app .st-plussfelt,html.is-app .st-humorfelt,html.is-app .st-hjem,html.is-app .st-forside .ad{display:none!important}
+/* Deg, ikke innlogget: figuren først */
+html.is-app .app-figur{display:grid;grid-template-columns:118px 1fr;align-items:center;gap:6px 14px;margin:6px 0 14px;padding:14px 16px 14px 10px;border-radius:22px;
+  background:var(--card);border:3px solid var(--ink2);box-shadow:6px 6px 0 var(--ink2)}
+html.is-app .app-figur-bilde{width:118px;height:130px}
+html.is-app .app-figur > div{display:flex;flex-direction:column;gap:6px;min-width:0}
+html.is-app .app-figur b{font-family:var(--display);font-size:20px;line-height:1.1}
+html.is-app .app-figur span{font-size:14px;line-height:1.4;color:var(--muted)}
+html.is-app .app-figur .btn{align-self:flex-start;margin-top:4px}
+html.is-app #kontoHode .lead{display:none}
+/* Lobbyen når verten er alene: invitasjonen er det store, stua er liten, og lekene som trenger flere ligger samlet */
+html.is-app .app-alene{display:flex;flex-direction:column;gap:6px;margin:12px 0 4px;padding:18px 18px 16px;border-radius:24px;background:var(--gold);color:var(--ink2);border:3px solid var(--ink2);box-shadow:6px 6px 0 var(--ink2)}
+html.is-app .app-alene > b{font-family:var(--display);font-size:22px;line-height:1.1}
+html.is-app .app-alene > span{font-size:15px;line-height:1.4}
+html.is-app .app-alene-kode{font-family:var(--display);font-size:19px;letter-spacing:.06em}
+html.is-app .app-alene .rom-stor-knapp{max-width:none;margin-top:10px;min-height:64px;border:3px solid var(--ink2);box-shadow:4px 4px 0 var(--ink2)}
+html.is-app .app-alene .rom-stor-knapp:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink2)}
+html.is-app.alene .rom-stua{max-width:300px;margin:6px auto 12px}
+html.is-app.alene .rom-stua .rom-stua-hint{display:none}
+html.is-app .app-flere{margin-top:12px;border:1px dashed var(--border2);border-radius:20px;padding:0 4px}
+html.is-app .app-flere summary{list-style:none;cursor:pointer;min-height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 14px;font-family:var(--display);font-weight:800;font-size:15px;color:var(--muted);-webkit-tap-highlight-color:transparent}
+html.is-app .app-flere summary::-webkit-details-marker{display:none}
+html.is-app .app-flere summary::after{content:"›";font-size:24px;transform:rotate(90deg);transition:transform .2s var(--ease-out)}
+html.is-app .app-flere[open] summary::after{transform:rotate(-90deg)}
+html.is-app .app-flere .app-lek{margin:0 4px 8px}
 /* Hus-ikonet i rommet: også i lobbyen i appen – det er veien tilbake til startskjermen */
 html.is-app .rom-hjem{display:grid;place-items:center;flex-shrink:0;width:40px;height:40px;margin-right:6px;border-radius:50%;background:var(--card2);border:1px solid var(--border);color:var(--ink);text-decoration:none}
 /* ---------- appen: startskjermen. To valg, ingenting annet: Lag rom, eller bli med med kode ---------- */
