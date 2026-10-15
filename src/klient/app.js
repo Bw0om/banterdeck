@@ -35,8 +35,11 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     });
   } catch (e) {}
 
-  // Statuslinja: mørk tekst, siden toppen alltid er oransje (theme-color)
-  StatusBar.setStyle({ style: Style.Light }).catch(() => {});
+  // Statuslinja (klokke, batteri) følger lys/mørk modus: mørk tekst på lys bakgrunn, lys tekst på mørk
+  const statuslinje = () => StatusBar.setStyle({ style: h.dataset.theme === 'dark' ? Style.Dark : Style.Light }).catch(() => {});
+  statuslinje();
+  new MutationObserver(statuslinje).observe(h, { attributes: true, attributeFilter: ['data-theme'] });
+  document.addEventListener('astro:after-swap', statuslinje);
   SplashScreen.hide().catch(() => {});
 
   // TV-en via AirPlay: appen viser storskjermen på TV-en (ios/App/App/TvSkjerm.swift). Rommet sier hvilken lenke.

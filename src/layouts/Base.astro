@@ -369,13 +369,22 @@ const isCurrent = (href: string) => {
 
   <!-- Appen (iPhone, senere Android): tre faner nederst. Spill = rommet (lag/bli med/spill), Leker = reglene, Deg = figur og konto.
        Vises bare når html.is-app er satt (se merkEnhet i head). Skjules under en lek, så ingen trykker seg ut ved et uhell. -->
+  <!-- Blar du nedover, krymper fanelinja til én knapp nede til venstre (logoen). Trykk på den, så folder fanene seg ut
+       over knappen. Øverst på siden er hele linja tilbake. Styres av html.hud-lukket / html.hud-apen (skript lenger ned). -->
   <nav class="app-tabbar" aria-label={lang === 'no' ? 'Appmeny' : 'App menu'}>
+    <button type="button" class="app-hud" data-hud aria-expanded="false" aria-label={lang === 'no' ? 'Meny' : 'Menu'}>
+      <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="2" y="2" width="60" height="60" rx="14" fill="#FFD23F" stroke="#16120F" stroke-width="4"/><g fill="#FFF8EE" stroke="#16120F" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M14 14h12l-2 17a4.5 4.5 0 0 1-8 0z" transform="rotate(10 20 22)"/><path d="M38 14h12l-2 17a4.5 4.5 0 0 1-8 0z" transform="rotate(-10 44 22)"/></g><g stroke="#16120F" stroke-width="3.5" stroke-linecap="round"><path d="M21.5 36v12M16 50h11M42.5 36v12M37 50h11M32 8v5M26 10l2 4M38 10l-2 4"/></g></svg>
+    </button>
     <a href={lang === 'no' ? '/no/rom' : '/room'} aria-current={isCurrent(lang === 'no' ? '/no/rom' : '/room') ? 'page' : undefined}>
       <span class="ti"><Icon name="terning" size={24} /></span><span class="tl">{lang === 'no' ? 'Spill' : 'Play'}</span></a>
     <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
       <span class="ti"><Icon name="drikkeleker" size={24} /></span><span class="tl">{lang === 'no' ? 'Leker' : 'Games'}</span></a>
     <a href={path(lang, '/account')} aria-current={isCurrent(path(lang, '/account')) ? 'page' : undefined}>
       <span class="ti"><Icon name="deg" size={24} /></span><span class="tl">{lang === 'no' ? 'Deg' : 'You'}</span></a>
+    <button type="button" class="app-tema" data-tema aria-label={lang === 'no' ? 'Bytt mellom lys og mørk modus' : 'Switch light or dark mode'}>
+      <span class="ti"><svg class="tema-sol" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg><svg class="tema-maane" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></span>
+      <span class="tl"><span class="tema-sol">{lang === 'no' ? 'Lys' : 'Light'}</span><span class="tema-maane">{lang === 'no' ? 'Mørk' : 'Dark'}</span></span>
+    </button>
   </nav>
 
   <!-- Aldersspørringen ligger UTENFOR .main, ellers blir den uskarp sammen med innholdet. -->
@@ -439,6 +448,24 @@ const isCurrent = (href: string) => {
         sisteY = y;
       }, { passive: true });
       document.addEventListener('astro:page-load', function () { document.body.classList.remove('bars-skjult'); });
+
+      /* Appen: fanelinja krymper til logoknappen når du blar nedover, og er hel igjen øverst på siden.
+         Trykk på logoen folder fanene ut over knappen; et trykk utenfor, eller en ny rulling, lukker dem. */
+      var hudY = window.scrollY, rot = document.documentElement;
+      function hudLukk() { rot.classList.remove('hud-apen'); var k = document.querySelector('[data-hud]'); if (k) k.setAttribute('aria-expanded', 'false'); }
+      window.addEventListener('scroll', function () {
+        if (!rot.classList.contains('is-app')) return;
+        var y = window.scrollY;
+        if (y < 60) { rot.classList.remove('hud-lukket'); hudLukk(); }
+        else if (y > hudY + 8) { if (!rot.classList.contains('hud-lukket')) { rot.classList.add('hud-lukket'); } hudLukk(); }
+        hudY = y;
+      }, { passive: true });
+      document.addEventListener('click', function (e) {
+        var k = e.target.closest && e.target.closest('[data-hud]');
+        if (k) { var apen = rot.classList.toggle('hud-apen'); k.setAttribute('aria-expanded', apen ? 'true' : 'false'); return; }
+        if (rot.classList.contains('hud-apen') && !(e.target.closest && e.target.closest('.app-tabbar'))) hudLukk();
+      });
+      document.addEventListener('astro:before-swap', function () { hudLukk(); rot.classList.remove('hud-lukket'); });
 
       function toast(msg, ms) {
         var t = document.getElementById('toast');
