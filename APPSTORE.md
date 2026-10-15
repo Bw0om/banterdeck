@@ -3,6 +3,18 @@
 iPhone-appen er et tynt skall (Capacitor) rundt mittvors.no. Alt innhold lastes fra nettsiden, så appen er alltid like
 ny som siden. Nettsiden kjenner igjen appen og skrur på vibrering, delingsark og statuslinje (`src/klient/app.js`).
 
+Appen har sitt eget skall: ingen sidemeny, topplinje eller bunntekst, men tre faner nederst (`.app-tabbar` i
+`src/layouts/Base.astro`): **Spill** (rommet – lag, bli med, spill), **Leker** (reglene) og **Deg** (figur og konto).
+Appen starter rett i rommet (`/no/rom?app=1`). Skallet velges før siden tegnes: Capacitor legger «mittvors-app» i user
+agent, og `html.is-app` styrer CSS-en (nederst i `src/styles/global.css`). Fanelinja er borte under en lek.
+
+Veien til godkjenning (Apple-regel 4.2, «minimum functionality», avviser rene nettside-apper):
+1. ✅ Eget app-skall med fanelinje.
+2. Pakke sidene inn i appen (Astro bygger, Capacitor legger filene i app-pakken) i stedet for `server.url`.
+3. Leker og regler virker uten nett; rommet sier fra pent.
+4. Pluss som kjøp gjennom Apple (StoreKit). Vipps vises aldri i appen.
+5. Push når rommet venter på deg.
+
 Filene:
 
 | Fil | Hva |

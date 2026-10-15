@@ -868,3 +868,5 @@ html[data-laast] .utvikling{overscroll-behavior:contain}
 .rom-kikk-folk span.vert{background:var(--gold);color:var(--ink2)}
 .rom-start.med-kode #romNavn1{font-size:20px;min-height:56px}
 .rom-alder{margin:12px 0 0;font-size:13.5px;line-height:1.45;color:var(--muted);text-align:center}
+/* Appen: fanelinja nederst er med i lobbyen (Spill-fanen ER rommet, så ingen trykker seg ut), men borte under leken */
+html.is-app.i-rom:not(.i-spill) body{padding-bottom:calc(env(safe-area-inset-bottom) + 84px)}

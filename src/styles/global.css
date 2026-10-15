@@ -2025,8 +2025,30 @@ img,svg,a{-webkit-user-drag:none}
 .rom-bg-knapper .btn{white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.rom-vent-prikker span{animation:none;opacity:.6}.rom-knapp-stor{transition:none}}
 
-/* iPhone-appen (Capacitor): toppen under statuslinja, og ingen kjøp eller «legg til på hjemskjermen» inne i appen */
-html.is-app .topbars{padding-top:env(safe-area-inset-top)}
+/* ---------- appen (iPhone, senere Android): eget skall ----------
+   Samme sider som nettsiden, men uten sidemeny, topplinje, bunntekst og nettsidens meny. Tre faner nederst (.app-tabbar).
+   Ingen kjøp (Apple krever kjøp gjennom App Store) og ingen «legg til på hjemskjermen» inne i appen. */
+.app-tabbar{display:none}
+html.is-app .side,html.is-app .topbars,html.is-app .foot,html.is-app .tabbar,html.is-app .langbanner,html.is-app .tool.dice,
 html.is-app .installer,html.is-app [data-kjop],html.is-app .bare-nett{display:none!important}
 html.is-app .bare-app{display:block}
 .bare-app{display:none}
+html.is-app .shell{grid-template-columns:1fr;align-content:start}
+html.is-app .main{padding:calc(env(safe-area-inset-top) + 14px) 18px 40px;max-width:none}
+html.is-app body{padding-bottom:calc(env(safe-area-inset-bottom) + 84px)}
+html.is-app .app-tabbar{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:fixed;left:0;right:0;bottom:0;z-index:70;
+  padding:6px 8px calc(env(safe-area-inset-bottom) + 4px);background:rgb(var(--bg-rgb) / .94);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--border)}
+html.is-app .app-tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:56px;border-radius:18px;
+  color:var(--faint);font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.01em;text-decoration:none;
+  -webkit-tap-highlight-color:transparent;transition:transform .12s ease}
+html.is-app .app-tabbar a:active{transform:scale(.94)}
+html.is-app .app-tabbar a[aria-current=page]{color:var(--gold-t)}
+html.is-app .app-tabbar .ti{display:grid;place-items:center;height:26px}
+html.is-app .app-tabbar .tl{white-space:nowrap}
+/* Under en lek, og når en gjest bare skal bli med: hele skjermen til rommet */
+html.is-app.i-spill .app-tabbar,html.is-app.bli-med .app-tabbar{display:none}
+html.is-app.i-spill body,html.is-app.bli-med body{padding-bottom:calc(env(safe-area-inset-bottom) + 16px)}
+/* Språkbytte, «noe galt?» og lenker som hører til nettsiden tas i Deg-fanen i stedet */
+html.is-app .rom-h1 + p.small{display:none}
+html.is-app .toast{bottom:calc(env(safe-area-inset-bottom) + 84px)}
