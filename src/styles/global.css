@@ -2040,14 +2040,13 @@ html.is-app .app-tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-in
   padding:6px 8px calc(env(safe-area-inset-bottom) + 4px);background:rgb(var(--bg-rgb) / .94);
   -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--border);
   transition:background-color .2s var(--ease-out),border-color .2s var(--ease-out)}
-html.is-app .app-tabbar a,html.is-app .app-tabbar .app-tema{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:56px;border-radius:18px;
+html.is-app .app-tabbar a{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:56px;border-radius:18px;
   border:0;background:transparent;color:var(--faint);font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.01em;text-decoration:none;
   -webkit-tap-highlight-color:transparent;transition:transform .2s var(--ease-out),opacity .2s var(--ease-out)}
-html.is-app .app-tabbar a:active,html.is-app .app-tabbar .app-tema:active{transform:scale(.94)}
+html.is-app .app-tabbar a:active{transform:scale(.94)}
 html.is-app .app-tabbar a[aria-current=page]{color:var(--gold-t)}
 html.is-app .app-tabbar .ti{display:grid;place-items:center;height:26px}
 html.is-app .app-tabbar .tl{white-space:nowrap}
-html.is-app .app-tabbar .app-tema .tl .tema-sol,html.is-app .app-tabbar .app-tema .tl .tema-maane{font:inherit}
 /* Logoknappen: usynlig til du blar nedover */
 html.is-app .app-hud{position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);width:58px;height:58px;padding:0;border:0;background:transparent;
   border-radius:18px;filter:drop-shadow(4px 4px 0 #16120F);opacity:0;transform:scale(.9) translateX(-8px);pointer-events:none;
@@ -2056,21 +2055,21 @@ html.is-app .app-hud svg{display:block;width:100%;height:100%}
 html.is-app .app-hud:active{transform:scale(.94)}
 /* Blar du nedover: fanene glir ut til venstre, linja blir gjennomsiktig, logoen kommer */
 html.is-app.hud-lukket .app-tabbar{background:transparent;border-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;pointer-events:none}
-html.is-app.hud-lukket .app-tabbar a,html.is-app.hud-lukket .app-tabbar .app-tema{opacity:0;transform:translateX(-24px) scale(.9);pointer-events:none}
+html.is-app.hud-lukket .app-tabbar a{opacity:0;transform:translateX(-24px) scale(.9);pointer-events:none}
 html.is-app.hud-lukket .app-hud{opacity:1;transform:none;pointer-events:auto}
 /* Trykk på logoen: fanene folder seg ut over knappen, én og én nedenfra (30 ms mellom hver) */
-html.is-app.hud-apen .app-tabbar a,html.is-app.hud-apen .app-tabbar .app-tema{position:fixed;left:14px;width:58px;height:58px;opacity:1;pointer-events:auto;
+html.is-app.hud-apen .app-tabbar a{position:fixed;left:14px;width:58px;height:58px;opacity:1;pointer-events:auto;
   transform:none;background:rgb(var(--card-rgb) / .96);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--border2);color:var(--ink);
   box-shadow:0 8px 24px rgb(0 0 0 / .18)}
 html.is-app.hud-apen .app-tabbar a:nth-of-type(1){bottom:calc(env(safe-area-inset-bottom) + 84px);transition-delay:0ms}
 html.is-app.hud-apen .app-tabbar a:nth-of-type(2){bottom:calc(env(safe-area-inset-bottom) + 150px);transition-delay:30ms}
 html.is-app.hud-apen .app-tabbar a:nth-of-type(3){bottom:calc(env(safe-area-inset-bottom) + 216px);transition-delay:60ms}
-html.is-app.hud-apen .app-tabbar .app-tema{bottom:calc(env(safe-area-inset-bottom) + 282px);transition-delay:90ms}
 html.is-app.hud-apen .app-tabbar a[aria-current=page]{background:var(--gold);color:var(--ink2);border-color:var(--ink2)}
 html.is-app.hud-apen .app-hud{transform:rotate(-8deg) scale(1.04)}
 @media (prefers-reduced-motion:reduce){
-  html.is-app .app-tabbar a,html.is-app .app-tabbar .app-tema,html.is-app .app-hud{transition:opacity .2s ease}
-  html.is-app.hud-lukket .app-tabbar a,html.is-app.hud-lukket .app-tabbar .app-tema{transform:none}
+  html.is-app .app-tabbar a,html.is-app .app-hud{transition:opacity .2s ease}
+  html.is-app.hud-lukket .app-tabbar a{transform:none}
+  html.is-app .rom-start > *{transition:opacity .2s ease}
 }
 /* Stripe bak klokka og batteriet, så innholdet ikke ruller rett under dem. Statuslinjas tekstfarge følger lys/mørk (app.js). */
 html.is-app body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);z-index:30;pointer-events:none;
@@ -2078,7 +2077,38 @@ html.is-app body::before{content:"";position:fixed;top:0;left:0;right:0;height:e
 /* Hold-trykk på lenker, knapper og kort skal aldri vise iPhone-menyen med nettadressen */
 a,button,[role=button],summary,label,img,svg,.btn,[data-g],[class*="knapp"],[class*="kort"]{-webkit-touch-callout:none}
 /* Nettside-ting som ikke hører hjemme i appen: «legg på hjemskjermen», nettvarsler (iPhone-appen får egne varsler), forsidelenka i rommet */
-html.is-app .nr-varsel,html.is-app .rom-hjem{display:none!important}
+html.is-app .nr-varsel,html.is-app .standalone-only{display:none!important}
+/* Hus-ikonet i rommet: også i lobbyen i appen – det er veien tilbake til startskjermen */
+html.is-app .rom-hjem{display:grid;place-items:center;flex-shrink:0;width:40px;height:40px;margin-right:6px;border-radius:50%;background:var(--card2);border:1px solid var(--border);color:var(--ink);text-decoration:none}
+/* ---------- appen: startskjermen. To valg, ingenting annet: Lag rom, eller bli med med kode ---------- */
+html.is-app .rom-start.uten-kode{gap:18px;margin-top:18px}
+html.is-app .rom-start.uten-kode .rom-boks.lag{background:transparent;border:0;padding:0;box-shadow:none;gap:0}
+html.is-app .rom-start .rom-boks.lag .rom-knapp{margin:0;min-height:80px;font-size:23px;font-family:var(--display);font-stretch:118%;font-weight:900;letter-spacing:-.01em;
+  border:3px solid var(--ink2);border-radius:24px;box-shadow:6px 6px 0 var(--ink2);transition:transform .14s var(--ease-out),box-shadow .14s var(--ease-out)}
+html.is-app .rom-start .rom-boks.lag .rom-knapp:active{transform:translate(3px,3px);box-shadow:3px 3px 0 var(--ink2)}
+html.is-app .rom-start .rom-eller{justify-content:center;margin:-2px 0}
+html.is-app .rom-start .rom-boks:not(.lag){gap:10px;padding:18px 18px 16px;border:3px solid var(--ink2);border-radius:24px;box-shadow:6px 6px 0 var(--ink2)}
+html.is-app .rom-start .rom-koderad label{font-family:var(--display);font-weight:800;font-size:15px}
+html.is-app .rom-start .rom-kodefelt{min-height:64px;font-size:32px!important;border-width:3px}
+html.is-app .rom-start .rom-boks:not(.lag) .rom-knapp{margin-top:2px;min-height:60px;font-size:18px;background:var(--card);color:var(--ink);border:3px solid var(--ink2);border-radius:18px;box-shadow:none}
+html.is-app .rom-start .rom-boks:not(.lag) .rom-knapp:active{transform:scale(.97)}
+/* Startskjermen kommer på plass nedenfra, én bit om gangen (40 ms mellom) – bare første gang den tegnes */
+html.is-app .rom-start > *{transition:opacity .24s var(--ease-out),transform .24s var(--ease-out)}
+@starting-style{html.is-app .rom-start > *{opacity:0;transform:translateY(10px)}}
+html.is-app .rom-start > :nth-child(2){transition-delay:40ms}
+html.is-app .rom-start > :nth-child(3){transition-delay:80ms}
+/* Innstillinger under Deg */
+html.is-app .app-innstillinger{display:grid;gap:0;margin:4px 0 26px;border:1px solid var(--border2);border-radius:20px;background:var(--card);overflow:hidden}
+html.is-app .app-rad{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:0 16px 0 18px;border:0;border-bottom:1px solid var(--border);
+  background:transparent;color:var(--ink);font:inherit;font-size:16px;font-weight:600;text-align:left;text-decoration:none;-webkit-tap-highlight-color:transparent}
+html.is-app .app-rad:last-child{border-bottom:0}
+html.is-app .app-rad:active{background:var(--card2)}
+html.is-app .app-rad i{font-style:normal;font-size:22px;color:var(--faint)}
+html.is-app .app-rad input{width:auto;max-width:46%;min-height:38px;margin:0;padding:6px 10px;text-align:right;font-weight:700;border:1px solid var(--border2);border-radius:10px;background:var(--bg)}
+html.is-app .app-bryter{position:relative;width:48px;height:28px;border-radius:14px;background:var(--border2);transition:background-color .2s var(--ease-out)}
+html.is-app .app-bryter::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgb(0 0 0 / .3);transition:transform .2s var(--ease-out)}
+:root[data-theme="dark"] html.is-app .app-bryter,html.is-app:root[data-theme="dark"] .app-bryter{background:var(--gold)}
+html.is-app:root[data-theme="dark"] .app-bryter::after{transform:translateX(20px)}
 /* Under en lek, og når en gjest bare skal bli med: hele skjermen til rommet */
 html.is-app.i-spill .app-tabbar,html.is-app.bli-med .app-tabbar{display:none}
 html.is-app.i-spill body,html.is-app.bli-med body{padding-bottom:calc(env(safe-area-inset-bottom) + 16px)}

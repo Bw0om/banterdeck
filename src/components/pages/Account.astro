@@ -55,6 +55,23 @@ const T = no ? {
   <div id="kontoHode"><h1>{L.accountTitle}</h1>
   <p class="lead">{L.accountLead}</p></div>
 
+  <!-- Appen: det som ellers ligger i toppen av nettsiden. Navnet brukes i rommet (huskes på telefonen, ingen konto). -->
+  <section class="app-innstillinger bare-app" aria-label={no ? 'Innstillinger' : 'Settings'}>
+    <label class="app-rad" for="appNavn"><span>{no ? 'Navnet ditt i rommet' : 'Your name in the room'}</span>
+      <input id="appNavn" maxlength="20" autocomplete="nickname" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder={no ? 'F.eks. Jonas' : 'E.g. Alex'} /></label>
+    <button type="button" class="app-rad" data-tema><span>{no ? 'Mørk modus' : 'Dark mode'}</span><i class="app-bryter" aria-hidden="true"></i></button>
+    <a class="app-rad" href={no ? '/room' : '/no/rom'} hreflang={no ? 'en' : 'no'}><span>{no ? 'English' : 'Norsk'}</span><i aria-hidden="true">›</i></a>
+    <button type="button" class="app-rad" data-feil><span>{no ? 'Noe galt? Si fra' : 'Something wrong? Tell us'}</span><i aria-hidden="true">›</i></button>
+  </section>
+  <script is:inline data-astro-rerun>
+    (function () {
+      var f = document.getElementById('appNavn'); if (!f || f.dataset.bound) return; f.dataset.bound = '1';
+      try { f.value = JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (e) {}
+      f.addEventListener('change', function () { var n = f.value.trim(); try { if (n) localStorage.setItem('bd_mittnavn', JSON.stringify(n)); else localStorage.removeItem('bd_mittnavn'); } catch (e) {} });
+      f.addEventListener('keydown', function (e) { if (e.key === 'Enter') f.blur(); });
+    })();
+  </script>
+
   {!configured && (
     <div class="notice">
       <p>{L.notConfigured}</p>

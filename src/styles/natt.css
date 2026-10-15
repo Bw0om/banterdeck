@@ -895,5 +895,15 @@ html.is-app .app-mer b{font-family:var(--display);font-size:16px}
 html.is-app .app-mer small{grid-column:1;font-size:13px;color:var(--muted)}
 html.is-app .app-mer i{grid-row:1 / span 2;font-size:26px;font-style:normal;color:var(--muted)}
 html.is-app .app-tilbake{margin:0 0 10px}
-html.is-app .rom-navnkjent{margin:0 0 12px;font-size:16px}
-html.is-app .rom-navnkjent b{font-family:var(--display);font-size:18px}
+/* Appen: rom-hodet i lobbyen like kompakt som under en lek, så hus-ikonet, koden og knappene får plass på én linje */
+html.is-app .rom-hode{padding:8px 10px 8px 12px;border-radius:18px}
+html.is-app .rom-hode .rom-etikett,html.is-app .rom-hode .rom-sprak,html.is-app .rom-hode small{display:none}
+html.is-app .rom-hode-v{flex:1 1 auto;min-width:0}
+html.is-app .rom-hode-v > div{min-width:0}
+html.is-app .rom-kode{font-size:22px!important;letter-spacing:.05em}
+html.is-app .rom-hk-tekst{display:none}
+html.is-app .rom-hk-ikon{width:40px;height:40px}
+html.is-app .rom-hodeknapper{gap:4px}
+@media (max-width:374px){html.is-app .rom-kode{font-size:24px!important}html.is-app .rom-hk-ikon,html.is-app .rom-hjem{width:38px;height:38px}}
+/* Startskjermen: Lag rom like bred som kortet under */
+html.is-app .rom-start.uten-kode{align-items:stretch}

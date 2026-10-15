@@ -381,10 +381,6 @@ const isCurrent = (href: string) => {
       <span class="ti"><Icon name="drikkeleker" size={24} /></span><span class="tl">{lang === 'no' ? 'Leker' : 'Games'}</span></a>
     <a href={path(lang, '/account')} aria-current={isCurrent(path(lang, '/account')) ? 'page' : undefined}>
       <span class="ti"><Icon name="deg" size={24} /></span><span class="tl">{lang === 'no' ? 'Deg' : 'You'}</span></a>
-    <button type="button" class="app-tema" data-tema aria-label={lang === 'no' ? 'Bytt mellom lys og mørk modus' : 'Switch light or dark mode'}>
-      <span class="ti"><svg class="tema-sol" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg><svg class="tema-maane" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></span>
-      <span class="tl"><span class="tema-sol">{lang === 'no' ? 'Lys' : 'Light'}</span><span class="tema-maane">{lang === 'no' ? 'Mørk' : 'Dark'}</span></span>
-    </button>
   </nav>
 
   <!-- Aldersspørringen ligger UTENFOR .main, ellers blir den uskarp sammen med innholdet. -->
