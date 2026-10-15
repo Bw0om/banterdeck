@@ -33,7 +33,9 @@ export function startRom(LEKNAVN, LANG) {
     if (!kode) { var tvRom = sistRom(); if (tvRom) { location.replace(location.pathname + '?k=' + tvRom); return; } setTimeout(function () { toast(T('Lag et rom først – så kobles TV-en til det.', 'Create a room first – then the TV connects to it.')); }, 900); }
   }
   // I appen: var du i et rom i kveld, lander du rett i det igjen (på nettet vises et banner i stedet)
-  if (erApp && !kode && !onsketLek && !tvKobl && qs.get('lag') !== '1') { var appRom = sistRom(); if (appRom) { location.replace(location.pathname + '?k=' + appRom); return; } }
+  var appStartet = false; try { appStartet = sessionStorage.getItem('mv_app_startet') === '1'; sessionStorage.setItem('mv_app_startet', '1'); } catch (e) {}
+  if (erApp && !appStartet && !kode && !onsketLek && !tvKobl && qs.get('lag') !== '1') { var appRom = sistRom(); if (appRom) { location.replace(location.pathname + '?k=' + appRom); return; } }
+  if (erApp) RUTE.hjem = RUTE.rom;   // hus-ikonet i rommet går til startskjermen (lag rom / bli med)
   // Kommer man fra en gjengside, telles rommet for den gjengen
   var onsketGjeng = /^[0-9a-f-]{36}$/i.test(qs.get('gjeng') || '') ? qs.get('gjeng') : '';
   var vervSjekket = false, sisteSkjerm = '';
@@ -541,16 +543,14 @@ export function startRom(LEKNAVN, LANG) {
         '</form>' +
       '</div>' +
       '';
-    // Appen: navnet huskes, så feltet er gjemt. «Lag rom» og «Bli med» er da ett trykk. «Endre» henter feltet fram.
-    if (erApp && navn && !melding) {
-      [medKode ? 'romNavn1' : 'romNavn2'].forEach(function (id) {
+    // Appen: navnet huskes (endres under Deg), så feltet er borte. «Lag rom» og «Bli med» er da ett trykk.
+    if (erApp && navn) {
+      ['romNavn1', 'romNavn2'].forEach(function (id) {
         var f = document.getElementById(id); if (!f) return;
         var lab = root.querySelector('label[for="' + id + '"]');
-        var rad = document.createElement('p'); rad.className = 'rom-navnkjent';
-        rad.innerHTML = T('Du er ', 'You’re ') + '<b>' + esc(navn) + '</b> · <button type="button" class="linkbtn">' + T('Endre', 'Change') + '</button>';
-        rad.querySelector('button').addEventListener('click', function () { rad.remove(); if (lab) lab.hidden = false; f.hidden = false; f.focus(); f.select(); });
-        f.hidden = true; if (lab) lab.hidden = true; f.parentNode.insertBefore(rad, f);
+        f.hidden = true; if (lab) lab.hidden = true;
       });
+      root.classList.add('navn-kjent');
     }
     var vk = document.getElementById('visKode');
     if (vk) vk.addEventListener('click', visKodefelt);
