@@ -2061,12 +2061,12 @@ html.is-app.hud-lukket .app-hud{opacity:1;transform:none;pointer-events:auto}
    Lukkes de, toner de ut på samme sted – de flytter seg aldri, så ingenting blir stående igjen som spøkelser. */
 html.is-app .app-vifte{position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom) + 84px);z-index:71;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none}
 html.is-app .app-vifte a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:58px;height:58px;border-radius:18px;
-  background:rgb(var(--card-rgb) / .96);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--border2);color:var(--ink);
-  box-shadow:0 8px 24px rgb(0 0 0 / .18);font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.01em;text-decoration:none;-webkit-tap-highlight-color:transparent;
+  background:var(--card);border:2px solid var(--ink2);color:var(--ink);
+  box-shadow:4px 4px 0 var(--ink2);font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.01em;text-decoration:none;-webkit-tap-highlight-color:transparent;
   opacity:0;transform:translateY(10px) scale(.92);transition:opacity .18s var(--ease-out),transform .18s var(--ease-out)}
 html.is-app .app-vifte a[aria-current=page]{background:var(--gold);color:var(--ink2);border-color:var(--ink2)}
 html.is-app .app-vifte .ti{display:grid;place-items:center;height:26px}
-html.is-app .app-vifte a:active{transform:scale(.94)}
+html.is-app .app-vifte a:active{transform:translate(2px,2px)!important;box-shadow:2px 2px 0 var(--ink2)}
 html.is-app.hud-lukket.hud-apen .app-vifte{pointer-events:auto}
 html.is-app.hud-lukket.hud-apen .app-vifte a{opacity:1;transform:none}
 html.is-app.hud-lukket.hud-apen .app-vifte a:nth-child(2){transition-delay:30ms}
@@ -2091,6 +2091,18 @@ html.is-app .nr-varsel,html.is-app .standalone-only,html.is-app .bare-nett{displ
 /* Hjem-fanen er forsiden, men bare det som hører appen til: stua med lag rom / bli med, lekene, én telefon, denne uka og gjengen.
    Pluss-prisene (Apple krever kjøp gjennom App Store), humoren, «ha vorset på hjemskjermen» og annonsene er borte. */
 html.is-app .st-plussfelt,html.is-app .st-humorfelt,html.is-app .st-hjem,html.is-app .st-forside .ad{display:none!important}
+/* Leker og lekesider i appen: ingen brødsmuler, ingen ingress skrevet for Google, ingen «Lag et rom» (det er Hjem).
+   På lekesiden er «Spill i rommet» den gule knappen; «Bare én telefon ↓» er en stille knapp som ruller til kortbunken. */
+html.is-app .crumb,html.is-app .lk-ingress,html.is-app .lk-snarveier .btn,html.is-app .gameacts button{display:none!important}
+html.is-app .lk-snarveier{margin-top:4px}
+html.is-app .btn .bare-app{display:inline}
+html.is-app .startrow{display:flex;flex-direction:column;gap:10px;margin:14px 0 22px}
+html.is-app .startrow .romlenke{order:-1;background:var(--gold);color:var(--ink2);border:3px solid var(--ink2);box-shadow:5px 5px 0 var(--ink2);min-height:64px;font-size:19px;font-family:var(--display);font-stretch:112%;font-weight:900;justify-content:center;
+  transition:transform .14s var(--ease-out),box-shadow .14s var(--ease-out)}
+html.is-app .startrow .romlenke:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink2)}
+html.is-app .startrow[data-irom] .btn.start{background:transparent;color:var(--ink);border:1px solid var(--border2);box-shadow:none;font-size:15px;padding:11px 16px;justify-content:center}
+/* Tekstlenker uten understrek – stille knapper, ikke nettlenker */
+html.is-app .linkbtn,html.is-app .feilknapp{text-decoration:none;font-weight:700;color:var(--ink)}
 /* Deg, ikke innlogget: figuren først */
 html.is-app .app-figur{display:grid;grid-template-columns:118px 1fr;align-items:center;gap:6px 14px;margin:6px 0 14px;padding:14px 16px 14px 10px;border-radius:22px;
   background:var(--card);border:3px solid var(--ink2);box-shadow:6px 6px 0 var(--ink2)}
@@ -2107,6 +2119,8 @@ html.is-app .app-alene > span{font-size:15px;line-height:1.4}
 html.is-app .app-alene-kode{font-family:var(--display);font-size:19px;letter-spacing:.06em}
 html.is-app .app-alene .rom-stor-knapp{max-width:none;margin-top:10px;min-height:64px;border:3px solid var(--ink2);box-shadow:4px 4px 0 var(--ink2)}
 html.is-app .app-alene .rom-stor-knapp:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink2)}
+html.is-app .app-start{max-width:none;margin-top:14px;border:3px solid var(--ink2);box-shadow:5px 5px 0 var(--ink2)}
+html.is-app .app-start:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink2)}
 html.is-app.alene .rom-stua{max-width:300px;margin:6px auto 12px}
 html.is-app.alene .rom-stua .rom-stua-hint{display:none}
 html.is-app .app-flere{margin-top:12px;border:1px dashed var(--border2);border-radius:20px;padding:0 4px}
