@@ -1,7 +1,14 @@
 # mittvors i App Store
 
-iPhone-appen er et tynt skall (Capacitor) rundt mittvors.no. Alt innhold lastes fra nettsiden, så appen er alltid like
-ny som siden. Nettsiden kjenner igjen appen og skrur på vibrering, delingsark og statuslinje (`src/klient/app.js`).
+iPhone-appen er nettsiden pakket inn i Capacitor. Sidene (leker, regler, rommet, figuren, kontoen) ligger i selve
+app-pakken og åpner øyeblikkelig, også uten nett. Rommet, kontoen og Pluss snakker med serveren på mittvors.no via
+API-et (`/api/…`), som slipper appen inn (CORS i `src/middleware.ts`). Appen skrur på vibrering, delingsark, statuslinje
+og AirPlay (`src/klient/app.js`).
+
+Bygg: `npm run build:app` (scripts/bygg-app.mjs) kjører Astro med `MV_APP=1` og legger filene i `app-www/`, som
+Capacitor pakker inn. GitHub gjør dette av seg selv i `.github/workflows/ios.yml`, og henter Supabase-adressene fra
+`https://www.mittvors.no/api/oppsett`. **Innholdsendringer i leker og regler krever derfor ny appversjon**
+(Actions → «iPhone-app til TestFlight» → Run workflow). Rommet og alt som bor på serveren oppdateres uten.
 
 Appen har sitt eget skall: ingen sidemeny, topplinje eller bunntekst, men tre faner nederst (`.app-tabbar` i
 `src/layouts/Base.astro`): **Spill** (rommet – lag, bli med, spill), **Leker** (reglene) og **Deg** (figur og konto).
@@ -10,8 +17,8 @@ agent, og `html.is-app` styrer CSS-en (nederst i `src/styles/global.css`). Fanel
 
 Veien til godkjenning (Apple-regel 4.2, «minimum functionality», avviser rene nettside-apper):
 1. ✅ Eget app-skall med fanelinje.
-2. Pakke sidene inn i appen (Astro bygger, Capacitor legger filene i app-pakken) i stedet for `server.url`.
-3. Leker og regler virker uten nett; rommet sier fra pent.
+2. ✅ Sidene pakket inn i appen (Astro bygger, Capacitor legger filene i app-pakken).
+3. ✅ Leker og regler virker uten nett. Rommet trenger nett (telefonene snakker via serveren).
 4. Pluss som kjøp gjennom Apple (StoreKit). Vipps vises aldri i appen.
 5. Push når rommet venter på deg.
 
@@ -20,7 +27,9 @@ Filene:
 | Fil | Hva |
 |---|---|
 | `capacitor.config.json` | App-ID `no.mittvors.app`, navn, adressen appen laster |
-| `app-shell/index.html` | Det eneste som ligger inni appen: «Ingen nett»-siden |
+| `scripts/bygg-app.mjs` | Bygger sidene inn i `app-www/` (ikke i git) |
+| `src/pages/api/oppsett.ts` | Supabase-adresse og offentlig nøkkel, som appen bygges med |
+| `ios/App/App/TvSkjerm.swift` | AirPlay-skjermen, og `MittvorsRuter` som finner `no/rom/index.html` i pakken |
 | `ios/` | Xcode-prosjektet. Ikoner og oppstartsbilde ligger i `ios/App/App/Assets.xcassets` |
 | `ios/App/App/App.entitlements` | Lenker som åpner appen (associated domains) og push |
 | `public/.well-known/apple-app-site-association` | Forteller iPhone at mittvors.no-lenker tilhører appen |

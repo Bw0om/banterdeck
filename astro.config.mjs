@@ -5,6 +5,9 @@ import minifyInline from './integrations/minify-inline.mjs';
 
 // Byggversjonen (git-commit på Vercel, ellers datoen). Den automatiske feilloggen viser hvilken versjon en feil kom fra.
 const BYGG = String(process.env.VERCEL_GIT_COMMIT_SHA || '').slice(0, 7) || new Date().toISOString().slice(0, 10);
+// Appen (iPhone, senere Android): samme sider, men pakket inn i app-pakken (scripts/bygg-app.mjs setter MV_APP=1).
+// Da vet siden at API-et ligger på mittvors.no og at den allerede er installert.
+const APP = process.env.MV_APP === '1';
 
 export default defineConfig({
   site: 'https://www.mittvors.no',
@@ -15,7 +18,7 @@ export default defineConfig({
   })],
   // Statisk side, men med én serverfunksjon (/api/forslag) som kjører på Vercel.
   adapter: vercel(),
-  vite: { define: { __MV_BYGG__: JSON.stringify(BYGG) } },
+  vite: { define: { __MV_BYGG__: JSON.stringify(BYGG), __MV_APP__: JSON.stringify(APP) } },
   build: {
     // Små stilark legges rett inn i siden, det store felles stilarket blir en egen fil med versjonsnavn.
     // Før lå 430 kB CSS inne i hver eneste side og ble lastet ned på nytt ved hver sidevisning;

@@ -39,7 +39,7 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
       });
     }
     function feil(t) { return '<p class="rom-feil">' + esc(t) + '</p>'; }
-    function lenke(g) { return location.origin + SIDE + '?k=' + g.kode; }
+    function lenke(g) { return (window.__MV_ORIGIN || location.origin) + SIDE + '?k=' + g.kode; }
     function inviter(g) {
       if (EN) return window.BDDel.lenke(lenke(g), 'Join the crew ' + g.navn + ' on mittvors – here’s our season table 🏆', {
         tittel: 'Invite to ' + g.navn, ingress: 'Anyone with the link can see the table. Those who create an account and join can also start rooms for the crew.',

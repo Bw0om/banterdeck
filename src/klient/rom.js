@@ -734,8 +734,8 @@ export function startRom(LEKNAVN, LANG) {
 
 
   // På mittvors.no holder det med mittvors.no/KODE (kortere lenke og enklere QR-kode)
-  var kortDomene = /(^|\.)mittvors\.no$/.test(location.hostname);
-  function lenke() { return kortDomene ? 'https://mittvors.no/' + kode : location.origin + RUTE.rom + '?k=' + kode; }
+  var kortDomene = /(^|\.)mittvors\.no$/.test(location.hostname) || erApp;   // appen: sidene ligger lokalt, men lenkene skal til mittvors.no
+  function lenke() { return kortDomene ? 'https://mittvors.no/' + kode : (window.__MV_ORIGIN || location.origin) + RUTE.rom + '?k=' + kode; }
   function qrBoks(stor) {
     var svg = window.BDqr ? window.BDqr(lenke()) : '';
     return '<div class="rom-qr' + (stor ? ' stor' : '') + '">' + (svg ? '<div class="rom-qrbilde">' + svg + '</div>' : '') +
@@ -1024,7 +1024,7 @@ export function startRom(LEKNAVN, LANG) {
     if (e.detail && e.detail.koblet && erVert()) { visSkjerm = true; if (!tilstand.skjermPin) gjor({ handling: 'skjerm-lag' }); }
     tegn();
   });
-  function skjermAdresse() { return (kortDomene ? 'https://mittvors.no' : location.origin) + (EN ? '/tv' : '/no/tv'); }
+  function skjermAdresse() { return (kortDomene ? 'https://mittvors.no' : (window.__MV_ORIGIN || location.origin)) + (EN ? '/tv' : '/no/tv'); }
   function skjermLenke() { return skjermAdresse() + '?k=' + kode + '&p=' + tilstand.skjermPin; }
   function skjermBoks() {
     var adr = skjermAdresse().replace(/^https?:\/\//, '');
@@ -4712,7 +4712,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   function delLov() {
     var lov = (tilstand.kveld && tilstand.kveld.lovValg) || null;
-    var url = location.origin + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
+    var url = (window.__MV_ORIGIN || location.origin) + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
     var tekst = lov && lov.type === 'ny' ? T('📜 Ny regel i ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'gjengen') + ': «' + lov.tekst + '»', '📜 New rule in ' + (tilstand.gjeng ? tilstand.gjeng.navn : 'the crew') + ': “' + lov.tekst + '”') : T('Gjengens lov på mittvors ⚖️', 'The Crew’s Law on mittvors ⚖️');
     hentVervKode();
     if (window.BDDel) return window.BDDel.lenke(url, tekst, { tittel: T('Del kvelden', 'Share the night'), bilde: lovStoryBilde });
@@ -4721,7 +4721,7 @@ export function startRom(LEKNAVN, LANG) {
     });
   }
   function delKveld() {
-    var url = tilstand.gjeng ? location.origin + RUTE.gjeng + '?k=' + tilstand.gjeng.kode : location.origin + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
+    var url = tilstand.gjeng ? (window.__MV_ORIGIN || location.origin) + RUTE.gjeng + '?k=' + tilstand.gjeng.kode : (window.__MV_ORIGIN || location.origin) + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
     var t = kveldsTall();
     var tekst = torr(t.kaaring[0] ? t.kaaring[0].tittel + ': ' + t.kaaring[0].navn + ' 🏆 ' : '') + T('Kveldens oppsummering fra mittvors –', 'Tonight\'s recap from mittvors –');
     if (!window.BDDel) {
@@ -5145,7 +5145,7 @@ export function startRom(LEKNAVN, LANG) {
     var farlig = farligTekst(g, b);
     if (farlig && !bekreftet(b, farlig)) return;
     if (g === 'del') {
-      var url = location.origin + RUTE.rom + '?k=' + kode;
+      var url = (window.__MV_ORIGIN || location.origin) + RUTE.rom + '?k=' + kode;
       var tekst = T('Bli med på mittvors! Kode: ', 'Join me on mittvors! Code: ') + kode;
       if (window.BDDel) return window.BDDel.lenke(url, tekst, { tittel: T('Inviter til rommet', 'Invite to the room'), ingress: T('Romkode: ', 'Room code: ') + kode });
       if (navigator.share) navigator.share({ title: 'mittvors', text: tekst, url: url }).catch(function () {});

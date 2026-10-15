@@ -3,6 +3,7 @@ dist/
 .astro/
 .DS_Store
 .vercel/
+app-www/
 .playwright-mcp/
 
 # Midlertidige arbeidskopier fra Claude-agenter
