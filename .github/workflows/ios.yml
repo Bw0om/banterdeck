@@ -2,15 +2,10 @@
 # Hemmelighetene (Settings → Secrets and variables → Actions) står i APPSTORE.md.
 name: iPhone-app til TestFlight
 
+# Bygges bare når du trykker «Run workflow» (Actions → iPhone-app til TestFlight). Ingenting bygges av seg selv,
+# så TestFlight ikke fylles opp. Kjør det når appen skal få med seg nye endringer.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'ios/**'
-      - 'scripts/bygg-app.mjs'
-      - 'capacitor.config.json'
-      - '.github/workflows/ios.yml'
 
 jobs:
   bygg:

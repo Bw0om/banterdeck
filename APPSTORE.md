@@ -81,8 +81,7 @@ Repoet er åpent, så GitHub sine Mac-maskiner er gratis uten kvote.
 3. Installer **TestFlight** fra App Store på iPhonen. App Store Connect → appen → **TestFlight** → Internal Testing
    → **+** → gruppe «Vi» → legg til deg selv. Åpne invitasjonen på telefonen.
 
-Hver gang `main` får endringer i `ios/` eller app-skallet, bygges appen på nytt av seg selv. Nettsiden oppdaterer
-seg uansett, uten nytt bygg.
+Appen bygges bare når du trykker **Run workflow**. Ingenting bygges av seg selv. Nettsiden oppdaterer seg uansett.
 
 ### 3. Skjermbilder og tekst
 
