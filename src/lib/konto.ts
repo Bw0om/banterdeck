@@ -1,6 +1,7 @@
 // Felles for kontoene på serveren. Service-nøkkelen brukes bare til databasefunksjonene (rpc),
 // mens selve innloggingen går mot Supabase Auth med den offentlige anon-nøkkelen.
 import { supabaseServer } from './spilt';
+import { PYNT } from './pynt.js';
 import { supabaseAnonKey } from '../config';
 
 export const json = (d: any, status = 200) =>
@@ -41,11 +42,13 @@ export async function innloggetBruker(request: Request) {
 
 export const BRUKERNAVN = /^[A-Za-z0-9_.-]{3,20}$/;
 
-/** Ting bare én konto får: eieren (Bw0om) og Ida. Kontoen i miljøvariabelen, ellers brukernavnet. */
-const EKSKLUSIV = [
-  { navn: 'bw0om', env: 'EIER_KONTO', ting: ['eierkrone'] },
+/** Ting bare én konto får: eieren (Bw0om) og Ida. Kontoen i miljøvariabelen, ellers brukernavnet.
+    Eieren (som designer appen) har i tillegg alt som ikke er laget for én bestemt person (alt: true). */
+const EKSKLUSIV: { navn: string; env: string; ting: string[]; alt?: boolean }[] = [
+  { navn: 'bw0om', env: 'EIER_KONTO', ting: ['eierkrone', 'axolotl'], alt: true },
   { navn: 'ida', env: 'IDA_KONTO', ting: ['idakrans', 'idapanda'] },
 ];
+const ALT_VANLIG: string[] = (PYNT as any[]).filter((p) => !p.eier).map((p) => p.id);
 const navnSvar = new Map<string, string>();
 async function brukernavnFor(userId: string) {
   if (navnSvar.has(userId)) return navnSvar.get(userId)!;
@@ -68,7 +71,7 @@ export async function eksklusivFor(userId: string) {
     let ja: boolean;
     if (faste.length) ja = faste.includes(userId);
     else { if (navn === null) navn = await brukernavnFor(userId); ja = navn === e.navn; }
-    if (ja) ut.push(...e.ting);
+    if (ja) { ut.push(...e.ting); if (e.alt) ut.push(...ALT_VANLIG); }
   }
   return ut;
 }

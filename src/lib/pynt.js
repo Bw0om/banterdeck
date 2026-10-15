@@ -19,8 +19,9 @@ export const PYNT = [
   { id: 'katt', slot: 'venn', navn: ['Katt', 'Cat'], laas: ['Spill tre kvelder', 'Play three nights'], kvelder: 3 },
   { id: 'and', slot: 'venn', navn: ['And', 'Duck'], laas: ['Spill fem kvelder', 'Play five nights'], kvelder: 5 },
   { id: 'sel', slot: 'venn', navn: ['Sel', 'Seal'], laas: ['Spill to kvelder', 'Play two nights'], kvelder: 2 },
-  // Eierens egen: deles aldri ut, vises ikke i andres garderobe. Serveren legger den til for eierkontoen (se konto.ts).
+  // Eierens egne: deles aldri ut, vises ikke i andres garderobe. Serveren legger dem til for eierkontoen (se konto.ts).
   { id: 'eierkrone', slot: 'hode', navn: ['Eierkrona', 'Owner crown'], laas: ['', ''], eier: true },
+  { id: 'axolotl', slot: 'venn', navn: ['Axolotlen', 'The axolotl'], laas: ['', ''], eier: true },
   // Bare til Ida
   { id: 'idakrans', slot: 'hode', navn: ['Idas blomsterkrans', 'Ida’s flower crown'], laas: ['', ''], eier: true },
   { id: 'idapanda', slot: 'venn', navn: ['Idas panda', 'Ida’s panda'], laas: ['', ''], eier: true },

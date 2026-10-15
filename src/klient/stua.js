@@ -108,6 +108,19 @@ export const PYNT_SVG = {
     `<ellipse class="pa-kinn" cx="-3.2" cy="-16.6" rx="2.4" ry="1.5" fill="#FF9CC2"/><ellipse class="pa-kinn" cx="11.2" cy="-16.6" rx="2.4" ry="1.5" fill="#FF9CC2"/>` +
     `<path d="M3.1 -18.6q.9-.5 1.8 0q-.2.8-.9 1q-.7-.2-.9-1z" fill="${B}"/></g>` +
     `<path class="pa-pop" d="M-4 -34l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2z" fill="#FF3B5C" stroke="${B}" stroke-width="1.2"/></g>`,
+  // Axolotlen: rosa som appens egen rosa, gjeller som vifter, liten hale som svinger (stua.css). Bare til designeren.
+  axolotl: `<g class="ax"><ellipse cx="0" cy="0" rx="13" ry="3" fill="${B}" opacity=".22"/>` +
+    `<g class="ax-hale"><path d="M-11 -8q-6 1-8-5q-1-5 3-7q1 4 4 5q1-3 4-2z" fill="#FFC2D9" ${HS}/></g>` +
+    `<path d="M-13 -3q-1-9 9-9h10q6 0 7 6l-1 4q-1 2-4 2h-19q-2 0-2-3z" fill="#FF9CC2" ${HS}/>` +
+    `<path d="M-9 -2v3M-3 -2v3M5 -2v3M10 -2v3" stroke="${B}" stroke-width="3" stroke-linecap="round"/>` +
+    `<path d="M-6 -7q4-2 8-1" fill="none" stroke="#FFC2D9" stroke-width="2.4" stroke-linecap="round"/>` +
+    `<g class="ax-gjeller"><g class="ax-gj v"><path d="M3 -18l-7-5M3 -15l-8-1M3 -12l-7 3" stroke="#FF3B5C" stroke-width="3.4" stroke-linecap="round"/><path d="M3 -18l-7-5M3 -15l-8-1M3 -12l-7 3" stroke="${B}" stroke-width="1.2" stroke-linecap="round" opacity=".35"/></g>` +
+    `<g class="ax-gj h"><path d="M17 -18l7-5M17 -15l8-1M17 -12l7 3" stroke="#FF3B5C" stroke-width="3.4" stroke-linecap="round"/><path d="M17 -18l7-5M17 -15l8-1M17 -12l7 3" stroke="${B}" stroke-width="1.2" stroke-linecap="round" opacity=".35"/></g></g>` +
+    `<circle cx="10" cy="-15" r="8" fill="#FF9CC2" ${HS}/>` +
+    `<circle cx="7" cy="-16.5" r="1.7" fill="${B}"/><circle cx="13" cy="-16.5" r="1.7" fill="${B}"/><circle cx="7.6" cy="-17.1" r=".6" fill="#FFF8EE"/><circle cx="13.6" cy="-17.1" r=".6" fill="#FFF8EE"/>` +
+    `<path d="M7 -12q3 2.6 6 0" fill="none" stroke="${B}" stroke-width="1.4" stroke-linecap="round"/>` +
+    `<circle cx="4.2" cy="-12.6" r="1.5" fill="#FF6B8A" opacity=".75"/><circle cx="15.8" cy="-12.6" r="1.5" fill="#FF6B8A" opacity=".75"/>` +
+    `<g class="ax-boble"><circle cx="21" cy="-24" r="1.6" fill="none" stroke="${B}" stroke-width="1.1" opacity=".55"/><circle cx="24" cy="-29" r="1" fill="none" stroke="${B}" stroke-width="1" opacity=".4"/></g></g>`,
   and: `<ellipse cx="2" cy="0" rx="9" ry="3" fill="${B}" opacity=".22"/><ellipse cx="0" cy="-8" rx="10" ry="6" fill="#FFD23F" ${HS}/><circle cx="8" cy="-16" r="5.5" fill="#FFD23F" ${HS}/><path d="M13 -16l7 2-7 2z" fill="#FF5B1F" ${HS}/><circle cx="9" cy="-17" r="1.3" fill="${B}"/><path d="M-3 -2v2M3 -2v2" stroke="#FF5B1F" stroke-width="3" stroke-linecap="round"/>`,
 };
 /* Luer som dekker hele toppen av hodet: håret klippes under bremmen, så det ikke stikker opp gjennom lua. Verdien er bremlinja (y). */

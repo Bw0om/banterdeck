@@ -2558,3 +2558,15 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .par-hjerte path{transform-box:fill-box;transform-origin:center;animation:parHjerte 2.4s cubic-bezier(.23,1,.32,1) both}
 @keyframes parHjerte{0%{opacity:0;transform:translateY(10px) scale(.4)}18%{opacity:1;transform:translateY(0) scale(1.15)}30%{transform:scale(1)}80%{opacity:1;transform:translateY(-14px) scale(1)}100%{opacity:0;transform:translateY(-22px) scale(.85)}}
 @media (prefers-reduced-motion:reduce){.ida-hjerter path,.venn-idapanda .pa,.venn-idapanda .pa-hode,.venn-idapanda .pa-blikk,.venn-idapanda .pa-kinn,.venn-idapanda .pa-arm,.venn-idapanda .pa-rolig,.par-hjerte path{animation:none}.venn-idapanda .pa-glad{animation:none;opacity:1}.venn-idapanda .pa-rolig{opacity:0}.venn-idapanda .pa-pop{animation:none;opacity:0}}
+
+/* Axolotlen (designerens): gjellene vifter rolig, halen svinger, og en boble stiger opp nå og da */
+.venn-axolotl .ax-gj{transform-box:fill-box;animation:axGj 3.2s ease-in-out infinite}
+.venn-axolotl .ax-gj.v{transform-origin:100% 50%}
+.venn-axolotl .ax-gj.h{transform-origin:0 50%;animation-delay:-1.6s}
+@keyframes axGj{0%,100%{transform:rotate(0)}50%{transform:rotate(7deg)}}
+.venn-axolotl .ax-hale{transform-box:fill-box;transform-origin:100% 80%;animation:axHale 2.6s ease-in-out infinite}
+@keyframes axHale{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg)}}
+.venn-axolotl .ax-boble{transform-box:fill-box;transform-origin:center;opacity:0;animation:axBoble 7s ease-out infinite}
+@keyframes axBoble{0%,70%{opacity:0;transform:translateY(3px) scale(.6)}78%,90%{opacity:1;transform:translateY(-3px) scale(1)}100%{opacity:0;transform:translateY(-9px) scale(1.1)}}
+.figur.m-dans .venn-axolotl .ax{transform-box:fill-box;transform-origin:50% 100%;animation:paHopp 640ms cubic-bezier(.23,1,.32,1) infinite}
+@media (prefers-reduced-motion:reduce){.venn-axolotl .ax-gj,.venn-axolotl .ax-hale,.venn-axolotl .ax{animation:none}.venn-axolotl .ax-boble{animation:none;opacity:0}}
