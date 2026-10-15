@@ -53,6 +53,11 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
 
   // Trykker noen på en mittvors-lenke i Messenger eller Snap, åpner den her i appen
   App.addListener('appUrlOpen', ({ url }) => {
-    try { const u = new URL(url); if (/(^|\.)mittvors\.no$/.test(u.hostname)) location.href = u.pathname + u.search + u.hash; } catch (e) {}
+    try {
+      const u = new URL(url); if (!/(^|\.)mittvors\.no$/.test(u.hostname)) return;
+      // mittvors.no/ABCD (QR-koden) er en omdirigering på serveren – i appen går vi rett til rommet
+      const kode = u.pathname.match(/^\/([A-Za-z0-9]{4,6})\/?$/);
+      location.href = kode ? '/no/rom?k=' + kode[1].toUpperCase() : (u.pathname === '/' ? '/no/rom' : u.pathname) + u.search + u.hash;
+    } catch (e) {}
   });
 }

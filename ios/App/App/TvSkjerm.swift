@@ -106,8 +106,26 @@ public class SkjermPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 }
 
+/// Sidene ligger som mapper i app-pakken (no/rom/index.html), slik Astro bygger dem. Capacitors egen ruter
+/// sender alt uten filendelse til én index.html (laget for apper med én side) – denne finner riktig fil.
+struct MittvorsRuter: Router {
+    var basePath: String = ""
+    func route(for path: String) -> String {
+        let fm = FileManager.default
+        var sti = path
+        if sti.hasSuffix("/") { sti.removeLast() }
+        if !sti.isEmpty && !URL(fileURLWithPath: sti).pathExtension.isEmpty && fm.fileExists(atPath: basePath + sti) { return basePath + sti }
+        if fm.fileExists(atPath: basePath + sti + "/index.html") { return basePath + sti + "/index.html" }
+        if fm.fileExists(atPath: basePath + sti + ".html") { return basePath + sti + ".html" }
+        return basePath + (fm.fileExists(atPath: basePath + "/404.html") ? "/404.html" : "/index.html")
+    }
+}
+
 /// Telefonens visning, med Skjerm-pluginen registrert
 class MittvorsViewController: CAPBridgeViewController {
+    override open func router() -> Router {
+        return MittvorsRuter()
+    }
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(SkjermPlugin())
     }

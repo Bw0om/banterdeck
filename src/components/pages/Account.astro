@@ -355,7 +355,7 @@ const T = no ? {
           e.preventDefault();
           var email = $('email').value.trim(); if (!email) return;
           $('linkBtn').disabled = true;
-          var back = location.origin + location.pathname;
+          var back = (window.__MV_ORIGIN || location.origin) + location.pathname;
           K.sb('/auth/v1/otp?redirect_to=' + encodeURIComponent(back), { method: 'POST', body: JSON.stringify({ email: email, create_user: true }) })
             .then(function (r) { say(msg, r.ok ? T.linkSent : T.generic, r.ok ? 'ok' : 'err'); })
             .catch(function () { say(msg, T.generic, 'err'); })
@@ -365,7 +365,7 @@ const T = no ? {
         $('glemtForm').addEventListener('submit', function (e) {
           e.preventDefault();
           var email = $('glemtEpost').value.trim(); if (!email) return;
-          var back = location.origin + location.pathname;
+          var back = (window.__MV_ORIGIN || location.origin) + location.pathname;
           K.sb('/auth/v1/recover?redirect_to=' + encodeURIComponent(back), { method: 'POST', body: JSON.stringify({ email: email }) })
             .then(function (r) { say(msg, r.ok ? T.resetSent : T.generic, r.ok ? 'ok' : 'err'); })
             .catch(function () { say(msg, T.generic, 'err'); });
@@ -549,7 +549,7 @@ const T = no ? {
         /* Trykk på en bunke: et ark med det man kan gjøre. Spill-knappen på bunken spiller med en gang. */
         var menyStokk = null;
         function delStokk(s) {
-          var lenke = location.origin + (LANG === 'no' ? '/no/kortstokk?s=' : '/deck?s=') + s.id;
+          var lenke = (window.__MV_ORIGIN || location.origin) + (LANG === 'no' ? '/no/kortstokk?s=' : '/deck?s=') + s.id;
           var dele = function () {
             if (navigator.share) return navigator.share({ title: s.navn, text: LANG === 'no' ? 'Spill kortstokken «' + s.navn + '» på mittvors' : 'Play the deck “' + s.navn + '” on mittvors', url: lenke }).catch(function () {});
             if (navigator.clipboard) navigator.clipboard.writeText(lenke).then(function () { say($('syncMsg'), T.linkCopied, 'ok'); });
@@ -686,10 +686,10 @@ const T = no ? {
         if ($('vervDel')) {
           $('vervDel').addEventListener('click', function () {
             if (!verv) return;
-            if (EN) return window.BDDel.lenke(location.origin + '/en?v=' + verv.kode, 'Join me on mittvors – drinking games where everyone plays from their own phone. Use my link and we both get a free night of Pluss 🎁', {
+            if (EN) return window.BDDel.lenke((window.__MV_ORIGIN || location.origin) + '/en?v=' + verv.kode, 'Join me on mittvors – drinking games where everyone plays from their own phone. Use my link and we both get a free night of Pluss 🎁', {
               tittel: 'Refer a friend', ingress: 'When your friend creates an account and plays their first room, you each get a night pass.',
             });
-            window.BDDel.lenke(location.origin + '/no/?v=' + verv.kode, 'Bli med på mittvors – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁', {
+            window.BDDel.lenke((window.__MV_ORIGIN || location.origin) + '/no/?v=' + verv.kode, 'Bli med på mittvors – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁', {
               tittel: 'Verv en venn', ingress: 'Når vennen lager konto og spiller sitt første rom, får dere et kveldspass hver.',
             });
           });

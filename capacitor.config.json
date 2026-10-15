@@ -1,9 +1,8 @@
 {
   "appId": "no.mittvors.app",
   "appName": "mittvors",
-  "webDir": "app-shell",
+  "webDir": "app-www",
   "server": {
-    "url": "https://www.mittvors.no/no/rom?app=1",
     "allowNavigation": ["mittvors.no", "*.mittvors.no"],
     "appendUserAgent": "mittvors-app"
   },

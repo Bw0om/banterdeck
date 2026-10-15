@@ -24,6 +24,8 @@ import Verving from '../components/Verving.astro';
 import { ClientRouter } from 'astro:transitions';
 
 interface Props { title?: string; description?: string; lang?: Lang; gate?: boolean; noindex?: boolean; bilde?: string; }
+// Appen: sidene pakkes inn i app-pakken (scripts/bygg-app.mjs setter MV_APP=1). Inline-skriptene leser window.__MV_APP__.
+const APP = process.env.MV_APP === '1';
 const { title, description, lang = 'en', gate = false, noindex = false, bilde = '/og/mittvors.jpg' } = Astro.props;
 // ?v=… tvinger Snap, Messenger og iMessage til å hente de nye delingsbildene i stedet for gamle kopier
 const bildeUrl = new URL(bilde, Astro.site); if (bildeUrl.pathname.startsWith('/og/')) bildeUrl.searchParams.set('v', '7');
@@ -81,6 +83,7 @@ const isCurrent = (href: string) => {
   <meta charset="utf-8" />
   <link rel="preload" href={fontArchivo} as="font" type="font/woff2" crossorigin />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <script is:inline set:html={`window.__MV_APP__=${APP};`} />
   <FeilFangst />
   <title>{fullTitle}</title>
   <meta name="description" content={desc} />
@@ -265,13 +268,28 @@ const isCurrent = (href: string) => {
       /* iPhone-appen (Capacitor): kjennes igjen FØR siden tegnes, så app-skallet (fanelinja nederst, ingen
          sidemeny/topplinje/bunntekst) vises fra første bilde. Capacitor legger inn window.Capacitor og
          «mittvors-app» i user agent (capacitor.config.json); ?app=1 er adressen appen starter på. */
-      var c = window.Capacitor, app = (c && c.isNativePlatform && c.isNativePlatform()) || /mittvors-app/.test(ua) || /[?&]app=1(&|$)/.test(location.search);
+      var c = window.Capacitor, app = window.__MV_APP__ || (c && c.isNativePlatform && c.isNativePlatform()) || /mittvors-app/.test(ua) || /[?&]app=1(&|$)/.test(location.search);
       /* Huskes for resten av økta, så app-skallet blir med videre selv om adressen mister ?app=1 */
       try { if (app) sessionStorage.setItem('mv_app', '1'); else app = sessionStorage.getItem('mv_app') === '1'; } catch (e) {}
       if (app) h.classList.add('is-app', 'is-standalone');
     })();
   </script>
   <ClientRouter />
+  <script is:inline>
+    /* Appen: sidene ligger i app-pakken, men rommet, kontoen og Pluss bor på serveren.
+       Alle kall til /api/… sendes derfor til mittvors.no (serveren slipper appen inn, se src/middleware.ts). */
+    if (window.__MV_APP__ && !window.__mvFetch) {
+      window.__mvFetch = true;
+      window.__MV_API = 'https://www.mittvors.no';
+      window.__MV_ORIGIN = 'https://www.mittvors.no';   // lenker som deles og innloggingslenker peker på nettet, ikke capacitor://localhost
+      var mvFetch = window.fetch;
+      window.fetch = function (u, o) {
+        if (typeof u === 'string' && u.indexOf('/api/') === 0) u = window.__MV_API + u;
+        else if (u && u.url && typeof u.url === 'string' && u.url.indexOf(location.origin + '/api/') === 0) u = new Request(window.__MV_API + u.url.slice(location.origin.length), u);
+        return mvFetch.call(this, u, o);
+      };
+    }
+  </script>
   <script>
     // Bare inne i iPhone-appen (Capacitor legger inn window.Capacitor før siden lastes)
     const c = (window as any).Capacitor;
@@ -459,7 +477,7 @@ const isCurrent = (href: string) => {
       });
 
       /* Offline-støtte, så siden virker som appen gjorde. */
-      if ('serviceWorker' in navigator) {
+      if ('serviceWorker' in navigator && !window.__MV_APP__) {   // appen har sidene i pakken allerede
         window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
         // Tas vare på, så «Legg til på hjemskjermen» kan vises senere
         window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__bdInstall = e; });
