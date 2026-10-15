@@ -75,9 +75,9 @@ const jsonLd = JSON.stringify([{
   {lang === 'no' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>Alkoholfri modus</button></p>}
   {lang === 'en' && <p class="alkfri-linje"><button type="button" class="alkfri-bryter" data-alkoholfri-bryter aria-pressed="false"><span class="alkfri-knott" aria-hidden="true"></span>Alcohol-free mode</button></p>}
   {(harVerktoy || iRom) && (
-    <p class="startrow">
-      {harVerktoy && <a class="btn start" href="#lekverktoy">{lang === 'no' ? 'Start leken' : 'Start the game'}{plussLek && <Icon name="gnist" size={16} />}<span aria-hidden="true">↓</span></a>}
-      {iRom && <a class="btn ghost romlenke" href={romLenke(game.slug, '', lang)}>{lang === 'en' ? 'Play from your own phones' : 'Spill fra hver sin telefon'}</a>}
+    <p class="startrow" data-irom={iRom ? '1' : undefined}>
+      {iRom && <a class="btn ghost romlenke" href={romLenke(game.slug, '', lang)}><span class="bare-nett">{lang === 'en' ? 'Play from your own phones' : 'Spill fra hver sin telefon'}</span><span class="bare-app">{lang === 'en' ? 'Play in the room' : 'Spill i rommet'}</span></a>}
+      {harVerktoy && <a class="btn start" href="#lekverktoy">{iRom ? <><span class="bare-nett">{lang === 'no' ? 'Start leken' : 'Start the game'}</span><span class="bare-app">{lang === 'no' ? 'Bare én telefon' : 'Just one phone'}</span></> : (lang === 'no' ? 'Start leken' : 'Start the game')}{plussLek && <Icon name="gnist" size={16} />}<span aria-hidden="true">↓</span></a>}
     </p>
   )}
 

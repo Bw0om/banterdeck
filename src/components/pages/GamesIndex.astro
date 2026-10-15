@@ -44,7 +44,7 @@ const romSti = no ? '/no/rom' : '/room';
 <Base title={L.gamesTitle} description={L.gamesDesc(synlige.length)} lang={lang} gate={true} bilde="/og/drikkeleker.jpg">
   <p class="crumb"><a href={path(lang, '/')}>{L.breadcrumbHome}</a> › {L.gamesTitle}</p>
   <h1>{L.gamesTitle}</h1>
-  <p class="lead">{no ? `${synlige.length} leker. De beste spiller dere fra hver deres telefon – ingen kortstokk, ingen forberedelser.` : `${synlige.length} games. The best ones you play from your own phones – no deck of cards, no prep.`}</p>
+  <p class="lead lk-ingress">{no ? `${synlige.length} leker. De beste spiller dere fra hver deres telefon – ingen kortstokk, ingen forberedelser.` : `${synlige.length} games. The best ones you play from your own phones – no deck of cards, no prep.`}</p>
 
   <div class="lk-snarveier">
     <a class="btn gold" href={romSti}><Icon name="telefon" />{no ? 'Lag et rom' : 'Create a room'}</a>

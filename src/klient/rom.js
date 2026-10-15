@@ -33,8 +33,9 @@ export function startRom(LEKNAVN, LANG) {
     if (!kode) { var tvRom = sistRom(); if (tvRom) { location.replace(location.pathname + '?k=' + tvRom); return; } setTimeout(function () { toast(T('Lag et rom først – så kobles TV-en til det.', 'Create a room first – then the TV connects to it.')); }, 900); }
   }
   // I appen: var du i et rom i kveld, lander du rett i det igjen (på nettet vises et banner i stedet)
-  // Appen: Spill-fanen ER rommet. Har du et rom i kveld, går du rett inn i det (Hjem-fanen har lag rom / bli med)
-  if (erApp && !kode && !onsketLek && !tvKobl && qs.get('lag') !== '1') { var appRom = sistRom(); if (appRom) { location.replace(location.pathname + '?k=' + appRom); return; } }
+  // Appen: Spill-fanen ER rommet. Har du et rom i kveld, går du rett inn i det (Hjem-fanen har lag rom / bli med).
+  // Også «Spill i rommet» fra en lekeside går til rommet du er i – leken velges der med ett trykk.
+  if (erApp && !kode && !tvKobl && qs.get('lag') !== '1') { var appRom = sistRom(); if (appRom) { location.replace(location.pathname + '?k=' + appRom); return; } }
   // Kommer man fra en gjengside, telles rommet for den gjengen
   var onsketGjeng = /^[0-9a-f-]{36}$/i.test(qs.get('gjeng') || '') ? qs.get('gjeng') : '';
   var vervSjekket = false, sisteSkjerm = '';
@@ -577,8 +578,8 @@ export function startRom(LEKNAVN, LANG) {
       var v = kf.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (v !== kf.value) kf.value = v;
       var nf1 = document.getElementById(medKode ? 'romNavn1' : 'romNavn2'); if (v.length === 4 && nf1 && !nf1.value) nf1.focus();
     });
-    // Appen: «Lag rom» på Hjem (?lag=1) lager rommet med en gang når navnet er kjent – ingen ekstra skjerm
-    if (erApp && qs.get('lag') === '1' && navn && !kode && !melding) setTimeout(function () { var f = document.getElementById('lagSkjema'); if (f) f.requestSubmit(); }, 0);
+    // Appen: «Lag rom» på Hjem (?lag=1) og «Spill i rommet» på en lekeside (?lek=…) lager rommet med en gang når navnet er kjent
+    if (erApp && (qs.get('lag') === '1' || onsketLek) && navn && !kode && !melding) setTimeout(function () { var f = document.getElementById('lagSkjema'); if (f) f.requestSubmit(); }, 0);
     document.getElementById('lagSkjema').addEventListener('submit', function (e) {
       e.preventDefault();
       var n = document.getElementById('romNavn2').value.trim();
@@ -913,6 +914,14 @@ export function startRom(LEKNAVN, LANG) {
   }
   /** Appen: lobbyen for verten. Én oppgave – start en lek. Hver lek har én knapp («Alle» varianter), ingen grupper som må
       åpnes. QR, TV, bare min telefon, bakgrunnslekene og innstillingene ligger bak «Mer» (den vanlige lobbyen). */
+  /** Toppen i app-lobbyene: alene = invitasjonen som det store gule kortet, ellers en stille rad med koden. */
+  function appTopp(n) {
+    return n <= 1
+      ? '<div class="app-alene"><b>' + T('Bare du så langt', 'Just you so far') + '</b><span>' + T('Koden er ', 'The code is ') + '<b class="app-alene-kode">' + esc(kode) + '</b>. ' + T('Del den, så er de med på sekunder.', 'Share it and they are in within seconds.') + '</span>' +
+          '<button type="button" class="rom-stor-knapp" data-g="del">' + T('Inviter', 'Invite') + '</button></div>'
+      : '<div class="app-del"><span><b>' + n + T(' i rommet', ' in the room') + '</b><small>' + T('Koden er ', 'The code is ') + '<b>' + esc(kode) + '</b></small></span>' +
+          '<button type="button" class="btn gold small" data-g="del">' + T('Inviter', 'Invite') + '</button></div>';
+  }
   function appLobby() {
     var t = tilstand, n = t.spillere.length, alene = n <= 1;
     var leker = (t.leker || []).filter(function (l) { return !l.skjult; });
@@ -945,12 +954,7 @@ export function startRom(LEKNAVN, LANG) {
       flere = '<details class="app-flere" data-gruppe="app-flere"' + (erApen('app-flere', false) ? ' open' : '') + '><summary>' + senere.length + T(' leker til når dere er flere', ' more games once more of you are in') + '</summary>' + senere.map(senereRad).join('') + '</details>';
     }
     // Alene: først og fremst få folk inn. Med gjester: koden som en stille rad, lekene i fokus.
-    var topp = alene
-      ? '<div class="app-alene"><b>' + T('Bare du så langt', 'Just you so far') + '</b><span>' + T('Koden er ', 'The code is ') + '<b class="app-alene-kode">' + esc(kode) + '</b>. ' + T('Del den, så er de med på sekunder.', 'Share it and they are in within seconds.') + '</span>' +
-          '<button type="button" class="rom-stor-knapp" data-g="del">' + T('Inviter', 'Invite') + '</button></div>'
-      : '<div class="app-del"><span><b>' + n + T(' i rommet', ' in the room') + '</b><small>' + T('Koden er ', 'The code is ') + '<b>' + esc(kode) + '</b></small></span>' +
-          '<button type="button" class="btn gold small" data-g="del">' + T('Inviter', 'Invite') + '</button></div>';
-    return plassInfo() + planBoks() + topp +
+    return plassInfo() + planBoks() + appTopp(n) +
       '<h2 class="rom-h2">' + T('Start en lek', 'Start a game') + '</h2>' + kveldKort() + reglerKort() + anbefalteLeker() +
       '<div class="app-leker">' + grupper + egneStokker() + flere + '</div>' +
       '<button type="button" class="app-mer" data-g="app-mer"><b>' + T('Mer', 'More') + '</b><small>' + T('TV, QR, bare min telefon, hele kvelden, varianter', 'TV, QR, just my phone, all night, variants') + '</small><i aria-hidden="true">›</i></button>';
@@ -1247,6 +1251,14 @@ export function startRom(LEKNAVN, LANG) {
         '<p>' + T('Venter på at ' + esc(navn(t.vert)) + ' starter når alle er med …', 'Waiting for ' + esc(navn(t.vert)) + ' to start once everyone\'s in …') + '</p>' + liste + romMerker() + '</div>';
     }
     var mod = l.moduser || [], valgtMod = mod.some(function (m) { return m.v === v.modus; }) || (l.type === 'nyhetsrunden' && /^\d{4}-\d{2}$/.test(v.modus || '')) ? v.modus : '';
+    if (erApp) {
+      // Appen: invitasjonen først, så én startknapp (alle varianter). Variantene ligger bak «Velg en annen lek» → «Mer».
+      var modApp = valgtMod || (mod[0] && l.type === 'nyhetsrunden' ? mod[0].v : '*');
+      return plassInfo() + appTopp(t.spillere.length) +
+        '<p class="rom-etikett">' + T('Dere skal spille', 'You’re playing') + '</p><h2 class="rom-h2" style="margin-top:0">' + esc(l.navn) + '</h2>' + (t.spillere.length > 1 ? liste : '') +
+        '<button class="rom-stor-knapp app-start" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(modApp) + '" type="button">Start ' + esc(l.navn) + '</button>' +
+        '<p><button class="linkbtn" data-g="velg-annen" type="button">' + T('Velg en annen lek', 'Pick another game') + '</button></p>';
+    }
     var startKnapper = mod.length > 1 && !valgtMod
       ? '<p class="small">' + T('Velg variant for å starte:', 'Pick a version to start:') + '</p><div class="rom-mod stor">' + mod.map(function (m) { return '<button type="button" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') + '</div>'
       : '<button class="rom-stor-knapp" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(valgtMod || (mod[0] && l.type === 'nyhetsrunden' ? mod[0].v : '*')) + '" type="button">Start ' + esc(l.navn) + '</button>';
