@@ -2075,6 +2075,8 @@ html.is-app.hud-apen .app-hud{transform:rotate(-8deg) scale(1.04)}
 /* Stripe bak klokka og batteriet, så innholdet ikke ruller rett under dem. Statuslinjas tekstfarge følger lys/mørk (app.js). */
 html.is-app body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);z-index:30;pointer-events:none;
   background:rgb(var(--bg-rgb) / .92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+/* Hold-trykk på lenker, knapper og kort skal aldri vise iPhone-menyen med nettadressen */
+a,button,[role=button],summary,label,img,svg,.btn,[data-g],[class*="knapp"],[class*="kort"]{-webkit-touch-callout:none}
 /* Nettside-ting som ikke hører hjemme i appen: «legg på hjemskjermen», nettvarsler (iPhone-appen får egne varsler), forsidelenka i rommet */
 html.is-app .nr-varsel,html.is-app .rom-hjem{display:none!important}
 /* Under en lek, og når en gjest bare skal bli med: hele skjermen til rommet */

@@ -128,5 +128,7 @@ class MittvorsViewController: CAPBridgeViewController {
     }
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(SkjermPlugin())
+        // Hold-trykk på en lenke skal ikke vise forhåndsvisning med nettadressen – det er en app, ikke en nettside
+        webView?.allowsLinkPreview = false
     }
 }
