@@ -870,3 +870,30 @@ html[data-laast] .utvikling{overscroll-behavior:contain}
 .rom-alder{margin:12px 0 0;font-size:13.5px;line-height:1.45;color:var(--muted);text-align:center}
 /* Appen: fanelinja nederst er med i lobbyen (Spill-fanen ER rommet, så ingen trykker seg ut), men borte under leken */
 html.is-app.i-rom:not(.i-spill) body{padding-bottom:calc(env(safe-area-inset-bottom) + 84px)}
+/* ---------- appen: lobbyen med ett mål ---------- */
+html.is-app .app-del{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 4px;padding:12px 14px 12px 18px;border-radius:20px;background:var(--card);border:1px solid var(--border2)}
+html.is-app .app-del > span{display:flex;flex-direction:column;gap:2px;min-width:0}
+html.is-app .app-del > span > b{font-family:var(--display);font-size:17px}
+html.is-app .app-del small{font-size:13.5px;color:var(--muted)}
+html.is-app .app-del .btn{flex:none}
+html.is-app .app-leker{display:grid;gap:8px;margin-top:4px}
+html.is-app .app-etikett{margin:14px 0 0}
+html.is-app .app-lek{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;width:100%;min-height:68px;padding:10px 12px 10px 14px;border-radius:20px;
+  border:1px solid var(--border2);background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:transform 120ms var(--ease-out)}
+html.is-app .app-lek:active{transform:scale(.98)}
+html.is-app .app-lek > span{display:flex;flex-direction:column;gap:2px;min-width:0}
+html.is-app .app-lek b{font-family:var(--display);font-size:17px;line-height:1.15}
+html.is-app .app-lek small{font-size:13px;color:var(--muted);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.is-app .app-lek i{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--ink2);font-style:normal;font-size:15px;box-shadow:0 3px 0 var(--volt-dyp)}
+html.is-app .app-lek.laast i{background:var(--card2);color:var(--ink);box-shadow:none}
+html.is-app .app-lek.for-fa{opacity:.55;cursor:default}
+html.is-app .app-lek-merke{width:44px;height:44px}
+html.is-app .app-lek-merke svg{width:100%;height:100%}
+html.is-app .app-mer{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;width:100%;margin:22px 0 8px;padding:14px 18px;border-radius:20px;
+  border:1px dashed var(--border2);background:transparent;color:var(--ink);font:inherit;text-align:left}
+html.is-app .app-mer b{font-family:var(--display);font-size:16px}
+html.is-app .app-mer small{grid-column:1;font-size:13px;color:var(--muted)}
+html.is-app .app-mer i{grid-row:1 / span 2;font-size:26px;font-style:normal;color:var(--muted)}
+html.is-app .app-tilbake{margin:0 0 10px}
+html.is-app .rom-navnkjent{margin:0 0 12px;font-size:16px}
+html.is-app .rom-navnkjent b{font-family:var(--display);font-size:18px}
