@@ -1024,6 +1024,13 @@ export function startRom(LEKNAVN, LANG) {
     if (e.detail && e.detail.koblet && erVert()) { visSkjerm = true; if (!tilstand.skjermPin) gjor({ handling: 'skjerm-lag' }); }
     tegn();
   });
+  // Speilet verten telefonen FØR rommet fantes (eller før siden var lastet)? Da kom hendelsen for tidlig – sjekk ved hver tegning.
+  var skjermBedt = false;
+  function tvSjekk() {
+    var sk = window.__mvSkjerm; if (!sk || !sk.koblet || !tilstand || !meg || !erVert()) return;
+    if (!tilstand.skjermPin) { if (!skjermBedt) { skjermBedt = true; visSkjerm = true; gjor({ handling: 'skjerm-lag' }); } return; }
+    sk.vis(skjermLenke() + '&auto=1');
+  }
   function skjermAdresse() { return (kortDomene ? 'https://mittvors.no' : (window.__MV_ORIGIN || location.origin)) + (EN ? '/tv' : '/no/tv'); }
   function skjermLenke() { return skjermAdresse() + '?k=' + kode + '&p=' + tilstand.skjermPin; }
   function skjermBoks() {
@@ -4814,7 +4821,7 @@ export function startRom(LEKNAVN, LANG) {
   }
 
   function tegn() {
-    tvKoblSjekk();
+    tvKoblSjekk(); tvSjekk();
     if (tavle && tilstand) tavle.innerHTML = tavleHtml();
     if (!tilstand) return;
     if (rofDrar) { rofVentTegn = true; return; }   // ikke tegn ringen på nytt midt i et drag
