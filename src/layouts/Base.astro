@@ -262,6 +262,13 @@ const isCurrent = (href: string) => {
       if (ios) h.classList.add('is-ios');
       if (android) h.classList.add('is-android');
       if (standalone) h.classList.add('is-standalone');
+      /* iPhone-appen (Capacitor): kjennes igjen FØR siden tegnes, så app-skallet (fanelinja nederst, ingen
+         sidemeny/topplinje/bunntekst) vises fra første bilde. Capacitor legger inn window.Capacitor og
+         «mittvors-app» i user agent (capacitor.config.json); ?app=1 er adressen appen starter på. */
+      var c = window.Capacitor, app = (c && c.isNativePlatform && c.isNativePlatform()) || /mittvors-app/.test(ua) || /[?&]app=1(&|$)/.test(location.search);
+      /* Huskes for resten av økta, så app-skallet blir med videre selv om adressen mister ?app=1 */
+      try { if (app) sessionStorage.setItem('mv_app', '1'); else app = sessionStorage.getItem('mv_app') === '1'; } catch (e) {}
+      if (app) h.classList.add('is-app', 'is-standalone');
     })();
   </script>
   <ClientRouter />
@@ -340,6 +347,17 @@ const isCurrent = (href: string) => {
       <span class="ti"><Icon name="nyhet" size={22} /></span><span class="tl">{lang === 'no' ? 'Nyheter' : 'Plan'}</span></a>
     <a href={path(lang, '/situations')} aria-current={isCurrent(path(lang, '/situations')) || current.includes('/categories/') || isCurrent(path(lang, '/ord')) || isCurrent(path(lang, '/uttrykk')) ? 'page' : undefined}>
       <span class="ti"><Icon name="replikker" size={22} /></span><span class="tl">{lang === 'no' ? 'Humor' : 'Humour'}</span></a>
+  </nav>
+
+  <!-- Appen (iPhone, senere Android): tre faner nederst. Spill = rommet (lag/bli med/spill), Leker = reglene, Deg = figur og konto.
+       Vises bare når html.is-app er satt (se merkEnhet i head). Skjules under en lek, så ingen trykker seg ut ved et uhell. -->
+  <nav class="app-tabbar" aria-label={lang === 'no' ? 'Appmeny' : 'App menu'}>
+    <a href={lang === 'no' ? '/no/rom' : '/room'} aria-current={isCurrent(lang === 'no' ? '/no/rom' : '/room') ? 'page' : undefined}>
+      <span class="ti"><Icon name="terning" size={24} /></span><span class="tl">{lang === 'no' ? 'Spill' : 'Play'}</span></a>
+    <a href={path(lang, '/drinking-games')} aria-current={isCurrent(path(lang, '/drinking-games')) ? 'page' : undefined}>
+      <span class="ti"><Icon name="drikkeleker" size={24} /></span><span class="tl">{lang === 'no' ? 'Leker' : 'Games'}</span></a>
+    <a href={path(lang, '/account')} aria-current={isCurrent(path(lang, '/account')) ? 'page' : undefined}>
+      <span class="ti"><Icon name="deg" size={24} /></span><span class="tl">{lang === 'no' ? 'Deg' : 'You'}</span></a>
   </nav>
 
   <!-- Aldersspørringen ligger UTENFOR .main, ellers blir den uskarp sammen med innholdet. -->
