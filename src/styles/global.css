@@ -2048,7 +2048,8 @@ html.is-app .app-tabbar a[aria-current=page]{color:var(--gold-t)}
 html.is-app .app-tabbar .ti{display:grid;place-items:center;height:26px}
 html.is-app .app-tabbar .tl{white-space:nowrap}
 /* Logoknappen: usynlig til du blar nedover */
-html.is-app .app-hud{position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);width:58px;height:58px;padding:0;border:0;background:transparent;z-index:72;
+.app-hud{display:none}
+html.is-app .app-hud{display:block;position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);width:58px;height:58px;padding:0;border:0;background:transparent;z-index:72;
   border-radius:18px;filter:drop-shadow(4px 4px 0 #16120F);opacity:0;transform:scale(.9) translateX(-8px);pointer-events:none;
   transition:transform .2s var(--ease-out),opacity .2s var(--ease-out);-webkit-tap-highlight-color:transparent}
 html.is-app .app-hud svg{display:block;width:100%;height:100%}
@@ -2110,7 +2111,7 @@ html.is-app .app-figur-bilde{width:118px;height:130px}
 html.is-app .app-figur > div{display:flex;flex-direction:column;gap:6px;min-width:0}
 html.is-app .app-figur b{font-family:var(--display);font-size:20px;line-height:1.1}
 html.is-app .app-figur span{font-size:14px;line-height:1.4;color:var(--muted)}
-html.is-app .app-figur .btn{align-self:flex-start;margin-top:4px}
+html.is-app .app-figur-knapper{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 html.is-app #kontoHode .lead{display:none}
 /* Lobbyen når verten er alene: invitasjonen er det store, stua er liten, og lekene som trenger flere ligger samlet */
 html.is-app .app-alene{display:flex;flex-direction:column;gap:6px;margin:12px 0 4px;padding:18px 18px 16px;border-radius:24px;background:var(--gold);color:var(--ink2);border:3px solid var(--ink2);box-shadow:6px 6px 0 var(--ink2)}

@@ -60,8 +60,7 @@ const T = no ? {
     <svg class="app-figur-bilde" viewBox="-48 -100 96 106" aria-hidden="true"></svg>
     <div>
       <b id="appFigurNavn">{no ? 'Figuren din' : 'Your figure'}</b>
-      <span>{no ? 'Logg inn, så får du en fast figur du kan kle på, og ting du låser opp ved å spille.' : 'Sign in to get a figure of your own to dress up, and gear you unlock by playing.'}</span>
-      <a class="btn gold small" href="#signin">{no ? 'Logg inn' : 'Sign in'}</a>
+      <span class="app-figur-knapper"><a class="btn gold small" href="#signin">{no ? 'Logg inn' : 'Sign in'}</a><a class="btn ghost small" href="#signin">{no ? 'Ny konto' : 'New account'}</a></span>
     </div>
   </section>
   <script is:inline data-astro-rerun>
@@ -763,7 +762,7 @@ const T = no ? {
           clearTimeout(figurTimer);
           figurTimer = setTimeout(function () {
             K.api('/api/konto/pynt', Object.assign({ method: 'POST', body: JSON.stringify({ valgt: figur.valgt }) }, EN_HODE || {})).then(function (r) { return r.ok ? r.json() : null; })
-              .then(function (d) { say($('figurMsg'), d && d.ok ? (EN ? 'Saved. You show up like this next time you join a room.' : 'Lagret. Slik ser du ut neste gang du blir med i et rom.') : T.generic, d && d.ok ? 'ok' : 'err'); })
+              .then(function (d) { if (!(d && d.ok)) say($('figurMsg'), T.generic, 'err'); })   // lagres stille – bare feil sies fra om
               .catch(function () { say($('figurMsg'), T.generic, 'err'); });
           }, 400);
         }
