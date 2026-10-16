@@ -5833,7 +5833,89 @@
    10,
    15,
    20
-  ]
+  ],
+  "alternativer": {
+   "A": [
+    [
+     "Everyone drinks",
+     "Everyone takes one sip together. Calmer than a waterfall."
+    ]
+   ],
+   "2": [
+    [
+     "Two for you",
+     "Point at two people who drink one each."
+    ]
+   ],
+   "3": [
+    [
+     "Me and mate",
+     "You and your mate drink."
+    ]
+   ],
+   "4": [
+    [
+     "Floor",
+     "Last one to touch the floor drinks."
+    ],
+    [
+     "All the girls",
+     "All the girls drink."
+    ]
+   ],
+   "5": [
+    [
+     "Little man",
+     "You have an invisible little man on your glass. Take him off before you drink and put him back after. Forget and drink again."
+    ]
+   ],
+   "6": [
+    [
+     "All the guys",
+     "All the guys drink."
+    ],
+    [
+     "Snakes",
+     "Everyone drinks one. Whoever drew the card drinks two."
+    ]
+   ],
+   "7": [
+    [
+     "Eyes",
+     "Everyone looks down. On three, everyone looks up at one person. Lock eyes and you both drink."
+    ]
+   ],
+   "8": [
+    [
+     "Date",
+     "Pick a date. You drink together for the rest of the game, and neither of you can drink without the other."
+    ]
+   ],
+   "9": [
+    [
+     "Never have I ever",
+     "Everyone holds up three fingers. Around the table, say something you've never done. Lose all your fingers and drink."
+    ]
+   ],
+   "10": [
+    [
+     "Alphabet",
+     "Pick a category. Around the table with A, B, C … Whoever gets stuck on their letter drinks."
+    ]
+   ],
+   "J": [
+    [
+     "Rule until next jack",
+     "Make a rule that lasts until the next jack is drawn."
+    ]
+   ],
+   "Q": [
+    [
+     "Question",
+     "Ask someone a question. If they answer, they drink. If they answer with another question, you drink."
+    ]
+   ]
+  }
  },
  "sannhet-eller-drikk": {
   "kind": "deck",

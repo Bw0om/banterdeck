@@ -1416,5 +1416,503 @@
     "k": "Del ut"
    }
   ]
+ },
+ "oktoberfest": {
+  "navn": "Oktoberfest",
+  "om": "Til ølteltet, oktoberfesten og alle kvelder med literglass. Prost!",
+  "items": [
+   {
+    "t": "Alle som eier lederhosen eller dirndl, drikker. Har du det på deg nå, del ut to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har bestilt «en liter» og angret halvveis, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som kan teksten til «Ein Prosit», drikker. Synger du den nå, deler du ut tre.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har mistet en jakke i et øltelt, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har sagt «prost» uten å se den andre i øynene, drikker to. Du vet hva det betyr.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har spist en hel brezel alene, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har danset på benken, drikker. Falt du ned, drikk to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som trodde Oktoberfest foregår i oktober, drikker. Det meste er i september.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har vært i München, drikker. Alle som bare har vært i Düsseldorf, drikker to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har kjøpt et pepperkakehjerte til noen, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som ikke klarer å holde glasset sitt strakt ut i ti sekunder, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har en ølmage de kaller «muskel», drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som ville sovnet først i ølteltet. Flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som kommer til å bestille «noe lett» i kveld. Den drikker to.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som best kunne båret ti liter-glass samtidig. Den deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den med dårligst tysk. Den bestiller neste runde på tysk, eller drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som egentlig heller vil ha vin. Den drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som synger høyest. Den starter «Ein Prosit» nå, eller drikker to.",
+    "k": "Pek"
+   },
+   {
+    "t": "Si «Oachkatzlschwoaf» tre ganger. Klarer du det, del ut tre. Ellers drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Hold glasset ditt strakt ut i armen til neste kort. Senker du det, drikk opp.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Tell til ti på tysk uten feil. Hver feil er én slurk.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Jodle i fem sekunder. Ler ingen, del ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Lag en skål på tysk. Bordet stemmer: godkjent gir to å dele ut, ikke godkjent gir to å drikke.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Dans en rask schuhplattler, klapp på lår og sko. Den som ler først, drikker.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Bytt glass med den til venstre til neste kort. Ingen klaging.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Skål for den som kom lengst vei i kveld! Alle drikker, den som kom lengst deler ut to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Ein Prosit! Alle synger, alle drikker. Den som ikke synger, drikker to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for Bayern! Alle drikker. Den som støtter et annet lag, drikker to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for den første som sa «dette blir en rolig kveld». Hen drikker to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for brezelen! Alle som har bakverk i magen akkurat nå, drikker.",
+    "k": "Skål"
+   },
+   {
+    "t": "Hva er det dummeste du har kjøpt på fest? Dårligst kjøp drikker.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Hvem i rommet ville du satt på neste fly til München, og hvorfor?",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Hva er den lengste dagen du har drukket uten å spise? Flest timer drikker.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Fortell om sist du sang med på en sang du ikke kunne. Ellers drikk to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Teltregel: alle sier «prost» og ser hverandre i øynene før hver slurk. Glemmer du det, drikk en til.",
+    "k": "Regel"
+   },
+   {
+    "t": "Teltregel: ølglass holdes med én hånd resten av runden. To hender gir en slurk.",
+    "k": "Regel"
+   },
+   {
+    "t": "Teltregel: du sier «ja, genau» i stedet for «ja». Feil gir en slurk.",
+    "k": "Regel"
+   },
+   {
+    "t": "Den med mest tyskklingende navn deler ut tre.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Alle med noe blått eller hvitt på seg deler ut én hver.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Den som sist sa «skål», deler ut to.",
+    "k": "Del ut"
+   }
+  ]
+ },
+ "nyttaar": {
+  "navn": "Nyttår",
+  "om": "Til nyttårsaften, fra middagen til midnatt og det som kommer etterpå.",
+  "items": [
+   {
+    "t": "Alle som har et nyttårsforsett de allerede har brutt, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har kysset noen ved midnatt, drikker. Alle som ikke husker hvem, drikker to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har falt på isen på vei til en nyttårsfest, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har sendt «godt nyttår» til noen de ikke har snakket med siden forrige nyttår, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har sovnet før midnatt på nyttårsaften, drikker to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har sett Kongens nyttårstale frivillig, drikker. Husker du hva han sa, del ut to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har skutt opp fyrverkeri med drikke i hånda, drikker to. Dere skulle hatt briller.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har holdt et løfte fra forrige nyttår, deler ut tre. Alle andre drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har brukt mer på nyttårsantrekket enn på julegaver, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har sagt «dette er mitt år» mer enn én gang, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har spist pinnekjøtt to dager på rad, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som møtte kjæresten på en nyttårsfest, drikker. Resten drikker for håpet.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som kommer til å gråte ved midnatt. Flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som bryter nyttårsforsettet først. Den drikker to.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som får mest ut av dette året. Den deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som sovner før tolv. Den må holde seg våken, ellers drikker alle for hen.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som ringer eksen etter midnatt. Den drikker, og gir telefonen til verten.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den med flest uleste meldinger akkurat nå. Den drikker én per hundre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Si nyttårsforsettet ditt høyt. Bordet stemmer om det holder til februar. Nei gir to slurker.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Tell ned fra ti uten å le. Ler du, drikk én per tall som er igjen.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Imiter Kongens nyttårstale i tjue sekunder. Holder du deg seriøs, del ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Finn en champagnekork og treff et glass fra en meter. Treff gir tre å dele ut, bom gir to å drikke.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Lag en fyrverkerilyd med munnen. Den dårligste lyden drikker, bordet dømmer.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Hold en nyttårstale for rommet på tretti sekunder. Får du applaus, del ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Vis din mest brukte emoji i år. Er det 😂, drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Skål for året som gikk! Alle drikker. Den som hadde det verste året, deler ut tre.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for den som arrangerte! Alle drikker, verten deler ut to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for alle som ikke er her i kveld. Den som savner noen mest, drikker to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for neste år! Alle med en plan for det deler ut én. Alle andre drikker.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for den som kom sist! Hen drikker to for hvert kvarter hen var sen.",
+    "k": "Skål"
+   },
+   {
+    "t": "Hva er det beste som skjedde deg i år? Bordet drikker for deg.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Hva skulle du helst gjort annerledes i år? Et ærlig svar deler ut to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Hvem i rommet ble du bedre kjent med i år, og hva overrasket deg?",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Hva er det pinligste du har gjort på en nyttårsfest? Dårligst historie drikker.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Midnattsregel: ingen sier «godt nyttår» før midnatt. Sier du det, drikk.",
+    "k": "Regel"
+   },
+   {
+    "t": "Nyttårsregel: alle skåler med «for neste år» i stedet for «skål». Glemmer du det, drikk.",
+    "k": "Regel"
+   },
+   {
+    "t": "Nyttårsregel: hver gang noen sjekker klokka, drikker alle én.",
+    "k": "Regel"
+   },
+   {
+    "t": "Den med glitter på seg deler ut tre.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Den som har bursdag nærmest nyttår deler ut to.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Den som husker hvor de var forrige nyttår, deler ut to. Ingen husker? Alle drikker.",
+    "k": "Del ut"
+   }
+  ]
+ },
+ "afterski": {
+  "navn": "Afterski",
+  "om": "Til afterski og hyttekvelden etter en dag i bakken. Funker i skistøvler.",
+  "items": [
+   {
+    "t": "Alle som har stått på ski i dag, drikker. Alle som bare satt i bakken, drikker to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har mistet en ski på vei ned, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har kjørt baklengs uten å ville det, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har danset på bordet i skistøvler, drikker to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle med solbrillebrunfarge akkurat nå, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har sovnet i en heis, drikker to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har bestilt gløgg uten noe i, drikker. Ingen tror deg.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har sagt «siste tur» og tatt tre til, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har mistet en vott i heisen, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som eier en onepiece, drikker. Har du den på nå, del ut tre.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har kjørt rett inn i et sikkerhetsnett, drikker.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Alle som har ropt «yeeew» i bakken i dag, drikker to.",
+    "k": "Drikk hvis"
+   },
+   {
+    "t": "Pek på den som bruker lengst tid i heiskøen på å finne frem kortet. Flest pekere drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som faller først på dansegulvet i kveld. Den drikker to.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som kjører best i bakken. Den deler ut tre.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som egentlig bare kom for afterski. Den drikker, og innrømmer det.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den som ville overlevd lengst i et snøskred. Den deler ut to.",
+    "k": "Pek"
+   },
+   {
+    "t": "Pek på den med mest solkrem i ansiktet. Den drikker.",
+    "k": "Pek"
+   },
+   {
+    "t": "Stå i hoppstilling i tjue sekunder. Rister du, drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Imiter en skiinstruktør på så mange språk du klarer. Hvert språk gir én å dele ut.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Stå på ett bein med lukkede øyne til neste kort. Faller du, drikk opp.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Ta på deg jakka og lukk glidelåsen med votter på. Klarer du det på tjue sekunder, del ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Syng refrenget i en afterski-sang. Får du med deg bordet, del ut tre.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Stå i snøplog til neste kort. Reiser du deg opp, drikk to.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Fortell om dagens største fall, med lydeffekter. Bordet dømmer om det gjorde vondt nok. Nei gir en slurk.",
+    "k": "Utfordring"
+   },
+   {
+    "t": "Skål for bakken! Alle drikker. Den som kjørte flest turer i dag, deler ut tre.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for heisvakta! Alle drikker. Den som fikk kjeft i dag, drikker to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for sola! Alle med solbrenthet drikker en ekstra.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for den som bar skiene til alle! Hen deler ut tre.",
+    "k": "Skål"
+   },
+   {
+    "t": "Skål for morgendagen! Den som ikke står opp til første heis, drikker to.",
+    "k": "Skål"
+   },
+   {
+    "t": "Hva er det farligste du har gjort i en bakke? Mest skummelt deler ut to.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Har du noen gang latet som du er bedre på ski enn du er? Ja gir to slurker.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Hvem i rommet ville du helst delt hyttesenga med, og hvorfor?",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Hva er den verste afterski-sangen? Alle som liker den, drikker.",
+    "k": "Sannhet"
+   },
+   {
+    "t": "Afterski-regel: alle skåler med «ski heil» resten av kvelden. Glemmer du det, drikk.",
+    "k": "Regel"
+   },
+   {
+    "t": "Afterski-regel: hver gang noen sier «bakken», drikker alle én.",
+    "k": "Regel"
+   },
+   {
+    "t": "Afterski-regel: du står når du drikker, som i heisen. Sitter du, drikk en til.",
+    "k": "Regel"
+   },
+   {
+    "t": "Den med mest solbrenthet deler ut to.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Den som sto opp tidligst i dag deler ut tre.",
+    "k": "Del ut"
+   },
+   {
+    "t": "Den som eier flest skipass fra tidligere sesonger, deler ut to.",
+    "k": "Del ut"
+   }
+  ]
  }
 }

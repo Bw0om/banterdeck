@@ -3242,7 +3242,8 @@
         "b|10 – Category: velg en kategori (bilmerker, ølmerker …). Rundt bordet til noen står fast – den drikker.",
         "b|Knekt – Rule: lag en regel som gjelder resten av spillet. Den som bryter den, drikker.",
         "b|Dronning – Question master: til neste dronning trekkes, drikker alle som svarer på et spørsmål fra deg.",
-        "b|Konge – første konge drikker 5 slurker, andre 10, tredje 15 og fjerde 20."
+        "b|Konge – første konge drikker 5 slurker, andre 10, tredje 15 og fjerde 20.",
+        "Spiller dere i rommet, kan verten bytte regelen på hvert kort: standard, et alternativ eller sin egen."
        ],
        "sv": [
         "Lägg korten i en tät cirkel runt en kopp eller flaska. Dra i tur och ordning och gör vad kortet säger. Bryter du cirkeln dricker du upp ditt glas.",
@@ -3258,7 +3259,8 @@
         "b|10 – Category: välj kategori; runt bordet tills någon fastnar – den dricker.",
         "b|Knekt – Rule: hitta på en regel för resten av spelet; bryt den och drick.",
         "b|Dam – Question master: tills nästa dam dricker alla som svarar på en fråga från dig.",
-        "b|Kung – första kungen dricker 5 klunkar, andra 10, tredje 15 och fjärde 20."
+        "b|Kung – första kungen dricker 5 klunkar, andra 10, tredje 15 och fjärde 20.",
+        "Spelar ni i rummet kan värden byta regel på varje kort: standard, ett alternativ eller sin egen."
        ],
        "en": [
         "Lay the cards in a tight circle around a cup or bottle. Take turns drawing and do what the card says. Break the circle and you finish your drink.",
@@ -3274,7 +3276,8 @@
         "b|10 – Category: pick a category; go around until someone is stuck – they drink.",
         "b|Jack – Rule: make a rule for the rest of the game; break it and drink.",
         "b|Queen – Question master: until the next queen, anyone who answers your question drinks.",
-        "b|King – first king drinks 5 sips, second 10, third 15 and fourth 20."
+        "b|King – first king drinks 5 sips, second 10, third 15 and fourth 20.",
+        "Playing in the room, the host can swap the rule on any card: standard, an alternative or their own."
        ]
       },
       "fit": {
@@ -3348,17 +3351,20 @@
        "no": [
         "Runde 1 – fire spørsmål til hver spiller, ett kort per svar: 1) Rød eller svart? 2) Over eller under ditt forrige kort? 3) Innenfor eller utenfor de to første? 4) Hvilken kortfarge (kløver/spar/hjerter/ruter)? Feil = drikk; riktig = del ut like mange.",
         "Runde 2 – pyramiden: legg kort i en pyramide (5-4-3-2-1) og snu rad for rad. Har du kortet på hånda, legger du det på og deler ut slurker etter radnivå (nederst 1, øverst 5).",
-        "Runde 3 – bussen: den som sitter igjen med flest kort kjører bussen. Snu kort fra bunken: knekt = 1 slurk, dame = 2, konge = 3, ess = 4 – og nytt kort legges på. Du er i mål først når et avtalt antall kort er passert uten bildekort."
+        "Runde 3 – bussen: den som sitter igjen med flest kort kjører bussen. Snu kort fra bunken: knekt = 1 slurk, dame = 2, konge = 3, ess = 4 – og nytt kort legges på. Du er i mål først når et avtalt antall kort er passert uten bildekort.",
+        "Variant: Buss-sjåføren. Én er sjåfør og stiller ja/nei-spørsmål om neste kort til hver passasjer: «Er det rødt?», «Over sju?». Feil svar: passasjeren drikker. Riktig: sjåføren drikker."
        ],
        "sv": [
         "Runda 1 – fyra frågor till varje spelare, ett kort per svar: 1) Rött eller svart? 2) Över eller under ditt förra kort? 3) Innanför eller utanför de två första? 4) Vilken färg (klöver/spader/hjärter/ruter)? Fel = drick; rätt = dela ut lika många.",
         "Runda 2 – pyramiden: lägg kort i en pyramid (5-4-3-2-1) och vänd rad för rad. Har du kortet på handen lägger du det och delar ut klunkar efter radnivå (nederst 1, överst 5).",
-        "Runda 3 – bussen: den med flest kort kvar åker buss. Vänd kort från leken: knekt = 1 klunk, dam = 2, kung = 3, ess = 4 – och ett nytt kort läggs på. Du är i mål först när ett avtalat antal kort passerat utan klädda kort."
+        "Runda 3 – bussen: den med flest kort kvar åker buss. Vänd kort från leken: knekt = 1 klunk, dam = 2, kung = 3, ess = 4 – och ett nytt kort läggs på. Du är i mål först när ett avtalat antal kort passerat utan klädda kort.",
+        "Variant: Busschauffören. En är chaufför och ställer ja/nej-frågor om nästa kort till varje passagerare. Fel svar: passageraren dricker. Rätt: chauffören dricker."
        ],
        "en": [
         "Round 1 – four questions per player, one card per answer: 1) Red or black? 2) Higher or lower than your last card? 3) Inside or outside the first two? 4) Which suit? Wrong = drink; right = give out the same.",
         "Round 2 – the pyramid: lay cards in a pyramid (5-4-3-2-1) and flip row by row. Holding a matching card lets you play it and hand out sips by row level (bottom 1, top 5).",
-        "Round 3 – the bus: whoever has most cards left rides the bus. Flip cards off the deck: jack = 1 sip, queen = 2, king = 3, ace = 4 – and a new card replaces it. You are done once an agreed number of cards pass with no face card."
+        "Round 3 – the bus: whoever has most cards left rides the bus. Flip cards off the deck: jack = 1 sip, queen = 2, king = 3, ace = 4 – and a new card replaces it. You are done once an agreed number of cards pass with no face card.",
+        "Variant: the Bus driver. One player is the driver and asks each passenger yes/no questions about the next card: “Is it red?”, “Above seven?”. Wrong: the passenger drinks. Right: the driver drinks."
        ]
       },
       "fit": {
@@ -3782,12 +3788,14 @@
        "no": [
         "Én leser opp et spørsmål, for eksempel «Hvem sovner først i kveld?».",
         "Den som holder snusboksen, kaster den til den spørsmålet passer best på. Den som tar imot, drikker og kaster videre på neste spørsmål.",
-        "Splash: mottakeren drikker to, og begge naboene drikker én."
+        "Splash: mottakeren drikker to, og begge naboene drikker én.",
+        "Variant: Snusboksen. Den som tar imot boksen, leser neste spørsmål selv, så det går fortere."
        ],
        "en": [
         "Someone reads out a question, like “Who falls asleep first tonight?”.",
         "Whoever holds the object throws it to the person it fits best. The catcher drinks and throws on the next question.",
-        "Splash: the catcher drinks two, and both neighbours drink one."
+        "Splash: the catcher drinks two, and both neighbours drink one.",
+        "Variant: the Snus box. Whoever catches the box reads the next question themselves, so it keeps moving."
        ]
       },
       "href": {
@@ -4076,44 +4084,6 @@
      },
      {
       "name": {
-       "no": "Thunderstruck"
-      },
-      "gear": {
-       "no": "Sangen «Thunderstruck» (AC/DC)",
-       "sv": "Låten «Thunderstruck» (AC/DC)",
-       "en": "The song “Thunderstruck” (AC/DC)"
-      },
-      "pl": "3+",
-      "rules": {
-       "no": [
-        "Sett på «Thunderstruck» med AC/DC og bestem rekkefølgen i ringen.",
-        "Ved første «Thunder» begynner første spiller å drikke – og drikker helt til neste «Thunder», da går turen videre.",
-        "Den som drikker når gitarsoloen starter, må drikke gjennom hele soloen. Lykke til."
-       ],
-       "sv": [
-        "Sätt på «Thunderstruck» med AC/DC och bestäm ordningen i ringen.",
-        "Vid första «Thunder» börjar första spelaren dricka – och dricker tills nästa «Thunder», då går turen vidare.",
-        "Den som dricker när gitarrsolot börjar får dricka genom hela solot. Lycka till."
-       ],
-       "en": [
-        "Put on “Thunderstruck” by AC/DC and set the order of the circle.",
-        "On the first “Thunder”, the first player starts drinking – and keeps going until the next “Thunder”, when it passes on.",
-        "Whoever is drinking when the guitar solo starts drinks through the whole solo. Good luck."
-       ]
-      },
-      "fit": {
-       "nar": [
-        "vors",
-        "bursdag"
-       ],
-       "utstyr": "musikk",
-       "tempo": "kaos",
-       "min": 3,
-       "maks": 99
-      }
-     },
-     {
-      "name": {
        "no": "Låtbekjennelsen",
        "en": "Song Confessions"
       },
@@ -4268,6 +4238,192 @@
     ]
    },
    {
+    "id": "sanger",
+    "title": {
+     "no": "Drikkesanger",
+     "en": "Drinking songs"
+    },
+    "type": "game",
+    "items": [
+     {
+      "name": {
+       "no": "Lambo",
+       "en": "Lambo"
+      },
+      "gear": {
+       "no": "Et glass som skal tømmes",
+       "en": "A glass to empty"
+      },
+      "pl": "4+",
+      "rules": {
+       "no": [
+        "Én står i midten med glasset. Alle de andre synger «Se der står en fyllehund, lambo, lambo …» mens hen drikker.",
+        "Glasset skal være tomt før sangen er ferdig. Snu det over hodet til slutt, så alle ser det.",
+        "Så peker hen ut nestemann: «Jeg mitt glass utdrukket har, lambo …». Den utpekte reiser seg og tar imot.",
+        "Søler du, eller er ikke glasset tomt, synger alle igjen og du drikker på nytt."
+       ],
+       "en": [
+        "One person stands in the middle with their glass. Everyone else sings the Lambo song while they drink.",
+        "The glass must be empty before the song ends. Turn it over your head at the end so everyone can see.",
+        "Then they point out the next person, who stands up and takes over.",
+        "Spill, or finish with drink left, and everyone sings again while you drink again."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "musikk",
+       "tempo": "kaos",
+       "min": 4,
+       "maks": 99
+      },
+      "only": "no"
+     },
+     {
+      "name": {
+       "no": "Rattlin’ Bog",
+       "en": "The Rattlin’ Bog"
+      },
+      "gear": {
+       "no": "Sangen «The Rattlin’ Bog» (The Irish Rovers)",
+       "en": "The song “The Rattlin’ Bog” (The Irish Rovers)"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Sett på «The Rattlin’ Bog». Hvert vers legger til et ledd, og refrenget blir lengre og raskere.",
+        "Dere drikker på rundgang: når det er din tur, tar du én slurk per ledd i refrenget mens det synges.",
+        "Sangen går fortere for hvert vers. Rekker du ikke slurkene dine før neste vers starter, drikker du opp.",
+        "Variant: alle synger med, og den som bommer på teksten drikker."
+       ],
+       "en": [
+        "Put on “The Rattlin’ Bog”. Every verse adds a link, and the chorus gets longer and faster.",
+        "You drink in turns: on your turn, take one sip per link in the chorus while it is sung.",
+        "The song speeds up every verse. Fail to finish your sips before the next verse and you finish your drink.",
+        "Variant: everyone sings along, and whoever fluffs the words drinks."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "musikk",
+       "tempo": "kaos",
+       "min": 3,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Roxanne",
+       "en": "Roxanne"
+      },
+      "gear": {
+       "no": "Sangen «Roxanne» (The Police)",
+       "en": "The song “Roxanne” (The Police)"
+      },
+      "pl": "2+",
+      "rules": {
+       "no": [
+        "Sett på «Roxanne» med The Police. Del rommet i to lag: lag Roxanne og lag Red light.",
+        "Lag Roxanne drikker hver gang Sting synger «Roxanne». Lag Red light drikker på «put on the red light».",
+        "Det er 26 Roxanne og rundt 20 red light. Bytt lag neste runde, om dere tør."
+       ],
+       "en": [
+        "Put on “Roxanne” by The Police. Split the room into two teams: team Roxanne and team Red light.",
+        "Team Roxanne drinks every time Sting sings “Roxanne”. Team Red light drinks on “put on the red light”.",
+        "There are 26 Roxannes and about 20 red lights. Swap teams next round, if you dare."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "musikk",
+       "tempo": "kaos",
+       "min": 2,
+       "maks": 99
+      }
+     },
+     {
+      "name": {
+       "no": "Pisk mig hårdt",
+       "en": "Pisk mig hårdt"
+      },
+      "gear": {
+       "no": "Sangen «Pisk mig hårdt»",
+       "en": "The song “Pisk mig hårdt”"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Sett på «Pisk mig hårdt». Én starter med den usynlige pisken.",
+        "Hver gang piskelyden kommer i sangen, pisker den som har pisken en ny person, som tar over pisken.",
+        "Den som har pisken, drikker dobbelt så lenge hen har den. Den som sitter med pisken når sangen slutter, drikker opp."
+       ],
+       "en": [
+        "Put on “Pisk mig hårdt”. One person starts with the invisible whip.",
+        "Every time the whip crack sounds in the song, whoever has the whip whips a new person, who takes it over.",
+        "Whoever holds the whip drinks double while holding it. Whoever has it when the song ends finishes their drink."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "nach"
+       ],
+       "utstyr": "musikk",
+       "tempo": "kaos",
+       "min": 3,
+       "maks": 99
+      },
+      "only": "no"
+     },
+     {
+      "name": {
+       "no": "Thunderstruck"
+      },
+      "gear": {
+       "no": "Sangen «Thunderstruck» (AC/DC)",
+       "sv": "Låten «Thunderstruck» (AC/DC)",
+       "en": "The song “Thunderstruck” (AC/DC)"
+      },
+      "pl": "3+",
+      "rules": {
+       "no": [
+        "Sett på «Thunderstruck» med AC/DC og bestem rekkefølgen i ringen.",
+        "Ved første «Thunder» begynner første spiller å drikke – og drikker helt til neste «Thunder», da går turen videre.",
+        "Den som drikker når gitarsoloen starter, må drikke gjennom hele soloen. Lykke til."
+       ],
+       "sv": [
+        "Sätt på «Thunderstruck» med AC/DC och bestäm ordningen i ringen.",
+        "Vid första «Thunder» börjar första spelaren dricka – och dricker tills nästa «Thunder», då går turen vidare.",
+        "Den som dricker när gitarrsolot börjar får dricka genom hela solot. Lycka till."
+       ],
+       "en": [
+        "Put on “Thunderstruck” by AC/DC and set the order of the circle.",
+        "On the first “Thunder”, the first player starts drinking – and keeps going until the next “Thunder”, when it passes on.",
+        "Whoever is drinking when the guitar solo starts drinks through the whole solo. Good luck."
+       ]
+      },
+      "fit": {
+       "nar": [
+        "vors",
+        "bursdag"
+       ],
+       "utstyr": "musikk",
+       "tempo": "kaos",
+       "min": 3,
+       "maks": 99
+      }
+     }
+    ]
+   },
+   {
     "id": "terninger",
     "title": {
      "no": "Terninger og hjul",
@@ -4293,21 +4449,30 @@
         "b|Ny ener i kastet = drikk 2 slurker. Enere du holder, teller ikke på nytt.",
         "b|Fire like = drikk summen av terningene i slurker.",
         "b|Yatzy = du bestemmer hvem som tar en shot (eventuelt resten av glasset).",
-        "b|Taperen til slutt drikker opp drikken sin eller tar en shot."
+        "b|Taperen til slutt drikker opp drikken sin eller tar en shot.",
+        "b|Hus = alle andre drikker én.",
+        "b|Liten eller stor straight = velg én som drikker to.",
+        "b|Fører du i samme felt som forrige spiller = skål, dere drikker begge."
        ],
        "sv": [
         "Vanliga yatzyregler: upp till tre kast per tur, fyll i de 13 fälten, flest poäng vinner. Sedan läggs detta på:",
         "b|Kast med en etta = drick 2 klunkar.",
         "b|Fyrtal = drick tärningarnas summa i klunkar.",
         "b|Yatzy = du bestämmer vem som tar en shot (eller resten av glaset).",
-        "b|Förloraren dricker upp sin dryck eller tar en shot."
+        "b|Förloraren dricker upp sin dryck eller tar en shot.",
+        "b|Kåk = alla andra dricker en.",
+        "b|Liten eller stor stege = välj en som dricker två.",
+        "b|Fyller du samma ruta som förra spelaren = skål, ni dricker båda."
        ],
        "en": [
         "Standard Yahtzee rules: up to three rolls per turn, fill the 13 boxes, most points wins. Then add:",
         "b|A new one in the roll = drink 2 sips. Ones you hold don't count again.",
         "b|Four of a kind = drink the dice total in sips.",
         "b|Yahtzee = you pick who takes a shot (or downs their glass).",
-        "b|The overall loser finishes their drink or takes a shot."
+        "b|The overall loser finishes their drink or takes a shot.",
+        "b|Full house = everyone else drinks one.",
+        "b|Small or large straight = pick one person who drinks two.",
+        "b|Score the same box as the previous player = cheers, you both drink."
        ]
       },
       "fit": {
@@ -4851,12 +5016,14 @@
        "no": [
         "Én velger en kategori – for eksempel ølmerker, norske fotballag eller filmer med Tom Cruise.",
         "Etter tur nevner alle noe som passer. Du har fem sekunder.",
-        "Den som står fast eller gjentar noe, drikker og velger neste kategori."
+        "Den som står fast eller gjentar noe, drikker og velger neste kategori.",
+        "Variant: Alfabetet. Samme kategori, men svarene går på A, B, C … rundt bordet. Den som står fast på sin bokstav, drikker."
        ],
        "en": [
         "Someone picks a category – for example beer brands, football clubs or Tom Cruise films.",
         "In turn, everyone names something that fits. You have five seconds.",
-        "Whoever gets stuck or repeats one drinks and picks the next category."
+        "Whoever gets stuck or repeats one drinks and picks the next category.",
+        "Variant: the Alphabet. Same category, but answers go A, B, C … around the table. Whoever gets stuck on their letter drinks."
        ]
       },
       "fit": {
@@ -4884,12 +5051,14 @@
        "no": [
         "Én spiller er tommelmester – gjerne den som vant forrige lek.",
         "Når som helst i løpet av kvelden kan tommelmesteren diskret legge tommelen på bordkanten.",
-        "Alle som merker det, gjør det samme. Den siste som oppdager det, drikker og blir ny tommelmester."
+        "Alle som merker det, gjør det samme. Den siste som oppdager det, drikker og blir ny tommelmester.",
+        "Variant: Kapteinen. Taperen får kapteinslua, eller en C på hånda, og drikker dobbelt til neste taper tar den over."
        ],
        "en": [
         "One player is thumb master – ideally whoever won the last game.",
         "At any moment during the night, the thumb master can quietly rest a thumb on the table edge.",
-        "Everyone who notices does the same. The last to notice drinks and becomes the new thumb master."
+        "Everyone who notices does the same. The last to notice drinks and becomes the new thumb master.",
+        "Variant: the Captain. The loser gets the captain’s hat, or a C on their hand, and drinks double until the next loser takes it over."
        ]
       },
       "fit": {
@@ -5213,7 +5382,10 @@
         "b|Hopp over: den som hoppes over, drikker én.",
         "b|Retningsskifte: den som la kortet, deler ut to slurker.",
         "b|Glemmer du å si UNO: drikk tre.",
-        "Den som vinner runden, lager en ny regel for neste."
+        "Den som vinner runden, lager en ny regel for neste.",
+        "b|Samme farge og tall som forrige kort: den som la det, drikker én.",
+        "b|Joker: alle drikker én, og du velger farge.",
+        "b|Går du ut på et trekk-kort: alle andre drikker to."
        ],
        "en": [
         "Play normal UNO, with these additions:",
@@ -5221,7 +5393,10 @@
         "b|Skip: the skipped player drinks one.",
         "b|Reverse: whoever played it hands out two sips.",
         "b|Forget to say UNO: drink three.",
-        "The round winner makes a new rule for the next."
+        "The round winner makes a new rule for the next.",
+        "b|Same colour and number as the previous card: whoever played it drinks one.",
+        "b|Wild card: everyone drinks one, and you pick the colour.",
+        "b|Go out on a draw card: everyone else drinks two."
        ]
       },
       "fit": {

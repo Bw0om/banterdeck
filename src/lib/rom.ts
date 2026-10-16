@@ -110,7 +110,7 @@ function lekelisteRa(lang: Lang) {
     { id: 'forraeder', navn: nv('forraeder'), type: 'forraeder', moduser: moduserFor('forraeder', lang), om: en ? 'One player is secretly told to lie or tell the truth. Everyone else votes.' : 'Én får i hemmelighet beskjed om å lyve eller si sannheten. Resten stemmer.' },
     { id: 'bingo', navn: nv('bingo'), type: 'bingo', moduser: B.eras.map((e: any) => ({ v: e.id, t: eraTittel(e.id, lang) })), om: en ? 'Everyone gets their own board. The page calls it out when someone gets a line or bingo.' : 'Hver får sitt eget brett. Siden roper når noen får rekke eller bingo.' },
     { id: 'ring-of-fire', navn: nv('ring-of-fire'), type: 'kort', moduser: [{ v: 'ring', t: en ? '🔥 The ring – pull the cards out' : '🔥 Ringen – dra ut kortene' }, { v: 'enkel', t: en ? 'Simple – tap for the next card' : 'Enkel – trykk for neste kort' }],
-      om: en ? 'The cards lie in a ring around a glass. Spin the ring and pull a card out slowly – pull too hard and the ring breaks, and you finish your drink.' : 'Kortene ligger i en ring rundt et glass. Snurr ringen og dra ut et kort forsiktig – drar du for hardt, ryker ringen og du må drikke opp.' },
+      om: en ? 'The cards lie in a ring around a glass. Spin the ring and pull a card out slowly – pull too hard and the ring breaks, and you finish your drink.' : 'Kortene ligger i en ring rundt et glass. Snurr ringen og dra ut et kort forsiktig – drar du for hardt, ryker ringen og du må drikke opp.' , kortregler: rofKortregler(en) },
     ...ekstraLeker(lang),
     ...kort.map((k) => ({ ...k, om: OM_L[k.id] ? OM_L[k.id][en ? 1 : 0] : en ? 'Everyone sees the same card. Anyone can draw the next one.' : 'Alle ser samme kort. Hvem som helst kan trekke neste.' })),
     ...PAKKER.map((p) => ({ id: p.id, navn: en ? p.en.navn : p.navn, type: 'kort', moduser: [], pluss: true, om: en ? p.en.om + ' ' + p.antall + ' cards.' : p.om + ' ' + p.antall + ' kort.' })),
@@ -323,7 +323,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
     reak: data.reak || [], stuaHend: data.stuaHend || null, utdeling: data.utdeling || null, kveld: lok(kveldVisning(data), lang), bors: lok(bors, lang),
     stua: stuaVisning(data, null),
-    alkoholfri: !!data.alkoholfri, ferdig: data.ferdig || null, kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null,
+    alkoholfri: !!data.alkoholfri, ferdig: data.ferdig || null, kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null, rofRegler: data.rofRegler || null,
     gjeng: data.gjeng ? { navn: data.gjeng.navn } : null,
     mester: data.mester ? { id: data.mester.id, til: data.mester.til } : null,
     vann: data.vann ? { nr: data.vann.nr, tid: data.vann.tid, t: tr(data.vann.t, lang) } : null,
@@ -393,6 +393,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode, kveld: !!data.gjengKveld, regler: data.gjeng.regler || [] } : null,
     kveld: lok(kveldVisning(data), lang), plan: data.plan || null,
     kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null,
+    rofRegler: data.rofRegler || null,
     mester: data.mester ? { id: data.mester.id, til: data.mester.til } : null,
     vann: data.vann ? { nr: data.vann.nr, tid: data.vann.tid, t: tr(data.vann.t, lang) } : null,
     vannAv: !!data.vannAv, vannNeste: meg && meg.id === data.vert ? vannNeste(data) : null,
@@ -887,6 +888,17 @@ function medSmakebiter(rekke: any[]) {
   }
   return ut;
 }
+/** Standardregelen og alternativene for hvert kort i Ring of Fire (ikke kongen), på ett språk. Telefonene viser dem i «Kortregler». */
+function rofKortregler(en: boolean) {
+  const r: any = D['ring-of-fire'], re: any = DE['ring-of-fire'] || {};
+  const std: any = {}, alt: any = {};
+  Object.keys(r.kort).forEach((v) => {
+    if (v === 'K') return;
+    std[v] = en && re.kort && re.kort[v] ? re.kort[v] : r.kort[v];
+    alt[v] = (en && re.alternativer && re.alternativer[v]) || (r.alternativer && r.alternativer[v]) || [];
+  });
+  return { std, alt, rekke: ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q'].filter((v) => r.kort[v]) };
+}
 const ROF_BRUDD = 5;   // slurker når ringen ryker («drikk opp»)
 const KONGE_NR: [string, string][] = [['Første', 'First'], ['Andre', 'Second'], ['Tredje', 'Third'], ['Fjerde', 'Fourth']];
 function visKort(s: any, data: any) {
@@ -894,6 +906,9 @@ function visKort(s: any, data: any) {
   if (s.lek !== 'ring-of-fire') return { t: k.t, k: k.k, h: k.h || undefined, ns: k.ns || undefined, id: k.smak || k.h || k.nsPlass ? null : kortId(k) };
   const info = D['ring-of-fire'].kort[k.v], infoEn = (DE['ring-of-fire'] && DE['ring-of-fire'].kort && DE['ring-of-fire'].kort[k.v]) || info;
   let regel: any = L(info[0], infoEn[0]), tekst: any = L(info[1], infoEn[1]);
+  // Verten kan ha byttet regelen på kortet (standard, et alternativ eller sin egen tekst)
+  const egen = data.rofRegler && data.rofRegler[k.v];
+  if (egen && k.v !== 'K') { regel = egen[0]; tekst = egen[1]; }
   if (k.v === 'K') {
     const nr = s.konger; const sl = D['ring-of-fire'].konger[Math.min(nr, 4) - 1];
     const kn = KONGE_NR[nr - 1] || ['Neste', 'Next'];
@@ -1490,6 +1505,18 @@ function handlingInne(data: any, meg: any, h: any) {
     case 'nullstill': {
       if (!erVert) return { feil: 'bare-vert' };
       data.spillere.forEach((p: any) => { p.slurker = 0; p.gi = 0; }); melde(data, 'Slurketelleren er nullstilt', 'The sip counter has been reset'); return { ok: true };
+    }
+    case 'rof-regel': {
+      // Verten bytter regelen på ett kort i Ring of Fire. Gjelder rommet resten av kvelden. Kongen kan ikke byttes.
+      if (!erVert) return { feil: 'bare-vert' };
+      const v = String(h.v || '');
+      if (!D['ring-of-fire'].kort[v] || v === 'K') return { feil: 'ugyldig' };
+      data.rofRegler = data.rofRegler || {};
+      if (h.std) { delete data.rofRegler[v]; if (!Object.keys(data.rofRegler).length) delete data.rofRegler; return { ok: true }; }
+      const navn = rens(h.navn, 30), tekst = rens(h.tekst, 160);
+      if (!navn || !tekst) return feilL('ugyldig', 'Skriv både navn og regel.', 'Write both a name and a rule.');
+      data.rofRegler[v] = [navn, tekst];
+      return { ok: true };
     }
     case 'rof-makker': {
       if (!s || s.type !== 'kort' || s.lek !== 'ring-of-fire' || !s.velgMakker) return { ok: true };

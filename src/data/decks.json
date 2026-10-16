@@ -5833,7 +5833,89 @@
    10,
    15,
    20
-  ]
+  ],
+  "alternativer": {
+   "A": [
+    [
+     "Alle drikker",
+     "Alle tar én slurk sammen. Roligere enn fossefall."
+    ]
+   ],
+   "2": [
+    [
+     "To til deg",
+     "Pek ut to som drikker én hver."
+    ]
+   ],
+   "3": [
+    [
+     "Meg og makker",
+     "Du og makkeren din drikker."
+    ]
+   ],
+   "4": [
+    [
+     "Gulvet",
+     "Sistemann som tar på gulvet, drikker."
+    ],
+    [
+     "Alle jentene",
+     "Alle jentene drikker."
+    ]
+   ],
+   "5": [
+    [
+     "Lille mann",
+     "Du har en usynlig liten mann på glasset. Ta ham av før du drikker og sett ham på etterpå. Glemmer du det, drikk igjen."
+    ]
+   ],
+   "6": [
+    [
+     "Alle gutta",
+     "Alle gutta drikker."
+    ],
+    [
+     "Slanger",
+     "Alle drikker én. Den som trakk kortet, drikker to."
+    ]
+   ],
+   "7": [
+    [
+     "Blikk",
+     "Alle ser ned. På tre ser alle opp på én person. Ser dere på hverandre, drikker begge."
+    ]
+   ],
+   "8": [
+    [
+     "Date",
+     "Velg en date. Dere drikker sammen resten av spillet, og ingen av dere kan drikke uten den andre."
+    ]
+   ],
+   "9": [
+    [
+     "Jeg har aldri",
+     "Alle holder opp tre fingre. Rundt bordet sier dere noe dere aldri har gjort. Den som mister alle fingrene, drikker."
+    ]
+   ],
+   "10": [
+    [
+     "Alfabetet",
+     "Velg en kategori. Rundt bordet med A, B, C … Den som står fast på sin bokstav, drikker."
+    ]
+   ],
+   "J": [
+    [
+     "Regel til neste knekt",
+     "Lag en regel som gjelder til neste knekt trekkes."
+    ]
+   ],
+   "Q": [
+    [
+     "Spørsmål",
+     "Still et spørsmål til noen. Svarer de, drikker de. Svarer de med et nytt spørsmål, drikker du."
+    ]
+   ]
+  }
  },
  "sannhet-eller-drikk": {
   "kind": "deck",

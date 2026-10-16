@@ -24,6 +24,12 @@ const no = lang === 'no';
 const N = (nb: string, en: string) => (no ? nb : en);
 const ROM = no ? '/no/rom' : '/room';
 const ANT_JUL = (PLUSSPAKKER as any).julebord.items.length;
+// Sesongpakkene som løftes fram på forsiden i sesongen (datoene står i skriptet lenger ned)
+const SESONGPAKKER = [
+  { id: 'oktoberfest', navn: N('Oktoberfest-pakken', 'The Oktoberfest pack'), om: N('kort til ølteltet. Prost!', 'cards for the beer tent. Prost!') },
+  { id: 'nyttaar', navn: N('Nyttårspakken', 'The New Year’s pack'), om: N('kort fra middagen til midnatt', 'cards from dinner to midnight') },
+  { id: 'afterski', navn: N('Afterski-pakken', 'The après-ski pack'), om: N('kort som funker i skistøvler', 'cards that work in ski boots') },
+].map((s) => ({ ...s, antall: (PLUSSPAKKER as any)[s.id].items.length }));
 const PAKKENAVN: string[] = Object.keys(PLUSSPAKKER).map((id) => (no ? (PLUSSPAKKER as any)[id].navn : ((PLUSSPAKKER_EN as any)[id]?.navn || (PLUSSPAKKER as any)[id].navn)));
 const PAKKELISTE = PAKKENAVN.length > 1 ? PAKKENAVN.slice(0, -1).join(', ') + N(' og ', ' and ') + PAKKENAVN[PAKKENAVN.length - 1] : PAKKENAVN[0];
 // Ukas ritualer (Nyhetsrunden finnes bare på norsk)
@@ -161,6 +167,13 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
             <em>{ukeBygg.gruppe} · {ukeBygg.pl} {N('spillere', 'players')}</em>
           </a>
         )}
+        {SESONGPAKKER.map((s) => (
+          <a class="st-ukelek st-jul" data-sesongpakke={s.id} href={ROM + '?lek=pakke-' + s.id} hidden>
+            <small class="st-merkelapp">{N('Sesongen er her', 'It’s the season')}</small>
+            <b>{s.navn}</b>
+            <em>{s.antall} {s.om}</em>
+          </a>
+        ))}
         <a class="st-ukelek st-jul" id="julebord" href={ROM + '?lek=pakke-julebord'} hidden>
           <small class="st-merkelapp">{N('Sesongen er her', 'It’s the season')}</small>
           <b>{N('Julebordpakken', 'The Christmas party pack')}</b>
@@ -479,7 +492,11 @@ const pil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14M12 5l
       } }
     // Julebordsesongen: 1. november til lille julaften (norsk tid)
     var j = document.getElementById('julebord');
-    if (j) { var n = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' })), m = n.getMonth(), dd = n.getDate(); if (m === 10 || (m === 11 && dd <= 23)) j.hidden = false; }
+    var n = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Oslo' })), m = n.getMonth(), dd = n.getDate();
+    if (j && (m === 10 || (m === 11 && dd <= 23))) j.hidden = false;
+    // Oktoberfest 10. sept – 10. okt, nyttår 26. des – 3. jan, afterski 15. jan – 20. april
+    var sesong = (m === 8 && dd >= 10) || (m === 9 && dd <= 10) ? 'oktoberfest' : (m === 11 && dd >= 26) || (m === 0 && dd <= 3) ? 'nyttaar' : (m === 0 && dd >= 15) || m === 1 || m === 2 || (m === 3 && dd <= 20) ? 'afterski' : '';
+    var sp = sesong && document.querySelector('[data-sesongpakke="' + sesong + '"]'); if (sp) sp.hidden = false;
   })();
   </script>
 

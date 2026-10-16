@@ -540,7 +540,12 @@
   "Get {navn} to promise to send you a recipe.",
   "Get {navn} to tell you what their very first mobile phone was.",
   "Get {navn} to recommend the best late-night kebab in town.",
-  "Get {navn} to decide what you're wearing tomorrow."
+  "Get {navn} to decide what you're wearing tomorrow.",
+  "Freeze completely still for ten seconds mid-conversation. If someone freezes with you, mission complete.",
+  "Get the whole room to hit the floor by shouting “take cover!”, without anyone realising it is your mission.",
+  "Get {navn} to swap seats with you without saying why.",
+  "Get {navn} to repeat what you just said, word for word.",
+  "Get {navn} to clink glasses with you three times within one minute."
  ],
  "steder": [
   "Mountain cabin",

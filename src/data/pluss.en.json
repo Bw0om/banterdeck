@@ -1416,5 +1416,503 @@
     "k": "Give out"
    }
   ]
+ },
+ "oktoberfest": {
+  "navn": "Oktoberfest",
+  "om": "For the beer tent, the Oktoberfest party and any night with litre glasses. Prost!",
+  "items": [
+   {
+    "t": "Everyone who owns lederhosen or a dirndl, drink. Wearing it right now? Hand out two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has ordered “a litre” and regretted it halfway, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who knows the words to “Ein Prosit”, drink. Sing it now and hand out three.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has lost a jacket in a beer tent, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has said “prost” without eye contact, drink two. You know what that means.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has eaten a whole pretzel alone, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has danced on the bench, drink. Fell off? Drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who thought Oktoberfest happens in October, drink. Most of it is in September.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has been to Munich, drink. Only been to Düsseldorf? Drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has bought a gingerbread heart for someone, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who can't hold their glass out at arm's length for ten seconds, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone with a beer belly they call “muscle”, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever would fall asleep first in the beer tent. Most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever is going to order “something light” tonight. They drink two.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever could carry ten litre glasses at once. They hand out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever has the worst German. They order the next round in German, or drink.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever would secretly rather have wine. They drink.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at the loudest singer. They start “Ein Prosit” now, or drink two.",
+    "k": "Point"
+   },
+   {
+    "t": "Say “Oachkatzlschwoaf” three times. Manage it and hand out three. Otherwise drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Hold your glass out at arm's length until the next card. Lower it and finish your drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Count to ten in German without mistakes. Every mistake is a sip.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Yodel for five seconds. If nobody laughs, hand out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Make a toast in German. The table votes: approved means hand out two, rejected means drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Do a quick schuhplattler, slapping thighs and shoes. Whoever laughs first drinks.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Swap glasses with the person on your left until the next card. No complaints.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Cheers to whoever travelled furthest tonight! Everyone drinks, the traveller hands out two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Ein Prosit! Everyone sings, everyone drinks. Anyone not singing drinks two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to Bayern! Everyone drinks. Anyone supporting another team drinks two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to the first person who said “quiet night tonight”. They drink two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to the pretzel! Everyone with pastry in their stomach right now, drink.",
+    "k": "Cheers"
+   },
+   {
+    "t": "What's the dumbest thing you've bought at a party? Worst purchase drinks.",
+    "k": "Truth"
+   },
+   {
+    "t": "Who in the room would you put on the next flight to Munich, and why?",
+    "k": "Truth"
+   },
+   {
+    "t": "What's the longest you've drunk without eating? Most hours drinks.",
+    "k": "Truth"
+   },
+   {
+    "t": "Tell us about the last time you sang along to a song you didn't know. Or drink two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Tent rule: everyone says “prost” with eye contact before every sip. Forget it and drink again.",
+    "k": "Rule"
+   },
+   {
+    "t": "Tent rule: beer glasses are held with one hand for the rest of the round. Two hands means a sip.",
+    "k": "Rule"
+   },
+   {
+    "t": "Tent rule: you say “ja, genau” instead of “yes”. Slip up and drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever has the most German-sounding name hands out three.",
+    "k": "Hand out"
+   },
+   {
+    "t": "Everyone wearing blue or white hands out one each.",
+    "k": "Hand out"
+   },
+   {
+    "t": "Whoever last said “cheers” hands out two.",
+    "k": "Hand out"
+   }
+  ]
+ },
+ "nyttaar": {
+  "navn": "New Year’s Eve",
+  "om": "For New Year’s Eve, from dinner to midnight and whatever comes after.",
+  "items": [
+   {
+    "t": "Everyone with a resolution they've already broken, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has kissed someone at midnight, drink. Can't remember who? Drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has slipped on ice on the way to a New Year's party, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has texted “happy new year” to someone they haven't spoken to since last new year, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has fallen asleep before midnight on New Year's Eve, drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has watched the King's New Year speech voluntarily, drink. Remember what he said? Hand out two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has lit fireworks with a drink in hand, drink two. You should have worn goggles.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who kept a resolution from last year hands out three. Everyone else drinks.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who spent more on their New Year's outfit than on Christmas presents, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has said “this is my year” more than once, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has eaten Christmas leftovers two days in a row, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who met their partner at a New Year's party, drink. The rest drink for hope.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever is going to cry at midnight. Most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever breaks their resolution first. They drink two.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever will make the most of this year. They hand out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever falls asleep before twelve. They have to stay awake, or everyone drinks for them.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever will call their ex after midnight. They drink and hand their phone to the host.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever has the most unread messages right now. They drink one per hundred.",
+    "k": "Point"
+   },
+   {
+    "t": "Say your resolution out loud. The table votes on whether it lasts until February. No means two sips.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Count down from ten without laughing. Laugh and drink one per number left.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Impersonate the King's New Year speech for twenty seconds. Keep a straight face and hand out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Find a champagne cork and hit a glass from a metre away. Hit means hand out three, miss means drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Make a firework sound with your mouth. Worst sound drinks, the table judges.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Give a thirty-second New Year speech to the room. Get applause and hand out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Show your most-used emoji this year. If it's 😂, drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Cheers to the year gone by! Everyone drinks. Whoever had the worst year hands out three.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to the host! Everyone drinks, the host hands out two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to everyone who isn't here tonight. Whoever misses someone most drinks two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to next year! Everyone with a plan for it hands out one. Everyone else drinks.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to whoever arrived last! They drink two for every quarter of an hour they were late.",
+    "k": "Cheers"
+   },
+   {
+    "t": "What's the best thing that happened to you this year? The table drinks to you.",
+    "k": "Truth"
+   },
+   {
+    "t": "What would you most like to have done differently this year? An honest answer hands out two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Who in the room did you get to know better this year, and what surprised you?",
+    "k": "Truth"
+   },
+   {
+    "t": "What's the most embarrassing thing you've done at a New Year's party? Worst story drinks.",
+    "k": "Truth"
+   },
+   {
+    "t": "Midnight rule: nobody says “happy new year” before midnight. Say it and drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "New Year rule: everyone toasts with “to next year” instead of “cheers”. Forget it and drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "New Year rule: every time someone checks the time, everyone drinks one.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever is wearing glitter hands out three.",
+    "k": "Hand out"
+   },
+   {
+    "t": "Whoever has a birthday closest to New Year hands out two.",
+    "k": "Hand out"
+   },
+   {
+    "t": "Whoever remembers where they were last New Year hands out two. Nobody remembers? Everyone drinks.",
+    "k": "Hand out"
+   }
+  ]
+ },
+ "afterski": {
+  "navn": "Après-ski",
+  "om": "For après-ski and the cabin night after a day on the slopes. Works in ski boots.",
+  "items": [
+   {
+    "t": "Everyone who skied today, drink. Only sat in the slope? Drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has lost a ski on the way down, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has skied backwards without meaning to, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has danced on a table in ski boots, drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone with goggle tan right now, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has fallen asleep on a lift, drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has ordered mulled wine without a shot in it, drink. Nobody believes you.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has said “last run” and done three more, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has dropped a mitten from the lift, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who owns a onesie ski suit, drink. Wearing it now? Hand out three.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who has skied straight into a safety net, drink.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Everyone who shouted “yeeew” on the slope today, drink two.",
+    "k": "Drink if"
+   },
+   {
+    "t": "Point at whoever takes longest in the lift queue to find their pass. Most fingers drinks.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever falls first on the dance floor tonight. They drink two.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at the best skier in the room. They hand out three.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever really only came for the après. They drink, and admit it.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever would survive longest in an avalanche. They hand out two.",
+    "k": "Point"
+   },
+   {
+    "t": "Point at whoever has the most sunscreen left on their face. They drink.",
+    "k": "Point"
+   },
+   {
+    "t": "Hold a ski jump tuck for twenty seconds. Shake and drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Impersonate a ski instructor in as many languages as you can. Every language is one to hand out.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Stand on one leg with your eyes closed until the next card. Fall and finish your drink.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Put on your jacket and zip it up wearing mittens. Do it in twenty seconds and hand out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Sing the chorus of an après-ski song. Get the table singing and hand out three.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Hold a snowplough stance until the next card. Straighten up and drink two.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Tell the story of today's biggest wipeout, with sound effects. The table judges if it hurt enough. No means a sip.",
+    "k": "Challenge"
+   },
+   {
+    "t": "Cheers to the slope! Everyone drinks. Whoever did the most runs today hands out three.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to the lift operator! Everyone drinks. Whoever got told off today drinks two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to the sun! Everyone with sunburn drinks an extra.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to whoever carried everyone's skis! They hand out three.",
+    "k": "Cheers"
+   },
+   {
+    "t": "Cheers to tomorrow! Whoever won't be up for first lift drinks two.",
+    "k": "Cheers"
+   },
+   {
+    "t": "What's the most dangerous thing you've done on a slope? Scariest hands out two.",
+    "k": "Truth"
+   },
+   {
+    "t": "Have you ever pretended to be a better skier than you are? Yes means two sips.",
+    "k": "Truth"
+   },
+   {
+    "t": "Who in the room would you rather share the cabin bunk with, and why?",
+    "k": "Truth"
+   },
+   {
+    "t": "What's the worst après-ski song? Everyone who likes it drinks.",
+    "k": "Truth"
+   },
+   {
+    "t": "Après rule: everyone toasts with “ski heil” for the rest of the night. Forget it and drink.",
+    "k": "Rule"
+   },
+   {
+    "t": "Après rule: every time someone says “the slope”, everyone drinks one.",
+    "k": "Rule"
+   },
+   {
+    "t": "Après rule: you stand up to drink, like on the lift. Sitting? Drink again.",
+    "k": "Rule"
+   },
+   {
+    "t": "Whoever is most sunburnt hands out two.",
+    "k": "Hand out"
+   },
+   {
+    "t": "Whoever got up earliest today hands out three.",
+    "k": "Hand out"
+   },
+   {
+    "t": "Whoever owns the most lift passes from past seasons hands out two.",
+    "k": "Hand out"
+   }
+  ]
  }
 }

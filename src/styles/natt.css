@@ -910,3 +910,18 @@ html.is-app .rom-start.uten-kode{align-items:stretch}
 /* App-lobbyen: hjulet og QR-koden ligger bak «Mer» (hjulet er for leken, QR gjør det samme som Inviter). Koden får plassen. */
 html.is-app.i-rom:not(.i-spill) .rom-hk[data-g="hjul-aapne"],html.is-app.i-rom:not(.i-spill) .rom-hk[data-g="qr"]{display:none}
 html.is-app.i-rom:not(.i-spill) .rom-kode{font-size:28px!important;letter-spacing:.06em}
+
+/* Kortregler i Ring of Fire (verten): ett kort per rad, standard eller alternativ med ett trykk, eller egen tekst */
+.rr-intro{margin:0 0 10px}
+.rr-rad{border:1px solid var(--border2);border-radius:16px;background:var(--card);margin-bottom:8px;overflow:hidden}
+.rr-rad.egen{border-color:var(--gold)}
+.rr-kort{display:grid;grid-template-columns:44px 1fr 20px;align-items:center;gap:10px;width:100%;padding:10px 12px;border:0;background:transparent;color:var(--ink);font:inherit;text-align:left;-webkit-tap-highlight-color:transparent}
+.rr-v{display:grid;place-items:center;width:44px;height:44px;border-radius:10px;background:var(--bg);border:2px solid var(--ink2);font-family:var(--display);font-weight:900;font-size:16px}
+.rr-tekst{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rr-tekst b{font-family:var(--display);font-size:15px}
+.rr-tekst small{font-size:12.5px;color:var(--muted);line-height:1.3}
+.rr-kort i{font-style:normal;color:var(--gold-t);font-size:16px}
+.rr-valg{padding:0 12px 12px}
+.rr-egen{display:grid;gap:6px;padding:0 12px 12px}
+.rr-egen input{min-height:42px}
+.rr-fot{margin:10px 0 0;color:var(--muted)}
