@@ -373,10 +373,11 @@ const isCurrent = (href: string) => {
        Vises bare når html.is-app er satt (se merkEnhet i head). Skjules under en lek, så ingen trykker seg ut ved et uhell. -->
   <!-- Blar du nedover, krymper fanelinja til én knapp nede til venstre (logoen). Trykk på den, så folder fanene seg ut
        over knappen. Øverst på siden er hele linja tilbake. Styres av html.hud-lukket / html.hud-apen (skript lenger ned). -->
+  <!-- Logoknappen står utenfor fanelinja: linja toner ut når du blar, og det må ikke ta knappen med seg -->
+  <button type="button" class="app-hud" data-hud aria-expanded="false" aria-label={lang === 'no' ? 'Meny' : 'Menu'}>
+    <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="2" y="2" width="60" height="60" rx="14" fill="#FFD23F" stroke="#16120F" stroke-width="4"/><g fill="#FFF8EE" stroke="#16120F" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M14 14h12l-2 17a4.5 4.5 0 0 1-8 0z" transform="rotate(10 20 22)"/><path d="M38 14h12l-2 17a4.5 4.5 0 0 1-8 0z" transform="rotate(-10 44 22)"/></g><g stroke="#16120F" stroke-width="3.5" stroke-linecap="round"><path d="M21.5 36v12M16 50h11M42.5 36v12M37 50h11M32 8v5M26 10l2 4M38 10l-2 4"/></g></svg>
+  </button>
   <nav class="app-tabbar" aria-label={lang === 'no' ? 'Appmeny' : 'App menu'}>
-    <button type="button" class="app-hud" data-hud aria-expanded="false" aria-label={lang === 'no' ? 'Meny' : 'Menu'}>
-      <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="2" y="2" width="60" height="60" rx="14" fill="#FFD23F" stroke="#16120F" stroke-width="4"/><g fill="#FFF8EE" stroke="#16120F" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M14 14h12l-2 17a4.5 4.5 0 0 1-8 0z" transform="rotate(10 20 22)"/><path d="M38 14h12l-2 17a4.5 4.5 0 0 1-8 0z" transform="rotate(-10 44 22)"/></g><g stroke="#16120F" stroke-width="3.5" stroke-linecap="round"><path d="M21.5 36v12M16 50h11M42.5 36v12M37 50h11M32 8v5M26 10l2 4M38 10l-2 4"/></g></svg>
-    </button>
     <a href={path(lang, '/')} aria-current={isCurrent(path(lang, '/')) ? 'page' : undefined}>
       <span class="ti"><Icon name="hjem" size={24} /></span><span class="tl">{lang === 'no' ? 'Hjem' : 'Home'}</span></a>
     <a href={lang === 'no' ? '/no/rom' : '/room'} aria-current={isCurrent(lang === 'no' ? '/no/rom' : '/room') ? 'page' : undefined}>

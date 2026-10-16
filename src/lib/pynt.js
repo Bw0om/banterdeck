@@ -19,9 +19,31 @@ export const PYNT = [
   { id: 'katt', slot: 'venn', navn: ['Katt', 'Cat'], laas: ['Spill tre kvelder', 'Play three nights'], kvelder: 3 },
   { id: 'and', slot: 'venn', navn: ['And', 'Duck'], laas: ['Spill fem kvelder', 'Play five nights'], kvelder: 5 },
   { id: 'sel', slot: 'venn', navn: ['Sel', 'Seal'], laas: ['Spill to kvelder', 'Play two nights'], kvelder: 2 },
+  // Flere ting å låse opp ved å spille (okt 2026): hatter, briller, på brystet og kjæledyr
+  { id: 'caps', slot: 'hode', navn: ['Caps', 'Cap'], laas: ['Spill fire kvelder', 'Play four nights'], kvelder: 4 },
+  { id: 'bottehatt', slot: 'hode', navn: ['Bøttehatt', 'Bucket hat'], laas: ['Spill seks kvelder', 'Play six nights'], kvelder: 6 },
+  { id: 'vikinghjelm', slot: 'hode', navn: ['Vikinghjelm', 'Viking helmet'], laas: ['Spill åtte kvelder', 'Play eight nights'], kvelder: 8 },
+  { id: 'kokkelue', slot: 'hode', navn: ['Kokkelue', 'Chef’s hat'], laas: ['Spill tolv kvelder', 'Play twelve nights'], kvelder: 12 },
+  { id: 'bandana', slot: 'hode', navn: ['Bandana', 'Bandana'], laas: ['Spill femten kvelder', 'Play fifteen nights'], kvelder: 15 },
+  { id: 'pirathatt', slot: 'hode', navn: ['Pirathatt', 'Pirate hat'], laas: ['Spill tjue kvelder', 'Play twenty nights'], kvelder: 20 },
+  { id: 'hjertebriller', slot: 'ansikt', navn: ['Hjertebriller', 'Heart glasses'], laas: ['Spill tre kvelder', 'Play three nights'], kvelder: 3 },
+  { id: 'monokel', slot: 'ansikt', navn: ['Monokel', 'Monocle'], laas: ['Spill sju kvelder', 'Play seven nights'], kvelder: 7 },
+  { id: 'tredbriller', slot: 'ansikt', navn: ['3D-briller', '3D glasses'], laas: ['Spill ni kvelder', 'Play nine nights'], kvelder: 9 },
+  { id: 'skibriller', slot: 'ansikt', navn: ['Skibriller', 'Ski goggles'], laas: ['Spill tolv kvelder', 'Play twelve nights'], kvelder: 12 },
+  { id: 'oyelapp', slot: 'ansikt', navn: ['Øyelapp', 'Eye patch'], laas: ['Spill femten kvelder', 'Play fifteen nights'], kvelder: 15 },
+  { id: 'slips', slot: 'bryst', navn: ['Slips', 'Tie'], laas: ['Spill to kvelder', 'Play two nights'], kvelder: 2 },
+  { id: 'tversoversloyfe', slot: 'bryst', navn: ['Tversoversløyfe', 'Bow tie'], laas: ['Spill fem kvelder', 'Play five nights'], kvelder: 5 },
+  { id: 'blomsterkrans', slot: 'bryst', navn: ['Blomsterkrans', 'Flower lei'], laas: ['Spill åtte kvelder', 'Play eight nights'], kvelder: 8 },
+  { id: 'skjerf', slot: 'bryst', navn: ['Skjerf', 'Scarf'], laas: ['Spill elleve kvelder', 'Play eleven nights'], kvelder: 11 },
+  { id: 'sheriffstjerne', slot: 'bryst', navn: ['Sheriffstjerne', 'Sheriff star'], laas: ['Spill tjue kvelder', 'Play twenty nights'], kvelder: 20 },
+  { id: 'kanin', slot: 'venn', navn: ['Kanin', 'Rabbit'], laas: ['Spill seks kvelder', 'Play six nights'], kvelder: 6 },
+  { id: 'pingvin', slot: 'venn', navn: ['Pingvin', 'Penguin'], laas: ['Spill ni kvelder', 'Play nine nights'], kvelder: 9 },
+  { id: 'skilpadde', slot: 'venn', navn: ['Skilpadde', 'Turtle'], laas: ['Spill tolv kvelder', 'Play twelve nights'], kvelder: 12 },
   // Eierens egne: deles aldri ut, vises ikke i andres garderobe. Serveren legger dem til for eierkontoen (se konto.ts).
   { id: 'eierkrone', slot: 'hode', navn: ['Eierkrona', 'Owner crown'], laas: ['', ''], eier: true },
   { id: 'axolotl', slot: 'venn', navn: ['Axolotlen', 'The axolotl'], laas: ['', ''], eier: true },
+  // Bare til Sondre
+  { id: 'mainecoon', slot: 'venn', navn: ['Maine coon', 'Maine coon'], laas: ['', ''], eier: true },
   // Bare til Ida
   { id: 'idakrans', slot: 'hode', navn: ['Idas blomsterkrans', 'Ida’s flower crown'], laas: ['', ''], eier: true },
   { id: 'idapanda', slot: 'venn', navn: ['Idas panda', 'Ida’s panda'], laas: ['', ''], eier: true },
@@ -76,7 +98,9 @@ export function kanBrukes(id, naa) { const p = AV_ID[id]; return !!p && (!p.seso
 
 /* Frisyre og farger: gratis fra start, ingenting å låse opp. Bare appens egne farger pluss naturlige hår- og hudtoner,
    så ingen figur ser fremmed ut i stua. Lagres i samme valg som pynten: haar, fh (hår), fhud, ftopp (genser), fhode (hatten). */
-export const FRISYRER = ['kort', 'sidebena', 'quiff', 'hanekam', 'krus', 'snau', 'pannelugg', 'langrett', 'lang', 'fletter', 'tuer', 'hestehale', 'bolle', 'afro', 'langkrus'];
+export const FRISYRER = ['kort', 'sidebena', 'midtskill', 'quiff', 'undercut', 'hanekam', 'krus', 'snau', 'mullet', 'pannelugg', 'langrett', 'lang', 'fletter', 'tuer', 'hestehale', 'bolle', 'afro', 'langkrus'];
+/** Skjegg: gratis som frisyren. Tegnes i hårfargen. */
+export const SKJEGG = ['ingen', 'bart', 'stubb', 'fullskjegg'];
 export const FARGER = {
   fh: ['#16120F', '#7A4A2A', '#E8C15C', '#FF5B1F', '#FF9CC2', '#63E2A8', '#5A8DEE'],
   fhud: ['#F2C6A0', '#E9B48F', '#C98D63', '#8D5A3B', '#5E3A24'],
@@ -84,7 +108,7 @@ export const FARGER = {
   fhode: ['#B9773F', '#1C1B1F', '#5A8DEE', '#FF5B1F', '#FF9CC2', '#63E2A8', '#FFD23F', '#E2363B'],
 };
 /** Hatter som kan farges, og fargen de er tegnet med (den byttes ut). Krone og glorie er alltid gull. */
-export const FARGBAR = { cowboyhatt: '#B9773F', topphatt: '#1C1B1F', hjelm: '#FFD23F', lue: '#63E2A8', partyhatt: '#FF5B1F', nisselue: '#E2363B' };
+export const FARGBAR = { cowboyhatt: '#B9773F', topphatt: '#1C1B1F', hjelm: '#FFD23F', lue: '#63E2A8', partyhatt: '#FF5B1F', nisselue: '#E2363B', caps: '#5A8DEE', bottehatt: '#63E2A8', bandana: '#E2363B' };
 
 /** Rens et valg {hode, ansikt, bryst, venn, beveg, haar, fh, fhud, ftopp, fhode}: kjente id-er, i riktig slot, låst opp,
     i sesong – og frisyre og farger bare fra listene over. */
@@ -97,6 +121,7 @@ export function rensPynt(valg, laast, naa) {
     if (p && p.slot === s && har.has(id) && kanBrukes(id, naa)) ut[s] = id;
   });
   if (FRISYRER.includes(valg.haar)) ut.haar = valg.haar;
+  if (SKJEGG.includes(valg.skjegg) && valg.skjegg !== 'ingen') ut.skjegg = valg.skjegg;
   Object.keys(FARGER).forEach((k) => { if (FARGER[k].includes(valg[k])) ut[k] = valg[k]; });
   const rom = rensRom(valg.rom); if (rom) ut.rom = rom;
   return ut;

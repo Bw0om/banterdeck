@@ -44,10 +44,24 @@ export const BRUKERNAVN = /^[A-Za-z0-9_.-]{3,20}$/;
 
 /** Ting bare én konto får: eieren (Bw0om) og Ida. Kontoen i miljøvariabelen, ellers brukernavnet.
     Eieren (som designer appen) har i tillegg alt som ikke er laget for én bestemt person (alt: true). */
-const EKSKLUSIV: { navn: string; env: string; ting: string[]; alt?: boolean }[] = [
+const EKSKLUSIV: { navn?: string; epost?: string; env: string; ting: string[]; alt?: boolean }[] = [
   { navn: 'bw0om', env: 'EIER_KONTO', ting: ['eierkrone', 'axolotl'], alt: true },
   { navn: 'ida', env: 'IDA_KONTO', ting: ['idakrans', 'idapanda'] },
+  { epost: 'sondre.stefanussen@gmail.com', env: 'SONDRE_KONTO', ting: ['mainecoon'] },
 ];
+const epostSvar = new Map<string, string>();
+/** E-posten til en konto (fra Supabase sin admin-API med servernøkkelen). Huskes så lenge funksjonen lever. */
+async function epostFor(userId: string) {
+  if (epostSvar.has(userId)) return epostSvar.get(userId)!;
+  try {
+    const { url, nokkel } = supabaseServer();
+    const r = await fetch(`${url}/auth/v1/admin/users/${encodeURIComponent(userId)}`, { headers: { apikey: nokkel, Authorization: `Bearer ${nokkel}` } });
+    const d: any = r.ok ? await r.json() : null;
+    const e = String((d && d.email) || '').toLowerCase();
+    epostSvar.set(userId, e);
+    return e;
+  } catch { return ''; }
+}
 const ALT_VANLIG: string[] = (PYNT as any[]).filter((p) => !p.eier).map((p) => p.id);
 const navnSvar = new Map<string, string>();
 async function brukernavnFor(userId: string) {
@@ -64,12 +78,13 @@ async function brukernavnFor(userId: string) {
 export async function eksklusivFor(userId: string) {
   if (!userId) return [] as string[];
   const env: any = (typeof process !== 'undefined' && process.env) || {};
-  let navn: string | null = null;
+  let navn: string | null = null, epost: string | null = null;
   const ut: string[] = [];
   for (const e of EKSKLUSIV) {
     const faste = String(env[e.env] || '').split(',').map((x) => x.trim()).filter(Boolean);
     let ja: boolean;
     if (faste.length) ja = faste.includes(userId);
+    else if (e.epost) { if (epost === null) epost = await epostFor(userId); ja = !!epost && epost === e.epost; }
     else { if (navn === null) navn = await brukernavnFor(userId); ja = navn === e.navn; }
     if (ja) { ut.push(...e.ting); if (e.alt) ut.push(...ALT_VANLIG); }
   }

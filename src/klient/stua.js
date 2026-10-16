@@ -45,6 +45,9 @@ const OYNE = {
 };
 const HAAR = {
   kort: `<path d="M-15 -58a15 15 0 0 1 30 0q-8-6-15-3t-15 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  midtskill: `<path d="M-15 -58a15 15 0 0 1 30 0q-7-7-15 1q-8-8-15-1z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  undercut: `<path d="M-11 -65q11-10 22 0q-6-4-11-1q-5-3-11 1z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+  mullet: `<path d="M-15 -58a15 15 0 0 1 30 0q-8-6-15-3t-15 3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
   lang: `<path d="M-16 -44v-14a16 16 0 0 1 32 0v14h-5v-12q-11-4-22 0v12z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
   lue: `<path d="M-15 -60a15 15 0 0 1 30 0z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><path d="M-17 -60h34" stroke="${B}" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-76" r="3.6" fill="{h}" stroke="${B}" stroke-width="2.6"/>`,
   krus: `<g fill="{h}" stroke="${B}" stroke-width="3"><circle cx="-11" cy="-64" r="6"/><circle cx="0" cy="-69" r="7"/><circle cx="11" cy="-64" r="6"/></g>`,
@@ -63,6 +66,7 @@ const HAAR = {
 };
 /** Hår som ligger bak hodet: langt hår faller rundt ansiktet, ikke over det */
 const HAAR_BAK = {
+  mullet: `<path d="M-16 -40v-14a16 16 0 0 1 32 0v14q-5 3-10 1v-7h-12v7q-5 2-10-1z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
   pannelugg: `<path d="M-18 -45v-13a18 18 0 0 1 36 0v13q-9 3-18 3t-18-3z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
   langrett: `<path d="M-18 -38v-20a18 18 0 0 1 36 0v20q-4 2-8 0v-5h-20v5q-4 2-8 0z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
   tuer: `<circle cx="-18" cy="-66" r="7" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/><circle cx="18" cy="-66" r="7" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
@@ -108,6 +112,38 @@ export const PYNT_SVG = {
     `<ellipse class="pa-kinn" cx="-3.2" cy="-16.6" rx="2.4" ry="1.5" fill="#FF9CC2"/><ellipse class="pa-kinn" cx="11.2" cy="-16.6" rx="2.4" ry="1.5" fill="#FF9CC2"/>` +
     `<path d="M3.1 -18.6q.9-.5 1.8 0q-.2.8-.9 1q-.7-.2-.9-1z" fill="${B}"/></g>` +
     `<path class="pa-pop" d="M-4 -34l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2z" fill="#FF3B5C" stroke="${B}" stroke-width="1.2"/></g>`,
+  // ---- Flere ting å låse opp (okt 2026) ----
+  caps: `<path d="M-15 -62a15 13 0 0 1 30 0z" fill="#5A8DEE" ${HS}/><path d="M9 -63h17q-2 5-9 5h-8z" fill="#5A8DEE" ${HS}/><circle cx="0" cy="-75" r="2" fill="${B}"/>`,
+  bottehatt: `<path d="M-13 -63l2-11h22l2 11z" fill="#63E2A8" ${HS}/><path d="M-21 -63h42q-2 6-21 6t-21-6z" fill="#63E2A8" ${HS}/><path d="M-11 -68h22" stroke="${B}" stroke-width="2" opacity=".35"/>`,
+  vikinghjelm: `<path d="M-15 -63a15 14 0 0 1 30 0z" fill="#8A8580" ${HS}/><rect x="-17" y="-66" width="34" height="5" rx="2" fill="#B9773F" ${HS}/><path d="M-15 -67q-11-4-9-17q6 6 12 11zM15 -67q11-4 9-17q-6 6-12 11z" fill="#FFF8EE" ${HS}/>`,
+  kokkelue: `<path d="M-13 -64v-9q-8-1-6-9q3-6 9-3q3-9 10-9t10 9q6-3 9 3q2 8-6 9v9z" fill="#FFF8EE" ${HS}/><rect x="-14" y="-67" width="28" height="5" rx="1" fill="#FFF8EE" stroke="${B}" stroke-width="2.5"/>`,
+  bandana: `<path d="M-16 -60q16-14 32 0q-16-5-32 0z" fill="#E2363B" ${HS}/><path d="M14 -61l9 2-5 7-4-5z" fill="#E2363B" ${HS}/><circle cx="-6" cy="-66" r="1.3" fill="#FFF8EE"/><circle cx="3" cy="-68" r="1.3" fill="#FFF8EE"/><circle cx="10" cy="-65" r="1.3" fill="#FFF8EE"/>`,
+  pirathatt: `<path d="M-25 -64q25-7 50 0q-6-11-25-15t-25 15z" fill="#1C1B1F" ${HS}/><circle cx="0" cy="-72" r="3.2" fill="#FFF8EE"/><path d="M-4 -66l8-3M-4 -69l8 3" stroke="#FFF8EE" stroke-width="1.8" stroke-linecap="round"/>`,
+  hjertebriller: `<path d="M-6 -51l-6-6a3.4 3.4 0 0 1 6-4a3.4 3.4 0 0 1 6 4zM6 -51l-6-6a3.4 3.4 0 0 1 6-4a3.4 3.4 0 0 1 6 4z" fill="#FF3B5C" stroke="${B}" stroke-width="2.2" stroke-linejoin="round"/><path d="M-13 -58l-3-2M13 -58l3-2" stroke="${B}" stroke-width="2.4" stroke-linecap="round"/>`,
+  monokel: `<circle cx="6" cy="-57" r="6" fill="#7CC6FE" fill-opacity=".35" stroke="${B}" stroke-width="2.6"/><path d="M10 -52q5 7 3 14" fill="none" stroke="${B}" stroke-width="1.8" stroke-linecap="round"/>`,
+  tredbriller: `<rect x="-14" y="-61" width="28" height="9" rx="2" fill="#FFF8EE" stroke="${B}" stroke-width="2.5"/><rect x="-12" y="-59.5" width="10" height="6" fill="#E2363B"/><rect x="2" y="-59.5" width="10" height="6" fill="#5A8DEE"/><path d="M-14 -58l-3-2M14 -58l3-2" stroke="${B}" stroke-width="2.4" stroke-linecap="round"/>`,
+  skibriller: `<path d="M-15 -57h-3M15 -57h3" stroke="${B}" stroke-width="3" stroke-linecap="round"/><rect x="-15" y="-63" width="30" height="12" rx="6" fill="#FF5B1F" stroke="${B}" stroke-width="2.6"/><rect x="-12" y="-61" width="24" height="8" rx="4" fill="#7CC6FE"/><path d="M-8 -59h6" stroke="#FFF8EE" stroke-width="1.6" stroke-linecap="round"/>`,
+  oyelapp: `<path d="M-11 -59l-5-4M-2 -61l17-8" stroke="${B}" stroke-width="2.2" stroke-linecap="round"/><circle cx="-6" cy="-57" r="5.5" fill="#1C1B1F" stroke="${B}" stroke-width="2"/>`,
+  slips: `<path d="M-3 -42h6l-1 4 2 2-4 13-4-13 2-2z" fill="#E2363B" stroke="${B}" stroke-width="2.2" stroke-linejoin="round"/>`,
+  tversoversloyfe: `<path d="M-8 -43l8 3 8-3v7l-8-3-8 3z" fill="#1C1B1F" stroke="${B}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="0" cy="-39.5" r="1.8" fill="${B}"/>`,
+  blomsterkrans: [[-12, -40, '#FF9CC2'], [-8, -34, '#FFD23F'], [-3, -31, '#FFF8EE'], [3, -31, '#FF9CC2'], [8, -34, '#FFD23F'], [12, -40, '#FFF8EE']].map(([x, y, f]) => `<circle cx="${x}" cy="${y}" r="3.2" fill="${f}" stroke="${B}" stroke-width="1.8"/><circle cx="${x}" cy="${y}" r="1" fill="${B}"/>`).join(''),
+  skjerf: `<path d="M-14 -44q14 6 28 0v7q-14 6-28 0z" fill="#5A8DEE" stroke="${B}" stroke-width="2.5" stroke-linejoin="round"/><path d="M3 -38l4 14h-8l1-14z" fill="#5A8DEE" stroke="${B}" stroke-width="2.5" stroke-linejoin="round"/><path d="M-10 -40q10 4 20 0" fill="none" stroke="#FFF8EE" stroke-width="1.6"/><path d="M1 -30h5" stroke="#FFF8EE" stroke-width="1.6"/>`,
+  sheriffstjerne: `<path d="M8 -37l1.9 3.8 4.2.6-3 3 .7 4.2-3.8-2-3.8 2 .7-4.2-3-3 4.2-.6z" fill="#FFD23F" stroke="${B}" stroke-width="2" stroke-linejoin="round"/>`,
+  kanin: `<ellipse cx="2" cy="0" rx="10" ry="3" fill="${B}" opacity=".22"/><circle cx="-11" cy="-6" r="2.6" fill="#FFF8EE" ${HS}/><ellipse cx="-2" cy="-7" rx="10" ry="6.5" fill="#FFF8EE" ${HS}/><path d="M6 -16l-1-13 5 3zM11 -16l2-13 3 5z" fill="#FFF8EE" ${HS}/><path d="M7.3 -19l-.6-8 2.4 1.4zM11.6 -19l1.4-8 1.4 2.5z" fill="#FF9CC2"/><circle cx="9" cy="-14" r="6.5" fill="#FFF8EE" ${HS}/><circle cx="7" cy="-15" r="1.3" fill="${B}"/><circle cx="11.5" cy="-15" r="1.3" fill="${B}"/><ellipse cx="9.3" cy="-12" rx="1.3" ry=".9" fill="#FF9CC2"/><path d="M-6 -2v2M2 -2v2" stroke="${B}" stroke-width="3" stroke-linecap="round"/>`,
+  pingvin: `<ellipse cx="0" cy="0" rx="9" ry="3" fill="${B}" opacity=".22"/><path d="M-6 -1l-3 1M6 -1l3 1" stroke="#FF5B1F" stroke-width="3" stroke-linecap="round"/><path d="M-8 -2q-2-19 8-21q10 2 8 21z" fill="#1C1B1F" ${HS}/><path d="M-5 -3q-1-12 5-14q6 2 5 14z" fill="#FFF8EE"/><path d="M-8 -12q-5 4-3 9" fill="none" stroke="${B}" stroke-width="2.5" stroke-linecap="round"/><circle cx="-2.6" cy="-16.5" r="1.7" fill="#FFF8EE"/><circle cx="2.6" cy="-16.5" r="1.7" fill="#FFF8EE"/><circle cx="-2.3" cy="-16.5" r=".8" fill="${B}"/><circle cx="2.9" cy="-16.5" r=".8" fill="${B}"/><path d="M-2.2 -13.5l2.2 3 2.2-3z" fill="#FF5B1F" stroke="${B}" stroke-width="1.4" stroke-linejoin="round"/>`,
+  skilpadde: `<ellipse cx="2" cy="0" rx="12" ry="3" fill="${B}" opacity=".22"/><path d="M-8 -2v2M6 -2v2" stroke="#7BC96F" stroke-width="3.5" stroke-linecap="round"/><circle cx="13" cy="-6" r="4" fill="#7BC96F" ${HS}/><circle cx="14" cy="-7" r="1" fill="${B}"/><path d="M-10 -4q0-11 10-11t10 11z" fill="#63E2A8" ${HS}/><path d="M-5 -5q5-7 10 0M0 -15v11" fill="none" stroke="${B}" stroke-width="1.6" stroke-linecap="round"/>`,
+  // Maine coon: stor, lodden, brun tabby med dusker på ørene og en hale som svinger (stua.css). Bare til Sondre.
+  mainecoon: `<g class="mc"><ellipse cx="2" cy="0" rx="13" ry="3.2" fill="${B}" opacity=".22"/>` +
+    `<g class="mc-hale"><path d="M-12 -8q-12-1-14-15q5 2 8 8q2-6 7-6q3 8-1 13z" fill="#9A6A3F" ${HS}/><path d="M-20 -14l-3-1M-18 -19l-2-2" stroke="#5E3A24" stroke-width="2" stroke-linecap="round"/></g>` +
+    `<path d="M-13 -3q-2-13 11-13h8q8 0 8 9v4q0 3-3 3h-21q-3 0-3-3z" fill="#9A6A3F" ${HS}/><path d="M-6 -12q4 5 10 0M-1 -9q3 3 7 0" fill="none" stroke="#5E3A24" stroke-width="2" stroke-linecap="round"/>` +
+    `<path d="M-9 -2v3M-3 -2v3M5 -2v3M11 -2v3" stroke="${B}" stroke-width="3" stroke-linecap="round"/>` +
+    `<path d="M2 -21l-3-8 6 3zM16 -21l3-8-6 3z" fill="#9A6A3F" ${HS}/><path d="M-1 -28l-2-3M19 -28l2-3" stroke="#5E3A24" stroke-width="1.6" stroke-linecap="round"/>` +
+    `<path d="M1 -17l-4-1 2 3M17 -17l4-1-2 3" fill="#9A6A3F" stroke="${B}" stroke-width="1.6" stroke-linejoin="round"/>` +
+    `<circle cx="9" cy="-15" r="8" fill="#9A6A3F" ${HS}/><path d="M9 -22v5M5.5 -21.5l1.6 3.5M12.5 -21.5l-1.6 3.5" stroke="#5E3A24" stroke-width="1.8" stroke-linecap="round"/>` +
+    `<path d="M3.5 -12q5.5 5 11 0q0 3-5.5 4.5q-5.5-1.5-5.5-4.5z" fill="#FFF8EE"/>` +
+    `<circle cx="6" cy="-16" r="1.9" fill="#63E2A8" stroke="${B}" stroke-width="1"/><circle cx="12" cy="-16" r="1.9" fill="#63E2A8" stroke="${B}" stroke-width="1"/><circle cx="6.3" cy="-16" r=".8" fill="${B}"/><circle cx="12.3" cy="-16" r=".8" fill="${B}"/>` +
+    `<path d="M9 -12.6l-1.3 1.1h2.6z" fill="#FF9CC2" stroke="${B}" stroke-width=".8" stroke-linejoin="round"/>` +
+    `<path d="M3 -11.5l-5 .3M3 -10.3l-5 1.4M15 -11.5l5 .3M15 -10.3l5 1.4" stroke="${B}" stroke-width="1" stroke-linecap="round"/></g>`,
   // Axolotlen: rosa som appens egen rosa, gjeller som vifter, liten hale som svinger (stua.css). Bare til designeren.
   axolotl: `<g class="ax"><ellipse cx="0" cy="0" rx="13" ry="3" fill="${B}" opacity=".22"/>` +
     `<g class="ax-hale"><path d="M-11 -8q-6 1-8-5q-1-5 3-7q1 4 4 5q1-3 4-2z" fill="#FFC2D9" ${HS}/></g>` +
@@ -126,6 +162,13 @@ export const PYNT_SVG = {
 /* Luer som dekker hele toppen av hodet: håret klippes under bremmen, så det ikke stikker opp gjennom lua. Verdien er bremlinja (y). */
 const BREM = { cowboyhatt: -67, topphatt: -66, hjelm: -66, lue: -64, nisselue: -64 };
 let klippNr = 0;
+/** Skjegg i hårfargen, under munnen. */
+const SKJEGG_SVG = {
+  bart: `<path d="M-7.5 -50.5q7.5-5 15 0q-3 2.6-7.5.9q-4.5 1.7-7.5-.9z" fill="{h}" stroke="${B}" stroke-width="1.8" stroke-linejoin="round"/>`,
+  stubb: `<g fill="{h}" opacity=".6">${[[-9, -47], [-6, -44], [-2, -42.5], [2, -42.5], [6, -44], [9, -47], [-4, -45.5], [4, -45.5], [0, -44]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.1"/>`).join('')}</g>`,
+  fullskjegg: `<path d="M-14.5 -51q-1 13 14.5 14t14.5-14q-4 6-14.5 5.5t-14.5-5.5z" fill="{h}" stroke="${B}" stroke-width="3" stroke-linejoin="round"/>`,
+};
+function skjeggHtml(p) { const k = SKJEGG_SVG[p.skjegg]; return k ? k.replace(/\{h\}/g, p.h) : ''; }
 function haarHtml(p, pynt, bak) {
   let type = pynt && pynt.hode && p.haar === 'lue' ? 'kort' : p.haar;
   if (HAAR[type] == null) type = 'kort';
@@ -164,7 +207,7 @@ export function figurHtml(p, pynt) {
     haarHtml(p, pynt, true) + `<circle cx="0" cy="-56" r="15" fill="${p.hud}" stroke="${B}" stroke-width="3"/><circle class="gronn" cx="0" cy="-56" r="13.5" fill="#7BC96F"/>` +
     `<circle cx="-9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/><circle cx="9" cy="-51" r="3" fill="#FF5B1F" opacity=".35"/>` +
     `<g class="rodme"><ellipse cx="-9" cy="-50" rx="5" ry="3" fill="#FF3B5C" opacity=".7"/><ellipse cx="9" cy="-50" rx="5" ry="3" fill="#FF3B5C" opacity=".7"/></g>` +
-    haarHtml(p, pynt) +
+    haarHtml(p, pynt) + skjeggHtml(p) +
     `<g class="oyne"><g class="oyne-v"><g class="pupiller">${OYNE[p.oyne]}</g></g>` +
     `<g class="oyne-g"><path d="M-7.5 -56q2.5-3.5 5 0M2.5 -56q2.5-3.5 5 0" fill="none" stroke="${B}" stroke-width="2.4" stroke-linecap="round"/></g>` +
     `<g class="oyne-h"><path d="M-5 -54.5l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2zM5 -54.5l-3-3a1.8 1.8 0 0 1 3-2a1.8 1.8 0 0 1 3 2z" fill="#FF3B5C" stroke="${B}" stroke-width="1.2"/></g>` +
@@ -218,7 +261,7 @@ const HODE_MUNN = {
 };
 /** Innholdet i et hode. uttrykk: 'vanlig' | 'oi' (store øyne, hevede bryn, åpen munn, svettedråpe) | 'flat' (litt flau munn). */
 export function hodeHtml(p, uttrykk) {
-  const ALIAS = { sidebena: 'kort', quiff: 'kort', hanekam: 'kort', pannelugg: 'lang', langrett: 'lang', fletter: 'lang', tuer: 'bolle', afro: 'krus', langkrus: 'krus' };
+  const ALIAS = { sidebena: 'kort', quiff: 'kort', hanekam: 'kort', midtskill: 'kort', undercut: 'kort', mullet: 'lang', pannelugg: 'lang', langrett: 'lang', fletter: 'lang', tuer: 'bolle', afro: 'krus', langkrus: 'krus' };
   const oi = uttrykk === 'oi', h = p.h || B, haar = HODE_HAAR[p.haar] != null ? p.haar : (ALIAS[p.haar] || 'kort');
   const munn = oi ? HODE_MUNN.oi : uttrykk === 'flat' ? HODE_MUNN.flat : (HODE_MUNN[p.munn] || HODE_MUNN.smil);
   const ry = oi ? 8 : 6.5, r = oi ? 2.2 : 3.2;
@@ -258,6 +301,7 @@ export function medValg(p, pynt) {
   if (pynt.haar && (HAAR[pynt.haar] != null)) ut.haar = pynt.haar;
   if (pynt.fh) ut.h = pynt.fh;
   if (pynt.fhud) ut.hud = pynt.fhud;
+  if (pynt.skjegg) ut.skjegg = pynt.skjegg;
   if (pynt.ftopp) ut.topp = pynt.ftopp;
   return ut;
 }

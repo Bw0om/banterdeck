@@ -2570,3 +2570,26 @@ button.vl-bane:active{transform:translate(2px,2px)}
 @keyframes axBoble{0%,70%{opacity:0;transform:translateY(3px) scale(.6)}78%,90%{opacity:1;transform:translateY(-3px) scale(1)}100%{opacity:0;transform:translateY(-9px) scale(1.1)}}
 .figur.m-dans .venn-axolotl .ax{transform-box:fill-box;transform-origin:50% 100%;animation:paHopp 640ms cubic-bezier(.23,1,.32,1) infinite}
 @media (prefers-reduced-motion:reduce){.venn-axolotl .ax-gj,.venn-axolotl .ax-hale,.venn-axolotl .ax{animation:none}.venn-axolotl .ax-boble{animation:none;opacity:0}}
+
+/* Maine coon (Sondres): halen svinger rolig */
+.venn-mainecoon .mc-hale{transform-box:fill-box;transform-origin:100% 85%;animation:axHale 3.4s ease-in-out infinite}
+.figur.m-dans .venn-mainecoon .mc{transform-box:fill-box;transform-origin:50% 100%;animation:paHopp 640ms cubic-bezier(.23,1,.32,1) infinite}
+@media (prefers-reduced-motion:reduce){.venn-mainecoon .mc-hale,.venn-mainecoon .mc{animation:none}}
+
+/* ---------- Figuren din (okt 2026): knappene står under figuren, aldri oppå den – du må se det du velger ---------- */
+.fv-scene{height:min(34dvh,260px)}
+.fv.valgt .fv-scene{height:min(30dvh,232px)}
+.fv-figur{margin-bottom:16px}
+.fv-deler{display:flex;gap:8px;overflow-x:auto;padding:6px 4px 8px;margin:0 -4px;scrollbar-width:none;scroll-snap-type:x proximity}
+.fv-deler::-webkit-scrollbar{display:none}
+.fv-del,.fv-del.valgt{position:static;flex:0 0 auto;width:auto;height:auto;min-width:66px;margin:0;padding:8px 10px 7px;flex-direction:column;gap:4px;border-radius:16px;
+  background:var(--card);color:var(--ink);border:2px solid var(--blekk);box-shadow:3px 3px 0 var(--blekk);scroll-snap-align:start}
+.fv-del small{font-family:var(--display);font-stretch:70%;font-weight:900;text-transform:uppercase;font-size:11px;line-height:1;white-space:nowrap}
+.fv-del.valgt{background:var(--gul);color:var(--blekk)}
+.fv-del.deg{background:var(--rosa);color:var(--blekk)}
+.fv-del.deg.valgt{background:var(--gul)}
+.fv.valgt .fv-del:not(.valgt),.fv.valgt .fv-del.deg:not(.valgt){opacity:1}
+.fv-del:active,.fv-del.valgt:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--blekk)}
+.fv-etikett{margin:6px 0 -6px;font-family:var(--display);font-stretch:70%;font-weight:900;text-transform:uppercase;font-size:12px;color:var(--muted)}
+.fv-skjegg svg{width:62px;height:62px}
+.fv-fot .btn + .btn{margin-left:6px}

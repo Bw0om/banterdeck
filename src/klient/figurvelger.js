@@ -4,7 +4,7 @@
 // Låste ting har hengelås; ett trykk viser hvordan du låser den opp – én linje, så forsvinner den.
 // Brukes både i rommet (arket «Figuren din») og på profilsiden, så de ser helt like ut.
 import { figurHtml, utseende, PYNT_SVG, BEVEG_SVG } from './stua.js';
-import { PYNT, sesong, FRISYRER, FARGER, FARGBAR, synligPynt } from '../lib/pynt.js';
+import { PYNT, sesong, FRISYRER, SKJEGG, FARGER, FARGBAR, synligPynt } from '../lib/pynt.js';
 
 const SLOTS = ['hode', 'deg', 'ansikt', 'bryst', 'venn', 'beveg'];
 const NAVN = {
@@ -14,7 +14,8 @@ const NAVN = {
 const FARGENAVN = {
   fh: ['Hårfarge', 'Hair colour'], fhud: ['Hudtone', 'Skin tone'], ftopp: ['Farge på genseren', 'Top colour'], fhode: ['Farge på hatten', 'Hat colour'],
 };
-const FRISYRENAVN = { kort: ['Kort', 'Short'], sidebena: ['Sidebena', 'Side part'], quiff: ['Quiff', 'Quiff'], hanekam: ['Hanekam', 'Mohawk'], krus: ['Krøller', 'Curls'], snau: ['Snau', 'Shaved'], pannelugg: ['Pannelugg', 'Bangs'], langrett: ['Langt rett', 'Long straight'], lang: ['Langt', 'Long'], fletter: ['Fletter', 'Braids'], tuer: ['Tuer', 'Space buns'], hestehale: ['Hestehale', 'Ponytail'], bolle: ['Bolle', 'Bun'], afro: ['Afro', 'Afro'], langkrus: ['Lange krøller', 'Long curls'] };
+const SKJEGGNAVN = { ingen: ['Glattbarbert', 'Clean-shaven'], bart: ['Bart', 'Moustache'], stubb: ['Skjeggstubber', 'Stubble'], fullskjegg: ['Fullskjegg', 'Full beard'] };
+const FRISYRENAVN = { midtskill: ['Midtskill', 'Centre part'], undercut: ['Undercut', 'Undercut'], mullet: ['Mullet', 'Mullet'], kort: ['Kort', 'Short'], sidebena: ['Sidebena', 'Side part'], quiff: ['Quiff', 'Quiff'], hanekam: ['Hanekam', 'Mohawk'], krus: ['Krøller', 'Curls'], snau: ['Snau', 'Shaved'], pannelugg: ['Pannelugg', 'Bangs'], langrett: ['Langt rett', 'Long straight'], lang: ['Langt', 'Long'], fletter: ['Fletter', 'Braids'], tuer: ['Tuer', 'Space buns'], hestehale: ['Hestehale', 'Ponytail'], bolle: ['Bolle', 'Bun'], afro: ['Afro', 'Afro'], langkrus: ['Lange krøller', 'Long curls'] };
 // Hvor knappene sitter på figuren (prosent av figurboksen, viewBox -48 -100 96 106)
 const PLASS = { hode: [31, 13], deg: [21, 35], ansikt: [74, 33], bryst: [28, 58], venn: [76, 71], beveg: [66, 93] };
 const IKON = {
@@ -41,7 +42,7 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': 
  */
 export function lagFigurVelger(rot, o) {
   const en = o.lang === 'en', T = (a, b) => (en ? b : a), N = NAVN[en ? 'en' : 'no'];
-  const st = { slot: null, laast: o.laast || [], valgt: Object.assign({}, o.valgt || {}), kvelder: o.kvelder || 0, inne: !!o.inne, sesong: sesong(), lapp: null };
+  const st = { slot: 'hode', laast: o.laast || [], valgt: Object.assign({}, o.valgt || {}), kvelder: o.kvelder || 0, inne: !!o.inne, sesong: sesong(), lapp: null };
   let lappTimer = null;
   const har = () => { const h = {}; st.laast.forEach((id) => { h[id] = true; }); return h; };
   /** Utseendet slik figuren ser ut nå (fra id-en, med valgt frisyre og farger) – til å markere valgt prikk */
@@ -60,6 +61,13 @@ export function lagFigurVelger(rot, o) {
     }).join('') + '</div>';
   }
 
+  function skjegg(p) {
+    return `<p class="fv-etikett">${T('Skjegg', 'Beard')}</p><div class="fv-rad" aria-label="${T('Skjegg', 'Beard')}">` + SKJEGG.map((k) => {
+      const paa = (p.skjegg || 'ingen') === k;
+      return `<button type="button" class="fv-valg fv-skjegg${paa ? ' paa' : ''}" data-skjegg="${k}" aria-pressed="${paa}" aria-label="${SKJEGGNAVN[k][en ? 1 : 0]}">` +
+        `<svg class="figur" viewBox="-24 -84 48 50" aria-hidden="true">${figurHtml(Object.assign({}, p, { skjegg: k === 'ingen' ? null : k }), {})}</svg></button>`;
+    }).join('') + '</div>';
+  }
   function tegn() {
     const sammeDel = st.tegnet === st.slot && rot.firstChild, rull = sammeDel ? [...rot.querySelectorAll('.fv-rad,.fv-prikker')].map((e) => e.scrollLeft) : [];
     st.tegnet = st.slot;
@@ -69,11 +77,11 @@ export function lagFigurVelger(rot, o) {
   function tegnInn() {
     const h = har(), bev = st.slot === 'beveg' ? (st.valgt.beveg || 'vink') : '', p = naa();
     const n = st.laast.length;
-    const deler = SLOTS.map((sl) => `<button type="button" class="fv-del${st.slot === sl ? ' valgt' : ''}${!st.slot && sl === 'hode' ? ' puls' : ''}${sl === 'deg' ? ' deg' : ''}" data-slot="${sl}" aria-label="${N[sl]}" aria-pressed="${st.slot === sl}" style="left:${PLASS[sl][0]}%;top:${PLASS[sl][1]}%"><svg viewBox="0 0 24 24" aria-hidden="true">${IKON[sl]}</svg></button>`).join('');
+    const deler = '<div class="fv-deler" role="tablist">' + SLOTS.map((sl) => `<button type="button" role="tab" class="fv-del${st.slot === sl ? ' valgt' : ''}${sl === 'deg' ? ' deg' : ''}" data-slot="${sl}" aria-selected="${st.slot === sl}"><svg viewBox="0 0 24 24" aria-hidden="true">${IKON[sl]}</svg><small>${N[sl]}</small></button>`).join('') + '</div>';
     const lapp = st.lapp ? `<div class="fv-lapp inn" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v3a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/><path d="M12 12v4M9 20h6M12 16v4"/></svg><div><b>${esc(st.lapp.navn)}</b><span>${esc(st.lapp.tekst)}</span></div></div>` : '';
     let rad = '';
     if (st.slot === 'deg') {
-      rad = frisyrer(p) + prikker('fh', p.h) + prikker('fhud', p.hud);
+      rad = `<p class="fv-etikett">${T('Frisyre', 'Hairstyle')}</p>` + frisyrer(p) + prikker('fh', p.h) + prikker('fhud', p.hud) + skjegg(p);
     } else if (st.slot) {
       const liste = synligPynt(st.laast).filter((x) => x.slot === st.slot);
       const ingen = st.slot === 'beveg' ? '' : `<button type="button" class="fv-valg${!st.valgt[st.slot] ? ' paa' : ''}" data-id="" aria-label="${T('Ingenting', 'Nothing')}" aria-pressed="${!st.valgt[st.slot]}"><svg viewBox="0 0 24 24" class="fv-ingen" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>`;
@@ -90,15 +98,14 @@ export function lagFigurVelger(rot, o) {
       else if (st.slot === 'hode') rad = valg + (st.valgt.hode && FARGBAR[st.valgt.hode] ? prikker('fhode', st.valgt.fhode || FARGBAR[st.valgt.hode]) : '');
       else rad = valg;
     }
-    const fot = st.slot
-      ? (st.slot === 'beveg' ? T('Trykk på deg selv i stua, så gjør figuren bevegelsen – hos alle.', 'Tap yourself in the living room and your figure does the move – for everyone.')
-        : st.slot === 'deg' ? T('Frisyre og farger er gratis', 'Hairstyles and colours are free')
-        : (st.inne ? `${synligPynt(st.laast).filter((x) => x.slot === st.slot && h[x.id]).length} ${T('av', 'of')} ${synligPynt(st.laast).filter((x) => x.slot === st.slot).length} ${T('låst opp', 'unlocked')}` : ''))
-      : (st.inne ? `${n} ${T('av', 'of')} ${synligPynt(st.laast).length} ${T('låst opp', 'unlocked')} · ${st.kvelder} ${st.kvelder === 1 ? T('kveld spilt', 'night played') : T('kvelder spilt', 'nights played')}` : '');
-    rot.innerHTML = `<div class="fv${st.slot ? ' valgt' : ''}">` +
-      `<div class="fv-scene"><i class="fv-gulv"></i><svg class="fv-figur figur${bev ? ' m-' + bev : ''}" viewBox="-48 -100 96 106" aria-hidden="true">${figurHtml(p, st.valgt)}</svg>${deler}${lapp}</div>` +
-      (st.slot ? '' : `<p class="fv-hint">${T('Trykk på en del', 'Tap a part')}</p>`) + rad +
-      (st.inne ? `<p class="fv-fot">${fot}</p>` : `<p class="fv-fot"><a class="btn small gold" href="${esc(o.kontoHref || '/no/account')}">${T('Lag bruker', 'Create account')}</a> ${T('– så lagres figuren din og du låser opp mer ved å spille. Gratis.', '– and your figure is saved, and you unlock more by playing. Free.')}</p>`) +
+    const fot = st.slot === 'beveg' ? T('Trykk på deg selv i stua, så gjør figuren bevegelsen – hos alle.', 'Tap yourself in the living room and your figure does the move – for everyone.')
+      : st.slot === 'deg' ? ''
+      : `${synligPynt(st.laast).filter((x) => x.slot === st.slot && h[x.id]).length} ${T('av', 'of')} ${synligPynt(st.laast).filter((x) => x.slot === st.slot).length} ${T('låst opp', 'unlocked')} · ${st.kvelder} ${st.kvelder === 1 ? T('kveld spilt', 'night played') : T('kvelder spilt', 'nights played')}`;
+    const konto = esc(o.kontoHref || '/no/account');
+    rot.innerHTML = `<div class="fv valgt">` +
+      `<div class="fv-scene"><i class="fv-gulv"></i><svg class="fv-figur figur${bev ? ' m-' + bev : ''}" viewBox="-48 -100 96 106" aria-hidden="true">${figurHtml(p, st.valgt)}</svg>${lapp}</div>` +
+      deler + rad +
+      (st.inne ? (fot ? `<p class="fv-fot">${fot}</p>` : '') : `<p class="fv-fot"><a class="btn small gold" href="${konto}#signin">${T('Logg inn', 'Sign in')}</a><a class="btn small ghost" href="${konto}#signin">${T('Ny konto', 'New account')}</a></p>`) +
       '</div>';
   }
   function visLapp(navn, tekst) {
@@ -113,11 +120,14 @@ export function lagFigurVelger(rot, o) {
     if (pr) { st.valgt[pr.dataset.farge] = pr.dataset.verdi; endret(); return; }
     const fr = e.target.closest('.fv-frisyre');
     if (fr) { st.valgt.haar = fr.dataset.frisyre; endret(); return; }
+    const sk = e.target.closest('.fv-skjegg');
+    if (sk) { if (sk.dataset.skjegg === 'ingen') delete st.valgt.skjegg; else st.valgt.skjegg = sk.dataset.skjegg; endret(); return; }
     const v = e.target.closest('.fv-valg'); if (!v || !st.slot) return;
     const id = v.dataset.id, x = PYNT.find((y) => y.id === id);
     if (v.classList.contains('laast') && x) {
+      if (!st.inne) { location.href = (o.kontoHref || '/no/account') + '#signin'; return; }
       const h = har();
-      visLapp(x.navn[en ? 1 : 0], !st.inne ? T('Lag en bruker for å låse opp', 'Create an account to unlock') : !h[x.id] ? x.laas[en ? 1 : 0] : T('Kommer tilbake i sesongen', 'Back in season'));
+      visLapp(x.navn[en ? 1 : 0], !h[x.id] ? x.laas[en ? 1 : 0] : T('Kommer tilbake i sesongen', 'Back in season'));
       return;
     }
     st.valgt[st.slot] = id ? (st.valgt[st.slot] === id && st.slot !== 'beveg' ? null : id) : null;
