@@ -1423,7 +1423,8 @@ export function startRom(LEKNAVN, LANG) {
         : holder ? esc(navn(holder.hvem)) + T(' drar … ryker ringen, drikker de opp.', ' is pulling … if the ring breaks, they finish their drink.')
         : T('Ryker ringen, drikker ', 'If the ring breaks, ') + esc(navn(s.turId)) + T(' opp glasset.', ' finishes their drink.')) + '</p>' +
       makkerHtml(s) +
-      (!min && erVert() && !s.ferdig ? '<p class="ring-knapper"><button class="btn ghost small" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button></p>' : '');
+      (erVert() ? '<p class="ring-knapper">' + (!min && !s.ferdig ? '<button class="btn ghost small" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button>' : '') +
+        '<button class="btn ghost small" data-g="rof-regler" type="button">🃏 ' + T('Kortregler', 'Card rules') + (tilstand.rofRegler ? ' · ' + Object.keys(tilstand.rofRegler).length : '') + '</button></p>' : '');
   }
   /** Ringen røk: alle telefonene får vite det. */
   function rofSjekkBrudd(d) {
@@ -4469,6 +4470,46 @@ export function startRom(LEKNAVN, LANG) {
   var SLOTNAVN = EN ? { hode: 'On your head', ansikt: 'Glasses', bryst: 'On your chest', venn: 'Pet', beveg: 'Moves' } : { hode: 'På hodet', ansikt: 'Briller', bryst: 'På brystet', venn: 'Kjæledyr', beveg: 'Bevegelser' };
   function megSpiller() { return (tilstand.spillere || []).find(function (p) { return p.id === tilstand.meg; }) || {}; }
   function innlogget() { var K = window.BDKonto; return !!(K && K.les && K.les()); }
+  /** Kortreglene i Ring of Fire: standard på hvert kort, alternativer å velge mellom, eller vertens egen tekst. Gjelder rommet i kveld. */
+  var rrApen = null;
+  function rofReglerArk() {
+    lukkArk();
+    var m = lagArk('rr-ark', T('Kortregler', 'Card rules')), kropp = m.querySelector('.ark-kropp');
+    var info = (tilstand.leker || []).find(function (l) { return l.id === 'ring-of-fire'; }), kr = info && info.kortregler;
+    if (!kr) { kropp.innerHTML = '<p class="small">' + T('Reglene er ikke lastet ennå.', 'The rules have not loaded yet.') + '</p>'; aapentArk = { el: m, oppdater: function () {} }; return; }
+    var VIS = { A: T('Ess', 'Ace'), J: T('Knekt', 'Jack'), Q: T('Dronning', 'Queen') };
+    function tegnListe() {
+      var egne = tilstand.rofRegler || {};
+      kropp.innerHTML = '<p class="small rr-intro">' + T('Trykk på et kort for å bytte regelen. Standard er alltid ett trykk unna.', 'Tap a card to change its rule. Standard is always one tap away.') + '</p>' +
+        kr.rekke.map(function (v) {
+          var naa = egne[v] || kr.std[v], erStd = !egne[v], apen = rrApen === v;
+          var std = kr.std[v], alt = kr.alt[v] || [];
+          var valg = '<div class="rom-mod rr-valg">' +
+            '<button type="button" data-rr="std" data-v="' + v + '" aria-pressed="' + erStd + '">' + esc(std[0]) + ' · ' + T('standard', 'standard') + '</button>' +
+            alt.map(function (a) { var paa = !erStd && egne[v][0] === a[0]; return '<button type="button" data-rr="alt" data-v="' + v + '" data-navn="' + esc(a[0]) + '" data-tekst="' + esc(a[1]) + '" aria-pressed="' + paa + '">' + esc(a[0]) + '</button>'; }).join('') +
+            '<button type="button" data-rr="egen" data-v="' + v + '">' + T('Egen …', 'Custom …') + '</button></div>' +
+            (apen === 'egen:' + v || rrApen === 'egen:' + v ? '<form class="rr-egen" data-v="' + v + '"><input name="navn" maxlength="30" placeholder="' + T('Navn, f.eks. Hopp', 'Name, e.g. Jump') + '" required><input name="tekst" maxlength="160" placeholder="' + T('Regelen', 'The rule') + '" required><button class="btn gold small" type="submit">' + T('Bruk', 'Use') + '</button></form>' : '');
+          return '<div class="rr-rad' + (apen || rrApen === 'egen:' + v ? ' apen' : '') + (erStd ? '' : ' egen') + '"><button type="button" class="rr-kort" data-rr="apne" data-v="' + v + '" aria-expanded="' + !!(apen || rrApen === 'egen:' + v) + '">' +
+            '<b class="rr-v">' + esc(VIS[v] || v) + '</b><span class="rr-tekst"><b>' + esc(naa[0]) + '</b><small>' + esc(naa[1]) + '</small></span><i aria-hidden="true">' + (erStd ? '' : '✎') + '</i></button>' +
+            (apen || rrApen === 'egen:' + v ? valg : '') + '</div>';
+        }).join('') +
+        '<p class="rr-fot small">' + T('Kongen kan ikke byttes: første konge drikker 5, så 10, 15 og 20.', 'The king cannot be changed: first king drinks 5, then 10, 15 and 20.') + '</p>';
+    }
+    kropp.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-rr]'); if (!b) return;
+      var v = b.dataset.v;
+      if (b.dataset.rr === 'apne') { rrApen = rrApen === v || rrApen === 'egen:' + v ? null : v; tegnListe(); return; }
+      if (b.dataset.rr === 'std') { gjor({ handling: 'rof-regel', v: v, std: true }); rrApen = null; return; }
+      if (b.dataset.rr === 'alt') { gjor({ handling: 'rof-regel', v: v, navn: b.dataset.navn, tekst: b.dataset.tekst }); rrApen = null; return; }
+      if (b.dataset.rr === 'egen') { rrApen = 'egen:' + v; tegnListe(); var f = kropp.querySelector('.rr-egen input'); if (f) f.focus(); return; }
+    });
+    kropp.addEventListener('submit', function (e) {
+      var f = e.target.closest('.rr-egen'); if (!f) return; e.preventDefault();
+      gjor({ handling: 'rof-regel', v: f.dataset.v, navn: f.navn.value.trim(), tekst: f.tekst.value.trim() }); rrApen = null;
+    });
+    tegnListe();
+    aapentArk = { el: m, oppdater: tegnListe };
+  }
   function lagArk(klasse, tittel) {
     var m = document.createElement('div'); m.className = 'rom-tavle ' + klasse; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', tittel);
     m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + esc(tittel) + '</h2><button class="linkbtn" data-u="lukk" type="button">' + T('Lukk', 'Close') + '</button></div><div class="ark-kropp"></div></div>';
@@ -5330,6 +5371,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
     if (g === 'rof-makker') return gjor({ handling: 'rof-makker', paa: b.dataset.paa });
     if (g === 'rof-for') { rofFor = tilstand.spill ? tilstand.spill.nr : -1; return tegn(); }
+    if (g === 'rof-regler') return rofReglerArk();
     if (g === 'stem') {
       var sp0 = tilstand && tilstand.spill;
       if (sp0 && sp0.type === 'forraeder') return gjor({ handling: 'stem', paa: b.dataset.paa, sikker: sp0.minStemme ? !!sp0.minSikker : lhSikker.v });
