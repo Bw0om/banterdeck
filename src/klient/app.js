@@ -59,6 +59,26 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   document.addEventListener('astro:after-swap', statuslinje);
   SplashScreen.hide().catch(() => {});
 
+  // Skallet (ios/App/App/Skall.swift): iPhonens egen fanelinje nederst. Finnes den, gjemmer nettsiden sin egen
+  // (html.har-skall), sier fra hvilken fane som er aktiv, og ber linja gjemme seg under en lek.
+  const Skall = registerPlugin('Skall');
+  const FANER = { hjem: ['/no/', '/'], spill: ['/no/rom', '/room'], leker: ['/no/drinking-games', '/drinking-games'], deg: ['/no/account', '/account'] };
+  const engelsk = () => !location.pathname.startsWith('/no');
+  const norm = (p) => p.replace(/\/$/, '') || '/';
+  window.__mvFane = (id) => { const r = FANER[id]; if (!r) return; const maal = engelsk() ? r[1] : r[0]; if (norm(location.pathname) !== norm(maal)) location.href = maal; };
+  const fanenNaa = () => { const p = norm(location.pathname); for (const id in FANER) if (FANER[id].some((r) => norm(r) === p)) return id; return ''; };
+  let harSkall = false, sistFane = '', sistSkjult = null;
+  const synkSkall = () => {
+    if (!harSkall) return;
+    const f = fanenNaa(); if (f && f !== sistFane) { sistFane = f; Skall.fane({ navn: f }).catch(() => {}); }
+    const skjul = h.classList.contains('i-spill') || h.classList.contains('bli-med');
+    if (skjul !== sistSkjult) { sistSkjult = skjul; Skall.skjul({ skjult: skjul }).catch(() => {}); }
+  };
+  Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' } })
+    .then(() => { harSkall = true; h.classList.add('har-skall'); synkSkall(); }).catch(() => {});
+  document.addEventListener('astro:page-load', synkSkall);
+  new MutationObserver(synkSkall).observe(h, { attributes: true, attributeFilter: ['class'] });
+
   // TV-en via AirPlay: appen viser storskjermen på TV-en (ios/App/App/TvSkjerm.swift). Rommet sier hvilken lenke.
   const Skjerm = registerPlugin('Skjerm');
   let sistUrl = '';

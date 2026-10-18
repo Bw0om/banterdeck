@@ -68,4 +68,5 @@ export const SELGER = {
 // «Under utvikling»: sperrer siden bak en kode til alt er klart. Sett paa: false for å åpne siden.
 // Sperren er bare et skjermbilde, ikke ekte sikkerhet – koden står i sidens kildekode.
 // Vilkår, priser (Pluss), personvern og kvittering er alltid åpne, så Vipps kan se dem.
-export const UTVIKLING = { paa: true, kode: '1991' };
+// Porten før lansering. MV_UTVIKLING=0 ved bygging slår den av (brukes av simulator-sjekken av appen på GitHub).
+export const UTVIKLING = { paa: env.MV_UTVIKLING !== '0', kode: '1991' };

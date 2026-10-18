@@ -1,4 +1,20 @@
+** BUILD SUCCEEDED **
 ----- siste linjer -----
+
+AppIntentsSSUTraining (in target 'App' from project 'App')
+2026-10-18 23:40:49.747 appintentsnltrainingprocessor[4678:18102] Parsing options for appintentsnltrainingprocessor
+2026-10-18 23:40:49.747 appintentsnltrainingprocessor[4678:18102] Starting AppIntents SSU YAML Generation
+2026-10-18 23:40:49.751 appintentsnltrainingprocessor[4678:18102] No AppShortcuts found - Skipping.
+
+RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+
+Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+
+Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
+
+** BUILD SUCCEEDED **
+
 ----- skjemaer -----
     Targets:
         App

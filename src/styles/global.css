@@ -2047,6 +2047,10 @@ html.is-app .app-tabbar a:active{transform:scale(.94)}
 html.is-app .app-tabbar a[aria-current=page]{color:var(--gold-t)}
 html.is-app .app-tabbar .ti{display:grid;place-items:center;height:26px}
 html.is-app .app-tabbar .tl{white-space:nowrap}
+/* Skallet (iPhonens egen fanelinje, Skall.swift) tar over for fanelinja, logoknappen og vifta. Siden slutter der linja begynner,
+   så bunnen trenger bare litt luft – under en lek er linja gjemt, og reaksjonslinja får plassen som før. */
+html.is-app.har-skall .app-tabbar,html.is-app.har-skall .app-hud,html.is-app.har-skall .app-vifte{display:none!important}
+html.is-app.har-skall:not(.i-spill):not(.bli-med) body{padding-bottom:16px!important}
 /* Logoknappen: usynlig til du blar nedover */
 .app-hud{display:none}
 html.is-app .app-hud{display:block;position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);width:58px;height:58px;padding:0;border:0;background:transparent;z-index:72;
@@ -2092,6 +2096,10 @@ html.is-app .nr-varsel,html.is-app .standalone-only,html.is-app .bare-nett{displ
 /* Hjem-fanen er forsiden, men bare det som hører appen til: stua med lag rom / bli med, lekene, én telefon, denne uka og gjengen.
    Pluss-prisene (Apple krever kjøp gjennom App Store), humoren, «ha vorset på hjemskjermen» og annonsene er borte. */
 html.is-app .st-plussfelt,html.is-app .st-humorfelt,html.is-app .st-hjem,html.is-app .st-forside .ad{display:none!important}
+/* Det oransje feltet på Hjem går helt opp bak statuslinja – ingen lys stripe rundt klokka */
+html.is-app .st-helt{margin-top:calc(-1 * (env(safe-area-inset-top) + 14px));padding-top:calc(env(safe-area-inset-top) + 14px)}
+/* Deg, ikke innlogget: skjemaet kommer når du trykker Logg inn eller Ny konto på figurkortet, ikke før */
+html.is-app #signin:not(.vis){display:none}
 /* Leker og lekesider i appen: ingen brødsmuler, ingen ingress skrevet for Google, ingen «Lag et rom» (det er Hjem).
    På lekesiden er «Spill i rommet» den gule knappen; «Bare én telefon ↓» er en stille knapp som ruller til kortbunken. */
 html.is-app .crumb,html.is-app .lk-ingress,html.is-app .lk-snarveier .btn,html.is-app .gameacts button{display:none!important}
