@@ -2,7 +2,7 @@
 // Her skrus det app-aktige på: vibrering når du trykker, telefonens eget delingsark, statuslinja i appens farge,
 // og lenker som åpner appen (mittvors.no/no/rom?k=…).
 import { Capacitor, registerPlugin } from '@capacitor/core';
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Share } from '@capacitor/share';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
@@ -20,6 +20,23 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     const stor = b.matches('.btn.gold, .rom-stor-knapp, .reaksjon, .tool.dice');
     Haptics.impact({ style: stor ? ImpactStyle.Medium : ImpactStyle.Light }).catch(() => {});
   }, true);
+
+  // Vibrasjon som følger det som skjer i leken (rommet sender 'mv-lyd' med samme navn som lydene, også når lyden er av):
+  // din tur gir et lite «pling» i hånda, ringen som snurrer tikker som et hjul, må du drikke dunker det to ganger.
+  const VIB = {
+    tur: () => Haptics.notification({ type: NotificationType.Success }),
+    slurk: () => Haptics.impact({ style: ImpactStyle.Heavy }).then(() => new Promise((r) => setTimeout(r, 140))).then(() => Haptics.impact({ style: ImpactStyle.Heavy })),
+    bom: () => Haptics.notification({ type: NotificationType.Error }),
+    knus: () => Haptics.notification({ type: NotificationType.Error }),
+    tikk: () => Haptics.selectionChanged(),
+    naa: () => Haptics.impact({ style: ImpactStyle.Medium }),
+    pek: () => Haptics.impact({ style: ImpactStyle.Medium }),
+    svar: () => Haptics.impact({ style: ImpactStyle.Light }),
+    ding: () => Haptics.impact({ style: ImpactStyle.Light }),
+    pop: () => Haptics.impact({ style: ImpactStyle.Light }),
+    grip: () => Haptics.impact({ style: ImpactStyle.Light }),
+  };
+  document.addEventListener('mv-lyd', (e) => { const f = VIB[e.detail]; if (f) f().catch(() => {}); });
 
   // Deling går gjennom telefonens delingsark. Bilder (tavla) deles som før, om nettleseren kan.
   const egen = navigator.share ? navigator.share.bind(navigator) : null;
