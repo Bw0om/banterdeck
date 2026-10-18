@@ -843,7 +843,9 @@ const T = no ? {
           });
         }
         $('outBtn').addEventListener('click', function () { K.loggUt(); location.reload(); });
-        start();
+        // Appen: vent til innloggingen er lest fra telefonens lager. Fikk brukernavnet seg en endring i bakgrunnen, tegn på nytt.
+        K.naarKlar(start);
+        document.addEventListener('bd:bruker', function (e) { var u = e.detail; if (!u) { location.reload(); return; } if (bruker && u.brukernavn !== bruker.brukernavn) start(); });
       })();
       </script>
     </>
