@@ -66,10 +66,15 @@ jobs:
           xcrun simctl install "$UDID" "$APP"
           mkdir -p skjermbilder
           xcrun simctl launch "$UDID" no.mittvors.app
-          sleep 8
-          xcrun simctl io "$UDID" screenshot skjermbilder/01-start.png
-          sleep 6
-          xcrun simctl io "$UDID" screenshot skjermbilder/02-etter-litt.png
+          sleep 12
+          xcrun simctl io "$UDID" screenshot skjermbilder/01-hjem.png
+          # Én start per fane: appen leser MV_FANE og velger fanen selv (Skall.swift)
+          for f in spill leker deg; do
+            xcrun simctl terminate "$UDID" no.mittvors.app || true
+            SIMCTL_CHILD_MV_FANE=$f xcrun simctl launch "$UDID" no.mittvors.app
+            sleep 12
+            xcrun simctl io "$UDID" screenshot "skjermbilder/02-$f.png"
+          done
           xcrun simctl spawn "$UDID" log show --predicate 'process == "App"' --last 2m --style compact > skjermbilder/app-logg.txt 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         if: always()
