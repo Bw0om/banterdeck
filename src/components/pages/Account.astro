@@ -60,7 +60,7 @@ const T = no ? {
     <svg class="app-figur-bilde" viewBox="-48 -100 96 106" aria-hidden="true"></svg>
     <div>
       <b id="appFigurNavn">{no ? 'Figuren din' : 'Your figure'}</b>
-      <span class="app-figur-knapper"><a class="btn gold small" href="#signin">{no ? 'Logg inn' : 'Sign in'}</a><a class="btn ghost small" href="#signin">{no ? 'Ny konto' : 'New account'}</a></span>
+      <span class="app-figur-knapper"><a class="btn gold small" href="#signin" data-vis="inn">{no ? 'Logg inn' : 'Sign in'}</a><a class="btn ghost small" href="#signin" data-vis="ny">{no ? 'Ny konto' : 'New account'}</a></span>
     </div>
   </section>
   <script is:inline data-astro-rerun>
@@ -73,6 +73,13 @@ const T = no ? {
         el.querySelector('.app-figur-bilde').innerHTML = '<g class="figur" transform="translate(0,0)">' + window.mvFigur(window.mvUtseende(navn || 'deg'), {}) + '</g>';
       }
       tegn();
+      // Logg inn / Ny konto: vis skjemaet under, på riktig fane
+      el.addEventListener('click', function (e) {
+        var a = e.target.closest('[data-vis]'); if (!a) return;
+        var s = document.getElementById('signin'); if (!s) return;
+        s.classList.add('vis');
+        var f = s.querySelector('[data-fane="' + a.dataset.vis + '"]'); if (f) f.click();
+      });
     })();
   </script>
 
