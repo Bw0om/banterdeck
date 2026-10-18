@@ -267,6 +267,41 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 }
 
 /* =====================================================================
+   LEKEN FYLLER SKJERMEN (mobil)
+   Under en lek er skjermen lekens. Toppen er én tynn linje (hjem, kode, poeng, Stua, Mer),
+   spillerne er små hoder på én rad, og resten av høyden er spillets. Stua, reglene, slurkene
+   og vertens knapper ligger bak «Stua» og «Mer» – ingen skal bla for å spille.
+   ===================================================================== */
+.rom-hoder{display:none}
+@media (max-width:899px){
+  html.i-spill .rom-spillere,html.i-spill .rom-hk[data-g="hjul-aapne"],html.i-spill .rom-hk[data-g="qr"],html.i-spill .rom-hk[data-g="del"]{display:none}
+  html.i-spill .rom-spill > .rom-regler,html.i-spill .rom-spill > .slurkelinje:not(:has(.sl-gi:not([disabled]))){display:none}
+  html.i-spill .rom-hoder{display:flex;gap:8px;overflow-x:auto;padding:8px 4px 10px;margin:4px -4px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  html.i-spill .rom-hoder::-webkit-scrollbar{display:none}
+  .rh{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none;width:54px}
+  .rh .nr-h{width:40px;height:40px;transition:transform .18s var(--ease-out),box-shadow .18s var(--ease-out)}
+  .rh small{font-size:10.5px;font-weight:700;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .rh.tur .nr-h{box-shadow:0 0 0 3px var(--gold),0 0 0 5px var(--ink2);transform:scale(1.12)}
+  .rh.tur small{color:var(--ink)}
+  /* Spillet får minst én hel skjerm, så det lille som ligger under (bakgrunnsting) aldri dytter noe opp */
+  html.i-spill .rom-spill{min-height:calc(100dvh - 280px - env(safe-area-inset-top) - env(safe-area-inset-bottom));justify-content:flex-start}
+  /* Ring of Fire: ringen tar den høyden som er igjen, ikke mer */
+  html.i-spill .ring-boks{height:clamp(230px,calc(100dvh - 440px - env(safe-area-inset-top)),500px);width:auto;max-width:100%;aspect-ratio:358/500}
+  html.i-spill .ring-topp{margin-bottom:6px;width:100%}
+  html.i-spill .ring-hint{margin-top:6px;font-size:13.5px}
+}
+/* På brede skjermer ligger stua og resten i rommet som før – knappene trengs ikke */
+@media (min-width:900px){.rom-hk[data-g="stua-ark"],.rom-hk[data-g="mer-ark"]{display:none}}
+/* Arkene: en hank å dra i, og stua i full størrelse når den ligger i et ark */
+.ark-hank{position:absolute;left:50%;top:8px;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:var(--border2)}
+.rom-tavle-topp{position:relative;padding-top:8px;touch-action:none;cursor:grab}
+.stua-ark .rom-tavle-innhold{max-width:560px;padding:14px 14px 10px}
+.stua-ark .rom-stua{margin:10px 0 0}
+.mer-ark .slurkelinje{margin-top:10px}
+.mer-ark .rom-vert{margin-top:14px}
+.mer-ark .rom-forlat{margin-top:16px}
+
+/* =====================================================================
    SKJERMKANTEN – tilstanden synes før du har lest et ord
    lime kant = din tur · oransje striper = hemmelig, ikke vis skjermen
    ===================================================================== */

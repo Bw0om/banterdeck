@@ -44,7 +44,9 @@ export function startRom(LEKNAVN, LANG) {
     del: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v7h14v-7"/></svg>',
     qr: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>',
     pokal: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>',
-    krone: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>'
+    krone: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>',
+    stua: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><path d="M3 13a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4H3z"/><path d="M5 17v2M19 17v2"/></svg>',
+    mer: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4.5M12 8h.01"/></svg>'
   };
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -211,6 +213,7 @@ export function startRom(LEKNAVN, LANG) {
     [392, 396, 494, 498, 587].forEach(function (f) { tone(f * 0.97, t0, varighet, 'sawtooth', 0.06, f); });
   }
   function spillLyd(navn, n) {
+    try { document.dispatchEvent(new CustomEvent('mv-lyd', { detail: navn })); } catch (e) {}   // appen: vibrasjon som følger lyden
     if (!lyd.paa || !lydCtx()) return;
     // Sofa-nedtelling: 3 – 2 – 1 stiger i tone, og «NÅ!» er et kort, lyst støt alle hører
     if (navn === 'tell') { var f = [0, 784, 659, 523][n] || 523; tone(f, 0, 0.12, 'square', 0.07); tone(f / 2, 0, 0.16, 'sine', 0.22); }
@@ -715,7 +718,9 @@ export function startRom(LEKNAVN, LANG) {
       '<div><span class="rom-etikett">' + (t.gjeng && t.gjeng.kveld ? esc(t.gjeng.navn) + ' · ' : '') + T('Rom', 'Room') + '</span><b class="rom-kode">' + esc(kode) + '</b> ' + sprakLenke('small') + '</div></div>' +
       '<span class="rom-hodeknapper">' +
         [['hjul-aapne', klistremerke('hjul', 'rom-hk-merke'), T('Hjul', 'Wheel'), T('Straffehjulet', 'Penalty wheel')], ['tavle', klistremerke('pokal', 'rom-hk-merke'), T('Poeng', 'Score'), T('Poengtavla', 'Scoreboard')],
-         ['qr', ikon.qr, 'QR', T('Vis QR-kode', 'Show QR code')], ['del', ikon.del, T('Inviter', 'Invite'), T('Inviter flere', 'Invite more people')]].map(function (k) {
+         ['qr', ikon.qr, 'QR', T('Vis QR-kode', 'Show QR code')], ['del', ikon.del, T('Inviter', 'Invite'), T('Inviter flere', 'Invite more people')]]
+         // Under leken på mobil ligger stua og resten (regler, slurker, vertens knapper) bak to knapper, så leken får hele skjermen
+         .concat(t.spill ? [['stua-ark', ikon.stua, T('Stua', 'Room'), T('Stua', 'The living room')], ['mer-ark', ikon.mer, T('Mer', 'More'), T('Regler og mer', 'Rules and more')]] : []).map(function (k) {
           return '<button class="rom-hk" data-g="' + k[0] + '" type="button" aria-label="' + k[3] + '"><span class="rom-hk-ikon">' + k[1] + '</span><span class="rom-hk-tekst">' + k[2] + '</span></button>';
         }).join('') + '</span>' +
     '</div>' +
@@ -734,6 +739,15 @@ export function startRom(LEKNAVN, LANG) {
     }).join('') + '</div>';
   }
 
+
+  /** Under leken på mobil: spillerne som små hoder på én rad i stedet for navnebrikker. Den som har tur, lyser. */
+  function hoderad(s) {
+    var tur = s && s.turId || null;
+    return '<div class="rom-hoder" aria-label="' + T('Spillerne', 'The players') + '">' + (tilstand.spillere || []).map(function (p) {
+      return '<span class="rh' + (p.id === tilstand.meg ? ' meg' : '') + (p.id === tur ? ' tur' : '') + '">' + nrHode(p.id) + '<small>' + esc(p.navn) + '</small></span>';
+    }).join('') + '</div>';
+  }
+  function erMobil() { return window.matchMedia('(max-width:899px)').matches; }
 
   // På mittvors.no holder det med mittvors.no/KODE (kortere lenke og enklere QR-kode)
   var kortDomene = /(^|\.)mittvors\.no$/.test(location.hostname) || erApp;   // appen: sidene ligger lokalt, men lenkene skal til mittvors.no
@@ -1435,9 +1449,14 @@ export function startRom(LEKNAVN, LANG) {
         : min ? T('Snurr ringen. Hold på det gule kortet og følg sporet ut – stø hånd.', 'Spin the ring. Hold the yellow card and follow the lane out – steady hand.')
         : holder ? esc(navn(holder.hvem)) + T(' drar … ryker ringen, drikker de opp.', ' is pulling … if the ring breaks, they finish their drink.')
         : T('Ryker ringen, drikker ', 'If the ring breaks, ') + esc(navn(s.turId)) + T(' opp glasset.', ' finishes their drink.')) + '</p>' +
-      makkerHtml(s) +
-      (erVert() ? '<p class="ring-knapper">' + (!min && !s.ferdig ? '<button class="btn ghost small" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button>' : '') +
-        '<button class="btn ghost small" data-g="rof-regler" type="button">🃏 ' + T('Kortregler', 'Card rules') + (tilstand.rofRegler ? ' · ' + Object.keys(tilstand.rofRegler).length : '') + '</button></p>' : '');
+      makkerHtml(s) + (erMobil() ? '' : rofMer(s));
+  }
+  /** Vertens knapper i Ring of Fire. På mobil ligger de bak «Mer», så ringen får plassen. */
+  function rofMer(s) {
+    if (!erVert()) return '';
+    var min = !s.ferdig && (s.turId === tilstand.meg || rofFor === s.nr);
+    return '<p class="ring-knapper">' + (!min && !s.ferdig ? '<button class="btn ghost small" data-g="rof-for" type="button">' + T('Trekk for ', 'Draw for ') + esc(navn(s.turId)) + '</button>' : '') +
+      '<button class="btn ghost small" data-g="rof-regler" type="button">🃏 ' + T('Kortregler', 'Card rules') + (tilstand.rofRegler ? ' · ' + Object.keys(tilstand.rofRegler).length : '') + '</button></p>';
   }
   /** Ringen røk: alle telefonene får vite det. */
   function rofSjekkBrudd(d) {
@@ -4525,12 +4544,44 @@ export function startRom(LEKNAVN, LANG) {
   }
   function lagArk(klasse, tittel) {
     var m = document.createElement('div'); m.className = 'rom-tavle ' + klasse; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', tittel);
-    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><h2>' + esc(tittel) + '</h2><button class="linkbtn" data-u="lukk" type="button">' + T('Lukk', 'Close') + '</button></div><div class="ark-kropp"></div></div>';
+    m.innerHTML = '<div class="rom-tavle-innhold"><div class="rom-tavle-topp"><i class="ark-hank" aria-hidden="true"></i><h2>' + esc(tittel) + '</h2><button class="linkbtn" data-u="lukk" type="button">' + T('Lukk', 'Close') + '</button></div><div class="ark-kropp"></div></div>';
     m.addEventListener('click', function (e) { if (e.target === m || e.target.closest('[data-u=lukk]')) lukkArk(); });
+    // Dra arket ned i toppen for å lukke det – som arkene ellers på telefonen
+    var inn = m.querySelector('.rom-tavle-innhold'), topp = m.querySelector('.rom-tavle-topp'), y0 = null, dy = 0;
+    topp.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; y0 = e.clientY; dy = 0; inn.style.transition = 'none'; try { topp.setPointerCapture(e.pointerId); } catch (x) {} });
+    topp.addEventListener('pointermove', function (e) { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); inn.style.transform = 'translateY(' + dy + 'px)'; });
+    function slipp() { if (y0 === null) return; y0 = null; inn.style.transition = ''; if (dy > 80) lukkArk(); else inn.style.transform = ''; }
+    topp.addEventListener('pointerup', slipp); topp.addEventListener('pointercancel', slipp);
     document.body.appendChild(m);
     return m;
   }
-  function lukkArk() { if (aapentArk) { aapentArk.el.remove(); aapentArk = null; } }
+  function lukkArk() {
+    if (!aapentArk) return;
+    var varStua = aapentArk.stua; aapentArk.el.remove(); aapentArk = null;
+    // Stua var i arket: legg den tilbake der den hører hjemme (gjemt under leken, i rommet ellers)
+    if (varStua && stuaEl) { stuaGjem().appendChild(stuaEl); if (tilstand && !(tilstand.spill && erMobil())) setTimeout(tegn, 0); }
+  }
+  /** Stua som ark under leken: samme stue, bare over spillet. Lukk, og du er tilbake der du var. */
+  function stuaArk() {
+    lukkArk();
+    var m = lagArk('stua-ark', T('Stua', 'The living room'));
+    aapentArk = { el: m, stua: true, oppdater: function () {} };
+    tegnStua(tilstand.spill);
+  }
+  /** «Mer» under leken: slurkene dine, reglene, lekens egne valg og vertens knapper – alt som ellers lå under spillet. */
+  function merArk() {
+    lukkArk();
+    if (!tilstand.spill) return;
+    var m = lagArk('mer-ark', tilstand.spill.navn || LEKNAVN[tilstand.spill.lek] || T('Mer', 'More')), kropp = m.querySelector('.ark-kropp');
+    function fyll() {
+      var s = tilstand.spill; if (!s) { lukkArk(); return; }
+      kropp.innerHTML = slurkelinje() + reglerPanel(s).replace('<details class="rom-regler"', '<details class="rom-regler" open') +
+        (s.lek === 'ring-of-fire' ? rofMer(s) : '') + vertVerktoy(s) +
+        '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
+    }
+    fyll();
+    aapentArk = { el: m, oppdater: fyll };
+  }
   function figurArk() {
     lukkArk();
     var m = lagArk('figur-ark', T('Figuren din', 'Your figure')), kropp = m.querySelector('.ark-kropp');
@@ -4941,10 +4992,11 @@ export function startRom(LEKNAVN, LANG) {
     var gammeltKort = kortByttet ? root.querySelector('.rom-kort, .rof-kort.rom-rof') : null;
     var gammelRekt = gammeltKort ? gammeltKort.getBoundingClientRect() : null;
     sistKortNokkel = nyKN;
-    var stuaPlass = tilstand.ferdig ? '' : STUA_PLASS;
+    var lekSkjerm = !!s && erMobil();   // leken fyller skjermen: stua, regler, slurker og vertens knapper ligger bak «Stua» og «Mer» i toppen
+    var stuaPlass = tilstand.ferdig || lekSkjerm ? '' : STUA_PLASS;
     var kbFra = kbRekt(), benkFra = benkRekter();
     settRot(s
-      ? topp + merker + borsHurtig() + innhold + stuaPlass + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + vert + forlat
+      ? topp + (lekSkjerm ? hoderad(s) : '') + merker + borsHurtig() + innhold + stuaPlass + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + (lekSkjerm ? '' : vert + forlat)
       : topp + stuaPlass + oppdragKnapp() + borsPille() + borsHurtig() + mesterStripe() + (tilstand.bors || tilstand.oppdrag ? reaksjonslinje() : '') + innhold + vert + forlat);
     tegnStua(s);
     kbFly(kbFra); benkGli(benkFra);
@@ -5081,8 +5133,13 @@ export function startRom(LEKNAVN, LANG) {
     plassEl.insertAdjacentHTML('beforebegin', html.slice(0, i));
     plassEl.insertAdjacentHTML('afterend', html.slice(i + STUA_PLASS.length));
   }
+  var stuaGjemEl = null;
+  /** Stedet stua ligger når den ikke synes (under leken på mobil). Skjult, så ingen animasjoner tegnes. */
+  function stuaGjem() { if (!stuaGjemEl) { stuaGjemEl = document.createElement('div'); stuaGjemEl.hidden = true; document.body.appendChild(stuaGjemEl); } return stuaGjemEl; }
   function tegnStua(s) {
-    var plass = root.querySelector('#romStuaPlass'); if (!plass || !meg) return;
+    if (!meg) return;
+    var iArk = !!(aapentArk && aapentArk.stua), plass = iArk ? aapentArk.el.querySelector('.ark-kropp') : root.querySelector('#romStuaPlass');
+    if (!plass) { if (stuaEl && stuaEl.parentNode !== stuaGjem()) stuaGjem().appendChild(stuaEl); if (aapentArk) aapentArk.oppdater(); return; }
     if (!stuaEl) {
       stuaEl = document.createElement('div'); stuaEl.className = 'rom-stua';
       stuaEl.innerHTML = '<svg role="img" aria-label="' + T('Stua: alle i rommet som tegnede figurer. Trykk på gulvet for å gå dit, dra i folka for å flytte dem.', 'The living room: everyone in the room as drawn figures. Tap the floor to walk there, drag people to move them.') + '"></svg>' +
@@ -5100,7 +5157,7 @@ export function startRom(LEKNAVN, LANG) {
     stuaEl.querySelector('.rom-stua-tips').innerHTML = (erVert() ? '<button type="button" class="linkbtn" data-g="rom-ark">' + T('Rommet', 'The room') + '</button>' : '') +
       '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>';
     if (stuaEl.parentNode !== plass) plass.appendChild(stuaEl);
-    stuaEl.classList.toggle('kompakt', !!s);
+    stuaEl.classList.toggle('kompakt', !!s && !iArk);
     var st = tilstand.stua || {}, ute = st.ute || [], jegUte = ute.indexOf(meg.id) !== -1, alle = (tilstand.spillere || []).concat(st.sofa || []);
     // Går du ut eller inn, følger skjermen deg
     if (jegUte !== stuaJegUte) { stuaJegUte = jegUte; stuaVis = jegUte ? 'ute' : 'inne'; }
@@ -5221,11 +5278,13 @@ export function startRom(LEKNAVN, LANG) {
     if (k !== sistInnhold) { if (sistInnhold) sperreTil = Date.now() + 700; sistInnhold = k; }
   }
 
-  root.addEventListener('click', function (e) {
+  function romKlikk(e) {
     var b = e.target.closest('[data-g]');
     if (trinn.nokkel && (!b || trinnNokkel(b) !== trinn.nokkel)) nullTrinn();
     if (!b || !tilstand) return;
     var g = b.dataset.g;
+    if (g === 'stua-ark') return stuaArk();
+    if (g === 'mer-ark') return merArk();
     if (b.classList.contains('rom-stor-knapp') && Date.now() < sperreTil) return;
     var farlig = farligTekst(g, b);
     if (farlig && !bekreftet(b, farlig)) return;
@@ -5433,6 +5492,14 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'legg') { var valgte = presValg.slice(); presValg = []; return gjor({ handling: 'legg', kort: valgte }); }
     if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass', 'stokk', 'startklokke'].indexOf(g) !== -1) return gjor({ handling: g });
     if (['avslutt', 'nullstill', 'svart', 'avslor', 'runde', 'nytt-brett'].indexOf(g) !== -1) return gjor({ handling: g });
+  }
+  root.addEventListener('click', romKlikk);
+  // Arkene ligger utenfor rommet i dokumentet, men knappene i dem (stua, slurker, vertens knapper) gjør det samme
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest || root.contains(e.target) || !e.target.closest('.stua-ark, .mer-ark')) return;
+    if (e.target.closest('[data-g="figur-ark"]')) return figurArk();
+    if (e.target.closest('[data-g="rom-ark"]')) { if (erVert()) romArk(); return; }
+    romKlikk(e);
   });
 
   function nrSpilt() { var l = les('bd_nr_spilt'); return Array.isArray(l) ? l : []; }
