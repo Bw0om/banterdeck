@@ -1451,6 +1451,15 @@ export function startRom(LEKNAVN, LANG) {
         : T('Ryker ringen, drikker ', 'If the ring breaks, ') + esc(navn(s.turId)) + T(' opp glasset.', ' finishes their drink.')) + '</p>' +
       makkerHtml(s) + (erMobil() ? '' : rofMer(s));
   }
+  /** Bingo: hvor nærme de andre er. */
+  function bgAndre(s) {
+    var megId = tilstand.meg, andre = (s.andre || []).slice().sort(function (a, c) { return c.n - a.n; });
+    return '<p class="nr-etikett">' + T('Hvor nærme er de?', 'How close are they?') + '</p><ul class="bg-andre">' + andre.map(function (a) {
+      return '<li' + (a.id === megId ? ' class="meg"' : '') + '>' + nrHode(a.id, '', '') + '<b>' + jaNavn(a.id) + '</b><span class="bg-stripe"><i style="transform:scaleX(' + (a.n / 16) + ')"></i></span><b>' + a.n + '/16</b></li>';
+    }).join('') + '</ul>';
+  }
+  /** Det hver lek legger i «Mer» på mobil – det som ellers lå under spillet. */
+  var merEkstra = { 'ring-of-fire': function (s) { return rofMer(s); }, bingo: function (s) { return bgAndre(s); } };
   /** Vertens knapper i Ring of Fire. På mobil ligger de bak «Mer», så ringen får plassen. */
   function rofMer(s) {
     if (!erVert()) return '';
@@ -2444,10 +2453,7 @@ export function startRom(LEKNAVN, LANG) {
       ut += '<div class="hs-dom ' + (jegBingo ? 'rett' : 'feil') + ' inn"><b>' + (jegBingo ? T('Alle andre drikker opp', 'Everyone else finishes their drink') : 'Bingo ' + T('for ', 'for ') + esc(navn(vinner)) + T(' – drikk opp!', ' – finish your drink!')) + '</b></div>';
       return ut + lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye brett – teller i kvelden', 'New boards – counts tonight')]]);
     }
-    var andre = (s.andre || []).slice().sort(function (a, c) { return c.n - a.n; });
-    ut += '<p class="nr-etikett">' + T('Hvor nærme er de?', 'How close are they?') + '</p><ul class="bg-andre">' + andre.map(function (a) {
-      return '<li' + (a.id === meg ? ' class="meg"' : '') + '>' + nrHode(a.id, '', '') + '<b>' + jaNavn(a.id) + '</b><span class="bg-stripe"><i style="transform:scaleX(' + (a.n / 16) + ')"></i></span><b>' + a.n + '/16</b></li>';
-    }).join('') + '</ul>';
+    ut += erMobil() ? '' : bgAndre(s);   // på mobil ligger de andres brett bak «Mer», så ditt eget får plassen
     if (!m.some(Boolean)) ut += '<button class="bg-bytt" data-g="nytt-brett" type="button">' + T('Bytt brett', 'New board') + '</button>';
     return ut;
   }
@@ -4576,7 +4582,7 @@ export function startRom(LEKNAVN, LANG) {
     function fyll() {
       var s = tilstand.spill; if (!s) { lukkArk(); return; }
       kropp.innerHTML = slurkelinje() + reglerPanel(s).replace('<details class="rom-regler"', '<details class="rom-regler" open') +
-        (s.lek === 'ring-of-fire' ? rofMer(s) : '') + vertVerktoy(s) +
+        (merEkstra[s.lek] ? merEkstra[s.lek](s) : '') + vertVerktoy(s) +
         '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button> · <button type="button" class="feilknapp" data-feil>' + T('Noe galt?', 'Something wrong?') + '</button></p>';
     }
     fyll();

@@ -276,12 +276,23 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
 @media (max-width:899px){
   html.i-spill .rom-spillere,html.i-spill .rom-hk[data-g="hjul-aapne"],html.i-spill .rom-hk[data-g="qr"],html.i-spill .rom-hk[data-g="del"]{display:none}
   html.i-spill .rom-spill > .rom-regler,html.i-spill .rom-spill > .slurkelinje:not(:has(.sl-gi:not([disabled]))){display:none}
-  html.i-spill .rom-hoder{display:flex;gap:8px;overflow-x:auto;padding:8px 4px 10px;margin:4px -4px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  /* Leker med egen benk (hodene nederst som reiser seg, snur ryggen til, danser) viser alle der – da trengs ikke raden i toppen */
+  html.i-spill #rom:has(.ee-benk,.nr-benk,.en-benk) .rom-hoder{display:none}
+  html.i-spill .rom-hoder{display:flex;gap:6px;overflow-x:auto;padding:6px 4px 6px;margin:2px -4px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   html.i-spill .rom-hoder::-webkit-scrollbar{display:none}
-  .rh{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none;width:54px}
-  .rh .nr-h{width:40px;height:40px;transition:transform .18s var(--ease-out),box-shadow .18s var(--ease-out)}
-  .rh small{font-size:10.5px;font-weight:700;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
-  .rh.tur .nr-h{box-shadow:0 0 0 3px var(--gold),0 0 0 5px var(--ink2);transform:scale(1.12)}
+  html.i-spill .rom-pluss{display:none}
+  .rh{display:flex;flex-direction:column;align-items:center;gap:3px;flex:none;width:50px}
+  .rh .nr-h{width:36px;height:36px;transition:transform .18s var(--ease-out),box-shadow .18s var(--ease-out)}
+  .rh small{font-size:10px;font-weight:700;max-width:50px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+  .rh.tur .nr-h{box-shadow:0 0 0 3px var(--gold),0 0 0 5px var(--ink2);transform:scale(1.1)}
+  /* De enkle lekene som stakk litt under reaksjonslinja: litt strammere, så alt får plass */
+  html.i-spill .sk-flate{min-height:clamp(320px,calc(100dvh - 430px - env(safe-area-inset-top)),540px)}
+  html.i-spill .ms-valg{--kol:4;gap:8px}
+  html.i-spill .ms-hode{padding:8px 4px 6px}
+  html.i-spill .ms-hode .mv-hode{width:48px}
+  html.i-spill .ms-hode span{font-size:12.5px}
+  html.i-spill .ftd{gap:8px}
+  html.i-spill .vl-hjelp{margin-bottom:6px}
   .rh.tur small{color:var(--ink)}
   /* Spillet får minst én hel skjerm, så det lille som ligger under (bakgrunnsting) aldri dytter noe opp */
   html.i-spill .rom-spill{min-height:calc(100dvh - 280px - env(safe-area-inset-top) - env(safe-area-inset-bottom));justify-content:flex-start}
