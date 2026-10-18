@@ -1345,15 +1345,9 @@ function handlingInne(data: any, meg: any, h: any) {
       }
       melde(data, `${p.navn} ble fjernet`, `${p.navn} was removed`); return { ok: true };
     }
-    case 'slurk': {
-      // Poengtavla: alle kan føre sine egne slurker, verten kan rette på alle
-      const hvem = String(h.hvem || meg.id);
-      if (hvem !== meg.id && !erVert) return feilL('bare-vert', 'Bare verten kan endre andres slurker.', "Only the host can change other people's sips.");
-      const p = data.spillere.find((x: any) => x.id === hvem); if (!p) return { ok: true };
-      const n = Number(h.n) === -1 ? -1 : 1;
-      p.slurker = Math.max(0, Math.min(999, (p.slurker || 0) + n));
-      return { ok: true };
-    }
+    case 'slurk':
+      // Poengtavla kan ikke endres for hånd – lekene fører slurkene selv
+      return feilL('ugyldig', 'Poengtavla kan ikke endres.', 'The scoreboard can’t be edited.');
     case 'stua-tema': {
       // Verten velger hvordan stua ser ut. Pluss-temaene krever Pluss i rommet (julebordstua er gratis i desember).
       if (!erVert) return { feil: 'bare-vert' };

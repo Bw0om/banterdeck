@@ -925,3 +925,6 @@ html.is-app.i-rom:not(.i-spill) .rom-kode{font-size:28px!important;letter-spacin
 .rr-egen{display:grid;gap:6px;padding:0 12px 12px}
 .rr-egen input{min-height:42px}
 .rr-fot{margin:10px 0 0;color:var(--muted)}
+/* Nyhetsrunden i venterommet: velg uke før start */
+.rom-nr-uke{display:flex;flex-direction:column;gap:6px;margin:14px 0 12px}
+.rom-nr-uke select{min-height:48px;padding:10px 14px;border-radius:14px;border:2px solid var(--ink2);background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:16px}

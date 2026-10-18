@@ -1251,6 +1251,19 @@ export function startRom(LEKNAVN, LANG) {
         '<p>' + T('Venter på at ' + esc(navn(t.vert)) + ' starter når alle er med …', 'Waiting for ' + esc(navn(t.vert)) + ' to start once everyone\'s in …') + '</p>' + liste + romMerker() + '</div>';
     }
     var mod = l.moduser || [], valgtMod = mod.some(function (m) { return m.v === v.modus; }) || (l.type === 'nyhetsrunden' && /^\d{4}-\d{2}$/.test(v.modus || '')) ? v.modus : '';
+    // Nyhetsrunden: nyeste uke er valgt, men verten kan velge en eldre uke før start
+    if (l.type === 'nyhetsrunden' && mod.length > 1) {
+      var uke = mod.some(function (m) { return m.v === nrUke; }) ? nrUke : (valgtMod || mod[0].v);
+      var ukevalg = '<label class="rom-nr-uke"><span class="rom-etikett">' + T('Uke', 'Week') + '</span><select data-nr-uke>' + mod.map(function (m) { return '<option value="' + esc(m.v) + '"' + (m.v === uke ? ' selected' : '') + '>' + esc(m.t) + (nrSpilt().indexOf(m.v) !== -1 ? ' ✓' : '') + '</option>'; }).join('') + '</select></label>';
+      var nrStart = '<button class="rom-stor-knapp' + (erApp ? ' app-start' : '') + '" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(uke) + '" type="button">Start ' + esc(l.navn) + '</button>';
+      var annen = '<p><button class="linkbtn" data-g="velg-annen" type="button">' + T('Velg en annen lek', 'Pick another game') + '</button></p>';
+      if (erApp) return plassInfo() + appTopp(t.spillere.length) +
+        '<p class="rom-etikett">' + T('Dere skal spille', 'You’re playing') + '</p><h2 class="rom-h2" style="margin-top:0">' + esc(l.navn) + '</h2>' + (t.spillere.length > 1 ? liste : '') +
+        ukevalg + nrStart + annen;
+      return '<p class="rom-etikett">' + T('Dere skal spille', 'You\'re playing') + '</p><h2 class="rom-h2" style="margin-top:0">' + esc(l.navn) + '</h2>' +
+        plassInfo() + qrBoks() + romValg() + '<p class="rom-status">' + t.spillere.length + T(' med i rommet', ' in the room') + '</p>' + liste +
+        ukevalg + nrStart + annen;
+    }
     if (erApp) {
       // Appen: invitasjonen først, så én startknapp (alle varianter). Variantene ligger bak «Velg en annen lek» → «Mer».
       var modApp = valgtMod || (mod[0] && l.type === 'nyhetsrunden' ? mod[0].v : '*');
@@ -4824,15 +4837,13 @@ export function startRom(LEKNAVN, LANG) {
     return ut;
   }
   function tavleHtml() {
-    var l = rangert(), k = kaaring(), vert = erVert();
+    var l = rangert(), k = kaaring();
     return '<div class="rom-tavle-innhold" role="document"><div class="rom-tavle-topp"><h2>' + T('Poengtavla', 'The scoreboard') + '</h2><button class="linkbtn" data-t="lukk" type="button">' + T('Lukk', 'Close') + '</button></div>' +
-      '<p class="small">' + T('Mange leker fører slurkene selv. Før resten med + og −. ', 'Many games keep track of sips themselves. Log the rest with + and −. ') + (vert ? T('Som vert kan du rette på alle.', 'As the host you can fix anyone\'s score.') : T('Verten kan rette på alle.', 'The host can fix anyone\'s score.')) + T(' 🍺 er slurker du har vunnet og kan sende til andre.', ' 🍺 are sips you\'ve won and can send to others.') + '</p>' +
+      '<p class="small">' + T('Lekene fører slurkene selv. 🍺 er slurker du har vunnet og kan sende til andre.', 'The games keep track of sips themselves. 🍺 are sips you\'ve won and can send to others.') + '</p>' +
       '<ol class="rom-tavle-liste">' + l.map(function (p, i) {
-        var kan = vert || p.id === tilstand.meg;
         return '<li class="' + (p.id === tilstand.meg ? 'meg' : '') + '"><span class="rt-plass">' + (i + 1) + '</span><span class="rt-navn">' + esc(p.navn) + '</span>' +
-          (kan ? '<button type="button" data-t="minus" data-id="' + p.id + '" aria-label="' + T('Én slurk mindre for ', 'One sip less for ') + esc(p.navn) + '">−</button>' : '') +
           '<b class="rt-tall">' + (p.slurker || 0) + '</b>' + (p.gi ? '<span class="rt-gi" title="' + T('Slurker å dele ut', 'Sips to hand out') + '">🍺' + p.gi + '</span>' : '') +
-          (kan ? '<button type="button" data-t="pluss" data-id="' + p.id + '" aria-label="' + T('Én slurk til ', 'One more sip for ') + esc(p.navn) + '">+</button>' : '') + '</li>';
+          '</li>';
       }).join('') + '</ol>' +
       (k.length ? '<div class="rom-kaaring">' + k.map(function (x) { return '<div><span>' + x.ikon + '</span><small>' + esc(x.tittel) + '</small><b>' + esc(x.navn) + (x.n !== null ? ' · ' + x.n : '') + '</b></div>'; }).join('') + '</div>' : '') +
       '<div class="dl-knapper"><button class="btn gold" data-t="del" type="button">' + T('Del tavla som bilde', 'Share the board as an image') + '</button></div></div>';
@@ -4846,7 +4857,6 @@ export function startRom(LEKNAVN, LANG) {
       var b = e.target.closest('[data-t]'); if (!b) return;
       var t = b.dataset.t;
       if (t === 'lukk') return lukkTavle();
-      if (t === 'pluss' || t === 'minus') return gjorAlltid({ handling: 'slurk', hvem: b.dataset.id, n: t === 'pluss' ? 1 : -1 });
       if (t === 'del') return delTavle(b);
     });
     document.body.appendChild(tavle);
@@ -5426,7 +5436,9 @@ export function startRom(LEKNAVN, LANG) {
   });
 
   function nrSpilt() { var l = les('bd_nr_spilt'); return Array.isArray(l) ? l : []; }
+  var nrUke = '';
   root.addEventListener('change', function (e) {
+    if (e.target && e.target.dataset && 'nrUke' in e.target.dataset) { nrUke = e.target.value; var sk = root.querySelector('.rom-stor-knapp[data-lek="nyhetsrunden"]'); if (sk) sk.dataset.modus = nrUke; return; }
     if (e.target && e.target.dataset && 'nrArkiv' in e.target.dataset && e.target.value) return gjor({ handling: 'start', lek: 'nyhetsrunden', modus: e.target.value });
     if (e.target && e.target.id === 'romGjeng' && e.target.value) gjorAlltid({ handling: 'gjeng', gjengId: e.target.value });
   });
