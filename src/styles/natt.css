@@ -297,7 +297,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
   /* Spillet får minst én hel skjerm, så det lille som ligger under (bakgrunnsting) aldri dytter noe opp */
   html.i-spill .rom-spill{min-height:calc(100dvh - 280px - env(safe-area-inset-top) - env(safe-area-inset-bottom));justify-content:flex-start}
   /* Ring of Fire: ringen tar den høyden som er igjen, ikke mer */
-  html.i-spill .ring-boks{height:clamp(230px,calc(100dvh - 440px - env(safe-area-inset-top)),500px);width:auto;max-width:100%;aspect-ratio:358/500}
+  html.i-spill .ring-boks,html.i-spill[data-theme="dark"] .ring-boks{border:0;border-radius:0;background:transparent;box-shadow:none;
+    height:min(500px,calc(100dvh - 330px - env(safe-area-inset-top)));width:auto;max-width:100%;aspect-ratio:358/500}
   html.i-spill .ring-topp{margin-bottom:6px;width:100%}
   html.i-spill .ring-hint{margin-top:6px;font-size:13.5px}
 }

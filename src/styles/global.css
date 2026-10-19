@@ -2050,7 +2050,7 @@ html.is-app .app-tabbar .tl{white-space:nowrap}
 /* Skallet (iPhonens egen fanelinje, Skall.swift) tar over for fanelinja, logoknappen og vifta. Siden slutter der linja begynner,
    så bunnen trenger bare litt luft – under en lek er linja gjemt, og reaksjonslinja får plassen som før. */
 html.is-app.har-skall .app-tabbar,html.is-app.har-skall .app-hud,html.is-app.har-skall .app-vifte{display:none!important}
-html.is-app.har-skall:not(.i-spill):not(.bli-med) body{padding-bottom:16px!important}
+html.is-app.har-skall:not(.i-spill):not(.bli-med) body{padding-bottom:calc(env(safe-area-inset-bottom) + 16px)!important}
 /* Logoknappen: usynlig til du blar nedover */
 .app-hud{display:none}
 html.is-app .app-hud{display:block;position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);width:58px;height:58px;padding:0;border:0;background:transparent;z-index:72;

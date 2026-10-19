@@ -272,6 +272,8 @@ const isCurrent = (href: string) => {
       /* Huskes for resten av økta, så app-skallet blir med videre selv om adressen mister ?app=1 */
       try { if (app) sessionStorage.setItem('mv_app', '1'); else app = sessionStorage.getItem('mv_app') === '1'; } catch (e) {}
       if (app) h.classList.add('is-app', 'is-standalone');
+      // iPhonens egen fanelinje (ios/App/App/Skall.swift) finnes: nettsidens egen skal ikke vises i det hele tatt
+      try { if (app && c && c.isPluginAvailable && c.isPluginAvailable('Skall')) h.classList.add('har-skall'); } catch (e) {}
       /* Appen er norsk: roten i app-pakken (index.html = engelsk forside) sender rett til Hjem */
       if (app && /^\/(en\/?)?$/.test(location.pathname)) location.replace('/no/');
     })();

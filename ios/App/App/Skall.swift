@@ -3,79 +3,82 @@ import Capacitor
 
 /// Skallet: iPhonens egen fanelinje nederst (Hjem, Spill, Leker, Deg), med nettsiden i. Et trykk på en fane bytter side
 /// i nettvisningen, og nettsiden sier fra hvilken fane som er aktiv, og om linja skal gjemmes (under en lek).
-/// Linja er iPhonens egen UITabBar, så den ser og kjennes ut som i andre apper – også på iOS 26.
-final class SkallViewController: UIViewController, UITabBarDelegate {
+/// Linja er iPhonens egen (UITabBarController), så den ser og kjennes ut som i andre apper: på iOS 26 krymper den
+/// til en liten knapp når du blar nedover, og kommer tilbake når du blar opp.
+final class SkallViewController: UITabBarController, UITabBarControllerDelegate {
     static weak var delt: SkallViewController?
 
     let nett = MittvorsViewController()
-    let linje = UITabBar()
     private let faner = ["hjem", "spill", "leker", "deg"]
-    private var nettBunnTilLinje: NSLayoutConstraint!
-    private var nettBunnTilKant: NSLayoutConstraint!
     private(set) var skjult = false
     private var startfaneBrukt = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
         SkallViewController.delt = self
+        delegate = self
         view.backgroundColor = UIColor(red: 1, green: 0.973, blue: 0.933, alpha: 1)   // #FFF8EE
+        tabBar.tintColor = UIColor(red: 0.776, green: 0.235, blue: 0.067, alpha: 1)   // rust, som den aktive fanen på nettsiden
 
-        addChild(nett)
-        nett.view.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(nett.view)
-        nett.didMove(toParent: self)
-
-        linje.translatesAutoresizingMaskIntoConstraints = false
-        linje.delegate = self
-        linje.tintColor = UIColor(red: 0.776, green: 0.235, blue: 0.067, alpha: 1)   // rust, som den aktive fanen på nettsiden
+        // Fire tomme sider i fanelinja. Nettsiden (én og samme nettvisning) flyttes inn i den som er valgt.
         let symboler: [(String, String)] = [("house", "house.fill"), ("die.face.5", "die.face.5.fill"), ("wineglass", "wineglass.fill"), ("person", "person.fill")]
         let navn = ["Hjem", "Spill", "Leker", "Deg"]
-        linje.items = zip(symboler, navn).enumerated().map { (i, p) in
-            let el = UITabBarItem(title: p.1, image: UIImage(systemName: p.0.0), selectedImage: UIImage(systemName: p.0.1))
-            el.tag = i
-            return el
+        viewControllers = zip(symboler, navn).enumerated().map { (i, p) in
+            let vc = UIViewController()
+            vc.view.backgroundColor = view.backgroundColor
+            vc.tabBarItem = UITabBarItem(title: p.1, image: UIImage(systemName: p.0.0), selectedImage: UIImage(systemName: p.0.1))
+            vc.tabBarItem.tag = i
+            return vc
         }
-        linje.selectedItem = linje.items?.first
-        view.addSubview(linje)
-
-        nettBunnTilLinje = nett.view.bottomAnchor.constraint(equalTo: linje.topAnchor)
-        nettBunnTilKant = nett.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        NSLayoutConstraint.activate([
-            nett.view.topAnchor.constraint(equalTo: view.topAnchor),
-            nett.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            nett.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            nettBunnTilLinje,
-            linje.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            linje.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            linje.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        if #available(iOS 26.0, *) {
+            tabBarMinimizeBehavior = .onScrollDown   // linja krymper når du blar nedover
+        }
+        selectedIndex = 0
+        flyttNett(til: viewControllers![0])
     }
 
     override var childForStatusBarStyle: UIViewController? { nett }
 
+    /// Nettvisningen bor i den valgte fanen – samme side, samme tilstand, uansett hvilken fane som er trykket
+    private func flyttNett(til vc: UIViewController) {
+        guard nett.parent !== vc else { return }
+        if nett.parent != nil { nett.willMove(toParent: nil); nett.view.removeFromSuperview(); nett.removeFromParent() }
+        vc.addChild(nett)
+        nett.view.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.addSubview(nett.view)
+        NSLayoutConstraint.activate([
+            nett.view.topAnchor.constraint(equalTo: vc.view.topAnchor),
+            nett.view.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor),
+            nett.view.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor),
+            nett.view.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor)
+        ])
+        nett.didMove(toParent: vc)
+    }
+
     /// Fanen som er valgt, som id («hjem», «spill», «leker», «deg»)
-    var valgtFane: String { faner[linje.selectedItem?.tag ?? 0] }
+    var valgtFane: String { faner[min(selectedIndex, faner.count - 1)] }
 
     func velg(fane: String) {
-        guard let i = faner.firstIndex(of: fane), let el = linje.items?[i] else { return }
-        linje.selectedItem = el
+        guard let i = faner.firstIndex(of: fane), i != selectedIndex, let vc = viewControllers?[i] else { return }
+        selectedIndex = i
+        flyttNett(til: vc)
     }
 
     func sett(titler: [String: String]) {
-        for el in linje.items ?? [] { if let t = titler[faner[el.tag]], !t.isEmpty { el.title = t } }
+        for vc in viewControllers ?? [] { if let t = titler[faner[vc.tabBarItem.tag]], !t.isEmpty { vc.tabBarItem.title = t } }
     }
 
     /// Gjem linja under en lek (skjermen er lekens), vis den igjen etterpå
     func skjul(_ skal: Bool) {
         guard skal != skjult else { return }
         skjult = skal
-        view.layoutIfNeeded()
-        nettBunnTilLinje.isActive = !skal
-        nettBunnTilKant.isActive = skal
-        UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseOut]) {
-            self.linje.transform = skal ? CGAffineTransform(translationX: 0, y: self.linje.bounds.height + 40) : .identity
-            self.linje.alpha = skal ? 0 : 1
-            self.view.layoutIfNeeded()
+        if #available(iOS 18.0, *) {
+            setTabBarHidden(skal, animated: true)
+        } else {
+            UIView.animate(withDuration: 0.22) {
+                self.tabBar.transform = skal ? CGAffineTransform(translationX: 0, y: self.tabBar.bounds.height + 40) : .identity
+                self.tabBar.alpha = skal ? 0 : 1
+            }
         }
     }
 
@@ -91,14 +94,16 @@ final class SkallViewController: UIViewController, UITabBarDelegate {
         nett.webView?.evaluateJavaScript("window.__mvFane && window.__mvFane('\(fane)')", completionHandler: nil)
     }
 
-    // MARK: UITabBarDelegate
-    func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+    // MARK: UITabBarControllerDelegate
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         UISelectionFeedbackGenerator().selectionChanged()
-        gaaTil(fane: faner[item.tag])
+        flyttNett(til: viewController)
+        gaaTil(fane: faner[viewController.tabBarItem.tag])
+        return true
     }
 }
 
-/// Capacitor-plugin: nettsiden snakker med skallet. Skall.klar({titler}) → {ok, fane}; Skall.fane({navn}); Skall.skjul({skjult}).
+/// Capacitor-plugin: nettsiden snakker med skallet. Skall.klar({titler}) → {ok, fane, rull}; Skall.fane({navn}); Skall.skjul({skjult}).
 @objc(SkallPlugin)
 public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "SkallPlugin"
@@ -117,7 +122,8 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
                 for (k, v) in t { if let s = v as? String { titler[k] = s } }
                 s.sett(titler: titler)
             }
-            call.resolve(["ok": true, "fane": s.valgtFane])
+            // rull: simulator-sjekken ber nettsiden bla nedover, så bildet viser linja i krympet stand
+            call.resolve(["ok": true, "fane": s.valgtFane, "rull": ProcessInfo.processInfo.environment["MV_RULL"] == "1"])
             s.brukStartfane()
         }
     }

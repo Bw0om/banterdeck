@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches: ['swift/**']
-    paths: ['ios/**', 'src/klient/app.js', 'capacitor.config.json', '.github/workflows/ios-sjekk.yml']
+    paths: ['ios/**', 'src/**', 'capacitor.config.json', '.github/workflows/ios-sjekk.yml']
 
 jobs:
   sjekk:
@@ -75,6 +75,10 @@ jobs:
             sleep 12
             xcrun simctl io "$UDID" screenshot "skjermbilder/02-$f.png"
           done
+          xcrun simctl terminate "$UDID" no.mittvors.app || true
+          SIMCTL_CHILD_MV_FANE=leker SIMCTL_CHILD_MV_RULL=1 xcrun simctl launch "$UDID" no.mittvors.app
+          sleep 15
+          xcrun simctl io "$UDID" screenshot skjermbilder/03-leker-blatt.png
           xcrun simctl spawn "$UDID" log show --predicate 'process == "App"' --last 2m --style compact > skjermbilder/app-logg.txt 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         if: always()

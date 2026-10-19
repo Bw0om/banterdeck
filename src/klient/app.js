@@ -68,6 +68,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   window.__mvFane = (id) => { const r = FANER[id]; if (!r) return; const maal = engelsk() ? r[1] : r[0]; if (norm(location.pathname) !== norm(maal)) location.href = maal; };
   const fanenNaa = () => { const p = norm(location.pathname); for (const id in FANER) if (FANER[id].some((r) => norm(r) === p)) return id; return ''; };
   let harSkall = false, sistFane = '', sistSkjult = null;
+  if (Capacitor.isPluginAvailable('Skall')) h.classList.add('har-skall');
   const synkSkall = () => {
     if (!harSkall) return;
     const f = fanenNaa(); if (f && f !== sistFane) { sistFane = f; Skall.fane({ navn: f }).catch(() => {}); }
@@ -75,7 +76,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     if (skjul !== sistSkjult) { sistSkjult = skjul; Skall.skjul({ skjult: skjul }).catch(() => {}); }
   };
   Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' } })
-    .then(() => { harSkall = true; h.classList.add('har-skall'); synkSkall(); }).catch(() => {});
+    .then((r) => { harSkall = true; h.classList.add('har-skall'); synkSkall(); if (r && r.rull) setTimeout(() => window.scrollTo({ top: 700, behavior: 'smooth' }), 1500); }).catch(() => {});
   document.addEventListener('astro:page-load', synkSkall);
   new MutationObserver(synkSkall).observe(h, { attributes: true, attributeFilter: ['class'] });
 
