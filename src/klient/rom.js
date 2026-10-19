@@ -966,7 +966,9 @@ export function startRom(LEKNAVN, LANG) {
       var laast = l.pluss && !t.pluss;
       var lekId = l.id === 'pekeleken' && pkMobil ? 'mest' : l.id;
       var mod = l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*';
-      return '<button type="button" class="app-lek' + (laast ? ' laast' : '') + '" data-g="start" data-lek="' + esc(lekId) + '" data-modus="' + esc(mod) + '">' + klistremerke(l.id, 'app-lek-merke') +
+      // Nyhetsrunden: velg uke først. Ring of Fire: kortreglene kan endres før start. Resten starter med ett trykk.
+      var g = laast ? 'start' : l.type === 'nyhetsrunden' ? 'app-uke' : l.id === 'ring-of-fire' ? 'app-rof' : 'start';
+      return '<button type="button" class="app-lek' + (laast ? ' laast' : '') + '" data-g="' + g + '" data-lek="' + esc(lekId) + '" data-modus="' + esc(mod) + '">' + klistremerke(l.id, 'app-lek-merke') +
         '<span><b>' + esc(l.navn) + '</b><small>' + esc(l.om || '') + '</small></span><i aria-hidden="true">' + (laast ? '🔒' : '▶') + '</i></button>';
     }
     function senereRad(l) {
@@ -1453,7 +1455,7 @@ export function startRom(LEKNAVN, LANG) {
     var visKort = k && rofSkjult !== s.nr && !holder;   // kortet ligger over ringen til neste trekk begynner (eller du legger det bort)
     return '<div class="ring-topp"><div class="ring-tur' + (min ? ' min' : '') + '"><span>Ring of Fire</span><b>' + (s.ferdig ? T('Siste kort', 'Last card') : min ? T('Din tur', 'Your turn') : esc(navn(s.turId)) + T(' trekker', ' draws')) + '</b></div>' +
       '<div class="ring-merker"><span>' + igjen + T(' igjen', ' left') + '</span><span class="rosa">' + T('Konger', 'Kings') + ' ' + konger + '/4</span></div></div>' +
-      '<div class="ring-boks' + (min ? ' aktiv' : '') + '" data-nr="' + s.nr + '">' +
+      '<div class="ring-boks' + (min ? ' aktiv' : '') + (s.ringBrutt ? ' fri' : '') + '" data-nr="' + s.nr + '">' +
         '<svg class="ring-svg" viewBox="0 0 358 500" role="img" aria-label="' + T('Ringen av kort rundt kongekoppen', 'The ring of cards around the king’s cup') + '">' +
           (visSpor ? '<path class="ring-spor-bred" d="' + ROF_D + '" stroke-width="' + Math.min(80, halv * 2) + '" stroke="' + rofFarge(sp) + '"/><path class="ring-spor" d="' + ROF_D + '"/>' : '') +
           (min && !s.ringBrutt ? '<g class="ring-slot"><rect x="153" y="22" width="52" height="34" rx="4"/><text x="179" y="44">' + T('UT HER', 'OUT HERE') + '</text></g>' : '') +
@@ -1468,7 +1470,8 @@ export function startRom(LEKNAVN, LANG) {
           '<button class="btn gold" data-g="rof-lukk" type="button">' + (min ? T('Greit – din tur', 'Got it – your turn') : T('Greit', 'Got it')) + '</button>' +
           (!min && s.turId && !s.ferdig ? '<p class="ring-neste">' + T('Neste: ', 'Next: ') + esc(navn(s.turId)) + '</p>' : '') + '</div>' : '') +
       '</div>' +
-      '<p class="ring-hint">' + (s.ringBrutt ? '💥 ' + T('Ringen er brutt av ', 'The ring was broken by ') + esc((s.brudd && s.brudd.navn) || '') + T('. Nå kan den ikke ryke igjen – bare trekk.', '. It can’t break again – just draw.')
+      '<p class="ring-hint">' + (s.ringBrutt ? (min ? '💥 ' + T('Ringen er brutt. Trykk på ringen – den snurrer og velger kortet for deg.', 'The ring is broken. Tap the ring – it spins and picks the card for you.')
+          : holder ? esc(navn(holder.hvem)) + T(' snurrer ringen …', ' is spinning the ring …') : '💥 ' + T('Ringen er brutt av ', 'The ring was broken by ') + esc((s.brudd && s.brudd.navn) || '') + T('. Nå snurrer ringen og velger kortet.', '. The ring now spins and picks the card.'))
         : min ? T('Snurr ringen. Hold på det gule kortet og følg sporet ut – stø hånd.', 'Spin the ring. Hold the yellow card and follow the lane out – steady hand.')
         : holder ? esc(navn(holder.hvem)) + T(' drar … ryker ringen, drikker de opp.', ' is pulling … if the ring breaks, they finish their drink.')
         : T('Ryker ringen, drikker ', 'If the ring breaks, ') + esc(navn(s.turId)) + T(' opp glasset.', ' finishes their drink.')) + '</p>' +
@@ -1518,11 +1521,37 @@ export function startRom(LEKNAVN, LANG) {
     if (!tving && naa - rofSendt < 400) return;
     rofSendt = naa; gjorAlltid({ handling: 'rof-holder', t: Math.round(d.t * 100) / 100, sp: Math.round(d.sp * 100) / 100, nr: d.nr });
   }
+  /* Ringen er brutt: ett trykk, så snurrer ringen av seg selv (to–fire runder), bremser og stopper på et kort. Det kortet trekkes. */
+  var rofFri = null;
+  function rofFriStart(boks, svg, s) {
+    if (rofFri) return;
+    rofFri = { boks: boks, svg: svg, nr: s.nr, fra: rofA, lengde: 720 + Math.random() * 720, t0: performance.now(), varighet: 2400 + Math.random() * 600 };
+    rofDrar = { type: 'fri' };   // ringen skal ikke tegnes på nytt midt i snurringen
+    spillLyd('grip');
+    gjorAlltid({ handling: 'rof-holder', t: 0.01, sp: 0, nr: s.nr });   // de andre ser at det snurres
+    requestAnimationFrame(rofFriSteg);
+  }
+  function rofFriSteg(naa) {
+    var d = rofFri; if (!d) return;
+    if (!tilstand || !tilstand.spill || tilstand.spill.nr !== d.nr || !d.svg.isConnected) { rofFri = null; rofFerdig(false); return; }
+    var x = Math.min(1, (naa - d.t0) / d.varighet), e = 1 - Math.pow(1 - x, 3);
+    rofA = d.fra + d.lengde * e;
+    d.svg.querySelector('.ring-rotor').setAttribute('transform', 'rotate(' + rofA + ' ' + ROF_CX + ' ' + ROF_CY + ')');
+    rofOppdaterValgt(d.boks);
+    if (x < 1) return requestAnimationFrame(rofFriSteg);
+    // Stopp: lås ringen med det øverste kortet rett opp, og trekk det
+    var s = tilstand.spill, p = rofTopp(s.tatt || []);
+    if (p >= 0) rofA = rofA + rofNorm(-(p * ROF_STEG + rofA));
+    var rotor = d.svg.querySelector('.ring-rotor'); rotor.classList.add('laas'); rotor.setAttribute('transform', 'rotate(' + rofA + ' ' + ROF_CX + ' ' + ROF_CY + ')');
+    rofFri = null; rofDrar = null;
+    if (p >= 0) setTimeout(function () { if (tilstand && tilstand.spill && tilstand.spill.nr === d.nr) rofTrekk({ boks: d.boks, svg: d.svg, p: p, nr: d.nr }, false); }, 350);
+  }
   document.addEventListener('pointerdown', function (e) {
     var boks = e.target.closest && e.target.closest('.ring-boks.aktiv'); if (!boks || !tilstand || !tilstand.spill || !tilstand.spill.ring) return;
     if (e.target.closest('.ring-over')) return;
     e.preventDefault();
     var svg = boks.querySelector('.ring-svg'), s = tilstand.spill, p = rofPunkt(svg, e), n = rofNaermest(p[0], p[1]);
+    if (s.ringBrutt) { rofFriStart(boks, svg, s); return; }
     try { boks.setPointerCapture(e.pointerId); } catch (x) {}
     var kortEl = e.target.closest('.ring-k.valgt') || (n[0] < 0.12 && n[1] < 34 ? boks.querySelector('.ring-k.valgt') : null);
     if (kortEl) {
@@ -1536,7 +1565,7 @@ export function startRom(LEKNAVN, LANG) {
     }
   });
   window.addEventListener('pointermove', function (e) {
-    var d = rofDrar; if (!d) return;
+    var d = rofDrar; if (!d || d.type === 'fri') return;
     if (e.cancelable) e.preventDefault();
     if (d.type === 'snurr') {
       rofA = d.a0 + rofNorm(rofVinkel(d.svg, e) - d.v0);
@@ -1560,7 +1589,7 @@ export function startRom(LEKNAVN, LANG) {
     rofMeld(d, naa, false);
   });
   function rofSlipp() {
-    var d = rofDrar; if (!d) return;
+    var d = rofDrar; if (!d || d.type === 'fri') return;
     if (d.type === 'snurr') {
       // Lås ringen slik at det valgte kortet står rett øverst
       var s = tilstand.spill, p = rofTopp(s.tatt || []);
@@ -4597,6 +4626,25 @@ export function startRom(LEKNAVN, LANG) {
     aapentArk = { el: m, stua: true, oppdater: function () {} };
     tegnStua(tilstand.spill);
   }
+  /** Appen, før start: Nyhetsrunden – hvilken uke? Nyeste øverst, spilte uker er merket. */
+  function ukeArk() {
+    lukkArk();
+    var l = (tilstand.leker || []).find(function (x) { return x.type === 'nyhetsrunden'; }); if (!l) return;
+    var m = lagArk('uke-ark', l.navn), kropp = m.querySelector('.ark-kropp'), spilt = nrSpilt();
+    kropp.innerHTML = '<p class="small">' + T('Velg uke. Nyeste først.', 'Pick a week. Newest first.') + '</p><div class="uke-liste">' + (l.moduser || []).map(function (mo) {
+      return '<button type="button" class="btn' + (spilt.indexOf(mo.v) !== -1 ? ' ghost' : ' gold') + '" data-g="start" data-lek="' + l.id + '" data-modus="' + esc(mo.v) + '">' + esc(mo.t) + (spilt.indexOf(mo.v) !== -1 ? ' ✓' : '') + '</button>';
+    }).join('') + '</div>';
+    aapentArk = { el: m, oppdater: function () {} };
+  }
+  /** Appen, før start: Ring of Fire – start, eller se og endre kortreglene først. */
+  function rofStartArk() {
+    lukkArk();
+    var m = lagArk('rof-start-ark', 'Ring of Fire'), kropp = m.querySelector('.ark-kropp');
+    kropp.innerHTML = '<p class="small">' + T('Standardreglene ligger på kortene. Verten kan bytte regel på hvert kort, også underveis (under «Mer»).', 'The standard rules are on the cards. The host can swap the rule on any card, also mid-game (under “More”).') + '</p>' +
+      '<div class="dl-knapper"><button type="button" class="btn gold" data-g="start" data-lek="ring-of-fire" data-modus="*">Start Ring of Fire</button>' +
+      '<button type="button" class="btn ghost" data-g="rof-regler">🃏 ' + T('Kortregler', 'Card rules') + (tilstand.rofRegler ? ' · ' + Object.keys(tilstand.rofRegler).length : '') + '</button></div>';
+    aapentArk = { el: m, oppdater: function () {} };
+  }
   /** «Mer» under leken: slurkene dine, reglene, lekens egne valg og vertens knapper – alt som ellers lå under spillet. */
   function merArk() {
     lukkArk();
@@ -5314,6 +5362,8 @@ export function startRom(LEKNAVN, LANG) {
     var g = b.dataset.g;
     if (g === 'stua-ark') return stuaArk();
     if (g === 'mer-ark') return merArk();
+    if (g === 'app-uke') return ukeArk();
+    if (g === 'app-rof') return rofStartArk();
     if (b.classList.contains('rom-stor-knapp') && Date.now() < sperreTil) return;
     var farlig = farligTekst(g, b);
     if (farlig && !bekreftet(b, farlig)) return;
@@ -5525,9 +5575,10 @@ export function startRom(LEKNAVN, LANG) {
   root.addEventListener('click', romKlikk);
   // Arkene ligger utenfor rommet i dokumentet, men knappene i dem (stua, slurker, vertens knapper) gjør det samme
   document.addEventListener('click', function (e) {
-    if (!e.target.closest || root.contains(e.target) || !e.target.closest('.stua-ark, .mer-ark')) return;
+    if (!e.target.closest || root.contains(e.target) || !e.target.closest('.stua-ark, .mer-ark, .uke-ark, .rof-start-ark')) return;
     if (e.target.closest('[data-g="figur-ark"]')) return figurArk();
     if (e.target.closest('[data-g="rom-ark"]')) { if (erVert()) romArk(); return; }
+    if (e.target.closest('[data-g="start"]')) lukkArk();   // leken starter: arket skal bort
     romKlikk(e);
   });
 
