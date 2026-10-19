@@ -1,0 +1,75 @@
+{
+  "temaer": [
+    { "id": "mat", "navn": "Mat og drikke", "en": "Food & drink", "par": [
+      ["Pizza", "Taco"], ["Kaffe", "Te"], ["Øl", "Cider"], ["Vaffel", "Pannekake"], ["Brunost", "Gulost"], ["Kebab", "Burger"], ["Sushi", "Fiskekake"], ["Grandiosa", "Hjemmelaget pizza"],
+      ["Rødvin", "Hvitvin"], ["Cola", "Pepsi"], ["Pølse", "Hamburger"], ["Lefse", "Lompe"], ["Smultring", "Berlinerbolle"], ["Is", "Sorbet"], ["Jordbær", "Bringebær"], ["Sjokolade", "Lakris"],
+      ["Potetgull", "Popcorn"], ["Fårikål", "Pinnekjøtt"], ["Laks", "Torsk"], ["Ketchup", "Sennep"], ["Melk", "Juice"], ["Eple", "Pære"], ["Banan", "Appelsin"], ["Pasta", "Ris"],
+      ["Kvikk Lunsj", "Stratos"], ["Smash", "Non Stop"], ["Freia melkesjokolade", "Daim"], ["Tacosaus", "Salsa"], ["Rømme", "Crème fraîche"], ["Brus", "Saft"], ["Shot", "Drink"], ["Vodka", "Gin"],
+      ["Aquavit", "Whisky"], ["Champagne", "Prosecco"], ["Risgrøt", "Havregrøt"], ["Boller", "Skolebrød"], ["Kanelsnurr", "Croissant"], ["Egg", "Bacon"], ["Nudler", "Spagetti"], ["Kylling", "Kalkun"],
+      ["Reker", "Krabbe"], ["Gulrot", "Agurk"], ["Tomat", "Paprika"], ["Løk", "Hvitløk"], ["Peanøtter", "Cashewnøtter"], ["Energidrikk", "Kaffe latte"], ["Hvetebrød", "Knekkebrød"], ["Makrell i tomat", "Leverpostei"],
+      ["Caviar", "Majones"], ["Kakao", "Varm sjokolade"], ["Grillpølse", "Wienerpølse"], ["Fish and chips", "Fiskegrateng"], ["Softis", "Kuleis"], ["Kjøttkaker", "Kjøttboller"], ["Rundstykke", "Baguett"], ["Muffins", "Cupcake"]
+    ]},
+    { "id": "kjendis", "navn": "Kjendiser", "en": "Celebrities", "par": [
+      ["Erling Braut Haaland", "Martin Ødegaard"], ["Kygo", "Alan Walker"], ["Petter Northug", "Johannes Høsflot Klæbo"], ["Taylor Swift", "Ariana Grande"], ["Elon Musk", "Jeff Bezos"], ["Beyoncé", "Rihanna"], ["Tom Cruise", "Brad Pitt"], ["Zlatan", "Ronaldo"],
+      ["Else Kåss Furuseth", "Ingrid Gjessing Linhave"], ["Herman Flesvig", "Nicolay Ramm"], ["Petter Stordalen", "Kjell Inge Røkke"], ["Jonas Gahr Støre", "Erna Solberg"], ["Kronprins Haakon", "Märtha Louise"], ["Sophie Elise", "Linni Meister"], ["Magnus Carlsen", "Casper Ruud"], ["Therese Johaug", "Marit Bjørgen"],
+      ["Kim Kardashian", "Kylie Jenner"], ["Donald Trump", "Joe Biden"], ["Harry Styles", "Justin Bieber"], ["Adele", "Billie Eilish"], ["Leonardo DiCaprio", "Johnny Depp"], ["Oprah", "Ellen DeGeneres"], ["Gordon Ramsay", "Jamie Oliver"], ["Greta Thunberg", "Malala"],
+      ["Atle Antonsen", "Harald Eia"], ["Bård Tufte Johansen", "Thomas Giertsen"], ["Jan Thomas", "Vegard Harm"], ["Aksel Hennie", "Kristofer Hivju"], ["Sigrid", "Astrid S"], ["Karpe", "Cezinando"], ["Tix", "Alexander Rybak"], ["Dagfinn Lyngbø", "Jon Niklas Rønning"],
+      ["Fredrik Skavlan", "Anne Lindmo"], ["Dorthe Skappel", "Jenny Skavlan"], ["Ari Behn", "Durek Verrett"], ["Carl I. Hagen", "Sylvi Listhaug"], ["Trygve Slagsvold Vedum", "Jonas Gahr Støre"], ["Ole Gunnar Solskjær", "Erik ten Hag"], ["Viktor Hovland", "Tiger Woods"], ["Karsten Warholm", "Jakob Ingebrigtsen"],
+      ["Snoop Dogg", "Eminem"], ["Lady Gaga", "Madonna"], ["Dwayne Johnson", "Vin Diesel"], ["Keanu Reeves", "Nicolas Cage"], ["Jennifer Aniston", "Courteney Cox"], ["Will Smith", "Chris Rock"], ["Ryan Reynolds", "Hugh Jackman"], ["Zendaya", "Tom Holland"],
+      ["Mr. Beast", "PewDiePie"], ["Pave Frans", "Dalai Lama"], ["Mark Zuckerberg", "Bill Gates"], ["Dronning Elizabeth", "Kong Harald"], ["Pamela Anderson", "Paris Hilton"], ["Morten Harket", "Kurt Nilsen"], ["Odd Nordstoga", "Åge Aleksandersen"], ["Mia Gundersen", "Dorthe Skappel"]
+    ]},
+    { "id": "ting", "navn": "Ting", "en": "Things", "par": [
+      ["Tannbørste", "Tanntråd"], ["Sofa", "Lenestol"], ["Mobiltelefon", "Nettbrett"], ["Paraply", "Regnjakke"], ["Ski", "Snowboard"], ["Toalettpapir", "Tørkerull"], ["Vaffeljern", "Brødrister"], ["Ostehøvel", "Kniv"],
+      ["Flaskeåpner", "Korketrekker"], ["Lommelykt", "Lighter"], ["Trampoline", "Huske"], ["Solbriller", "Lesebriller"], ["Bunad", "Dress"], ["Mikrobølgeovn", "Stekeovn"], ["Sovepose", "Dyne"], ["Sparkesykkel", "Sykkel"],
+      ["Selfiestang", "Stativ"], ["Snus", "Sigarett"], ["Pant", "Søppel"], ["Hodetelefoner", "Høyttaler"], ["Bil", "Buss"], ["Fly", "Helikopter"], ["Båt", "Kano"], ["Telt", "Hytte"],
+      ["Bok", "Blad"], ["TV", "Kino"], ["PlayStation", "Xbox"], ["Nøkkel", "Kodelås"], ["Lommebok", "Veske"], ["Klokke", "Armbånd"], ["Ring", "Halskjede"], ["Caps", "Lue"],
+      ["Joggesko", "Sandaler"], ["Genser", "Jakke"], ["Olabukse", "Joggebukse"], ["Badebukse", "Bikini"], ["Såpe", "Sjampo"], ["Håndkle", "Badekåpe"], ["Speil", "Kamera"], ["Stol", "Krakk"],
+      ["Seng", "Hengekøye"], ["Pute", "Teppe"], ["Gardin", "Persienne"], ["Lampe", "Stearinlys"], ["Pose", "Eske"], ["Gave", "Blomst"], ["Kortstokk", "Terning"], ["Fotball", "Håndball"],
+      ["Tennisracket", "Badmintonracket"], ["Fiskestang", "Garn"], ["Grill", "Bålpanne"], ["Hengelås", "Dørklokke"], ["Robotstøvsuger", "Kost"], ["Oppvaskmaskin", "Vaskemaskin"], ["Kaffetrakter", "Espressomaskin"], ["Elbil", "Dieselbil"]
+    ]},
+    { "id": "steder", "navn": "Steder", "en": "Places", "par": [
+      ["Hytta på fjellet", "Hytta ved sjøen"], ["Kino", "Teater"], ["Stranda", "Svømmehallen"], ["Flyplassen", "Togstasjonen"], ["Skolen", "Universitetet"], ["Sykehuset", "Tannlegen"], ["Fengselet", "Politistasjonen"], ["Nachspiel", "Vorspiel"],
+      ["Nattklubben", "Puben"], ["Ikea", "Jysk"], ["Rema 1000", "Kiwi"], ["Vinmonopolet", "Taxfree"], ["Treningssenteret", "Fotballbanen"], ["Kirken", "Bryllupet"], ["Begravelsen", "Konfirmasjonen"], ["Julebordet", "Sommerfesten"],
+      ["Oslo", "Bergen"], ["Trondheim", "Stavanger"], ["Syden", "Afterski"], ["Paris", "Roma"], ["London", "New York"], ["Dyreparken i Kristiansand", "Tusenfryd"], ["Bussen", "Trikken"], ["Taxi", "Uber"],
+      ["Legevakta", "Apoteket"], ["Frisøren", "Tatovøren"], ["Biblioteket", "Bokhandelen"], ["Restaurant", "Kantina"], ["McDonald's", "Burger King"], ["Hotellet", "Campingplassen"], ["Badstua", "Boblebadet"], ["Fjellturen", "Skituren"],
+      ["17. mai-toget", "Russetreffet"], ["Bursdagsfesten", "Utdrikningslaget"], ["Jobbintervjuet", "Eksamen"], ["Første date", "Bryllupsnatta"], ["Tannlegestolen", "Frisørstolen"], ["Heisen", "Trappa"], ["Garasjen", "Kjelleren"], ["Badet", "Kjøkkenet"],
+      ["Soverommet", "Stua"], ["Balkongen", "Hagen"], ["Parkeringshuset", "Bensinstasjonen"], ["Båthavna", "Fiskebrygga"], ["Skibakken", "Skøytebanen"], ["Konserten", "Festivalen"], ["Stadion", "Ishallen"], ["Hjemme hos eksen", "Hjemme hos svigers"],
+      ["Legekontoret", "Psykologen"], ["Nordpolen", "Sydpolen"], ["Månen", "Mars"], ["Elgjakta", "Fisketuren"], ["Lekeland", "Badeland"], ["Barnehagen", "SFO"], ["Kontoret", "Hjemmekontoret"], ["Toalettkøen", "Barkøen"]
+    ]},
+    { "id": "dyr", "navn": "Dyr", "en": "Animals", "par": [
+      ["Katt", "Hund"], ["Elg", "Hjort"], ["Pingvin", "Isbjørn"], ["Delfin", "Hai"], ["Ørn", "Måke"], ["Skilpadde", "Snegle"], ["Laks", "Torsk"], ["Sjiraff", "Elefant"],
+      ["Humle", "Veps"], ["Sau", "Geit"], ["Reinsdyr", "Hest"], ["Dovendyr", "Koala"], ["Flaggermus", "Ugle"], ["Ku", "Okse"], ["Hummer", "Krabbe"], ["Kenguru", "Hare"],
+      ["Mygg", "Flue"], ["Ulv", "Rev"], ["Pytonslange", "Hoggorm"], ["Hamster", "Marsvin"], ["Flodhest", "Neshorn"], ["Papegøye", "Kanarifugl"], ["Gullfisk", "Guppy"], ["Alpakka", "Lama"],
+      ["Krokodille", "Øgle"], ["Lemen", "Mus"], ["Gris", "Villsvin"], ["Løve", "Tiger"], ["Ape", "Gorilla"], ["Bjørn", "Panda"], ["Hval", "Sel"], ["Ekorn", "Mår"],
+      ["Rotte", "Pinnsvin"], ["Kylling", "And"], ["Svane", "Gås"], ["Kråke", "Skjære"], ["Spurv", "Rødstrupe"], ["Edderkopp", "Skorpion"], ["Maur", "Bille"], ["Sommerfugl", "Møll"],
+      ["Frosk", "Padde"], ["Blekksprut", "Manet"], ["Sjøstjerne", "Krabbe"], ["Esel", "Muldyr"], ["Kamel", "Dromedar"], ["Sebra", "Hest"], ["Flamingo", "Stork"], ["Pelikan", "Lundefugl"],
+      ["Jerv", "Gaupe"], ["Oter", "Bever"], ["Moskus", "Bison"], ["Chihuahua", "Grand danois"], ["Golden retriever", "Labrador"], ["Siameser", "Perser"], ["Kanin", "Hare"], ["Fjellrev", "Rødrev"]
+    ]},
+    { "id": "film", "navn": "Film og serier", "en": "Film & TV", "par": [
+      ["Harry Potter", "Ringenes herre"], ["Star Wars", "Star Trek"], ["Friends", "How I Met Your Mother"], ["Skam", "Exit"], ["Game of Thrones", "Vikings"], ["Frost", "Vaiana"], ["Shrek", "Istid"], ["Titanic", "The Notebook"],
+      ["Paradise Hotel", "Ex on the Beach"], ["Farmen", "71 grader nord"], ["Mesternes mester", "Kompani Lauritzen"], ["Idol", "The Voice"], ["Melodi Grand Prix", "Eurovision"], ["Stranger Things", "Dark"], ["Breaking Bad", "Better Call Saul"], ["The Office", "Parks and Recreation"],
+      ["James Bond", "Mission Impossible"], ["Fast & Furious", "Transformers"], ["Marvel", "DC"], ["Batman", "Superman"], ["Spider-Man", "Iron Man"], ["Joker", "Harley Quinn"], ["Barbie", "Oppenheimer"], ["Toy Story", "Finding Nemo"],
+      ["Olsenbanden", "Flåklypa"], ["Elling", "Kongen av Bastøy"], ["Bølgen", "Skjelvet"], ["Kon-Tiki", "Max Manus"], ["Side om side", "Nytt på nytt"], ["Senkveld", "Lindmo"], ["Dagsrevyen", "God morgen Norge"], ["Luksusfellen", "Sinnasnekker’n"],
+      ["The Simpsons", "Family Guy"], ["South Park", "Rick and Morty"], ["Squid Game", "Alice in Borderland"], ["Wednesday", "Addams Family"], ["Bridgerton", "Downton Abbey"], ["The Crown", "The Queen"], ["Grey’s Anatomy", "House"], ["Sex and the City", "Gossip Girl"],
+      ["Love Island", "Bachelor"], ["Hotel Cæsar", "Hjem"], ["Lilyhammer", "Mammon"], ["Beforeigners", "Ragnarok"], ["Pirates of the Caribbean", "Hook"], ["Jurassic Park", "King Kong"], ["Avatar", "Dune"], ["Gladiator", "Troja"],
+      ["Home Alone", "Elf"], ["Love Actually", "Notting Hill"], ["Dirty Dancing", "Grease"], ["Mamma Mia", "La La Land"], ["Pulp Fiction", "Kill Bill"], ["Inception", "Interstellar"], ["Top Gun", "Rocky"], ["Ocean’s Eleven", "Casino Royale"]
+    ]},
+    { "id": "droyt", "navn": "Drøyt (18+)", "en": "Edgy (18+)", "par": [
+      ["Fyllesyk søndag", "Hangover på julebordet"], ["Eksen", "Tinder-daten"], ["Nach", "Vors"], ["Angrepillen", "Kondom"], ["One night stand", "Kjæreste"], ["Fylleringing", "Fyllemelding"], ["Blackout", "Promille"], ["Shot", "Boblebad"],
+      ["Russetida", "Fadderuka"], ["Strippeklubb", "Nattklubb"], ["Pornhub", "Netflix"], ["Onenightstand-kebaben", "Frokosten dagen derpå"], ["Tissepause i buskene", "Toalettkø på byen"], ["Sjekkereplikk", "Tørr kompliment"], ["Fyllekyss", "Fyllekrangel"], ["Nachspiel-kebab", "Nattmat"],
+      ["Spy i taxi", "Spy i hagen"], ["Vipps-krangel", "Delt regning"], ["Snapchat-streak med eksen", "Følger eksen på Insta"], ["Fylleangst", "Søndagsangst"], ["Dansegulvet", "Baren"], ["Bakfull på jobb", "Bakfull på eksamen"], ["Skinkerull", "Fylleskade"], ["Walk of shame", "Taxi hjem klokka fire"],
+      ["Den fulle onkelen", "Den fulle sjefen"], ["Ekskjæresten dukker opp", "Eksen har ny kjæreste"], ["Nachspiel på kjøkkenet", "Nachspiel på badet"], ["Sovne på do", "Sovne på vorset"], ["Jägerbomb", "Fisk-shot"], ["Fyllepizza", "Fyllekebab"], ["Hangover-fis", "Fyllehikke"], ["Bankende hodepine", "Tørr i munnen"],
+      ["Tinder", "Hinge"], ["Grindr", "Bumble"], ["Sexy dans", "Pinlig dans"], ["Skinny dipping", "Badstue uten klær"], ["Russekort med drøy regel", "Fylleregel"], ["Kyssedans", "Flaskeleken"], ["Sannhet", "Konsekvens"], ["Strip poker", "Vanlig poker"],
+      ["Hjemme hos en fremmed", "Hjemme hos eksen"], ["Fylleprat med taxisjåfør", "Fylleprat med dørvakt"], ["Mistet lommeboka", "Mistet mobilen"], ["Angre-tatovering", "Angre-piercing"], ["Vorsgjengens drøyeste", "Vorsgjengens snilleste"], ["Beer pong", "Flip cup"], ["Lambo", "Shot-rekke"], ["Nach-DJ", "Han som bare vil hjem"]
+    ]},
+    { "id": "norsk", "navn": "Typisk norsk", "en": "Typically Norwegian", "par": [
+      ["Brunost", "Kaviar"], ["Bunad", "Allværsjakke"], ["17. mai", "Julaften"], ["Hytte", "Telt"], ["Søndagstur", "Fjelltur"], ["Kvikk Lunsj", "Appelsin i bakken"], ["Taco-fredag", "Lørdagsgodt"], ["Vinmonopolet", "Taxfree"],
+      ["Ski", "Skøyter"], ["Dugnad", "Loppemarked"], ["Vaffel", "Lefse"], ["Fårikål", "Pinnekjøtt"], ["Nordlys", "Midnattssol"], ["Oljefondet", "Statsbudsjettet"], ["Elbil", "Bompenger"], ["Harry-handel", "Svenskehandel"],
+      ["Grandiosa", "Fredagstaco"], ["Kong Harald", "Kronprins Haakon"], ["Hurtigruten", "Fløibanen"], ["Fjord", "Fjell"], ["Snus", "Pant"], ["Matpakke", "Kantine"], ["Russ", "Konfirmant"], ["Koselig", "Hyggelig"],
+      ["Påskekrim", "Julekalender"], ["Smågodt", "Lørdagspizza"], ["Bergen i regn", "Oslo i sol"], ["Sydenferie", "Hytteferie"], ["Vorspiel", "Nachspiel"], ["Ribbe", "Pinnekjøtt"], ["Akevitt", "Juleøl"], ["Melkesjokolade", "Kvikk Lunsj"],
+      ["Lusekofte", "Marius-genser"], ["Fiskeboller", "Kjøttkaker"], ["Lutefisk", "Rakfisk"], ["Smalahove", "Fårikål"], ["NRK", "TV 2"], ["Vipps", "BankID"], ["Finn.no", "Tise"], ["Rema 1000", "Kiwi"],
+      ["Kaffe på termos", "Kakao på termos"], ["Tur i marka", "Tur på kjøpesenteret"], ["Ikke-nordmann på ski", "Nordmann på ski"], ["Bursdag med pølser", "Barnebursdag med pizza"], ["Lørdagsgodt", "Fredagskos"], ["Kos", "Hygge"], ["Sol i Bergen", "Snø i mai"], ["Fredagstaco", "Søndagsmiddag"],
+      ["Helgefylla", "Fyllesyk mandag"], ["Russelåt", "Sommerhit"], ["Idrettsgalla", "Gullruten"], ["Birken", "Holmenkollstafetten"], ["Tippeligaen", "Eliteserien"], ["Brann", "Rosenborg"], ["Vålerenga", "Lyn"], ["Bodø/Glimt", "Molde"]
+    ]}
+  ]
+}

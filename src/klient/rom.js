@@ -1140,7 +1140,8 @@ export function startRom(LEKNAVN, LANG) {
     hvemskrev: [['Alle svarer anonymt på samme spørsmål på sin telefon.', 'Everyone answers the same question anonymously on their phone.'], ['Svarene vises ett og ett – gjett hvem som skrev hva.', 'The answers are shown one at a time – guess who wrote what.'], ['Gjetter du feil, drikker du. Lurer du alle, får du slurker å dele ut.', 'Guess wrong and you drink. Fool everyone and you get sips to hand out.']],
     bloff: [['Et spørsmål står som et oppslag i leksikonet. Alle dikter opp et svar som høres ekte ut.', 'A question appears as an encyclopedia entry. Everyone makes up an answer that sounds real.'], ['Det ekte svaret blandes inn. Trykk på det du tror er ekte – lurt = drikk 1, og den som diktet opp, deler ut 1 per lurt.', 'The real answer is mixed in. Tap the one you think is real – fooled = drink 1, and whoever made it up hands out 1 per person fooled.'], ['Fem oppslag i en runde – neste kommer av seg selv. Den som lurte flest, er beste skrønemaker.', 'Five entries in a round – the next comes by itself. Whoever fooled the most is the best fibber.']],
     samme: [['Alle skriver ett ord i hemmelighet som passer oppgaven.', 'Everyone secretly writes one word that fits the prompt.'], ['Målet er å svare det samme som de andre.', 'The goal is to answer the same as the others.'], ['Står du alene med svaret ditt, drikker du.', 'If nobody else wrote your answer, you drink.']],
-    spion: [['Hold kortet for å se stedet. Én av dere er muldvarpen og vet det ikke.', 'Hold your card to see the location. One of you is the mole and doesn’t know it.'], ['Den som har tur, spør noen og trykker på hodet deres – så har den personen tur.', 'Whoever’s turn it is asks someone and taps their head – then it’s their turn.'], ['Tror du at du vet hvem det er? Si det høyt – verten snur kortet. Feil: de som pekte drikker 2. Tatt: muldvarpen drikker 3.', 'Think you know? Say it out loud – the host flips the card. Wrong: those who called it drink 2. Caught: the mole drinks 3.']],
+    spion: [['Hold kortet for å se ordet ditt. Alle har samme ord – bortsett fra muldvarpen, som har et nesten likt og ikke vet det selv.', 'Hold your card to see your word. Everyone has the same word – except the mole, who has a near miss and doesn’t know it.'], ['Si én ting om ordet ditt, to runder rundt bordet. Ikke si ordet. Så stemmer alle på telefonen.', 'Say one thing about your word, two rounds around the table. Don’t say the word. Then everyone votes on their phone.'], ['Tatt: muldvarpen får gjette ordet. Bom = drikk 3, de som stemte rett deler ut 1. Treff eller slapp unna = alle andre drikker 2.', 'Caught: the mole gets to guess the word. Miss = drink 3, correct voters hand out 1. Hit or got away = everyone else drinks 2.']],
+    spionGammel: [['Hold kortet for å se stedet. Én av dere er muldvarpen og vet det ikke.', 'Hold your card to see the location. One of you is the mole and doesn’t know it.'], ['Den som har tur, spør noen og trykker på hodet deres – så har den personen tur.', 'Whoever’s turn it is asks someone and taps their head – then it’s their turn.'], ['Tror du at du vet hvem det er? Si det høyt – verten snur kortet. Feil: de som pekte drikker 2. Tatt: muldvarpen drikker 3.', 'Think you know? Say it out loud – the host flips the card. Wrong: those who called it drink 2. Caught: the mole drinks 3.']],
     pannekort: [['Skriv en person, figur eller ting på lappen til den du har fått.', 'Write a person, character or thing on the note for the person you got.'], ['Alle ser lappene til de andre – bare ikke sin egen. Still ja/nei-spørsmål på omgang.', 'Everyone sees the other notes – just not their own. Take turns asking yes/no questions.'], ['Trykk «Gjettet!» når noen klarer det. Først ut deler ut 2, sistemann drikker 3.', 'Tap “Got it!” when someone gets it. First out hands out 2, the last one drinks 3.']],
     skal: [['Glasset bobler – vent til det står SKÅL! Trykk hvor som helst så fort du kan.', 'The glass fizzes – wait until it says CHEERS! Tap anywhere as fast as you can.'], ['Treigest drikker 1. Trykker du for tidlig, drikker du 2.', 'Slowest drinks 1. Tap too early and you drink 2.'], ['Fem skåler i en sprint – neste kommer av seg selv. Raskest samlet vinner.', 'Five cheers in a sprint – the next comes by itself. Fastest total wins.']],
     mest: [['Ett «Hvem er mest sannsynlig …»-kort om gangen.', 'One “Who’s most likely …” card at a time.'], ['Trykk på hodet til den det passer best på. Ingen ser hva du stemte.', 'Tap the head of whoever it fits best. Nobody sees your vote.'], ['Hver stemme er én slurk.', 'Every vote is one sip.']],
@@ -3839,57 +3840,55 @@ export function startRom(LEKNAVN, LANG) {
     var l = Math.max.apply(null, String(t || '').split(/\s+/).map(function (w) { return w.length; }).concat([1]));
     return Math.max(min || 9, Math.min(maks, Math.floor((bredde - 10) / (l * 0.6))));
   }
+  /* Muldvarpen: alle har samme ord, muldvarpen et nesten likt, og ingen vet om de er muldvarpen. Snakk rundt bordet,
+     stem på telefonen, og la den som blir tatt gjette ordet. */
+  var mvTellSendt = 0;
   function spionSpill(s) {
-    var alle = tilstand.spillere || [], meg = tilstand.meg, vert = erVert(), f = s.fase, kort = s.kort || {}, vn = esc(navn(tilstand.vert));
-    var chip = f === 'ring' ? T('Spør i ring', 'Ask around') : f === 'peke' ? T('Snu et kort', 'Flip a card') : f === 'feil' ? T('Uskyldig!', 'Innocent!')
-      : f === 'riktige' || s.utfall === 'fanget' ? T('Tatt!', 'Caught!') : T('Slapp unna', 'Got away');
-    var ut = jaTopp(T('Muldvarpen', 'The mole'), chip, f === 'ring' || f === 'peke', false).replace('ja-topp', 'ja-topp mv-topp');
-    ut += '<button type="button" class="lh-kikk mv-kikk' + (s.erSpion ? ' muldvarp' : '') + '" aria-label="' + T('Hold for å se kortet ditt', 'Hold to see your card') + '">' +
-      '<span class="mv-innhold">' + (s.erSpion ? MV_SVG + '<b>' + T('Du er<br>muldvarpen', 'You’re<br>the mole') + '</b>'
-        : '<span class="mv-sted"><small>' + T('Dere er på', 'You’re at') + '</small><b style="font-size:' + passFont(s.sted, 300, 40, 20) + 'px">' + esc(s.sted || '') + '</b></span>') + '</span>' +
-      '<span class="mv-dekk"><b>' + T('Hold for å se kortet ditt', 'Hold to see your card') + '</b></span></button>';
-    var pekt = s.pekt ? esc(navn(s.pekt)) : '';
-    var hjelp = f === 'ring' ? (s.tur === meg ? T('Din tur: still et spørsmål og trykk på den du spør.', 'Your turn: ask a question and tap who you ask.') : esc(navn(s.tur)) + T(' spør nå …', ' is asking …'))
-      : f === 'peke' ? (vert ? T('Hvem blir pekt ut? Trykk på hodet for å snu kortet.', 'Who is being called out? Tap their head to flip the card.') : vn + T(' snur et kort …', ' is flipping a card …'))
-      : f === 'feil' ? pekt + T(' var uskyldig!', ' was innocent!') + (vert ? ' ' + T('Trykk på dem som pekte.', 'Tap those who called it.') : '')
-      : f === 'riktige' ? (vert ? T('Muldvarpen er tatt! Trykk på dem som gjettet riktig.', 'The mole is caught! Tap those who guessed right.') : vn + T(' haker av hvem som gjettet riktig …', ' is ticking off who guessed right …'))
-      : T('Stedet var ', 'The location was ') + esc(s.sted || '') + '.';
-    ut += '<p class="mv-hjelp">' + hjelp + '</p>';
-    // Ringen: hodene i en sirkel, pilene viser hvem som har spurt hvem
-    var n = alle.length, pos = {};
-    alle.forEach(function (p, i) { var v = -Math.PI / 2 + (i / n) * Math.PI * 2; pos[p.id] = [50 + 36 * Math.cos(v), 46 + 33 * Math.sin(v)]; });
-    var piler = (s.spor || []).filter(function (x) { return pos[x[0]] && pos[x[1]]; }).map(function (x, i, l) {
-      var a = pos[x[0]], b = pos[x[1]], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1, k = Math.min(0.4, 11 / len);
-      var sx = a[0] + dx * k, sy = a[1] + dy * k, ex = b[0] - dx * k, ey = b[1] - dy * k, mx = (sx + ex) / 2 - dy * 0.12, my = (sy + ey) / 2 + dx * 0.12;
-      return '<path class="' + (i === l.length - 1 ? 'siste' : '') + '" d="M' + sx.toFixed(1) + ' ' + sy.toFixed(1) + 'Q' + mx.toFixed(1) + ' ' + my.toFixed(1) + ' ' + ex.toFixed(1) + ' ' + ey.toFixed(1) + '" marker-end="url(#mvSpiss)"/>';
-    }).join('');
-    var r = s.runde || 1;
-    var hoder = alle.map(function (p) {
-      var id = p.id, k = kort[id], nyKort = k && !mvSett[r + ':' + id]; if (k) mvSett[r + ':' + id] = 1;
-      var g = f === 'ring' && s.tur === meg && id !== meg ? 'sp-spor' : vert && f === 'peke' && !k ? 'sp-snu' : vert && (f === 'feil' || f === 'riktige') && id !== s.pekt ? 'sp-merk' : '';
-      var oi = k === 'muldvarp', tur = f === 'ring' && s.tur === id, merket = (s.merket || []).indexOf(id) !== -1;
-      var hode = nrHode(id, '', oi ? 'oi' : '');
-      return '<div class="mv-plass" style="left:' + pos[id][0].toFixed(1) + '%;top:' + (pos[id][1] / 0.92).toFixed(1) + '%">' +
-        (g ? '<button type="button" class="mv-ringhode kan' + (tur ? ' tur' : '') + '" data-g="' + g + '" data-paa="' + id + '" aria-label="' + esc(p.navn) + '">' + hode + '</button>' : '<span class="mv-ringhode' + (tur ? ' tur' : '') + '">' + hode + '</span>') +
-        '<b>' + (id === meg ? T('Du', 'You') : esc(p.navn)) + '</b>' +
-        '<span class="mv-kort' + (k ? ' snudd ' + k : '') + (nyKort ? ' inn' : '') + '"><span class="snu"><i class="bak">?</i><i class="fram">' + (k === 'muldvarp' ? T('Muldvarp!', 'Mole!') : T('Uskyldig', 'Innocent')) + '</i></span></span>' +
-        (merket ? '<em class="mv-hake">✓</em>' : '') + '</div>';
-    }).join('');
-    ut += '<div class="mv-ring"><svg viewBox="0 0 100 92" aria-hidden="true"><defs><marker id="mvSpiss" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>' + piler + '</svg>' + hoder + '</div>';
-    var merk = (s.merket || []).map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and '));
-    if (f === 'feil') ut += '<div class="hs-dom feil inn"><b>' + T('De som pekte på ', 'Those who called ') + pekt + T(' drikker 2', ' drink 2') + '</b></div>';
-    if (f === 'fasit') ut += '<div class="hs-dom ' + (s.utfall === 'fanget' ? 'rett' : 'feil') + ' inn"><b>' + (s.utfall === 'fanget'
-      ? esc(navn(s.spion)) + T(' drikker 3', ' drinks 3') + (merk ? ' · ' + merk + T(' deler ut 1', ' hand out 1') : '')
-      : esc(navn(s.spion)) + T(' gjettet stedet – alle andre drikker 2', ' guessed the location – everyone else drinks 2')) + '</b></div>';
-    if (f === 'ring') ut += '<details class="sp-steder"><summary>' + T('Alle mulige steder', 'All possible locations') + '</summary><p>' + (s.steder || []).map(esc).join(' · ') + '</p></details>';
-    if (f === 'fasit') return ut + lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny muldvarp – teller i kvelden', 'New mole – counts tonight')]]);
-    if (!vert) return ut + (f === 'ring' ? '<p class="nr-vent">' + vn + T(' snur kortene når noen peker ut muldvarpen.', ' flips the cards when someone calls out the mole.') + '</p>' : '');
-    var kn = f === 'ring' ? '<button class="rom-stor-knapp" data-g="sp-pek" type="button">' + T('Noen peker ut muldvarpen', 'Someone calls out the mole') + '</button>'
-      : f === 'peke' ? '<button class="rom-stor-knapp lh-hvit" data-g="sp-avbryt" type="button">' + T('Avbryt', 'Cancel') + '</button>'
-      : f === 'feil' ? '<button class="rom-stor-knapp" data-g="sp-videre" type="button">' + T('Fortsett ringen', 'Continue the round') + '</button>'
-      : '<div class="sm-vert"><button type="button" class="btn ghost' + (s.stedRett ? ' paa' : '') + '" data-g="sp-sted">' + (s.stedRett ? T('Gjettet stedet ✓', 'Guessed the place ✓') : T('Gjettet stedet?', 'Guessed the place?')) + '</button>' +
-          '<button class="rom-stor-knapp" data-g="sp-ferdig" type="button">' + T('Ferdig', 'Done') + '</button></div>';
-    return ut + kn;
+    var alle = tilstand.spillere || [], meg = tilstand.meg, vert = erVert(), f = s.fase, vn = esc(navn(tilstand.vert));
+    var tema = s.temaNavn ? (EN ? s.temaNavn[1] : s.temaNavn[0]) : '';
+    var chip = f === 'snakk' ? T('Snakk sammen', 'Talk it out') : f === 'stem' ? T('Stem', 'Vote') : f === 'gjett' || s.utfall === 'fanget' ? T('Tatt!', 'Caught!') : T('Slapp unna', 'Got away');
+    var ut = jaTopp(T('Muldvarpen', 'The mole'), chip, f === 'snakk' || f === 'stem', false).replace('ja-topp', 'ja-topp mv-topp');
+    if (f === 'snakk' || f === 'stem') {
+      ut += '<button type="button" class="lh-kikk mv-kikk" aria-label="' + T('Hold for å se ordet ditt', 'Hold to see your word') + '">' +
+        '<span class="mv-innhold"><span class="mv-sted"><small>' + T('Ditt ord', 'Your word') + (tema ? ' · ' + esc(tema) : '') + '</small><b style="font-size:' + passFont(s.ord || '', 300, 44, 22) + 'px">' + esc(s.ord || '') + '</b></span></span>' +
+        '<span class="mv-dekk"><b>' + T('Hold for å se ordet ditt', 'Hold to see your word') + '</b></span></button>';
+    }
+    if (f === 'snakk') {
+      ut += '<p class="mv-hjelp"><b>' + esc(navn(s.starter)) + T(' begynner.', ' starts.') + '</b> ' + T('Si én ting om ordet ditt, to runder rundt bordet. Ikke si selve ordet – og vær akkurat vag nok til at muldvarpen ikke skjønner det. Én av dere har et nesten likt ord og vet det ikke selv.', 'Say one thing about your word, two rounds around the table. Don’t say the word itself – and stay just vague enough that the mole can’t work it out. One of you has a near-miss word and doesn’t know it.') + '</p>';
+      ut += vert ? '<button class="rom-stor-knapp" data-g="sp-stem-start" type="button">' + T('Vi er klare til å stemme', 'We’re ready to vote') + '</button>'
+        : '<p class="nr-vent">' + vn + T(' sier fra når dere skal stemme.', ' calls the vote when you’re ready.') + '</p>';
+      return ut;
+    }
+    if (f === 'stem') {
+      var harStemt = s.harStemt || [];
+      if (vert && s.frist && Date.now() + klokkeAvvik > s.frist && mvTellSendt !== s.frist) { mvTellSendt = s.frist; gjorAlltid({ handling: 'sp-tell' }); }
+      ut += '<p class="mv-hjelp">' + T('Hvem har et annet ord? Trykk på den du tror er muldvarpen.', 'Who has a different word? Tap the one you think is the mole.') + '</p>' +
+        '<div class="mv-stem">' + alle.map(function (p) {
+          var erMeg = p.id === meg, stemt = harStemt.indexOf(p.id) !== -1;
+          return '<button type="button" class="mv-stemknapp' + (erMeg ? ' meg' : '') + '" data-g="sp-stem" data-paa="' + p.id + '" aria-pressed="' + (s.minStemme === p.id) + '"' + (erMeg ? ' disabled' : '') + '>' + nrHode(p.id) + '<b>' + (erMeg ? T('Du', 'You') : esc(p.navn)) + '</b>' + (stemt ? '<em class="mv-hake">✓</em>' : '') + '</button>';
+        }).join('') + '</div>' +
+        '<p class="ts-status"><b>' + harStemt.length + T(' av ', ' of ') + alle.length + T(' har stemt', ' have voted') + '</b></p>' + fristHtml(s, T('sekunder til stemmene telles', 'seconds until the votes are counted'));
+      if (vert && harStemt.length) ut += '<button class="btn ghost" data-g="sp-tell" type="button">' + T('Tell opp nå', 'Count the votes now') + '</button>';
+      return ut;
+    }
+    if (f === 'gjett') {
+      if (vert && s.frist && Date.now() + klokkeAvvik > s.frist && mvTellSendt !== s.frist) { mvTellSendt = s.frist; gjorAlltid({ handling: 'sp-tell' }); }
+      if (meg === s.spion) ut += '<div class="hs-dom feil inn"><b>' + T('Du er tatt!', 'You’re caught!') + '</b></div><p class="mv-hjelp">' + T('Siste sjanse: hvilket ord hadde de andre? Treffer du, drikker de – bommer du, drikker du 3.', 'Last chance: which word did the others have? Hit it and they drink – miss and you drink 3.') + '</p>' +
+        '<div class="mv-valg">' + (s.valg || []).map(function (v) { return '<button type="button" class="btn" data-g="sp-gjett" data-ord="' + esc(v) + '">' + esc(v) + '</button>'; }).join('') + '</div>';
+      else ut += '<div class="hs-dom rett inn"><b>' + esc(navn(s.spion)) + T(' er muldvarpen!', ' is the mole!') + '</b></div><p class="mv-hjelp">' + T('Nå gjetter hen hva ordet deres var …', 'Now they’re guessing your word …') + '</p>';
+      return ut + fristHtml(s, T('sekunder igjen', 'seconds left'));
+    }
+    // fasit
+    var rett = Object.keys(s.stemmer || {}).filter(function (id) { return s.stemmer[id] === s.spion && id !== s.spion; }).map(function (id) { return esc(navn(id)); });
+    ut += '<div class="mv-fasit"><p>' + T('Ordet var ', 'The word was ') + '<b>' + esc(s.ordA || '') + '</b>. ' + esc(navn(s.spion)) + T(' var muldvarpen og hadde ', ' was the mole and had ') + '<b>' + esc(s.ordB || '') + '</b>.' +
+      (s.gjett ? ' ' + T('Hen gjettet ', 'They guessed ') + '<b>' + esc(s.gjett) + '</b>.' : '') + '</p></div>' +
+      '<div class="hs-dom ' + (s.utfall === 'fanget' ? 'rett' : 'feil') + ' inn"><b>' + (s.utfall === 'fanget' ? esc(navn(s.spion)) + T(' drikker 3', ' drinks 3') + (rett.length ? ' · ' + rett.join(T(' og ', ' and ')) + T(' deler ut 1', ' hand out 1') : '')
+        : s.utfall === 'spion-gjettet' ? esc(navn(s.spion)) + T(' gjettet ordet – alle andre drikker 2', ' guessed the word – everyone else drinks 2') : esc(navn(s.spion)) + T(' slapp unna – alle andre drikker 2', ' got away – everyone else drinks 2')) + '</b></div>' +
+      '<div class="mv-stem fasit">' + alle.map(function (p) {
+        var til = (s.stemmer || {})[p.id];
+        return '<div class="mv-stemknapp' + (p.id === s.spion ? ' muldvarp' : '') + '">' + nrHode(p.id, '', p.id === s.spion ? 'oi' : '') + '<b>' + esc(p.navn) + '</b><small>' + (til ? '→ ' + esc(navn(til)) : T('stemte ikke', 'didn’t vote')) + '</small></div>';
+      }).join('') + '</div>';
+    return ut + lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nytt ord og ny muldvarp – teller i kvelden', 'New word and new mole – counts tonight')]]);
   }
 
   /* ---------- Hvem er jeg?: lappen i panna. Ordet dukker opp på lappen mens du skriver. ---------- */
@@ -5501,9 +5500,9 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'pk-sporsmal') return pkSporsmalArk();
     if (g === 'pk-riktig') return gjor({ handling: 'pk-riktig', hvem: b.dataset.paa });
     if (g === 'pk-angre') return gjor({ handling: 'pk-angre', hvem: b.dataset.paa });
-    if (g === 'sp-spor') return gjor({ handling: 'sp-spor', til: b.dataset.paa });
-    if (g === 'sp-snu' || g === 'sp-merk') return gjor({ handling: g, hvem: b.dataset.paa });
-    if (['sp-pek', 'sp-avbryt', 'sp-sted', 'sp-videre', 'sp-ferdig'].indexOf(g) !== -1) return gjor({ handling: g });
+    if (g === 'sp-stem') return gjor({ handling: 'sp-stem', hvem: b.dataset.paa });
+    if (g === 'sp-gjett') return gjor({ handling: 'sp-gjett', ord: b.dataset.ord });
+    if (g === 'sp-stem-start' || g === 'sp-tell') return gjor({ handling: g });
     if (g === 'sk-trykk') {
       var tidlig = !skalVist, ms = skalVist ? Math.round(performance.now() - skalVist) : null, skSp = tilstand.spill;
       if (skSp) skalMitt[skSp.tid] = { tidlig: tidlig, ms: ms };
