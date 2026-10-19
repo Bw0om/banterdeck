@@ -300,6 +300,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)!im
   html.i-spill .ring-boks,html.i-spill[data-theme="dark"] .ring-boks{border:0;border-radius:0;background:transparent;box-shadow:none;
     height:min(500px,calc(100dvh - 330px - env(safe-area-inset-top)));width:auto;max-width:100%;aspect-ratio:358/500}
   html.i-spill .ring-topp{margin-bottom:6px;width:100%}
+  /* Ingen vinduer rundt brettene: filten i Yatzy og Veddeløpet, flaten i Skål, fjøset i Gris, bordet i Pyramiden og President,
+     siden i Bløff, kikkeboksen i Spion og Forræder. Brettet går fra kant til kant – leken er skjermen. Kortene er fortsatt kort. */
+  html.i-spill .rom-spill > :is(.vl-banen,.vl-sats,.sk-flate,.yz-brett,.py-bord,.gr-fjos,.pr-bord,.bf-side,.lh-kikk,.ns-feig){
+    border:0;border-radius:0;box-shadow:none;margin-left:-18px;margin-right:-18px;width:auto;max-width:none;align-self:stretch}
   html.i-spill .ring-hint{margin-top:6px;font-size:13.5px}
 }
 /* På brede skjermer ligger stua og resten i rommet som før – knappene trengs ikke */
