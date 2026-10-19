@@ -2146,7 +2146,7 @@ const EKSTRA_INFO: EkstraInfo[] = [
   ['bloff', 'Skrøna', 'Tall tales', 'Finn på et troverdig feil svar. Lur de andre – og finn det ekte.', 'Make up a believable wrong answer. Fool the others – and spot the real one.'],
   ['samme', 'Saueflokken', 'The herd', 'Alle skriver ett ord i hemmelighet. Unike svar drikker.', 'Everyone secretly writes one word. Unique answers drink.'],
   ['spion', 'Muldvarpen', 'The mole', 'Alle vet hvor dere er – bortsett fra muldvarpen. Still spørsmål og avslør hen.', 'Everyone knows where you are – except the mole. Ask questions and unmask them.'],
-  ['pannekort', 'Hvem er jeg?', 'Who am I?', 'Skriv et ord til den du får tildelt. Du ser alles ord – bortsett fra ditt eget.', "Write a word for the person you're assigned. You see everyone's word – except your own."],
+  ['pannekort', 'Lappen i panna', 'The forehead note', 'Skriv et ord til den du får tildelt. Du ser alles ord – bortsett fra ditt eget.', "Write a word for the person you're assigned. You see everyone's word – except your own."],
   ['skal', 'Skålsprinten', 'Cheers sprint', 'Trykk når det står SKÅL! Treigest drikker. For tidlig drikker dobbelt.', 'Tap when it says CHEERS! Slowest drinks. Too early drinks double.'],
   ['bussruta', 'Bussruta', 'Ride the bus', 'Fire spørsmål hver på egen telefon, så pyramiden – og taperen kjører bussen.', 'Four questions each on your own phone, then the pyramid – and the loser rides the bus.'],
   ['yatzy', 'Drikke-Yatzy', 'Drinking Yahtzee', 'Trill på din telefon når det er din tur. Alle ser terningene og blokka.', "Roll on your phone when it's your turn. Everyone sees the dice and the scorecard."],

@@ -3900,15 +3900,16 @@ export function startRom(LEKNAVN, LANG) {
   /* Hvem er jeg: kategorier med forslag til den som skriver, og spørsmål å stille for den som gjetter.
      Kategorien du velger, følger lappen og vises som hint til den som skal gjette. */
   var PK_KAT = [
-    ['kjendis', 'Kjendis', 'Celebrity', ['Beyoncé', 'Elon Musk', 'Dolly Parton', 'Zlatan', 'Taylor Swift', 'Tom Cruise', 'Rihanna', 'Leonardo DiCaprio', 'Oprah', 'Gordon Ramsay']],
-    ['norsk', 'Norsk kjendis', 'Norwegian celebrity', ['Erling Braut Haaland', 'Kygo', 'Petter Northug', 'Else Kåss Furuseth', 'Kristofer Hivju', 'Jonas Gahr Støre', 'Atle Antonsen', 'Kronprins Haakon', 'Ingrid Gjessing Linhave', 'Herman Flesvig']],
-    ['figur', 'Film- og seriefigur', 'Film & TV character', ['Harry Potter', 'Darth Vader', 'Shrek', 'Homer Simpson', 'Barbie', 'Jack Sparrow', 'Hermine Grang', 'Walter White', 'Forrest Gump', 'Wednesday Addams']],
-    ['tegne', 'Tegnefilm og barne-TV', 'Cartoons & kids’ TV', ['Pippi Langstrømpe', 'Donald Duck', 'Pikachu', 'Peppa Gris', 'Spider-Man', 'Elsa fra Frost', 'Ole Brumm', 'Kaptein Sabeltann', 'SpongeBob', 'Postmann Pat']],
-    ['idrett', 'Idrettsstjerne', 'Sports star', ['Cristiano Ronaldo', 'Serena Williams', 'Magnus Carlsen', 'Therese Johaug', 'Usain Bolt', 'Casper Ruud', 'Marit Bjørgen', 'Lionel Messi', 'Ada Hegerberg', 'Michael Jordan']],
-    ['musikk', 'Musiker', 'Musician', ['Elvis', 'Madonna', 'Eminem', 'Morten Harket', 'Adele', 'Bob Marley', 'Astrid S', 'Freddie Mercury', 'Karpe', 'Britney Spears']],
-    ['historisk', 'Historisk person', 'Historical figure', ['Napoleon', 'Kleopatra', 'Leonardo da Vinci', 'Roald Amundsen', 'Albert Einstein', 'Gandhi', 'Olav den hellige', 'Marie Curie', 'Julius Cæsar', 'Henrik Ibsen']],
-    ['dyr', 'Dyr', 'Animal', ['Elefant', 'Pingvin', 'Elg', 'Delfin', 'Katt', 'Ørn', 'Skilpadde', 'Laks', 'Sjiraff', 'Humle']],
-    ['ting', 'Ting', 'Thing', ['Tannbørste', 'Kaffe', 'Ostehøvel', 'Sofa', 'Mobiltelefon', 'Boblebad', 'Paraply', 'Ski', 'Toalettpapir', 'Grandiosa']],
+    ['kjendis', 'Kjendis', 'Celebrity', ['Beyoncé', 'Elon Musk', 'Dolly Parton', 'Zlatan', 'Taylor Swift', 'Tom Cruise', 'Rihanna', 'Leonardo DiCaprio', 'Oprah', 'Gordon Ramsay', 'Kim Kardashian', 'Donald Trump', 'Dronning Elizabeth', 'Snoop Dogg', 'Keanu Reeves', 'Paris Hilton', 'Will Smith', 'Greta Thunberg', 'Jennifer Aniston', 'Pave Frans', 'Mr. Beast', 'Dwayne «The Rock» Johnson', 'Kylie Jenner', 'Ryan Reynolds', 'Harry Styles', 'Zendaya', 'Mark Zuckerberg', 'Pamela Anderson']],
+    ['norsk', 'Norsk kjendis', 'Norwegian celebrity', ['Erling Braut Haaland', 'Kygo', 'Petter Northug', 'Else Kåss Furuseth', 'Kristofer Hivju', 'Jonas Gahr Støre', 'Atle Antonsen', 'Kronprins Haakon', 'Ingrid Gjessing Linhave', 'Herman Flesvig', 'Petter Stordalen', 'Kjell Inge Røkke', 'Sophie Elise', 'Jahn Teigen', 'Erna Solberg', 'Thomas Giertsen', 'Dagfinn Lyngbø', 'Linni Meister', 'Aksel Hennie', 'Sigrid', 'Ari Behn', 'Carl I. Hagen', 'Bård Tufte Johansen', 'Alexander Rybak', 'Fredrik Skavlan', 'Dorthe Skappel', 'Märtha Louise', 'Durek Verrett', 'Sylvi Listhaug', 'Harald Eia', 'Nicolay Ramm', 'Odd Nordstoga', 'Trygve Slagsvold Vedum', 'Jan Thomas', 'Mia Gundersen', 'Vegard Harm']],
+    ['figur', 'Film- og seriefigur', 'Film & TV character', ['Harry Potter', 'Darth Vader', 'Shrek', 'Homer Simpson', 'Barbie', 'Jack Sparrow', 'Hermine Grang', 'Walter White', 'Forrest Gump', 'Wednesday Addams', 'James Bond', 'Gollum', 'Joker', 'Tony Soprano', 'Rocky Balboa', 'Hannibal Lecter', 'Katniss Everdeen', 'Michael Scott', 'Eleven fra Stranger Things', 'Jon Snow', 'Yoda', 'Egon Olsen', 'Elling', 'Mr. Bean', 'Ted Lasso', 'Thor', 'Carrie Bradshaw', 'Gandalf', 'Marty McFly', 'Edward Cullen']],
+    ['tegne', 'Tegnefilm og barne-TV', 'Cartoons & kids’ TV', ['Pippi Langstrømpe', 'Donald Duck', 'Pikachu', 'Peppa Gris', 'Spider-Man', 'Elsa fra Frost', 'Ole Brumm', 'Kaptein Sabeltann', 'SpongeBob', 'Postmann Pat', 'Bamse', 'Scooby-Doo', 'Fantorangen', 'Karsten og Petra', 'Teletubbies', 'Bart Simpson', 'Mikke Mus', 'Ash Ketchum', 'Snurre Sprett', 'Simba', 'Brannmann Sam', 'Minions', 'Pingu', 'Garfield', 'Askeladden', 'Mummitrollet', 'Reodor Felgen', 'Vaiana', 'Bluey', 'Smurfene']],
+    ['idrett', 'Idrettsstjerne', 'Sports star', ['Cristiano Ronaldo', 'Serena Williams', 'Magnus Carlsen', 'Therese Johaug', 'Usain Bolt', 'Casper Ruud', 'Marit Bjørgen', 'Lionel Messi', 'Ada Hegerberg', 'Michael Jordan', 'Ole Gunnar Solskjær', 'Karsten Warholm', 'Tiger Woods', 'Johannes Høsflot Klæbo', 'Jakob Ingebrigtsen', 'Martin Ødegaard', 'Mike Tyson', 'Petter Solberg', 'Lewis Hamilton', 'Aksel Lund Svindal', 'Novak Djokovic', 'Bjørn Dæhlie', 'Conor McGregor', 'Viktor Hovland', 'Simone Biles', 'Ole Einar Bjørndalen', 'Tom Brady', 'Cecilia Brækhus', 'Shaquille O’Neal', 'Mo Salah']],
+    ['musikk', 'Musiker', 'Musician', ['Elvis', 'Madonna', 'Eminem', 'Morten Harket', 'Adele', 'Bob Marley', 'Astrid S', 'Freddie Mercury', 'Karpe', 'Britney Spears', 'Michael Jackson', 'Lady Gaga', 'Drake', 'Alan Walker', 'Åge Aleksandersen', 'Bruce Springsteen', 'Ariana Grande', 'Marcus & Martinus', 'Justin Bieber', 'Shakira', 'Kurt Nilsen', 'Bad Bunny', 'DDE', 'Billie Eilish', 'Ed Sheeran', 'Tix', 'Postgirobygget', 'Lars Vaular', 'Ramón', 'Prince', 'Amy Winehouse', 'Jan Eggum']],
+    ['historisk', 'Historisk person', 'Historical figure', ['Napoleon', 'Kleopatra', 'Leonardo da Vinci', 'Roald Amundsen', 'Albert Einstein', 'Gandhi', 'Olav den hellige', 'Marie Curie', 'Julius Cæsar', 'Henrik Ibsen', 'Harald Hårfagre', 'Jesus', 'Edvard Munch', 'Leiv Eriksson', 'Marilyn Monroe', 'Fridtjof Nansen', 'Winston Churchill', 'Mozart', 'Gro Harlem Brundtland', 'Shakespeare', 'Nelson Mandela', 'Kong Olav', 'Pablo Picasso', 'Christopher Columbus', 'Sonja Henie', 'Charlie Chaplin', 'Buddha', 'Ivar Aasen', 'Frida Kahlo', 'Thor Heyerdahl']],
+    ['dyr', 'Dyr', 'Animal', ['Elefant', 'Pingvin', 'Elg', 'Delfin', 'Katt', 'Ørn', 'Skilpadde', 'Laks', 'Sjiraff', 'Humle', 'Isbjørn', 'Sau', 'Hai', 'Måke', 'Reinsdyr', 'Dovendyr', 'Flaggermus', 'Ku', 'Hummer', 'Kenguru', 'Mygg', 'Ulv', 'Pytonslange', 'Hamster', 'Flodhest', 'Papegøye', 'Gullfisk', 'Alpakka', 'Krokodille', 'Lemen']],
+    ['ting', 'Ting', 'Thing', ['Tannbørste', 'Kaffe', 'Ostehøvel', 'Sofa', 'Mobiltelefon', 'Boblebad', 'Paraply', 'Ski', 'Toalettpapir', 'Grandiosa', 'Vaffeljern', 'Brunost', 'Flaskeåpner', 'Tinder', 'Pølse med lompe', 'Kvikk Lunsj', 'Lommelykt', 'Vipps', 'Trampoline', 'Taxi', 'Solbriller', 'Bunad', 'Mikrobølgeovn', 'Smultring', 'Bompenger', 'Sovepose', 'Fiskekake', 'Slalåmstøvel', 'Kebab', 'Sparkesykkel', 'Selfiestang', 'Tollvesenet', 'Snus', 'Pant', 'Tacosaus']],
+    ['droyt', 'Drøyt (18+)', 'Edgy (18+)', ['Fylla på byen', 'Eksen din', 'Angrepillen', 'En fyllesyk søndag', 'Nach', 'Tinder-daten som ikke lignet bildet', 'Nabokjerringa', 'Kondomet som ble glemt', 'Bakrusen på julebordet', 'Sjefen etter tre øl', 'Ex on the Beach', 'En hjemmesnekra shot', 'Et pinlig øyeblikk på dansegulvet', 'Fylleangsten', 'Daten som endte på legevakta', 'Toalettkøen på byen', 'Barnebursdag med fri bar', 'Sjekkereplikken «har du vondt i knærne?»', 'Han som alltid betaler minst på Vipps', 'Blackouten fra 17. mai', 'Den rare onkelen i konfirmasjonen', 'Tissepause i buskene', 'Frokosten på nachet', 'Taxisjåføren klokka fire', 'Et russekort med drøy regel', 'Kebaben etter byen', 'Snapchat-streaken med eksen', 'Fylleringen til eksen klokka tre', 'Hangover-fisen', 'Den som sovnet på vorset']],
     ['rommet', 'Noen her i rommet', 'Someone in the room', []]
   ];
   var PK_SPM = [
@@ -3917,11 +3918,14 @@ export function startRom(LEKNAVN, LANG) {
     [T('Er jeg et dyr eller en ting?', 'Am I an animal or a thing?'), [T('Kan man spise meg?', 'Can you eat me?'), T('Er jeg større enn en bil?', 'Am I bigger than a car?'), T('Finnes jeg i dette rommet?', 'Am I in this room?'), T('Har jeg fire bein?', 'Do I have four legs?'), T('Bor jeg i vann?', 'Do I live in water?'), T('Bruker folk meg hver dag?', 'Do people use me every day?')]],
     [T('Snevre inn', 'Narrow it down'), [T('Er jeg over 50 år?', 'Am I over 50?'), T('Har jeg vunnet noe stort?', 'Have I won something big?'), T('Er jeg mest kjent i Norge?', 'Am I mostly known in Norway?'), T('Har jeg vært i nyhetene i år?', 'Have I been in the news this year?'), T('Begynner navnet mitt på A–M?', 'Does my name start with A–M?'), T('Ville jeg passet inn på dette vorset?', 'Would I fit in at this pre-party?')]]
   ];
-  var pkKat = '', pkForslag = null;
+  var pkKat = '', pkForslag = null, pkValgtForslag = '';
   function pkKatNavn(id) { var k = PK_KAT.find(function (x) { return x[0] === id; }); return k ? (EN ? k[2] : k[1]) : ''; }
+  /** Tre forslag fra hele bunken, fra ulike kategorier. Bruker du et forslag, følger kategorien med som hint til den som gjetter. */
   function pkTrekkForslag() {
-    var k = PK_KAT.find(function (x) { return x[0] === pkKat; }), kilde = k && k[3].length ? k[3] : PK_KAT.reduce(function (a, x) { return a.concat(x[3]); }, []);
-    return kilde.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
+    var alle = []; PK_KAT.forEach(function (k) { k[3].forEach(function (t) { alle.push({ t: t, kat: k[0] }); }); });
+    var ut = [], brukt = {};
+    alle.sort(function () { return Math.random() - 0.5; }).forEach(function (f) { if (ut.length < 3 && !brukt[f.kat]) { ut.push(f); brukt[f.kat] = 1; } });
+    return ut;
   }
   function pkSporsmalArk() {
     lukkArk();
@@ -3936,14 +3940,12 @@ export function startRom(LEKNAVN, LANG) {
     var alle = (tilstand.spillere || []).filter(function (p) { return !s.med || !s.med.length || s.med.indexOf(p.id) !== -1; }), meg = tilstand.meg, r = s.runde || 1;
     if (s.fase === 'skriv') {
       var mal = s.mitMaal, mitt = mal && s.ord[mal] ? s.ord[mal].t : '', sk = r + ':' + mitt, klask = mitt && pkSkrevetVist !== sk; if (mitt) pkSkrevetVist = sk;
-      return jaTopp(T('Hvem er jeg?', 'Who am I?'), T('Skriv en lapp', 'Write a note'), true, true) +
+      return jaTopp(T('Lappen i panna', 'The forehead note'), T('Skriv en lapp', 'Write a note'), true, true) +
         (mal ? '<div class="pk-skriv"><span class="pk-stor">' + nrHode(mal) + pkLapp(mitt || '…', 128, 26, (mitt ? '' : 'tom') + (klask ? ' klask' : ''), 'pkLapp') + '</span>' +
           '<p>' + (mitt ? T('Klask! Den sitter.', 'Slap! It’s on.') : T('Til ', 'For ') + esc(navn(mal))) + '</p></div>' +
-          (mitt ? '' : '<p class="rom-etikett">' + T('Velg kategori (hint til den som gjetter)', 'Pick a category (a hint for the guesser)') + '</p><div class="pk-kats">' + PK_KAT.map(function (k) {
-            return '<button type="button" data-g="pk-kat" data-k="' + k[0] + '" aria-pressed="' + (pkKat === k[0]) + '">' + esc(EN ? k[2] : k[1]) + '</button>'; }).join('') + '</div>' +
-            (pkForslag ? '<div class="pk-forslag">' + pkForslag.map(function (f) { return '<button type="button" data-g="pk-fyll" data-t="' + esc(f) + '">' + esc(f) + '</button>'; }).join('') +
+          (mitt ? '' : (pkForslag ? '<div class="pk-forslag">' + pkForslag.map(function (f) { return '<button type="button" data-g="pk-fyll" data-t="' + esc(f.t) + '" data-k="' + f.kat + '">' + esc(f.t) + '<small>' + esc(pkKatNavn(f.kat)) + '</small></button>'; }).join('') +
               '<button type="button" class="linkbtn" data-g="pk-forslag">' + T('Nye forslag', 'New ideas') + '</button></div>'
-              : '<p><button type="button" class="linkbtn" data-g="pk-forslag">' + T('Gi meg forslag', 'Give me ideas') + '</button></p>')) +
+              : '<p><button type="button" class="linkbtn" data-g="pk-forslag">' + T('Tom i hodet? Få forslag', 'Stuck? Get ideas') + '</button></p>')) +
           '<form class="sm-skjema' + (mitt ? '' : ' stor') + '" id="sosSkjema">' + (mitt ? '' : '<label for="sosInput">' + T('Person, figur eller ting', 'Person, character or thing') + '</label>') +
             '<input id="sosInput" maxlength="40" autocomplete="off" enterkeyhint="send" placeholder="' + (mitt ? T('Bytt ord …', 'Change word …') : T('F.eks. Elvis', 'E.g. Elvis')) + '">' +
             '<button class="' + (mitt ? 'btn ghost' : 'rom-stor-knapp') + '" type="submit">' + (mitt ? T('Bytt', 'Change') : T('Klask den på', 'Slap it on')) + '</button></form>' : '') +
@@ -3967,11 +3969,11 @@ export function startRom(LEKNAVN, LANG) {
         '<b>' + (erMeg ? T('Du', 'You') : esc(p.navn)) + '</b>' + (fersk ? '' : under) + knapp + '</div>';
     }).join('');
     clearTimeout(pkTimer); if (angreMulig) pkTimer = setTimeout(tegn, 1000);
-    if (spill) return jaTopp(T('Hvem er jeg?', 'Who am I?'), T('Hvem er du?', 'Who are you?'), true, false) +
+    if (spill) return jaTopp(T('Lappen i panna', 'The forehead note'), T('Hvem er du?', 'Who are you?'), true, false) +
       '<p class="mv-hjelp liten">' + T('Still ja/nei-spørsmål på omgang. Nei = neste. Trykk «Gjettet!» når noen klarer det.', 'Take turns asking yes/no questions. No = next. Tap “Got it!” when someone gets it.') + '</p>' +
       '<div class="pk-grid">' + kort + '</div>' +
       ((s.gjettet || []).indexOf(meg) === -1 ? '<p class="pk-hjelp"><button type="button" class="btn ghost small" data-g="pk-sporsmal">❓ ' + T('Trenger du spørsmål?', 'Need questions?') + '</button></p>' : '');
-    return jaTopp(T('Hvem er jeg?', 'Who am I?'), T('Runden er over', 'Round over'), false, false) +
+    return jaTopp(T('Lappen i panna', 'The forehead note'), T('Runden er over', 'Round over'), false, false) +
       (s.sist ? '<div class="hs-dom feil"><b>' + esc(navn(s.sist)) + T(' ble sist – drikk 3', ' came last – drink 3') + '</b></div>' : '') +
       '<div class="pk-grid">' + kort + '</div>' +
       lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye lapper – teller i kvelden', 'New notes – counts tonight')]]);
@@ -5227,7 +5229,7 @@ export function startRom(LEKNAVN, LANG) {
       var i = document.getElementById('sosInput'), t = i.value.trim(); if (!t) return;
       var typ = tilstand.spill && tilstand.spill.type;
       var hd = { hvemskrev: 'hs-skriv', bloff: 'bf-skriv', samme: 'sm-skriv', pannekort: 'pk-skriv' }[typ]; if (!hd) return;
-      i.value = ''; i.blur(); gjorAlltid(typ === 'pannekort' ? { handling: hd, tekst: t, kat: pkKat } : { handling: hd, tekst: t });
+      i.value = ''; i.blur(); gjorAlltid(typ === 'pannekort' ? { handling: hd, tekst: t, kat: t === pkValgtForslag ? pkKat : '' } : { handling: hd, tekst: t });
     });
     var lovS = document.getElementById('lovSkjema');
     if (lovS) lovS.addEventListener('submit', function (e) { e.preventDefault(); var i = document.getElementById('lovInput'), t = i.value.trim(); if (!t) return; if (!confirm(T('Foreslå loven «' + t + '»?', 'Propose the law “' + t + '”?'))) return; gjor({ handling: 'lov-forslag', tekst: t }); });
@@ -5494,9 +5496,8 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'sp-stem') return gjor({ handling: 'sp-stem', hvem: b.dataset.paa });
     if (g === 'sp-gjett') return gjor({ handling: 'sp-gjett', sted: b.dataset.sted });
     if (g === 'bf-stem') return gjor({ handling: 'bf-stem', i: Number(b.dataset.i) });
-    if (g === 'pk-kat') { pkKat = pkKat === b.dataset.k ? '' : b.dataset.k; pkForslag = null; return tegn(); }
     if (g === 'pk-forslag') { pkForslag = pkTrekkForslag(); return tegn(); }
-    if (g === 'pk-fyll') { var inp = document.getElementById('sosInput'); if (inp) { inp.value = b.dataset.t; inp.focus(); } return; }
+    if (g === 'pk-fyll') { var inp = document.getElementById('sosInput'); if (inp) { inp.value = b.dataset.t; pkValgtForslag = b.dataset.t; pkKat = b.dataset.k || ''; inp.focus(); } return; }
     if (g === 'pk-sporsmal') return pkSporsmalArk();
     if (g === 'pk-riktig') return gjor({ handling: 'pk-riktig', hvem: b.dataset.paa });
     if (g === 'pk-angre') return gjor({ handling: 'pk-angre', hvem: b.dataset.paa });

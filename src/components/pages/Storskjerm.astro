@@ -808,7 +808,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var tvPkSett = {};
     function pkScene(d, s) {
       var m = s.sos, alle = (d.spillere || []).filter(function (p) { return !m.med || !m.med.length || m.med.indexOf(p.id) !== -1; }), f = m.fase, ord = m.ord || {};
-      if (f === 'skriv') return tvMedBenk('<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + T('Hvem er jeg?', 'Who am I?') + '</p><span class="tvlh-chip">' + T('Skriv en lapp', 'Write a note') + '</span></div>' +
+      if (f === 'skriv') return tvMedBenk('<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + T('Lappen i panna', 'The forehead note') + '</p><span class="tvlh-chip">' + T('Skriv en lapp', 'Write a note') + '</span></div>' +
         '<h1 class="tv-sporsmal">' + T('Skriv en lapp til den du har fått.', 'Write a note for the person you got.') + '</h1><p class="tv-stor">' + T('Person, figur eller ting. Hen ser den ikke selv. · ', 'Person, character or thing. They can’t see it. · ') + (m.harSkrevet || []).length + ' / ' + alle.length + '</p></div></div>',
         tvBenk(d, alle, { oppe: m.harSkrevet || [] }));
       var ferdig = f === 'ferdig';
@@ -820,7 +820,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
           '<span class="tvpk-lapp' + (vis ? '' : ' skjult') + (ny ? ' inn' : '') + '" style="font-size:' + font + 'px;--i:' + i + '">' + esc(t) + '</span></span><b>' + esc(p.navn) + '</b>' +
           '<small>' + (gj ? ((m.gjettet || [])[0] === id ? T('Først · del ut 2', 'First · hand out 2') : T('Gjettet', 'Guessed')) : sist ? T('Sist · drikk 3', 'Last · drink 3') : T('Gjetter …', 'Guessing …')) + '</small></div>';
       }).join('');
-      return '<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + T('Hvem er jeg?', 'Who am I?') + '</p><span class="tvlh-chip' + (ferdig ? ' rosa' : '') + '">' + (ferdig ? T('Runden er over', 'Round over') : T('Hvem er du?', 'Who are you?')) + '</span></div>' +
+      return '<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + T('Lappen i panna', 'The forehead note') + '</p><span class="tvlh-chip' + (ferdig ? ' rosa' : '') + '">' + (ferdig ? T('Runden er over', 'Round over') : T('Hvem er du?', 'Who are you?')) + '</span></div>' +
         '<p class="tv-stor">' + (ferdig ? (m.sist ? esc(navn(m.sist)) + T(' ble sist – drikker 3. ', ' came last – drinks 3. ') : '') + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') : T('Still ja/nei-spørsmål på omgang. Lappene vises her når de er gjettet.', 'Take turns asking yes/no questions. Notes show up here once guessed.')) + '</p>' +
         '<div class="tvpk-grid">' + kort + '</div></div></div>';
     }
