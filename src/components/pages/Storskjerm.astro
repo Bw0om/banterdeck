@@ -189,7 +189,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       var knust = na.brudd && na.brudd !== sett.brudd;
       if (knust) visKnust(s.brudd.navn);
       // Ringen røk: la «RINGEN RØK!» stå alene først, så kommer DRIKK-tavla
-      if (drikk.length && drikk.length <= 8 && !resultatNaa && !nyUt) { if (knust) setTimeout(function () { visDrikk(drikk, d.alkoholfri); }, 2800); else visDrikk(drikk, d.alkoholfri); }
+      // Veddeløpet i mål: jubel og kommentator først, DRIKK-tavla etterpå
+      var vlMaal = s.type === 'veddelopet' && s.vl && s.vl.fase === 'ferdig' && na.fase !== sett.fase;
+      if (drikk.length && drikk.length <= 8 && !resultatNaa && !nyUt) { if (knust || vlMaal) setTimeout(function () { visDrikk(drikk, d.alkoholfri); }, vlMaal ? 5500 : 2800); else visDrikk(drikk, d.alkoholfri); }
       if (na.meldte.some(function (id) { return sett.meldte.indexOf(id) === -1; })) { spill('dundun'); var a = (b.meldte || []).find(function (x) { return sett.meldte.indexOf(x.id) === -1; }); if (a) visBanner('📣 ' + T('MELDT: ', 'REPORTED: ') + (a.type === 'hvem' ? navn(a.utfall) + ' – ' : '') + a.q, T('Stem på telefonen – skjedde det?', 'Vote on your phone – did it happen?')); }
       var nyeSaker = na.saker.filter(function (x) { return sett.saker.indexOf(x) === -1; });
       if (nyeSaker.length) visBlalys(nyeSaker.some(function (x) { return /:d$/.test(x); }));
@@ -927,7 +929,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var tvVlSett = {}, tvVlPos = {};
     /* Veddeløpet: musikk og kommentator på TV-en (public/lyd/veddelop/). Bare etter at noen har trykket start på TV-en (lyd er lov da). */
     var TVVL_FIL = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' };
-    var tvVlSt = { runde: 0, fase: '', leder: '', jevnt: false, sist: 0 }, tvVlMusikk = null;
+    var tvVlSt = { runde: 0, fase: '', leder: '', jevnt: false, sist: 0, n: 0, pos: null }, tvVlMusikk = null;
+    function tvVlVariant(navn) { return navn + (Math.random() < 0.5 ? '-a' : '-b'); }
     function tvVlMusikkPaa(paa) {
       if (paa) {
         if (!tvVlMusikk) { tvVlMusikk = new Audio('/lyd/veddelop/musikk.mp3'); tvVlMusikk.loop = true; }
@@ -936,8 +939,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         var el = tvVlMusikk, fade = setInterval(function () { el.volume = Math.max(0, el.volume - 0.05); if (el.volume <= 0.01) { clearInterval(fade); el.pause(); el.currentTime = 0; } }, 80);
       }
     }
-    function tvVlSi(navn) {
-      var naa = Date.now(); if (naa - tvVlSt.sist < 2500) return false; tvVlSt.sist = naa;
+    function tvVlSi(navn, tving) {
+      var naa = Date.now(); if (!tving && naa - tvVlSt.sist < 2300) return false; tvVlSt.sist = naa;
       try { var a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = 1; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
       return true;
     }
@@ -945,14 +948,23 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       if (!startet) return;
       var r = v.runde || 1, f = v.fase;
       if (r !== tvVlSt.runde) tvVlSt = { runde: r, fase: '', leder: '', jevnt: false, sist: 0 };
-      if (f === 'lop' && tvVlSt.fase !== 'lop') { tvVlMusikkPaa(true); tvVlSt.sist = 0; tvVlSi('start'); }
-      if (f === 'lop') {
-        var pos = v.pos || {}, best = -1, leder = '', delt = false;
-        ['♥', '♠', '♦', '♣'].forEach(function (x) { var p = pos[x] || 0; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
-        if (best >= 2 && !delt && leder !== tvVlSt.leder && tvVlSi('leder-' + TVVL_FIL[leder])) tvVlSt.leder = leder;
-        if (best >= 6 && delt && !tvVlSt.jevnt && tvVlSi('jevnt')) tvVlSt.jevnt = true;
+      if (f === 'lop' && tvVlSt.fase !== 'lop') { tvVlMusikkPaa(true); tvVlSt.sist = 0; tvVlSi(tvVlVariant('start'), true); tvVlSt.pos = Object.assign({}, v.pos || {}); }
+      if (f === 'lop' && v.n !== tvVlSt.n) {
+        tvVlSt.n = v.n;
+        var pos = v.pos || {}, forrige = tvVlSt.pos || {}, best = -1, leder = '', delt = false, tilbake = '';
+        ['♥', '♠', '♦', '♣'].forEach(function (x) { var p = pos[x] || 0; if (p < (forrige[x] || 0)) tilbake = x; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
+        tvVlSt.pos = Object.assign({}, pos);
+        if (tilbake) tvVlSi('tilbake-' + TVVL_FIL[tilbake]);
+        else if (best >= 2 && !delt && leder !== tvVlSt.leder && tvVlSi(tvVlVariant('leder-' + TVVL_FIL[leder]))) tvVlSt.leder = leder;
+        else if (best >= 6 && delt && !tvVlSt.jevnt && tvVlSi(tvVlVariant('jevnt'))) tvVlSt.jevnt = true;
+        else if (v.sist && v.sist.f) tvVlSi(tvVlVariant('fram-' + TVVL_FIL[v.sist.f]));
       }
-      if (f === 'ferdig' && tvVlSt.fase !== 'ferdig') { tvVlMusikkPaa(false); tvVlSt.sist = 0; if (v.vinner) tvVlSi('vinner-' + TVVL_FIL[v.vinner]); }
+      if (f === 'ferdig' && tvVlSt.fase !== 'ferdig') {
+        tvVlMusikkPaa(false);
+        try { var j = new Audio('/lyd/veddelop/jubel.mp3'); j.volume = 0.9; var pj = j.play(); if (pj && pj.catch) pj.catch(function () {}); } catch (e) {}
+        var vinner = v.vinner; setTimeout(function () { tvVlSt.sist = 0; if (vinner) tvVlSi('vinner-' + TVVL_FIL[vinner], true); }, 900);
+        setTimeout(function () { tvVlSt.sist = 0; tvVlSi('seier', true); }, 3600);
+      }
       tvVlSt.fase = f;
     }
     function vlScene(d, s) {

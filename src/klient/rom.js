@@ -292,7 +292,10 @@ export function startRom(LEKNAVN, LANG) {
     var nye = (ny.utdelinger || []).filter(function (u) { return sisteUtNr !== null && u.nr > sisteUtNr; });
     sisteUtNr = (ny.utdelinger || []).reduce(function (m, u) { return Math.max(m, u.nr || 0); }, sisteUtNr || 0);
     var fra = nye.filter(function (u) { return (u.liste || []).some(function (x) { return x.id === ny.meg; }); }).map(function (u) { return navn(u.fra); });
-    if (diff > 0 && diff < 60 && Date.now() - egenSlurkT > 2500) drikkAlarm(diff, fra);   // ikke når du fører dine egne slurker
+    if (diff > 0 && diff < 60 && Date.now() - egenSlurkT > 2500) {   // ikke når du fører dine egne slurker
+      var vent = vlUtsettTil - Date.now();
+      if (vent > 0) setTimeout(function () { drikkAlarm(diff, fra); }, vent); else drikkAlarm(diff, fra);
+    }
   }
   /** Vannrunde: et rolig blått varsel på alle telefonene – ingen straff, bare et glass vann. */
   var sisteVann = null, vannKode = '', vannEl = null, vannTimer = null;
@@ -2576,7 +2579,8 @@ export function startRom(LEKNAVN, LANG) {
   /* Veddeløpet har musikk og kommentator (public/lyd/veddelop/, laget med ElevenLabs). Vertens telefon spiller dem –
      men ikke når en TV er koblet til, for da er det TV-en som er høyttaleren. Bare når lyden er på. */
   var VL_FIL = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' };
-  var vlLydSt = { runde: 0, fase: '', leder: '', jevnt: false, sist: 0 }, vlMusikkEl = null;
+  var vlLydSt = { runde: 0, fase: '', leder: '', jevnt: false, sist: 0, n: 0, pos: null }, vlMusikkEl = null, vlUtsettTil = 0;
+  function vlVariant(navn) { return navn + (Math.random() < 0.5 ? '-a' : '-b'); }
   function vlMusikk(paa) {
     if (paa) {
       if (!vlMusikkEl) { vlMusikkEl = new Audio('/lyd/veddelop/musikk.mp3'); vlMusikkEl.loop = true; }
@@ -2585,23 +2589,35 @@ export function startRom(LEKNAVN, LANG) {
       var el = vlMusikkEl, fade = setInterval(function () { el.volume = Math.max(0, el.volume - 0.05); if (el.volume <= 0.01) { clearInterval(fade); el.pause(); el.currentTime = 0; } }, 80);
     }
   }
-  function vlSi(navn) {
-    var naa = Date.now(); if (naa - vlLydSt.sist < 2500) return false; vlLydSt.sist = naa;
+  function vlSi(navn, tving) {
+    var naa = Date.now(); if (!tving && naa - vlLydSt.sist < 2300) return false; vlLydSt.sist = naa;
     try { var a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = 0.9; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
     return true;
   }
   function vlLyd(s) {
-    if (!lyd.paa || !erVert() || tilstand.skjermPin) { vlMusikk(false); return; }
     var r = s.runde || 1, f = s.fase;
+    if (f === 'ferdig' && vlLydSt.fase !== 'ferdig') vlUtsettTil = Date.now() + 5500;   // alle venter med slurkene til jubelen er over
+    if (!lyd.paa || !erVert() || tilstand.skjermPin) { vlMusikk(false); vlLydSt.fase = f; return; }
     if (r !== vlLydSt.runde) vlLydSt = { runde: r, fase: '', leder: '', jevnt: false, sist: 0 };
-    if (f === 'lop' && vlLydSt.fase !== 'lop') { vlMusikk(true); vlLydSt.sist = 0; vlSi('start'); }
-    if (f === 'lop') {
-      var pos = s.pos || {}, best = -1, leder = '', delt = false;
-      VL_F.forEach(function (x) { var p = pos[x] || 0; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
-      if (best >= 2 && !delt && leder !== vlLydSt.leder && vlSi('leder-' + VL_FIL[leder])) vlLydSt.leder = leder;
-      if (best >= 6 && delt && !vlLydSt.jevnt && vlSi('jevnt')) vlLydSt.jevnt = true;
+    if (f === 'lop' && vlLydSt.fase !== 'lop') { vlMusikk(true); vlLydSt.sist = 0; vlSi(vlVariant('start'), true); vlLydSt.pos = Object.assign({}, s.pos || {}); }
+    if (f === 'lop' && s.n !== vlLydSt.n) {
+      // Nytt kort: hva skjedde? Tilbake-rykk først, så lederskifte, så jevnt, ellers «rykker fram»
+      vlLydSt.n = s.n;
+      var pos = s.pos || {}, forrige = vlLydSt.pos || {}, best = -1, leder = '', delt = false, tilbake = '';
+      VL_F.forEach(function (x) { var p = pos[x] || 0; if (p < (forrige[x] || 0)) tilbake = x; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
+      vlLydSt.pos = Object.assign({}, pos);
+      if (tilbake) vlSi('tilbake-' + VL_FIL[tilbake]);
+      else if (best >= 2 && !delt && leder !== vlLydSt.leder && vlSi(vlVariant('leder-' + VL_FIL[leder]))) vlLydSt.leder = leder;
+      else if (best >= 6 && delt && !vlLydSt.jevnt && vlSi(vlVariant('jevnt'))) vlLydSt.jevnt = true;
+      else if (s.sist && s.sist.f) vlSi(vlVariant('fram-' + VL_FIL[s.sist.f]));
     }
-    if (f === 'ferdig' && vlLydSt.fase !== 'ferdig') { vlMusikk(false); vlLydSt.sist = 0; if (s.vinner) vlSi('vinner-' + VL_FIL[s.vinner]); }
+    if (f === 'ferdig' && vlLydSt.fase !== 'ferdig') {
+      // I mål: jubel og «X VINNER!» først. Slurkene kommer etterpå (drikk-varselet venter).
+      vlMusikk(false); vlUtsettTil = Date.now() + 5500;
+      try { var j = new Audio('/lyd/veddelop/jubel.mp3'); j.volume = 0.8; var pj = j.play(); if (pj && pj.catch) pj.catch(function () {}); } catch (e) {}
+      var v = s.vinner; setTimeout(function () { vlLydSt.sist = 0; if (v) vlSi('vinner-' + VL_FIL[v], true); }, 900);
+      setTimeout(function () { vlLydSt.sist = 0; vlSi('seier', true); }, 3600);
+    }
     vlLydSt.fase = f;
   }
   function vlNavn(f) { return (EN ? { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' } : { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' })[f]; }
@@ -2615,7 +2631,7 @@ export function startRom(LEKNAVN, LANG) {
       if (!sp || sp.type !== 'veddelopet' || sp.fase !== 'lop') { clearInterval(vlTimer); vlTimer = null; return; }
       if (document.hidden) return;
       gjorAlltid({ handling: 'snu' });
-    }, 1000 + driverVent());
+    }, 2600 + driverVent());
   }
   function veddelopetSpill(s) {
     vlLyd(s);
