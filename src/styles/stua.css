@@ -1361,6 +1361,19 @@ button.mv-ringhode:active{transform:scale(.94)}
 .pk-hode .nr-h{width:108px;height:108px}
 .pk-hode .mv-hake{right:-4px;top:auto;bottom:4px;width:30px;height:30px;font-size:16px}
 .pk-merke{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;padding:4px 8px;border-radius:10px;border:2px solid var(--ink);background:var(--card)}
+/* Muldvarpen: stem på hoder, gjett blant fire, fasit */
+.mv-stem{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;width:100%;margin:6px 0 10px}
+.mv-stemknapp{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px 8px;font:inherit;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--hard);position:relative;cursor:pointer}
+.mv-stemknapp .nr-h{width:44px;height:44px}
+.mv-stemknapp b{font-size:13px;font-weight:900;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mv-stemknapp small{font-size:11px;color:var(--muted)}
+.mv-stemknapp[aria-pressed="true"]{background:var(--gul);transform:translate(2px,2px);box-shadow:1px 1px 0 var(--hard)}
+.mv-stemknapp.meg{opacity:.55;cursor:default}
+.mv-stemknapp.muldvarp{background:var(--rosa)}
+.mv-stemknapp .mv-hake{position:absolute;top:-6px;right:-6px}
+.mv-valg{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin:8px 0 12px}
+.mv-valg .btn{min-height:56px;justify-content:center;font-size:16px}
+.mv-fasit{width:100%;text-align:center;font-size:17px;line-height:1.4;margin:6px 0}
 /* Hvem er jeg: kategorier og forslag til den som skriver, spørsmål til den som gjetter */
 .pk-forslag{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 10px;width:100%}
 .pk-forslag button:not(.linkbtn){display:flex;flex-direction:column;align-items:center;gap:1px;font:inherit;font-size:14px;font-weight:800;padding:7px 12px;border-radius:14px;border:2px solid var(--ink);background:var(--mint);color:var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--hard)}

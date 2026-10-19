@@ -777,32 +777,27 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     /* ---------- Muldvarpen: ringen med pilene og kortene verten snur. Aldri stedet før slutt. ---------- */
     var tvMvSett = {};
     function mvScene(d, s) {
-      var m = s.sos, alle = d.spillere || [], f = m.fase, kort = m.kort || {}, r = m.runde || 1, vn = esc(navn(d.vert));
-      var chip = f === 'ring' ? T('Spør i ring', 'Ask around') : f === 'peke' ? T('Snu et kort', 'Flip a card') : f === 'feil' ? T('Uskyldig!', 'Innocent!') : f === 'riktige' || m.utfall === 'fanget' ? T('Tatt!', 'Caught!') : T('Slapp unna', 'Got away');
-      var pekt = m.pekt ? esc(navn(m.pekt)) : '', merk = (m.merket || []).map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and '));
-      var tittel = f === 'ring' ? esc(navn(m.tur)) + T(' spør nå', ' is asking') : f === 'peke' ? T('Hvem blir pekt ut?', 'Who gets called out?') : f === 'feil' ? pekt + T(' var uskyldig', ' was innocent')
-        : f === 'riktige' ? pekt + T(' er muldvarpen!', ' is the mole!') : esc(navn(m.spion)) + T(' var muldvarpen', ' was the mole');
-      var linje = f === 'ring' ? T('Den som får et spørsmål, spør videre. Tror du at du vet hvem det er? Si det høyt – ', 'Whoever gets asked asks next. Think you know? Say it out loud – ') + vn + T(' snur kortet.', ' flips the card.')
-        : f === 'peke' ? vn + T(' snur kortet …', ' is flipping the card …') : f === 'feil' ? T('De som pekte på ', 'Those who called ') + pekt + T(' drikker 2. Ringen fortsetter.', ' drink 2. The round goes on.')
-        : f === 'riktige' ? vn + T(' haker av hvem som gjettet riktig …', ' is ticking off who guessed right …')
-        : T('Stedet var ', 'The location was ') + '<b class="tvmv-sted">' + esc(m.sted || '') + '</b>. ' + (m.utfall === 'fanget' ? esc(navn(m.spion)) + T(' drikker 3', ' drinks 3') + (merk ? ' – ' + merk + T(' deler ut 1', ' hand out 1') : '') + '.' : esc(navn(m.spion)) + T(' gjettet stedet – alle andre drikker 2.', ' guessed the location – everyone else drinks 2.'));
+      var m = s.sos, alle = d.spillere || [], f = m.fase, vn = esc(navn(d.vert)), tema = m.temaNavn ? (LANG === 'en' ? m.temaNavn[1] : m.temaNavn[0]) : '';
+      var chip = f === 'snakk' ? T('Snakk sammen', 'Talk it out') : f === 'stem' ? T('Stem på telefonen', 'Vote on your phone') : f === 'gjett' || m.utfall === 'fanget' ? T('Tatt!', 'Caught!') : T('Slapp unna', 'Got away');
+      var tittel = f === 'snakk' ? esc(navn(m.starter)) + T(' begynner', ' starts') : f === 'stem' ? T('Hvem er muldvarpen?', 'Who is the mole?') : f === 'gjett' ? esc(navn(m.spion)) + T(' er muldvarpen!', ' is the mole!')
+        : T('Ordet var ', 'The word was ') + '<b class="tvmv-sted">' + esc(m.ordA || '') + '</b>';
+      var rett = Object.keys(m.stemmer || {}).filter(function (id) { return m.stemmer[id] === m.spion && id !== m.spion; }).map(function (id) { return esc(navn(id)); });
+      var linje = f === 'snakk' ? (tema ? T('Tema: ', 'Theme: ') + '<b>' + esc(tema) + '</b>. ' : '') + T('Én ting om ordet ditt hver, to runder rundt. Ikke si ordet. ', 'One thing about your word each, two rounds around. Don’t say the word. ') + vn + T(' sier fra når dere stemmer.', ' calls the vote.')
+        : f === 'stem' ? (m.harStemt || []).length + T(' av ', ' of ') + alle.length + T(' har stemt', ' have voted')
+        : f === 'gjett' ? T('Nå gjetter hen ordet deres …', 'Now they’re guessing your word …')
+        : esc(navn(m.spion)) + T(' hadde ', ' had ') + '<b>' + esc(m.ordB || '') + '</b>. ' + (m.utfall === 'fanget' ? esc(navn(m.spion)) + T(' drikker 3', ' drinks 3') + (rett.length ? ' – ' + rett.join(T(' og ', ' and ')) + T(' deler ut 1', ' hand out 1') : '') + '.'
+          : m.utfall === 'spion-gjettet' ? esc(navn(m.spion)) + T(' gjettet ordet – alle andre drikker 2.', ' guessed the word – everyone else drinks 2.') : esc(navn(m.spion)) + T(' slapp unna – alle andre drikker 2.', ' got away – everyone else drinks 2.'));
       var n = alle.length, pos = {};
       alle.forEach(function (p, i) { var v = -Math.PI / 2 + (i / n) * Math.PI * 2; pos[p.id] = [50 + 36 * Math.cos(v), 50 + 36 * Math.sin(v)]; });
-      var piler = f === 'ring' || f === 'peke' ? (m.spor || []).filter(function (x) { return pos[x[0]] && pos[x[1]]; }).map(function (x, i, l) {
-        var a = pos[x[0]], b = pos[x[1]], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1, k = Math.min(0.4, 12 / len);
-        var sx = a[0] + dx * k, sy = a[1] + dy * k, ex = b[0] - dx * k, ey = b[1] - dy * k, mx = (sx + ex) / 2 - dy * 0.12, my = (sy + ey) / 2 + dx * 0.12;
-        return '<path class="' + (i === l.length - 1 ? 'siste' : '') + '" d="M' + sx.toFixed(1) + ' ' + sy.toFixed(1) + 'Q' + mx.toFixed(1) + ' ' + my.toFixed(1) + ' ' + ex.toFixed(1) + ' ' + ey.toFixed(1) + '" marker-end="url(#tvmvSpiss)"/>';
-      }).join('') : '';
       var hoder = alle.map(function (p) {
-        var id = p.id, k = kort[id], ny = k && !tvMvSett[r + ':' + id]; if (k) tvMvSett[r + ':' + id] = 1;
-        var tur = f === 'ring' && m.tur === id, merket = (m.merket || []).indexOf(id) !== -1;
-        return '<div class="tvmv-plass" style="left:' + pos[id][0].toFixed(1) + '%;top:' + pos[id][1].toFixed(1) + '%"><span class="tvmv-hode' + (tur ? ' tur' : '') + '">' + tvHode(d, id, '', k === 'muldvarp' ? 'oi' : '') + '</span>' +
-          '<b>' + esc(p.navn) + '</b><span class="tvmv-kort' + (k ? ' snudd ' + k : '') + (ny ? ' inn' : '') + '"><span class="snu"><i class="bak">?</i><i class="fram">' + (k === 'muldvarp' ? T('Muldvarp!', 'Mole!') : T('Uskyldig', 'Innocent')) + '</i></span></span>' +
-          (merket ? '<em class="tvmv-hake">✓</em>' : '') + '</div>';
+        var id = p.id, erSpion = (f === 'gjett' || f === 'fasit') && m.spion === id, stemt = f === 'stem' && (m.harStemt || []).indexOf(id) !== -1, til = f === 'fasit' && m.stemmer ? m.stemmer[id] : null;
+        return '<div class="tvmv-plass" style="left:' + pos[id][0].toFixed(1) + '%;top:' + pos[id][1].toFixed(1) + '%"><span class="tvmv-hode' + (f === 'snakk' && m.starter === id ? ' tur' : '') + '">' + tvHode(d, id, '', erSpion ? 'oi' : '') + '</span>' +
+          '<b>' + esc(p.navn) + '</b>' + (erSpion ? '<span class="tvmv-kort snudd muldvarp inn"><span class="snu"><i class="fram">' + T('Muldvarp!', 'Mole!') + '</i></span></span>' : '') +
+          (til ? '<small class="tvmv-til">→ ' + esc(navn(til)) + '</small>' : '') + (stemt ? '<em class="tvmv-hake">✓</em>' : '') + '</div>';
       }).join('');
-      return '<div class="tv-scene tvnr tvmv"><div class="tvmv-tekst"><div class="tvnr-hode"><p class="tv-etikett">' + T('Muldvarpen', 'The mole') + '</p><span class="tvlh-chip' + (f === 'feil' ? ' rosa' : f === 'riktige' || f === 'fasit' ? ' hvit' : '') + '">' + chip + '</span></div>' +
+      return '<div class="tv-scene tvnr tvmv"><div class="tvmv-tekst"><div class="tvnr-hode"><p class="tv-etikett">' + T('Muldvarpen', 'The mole') + '</p><span class="tvlh-chip' + (f === 'gjett' || f === 'fasit' ? ' hvit' : '') + '">' + chip + '</span></div>' +
         '<h1 class="tv-sporsmal tvmv-tittel">' + tittel + '</h1><p class="tv-stor tvmv-linje">' + linje + '</p></div>' +
-        '<div class="tvmv-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><marker id="tvmvSpiss" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>' + piler + '</svg>' + hoder + '</div></div>';
+        '<div class="tvmv-ring"><svg viewBox="0 0 100 100" aria-hidden="true"></svg>' + hoder + '</div></div>';
     }
     /* ---------- Hvem er jeg?: hodene med lapp i panna. Bare lappene som er gjettet vises (ellers ser du din egen). ---------- */
     var tvPkSett = {};
@@ -1814,6 +1809,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tv-ut-panel h1{margin:0;font-family:var(--serif);font-weight:560;font-size:3.4em;letter-spacing:-.03em;line-height:1.02}
     .tv-ut-panel h1 em{font-style:italic;font-weight:440;color:var(--ink);background:var(--gold);padding:0 .18em;border-radius:.15em}
     .tv-ut-glass{display:flex;gap:.6vw}
+    .tvmv-til{display:block;font-size:.8em;opacity:.8}
     .tv-ut-glass svg{width:2em;height:2.4em;fill:var(--gold);stroke:var(--gold);stroke-width:1.8;stroke-linejoin:round;animation:tvAldriNavn 280ms cubic-bezier(.23,1,.32,1) both;animation-delay:calc(200ms + var(--i, 0) * 70ms)}
     .tv-ut-navn{display:flex;flex-wrap:wrap;gap:1.4vh 1vw;justify-content:center}
     .tv-ut-navn span{padding:1.1vh 1.4vw;border-radius:999px;background:var(--accent);color:var(--ink2);font-size:1.5em;font-weight:900;letter-spacing:-.02em;animation:tvAldriNavn 300ms cubic-bezier(.23,1,.32,1) both;animation-delay:calc(500ms + min(var(--i, 0), 10) * 80ms)}

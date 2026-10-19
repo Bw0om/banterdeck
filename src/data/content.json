@@ -3951,11 +3951,12 @@
       "only": "no",
       "rules": {
        "no": [
-        "Alle får samme sted på telefonen – for eksempel «Hytta på fjellet» – bortsett fra én: muldvarpen.",
-        "Dere stiller hverandre spørsmål på omgang uten å avsløre stedet. Muldvarpen prøver å henge med og gjette hvor dere er.",
-        "Etter tre minutter – eller når verten vil – stemmer alle på hvem som er muldvarpen.",
-        "b|Tar dere muldvarpen, får hen én sjanse til å gjette stedet. Gjetter hen feil: muldvarpen drikker tre.",
-        "b|Slipper muldvarpen unna eller gjetter stedet: alle andre drikker to."
+        "Alle får samme hemmelige ord på telefonen – for eksempel «Pizza» – bortsett fra én: muldvarpen får et nesten likt ord, «Taco». Ingen vet om de er muldvarpen.",
+        "Rundt bordet sier hver én ting om ordet sitt, to runder. Ikke si ordet. Vær vag nok til at muldvarpen ikke skjønner det, men tydelig nok til at de andre stoler på deg.",
+        "Verten sier fra når dere skal stemme. Alle stemmer på telefonen på hvem som har et annet ord.",
+        "b|Tar dere muldvarpen, får hen én sjanse til å gjette ordet deres blant fire. Bom: muldvarpen drikker tre, og de som stemte rett deler ut én.",
+        "b|Treffer muldvarpen, eller slipper unna: alle andre drikker to.",
+        "Åtte temaer å velge mellom: mat og drikke, kjendiser, ting, steder, dyr, film og serier, typisk norsk og drøyt (18+). Rundt 440 ordpar."
        ]
       },
       "fit": {
