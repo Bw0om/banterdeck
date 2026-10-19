@@ -632,7 +632,9 @@ export function startRom(LEKNAVN, LANG) {
       var nf1 = document.getElementById(medKode ? 'romNavn1' : 'romNavn2'); if (v.length === 4 && nf1 && !nf1.value) nf1.focus();
     });
     // Appen: «Lag rom» på Hjem (?lag=1) og «Spill i rommet» på en lekeside (?lek=…) lager rommet med en gang når navnet er kjent
-    var autoLag = erApp && (qs.get('lag') === '1' || onsketLek) && navn && !kode && !melding;
+    // Bare første gang siden vises: forlater du rommet, skal du stå på startskjermen – ikke havne i et nytt rom
+    var autoLag = erApp && (qs.get('lag') === '1' || onsketLek) && navn && !kode && !melding && !autoLagBrukt;
+    if (autoLag) autoLagBrukt = true;
     if (autoLag) setTimeout(function () { var f = document.getElementById('lagSkjema'); if (f) f.requestSubmit(); }, 0);
     document.getElementById('lagSkjema').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -648,7 +650,7 @@ export function startRom(LEKNAVN, LANG) {
     meldSkjerm(autoLag ? 'laster' : 'start', { navn: navn, kode: medKode ? kode : '', fortsett: sistRom() || '', melding: melding || '' });
   }
   /** Sier fra til app-skallet hvilken skjerm siden viser (start / laster / rom), så den native startskjermen kan vises eller gå bort */
-  var sistSkjerm = '';
+  var sistSkjerm = '', autoLagBrukt = false;
   function meldSkjerm(skjerm, ekstra) {
     var n = skjerm + '|' + JSON.stringify(ekstra || {}); if (n === sistSkjerm) return; sistSkjerm = n;
     try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: Object.assign({ skjerm: skjerm }, ekstra || {}) })); } catch (e) {}
