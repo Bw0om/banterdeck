@@ -133,7 +133,8 @@ export function startRom(LEKNAVN, LANG) {
     clearTimeout(timer);
     if (!root.isConnected || !meg) return;
     // Med sanntid kommer endringene med én gang, så da sjekker vi bare av og til for sikkerhets skyld
-    var ms = document.hidden ? (rt.ok ? 20000 : 6000) : rt.ok ? 6000 : Math.min(1500 + feilTeller * 1500, 8000);
+    // Strømsparing: sjeldnere når sanntid virker (endringer kommer uansett med én gang), og mye sjeldnere når fanen er skjult
+    var ms = document.hidden ? (rt.ok ? 45000 : 10000) : rt.ok ? 12000 : Math.min(1500 + feilTeller * 1500, 8000);
     timer = setTimeout(hent, ms);
   }
 
@@ -437,7 +438,8 @@ export function startRom(LEKNAVN, LANG) {
     if (!vervSjekket && d.spill && (d.spillere || []).length >= 2 && window.BDVerv) { vervSjekket = true; window.BDVerv.fullfor(); }
     if (onsketGjeng && meg && d.vert === d.meg && !d.gjeng) { var gid = onsketGjeng; onsketGjeng = ''; gjorAlltid({ handling: 'gjeng', gjengId: gid }); }
     rtKobl();
-    holdVaaken();
+    // Skjermen holdes våken under en lek, og for verten i lobbyen (koden/QR-en står på skjermen) – ikke for gjester som venter
+    if (d.spill || d.vert === d.meg) holdVaaken(); else slippVaaken();
     tegn();
   }
   // Byttet til det andre språket midt i rommet? Serveren husker språket fra da man ble med, så si fra.
@@ -481,11 +483,11 @@ export function startRom(LEKNAVN, LANG) {
     }).catch(function () { vaaken.venter = false; });
     if (!vaaken.t) vaaken.t = setInterval(function () {
       if (!root.isConnected) { slippVaaken(); clearInterval(vaaken.t); vaaken.t = null; return; }
-      if (vaaken.las && Date.now() - vaaken.sist > 10 * 60 * 1000) slippVaaken();
+      if (vaaken.las && Date.now() - vaaken.sist > 5 * 60 * 1000) slippVaaken();
     }, 60 * 1000);
   }
   function slippVaaken() { var l = vaaken.las; vaaken.las = null; if (l) { try { l.release(); } catch (e) {} } }
-  root.addEventListener('click', function () { if (meg) holdVaaken(); });
+  root.addEventListener('click', function () { if (meg && tilstand && (tilstand.spill || tilstand.vert === tilstand.meg)) holdVaaken(); });
   if (window.__bdQrLytter) document.removeEventListener('bdqr-klar', window.__bdQrLytter);
   window.__bdQrLytter = function () { if (tilstand && root.isConnected && root.querySelector('.rom-qr') && !root.querySelector('.rom-qrbilde')) tegn(); };
   document.addEventListener('bdqr-klar', window.__bdQrLytter);

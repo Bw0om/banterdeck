@@ -979,3 +979,10 @@ html.is-app.i-rom:not(.i-spill) .rom-kode{font-size:28px!important;letter-spacin
 /* Nyhetsrunden i venterommet: velg uke før start */
 .rom-nr-uke{display:flex;flex-direction:column;gap:6px;margin:14px 0 12px}
 .rom-nr-uke select{min-height:48px;padding:10px 14px;border-radius:14px;border:2px solid var(--ink2);background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:16px}
+
+/* Strømsparing i appen: uskarphet (backdrop-filter) bak faste felt tegnes om for hver eneste rulling og koster mye på telefonen –
+   heldekkende farge i stedet. Hjem beholder den oransje stripa. */
+html.is-app body::before{background:rgb(var(--bg-rgb));-webkit-backdrop-filter:none;backdrop-filter:none}
+html.is-app body:has(.st-forside)::before{background:var(--oransje)}
+html.is-app .app-tabbar,html.is-app .tabbar,html.is-app .minibar,html.is-app .lk-filter,html.is-app .sticky.is-stuck,html.is-app.i-spill .reak-linje{
+  -webkit-backdrop-filter:none;backdrop-filter:none;background:rgb(var(--bg-rgb))}

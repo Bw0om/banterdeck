@@ -1361,6 +1361,8 @@ button.mv-ringhode:active{transform:scale(.94)}
 .pk-hode .nr-h{width:108px;height:108px}
 .pk-hode .mv-hake{right:-4px;top:auto;bottom:4px;width:30px;height:30px;font-size:16px}
 .pk-merke{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;padding:4px 8px;border-radius:10px;border:2px solid var(--ink);background:var(--card)}
+/* Strømsparing: stua som ikke synes (blatt bort, bak en lek, skjult fane) står helt stille */
+svg.hvile *{animation-play-state:paused!important}
 /* «Si noe»: ett felt, én knapp */
 .si-skjema{display:flex;gap:8px;margin:4px 0 10px}
 .si-skjema input{flex:1;min-width:0;font:inherit;font-size:17px;padding:12px 14px;border:var(--strek) solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink)}
