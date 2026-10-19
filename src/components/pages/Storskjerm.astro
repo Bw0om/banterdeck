@@ -722,8 +722,12 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var tvSmVist = '';
     function smScene(d, s) {
       var m = s.sos, alle = d.spillere || [], n = alle.length;
+      var poeng = m.poeng || {}, vinnere = m.vinnere || [];
+      var stilling = function (stor) { return '<div class="tvsm-stilling' + (stor ? ' stor' : '') + '">' + alle.slice().sort(function (a, b) { return (poeng[b.id] || 0) - (poeng[a.id] || 0); }).map(function (p) {
+        return '<span class="' + (vinnere.indexOf(p.id) !== -1 ? 'vant' : '') + '">' + tvHode(d, p.id, '', m.svartSau === p.id ? 'oi' : '') + '<b>' + esc(p.navn) + '</b>' + (m.svartSau === p.id ? '<i>🐑</i>' : '') + '<em>' + (poeng[p.id] || 0) + '</em></span>'; }).join('') + '</div>'; };
       if (m.fase === 'slutt') return '<div class="tv-scene tvnr"><div class="tvnr-hoved"><div class="tvnr-hode"><p class="tv-etikett">' + T('Saueflokken', 'The herd') + '</p><span class="tvlh-chip">' + T('Flokken er samlet', 'The herd is home') + '</span></div>' +
-        '<h1 class="tv-sporsmal">' + T('Ferdig for denne gang!', 'That’s it for now!') + '</h1><p class="tv-stor">' + esc(navn(d.vert)) + T(' velger: spill igjen eller neste lek.', ' picks: play again or the next game.') + '</p></div></div>';
+        '<h1 class="tv-sporsmal">' + (vinnere.length ? vinnere.map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and ')) + T(' tenkte mest som flokken!', ' thought most like the herd!') : T('Ferdig for denne gang!', 'That’s it for now!')) + '</h1>' +
+        '<p class="tv-stor">' + (vinnere.length ? T('Deler ut 3 hver. ', 'Hand out 3 each. ') : '') + (m.svartSau ? esc(navn(m.svartSau)) + T(' satt igjen med den svarte sauen – drikk 2.', ' got stuck with the black sheep – drink 2.') : '') + '</p>' + stilling(true) + '</div></div>';
       var hode = '<div class="tvnr-hode"><p class="tv-etikett">' + T('Saueflokken', 'The herd') + '</p><span class="tvlh-chip' + (m.fase === 'fasit' ? ' hvit' : '') + '">' + (m.fase === 'fasit' ? T('Flokkene', 'The herds') : T('Tenk som flokken', 'Think like the herd')) + '</span></div>';
       if (m.fase !== 'fasit') return tvMedBenk('<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<h1 class="tv-sporsmal">' + esc(m.oppgave || '') + '</h1>' +
         '<p class="tv-stor">' + T('Skriv ett ord på telefonen. Står du alene, drikker du. · ', 'Write one word on your phone. Alone? You drink. · ') + (m.harSkrevet || []).length + ' / ' + n + '</p></div></div>',
@@ -739,9 +743,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         return '<div class="tvsm-flokk ' + (alene ? 'alene' : stor ? 'stor' : 'trygg') + (forste && inn ? ' inn' : '') + '" style="--f:' + (forste ? j * 800 : 0) + 'ms"><b>' + esc(g.t) + '</b>' +
           '<span class="tvsm-hoder' + (inn ? ' hopp' : '') + '">' + g.ider.map(function (id, h) { return '<span style="--h:' + h + '">' + tvHode(d, id, '', alene ? 'oi' : '') + '</span>'; }).join('') + '</span>' +
           '<small>' + (g.ingen ? T('Ingen svar · drikk 1', 'No answer · drink 1') : alene ? T('Svart får · drikk 1', 'Black sheep · drink 1') : stor ? g.ider.length + T(' i flokken', ' in the herd') : T('Trygge', 'Safe')) + '</small>' +
-          (stor ? '<em>' + T('Flokken!', 'The herd!') + '</em>' : '') + '</div>';
+          (stor ? '<em>' + T('Flokken! +1', 'The herd! +1') + '</em>' : '') + '</div>';
       }).join('');
-      return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<h1 class="tv-sporsmal tvlh-liten">' + esc(m.oppgave || '') + '</h1><div class="tvsm-flokker">' + kort + '</div></div></div>';
+      return '<div class="tv-scene tvnr"><div class="tvnr-hoved">' + hode + '<h1 class="tv-sporsmal tvlh-liten">' + esc(m.oppgave || '') + '</h1><div class="tvsm-flokker">' + kort + '</div>' + stilling(false) + '</div></div>';
     }
     /* ---------- Ukjent avsender: meldingen fra et ukjent nummer, så navnet og hodet ---------- */
     var tvHsVist = '';
@@ -1810,6 +1814,11 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     .tv-ut-panel h1 em{font-style:italic;font-weight:440;color:var(--ink);background:var(--gold);padding:0 .18em;border-radius:.15em}
     .tv-ut-glass{display:flex;gap:.6vw}
     .tvmv-til{display:block;font-size:.8em;opacity:.8}
+    .tvsm-stilling{display:flex;flex-wrap:wrap;gap:1vh 2vw;justify-content:center;margin-top:2.5vh}
+    .tvsm-stilling span{display:inline-flex;align-items:center;gap:.5vw;padding:.6vh 1.2vw;border-radius:999px;background:var(--card);border:1px solid var(--hårstrek);font-size:1.1em}
+    .tvsm-stilling.stor span{font-size:1.5em;padding:1vh 1.6vw}
+    .tvsm-stilling span.vant{background:var(--gold);color:var(--ink2)}
+    .tvsm-stilling b{font-weight:800}.tvsm-stilling em{font-style:normal;font-weight:900;font-variant-numeric:tabular-nums}.tvsm-stilling i{font-style:normal;filter:grayscale(1) brightness(.4)}
     .tv-ut-glass svg{width:2em;height:2.4em;fill:var(--gold);stroke:var(--gold);stroke-width:1.8;stroke-linejoin:round;animation:tvAldriNavn 280ms cubic-bezier(.23,1,.32,1) both;animation-delay:calc(200ms + var(--i, 0) * 70ms)}
     .tv-ut-navn{display:flex;flex-wrap:wrap;gap:1.4vh 1vw;justify-content:center}
     .tv-ut-navn span{padding:1.1vh 1.4vw;border-radius:999px;background:var(--accent);color:var(--ink2);font-size:1.5em;font-weight:900;letter-spacing:-.02em;animation:tvAldriNavn 300ms cubic-bezier(.23,1,.32,1) both;animation-delay:calc(500ms + min(var(--i, 0), 10) * 80ms)}

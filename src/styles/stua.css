@@ -1361,6 +1361,17 @@ button.mv-ringhode:active{transform:scale(.94)}
 .pk-hode .nr-h{width:108px;height:108px}
 .pk-hode .mv-hake{right:-4px;top:auto;bottom:4px;width:30px;height:30px;font-size:16px}
 .pk-merke{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;padding:4px 8px;border-radius:10px;border:2px solid var(--ink);background:var(--card)}
+/* Saueflokken: stillingen gjennom leken, og den svarte sauen */
+.sm-stilling{width:100%;display:flex;flex-direction:column;gap:6px;margin:10px 0 4px}
+.sm-stilling.liten{gap:4px;margin-top:14px}
+.sm-rad{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--card);border:2px solid var(--ink);border-radius:12px}
+.sm-stilling.liten .sm-rad{padding:4px 8px;border-width:1.5px}
+.sm-rad .nr-h{width:30px;height:30px}
+.sm-rad b{flex:1;font-size:14px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sm-rad span{font-family:var(--display);font-size:20px;font-weight:900;min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
+.sm-rad.vant{background:var(--gul)}
+.sm-svart{font-style:normal;filter:grayscale(1) brightness(.35);font-size:16px}
+.sm-stilling .small{margin:4px 0 0;text-align:center}
 /* Muldvarpen: stem på hoder, gjett blant fire, fasit */
 .mv-stem{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;width:100%;margin:6px 0 10px}
 .mv-stemknapp{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px 8px;font:inherit;color:var(--ink);background:var(--card);border:var(--strek) solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--hard);position:relative;cursor:pointer}
