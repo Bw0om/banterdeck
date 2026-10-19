@@ -3918,11 +3918,14 @@ export function startRom(LEKNAVN, LANG) {
     [T('Er jeg et dyr eller en ting?', 'Am I an animal or a thing?'), [T('Kan man spise meg?', 'Can you eat me?'), T('Er jeg større enn en bil?', 'Am I bigger than a car?'), T('Finnes jeg i dette rommet?', 'Am I in this room?'), T('Har jeg fire bein?', 'Do I have four legs?'), T('Bor jeg i vann?', 'Do I live in water?'), T('Bruker folk meg hver dag?', 'Do people use me every day?')]],
     [T('Snevre inn', 'Narrow it down'), [T('Er jeg over 50 år?', 'Am I over 50?'), T('Har jeg vunnet noe stort?', 'Have I won something big?'), T('Er jeg mest kjent i Norge?', 'Am I mostly known in Norway?'), T('Har jeg vært i nyhetene i år?', 'Have I been in the news this year?'), T('Begynner navnet mitt på A–M?', 'Does my name start with A–M?'), T('Ville jeg passet inn på dette vorset?', 'Would I fit in at this pre-party?')]]
   ];
-  var pkKat = '', pkForslag = null;
+  var pkKat = '', pkForslag = null, pkValgtForslag = '';
   function pkKatNavn(id) { var k = PK_KAT.find(function (x) { return x[0] === id; }); return k ? (EN ? k[2] : k[1]) : ''; }
+  /** Tre forslag fra hele bunken, fra ulike kategorier. Bruker du et forslag, følger kategorien med som hint til den som gjetter. */
   function pkTrekkForslag() {
-    var k = PK_KAT.find(function (x) { return x[0] === pkKat; }), kilde = k && k[3].length ? k[3] : PK_KAT.reduce(function (a, x) { return a.concat(x[3]); }, []);
-    return kilde.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
+    var alle = []; PK_KAT.forEach(function (k) { k[3].forEach(function (t) { alle.push({ t: t, kat: k[0] }); }); });
+    var ut = [], brukt = {};
+    alle.sort(function () { return Math.random() - 0.5; }).forEach(function (f) { if (ut.length < 3 && !brukt[f.kat]) { ut.push(f); brukt[f.kat] = 1; } });
+    return ut;
   }
   function pkSporsmalArk() {
     lukkArk();
@@ -3937,14 +3940,12 @@ export function startRom(LEKNAVN, LANG) {
     var alle = (tilstand.spillere || []).filter(function (p) { return !s.med || !s.med.length || s.med.indexOf(p.id) !== -1; }), meg = tilstand.meg, r = s.runde || 1;
     if (s.fase === 'skriv') {
       var mal = s.mitMaal, mitt = mal && s.ord[mal] ? s.ord[mal].t : '', sk = r + ':' + mitt, klask = mitt && pkSkrevetVist !== sk; if (mitt) pkSkrevetVist = sk;
-      return jaTopp(T('Hvem er jeg?', 'Who am I?'), T('Skriv en lapp', 'Write a note'), true, true) +
+      return jaTopp(T('Lappen i panna', 'The forehead note'), T('Skriv en lapp', 'Write a note'), true, true) +
         (mal ? '<div class="pk-skriv"><span class="pk-stor">' + nrHode(mal) + pkLapp(mitt || '…', 128, 26, (mitt ? '' : 'tom') + (klask ? ' klask' : ''), 'pkLapp') + '</span>' +
           '<p>' + (mitt ? T('Klask! Den sitter.', 'Slap! It’s on.') : T('Til ', 'For ') + esc(navn(mal))) + '</p></div>' +
-          (mitt ? '' : '<p class="rom-etikett">' + T('Velg kategori (hint til den som gjetter)', 'Pick a category (a hint for the guesser)') + '</p><div class="pk-kats">' + PK_KAT.map(function (k) {
-            return '<button type="button" data-g="pk-kat" data-k="' + k[0] + '" aria-pressed="' + (pkKat === k[0]) + '">' + esc(EN ? k[2] : k[1]) + '</button>'; }).join('') + '</div>' +
-            (pkForslag ? '<div class="pk-forslag">' + pkForslag.map(function (f) { return '<button type="button" data-g="pk-fyll" data-t="' + esc(f) + '">' + esc(f) + '</button>'; }).join('') +
+          (mitt ? '' : (pkForslag ? '<div class="pk-forslag">' + pkForslag.map(function (f) { return '<button type="button" data-g="pk-fyll" data-t="' + esc(f.t) + '" data-k="' + f.kat + '">' + esc(f.t) + '<small>' + esc(pkKatNavn(f.kat)) + '</small></button>'; }).join('') +
               '<button type="button" class="linkbtn" data-g="pk-forslag">' + T('Nye forslag', 'New ideas') + '</button></div>'
-              : '<p><button type="button" class="linkbtn" data-g="pk-forslag">' + T('Gi meg forslag', 'Give me ideas') + '</button></p>')) +
+              : '<p><button type="button" class="linkbtn" data-g="pk-forslag">' + T('Tom i hodet? Få forslag', 'Stuck? Get ideas') + '</button></p>')) +
           '<form class="sm-skjema' + (mitt ? '' : ' stor') + '" id="sosSkjema">' + (mitt ? '' : '<label for="sosInput">' + T('Person, figur eller ting', 'Person, character or thing') + '</label>') +
             '<input id="sosInput" maxlength="40" autocomplete="off" enterkeyhint="send" placeholder="' + (mitt ? T('Bytt ord …', 'Change word …') : T('F.eks. Elvis', 'E.g. Elvis')) + '">' +
             '<button class="' + (mitt ? 'btn ghost' : 'rom-stor-knapp') + '" type="submit">' + (mitt ? T('Bytt', 'Change') : T('Klask den på', 'Slap it on')) + '</button></form>' : '') +
@@ -3968,11 +3969,11 @@ export function startRom(LEKNAVN, LANG) {
         '<b>' + (erMeg ? T('Du', 'You') : esc(p.navn)) + '</b>' + (fersk ? '' : under) + knapp + '</div>';
     }).join('');
     clearTimeout(pkTimer); if (angreMulig) pkTimer = setTimeout(tegn, 1000);
-    if (spill) return jaTopp(T('Hvem er jeg?', 'Who am I?'), T('Hvem er du?', 'Who are you?'), true, false) +
+    if (spill) return jaTopp(T('Lappen i panna', 'The forehead note'), T('Hvem er du?', 'Who are you?'), true, false) +
       '<p class="mv-hjelp liten">' + T('Still ja/nei-spørsmål på omgang. Nei = neste. Trykk «Gjettet!» når noen klarer det.', 'Take turns asking yes/no questions. No = next. Tap “Got it!” when someone gets it.') + '</p>' +
       '<div class="pk-grid">' + kort + '</div>' +
       ((s.gjettet || []).indexOf(meg) === -1 ? '<p class="pk-hjelp"><button type="button" class="btn ghost small" data-g="pk-sporsmal">❓ ' + T('Trenger du spørsmål?', 'Need questions?') + '</button></p>' : '');
-    return jaTopp(T('Hvem er jeg?', 'Who am I?'), T('Runden er over', 'Round over'), false, false) +
+    return jaTopp(T('Lappen i panna', 'The forehead note'), T('Runden er over', 'Round over'), false, false) +
       (s.sist ? '<div class="hs-dom feil"><b>' + esc(navn(s.sist)) + T(' ble sist – drikk 3', ' came last – drink 3') + '</b></div>' : '') +
       '<div class="pk-grid">' + kort + '</div>' +
       lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye lapper – teller i kvelden', 'New notes – counts tonight')]]);
@@ -5228,7 +5229,7 @@ export function startRom(LEKNAVN, LANG) {
       var i = document.getElementById('sosInput'), t = i.value.trim(); if (!t) return;
       var typ = tilstand.spill && tilstand.spill.type;
       var hd = { hvemskrev: 'hs-skriv', bloff: 'bf-skriv', samme: 'sm-skriv', pannekort: 'pk-skriv' }[typ]; if (!hd) return;
-      i.value = ''; i.blur(); gjorAlltid(typ === 'pannekort' ? { handling: hd, tekst: t, kat: pkKat } : { handling: hd, tekst: t });
+      i.value = ''; i.blur(); gjorAlltid(typ === 'pannekort' ? { handling: hd, tekst: t, kat: t === pkValgtForslag ? pkKat : '' } : { handling: hd, tekst: t });
     });
     var lovS = document.getElementById('lovSkjema');
     if (lovS) lovS.addEventListener('submit', function (e) { e.preventDefault(); var i = document.getElementById('lovInput'), t = i.value.trim(); if (!t) return; if (!confirm(T('Foreslå loven «' + t + '»?', 'Propose the law “' + t + '”?'))) return; gjor({ handling: 'lov-forslag', tekst: t }); });
@@ -5495,9 +5496,8 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'sp-stem') return gjor({ handling: 'sp-stem', hvem: b.dataset.paa });
     if (g === 'sp-gjett') return gjor({ handling: 'sp-gjett', sted: b.dataset.sted });
     if (g === 'bf-stem') return gjor({ handling: 'bf-stem', i: Number(b.dataset.i) });
-    if (g === 'pk-kat') { pkKat = pkKat === b.dataset.k ? '' : b.dataset.k; pkForslag = null; return tegn(); }
     if (g === 'pk-forslag') { pkForslag = pkTrekkForslag(); return tegn(); }
-    if (g === 'pk-fyll') { var inp = document.getElementById('sosInput'); if (inp) { inp.value = b.dataset.t; inp.focus(); } return; }
+    if (g === 'pk-fyll') { var inp = document.getElementById('sosInput'); if (inp) { inp.value = b.dataset.t; pkValgtForslag = b.dataset.t; pkKat = b.dataset.k || ''; inp.focus(); } return; }
     if (g === 'pk-sporsmal') return pkSporsmalArk();
     if (g === 'pk-riktig') return gjor({ handling: 'pk-riktig', hvem: b.dataset.paa });
     if (g === 'pk-angre') return gjor({ handling: 'pk-angre', hvem: b.dataset.paa });
