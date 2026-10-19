@@ -11,3 +11,6 @@ app-www/
 
 # graphify: kunnskapsgrafen bygges lokalt (graphify update .)
 graphify-out/
+
+# Genererte designfiler (lydpalett o.l.) – de valgte kopieres inn i public/
+.design/

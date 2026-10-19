@@ -212,9 +212,25 @@ export function startRom(LEKNAVN, LANG) {
   function horn(t0, varighet) {
     [392, 396, 494, 498, 587].forEach(function (f) { tone(f * 0.97, t0, varighet, 'sawtooth', 0.06, f); });
   }
+  /* Lydpaletten: små, rolige lyder laget for appen (public/lyd/, valgt etter lytting). Trykk, hjul-tikk, din tur, kort,
+     ringen røk og drikk. Lydene som ikke har en fil ennå (nedtelling, lunte, bombe), lages fortsatt som toner under. */
+  var LYDFIL = { tikk: 'hjul', grip: 'trykk', pek: 'trykk', tur: 'tur', pop: 'kort', svar: 'kort', ding: 'kort', knus: 'knus', bom: 'knus', slurk: 'slurk' };
+  var lydFiler = {}, lydSist = {};
+  function lydFil(navn) {
+    if (!lydFiler[navn]) { var a = new Audio('/lyd/' + navn + '.mp3'); a.preload = 'auto'; a.volume = navn === 'hjul' || navn === 'trykk' ? 0.45 : 0.6; lydFiler[navn] = a; }
+    return lydFiler[navn];
+  }
+  function spillFil(navn) {
+    var naa = Date.now(); if (naa - (lydSist[navn] || 0) < 40) return true;   // hjulet tikker aldri tettere enn dette
+    lydSist[navn] = naa;
+    try { var a = lydFil(navn); a.currentTime = 0; var p = a.play(); if (p && p.catch) p.catch(function () {}); return true; } catch (e) { return false; }
+  }
+  if (lyd.paa) setTimeout(function () { Object.keys(LYDFIL).forEach(function (k) { lydFil(LYDFIL[k]); }); }, 1500);   // last dem i bakgrunnen
   function spillLyd(navn, n) {
     try { document.dispatchEvent(new CustomEvent('mv-lyd', { detail: navn })); } catch (e) {}   // appen: vibrasjon som følger lyden
-    if (!lyd.paa || !lydCtx()) return;
+    if (!lyd.paa) return;
+    if (LYDFIL[navn] && spillFil(LYDFIL[navn])) return;
+    if (!lydCtx()) return;
     // Sofa-nedtelling: 3 – 2 – 1 stiger i tone, og «NÅ!» er et kort, lyst støt alle hører
     if (navn === 'tell') { var f = [0, 784, 659, 523][n] || 523; tone(f, 0, 0.12, 'square', 0.07); tone(f / 2, 0, 0.16, 'sine', 0.22); }
     if (navn === 'naa') { tone(1047, 0, 0.32, 'square', 0.08); tone(1568, 0, 0.32, 'triangle', 0.14); stoy(0, 0.06, 0.25, 3000, 'bandpass'); }
