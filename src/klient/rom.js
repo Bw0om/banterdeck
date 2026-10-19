@@ -3897,6 +3897,41 @@ export function startRom(LEKNAVN, LANG) {
   function pkLapp(tekst, bredde, maks, kl, id) {
     return '<span class="pk-lapp' + (kl ? ' ' + kl : '') + '"' + (id ? ' id="' + id + '"' : '') + ' style="width:' + bredde + 'px;font-size:' + passFont(tekst, bredde, maks) + 'px">' + esc(tekst) + '</span>';
   }
+  /* Hvem er jeg: kategorier med forslag til den som skriver, og spørsmål å stille for den som gjetter.
+     Kategorien du velger, følger lappen og vises som hint til den som skal gjette. */
+  var PK_KAT = [
+    ['kjendis', 'Kjendis', 'Celebrity', ['Beyoncé', 'Elon Musk', 'Dolly Parton', 'Zlatan', 'Taylor Swift', 'Tom Cruise', 'Rihanna', 'Leonardo DiCaprio', 'Oprah', 'Gordon Ramsay']],
+    ['norsk', 'Norsk kjendis', 'Norwegian celebrity', ['Erling Braut Haaland', 'Kygo', 'Petter Northug', 'Else Kåss Furuseth', 'Kristofer Hivju', 'Jonas Gahr Støre', 'Atle Antonsen', 'Kronprins Haakon', 'Ingrid Gjessing Linhave', 'Herman Flesvig']],
+    ['figur', 'Film- og seriefigur', 'Film & TV character', ['Harry Potter', 'Darth Vader', 'Shrek', 'Homer Simpson', 'Barbie', 'Jack Sparrow', 'Hermine Grang', 'Walter White', 'Forrest Gump', 'Wednesday Addams']],
+    ['tegne', 'Tegnefilm og barne-TV', 'Cartoons & kids’ TV', ['Pippi Langstrømpe', 'Donald Duck', 'Pikachu', 'Peppa Gris', 'Spider-Man', 'Elsa fra Frost', 'Ole Brumm', 'Kaptein Sabeltann', 'SpongeBob', 'Postmann Pat']],
+    ['idrett', 'Idrettsstjerne', 'Sports star', ['Cristiano Ronaldo', 'Serena Williams', 'Magnus Carlsen', 'Therese Johaug', 'Usain Bolt', 'Casper Ruud', 'Marit Bjørgen', 'Lionel Messi', 'Ada Hegerberg', 'Michael Jordan']],
+    ['musikk', 'Musiker', 'Musician', ['Elvis', 'Madonna', 'Eminem', 'Morten Harket', 'Adele', 'Bob Marley', 'Astrid S', 'Freddie Mercury', 'Karpe', 'Britney Spears']],
+    ['historisk', 'Historisk person', 'Historical figure', ['Napoleon', 'Kleopatra', 'Leonardo da Vinci', 'Roald Amundsen', 'Albert Einstein', 'Gandhi', 'Olav den hellige', 'Marie Curie', 'Julius Cæsar', 'Henrik Ibsen']],
+    ['dyr', 'Dyr', 'Animal', ['Elefant', 'Pingvin', 'Elg', 'Delfin', 'Katt', 'Ørn', 'Skilpadde', 'Laks', 'Sjiraff', 'Humle']],
+    ['ting', 'Ting', 'Thing', ['Tannbørste', 'Kaffe', 'Ostehøvel', 'Sofa', 'Mobiltelefon', 'Boblebad', 'Paraply', 'Ski', 'Toalettpapir', 'Grandiosa']],
+    ['rommet', 'Noen her i rommet', 'Someone in the room', []]
+  ];
+  var PK_SPM = [
+    [T('Begynn bredt', 'Start broad'), [T('Er jeg en ekte person?', 'Am I a real person?'), T('Er jeg et menneske?', 'Am I human?'), T('Lever jeg?', 'Am I alive?'), T('Er jeg en mann?', 'Am I a man?'), T('Er jeg norsk?', 'Am I Norwegian?'), T('Kjenner alle her meg?', 'Does everyone here know me?')]],
+    [T('Finn feltet', 'Find the field'), [T('Er jeg kjent fra TV eller film?', 'Am I known from TV or film?'), T('Er jeg kjent fra musikk?', 'Am I known from music?'), T('Er jeg kjent fra idrett?', 'Am I known from sports?'), T('Er jeg fra en tegnefilm?', 'Am I from a cartoon?'), T('Finnes jeg i virkeligheten?', 'Do I exist in real life?'), T('Er jeg fra før år 2000?', 'Am I from before the year 2000?'), T('Har jeg vært med i et realityprogram?', 'Have I been on a reality show?')]],
+    [T('Er jeg et dyr eller en ting?', 'Am I an animal or a thing?'), [T('Kan man spise meg?', 'Can you eat me?'), T('Er jeg større enn en bil?', 'Am I bigger than a car?'), T('Finnes jeg i dette rommet?', 'Am I in this room?'), T('Har jeg fire bein?', 'Do I have four legs?'), T('Bor jeg i vann?', 'Do I live in water?'), T('Bruker folk meg hver dag?', 'Do people use me every day?')]],
+    [T('Snevre inn', 'Narrow it down'), [T('Er jeg over 50 år?', 'Am I over 50?'), T('Har jeg vunnet noe stort?', 'Have I won something big?'), T('Er jeg mest kjent i Norge?', 'Am I mostly known in Norway?'), T('Har jeg vært i nyhetene i år?', 'Have I been in the news this year?'), T('Begynner navnet mitt på A–M?', 'Does my name start with A–M?'), T('Ville jeg passet inn på dette vorset?', 'Would I fit in at this pre-party?')]]
+  ];
+  var pkKat = '', pkForslag = null;
+  function pkKatNavn(id) { var k = PK_KAT.find(function (x) { return x[0] === id; }); return k ? (EN ? k[2] : k[1]) : ''; }
+  function pkTrekkForslag() {
+    var k = PK_KAT.find(function (x) { return x[0] === pkKat; }), kilde = k && k[3].length ? k[3] : PK_KAT.reduce(function (a, x) { return a.concat(x[3]); }, []);
+    return kilde.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
+  }
+  function pkSporsmalArk() {
+    lukkArk();
+    var m = lagArk('pk-ark', T('Spørsmål å stille', 'Questions to ask')), kropp = m.querySelector('.ark-kropp');
+    var kat = tilstand.spill && tilstand.spill.minKat ? pkKatNavn(tilstand.spill.minKat) : '';
+    kropp.innerHTML = (kat ? '<p class="pk-kat-stor">' + T('Hint: du er ', 'Hint: you are ') + '<b>' + esc(kat.toLowerCase()) + '</b></p>' : '') +
+      '<p class="small">' + T('Bare ja/nei-spørsmål. Får du nei, går turen videre.', 'Yes/no questions only. A no passes the turn.') + '</p>' +
+      PK_SPM.map(function (g) { return '<p class="rom-etikett">' + esc(g[0]) + '</p><ul class="pk-spm">' + g[1].map(function (q) { return '<li>' + esc(q) + '</li>'; }).join('') + '</ul>'; }).join('');
+    aapentArk = { el: m, oppdater: function () {} };
+  }
   function pannekortSpill(s) {
     var alle = (tilstand.spillere || []).filter(function (p) { return !s.med || !s.med.length || s.med.indexOf(p.id) !== -1; }), meg = tilstand.meg, r = s.runde || 1;
     if (s.fase === 'skriv') {
@@ -3904,6 +3939,11 @@ export function startRom(LEKNAVN, LANG) {
       return jaTopp(T('Hvem er jeg?', 'Who am I?'), T('Skriv en lapp', 'Write a note'), true, true) +
         (mal ? '<div class="pk-skriv"><span class="pk-stor">' + nrHode(mal) + pkLapp(mitt || '…', 128, 26, (mitt ? '' : 'tom') + (klask ? ' klask' : ''), 'pkLapp') + '</span>' +
           '<p>' + (mitt ? T('Klask! Den sitter.', 'Slap! It’s on.') : T('Til ', 'For ') + esc(navn(mal))) + '</p></div>' +
+          (mitt ? '' : '<p class="rom-etikett">' + T('Velg kategori (hint til den som gjetter)', 'Pick a category (a hint for the guesser)') + '</p><div class="pk-kats">' + PK_KAT.map(function (k) {
+            return '<button type="button" data-g="pk-kat" data-k="' + k[0] + '" aria-pressed="' + (pkKat === k[0]) + '">' + esc(EN ? k[2] : k[1]) + '</button>'; }).join('') + '</div>' +
+            (pkForslag ? '<div class="pk-forslag">' + pkForslag.map(function (f) { return '<button type="button" data-g="pk-fyll" data-t="' + esc(f) + '">' + esc(f) + '</button>'; }).join('') +
+              '<button type="button" class="linkbtn" data-g="pk-forslag">' + T('Nye forslag', 'New ideas') + '</button></div>'
+              : '<p><button type="button" class="linkbtn" data-g="pk-forslag">' + T('Gi meg forslag', 'Give me ideas') + '</button></p>')) +
           '<form class="sm-skjema' + (mitt ? '' : ' stor') + '" id="sosSkjema">' + (mitt ? '' : '<label for="sosInput">' + T('Person, figur eller ting', 'Person, character or thing') + '</label>') +
             '<input id="sosInput" maxlength="40" autocomplete="off" enterkeyhint="send" placeholder="' + (mitt ? T('Bytt ord …', 'Change word …') : T('F.eks. Elvis', 'E.g. Elvis')) + '">' +
             '<button class="' + (mitt ? 'btn ghost' : 'rom-stor-knapp') + '" type="submit">' + (mitt ? T('Bytt', 'Change') : T('Klask den på', 'Slap it on')) + '</button></form>' : '') +
@@ -3918,7 +3958,8 @@ export function startRom(LEKNAVN, LANG) {
       if (fersk && spill) angreMulig = true;
       var ord = erMeg && !gj && spill ? '?' : o ? o.t : '–';
       var lapp = spill ? (gj && !nyFall ? '' : pkLapp(ord, 84, erMeg ? 30 : 17, (erMeg && !gj ? 'meg' : '') + (nyFall ? ' fall' : ''))) : pkLapp(o ? o.t : '–', 84, 17, 'snupp');
-      var under = gj ? '<span class="pk-merke rett">' + ((s.gjettet || [])[0] === id ? T('Først! Del ut 2', 'First! Hand out 2') : T('Gjettet', 'Guessed')) + '</span>' : erMeg && spill ? '<span class="pk-merke">' + T('Spør de andre', 'Ask the others') + '</span>' : '';
+      var under = gj ? '<span class="pk-merke rett">' + ((s.gjettet || [])[0] === id ? T('Først! Del ut 2', 'First! Hand out 2') : T('Gjettet', 'Guessed')) + '</span>'
+        : erMeg && spill ? '<span class="pk-merke">' + (s.minKat ? esc(pkKatNavn(s.minKat)) : T('Spør de andre', 'Ask the others')) + '</span>' : '';
       var knapp = !spill ? '' : gj && fersk ? '<button type="button" class="pk-knapp hvit" data-g="pk-angre" data-paa="' + id + '">' + T('Angre', 'Undo') + '</button>'
         : !gj && !erMeg ? '<button type="button" class="pk-knapp" data-g="pk-riktig" data-paa="' + id + '">' + T('Gjettet!', 'Got it!') + '</button>' : '';
       var sist = !spill && s.sist === id;
@@ -3928,7 +3969,8 @@ export function startRom(LEKNAVN, LANG) {
     clearTimeout(pkTimer); if (angreMulig) pkTimer = setTimeout(tegn, 1000);
     if (spill) return jaTopp(T('Hvem er jeg?', 'Who am I?'), T('Hvem er du?', 'Who are you?'), true, false) +
       '<p class="mv-hjelp liten">' + T('Still ja/nei-spørsmål på omgang. Nei = neste. Trykk «Gjettet!» når noen klarer det.', 'Take turns asking yes/no questions. No = next. Tap “Got it!” when someone gets it.') + '</p>' +
-      '<div class="pk-grid">' + kort + '</div>';
+      '<div class="pk-grid">' + kort + '</div>' +
+      ((s.gjettet || []).indexOf(meg) === -1 ? '<p class="pk-hjelp"><button type="button" class="btn ghost small" data-g="pk-sporsmal">❓ ' + T('Trenger du spørsmål?', 'Need questions?') + '</button></p>' : '');
     return jaTopp(T('Hvem er jeg?', 'Who am I?'), T('Runden er over', 'Round over'), false, false) +
       (s.sist ? '<div class="hs-dom feil"><b>' + esc(navn(s.sist)) + T(' ble sist – drikk 3', ' came last – drink 3') + '</b></div>' : '') +
       '<div class="pk-grid">' + kort + '</div>' +
@@ -5185,7 +5227,7 @@ export function startRom(LEKNAVN, LANG) {
       var i = document.getElementById('sosInput'), t = i.value.trim(); if (!t) return;
       var typ = tilstand.spill && tilstand.spill.type;
       var hd = { hvemskrev: 'hs-skriv', bloff: 'bf-skriv', samme: 'sm-skriv', pannekort: 'pk-skriv' }[typ]; if (!hd) return;
-      i.value = ''; i.blur(); gjorAlltid({ handling: hd, tekst: t });
+      i.value = ''; i.blur(); gjorAlltid(typ === 'pannekort' ? { handling: hd, tekst: t, kat: pkKat } : { handling: hd, tekst: t });
     });
     var lovS = document.getElementById('lovSkjema');
     if (lovS) lovS.addEventListener('submit', function (e) { e.preventDefault(); var i = document.getElementById('lovInput'), t = i.value.trim(); if (!t) return; if (!confirm(T('Foreslå loven «' + t + '»?', 'Propose the law “' + t + '”?'))) return; gjor({ handling: 'lov-forslag', tekst: t }); });
@@ -5452,6 +5494,10 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'sp-stem') return gjor({ handling: 'sp-stem', hvem: b.dataset.paa });
     if (g === 'sp-gjett') return gjor({ handling: 'sp-gjett', sted: b.dataset.sted });
     if (g === 'bf-stem') return gjor({ handling: 'bf-stem', i: Number(b.dataset.i) });
+    if (g === 'pk-kat') { pkKat = pkKat === b.dataset.k ? '' : b.dataset.k; pkForslag = null; return tegn(); }
+    if (g === 'pk-forslag') { pkForslag = pkTrekkForslag(); return tegn(); }
+    if (g === 'pk-fyll') { var inp = document.getElementById('sosInput'); if (inp) { inp.value = b.dataset.t; inp.focus(); } return; }
+    if (g === 'pk-sporsmal') return pkSporsmalArk();
     if (g === 'pk-riktig') return gjor({ handling: 'pk-riktig', hvem: b.dataset.paa });
     if (g === 'pk-angre') return gjor({ handling: 'pk-angre', hvem: b.dataset.paa });
     if (g === 'sp-spor') return gjor({ handling: 'sp-spor', til: b.dataset.paa });

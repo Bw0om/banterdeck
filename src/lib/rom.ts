@@ -3486,7 +3486,8 @@ function sosHandling(data: any, meg: any, h: any): any {
       if (s.fase !== 'skriv') return feilL('for-sent', 'Ordene er allerede delt ut.', 'The words have already been handed out.');
       const t = rens(h.tekst, 40); if (!t) return { ok: true };
       const til = s.tildelt[meg.id]; if (!til) return { ok: true };
-      s.ord[til] = { t, fra: meg.id };
+      const kat = rens(h.kat, 24) || '';   // kategorien er et hint til den som skal gjette
+      s.ord[til] = { t, fra: meg.id, kat };
       if (Object.keys(s.tildelt).every((fra) => s.ord[s.tildelt[fra]])) pkStartSpill(data);
       return { ok: true };
     }
@@ -3576,9 +3577,10 @@ function sosVisning(s: any, meg: any, data: any) {
       spion: aapen || s.fase === 'riktige' ? s.spion : null, utfall: s.utfall || null, runde: s.runde || 1 };
   }
   if (s.type === 'pannekort') {
-    const ord: any = {}; Object.entries(s.ord).forEach(([id, o]: any) => { if (id !== m || s.fase === 'ferdig' || (s.gjettet || []).includes(id)) ord[id] = { t: o.t, fra: o.fra }; });
+    const ord: any = {}; Object.entries(s.ord).forEach(([id, o]: any) => { if (id !== m || s.fase === 'ferdig' || (s.gjettet || []).includes(id)) ord[id] = { t: o.t, fra: o.fra, kat: o.kat || '' }; });
     return { fase: s.fase, mitMaal: m ? s.tildelt[m] || null : null, harSkrevet: Object.keys(s.tildelt).filter((fra) => s.ord[s.tildelt[fra]]),
-      ord, gjettet: s.gjettet, sist: s.sist || null, mittOrdSkjult: !!(m && s.ord[m] && s.fase !== 'ferdig'), runde: s.runde || 1, med: Object.keys(s.tildelt || {}) };
+      ord, gjettet: s.gjettet, sist: s.sist || null, mittOrdSkjult: !!(m && s.ord[m] && s.fase !== 'ferdig'), runde: s.runde || 1, med: Object.keys(s.tildelt || {}),
+      minKat: m && s.ord[m] ? s.ord[m].kat || '' : '' };
   }
   if (s.type === 'skal') return { fase: s.fase, tid: s.tid, harTrykket: Object.keys(s.trykk || {}).concat(s.tidlig || []), resultat: s.resultat,
     trykk: s.trykk || {}, tidlig: s.tidlig || [], nr: s.nr || 0, antall: SKAL_ANTALL, sum: s.sum || {}, runde: s.runde || 1 };
