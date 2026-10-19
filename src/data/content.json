@@ -4447,7 +4447,7 @@
        "no": [
         "Vanlige yatzyregler: opptil tre kast per tur, fyll ut de 13 feltene, flest poeng vinner. Så legges dette på:",
         "b|Ny ener i kastet = drikk 2 slurker. Enere du holder, teller ikke på nytt.",
-        "b|Fire like = drikk summen av terningene i slurker.",
+        "b|Fire like = drikk tallet på terningen (fire seksere = 6 slurker).",
         "b|Yatzy = du bestemmer hvem som tar en shot (eventuelt resten av glasset).",
         "b|Taperen til slutt drikker opp drikken sin eller tar en shot.",
         "b|Hus = alle andre drikker én.",
@@ -4467,7 +4467,7 @@
        "en": [
         "Standard Yahtzee rules: up to three rolls per turn, fill the 13 boxes, most points wins. Then add:",
         "b|A new one in the roll = drink 2 sips. Ones you hold don't count again.",
-        "b|Four of a kind = drink the dice total in sips.",
+        "b|Four of a kind = drink the number on the dice (four sixes = 6 sips).",
         "b|Yahtzee = you pick who takes a shot (or downs their glass).",
         "b|The overall loser finishes their drink or takes a shot.",
         "b|Full house = everyone else drinks one.",
