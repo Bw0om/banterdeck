@@ -1,0 +1,17 @@
+{
+  "_om": "Hatefulle ord – om hudfarge, opphav, religion, legning, kjønnsidentitet og funksjonsnedsettelse – vises aldri i stua og koster en slurk. Vanlig banning går fritt (appen er 18+). Hele ord; «*» til slutt = alle ord som begynner slik. Utgangspunkt: LDNOOBW (CC BY 4.0) og censor-text/profanity-list (Unlicense), siktet ned til skjellsord.",
+  "no": [
+    "nigger*", "nigga*", "neger*", "svarting*", "svartskalle*", "sotrør", "pakkis*", "pakkisene", "mulatt*", "skjevøyd*", "tater*", "sigøyner*", "innvandrersvin", "utlendingsvin",
+    "jødesvin", "jødeunge", "muslimsvin", "muhammedaner*", "kristensvin", "koranbrenner",
+    "soper*", "sopar", "homsesvin", "homosvin", "lesbesvin", "transe", "transer", "trannie",
+    "mongo", "mongis", "mongoloid*", "tilbakestående", "spasser", "spastiker", "krøpling*", "åndssvak*"
+  ],
+  "en": [
+    "nigger*", "nigga*", "negro*", "coon", "coons", "kike*", "spic", "spics", "chink*", "gook*", "wetback*", "beaner*", "raghead*", "towelhead*", "paki", "pakis", "jap", "japs", "gyppo*", "darkie*", "jigaboo*", "sand nigger*",
+    "christ killer*", "muzzie*", "muzrat*", "jew boy", "zionazi*",
+    "faggot*", "fag", "fags", "dyke*", "tranny", "trannies", "shemale*",
+    "retard*", "spastic*", "spaz", "mongoloid*", "cripple*"
+  ],
+  "sv": ["neger*", "blatte*", "svartskalle*", "zigenare", "bögjävel*", "bögdjävel*", "svartskallar", "mongo", "cp-skadad", "efterbliven"],
+  "da": ["perker*", "neger*", "bøsserøv*", "svans", "mongol", "spasser", "åndssvag*"]
+}
