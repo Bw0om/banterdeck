@@ -269,23 +269,30 @@ export function startRom(LEKNAVN, LANG) {
     if (navn === 'vann') { tone(260, 0, 0.11, 'sine', 0.32, 700); tone(350, 0.24, 0.1, 'sine', 0.24, 900); tone(230, 0.52, 0.15, 'sine', 0.3, 625); }
   }
   /** Stor beskjed over hele skjermen når du må drikke – synes og høres selv med musikk på. */
-  var drikkEl = null, drikkN = 0, drikkTimer = null, egenSlurkT = 0;
-  function drikkAlarm(n) {
+  var drikkEl = null, drikkN = 0, drikkTimer = null, egenSlurkT = 0, drikkFra = [], sisteUtNr = null;
+  function drikkAlarm(n, fra) {
     // «RINGEN RØK!» får stå alene først
     if (document.querySelector('.rof-knust') && !drikkEl) { setTimeout(function () { drikkAlarm(n); }, 2600); return; }
     drikkN = drikkEl ? drikkN + n : n;
+    if (!drikkEl) drikkFra = [];
+    (fra || []).forEach(function (x) { if (drikkFra.indexOf(x) === -1) drikkFra.push(x); });
     var fri = tilstand && tilstand.alkoholfri;
     if (!drikkEl) { drikkEl = document.createElement('div'); drikkEl.className = 'drikk-alarm'; drikkEl.setAttribute('role', 'alert'); drikkEl.addEventListener('click', function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }); document.body.appendChild(drikkEl); spillLyd('slurk'); }
     drikkEl.innerHTML = '<b>' + (fri ? '⚠️ ' + T('STRAFFEPOENG!', 'PENALTY!') : '🍺 ' + T('DRIKK!', 'DRINK!')) + '</b><span>' + drikkN + ' ' + (fri ? T(drikkN === 1 ? 'straffepoeng' : 'straffepoeng', drikkN === 1 ? 'point' : 'points') : T(drikkN === 1 ? 'slurk' : 'slurker', drikkN === 1 ? 'sip' : 'sips')) + '</span>';
+    if (drikkFra.length) drikkEl.innerHTML += '<small>' + T('fra ', 'from ') + esc(drikkFra.join(T(' og ', ' and '))) + '</small>';
     try { navigator.vibrate && navigator.vibrate([300, 120, 300, 120, 500]); } catch (e) {}
-    clearTimeout(drikkTimer); drikkTimer = setTimeout(function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }, 3200);
+    clearTimeout(drikkTimer); drikkTimer = setTimeout(function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }, drikkFra.length ? 4200 : 3200);
   }
   function sjekkSlurker(gammel, ny) {
     if (!gammel || !ny || !ny.meg) return;
     var f = (gammel.spillere || []).find(function (p) { return p.id === ny.meg; }), e = (ny.spillere || []).find(function (p) { return p.id === ny.meg; });
     if (!f || !e) return;
     var diff = (e.slurker || 0) - (f.slurker || 0);
-    if (diff > 0 && diff < 60 && Date.now() - egenSlurkT > 2500) drikkAlarm(diff);   // ikke når du fører dine egne slurker
+    // Hvem delte ut til meg siden sist? (alle nye utdelinger, ikke bare den siste)
+    var nye = (ny.utdelinger || []).filter(function (u) { return sisteUtNr !== null && u.nr > sisteUtNr; });
+    sisteUtNr = (ny.utdelinger || []).reduce(function (m, u) { return Math.max(m, u.nr || 0); }, sisteUtNr || 0);
+    var fra = nye.filter(function (u) { return (u.liste || []).some(function (x) { return x.id === ny.meg; }); }).map(function (u) { return navn(u.fra); });
+    if (diff > 0 && diff < 60 && Date.now() - egenSlurkT > 2500) drikkAlarm(diff, fra);   // ikke når du fører dine egne slurker
   }
   /** Vannrunde: et rolig blått varsel på alle telefonene – ingen straff, bare et glass vann. */
   var sisteVann = null, vannKode = '', vannEl = null, vannTimer = null;
