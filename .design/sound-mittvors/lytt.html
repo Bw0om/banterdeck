@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="no"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lydpalett mittvors</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#FFF8EE;color:#16120F;margin:0;padding:24px;max-width:640px;margin-inline:auto}
+  h1{font-size:28px;margin:0 0 4px}p{margin:0 0 20px;color:#4A3F37}
+  .rad{display:grid;grid-template-columns:1fr repeat(auto-fit,auto);display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;margin:8px 0;background:#fff;border:3px solid #16120F;border-radius:12px;box-shadow:4px 4px 0 #16120F}
+  .rad>span{flex:1 1 140px}.rad b{display:block}.rad small{color:#4A3F37}
+  button{font:inherit;font-weight:800;padding:10px 16px;border:3px solid #16120F;border-radius:10px;background:#FFD23F;box-shadow:3px 3px 0 #16120F;cursor:pointer}
+  button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #16120F}
+</style>
+<h1>Lydpalett mittvors</h1>
+<p>A og B er første runde. C og D er den roligere runden: mykere, varmere, lavere. Si hvilken du vil ha per rad.</p>
+<div id="liste"></div>
+<script>
+  const L = [['trykk','Trykk','knapp tok imot'],['hjul','Hjul-tikk','ringen gikk ett hakk'],['tur','Din tur','nå er det deg'],['kort','Kort trukket','noe nytt på bordet'],['knus','Ringen røk','grensen ble brutt'],['slurk','Drikk','du må drikke']];
+  const EKSTRA = { slurk: ['e','f','g','h'] };
+  document.getElementById('liste').innerHTML = L.map(([id,navn,om]) => `<div class="rad"><span><b>${navn}</b><small>${om}</small></span><button onclick="spill('${id}-a')">A</button><button onclick="spill('${id}-b')">B</button><button onclick="spill('${id}-c')">C</button><button onclick="spill('${id}-d')">D</button>${(EKSTRA[id]||[]).map(v=>`<button onclick="spill('${id}-${v}')">${v.toUpperCase()}</button>`).join('')}</div>`).join('');
+  function spill(n){ const a = new Audio(n + '.mp3'); a.volume = .5; a.play(); }
+</script>
+</html>

@@ -1,0 +1,11 @@
+{
+  "provider": "elevenlabs",
+  "request": {
+    "text": "A playing card snapped down on a wooden table, crisp paper flick, short, close",
+    "prompt_influence": 0.3,
+    "model_id": "eleven_text_to_sound_v2",
+    "duration_seconds": 0.5
+  },
+  "endpoint": "https://api.elevenlabs.io/v1/sound-generation",
+  "character_cost": "5"
+}

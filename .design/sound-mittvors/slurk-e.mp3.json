@@ -1,0 +1,11 @@
+{
+  "provider": "elevenlabs",
+  "request": {
+    "text": "A soft cork pop from a bottle followed by a short gentle liquid glug, playful and warm, intimate, no splash, no harshness",
+    "prompt_influence": 0.4,
+    "model_id": "eleven_text_to_sound_v2",
+    "duration_seconds": 0.9
+  },
+  "endpoint": "https://api.elevenlabs.io/v1/sound-generation",
+  "character_cost": "9"
+}

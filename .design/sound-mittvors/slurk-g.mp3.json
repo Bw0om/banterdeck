@@ -1,0 +1,11 @@
+{
+  "provider": "elevenlabs",
+  "request": {
+    "text": "A cheeky three-note wooden xylophone phrase going down, warm, soft mallets, playful teasing feeling, quiet",
+    "prompt_influence": 0.4,
+    "model_id": "eleven_text_to_sound_v2",
+    "duration_seconds": 0.9
+  },
+  "endpoint": "https://api.elevenlabs.io/v1/sound-generation",
+  "character_cost": "9"
+}

@@ -163,6 +163,12 @@
       "skillPath": "skills/review-animations/SKILL.md",
       "computedHash": "8c2befeb28bb484bf2de7b2fc228774857e266d32a65d76895e78651a536d8cf"
     },
+    "sound-effects": {
+      "source": "glebis/humane-agentic-design",
+      "sourceType": "github",
+      "skillPath": "humane/skills/sound-effects/SKILL.md",
+      "computedHash": "198406631eb3f154cb17be4ff5710643884eaea4c49cf6452867abefa0d92b99"
+    },
     "stitch-design-taste": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",

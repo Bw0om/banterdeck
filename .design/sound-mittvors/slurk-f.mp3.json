@@ -1,0 +1,11 @@
+{
+  "provider": "elevenlabs",
+  "request": {
+    "text": "A playful short descending two-note slide whistle, soft and breathy, cheeky uh-oh feeling, quiet, no shriek",
+    "prompt_influence": 0.4,
+    "model_id": "eleven_text_to_sound_v2",
+    "duration_seconds": 0.8
+  },
+  "endpoint": "https://api.elevenlabs.io/v1/sound-generation",
+  "character_cost": "8"
+}

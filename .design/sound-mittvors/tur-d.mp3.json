@@ -1,0 +1,11 @@
+{
+  "provider": "elevenlabs",
+  "request": {
+    "text": "A soft warm kalimba note with a gentle rise, mellow, rounded, intimate, slow decay, no fanfare, no melody",
+    "prompt_influence": 0.4,
+    "model_id": "eleven_text_to_sound_v2",
+    "duration_seconds": 0.8
+  },
+  "endpoint": "https://api.elevenlabs.io/v1/sound-generation",
+  "character_cost": "8"
+}
