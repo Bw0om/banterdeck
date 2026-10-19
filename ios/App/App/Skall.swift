@@ -85,6 +85,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     /// Mørk modus er et valg i appen (Deg → Mørk modus), ikke telefonens. Fanelinja følger appen.
     func sett(moerk: Bool) {
         overrideUserInterfaceStyle = moerk ? .dark : .light
+        // Den valgte fanen: rust på lys bakgrunn, gul på mørk – ellers drukner den i den mørke linja
+        tabBar.tintColor = moerk ? UIColor(red: 1, green: 0.824, blue: 0.247, alpha: 1) : UIColor(red: 0.776, green: 0.235, blue: 0.067, alpha: 1)
     }
 
     /// Simulator-sjekken på GitHub starter appen med MV_FANE=leker osv. for å ta bilde av hver fane
