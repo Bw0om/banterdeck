@@ -51,7 +51,12 @@ jobs:
       - name: Bygger
         run: xcode-project build-ipa --project ios/App/App.xcodeproj --scheme App
       - name: Til TestFlight
-        run: app-store-connect publish --path 'build/ios/ipa/*.ipa'
+        # Apples statistikk-server (metricsAndLogging) svarer av og til 500 etter en vellykket opplasting, og da
+        # avslutter verktøyet med feil likevel. Det som teller, er om selve opplastingen lyktes.
+        run: |
+          set -o pipefail
+          app-store-connect publish --path 'build/ios/ipa/*.ipa' 2>&1 | tee publish.log || true
+          grep -q "UPLOAD SUCCEEDED" publish.log || { echo "Opplastingen til App Store Connect lyktes ikke"; exit 1; }
       - uses: actions/upload-artifact@v4
         if: always()
         with:
