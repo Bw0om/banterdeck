@@ -106,7 +106,7 @@ struct StartSkjerm: View {
 
                 felt(m.T("Kode fra verten", "Code from the host")) {
                     TextField("ABCD", text: $m.kode)
-                        .font(.system(size: 26, weight: .black, design: .monospaced)).tracking(6)
+                        .font(.system(size: 26, weight: .black, design: .monospaced))
                         .textInputAutocapitalization(.characters).disableAutocorrection(true)
                         .submitLabel(.go).focused($fokus, equals: .kode)
                         .onChange(of: m.kode) { v in
