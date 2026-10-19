@@ -117,8 +117,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
 
     /// Simulator-sjekken: nettsiden sender feil og en kort tilstand hit, og det havner i Documents/sjekk.log
     @objc func logg(_ call: CAPPluginCall) {
-        let tekst = (call.getString("tekst") ?? "") + "
-"
+        let tekst = (call.getString("tekst") ?? "") + "\n"
         if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
             let fil = dir.appendingPathComponent("sjekk.log")
             if let h = try? FileHandle(forWritingTo: fil) { h.seekToEndOfFile(); h.write(tekst.data(using: .utf8)!); try? h.close() }
