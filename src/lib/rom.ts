@@ -812,7 +812,7 @@ function venter(s: any, mangler: number) {
 }
 /** Hendelsen alle ser. Lagres på begge språk; visning() viser tekst på språket til den som ser på. */
 function melde(data: any, tekst: string, en?: string) { data.nr = (data.nr || 0) + 1; data.hendelse = { nr: data.nr, tekst, en: en || tekst }; }
-/** Banneord i stua koster en slurk. Hele ord (med «*» = begynner slik), uansett store/små bokstaver og enkel l33t. */
+/** Hatefulle ord i stua vises aldri og koster en slurk (vanlig banning går fritt – appen er 18+). Hele ord (med «*» = begynner slik), uansett store/små bokstaver og enkel l33t. */
 const SLURKEORD_RE: RegExp[] = ([] as string[]).concat(SLURKEORD.no, SLURKEORD.en, SLURKEORD.sv, SLURKEORD.da).map((o) => {
   const pre = o.endsWith('*'), ord = (pre ? o.slice(0, -1) : o).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+');
   return new RegExp('(^|[^a-zæøåäö])' + ord + (pre ? '' : '(?=$|[^a-zæøåäö])'), 'i');
@@ -1498,9 +1498,9 @@ function handlingInne(data: any, meg: any, h: any) {
         // Snakkeboble over figuren i stua – hos alle, og på TV-en
         const t = rens(h.tekst, 40); if (!t) return { ok: true };
         if (erSlurkeord(t)) {
-          // Banneord: meldingen vises ikke – figuren får en slurk i stedet
+          // Hatefulle ord: meldingen vises ikke – figuren får en slurk i stedet
           giSlurker(data, meg.id, 1);
-          melde(data, `🤐 ${meg.navn} bannet i stua – 1 slurk!`, `🤐 ${meg.navn} swore in the lounge – 1 sip!`);
+          melde(data, `🤐 ${meg.navn} skrev noe vi ikke sier her – 1 slurk!`, `🤐 ${meg.navn} wrote something we don’t say here – 1 sip!`);
           reak.e = '🤐'; reak.slurk = true;
         } else { reak.e = '💬'; reak.t = t; }
       } else {

@@ -1553,7 +1553,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       liste.forEach(function (r) {
         if (r.nr <= forrige || r.til) return;
         if (r.t) { tvSnakk(r.fra, r.t); return; }
-        if (r.slurk) { tvStua.straff(r.fra, 'Banning = slurk 🍺'); spill('ooh'); return; }
+        if (r.slurk) { tvStua.straff(r.fra, 'Ikke sånt her 🍺'); spill('ooh'); return; }
         tvStua.reaksjon(r.fra, r.e, r.b || null); if (REAK_LYD[r.e]) spill(REAK_LYD[r.e]);
       });
     }
