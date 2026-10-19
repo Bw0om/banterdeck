@@ -593,17 +593,35 @@ export function startRom(LEKNAVN, LANG) {
     var vl = document.getElementById('visLag');
     if (vl) vl.addEventListener('click', function () { var f = document.getElementById('lagSkjema'); if (f) { f.classList.remove('skjult-lag'); f.scrollIntoView({ block: 'center', behavior: 'smooth' }); } vl.parentNode.remove(); });
     if (qs.get('lag') === '1' && !kode) { var nf2 = document.getElementById('romNavn2'); if (nf2) setTimeout(function () { nf2.focus(); nf2.scrollIntoView({ block: 'center' }); }, 60); }
+    /** Bli med i et rom. Gir {ok} eller {feil}. `alder` = knappen som ble trykket bekrefter at man er over 18 (lenke med kode, native startskjerm). */
+    function startBliMed(k, n, alder) {
+      k = String(k || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); n = String(n || '').trim();
+      if (k.length < 4) return Promise.resolve({ feil: T('Skriv inn koden.', 'Enter the code.') });
+      if (!n) return Promise.resolve({ feil: T('Skriv inn navnet ditt.', 'Enter your name.') });
+      skriv('bd_mittnavn', n);
+      if (alder) { try { localStorage.setItem('la_age_ok', '1'); } catch (x) {} }
+      return api('POST', '/api/rom/' + k, { handling: 'bli-med', navn: n, lang: LANG }).then(function (d) {
+        kode = k; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode); ta(d); planlegg();
+        return { ok: true, kode: k };
+      }, function (err) { return { feil: err.message }; });
+    }
+    /** Lag et nytt rom (med leken fra lenka, om noen). Gir {ok, kode} eller {feil}. */
+    function startLag(n, alder) {
+      n = String(n || '').trim();
+      if (!n) return Promise.resolve({ feil: T('Skriv inn navnet ditt.', 'Enter your name.') });
+      skriv('bd_mittnavn', n);
+      if (alder) { try { localStorage.setItem('la_age_ok', '1'); } catch (x) {} }
+      return api('POST', '/api/rom', { navn: n, lek: onsketLek, modus: onsketModus, lang: LANG }).then(function (d) {
+        kode = d.kode; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode);
+        versjon = 0; hent();
+        return { ok: true, kode: d.kode };
+      }, function (err) { return { feil: err.message }; });
+    }
     document.getElementById('blimedSkjema').addEventListener('submit', function (e) {
       e.preventDefault();
-      var k = document.getElementById('romKode').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-      var n = (document.getElementById('romNavn1').value || (document.getElementById('romNavn2') || { value: '' }).value).trim();
-      if (k.length < 4) return toast(T('Skriv inn koden.', 'Enter the code.'));
-      if (!n) return toast(T('Skriv inn navnet ditt.', 'Enter your name.'));
-      skriv('bd_mittnavn', n);
-      if (medKode) { try { localStorage.setItem('la_age_ok', '1'); } catch (x) {} }
-      api('POST', '/api/rom/' + k, { handling: 'bli-med', navn: n, lang: LANG }).then(function (d) {
-        kode = k; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode); ta(d); planlegg();
-      }).catch(function (err) { tegnStart(err.message); });
+      var k = document.getElementById('romKode').value;
+      var n = (document.getElementById('romNavn1').value || (document.getElementById('romNavn2') || { value: '' }).value);
+      startBliMed(k, n, medKode).then(function (r) { if (r.feil) { if (/^(Skriv inn|Enter)/.test(r.feil)) toast(r.feil); else tegnStart(r.feil); } });
     });
     // Kom man med en kode, er navnet det eneste som mangler
     if (kode) { var nf = document.getElementById('romNavn1'); if (nf && !nf.value) setTimeout(function () { nf.focus(); }, 50); }
@@ -614,18 +632,26 @@ export function startRom(LEKNAVN, LANG) {
       var nf1 = document.getElementById(medKode ? 'romNavn1' : 'romNavn2'); if (v.length === 4 && nf1 && !nf1.value) nf1.focus();
     });
     // Appen: «Lag rom» på Hjem (?lag=1) og «Spill i rommet» på en lekeside (?lek=…) lager rommet med en gang når navnet er kjent
-    if (erApp && (qs.get('lag') === '1' || onsketLek) && navn && !kode && !melding) setTimeout(function () { var f = document.getElementById('lagSkjema'); if (f) f.requestSubmit(); }, 0);
+    var autoLag = erApp && (qs.get('lag') === '1' || onsketLek) && navn && !kode && !melding;
+    if (autoLag) setTimeout(function () { var f = document.getElementById('lagSkjema'); if (f) f.requestSubmit(); }, 0);
     document.getElementById('lagSkjema').addEventListener('submit', function (e) {
       e.preventDefault();
-      var n = document.getElementById('romNavn2').value.trim();
-      if (!n) return toast(T('Skriv inn navnet ditt.', 'Enter your name.'));
-      skriv('bd_mittnavn', n);
-      if (medKode) { try { localStorage.setItem('la_age_ok', '1'); } catch (x) {} }
-      api('POST', '/api/rom', { navn: n, lek: onsketLek, modus: onsketModus, lang: LANG }).then(function (d) {
-        kode = d.kode; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode);
-        versjon = 0; hent();
-      }).catch(function (err) { tegnStart(err.message); });
+      startLag(document.getElementById('romNavn2').value, medKode).then(function (r) { if (r.feil) { if (/^(Skriv inn|Enter)/.test(r.feil)) toast(r.feil); else tegnStart(r.feil); } });
     });
+    // Swift-skallet: den native startskjermen ligger over denne siden og bruker disse for å lage/bli med i rommet
+    window.__mvStart = {
+      navn: function () { return navn; },
+      lag: function (n) { return startLag(n, true); },
+      bliMed: function (k, n) { return startBliMed(k, n, true); },
+      fortsett: function () { var k = sistRom(); if (k) location.href = location.pathname + '?k=' + k; return { ok: !!k }; }
+    };
+    meldSkjerm(autoLag ? 'laster' : 'start', { navn: navn, kode: medKode ? kode : '', fortsett: sistRom() || '', melding: melding || '' });
+  }
+  /** Sier fra til app-skallet hvilken skjerm siden viser (start / laster / rom), så den native startskjermen kan vises eller gå bort */
+  var sistSkjerm = '';
+  function meldSkjerm(skjerm, ekstra) {
+    var n = skjerm + '|' + JSON.stringify(ekstra || {}); if (n === sistSkjerm) return; sistSkjerm = n;
+    try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: Object.assign({ skjerm: skjerm }, ekstra || {}) })); } catch (e) {}
   }
 
   /* ---------- gjengkveld: venterommet ---------- */
@@ -5250,6 +5276,7 @@ export function startRom(LEKNAVN, LANG) {
     var rotEl = document.documentElement;
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
+    meldSkjerm('rom');
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først
     rotEl.classList.toggle('app-gjest', erApp && !s && !erVert() && !tilstand.valgt);   // gjestens venterom i appen: stua og én linje, ingenting å bla i
     rotEl.classList.toggle('i-spill', !!s);
@@ -5772,6 +5799,7 @@ export function startRom(LEKNAVN, LANG) {
   if (kode && meg) {
     // Et skjelett av rommet mens det kobler til: koden står der med en gang, så man vet at man er på rett sted
     document.documentElement.classList.add('i-rom');
+    meldSkjerm('rom');
     root.innerHTML = '<div class="rom-laster" aria-busy="true"><div class="rom-hode"><div class="rom-hode-v"><div><span class="rom-etikett">' + T('Rom', 'Room') + '</span><b class="rom-kode">' + esc(kode) + '</b></div></div>' +
       '<span class="rom-hodeknapper"><i></i><i></i><i></i><i></i></span></div><div class="skj-rad"><i></i><i></i><i></i></div><div class="skj-kort"></div>' +
       '<p class="rom-laster-tekst" role="status">' + T('Kobler til rom ', 'Connecting to room ') + esc(kode) + ' …</p></div>';

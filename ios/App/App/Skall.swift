@@ -1,4 +1,5 @@
 import UIKit
+import SwiftUI
 import Capacitor
 
 /// Skallet: iPhonens egen fanelinje nederst (Hjem, Spill, Leker, Deg). Hver fane har sin egen skjerm (nettvisning)
@@ -112,6 +113,58 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
 
     func hentVentende(_ i: Int) -> String? { defer { ventende[i] = nil }; return ventende[i] }
 
+    // MARK: Den native startskjermen (Spill-fanen)
+    private let startModell = StartModell()
+    private var startVert: UIHostingController<StartSkjerm>?
+
+    /// Siden i en skjerm sier hvilken skjerm den viser: «start» → vis den native startskjermen over Spill-fanen, ellers ta den bort
+    func skjerm(_ d: [String: Any], fra: UIViewController?) {
+        guard let i = fane(for: fra), faner[i] == "spill", let v = visninger[i], let side = viewControllers?[i] else { return }
+        let hva = d["skjerm"] as? String ?? ""
+        if hva == "start" {
+            startModell.nett = v.webView
+            startModell.engelsk = spraak == "en"
+            if let n = d["navn"] as? String, !n.isEmpty { startModell.navn = n }
+            if let k = d["kode"] as? String, !k.isEmpty { startModell.kode = k }
+            startModell.fortsett = d["fortsett"] as? String ?? ""
+            startModell.feil = d["melding"] as? String ?? ""
+            startModell.travel = nil
+            visStart(i: side, true)
+        } else {
+            startModell.travel = nil
+            visStart(i: side, false)
+        }
+    }
+
+    private func visStart(i side: UIViewController, _ vis: Bool) {
+        if vis {
+            if startVert == nil {
+                let h = UIHostingController(rootView: StartSkjerm(m: startModell))
+                h.view.backgroundColor = .clear
+                side.addChild(h)
+                h.view.translatesAutoresizingMaskIntoConstraints = false
+                side.view.addSubview(h.view)
+                NSLayoutConstraint.activate([
+                    h.view.topAnchor.constraint(equalTo: side.view.topAnchor),
+                    h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
+                    h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor),
+                    h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
+                ])
+                h.didMove(toParent: side)
+                h.view.alpha = 0
+                startVert = h
+            }
+            side.view.bringSubviewToFront(startVert!.view)
+            UIView.animate(withDuration: 0.18) { self.startVert?.view.alpha = 1 }
+        } else if let h = startVert {
+            // Rommet er klart: skjermen glir bort og nettvisningen er der under
+            UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0; h.view.transform = CGAffineTransform(translationX: 0, y: 24) }) { _ in
+                h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent()
+                if self.startVert === h { self.startVert = nil }
+            }
+        }
+    }
+
     private func gaa(_ v: MittvorsViewController?, til url: String) {
         guard let data = try? JSONSerialization.data(withJSONObject: [url]), let json = String(data: data, encoding: .utf8) else { return }
         v?.webView?.evaluateJavaScript("location.href = \(json)[0]", completionHandler: nil)
@@ -185,6 +238,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "fane", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "aapne", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "skjul", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "skjerm", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
@@ -244,6 +298,16 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let navn = call.getString("navn") ?? "", url = call.getString("url") ?? ""
         DispatchQueue.main.async {
             SkallViewController.delt?.aapne(fane: navn, url: url)
+            call.resolve()
+        }
+    }
+
+    /// Siden sier hvilken skjerm den viser ({skjerm: start|laster|rom, navn, kode, fortsett, melding}) – Spill-fanen får den native startskjermen på «start»
+    @objc func skjerm(_ call: CAPPluginCall) {
+        let d = call.options as? [String: Any] ?? [:]
+        let vc = bridge?.viewController
+        DispatchQueue.main.async {
+            SkallViewController.delt?.skjerm(d, fra: vc)
             call.resolve()
         }
     }
