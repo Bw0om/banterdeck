@@ -215,7 +215,8 @@ export function startRom(LEKNAVN, LANG) {
   /* Lydpaletten: små, rolige lyder laget for appen (public/lyd/, valgt etter lytting). Trykk, hjul-tikk, din tur, kort,
      ringen røk og drikk. Lydene som ikke har en fil ennå (nedtelling, lunte, bombe), lages fortsatt som toner under. */
   var LYDFIL = { tikk: 'hjul', grip: 'trykk', pek: 'trykk', tur: 'tur', pop: 'kort', svar: 'kort', ding: 'kort', knus: 'knus', bom: 'bombe', slurk: 'slurk',
-    naa: 'naa', fanfare: 'fanfare', womp: 'womp', lunte: 'lunte', vann: 'vann', skaal: 'skaal', forsent: 'forsent', terning: 'terning', kortsnu: 'kortsnu', kortlegg: 'kortlegg' };
+    naa: 'naa', fanfare: 'fanfare', womp: 'womp', lunte: 'lunte', vann: 'vann', skaal: 'skaal', forsent: 'forsent', terning: 'terning', kortsnu: 'kortsnu', kortlegg: 'kortlegg',
+    dundun: 'dundun', bytt: 'bytt', kaching: 'kaching', mynt: 'mynt' };
   var lydFiler = {}, lydSist = {}, lunteStopp = null;
   function lydFil(navn) {
     if (!lydFiler[navn]) { var a = new Audio('/lyd/' + navn + '.mp3'); a.preload = 'auto'; a.volume = navn === 'hjul' || navn === 'trykk' ? 0.45 : 0.6; lydFiler[navn] = a; }

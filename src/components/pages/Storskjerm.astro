@@ -103,8 +103,19 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       src.connect(fl); fl.connect(g); g.connect(lyd.ut); src.start(t);
     }
     function horn(t0, d) { [466, 470, 587, 592, 698].forEach(function (f) { tone(f * 0.97, t0, d, 'sawtooth', 0.06, f); }); }
+    /* TV-ens lyder som filer (public/lyd/tv/ og public/lyd/), laget i samme rolige palett som telefonens. Det som ikke har fil, lages som toner under. */
+    var TVFIL = { intro: 'tv/intro', applaus: 'tv/applaus', ooh: 'tv/ooh', virvel: 'tv/virvel', sirene: 'tv/sirene', inn: 'tv/inn', bingo: 'tv/bingo', rekke: 'tv/rekke', avsloring: 'tv/avsloring',
+      fanfare: 'fanfare', vann: 'vann', knus: 'knus', slurk: 'slurk', dundun: 'dundun', svar: 'kort', pop: 'kort' };
+    var tvFiler = {}, tvSist = {};
+    function tvFil(navn) { if (!tvFiler[navn]) { var a = new Audio('/lyd/' + navn + '.mp3'); a.preload = 'auto'; a.volume = 0.8; tvFiler[navn] = a; } return tvFiler[navn]; }
+    function tvSpillFil(navn) {
+      var naa = Date.now(); if (naa - (tvSist[navn] || 0) < 60) return true; tvSist[navn] = naa;
+      try { var a = tvFil(navn); a.currentTime = 0; var p = a.play(); if (p && p.catch) p.catch(function () {}); return true; } catch (e) { return false; }
+    }
     function spill(navn) {
-      if (!startet || !lydCtx()) return;
+      if (!startet) return;
+      if (TVFIL[navn] && tvSpillFil(TVFIL[navn])) return;
+      if (!lydCtx()) return;
       if (navn === 'slurk') { horn(0, 0.28); horn(0.36, 0.6); [1.05, 1.25, 1.45].forEach(function (t) { tone(260, t, 0.13, 'sine', 0.35, 780); }); }
       if (navn === 'pop') tone(600, 0, 0.08, 'sine', 0.14, 900);
       // Figurene: klirr ved skål, kort latter, «ooh», applaus
@@ -202,6 +213,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       else if (na.kortNr && na.kortNr !== sett.kortNr) spill('pop');
       if (na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar|kort:rr-avslort|kort:ns-avslort/.test(na.fase)) spill('svar');
       if (na.fase !== sett.fase && na.fase === 'kort:kb-bom') spill('dundun');
+      if (na.fase !== sett.fase && /^spion:(gjett|fasit)$/.test(na.fase) && !/^spion:gjett$/.test(sett.fase)) spill('avsloring');
       if (na.fase !== sett.fase && /^kort:lb-(avslort|ferdig)/.test(na.fase)) spill('svar');
       if (na.spillere > sett.spillere) spill('inn');
       if (na.hend && na.hend !== sett.hend && d.hendelse) toast(d.hendelse.tekst);
@@ -892,6 +904,8 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }).join('');
       var siden = Date.now() - tvBgRekkeTid, sisteRekke = (b.rekker || [])[(b.rekker || []).length - 1];
       var vinner = (b.bingo || [])[0], bingoNy = b.ferdig && !tvBgSett[r + ':bingo']; if (b.ferdig) tvBgSett[r + ':bingo'] = 1;
+      if (bingoNy) spill('bingo');
+      var rekkeNokkel = r + ':rekke' + (b.rekker || []).length; if (sisteRekke && !b.ferdig && !tvBgSett[rekkeNokkel]) { tvBgSett[rekkeNokkel] = 1; if (siden < 4000) spill('rekke'); }
       return '<div class="tv-scene tvnr"><div class="tvbg"><div class="tvbg-venstre"><p class="tv-etikett">' + T('Drikke-bingo', 'Drinking bingo') + '</p><h1 class="tvbg-tittel">' + esc(b.tittel || '') + '</h1>' +
         '<svg class="tvbg-plate" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="#16120F" stroke="#FFF8EE" stroke-width="4"/><circle cx="100" cy="100" r="74" fill="none" stroke="#3A3940" stroke-width="2"/><circle cx="100" cy="100" r="58" fill="none" stroke="#3A3940" stroke-width="2"/><circle cx="100" cy="100" r="34" fill="#FFD23F" stroke="#16120F" stroke-width="3"/><path d="M84 92a18 18 0 0 1 20-10" fill="none" stroke="#16120F" stroke-width="3" stroke-linecap="round"/><circle cx="100" cy="100" r="5" fill="#16120F"/></svg>' +
         (b.sist ? '<div class="tvbg-sist"><span>' + T('Sist merket', 'Last marked') + '</span><p><b>' + esc(navn(b.sist.id)) + '</b> · ' + esc(b.sist.laat) + '</p></div>' : '<div class="tvbg-sist"><span>' + T('Kryss av på telefonen', 'Mark it on your phone') + '</span></div>') + '</div>' +
