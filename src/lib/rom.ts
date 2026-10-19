@@ -3039,7 +3039,11 @@ function nyeHandling(data: any, meg: any, h: any): any {
       s.drikk = { ener: nyEner, fire: 0, yatzy, nr: s.nr };
       if (nyEner) { giSlurker(data, aktiv, 2); deler.push('Ener i kastet – drikk 2.'); delerEn.push('A one in the roll – drink 2.'); }
       if (yatzy) { giUtdeling(data, aktiv, 5); deler.push('YATZY! Del ut 5 – eller en shot.'); delerEn.push('YAHTZEE! Give out 5 – or a shot.'); }
-      else if (fireLike) { const sum = s.terninger.reduce((a: number, b: number) => a + b, 0); giSlurker(data, aktiv, sum); s.drikk.fire = sum; deler.push('Fire like – drikk ' + sum + ' slurker.'); delerEn.push('Four of a kind – drink ' + sum + ' sips.'); }
+      else if (fireLike) {
+        // Fire like: drikk tallet på terningen (fire seksere = 6), ikke summen – et godt kast skal ikke være en felle
+        const tall = c.findIndex((x, v) => x >= 4 && nyttAv(v));
+        giSlurker(data, aktiv, tall); s.drikk.fire = tall; deler.push('Fire like – drikk ' + tall + ' slurker.'); delerEn.push('Four of a kind – drink ' + tall + ' sips.');
+      }
       s.melding = L(deler.join(' ') || (s.kast < 3 ? 'Hold og trill igjen, eller velg et felt.' : 'Velg et felt.'),
         delerEn.join(' ') || (s.kast < 3 ? 'Hold and roll again, or pick a box.' : 'Pick a box.'));
       return { ok: true };
