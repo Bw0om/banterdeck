@@ -1471,6 +1471,7 @@ function handlingInne(data: any, meg: any, h: any) {
     }
     case 'reager':
     case 'beveg':
+    case 'si':
     case 'send': {
       const naa = Date.now();
       if (meg.sistR && naa - meg.sistR < 2000) return feilL('for-fort', 'Rolig nå 😄', 'Easy there 😄');
@@ -1483,6 +1484,10 @@ function handlingInne(data: any, meg: any, h: any) {
         const b = String(h.b || ''); const min = (meg.pynt && meg.pynt.beveg) || BEVEG_GRATIS;
         if (b !== min && b !== BEVEG_GRATIS) return { feil: 'ukjent' };
         reak.e = '✨'; reak.b = b;
+      } else if (h.handling === 'si') {
+        // Snakkeboble over figuren i stua – hos alle, og på TV-en
+        const t = rens(h.tekst, 40); if (!t) return { ok: true };
+        reak.e = '💬'; reak.t = t;
       } else {
         const til = data.spillere.find((x: any) => x.id === h.hvem);
         if (!til || til.id === meg.id) return { feil: 'ukjent' };

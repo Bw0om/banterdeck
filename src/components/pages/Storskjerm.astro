@@ -1550,7 +1550,23 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var REAK_LYD = { '🍻': 'klirr', '😂': 'latter', '😱': 'ooh', '👏': 'applaus', '🤘': 'latter' };
     function stuaReak(liste, forrige) {
       if (!tvStua || !forrige) return;
-      liste.forEach(function (r) { if (r.nr > forrige && !r.til) { tvStua.reaksjon(r.fra, r.e, r.b || null); if (REAK_LYD[r.e]) spill(REAK_LYD[r.e]); } });
+      liste.forEach(function (r) {
+        if (r.nr <= forrige || r.til) return;
+        if (r.t) { tvSnakk(r.fra, r.t); return; }
+        tvStua.reaksjon(r.fra, r.e, r.b || null); if (REAK_LYD[r.e]) spill(REAK_LYD[r.e]);
+      });
+    }
+    /* Snakkebobler på TV-en, med de samme små overraskelsene som på telefonene */
+    function tvSnakk(fra, tekst) {
+      tvStua.personSi(fra, tekst, 20000);
+      var t = String(tekst).toLowerCase(), alle = (tilstand.spillere || []).map(function (p) { return p.id; });
+      if (/sk[åa]l|cheers|🍻/.test(t)) { setTimeout(function () { tvStua.hendelse('drikk', alle); }, 400); spill('klirr'); }
+      else if (/disco|disko|🪩/.test(t)) { try { tvStua.disco(); } catch (e) {} }
+      else if (/❤|elsker|love|😍/.test(t)) setTimeout(function () { tvStua.reaksjon(fra, '😍', null); }, 400);
+      else if (/😂|haha|lol/.test(t)) { setTimeout(function () { tvStua.reaksjon(fra, '😂', null); }, 400); spill('latter'); }
+      (tilstand.spillere || []).forEach(function (p) {
+        if (p.id !== fra && p.navn && p.navn.length >= 3 && t.indexOf(p.navn.toLowerCase()) !== -1) setTimeout(function () { tvStua.reaksjon(p.id, '✨', 'vink'); }, 600);
+      });
     }
     var tvHendSett = null, tvPallVist = false;
     function tegnTvStua(d) {

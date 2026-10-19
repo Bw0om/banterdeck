@@ -3529,6 +3529,34 @@ export function startRom(LEKNAVN, LANG) {
   }, true);
 
   /* ---------- reaksjoner og «send en slurk» ---------- */
+  /* Snakkebobler: det du skriver står over figuren din i 20 sekunder, hos alle. Noen ord gjør noe ekstra i stua:
+     «skål» får alle til å drikke, «disco» tenner diskokula, navnet på en i rommet får dem til å vinke til deg,
+     og et ❤️ eller «elsker» gjør figuren din forelsket. */
+  function stuaSnakk(st, fra, tekst) {
+    st.personSi(fra, tekst, 20000);
+    var t = String(tekst).toLowerCase(), alle = (tilstand.spillere || []).map(function (p) { return p.id; });
+    if (/sk[åa]l|cheers|🍻/.test(t)) setTimeout(function () { st.hendelse('drikk', alle); }, 400);
+    else if (/disco|disko|🪩/.test(t)) { try { st.disco(); } catch (e) {} }
+    else if (/❤|elsker|love|😍/.test(t)) setTimeout(function () { st.reaksjon(fra, '😍', null); }, 400);
+    else if (/😂|haha|lol/.test(t)) setTimeout(function () { st.reaksjon(fra, '😂', null); }, 400);
+    (tilstand.spillere || []).forEach(function (p) {
+      if (p.id !== fra && p.navn && p.navn.length >= 3 && t.indexOf(p.navn.toLowerCase()) !== -1) setTimeout(function () { st.reaksjon(p.id, '✨', 'vink'); }, 600);
+    });
+  }
+  /** «Si noe»: et lite ark med ett felt. Sendes som reaksjon, så alle får boblen samtidig. */
+  function siArk() {
+    lukkArk();
+    var m = lagArk('si-ark', T('Si noe', 'Say something')), kropp = m.querySelector('.ark-kropp');
+    kropp.innerHTML = '<form class="si-skjema" id="siSkjema"><input id="siInput" maxlength="40" autocomplete="off" enterkeyhint="send" placeholder="' + T('Maks 40 tegn …', 'Max 40 characters …') + '">' +
+      '<button class="btn gold" type="submit">' + T('Send', 'Send') + '</button></form>' +
+      '<p class="small">' + T('Står over figuren din i stua i 20 sekunder – hos alle. Prøv «skål» eller navnet på noen.', 'Stays above your figure for 20 seconds – for everyone. Try “cheers” or someone’s name.') + '</p>';
+    kropp.querySelector('#siSkjema').addEventListener('submit', function (e) {
+      e.preventDefault(); var t = kropp.querySelector('#siInput').value.trim(); if (!t) return;
+      gjorAlltid({ handling: 'si', tekst: t }); lukkArk();
+    });
+    aapentArk = { el: m, oppdater: function () {} };
+    setTimeout(function () { var i = kropp.querySelector('#siInput'); if (i) i.focus(); }, 50);
+  }
   var sisteReak = -1, reakMer = false;
   function visReaksjoner(liste) {
     if (!liste || !liste.length) { if (sisteReak < 0) sisteReak = 0; return; }
@@ -3543,6 +3571,7 @@ export function startRom(LEKNAVN, LANG) {
       document.body.appendChild(el);
       setTimeout(function () { el.remove(); }, 2600);
       // Figuren i stua gjør det samme – hos alle
+      if (r.t) { if (stua) stuaSnakk(stua, r.fra, r.t); el.remove(); return; }
       if (stua && !r.til) stua.reaksjon(r.fra, r.e, r.b || null);
       if (!(r.til && r.til === tilstand.meg) && r.fra !== tilstand.meg) spillLyd('pop');
       if (r.til && r.til === tilstand.meg) {
@@ -3559,6 +3588,7 @@ export function startRom(LEKNAVN, LANG) {
     }).join('') + '<span class="reak-ekstra">' + ['😍', '🤢', '🥴', '🙈', '🤘'].map(function (e) {
       return '<button type="button" data-g="reager" data-e="' + e + '" aria-label="Send ' + e + '">' + e + '</button>';
     }).join('') + '</span><button type="button" class="reak-mer" data-g="reak-mer" aria-expanded="' + reakMer + '" aria-label="' + T('Flere reaksjoner', 'More reactions') + '">' + (reakMer ? '↩' : '+') + '</button>' +
+      '<button type="button" data-g="si-aapne" aria-label="' + T('Si noe', 'Say something') + '">💬</button>' +
       '<button type="button" data-g="lyd" aria-label="' + (lyd.paa ? T('Skru av lyd', 'Turn sound off') : T('Skru på lyd', 'Turn sound on')) + '" aria-pressed="' + lyd.paa + '">' + (lyd.paa ? '🔊' : '🔇') + '</button>' +
       (megS.gi ? '' : '<!-- ingen slurker å dele ut -->') + '<button type="button" class="reak-send" data-g="del-ut"' + (megS.gi ? '' : ' hidden') + ' aria-label="' + T('Del ut ', 'Hand out ') + (megS.gi || 0) + '">' + T('Del ut', 'Hand out') + ' <b>' + (megS.gi || 0) + '</b></button></div>';
   }
@@ -5370,7 +5400,8 @@ export function startRom(LEKNAVN, LANG) {
       stuaEl.appendChild(Object.assign(document.createElement('p'), { className: 'rom-stua-tips' }));
     }
     stuaEl.querySelector('.rom-stua-tips').innerHTML = (erVert() ? '<button type="button" class="linkbtn" data-g="rom-ark">' + T('Rommet', 'The room') + '</button>' : '') +
-      '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>';
+      '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>' +
+      '<button type="button" class="linkbtn" data-g="si-aapne">💬 ' + T('Si noe', 'Say something') + '</button>';
     if (stuaEl.parentNode !== plass) plass.appendChild(stuaEl);
     stuaEl.classList.toggle('kompakt', !!s && !iArk);
     var st = tilstand.stua || {}, ute = st.ute || [], jegUte = ute.indexOf(meg.id) !== -1, alle = (tilstand.spillere || []).concat(st.sofa || []);
@@ -5503,6 +5534,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'app-uke') return ukeArk();
     if (g === 'app-rof') return rofStartArk();
     if (g === 'lek-info') return lekInfoArk(b.dataset.lek);
+    if (g === 'si-aapne') return siArk();
     if (b.classList.contains('rom-stor-knapp') && Date.now() < sperreTil) return;
     var farlig = farligTekst(g, b);
     if (farlig && !bekreftet(b, farlig)) return;
@@ -5721,6 +5753,7 @@ export function startRom(LEKNAVN, LANG) {
     if (!e.target.closest || root.contains(e.target) || !e.target.closest('.stua-ark, .mer-ark, .uke-ark, .rof-start-ark, .info-ark')) return;
     if (e.target.closest('[data-g="figur-ark"]')) return figurArk();
     if (e.target.closest('[data-g="rom-ark"]')) { if (erVert()) romArk(); return; }
+    if (e.target.closest('[data-g="si-aapne"]')) return siArk();
     if (e.target.closest('[data-g="start"]')) lukkArk();   // leken starter: arket skal bort
     romKlikk(e);
   });

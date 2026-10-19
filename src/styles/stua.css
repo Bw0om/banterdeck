@@ -1361,6 +1361,9 @@ button.mv-ringhode:active{transform:scale(.94)}
 .pk-hode .nr-h{width:108px;height:108px}
 .pk-hode .mv-hake{right:-4px;top:auto;bottom:4px;width:30px;height:30px;font-size:16px}
 .pk-merke{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;padding:4px 8px;border-radius:10px;border:2px solid var(--ink);background:var(--card)}
+/* «Si noe»: ett felt, én knapp */
+.si-skjema{display:flex;gap:8px;margin:4px 0 10px}
+.si-skjema input{flex:1;min-width:0;font:inherit;font-size:17px;padding:12px 14px;border:var(--strek) solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink)}
 /* Saueflokken: stillingen gjennom leken, og den svarte sauen */
 .sm-stilling{width:100%;display:flex;flex-direction:column;gap:6px;margin:10px 0 4px}
 .sm-stilling.liten{gap:4px;margin-top:14px}
