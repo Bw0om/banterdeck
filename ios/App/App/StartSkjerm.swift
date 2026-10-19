@@ -74,18 +74,18 @@ struct StartSkjerm: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 Text(m.T("Spill sammen", "Play together").uppercased())
-                    .font(.system(size: 40, weight: .black)).tracking(-1.5)
+                    .font(.archivo(40, vekt: 900)).tracking(-1)
                     .padding(.top, 8)
 
                 if !m.fortsett.isEmpty {
                     Button(action: m.fortsettRom) {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(m.T("Du er i rom ", "You’re in room ") + m.fortsett).font(.system(size: 17, weight: .heavy))
-                                Text(m.T("Trykk for å gå tilbake til rommet", "Tap to go back to the room")).font(.system(size: 14)).opacity(0.75)
+                                Text(m.T("Du er i rom ", "You’re in room ") + m.fortsett).font(.archivo(17, vekt: 800))
+                                Text(m.T("Trykk for å gå tilbake til rommet", "Tap to go back to the room")).font(.archivo(14, vekt: 500)).opacity(0.75)
                             }
                             Spacer()
-                            Text("→").font(.system(size: 22, weight: .heavy))
+                            Text("→").font(.archivo(22, vekt: 800))
                         }
                         .padding(14).foregroundColor(morkBlekk)
                         .background(RoundedRectangle(cornerRadius: 14).fill(gul))
@@ -102,11 +102,11 @@ struct StartSkjerm: View {
 
                 knapp(m.T("Lag rom", "Create room"), travel: m.travel == "lag", action: m.lagRom)
 
-                HStack { linje; Text(m.T("eller", "or")).font(.system(size: 14, weight: .bold)).opacity(0.6); linje }
+                HStack { linje; Text(m.T("eller", "or")).font(.archivo(14, vekt: 700)).opacity(0.6); linje }
 
                 felt(m.T("Kode fra verten", "Code from the host")) {
                     TextField("ABCD", text: $m.kode)
-                        .font(.system(size: 26, weight: .black, design: .monospaced))
+                        .font(.archivo(26, vekt: 900))
                         .textInputAutocapitalization(.characters).disableAutocorrection(true)
                         .submitLabel(.go).focused($fokus, equals: .kode)
                         .onChange(of: m.kode) { v in
@@ -120,13 +120,13 @@ struct StartSkjerm: View {
                 knapp(m.T("Bli med", "Join"), travel: m.travel == "bli", action: m.bliMed)
 
                 if !m.feil.isEmpty {
-                    Text(m.feil).font(.system(size: 15, weight: .bold)).foregroundColor(rust)
+                    Text(m.feil).font(.archivo(15, vekt: 700)).foregroundColor(rust)
                         .transition(.opacity)
                 }
 
                 Text(m.T("Ved å lage eller bli med i et rom bekrefter du at du er over 18. Drikk med vett – og aldri kjør etterpå.",
                          "By creating or joining a room you confirm you’re over 18. Drink responsibly – and never drive afterwards."))
-                    .font(.system(size: 13)).opacity(0.7).padding(.top, 6)
+                    .font(.archivo(13, vekt: 500)).opacity(0.7).padding(.top, 6)
             }
             .padding(.horizontal, 20).padding(.bottom, 32)
         }
@@ -140,9 +140,9 @@ struct StartSkjerm: View {
 
     private func felt<V: View>(_ etikett: String, @ViewBuilder _ inn: () -> V) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(etikett).font(.system(size: 14, weight: .heavy))
+            Text(etikett).font(.archivo(14, vekt: 800))
             inn()
-                .font(.system(size: 20, weight: .semibold))
+                .font(.archivo(20, vekt: 600))
                 .padding(.horizontal, 14).frame(height: 56)
                 .background(RoundedRectangle(cornerRadius: 14).fill(modus == .dark ? Color.white.opacity(0.06) : Color.white))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
@@ -153,7 +153,7 @@ struct StartSkjerm: View {
     private func knapp(_ tekst: String, travel: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             ZStack {
-                Text(tekst.uppercased()).font(.system(size: 20, weight: .black)).tracking(0.5).opacity(travel ? 0 : 1)
+                Text(tekst.uppercased()).font(.archivo(20, vekt: 900)).tracking(0.5).opacity(travel ? 0 : 1)
                 if travel { ProgressView().progressViewStyle(.circular).tint(morkBlekk) }
             }
             .frame(maxWidth: .infinity).frame(height: 60).foregroundColor(morkBlekk)
@@ -176,6 +176,19 @@ private struct TrykkStil: ButtonStyle {
         configuration.label
             .offset(x: configuration.isPressed ? 3 : 0, y: configuration.isPressed ? 3 : 0)
             .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+    }
+}
+
+extension Font {
+    /// Archivo – samme skrift som på nettsiden (Fonter/Archivo.ttf, variabel). `vekt` 100–900 som i CSS.
+    /// Mangler fonten, brukes systemfonten med tilsvarende vekt.
+    static func archivo(_ size: CGFloat, vekt: CGFloat = 700) -> Font {
+        let wght = 0x77676874   // aksen 'wght'
+        let variasjon = UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String)
+        let d = UIFontDescriptor(fontAttributes: [.name: "Archivo-SemiBold", variasjon: [NSNumber(value: wght): NSNumber(value: Double(vekt))]])
+        let f = UIFont(descriptor: d, size: size)
+        if f.familyName.hasPrefix("Archivo") { return Font(f) }
+        return .system(size: size, weight: vekt >= 850 ? .black : vekt >= 750 ? .heavy : vekt >= 650 ? .bold : .semibold)
     }
 }
 
