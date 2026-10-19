@@ -95,9 +95,9 @@ struct StartSkjerm: View {
 
                 felt(m.T("Navnet ditt", "Your name")) {
                     TextField(m.T("F.eks. Maria", "E.g. Sam"), text: $m.navn)
-                        .textContentType(.nickname).autocorrectionDisabled()
+                        .textContentType(.nickname).disableAutocorrection(true)
                         .submitLabel(.go).focused($fokus, equals: .navn)
-                        .onSubmit { m.kode.isEmpty ? m.lagRom() : m.bliMed() }
+                        .onSubmit { if m.kode.isEmpty { m.lagRom() } else { m.bliMed() } }
                 }
 
                 knapp(m.T("Lag rom", "Create room"), travel: m.travel == "lag", action: m.lagRom)
@@ -107,7 +107,7 @@ struct StartSkjerm: View {
                 felt(m.T("Kode fra verten", "Code from the host")) {
                     TextField("ABCD", text: $m.kode)
                         .font(.system(size: 26, weight: .black, design: .monospaced)).tracking(6)
-                        .textInputAutocapitalization(.characters).autocorrectionDisabled()
+                        .textInputAutocapitalization(.characters).disableAutocorrection(true)
                         .submitLabel(.go).focused($fokus, equals: .kode)
                         .onChange(of: m.kode) { v in
                             let r = String(v.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(6))
