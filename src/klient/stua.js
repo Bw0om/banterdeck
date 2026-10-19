@@ -976,7 +976,7 @@ export function lagStua(svg, valg = {}) {
   }
   function straff(id, tekst) {
     const f = kart.get(id); if (!f) return;
-    f.si(tekst, 2600); f.svimmel();
+    f.svimmel(); f.si(tekst, 2200);   // svimmel() tegner figuren på nytt og ville visket ut boblen – derfor først
     if (!REDUSERT) { f.z.fart = 140; start(f); }
   }
 
