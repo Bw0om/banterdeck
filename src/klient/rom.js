@@ -985,7 +985,7 @@ export function startRom(LEKNAVN, LANG) {
         '<span><b>' + esc(l.navn) + '</b></span><span class="lek-info" role="button" tabindex="0" data-g="lek-info" data-lek="' + esc(l.id) + '" aria-label="' + T('Om ', 'About ') + esc(l.navn) + '">i</span><i aria-hidden="true">' + (laast ? '🔒' : '▶') + '</i></button>';
     }
     function senereRad(l) {
-      return '<div class="app-lek for-fa">' + klistremerke(l.id, 'app-lek-merke') + '<span><b>' + esc(l.navn) + '</b><small>' + T('Minst ' + forFa(l) + ' spillere', 'At least ' + forFa(l) + ' players') + '</small></span></div>';
+      return '<div class="app-lek for-fa">' + klistremerke(l.id, 'app-lek-merke') + '<span><b>' + esc(l.navn) + '</b><small>' + T('Minst ' + forFa(l) + ' spillere', 'At least ' + forFa(l) + ' players') + '</small></span><span class="lek-info" role="button" tabindex="0" data-g="lek-info" data-lek="' + esc(l.id) + '" aria-label="' + T('Om ', 'About ') + esc(l.navn) + '">i</span></div>';
     }
     // Lekene dere kan starte nå, gruppert. De som trenger flere telefoner samles nederst i én linje.
     var brukt = {}, grupper = '', senere = [];
