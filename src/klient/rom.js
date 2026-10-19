@@ -3549,7 +3549,7 @@ export function startRom(LEKNAVN, LANG) {
     var m = lagArk('si-ark', T('Si noe', 'Say something')), kropp = m.querySelector('.ark-kropp');
     kropp.innerHTML = '<form class="si-skjema" id="siSkjema"><input id="siInput" maxlength="40" autocomplete="off" enterkeyhint="send" placeholder="' + T('Maks 40 tegn …', 'Max 40 characters …') + '">' +
       '<button class="btn gold" type="submit">' + T('Send', 'Send') + '</button></form>' +
-      '<p class="small">' + T('Står over figuren din i stua i 20 sekunder – hos alle. Prøv «skål» eller navnet på noen.', 'Stays above your figure for 20 seconds – for everyone. Try “cheers” or someone’s name.') + '</p>';
+      '<p class="small">' + T('Står over figuren din i stua i 20 sekunder – hos alle. Prøv «skål» eller navnet på noen. Banneord koster en slurk.', 'Stays above your figure for 20 seconds – for everyone. Try “cheers” or someone’s name. Swearing costs a sip.') + '</p>';
     kropp.querySelector('#siSkjema').addEventListener('submit', function (e) {
       e.preventDefault(); var t = kropp.querySelector('#siInput').value.trim(); if (!t) return;
       gjorAlltid({ handling: 'si', tekst: t }); lukkArk();
@@ -3572,6 +3572,7 @@ export function startRom(LEKNAVN, LANG) {
       setTimeout(function () { el.remove(); }, 2600);
       // Figuren i stua gjør det samme – hos alle
       if (r.t) { if (stua) stuaSnakk(stua, r.fra, r.t); el.remove(); return; }
+      if (r.slurk) { if (stua) stua.straff(r.fra, T('Banning = slurk 🍺', 'Swearing = sip 🍺')); if (r.fra === tilstand.meg) { spillLyd('womp'); toast(T('Oi, banneord! Det koster en slurk 🍺', 'Oops, swearing! That costs a sip 🍺')); } return; }
       if (stua && !r.til) stua.reaksjon(r.fra, r.e, r.b || null);
       if (!(r.til && r.til === tilstand.meg) && r.fra !== tilstand.meg) spillLyd('pop');
       if (r.til && r.til === tilstand.meg) {

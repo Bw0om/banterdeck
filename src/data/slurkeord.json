@@ -1,0 +1,17 @@
+{
+  "_om": "Ord som koster en slurk når de skrives i stua. Hele ord; «*» til slutt = alle ord som begynner slik. Fra LDNOOBW (CC BY 4.0) og censor-text/profanity-list (Unlicense), lukt gjennom og utvidet for norsk.",
+  "no": [
+    "faen*", "fan", "fanken", "fitte*", "fitta", "forbanna", "forbannet", "forjævlig", "jævl*", "jævel*", "helvete*", "satan*", "pokker",
+    "dritt*", "drit", "føkk*", "fuck*", "kuk", "kuken", "kuker", "kukene", "kukhue", "kuksuger*", "pikk", "pikken", "ståpikk*", "ræva", "ræven", "rævhøl", "rævhull", "rasshøl", "rasshol", "rævkjørt",
+    "morraknuller*", "morrapuler*", "hore", "hora", "horer", "horunge*", "fittetryne", "kukkhue", "mongo", "mongis", "tilbakestående", "spasser",
+    "nigger*", "neger*", "svarting*", "pakkis*", "svartheiteste", "sotrør", "soper*", "transe"
+  ],
+  "en": [
+    "fuck*", "fuk", "fucker", "motherfucker*", "shit*", "bullshit", "ass", "asshole*", "arsehole*", "arse", "bastard*", "bitch*", "cunt*", "dick*", "cock*", "pussy", "pussies", "twat*", "wanker*", "whore*", "slut*", "piss*", "crap",
+    "damn", "goddamn", "god damn", "bollocks", "bugger", "prick", "jerk off", "jack off", "blowjob", "blow job", "handjob", "hand job", "cum", "jizz", "boner", "schlong", "tits", "titties", "boobs",
+    "nigga*", "nigger*", "negro", "coon", "kike", "spic", "chink", "gook", "wetback", "beaner", "raghead", "towelhead", "paki", "faggot*", "fag", "fags", "dyke", "tranny", "retard*", "spastic",
+    "rape", "rapist", "porn*", "milf", "orgy", "gangbang", "incest"
+  ],
+  "sv": ["jävlar", "jävla", "fitta", "fittig", "knulla", "kuksås", "kötthuvud", "köttnacke", "runka", "röv", "rövhål", "rövknulla", "subba", "skit ner dig", "dra åt helvete", "för helvete", "tusan", "arsle", "snedfitta", "snefitta", "neger"],
+  "da": ["fisse*", "luder", "lort", "pik", "pikhår", "hestepik", "røv", "røvhul", "bøsserøv", "kusse*", "pis", "piksutteri", "pikslugeri"]
+}

@@ -8,6 +8,7 @@ import DECKS from '../data/decks.json';
 import BINGO from '../data/bingo.json';
 import PLUSSPAKKER from '../data/pluss.json';
 import MULDVARP from '../data/muldvarp.json';
+import SLURKEORD from '../data/slurkeord.json';
 import SOSIAL from '../data/sosial.json';
 import DECKS_EN from '../data/decks.en.json';
 import BINGO_EN from '../data/bingo.en.json';
@@ -811,6 +812,15 @@ function venter(s: any, mangler: number) {
 }
 /** Hendelsen alle ser. Lagres på begge språk; visning() viser tekst på språket til den som ser på. */
 function melde(data: any, tekst: string, en?: string) { data.nr = (data.nr || 0) + 1; data.hendelse = { nr: data.nr, tekst, en: en || tekst }; }
+/** Banneord i stua koster en slurk. Hele ord (med «*» = begynner slik), uansett store/små bokstaver og enkel l33t. */
+const SLURKEORD_RE: RegExp[] = ([] as string[]).concat(SLURKEORD.no, SLURKEORD.en, SLURKEORD.sv, SLURKEORD.da).map((o) => {
+  const pre = o.endsWith('*'), ord = (pre ? o.slice(0, -1) : o).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+');
+  return new RegExp('(^|[^a-zæøåäö])' + ord + (pre ? '' : '(?=$|[^a-zæøåäö])'), 'i');
+});
+export function erSlurkeord(tekst: string) {
+  const t = String(tekst || '').toLowerCase().replace(/[0@]/g, (c) => (c === '0' ? 'o' : 'a')).replace(/1/g, 'i').replace(/3/g, 'e').replace(/\$/g, 's').replace(/[*._\-]+/g, '');
+  return SLURKEORD_RE.some((re) => re.test(t));
+}
 function navnPaa(data: any, id: string) { const p = data.spillere.find((x: any) => x.id === id); return p ? p.navn : '?'; }
 function giSlurker(data: any, id: string, n: number, viaMakker = false) {
   const p = data.spillere.find((x: any) => x.id === id); if (!p) return;
@@ -1487,7 +1497,12 @@ function handlingInne(data: any, meg: any, h: any) {
       } else if (h.handling === 'si') {
         // Snakkeboble over figuren i stua – hos alle, og på TV-en
         const t = rens(h.tekst, 40); if (!t) return { ok: true };
-        reak.e = '💬'; reak.t = t;
+        if (erSlurkeord(t)) {
+          // Banneord: meldingen vises ikke – figuren får en slurk i stedet
+          giSlurker(data, meg.id, 1);
+          melde(data, `🤐 ${meg.navn} bannet i stua – 1 slurk!`, `🤐 ${meg.navn} swore in the lounge – 1 sip!`);
+          reak.e = '🤐'; reak.slurk = true;
+        } else { reak.e = '💬'; reak.t = t; }
       } else {
         const til = data.spillere.find((x: any) => x.id === h.hvem);
         if (!til || til.id === meg.id) return { feil: 'ukjent' };
