@@ -1,20 +1,24 @@
-** BUILD SUCCEEDED **
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:120:55: error: unterminated string literal
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:121:1: error: unterminated string literal
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:120:55: error: Unterminated string literal
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:121:1: error: Unterminated string literal
+** BUILD FAILED **
 ----- siste linjer -----
+Copy /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/Frameworks/Cordova.framework /Users/runner/work/banterdeck/banterdeck/build/sim/SourcePackages/artifacts/capacitor-swift-pm/Cordova/Cordova.xcframework/ios-arm64_x86_64-simulator/Cordova.framework (in target 'App' from project 'App')
 
-AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-10-19 07:31:37.266 appintentsnltrainingprocessor[3722:14945] Parsing options for appintentsnltrainingprocessor
-2026-10-19 07:31:37.268 appintentsnltrainingprocessor[3722:14945] Starting AppIntents SSU YAML Generation
-2026-10-19 07:31:37.274 appintentsnltrainingprocessor[3722:14945] No AppShortcuts found - Skipping.
+Copy /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/Frameworks/Capacitor.framework /Users/runner/work/banterdeck/banterdeck/build/sim/SourcePackages/artifacts/capacitor-swift-pm/Capacitor/Capacitor.xcframework/ios-arm64_x86_64-simulator/Capacitor.framework (in target 'App' from project 'App')
 
-RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+CompileStoryboard /Users/runner/work/banterdeck/banterdeck/ios/App/App/Base.lproj/Main.storyboard (in target 'App' from project 'App')
 
-Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+CompileStoryboard /Users/runner/work/banterdeck/banterdeck/ios/App/App/Base.lproj/LaunchScreen.storyboard (in target 'App' from project 'App')
 
-Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
-    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
+** BUILD FAILED **
 
-** BUILD SUCCEEDED **
 
+The following build commands failed:
+	SwiftDriver App normal arm64 com.apple.xcode.tools.swift.compiler (in target 'App' from project 'App')
+	Building project App with scheme App and configuration Debug
+(2 failures)
 ----- skjemaer -----
     Targets:
         App
