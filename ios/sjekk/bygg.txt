@@ -1,21 +1,20 @@
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/StartSkjerm.swift:109:87: error: 'tracking' is only available in iOS 16.0 or newer
-** BUILD FAILED **
+** BUILD SUCCEEDED **
 ----- siste linjer -----
-LinkAssetCatalog /Users/runner/work/banterdeck/banterdeck/ios/App/App/Assets.xcassets (in target 'App' from project 'App')
-note: Emplaced /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/AppIcon60x60@2x.png (in target 'App' from project 'App')
-note: Emplaced /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/Assets.car (in target 'App' from project 'App')
-note: Emplaced /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/AppIcon76x76@2x~ipad.png (in target 'App' from project 'App')
 
-ProcessInfoPlistFile /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/Info.plist /Users/runner/work/banterdeck/banterdeck/ios/App/App/Info.plist (in target 'App' from project 'App')
+AppIntentsSSUTraining (in target 'App' from project 'App')
+2026-10-19 22:03:42.924 appintentsnltrainingprocessor[3693:14730] Parsing options for appintentsnltrainingprocessor
+2026-10-19 22:03:42.925 appintentsnltrainingprocessor[3693:14730] Starting AppIntents SSU YAML Generation
+2026-10-19 22:03:42.930 appintentsnltrainingprocessor[3693:14730] No AppShortcuts found - Skipping.
 
-** BUILD FAILED **
+RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
+Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
-The following build commands failed:
-	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/StartSkjerm.swift (in target 'App' from project 'App')
-	SwiftCompile normal arm64 Compiling\ StartSkjerm.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/StartSkjerm.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
-	Building project App with scheme App and configuration Debug
-(3 failures)
+Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
+
+** BUILD SUCCEEDED **
+
 ----- skjemaer -----
     Targets:
         App
