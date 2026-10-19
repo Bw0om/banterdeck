@@ -2580,7 +2580,8 @@ export function startRom(LEKNAVN, LANG) {
      men ikke når en TV er koblet til, for da er det TV-en som er høyttaleren. Bare når lyden er på. */
   var VL_FIL = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' };
   var vlLydSt = { runde: 0, fase: '', leder: '', jevnt: false, sist: 0, n: 0, pos: null }, vlMusikkEl = null, vlUtsettTil = 0;
-  function vlVariant(navn) { return navn + (Math.random() < 0.5 ? '-a' : '-b'); }
+  var VL_ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4 };   // antall varianter per replikk
+  function vlVariant(navn) { var n = VL_ANT[navn.split('-')[0]] || 1; return navn + '-' + 'abcd'.charAt(Math.floor(Math.random() * n)); }
   function vlMusikk(paa) {
     if (paa) {
       if (!vlMusikkEl) { vlMusikkEl = new Audio('/lyd/veddelop/musikk.mp3'); vlMusikkEl.loop = true; }
@@ -2606,17 +2607,21 @@ export function startRom(LEKNAVN, LANG) {
       var pos = s.pos || {}, forrige = vlLydSt.pos || {}, best = -1, leder = '', delt = false, tilbake = '';
       VL_F.forEach(function (x) { var p = pos[x] || 0; if (p < (forrige[x] || 0)) tilbake = x; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
       vlLydSt.pos = Object.assign({}, pos);
-      if (tilbake) vlSi('tilbake-' + VL_FIL[tilbake]);
+      var sist = '', verst = 99; VL_F.forEach(function (x) { var p = pos[x] || 0; if (p < verst) { verst = p; sist = x; } });
+      var sistAlene = VL_F.filter(function (x) { return (pos[x] || 0) === verst; }).length === 1 && best - verst >= 3;
+      if (tilbake) vlSi(vlVariant('tilbake-' + VL_FIL[tilbake]));
       else if (best >= 2 && !delt && leder !== vlLydSt.leder && vlSi(vlVariant('leder-' + VL_FIL[leder]))) vlLydSt.leder = leder;
       else if (best >= 6 && delt && !vlLydSt.jevnt && vlSi(vlVariant('jevnt'))) vlLydSt.jevnt = true;
+      else if (sistAlene && !vlLydSt.sistSagt && vlSi('sist-' + VL_FIL[sist])) vlLydSt.sistSagt = true;
+      else if (best >= 3 && Math.random() < 0.3) vlSi(vlVariant('fyll'));
       else if (s.sist && s.sist.f) vlSi(vlVariant('fram-' + VL_FIL[s.sist.f]));
     }
     if (f === 'ferdig' && vlLydSt.fase !== 'ferdig') {
       // I mål: jubel og «X VINNER!» først. Slurkene kommer etterpå (drikk-varselet venter).
       vlMusikk(false); vlUtsettTil = Date.now() + 5500;
       try { var j = new Audio('/lyd/veddelop/jubel.mp3'); j.volume = 0.8; var pj = j.play(); if (pj && pj.catch) pj.catch(function () {}); } catch (e) {}
-      var v = s.vinner; setTimeout(function () { vlLydSt.sist = 0; if (v) vlSi('vinner-' + VL_FIL[v], true); }, 900);
-      setTimeout(function () { vlLydSt.sist = 0; vlSi('seier', true); }, 3600);
+      var v = s.vinner; setTimeout(function () { vlLydSt.sist = 0; if (v) vlSi(vlVariant('vinner-' + VL_FIL[v]), true); }, 900);
+      setTimeout(function () { vlLydSt.sist = 0; vlSi(vlVariant('seier'), true); }, 3800);
     }
     vlLydSt.fase = f;
   }
