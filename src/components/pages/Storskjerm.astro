@@ -104,7 +104,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     }
     function horn(t0, d) { [466, 470, 587, 592, 698].forEach(function (f) { tone(f * 0.97, t0, d, 'sawtooth', 0.06, f); }); }
     /* TV-ens lyder som filer (public/lyd/tv/ og public/lyd/), laget i samme rolige palett som telefonens. Det som ikke har fil, lages som toner under. */
-    var TVFIL = { intro: 'tv/intro', applaus: 'tv/applaus', ooh: 'tv/ooh', virvel: 'tv/virvel', sirene: 'tv/sirene', inn: 'tv/inn', bingo: 'tv/bingo', rekke: 'tv/rekke', avsloring: 'tv/avsloring',
+    var TVFIL = { intro: 'tv/intro', applaus: 'tv/applaus', ooh: 'tv/ooh', virvel: 'tv/virvel', sirene: 'tv/sirene', inn: 'tv/inn', bingo: 'tv/bingo', rekke: 'tv/rekke', avsloring: 'tv/avsloring', poeng: 'tv/poeng', sau: 'tv/sau', hemmelig: 'tv/hemmelig',
       fanfare: 'fanfare', vann: 'vann', knus: 'knus', slurk: 'slurk', dundun: 'dundun', svar: 'kort', pop: 'kort' };
     var tvFiler = {}, tvSist = {};
     function tvFil(navn) { if (!tvFiler[navn]) { var a = new Audio('/lyd/' + navn + '.mp3'); a.preload = 'auto'; a.volume = 0.8; tvFiler[navn] = a; } return tvFiler[navn]; }
@@ -175,6 +175,31 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       ws.onerror = function () { try { ws.close(); } catch (x) {} };
     }
 
+    /* Lyd ved faseskifte i de sosiale lekene. «hemmelig» spilles én gang for alle når rollene er delt ut – den sier ingenting om hvem. */
+    function tvSosLyd(s) {
+      var m = s.sos, f = m.fase;
+      if (s.type === 'spion') { if (f === 'snakk') spill('hemmelig'); else if (f === 'gjett') spill('avsloring'); else if (f === 'fasit') spill(m.utfall === 'fanget' ? 'applaus' : 'ooh'); }
+      if (s.type === 'samme') {
+        if (f === 'slutt') spill('fanfare');
+        else if (f === 'fasit') {
+          var gr = m.grupper || [], maks = gr.reduce(function (x, g) { return Math.max(x, g.ider.length); }, 0), med = gr.reduce(function (x, g) { return x + g.ider.length; }, 0);
+          var flokk = gr.filter(function (g) { return g.ider.length === maks; }).length === 1 && maks > 1, alene = gr.some(function (g) { return g.ider.length === 1; }) || med < (tilstand && tilstand.spillere ? tilstand.spillere.length : med);
+          if (flokk) spill('poeng');
+          if (alene) setTimeout(function () { spill('sau'); }, flokk ? 1100 : 500);
+        }
+      }
+      if (s.type === 'hvemskrev' || s.type === 'bloff') { if (f === 'fasit') spill('avsloring'); else if (f === 'ferdig') spill('fanfare'); }
+      if (s.type === 'pannekort' && f === 'ferdig') spill('svar');
+    }
+    /* Klokka tikker de siste sekundene før en fasit i de sosiale lekene (aldri mens fasiten leses) */
+    var tvKlokkeA = null;
+    function tvKlokke(s) {
+      var igjen = s && s.frist ? (s.frist - 1500 - (Date.now() + tvAvvik)) / 1000 : 0, f = s && s.sos ? s.sos.fase : s && s.ts ? s.ts.fase : '';
+      var paa = startet && igjen > 0 && igjen <= 5.5 && /^(spion|samme|pannekort|hvemskrev|bloff|tosannheter)$/.test(s.type) && /^(skriv|stem|snakk|gjett)$/.test(f || '');
+      if (paa && !tvKlokkeA) { tvKlokkeA = tvFil('tv/klokke'); tvKlokkeA.loop = true; tvKlokkeA.volume = 0.5; tvKlokkeA.currentTime = 0; var p = tvKlokkeA.play(); if (p && p.catch) p.catch(function () {}); }
+      if (!paa && tvKlokkeA) { tvKlokkeA.pause(); tvKlokkeA.loop = false; tvKlokkeA = null; }
+    }
+    setInterval(function () { if (tilstand && tilstand.spill) tvKlokke(tilstand.spill); }, 400);
     /* ---------- hendelser: det som skal høres og synes i hele rommet ---------- */
     var sett = null;
     function hendelser(gml, d) {
@@ -184,7 +209,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         slurker: {}, brudd: s.ring && s.brudd ? s.brudd.nr : 0, kortNr: s.type === 'kort' ? (s.ring ? s.nr : s.pos) + ':' + (s.lek || '') : '',
         meldte: (b.meldte || []).map(function (a) { return a.id; }), saker: (b.saker || []).map(function (x) { return x.id + ':' + (x.dom === true ? 'd' : ''); }),
         vinner: (d.kveld && d.kveld.vinner) || '', ferdig: !!d.ferdig, hend: d.hendelse ? d.hendelse.nr : 0, reak: (d.reak || []).length ? d.reak[d.reak.length - 1].nr : 0,
-        fase: s.type + ':' + (s.fase || ''), spillere: (d.spillere || []).length, vann: d.vann ? d.vann.nr : 0, ut: d.utdeling ? d.utdeling.nr : 0,
+        fase: s.type + ':' + (s.fase || ''), spillere: (d.spillere || []).length,
+        sos: s.sos ? s.type + ':' + (s.sos.fase || '') + ':' + (s.sos.runde || 0) + ':' + (s.sos.nr != null ? s.sos.nr : s.sos.i != null ? s.sos.i : 0) : '',
+        pkGj: s.type === 'pannekort' && s.sos ? (s.sos.gjettet || []).length : 0, tsN: s.ts && s.ts.forrige ? s.ts.forrige.n : 0, tsFase: s.ts ? s.ts.fase || '' : '', vann: d.vann ? d.vann.nr : 0, ut: d.utdeling ? d.utdeling.nr : 0,
         lek: d.spill ? [d.spill.antallLeker || 0, d.spill.type, d.spill.lek || '', d.spill.navn].join('|') : '',
       };
       (d.spillere || []).forEach(function (p) { na.slurker[p.id] = p.slurker || 0; });
@@ -213,6 +240,12 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       else if (na.kortNr && na.kortNr !== sett.kortNr) spill('pop');
       if (na.fase !== sett.fase && /mest:resultat|forraeder:avslort|kort:aldri-avslort|kort:ee-avslort|kort:ee-forsvar|kort:rr-avslort|kort:ns-avslort/.test(na.fase)) spill('svar');
       if (na.fase !== sett.fase && na.fase === 'kort:kb-bom') spill('dundun');
+      // De sosiale lekene: lyden går på TV-en, aldri på telefonene – alle sitter i samme rom, og en lyd hos én ville avslørt rollen
+      if (na.sos && na.sos !== sett.sos) tvSosLyd(s);
+      if (na.pkGj > sett.pkGj) spill('poeng');                       // Lappen i panna: noen gjettet lappen sin
+      if (na.tsN && na.tsN !== sett.tsN) spill('avsloring');          // To sannheter: kortene snus
+      if (na.tsFase === 'ferdig' && sett.tsFase !== 'ferdig') spill('fanfare');
+      tvKlokke(s);
       if (na.fase !== sett.fase && /^spion:(gjett|fasit)$/.test(na.fase) && !/^spion:gjett$/.test(sett.fase)) spill('avsloring');
       if (na.fase !== sett.fase && /^kort:lb-(avslort|ferdig)/.test(na.fase)) spill('svar');
       if (na.spillere > sett.spillere) spill('inn');
