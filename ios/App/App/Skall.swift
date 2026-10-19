@@ -111,8 +111,21 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "klar", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "fane", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "skjul", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "skjul", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise)
     ]
+
+    /// Simulator-sjekken: nettsiden sender feil og en kort tilstand hit, og det havner i Documents/sjekk.log
+    @objc func logg(_ call: CAPPluginCall) {
+        let tekst = (call.getString("tekst") ?? "") + "
+"
+        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fil = dir.appendingPathComponent("sjekk.log")
+            if let h = try? FileHandle(forWritingTo: fil) { h.seekToEndOfFile(); h.write(tekst.data(using: .utf8)!); try? h.close() }
+            else { try? tekst.write(to: fil, atomically: true, encoding: .utf8) }
+        }
+        call.resolve()
+    }
 
     @objc func klar(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
@@ -123,7 +136,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
                 s.sett(titler: titler)
             }
             // rull: simulator-sjekken ber nettsiden bla nedover, så bildet viser linja i krympet stand
-            call.resolve(["ok": true, "fane": s.valgtFane, "rull": ProcessInfo.processInfo.environment["MV_RULL"] == "1"])
+            call.resolve(["ok": true, "fane": s.valgtFane, "rull": ProcessInfo.processInfo.environment["MV_RULL"] == "1", "sjekk": ProcessInfo.processInfo.environment["MV_SJEKK"] == "1"])
             s.brukStartfane()
         }
     }
