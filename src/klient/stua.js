@@ -639,6 +639,13 @@ export function lagStua(svg, valg = {}) {
   const BEVEG_MS = { 'm-skal': 1300, 'm-latter': 1000, 'm-hopp': 800, 'm-skvett': 800, 'm-klapp': 1100, 'm-hjerte': 1600, 'm-kvalm': 1600, 'm-full': 1700, 'm-gjem': 1600, 'm-rock': 1500,
     'm-vink': 1400, 'm-dans': 1700, 'm-snurr': 1000, 'm-bukk': 1200, 'm-gitar': 1600, 'm-moon': 1700, 'm-slurk': 1600, 'm-ooh': 1500, 'm-trekk': 1100, 'm-sulk': 1300, 'm-besvim': 1500 };
   let sistAktiv = Date.now();
+  // Strømsparing: står stua utenfor skjermen (blatt bort, bak en lek, i en annen fane) eller er fanen skjult, hviler figurene –
+  // ingen rusling, vaner eller gjesp, og CSS-bevegelsene står stille. Telefonene ble varme av at alt gikk hele tida.
+  let synlig = true;
+  if (typeof IntersectionObserver === 'function') {
+    try { new IntersectionObserver((e) => { synlig = e.some((x) => x.isIntersecting); svg.classList.toggle('hvile', !synlig); }, { threshold: 0.05 }).observe(svg); } catch (e) {}
+  }
+  const hviler = () => REDUSERT || document.hidden || !synlig;
   Figur.prototype.beveg = function (klasse, ansikt, ms) {
     if (!klasse || !this.g.isConnected) return;
     sistAktiv = Date.now();
@@ -680,7 +687,7 @@ export function lagStua(svg, valg = {}) {
     clearTimeout(this.vaneT);
     this.vaneT = setTimeout(() => {
       if (!svg.isConnected) return;
-      if (!this.drar && !document.hidden && !/(^| )m-/.test(this.g.className.baseVal || '')) this.beveg(VANER[hash(String(this.info.id || this.hjem.join())) % VANER.length], [], 2300);
+      if (!this.drar && !hviler() && !/(^| )m-/.test(this.g.className.baseVal || '')) this.beveg(VANER[hash(String(this.info.id || this.hjem.join())) % VANER.length], [], 2300);
       this.planleggVane();
     }, 22000 + Math.random() * 18000);
   };
@@ -724,13 +731,14 @@ export function lagStua(svg, valg = {}) {
     clearTimeout(this.ruslT);
     this.ruslT = setTimeout(() => {
       if (!svg.isConnected) return;
-      if (!this.drar && !this.vei.length && !document.hidden) {
+      // Rolig modus: har ingen rørt stua på halvannet minutt, står de stille til noe skjer igjen
+      if (!this.drar && !this.vei.length && !hviler() && Date.now() - sistAktiv < 90000) {
         let x, y, n = 0;
         do { x = this.hjem[0] + (Math.random() - 0.5) * 1.1; y = this.hjem[1] + (Math.random() - 0.5) * 1.1; } while (!ledig(x, y) && ++n < 8);
         if (ledig(x, y)) { this.x.f = this.y.f = ROLIG; this.vei = [[x, y]]; start(this); }
       }
       this.planleggRusling();
-    }, 5000 + Math.random() * 7000);
+    }, 9000 + Math.random() * 11000);
   };
   Figur.prototype.si = function (tekst, ms) {
     if (!this.boble) return;
@@ -890,7 +898,7 @@ export function lagStua(svg, valg = {}) {
   // Eieren og Ida: står de nær hverandre, stiger et hjerte opp mellom dem omtrent hvert tiende sekund
   const parT = setInterval(() => {
     if (!svg.isConnected) { clearInterval(parT); return; }
-    if (REDUSERT || document.hidden) return;
+    if (hviler()) return;
     const to = folk.filter((f) => f.info.par && !f.ut);
     if (to.length !== 2 || to.some((f) => f.drar)) return;
     const [a, b] = to;
@@ -963,7 +971,7 @@ export function lagStua(svg, valg = {}) {
   // Har ingenting skjedd på to minutter, gjesper alle – et hint til verten
   const gjespT = setInterval(() => {
     if (!svg.isConnected) { clearInterval(gjespT); return; }
-    if (REDUSERT || document.hidden || Date.now() - sistAktiv < 120000) return;
+    if (hviler() || Date.now() - sistAktiv < 120000) return;
     sistAktiv = Date.now();
     folk.forEach((f, i) => setTimeout(() => f.beveg('v-gjesp', [], 2300), i * 400));
   }, 15000);
