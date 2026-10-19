@@ -321,7 +321,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, par: erPar(p), slurker: p.slurker || 0 })),
     spill: lok(spill, lang), valgt: data.valgt ? { lek: data.valgt.lek, navn: tr(lekNavnL(data.valgt.lek), lang) } : null,
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
-    reak: data.reak || [], stuaHend: data.stuaHend || null, utdeling: data.utdeling || null, kveld: lok(kveldVisning(data), lang), bors: lok(bors, lang),
+    reak: data.reak || [], stuaHend: data.stuaHend || null, utdeling: data.utdeling || null, utdelinger: data.utdelinger || [], kveld: lok(kveldVisning(data), lang), bors: lok(bors, lang),
     stua: stuaVisning(data, null),
     alkoholfri: !!data.alkoholfri, ferdig: data.ferdig || null, kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null, rofRegler: data.rofRegler || null,
     gjeng: data.gjeng ? { navn: data.gjeng.navn } : null,
@@ -387,7 +387,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, pynt: p.pynt || null, figur: p.konto || p.bruker ? figurNokkel(p.konto || p.bruker) : p.id, par: erPar(p), bruker: !!(p.konto || p.bruker), medlem: !!p.konto, invitert: !!p.invitert, immun: p.immun || 0, slurker: p.slurker || 0, gi: p.gi || 0, sendt: p.sendt || 0, mottatt: p.mottatt || 0, quiz: p.quiz || 0, lang: rensLang(p.lang) })),
     spill: lok(spill, lang),
     hendelse: hd ? { nr: hd.nr, tekst: lang === 'en' && hd.en ? hd.en : tr(hd.tekst, lang) } : null,
-    nr: data.nr, reak: data.reak || [], stuaHend: data.stuaHend || null, utdeling: data.utdeling || null, valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
+    nr: data.nr, reak: data.reak || [], stuaHend: data.stuaHend || null, utdeling: data.utdeling || null, utdelinger: data.utdelinger || [], valgt: data.valgt || null, naa: Date.now(), hjul: data.hjul ? hjulVisning(data, lang) : null,
     stua: stuaVisning(data, meg), tvEkstra: null, nyPynt: meg && data.nyPynt ? data.nyPynt[meg.id] || null : null,
     hjulListe: data.hjulListe || (lang === 'en' ? HJUL_STANDARD_EN : HJUL_STANDARD), oppdrag: lok(oppdragVisning(data, meg), lang), bors: lok(borsVisning(data, meg), lang), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: lok(data.historikk || [], lang),
     alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode, kveld: !!data.gjengKveld, regler: data.gjeng.regler || [] } : null,
@@ -1825,6 +1825,8 @@ function handlingInne(data: any, meg: any, h: any) {
       rens.forEach(({ til, n }) => { giSlurker(data, til.id, n); til.mottatt = (til.mottatt || 0) + n; });
       data.utNr = (data.utNr || 0) + 1;
       data.utdeling = { nr: data.utNr, fra: meg.id, sum, liste: rens.map((r) => ({ id: r.til.id, n: r.n })) };
+      // De siste utdelingene som liste: deler to ut nesten samtidig, får TV-en og telefonene med seg begge
+      data.utdelinger = ((data.utdelinger as any[]) || []).concat([data.utdeling]).slice(-8);
       return { ok: true };
     }
     case 'stem': {
