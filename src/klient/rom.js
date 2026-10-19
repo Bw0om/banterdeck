@@ -1142,7 +1142,7 @@ export function startRom(LEKNAVN, LANG) {
     return '<div class="rom-anbefalt">' +
       liste.map(function (l) {
         var mod = l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*';
-        return '<button type="button" class="rom-anbefalt-lek" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(mod) + '">' + klistremerke(l.id, 'rom-anbefalt-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><i aria-hidden="true">▶</i></button>';
+        return '<button type="button" class="rom-anbefalt-lek" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(mod) + '">' + klistremerke(l.id, 'rom-anbefalt-merke') + '<b>' + esc(l.navn) + '</b><span class="lek-info" role="button" tabindex="0" data-g="lek-info" data-lek="' + esc(l.id) + '" aria-label="' + T('Om ', 'About ') + esc(l.navn) + '">i</span><i aria-hidden="true">▶</i></button>';
       }).join('') + '</div>';
   }
   /** Kort forklaring av hver lek i rommet – åpen første gang du ser leken. */
