@@ -121,8 +121,22 @@ struct MittvorsRuter: Router {
     }
 }
 
-/// Telefonens visning, med Skjerm-pluginen registrert
+/// Én skjerm i skallet (én per fane), med Skjerm- og Skall-pluginene registrert. `startSti` er siden skjermen starter på
+/// (f.eks. «no/rom» for Spill-fanen) – uten den starter den på forsiden, som velger språk selv.
 class MittvorsViewController: CAPBridgeViewController {
+    var startSti: String?
+
+    convenience init(startSti: String?) {
+        self.init(nibName: nil, bundle: nil)
+        self.startSti = startSti
+    }
+
+    override open func instanceDescriptor() -> InstanceDescriptor {
+        let d = super.instanceDescriptor()
+        if let sti = startSti, !sti.isEmpty { d.appStartPath = sti }
+        return d
+    }
+
     override open func router() -> Router {
         return MittvorsRuter()
     }

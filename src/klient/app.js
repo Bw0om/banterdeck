@@ -63,25 +63,40 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   document.addEventListener('astro:after-swap', statuslinje);
   SplashScreen.hide().catch(() => {});
 
-  // Skallet (ios/App/App/Skall.swift): iPhonens egen fanelinje nederst. Finnes den, gjemmer nettsiden sin egen
-  // (html.har-skall), sier fra hvilken fane som er aktiv, og ber linja gjemme seg under en lek.
+  // Skallet (ios/App/App/Skall.swift): iPhonens egen fanelinje nederst, med én skjerm (nettvisning) per fane.
+  // Finnes det, gjemmer nettsiden sin egen linje (html.har-skall), åpner lenker til andre faner i riktig fane,
+  // og ber linja gjemme seg under en lek.
   const Skall = registerPlugin('Skall');
   const FANER = { hjem: ['/no/', '/'], spill: ['/no/rom', '/room'], leker: ['/no/drinking-games', '/drinking-games'], deg: ['/no/account', '/account'] };
   const engelsk = () => !location.pathname.startsWith('/no');
   const norm = (p) => p.replace(/\/$/, '') || '/';
   window.__mvFane = (id) => { const r = FANER[id]; if (!r) return; const maal = engelsk() ? r[1] : r[0]; if (norm(location.pathname) !== norm(maal)) location.href = maal; };
-  const fanenNaa = () => { const p = norm(location.pathname); for (const id in FANER) if (FANER[id].some((r) => norm(r) === p)) return id; return ''; };
-  let harSkall = false, sistFane = '', sistSkjult = null;
+  const fanenFor = (sti) => { const p = norm(sti); for (const id in FANER) if (FANER[id].some((r) => norm(r) === p)) return id; return ''; };
+  const fanenNaa = () => fanenFor(location.pathname);
+  let harSkall = false, minFane = '', sistSkjult = null;
   if (Capacitor.isPluginAvailable('Skall')) h.classList.add('har-skall');
   const synkSkall = () => {
     if (!harSkall) return;
-    const f = fanenNaa(); if (f && f !== sistFane) { sistFane = f; Skall.fane({ navn: f }).catch(() => {}); }
+    // Siden havnet i en annen fane enn skjermen den står i (navigerte selv dit): skallet flytter den til riktig fane
+    const f = fanenNaa(); if (f && minFane && f !== minFane) { Skall.fane({ navn: f, url: location.pathname + location.search }).catch(() => {}); return; }
     const skjul = h.classList.contains('i-spill') || h.classList.contains('bli-med');
     if (skjul !== sistSkjult) { sistSkjult = skjul; Skall.skjul({ skjult: skjul }).catch(() => {}); }
   };
-  Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' } })
+  // Lenker til en annen fane (f.eks. «Lag rom» fra Hjem) åpnes i den fanen – denne skjermen blir stående
+  document.addEventListener('click', (e) => {
+    if (!harSkall || !e.target.closest) return;
+    const a = e.target.closest('a[href]'); if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    let u; try { u = new URL(a.href, location.href); } catch (x) { return; }
+    if (u.origin !== location.origin) return;
+    const f = fanenFor(u.pathname); if (!f || f === minFane) return;
+    e.preventDefault();
+    Skall.aapne({ navn: f, url: u.pathname + u.search }).catch(() => { location.href = u.href; });
+  }, true);
+  Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' }, lang: engelsk() ? 'en' : 'no' })
     .then((r) => {
-      harSkall = true; h.classList.add('har-skall'); synkSkall();
+      harSkall = true; minFane = (r && r.fane) || fanenNaa(); h.classList.add('har-skall');
+      if (r && r.gaaTil) { location.replace(r.gaaTil); return; }   // skjermen ble åpnet for en bestemt adresse
+      synkSkall();
       if (r && r.rull) setTimeout(() => window.scrollTo({ top: 700, behavior: 'smooth' }), 1500);
       if (r && r.moerk) h.dataset.theme = 'dark';   // simulator-sjekken: bilde i mørk modus
       if (r && r.sjekk) {
