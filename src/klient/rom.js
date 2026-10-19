@@ -931,8 +931,11 @@ export function startRom(LEKNAVN, LANG) {
     var t = tilstand;
     if (t.valgt && !visAlle) return valgtLobby();
     if (!erVert()) {
-      return '<div class="rom-vent"><p class="rom-stor">' + esc(navn(t.vert)) + (t.plan && t.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) + '</p>' +
-        '<div class="rom-vent-prikker" aria-hidden="true"><span></span><span></span><span></span></div>' + romMerker() + '</div>' + kveldKort() + reglerKort();
+      var venter = '<div class="rom-vent"><p class="rom-stor">' + esc(navn(t.vert)) + (t.plan && t.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) + '</p>' +
+        '<div class="rom-vent-prikker" aria-hidden="true"><span></span><span></span><span></span></div>';
+      // Appen: gjesten trenger bare stua og beskjeden om at verten velger – ikke kveldskort, regler eller merker
+      if (erApp) return venter + '</div>';
+      return venter + romMerker() + '</div>' + kveldKort() + reglerKort();
     }
     if (sofaModus()) return sofaLobby();
     if (erApp && !appMer) return appLobby();
@@ -945,9 +948,10 @@ export function startRom(LEKNAVN, LANG) {
       lekeGrupper(t.leker.filter(function (l) { return !l.pluss && !l.skjult; }), function (l) {
         var mod = l.moduser && (l.moduser.length > 1 || l.type === 'nyhetsrunden') ? l.moduser : [];
         var min = forFa(l);
-        if (min) return '<div class="rom-lek for-fa">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><p class="small">👥 ' + T('Minst ' + min, 'At least ' + min) + '</p></div>';
+        var infoKn = '<button type="button" class="lek-info" data-g="lek-info" data-lek="' + esc(l.id) + '" aria-label="' + T('Om ', 'About ') + esc(l.navn) + '">i</button>';
+        if (min) return '<div class="rom-lek for-fa">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + infoKn + '</b><p class="small">👥 ' + T('Minst ' + min, 'At least ' + min) + '</p></div>';
         var lekId = l.id === 'pekeleken' && pkMobil ? 'mest' : l.id;
-        return '<div class="rom-lek">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span>' + (l.id === 'pekeleken' ? pkVariant() : '') +
+        return '<div class="rom-lek">' + klistremerke(l.id, 'rom-lek-merke') + '<b>' + esc(l.navn) + infoKn + '</b>' + (l.id === 'pekeleken' ? pkVariant() : '') +
           '<div class="rom-mod">' + (mod.length
             ? mod.slice(0, l.type === 'nyhetsrunden' ? 4 : 99).map(function (m) { return '<button type="button" data-g="start" data-lek="' + lekId + '" data-modus="' + esc(m.v) + '">' + esc(m.t) + '</button>'; }).join('') +
               (l.type !== 'bingo' && l.type !== 'nyhetsrunden' ? '<button type="button" data-g="start" data-lek="' + lekId + '" data-modus="*">' + T('Alle', 'All') + '</button>' : '') +
@@ -978,10 +982,10 @@ export function startRom(LEKNAVN, LANG) {
       // Nyhetsrunden: velg uke først. Ring of Fire: kortreglene kan endres før start. Resten starter med ett trykk.
       var g = laast ? 'start' : l.type === 'nyhetsrunden' ? 'app-uke' : l.id === 'ring-of-fire' ? 'app-rof' : 'start';
       return '<button type="button" class="app-lek' + (laast ? ' laast' : '') + '" data-g="' + g + '" data-lek="' + esc(lekId) + '" data-modus="' + esc(mod) + '">' + klistremerke(l.id, 'app-lek-merke') +
-        '<span><b>' + esc(l.navn) + '</b><small>' + esc(l.om || '') + '</small></span><i aria-hidden="true">' + (laast ? '🔒' : '▶') + '</i></button>';
+        '<span><b>' + esc(l.navn) + '</b></span><span class="lek-info" role="button" tabindex="0" data-g="lek-info" data-lek="' + esc(l.id) + '" aria-label="' + T('Om ', 'About ') + esc(l.navn) + '">i</span><i aria-hidden="true">' + (laast ? '🔒' : '▶') + '</i></button>';
     }
     function senereRad(l) {
-      return '<div class="app-lek for-fa">' + klistremerke(l.id, 'app-lek-merke') + '<span><b>' + esc(l.navn) + '</b><small>' + T('Minst ' + forFa(l) + ' spillere', 'At least ' + forFa(l) + ' players') + '</small></span></div>';
+      return '<div class="app-lek for-fa">' + klistremerke(l.id, 'app-lek-merke') + '<span><b>' + esc(l.navn) + '</b><small>' + T('Minst ' + forFa(l) + ' spillere', 'At least ' + forFa(l) + ' players') + '</small></span><span class="lek-info" role="button" tabindex="0" data-g="lek-info" data-lek="' + esc(l.id) + '" aria-label="' + T('Om ', 'About ') + esc(l.navn) + '">i</span></div>';
     }
     // Lekene dere kan starte nå, gruppert. De som trenger flere telefoner samles nederst i én linje.
     var brukt = {}, grupper = '', senere = [];
@@ -1138,7 +1142,7 @@ export function startRom(LEKNAVN, LANG) {
     return '<div class="rom-anbefalt">' +
       liste.map(function (l) {
         var mod = l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*';
-        return '<button type="button" class="rom-anbefalt-lek" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(mod) + '">' + klistremerke(l.id, 'rom-anbefalt-merke') + '<b>' + esc(l.navn) + '</b><span>' + esc(l.om || '') + '</span><i aria-hidden="true">▶</i></button>';
+        return '<button type="button" class="rom-anbefalt-lek" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(mod) + '">' + klistremerke(l.id, 'rom-anbefalt-merke') + '<b>' + esc(l.navn) + '</b><span class="lek-info" role="button" tabindex="0" data-g="lek-info" data-lek="' + esc(l.id) + '" aria-label="' + T('Om ', 'About ') + esc(l.navn) + '">i</span><i aria-hidden="true">▶</i></button>';
       }).join('') + '</div>';
   }
   /** Kort forklaring av hver lek i rommet – åpen første gang du ser leken. */
@@ -4742,6 +4746,22 @@ export function startRom(LEKNAVN, LANG) {
     aapentArk = { el: m, stua: true, oppdater: function () {} };
     tegnStua(tilstand.spill);
   }
+  /** Hvilken regeltekst hører til leken? (samme nøkler som reglerPanel bruker under leken) */
+  function reglerNokkelFor(l) {
+    var egne = { 'ring-of-fire': 'ringr', pekeleken: 'pekeleken', 'jeg-har-aldri': 'aldri', 'enten-eller': 'enten', 'rygg-mot-rygg': 'rygg', 'nodt-eller-sannhet': 'nodt', kategorier: 'kategori', 'tanken-bak-sangen': 'lat' };
+    return egne[l.id] || (l.type === 'kort' ? 'kort' : l.type);
+  }
+  /** ⓘ ved en lek i lobbyen: hva den går ut på og hvordan den spilles, uten å starte den. */
+  function lekInfoArk(id) {
+    lukkArk();
+    var l = (tilstand.leker || []).find(function (x) { return x.id === id; }); if (!l) return;
+    var m = lagArk('info-ark', l.navn), kropp = m.querySelector('.ark-kropp'), r = REGLER[reglerNokkelFor(l)] || [];
+    kropp.innerHTML = (l.om ? '<p class="info-om">' + esc(l.om) + '</p>' : '') +
+      (r.length ? '<p class="rom-etikett">' + T('Slik spiller dere', 'How to play') + '</p><ol class="info-regler">' + r.map(function (x) { return '<li>' + esc(T(x[0], x[1])) + '</li>'; }).join('') + '</ol>' : '') +
+      (forFa(l) ? '<p class="small">👥 ' + T('Minst ' + forFa(l) + ' spillere', 'At least ' + forFa(l) + ' players') + '</p>' : '') +
+      (erVert() && !forFa(l) && !(l.pluss && !tilstand.pluss) ? '<div class="dl-knapper"><button type="button" class="btn gold" data-g="start" data-lek="' + esc(l.id === 'pekeleken' && pkMobil ? 'mest' : l.id) + '" data-modus="' + esc(l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*') + '">Start ' + esc(l.navn) + '</button></div>' : '');
+    aapentArk = { el: m, oppdater: function () {} };
+  }
   /** Appen, før start: Nyhetsrunden – hvilken uke? Nyeste øverst, spilte uker er merket. */
   function ukeArk() {
     lukkArk();
@@ -5200,6 +5220,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først
+    rotEl.classList.toggle('app-gjest', erApp && !s && !erVert() && !tilstand.valgt);   // gjestens venterom i appen: stua og én linje, ingenting å bla i
     rotEl.classList.toggle('i-spill', !!s);
     if (vlMusikkEl && !(s && s.type === 'veddelopet' && s.fase === 'lop')) vlMusikk(false);
     rotEl.classList.toggle('min-tur', !!turTekst);
@@ -5481,6 +5502,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'mer-ark') return merArk();
     if (g === 'app-uke') return ukeArk();
     if (g === 'app-rof') return rofStartArk();
+    if (g === 'lek-info') return lekInfoArk(b.dataset.lek);
     if (b.classList.contains('rom-stor-knapp') && Date.now() < sperreTil) return;
     var farlig = farligTekst(g, b);
     if (farlig && !bekreftet(b, farlig)) return;
@@ -5696,7 +5718,7 @@ export function startRom(LEKNAVN, LANG) {
   root.addEventListener('click', romKlikk);
   // Arkene ligger utenfor rommet i dokumentet, men knappene i dem (stua, slurker, vertens knapper) gjør det samme
   document.addEventListener('click', function (e) {
-    if (!e.target.closest || root.contains(e.target) || !e.target.closest('.stua-ark, .mer-ark, .uke-ark, .rof-start-ark')) return;
+    if (!e.target.closest || root.contains(e.target) || !e.target.closest('.stua-ark, .mer-ark, .uke-ark, .rof-start-ark, .info-ark')) return;
     if (e.target.closest('[data-g="figur-ark"]')) return figurArk();
     if (e.target.closest('[data-g="rom-ark"]')) { if (erVert()) romArk(); return; }
     if (e.target.closest('[data-g="start"]')) lukkArk();   // leken starter: arket skal bort

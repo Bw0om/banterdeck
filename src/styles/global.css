@@ -2116,6 +2116,19 @@ html.is-app .startrow .romlenke:active{transform:translate(3px,3px);box-shadow:2
 html.is-app .startrow[data-irom] .btn.start{background:transparent;color:var(--ink);border:1px solid var(--border2);box-shadow:none;font-size:15px;padding:11px 16px;justify-content:center}
 /* Tekstlenker uten understrek – stille knapper, ikke nettlenker */
 html.is-app .linkbtn,html.is-app .feilknapp{text-decoration:none;font-weight:700;color:var(--ink)}
+/* Gjestens venterom i appen: ingenting å bla i. Koden øverst, stua stor i midten, «verten velger lek» under. */
+html.is-app.app-gjest body{overflow:hidden}
+html.is-app.app-gjest .rom-spillere,html.is-app.app-gjest .rom-forlat,html.is-app.app-gjest .rom-bakgrunn,html.is-app.app-gjest .reak-linje,html.is-app.app-gjest .rom-stua-hint,html.is-app.app-gjest .rom-hk[data-g="hjul-aapne"],html.is-app.app-gjest .rom-hk[data-g="qr"]{display:none!important}
+html.is-app.app-gjest .rom-stua{margin:6px -18px 0;border:0;border-radius:0;box-shadow:none;padding:8px 10px 6px}
+html.is-app.app-gjest .rom-stua svg{max-height:calc(100dvh - 330px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+html.is-app.app-gjest .rom-vent{margin:10px 0 0!important;border:0!important;background:transparent!important;box-shadow:none!important;padding:8px 0!important}
+html.is-app.app-gjest .rom-vent .rom-stor{font-size:22px}
+/* ⓘ ved lekene: beskrivelsen ligger bak den */
+.lek-info{display:inline-grid;place-items:center;width:26px;height:26px;margin-left:8px;border-radius:50%;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:italic 900 14px/1 Georgia,serif;cursor:pointer;flex:none;vertical-align:middle;padding:0}
+.app-lek .lek-info{margin-left:auto;margin-right:8px}
+.app-lek > span:first-of-type{flex:1;min-width:0}
+.info-om{font-size:17px;line-height:1.4;margin:0 0 10px}
+.info-regler{padding-left:20px;line-height:1.5;margin:0 0 12px}
 /* Deg, ikke innlogget: figuren først */
 html.is-app .app-figur{display:grid;grid-template-columns:118px 1fr;align-items:center;gap:6px 14px;margin:6px 0 14px;padding:14px 16px 14px 10px;border-radius:22px;
   background:var(--card);border:3px solid var(--ink2);box-shadow:6px 6px 0 var(--ink2)}
