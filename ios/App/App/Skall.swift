@@ -82,6 +82,11 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         }
     }
 
+    /// Mørk modus er et valg i appen (Deg → Mørk modus), ikke telefonens. Fanelinja følger appen.
+    func sett(moerk: Bool) {
+        overrideUserInterfaceStyle = moerk ? .dark : .light
+    }
+
     /// Simulator-sjekken på GitHub starter appen med MV_FANE=leker osv. for å ta bilde av hver fane
     func brukStartfane() {
         guard !startfaneBrukt, let f = ProcessInfo.processInfo.environment["MV_FANE"], faner.contains(f) else { return }
@@ -112,8 +117,17 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "klar", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "fane", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "skjul", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
+
+    @objc func tema(_ call: CAPPluginCall) {
+        let moerk = call.getBool("moerk") ?? false
+        DispatchQueue.main.async {
+            SkallViewController.delt?.sett(moerk: moerk)
+            call.resolve()
+        }
+    }
 
     /// Simulator-sjekken: nettsiden sender feil og en kort tilstand hit, og det havner i Documents/sjekk.log
     @objc func logg(_ call: CAPPluginCall) {
@@ -135,7 +149,8 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
                 s.sett(titler: titler)
             }
             // rull: simulator-sjekken ber nettsiden bla nedover, så bildet viser linja i krympet stand
-            call.resolve(["ok": true, "fane": s.valgtFane, "rull": ProcessInfo.processInfo.environment["MV_RULL"] == "1", "sjekk": ProcessInfo.processInfo.environment["MV_SJEKK"] == "1"])
+            let env = ProcessInfo.processInfo.environment
+            call.resolve(["ok": true, "fane": s.valgtFane, "rull": env["MV_RULL"] == "1", "sjekk": env["MV_SJEKK"] == "1", "moerk": env["MV_MORK"] == "1"])
             s.brukStartfane()
         }
     }
