@@ -53,7 +53,11 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   } catch (e) {}
 
   // Statuslinja (klokke, batteri) følger lys/mørk modus: mørk tekst på lys bakgrunn, lys tekst på mørk
-  const statuslinje = () => StatusBar.setStyle({ style: h.dataset.theme === 'dark' ? Style.Dark : Style.Light }).catch(() => {});
+  const statuslinje = () => {
+    const moerk = h.dataset.theme === 'dark';
+    StatusBar.setStyle({ style: moerk ? Style.Dark : Style.Light }).catch(() => {});
+    if (Capacitor.isPluginAvailable('Skall')) registerPlugin('Skall').tema({ moerk }).catch(() => {});   // fanelinja følger appens mørke modus
+  };
   statuslinje();
   new MutationObserver(statuslinje).observe(h, { attributes: true, attributeFilter: ['data-theme'] });
   document.addEventListener('astro:after-swap', statuslinje);
@@ -76,7 +80,23 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     if (skjul !== sistSkjult) { sistSkjult = skjul; Skall.skjul({ skjult: skjul }).catch(() => {}); }
   };
   Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' } })
-    .then((r) => { harSkall = true; h.classList.add('har-skall'); synkSkall(); if (r && r.rull) setTimeout(() => window.scrollTo({ top: 700, behavior: 'smooth' }), 1500); }).catch(() => {});
+    .then((r) => {
+      harSkall = true; h.classList.add('har-skall'); synkSkall();
+      if (r && r.rull) setTimeout(() => window.scrollTo({ top: 700, behavior: 'smooth' }), 1500);
+      if (r && r.moerk) h.dataset.theme = 'dark';   // simulator-sjekken: bilde i mørk modus
+      if (r && r.sjekk) {
+        // Simulator-sjekken: feil og en kort tilstand går til Documents/sjekk.log, som jobben henter ut
+        const logg = (t) => Skall.logg({ tekst: new Date().toISOString().slice(11, 19) + ' ' + t }).catch(() => {});
+        window.addEventListener('error', (e) => logg('FEIL ' + e.message + ' @ ' + (e.filename || '') + ':' + (e.lineno || '')));
+        window.addEventListener('unhandledrejection', (e) => logg('AVVIST ' + (e.reason && e.reason.message || e.reason)));
+        logg('side ' + location.pathname + ' klasser=' + h.className);
+        setTimeout(() => {
+          const stue = document.querySelector('.st-stue svg');
+          const res = performance.getEntriesByType('resource').filter((x) => x.responseStatus >= 400 || (x.transferSize === 0 && x.decodedBodySize === 0 && !/^data:/.test(x.name))).map((x) => x.name.replace(/^.*\/\/[^/]+/, '')).slice(0, 15);
+          logg('etter 6s: stue-svg=' + (stue ? stue.children.length + ' barn, ' + Math.round(stue.getBoundingClientRect().height) + 'px' : 'mangler') + ' main-topp=' + Math.round((document.querySelector('.main') || document.body).getBoundingClientRect().top) + ' safe-top=' + getComputedStyle(h).getPropertyValue('--sat') + ' main-padding=' + getComputedStyle(document.querySelector('.main') || document.body).paddingTop + ' helt-topp=' + (document.querySelector('.st-helt') ? Math.round(document.querySelector('.st-helt').getBoundingClientRect().top) : '-') + ' body-bg=' + getComputedStyle(document.body).backgroundColor + ' html-bg=' + getComputedStyle(h).backgroundColor + ' vw=' + innerWidth + 'x' + innerHeight + ' ressurser-feilet=' + JSON.stringify(res));
+        }, 6000);
+      }
+    }).catch(() => {});
   document.addEventListener('astro:page-load', synkSkall);
   new MutationObserver(synkSkall).observe(h, { attributes: true, attributeFilter: ['class'] });
 

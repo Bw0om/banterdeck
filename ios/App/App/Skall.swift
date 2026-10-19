@@ -82,6 +82,13 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         }
     }
 
+    /// Mørk modus er et valg i appen (Deg → Mørk modus), ikke telefonens. Fanelinja følger appen.
+    func sett(moerk: Bool) {
+        overrideUserInterfaceStyle = moerk ? .dark : .light
+        // Den valgte fanen: rust på lys bakgrunn, gul på mørk – ellers drukner den i den mørke linja
+        tabBar.tintColor = moerk ? UIColor(red: 1, green: 0.824, blue: 0.247, alpha: 1) : UIColor(red: 0.776, green: 0.235, blue: 0.067, alpha: 1)
+    }
+
     /// Simulator-sjekken på GitHub starter appen med MV_FANE=leker osv. for å ta bilde av hver fane
     func brukStartfane() {
         guard !startfaneBrukt, let f = ProcessInfo.processInfo.environment["MV_FANE"], faner.contains(f) else { return }
@@ -111,8 +118,29 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "klar", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "fane", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "skjul", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "skjul", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
+
+    @objc func tema(_ call: CAPPluginCall) {
+        let moerk = call.getBool("moerk") ?? false
+        DispatchQueue.main.async {
+            SkallViewController.delt?.sett(moerk: moerk)
+            call.resolve()
+        }
+    }
+
+    /// Simulator-sjekken: nettsiden sender feil og en kort tilstand hit, og det havner i Documents/sjekk.log
+    @objc func logg(_ call: CAPPluginCall) {
+        let tekst = (call.getString("tekst") ?? "") + "\n"
+        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fil = dir.appendingPathComponent("sjekk.log")
+            if let h = try? FileHandle(forWritingTo: fil) { h.seekToEndOfFile(); h.write(tekst.data(using: .utf8)!); try? h.close() }
+            else { try? tekst.write(to: fil, atomically: true, encoding: .utf8) }
+        }
+        call.resolve()
+    }
 
     @objc func klar(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
@@ -123,7 +151,8 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
                 s.sett(titler: titler)
             }
             // rull: simulator-sjekken ber nettsiden bla nedover, så bildet viser linja i krympet stand
-            call.resolve(["ok": true, "fane": s.valgtFane, "rull": ProcessInfo.processInfo.environment["MV_RULL"] == "1"])
+            let env = ProcessInfo.processInfo.environment
+            call.resolve(["ok": true, "fane": s.valgtFane, "rull": env["MV_RULL"] == "1", "sjekk": env["MV_SJEKK"] == "1", "moerk": env["MV_MORK"] == "1"])
             s.brukStartfane()
         }
     }

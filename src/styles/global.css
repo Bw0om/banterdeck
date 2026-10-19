@@ -2089,6 +2089,8 @@ html.is-app.i-spill .app-vifte,html.is-app.bli-med .app-vifte,html.is-app.i-spil
 /* Stripe bak klokka og batteriet, så innholdet ikke ruller rett under dem. Statuslinjas tekstfarge følger lys/mørk (app.js). */
 html.is-app body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);z-index:30;pointer-events:none;
   background:rgb(var(--bg-rgb) / .92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+/* På Hjem er stripa oransje som feltet under, så det går i ett helt opp */
+html.is-app body:has(.st-forside)::before{background:var(--oransje);-webkit-backdrop-filter:none;backdrop-filter:none}
 /* Hold-trykk på lenker, knapper og kort skal aldri vise iPhone-menyen med nettadressen */
 a,button,[role=button],summary,label,img,svg,.btn,[data-g],[class*="knapp"],[class*="kort"]{-webkit-touch-callout:none}
 /* Nettside-ting som ikke hører hjemme i appen: «legg på hjemskjermen», nettvarsler (iPhone-appen får egne varsler), forsidelenka i rommet */
@@ -2097,6 +2099,7 @@ html.is-app .nr-varsel,html.is-app .standalone-only,html.is-app .bare-nett{displ
    Pluss-prisene (Apple krever kjøp gjennom App Store), humoren, «ha vorset på hjemskjermen» og annonsene er borte. */
 html.is-app .st-plussfelt,html.is-app .st-humorfelt,html.is-app .st-hjem,html.is-app .st-forside .ad{display:none!important}
 /* Det oransje feltet på Hjem går helt opp bak statuslinja – ingen lys stripe rundt klokka */
+html.is-app body:has(.st-forside){background:var(--oransje)}
 html.is-app .st-helt{margin-top:calc(-1 * (env(safe-area-inset-top) + 14px));padding-top:calc(env(safe-area-inset-top) + 14px)}
 /* Deg, ikke innlogget: skjemaet kommer når du trykker Logg inn eller Ny konto på figurkortet, ikke før */
 html.is-app #signin:not(.vis){display:none}
