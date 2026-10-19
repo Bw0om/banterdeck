@@ -214,8 +214,9 @@ export function startRom(LEKNAVN, LANG) {
   }
   /* Lydpaletten: små, rolige lyder laget for appen (public/lyd/, valgt etter lytting). Trykk, hjul-tikk, din tur, kort,
      ringen røk og drikk. Lydene som ikke har en fil ennå (nedtelling, lunte, bombe), lages fortsatt som toner under. */
-  var LYDFIL = { tikk: 'hjul', grip: 'trykk', pek: 'trykk', tur: 'tur', pop: 'kort', svar: 'kort', ding: 'kort', knus: 'knus', bom: 'knus', slurk: 'slurk' };
-  var lydFiler = {}, lydSist = {};
+  var LYDFIL = { tikk: 'hjul', grip: 'trykk', pek: 'trykk', tur: 'tur', pop: 'kort', svar: 'kort', ding: 'kort', knus: 'knus', bom: 'bombe', slurk: 'slurk',
+    naa: 'naa', fanfare: 'fanfare', womp: 'womp', lunte: 'lunte', vann: 'vann', skaal: 'skaal', forsent: 'forsent', terning: 'terning', kortsnu: 'kortsnu', kortlegg: 'kortlegg' };
+  var lydFiler = {}, lydSist = {}, lunteStopp = null;
   function lydFil(navn) {
     if (!lydFiler[navn]) { var a = new Audio('/lyd/' + navn + '.mp3'); a.preload = 'auto'; a.volume = navn === 'hjul' || navn === 'trykk' ? 0.45 : 0.6; lydFiler[navn] = a; }
     return lydFiler[navn];
@@ -223,12 +224,16 @@ export function startRom(LEKNAVN, LANG) {
   function spillFil(navn) {
     var naa = Date.now(); if (naa - (lydSist[navn] || 0) < 40) return true;   // hjulet tikker aldri tettere enn dette
     lydSist[navn] = naa;
+    // Lunta freser sammenhengende så lenge bomba går – den startes ikke på nytt for hvert tikk, og stopper når bomba smeller
+    if (navn === 'lunte') { try { var l = lydFil('lunte'); l.loop = true; if (l.paused) { var pl = l.play(); if (pl && pl.catch) pl.catch(function () {}); } clearTimeout(lunteStopp); lunteStopp = setTimeout(function () { l.pause(); l.currentTime = 0; }, 1500); } catch (e) {} return true; }
+    if (navn === 'bombe' && lydFiler.lunte) { lydFiler.lunte.pause(); lydFiler.lunte.currentTime = 0; }
     try { var a = lydFil(navn); a.currentTime = 0; var p = a.play(); if (p && p.catch) p.catch(function () {}); return true; } catch (e) { return false; }
   }
   if (lyd.paa) setTimeout(function () { Object.keys(LYDFIL).forEach(function (k) { lydFil(LYDFIL[k]); }); }, 1500);   // last dem i bakgrunnen
   function spillLyd(navn, n) {
     try { document.dispatchEvent(new CustomEvent('mv-lyd', { detail: navn })); } catch (e) {}   // appen: vibrasjon som følger lyden
     if (!lyd.paa) return;
+    if (navn === 'tell' && spillFil('tell' + n)) return;   // 3 – 2 – 1: tre tretoner som stiger
     if (LYDFIL[navn] && spillFil(LYDFIL[navn])) return;
     if (!lydCtx()) return;
     // Sofa-nedtelling: 3 – 2 – 1 stiger i tone, og «NÅ!» er et kort, lyst støt alle hører
@@ -2716,6 +2721,7 @@ export function startRom(LEKNAVN, LANG) {
   function pyramidenSpill(s) {
     var meg = tilstand.meg, vert = erVert(), naaI = s.pos - 1, naa = s.pyr[naaI], rad = pyRad(naaI), past = s.pastander || [];
     if (s.pos < pySistPos) pySett = {};
+    if (pySistPos && s.pos > pySistPos) spillLyd('kortsnu');
     pySistPos = s.pos;
     if (!s.ferdig) pyDriv();
     pyKikk();
@@ -2770,7 +2776,7 @@ export function startRom(LEKNAVN, LANG) {
   /* ---------- Fuck the Dealer: tastaturet og tellebrettet ----------
      Krem og mint, hard skygge. Bare dealeren ser kortet og tastaturet; de andre ser tellebrettet og hvem som deler.
      Ett kort på brettet per avgjørelse. Kortet snus for alle når det er avgjort, slurkene smeller inn under. */
-  var ftdSett = {};
+  var ftdSett = {}, ftdSistPos = null;
   function ftdVn(v) { return v === 1 ? 'A' : v <= 10 ? String(v) : (EN ? { 11: 'J', 12: 'Q', 13: 'K' } : { 11: 'Kn', 12: 'D', 13: 'K' })[v]; }
   function ftdKort(k, kl) {
     if (!k) return '<span class="ftd-kort bak' + (kl ? ' ' + kl : '') + '"></span>';
@@ -2795,6 +2801,8 @@ export function startRom(LEKNAVN, LANG) {
   function dealerSpill(s) {
     var meg = tilstand.meg, vert = erVert(), jeg = s.dealer === meg, styrer = jeg || vert, k = s.kort, r = s.res;
     if (s.runde && ftdSett.runde !== s.runde) ftdSett = { runde: s.runde };
+    if (ftdSistPos !== null && s.pos !== ftdSistPos && s.fase !== 'ferdig') spillLyd('kortsnu');
+    ftdSistPos = s.pos;
     var topp = '<div class="ftd-topp"><div><span>Fuck the Dealer · ' + (s.pos + (s.fase === 'ferdig' ? 0 : 1)) + ' / 52</span><b>' +
       (s.fase === 'ferdig' ? T('Stokken er tom', 'The deck is empty') : jeg ? T('Du deler', 'You deal') : esc(navn(s.dealer)) + T(' deler', ' deals')) + '</b></div>' +
       (s.fase === 'ferdig' ? '' : ftdPrikker(s.bom)) + '</div>';
@@ -2973,6 +2981,7 @@ export function startRom(LEKNAVN, LANG) {
       bunke.map(function (k, i) { var r = ((i - (bn - 1) / 2) * 12 + (s.leggNr % 3 - 1) * 4); return prKort(k, s.bord.length && nyLegg ? 'smell' : '', '--r:' + r + 'deg;--x:' + ((i - (bn - 1) / 2) * 30) + 'px'); }).join('') + '</div>' +
       (s.bytte && !s.sist ? '<p class="pr-bytte">' + jaNavn(s.bytte.fra) + T(' ga ', ' gave ') + vn(s.bytte.kort.v) + s.bytte.kort.f + T(' til ', ' to ') + jaNavn(s.bytte.til) + '</p>' : '') + '</div>';
     if (s.bord.length) prForrigeBord = s.bord.slice();
+    if (nyLegg && s.bord.length) spillLyd('kortlegg');
     prSett.start = 1;
     var hn = hand.length, steg = hn > 1 ? Math.min(31, (300 - 52) / (hn - 1)) : 0;
     var handHtml = !s.minHand ? '<p class="gr-hjelp">' + T('Du er med fra neste runde.', 'You’re in from the next round.') + '</p>' :
@@ -4017,10 +4026,12 @@ export function startRom(LEKNAVN, LANG) {
         skalTimer = setTimeout(function () {
           skalVist = performance.now();
           var b = document.getElementById('skalKnapp'); if (b && !b.disabled) b.classList.add('naa');
+          spillLyd('skaal');
           try { navigator.vibrate && navigator.vibrate(80); } catch (e) {}
         }, Math.max(0, om));
       }
       var mitt = skalMitt[s.tid] || (s.harTrykket.indexOf(meg) !== -1 ? { tidlig: (s.tidlig || []).indexOf(meg) !== -1, ms: (s.trykk || {})[meg] } : null);
+      if (mitt && mitt.tidlig && !skalSett['t' + s.tid]) { skalSett['t' + s.tid] = 1; spillLyd('forsent'); }
       var kl = 'sk-flate' + (mitt ? (mitt.tidlig ? ' tidlig' : ' trykket naa') : skalVist ? ' naa' : '');
       return topp + '<button class="' + kl + '" id="skalKnapp" data-g="sk-trykk" type="button"' + (mitt ? ' disabled' : '') + '>' +
         '<span class="sk-scene">' + SK_GLASS + SK_MOT + '<i class="sk-dam"></i></span>' +
@@ -5623,6 +5634,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'nr-flipp') return gjor({ handling: 'nr-flipp', hvem: b.dataset.id });
     if (g === 'nr-lengde') return gjor({ handling: 'nr-lengde', antall: Number(b.dataset.n) });
     if (g === 'nr-nytt') return gjor({ handling: 'nytt', antall: Number(b.dataset.n) });
+    if (g === 'yz-kast') spillLyd('terning');
     if (['br-buss', 'br-kjor', 'yz-kast', 'nr-vis', 'nr-neste', 'nr-start'].indexOf(g) !== -1) return gjor({ handling: g });
     if (g === 'neste') return gjor({ handling: 'neste', pos: Number(b.dataset.pos) });
     if (g === 'rof-makker') return gjor({ handling: 'rof-makker', paa: b.dataset.paa });
@@ -5674,7 +5686,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'gjett') return gjor({ handling: 'gjett', paa: b.dataset.paa });
     if (g === 'vedd') { var sl = document.getElementById('veddSl'); return gjor({ handling: 'vedd', farge: b.dataset.farge, slurker: sl ? Number(sl.value) : 2 }); }
     if (g === 'utfordre') return gjor({ handling: 'utfordre', paa: b.dataset.paa });
-    if (g === 'velg') return gjor({ handling: 'velg', i: Number(b.dataset.i) });
+    if (g === 'velg') { spillLyd('kortlegg'); return gjor({ handling: 'velg', i: Number(b.dataset.i) }); }
     if (g === 'pvelg') { var i = Number(b.dataset.i), j = presValg.indexOf(i); if (j === -1) presValg.push(i); else presValg.splice(j, 1); return tegn(); }
     if (g === 'legg') { var valgte = presValg.slice(); presValg = []; return gjor({ handling: 'legg', kort: valgte }); }
     if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass', 'stokk', 'startklokke'].indexOf(g) !== -1) return gjor({ handling: g });
