@@ -3227,6 +3227,7 @@ function startSos(data: any, lek: string, ider: string[], modus = ''): any {
   const gammel = data.spill && data.spill.type === lek ? data.spill.brukt : null;
   const navn: L = EKSTRA_NAVN[lek];
   const s: any = { type: lek, lek, navn, brukt: gammel || {}, runde: 1, modus: modus || '' };
+  if (lek === 'samme') { s.poeng = {}; s.svartSau = null; }   // Saueflokken: poeng og den svarte sauen følger hele leken
   data.spill = s;
   sosNyRunde(data);
   melde(data, `Nytt spill: ${navn.no}`, `New game: ${navn.en}`);
@@ -3286,7 +3287,30 @@ function smFasit(data: any) {
   Object.entries(s.svar).forEach(([id, t]: any) => { const k = norm(t); (g[k] = g[k] || { t, ider: [] }).ider.push(id); });
   s.grupper = Object.values(g).sort((a: any, b: any) => b.ider.length - a.ider.length);
   data.spillere.forEach((p: any) => { const gr = s.grupper.find((x: any) => x.ider.includes(p.id)); if (!gr || gr.ider.length < 2) giSlurker(data, p.id, 1); });
+  s.poengFor = { ...(s.poeng || {}) }; s.svartSauFor = s.svartSau || null;
+  smPoeng(data);
   s.fase = 'fasit'; s.frist = null;
+}
+/** Poeng som i Herd Mentality: den største flokken (alene om å være størst) får ett poeng hver. Står nøyaktig én alene,
+    får hen den svarte sauen – og den kan bare gis videre til neste som står alene. Regnes om når verten slår sammen svar. */
+function smPoeng(data: any) {
+  const s = data.spill; s.poeng = { ...(s.poengFor || {}) }; s.svartSau = s.svartSauFor || null;
+  const gr: any[] = s.grupper || [], maks = gr.reduce((m, x) => Math.max(m, x.ider.length), 0), store = gr.filter((x) => x.ider.length === maks && maks >= 2);
+  s.rundeStor = store.length === 1 ? store[0].ider.slice() : [];
+  s.rundeStor.forEach((id: string) => { s.poeng[id] = (s.poeng[id] || 0) + 1; });
+  const alene = gr.filter((x) => x.ider.length === 1).map((x) => x.ider[0]);
+  if (alene.length === 1) s.svartSau = alene[0];
+}
+function smSlutt(data: any) {
+  const s = data.spill; s.fase = 'slutt'; s.frist = null;
+  // Flest poeng vinner – men ikke med den svarte sauen i hånda. Vinnerne deler ut 3, den som sitter igjen med sauen drikker 2.
+  const kand = data.spillere.map((p: any) => p.id).filter((id: string) => id !== s.svartSau);
+  const topp = Math.max(0, ...kand.map((id: string) => s.poeng[id] || 0));
+  s.vinnere = topp > 0 ? kand.filter((id: string) => (s.poeng[id] || 0) === topp) : [];
+  s.vinnere.forEach((id: string) => giUtdeling(data, id, 3));
+  if (s.svartSau && data.spillere.some((p: any) => p.id === s.svartSau)) giSlurker(data, s.svartSau, 2);
+  const navnene = s.vinnere.map((id: string) => navnPaa(data, id)).join(' og ');
+  melde(data, navnene ? `🐑 ${navnene} tenkte mest som flokken!` : '🐑 Flokken er samlet!', navnene ? `🐑 ${navnene} thought most like the herd!` : '🐑 The herd is home!');
 }
 function spTelling(data: any) {
   const s = data.spill, t: any = {};
@@ -3355,7 +3379,7 @@ function sosHandling(data: any, meg: any, h: any): any {
     if (s.type === 'samme') {
       if (!erVert && s.fase !== 'fasit') return { feil: 'bare-vert' };
       s.nr = (s.nr || 0) + 1;
-      if (s.nr >= Math.max(2, data.spillere.length)) { s.fase = 'slutt'; s.frist = null; return { ok: true }; }
+      if (s.nr >= Math.max(2, data.spillere.length)) { smSlutt(data); return { ok: true }; }
       s.runde++; sosNyRunde(data); return { ok: true };
     }
     if (!erVert) return { feil: 'bare-vert' };
@@ -3445,6 +3469,7 @@ function sosHandling(data: any, meg: any, h: any): any {
       til.ider.push(...fra.ider);
       s.grupper = s.grupper.filter((g: any) => g !== fra).sort((a: any, b: any) => b.ider.length - a.ider.length);
       s.slaatt = (s.slaatt || 0) + 1;
+      smPoeng(data);   // flokken kan ha blitt større – poengene regnes om
       return { ok: true };
     }
     if (hd === 'tid-ute' && fristUte(s) && s.fase === 'skriv') smFasit(data);
@@ -3564,7 +3589,8 @@ function sosVisning(s: any, meg: any, data: any) {
     nr: s.nr || 0, antall: BF_ANTALL, runde: s.runde || 1,
     lurt: Object.entries(s.lurt || {}).map(([id, n]: any) => ({ id, n })).sort((a: any, b: any) => b.n - a.n),
   };
-  if (s.type === 'samme') return { fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null, grupper: s.fase === 'fasit' ? s.grupper : null, runde: s.runde || 1, slaatt: s.slaatt || 0, nr: s.nr || 0, antall: Math.max(2, data.spillere.length) };
+  if (s.type === 'samme') return { fase: s.fase, oppgave: s.oppgave, harSkrevet: Object.keys(s.svar), mittSvar: m ? s.svar[m] || null : null, grupper: s.fase === 'fasit' ? s.grupper : null, runde: s.runde || 1, slaatt: s.slaatt || 0, nr: s.nr || 0, antall: Math.max(2, data.spillere.length),
+    poeng: s.poeng || {}, svartSau: s.svartSau || null, rundeStor: s.fase === 'fasit' ? s.rundeStor || [] : [], vinnere: s.vinnere || [] };
   if (s.type === 'spion') {
     const aapen = s.fase === 'fasit', tatt = s.fase === 'gjett' || aapen, tema = mvTema(s.tema);
     return { fase: s.fase, tema: s.tema, temaNavn: [tema.navn, tema.en], ord: m ? (m === s.spion ? s.ordB : s.ordA) : null, starter: s.starter || null,

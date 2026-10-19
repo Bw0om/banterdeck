@@ -3923,9 +3923,11 @@
        "no": [
         "Telefonen gir en kategori, for eksempel «Noe man finner i et kjøleskap» eller «En kjent nordmann med skjegg».",
         "Alle skriver ett svar i hemmelighet på 30 sekunder.",
-        "Svarene vises gruppert. Har minst én annen svart det samme som deg, går du fri.",
+        "Svarene vises gruppert. Den største flokken får ett poeng hver – men bare hvis den er alene om å være størst.",
         "b|Er du alene om svaret ditt – eller svarte ikke: drikk én.",
-        "Etterpå kommer diskusjonen om hvem som tenker sært."
+        "b|Står nøyaktig én alene, får hen den svarte sauen. Den går videre til neste som står alene, og du kan ikke vinne med den i hånda.",
+        "Like mange spørsmål som spillere. Til slutt deler den med flest poeng ut tre, og den som sitter igjen med den svarte sauen drikker to.",
+        "Over 200 spørsmål – fra «Noe man finner i et kjøleskap» til «Noe man angrer på etter fylla»."
        ]
       },
       "fit": {

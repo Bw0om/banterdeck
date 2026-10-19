@@ -3785,13 +3785,18 @@ export function startRom(LEKNAVN, LANG) {
   }
   /* ---------- Saueflokken: finn flokken din. Står du alene, er du et svart får. ---------- */
   var smVist = '', smSlaa = null, smSendtVist = '';
+  var SM_SAU_SVART = '<i class="sm-svart" title="' + T('Den svarte sauen', 'The black sheep') + '">🐑</i>';
   var SM_SAU = '<svg class="sm-sau" viewBox="0 0 64 48" aria-hidden="true"><g class="ull"><circle cx="20" cy="22" r="10"/><circle cx="32" cy="16" r="11"/><circle cx="44" cy="22" r="10"/><circle cx="26" cy="30" r="10"/><circle cx="40" cy="30" r="10"/></g><ellipse class="fjes" cx="12" cy="26" rx="7" ry="8"/><circle class="oye" cx="10" cy="24" r="1.6"/><path class="bein" d="M24 38v8M40 38v8"/></svg>';
   function sammeSpill(s) {
     var alle = tilstand.spillere || [], n = alle.length, meg = tilstand.meg, vert = erVert();
     var et = T('Saueflokken', 'The herd');
     if (s.fase === 'slutt') {
+      var vinnere = s.vinnere || [], poeng = s.poeng || {};
+      var rekke = alle.slice().sort(function (a, b) { return (poeng[b.id] || 0) - (poeng[a.id] || 0); });
       return jaTopp(et, T('Flokken er samlet', 'The herd is home'), true, false) +
-        '<div class="rr-dom enige inn"><span>' + (s.antall || n) + T(' spørsmål', ' questions') + '</span><b>' + T('Ferdig for denne gang!', 'That’s it for now!') + '</b><small>' + T('Svarte får drakk underveis.', 'The black sheep drank along the way.') + '</small></div>' +
+        '<div class="rr-dom enige inn"><span>' + (s.antall || n) + T(' spørsmål', ' questions') + '</span><b>' + (vinnere.length ? vinnere.map(function (id) { return esc(navn(id)); }).join(T(' og ', ' and ')) + T(' tenkte mest som flokken!', ' thought most like the herd!') : T('Ferdig for denne gang!', 'That’s it for now!')) + '</b>' +
+          '<small>' + (vinnere.length ? T('Deler ut 3 hver.', 'Hand out 3 each.') : '') + (s.svartSau ? ' ' + esc(navn(s.svartSau)) + T(' satt igjen med den svarte sauen – drikk 2.', ' got stuck with the black sheep – drink 2.') : '') + '</small></div>' +
+        '<div class="sm-stilling">' + rekke.map(function (p) { return '<div class="sm-rad' + (vinnere.indexOf(p.id) !== -1 ? ' vant' : '') + '">' + nrHode(p.id, '', s.svartSau === p.id ? 'oi' : '') + '<b>' + (p.id === meg ? T('Du', 'You') : esc(p.navn)) + '</b>' + (s.svartSau === p.id ? SM_SAU_SVART : '') + '<span>' + (poeng[p.id] || 0) + '</span></div>'; }).join('') + '</div>' +
         lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye spørsmål – teller i kvelden', 'New questions – counts tonight')]]);
     }
     var opp = '<div class="nr-kort sm-oppgave' + (s.fase === 'fasit' ? ' liten' : '') + '"><p>' + esc(s.oppgave) + '</p></div>';
@@ -3818,14 +3823,17 @@ export function startRom(LEKNAVN, LANG) {
         ' class="sm-flokk ' + (alene ? 'alene' : stor ? 'stor' : 'trygg') + (forste && inn ? ' inn' : '') + (kan && i != null ? ' velg' : '') + (valgt ? ' valgt' : '') + '" style="--f:' + (forste ? (antall - 1 - j) * STEG : 0) + 'ms">' +
         '<span class="sm-topp"><b>' + esc(tekst) + '</b><small>' + (i == null ? T('Ingen svar · drikk 1', 'No answer · drink 1') : alene ? T('Svart får · drikk 1', 'Black sheep · drink 1') : stor ? ider.length + T(' i flokken', ' in the herd') : T('Trygge', 'Safe')) + '</small></span>' +
         '<span class="sm-hoder' + (inn ? ' hopp' : '') + '">' + ider.map(function (id, h) { return '<span style="--h:' + h + '">' + nrHode(id, '', alene ? 'oi' : '') + '</span>'; }).join('') + '</span>' +
-        (stor ? '<em class="sm-stempel">' + T('Flokken!', 'The herd!') + '</em>' : '') + '</' + tag + '>';
+        (stor ? '<em class="sm-stempel">' + T('Flokken! +1', 'The herd! +1') + '</em>' : '') + '</' + tag + '>';
     };
     var kort = vis.map(function (x, j) { var alene = x.g.ider.length === 1; return flokk(x.g.t, x.g.ider, alene, !alene && x.g.ider.length === maks && flere === 1, x.i, j); }).join('') +
       (uten.length ? flokk(T('Ingen svar', 'No answer'), uten, true, false, null, vis.length) : '');
-    var minG = gr.find(function (x) { return x.g.ider.indexOf(meg) !== -1; });
+    var minG = gr.find(function (x) { return x.g.ider.indexOf(meg) !== -1; }), poeng = s.poeng || {};
+    var stilling = '<div class="sm-stilling liten">' + alle.slice().sort(function (a, b) { return (poeng[b.id] || 0) - (poeng[a.id] || 0); }).map(function (p) {
+      return '<div class="sm-rad">' + nrHode(p.id, '', s.svartSau === p.id ? 'oi' : '') + '<b>' + (p.id === meg ? T('Du', 'You') : esc(p.navn)) + '</b>' + (s.svartSau === p.id ? SM_SAU_SVART : '') + '<span>' + (poeng[p.id] || 0) + '</span></div>'; }).join('') +
+      (s.svartSau ? '<p class="small">🐑 ' + (s.svartSau === meg ? T('Du har den svarte sauen. Den går videre til neste som står alene – og du kan ikke vinne med den.', 'You have the black sheep. It moves on to the next loner – and you can’t win while holding it.') : esc(navn(s.svartSau)) + T(' har den svarte sauen.', ' has the black sheep.')) + '</p>' : '') + '</div>';
     var dom = !alle.some(function (p) { return p.id === meg; }) ? null : !minG ? ['feil', T('Ingen svar – drikk 1', 'No answer – drink 1')] : minG.g.ider.length === 1 ? ['feil', T('Svart får – drikk 1', 'Black sheep – drink 1')] : ['rett', T('Du er trygg', 'You’re safe')];
     return jaTopp(et, T('Flokkene', 'The herds'), false) + opp + '<div class="sm-flokker">' + kort + '</div>' +
-      (dom ? '<div class="hs-dom ' + dom[0] + (forste && inn ? ' inn' : '') + '" style="--f:' + (forste ? antall * STEG : 0) + 'ms"><b>' + dom[1] + '</b></div>' : '') +
+      (dom ? '<div class="hs-dom ' + dom[0] + (forste && inn ? ' inn' : '') + '" style="--f:' + (forste ? antall * STEG : 0) + 'ms"><b>' + dom[1] + '</b></div>' : '') + stilling +
       (vert ? '<div class="sm-vert"><button type="button" class="btn ghost' + (smSlaa ? ' paa' : '') + '" data-g="sm-slaa-modus">' + (!smSlaa ? T('Slå sammen', 'Merge') : smSlaa.valgt == null ? T('Trykk på et svar', 'Tap an answer') : T('Trykk på det andre', 'Tap the other one')) + '</button>' +
           '<button class="rom-stor-knapp" data-g="runde" type="button">' + ((s.nr || 0) + 1 >= (s.antall || n) ? T('Avslutt', 'Finish') : T('Nytt spørsmål', 'New question')) + '</button></div>'
         : '<p class="nr-vent">' + esc(navn(tilstand.vert)) + T(' tar neste spørsmål.', ' picks the next question.') + '</p>');
