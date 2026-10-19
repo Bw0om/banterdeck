@@ -92,11 +92,15 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     e.preventDefault();
     Skall.aapne({ navn: f, url: u.pathname + u.search }).catch(() => { location.href = u.href; });
   }, true);
+  // Siden sier hvilken skjerm den viser (rom.js meldSkjerm): på startskjermen legger skallet sin egen native startskjerm oppå
+  let sistSkjerm = null;
+  const sendSkjerm = () => { if (harSkall && sistSkjerm) Skall.skjerm(sistSkjerm).catch(() => {}); };
+  document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; sendSkjerm(); });
   Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' }, lang: engelsk() ? 'en' : 'no' })
     .then((r) => {
       harSkall = true; minFane = (r && r.fane) || fanenNaa(); h.classList.add('har-skall');
       if (r && r.gaaTil) { location.replace(r.gaaTil); return; }   // skjermen ble åpnet for en bestemt adresse
-      synkSkall();
+      synkSkall(); sendSkjerm();
       if (r && r.rull) setTimeout(() => window.scrollTo({ top: 700, behavior: 'smooth' }), 1500);
       if (r && r.moerk) h.dataset.theme = 'dark';   // simulator-sjekken: bilde i mørk modus
       if (r && r.sjekk) {
