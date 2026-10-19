@@ -168,6 +168,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var sett = null;
     function hendelser(gml, d) {
       var s = d.spill || {}, b = d.bors || {};
+      if (tvVlMusikk && !(s.type === 'veddelopet' && s.vl && s.vl.fase === 'lop')) tvVlMusikkPaa(false);
       var na = {
         slurker: {}, brudd: s.ring && s.brudd ? s.brudd.nr : 0, kortNr: s.type === 'kort' ? (s.ring ? s.nr : s.pos) + ':' + (s.lek || '') : '',
         meldte: (b.meldte || []).map(function (a) { return a.id; }), saker: (b.saker || []).map(function (x) { return x.id + ':' + (x.dom === true ? 'd' : ''); }),
@@ -924,8 +925,39 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     }
     /* ---------- Veddeløpet: travbanen ---------- */
     var tvVlSett = {}, tvVlPos = {};
+    /* Veddeløpet: musikk og kommentator på TV-en (public/lyd/veddelop/). Bare etter at noen har trykket start på TV-en (lyd er lov da). */
+    var TVVL_FIL = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' };
+    var tvVlSt = { runde: 0, fase: '', leder: '', jevnt: false, sist: 0 }, tvVlMusikk = null;
+    function tvVlMusikkPaa(paa) {
+      if (paa) {
+        if (!tvVlMusikk) { tvVlMusikk = new Audio('/lyd/veddelop/musikk.mp3'); tvVlMusikk.loop = true; }
+        tvVlMusikk.volume = 0.4; var p = tvVlMusikk.play(); if (p && p.catch) p.catch(function () {});
+      } else if (tvVlMusikk && !tvVlMusikk.paused) {
+        var el = tvVlMusikk, fade = setInterval(function () { el.volume = Math.max(0, el.volume - 0.05); if (el.volume <= 0.01) { clearInterval(fade); el.pause(); el.currentTime = 0; } }, 80);
+      }
+    }
+    function tvVlSi(navn) {
+      var naa = Date.now(); if (naa - tvVlSt.sist < 2500) return false; tvVlSt.sist = naa;
+      try { var a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = 1; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+      return true;
+    }
+    function tvVlLyd(v) {
+      if (!startet) return;
+      var r = v.runde || 1, f = v.fase;
+      if (r !== tvVlSt.runde) tvVlSt = { runde: r, fase: '', leder: '', jevnt: false, sist: 0 };
+      if (f === 'lop' && tvVlSt.fase !== 'lop') { tvVlMusikkPaa(true); tvVlSt.sist = 0; tvVlSi('start'); }
+      if (f === 'lop') {
+        var pos = v.pos || {}, best = -1, leder = '', delt = false;
+        ['♥', '♠', '♦', '♣'].forEach(function (x) { var p = pos[x] || 0; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
+        if (best >= 2 && !delt && leder !== tvVlSt.leder && tvVlSi('leder-' + TVVL_FIL[leder])) tvVlSt.leder = leder;
+        if (best >= 6 && delt && !tvVlSt.jevnt && tvVlSi('jevnt')) tvVlSt.jevnt = true;
+      }
+      if (f === 'ferdig' && tvVlSt.fase !== 'ferdig') { tvVlMusikkPaa(false); tvVlSt.sist = 0; if (v.vinner) tvVlSi('vinner-' + TVVL_FIL[v.vinner]); }
+      tvVlSt.fase = f;
+    }
     function vlScene(d, s) {
       var v = s.vl, f = v.fase, r = v.runde || 1, vm = v.veddemaal || {}, alle = d.spillere || [];
+      tvVlLyd(v);
       var NAVN = LANG === 'en' ? { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' } : { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' };
       var antV = Object.keys(vm).length;
       var linje = f === 'vedd' ? antV + T(' av ', ' of ') + alle.length + T(' har veddet – vedd på telefonen', ' have bet – bet on your phone') : f === 'lop' ? (v.sist ? NAVN[v.sist.f] + T(' rykker fram', ' moves up') : T('Og de er i gang …', 'And they’re off …')) : T('Fotofinish!', 'Photo finish!');

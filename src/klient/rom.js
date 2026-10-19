@@ -2573,6 +2573,37 @@ export function startRom(LEKNAVN, LANG) {
      Trykk på en bane for å vedde. Når alle har veddet (eller verten starter), går løpet av seg selv:
      telefonen til verten snur ett kort i sekundet, så ingen andre trenger telefonen oppe. */
   var VL_F = ['♥', '♠', '♦', '♣'], vlSats = 2, vlTimer = null, vlSett = {}, vlPos = {};
+  /* Veddeløpet har musikk og kommentator (public/lyd/veddelop/, laget med ElevenLabs). Vertens telefon spiller dem –
+     men ikke når en TV er koblet til, for da er det TV-en som er høyttaleren. Bare når lyden er på. */
+  var VL_FIL = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' };
+  var vlLydSt = { runde: 0, fase: '', leder: '', jevnt: false, sist: 0 }, vlMusikkEl = null;
+  function vlMusikk(paa) {
+    if (paa) {
+      if (!vlMusikkEl) { vlMusikkEl = new Audio('/lyd/veddelop/musikk.mp3'); vlMusikkEl.loop = true; }
+      vlMusikkEl.volume = 0.35; var p = vlMusikkEl.play(); if (p && p.catch) p.catch(function () {});
+    } else if (vlMusikkEl && !vlMusikkEl.paused) {
+      var el = vlMusikkEl, fade = setInterval(function () { el.volume = Math.max(0, el.volume - 0.05); if (el.volume <= 0.01) { clearInterval(fade); el.pause(); el.currentTime = 0; } }, 80);
+    }
+  }
+  function vlSi(navn) {
+    var naa = Date.now(); if (naa - vlLydSt.sist < 2500) return false; vlLydSt.sist = naa;
+    try { var a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = 0.9; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    return true;
+  }
+  function vlLyd(s) {
+    if (!lyd.paa || !erVert() || tilstand.skjermPin) { vlMusikk(false); return; }
+    var r = s.runde || 1, f = s.fase;
+    if (r !== vlLydSt.runde) vlLydSt = { runde: r, fase: '', leder: '', jevnt: false, sist: 0 };
+    if (f === 'lop' && vlLydSt.fase !== 'lop') { vlMusikk(true); vlLydSt.sist = 0; vlSi('start'); }
+    if (f === 'lop') {
+      var pos = s.pos || {}, best = -1, leder = '', delt = false;
+      VL_F.forEach(function (x) { var p = pos[x] || 0; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
+      if (best >= 2 && !delt && leder !== vlLydSt.leder && vlSi('leder-' + VL_FIL[leder])) vlLydSt.leder = leder;
+      if (best >= 6 && delt && !vlLydSt.jevnt && vlSi('jevnt')) vlLydSt.jevnt = true;
+    }
+    if (f === 'ferdig' && vlLydSt.fase !== 'ferdig') { vlMusikk(false); vlLydSt.sist = 0; if (s.vinner) vlSi('vinner-' + VL_FIL[s.vinner]); }
+    vlLydSt.fase = f;
+  }
   function vlNavn(f) { return (EN ? { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' } : { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' })[f]; }
   /** Klokkene i lekene drives av den telefonen som er våken: verten først, de andre halvannet sekund etter.
       Da stopper ikke leken om vertens telefon ligger i lomma. Serveren holder takten uansett. */
@@ -2587,6 +2618,7 @@ export function startRom(LEKNAVN, LANG) {
     }, 1000 + driverVent());
   }
   function veddelopetSpill(s) {
+    vlLyd(s);
     var meg = tilstand.meg, vert = erVert(), f = s.fase, mv = s.mittVeddemaal, vm = s.veddemaal || {}, r = s.runde || 1;
     if (mv && f === 'vedd') vlSats = mv.slurker;
     if (f === 'lop' && vert) vlDriv();
@@ -5085,6 +5117,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først
     rotEl.classList.toggle('i-spill', !!s);
+    if (vlMusikkEl && !(s && s.type === 'veddelopet' && s.fase === 'lop')) vlMusikk(false);
     rotEl.classList.toggle('min-tur', !!turTekst);
     rotEl.classList.toggle('hemmelig', !!root.querySelector('[data-hemmelig]'));
     // Nytt skjermbilde (lobby, ny lek, oppsummering): start øverst. Ellers: behold plassen.
