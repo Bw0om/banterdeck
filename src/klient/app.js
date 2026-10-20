@@ -98,6 +98,8 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; sendSkjerm(); });
   // Lobbyen: «Alle lekene» åpner det native lekvelger-arket (ios/App/App/VelgerArk.swift)
   document.addEventListener('mv-velger', (e) => { if (harSkall) Skall.velger(e.detail || {}).catch(() => {}); });
+  // Inviter: iPhonens eget delingsark, med AirDrop øverst
+  document.addEventListener('mv-del', (e) => { if (harSkall) Skall.del(e.detail || {}).catch(() => {}); });
   Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' }, lang: engelsk() ? 'en' : 'no' })
     .then((r) => {
       harSkall = true; minFane = (r && r.fane) || fanenNaa(); h.classList.add('har-skall');
@@ -135,6 +137,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
 
   // Trykker noen på en mittvors-lenke i Messenger eller Snap, åpner den her i appen
   App.addListener('appUrlOpen', ({ url }) => {
+    if (harSkall) return;   // Swift-skallet åpner lenka selv, i Spill-fanen (SceneDelegate.swift)
     try {
       const u = new URL(url); if (!/(^|\.)mittvors\.no$/.test(u.hostname)) return;
       // mittvors.no/ABCD (QR-koden) er en omdirigering på serveren – i appen går vi rett til rommet

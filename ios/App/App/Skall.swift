@@ -113,6 +113,36 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
 
     func hentVentende(_ i: Int) -> String? { defer { ventende[i] = nil }; return ventende[i] }
 
+    // MARK: Inviter – iPhonens eget delingsark (AirDrop, Meldinger, Snap …)
+    func del(tekst: String, url: String) {
+        var ting: [Any] = [tekst]
+        if let u = URL(string: url) { ting.append(u) }
+        let ark = UIActivityViewController(activityItems: ting, applicationActivities: nil)
+        ark.excludedActivityTypes = [.addToReadingList, .assignToContact, .print, .saveToCameraRoll]
+        ark.popoverPresentationController?.sourceView = view
+        ark.popoverPresentationController?.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.maxY - 80, width: 1, height: 1)
+        UISelectionFeedbackGenerator().selectionChanged()
+        (presentedViewController ?? self).present(ark, animated: true)
+    }
+
+    /// En mittvors-lenke åpnet appen (AirDrop, Meldinger, QR): rommet åpnes i Spill-fanen, resten av appen står som før
+    func aapneLenke(_ u: URL) -> Bool {
+        guard let host = u.host, host == "mittvors.no" || host.hasSuffix(".mittvors.no") else { return false }
+        var sti = u.path
+        // mittvors.no/ABCD (QR-koden) er en omdirigering på serveren – i appen går vi rett til rommet
+        if let m = sti.range(of: #"^/([A-Za-z0-9]{4,6})/?$"#, options: .regularExpression) {
+            let kode = String(sti[m]).trimmingCharacters(in: CharacterSet(charactersIn: "/")).uppercased()
+            sti = (spraak == "en" ? "/room?k=" : "/no/rom?k=") + kode
+        } else if sti == "/" || sti.isEmpty {
+            sti = spraak == "en" ? "/room" : "/no/rom"
+        } else {
+            sti += (u.query.map { "?" + $0 } ?? "")
+        }
+        let fane = sti.hasPrefix("/no/rom") || sti.hasPrefix("/room") ? "spill" : sti.hasPrefix("/no/drinking-games") || sti.hasPrefix("/drinking-games") ? "leker" : sti.hasPrefix("/no/account") || sti.hasPrefix("/account") ? "deg" : "hjem"
+        aapne(fane: fane, url: sti)
+        return true
+    }
+
     // MARK: Lekvelgeren – et iOS-ark over Spill-fanen (VelgerArk.swift)
     func visVelger(_ d: [String: Any], fra: UIViewController?) {
         guard let i = fane(for: fra), let v = visninger[i] else { return }
@@ -260,6 +290,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "skjul", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "skjerm", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "velger", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "del", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
@@ -329,6 +360,15 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let vc = bridge?.viewController
         DispatchQueue.main.async {
             SkallViewController.delt?.skjerm(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// Inviter: delingsarket med tekst og lenke
+    @objc func del(_ call: CAPPluginCall) {
+        let tekst = call.getString("tekst") ?? "", url = call.getString("url") ?? ""
+        DispatchQueue.main.async {
+            SkallViewController.delt?.del(tekst: tekst, url: url)
             call.resolve()
         }
     }

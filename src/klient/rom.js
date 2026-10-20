@@ -5609,6 +5609,8 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'del') {
       var url = (window.__MV_ORIGIN || location.origin) + RUTE.rom + '?k=' + kode;
       var tekst = T('Bli med på mittvors! Kode: ', 'Join me on mittvors! Code: ') + kode;
+      // Swift-skallet: iPhonens eget delingsark (AirDrop til telefonene ved siden av, Meldinger, Snap …)
+      if (harSkall()) { try { document.dispatchEvent(new CustomEvent('mv-del', { detail: { tekst: tekst, url: url } })); } catch (x) {} return; }
       if (window.BDDel) return window.BDDel.lenke(url, tekst, { tittel: T('Inviter til rommet', 'Invite to the room'), ingress: T('Romkode: ', 'Room code: ') + kode });
       if (navigator.share) navigator.share({ title: 'mittvors', text: tekst, url: url }).catch(function () {});
       else if (navigator.clipboard) navigator.clipboard.writeText(tekst + '\n' + url).then(function () { toast(T('Lenken er kopiert', 'Link copied')); });
