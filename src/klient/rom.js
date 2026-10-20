@@ -1413,6 +1413,12 @@ export function startRom(LEKNAVN, LANG) {
     return '';
   }
   function visPlussTilbud() {
+    if (harSkall()) {
+      // iPhone-appen: kjøp går gjennom App Store (ios/App/App/PlussArk.swift). Når Pluss er på plass, skrus det på her.
+      window.__mvPlussEtter = function () { plussSjekket = false; aktiverPluss(true); };
+      try { document.dispatchEvent(new CustomEvent('mv-pluss', { detail: {} })); } catch (x) {}
+      return;
+    }
     if (document.querySelector('.pluss-tilbud')) return;
     var m = document.createElement('div'); m.className = 'rom-tavle pluss-tilbud'; m.setAttribute('role', 'dialog');
     var inne = window.BDKonto && window.BDKonto.les();

@@ -98,6 +98,32 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; sendSkjerm(); });
   // Lobbyen: «Alle lekene» åpner det native lekvelger-arket (ios/App/App/VelgerArk.swift)
   document.addEventListener('mv-velger', (e) => { if (harSkall) Skall.velger(e.detail || {}).catch(() => {}); });
+  // Pluss i appen: kjøp med App Store (StoreKit) – serveren sjekker Apples kvittering og gir Pluss på kontoen
+  const kontoSvar = (sti, opts) => {
+    const K = window.BDKonto; if (!K || !K.api) return Promise.resolve({ feil: 'logg-inn' });
+    return K.api(sti, Object.assign({ headers: { 'x-lang': engelsk() ? 'en' : 'no', 'content-type': 'application/json' } }, opts || {}))
+      .then((r) => r.json().then((d) => Object.assign({ innlogget: !!(K.les && K.les()) }, d)).catch(() => ({ feil: 'server' })))
+      .catch(() => ({ feil: 'server' }));
+  };
+  window.__mvPluss = {
+    status: () => kontoSvar('/api/pluss/status'),
+    gratis: () => kontoSvar('/api/pluss/gratis', { method: 'POST' }),
+    apple: (jws) => kontoSvar('/api/pluss/apple', { method: 'POST', body: JSON.stringify({ jws }) }),
+    ferdig: () => { try { window.__mvPlussEtter && window.__mvPlussEtter(); } catch (e) {} },
+  };
+  document.addEventListener('mv-pluss', (e) => { if (harSkall) Skall.pluss(e.detail || {}).catch(() => {}); });
+  // Pluss-siden i appen: «Kjøp med Vipps» blir «Kjøp», og åpner arket
+  const plussSide = () => {
+    if (!harSkall) return;
+    document.querySelectorAll('[data-kjop]').forEach((b) => { b.textContent = engelsk() ? 'Buy' : 'Kjøp'; b.dataset.app = '1'; });
+  };
+  document.addEventListener('click', (e) => {
+    if (!harSkall || !e.target.closest) return;
+    const b = e.target.closest('[data-kjop][data-app]'); if (!b) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    document.dispatchEvent(new CustomEvent('mv-pluss', { detail: { produkt: b.dataset.kjop } }));
+  }, true);
+  document.addEventListener('astro:page-load', plussSide);
   // «Figuren din» og «Rommet» som native ark (ios/App/App/FigurArk.swift, RomArk.swift)
   document.addEventListener('mv-ark', (e) => { if (harSkall) Skall.ark(e.detail || {}).catch(() => {}); });
   // Inviter: iPhonens eget delingsark, med AirDrop øverst
@@ -106,7 +132,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     .then((r) => {
       harSkall = true; minFane = (r && r.fane) || fanenNaa(); h.classList.add('har-skall');
       if (r && r.gaaTil) { location.replace(r.gaaTil); return; }   // skjermen ble åpnet for en bestemt adresse
-      synkSkall(); sendSkjerm();
+      synkSkall(); sendSkjerm(); plussSide();
       if (r && r.rull) setTimeout(() => window.scrollTo({ top: 700, behavior: 'smooth' }), 1500);
       if (r && r.moerk) h.dataset.theme = 'dark';   // simulator-sjekken: bilde i mørk modus
       if (r && r.sjekk) {
