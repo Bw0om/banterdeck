@@ -1926,7 +1926,8 @@ export function startRom(LEKNAVN, LANG) {
           var side = function (sel) { var el2 = e.querySelector(sel); if (!el2) return null; return { tekst: tekstAv(el2.querySelector('span')), valg: tekstAv(el2.querySelector('b')), folk: Array.prototype.map.call(el2.querySelectorAll('.nr-p'), function (p) { var f = (p.getAttribute('style') || '').match(/--f:(#[0-9A-Fa-f]{6})/); return { init: tekstAv(p), farge: f ? f[1] : '#FFD23F', meg: /\bmeg\b/.test(p.className) }; }) }; };
           ut.push({ type: 'sider', a: side('.ee-side.a'), b: side('.ee-side.b') }); return;
         }
-        if (/\b(rom-stua-plass|rom-h2|app-leker)\b/.test(c) && !e.querySelector('button')) return;
+        if (/\b(rom-stua-plass|rom-h2|app-alene|app-del|rom-etikett)\b/.test(c)) return;   // toppen (kode/inviter) og stua tegnes native
+        if (/\bapp-leker\b/.test(c) && !e.querySelector('button')) return;
         if (/\b(rom-anbefalt|rom-valg|gk-sporsmal)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b, 'kort'); }) }); return; }
         if (/\b(aldri-valg|rr-valg|ns-valg|slutt-valg|pk-forsvar-valg|ee-valg|ee-med)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b); }) }); return; }
         if (e.tagName === 'BUTTON') { ut.push(knapp(e)); return; }

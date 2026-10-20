@@ -46,6 +46,21 @@ struct KortSkjerm: View {
     @ObservedObject var m: KortModell
     @Environment(\.colorScheme) private var modus
     private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
+    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
+    var body: some View {
+        ZStack {
+            papir.ignoresSafeArea()
+            ScrollView { BlokkListe(m: m).padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 24) }
+        }
+        .foregroundColor(blekk)
+    }
+}
+
+/// Blokkene fra nettsiden, tegnet i appens stil. Brukes av kortlekene og lobbyen.
+struct BlokkListe: View {
+    @ObservedObject var m: KortModell
+    @Environment(\.colorScheme) private var modus
+    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
     private var kort: Color { modus == .dark ? Color.white.opacity(0.07) : .white }
     private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
     private let gul = Color(red: 1, green: 0.824, blue: 0.247)
@@ -56,16 +71,9 @@ struct KortSkjerm: View {
     private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
 
     var body: some View {
-        ZStack {
-            papir.ignoresSafeArea()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    ForEach(Array(m.blokker.enumerated()), id: \.offset) { _, b in blokk(b) }
-                }
-                .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 24)
-            }
+        VStack(alignment: .leading, spacing: 14) {
+            ForEach(Array(m.blokker.enumerated()), id: \.offset) { _, b in blokk(b) }
         }
-        .foregroundColor(blekk)
         .animation(.easeOut(duration: 0.2), value: m.blokker.count)
     }
 

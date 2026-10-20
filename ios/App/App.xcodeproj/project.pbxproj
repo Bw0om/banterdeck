@@ -29,6 +29,7 @@
 		A1B2C3D4E5F60718293A4B77 /* PekelekenSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B76 /* PekelekenSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B79 /* KortSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B78 /* KortSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B81 /* RingSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B80 /* RingSkjerm.swift */; };
+		A1B2C3D4E5F60718293A4B83 /* LobbySkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B82 /* LobbySkjerm.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,6 +56,7 @@
 		A1B2C3D4E5F60718293A4B76 /* PekelekenSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PekelekenSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B78 /* KortSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KortSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B80 /* RingSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RingSkjerm.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B82 /* LobbySkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbySkjerm.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -103,6 +105,7 @@
 				A1B2C3D4E5F60718293A4B76 /* PekelekenSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B78 /* KortSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B80 /* RingSkjerm.swift */,
+				A1B2C3D4E5F60718293A4B82 /* LobbySkjerm.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -212,6 +215,7 @@
 				A1B2C3D4E5F60718293A4B77 /* PekelekenSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B79 /* KortSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B81 /* RingSkjerm.swift in Sources */,
+				A1B2C3D4E5F60718293A4B83 /* LobbySkjerm.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
