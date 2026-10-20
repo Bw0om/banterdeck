@@ -2,9 +2,9 @@
 ----- siste linjer -----
 
 AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-10-20 09:56:34.863 appintentsnltrainingprocessor[8797:29395] Parsing options for appintentsnltrainingprocessor
-2026-10-20 09:56:34.864 appintentsnltrainingprocessor[8797:29395] Starting AppIntents SSU YAML Generation
-2026-10-20 09:56:34.869 appintentsnltrainingprocessor[8797:29395] No AppShortcuts found - Skipping.
+2026-10-20 10:20:32.225 appintentsnltrainingprocessor[3541:14216] Parsing options for appintentsnltrainingprocessor
+2026-10-20 10:20:32.225 appintentsnltrainingprocessor[3541:14216] Starting AppIntents SSU YAML Generation
+2026-10-20 10:20:32.230 appintentsnltrainingprocessor[3541:14216] No AppShortcuts found - Skipping.
 
 RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
