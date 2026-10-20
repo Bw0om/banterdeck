@@ -1896,7 +1896,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   /* Kortlekene som native skjerm: nettsidens ferdige HTML oversettes til enkle blokker (topp, kort, knapper, benk, søyler …)
      som Swift tegner. Logikk, tekster, lyd og vibrasjon bor fortsatt her – skjermen er bare en annen penn. */
-  var NATIVE_LEKER = ['jeg-har-aldri', 'nodt-eller-sannhet', 'enten-eller', 'rygg-mot-rygg'];
+  var NATIVE_LEKER = ['jeg-har-aldri', 'nodt-eller-sannhet', 'enten-eller', 'rygg-mot-rygg', 'kategorier'];
   var hodePng = {};
   function skjermBlokker(html) {
     var tmp = document.createElement('div'); tmp.innerHTML = html; var ut = [], jobber = [];
@@ -1907,7 +1907,7 @@ export function startRom(LEKNAVN, LANG) {
       var bb = b.querySelector('b'), sm = b.querySelector('small');
       if (bb) { k.tekst = tekstAv(bb); k.under = sm ? tekstAv(sm) : tekstAv(b.querySelector('span')); } else { k.tekst = tekstAv(b); }
       var c = typeof b.className === 'string' ? b.className : '';
-      if (!k.stil) k.stil = /rom-stor-knapp|slutt-knapp|app-velger|gk-planstart/.test(c) ? 'stor' : /rom-anbefalt-lek|app-mer|slutt-knapp/.test(c) ? 'kort' : /linkbtn|ja-nekt/.test(c) ? 'link' : /\bnodt\b/.test(c) ? 'nodt' : /\bsann\b/.test(c) ? 'sann' : /\bja\b|aldri-har/.test(c) ? 'ja' : /\bnei\b|aldri-aldri|feig|\bdrikk\b/.test(c) ? 'nei' : 'vanlig';
+      if (!k.stil) k.stil = /rom-stor-knapp|slutt-knapp|app-velger|gk-planstart|kb-knapp/.test(c) ? 'stor' : /rom-anbefalt-lek|app-mer|slutt-knapp/.test(c) ? 'kort' : /linkbtn|ja-nekt/.test(c) ? 'link' : /\bnodt\b/.test(c) ? 'nodt' : /\bsann\b/.test(c) ? 'sann' : /\bja\b|aldri-har/.test(c) ? 'ja' : /\bnei\b|aldri-aldri|feig|\bdrikk\b/.test(c) ? 'nei' : 'vanlig';
       return k;
     }
     function hode(svg, id, px) {
@@ -1937,17 +1937,18 @@ export function startRom(LEKNAVN, LANG) {
             jobber.push(hode(h.querySelector('svg.mv-hode'), f.id, 96).then(function (b) { f.png = b; }));
             return f;
           });
-          ut.push({ type: 'benk', status: tekstAv(e.querySelector('.ee-status')), folk: folk }); return;
+          var bo = e.querySelector('.kb-bombe'), bombe = bo ? { id: bo.dataset.id || '', bom: /\bbom\b/.test(bo.className), start: Number(bo.dataset.start) || 0, smell: Number(bo.dataset.smell) || 0 } : null;
+          ut.push({ type: 'benk', status: tekstAv(e.querySelector('.ee-status')), folk: folk, bombe: bombe }); return;
         }
         if (/\brr-dom\b/.test(c)) { ut.push({ type: 'dom', stil: /\bfeig\b/.test(c) ? 'feig' : /\buenige\b/.test(c) ? 'uenige' : /\btom\b/.test(c) ? 'tom' : 'enige', over: tekstAv(e.querySelector('span')), tittel: tekstAv(e.querySelector('b')), under: tekstAv(e.querySelector('small')) }); return; }
         if (/\bpk-soyler\b/.test(c)) { ut.push({ type: 'stolper', rader: Array.prototype.map.call(e.querySelectorAll('li'), function (li) { var b = li.querySelector('i b'), st = b ? b.getAttribute('style') || '' : '', m = st.match(/scaleX\(([\d.]+)\)/), f = st.match(/background:(#[0-9A-Fa-f]{6})/); return { navn: tekstAv(li.querySelector('span')), n: tekstAv(li.querySelector('em')), andel: m ? Number(m[1]) : 0, farge: f ? f[1] : '#FFD23F' }; }) }); return; }
         if (/\brr-gjett\b/.test(c)) { ut.push({ type: 'liste', rader: Array.prototype.map.call(e.querySelectorAll('li'), function (li) { return { navn: tekstAv(li.querySelector('b')), mellom: tekstAv(li.querySelector('span')), tekst: tekstAv(li.querySelector('em')), rett: /\brett\b/.test(li.className) }; }) }); return; }
         if (/\bja-ulv\b/.test(c)) { var u = { type: 'ulv', etikett: tekstAv(e.querySelector('.ja-ulv-etikett')), navn: tekstAv(e.querySelector('.ja-ulv-navn')), be: tekstAv(e.querySelector('.ja-ulv-be')), tekst: tekstAv(e.querySelector('p')), knapp: e.querySelector('button') ? knapp(e.querySelector('button'), 'link') : null, png: '' }; jobber.push(hode(e.querySelector('svg'), 'ulv', 120).then(function (b) { u.png = b; })); ut.push(u); return; }
         if (/\bja-vinner\b/.test(c)) { var vn = { type: 'vinner', navn: tekstAv(e.querySelector('b')), n: tekstAv(e.querySelector('em')), png: '' }; jobber.push(hode(e.querySelector('svg'), 'vinner', 120).then(function (b) { vn.png = b; })); ut.push(vn); return; }
-        if (/\b(nr-vent|rr-hint|ns-stor|ja-dom|ja-mest|ja-kommentar|nr-etikett|pk-sporsmal|pk-merk|aldri-bryter|ja-vis)\b/.test(c)) {
+        if (/\b(nr-vent|rr-hint|ns-stor|ja-dom|ja-mest|ja-kommentar|nr-etikett|pk-sporsmal|pk-merk|aldri-bryter|ja-vis|kb-protest)\b/.test(c)) {
           var kn = e.querySelector('button');
           if (kn && /\b(aldri-bryter|ja-vis)\b/.test(c)) { Array.prototype.forEach.call(e.querySelectorAll('button'), function (b) { ut.push(knapp(b, 'link')); }); return; }
-          ut.push({ type: 'tekst', tekst: tekstAv(e), stil: /ns-stor/.test(c) ? 'stor' : /ja-dom/.test(c) ? 'dom' : /nr-etikett/.test(c) ? 'etikett' : /pk-merk|ja-mest|ja-kommentar/.test(c) ? 'merk' : 'vent' }); return;
+          ut.push({ type: 'tekst', tekst: tekstAv(e), stil: /ns-stor/.test(c) ? 'stor' : /ja-dom/.test(c) ? 'dom' : /nr-etikett/.test(c) ? 'etikett' : /pk-merk|ja-mest|ja-kommentar|kb-protest/.test(c) ? 'merk' : 'vent' }); return;
         }
         if (e.children.length && e.querySelector('button, .pk-kort, .ee-benk, .nr-topp, .pk-soyler, .ja-ulv, .ja-vinner, .rr-dom')) { gaa(e); return; }
         var t = tekstAv(e); if (t) ut.push({ type: 'tekst', tekst: t, stil: 'vent' });
@@ -2530,7 +2531,7 @@ export function startRom(LEKNAVN, LANG) {
   function kbBrent(b) { var naa = Date.now() + klokkeAvvik; return Math.max(0, Math.min(1, (naa - b.start) / Math.max(1, b.smell - b.start))); }
   function kbFart(b) { return Math.round(700 - 560 * kbBrent(b)) + 'ms'; }
   function kbBombe(x, o) {
-    return '<div class="kb-bombe' + (o.bom ? ' bom' : '') + '" style="--x:' + (x / 100).toFixed(3) + '">' + (o.bom ? '<i class="kb-smell">' + KB_BOM + '<b>BOM!</b></i>' : '<i class="kb-rist" style="--fart:' + o.fart + '">' + KB_SVG + '</i>') + '</div>';
+    return '<div class="kb-bombe' + (o.bom ? ' bom' : '') + '" data-id="' + esc(o.id) + '" data-start="' + (o.start || 0) + '" data-smell="' + (o.smell || 0) + '" style="--x:' + (x / 100).toFixed(3) + '">' + (o.bom ? '<i class="kb-smell">' + KB_BOM + '<b>BOM!</b></i>' : '<i class="kb-rist" style="--fart:' + o.fart + '">' + KB_SVG + '</i>') + '</div>';
   }
   /** Bomba flyr fra der den var til der den er nå: en bue med fjær (FLIP, bare transform). */
   function kbRekt() { var e = root.querySelector('.kb-bombe:not(.bom)'); return e ? e.getBoundingClientRect() : null; }
@@ -2555,7 +2556,7 @@ export function startRom(LEKNAVN, LANG) {
     var topp = jaTopp(T('Kategorier · kort ', 'Categories · card ') + (s.pos + 1) + T(' av ', ' of ') + s.antall, chip, b.fase === 'gaar' && !har, false);
     var kort = '<div class="pk-kort kb-kort"><span class="pk-pre">' + T('Kategori', 'Category') + '</span><p>' + esc((s.kort && s.kort.t) || '') + '</p></div>';
     var protest = (b.protest || []).length ? '<p class="kb-protest">' + T('Sagt før!', 'Said before!') + ' <span>' + b.protest.map(function (id) { return esc(id === jeg ? T('du', 'you') : navn(id)); }).join(', ') + '</span></p>' : '';
-    var benk = hodeBenk(alle, { oppe: true, stirr: b.holder, bombe: { id: b.holder, fart: kbFart(b), bom: b.fase === 'bom' }, oi: b.fase === 'bom' ? [b.holder] : [], flat: false, status: b.svar ? b.svar + T(' svar', ' answers') : '' });
+    var benk = hodeBenk(alle, { oppe: true, stirr: b.holder, bombe: { id: b.holder, fart: kbFart(b), bom: b.fase === 'bom', start: b.start, smell: b.smell }, oi: b.fase === 'bom' ? [b.holder] : [], flat: false, status: b.svar ? b.svar + T(' svar', ' answers') : '' });
     if (b.fase === 'gaar') {
       var midt = har
         ? '<button type="button" class="kb-knapp" data-g="kb-send" data-fra="' + b.holder + '"><b>' + T('Sagt!', 'Said it!') + '</b><span>' + T('Send bomba →', 'Pass the bomb →') + '</span></button>' + protest
@@ -5608,7 +5609,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || NATIVE_LEKER.indexOf(s.lek) !== -1 ? 'kort' : '')
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
