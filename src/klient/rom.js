@@ -3717,6 +3717,11 @@ export function startRom(LEKNAVN, LANG) {
   }
   /** «Si noe»: et lite ark med ett felt. Sendes som reaksjon, så alle får boblen samtidig. */
   function siArk() {
+    if (harSkall()) {
+      window.__mvStua = { si: function (t) { t = String(t || '').trim(); if (t) gjorAlltid({ handling: 'si', tekst: t.slice(0, 40) }); } };
+      try { document.dispatchEvent(new CustomEvent('mv-si', { detail: { tittel: T('Si noe', 'Say something'), tekst: T('Står over figuren din i stua i 20 sekunder – hos alle. Prøv «skål» eller navnet på noen.', 'Stays above your figure for 20 seconds – for everyone. Try “cheers” or someone’s name.'), plass: T('Maks 40 tegn …', 'Max 40 characters …'), send: T('Send', 'Send'), avbryt: T('Avbryt', 'Cancel') } })); } catch (x) {}
+      return;
+    }
     lukkArk();
     var m = lagArk('si-ark', T('Si noe', 'Say something')), kropp = m.querySelector('.ark-kropp');
     kropp.innerHTML = '<form class="si-skjema" id="siSkjema"><input id="siInput" maxlength="40" autocomplete="off" enterkeyhint="send" placeholder="' + T('Maks 40 tegn …', 'Max 40 characters …') + '">' +
@@ -5575,9 +5580,11 @@ export function startRom(LEKNAVN, LANG) {
       });
       stuaEl.appendChild(Object.assign(document.createElement('p'), { className: 'rom-stua-tips' }));
     }
-    stuaEl.querySelector('.rom-stua-tips').innerHTML = (erVert() ? '<button type="button" class="linkbtn" data-g="rom-ark">' + T('Rommet', 'The room') + '</button>' : '') +
-      '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>' +
-      '<button type="button" class="linkbtn" data-g="si-aapne">💬 ' + T('Si noe', 'Say something') + '</button>';
+    stuaEl.querySelector('.rom-stua-tips').innerHTML = harSkall()
+      ? '<button type="button" class="stua-si" data-g="si-aapne" aria-label="' + T('Si noe', 'Say something') + '">💬</button>'
+      : (erVert() ? '<button type="button" class="linkbtn" data-g="rom-ark">' + T('Rommet', 'The room') + '</button>' : '') +
+        '<button type="button" class="linkbtn" data-g="figur-ark">' + T('Figuren din', 'Your figure') + '</button>' +
+        '<button type="button" class="linkbtn" data-g="si-aapne">💬 ' + T('Si noe', 'Say something') + '</button>';
     if (stuaEl.parentNode !== plass) plass.appendChild(stuaEl);
     stuaEl.classList.toggle('kompakt', !!s && !iArk);
     var st = tilstand.stua || {}, ute = st.ute || [], jegUte = ute.indexOf(meg.id) !== -1, alle = (tilstand.spillere || []).concat(st.sofa || []);

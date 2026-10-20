@@ -124,6 +124,31 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     document.dispatchEvent(new CustomEvent('mv-pluss', { detail: { produkt: b.dataset.kjop } }));
   }, true);
   document.addEventListener('astro:page-load', plussSide);
+  // Kontoen i appen: logg inn / ny konto / lenke som native ark (ios/App/App/LoggInnArk.swift). Nettsiden gjør jobben.
+  const kontoFeil = (r) => r.json().catch(() => ({})).then((d) => ({ feil: d.feil || 'feil', melding: d.melding || (engelsk() ? 'Something went wrong. Try again.' : 'Noe gikk galt. Prøv igjen.') }));
+  const loggInnMed = (d) => { const K = window.BDKonto; if (K && K.lagre) K.lagre({ access_token: d.access_token, refresh_token: d.refresh_token }); return { ok: true }; };
+  const tilbake = () => (window.__MV_ORIGIN || location.origin) + (engelsk() ? '/account' : '/no/account');
+  window.__mvKonto = {
+    inn: (navn, pw) => fetch('/api/konto/logginn', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ navn, passord: pw }) })
+      .then((r) => r.ok ? r.json().then(loggInnMed) : kontoFeil(r)).catch(() => ({ feil: 'nett', melding: engelsk() ? 'No connection. Try again.' : 'Ingen kontakt. Prøv igjen.' })),
+    ny: (epost, navn, pw) => fetch('/api/konto/registrer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ epost, brukernavn: navn, passord: pw }) })
+      .then((r) => r.ok ? r.json().then((d) => d.access_token ? loggInnMed(d) : { ok: true, sendt: true, melding: engelsk() ? 'Check your email and confirm the account.' : 'Sjekk e-posten din og bekreft kontoen.' }) : kontoFeil(r))
+      .catch(() => ({ feil: 'nett', melding: engelsk() ? 'No connection. Try again.' : 'Ingen kontakt. Prøv igjen.' })),
+    lenke: (epost) => { const K = window.BDKonto; if (!K || !K.sb) return Promise.resolve({ feil: 'ikke-klar' }); return K.sb('/auth/v1/otp?redirect_to=' + encodeURIComponent(tilbake()), { method: 'POST', body: JSON.stringify({ email: epost, create_user: true }) })
+      .then((r) => r.ok ? { ok: true, sendt: true, melding: engelsk() ? 'The link is sent – check your email.' : 'Lenken er sendt – sjekk e-posten.' } : kontoFeil(r)).catch(() => ({ feil: 'nett' })); },
+    glemt: (epost) => { const K = window.BDKonto; if (!K || !K.sb) return Promise.resolve({ feil: 'ikke-klar' }); return K.sb('/auth/v1/recover?redirect_to=' + encodeURIComponent(tilbake()), { method: 'POST', body: JSON.stringify({ email: epost }) })
+      .then((r) => r.ok ? { ok: true, sendt: true, melding: engelsk() ? 'We’ve sent a link to set a new password.' : 'Vi har sendt en lenke for å sette nytt passord.' } : kontoFeil(r)).catch(() => ({ feil: 'nett' })); },
+    innlogget: () => { const K = window.BDKonto; return !!(K && K.les && K.les()); },
+  };
+  // Deg-siden: «Logg inn» / «Ny konto» åpner arket i stedet for skjemaet under
+  document.addEventListener('click', (e) => {
+    if (!harSkall || !e.target.closest) return;
+    const a = e.target.closest('[data-vis]'); if (!a) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    Skall.logginn({ del: a.dataset.vis === 'ny' ? 'ny' : 'inn' }).catch(() => {});
+  }, true);
+  // «Si noe» i stua: iOS-dialog med tekstfelt (tastaturet håndteres av iOS)
+  document.addEventListener('mv-si', (e) => { if (harSkall) Skall.si(e.detail || {}).catch(() => {}); });
   // «Figuren din» og «Rommet» som native ark (ios/App/App/FigurArk.swift, RomArk.swift)
   document.addEventListener('mv-ark', (e) => { if (harSkall) Skall.ark(e.detail || {}).catch(() => {}); });
   // Inviter: iPhonens eget delingsark, med AirDrop øverst

@@ -132,7 +132,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             let m = FigurModell()
             m.nett = v.webView
             let h = UIHostingController(rootView: FigurArk(m: m))
-            m.loggInn = { [weak self, weak h] konto in h?.dismiss(animated: true) { self?.aapne(fane: "deg", url: konto) } }
+            m.loggInn = { [weak self, weak h] _ in h?.dismiss(animated: true) { self?.visLoggInn([:], fra: nil) } }
             visArkHalvt(h)
         } else if type == "rom" {
             let m = RomModell(d["data"] as? [String: Any] ?? [:])
@@ -141,6 +141,51 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             m.pluss = { [weak h, weak v] in h?.dismiss(animated: true) { v?.webView?.evaluateJavaScript("window.__mvRom && window.__mvRom.pluss()", completionHandler: nil) } }
             visArkHalvt(h)
         }
+    }
+
+    // MARK: Kontoen – logg inn / ny konto / lenke som ark (LoggInnArk.swift)
+    func visLoggInn(_ d: [String: Any], fra: UIViewController?) {
+        // Nettsiden i Spill-fanen gjør selve innloggingen om vi ikke vet hvem som spør (arkene for figur/Pluss)
+        let i = fane(for: fra) ?? faner.firstIndex(of: "spill") ?? 0
+        let v = visning(i)
+        let m = KontoModell()
+        m.nett = v.webView
+        m.engelsk = spraak == "en"
+        if let del = d["del"] as? String, let x = KontoModell.Del(rawValue: del) { m.del = x }
+        let h = UIHostingController(rootView: LoggInnArk(m: m))
+        m.ferdig = { [weak self, weak h] in
+            h?.dismiss(animated: true) {
+                // Innlogget: alle skjermene leser kontoen fra samme lager, men Deg-siden må tegnes på nytt for å vise det
+                if let s = self, let j = s.faner.firstIndex(of: "deg"), let deg = s.visninger[j] { deg.webView?.reload() }
+            }
+        }
+        if let ark = h.sheetPresentationController { ark.detents = [.large()]; ark.prefersGrabberVisible = false }
+        UISelectionFeedbackGenerator().selectionChanged()
+        (presentedViewController ?? self).present(h, animated: true)
+    }
+
+    // MARK: «Si noe» – iOS-dialog med tekstfelt (tastaturet håndteres av iOS, feltet forsvinner aldri)
+    func visSi(_ d: [String: Any], fra: UIViewController?) {
+        guard let i = fane(for: fra), let v = visninger[i] else { return }
+        let a = UIAlertController(title: d["tittel"] as? String ?? "Si noe", message: d["tekst"] as? String, preferredStyle: .alert)
+        a.addTextField { f in
+            f.placeholder = d["plass"] as? String ?? "Maks 40 tegn …"
+            f.autocapitalizationType = .sentences
+            f.returnKeyType = .send
+            f.addTarget(self, action: #selector(self.siMaks(_:)), for: .editingChanged)
+        }
+        a.addAction(UIAlertAction(title: d["avbryt"] as? String ?? "Avbryt", style: .cancel))
+        a.addAction(UIAlertAction(title: d["send"] as? String ?? "Send", style: .default) { [weak a, weak v] _ in
+            let t = (a?.textFields?.first?.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !t.isEmpty, let data = try? JSONSerialization.data(withJSONObject: [t]), let json = String(data: data, encoding: .utf8) else { return }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            v?.webView?.evaluateJavaScript("window.__mvStua && window.__mvStua.si(\(json)[0])", completionHandler: nil)
+        })
+        (presentedViewController ?? self).present(a, animated: true)
+    }
+
+    @objc private func siMaks(_ f: UITextField) {
+        if let t = f.text, t.count > 40 { f.text = String(t.prefix(40)) }
     }
 
     // MARK: Pluss – kjøp med App Store (PlussArk.swift)
@@ -152,7 +197,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         m.engelsk = spraak == "en"
         plussModell = m
         let h = UIHostingController(rootView: PlussArk(m: m))
-        m.loggInn = { [weak self, weak h] in h?.dismiss(animated: true) { self?.aapne(fane: "deg", url: (self?.spraak == "en" ? "/account" : "/no/account") + "#signin") } }
+        m.loggInn = { [weak self, weak h] in h?.dismiss(animated: true) { self?.visLoggInn([:], fra: nil) } }
         m.ferdig = { [weak h, weak v] in
             // Pluss er på plass: siden får beskjed (rommet skrur på Pluss), og arket går bort etter et øyeblikk
             v?.webView?.evaluateJavaScript("window.__mvPluss && window.__mvPluss.ferdig()", completionHandler: nil)
@@ -343,6 +388,8 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "del", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "ark", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "pluss", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "si", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "logginn", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
@@ -412,6 +459,26 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let vc = bridge?.viewController
         DispatchQueue.main.async {
             SkallViewController.delt?.skjerm(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// Kontoen: logg inn / ny konto som ark ({del: inn|ny|lenke})
+    @objc func logginn(_ call: CAPPluginCall) {
+        let d = call.options as? [String: Any] ?? [:]
+        let vc = bridge?.viewController
+        DispatchQueue.main.async {
+            SkallViewController.delt?.visLoggInn(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// «Si noe»: dialog med tekstfelt
+    @objc func si(_ call: CAPPluginCall) {
+        let d = call.options as? [String: Any] ?? [:]
+        let vc = bridge?.viewController
+        DispatchQueue.main.async {
+            SkallViewController.delt?.visSi(d, fra: vc)
             call.resolve()
         }
     }
