@@ -6,14 +6,14 @@ import UIKit
 /// så uke-valg i Nyhetsrunden, kortreglene i Ring of Fire og Pluss-låsen virker som før.
 struct Lek: Identifiable {
     let id: String, navn: String, om: String, g: String, lek: String, modus: String
-    let laast: Bool, pluss: Bool, min: Int, regler: [String]
+    let laast: Bool, pluss: Bool, minst: Int, regler: [String]
 
     init?(_ d: [String: Any]) {
         guard let id = d["id"] as? String, let navn = d["navn"] as? String else { return nil }
         self.id = id; self.navn = navn
-        om = d["om"] as? String ?? ""; g = d["g"] as? String ?? "start"; lek = d["lek"] as? String ?? id; modus = d["modus"] as? String ?? "*"
-        laast = d["laast"] as? Bool ?? false; pluss = d["pluss"] as? Bool ?? false; min = d["min"] as? Int ?? 0
-        regler = d["regler"] as? [String] ?? []
+        self.om = d["om"] as? String ?? ""; self.g = d["g"] as? String ?? "start"; self.lek = d["lek"] as? String ?? id; self.modus = d["modus"] as? String ?? "*"
+        self.laast = d["laast"] as? Bool ?? false; self.pluss = d["pluss"] as? Bool ?? false; self.minst = d["min"] as? Int ?? 0
+        self.regler = d["regler"] as? [String] ?? []
     }
 }
 
@@ -33,11 +33,11 @@ final class VelgerModell: ObservableObject {
         for g in d["grupper"] as? [[String: Any]] ?? [] {
             let leker = (g["leker"] as? [[String: Any]] ?? []).compactMap(Lek.init)
             alle += leker
-            let naa = leker.filter { $0.min == 0 }; senereUt += leker.filter { $0.min > 0 }
+            let naa = leker.filter { $0.minst == 0 }; senereUt += leker.filter { $0.minst > 0 }
             if !naa.isEmpty { grupperUt.append(LekGruppe(navn: g["navn"] as? String ?? "", leker: naa)) }
         }
         let ider = d["anbefalt"] as? [String] ?? []
-        anbefalt = ider.compactMap { id in alle.first { $0.id == id && !$0.laast && $0.min == 0 } }
+        anbefalt = ider.compactMap { id in alle.first { $0.id == id && !$0.laast && $0.minst == 0 } }
         grupper = grupperUt; senere = senereUt
     }
 }
@@ -65,7 +65,7 @@ struct VelgerArk: View {
                             HStack {
                                 Text(l.navn).font(.archivo(18, vekt: 800)).opacity(0.45)
                                 Spacer()
-                                Text("👥 \(m.minstOrd) \(l.min)").font(.archivo(14, vekt: 600)).opacity(0.6)
+                                Text("👥 \(m.minstOrd) \(l.minst)").font(.archivo(14, vekt: 600)).opacity(0.6)
                                 info(l)
                             }
                         }
@@ -142,12 +142,12 @@ struct LekDetalj: View {
                         }
                     }.padding(.top, 4)
                 }
-                if l.min > 0 {
-                    Text("👥 \(m.minstOrd) \(l.min) \(m.spillereOrd)").font(.archivo(15, vekt: 700)).opacity(0.7)
+                if l.minst > 0 {
+                    Text("👥 \(m.minstOrd) \(l.minst) \(m.spillereOrd)").font(.archivo(15, vekt: 700)).opacity(0.7)
                 } else if l.laast {
                     Text("✨ \(m.plussTekst)").font(.archivo(15, vekt: 700)).opacity(0.7)
                 }
-                if l.min == 0 {
+                if l.minst == 0 {
                     Button(action: { trykk(l) }) {
                         Text("\(m.startOrd) \(l.navn)".uppercased()).font(.archivo(18, vekt: 900)).tracking(0.5)
                             .frame(maxWidth: .infinity).frame(height: 58).foregroundColor(blekk)
