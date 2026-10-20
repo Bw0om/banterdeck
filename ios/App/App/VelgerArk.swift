@@ -18,7 +18,9 @@ struct Lek: Identifiable {
 }
 
 struct LekGruppe: Identifiable {
-    let id = UUID(), navn: String, leker: [Lek]
+    let id = UUID()
+    let navn: String
+    let leker: [Lek]
 }
 
 final class VelgerModell: ObservableObject {
