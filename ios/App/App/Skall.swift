@@ -1,3 +1,4 @@
+// Skrivedialogen i lekene (visSkjema) – se nederst i filen
 import UIKit
 import SwiftUI
 import WebKit
