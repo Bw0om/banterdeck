@@ -143,6 +143,30 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         }
     }
 
+    // MARK: «Si noe» – iOS-dialog med tekstfelt (tastaturet håndteres av iOS, feltet forsvinner aldri)
+    func visSi(_ d: [String: Any], fra: UIViewController?) {
+        guard let i = fane(for: fra), let v = visninger[i] else { return }
+        let a = UIAlertController(title: d["tittel"] as? String ?? "Si noe", message: d["tekst"] as? String, preferredStyle: .alert)
+        a.addTextField { f in
+            f.placeholder = d["plass"] as? String ?? "Maks 40 tegn …"
+            f.autocapitalizationType = .sentences
+            f.returnKeyType = .send
+            f.addTarget(self, action: #selector(self.siMaks(_:)), for: .editingChanged)
+        }
+        a.addAction(UIAlertAction(title: d["avbryt"] as? String ?? "Avbryt", style: .cancel))
+        a.addAction(UIAlertAction(title: d["send"] as? String ?? "Send", style: .default) { [weak a, weak v] _ in
+            let t = (a?.textFields?.first?.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !t.isEmpty, let data = try? JSONSerialization.data(withJSONObject: [t]), let json = String(data: data, encoding: .utf8) else { return }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            v?.webView?.evaluateJavaScript("window.__mvStua && window.__mvStua.si(\(json)[0])", completionHandler: nil)
+        })
+        (presentedViewController ?? self).present(a, animated: true)
+    }
+
+    @objc private func siMaks(_ f: UITextField) {
+        if let t = f.text, t.count > 40 { f.text = String(t.prefix(40)) }
+    }
+
     // MARK: Pluss – kjøp med App Store (PlussArk.swift)
     private var plussModell: PlussModell?
     func visPluss(_ d: [String: Any], fra: UIViewController?) {
@@ -343,6 +367,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "del", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "ark", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "pluss", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "si", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
@@ -412,6 +437,16 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let vc = bridge?.viewController
         DispatchQueue.main.async {
             SkallViewController.delt?.skjerm(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// «Si noe»: dialog med tekstfelt
+    @objc func si(_ call: CAPPluginCall) {
+        let d = call.options as? [String: Any] ?? [:]
+        let vc = bridge?.viewController
+        DispatchQueue.main.async {
+            SkallViewController.delt?.visSi(d, fra: vc)
             call.resolve()
         }
     }

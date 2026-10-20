@@ -124,6 +124,8 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     document.dispatchEvent(new CustomEvent('mv-pluss', { detail: { produkt: b.dataset.kjop } }));
   }, true);
   document.addEventListener('astro:page-load', plussSide);
+  // «Si noe» i stua: iOS-dialog med tekstfelt (tastaturet håndteres av iOS)
+  document.addEventListener('mv-si', (e) => { if (harSkall) Skall.si(e.detail || {}).catch(() => {}); });
   // «Figuren din» og «Rommet» som native ark (ios/App/App/FigurArk.swift, RomArk.swift)
   document.addEventListener('mv-ark', (e) => { if (harSkall) Skall.ark(e.detail || {}).catch(() => {}); });
   // Inviter: iPhonens eget delingsark, med AirDrop øverst

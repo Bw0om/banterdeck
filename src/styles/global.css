@@ -2196,3 +2196,10 @@ html.is-app .toast{bottom:calc(env(safe-area-inset-bottom) + 84px)}
 /* Appen med Swift-skall: lekvelgeren er et native ark – én knapp i lobbyen */
 html.har-skall .app-velger{width:100%;display:flex;justify-content:space-between;align-items:center;margin:4px 0 14px;font-size:20px}
 html.har-skall .app-velger i{font-style:normal;font-size:24px;line-height:1}
+
+/* Appen med Swift-skall: stua er menyen (trykk på deg selv = figuren, på rommet = rommet). Bare snakkebobla står igjen, i hjørnet. */
+html.har-skall .rom-stua{position:relative}
+html.har-skall .rom-stua-tips{margin:0}
+html.har-skall .stua-si{position:absolute;right:10px;bottom:10px;width:44px;height:44px;border-radius:50%;border:var(--strek) solid var(--ink);background:var(--card);
+  box-shadow:3px 3px 0 var(--ink);font-size:22px;line-height:1;display:grid;place-items:center;padding:0;cursor:pointer;z-index:2}
+html.har-skall .stua-si:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
