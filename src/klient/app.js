@@ -147,6 +147,8 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     e.preventDefault(); e.stopImmediatePropagation();
     Skall.logginn({ del: a.dataset.vis === 'ny' ? 'ny' : 'inn' }).catch(() => {});
   }, true);
+  // Et nettark (Mer, Stua, uke, regler …) er oppe: den native skjermen trekker seg til side så lenge
+  document.addEventListener('mv-ark-aapen', (e) => { if (harSkall) Skall.arkAapen(e.detail || {}).catch(() => {}); });
   // «Si noe» i stua: iOS-dialog med tekstfelt (tastaturet håndteres av iOS)
   document.addEventListener('mv-si', (e) => { if (harSkall) Skall.si(e.detail || {}).catch(() => {}); });
   // «Figuren din» og «Rommet» som native ark (ios/App/App/FigurArk.swift, RomArk.swift)
