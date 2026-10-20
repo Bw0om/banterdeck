@@ -1,19 +1,19 @@
 /Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift:20:8: error: return from initializer without initializing all stored properties
 ** BUILD FAILED **
 ----- siste linjer -----
-                                   ^
 
-SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
+SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/SceneDelegate.swift (in target 'App' from project 'App')
     
 
-SwiftDriverJobDiscovery normal arm64 Compiling AppDelegate.swift, SceneDelegate.swift, TvSkjerm.swift (in target 'App' from project 'App')
+SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/TvSkjerm.swift (in target 'App' from project 'App')
+    
 
 ** BUILD FAILED **
 
 
 The following build commands failed:
-	SwiftCompile normal arm64 Compiling\ VelgerArk.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
 	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift (in target 'App' from project 'App')
+	SwiftCompile normal arm64 Compiling\ VelgerArk.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
 	Building project App with scheme App and configuration Debug
 (3 failures)
 ----- skjemaer -----
