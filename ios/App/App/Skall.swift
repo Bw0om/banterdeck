@@ -326,11 +326,13 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
         guard let i = fane(for: fra), faner[i] == "spill", let v = visninger[i], let side = viewControllers?[i] else { return }
         let hva = d["skjerm"] as? String ?? ""
+        if hva != "vl" { visVl(nil, over: side) }
         // Lekene som tegnes native (Pekeleken): skjermen ligger over nettsiden så lenge leken pågår
         if hva == "lek" { visStart(i: side, false); visKort(nil, over: side); visLek(d, over: side, nett: v.webView); return } else { visLek(nil, over: side, nett: nil) }
         if hva == "kort" { visStart(i: side, false); visRof(nil, over: side); kortModell.nett = v.webView; visKort(d, over: side); return } else { visKort(nil, over: side) }
         if hva == "rof" { visStart(i: side, false); rofModell.nett = v.webView; visRof(d, over: side); return } else { visRof(nil, over: side) }
         if hva == "lobby" { visStart(i: side, false); lobbyModell.nett = v.webView; visLobby(d, over: side); return } else { visLobby(nil, over: side) }
+        if hva == "vl" { visStart(i: side, false); vlModell.nett = v.webView; visVl(d, over: side); return } else { visVl(nil, over: side) }
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
@@ -417,7 +419,35 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
 
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
     func settOverleggSkjult(_ skjult: Bool) {
-        for v in [lekVert?.view, kortVert?.view, rofVert?.view, lobbyHull, startVert?.view] { v?.isHidden = skjult }
+        for v in [lekVert?.view, kortVert?.view, rofVert?.view, lobbyHull, vlVert?.view, startVert?.view] { v?.isHidden = skjult }
+    }
+
+    // Veddeløpet (VeddelopSkjerm.swift)
+    private let vlModell = VlModell()
+    private var vlVert: UIHostingController<VeddelopSkjerm>?
+    private func visVl(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else {
+            if let h = vlVert {
+                UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent(); if self.vlVert === h { self.vlVert = nil } }
+            }
+            return
+        }
+        vlModell.sett(d)
+        if vlVert == nil {
+            let h = UIHostingController(rootView: VeddelopSkjerm(m: vlModell))
+            side.addChild(h)
+            h.view.translatesAutoresizingMaskIntoConstraints = false
+            side.view.addSubview(h.view)
+            NSLayoutConstraint.activate([
+                h.view.topAnchor.constraint(equalTo: side.view.topAnchor), h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
+                h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
+            ])
+            h.didMove(toParent: side)
+            h.view.alpha = 0
+            vlVert = h
+            UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
+        }
+        side.view.bringSubviewToFront(vlVert!.view)
     }
 
     // Ring of Fire (RingSkjerm.swift)

@@ -2985,6 +2985,40 @@ export function startRom(LEKNAVN, LANG) {
     }
     vlLydSt.fase = f;
   }
+  var vlPng = {};
+  function vlHodePng(id, uttrykk) {
+    var p = (tilstand.spillere || []).concat(sofaFolk()).find(function (x) { return x.id === id; }) || { id: id, navn: '?' };
+    var svg = hodeHtml(utseende(p.figur || p.id, p.pynt), uttrykk || ''), n = id + '|' + (uttrykk || '') + '|' + svg.length;
+    if (vlPng[n]) return Promise.resolve(vlPng[n]);
+    return svgTilPng(svg, '-28 -36 56 62', 72).then(function (b) { vlPng[n] = b; return b; });
+  }
+  function vlData(s) {
+    var meg = tilstand.meg, vert = erVert(), f = s.fase, mv = s.mittVeddemaal, vm = s.veddemaal || {}, r = s.runde || 1;
+    var antVeddet = Object.keys(vm).length, alle = (tilstand.spillere || []).length, jobber = [];
+    var hode = function (id, oi) { var h = { id: id, png: '', oi: !!oi }; jobber.push(vlHodePng(id, oi ? 'oi' : '').then(function (b) { h.png = b; })); return h; };
+    var d = {
+      fase: f, runde: r, n: s.n || 0, naa: Date.now() + klokkeAvvik,
+      tittel: T('Veddeløpet', 'The horse race'),
+      chip: f === 'vedd' ? (antVeddet >= alle ? T('Klar … ferdig …', 'Ready … set …') : T('Vedd på en hest', 'Bet on a horse')) : f === 'lop' ? T('Løpet går!', 'They’re off!') : vlNavn(s.vinner) + T(' vant!', ' won!'),
+      hjelp: f === 'vedd' ? T('Trykk på banen du tror vinner.', 'Tap the lane you think wins.') : f === 'lop' ? T('Ett kort i sekundet. Sidekortene sender en hest ett steg tilbake.', 'One card a second. Side cards send a horse one step back.') : '',
+      sider: s.bane.map(function (k, i) { var snudd = !!(s.snudd || [])[i] || !!k; return { snudd: snudd, v: k ? vn(k.v) : '', f: k ? k.f : '', rod: !!(k && (k.f === '♥' || k.f === '♦')) }; }),
+      baner: VL_F.map(function (x) {
+        var vant = s.vinner === x;
+        return { f: x, navn: vlNavn(x), pos: Math.min(8, s.pos[x] || 0), rod: x === '♥' || x === '♦', valgt: !!(mv && mv.farge === x), vant: vant,
+          hoder: Object.keys(vm).filter(function (id) { return vm[id].farge === x; }).map(function (id) { return hode(id, f === 'ferdig' && !vant); }) };
+      }),
+      sats: vlSats, satsTekst: T('Innsats', 'Stake'),
+      status: antVeddet >= alle ? T('Alle har veddet – løpet starter …', 'Everyone’s in – the race starts …') : antVeddet + T(' av ', ' of ') + alle + T(' har veddet', ' have bet'),
+      statusHoder: f === 'vedd' ? Object.keys(vm).map(function (id) { return hode(id, false); }) : [],
+      frist: f === 'vedd' && tilstand.spill && tilstand.spill.frist ? tilstand.spill.frist : 0, fristTekst: T('sekunder til løpet starter', 'seconds until the race starts'),
+      start: f === 'vedd' && vert && antVeddet && antVeddet < alle ? T('Start løpet nå', 'Start the race now') : '',
+      sist: s.sist && f !== 'vedd' ? { v: vn(s.sist.v), f: s.sist.f, rod: s.sist.f === '♥' || s.sist.f === '♦', tekst: vlNavn(s.sist.f) + T(' rykker fram', ' moves up') } : null,
+      dom: f === 'ferdig' && mv ? { rett: s.vinner === mv.farge, tekst: s.vinner === mv.farge ? T('Du vant! Del ut ', 'You won! Hand out ') + mv.slurker * 2 : T('Du tapte – drikk ', 'You lost – drink ') + mv.slurker } : null,
+      slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
+    };
+    var slutt = f === 'ferdig' ? skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nytt løp – teller i kvelden', 'New race – counts tonight')]])).then(function (b) { d.slutt = b; }) : Promise.resolve();
+    return Promise.all(jobber.concat([slutt])).then(function () { return d; });
+  }
   function vlNavn(f) { return (EN ? { '♥': 'Hearts', '♠': 'Spades', '♦': 'Diamonds', '♣': 'Clubs' } : { '♥': 'Hjerter', '♠': 'Spar', '♦': 'Ruter', '♣': 'Kløver' })[f]; }
   /** Klokkene i lekene drives av den telefonen som er våken: verten først, de andre halvannet sekund etter.
       Da stopper ikke leken om vertens telefon ligger i lomma. Serveren holder takten uansett. */
@@ -5609,13 +5643,14 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
     else if (nativ === 'lobby') { var nL = (tilstand.spillere || []).length; skjermBlokker(innhold).then(function (b) { if (tilstand && !tilstand.spill) meldSkjerm('lobby', { kode: kode, n: nL, erVert: erVert(), vert: navn(tilstand.vert), blokker: b, naa: Date.now() + klokkeAvvik,
       tekst: { inviter: T('Inviter', 'Invite'), iRommet: nL === 1 ? T('Bare du så langt', 'Just you so far') : nL + T(' i rommet', ' in the room'), kode: T('Romkode', 'Room code'), venter: navn(tilstand.vert) + (tilstand.plan && tilstand.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) } }); }); }
     else if (nativ === 'rof') meldSkjerm('rof', rofData(s));
+    else if (nativ === 'vl') { var rVl = s.runde, nVl = s.n, fVl = s.fase; vlData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'veddelopet' && sp.runde === rVl && sp.n === nVl && sp.fase === fVl) meldSkjerm('vl', d); }); }
     else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
     else meldSkjerm('rom');
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først
