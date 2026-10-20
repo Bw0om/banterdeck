@@ -1,6 +1,6 @@
 // Kjøp i iPhone-appen (StoreKit 2): appen sender Apples signerte transaksjon (en JWS) hit, og vi sjekker signaturen
 // selv mot Apples rotsertifikat – ingen nøkler, ingen kall til Apple. Deretter gis Pluss på kontoen akkurat som etter et Vipps-kjøp.
-import { X509Certificate, verify as kryptoVerify, createPublicKey } from 'node:crypto';
+import { X509Certificate, verify as kryptoVerify } from 'node:crypto';
 
 export const APPLE_PRODUKTER: Record<string, string> = {
   'no.mittvors.pluss.kveld': 'kveld',
@@ -59,7 +59,7 @@ export function sjekkAppleJws(jws: string): AppleTransaksjon {
   const sist = kjede[kjede.length - 1];
   if (sist.fingerprint256 !== APPLE_ROT_FINGERAVTRYKK && !sist.verify(rot.publicKey)) throw new Error('Kjeden ender ikke hos Apple.');
 
-  const ok = kryptoVerify('sha256', Buffer.from(deler[0] + '.' + deler[1], 'ascii'), { key: createPublicKey(kjede[0].publicKey), dsaEncoding: 'ieee-p1363' }, b64url(deler[2]));
+  const ok = kryptoVerify('sha256', Buffer.from(deler[0] + '.' + deler[1], 'ascii'), { key: kjede[0].publicKey, dsaEncoding: 'ieee-p1363' }, b64url(deler[2]));
   if (!ok) throw new Error('Signaturen stemmer ikke.');
 
   let t: AppleTransaksjon; try { t = JSON.parse(b64url(deler[1]).toString('utf8')); } catch { throw new Error('Ikke en gyldig kvittering.'); }
