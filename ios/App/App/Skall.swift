@@ -1,3 +1,4 @@
+// Skrivedialogen i lekene (visSkjema) – se nederst i filen
 import UIKit
 import SwiftUI
 import WebKit
@@ -163,6 +164,64 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         if let ark = h.sheetPresentationController { ark.detents = [.large()]; ark.prefersGrabberVisible = false }
         UISelectionFeedbackGenerator().selectionChanged()
         (presentedViewController ?? self).present(h, animated: true)
+    }
+
+    // MARK: Skrivefelt i lekene – iOS-dialog med feltene i skjemaet (skrøne, låt, ord, tre påstander …)
+    private var skjemaMaks: [ObjectIdentifier: Int] = [:]
+    func visSkjema(_ d: [String: Any], fra: UIViewController?) {
+        guard let i = fane(for: fra), let v = visninger[i], let id = d["id"] as? String, !id.isEmpty else { return }
+        let felter = d["felter"] as? [[String: Any]] ?? []
+        guard !felter.isEmpty else { return }
+        let a = UIAlertController(title: d["tittel"] as? String, message: nil, preferredStyle: .alert)
+        for f in felter {
+            a.addTextField { [weak self] t in
+                t.placeholder = (f["etikett"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? f["plass"] as? String
+                t.text = f["verdi"] as? String
+                t.autocapitalizationType = .sentences
+                t.returnKeyType = felter.count > 1 ? .next : .send
+                let maks = f["maks"] as? Int ?? 120
+                self?.skjemaMaks[ObjectIdentifier(t)] = maks
+                t.addTarget(self, action: #selector(SkallViewController.skjemaKlipp(_:)), for: .editingChanged)
+            }
+        }
+        a.addAction(UIAlertAction(title: d["avbryt"] as? String ?? "Avbryt", style: .cancel))
+        a.addAction(UIAlertAction(title: d["knapp"] as? String ?? "Send", style: .default) { [weak self, weak a, weak v] _ in
+            guard let self = self, let a = a else { return }
+            var verdier: [String: String] = [:]
+            for (n, f) in felter.enumerated() {
+                let t = (a.textFields?[n].text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                let nokkel = (f["id"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? (f["navn"] as? String ?? "")
+                if !nokkel.isEmpty { verdier[nokkel] = t }
+            }
+            // Radiovalg (f.eks. «hvilken er løgnen?») tas i et eget valg etterpå
+            if let r = d["radio"] as? [String: Any], let navn = r["navn"] as? String, let valg = r["valg"] as? [[String: Any]], !valg.isEmpty {
+                let b = UIAlertController(title: (r["sporsmal"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? (self.spraak == "en" ? "Which one is the lie?" : "Hvilken er løgnen?"), message: nil, preferredStyle: .actionSheet)
+                for x in valg {
+                    b.addAction(UIAlertAction(title: x["tekst"] as? String ?? "", style: .default) { _ in
+                        verdier[navn] = x["v"] as? String ?? ""
+                        self.sendSkjema(v, id, verdier)
+                    })
+                }
+                b.addAction(UIAlertAction(title: d["avbryt"] as? String ?? "Avbryt", style: .cancel))
+                b.popoverPresentationController?.sourceView = self.view
+                (self.presentedViewController ?? self).present(b, animated: true)
+                return
+            }
+            self.sendSkjema(v, id, verdier)
+        })
+        UISelectionFeedbackGenerator().selectionChanged()
+        (presentedViewController ?? self).present(a, animated: true)
+    }
+
+    private func sendSkjema(_ v: MittvorsViewController?, _ id: String, _ verdier: [String: String]) {
+        guard let data = try? JSONSerialization.data(withJSONObject: [id, verdier]), let json = String(data: data, encoding: .utf8) else { return }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        v?.webView?.evaluateJavaScript("window.__mvLek && window.__mvLek.skriv.apply(null, \(json))", completionHandler: nil)
+    }
+
+    @objc private func skjemaKlipp(_ f: UITextField) {
+        let maks = skjemaMaks[ObjectIdentifier(f)] ?? 120
+        if let t = f.text, t.count > maks { f.text = String(t.prefix(maks)) }
     }
 
     // MARK: «Si noe» – iOS-dialog med tekstfelt (tastaturet håndteres av iOS, feltet forsvinner aldri)
@@ -536,6 +595,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "arkAapen", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "si", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logginn", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "skjema", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
@@ -605,6 +665,16 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let vc = bridge?.viewController
         DispatchQueue.main.async {
             SkallViewController.delt?.skjerm(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// Skrivefelt i en lek: dialog med feltene ({id, tittel, felter, radio?, knapp, avbryt})
+    @objc func skjema(_ call: CAPPluginCall) {
+        let d = call.options as? [String: Any] ?? [:]
+        let vc = bridge?.viewController
+        DispatchQueue.main.async {
+            SkallViewController.delt?.visSkjema(d, fra: vc)
             call.resolve()
         }
     }
