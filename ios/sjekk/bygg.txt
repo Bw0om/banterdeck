@@ -1,21 +1,20 @@
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift:20:8: error: return from initializer without initializing all stored properties
-** BUILD FAILED **
+** BUILD SUCCEEDED **
 ----- siste linjer -----
 
-SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/SceneDelegate.swift (in target 'App' from project 'App')
-    
+AppIntentsSSUTraining (in target 'App' from project 'App')
+2026-10-20 09:35:29.145 appintentsnltrainingprocessor[3461:14502] Parsing options for appintentsnltrainingprocessor
+2026-10-20 09:35:29.147 appintentsnltrainingprocessor[3461:14502] Starting AppIntents SSU YAML Generation
+2026-10-20 09:35:29.153 appintentsnltrainingprocessor[3461:14502] No AppShortcuts found - Skipping.
 
-SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/TvSkjerm.swift (in target 'App' from project 'App')
-    
+RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
-** BUILD FAILED **
+Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
+Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
 
-The following build commands failed:
-	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift (in target 'App' from project 'App')
-	SwiftCompile normal arm64 Compiling\ VelgerArk.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
-	Building project App with scheme App and configuration Debug
-(3 failures)
+** BUILD SUCCEEDED **
+
 ----- skjemaer -----
     Targets:
         App
