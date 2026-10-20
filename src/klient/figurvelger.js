@@ -140,3 +140,6 @@ export function lagFigurVelger(rot, o) {
     valgt() { return Object.assign({}, st.valgt); },
   };
 }
+
+// Swift-skallet: det native arket «Figuren din» bruker de samme navnene og utsnittene
+export { NAVN as FV_NAVN, FARGENAVN as FV_FARGENAVN, SKJEGGNAVN as FV_SKJEGGNAVN, FRISYRENAVN as FV_FRISYRENAVN, BOKS as FV_BOKS };

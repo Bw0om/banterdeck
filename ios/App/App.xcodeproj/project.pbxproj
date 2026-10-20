@@ -21,6 +21,8 @@
 		A1B2C3D4E5F60718293A4B5F /* Skall.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5E /* Skall.swift */; };
 		A1B2C3D4E5F60718293A4B61 /* StartSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B60 /* StartSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B65 /* VelgerArk.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B64 /* VelgerArk.swift */; };
+		A1B2C3D4E5F60718293A4B67 /* FigurArk.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B66 /* FigurArk.swift */; };
+		A1B2C3D4E5F60718293A4B69 /* RomArk.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B68 /* RomArk.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +41,8 @@
 		A1B2C3D4E5F60718293A4B5E /* Skall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skall.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B60 /* StartSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B64 /* VelgerArk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VelgerArk.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B66 /* FigurArk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FigurArk.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B68 /* RomArk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RomArk.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -79,6 +83,8 @@
 				A1B2C3D4E5F60718293A4B5E /* Skall.swift */,
 				A1B2C3D4E5F60718293A4B60 /* StartSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B64 /* VelgerArk.swift */,
+				A1B2C3D4E5F60718293A4B66 /* FigurArk.swift */,
+				A1B2C3D4E5F60718293A4B68 /* RomArk.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -180,6 +186,8 @@
 				A1B2C3D4E5F60718293A4B5F /* Skall.swift in Sources */,
 				A1B2C3D4E5F60718293A4B61 /* StartSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B65 /* VelgerArk.swift in Sources */,
+				A1B2C3D4E5F60718293A4B67 /* FigurArk.swift in Sources */,
+				A1B2C3D4E5F60718293A4B69 /* RomArk.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
