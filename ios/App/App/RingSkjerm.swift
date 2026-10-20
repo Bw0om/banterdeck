@@ -51,7 +51,9 @@ final class RofModell: ObservableObject {
     @Published var vinkel: Double = 0          // ringens rotasjon (rofA)
     @Published var valgt: Int = -1             // kortet øverst
     @Published var drar = false                // holder i kortet
-    @Published var draT: Double = 0, sp: Double = 0, vri: Double = 0
+    @Published var draT: Double = 0
+    @Published var sp: Double = 0
+    @Published var vri: Double = 0
     @Published var holdt: CGPoint = CGPoint(x: 179, y: 190)
     @Published var skjelv = false
     @Published var skjultNr = -1               // kortet lagt bort for dette trekket
