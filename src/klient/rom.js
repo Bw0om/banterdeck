@@ -1818,6 +1818,61 @@ export function startRom(LEKNAVN, LANG) {
     dobbel: [T('Dobbel', 'Double'), T('Fingrene teller dobbelt denne runden.', 'Fingers count double this round.')],
   };
   var pkVist = '', pkTimer = null, pkSist = '';
+  /** Swift-skallet: alt den native Pekeleken-skjermen trenger, ferdig regnet ut her (samme logikk som pekSpill) */
+  function pkData(s) {
+    var pk = s.pek, vert = erVert(), jegLeser = pk.leser === tilstand.meg, kan = jegLeser || vert, alle = tilstand.spillere || [];
+    var tekst = String((s.kort && s.kort.t) || ''), m = tekst.match(pk.duo ? PK_DUO_PRE : PK_PRE), rest = m ? tekst.slice(m[0].length) : tekst;
+    var v = pk.duo ? [T('Pek på to', 'Point at two'), T('Én hånd på hver.', 'One hand on each.')] : (pk.vri && PK_VRI[pk.vri]) || null;
+    var d = {
+      lek: 'pekeleken', fase: pk.fase, kan: kan, duo: !!pk.duo, start: pk.start || 0, tell: pk.tell || 2400, naa: Date.now() + klokkeAvvik,
+      topp: { kort: T('Pekeleken · kort ', 'Most likely to · card ') + (s.pos + 1), leser: jegLeser ? T('Du leser', 'You read') : navn(pk.leser) + T(' leser', ' reads'), jegLeser: jegLeser },
+      kort: { pre: m ? m[1] + ' …' : '', tekst: rest, vriNavn: v ? (pk.duo ? 'Duo' : T('Vri', 'Twist')) + ' · ' + v[0] : '', vriTekst: v ? v[1] : '' },
+      spillere: alle.map(function (p) { return { id: p.id, navn: p.navn, meg: p.id === tilstand.meg, farge: nrFarge(p.id), init: initialer(p) }; }),
+      pek: pk.duo ? T('Pek på to!', 'Point at two!') : T('Pek!', 'Point!'),
+      stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
+    };
+    if (pk.fase === 'klar') {
+      d.klar = { knapp: kan ? T('Tell ned – 3 · 2 · 1', 'Count down – 3 · 2 · 1') : '', vent: kan ? (jegLeser ? T('Les kortet høyt først. Alle telefonene teller ned samtidig.', 'Read the card out loud first. All the phones count down together.') : T('Du kan starte for ', 'You can start for ') + navn(pk.leser) + '.')
+        : navn(pk.leser) + T(' leser høyt og starter nedtellingen. Gjør deg klar til å peke.', ' reads it out and starts the countdown. Get ready to point.') };
+    } else if (pk.fase === 'teller') {
+      var har = pk.harTalt || [], maks = Math.max(1, Math.min(6, alle.length - 1)), mangler = alle.length - har.length;
+      d.fingre = { mine: pk.mine == null ? -1 : pk.mine, maks: maks, pluss: alle.length - 1 > maks, mangler: mangler,
+        sporsmal: pk.vri === 'dobbel' ? T('Hvor mange pekte på deg? (Teller dobbelt)', 'How many pointed at you? (Counts double)') : T('Hvor mange pekte på deg?', 'How many pointed at you?'),
+        selv: pk.vri === 'selv' ? { tekst: pk.selv.indexOf(tilstand.meg) !== -1 ? T('Ærlig – du deler ut én', 'Honest – you hand out one') : T('Det stemmer – jeg peker på meg selv', 'It’s true – I point at myself'), av: pk.selv.indexOf(tilstand.meg) !== -1 } : null,
+        videre: kan && mangler > 0 ? T('Gå videre uten de siste', 'Move on without the rest') : '',
+        venter: mangler > 0 ? mangler + T(' har ikke svart ennå', ' haven’t answered yet') : T('Alle har svart', 'Everyone has answered') };
+    } else {
+      var r = pk.resultat || {}, navnene = (r.topp || []).map(function (id) { return id === tilstand.meg ? T('Du', 'You') : navn(id); }).join(T(' og ', ' and '));
+      if (pk.fase === 'forsvar') {
+        var igjen = Math.max(0, 15 - Math.floor((Date.now() + klokkeAvvik - (pk.forsvarFra || Date.now())) / 1000));
+        d.forsvar = { tittel: navnene + T(' – forsvar deg!', ' – defend yourself!'), tekst: T('15 sekunder. Får du én til å snu, slipper du ', '15 seconds. Turn one person and you skip ') + r.slurker + T(' slurker.', ' sips.'), igjen: igjen, kan: kan,
+          slapp: T('Slapp unna', 'Got away'), drikk: T('Drikk', 'Drink'), topp: r.topp || [] };
+      } else {
+        var ford = r.fordeling || {}, maksN = Math.max(1, r.maks || 0), nesteL = pkNesteLeser(pk);
+        var rader = alle.slice().sort(function (a, b) { return (ford[b.id] || 0) - (ford[a.id] || 0); }).filter(function (p) { return ford[p.id] > 0 || p.id === tilstand.meg; });
+        var tittel = r.duo ? (r.topp || []).map(function (id) { return id === tilstand.meg ? T('Du', 'You') : navn(id); }).join(' & ') + T(' – skål sammen!', ' – cheers together!')
+          : !(r.topp || []).length ? T('Ingen fikk fingre', 'Nobody got any fingers') : r.slapp ? navnene + T(' slapp unna!', ' got away!') : navnene + T(' – drikk ', ' – drink ') + r.slurker;
+        var linje = r.duo ? r.topp.map(function (id) { return (id === tilstand.meg ? T('Du', 'You') : navn(id)) + ' ' + r.hver[id]; }).join(' · ')
+          : (r.topp || []).length ? r.maks + (r.maks === 1 ? T(' finger pekte', ' finger pointed') : T(' fingre pekte', ' fingers pointed')) : '';
+        var kanVidere = !s.videre || s.videre.indexOf(tilstand.meg) !== -1;
+        d.resultat = { tittel: tittel, linje: linje, drikk: !!(r.topp || []).length && !r.slapp, topp: r.topp || [],
+          merk: pk.vri === 'flertall' && (r.topp || []).length ? T('Pekte du ikke på ', 'Didn’t point at ') + navnene + T('? Drikk én.', '? Drink one.') : '',
+          rader: rader.map(function (p) { var n = ford[p.id] || 0; return { navn: p.id === tilstand.meg ? T('Du', 'You') : p.navn, n: n, andel: n / maksN, farge: nrFarge(p.id) }; }),
+          videre: kanVidere ? T('Neste kort', 'Next card') + (nesteL ? ' – ' + (nesteL.id === tilstand.meg ? T('du leser', 'you read') : nesteL.navn + T(' leser', ' reads')) : '') : '',
+          vent: kanVidere ? '' : s.videre.filter(function (id, i, a) { return a.indexOf(id) === i; }).map(function (id) { return navn(id); }).join(T(' eller ', ' or ')) + T(' går videre.', ' moves on.'),
+          pos: s.pos };
+      }
+    }
+    return d;
+  }
+  // Den native skjermen trykker på de samme knappene som nettsiden har (data-g + data-*), så all logikk bor ett sted
+  window.__mvLek = {
+    trykk: function (g, attrs) {
+      var b = document.createElement('button'); b.type = 'button'; b.hidden = true; b.dataset.g = g;
+      Object.keys(attrs || {}).forEach(function (k) { b.dataset[k] = String(attrs[k]); });
+      root.appendChild(b); b.click(); b.remove();
+    }
+  };
   function pkTid(pk) { return Date.now() + klokkeAvvik - (pk.start || 0); }
   function pkTrinn(pk) { var t = pkTid(pk); return t < 0 ? 3 : t < 800 ? 3 : t < 1600 ? 2 : t < pk.tell ? 1 : 0; }
   function pkTikk() {
@@ -5429,7 +5484,8 @@ export function startRom(LEKNAVN, LANG) {
     var rotEl = document.documentElement;
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
-    meldSkjerm('rom');
+    // Swift-skallet: Pekeleken tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
+    if (harSkall() && s && s.pek && (s.lek === 'pekeleken' || s.type === 'kort' && s.pek)) meldSkjerm('lek', pkData(s)); else meldSkjerm('rom');
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først
     rotEl.classList.toggle('app-gjest', erApp && !s && !erVert() && !tilstand.valgt);   // gjestens venterom i appen: stua og én linje, ingenting å bla i
     rotEl.classList.toggle('i-spill', !!s);
