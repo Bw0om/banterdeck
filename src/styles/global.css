@@ -2203,3 +2203,9 @@ html.har-skall .rom-stua-tips{margin:0}
 html.har-skall .stua-si{position:absolute;right:10px;bottom:10px;width:44px;height:44px;border-radius:50%;border:var(--strek) solid var(--ink);background:var(--card);
   box-shadow:3px 3px 0 var(--ink);font-size:22px;line-height:1;display:grid;place-items:center;padding:0;cursor:pointer;z-index:2}
 html.har-skall .stua-si:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+
+/* Lobbyen native i appen (LobbySkjerm.swift): bare stua vises, gjennom et hull i den native skjermen, der skallet sier den skal stå */
+html.har-skall.lobby-nativ #rom > *:not(#romStuaPlass){display:none!important}
+html.har-skall.lobby-nativ body{overflow:hidden}
+html.har-skall.lobby-nativ #romStuaPlass{position:fixed;top:var(--mv-stua-topp,120px);left:0;right:0;z-index:5;padding:0 12px}
+html.har-skall.lobby-nativ #romStuaPlass .rom-stua{margin:0!important;max-width:none}

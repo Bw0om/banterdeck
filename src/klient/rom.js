@@ -1663,6 +1663,35 @@ export function startRom(LEKNAVN, LANG) {
         : T('Ryker ringen, drikker ', 'If the ring breaks, ') + esc(navn(s.turId)) + T(' opp glasset.', ' finishes their drink.')) + '</p>' +
       makkerHtml(s) + (erMobil() ? '' : rofMer(s));
   }
+  /** Swift-skallet: Ring of Fire tegnes native (RingSkjerm.swift). Alt skjermen trenger, ferdig regnet ut her – samme logikk som rofSpill. */
+  function rofData(s) {
+    var tatt = s.tatt || [], min = !s.ferdig && (s.turId === tilstand.meg || (erVert() && rofFor === s.nr)), k = s.kort;
+    var igjen = s.igjen != null ? s.igjen : ROF_N - tatt.length, konger = s.konger || 0;
+    var holder = s.holder && s.holder.hvem !== tilstand.meg && s.holder.t > 0 ? { navn: navn(s.holder.hvem), t: s.holder.t, sp: s.holder.sp } : null;
+    var hint = s.ringBrutt ? (min ? '💥 ' + T('Ringen er brutt. Trykk på ringen – den snurrer og velger kortet for deg.', 'The ring is broken. Tap the ring – it spins and picks the card for you.')
+        : holder ? holder.navn + T(' snurrer ringen …', ' is spinning the ring …') : '💥 ' + T('Ringen er brutt av ', 'The ring was broken by ') + ((s.brudd && s.brudd.navn) || '') + T('. Ringen snurrer selv nå.', '. The ring spins by itself now.'))
+      : min ? T('Snurr ringen. Hold på det gule kortet og følg sporet ut – stø hånd.', 'Spin the ring. Hold the yellow card and follow the lane out – steady hand.')
+      : holder ? holder.navn + T(' drar … ryker ringen, drikker de opp.', ' is pulling … if the ring breaks, they finish their drink.')
+      : T('Ryker ringen, drikker ', 'If the ring breaks, ') + navn(s.turId) + T(' opp glasset.', ' finishes their drink.');
+    var makker = null;
+    if (s.velgMakker && (s.velgMakker === tilstand.meg || erVert())) makker = { tittel: '🤝 ' + (s.velgMakker === tilstand.meg ? T('Velg makkeren din', 'Pick your mate') : navn(s.velgMakker) + T(' velger makker', ' picks a mate')), valg: tilstand.spillere.filter(function (p) { return p.id !== s.velgMakker; }).map(function (p) { return { id: p.id, navn: p.navn }; }) };
+    else if (s.velgMakker) makker = { tittel: '🤝 ' + navn(s.velgMakker) + T(' velger makker …', ' is picking a mate …'), valg: [] };
+    var makkere = s.makkere && s.makkere.length ? '🤝 ' + s.makkere.map(function (m) { return navn(m[0]) + ' ↔ ' + navn(m[1]); }).join(' · ') : '';
+    return { lek: 'ring-of-fire', nr: s.nr, tatt: tatt, min: min, ferdig: !!s.ferdig, igjen: igjen, konger: konger, ringBrutt: !!s.ringBrutt, bruddPlass: s.bruddPlass == null ? -1 : s.bruddPlass, holder: holder, halv: rofHalv(s),
+      brudd: s.brudd ? { nr: s.brudd.nr || 0, navn: s.brudd.navn || '' } : null,
+      tur: s.ferdig ? T('Siste kort', 'Last card') : min ? T('Din tur', 'Your turn') : navn(s.turId) + T(' trekker', ' draws'),
+      igjenTekst: igjen + T(' igjen', ' left'), kongerTekst: T('Konger', 'Kings') + ' ' + konger + '/4', kortI: igjen + T(' kort i ringen', ' cards in the ring'),
+      kort: k ? { v: k.v, s: k.s, regel: k.regel, tekst: k.tekst, rod: !!k.rod, hvem: k.hvem || '', trakk: (k.hvem || '') + T(' trakk', ' drew') } : null,
+      greit: min ? T('Greit – din tur', 'Got it – your turn') : T('Greit', 'Got it'), neste: !min && s.turId && !s.ferdig ? T('Neste: ', 'Next: ') + navn(s.turId) : '',
+      hint: hint, makker: makker, makkere: makkere, slot: T('UT HER', 'OUT HERE'), spenning: T('SPENNING', 'TENSION'), rok: T('RINGEN RØK!', 'THE RING BROKE!'), drikkerOpp: T(' drikker opp glasset', ' finishes their drink'),
+      stua: T('Stua', 'Lounge'), mer: T('Mer', 'More'), naa: Date.now() + klokkeAvvik };
+  }
+  window.__mvRof = {
+    holder: function (t, sp, nr) { gjorAlltid({ handling: 'rof-holder', t: Math.round(t * 100) / 100, sp: Math.round(sp * 100) / 100, nr: nr }); },
+    trekk: function (plass, brutt, nr) { rofBruddSett = null; rofSkjult = -1; gjorAlltid({ handling: 'rof-trekk', plass: plass, brutt: !!brutt, nr: nr }); },
+    lukk: function () { rofSkjult = tilstand && tilstand.spill ? tilstand.spill.nr : -1; tegn(); },
+    lyd: function (n) { spillLyd(n); }
+  };
   /** Bingo: hvor nærme de andre er. */
   function bgAndre(s) {
     var megId = tilstand.meg, andre = (s.andre || []).slice().sort(function (a, c) { return c.n - a.n; });
@@ -1878,7 +1907,7 @@ export function startRom(LEKNAVN, LANG) {
       var bb = b.querySelector('b'), sm = b.querySelector('small');
       if (bb) { k.tekst = tekstAv(bb); k.under = sm ? tekstAv(sm) : tekstAv(b.querySelector('span')); } else { k.tekst = tekstAv(b); }
       var c = typeof b.className === 'string' ? b.className : '';
-      if (!k.stil) k.stil = /rom-stor-knapp|slutt-knapp/.test(c) ? 'stor' : /linkbtn|ja-nekt/.test(c) ? 'link' : /\bnodt\b/.test(c) ? 'nodt' : /\bsann\b/.test(c) ? 'sann' : /\bja\b|aldri-har/.test(c) ? 'ja' : /\bnei\b|aldri-aldri|feig|\bdrikk\b/.test(c) ? 'nei' : 'vanlig';
+      if (!k.stil) k.stil = /rom-stor-knapp|slutt-knapp|app-velger|gk-planstart/.test(c) ? 'stor' : /rom-anbefalt-lek|app-mer|slutt-knapp/.test(c) ? 'kort' : /linkbtn|ja-nekt/.test(c) ? 'link' : /\bnodt\b/.test(c) ? 'nodt' : /\bsann\b/.test(c) ? 'sann' : /\bja\b|aldri-har/.test(c) ? 'ja' : /\bnei\b|aldri-aldri|feig|\bdrikk\b/.test(c) ? 'nei' : 'vanlig';
       return k;
     }
     function hode(svg, id, px) {
@@ -1897,6 +1926,9 @@ export function startRom(LEKNAVN, LANG) {
           var side = function (sel) { var el2 = e.querySelector(sel); if (!el2) return null; return { tekst: tekstAv(el2.querySelector('span')), valg: tekstAv(el2.querySelector('b')), folk: Array.prototype.map.call(el2.querySelectorAll('.nr-p'), function (p) { var f = (p.getAttribute('style') || '').match(/--f:(#[0-9A-Fa-f]{6})/); return { init: tekstAv(p), farge: f ? f[1] : '#FFD23F', meg: /\bmeg\b/.test(p.className) }; }) }; };
           ut.push({ type: 'sider', a: side('.ee-side.a'), b: side('.ee-side.b') }); return;
         }
+        if (/\b(rom-stua-plass|rom-h2|app-alene|app-del|rom-etikett)\b/.test(c)) return;   // toppen (kode/inviter) og stua tegnes native
+        if (/\bapp-leker\b/.test(c) && !e.querySelector('button')) return;
+        if (/\b(rom-anbefalt|rom-valg|gk-sporsmal)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b, 'kort'); }) }); return; }
         if (/\b(aldri-valg|rr-valg|ns-valg|slutt-valg|pk-forsvar-valg|ee-valg|ee-med)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b); }) }); return; }
         if (e.tagName === 'BUTTON') { ut.push(knapp(e)); return; }
         if (/\bee-benk\b/.test(c)) {
@@ -1954,6 +1986,8 @@ export function startRom(LEKNAVN, LANG) {
       });
       if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
     },
+    // Lobbyen native: stua vises gjennom et hull i skjermen – skallet sier hvor hullet er
+    stuaTopp: function (px) { try { document.documentElement.style.setProperty('--mv-stua-topp', Math.round(px) + 'px'); } catch (e) {} },
     trykk: function (g, attrs) {
       var b = document.createElement('button'); b.type = 'button'; b.hidden = true; b.dataset.g = g;
       Object.keys(attrs || {}).forEach(function (k) { b.dataset[k] = String(attrs[k]); });
@@ -5081,11 +5115,13 @@ export function startRom(LEKNAVN, LANG) {
     function slipp() { if (y0 === null) return; y0 = null; inn.style.transition = ''; if (dy > 80) lukkArk(); else inn.style.transform = ''; }
     topp.addEventListener('pointerup', slipp); topp.addEventListener('pointercancel', slipp);
     document.body.appendChild(m);
+    try { document.dispatchEvent(new CustomEvent('mv-ark-aapen', { detail: { aapen: true } })); } catch (x) {}
     return m;
   }
   function lukkArk() {
     if (!aapentArk) return;
     var varStua = aapentArk.stua; aapentArk.el.remove(); aapentArk = null;
+    try { document.dispatchEvent(new CustomEvent('mv-ark-aapen', { detail: { aapen: false } })); } catch (x) {}
     // Stua var i arket: legg den tilbake der den hører hjemme (gjemt under leken, i rommet ellers)
     if (varStua && stuaEl) { stuaGjem().appendChild(stuaEl); if (tilstand && !(tilstand.spill && erMobil())) setTimeout(tegn, 0); }
   }
@@ -5572,8 +5608,13 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : NATIVE_LEKER.indexOf(s.lek) !== -1 ? 'kort' : '') : '';
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || NATIVE_LEKER.indexOf(s.lek) !== -1 ? 'kort' : '')
+      : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
+    rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
+    else if (nativ === 'lobby') { var nL = (tilstand.spillere || []).length; skjermBlokker(innhold).then(function (b) { if (tilstand && !tilstand.spill) meldSkjerm('lobby', { kode: kode, n: nL, erVert: erVert(), vert: navn(tilstand.vert), blokker: b, naa: Date.now() + klokkeAvvik,
+      tekst: { inviter: T('Inviter', 'Invite'), iRommet: nL === 1 ? T('Bare du så langt', 'Just you so far') : nL + T(' i rommet', ' in the room'), kode: T('Romkode', 'Room code'), venter: navn(tilstand.vert) + (tilstand.plan && tilstand.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) } }); }); }
+    else if (nativ === 'rof') meldSkjerm('rof', rofData(s));
     else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
     else meldSkjerm('rom');
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først

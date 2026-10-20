@@ -328,7 +328,9 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         let hva = d["skjerm"] as? String ?? ""
         // Lekene som tegnes native (Pekeleken): skjermen ligger over nettsiden så lenge leken pågår
         if hva == "lek" { visStart(i: side, false); visKort(nil, over: side); visLek(d, over: side, nett: v.webView); return } else { visLek(nil, over: side, nett: nil) }
-        if hva == "kort" { visStart(i: side, false); kortModell.nett = v.webView; visKort(d, over: side); return } else { visKort(nil, over: side) }
+        if hva == "kort" { visStart(i: side, false); visRof(nil, over: side); kortModell.nett = v.webView; visKort(d, over: side); return } else { visKort(nil, over: side) }
+        if hva == "rof" { visStart(i: side, false); rofModell.nett = v.webView; visRof(d, over: side); return } else { visRof(nil, over: side) }
+        if hva == "lobby" { visStart(i: side, false); lobbyModell.nett = v.webView; visLobby(d, over: side); return } else { visLobby(nil, over: side) }
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
@@ -371,6 +373,79 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
         }
         side.view.bringSubviewToFront(lekVert!.view)
+    }
+
+    // Lobbyen (LobbySkjerm.swift): native skjerm med et hull der nettsidens stue vises – fingeren går gjennom hullet
+    private let lobbyModell = LobbyModell()
+    private var lobbyVert: UIHostingController<LobbySkjerm>?
+    private var lobbyHull: HullVisning?
+    private func visLobby(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else {
+            if let h = lobbyVert, let hull = lobbyHull {
+                UIView.animate(withDuration: 0.22, animations: { hull.alpha = 0 }) { _ in h.willMove(toParent: nil); hull.removeFromSuperview(); h.removeFromParent(); if self.lobbyVert === h { self.lobbyVert = nil; self.lobbyHull = nil } }
+            }
+            return
+        }
+        lobbyModell.sett(d)
+        if lobbyVert == nil {
+            let h = UIHostingController(rootView: LobbySkjerm(m: lobbyModell))
+            let hull = HullVisning()
+            h.view.backgroundColor = .clear
+            side.addChild(h)
+            hull.translatesAutoresizingMaskIntoConstraints = false
+            h.view.translatesAutoresizingMaskIntoConstraints = false
+            side.view.addSubview(hull)
+            hull.addSubview(h.view)
+            NSLayoutConstraint.activate([
+                hull.topAnchor.constraint(equalTo: side.view.topAnchor), hull.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
+                hull.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), hull.bottomAnchor.constraint(equalTo: side.view.bottomAnchor),
+                h.view.topAnchor.constraint(equalTo: hull.topAnchor), h.view.leadingAnchor.constraint(equalTo: hull.leadingAnchor),
+                h.view.trailingAnchor.constraint(equalTo: hull.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: hull.bottomAnchor)
+            ])
+            h.didMove(toParent: side)
+            hull.alpha = 0
+            lobbyVert = h; lobbyHull = hull
+            lobbyModell.hullEndret = { [weak self, weak hull] r in
+                hull?.hull = r
+                // Nettsiden legger stua akkurat der hullet er (CSS-px = punkter)
+                self?.lobbyModell.nett?.evaluateJavaScript("window.__mvLobby && window.__mvLobby.stuaTopp(\(Int(r.minY)))", completionHandler: nil)
+            }
+            UIView.animate(withDuration: 0.2) { hull.alpha = 1 }
+        }
+        side.view.bringSubviewToFront(lobbyHull!)
+    }
+
+    // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
+    func settOverleggSkjult(_ skjult: Bool) {
+        for v in [lekVert?.view, kortVert?.view, rofVert?.view, lobbyHull, startVert?.view] { v?.isHidden = skjult }
+    }
+
+    // Ring of Fire (RingSkjerm.swift)
+    private let rofModell = RofModell()
+    private var rofVert: UIHostingController<RingSkjerm>?
+    private func visRof(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else {
+            if let h = rofVert {
+                UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent(); if self.rofVert === h { self.rofVert = nil } }
+            }
+            return
+        }
+        rofModell.sett(d)
+        if rofVert == nil {
+            let h = UIHostingController(rootView: RingSkjerm(m: rofModell))
+            side.addChild(h)
+            h.view.translatesAutoresizingMaskIntoConstraints = false
+            side.view.addSubview(h.view)
+            NSLayoutConstraint.activate([
+                h.view.topAnchor.constraint(equalTo: side.view.topAnchor), h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
+                h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
+            ])
+            h.didMove(toParent: side)
+            h.view.alpha = 0
+            rofVert = h
+            UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
+        }
+        side.view.bringSubviewToFront(rofVert!.view)
     }
 
     // Kortlekene (KortSkjerm.swift): samme overlegg, en annen tegner
@@ -492,6 +567,15 @@ private extension Array {
     subscript(safe i: Int) -> Element? { indices.contains(i) ? self[i] : nil }
 }
 
+/// En visning med et hull: trykk innenfor hullet går rett gjennom til det som ligger under (nettsidens stue)
+final class HullVisning: UIView {
+    var hull: CGRect = .zero
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        if hull.contains(point) { return nil }
+        return super.hitTest(point, with: event)
+    }
+}
+
 /// Capacitor-plugin: nettsiden snakker med skallet. Hver skjerm har sin egen bridge, så pluginen vet hvilken fane som ringer.
 /// Skall.klar({titler, lang}) → {ok, fane, gaaTil?, rull, sjekk, moerk}; Skall.aapne({navn, url}); Skall.fane({navn, url}); Skall.skjul({skjult}).
 @objc(SkallPlugin)
@@ -508,6 +592,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "del", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "ark", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "pluss", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "arkAapen", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "si", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logginn", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "skjema", returnType: CAPPluginReturnPromise),
@@ -610,6 +695,15 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let vc = bridge?.viewController
         DispatchQueue.main.async {
             SkallViewController.delt?.visSi(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// Et nettark er oppe/lukket: {aapen}
+    @objc func arkAapen(_ call: CAPPluginCall) {
+        let aapen = call.getBool("aapen") ?? false
+        DispatchQueue.main.async {
+            SkallViewController.delt?.settOverleggSkjult(aapen)
             call.resolve()
         }
     }
