@@ -1038,9 +1038,44 @@ export function startRom(LEKNAVN, LANG) {
     // Alene: først og fremst få folk inn. Med gjester: koden som en stille rad, lekene i fokus.
     return plassInfo() + planBoks() + appTopp(n) +
       '<h2 class="rom-h2">' + T('Start en lek', 'Start a game') + '</h2>' + kveldKort() + reglerKort() + anbefalteLeker() +
-      '<div class="app-leker">' + grupper + egneStokker() + flere + '</div>' +
+      (harSkall() ? '<button type="button" class="btn gold rom-knapp app-velger" data-g="velger">' + T('Alle lekene', 'All the games') + ' <i aria-hidden="true">›</i></button><div class="app-leker">' + egneStokker() + '</div>'
+        : '<div class="app-leker">' + grupper + egneStokker() + flere + '</div>') +
       '<button type="button" class="app-mer" data-g="app-mer"><b>' + T('Mer', 'More') + '</b><small>' + T('TV, QR, bare min telefon, hele kvelden, varianter', 'TV, QR, just my phone, all night, variants') + '</small><i aria-hidden="true">›</i></button>';
   }
+  /** Swift-skallet (iPhone-appen): lekvelgeren er et native ark. Dette er lista den får, med det samme et trykk på raden ville gjort. */
+  function harSkall() { return document.documentElement.classList.contains('har-skall'); }
+  function lekerForVelger() {
+    var t = tilstand, leker = (t.leker || []).filter(function (l) { return !l.skjult; });
+    function en(l) {
+      var laast = !!(l.pluss && !t.pluss), min = forFa(l);
+      var lekId = l.id === 'pekeleken' && pkMobil ? 'mest' : l.id;
+      var mod = l.type === 'nyhetsrunden' && l.moduser && l.moduser[0] ? l.moduser[0].v : '*';
+      var g = laast ? 'start' : l.type === 'nyhetsrunden' ? 'app-uke' : l.id === 'ring-of-fire' ? 'app-rof' : 'start';
+      return { id: l.id, navn: l.navn, om: l.om || '', g: g, lek: lekId, modus: mod, laast: laast, pluss: !!l.pluss, min: min || 0,
+        regler: (REGLER[reglerNokkelFor(l)] || []).map(function (x) { return T(x[0], x[1]); }) };
+    }
+    var brukt = {}, grupper = [];
+    GRUPPER.forEach(function (g, i) {
+      var l = leker.filter(function (x) { return g[1].indexOf(x.id) !== -1 && !x.pluss; });
+      var pl = i === 1 ? leker.filter(function (x) { return x.pluss && KORT_PLUSS.indexOf(x.id) !== -1; }) : [];
+      l.concat(pl).forEach(function (x) { brukt[x.id] = 1; });
+      if (l.length || pl.length) grupper.push({ navn: g[0], leker: l.concat(pl).map(en) });
+    });
+    var rest = leker.filter(function (x) { return !brukt[x.id] && !x.pluss; }), pluss = leker.filter(function (x) { return !brukt[x.id] && x.pluss; });
+    if (rest.length) grupper.push({ navn: T('Kortstokker med spørsmål', 'Question decks'), leker: rest.map(en) });
+    if (pluss.length) grupper.push({ navn: '✨ ' + T('Med Pluss', 'With Pluss'), leker: pluss.map(en) });
+    var n = t.spillere.length, anbefalt = (n >= 3 ? ['hvemskrev', 'mest', 'spion'] : ['mest', 'ring-of-fire', 'skal']);
+    return { tittel: T('Velg lek', 'Pick a game'), anbefalt: anbefalt, spillere: n, grupper: grupper, senere: T('Når dere er flere', 'Once more of you are in'), anbefaltNavn: T('Anbefalt nå', 'Recommended now'), start: T('Start', 'Start'), minst: T('Minst', 'At least'), spillereOrd: T('spillere', 'players'), plussTekst: T('Krever Pluss', 'Needs Pluss') };
+  }
+  window.__mvLobby = {
+    leker: lekerForVelger,
+    // Det native arket valgte en lek: gjør akkurat det raden i lista ville gjort (start, uke-valg, Ring of Fire-regler …)
+    trykk: function (g, lek, modus) {
+      var b = document.createElement('button'); b.type = 'button'; b.hidden = true;
+      b.dataset.g = g; b.dataset.lek = lek || ''; b.dataset.modus = modus || '*';
+      root.appendChild(b); b.click(); b.remove();
+    }
+  };
   /** Bakgrunnslekene: går hele kvelden, uansett hvilken hovedlek dere spiller. Verten slår dem av og på. */
   function bakgrunnBoks() {
     var t = tilstand, rader = [];
@@ -5567,6 +5602,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'app-rof') return rofStartArk();
     if (g === 'lek-info') return lekInfoArk(b.dataset.lek);
     if (g === 'si-aapne') return siArk();
+    if (g === 'velger') { try { document.dispatchEvent(new CustomEvent('mv-velger', { detail: lekerForVelger() })); } catch (x) {} return; }
     if (b.classList.contains('rom-stor-knapp') && Date.now() < sperreTil) return;
     var farlig = farligTekst(g, b);
     if (farlig && !bekreftet(b, farlig)) return;

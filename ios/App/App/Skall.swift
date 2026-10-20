@@ -113,6 +113,26 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
 
     func hentVentende(_ i: Int) -> String? { defer { ventende[i] = nil }; return ventende[i] }
 
+    // MARK: Lekvelgeren – et iOS-ark over Spill-fanen (VelgerArk.swift)
+    func visVelger(_ d: [String: Any], fra: UIViewController?) {
+        guard let i = fane(for: fra), let v = visninger[i] else { return }
+        let m = VelgerModell(d)
+        let h = UIHostingController(rootView: VelgerArk(m: m))
+        m.velg = { [weak h, weak v] lek in
+            h?.dismiss(animated: true) {
+                guard let data = try? JSONSerialization.data(withJSONObject: [lek.g, lek.lek, lek.modus]), let json = String(data: data, encoding: .utf8) else { return }
+                v?.webView?.evaluateJavaScript("window.__mvLobby && window.__mvLobby.trykk.apply(null, \(json))", completionHandler: nil)
+            }
+        }
+        if let ark = h.sheetPresentationController {
+            ark.detents = [.medium(), .large()]
+            ark.prefersGrabberVisible = true
+            ark.prefersScrollingExpandsWhenScrolledToEdge = true
+        }
+        UISelectionFeedbackGenerator().selectionChanged()
+        present(h, animated: true)
+    }
+
     // MARK: Den native startskjermen (Spill-fanen)
     private let startModell = StartModell()
     private var startVert: UIHostingController<StartSkjerm>?
@@ -239,6 +259,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "aapne", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "skjul", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "skjerm", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "velger", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
@@ -308,6 +329,16 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let vc = bridge?.viewController
         DispatchQueue.main.async {
             SkallViewController.delt?.skjerm(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// Lobbyen: «Alle lekene» – lista fra nettsiden vises som et native ark
+    @objc func velger(_ call: CAPPluginCall) {
+        let d = call.options as? [String: Any] ?? [:]
+        let vc = bridge?.viewController
+        DispatchQueue.main.async {
+            SkallViewController.delt?.visVelger(d, fra: vc)
             call.resolve()
         }
     }
