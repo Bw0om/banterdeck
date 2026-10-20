@@ -1938,7 +1938,8 @@ export function startRom(LEKNAVN, LANG) {
     });
     var radio = null, rs = f.querySelectorAll('input[type=radio]');
     if (rs.length) { radio = { navn: rs[0].name, sporsmal: '', valg: Array.prototype.map.call(rs, function (r, i) { var lb = r.closest('label'); return { v: r.value, tekst: (lb ? lb.textContent : r.value).replace(/\s+/g, ' ').trim() + ' ' + (i + 1) }; }) }; }
-    var kn = f.querySelector('button[type=submit], button:not([type])'), tittel = f.querySelector('label, .ts-hjelp, p');
+    var kn = f.querySelector('button[type=submit], button:not([type])');
+    var fs = f.previousElementSibling, tittel = (fs && /(ts-hjelp|sm-oppgave|hs-oppgave|nr-vent|pk-spm)/.test(fs.className || '') ? fs : null) || (felter.length === 1 ? f.querySelector('label, p') : null);
     inp.blur();
     try { document.dispatchEvent(new CustomEvent('mv-skjema', { detail: { id: f.id, tittel: tittel ? tittel.textContent.replace(/\s+/g, ' ').trim().slice(0, 80) : '', felter: felter, radio: radio, knapp: kn ? kn.textContent.trim() : T('Send', 'Send'), avbryt: T('Avbryt', 'Cancel') } })); } catch (x) {}
   });
