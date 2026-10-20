@@ -1,20 +1,21 @@
-** BUILD SUCCEEDED **
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift:20:8: error: return from initializer without initializing all stored properties
+** BUILD FAILED **
 ----- siste linjer -----
+                                   ^
 
-AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-10-19 23:04:29.163 appintentsnltrainingprocessor[4445:17363] Parsing options for appintentsnltrainingprocessor
-2026-10-19 23:04:29.164 appintentsnltrainingprocessor[4445:17363] Starting AppIntents SSU YAML Generation
-2026-10-19 23:04:29.168 appintentsnltrainingprocessor[4445:17363] No AppShortcuts found - Skipping.
+SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
+    
 
-RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+SwiftDriverJobDiscovery normal arm64 Compiling AppDelegate.swift, SceneDelegate.swift, TvSkjerm.swift (in target 'App' from project 'App')
 
-Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+** BUILD FAILED **
 
-Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
-    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
 
-** BUILD SUCCEEDED **
-
+The following build commands failed:
+	SwiftCompile normal arm64 Compiling\ VelgerArk.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
+	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift (in target 'App' from project 'App')
+	Building project App with scheme App and configuration Debug
+(3 failures)
 ----- skjemaer -----
     Targets:
         App
