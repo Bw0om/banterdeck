@@ -143,6 +143,26 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         }
     }
 
+    // MARK: Pluss – kjøp med App Store (PlussArk.swift)
+    private var plussModell: PlussModell?
+    func visPluss(_ d: [String: Any], fra: UIViewController?) {
+        guard let i = fane(for: fra), let v = visninger[i] else { return }
+        let m = PlussModell()
+        m.nett = v.webView
+        m.engelsk = spraak == "en"
+        plussModell = m
+        let h = UIHostingController(rootView: PlussArk(m: m))
+        m.loggInn = { [weak self, weak h] in h?.dismiss(animated: true) { self?.aapne(fane: "deg", url: (self?.spraak == "en" ? "/account" : "/no/account") + "#signin") } }
+        m.ferdig = { [weak h, weak v] in
+            // Pluss er på plass: siden får beskjed (rommet skrur på Pluss), og arket går bort etter et øyeblikk
+            v?.webView?.evaluateJavaScript("window.__mvPluss && window.__mvPluss.ferdig()", completionHandler: nil)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { h?.dismiss(animated: true) }
+        }
+        if let ark = h.sheetPresentationController { ark.detents = [.large()]; ark.prefersGrabberVisible = false }
+        UISelectionFeedbackGenerator().selectionChanged()
+        (presentedViewController ?? self).present(h, animated: true)
+    }
+
     // MARK: Inviter – iPhonens eget delingsark (AirDrop, Meldinger, Snap …)
     func del(tekst: String, url: String) {
         var ting: [Any] = [tekst]
@@ -322,6 +342,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "velger", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "del", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "ark", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "pluss", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
@@ -391,6 +412,16 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let vc = bridge?.viewController
         DispatchQueue.main.async {
             SkallViewController.delt?.skjerm(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// Pluss-tilbudet: kjøp med App Store
+    @objc func pluss(_ call: CAPPluginCall) {
+        let d = call.options as? [String: Any] ?? [:]
+        let vc = bridge?.viewController
+        DispatchQueue.main.async {
+            SkallViewController.delt?.visPluss(d, fra: vc)
             call.resolve()
         }
     }
