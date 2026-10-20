@@ -2192,3 +2192,7 @@ html.is-app.i-spill body,html.is-app.bli-med body{padding-bottom:calc(env(safe-a
 /* Språkbytte, «noe galt?» og lenker som hører til nettsiden tas i Deg-fanen i stedet */
 html.is-app .rom-h1 + p.small{display:none}
 html.is-app .toast{bottom:calc(env(safe-area-inset-bottom) + 84px)}
+
+/* Appen med Swift-skall: lekvelgeren er et native ark – én knapp i lobbyen */
+html.har-skall .app-velger{width:100%;display:flex;justify-content:space-between;align-items:center;margin:4px 0 14px;font-size:20px}
+html.har-skall .app-velger i{font-style:normal;font-size:24px;line-height:1}

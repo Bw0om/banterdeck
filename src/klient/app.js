@@ -96,6 +96,8 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   let sistSkjerm = null;
   const sendSkjerm = () => { if (harSkall && sistSkjerm) Skall.skjerm(sistSkjerm).catch(() => {}); };
   document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; sendSkjerm(); });
+  // Lobbyen: «Alle lekene» åpner det native lekvelger-arket (ios/App/App/VelgerArk.swift)
+  document.addEventListener('mv-velger', (e) => { if (harSkall) Skall.velger(e.detail || {}).catch(() => {}); });
   Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' }, lang: engelsk() ? 'en' : 'no' })
     .then((r) => {
       harSkall = true; minFane = (r && r.fane) || fanenNaa(); h.classList.add('har-skall');
