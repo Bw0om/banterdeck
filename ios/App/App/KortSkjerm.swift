@@ -173,6 +173,8 @@ struct BlokkListe: View {
     /// Benken: hodene nederst – de som har svart står oppe
     private func benk(_ b: [String: Any]) -> some View {
         let folk = b["folk"] as? [[String: Any]] ?? []
+        let bombe = b["bombe"] as? [String: Any]
+        let harBombe = bombe != nil
         return VStack(alignment: .leading, spacing: 6) {
             if !s(b, "status").isEmpty { Text(s(b, "status")).font(.archivo(12, vekt: 700)).opacity(0.65) }
             ScrollView(.horizontal, showsIndicators: false) {
@@ -187,11 +189,17 @@ struct BlokkListe: View {
                             }
                             .offset(y: oppe ? -10 : 0)
                             .overlay(stol || oi ? Circle().stroke(oi ? oransje : gul, lineWidth: 3).frame(width: 60, height: 60).offset(y: oppe ? -18 : -8) : nil)
+                            .overlay(alignment: .top) {
+                                if let bo = bombe, s(bo, "id") == s(f, "id") {
+                                    BombeVisning(bom: bo["bom"] as? Bool ?? false, start: (bo["start"] as? NSNumber)?.doubleValue ?? 0, smell: (bo["smell"] as? NSNumber)?.doubleValue ?? 0, avvik: m.avvik)
+                                        .frame(width: 64, height: 76).offset(y: -62)
+                                }
+                            }
                             .animation(.spring(response: 0.3, dampingFraction: 0.6), value: oppe)
                             Text(s(f, "navn")).font(.archivo(12, vekt: oppe ? 900 : 600)).lineLimit(1).opacity(oppe ? 1 : 0.7)
                         }.frame(minWidth: 60)
                     }
-                }.padding(.top, 14).padding(.horizontal, 4)
+                }.padding(.top, harBombe ? 70 : 14).padding(.horizontal, 4)
             }
         }
         .padding(.top, 8)
@@ -299,5 +307,76 @@ struct BlokkListe: View {
             .foregroundColor(stil == "merk" ? rust : blekk)
             .opacity(stil == "vent" ? 0.75 : stil == "etikett" ? 0.65 : 1)
             .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// Kategorier: bomba over hodet til den som har den. Rister raskere jo nærmere smellet (start → smell, servertid),
+/// og smeller som en stjerne med «BOM!». Tiden holdes av nettsiden – denne tegner bare.
+struct BombeVisning: View {
+    var bom: Bool
+    var start: Double
+    var smell: Double
+    var avvik: Double
+    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
+    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
+    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+
+    var body: some View {
+        if bom {
+            ZStack {
+                Stjerne(n: 14, indre: 0.55).fill(gul).overlay(Stjerne(n: 14, indre: 0.55).stroke(morkBlekk, lineWidth: 3))
+                Stjerne(n: 7, indre: 0.5).fill(oransje).scaleEffect(0.55)
+                Text("BOM!").font(.archivo(15, vekt: 900)).foregroundColor(morkBlekk).rotationEffect(.degrees(-8))
+            }
+            .transition(.scale(scale: 0.3).combined(with: .opacity))
+        } else {
+            TimelineView(.animation) { tl in
+                let naa = tl.date.timeIntervalSince1970 * 1000 + avvik
+                let brent = smell > start ? min(1, max(0, (naa - start) / (smell - start))) : 0
+                let periode = 0.7 - 0.56 * brent   // sekunder per rist, som nettsiden
+                let fase = (naa / 1000).truncatingRemainder(dividingBy: periode) / periode
+                let vink = sin(fase * .pi * 2) * (4 + 8 * brent)
+                let gnist = Int(naa / 90) % 2 == 0
+                bombe(gnist: gnist, brent: brent)
+                    .rotationEffect(.degrees(vink), anchor: .bottom)
+                    .offset(x: CGFloat(sin(fase * .pi * 4)) * CGFloat(1 + 2 * brent))
+            }
+        }
+    }
+
+    private func bombe(gnist: Bool, brent: Double) -> some View {
+        ZStack {
+            // lunta
+            Path { p in p.move(to: CGPoint(x: 42, y: 22)); p.addQuadCurve(to: CGPoint(x: 58, y: 8), control: CGPoint(x: 46, y: 8)) }
+                .stroke(morkBlekk, style: StrokeStyle(lineWidth: 3.5, lineCap: .round))
+            // gnisten
+            Circle().fill(gul).frame(width: gnist ? 14 : 11, height: gnist ? 14 : 11).position(x: 58, y: 8)
+            Circle().fill(oransje).frame(width: 6, height: 6).position(x: 58, y: 8)
+            // halsen
+            RoundedRectangle(cornerRadius: 2).fill(Color(red: 0.29, green: 0.247, blue: 0.216)).frame(width: 18, height: 10)
+                .overlay(RoundedRectangle(cornerRadius: 2).stroke(morkBlekk, lineWidth: 2.5)).rotationEffect(.degrees(30)).position(x: 40, y: 24)
+            // kula
+            Circle().fill(brent > 0.75 ? Color(red: 0.35, green: 0.12, blue: 0.08) : morkBlekk).frame(width: 46, height: 46)
+                .overlay(Circle().stroke(morkBlekk, lineWidth: 3)).position(x: 30, y: 50)
+            Path { p in p.move(to: CGPoint(x: 16, y: 40)); p.addQuadCurve(to: CGPoint(x: 28, y: 32), control: CGPoint(x: 19, y: 33)) }
+                .stroke(Color(red: 1, green: 0.973, blue: 0.933).opacity(0.7), style: StrokeStyle(lineWidth: 3.5, lineCap: .round))
+        }
+    }
+}
+
+/// Stjerne med n tagger (smellet)
+struct Stjerne: Shape {
+    var n: Int
+    var indre: CGFloat
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        let c = CGPoint(x: r.midX, y: r.midY), R = min(r.width, r.height) / 2
+        for i in 0..<(n * 2) {
+            let a = Double(i) * .pi / Double(n) - .pi / 2, rad = i % 2 == 0 ? R : R * indre
+            let pt = CGPoint(x: c.x + CGFloat(cos(a)) * rad, y: c.y + CGFloat(sin(a)) * rad)
+            if i == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
+        }
+        p.closeSubpath()
+        return p
     }
 }
