@@ -1865,6 +1865,61 @@ export function startRom(LEKNAVN, LANG) {
     }
     return d;
   }
+  /* Kortlekene som native skjerm: nettsidens ferdige HTML oversettes til enkle blokker (topp, kort, knapper, benk, søyler …)
+     som Swift tegner. Logikk, tekster, lyd og vibrasjon bor fortsatt her – skjermen er bare en annen penn. */
+  var NATIVE_LEKER = ['jeg-har-aldri', 'nodt-eller-sannhet'];
+  var hodePng = {};
+  function skjermBlokker(html) {
+    var tmp = document.createElement('div'); tmp.innerHTML = html; var ut = [], jobber = [];
+    function tekstAv(el) { return el && el.textContent ? el.textContent.replace(/\s+/g, ' ').trim() : ''; }
+    function knapp(b, stil) {
+      var k = { type: 'knapp', g: b.dataset.g || '', attrs: {}, tekst: '', under: '', paa: b.getAttribute('aria-pressed') === 'true', av: !!b.disabled, stil: stil || '' };
+      Object.keys(b.dataset).forEach(function (x) { if (x !== 'g') k.attrs[x] = b.dataset[x]; });
+      var bb = b.querySelector('b'), sm = b.querySelector('small');
+      if (bb) { k.tekst = tekstAv(bb); k.under = sm ? tekstAv(sm) : tekstAv(b.querySelector('span')); } else { k.tekst = tekstAv(b); }
+      var c = typeof b.className === 'string' ? b.className : '';
+      if (!k.stil) k.stil = /rom-stor-knapp|slutt-knapp/.test(c) ? 'stor' : /linkbtn|ja-nekt/.test(c) ? 'link' : /\bnodt\b/.test(c) ? 'nodt' : /\bsann\b/.test(c) ? 'sann' : /\bja\b|aldri-har/.test(c) ? 'ja' : /\bnei\b|aldri-aldri|feig|\bdrikk\b/.test(c) ? 'nei' : 'vanlig';
+      return k;
+    }
+    function hode(svg, id, px) {
+      if (!svg) return Promise.resolve('');
+      var n = id + '|' + px + '|' + svg.innerHTML.length + '|' + svg.innerHTML.slice(0, 120);
+      if (hodePng[n]) return Promise.resolve(hodePng[n]);
+      return svgTilPng(svg.innerHTML, svg.getAttribute('viewBox') || '-30 -42 60 92', px).then(function (b) { hodePng[n] = b; return b; });
+    }
+    function gaa(el) {
+      Array.prototype.forEach.call(el.children, function (e) {
+        var c = typeof e.className === 'string' ? e.className : '';
+        if (/\brom-spillnavn\b/.test(c)) return;
+        if (/\bnr-topp\b/.test(c)) { var sp = e.querySelector('.nr-topp-tekst span'), bt = e.querySelector('.nr-topp-tekst b'), kl = e.querySelector('.nr-klokke span'); ut.push({ type: 'topp', tekst: tekstAv(sp), chip: tekstAv(bt), gul: !!(bt && bt.classList.contains('gul')), frist: kl ? Number(kl.dataset.frist) || 0 : 0 }); return; }
+        if (/\bpk-kort\b/.test(c)) { ut.push({ type: 'kort', pre: tekstAv(e.querySelector('.pk-pre')), tekst: tekstAv(e.querySelector('p')) || tekstAv(e), tag: tekstAv(e.querySelector('.ja-tag, .pk-vri, .nr-type')), under: tekstAv(e.querySelector('small')), stil: /\bnodt\b/.test(c) ? 'nodt' : /\bsannhet\b/.test(c) ? 'sannhet' : '', liten: /\bliten\b/.test(c) }); return; }
+        if (/\b(aldri-valg|rr-valg|ns-valg|slutt-valg|pk-forsvar-valg)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b); }) }); return; }
+        if (e.tagName === 'BUTTON') { ut.push(knapp(e)); return; }
+        if (/\bee-benk\b/.test(c)) {
+          var folk = Array.prototype.map.call(e.querySelectorAll('.ee-hode'), function (h) {
+            var f = { id: h.dataset.id || '', navn: tekstAv(h.querySelector('.ee-navn')), oppe: !!h.querySelector('.ee-hev.oppe'), stol: /\bstol\b/.test(h.className), oi: /\balene\b/.test(h.className), tall: tekstAv(h.querySelector('.ee-tall')), png: '' };
+            jobber.push(hode(h.querySelector('svg.mv-hode'), f.id, 96).then(function (b) { f.png = b; }));
+            return f;
+          });
+          ut.push({ type: 'benk', status: tekstAv(e.querySelector('.ee-status')), folk: folk }); return;
+        }
+        if (/\brr-dom\b/.test(c)) { ut.push({ type: 'dom', stil: /\bfeig\b/.test(c) ? 'feig' : /\buenige\b/.test(c) ? 'uenige' : 'enige', over: tekstAv(e.querySelector('span')), tittel: tekstAv(e.querySelector('b')), under: tekstAv(e.querySelector('small')) }); return; }
+        if (/\bpk-soyler\b/.test(c)) { ut.push({ type: 'stolper', rader: Array.prototype.map.call(e.querySelectorAll('li'), function (li) { var b = li.querySelector('i b'), st = b ? b.getAttribute('style') || '' : '', m = st.match(/scaleX\(([\d.]+)\)/), f = st.match(/background:(#[0-9A-Fa-f]{6})/); return { navn: tekstAv(li.querySelector('span')), n: tekstAv(li.querySelector('em')), andel: m ? Number(m[1]) : 0, farge: f ? f[1] : '#FFD23F' }; }) }); return; }
+        if (/\brr-gjett\b/.test(c)) { ut.push({ type: 'liste', rader: Array.prototype.map.call(e.querySelectorAll('li'), function (li) { return { navn: tekstAv(li.querySelector('b')), tekst: tekstAv(li.querySelector('em')), rett: /\brett\b/.test(li.className) }; }) }); return; }
+        if (/\bja-ulv\b/.test(c)) { var u = { type: 'ulv', etikett: tekstAv(e.querySelector('.ja-ulv-etikett')), navn: tekstAv(e.querySelector('.ja-ulv-navn')), be: tekstAv(e.querySelector('.ja-ulv-be')), tekst: tekstAv(e.querySelector('p')), knapp: e.querySelector('button') ? knapp(e.querySelector('button'), 'link') : null, png: '' }; jobber.push(hode(e.querySelector('svg'), 'ulv', 120).then(function (b) { u.png = b; })); ut.push(u); return; }
+        if (/\bja-vinner\b/.test(c)) { var vn = { type: 'vinner', navn: tekstAv(e.querySelector('b')), n: tekstAv(e.querySelector('em')), png: '' }; jobber.push(hode(e.querySelector('svg'), 'vinner', 120).then(function (b) { vn.png = b; })); ut.push(vn); return; }
+        if (/\b(nr-vent|rr-hint|ns-stor|ja-dom|ja-mest|ja-kommentar|nr-etikett|pk-sporsmal|pk-merk|aldri-bryter|ja-vis)\b/.test(c)) {
+          var kn = e.querySelector('button');
+          if (kn && /\b(aldri-bryter|ja-vis)\b/.test(c)) { Array.prototype.forEach.call(e.querySelectorAll('button'), function (b) { ut.push(knapp(b, 'link')); }); return; }
+          ut.push({ type: 'tekst', tekst: tekstAv(e), stil: /ns-stor/.test(c) ? 'stor' : /ja-dom/.test(c) ? 'dom' : /nr-etikett/.test(c) ? 'etikett' : /pk-merk|ja-mest|ja-kommentar/.test(c) ? 'merk' : 'vent' }); return;
+        }
+        if (e.children.length && e.querySelector('button, .pk-kort, .ee-benk, .nr-topp, .pk-soyler, .ja-ulv, .ja-vinner, .rr-dom')) { gaa(e); return; }
+        var t = tekstAv(e); if (t) ut.push({ type: 'tekst', tekst: t, stil: 'vent' });
+      });
+    }
+    gaa(tmp);
+    return Promise.all(jobber).then(function () { return ut; });
+  }
   // Den native skjermen trykker på de samme knappene som nettsiden har (data-g + data-*), så all logikk bor ett sted
   window.__mvLek = {
     trykk: function (g, attrs) {
@@ -5484,8 +5539,11 @@ export function startRom(LEKNAVN, LANG) {
     var rotEl = document.documentElement;
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
-    // Swift-skallet: Pekeleken tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    if (harSkall() && s && s.pek && (s.lek === 'pekeleken' || s.type === 'kort' && s.pek)) meldSkjerm('lek', pkData(s)); else meldSkjerm('rom');
+    // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : NATIVE_LEKER.indexOf(s.lek) !== -1 ? 'kort' : '') : '';
+    if (nativ === 'pek') meldSkjerm('lek', pkData(s));
+    else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
+    else meldSkjerm('rom');
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først
     rotEl.classList.toggle('app-gjest', erApp && !s && !erVert() && !tilstand.valgt);   // gjestens venterom i appen: stua og én linje, ingenting å bla i
     rotEl.classList.toggle('i-spill', !!s);
