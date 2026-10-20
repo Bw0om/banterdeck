@@ -1,20 +1,23 @@
-** BUILD SUCCEEDED **
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:54:5: error: property wrapper can only apply to a single variable
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:54:5: error: property wrapper can only apply to a single variable
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:54:5: error: property wrapper can only apply to a single variable
+** BUILD FAILED **
 ----- siste linjer -----
+    
 
-AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-10-20 15:23:21.724 appintentsnltrainingprocessor[3847:15185] Parsing options for appintentsnltrainingprocessor
-2026-10-20 15:23:21.726 appintentsnltrainingprocessor[3847:15185] Starting AppIntents SSU YAML Generation
-2026-10-20 15:23:21.732 appintentsnltrainingprocessor[3847:15185] No AppShortcuts found - Skipping.
+LinkAssetCatalog /Users/runner/work/banterdeck/banterdeck/ios/App/App/Assets.xcassets (in target 'App' from project 'App')
+note: Emplaced /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/AppIcon60x60@2x.png (in target 'App' from project 'App')
+note: Emplaced /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/AppIcon76x76@2x~ipad.png (in target 'App' from project 'App')
+note: Emplaced /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/Assets.car (in target 'App' from project 'App')
 
-RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+** BUILD FAILED **
 
-Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
-Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
-    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
-
-** BUILD SUCCEEDED **
-
+The following build commands failed:
+	EmitSwiftModule normal arm64 (in target 'App' from project 'App')
+	SwiftEmitModule normal arm64 Emitting\ module\ for\ App (in target 'App' from project 'App')
+	Building project App with scheme App and configuration Debug
+(3 failures)
 ----- skjemaer -----
     Targets:
         App
