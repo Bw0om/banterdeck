@@ -1,23 +1,20 @@
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:54:5: error: property wrapper can only apply to a single variable
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:54:5: error: property wrapper can only apply to a single variable
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:54:5: error: property wrapper can only apply to a single variable
-** BUILD FAILED **
+** BUILD SUCCEEDED **
 ----- siste linjer -----
-    
 
-LinkAssetCatalog /Users/runner/work/banterdeck/banterdeck/ios/App/App/Assets.xcassets (in target 'App' from project 'App')
-note: Emplaced /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/AppIcon60x60@2x.png (in target 'App' from project 'App')
-note: Emplaced /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/AppIcon76x76@2x~ipad.png (in target 'App' from project 'App')
-note: Emplaced /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/Assets.car (in target 'App' from project 'App')
+AppIntentsSSUTraining (in target 'App' from project 'App')
+2026-10-20 15:56:23.169 appintentsnltrainingprocessor[3304:13748] Parsing options for appintentsnltrainingprocessor
+2026-10-20 15:56:23.169 appintentsnltrainingprocessor[3304:13748] Starting AppIntents SSU YAML Generation
+2026-10-20 15:56:23.182 appintentsnltrainingprocessor[3304:13748] No AppShortcuts found - Skipping.
 
-** BUILD FAILED **
+RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
+Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
-The following build commands failed:
-	EmitSwiftModule normal arm64 (in target 'App' from project 'App')
-	SwiftEmitModule normal arm64 Emitting\ module\ for\ App (in target 'App' from project 'App')
-	Building project App with scheme App and configuration Debug
-(3 failures)
+Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
+
+** BUILD SUCCEEDED **
+
 ----- skjemaer -----
     Targets:
         App
