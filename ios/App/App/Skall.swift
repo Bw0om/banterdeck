@@ -113,6 +113,36 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
 
     func hentVentende(_ i: Int) -> String? { defer { ventende[i] = nil }; return ventende[i] }
 
+    // MARK: «Figuren din» og «Rommet» – iOS-ark halvveis oppe, så stua bak endres med en gang
+    private func visArkHalvt(_ h: UIViewController) {
+        if let ark = h.sheetPresentationController {
+            ark.detents = [.medium(), .large()]
+            ark.prefersGrabberVisible = false
+            ark.prefersScrollingExpandsWhenScrolledToEdge = true
+            ark.largestUndimmedDetentIdentifier = .medium   // stua bak holdes lys og levende mens arket står halvveis
+        }
+        UISelectionFeedbackGenerator().selectionChanged()
+        present(h, animated: true)
+    }
+
+    func visArk(_ d: [String: Any], fra: UIViewController?) {
+        guard let i = fane(for: fra), let v = visninger[i] else { return }
+        let type = d["type"] as? String ?? ""
+        if type == "figur" {
+            let m = FigurModell()
+            m.nett = v.webView
+            let h = UIHostingController(rootView: FigurArk(m: m))
+            m.loggInn = { [weak self, weak h] konto in h?.dismiss(animated: true) { self?.aapne(fane: "deg", url: konto) } }
+            visArkHalvt(h)
+        } else if type == "rom" {
+            let m = RomModell(d["data"] as? [String: Any] ?? [:])
+            m.nett = v.webView
+            let h = UIHostingController(rootView: RomArk(m: m))
+            m.pluss = { [weak h, weak v] in h?.dismiss(animated: true) { v?.webView?.evaluateJavaScript("window.__mvRom && window.__mvRom.pluss()", completionHandler: nil) } }
+            visArkHalvt(h)
+        }
+    }
+
     // MARK: Inviter – iPhonens eget delingsark (AirDrop, Meldinger, Snap …)
     func del(tekst: String, url: String) {
         var ting: [Any] = [tekst]
@@ -291,6 +321,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "skjerm", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "velger", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "del", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "ark", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logg", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "tema", returnType: CAPPluginReturnPromise)
     ]
@@ -360,6 +391,16 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let vc = bridge?.viewController
         DispatchQueue.main.async {
             SkallViewController.delt?.skjerm(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// «Figuren din» / «Rommet»: {type: figur|rom, data?}
+    @objc func ark(_ call: CAPPluginCall) {
+        let d = call.options as? [String: Any] ?? [:]
+        let vc = bridge?.viewController
+        DispatchQueue.main.async {
+            SkallViewController.delt?.visArk(d, fra: vc)
             call.resolve()
         }
     }

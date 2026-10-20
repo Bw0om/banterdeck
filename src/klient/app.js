@@ -98,6 +98,8 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; sendSkjerm(); });
   // Lobbyen: «Alle lekene» åpner det native lekvelger-arket (ios/App/App/VelgerArk.swift)
   document.addEventListener('mv-velger', (e) => { if (harSkall) Skall.velger(e.detail || {}).catch(() => {}); });
+  // «Figuren din» og «Rommet» som native ark (ios/App/App/FigurArk.swift, RomArk.swift)
+  document.addEventListener('mv-ark', (e) => { if (harSkall) Skall.ark(e.detail || {}).catch(() => {}); });
   // Inviter: iPhonens eget delingsark, med AirDrop øverst
   document.addEventListener('mv-del', (e) => { if (harSkall) Skall.del(e.detail || {}).catch(() => {}); });
   Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' }, lang: engelsk() ? 'en' : 'no' })

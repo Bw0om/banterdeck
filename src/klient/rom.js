@@ -3,9 +3,9 @@
 // språkversjonene deler den, og telefonen slipper å tolke 200 kB JavaScript på nytt hver gang rommet åpnes.
 // Startes fra Rom.astro ved hver sidevisning (astro:page-load), med lekenavnene og språket som argumenter.
 import { lagStua, figurHtml, utseende, PYNT_SVG, BEVEG_SVG, hodeHtml, synkAnimasjoner } from './stua.js';
-import { lagFigurVelger } from './figurvelger.js';
+import { lagFigurVelger, FV_NAVN, FV_FARGENAVN, FV_SKJEGGNAVN, FV_FRISYRENAVN, FV_BOKS } from './figurvelger.js';
 import { klistremerke } from '../lib/klistremerker';
-import { TEMAER, temaLov, pyntNavn, PYNT, EKSTRA, sesong, STIL, STIL_PLUSS } from '../lib/pynt.js';
+import { TEMAER, temaLov, pyntNavn, PYNT, EKSTRA, sesong, STIL, STIL_PLUSS, FRISYRER, SKJEGG, FARGER, FARGBAR, synligPynt } from '../lib/pynt.js';
 
 export function startRom(LEKNAVN, LANG) {
   // Språk: samme kode for /no/rom og /room. T('norsk', 'English') velger tekst.
@@ -1075,6 +1075,107 @@ export function startRom(LEKNAVN, LANG) {
       b.dataset.g = g; b.dataset.lek = lek || ''; b.dataset.modus = modus || '*';
       root.appendChild(b); b.click(); b.remove();
     }
+  };
+  /* ---------- Swift-skallet: «Figuren din» og «Rommet» som native ark ----------
+     Bildene av hvert valg lages her (SVG → PNG) og sendes til arket; valgene gjøres og lagres her, så alt virker som i nettutgaven. */
+  var pngCache = {};
+  function svgTilPng(svg, viewBox, px) {
+    return new Promise(function (res) {
+      var n = viewBox + '|' + px + '|' + svg; if (pngCache[n]) return res(pngCache[n]);
+      var vb = viewBox.split(' ').map(Number), h = Math.round(px * vb[3] / vb[2]);
+      var s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + viewBox + '" width="' + px + '" height="' + h + '">' + svg + '</svg>';
+      var img = new Image();
+      img.onload = function () { try { var c = document.createElement('canvas'); c.width = px; c.height = h; c.getContext('2d').drawImage(img, 0, 0, px, h); pngCache[n] = c.toDataURL('image/png').split(',')[1]; res(pngCache[n]); } catch (e) { res(''); } };
+      img.onerror = function () { res(''); };
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+    });
+  }
+  var fvSt = null, fvLagreT = null;
+  function fvStart() {
+    if (fvSt) return Promise.resolve(fvSt);
+    var megS = megSpiller();
+    fvSt = { inne: innlogget(), laast: [], valgt: Object.assign({}, megS.pynt || {}), kvelder: 0, nokkel: megS.figur || tilstand.meg };
+    if (!fvSt.inne) return Promise.resolve(fvSt);
+    return kontoApi('/api/konto/pynt').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (d) { fvSt.laast = d.laast || []; fvSt.valgt = Object.assign({}, d.valgt || {}); fvSt.kvelder = d.kvelder || 0; }
+      return fvSt;
+    }).catch(function () { return fvSt; });
+  }
+  function fvLagre() {
+    clearTimeout(fvLagreT);
+    fvLagreT = setTimeout(function () {
+      kontoApi('/api/konto/pynt', { method: 'POST', body: JSON.stringify({ valgt: fvSt.valgt }) }).then(function (r) { if (r.ok) gjorAlltid({ handling: 'min-pynt' }); else toast(T('Fikk ikke lagret. Prøv igjen.', 'Could not save. Try again.')); }).catch(function () {});
+    }, 350);
+  }
+  function fvData() {
+    return fvStart().then(function (st) {
+      var har = {}; st.laast.forEach(function (id) { har[id] = true; });
+      var p = utseende(st.nokkel, st.valgt), ses = sesong(), L = EN ? 1 : 0, jobber = [];
+      var ting = synligPynt(st.laast).map(function (x) {
+        var svg = x.slot === 'beveg' ? BEVEG_SVG[x.id] || '' : PYNT_SVG[x.id] || '';
+        if (x.slot === 'hode' && st.valgt.fhode && FARGBAR[x.id]) svg = svg.split(FARGBAR[x.id]).join(st.valgt.fhode);
+        var t = { id: x.id, slot: x.slot, navn: x.navn[L], kan: st.inne && !!har[x.id] && (!x.sesong || x.sesong === ses), har: !!har[x.id], laas: !har[x.id] ? x.laas[L] : T('Kommer tilbake i sesongen', 'Back in season'), png: '' };
+        jobber.push(svgTilPng(svg, FV_BOKS[x.slot], 120).then(function (b) { t.png = b; }));
+        return t;
+      });
+      var frisyrer = FRISYRER.map(function (f) { var t = { id: f, navn: (FV_FRISYRENAVN[f] || [f, f])[L], png: '' }; jobber.push(svgTilPng(figurHtml(Object.assign({}, p, { haar: f }), {}), '-24 -84 48 44', 120).then(function (b) { t.png = b; })); return t; });
+      var skjegg = SKJEGG.map(function (k) { var t = { id: k, navn: FV_SKJEGGNAVN[k][L], png: '' }; jobber.push(svgTilPng(figurHtml(Object.assign({}, p, { skjegg: k === 'ingen' ? null : k }), {}), '-24 -84 48 50', 120).then(function (b) { t.png = b; })); return t; });
+      return Promise.all(jobber).then(function () {
+        var fn = {}; Object.keys(FV_FARGENAVN).forEach(function (k) { fn[k] = FV_FARGENAVN[k][L]; });
+        var valgt = {}; Object.keys(st.valgt).forEach(function (k) { if (st.valgt[k] != null && typeof st.valgt[k] !== 'object') valgt[k] = String(st.valgt[k]); });
+        return { inne: st.inne, kvelder: st.kvelder, valgt: valgt, naa: { haar: p.haar || '', h: p.h || '', hud: p.hud || '', topp: p.topp || '', skjegg: p.skjegg || 'ingen' },
+          slots: ['hode', 'deg', 'ansikt', 'bryst', 'venn', 'beveg'].map(function (s) { return { id: s, navn: FV_NAVN[EN ? 'en' : 'no'][s] }; }),
+          ting: ting, frisyrer: frisyrer, skjegg: skjegg, farger: FARGER, fargenavn: fn, fargbar: FARGBAR, konto: RUTE.konto + '#signin',
+          tekst: { tittel: T('Figuren din', 'Your figure'), ingenting: T('Ingenting', 'Nothing'), frisyre: T('Frisyre', 'Hairstyle'), skjegg: T('Skjegg', 'Beard'), av: T('av', 'of'), laastOpp: T('låst opp', 'unlocked'),
+            kveld: T('kveld spilt', 'night played'), kvelder: T('kvelder spilt', 'nights played'), laast: T('låst', 'locked'), loggInn: T('Logg inn', 'Sign in'), nyKonto: T('Ny konto', 'New account'),
+            beveg: T('Trykk på deg selv i stua, så gjør figuren bevegelsen – hos alle.', 'Tap yourself in the living room and your figure does the move – for everyone.'),
+            gjest: T('Logg inn for å låse opp og ta på ting.', 'Sign in to unlock and wear things.') } };
+      });
+    });
+  }
+  window.__mvFigur = {
+    data: fvData,
+    // En endring fra arket: {slot, id} (tom id = ingenting), {farge, verdi}, {haar}, {skjegg}
+    velg: function (e) {
+      return fvStart().then(function (st) {
+        e = e || {};
+        if (e.farge) st.valgt[e.farge] = e.verdi;
+        else if (e.haar) st.valgt.haar = e.haar;
+        else if (e.skjegg) { if (e.skjegg === 'ingen') delete st.valgt.skjegg; else st.valgt.skjegg = e.skjegg; }
+        else if (e.slot) st.valgt[e.slot] = e.id ? (st.valgt[e.slot] === e.id && e.slot !== 'beveg' ? null : e.id) : null;
+        fvLagre();
+        return fvData();
+      });
+    }
+  };
+  function rmData() {
+    var st = tilstand.stua || {}, harPluss = !!(tilstand.pluss && tilstand.pluss.til > Date.now()), naa = st.tema || 'stue', paa = st.ekstra || [], lov = st.ekstraLov || [], L = EN ? 1 : 0, pl = 'Pluss';
+    return { tittel: T('Rommet', 'The room'), husk: innlogget() ? T('Huskes til neste gang', 'Remembered for next time') : '', rader: [
+      { id: 'tema', navn: T('Rom', 'Room'), ruter: TEMAER.map(function (t) { var ok = temaLov(t.id, harPluss), gratisNaa = t.gratisI && t.gratisI === sesong(); return { v: t.id, navn: t.navn[L], farger: TEMAFARGER[t.id] || TEMAFARGER.stue, ikon: '', paa: naa === t.id, laas: ok ? '' : (gratisNaa ? T('Gratis nå', 'Free now') : pl) }; }) },
+      { id: 'gulv', navn: T('Gulv', 'Floor'), ruter: STIL.gulv.map(function (v) { var laast = STIL_PLUSS.indexOf(v) !== -1 && !harPluss; return { v: v, navn: v === 'disko' ? T('Disko', 'Disco') : T('Fliser', 'Tiles'), farger: v === 'disko' ? ['#FF9CC2', '#63E2A8', '#5A8DEE', '#FFD23F'] : [], ikon: v, paa: (st.gulv || 'fliser') === v, laas: laast ? pl : '' }; }) },
+      { id: 'lys', navn: T('Lys', 'Light'), ruter: STIL.lys.map(function (v) { var laast = STIL_PLUSS.indexOf(v) !== -1 ? !harPluss : (v === 'lys' && lov.indexOf('lys') === -1); return { v: v, navn: v === 'lampe' ? T('Lampe', 'Lamp') : v === 'lys' ? T('Lyslenke', 'String lights') : T('Diskokule', 'Disco ball'), farger: [], ikon: v, paa: (st.lys || 'lampe') === v, laas: laast ? (v === 'lys' ? '🔒' : pl) : '' }; }) },
+      { id: 'ting', navn: T('Ting', 'Things'), ruter: EKSTRA.filter(function (e) { return e.id !== 'lys'; }).map(function (e) { return { v: e.id, navn: e.navn[L], farger: [], ikon: e.id, paa: paa.indexOf(e.id) !== -1, laas: lov.indexOf(e.id) !== -1 ? '' : '🔒' }; }) }
+    ] };
+  }
+  window.__mvRom = {
+    data: rmData,
+    velg: function (g, v) {
+      var d = rmData(), rad = d.rader.find(function (r) { return r.id === g; }), rute = rad && rad.ruter.find(function (r) { return r.v === v; });
+      if (!rute) return { feil: 'ukjent' };
+      if (rute.laas) {
+        if (g === 'ting' || (g === 'lys' && v === 'lys')) { var e2 = EKSTRA.find(function (x) { return x.id === (g === 'lys' ? 'lys' : v); }); return { melding: e2 ? e2.laas[EN ? 1 : 0] : '' }; }
+        return { pluss: true };
+      }
+      var st = tilstand.stua || {}, rom = { tema: st.tema || 'stue', gulv: st.gulv || 'fliser', lys: st.lys || 'lampe', ekstra: (st.ekstra || []).slice() };
+      if (g === 'tema') { rom.tema = v; gjor({ handling: 'stua-tema', tema: v }); }
+      else if (g === 'gulv' || g === 'lys') { rom[g] = v; gjorAlltid({ handling: 'stua-stil', gulv: rom.gulv, lys: rom.lys }); }
+      else if (g === 'ting') { var i = rom.ekstra.indexOf(v); if (i === -1) rom.ekstra.push(v); else rom.ekstra.splice(i, 1); gjorAlltid({ handling: 'stua-ekstra', liste: rom.ekstra }); }
+      huskRom(rom);
+      // Arket viser valget med en gang; serveren bekrefter på neste henting
+      tilstand.stua = Object.assign({}, st, { tema: rom.tema, gulv: rom.gulv, lys: rom.lys, ekstra: rom.ekstra });
+      return { ok: true, data: rmData() };
+    },
+    pluss: function () { visPlussTilbud(); }
   };
   /** Bakgrunnslekene: går hele kvelden, uansett hvilken hovedlek dere spiller. Verten slår dem av og på. */
   function bakgrunnBoks() {
@@ -4892,6 +4993,7 @@ export function startRom(LEKNAVN, LANG) {
     aapentArk = { el: m, oppdater: fyll };
   }
   function figurArk() {
+    if (harSkall()) { try { document.dispatchEvent(new CustomEvent('mv-ark', { detail: { type: 'figur' } })); } catch (x) {} return; }
     lukkArk();
     var m = lagArk('figur-ark', T('Figuren din', 'Your figure')), kropp = m.querySelector('.ark-kropp');
     var megS = megSpiller(), timer = null, inne = innlogget();
@@ -4919,6 +5021,7 @@ export function startRom(LEKNAVN, LANG) {
       (laas === '🔒' ? '<i class="rs-laas rs-lock" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></i>' : laas ? '<i class="rs-laas">' + esc(laas) + '</i>' : '') + '<small>' + esc(tekst) + '</small></button>';
   }
   function romArk() {
+    if (harSkall()) { try { document.dispatchEvent(new CustomEvent('mv-ark', { detail: { type: 'rom', data: rmData() } })); } catch (x) {} return; }
     lukkArk();
     var m = lagArk('rom-ark', T('Rommet', 'The room')), kropp = m.querySelector('.ark-kropp');
     function tegnArk() {
