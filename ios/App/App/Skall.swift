@@ -1,5 +1,6 @@
 import UIKit
 import SwiftUI
+import WebKit
 import Capacitor
 
 /// Skallet: iPhonens egen fanelinje nederst (Hjem, Spill, Leker, Deg). Hver fane har sin egen skjerm (nettvisning)
@@ -266,6 +267,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
         guard let i = fane(for: fra), faner[i] == "spill", let v = visninger[i], let side = viewControllers?[i] else { return }
         let hva = d["skjerm"] as? String ?? ""
+        // Lekene som tegnes native (Pekeleken): skjermen ligger over nettsiden så lenge leken pågår
+        if hva == "lek" { visStart(i: side, false); visLek(d, over: side, nett: v.webView); return } else { visLek(nil, over: side, nett: nil) }
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
@@ -279,6 +282,35 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             startModell.travel = nil
             visStart(i: side, false)
         }
+    }
+
+    // MARK: Native leker (PekelekenSkjerm.swift)
+    private let pekModell = PekModell()
+    private var lekVert: UIHostingController<PekelekenSkjerm>?
+    private func visLek(_ d: [String: Any]?, over side: UIViewController, nett: WKWebView?) {
+        guard let d = d else {
+            if let h = lekVert {
+                UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent(); if self.lekVert === h { self.lekVert = nil } }
+            }
+            return
+        }
+        pekModell.nett = nett
+        pekModell.sett(d)
+        if lekVert == nil {
+            let h = UIHostingController(rootView: PekelekenSkjerm(m: pekModell))
+            side.addChild(h)
+            h.view.translatesAutoresizingMaskIntoConstraints = false
+            side.view.addSubview(h.view)
+            NSLayoutConstraint.activate([
+                h.view.topAnchor.constraint(equalTo: side.view.topAnchor), h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
+                h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
+            ])
+            h.didMove(toParent: side)
+            h.view.alpha = 0
+            lekVert = h
+            UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
+        }
+        side.view.bringSubviewToFront(lekVert!.view)
     }
 
     private func visStart(i side: UIViewController, _ vis: Bool) {
