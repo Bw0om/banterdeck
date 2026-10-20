@@ -80,6 +80,7 @@ struct KortSkjerm: View {
             let kn = b["knapper"] as? [[String: Any]] ?? []
             HStack(alignment: .top, spacing: 10) { ForEach(Array(kn.enumerated()), id: \.offset) { _, k in knapp(k, bred: true) } }
         case "benk": benk(b)
+        case "sider": sider(b)
         case "dom": dom(b)
         case "stolper": stolper(b)
         case "liste": liste(b)
@@ -188,9 +189,33 @@ struct KortSkjerm: View {
         .padding(.top, 8)
     }
 
+    /// Enten eller: de to sidene med hvem som valgte hva
+    private func sider(_ b: [String: Any]) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            ForEach(["a", "b"], id: \.self) { k in
+                if let sd = b[k] as? [String: Any] {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(s(sd, "tekst").uppercased()).font(.archivo(11, vekt: 900)).opacity(0.7)
+                        Text(s(sd, "valg")).font(.archivo(16, vekt: 900)).fixedSize(horizontal: false, vertical: true)
+                        let folk = sd["folk"] as? [[String: Any]] ?? []
+                        HStack(spacing: -6) {
+                            ForEach(Array(folk.enumerated()), id: \.offset) { _, p in
+                                Text(s(p, "init")).font(.archivo(11, vekt: 900)).frame(width: 30, height: 30)
+                                    .background(Circle().fill(Color(hex: s(p, "farge")))).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
+                            }
+                        }.frame(minHeight: 30)
+                    }
+                    .padding(12).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(RoundedRectangle(cornerRadius: 14).fill(k == "a" ? mint.opacity(0.35) : rosa.opacity(0.35)))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 2.5))
+                }
+            }
+        }
+    }
+
     private func dom(_ b: [String: Any]) -> some View {
         let stil = s(b, "stil")
-        let bg: Color = stil == "feig" ? oransje : stil == "uenige" ? rosa : mint
+        let bg: Color = stil == "feig" ? oransje : stil == "uenige" ? rosa : stil == "tom" ? gul : mint
         return VStack(alignment: .leading, spacing: 4) {
             if !s(b, "over").isEmpty { Text(s(b, "over").uppercased()).font(.archivo(12, vekt: 900)).opacity(0.75) }
             Text(s(b, "tittel")).font(.archivo(24, vekt: 900))
@@ -224,6 +249,7 @@ struct KortSkjerm: View {
             ForEach(Array(rader.enumerated()), id: \.offset) { _, x in
                 HStack {
                     Text(s(x, "navn")).font(.archivo(15, vekt: 800))
+                    if !s(x, "mellom").isEmpty { Text(s(x, "mellom")).font(.archivo(13, vekt: 500)).opacity(0.7).lineLimit(1) }
                     Spacer()
                     Text(s(x, "tekst")).font(.archivo(13, vekt: 800)).padding(.horizontal, 9).padding(.vertical, 4)
                         .background(Capsule().fill(x["rett"] as? Bool == true ? mint : oransje)).foregroundColor(morkBlekk)

@@ -1867,7 +1867,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   /* Kortlekene som native skjerm: nettsidens ferdige HTML oversettes til enkle blokker (topp, kort, knapper, benk, søyler …)
      som Swift tegner. Logikk, tekster, lyd og vibrasjon bor fortsatt her – skjermen er bare en annen penn. */
-  var NATIVE_LEKER = ['jeg-har-aldri', 'nodt-eller-sannhet'];
+  var NATIVE_LEKER = ['jeg-har-aldri', 'nodt-eller-sannhet', 'enten-eller', 'rygg-mot-rygg'];
   var hodePng = {};
   function skjermBlokker(html) {
     var tmp = document.createElement('div'); tmp.innerHTML = html; var ut = [], jobber = [];
@@ -1893,7 +1893,11 @@ export function startRom(LEKNAVN, LANG) {
         if (/\brom-spillnavn\b/.test(c)) return;
         if (/\bnr-topp\b/.test(c)) { var sp = e.querySelector('.nr-topp-tekst span'), bt = e.querySelector('.nr-topp-tekst b'), kl = e.querySelector('.nr-klokke span'); ut.push({ type: 'topp', tekst: tekstAv(sp), chip: tekstAv(bt), gul: !!(bt && bt.classList.contains('gul')), frist: kl ? Number(kl.dataset.frist) || 0 : 0 }); return; }
         if (/\bpk-kort\b/.test(c)) { ut.push({ type: 'kort', pre: tekstAv(e.querySelector('.pk-pre')), tekst: tekstAv(e.querySelector('p')) || tekstAv(e), tag: tekstAv(e.querySelector('.ja-tag, .pk-vri, .nr-type')), under: tekstAv(e.querySelector('small')), stil: /\bnodt\b/.test(c) ? 'nodt' : /\bsannhet\b/.test(c) ? 'sannhet' : '', liten: /\bliten\b/.test(c) }); return; }
-        if (/\b(aldri-valg|rr-valg|ns-valg|slutt-valg|pk-forsvar-valg)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b); }) }); return; }
+        if (/\bee-sider\b/.test(c)) {
+          var side = function (sel) { var el2 = e.querySelector(sel); if (!el2) return null; return { tekst: tekstAv(el2.querySelector('span')), valg: tekstAv(el2.querySelector('b')), folk: Array.prototype.map.call(el2.querySelectorAll('.nr-p'), function (p) { var f = (p.getAttribute('style') || '').match(/--f:(#[0-9A-Fa-f]{6})/); return { init: tekstAv(p), farge: f ? f[1] : '#FFD23F', meg: /\bmeg\b/.test(p.className) }; }) }; };
+          ut.push({ type: 'sider', a: side('.ee-side.a'), b: side('.ee-side.b') }); return;
+        }
+        if (/\b(aldri-valg|rr-valg|ns-valg|slutt-valg|pk-forsvar-valg|ee-valg|ee-med)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b); }) }); return; }
         if (e.tagName === 'BUTTON') { ut.push(knapp(e)); return; }
         if (/\bee-benk\b/.test(c)) {
           var folk = Array.prototype.map.call(e.querySelectorAll('.ee-hode'), function (h) {
@@ -1903,9 +1907,9 @@ export function startRom(LEKNAVN, LANG) {
           });
           ut.push({ type: 'benk', status: tekstAv(e.querySelector('.ee-status')), folk: folk }); return;
         }
-        if (/\brr-dom\b/.test(c)) { ut.push({ type: 'dom', stil: /\bfeig\b/.test(c) ? 'feig' : /\buenige\b/.test(c) ? 'uenige' : 'enige', over: tekstAv(e.querySelector('span')), tittel: tekstAv(e.querySelector('b')), under: tekstAv(e.querySelector('small')) }); return; }
+        if (/\brr-dom\b/.test(c)) { ut.push({ type: 'dom', stil: /\bfeig\b/.test(c) ? 'feig' : /\buenige\b/.test(c) ? 'uenige' : /\btom\b/.test(c) ? 'tom' : 'enige', over: tekstAv(e.querySelector('span')), tittel: tekstAv(e.querySelector('b')), under: tekstAv(e.querySelector('small')) }); return; }
         if (/\bpk-soyler\b/.test(c)) { ut.push({ type: 'stolper', rader: Array.prototype.map.call(e.querySelectorAll('li'), function (li) { var b = li.querySelector('i b'), st = b ? b.getAttribute('style') || '' : '', m = st.match(/scaleX\(([\d.]+)\)/), f = st.match(/background:(#[0-9A-Fa-f]{6})/); return { navn: tekstAv(li.querySelector('span')), n: tekstAv(li.querySelector('em')), andel: m ? Number(m[1]) : 0, farge: f ? f[1] : '#FFD23F' }; }) }); return; }
-        if (/\brr-gjett\b/.test(c)) { ut.push({ type: 'liste', rader: Array.prototype.map.call(e.querySelectorAll('li'), function (li) { return { navn: tekstAv(li.querySelector('b')), tekst: tekstAv(li.querySelector('em')), rett: /\brett\b/.test(li.className) }; }) }); return; }
+        if (/\brr-gjett\b/.test(c)) { ut.push({ type: 'liste', rader: Array.prototype.map.call(e.querySelectorAll('li'), function (li) { return { navn: tekstAv(li.querySelector('b')), mellom: tekstAv(li.querySelector('span')), tekst: tekstAv(li.querySelector('em')), rett: /\brett\b/.test(li.className) }; }) }); return; }
         if (/\bja-ulv\b/.test(c)) { var u = { type: 'ulv', etikett: tekstAv(e.querySelector('.ja-ulv-etikett')), navn: tekstAv(e.querySelector('.ja-ulv-navn')), be: tekstAv(e.querySelector('.ja-ulv-be')), tekst: tekstAv(e.querySelector('p')), knapp: e.querySelector('button') ? knapp(e.querySelector('button'), 'link') : null, png: '' }; jobber.push(hode(e.querySelector('svg'), 'ulv', 120).then(function (b) { u.png = b; })); ut.push(u); return; }
         if (/\bja-vinner\b/.test(c)) { var vn = { type: 'vinner', navn: tekstAv(e.querySelector('b')), n: tekstAv(e.querySelector('em')), png: '' }; jobber.push(hode(e.querySelector('svg'), 'vinner', 120).then(function (b) { vn.png = b; })); ut.push(vn); return; }
         if (/\b(nr-vent|rr-hint|ns-stor|ja-dom|ja-mest|ja-kommentar|nr-etikett|pk-sporsmal|pk-merk|aldri-bryter|ja-vis)\b/.test(c)) {
