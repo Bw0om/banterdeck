@@ -1924,8 +1924,35 @@ export function startRom(LEKNAVN, LANG) {
     gaa(tmp);
     return Promise.all(jobber).then(function () { return ut; });
   }
+  /* Skrivefeltene i lekene (skrøne, låt, ord, påstander …) bruker iPhonens egen dialog i appen: tastaturet dekker aldri feltet.
+     Når et felt får fokus, beskrives skjemaet for skallet; svaret fylles inn her og skjemaet sendes som om du trykket selv. */
+  root.addEventListener('focusin', function (e) {
+    if (!harSkall()) return;
+    var inp = e.target; if (!inp || !inp.form || !inp.form.id || inp.type === 'radio' || inp.type === 'checkbox') return;
+    if (/^(blimedSkjema|lagSkjema|siSkjema)$/.test(inp.form.id)) return;   // disse har egne native skjermer
+    var f = inp.form;
+    var felter = Array.prototype.filter.call(f.querySelectorAll('input, textarea'), function (x) { return x.type !== 'radio' && x.type !== 'checkbox' && x.type !== 'submit' && x.type !== 'hidden' && !x.hidden; }).map(function (x) {
+      var lab = x.id ? f.querySelector('label[for="' + x.id + '"] , label[for="' + x.id + '"] span') : null, lb = x.closest('label');
+      var etikett = lab ? lab.textContent : lb && lb.querySelector('span') ? lb.querySelector('span').textContent : x.getAttribute('aria-label') || '';
+      return { id: x.id || '', navn: x.name || '', etikett: String(etikett || '').replace(/\s+/g, ' ').trim(), plass: x.placeholder || '', maks: Number(x.maxLength) > 0 ? Number(x.maxLength) : 120, verdi: x.value || '' };
+    });
+    var radio = null, rs = f.querySelectorAll('input[type=radio]');
+    if (rs.length) { radio = { navn: rs[0].name, sporsmal: '', valg: Array.prototype.map.call(rs, function (r, i) { var lb = r.closest('label'); return { v: r.value, tekst: (lb ? lb.textContent : r.value).replace(/\s+/g, ' ').trim() + ' ' + (i + 1) }; }) }; }
+    var kn = f.querySelector('button[type=submit], button:not([type])'), tittel = f.querySelector('label, .ts-hjelp, p');
+    inp.blur();
+    try { document.dispatchEvent(new CustomEvent('mv-skjema', { detail: { id: f.id, tittel: tittel ? tittel.textContent.replace(/\s+/g, ' ').trim().slice(0, 80) : '', felter: felter, radio: radio, knapp: kn ? kn.textContent.trim() : T('Send', 'Send'), avbryt: T('Avbryt', 'Cancel') } })); } catch (x) {}
+  });
   // Den native skjermen trykker på de samme knappene som nettsiden har (data-g + data-*), så all logikk bor ett sted
   window.__mvLek = {
+    // Svar fra den native skrivedialogen: fyll feltene og send skjemaet
+    skriv: function (formId, verdier) {
+      var f = document.getElementById(formId); if (!f) return;
+      Object.keys(verdier || {}).forEach(function (k) {
+        var el = document.getElementById(k); if (el && el.form === f) { el.value = verdier[k]; return; }
+        var r = f.querySelector('input[type=radio][name="' + k + '"][value="' + verdier[k] + '"]'); if (r) r.checked = true;
+      });
+      if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    },
     trykk: function (g, attrs) {
       var b = document.createElement('button'); b.type = 'button'; b.hidden = true; b.dataset.g = g;
       Object.keys(attrs || {}).forEach(function (k) { b.dataset[k] = String(attrs[k]); });
