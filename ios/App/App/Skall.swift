@@ -331,6 +331,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         if hva != "py" { visPy(nil, over: side) }
         if hva != "br" { visBr(nil, over: side) }
         if hva != "pr" { visPr(nil, over: side) }
+        if hva != "gr" { visGr(nil, over: side) }
+        if hva != "bg" { visBg(nil, over: side) }
         // Lekene som tegnes native (Pekeleken): skjermen ligger over nettsiden så lenge leken pågår
         if hva == "lek" { visStart(i: side, false); visKort(nil, over: side); visLek(d, over: side, nett: v.webView); return } else { visLek(nil, over: side, nett: nil) }
         if hva == "kort" { visStart(i: side, false); visRof(nil, over: side); kortModell.nett = v.webView; visKort(d, over: side); return } else { visKort(nil, over: side) }
@@ -341,6 +343,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         if hva == "py" { visStart(i: side, false); pyModell.nett = v.webView; visPy(d, over: side); return } else { visPy(nil, over: side) }
         if hva == "br" { visStart(i: side, false); brModell.nett = v.webView; visBr(d, over: side); return } else { visBr(nil, over: side) }
         if hva == "pr" { visStart(i: side, false); prModell.nett = v.webView; visPr(d, over: side); return } else { visPr(nil, over: side) }
+        if hva == "gr" { visStart(i: side, false); grModell.nett = v.webView; visGr(d, over: side); return } else { visGr(nil, over: side) }
+        if hva == "bg" { visStart(i: side, false); bgModell.nett = v.webView; visBg(d, over: side); return } else { visBg(nil, over: side) }
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
@@ -427,7 +431,25 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
 
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
     func settOverleggSkjult(_ skjult: Bool) {
-        for v in [lekVert?.view, kortVert?.view, rofVert?.view, lobbyHull, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, startVert?.view] { v?.isHidden = skjult }
+        for v in [lekVert?.view, kortVert?.view, rofVert?.view, lobbyHull, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, startVert?.view] { v?.isHidden = skjult }
+    }
+
+    // Gris (GrisSkjerm.swift) og Bingo (BingoSkjerm.swift)
+    private let grModell = GrModell()
+    private var grVert: UIHostingController<GrisSkjerm>?
+    private func visGr(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&grVert); return }
+        grModell.sett(d)
+        if grVert == nil { grVert = leggOverlegg(UIHostingController(rootView: GrisSkjerm(m: grModell)), over: side) }
+        side.view.bringSubviewToFront(grVert!.view)
+    }
+    private let bgModell = BgModell()
+    private var bgVert: UIHostingController<BingoSkjerm>?
+    private func visBg(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&bgVert); return }
+        bgModell.sett(d)
+        if bgVert == nil { bgVert = leggOverlegg(UIHostingController(rootView: BingoSkjerm(m: bgModell)), over: side) }
+        side.view.bringSubviewToFront(bgVert!.view)
     }
 
     // Bussruta (BussrutaSkjerm.swift) og President (PresidentSkjerm.swift)
