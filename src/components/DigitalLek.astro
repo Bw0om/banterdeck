@@ -43,6 +43,7 @@ const romNavn = en ? t((games.find((g) => g.slug === slug) || {}).name, 'en') : 
 
 {har && (
 <script is:inline data-astro-rerun>
+
 /* Felles hjelpere for kort og terninger – defineres én gang */
 if (!window.BDK) window.BDK = (function () {
   function bland(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
@@ -411,6 +412,7 @@ if (!window.BDK) window.BDK = (function () {
 
 {slug === 'opus' && (
 <script is:inline data-astro-rerun>
+  window.mvVibrer = window.mvVibrer || function (m) { try { if (document.documentElement.classList.contains('is-app')) { document.dispatchEvent(new CustomEvent('mv-vibrer', { detail: m })); return; } } catch (e) {} try { navigator.vibrate && navigator.vibrate(m); } catch (e) {} };
 (function () {
   var root = document.querySelector('[data-dl="opus"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
   var K = window.BDK, T = K.T, laas = null, opptatt = false;
@@ -439,7 +441,7 @@ if (!window.BDK) window.BDK = (function () {
         opptatt = false;
         if (r[0] === 6) {
           flate.classList.add('sekser'); tekst.textContent = T('SEKSER! Send telefonen videre', 'SIX! Pass the phone on');
-          try { if (navigator.vibrate) navigator.vibrate([120, 60, 120]); } catch (e) {}
+          mvVibrer([120, 60, 120]);
         } else tekst.textContent = r[0] + T(' – trill igjen!', ' – roll again!');
       });
     }
@@ -548,6 +550,7 @@ if (!window.BDK) window.BDK = (function () {
 
 {slug === 'power-hour' && (
 <script is:inline data-astro-rerun>
+  window.mvVibrer = window.mvVibrer || function (m) { try { if (document.documentElement.classList.contains('is-app')) { document.dispatchEvent(new CustomEvent('mv-vibrer', { detail: m })); return; } } catch (e) {} try { navigator.vibrate && navigator.vibrate(m); } catch (e) {} };
 (function () {
   var root = document.querySelector('[data-dl="power-hour"] .dl-body'); if (!root || root.dataset.bound) return; root.dataset.bound = '1';
   var K = window.BDK, T = K.T, totalt = 60, start = null, pauseVed = null, tikk = null, laas = null, lyd = null, sistMin = 0;
@@ -559,7 +562,7 @@ if (!window.BDK) window.BDK = (function () {
       g.gain.setValueAtTime(0.0001, lyd.currentTime); g.gain.exponentialRampToValueAtTime(0.4, lyd.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, lyd.currentTime + 0.5);
       o.start(); o.stop(lyd.currentTime + 0.55);
     } catch (e) {}
-    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+    mvVibrer([200, 100, 200]);
   }
   function oppsett() {
     root.innerHTML = '<div class="rom-mod">' + [[30, T('Halv time', 'Half hour')], [60, 'Power hour'], [100, 'Centurion (100)']].map(function (x) {
