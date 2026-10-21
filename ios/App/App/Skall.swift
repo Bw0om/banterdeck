@@ -647,9 +647,6 @@ class HullVisning: UIView {
     }
 }
 
-    }
-}
-
 /// Capacitor-plugin: nettsiden snakker med skallet. Hver skjerm har sin egen bridge, så pluginen vet hvilken fane som ringer.
 /// Skall.klar({titler, lang}) → {ok, fane, gaaTil?, rull, sjekk, moerk}; Skall.aapne({navn, url}); Skall.fane({navn, url}); Skall.skjul({skjult}).
 @objc(SkallPlugin)
