@@ -1,20 +1,24 @@
-** BUILD SUCCEEDED **
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:650:5: error: extraneous '}' at top level
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:651:1: error: extraneous '}' at top level
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:650:5: error: Extraneous '}' at top level
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:651:1: error: Extraneous '}' at top level
+** BUILD FAILED **
 ----- siste linjer -----
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:650:5: error: Extraneous '}' at top level
+    }
+    ^
+     (in target 'App' from project 'App')
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:651:1: error: Extraneous '}' at top level
+}
+^ (in target 'App' from project 'App')
 
-AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-10-21 11:39:12.608 appintentsnltrainingprocessor[3983:15468] Parsing options for appintentsnltrainingprocessor
-2026-10-21 11:39:12.609 appintentsnltrainingprocessor[3983:15468] Starting AppIntents SSU YAML Generation
-2026-10-21 11:39:12.616 appintentsnltrainingprocessor[3983:15468] No AppShortcuts found - Skipping.
+** BUILD FAILED **
 
-RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
-Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
-
-Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
-    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
-
-** BUILD SUCCEEDED **
-
+The following build commands failed:
+	SwiftDriver App normal arm64 com.apple.xcode.tools.swift.compiler (in target 'App' from project 'App')
+	Building project App with scheme App and configuration Debug
+(2 failures)
 ----- skjemaer -----
     Targets:
         App
