@@ -43,25 +43,27 @@ struct LobbySkjerm: View {
             let hull = (g.size.width - 24) * 0.823 + 28   // stua er 396 × 326 i nettsiden, pluss luft
             ZStack(alignment: .top) {
                 papir.ignoresSafeArea()
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 12) {
-                        topp
-                        // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den
-                        Color.clear.frame(height: hull)
-                            .background(GeometryReader { h in Color.clear.preference(key: HullKey.self, value: h.frame(in: .named("lobby"))) })
-                        if m.erVert {
-                            BlokkListe(m: m.blokker)
-                        } else {
-                            VStack(spacing: 10) {
-                                Text(m.t("venter")).font(.archivo(20, vekt: 900)).multilineTextAlignment(.center)
-                                HStack(spacing: 6) { ForEach(0..<3, id: \.self) { i in Circle().fill(gul).frame(width: 10, height: 10).opacity(0.5 + Double(i) * 0.25) } }
-                            }.frame(maxWidth: .infinity).padding(.top, 14)
+                VStack(spacing: 10) {
+                    topp.padding(.horizontal, 16).padding(.top, 6)
+                    // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den. Står fast – bare lista under blar.
+                    Color.clear.frame(height: hull)
+                        .background(GeometryReader { h in Color.clear.preference(key: HullKey.self, value: h.frame(in: .named("lobby"))) })
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 12) {
+                            if m.erVert {
+                                BlokkListe(m: m.blokker)
+                            } else {
+                                VStack(spacing: 10) {
+                                    Text(m.t("venter")).font(.archivo(20, vekt: 900)).multilineTextAlignment(.center)
+                                    HStack(spacing: 6) { ForEach(0..<3, id: \.self) { i in Circle().fill(gul).frame(width: 10, height: 10).opacity(0.5 + Double(i) * 0.25) } }
+                                }.frame(maxWidth: .infinity).padding(.top, 14)
+                            }
                         }
+                        .padding(.horizontal, 16).padding(.top, 4).padding(.bottom, 30)
                     }
-                    .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 30)
                 }
-                .coordinateSpace(name: "lobby")
             }
+            .coordinateSpace(name: "lobby")
             .onPreferenceChange(HullKey.self) { r in m.hullEndret?(r) }
         }
         .foregroundColor(blekk)

@@ -77,7 +77,7 @@ struct GrisSkjerm: View {
 
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea()
+            papir.ignoresSafeArea(edges: [.top, .horizontal])
             if let d = m.d {
                 VStack(spacing: 0) {
                     topp(d)

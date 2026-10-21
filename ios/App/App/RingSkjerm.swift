@@ -200,7 +200,7 @@ struct RingSkjerm: View {
 
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea()
+            papir.ignoresSafeArea(edges: [.top, .horizontal])
             if let d = m.d {
                 VStack(spacing: 6) {
                     topp(d)
@@ -283,7 +283,7 @@ struct RingSkjerm: View {
                 let rect = CGRect(x: 168, y: valgt ? 175 : 183, width: 22, height: 34)
                 let synlig = !(valgt && (m.drar || d.holderT > 0))
                 if synlig {
-                    k.fill(Path(roundedRect: rect, cornerRadius: 3), with: .color(valgt ? Color(hex: "#FFD23F") : Color(hex: "#FFF8EE")))
+                    k.fill(Path(roundedRect: rect, cornerRadius: 3), with: .color(valgt ? Color(hex: "#FFD23F") : Color(hex: "#D7263D")))
                     k.stroke(Path(roundedRect: rect, cornerRadius: 3), with: .color(ink), lineWidth: valgt ? 2.5 : 1.5)
                 }
             }
@@ -294,7 +294,7 @@ struct RingSkjerm: View {
             }
             // Koppen i midten, fylt med konger
             var kopp = Path(); kopp.move(to: CGPoint(x: 155, y: 280)); kopp.addLine(to: CGPoint(x: 203, y: 280)); kopp.addLine(to: CGPoint(x: 197, y: 352)); kopp.addLine(to: CGPoint(x: 161, y: 352)); kopp.closeSubpath()
-            ctx.fill(kopp, with: .color(Color(hex: "#FFF8EE")))
+            ctx.fill(kopp, with: .color(Color(hex: "#F2D27A")))
             let fyll = CGRect(x: 160, y: 354 - CGFloat(min(4, d.konger)) * 17, width: 38, height: CGFloat(min(4, d.konger)) * 17)
             if d.konger > 0 { ctx.fill(Path(fyll), with: .color(Color(hex: "#FF5B1F"))) }
             ctx.stroke(kopp, with: .color(ink), lineWidth: 3)
