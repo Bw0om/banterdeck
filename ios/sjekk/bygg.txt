@@ -1,21 +1,20 @@
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:651:13: error: inheritance from a final class 'HullVisning'
-** BUILD FAILED **
+** BUILD SUCCEEDED **
 ----- siste linjer -----
-    
 
-SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
-    
+AppIntentsSSUTraining (in target 'App' from project 'App')
+2026-10-21 11:14:26.810 appintentsnltrainingprocessor[4023:15660] Parsing options for appintentsnltrainingprocessor
+2026-10-21 11:14:26.810 appintentsnltrainingprocessor[4023:15660] Starting AppIntents SSU YAML Generation
+2026-10-21 11:14:26.815 appintentsnltrainingprocessor[4023:15660] No AppShortcuts found - Skipping.
 
-SwiftCompile normal arm64 Compiling\ Pluss.swift,\ PlussArk.swift,\ LoggInnArk.swift,\ PekelekenSkjerm.swift,\ KortSkjerm.swift,\ RingSkjerm.swift,\ LobbySkjerm.swift,\ VeddelopSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/Pluss.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PlussArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LoggInnArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PekelekenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/KortSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LobbySkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/VeddelopSkjerm.swift (in target 'App' from project 'App')
+RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
-** BUILD FAILED **
+Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
+Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
 
-The following build commands failed:
-	EmitSwiftModule normal arm64 (in target 'App' from project 'App')
-	SwiftEmitModule normal arm64 Emitting\ module\ for\ App (in target 'App' from project 'App')
-	Building project App with scheme App and configuration Debug
-(3 failures)
+** BUILD SUCCEEDED **
+
 ----- skjemaer -----
     Targets:
         App
