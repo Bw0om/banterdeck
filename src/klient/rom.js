@@ -3374,6 +3374,34 @@ export function startRom(LEKNAVN, LANG) {
         (hvem ? '<span class="pr-paa' + (ny ? ' hopp' : '') + '">' + nrHode(hvem) + '</span>' : '') + '</div>';
     }).join('') + '</div>';
   }
+  /** President til den native skjermen (PresidentSkjerm.swift). Den velger kort selv og sender «pr-legg» med indeksene. */
+  function prData(s) {
+    var meg = tilstand.meg, vert = erVert(), ferdig = s.fase === 'ferdig', jeg = s.tur === meg && !ferdig, ider = s.ider || [], n = ider.length, jobber = [];
+    var hode = function (id) { var h = { png: '' }; if (id) jobber.push(vlHodePng(id, '').then(function (b) { h.png = b; })); return h; };
+    var kortet = function (k) { return { v: vn(k.v), f: k.f, rod: k.f === '♥' || k.f === '♦', rang: prRang(k.v) }; };
+    var b = s.bord || [];
+    var d = {
+      ferdig: ferdig, tittel: T('President · runde ', 'President · round ') + s.runde, minTur: jeg, naa: Date.now() + klokkeAvvik, turVed: s.turVed || 0, turTid: s.turTid || 0,
+      chip: ferdig ? jaNavn(s.ferdige[0]) + T(' er President!', ' is President!') : jeg ? (b.length ? T('Din tur – over ', 'Your turn – beat ') + b.length + ' × ' + vn(b[0].v) + '?' : T('Din tur – legg ut noe', 'Your turn – play anything')) : navn(s.tur) + T(' har tur', ' to play'),
+      trapp: ider.map(function (_, i) { var plass = n - 1 - i, hvem = s.ferdige[plass]; return Object.assign(hode(hvem), { navn: prPlassNavn(plass, n), farge: PR_FARGER[Math.min(plass, PR_FARGER.length - 1)], harNoen: !!hvem }); }),
+      folk: ider.map(function (id) { var ute = s.ferdige.indexOf(id) !== -1, tur = s.tur === id && !ferdig; return Object.assign(hode(id), { id: id, navn: jaNavn(id), ute: ute, tur: tur,
+        tekst: ute ? T('ute', 'out') : s.pass.indexOf(id) !== -1 ? 'pass' : tur ? T('har tur', 'to play') : (s.antall[id] || 0) + T(' kort', ' cards') }); }),
+      bordTekst: ferdig ? '' : prBordTekst(s), bord: b.map(kortet), bordAntall: b.length, bordRang: b.length ? prRang(b[0].v) : 0,
+      bytte: s.bytte && !s.sist ? jaNavn(s.bytte.fra) + T(' ga ', ' gave ') + vn(s.bytte.kort.v) + s.bytte.kort.f + T(' til ', ' to ') + jaNavn(s.bytte.til) : '',
+      hand: s.minHand ? s.minHand.map(kortet) : null, handTekst: !s.minHand ? T('Du er med fra neste runde.', 'You’re in from the next round.') : jeg ? '' : T('Vent på ', 'Wait for ') + navn(s.tur) + '.',
+      t: { legg: T('Legg', 'Play'), ugyldig: T('Ikke gyldig', 'Not valid'), velgOver: b.length ? T('Velg ', 'Pick ') + b.length + T(' like over ', ' alike over ') + vn(b[0].v) : '', velgKort: T('Velg kort', 'Pick cards') },
+      kanPasse: jeg && b.length > 0, vertPass: !jeg && !ferdig && vert && b.length ? T('Pass for ', 'Pass for ') + navn(s.tur) : '',
+      titler: [], slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
+    };
+    var slutt = Promise.resolve();
+    if (ferdig) {
+      var dr = s.drikk || { drikker: [] }, nf = s.ferdige.length;
+      d.titler = s.ferdige.map(function (id, i) { var x = dr.drikker.find(function (y) { return y.id === id; }); return Object.assign(hode(id), { id: id, navn: jaNavn(id), plass: prPlassNavn(i, nf), farge: PR_FARGER[Math.min(i, PR_FARGER.length - 1)],
+        em: i === 0 ? T('Deler ut ', 'Hands out ') + dr.deler : x ? T('Drikk ', 'Drink ') + x.n : '' }); });
+      slutt = skjermBlokker(lekSlutt([['runde', T('Neste runde', 'Next round'), T('Rævkjøreren gir beste kort til Presidenten', 'The Scumbag gives their best card to the President')]])).then(function (bl) { d.slutt = bl; });
+    }
+    return Promise.all(jobber.concat([slutt])).then(function () { return d; });
+  }
   function presidentSpill(s) {
     var meg = tilstand.meg, vert = erVert(), start = !!prSett.start, ferdig = s.fase === 'ferdig';
     if (!ferdig) prDriv();
@@ -3645,6 +3673,39 @@ export function startRom(LEKNAVN, LANG) {
       if (document.hidden) return;
       if (sp.pyrPos < 15) gjorAlltid({ handling: 'br-snu', pos: sp.pyrPos }); else gjorAlltid({ handling: 'br-buss' });
     }, 3000 + driverVent());
+  }
+  /** Bussruta til den native skjermen (BussrutaSkjerm.swift). Nettsiden holder tilstanden og snur pyramiden (brDriv). */
+  function brData(s) {
+    var meg = tilstand.meg, vert = erVert(), jeg = s.aktiv === meg;
+    var kortet = function (k) { return k ? { v: vn(k.v), f: k.f, rod: k.f === '♥' || k.f === '♦', snudd: true } : { v: '', f: '', rod: false, snudd: false }; };
+    var d = { fase: s.fase, ferdig: !!s.ferdig, tittel: T('Bussruta', 'Ride the bus'), chip: '', minTur: false, naa: Date.now() + klokkeAvvik,
+      linje: [T('Billetten', 'The ticket'), T('Pyramiden', 'The pyramid'), T('Bussen', 'The bus')], sporsmal: '', hand: [], svar: {}, knapper: [], vent: '', pyr: [], treff: '', etikett: '',
+      hjelp: '', maal: s.maal || 5, rekke: s.bussRekke || 0, buss: {}, kjor: '', slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    if (s.fase === 1) {
+      var hand = (s.hender || {})[s.aktiv] || [], sv = s.sistSvar;
+      d.chip = jeg ? T('Din tur · kort ', 'Your turn · card ') + (s.steg + 1) : navn(s.aktiv) + T(' svarer', ' is answering'); d.minTur = jeg;
+      var VALG = [[['rod', T('Rød', 'Red'), 'rosa'], ['svart', T('Svart', 'Black'), 'svart']], [['over', T('Over', 'Higher'), 'mint'], ['under', T('Under', 'Lower'), 'rosa']],
+        [['inn', T('Innenfor', 'Inside'), 'gul'], ['ut', T('Utenfor', 'Outside'), 'hvit']], [['♥', '♥', 'hvit rod'], ['♦', '♦', 'hvit rod'], ['♠', '♠', 'hvit'], ['♣', '♣', 'hvit']]];
+      d.sporsmal = s.sporsmal || ''; d.hand = hand.map(kortet);
+      if (sv) d.svar = { ok: !!sv.ok, tittel: jaNavn(sv.id) + ': ' + (sv.ok ? T('riktig!', 'right!') : T('feil!', 'wrong!')), tekst: (sv.ok ? T('Del ut ', 'Hand out ') : T('Drikk ', 'Drink ')) + sv.n + '.' };
+      if (jeg || vert) d.knapper = (VALG[s.steg] || []).map(function (v) { return { v: v[0], tekst: v[1], stil: v[2] }; }); else d.vent = T('Vent på ', 'Wait for ') + navn(s.aktiv) + '.';
+    } else if (s.fase === 2) {
+      var tr = s.treff, rader = [[0, 5], [5, 9], [9, 12], [12, 14], [14, 15]];
+      d.chip = s.pyrPos < 15 ? T('Pyramiden snus', 'The pyramid flips') : T('Bussen kommer …', 'The bus is coming …');
+      d.pyr = rader.map(function (r) { var ut = []; for (var i = r[0]; i < r[1]; i++) { var k = kortet(i < s.pyrPos ? s.pyr[i] : null); k.naa = i === s.pyrPos - 1; ut.push(k); } return ut; });
+      if (tr && tr.pos === s.pyrPos - 1 && tr.ider.length) d.treff = tr.ider.indexOf(meg) !== -1 ? T('Du har den!', 'You have it!') : tr.ider.map(function (id) { return navn(id); }).join(', ') + T(' har den!', ' have it!');
+      var min = (s.hender || {})[meg] || [];
+      d.etikett = T('Din hånd', 'Your hand') + (min.length ? '' : ' · ' + T('tom – fint!', 'empty – nice!')); d.hand = min.map(kortet);
+    } else {
+      var sjafor = s.buss === meg, bs = s.bussSist;
+      d.chip = s.ferdig ? T('Bussen er i mål!', 'The bus made it!') : sjafor ? T('Du kjører bussen!', 'You’re riding the bus!') : navn(s.buss) + T(' kjører bussen', ' rides the bus'); d.minTur = sjafor && !s.ferdig;
+      d.hjelp = T('Fem kort uten bildekort eller ess. Bildekort eller ess = drikk og tilbake til start.', 'Five cards without a face card or ace. Face card or ace = drink and back to the start.');
+      if (bs) d.buss = { ok: !bs.straff, kort: kortet(bs.k), tittel: bs.straff ? T('Au! Drikk ', 'Ouch! Drink ') + bs.straff : T('Trygt!', 'Safe!'),
+        tekst: bs.straff ? T('Tilbake til start.', 'Back to the start.') : s.ferdig ? T('Bussen er fri.', 'The bus is free.') : (s.maal - s.bussRekke) + T(' stopp igjen.', ' stops to go.') };
+      if (!s.ferdig) { if (sjafor || vert) d.kjor = T('Snu', 'Flip'); else d.vent = navn(s.buss) + T(' snur kortene.', ' flips the cards.'); }
+    }
+    if (!s.ferdig) return Promise.resolve(d);
+    return skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny rute – teller i kvelden', 'New route – counts tonight')]])).then(function (b) { d.slutt = b; return d; });
   }
   function bussrutaSpill(s) {
     var meg = tilstand.meg, vert = erVert(), jeg = s.aktiv === meg;
@@ -5723,7 +5784,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
@@ -5732,6 +5793,8 @@ export function startRom(LEKNAVN, LANG) {
     else if (nativ === 'rof') meldSkjerm('rof', rofData(s));
     else if (nativ === 'yz') { var nYz = s.nr, kYz = s.kast, fYz = !!s.ferdig; yzData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'yatzy' && sp.nr === nYz && sp.kast === kYz && !!sp.ferdig === fYz) meldSkjerm('yz', d); }); }
     else if (nativ === 'py') { var pPy = s.pos, fPy = !!s.ferdig; pyData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'pyramiden' && sp.pos === pPy && !!sp.ferdig === fPy) meldSkjerm('py', d); }); }
+    else if (nativ === 'br') { var nBr = [s.fase, s.steg, s.pyrPos, s.bussRekke, s.sistSvar && s.sistSvar.nr, s.bussSist && s.bussSist.nr, !!s.ferdig].join('|'); brData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'bussruta' && [sp.fase, sp.steg, sp.pyrPos, sp.bussRekke, sp.sistSvar && sp.sistSvar.nr, sp.bussSist && sp.bussSist.nr, !!sp.ferdig].join('|') === nBr) meldSkjerm('br', d); }); }
+    else if (nativ === 'pr') { var nPr = [s.runde, s.leggNr, s.feiNr, s.tur, s.fase].join('|'); prData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'president' && [sp.runde, sp.leggNr, sp.feiNr, sp.tur, sp.fase].join('|') === nPr) meldSkjerm('pr', d); }); }
     else if (nativ === 'vl') { var rVl = s.runde, nVl = s.n, fVl = s.fase; vlData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'veddelopet' && sp.runde === rVl && sp.n === nVl && sp.fase === fVl) meldSkjerm('vl', d); }); }
     else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
     else meldSkjerm('rom');
@@ -6236,6 +6299,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'velg') { spillLyd('kortlegg'); return gjor({ handling: 'velg', i: Number(b.dataset.i) }); }
     if (g === 'pvelg') { var i = Number(b.dataset.i), j = presValg.indexOf(i); if (j === -1) presValg.push(i); else presValg.splice(j, 1); return tegn(); }
     if (g === 'legg') { var valgte = presValg.slice(); presValg = []; return gjor({ handling: 'legg', kort: valgte }); }
+    if (g === 'pr-legg') { presValg = []; return gjor({ handling: 'legg', kort: String(b.dataset.kort || '').split(',').filter(Boolean).map(Number) }); }
     if (['kast', 'drop', 'lop', 'snu', 'nytt', 'pastand', 'nese', 'pass', 'stokk', 'startklokke'].indexOf(g) !== -1) return gjor({ handling: g });
     if (['avslutt', 'nullstill', 'svart', 'avslor', 'runde', 'nytt-brett'].indexOf(g) !== -1) return gjor({ handling: g });
   }
