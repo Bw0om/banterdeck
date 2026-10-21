@@ -232,6 +232,11 @@ export function startRom(LEKNAVN, LANG) {
     try { var a = lydFil(navn); a.currentTime = 0; var p = a.play(); if (p && p.catch) p.catch(function () {}); return true; } catch (e) { return false; }
   }
   if (lyd.paa) setTimeout(function () { Object.keys(LYDFIL).forEach(function (k) { lydFil(LYDFIL[k]); }); }, 1500);   // last dem i bakgrunnen
+  /** Vibrasjon: i appen går mønsteret til iOS-haptikk (app.js lytter på mv-vibrer – iPhone har ikke navigator.vibrate), ellers rett til telefonen. */
+  function vibrer(m) {
+    try { if (document.documentElement.classList.contains('is-app')) { document.dispatchEvent(new CustomEvent('mv-vibrer', { detail: m })); return; } } catch (e) {}
+    try { navigator.vibrate && navigator.vibrate(m); } catch (e) {}
+  }
   function spillLyd(navn, n) {
     try { document.dispatchEvent(new CustomEvent('mv-lyd', { detail: navn })); } catch (e) {}   // appen: vibrasjon som følger lyden
     if (!lyd.paa) return;
@@ -287,7 +292,7 @@ export function startRom(LEKNAVN, LANG) {
     if (!drikkEl) { drikkEl = document.createElement('div'); drikkEl.className = 'drikk-alarm'; drikkEl.setAttribute('role', 'alert'); drikkEl.addEventListener('click', function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }); document.body.appendChild(drikkEl); spillLyd('slurk'); }
     drikkEl.innerHTML = '<b>' + (fri ? '⚠️ ' + T('STRAFFEPOENG!', 'PENALTY!') : '🍺 ' + T('DRIKK!', 'DRINK!')) + '</b><span>' + drikkN + ' ' + (fri ? T(drikkN === 1 ? 'straffepoeng' : 'straffepoeng', drikkN === 1 ? 'point' : 'points') : T(drikkN === 1 ? 'slurk' : 'slurker', drikkN === 1 ? 'sip' : 'sips')) + '</span>';
     if (drikkFra.length) drikkEl.innerHTML += '<small>' + T('fra ', 'from ') + esc(drikkFra.join(T(' og ', ' and '))) + '</small>';
-    try { navigator.vibrate && navigator.vibrate([300, 120, 300, 120, 500]); } catch (e) {}
+    vibrer([300, 120, 300, 120, 500]);
     clearTimeout(drikkTimer); drikkTimer = setTimeout(function () { if (drikkEl) { drikkEl.remove(); drikkEl = null; } }, drikkFra.length ? 4200 : 3200);
   }
   function sjekkSlurker(gammel, ny) {
@@ -324,7 +329,7 @@ export function startRom(LEKNAVN, LANG) {
     vannEl.addEventListener('click', lukkVann);
     document.body.appendChild(vannEl);
     spillLyd('vann');
-    try { navigator.vibrate && navigator.vibrate([90, 70, 90]); } catch (e) {}
+    vibrer([90, 70, 90]);
     vannTimer = setTimeout(lukkVann, 9000);
   }
   function lukkVann() { clearTimeout(vannTimer); if (vannEl) { vannEl.remove(); vannEl = null; } }
@@ -887,7 +892,7 @@ export function startRom(LEKNAVN, LANG) {
     enTell = { k: k, fase: 'teller', tall: 3, t: [] };
     spillLyd('tell', 3);
     enTell.t = [setTimeout(function () { enTell.tall = 2; spillLyd('tell', 2); tegn(); }, 800), setTimeout(function () { enTell.tall = 1; spillLyd('tell', 1); tegn(); }, 1600),
-      setTimeout(function () { enTell.fase = 'sagt'; spillLyd('naa'); try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} tegn(); }, 2400)];
+      setTimeout(function () { enTell.fase = 'sagt'; spillLyd('naa'); vibrer(80); tegn(); }, 2400)];
     tegn();
   }
   function enBombeStart(k) {
@@ -895,7 +900,7 @@ export function startRom(LEKNAVN, LANG) {
     enBombe = { k: k, fase: 'gaar', holder: 0, start: Date.now(), lengde: 20000 + Math.random() * 30000, timer: null, tikk: 0 };
     enBombe.timer = setInterval(function () {
       var el = document.querySelector('.en-bombe svg'), naa = Date.now(), a = (naa - enBombe.start) / enBombe.lengde;
-      if (a >= 1) { clearInterval(enBombe.timer); enBombe.fase = 'bom'; try { navigator.vibrate && navigator.vibrate([200, 80, 300]); } catch (e) {} spillLyd('bom'); return tegn(); }
+      if (a >= 1) { clearInterval(enBombe.timer); enBombe.fase = 'bom'; vibrer([200, 80, 300]); spillLyd('bom'); return tegn(); }
       // Lunta tikker i samme takt som bomben pulserer – raskere mot slutten
       var d = a < .5 ? 1000 : a < .8 ? 600 : 320;
       if (el) el.style.setProperty('--d', d + 'ms');
@@ -1719,7 +1724,7 @@ export function startRom(LEKNAVN, LANG) {
     var el = document.createElement('div'); el.className = 'rof-knust'; el.setAttribute('role', 'alert');
     el.innerHTML = '<b>💥 ' + T('RINGEN RØK!', 'THE RING BROKE!') + '</b><span>' + esc(hvem || '') + T(' drikker opp glasset', ' finishes their drink') + '</span>';
     document.body.appendChild(el); setTimeout(function () { el.remove(); }, 2800);
-    try { navigator.vibrate && navigator.vibrate([400, 100, 400]); } catch (e) {}
+    vibrer([400, 100, 400]);
   }
   function rofOppdaterValgt(boks) {
     var s = tilstand.spill, ny = rofTopp(s.tatt || []);
@@ -1798,7 +1803,7 @@ export function startRom(LEKNAVN, LANG) {
     var f = rofFarge(d.sp), m = d.svg.querySelector('.ring-maaler-i'); m.setAttribute('width', Math.round(244 * Math.min(1, d.sp))); m.setAttribute('fill', f);
     var bred = d.svg.querySelector('.ring-spor-bred'); if (bred) bred.setAttribute('stroke', f);
     d.boks.classList.toggle('skjelv', d.sp > 0.6);
-    if (over > 0) { try { navigator.vibrate && navigator.vibrate(8); } catch (x) {} if (naa - rofKnirk > 240) { rofKnirk = naa; spillLyd('knirk'); } }
+    if (over > 0) { vibrer(8); if (naa - rofKnirk > 240) { rofKnirk = naa; spillLyd('knirk'); } }
     if (d.sp >= 1) { rofTrekk(d, true); return; }
     if (d.t >= 0.97) { rofTrekk(d, false); return; }
     rofMeld(d, naa, false);
@@ -2008,7 +2013,7 @@ export function startRom(LEKNAVN, LANG) {
         el.textContent = trinn ? trinn : pk.duo ? T('Pek på to!', 'Point at two!') : T('Pek!', 'Point!');
         el.className = 'pk-tall' + (trinn ? '' : ' pek') + (trinn === 1 ? ' en' : '');
         void el.offsetWidth; el.classList.add('inn');
-        if (trinn) spillLyd('tikk'); else { spillLyd('pek'); try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} }
+        if (trinn) spillLyd('tikk'); else { spillLyd('pek'); vibrer(80); }
         var hand = document.getElementById('pkHand'); if (hand) { if (trinn) hand.setAttribute('hidden', ''); else hand.removeAttribute('hidden'); }
       }
       if (pkTid(pk) > pk.tell + 1400) { clearInterval(pkTimer); tegn(); }
@@ -2545,8 +2550,8 @@ export function startRom(LEKNAVN, LANG) {
   function kbSpill(s) {
     var t = tilstand, b = s.kb, alle = t.spillere || [], jeg = t.meg, har = b.holder === jeg, han = esc(navn(b.holder));
     var nokkel = s.pos + ':' + s.antall + ':' + b.fase + ':' + b.holder, ny = kbVist !== nokkel, varFase = kbVist.split(':')[2]; kbVist = nokkel;
-    if (ny && b.fase === 'gaar' && har) { spillLyd('tur'); try { navigator.vibrate && navigator.vibrate(60); } catch (e) {} }
-    if (ny && b.fase === 'bom' && varFase === 'gaar') { spillLyd('dundun'); if (har) { try { navigator.vibrate && navigator.vibrate([90, 50, 160]); } catch (e) {} } }
+    if (ny && b.fase === 'gaar' && har) { spillLyd('tur'); vibrer(60); }
+    if (ny && b.fase === 'bom' && varFase === 'gaar') { spillLyd('dundun'); if (har) { vibrer([90, 50, 160]); } }
     clearTimeout(kbTimer); clearInterval(kbIntervall);
     if (b.fase === 'gaar') {
       kbTimer = setTimeout(function () { gjorAlltid({ handling: 'kb-smell' }); }, Math.max(0, b.smell - (Date.now() + klokkeAvvik)) + 250 + Math.random() * 600);
@@ -2796,7 +2801,7 @@ export function startRom(LEKNAVN, LANG) {
   document.addEventListener('pointerdown', function (e) {
     var k = e.target.closest && e.target.closest('.lh-kikk'); if (!k) return;
     e.preventDefault(); try { k.setPointerCapture(e.pointerId); } catch (x) {}
-    k.classList.add('vis'); try { navigator.vibrate && navigator.vibrate(10); } catch (x) {}
+    k.classList.add('vis'); vibrer(10);
   });
   window.addEventListener('pointerup', lhSkjul); window.addEventListener('pointercancel', lhSkjul); window.addEventListener('blur', lhSkjul);
   document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.lh-kikk,.lh-stemknapp')) e.preventDefault(); });
@@ -2815,7 +2820,7 @@ export function startRom(LEKNAVN, LANG) {
     lhHold = { paa: b.dataset.paa, t0: Date.now() }; b.style.removeProperty('--hold'); b.classList.add('holder');
     lhHoldT = setTimeout(function () {
       var p = lhHold && lhHold.paa; lhHold = null; if (!p) return;
-      try { navigator.vibrate && navigator.vibrate(20); } catch (x) {}
+      vibrer(20);
       gjorAlltid({ handling: 'stem', paa: p, sikker: true });
     }, LH_HOLD_MS);
   });
@@ -3563,7 +3568,7 @@ export function startRom(LEKNAVN, LANG) {
     // Trekk
     var tilMeg = (s.mottakere || []).indexOf(tilstand.meg) !== -1, kn = s.pos + ':' + s.totalt + ':' + s.kortet;
     var innK = sdVist !== kn; sdVist = kn;
-    if (tilMeg && sdTilDegVist !== kn) { sdTilDegVist = kn; try { navigator.vibrate && navigator.vibrate([60, 60, 120]); } catch (e) {} spillLyd('ding'); }
+    if (tilMeg && sdTilDegVist !== kn) { sdTilDegVist = kn; vibrer([60, 60, 120]); spillLyd('ding'); }
     var kk = s.kast;
     var kast = kk ? '<div class="sd-kast"><b>' + T('Kaste kortet i Skammekroken?', 'Bin the card to the corner of shame?') + '</b><span>' + kk.ja + T(' av ', ' of ') + kk.stemmere + T(' har sagt ja. Alle må si ja.', ' said yes. Everyone has to say yes.') + '</span>' +
         (kk.kanStemme ? '<div class="sd-kast-valg"><button type="button" data-g="rf-kast-stem" data-ja="1" aria-pressed="' + (kk.mitt === 'ja') + '">' + T('Ja, kast', 'Yes, bin it') + '</button><button type="button" data-g="rf-kast-stem" data-ja="0">' + T('Nei, behold', 'No, keep it') + '</button></div>'
@@ -4049,7 +4054,7 @@ export function startRom(LEKNAVN, LANG) {
     var ut = document.getElementById('nrTallUt'), las = document.getElementById('nrLas');
     if (ut) ut.textContent = nrFormat(nrTall.v) || '0';
     if (las) las.textContent = nrLasTekst(tilstand.spill.mittSvar);
-    try { navigator.vibrate && navigator.vibrate(6); } catch (x) {}
+    vibrer(6);
   }, true);
 
   /* ---------- reaksjoner og «send en slurk» ---------- */
@@ -4592,7 +4597,7 @@ export function startRom(LEKNAVN, LANG) {
           skalVist = performance.now();
           var b = document.getElementById('skalKnapp'); if (b && !b.disabled) b.classList.add('naa');
           spillLyd('skaal');
-          try { navigator.vibrate && navigator.vibrate(80); } catch (e) {}
+          vibrer(80);
         }, Math.max(0, om));
       }
       var mitt = skalMitt[s.tid] || (s.harTrykket.indexOf(meg) !== -1 ? { tidlig: (s.tidlig || []).indexOf(meg) !== -1, ms: (s.trykk || {})[meg] } : null);
@@ -4644,7 +4649,7 @@ export function startRom(LEKNAVN, LANG) {
     el.setAttribute('role', 'status');
     el.innerHTML = '<b>' + (pluss ? '+' : '−') + Math.abs(e.kr).toLocaleString(LOKALE) + T(' kr', ' 🪙') + (stor ? (pluss ? ' 💰' : ' 💸') : '') + '</b><span>' + esc(e.t || '') + '</span>';
     document.body.appendChild(el);
-    if (stor && navigator.vibrate) try { navigator.vibrate(pluss ? [40, 60, 40] : 120); } catch (x) {}
+    if (stor) vibrer(pluss ? [40, 60, 40] : 120);
     try { spillLyd(pluss ? (stor ? 'kaching' : 'mynt') : (stor ? 'womp' : '')); } catch (x) {}
     setTimeout(function () { el.remove(); }, 2600);
   }
@@ -4687,7 +4692,7 @@ export function startRom(LEKNAVN, LANG) {
     var el = document.createElement('div'); el.className = 'bs-blalys' + (dom ? ' dom' : ''); el.setAttribute('aria-hidden', 'true');
     el.innerHTML = '<span>' + (dom ? '🚨 ' + T('DØMT!', 'CONVICTED!') : '🚨 ' + T('BØRSTILSYNET', 'MARKET WATCHDOG')) + '</span>';
     document.body.appendChild(el); setTimeout(function () { el.remove(); }, 2600);
-    if (navigator.vibrate) try { navigator.vibrate([200, 100, 200, 100, 200]); } catch (x) {}
+    vibrer([200, 100, 200, 100, 200]);
     if (!lyd.paa || !lydCtx()) return;
     // Sirene: to toner som veksler, med glidende overgang (som et utrykningskjøretøy)
     for (var i = 0; i < 4; i++) { tone(650, i * 0.5, 0.25, 'sawtooth', 0.07, 950); tone(950, i * 0.5 + 0.25, 0.25, 'sawtooth', 0.07, 650); }
@@ -5205,7 +5210,7 @@ export function startRom(LEKNAVN, LANG) {
       if (!tavleHjul) return;
       res.innerHTML = '<b>' + esc(navn(hj.hvem)) + '</b>: ' + esc(hj.tekst);
       res.classList.add('landet');
-      if (hj.hvem === tilstand.meg) { try { navigator.vibrate && navigator.vibrate(120); } catch (e) {} }
+      if (hj.hvem === tilstand.meg) { vibrer(120); }
     }, 4100);
   }
 
@@ -6053,7 +6058,7 @@ export function startRom(LEKNAVN, LANG) {
     nullTrinn();
     trinn.nokkel = k; trinn.t = naa; trinn.tekst = tekst; visTrinn(b);
     trinn.timer = setTimeout(nullTrinn, 4000);
-    try { navigator.vibrate && navigator.vibrate(25); } catch (x) {}
+    vibrer(25);
     return false;
   }
   function farligTekst(g, b) {

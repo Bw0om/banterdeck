@@ -37,6 +37,23 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     grip: () => Haptics.impact({ style: ImpactStyle.Light }),
   };
   document.addEventListener('mv-lyd', (e) => { const f = VIB[e.detail]; if (f) f().catch(() => {}); });
+  // Vibrasjonsmønstre fra lekene (rom.js vibrer): tall eller [på, pause, på …] i ms – oversatt til iOS-haptikk.
+  // Korte støt blir et lett dunk, lengre et tungt, og pausene holdes så rytmen kjennes igjen (bomba, nedtellingen, skålet).
+  let vibKo = Promise.resolve();
+  document.addEventListener('mv-vibrer', (e) => {
+    const m = Array.isArray(e.detail) ? e.detail : [Number(e.detail) || 0];
+    vibKo = vibKo.then(async () => {
+      for (let i = 0; i < m.length; i++) {
+        const ms = m[i];
+        if (i % 2 === 1) { await new Promise((r) => setTimeout(r, Math.min(600, ms))); continue; }   // pause
+        if (ms <= 0) continue;
+        if (ms < 30) await Haptics.selectionChanged();
+        else if (ms < 100) await Haptics.impact({ style: ImpactStyle.Light });
+        else if (ms < 200) await Haptics.impact({ style: ImpactStyle.Medium });
+        else { await Haptics.impact({ style: ImpactStyle.Heavy }); if (ms >= 300) { await new Promise((r) => setTimeout(r, 120)); await Haptics.impact({ style: ImpactStyle.Heavy }); } }
+      }
+    }).catch(() => {});
+  });
 
   // Deling går gjennom telefonens delingsark. Bilder (tavla) deles som før, om nettleseren kan.
   const egen = navigator.share ? navigator.share.bind(navigator) : null;
