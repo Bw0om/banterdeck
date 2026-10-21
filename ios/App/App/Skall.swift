@@ -639,7 +639,7 @@ private extension Array {
 }
 
 /// En visning med et hull: trykk innenfor hullet går rett gjennom til det som ligger under (nettsidens stue)
-final class HullVisning: UIView {
+class HullVisning: UIView {
     var hull: CGRect = .zero
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if hull.contains(point) { return nil }
