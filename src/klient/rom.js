@@ -3106,6 +3106,43 @@ export function startRom(LEKNAVN, LANG) {
     document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.py-hand')) e.preventDefault(); });
   }
   function pyDrikker(id, n) { return (id === tilstand.meg ? T('Du drikker ', 'You drink ') : esc(navn(id)) + T(' drikker ', ' drinks ')) + n + '.'; }
+  /** Pyramiden til den native skjermen (PyramidenSkjerm.swift). Nettsiden holder tilstanden, klokka (pyDriv) og LØGN!-øyeblikket. */
+  function pyData(s) {
+    var meg = tilstand.meg, naaI = s.pos - 1, naa = s.pyr[naaI], rad = pyRad(naaI), past = s.pastander || [], jobber = [];
+    var hode = function (id) { var h = { id: id, png: '' }; jobber.push(vlHodePng(id, '').then(function (b) { h.png = b; })); return h; };
+    var kortet = function (k, i) { return k ? { i: i, v: vn(k.v), f: k.f, rod: k.f === '♥' || k.f === '♦', snudd: true } : { i: i, v: '', f: '', rod: false, snudd: false }; };
+    var RADER = [[14], [12, 13], [9, 10, 11], [5, 6, 7, 8], [0, 1, 2, 3, 4]];
+    var NAVN = EN ? { 11: 'jack', 12: 'queen', 13: 'king', 14: 'ace' } : { 11: 'knekt', 12: 'dame', 13: 'konge', 14: 'ess' };
+    var minPast = past.some(function (p) { return p.id === meg; }), hand = s.minHand;
+    var av = pyAvsl && Date.now() < pyAvslTil ? pyAvsl : null;
+    var d = {
+      ferdig: !!s.ferdig, tittel: T('Pyramiden', 'The pyramid'), naa: Date.now() + klokkeAvvik, vindu: s.vindu || 0, snuddVed: s.snuddVed || 0,
+      chip: s.ferdig ? T('Toppen er snudd', 'The top is flipped') : T('Rad ', 'Row ') + rad + T(' · del ut ', ' · hand out ') + rad,
+      igjen: s.ferdig ? '' : (15 - s.pos) + T(' kort igjen', ' cards left'),
+      rader: RADER.map(function (r, ri) { return { rad: 5 - ri, naa: 5 - ri === rad && !s.ferdig, kort: r.map(function (i) {
+        var k = kortet(i < s.pos ? s.pyr[i] : null, i); k.naa = i === naaI && !s.ferdig; k.n = k.naa && past.length ? String(past.length) : ''; return k; }) }; }),
+      pastander: past.map(function (p) { return Object.assign(hode(p.id), { navn: jaNavn(p.id), kanLogn: p.id !== meg && !p.avgjort,
+        domm: p.avgjort === 'sant' ? T('Sant', 'True') : p.avgjort === 'bløff' ? T('Bløff', 'Bluff') : '',
+        tekst: (p.id === meg ? T('Du la på ', 'You laid ') + (p.kort ? vn(p.kort.v) + p.kort.f : '') + T(' – delte ut ', ' – handed out ') + p.rad : T('la på et kort og deler ut ', 'laid a card and hands out ') + p.rad) + (p.av ? ' · ' + jaNavn(p.av) + T(' ropte løgn', ' called it') : '') }); }),
+      tom: T('Ingen har lagt på ennå. Har du en ', 'Nobody has laid a card yet. Got a ') + (naa ? (NAVN[naa.v] || naa.v) : '') + '?',
+      hand: hand ? hand.map(kortet) : null,
+      handTekst: !hand ? T('Du er med fra neste pyramide.', 'You’re in from the next pyramid.') : !hand.length ? T('Tom hånd – fint spilt!', 'Empty hand – well played!') : T('Hold fingeren på kortene for å kikke', 'Hold your finger on the cards to peek'),
+      velgTekst: T('Velg kortet du legger på', 'Pick the card to lay'), legg: minPast ? T('Du har lagt på', 'You’ve laid a card') : T('Legg på et kort', 'Lay a card'), avbryt: T('Avbryt', 'Cancel'),
+      lagt: minPast, kanLegge: !minPast && !!(hand && hand.length) && !s.ferdig,
+      avsl: av ? { over: jaNavn(av.av) + T(' ropte løgn på ', ' called out ') + (av.id === meg ? T('deg', 'you') : navn(av.id)), kort: kortet(av.kort, 0), sant: !!av.sant, domm: av.sant ? T('Sant', 'True') : T('Bløff', 'Bluff'),
+        tekst: av.sant ? jaNavn(av.id) + T(' hadde den. ', ' had it. ') + pyDrikker(av.av, av.n) : jaNavn(av.id) + T(' bløffet! ', ' bluffed! ') + pyDrikker(av.id, av.n) } : null,
+      best: '', bestNavn: '', bestTekst: '', hender: [], slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
+    };
+    var slutt = Promise.resolve();
+    if (s.ferdig) {
+      var lurt = s.lurt || {}, best = Object.keys(lurt).sort(function (a, b) { return lurt[b] - lurt[a]; })[0], hender = s.fasit || {};
+      d.best = T('Største bløffer', 'Biggest bluffer'); d.bestNavn = best ? jaNavn(best) : T('Ingen – for ærlige folk!', 'Nobody – too honest!');
+      d.bestTekst = best ? lurt[best] + (lurt[best] === 1 ? T(' bløff', ' bluff') : T(' bløffer', ' bluffs')) + T(' uten å bli tatt', ' without getting caught') : '';
+      d.hender = Object.keys(hender).map(function (id) { return Object.assign(hode(id), { navn: jaNavn(id), kort: hender[id].map(kortet), tom: T('tom hånd', 'empty hand') }); });
+      slutt = skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny pyramide – teller i kvelden', 'New pyramid – counts tonight')]])).then(function (b) { d.slutt = b; });
+    }
+    return Promise.all(jobber.concat([slutt])).then(function () { return d; });
+  }
   function pyramidenSpill(s) {
     var meg = tilstand.meg, vert = erVert(), naaI = s.pos - 1, naa = s.pyr[naaI], rad = pyRad(naaI), past = s.pastander || [];
     if (s.pos < pySistPos) pySett = {};
@@ -3681,6 +3718,49 @@ export function startRom(LEKNAVN, LANG) {
       sum(T('Sum', 'Sum'), '', function (b) { return ov(b); }) + sum('Bonus', 'bonus', function (b) { return ov(b) >= 63 ? 50 : ''; }) +
       YZF.slice(6).map(function (x) { return felt(x[0], x[1]); }).join('') +
       sum('Total', 'total', function (b, id) { return (s.summer || {})[id] || 0; }) + '</div>';
+  }
+  /** Yatzy til den native skjermen (YatzySkjerm.swift): terningene, blokka og tekstene – nettsiden holder tilstanden. */
+  function yzData(s) {
+    var meg = tilstand.meg, vert = erVert(), jeg = s.aktiv === meg || vert, hvem = s.aktiv === meg ? T('Du', 'You') : navn(s.aktiv);
+    var d = s.drikk && s.drikk.nr === s.nr && s.kast > 0 ? s.drikk : null, lapp = '', stil = '';
+    if (d && (d.yatzy || d.fire || d.ener)) {
+      var deler = [];
+      if (d.yatzy) deler.push('YATZY! ' + hvem + T(' deler ut 5 – eller en shot', ' hand' + (s.aktiv === meg ? '' : 's') + ' out 5 – or a shot'));
+      else if (d.fire) deler.push(T('Fire like – ', 'Four of a kind – ') + (s.aktiv === meg ? T('drikk ', 'drink ') : hvem + T(' drikker ', ' drinks ')) + d.fire);
+      if (d.ener) deler.push(T('Ener i kastet – ', 'A one in the roll – ') + (s.aktiv === meg ? T('drikk 2', 'drink 2') : hvem + T(' drikker 2', ' drinks 2')));
+      lapp = deler.join(' · '); stil = d.yatzy ? 'gull' : 'rod';
+    } else if (!s.kast && s.sistFelt) {
+      var sf = s.sistFelt, sv = (s.blokker[sf.id] || {})[sf.f], hvemF = sf.id === meg ? T('Du', 'You') : navn(sf.id);
+      lapp = hvemF + (sf.stroket ? T(' fikk ', ' had ') + yzFeltNavn(sf.f) + T(' strøket', ' scratched') : sf.drakk ? T(' strøk ', ' scratched ') + yzFeltNavn(sf.f) : T(' førte ', ' scored ') + sv + T(' på ', ' in ') + yzFeltNavn(sf.f)) +
+        (sf.drakk ? (sf.id === meg ? T(' – drikk ', ' – drink ') : T(' – drikker ', ' – drinks ')) + sf.drakk : '');
+      stil = sf.drakk ? 'rod' : '';
+    }
+    var chip = s.ferdig ? s.ferdig[0].navn + T(' vant!', ' won!') : s.aktiv === meg ? (s.kast ? (s.kast < 3 ? T('Hold, trill igjen eller før', 'Hold, roll again or score') : T('Velg et felt', 'Pick a box')) : T('Din tur – rist begeret', 'Your turn – shake the cup'))
+      : jeg ? T('Du fører for ', 'You play for ') + navn(s.aktiv) : navn(s.aktiv) + (s.kast ? T(' · kast ', ' · roll ') + s.kast : T(' rister begeret', ' is shaking the cup'));
+    var stryk = '';
+    if (!s.ferdig && vert && s.aktiv !== meg && s.trekkVed + s.somle - (Date.now() + klokkeAvvik) <= 0) stryk = T('Stryk et felt for ', 'Scratch a box for ') + navn(s.aktiv);
+    var ider = s.ider || [], kan = !s.ferdig && jeg && s.kast > 0, sfN = s.sistFelt;
+    var ov = function (b) { return ['1', '2', '3', '4', '5', '6'].reduce(function (a, f) { return a + (b[f] || 0); }, 0); };
+    var rad = function (f, navnTekst, stilR, fn) { return { f: f, navn: navnTekst, stil: stilR, celler: ider.map(function (id) { return Object.assign({ aktiv: id === s.aktiv && !s.ferdig, mulig: '', skriv: false, tekst: '' }, fn(s.blokker[id] || {}, id)); }) }; };
+    var rader = [];
+    var felt = function (x) { return rad(x[0], x[1], '', function (b, id) { var v = b[x[0]]; if (kan && id === s.aktiv && v == null) return { mulig: String(s.mulige ? s.mulige[x[0]] : 0) }; return { tekst: v == null ? '' : v === 0 ? '–' : String(v), skriv: !!(sfN && !s.kast && sfN.id === id && sfN.f === x[0]) }; }); };
+    YZF.slice(0, 6).forEach(function (x) { rader.push(felt(x)); });
+    rader.push(rad('sum', T('Sum', 'Sum'), 'sum', function (b) { return { tekst: String(ov(b)) }; }));
+    rader.push(rad('bonus', 'Bonus', 'bonus', function (b) { return { tekst: ov(b) >= 63 ? '50' : '' }; }));
+    YZF.slice(6).forEach(function (x) { rader.push(felt(x)); });
+    rader.push(rad('total', 'Total', 'total', function (b, id) { return { tekst: String((s.summer || {})[id] || 0) }; }));
+    var fe = s.ferdig;
+    var ut = {
+      ferdig: !!fe, tittel: T('Drikke-Yatzy', 'Drinking Yahtzee'), chip: chip, minTur: s.aktiv === meg, jeg: jeg, kast: s.kast || 0, nr: s.nr || 0, naa: Date.now() + klokkeAvvik,
+      terninger: (s.terninger || []).map(function (v, i) { return { v: v, hold: !!s.hold[i] && s.kast > 0, ring: !!(d && d.ener && v === 1) }; }),
+      kanKaste: !fe && jeg && s.kast < 3, kanHolde: !fe && jeg && s.kast > 0 && s.kast < 3, beger: T('Trykk på begeret', 'Tap the cup'), holdt: T('Holdt', 'Held'),
+      yatzy: !!(d && d.yatzy), lapp: lapp, lappStil: stil, stryk: stryk,
+      blokk: { hode: ider.map(function (id) { return id === meg ? T('Du', 'You') : navn(id); }), aktiv: fe ? -1 : ider.indexOf(s.aktiv), rader: rader },
+      vinner: fe ? fe[0].navn : '', vinnerTekst: fe ? fe[0].sum + T(' poeng · deler ut 5', ' points · hands out 5') : '', taper: fe ? fe[fe.length - 1].navn + T(' tapte og drikker opp.', ' lost and finishes their drink.') : '',
+      slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
+    };
+    if (!fe) return Promise.resolve(ut);
+    return skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny blokk – teller i kvelden', 'New scorecard – counts tonight')]])).then(function (b) { ut.slutt = b; return ut; });
   }
   function yatzySpill(s) {
     var meg = tilstand.meg, vert = erVert(), borte = true;
@@ -5643,13 +5723,15 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
     else if (nativ === 'lobby') { var nL = (tilstand.spillere || []).length; skjermBlokker(innhold).then(function (b) { if (tilstand && !tilstand.spill) meldSkjerm('lobby', { kode: kode, n: nL, erVert: erVert(), vert: navn(tilstand.vert), blokker: b, naa: Date.now() + klokkeAvvik,
       tekst: { inviter: T('Inviter', 'Invite'), iRommet: nL === 1 ? T('Bare du så langt', 'Just you so far') : nL + T(' i rommet', ' in the room'), kode: T('Romkode', 'Room code'), venter: navn(tilstand.vert) + (tilstand.plan && tilstand.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) } }); }); }
     else if (nativ === 'rof') meldSkjerm('rof', rofData(s));
+    else if (nativ === 'yz') { var nYz = s.nr, kYz = s.kast, fYz = !!s.ferdig; yzData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'yatzy' && sp.nr === nYz && sp.kast === kYz && !!sp.ferdig === fYz) meldSkjerm('yz', d); }); }
+    else if (nativ === 'py') { var pPy = s.pos, fPy = !!s.ferdig; pyData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'pyramiden' && sp.pos === pPy && !!sp.ferdig === fPy) meldSkjerm('py', d); }); }
     else if (nativ === 'vl') { var rVl = s.runde, nVl = s.n, fVl = s.fase; vlData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'veddelopet' && sp.runde === rVl && sp.n === nVl && sp.fase === fVl) meldSkjerm('vl', d); }); }
     else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
     else meldSkjerm('rom');
@@ -6089,6 +6171,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'yz-felt') return gjor({ handling: 'yz-felt', f: b.dataset.f });
     if (g === 'yz-stryk') return gjor({ handling: 'yz-stryk' });
     if (g === 'py-modus') { pyVelg = !pyVelg; return tegn(); }
+    if (g === 'py-legg') return gjor({ handling: 'py-legg', i: Number(b.dataset.i) });
     if (g === 'py-velg') {
       if (!pyVelg) return;
       var pyI = Number(b.dataset.i); b.classList.add('flyr'); pyVelg = false;

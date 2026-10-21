@@ -327,12 +327,16 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         guard let i = fane(for: fra), faner[i] == "spill", let v = visninger[i], let side = viewControllers?[i] else { return }
         let hva = d["skjerm"] as? String ?? ""
         if hva != "vl" { visVl(nil, over: side) }
+        if hva != "yz" { visYz(nil, over: side) }
+        if hva != "py" { visPy(nil, over: side) }
         // Lekene som tegnes native (Pekeleken): skjermen ligger over nettsiden så lenge leken pågår
         if hva == "lek" { visStart(i: side, false); visKort(nil, over: side); visLek(d, over: side, nett: v.webView); return } else { visLek(nil, over: side, nett: nil) }
         if hva == "kort" { visStart(i: side, false); visRof(nil, over: side); kortModell.nett = v.webView; visKort(d, over: side); return } else { visKort(nil, over: side) }
         if hva == "rof" { visStart(i: side, false); rofModell.nett = v.webView; visRof(d, over: side); return } else { visRof(nil, over: side) }
         if hva == "lobby" { visStart(i: side, false); lobbyModell.nett = v.webView; visLobby(d, over: side); return } else { visLobby(nil, over: side) }
         if hva == "vl" { visStart(i: side, false); vlModell.nett = v.webView; visVl(d, over: side); return } else { visVl(nil, over: side) }
+        if hva == "yz" { visStart(i: side, false); yzModell.nett = v.webView; visYz(d, over: side); return } else { visYz(nil, over: side) }
+        if hva == "py" { visStart(i: side, false); pyModell.nett = v.webView; visPy(d, over: side); return } else { visPy(nil, over: side) }
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
@@ -419,7 +423,44 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
 
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
     func settOverleggSkjult(_ skjult: Bool) {
-        for v in [lekVert?.view, kortVert?.view, rofVert?.view, lobbyHull, vlVert?.view, startVert?.view] { v?.isHidden = skjult }
+        for v in [lekVert?.view, kortVert?.view, rofVert?.view, lobbyHull, vlVert?.view, yzVert?.view, pyVert?.view, startVert?.view] { v?.isHidden = skjult }
+    }
+
+    // Yatzy (YatzySkjerm.swift) og Pyramiden (PyramidenSkjerm.swift): samme overlegg som de andre
+    private let yzModell = YzModell()
+    private var yzVert: UIHostingController<YatzySkjerm>?
+    private func visYz(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&yzVert); return }
+        yzModell.sett(d)
+        if yzVert == nil { yzVert = leggOverlegg(UIHostingController(rootView: YatzySkjerm(m: yzModell)), over: side) }
+        side.view.bringSubviewToFront(yzVert!.view)
+    }
+    private let pyModell = PyModell()
+    private var pyVert: UIHostingController<PyramidenSkjerm>?
+    private func visPy(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&pyVert); return }
+        pyModell.sett(d)
+        if pyVert == nil { pyVert = leggOverlegg(UIHostingController(rootView: PyramidenSkjerm(m: pyModell)), over: side) }
+        side.view.bringSubviewToFront(pyVert!.view)
+    }
+    /// Et native overlegg over nettsiden i fanen: fyller skjermen, tones inn
+    private func leggOverlegg<V: View>(_ h: UIHostingController<V>, over side: UIViewController) -> UIHostingController<V> {
+        side.addChild(h)
+        h.view.translatesAutoresizingMaskIntoConstraints = false
+        side.view.addSubview(h.view)
+        NSLayoutConstraint.activate([
+            h.view.topAnchor.constraint(equalTo: side.view.topAnchor), h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
+            h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
+        ])
+        h.didMove(toParent: side)
+        h.view.alpha = 0
+        UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
+        return h
+    }
+    private func fjernOverlegg<V: View>(_ vert: inout UIHostingController<V>?) {
+        guard let h = vert else { return }
+        vert = nil
+        UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent() }
     }
 
     // Veddeløpet (VeddelopSkjerm.swift)
