@@ -154,7 +154,7 @@ struct LekDetalj: View {
                         Text("\(m.startOrd) \(l.navn)".uppercased()).font(.archivo(18, vekt: 900)).tracking(0.5)
                             .frame(maxWidth: .infinity).frame(height: 58).foregroundColor(blekk)
                             .background(ZStack {
-                                RoundedRectangle(cornerRadius: 14).fill(blekk).offset(x: 4, y: 4)
+                                RoundedRectangle(cornerRadius: 14).fill(Color.black).offset(x: 4, y: 4)
                                 RoundedRectangle(cornerRadius: 14).fill(gul)
                                 RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3)
                             })

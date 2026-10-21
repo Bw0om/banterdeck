@@ -1918,9 +1918,11 @@ export function startRom(LEKNAVN, LANG) {
     function knapp(b, stil) {
       var k = { type: 'knapp', g: b.dataset.g || '', attrs: {}, tekst: '', under: '', paa: b.getAttribute('aria-pressed') === 'true', av: !!b.disabled, stil: stil || '' };
       Object.keys(b.dataset).forEach(function (x) { if (x !== 'g') k.attrs[x] = b.dataset[x]; });
+      var orig = b; b = b.cloneNode(true);
+      Array.prototype.forEach.call(b.querySelectorAll('.lek-info, svg, [class*="merke"]'), function (x) { x.remove(); });
       var bb = b.querySelector('b'), sm = b.querySelector('small');
       if (bb) { k.tekst = tekstAv(bb); k.under = sm ? tekstAv(sm) : tekstAv(b.querySelector('span')); } else { k.tekst = tekstAv(b); }
-      var c = typeof b.className === 'string' ? b.className : '';
+      var c = typeof orig.className === 'string' ? orig.className : '';
       if (!k.stil) k.stil = /rom-stor-knapp|slutt-knapp|gk-planstart|kb-knapp|rom-anbefalt-lek/.test(c) ? 'stor' : /app-velger|app-mer/.test(c) ? 'kort' : /linkbtn|ja-nekt/.test(c) ? 'link' : /\bnodt\b/.test(c) ? 'nodt' : /\bsann\b/.test(c) ? 'sann' : /\bja\b|aldri-har/.test(c) ? 'ja' : /\bnei\b|aldri-aldri|feig|\bdrikk\b/.test(c) ? 'nei' : 'vanlig';
       return k;
     }
@@ -2002,7 +2004,11 @@ export function startRom(LEKNAVN, LANG) {
       if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
     },
     // Lobbyen native: stua vises gjennom et hull i skjermen – skallet sier hvor hullet er
-    stuaTopp: function (px) { try { document.documentElement.style.setProperty('--mv-stua-topp', Math.round(px) + 'px'); } catch (e) {} },
+    stuaTopp: function (px) {
+      try { document.documentElement.style.setProperty('--mv-stua-topp', Math.round(px) + 'px'); } catch (e) {}
+      var st = document.querySelector('#romStuaPlass .rom-stua');
+      return st ? Math.round(st.getBoundingClientRect().height) : 0;
+    },
     trykk: function (g, attrs) {
       var b = document.createElement('button'); b.type = 'button'; b.hidden = true; b.dataset.g = g;
       Object.keys(attrs || {}).forEach(function (k) { b.dataset[k] = String(attrs[k]); });
@@ -5407,9 +5413,23 @@ export function startRom(LEKNAVN, LANG) {
     aapentArk = { el: m, oppdater: function () {} };
   }
   /** «Mer» under leken: slurkene dine, reglene, lekens egne valg og vertens knapper – alt som ellers lå under spillet. */
+  /** Appen: «Mer» i lobbyen – TV, bare min telefon, hele kvelden, varianter – i et ark over lobbyen. */
+  function lobbyMerArk() {
+    lukkArk();
+    var m = lagArk('mer-ark', T('Mer', 'More')), kropp = m.querySelector('.ark-kropp');
+    function fyll() {
+      if (tilstand.spill) { lukkArk(); return; }
+      kropp.innerHTML = '<div class="rom-knapperad">' + (visSkjerm ? '' : '<button type="button" class="rom-knapp-stor" data-g="skjerm">📺 ' + T('Vis på TV', 'Show on TV') + '</button>') +
+        '<button type="button" class="rom-knapp-stor" data-g="sofa-start">🛋️ ' + T('Bare min telefon', 'Just my phone') + '</button></div>' +
+        (tilstand.spillere.length > 1 ? '' : qrBoks()) + vertVerktoy(null) +
+        '<p class="rom-forlat"><button class="linkbtn" data-g="forlat" type="button">' + T('Forlat rommet', 'Leave the room') + '</button></p>';
+    }
+    fyll();
+    aapentArk = { el: m, oppdater: fyll };
+  }
   function merArk() {
     lukkArk();
-    if (!tilstand.spill) return;
+    if (!tilstand.spill) return lobbyMerArk();
     var m = lagArk('mer-ark', tilstand.spill.navn || LEKNAVN[tilstand.spill.lek] || T('Mer', 'More')), kropp = m.querySelector('.ark-kropp');
     function fyll() {
       var s = tilstand.spill; if (!s) { lukkArk(); return; }
@@ -6220,7 +6240,7 @@ export function startRom(LEKNAVN, LANG) {
       document.body.appendChild(m); return;
     }
     if (g === 'forlat') { glemRom(); settAdresse(''); kode = ''; tegnStart(); return; }
-    if (g === 'app-mer') { appMer = true; tegn(); window.scrollTo({ top: 0 }); return; }
+    if (g === 'app-mer') { if (harSkall()) return lobbyMerArk(); appMer = true; tegn(); window.scrollTo({ top: 0 }); return; }
     if (g === 'app-tilbake') { appMer = false; tegn(); window.scrollTo({ top: 0 }); return; }
     if (g === 'start') {
       appMer = false;

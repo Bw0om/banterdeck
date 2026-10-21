@@ -9,6 +9,8 @@ final class LobbyModell: ObservableObject {
     @Published var n = 0
     @Published var erVert = false
     @Published var tekst: [String: String] = [:]
+    /// Høyden stua faktisk har i nettsiden (målt der), så hullet er like stort som stua
+    @Published var stuaH: CGFloat = 0
     let blokker = KortModell()
     var hullEndret: ((CGRect) -> Void)?
     weak var nett: WKWebView? { didSet { blokker.nett = nett } }
@@ -32,7 +34,7 @@ struct LobbySkjerm: View {
     @ObservedObject var m: LobbyModell
     @Environment(\.colorScheme) private var modus
     private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color.white.opacity(0.07) : .white }
+    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
     private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
     private let gul = Color(red: 1, green: 0.824, blue: 0.247)
     private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
@@ -40,13 +42,13 @@ struct LobbySkjerm: View {
 
     var body: some View {
         GeometryReader { g in
-            let hull = (g.size.width - 24) * 0.823 + 28   // stua er 396 × 326 i nettsiden, pluss luft
+            let hull = m.stuaH > 0 ? m.stuaH + 8 : (g.size.width - 24) * 0.56 + 16
             ZStack(alignment: .top) {
                 VStack(spacing: 10) {
                     topp.padding(.horizontal, 16).padding(.top, 6).frame(maxWidth: .infinity).background(papir.ignoresSafeArea(edges: [.top, .horizontal]))
                     // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den. Står fast – bare lista under blar.
                     Color.clear.frame(height: hull)
-                        .background(GeometryReader { h in Color.clear.preference(key: HullKey.self, value: h.frame(in: .named("lobby"))) })
+                        .background(GeometryReader { h in Color.clear.preference(key: HullKey.self, value: h.frame(in: .global)) })
                     ScrollView {
                         VStack(alignment: .leading, spacing: 12) {
                             if m.erVert {

@@ -75,7 +75,7 @@ struct PyramidenSkjerm: View {
     @State private var kikk = false
     @State private var velg = false
     private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color.white.opacity(0.07) : .white }
+    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
     private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
     private let gul = Color(red: 1, green: 0.824, blue: 0.247)
     private let oransje = Color(red: 1, green: 0.357, blue: 0.122)

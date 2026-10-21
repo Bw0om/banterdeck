@@ -194,7 +194,7 @@ struct RingSkjerm: View {
     @ObservedObject var m: RofModell
     @Environment(\.colorScheme) private var modus
     private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color.white.opacity(0.07) : .white }
+    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
     private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
     private let gul = Color(hex: "#FFD23F"), oransje = Color(hex: "#FF5B1F"), rosa = Color(hex: "#FF9CC2"), mint = Color(hex: "#63E2A8"), morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
 
