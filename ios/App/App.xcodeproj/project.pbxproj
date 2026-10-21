@@ -33,6 +33,8 @@
 		A1B2C3D4E5F60718293A4B85 /* VeddelopSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B84 /* VeddelopSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B87 /* YatzySkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B86 /* YatzySkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B89 /* PyramidenSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B88 /* PyramidenSkjerm.swift */; };
+		A1B2C3D4E5F60718293A4B91 /* BussrutaSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B90 /* BussrutaSkjerm.swift */; };
+		A1B2C3D4E5F60718293A4B93 /* PresidentSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B92 /* PresidentSkjerm.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,6 +65,8 @@
 		A1B2C3D4E5F60718293A4B84 /* VeddelopSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VeddelopSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B86 /* YatzySkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YatzySkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B88 /* PyramidenSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PyramidenSkjerm.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B90 /* BussrutaSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BussrutaSkjerm.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B92 /* PresidentSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresidentSkjerm.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -115,6 +119,8 @@
 				A1B2C3D4E5F60718293A4B84 /* VeddelopSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B86 /* YatzySkjerm.swift */,
 				A1B2C3D4E5F60718293A4B88 /* PyramidenSkjerm.swift */,
+				A1B2C3D4E5F60718293A4B90 /* BussrutaSkjerm.swift */,
+				A1B2C3D4E5F60718293A4B92 /* PresidentSkjerm.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -228,6 +234,8 @@
 				A1B2C3D4E5F60718293A4B85 /* VeddelopSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B87 /* YatzySkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B89 /* PyramidenSkjerm.swift in Sources */,
+				A1B2C3D4E5F60718293A4B91 /* BussrutaSkjerm.swift in Sources */,
+				A1B2C3D4E5F60718293A4B93 /* PresidentSkjerm.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
