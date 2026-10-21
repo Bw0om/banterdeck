@@ -1942,7 +1942,7 @@ export function startRom(LEKNAVN, LANG) {
         }
         if (/\b(rom-stua-plass|rom-h2|app-alene|app-del|rom-etikett|rom-regler)\b/.test(c)) return;   // toppen (kode/inviter) og stua tegnes native
         if (/\bapp-leker\b/.test(c) && !e.querySelector('button')) return;
-        if (/\b(rom-anbefalt|rom-valg|gk-sporsmal)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b, 'kort'); }) }); return; }
+        if (/\b(rom-anbefalt|rom-valg|gk-sporsmal)\b/.test(c)) { var stilR = /\brom-anbefalt\b/.test(c) ? 'stor' : 'kort'; ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b, stilR); }) }); return; }
         if (/\b(aldri-valg|rr-valg|ns-valg|slutt-valg|pk-forsvar-valg|ee-valg|ee-med)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b); }) }); return; }
         if (e.tagName === 'BUTTON') { ut.push(knapp(e)); return; }
         if (/\bee-benk\b/.test(c)) {
@@ -5833,7 +5833,7 @@ export function startRom(LEKNAVN, LANG) {
     var gammelRekt = gammeltKort ? gammeltKort.getBoundingClientRect() : null;
     sistKortNokkel = nyKN;
     var lekSkjerm = !!s && erMobil();   // leken fyller skjermen: stua, regler, slurker og vertens knapper ligger bak «Stua» og «Mer» i toppen
-    var stuaPlass = tilstand.ferdig || (lekSkjerm && !harSkall()) ? '' : STUA_PLASS;
+    var stuaPlass = tilstand.ferdig || lekSkjerm ? '' : STUA_PLASS;
     var kbFra = kbRekt(), benkFra = benkRekter();
     settRot(s
       ? topp + (lekSkjerm ? hoderad(s) : '') + merker + borsHurtig() + innhold + stuaPlass + '<div class="rom-bakgrunn">' + oppdragKnapp() + borsPille() + mesterStripe() + '</div>' + reaksjonslinje() + (lekSkjerm ? '' : vert + forlat)
@@ -5850,7 +5850,6 @@ export function startRom(LEKNAVN, LANG) {
     var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
-    rotEl.classList.toggle('lek-nativ', !!nativ && nativ !== 'lobby');
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
     else if (nativ === 'lobby') { var nL = (tilstand.spillere || []).length; skjermBlokker(innhold).then(function (b) { if (tilstand && !tilstand.spill) meldSkjerm('lobby', { kode: kode, n: nL, erVert: erVert(), vert: navn(tilstand.vert), blokker: b, naa: Date.now() + klokkeAvvik,
       tekst: { inviter: T('Inviter', 'Invite'), iRommet: nL === 1 ? T('Bare du så langt', 'Just you so far') : nL + T(' i rommet', ' in the room'), kode: T('Romkode', 'Room code'), venter: navn(tilstand.vert) + (tilstand.plan && tilstand.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) } }); }); }

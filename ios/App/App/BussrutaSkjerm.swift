@@ -68,12 +68,11 @@ struct BussrutaSkjerm: View {
 
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea(edges: [.top, .horizontal])
+            papir.ignoresSafeArea()
             if let d = m.d {
                 VStack(spacing: 0) {
                     topp(d)
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
                             linje(d)
                             switch d.fase {
                             case 1: billetten(d)
@@ -81,8 +80,8 @@ struct BussrutaSkjerm: View {
                             default: bussen(d)
                             }
                             if d.ferdig { BlokkListe(m: m.blokker) }
-                        }.padding(.horizontal, 16).padding(.bottom, 24)
-                    }
+                            Spacer(minLength: 0)
+                        }.padding(.horizontal, 16).padding(.bottom, 12)
                 }
             }
         }

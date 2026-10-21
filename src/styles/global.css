@@ -2210,10 +2210,5 @@ html.har-skall.lobby-nativ body{overflow:hidden}
 html.har-skall.lobby-nativ #romStuaPlass{position:fixed;top:var(--mv-stua-topp,120px);left:0;right:0;z-index:5;padding:0 12px}
 html.har-skall.lobby-nativ #romStuaPlass .rom-stua{margin:0!important;max-width:none}
 
-/* Lekene native i appen: stua vises gjennom et hull nederst på den native skjermen, resten av nettsidens tegning er skjult */
-html.har-skall.lek-nativ #rom > *:not(#romStuaPlass){display:none!important}
-html.har-skall.lek-nativ body{overflow:hidden}
-html.har-skall.lek-nativ #romStuaPlass{position:fixed;top:var(--mv-stua-topp,99999px);left:0;right:0;z-index:5;padding:0 12px}
-html.har-skall.lek-nativ #romStuaPlass .rom-stua{width:62%;margin:0 auto!important;max-width:none}
 /* Et nettark (Mer, Stua, regler …) er oppe over en native skjerm: nettsiden under skjules helt */
 html.har-skall.ark-aapen #rom{visibility:hidden}

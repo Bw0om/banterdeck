@@ -81,12 +81,11 @@ struct PresidentSkjerm: View {
 
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea(edges: [.top, .horizontal])
+            papir.ignoresSafeArea()
             if let d = m.d {
                 VStack(spacing: 0) {
                     topp(d)
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
                             trapp(d)
                             if d.ferdig {
                                 titler(d)
@@ -97,8 +96,8 @@ struct PresidentSkjerm: View {
                                 hand(d)
                                 knapper(d)
                             }
-                        }.padding(.horizontal, 16).padding(.bottom, 24)
-                    }
+                            Spacer(minLength: 0)
+                        }.padding(.horizontal, 16).padding(.bottom, 12)
                 }
             }
         }

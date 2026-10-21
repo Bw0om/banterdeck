@@ -90,16 +90,15 @@ struct PyramidenSkjerm: View {
 
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea(edges: [.top, .horizontal])
+            papir.ignoresSafeArea()
             if let d = m.d {
                 VStack(spacing: 0) {
                     topp(d)
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
                             bord(d)
                             if d.ferdig { BlokkListe(m: m.blokker) }
-                        }.padding(.horizontal, 16).padding(.bottom, 24)
-                    }
+                            Spacer(minLength: 0)
+                        }.padding(.horizontal, 16).padding(.bottom, 12)
                 }
                 if !d.avsl.isEmpty { avsl(d.avsl) }
             }
@@ -210,7 +209,7 @@ struct PyramidenSkjerm: View {
         if d.pastander.isEmpty {
             Text(d.tom).font(.archivo(14, vekt: 600)).foregroundColor(krem.opacity(0.75))
         } else {
-            VStack(spacing: 8) {
+            ScrollView(showsIndicators: false) { VStack(spacing: 8) {
                 ForEach(d.pastander) { p in
                     HStack(spacing: 10) {
                         hode(p.png).frame(width: 36, height: 40)
@@ -234,7 +233,7 @@ struct PyramidenSkjerm: View {
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.06)))
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-            }
+            } }.frame(maxHeight: 190)
         }
     }
 

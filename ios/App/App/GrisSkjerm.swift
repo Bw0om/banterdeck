@@ -77,12 +77,11 @@ struct GrisSkjerm: View {
 
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea(edges: [.top, .horizontal])
+            papir.ignoresSafeArea()
             if let d = m.d {
                 VStack(spacing: 0) {
                     topp(d)
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
                             if d.fase == "slutt" {
                                 grisLapp(d)
                                 fjos(d)
@@ -90,8 +89,8 @@ struct GrisSkjerm: View {
                             } else {
                                 fjos(d)
                             }
-                        }.padding(.horizontal, 16).padding(.bottom, 24)
-                    }
+                            Spacer(minLength: 0)
+                        }.padding(.horizontal, 16).padding(.bottom, 12)
                 }
             }
         }

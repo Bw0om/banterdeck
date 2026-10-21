@@ -328,6 +328,11 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         let hva = d["skjerm"] as? String ?? ""
         if ["rom", "lobby", "start", "laster"].contains(hva) { sisteRegler = "" }
         else if let r = d["regler"] as? [String], !r.isEmpty, let n = d["lekNokkel"] as? String, n != sisteRegler { sisteRegler = n; visRegler(d, r) }
+        // Alt som ikke er denne skjermen, tas bort først – også lobbyen, så den ikke ligger igjen under en lek
+        if hva != "lek" { visLek(nil, over: side, nett: nil) }
+        if hva != "kort" { visKort(nil, over: side) }
+        if hva != "rof" { visRof(nil, over: side) }
+        if hva != "lobby" { visLobby(nil, over: side) }
         if hva != "vl" { visVl(nil, over: side) }
         if hva != "yz" { visYz(nil, over: side) }
         if hva != "py" { visPy(nil, over: side) }
@@ -485,13 +490,9 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         if pyVert == nil { pyVert = leggOverlegg(UIHostingController(rootView: PyramidenSkjerm(m: pyModell)), over: side, nett: pyModell.nett) }
         fram(pyVert?.view.superview)
     }
-    /// Et native overlegg over nettsiden i fanen: fyller skjermen, tones inn. Nederst er det et hull der nettsidens stue vises
-    /// (nettsiden legger stua akkurat der, via window.__mvLek.stuaTopp), og fingeren går gjennom hullet til figurene.
+    /// Et native overlegg over nettsiden i fanen: leken er hele skjermen. Stua hentes med «Stua»-knappen (nettark).
     private func leggOverlegg<V: View>(_ h: UIHostingController<V>, over side: UIViewController, nett: WKWebView?) -> UIHostingController<V> {
-        let boks = LekHull()
-        boks.hullH = (side.view.bounds.width - 24) * 0.62 * 0.823 + 8
-        h.view.backgroundColor = .clear
-        h.additionalSafeAreaInsets.bottom = boks.hullH
+        let boks = HullVisning()
         side.addChild(h)
         boks.translatesAutoresizingMaskIntoConstraints = false
         h.view.translatesAutoresizingMaskIntoConstraints = false
@@ -504,7 +505,6 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             h.view.trailingAnchor.constraint(equalTo: boks.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: boks.bottomAnchor)
         ])
         h.didMove(toParent: side)
-        boks.endret = { [weak nett] r in nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.stuaTopp(\(Int(r.minY)))", completionHandler: nil) }
         boks.alpha = 0
         UIView.animate(withDuration: 0.2) { boks.alpha = 1 }
         return h
@@ -644,17 +644,6 @@ class HullVisning: UIView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if hull.contains(point) { return nil }
         return super.hitTest(point, with: event)
-    }
-}
-
-/// Lekene: hullet ligger nederst, over fanelinja, og nettsiden får vite hvor det er
-final class LekHull: HullVisning {
-    var hullH: CGFloat = 0
-    var endret: ((CGRect) -> Void)?
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        let r = CGRect(x: 0, y: bounds.height - safeAreaInsets.bottom - hullH, width: bounds.width, height: hullH + safeAreaInsets.bottom)
-        if r != hull { hull = r; endret?(r) }
     }
 }
 
