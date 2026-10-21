@@ -1,24 +1,20 @@
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:650:5: error: extraneous '}' at top level
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:651:1: error: extraneous '}' at top level
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:650:5: error: Extraneous '}' at top level
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:651:1: error: Extraneous '}' at top level
-** BUILD FAILED **
+** BUILD SUCCEEDED **
 ----- siste linjer -----
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:650:5: error: Extraneous '}' at top level
-    }
-    ^
-     (in target 'App' from project 'App')
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift:651:1: error: Extraneous '}' at top level
-}
-^ (in target 'App' from project 'App')
 
-** BUILD FAILED **
+AppIntentsSSUTraining (in target 'App' from project 'App')
+2026-10-21 15:19:29.050 appintentsnltrainingprocessor[3101:13030] Parsing options for appintentsnltrainingprocessor
+2026-10-21 15:19:29.051 appintentsnltrainingprocessor[3101:13030] Starting AppIntents SSU YAML Generation
+2026-10-21 15:19:29.057 appintentsnltrainingprocessor[3101:13030] No AppShortcuts found - Skipping.
 
+RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
-The following build commands failed:
-	SwiftDriver App normal arm64 com.apple.xcode.tools.swift.compiler (in target 'App' from project 'App')
-	Building project App with scheme App and configuration Debug
-(2 failures)
+Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+
+Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
+
+** BUILD SUCCEEDED **
+
 ----- skjemaer -----
     Targets:
         App
