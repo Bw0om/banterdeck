@@ -72,12 +72,11 @@ struct BingoSkjerm: View {
 
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea(edges: [.top, .horizontal])
+            papir.ignoresSafeArea()
             if let d = m.d {
                 VStack(spacing: 0) {
                     topp(d)
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
                             brett(d)
                             if !d.ferdig && d.rekkeSiden < 4000 { rekkeLapp(d) }
                             if d.ferdig {
@@ -89,8 +88,8 @@ struct BingoSkjerm: View {
                                         .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
                                 }.buttonStyle(.plain)
                             }
-                        }.padding(.horizontal, 16).padding(.bottom, 24)
-                    }
+                            Spacer(minLength: 0)
+                        }.padding(.horizontal, 16).padding(.bottom, 12)
                 }
             }
         }

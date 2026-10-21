@@ -42,9 +42,8 @@ struct LobbySkjerm: View {
         GeometryReader { g in
             let hull = (g.size.width - 24) * 0.823 + 28   // stua er 396 × 326 i nettsiden, pluss luft
             ZStack(alignment: .top) {
-                papir.ignoresSafeArea()
                 VStack(spacing: 10) {
-                    topp.padding(.horizontal, 16).padding(.top, 6)
+                    topp.padding(.horizontal, 16).padding(.top, 6).frame(maxWidth: .infinity).background(papir.ignoresSafeArea(edges: [.top, .horizontal]))
                     // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den. Står fast – bare lista under blar.
                     Color.clear.frame(height: hull)
                         .background(GeometryReader { h in Color.clear.preference(key: HullKey.self, value: h.frame(in: .named("lobby"))) })
@@ -61,6 +60,7 @@ struct LobbySkjerm: View {
                         }
                         .padding(.horizontal, 16).padding(.top, 4).padding(.bottom, 30)
                     }
+                    .background(papir.ignoresSafeArea(edges: [.bottom, .horizontal]))
                 }
             }
             .coordinateSpace(name: "lobby")

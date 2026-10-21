@@ -49,7 +49,7 @@ struct KortSkjerm: View {
     private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea(edges: [.top, .horizontal])
+            papir.ignoresSafeArea()
             ScrollView { BlokkListe(m: m).padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 24) }
         }
         .foregroundColor(blekk)
@@ -62,6 +62,7 @@ struct BlokkListe: View {
     @Environment(\.colorScheme) private var modus
     private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
     private var kort: Color { modus == .dark ? Color.white.opacity(0.07) : .white }
+    private let lys = Color(red: 1, green: 0.973, blue: 0.933)
     private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
     private let gul = Color(red: 1, green: 0.824, blue: 0.247)
     private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
@@ -148,7 +149,7 @@ struct BlokkListe: View {
     private func knapp(_ k: [String: Any], bred: Bool) -> some View {
         let stil = s(k, "stil"), paa = k["paa"] as? Bool ?? false, av = k["av"] as? Bool ?? false
         let tekst = s(k, "tekst"), under = s(k, "under")
-        let farge: Color = stil == "nodt" || stil == "nei" ? oransje : stil == "sann" || stil == "ja" ? mint : stil == "stor" ? gul : kort
+        let farge: Color = stil == "nodt" || stil == "nei" ? oransje : stil == "sann" || stil == "ja" ? mint : stil == "stor" ? gul : lys
         let hoy: CGFloat = stil == "stor" ? 60 : (!under.isEmpty ? 68 : 50)
         return Button(action: { m.trykk(k) }) {
             if stil == "link" {
@@ -159,7 +160,7 @@ struct BlokkListe: View {
                     if !under.isEmpty { Text(under).font(.archivo(12, vekt: 600)).opacity(0.8).lineLimit(2).multilineTextAlignment(.center) }
                 }
                 .frame(maxWidth: bred ? .infinity : nil).frame(minHeight: hoy).padding(.horizontal, 10)
-                .foregroundColor(stil == "vanlig" || stil == "" ? blekk : morkBlekk)
+                .foregroundColor(morkBlekk)
                 .background(ZStack {
                     RoundedRectangle(cornerRadius: 14).fill(morkBlekk).offset(x: paa ? 1 : 4, y: paa ? 1 : 4)
                     RoundedRectangle(cornerRadius: 14).fill(farge.opacity(av ? 0.5 : 1))

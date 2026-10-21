@@ -77,12 +77,11 @@ struct YatzySkjerm: View {
 
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea(edges: [.top, .horizontal])
+            papir.ignoresSafeArea()
             if let d = m.d {
                 VStack(spacing: 0) {
                     topp(d)
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 10) {
                             if d.ferdig {
                                 slutt(d)
                             } else {
@@ -97,8 +96,8 @@ struct YatzySkjerm: View {
                                 }.buttonStyle(.plain)
                             }
                             if d.ferdig { BlokkListe(m: m.blokker) }
-                        }.padding(.horizontal, 16).padding(.bottom, 24)
-                    }
+                            Spacer(minLength: 0)
+                        }.padding(.horizontal, 16).padding(.bottom, 12)
                 }
             }
         }
@@ -229,7 +228,7 @@ struct YatzySkjerm: View {
     // MARK: Blokka – navnene øverst, feltene, summer; mulige felt kan trykkes
     private func blokk(_ d: YzData) -> some View {
         let kol = max(1, d.hode.count)
-        return ScrollView(.horizontal, showsIndicators: false) {
+        return ScrollView([.horizontal, .vertical], showsIndicators: false) {
             VStack(spacing: 0) {
                 rad(navn: "Yatzy", stil: "hode", celler: d.hode.enumerated().map { i, n in YzCelle(tekst: n, mulig: "", aktiv: i == d.aktivKol, skriv: false, f: "") }, kol: kol)
                 ForEach(d.rader) { r in rad(navn: r.navn, stil: r.stil, celler: r.celler, kol: kol) }
@@ -239,6 +238,7 @@ struct YatzySkjerm: View {
             .background(RoundedRectangle(cornerRadius: 4).fill(morkBlekk).offset(x: 4, y: 4))
             .padding(.trailing, 6).padding(.bottom, 6)
         }
+        .frame(maxHeight: .infinity)
     }
 
     private func rad(navn: String, stil: String, celler: [YzCelle], kol: Int) -> some View {

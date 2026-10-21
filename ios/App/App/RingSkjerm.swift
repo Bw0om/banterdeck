@@ -200,7 +200,7 @@ struct RingSkjerm: View {
 
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea(edges: [.top, .horizontal])
+            papir.ignoresSafeArea()
             if let d = m.d {
                 VStack(spacing: 6) {
                     topp(d)
@@ -246,9 +246,15 @@ struct RingSkjerm: View {
             Spacer()
             Text(d.igjenTekst).font(.archivo(12, vekt: 800)).padding(.horizontal, 9).padding(.vertical, 5).background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk.opacity(0.3), lineWidth: 1.5))
             Text(d.kongerTekst).font(.archivo(12, vekt: 800)).padding(.horizontal, 9).padding(.vertical, 5).background(Capsule().fill(rosa)).foregroundColor(morkBlekk)
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
+            ikon("sofa.fill") { m.trykk("stua-ark") }
+            ikon("ellipsis") { m.trykk("mer-ark") }
         }.padding(.horizontal, 14).padding(.top, 4)
+    }
+    private func ikon(_ sym: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: sym).font(.system(size: 14, weight: .bold)).frame(width: 36, height: 34)
+                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
+        }.buttonStyle(.plain)
     }
     private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
