@@ -23,6 +23,7 @@ const aarData: any = { eras: bingoData.eras };
     <h2>{deck.title}</h2>
     <div class="gt-body"></div>
     <script is:inline data-astro-rerun define:vars={{ D: deck, EN }}>
+
     (function () {
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
@@ -178,6 +179,7 @@ const aarData: any = { eras: bingoData.eras };
     <h2>{deck.title}</h2>
     <div class="gt-body"></div>
     <script is:inline data-astro-rerun define:vars={{ D: deck, EN }}>
+  window.mvVibrer = window.mvVibrer || function (m) { try { if (document.documentElement.classList.contains('is-app')) { document.dispatchEvent(new CustomEvent('mv-vibrer', { detail: m })); return; } } catch (e) {} try { navigator.vibrate && navigator.vibrate(m); } catch (e) {} };
     (function () {
       var root = document.currentScript.closest('.gt');
       var body = root.querySelector('.gt-body');
@@ -229,7 +231,7 @@ const aarData: any = { eras: bingoData.eras };
             requestAnimationFrame(function(){ res.classList.remove('skjult'); desc.classList.remove('skjult'); });
           } else {
             void res.offsetWidth; res.classList.add('inn'); desc.classList.add('inn');
-            if (navigator.vibrate) { try { navigator.vibrate([18, 40, 30]); } catch (e) {} }
+            mvVibrer([18, 40, 30]);
           }
           snurrer = false; knapp.disabled = false;
         }
@@ -252,7 +254,7 @@ const aarData: any = { eras: bingoData.eras };
             pil.animate([{ transform: 'translateX(-50%) rotate(0deg)' }, { transform: 'translateX(-50%) rotate(-22deg)', offset: 0.3 }, { transform: 'translateX(-50%) rotate(0deg)' }],
               { duration: 140, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
             // De siste, langsomme tikkene merkes også i hånda
-            if (Math.abs(d) < 6 && navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} }
+            if (Math.abs(d) < 6) mvVibrer(6);
           }
           requestAnimationFrame(folg);
         }
