@@ -2842,6 +2842,26 @@ export function startRom(LEKNAVN, LANG) {
     var l = Math.max.apply(null, String(t || '').split(/\s+/).map(function (w) { return w.length; }).concat([1]));
     return Math.max(8, Math.min(15, Math.floor(60 / (l * 0.72)), Math.floor(170 / (String(t || '').length * 0.66))));
   }
+  /** Bingo til den native skjermen (BingoSkjerm.swift). Rekkene og «Rekke!»-øyeblikket regnes her som på nettsiden. */
+  function bgData(s) {
+    var b = s.mittBrett || [], m = s.mineMerker || [], r = s.runde || 1, meg = tilstand.meg, jegBingo = (s.bingo || []).indexOf(meg) !== -1;
+    var fulle = BG_LINJER.map(function (l, k) { return l.every(function (x) { return m[x]; }) ? k : -1; }).filter(function (k) { return k !== -1; });
+    var forr = bgAntall[r] == null ? fulle.length : bgAntall[r];
+    if (fulle.length > forr && !s.ferdig) bgRekkeTid = Date.now();
+    bgAntall[r] = fulle.length;
+    var vinner = (s.bingo || [])[0];
+    var d = {
+      ferdig: !!s.ferdig, tittel: T('Drikke-bingo', 'Drinking bingo'), chip: s.ferdig ? 'Bingo!' : String(s.tittel || ''), naa: Date.now() + klokkeAvvik,
+      ruter: b.map(function (x, i) { return { tittel: String(x[1] || ''), under: String(x[0] || ''), merket: !!m[i] }; }),
+      linjer: fulle.map(function (k) { var l = BG_LINJER[k]; return { k: k, a: l[0], z: l[3] }; }),
+      rekkeSiden: Date.now() - bgRekkeTid, rekke: T('Rekke!', 'Line!'), rekkeUnder: T('Del ut 2 slurker', 'Hand out 2 sips'),
+      jegBingo: jegBingo, domRett: jegBingo, domTekst: s.ferdig ? (jegBingo ? T('Alle andre drikker opp', 'Everyone else finishes their drink') : 'Bingo ' + T('for ', 'for ') + navn(vinner) + T(' – drikk opp!', ' – finish your drink!')) : '',
+      bytt: !s.ferdig && !m.some(Boolean) ? T('Bytt brett', 'New board') : '', spotify: erVert() && s.spotify ? String(s.spotify) : '', spotifyTekst: T('Spilleliste', 'Playlist'),
+      slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
+    };
+    if (!s.ferdig) return Promise.resolve(d);
+    return skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye brett – teller i kvelden', 'New boards – counts tonight')]])).then(function (bl) { d.slutt = bl; return d; });
+  }
   function bingoSpill(s) {
     var b = s.mittBrett || [], m = s.mineMerker || [], r = s.runde || 1, meg = tilstand.meg, jegBingo = (s.bingo || []).indexOf(meg) !== -1;
     var ut = '<div class="bg-topp">' + jaTopp(T('Drikke-bingo', 'Drinking bingo'), s.ferdig ? 'Bingo!' : esc(s.tittel), !s.ferdig, false) +
@@ -3300,6 +3320,33 @@ export function startRom(LEKNAVN, LANG) {
   function grBrett(s, id, start) {
     var n = (s.bokstaver || {})[id] || 0, ord = T('GRIS', 'PIGS'), nk = 'b' + id + ':' + n, ny = start && n && !grSett[nk]; grSett[nk] = 1;
     return '<span class="gr-bokst">' + ord.split('').map(function (t, j) { return '<i class="' + (j < n ? 'paa' : '') + (ny && j === n - 1 ? ' mal' : '') + '">' + t + '</i>'; }).join('') + '</span>';
+  }
+  /** Gris til den native skjermen (GrisSkjerm.swift). Nettsiden holder tilstanden og klokka (grDriv). */
+  function grData(s) {
+    var meg = tilstand.meg, ider = s.ider || [], jobber = [], tatt = s.neser.indexOf(meg) !== -1, valgt = s.mittValg != null, hand = s.minHand;
+    var hode = function (id) { var h = { png: '' }; jobber.push(vlHodePng(id, '').then(function (b) { h.png = b; })); return h; };
+    var ord = T('GRIS', 'PIGS'), bokst = function (id) { var n = Math.min(4, (s.bokstaver || {})[id] || 0); return ord.slice(n - 1, n); };
+    var d = {
+      fase: s.fase, tittel: s.fase === 'slutt' ? T('Gris', 'Pigs') : T('Gris · runde ', 'Pigs · round ') + s.runde, naa: Date.now() + klokkeAvvik, ord: ord, varsel: s.fase === 'nese' && !tatt,
+      chip: s.fase === 'slutt' ? jaNavn(s.gris) + T(' er GRIS!', ' is the PIG!') : s.fase === 'send' ? (s.harFire ? T('Fire like! Trykk på trynet', 'Four of a kind! Tap the snout') : valgt ? T('Venter på de andre …', 'Waiting for the others …') : T('Send et kort til venstre', 'Pass a card to the left'))
+        : s.fase === 'nese' ? (tatt ? T('Du var nr ', 'You were no. ') + (s.neser.indexOf(meg) + 1) : T('NESA! Fort!', 'NOSE! Quick!')) : s.taper ? jaNavn(s.taper) + T(' var sist – ', ' was last – ') + bokst(s.taper) + '!' : T('Alle rakk nesa', 'Everyone made it'),
+      folk: ider.map(function (id) {
+        var klar = s.fase === 'send' ? s.harValgt.indexOf(id) !== -1 : s.neser.indexOf(id) !== -1, nr = s.neser.indexOf(id);
+        return Object.assign(hode(id), { id: id, navn: jaNavn(id), n: Math.min(4, (s.bokstaver || {})[id] || 0), klar: klar, taper: s.taper === id && s.fase !== 'send',
+          status: s.fase === 'send' ? (klar ? T('valgt', 'picked') : '') : nr !== -1 ? T('nr ', 'no. ') + (nr + 1) : ((s.fase === 'ferdig' || s.fase === 'slutt') && s.taper === id ? T('sist!', 'last!') : '') });
+      }),
+      halm: s.fase === 'send' || s.fase === 'nese', halmLengde: s.fase === 'nese' ? s.vinduer.nese : s.vinduer.bytt, halmVed: s.fase === 'nese' ? s.neseVed : s.sendVed, nese: s.fase === 'nese',
+      hand: hand ? hand.map(function (k) { return { v: vn(k.v), f: k.f, rod: k.f === '♥' || k.f === '♦' }; }) : null, handTekst: T('Du er med fra neste runde.', 'You’re in from the next round.'),
+      merke: s.fase === 'send' ? (valgt ? T('Sendt!', 'Sent!') : T('Trykk på kortet du sender', 'Tap the card to pass')) : T('Hånda di', 'Your hand'),
+      mittValg: valgt ? s.mittValg : -1, kanSende: s.fase === 'send' && !valgt && !!hand, harFire: !!s.harFire, tatt: tatt,
+      tryneTekst: s.fase === 'nese' ? (tatt ? T('Tatt!', 'Got it!') : T('NESA!', 'NOSE!')) : T('Nesa', 'The nose'),
+      tryneHjelp: s.fase === 'nese' ? (tatt ? T('Vent på de andre – sistemann får en bokstav.', 'Wait for the others – the last one gets a letter.') : T('Noen har fire like. Trykk før det er for sent!', 'Someone has four of a kind. Tap before it’s too late!'))
+        : s.fase === 'ferdig' ? T('Ny runde kommer straks …', 'A new round is coming …') : T('Har du fire like? Trykk. Trykker du for tidlig, får du en bokstav.', 'Four of a kind? Tap. Tap too early and you get a letter.'),
+      pust: (s.fase === 'nese' && !tatt) || (!!s.harFire && s.fase === 'send'), paa: s.fase === 'nese' || !!s.harFire,
+      gris: T('GRIS!', 'PIGS!'), grisTekst: s.fase === 'slutt' ? jaNavn(s.gris) + T(' tar en shot.', ' takes a shot.') : '', slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
+    };
+    var slutt = s.fase === 'slutt' ? skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye brett – teller i kvelden', 'New boards – counts tonight')]])).then(function (b) { d.slutt = b; }) : Promise.resolve();
+    return Promise.all(jobber.concat([slutt])).then(function () { return d; });
   }
   function grisSpill(s) {
     var meg = tilstand.meg, vert = erVert(), ider = s.ider || [], start = !!grSett.start;
@@ -5784,7 +5831,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
@@ -5795,6 +5842,8 @@ export function startRom(LEKNAVN, LANG) {
     else if (nativ === 'py') { var pPy = s.pos, fPy = !!s.ferdig; pyData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'pyramiden' && sp.pos === pPy && !!sp.ferdig === fPy) meldSkjerm('py', d); }); }
     else if (nativ === 'br') { var nBr = [s.fase, s.steg, s.pyrPos, s.bussRekke, s.sistSvar && s.sistSvar.nr, s.bussSist && s.bussSist.nr, !!s.ferdig].join('|'); brData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'bussruta' && [sp.fase, sp.steg, sp.pyrPos, sp.bussRekke, sp.sistSvar && sp.sistSvar.nr, sp.bussSist && sp.bussSist.nr, !!sp.ferdig].join('|') === nBr) meldSkjerm('br', d); }); }
     else if (nativ === 'pr') { var nPr = [s.runde, s.leggNr, s.feiNr, s.tur, s.fase].join('|'); prData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'president' && [sp.runde, sp.leggNr, sp.feiNr, sp.tur, sp.fase].join('|') === nPr) meldSkjerm('pr', d); }); }
+    else if (nativ === 'gr') { var nGr = [s.runde, s.fase, s.byttNr, (s.neser || []).length, (s.harValgt || []).length, s.mittValg, !!s.harFire].join('|'); grData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'gris' && [sp.runde, sp.fase, sp.byttNr, (sp.neser || []).length, (sp.harValgt || []).length, sp.mittValg, !!sp.harFire].join('|') === nGr) meldSkjerm('gr', d); }); }
+    else if (nativ === 'bg') { var nBg = [s.runde, !!s.ferdig, (s.mineMerker || []).map(Number).join('')].join('|'); bgData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'bingo' && [sp.runde, !!sp.ferdig, (sp.mineMerker || []).map(Number).join('')].join('|') === nBg) meldSkjerm('bg', d); }); }
     else if (nativ === 'vl') { var rVl = s.runde, nVl = s.n, fVl = s.fase; vlData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'veddelopet' && sp.runde === rVl && sp.n === nVl && sp.fase === fVl) meldSkjerm('vl', d); }); }
     else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
     else meldSkjerm('rom');
@@ -6269,6 +6318,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'pek-forsvar') return gjor({ handling: 'pek-forsvar', slapp: b.dataset.slapp === '1' });
     if (g === 'lh-ide') { var ide = document.getElementById('lhIde'); if (ide) { ide.textContent = lhIde(); ide.hidden = false; ide.classList.remove('inn'); void ide.offsetWidth; ide.classList.add('inn'); } return; }
     if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
+    if (g === 'bg-nytt') return gjor({ handling: 'nytt-brett' });
     if (g === 'sofa-start') { try { localStorage.setItem(sofaNokkel(), '1'); } catch (e) {} return tegn(); }
     if (g === 'sofa-vent') { aleneLukket = Infinity; try { sessionStorage.setItem('bd_alene_vent_' + kode, '1'); } catch (e) {} return tegn(); }
     if (g === 'sofa-av') { try { localStorage.removeItem(sofaNokkel()); } catch (e) {} aleneFra = Date.now(); return tegn(); }
