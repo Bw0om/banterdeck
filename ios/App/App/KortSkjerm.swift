@@ -49,7 +49,7 @@ struct KortSkjerm: View {
     private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
     var body: some View {
         ZStack {
-            papir.ignoresSafeArea()
+            papir.ignoresSafeArea(edges: [.top, .horizontal])
             ScrollView { BlokkListe(m: m).padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 24) }
         }
         .foregroundColor(blekk)

@@ -326,6 +326,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
         guard let i = fane(for: fra), faner[i] == "spill", let v = visninger[i], let side = viewControllers?[i] else { return }
         let hva = d["skjerm"] as? String ?? ""
+        if ["rom", "lobby", "start", "laster"].contains(hva) { sisteRegler = "" }
+        else if let r = d["regler"] as? [String], !r.isEmpty, let n = d["lekNokkel"] as? String, n != sisteRegler { sisteRegler = n; visRegler(d, r) }
         if hva != "vl" { visVl(nil, over: side) }
         if hva != "yz" { visYz(nil, over: side) }
         if hva != "py" { visPy(nil, over: side) }
@@ -360,33 +362,27 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         }
     }
 
+    // MARK: «Slik spiller dere» – et ark når en lek starter, så verten rekker å forklare (ReglerArk.swift)
+    private var sisteRegler = ""
+    private func visRegler(_ d: [String: Any], _ regler: [String]) {
+        guard presentedViewController == nil else { return }
+        var h: UIHostingController<ReglerArk>?
+        let ark = ReglerArk(tittel: d["reglerTittel"] as? String ?? "Slik spiller dere", navn: d["lekNavn"] as? String ?? "", regler: regler,
+                            knapp: d["reglerKnapp"] as? String ?? "Vi er klare", lukk: { h?.dismiss(animated: true) })
+        h = UIHostingController(rootView: ark)
+        if let sp = h!.sheetPresentationController { sp.detents = [.large()]; sp.prefersGrabberVisible = true }
+        present(h!, animated: true)
+    }
+
     // MARK: Native leker (PekelekenSkjerm.swift)
     private let pekModell = PekModell()
     private var lekVert: UIHostingController<PekelekenSkjerm>?
     private func visLek(_ d: [String: Any]?, over side: UIViewController, nett: WKWebView?) {
-        guard let d = d else {
-            if let h = lekVert {
-                UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent(); if self.lekVert === h { self.lekVert = nil } }
-            }
-            return
-        }
+        guard let d = d else { fjernOverlegg(&lekVert); return }
         pekModell.nett = nett
         pekModell.sett(d)
-        if lekVert == nil {
-            let h = UIHostingController(rootView: PekelekenSkjerm(m: pekModell))
-            side.addChild(h)
-            h.view.translatesAutoresizingMaskIntoConstraints = false
-            side.view.addSubview(h.view)
-            NSLayoutConstraint.activate([
-                h.view.topAnchor.constraint(equalTo: side.view.topAnchor), h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
-                h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
-            ])
-            h.didMove(toParent: side)
-            h.view.alpha = 0
-            lekVert = h
-            UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
-        }
-        side.view.bringSubviewToFront(lekVert!.view)
+        if lekVert == nil { lekVert = leggOverlegg(UIHostingController(rootView: PekelekenSkjerm(m: pekModell)), over: side, nett: pekModell.nett) }
+        fram(lekVert?.view.superview)
     }
 
     // Lobbyen (LobbySkjerm.swift): native skjerm med et hull der nettsidens stue vises – fingeren går gjennom hullet
@@ -422,7 +418,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             lobbyModell.hullEndret = { [weak self, weak hull] r in
                 hull?.hull = r
                 // Nettsiden legger stua akkurat der hullet er (CSS-px = punkter)
-                self?.lobbyModell.nett?.evaluateJavaScript("window.__mvLobby && window.__mvLobby.stuaTopp(\(Int(r.minY)))", completionHandler: nil)
+                self?.lobbyModell.nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.stuaTopp(\(Int(r.minY)))", completionHandler: nil)
             }
             UIView.animate(withDuration: 0.2) { hull.alpha = 1 }
         }
@@ -431,7 +427,9 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
 
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
     func settOverleggSkjult(_ skjult: Bool) {
-        for v in [lekVert?.view, kortVert?.view, rofVert?.view, lobbyHull, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, startVert?.view] { v?.isHidden = skjult }
+        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view]
+        for v in hoster { ((v?.superview as? HullVisning) ?? v)?.isHidden = skjult }
+        lobbyHull?.isHidden = skjult; startVert?.view.isHidden = skjult
     }
 
     // Gris (GrisSkjerm.swift) og Bingo (BingoSkjerm.swift)
@@ -440,16 +438,16 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     private func visGr(_ d: [String: Any]?, over side: UIViewController) {
         guard let d = d else { fjernOverlegg(&grVert); return }
         grModell.sett(d)
-        if grVert == nil { grVert = leggOverlegg(UIHostingController(rootView: GrisSkjerm(m: grModell)), over: side) }
-        side.view.bringSubviewToFront(grVert!.view)
+        if grVert == nil { grVert = leggOverlegg(UIHostingController(rootView: GrisSkjerm(m: grModell)), over: side, nett: grModell.nett) }
+        fram(grVert?.view.superview)
     }
     private let bgModell = BgModell()
     private var bgVert: UIHostingController<BingoSkjerm>?
     private func visBg(_ d: [String: Any]?, over side: UIViewController) {
         guard let d = d else { fjernOverlegg(&bgVert); return }
         bgModell.sett(d)
-        if bgVert == nil { bgVert = leggOverlegg(UIHostingController(rootView: BingoSkjerm(m: bgModell)), over: side) }
-        side.view.bringSubviewToFront(bgVert!.view)
+        if bgVert == nil { bgVert = leggOverlegg(UIHostingController(rootView: BingoSkjerm(m: bgModell)), over: side, nett: bgModell.nett) }
+        fram(bgVert?.view.superview)
     }
 
     // Bussruta (BussrutaSkjerm.swift) og President (PresidentSkjerm.swift)
@@ -458,16 +456,16 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     private func visBr(_ d: [String: Any]?, over side: UIViewController) {
         guard let d = d else { fjernOverlegg(&brVert); return }
         brModell.sett(d)
-        if brVert == nil { brVert = leggOverlegg(UIHostingController(rootView: BussrutaSkjerm(m: brModell)), over: side) }
-        side.view.bringSubviewToFront(brVert!.view)
+        if brVert == nil { brVert = leggOverlegg(UIHostingController(rootView: BussrutaSkjerm(m: brModell)), over: side, nett: brModell.nett) }
+        fram(brVert?.view.superview)
     }
     private let prModell = PrModell()
     private var prVert: UIHostingController<PresidentSkjerm>?
     private func visPr(_ d: [String: Any]?, over side: UIViewController) {
         guard let d = d else { fjernOverlegg(&prVert); return }
         prModell.sett(d)
-        if prVert == nil { prVert = leggOverlegg(UIHostingController(rootView: PresidentSkjerm(m: prModell)), over: side) }
-        side.view.bringSubviewToFront(prVert!.view)
+        if prVert == nil { prVert = leggOverlegg(UIHostingController(rootView: PresidentSkjerm(m: prModell)), over: side, nett: prModell.nett) }
+        fram(prVert?.view.superview)
     }
 
     // Yatzy (YatzySkjerm.swift) og Pyramiden (PyramidenSkjerm.swift): samme overlegg som de andre
@@ -476,119 +474,77 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     private func visYz(_ d: [String: Any]?, over side: UIViewController) {
         guard let d = d else { fjernOverlegg(&yzVert); return }
         yzModell.sett(d)
-        if yzVert == nil { yzVert = leggOverlegg(UIHostingController(rootView: YatzySkjerm(m: yzModell)), over: side) }
-        side.view.bringSubviewToFront(yzVert!.view)
+        if yzVert == nil { yzVert = leggOverlegg(UIHostingController(rootView: YatzySkjerm(m: yzModell)), over: side, nett: yzModell.nett) }
+        fram(yzVert?.view.superview)
     }
     private let pyModell = PyModell()
     private var pyVert: UIHostingController<PyramidenSkjerm>?
     private func visPy(_ d: [String: Any]?, over side: UIViewController) {
         guard let d = d else { fjernOverlegg(&pyVert); return }
         pyModell.sett(d)
-        if pyVert == nil { pyVert = leggOverlegg(UIHostingController(rootView: PyramidenSkjerm(m: pyModell)), over: side) }
-        side.view.bringSubviewToFront(pyVert!.view)
+        if pyVert == nil { pyVert = leggOverlegg(UIHostingController(rootView: PyramidenSkjerm(m: pyModell)), over: side, nett: pyModell.nett) }
+        fram(pyVert?.view.superview)
     }
-    /// Et native overlegg over nettsiden i fanen: fyller skjermen, tones inn
-    private func leggOverlegg<V: View>(_ h: UIHostingController<V>, over side: UIViewController) -> UIHostingController<V> {
+    /// Et native overlegg over nettsiden i fanen: fyller skjermen, tones inn. Nederst er det et hull der nettsidens stue vises
+    /// (nettsiden legger stua akkurat der, via window.__mvLek.stuaTopp), og fingeren går gjennom hullet til figurene.
+    private func leggOverlegg<V: View>(_ h: UIHostingController<V>, over side: UIViewController, nett: WKWebView?) -> UIHostingController<V> {
+        let boks = LekHull()
+        boks.hullH = (side.view.bounds.width - 24) * 0.62 * 0.823 + 8
+        h.view.backgroundColor = .clear
+        h.additionalSafeAreaInsets.bottom = boks.hullH
         side.addChild(h)
+        boks.translatesAutoresizingMaskIntoConstraints = false
         h.view.translatesAutoresizingMaskIntoConstraints = false
-        side.view.addSubview(h.view)
+        side.view.addSubview(boks)
+        boks.addSubview(h.view)
         NSLayoutConstraint.activate([
-            h.view.topAnchor.constraint(equalTo: side.view.topAnchor), h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
-            h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
+            boks.topAnchor.constraint(equalTo: side.view.topAnchor), boks.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
+            boks.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), boks.bottomAnchor.constraint(equalTo: side.view.bottomAnchor),
+            h.view.topAnchor.constraint(equalTo: boks.topAnchor), h.view.leadingAnchor.constraint(equalTo: boks.leadingAnchor),
+            h.view.trailingAnchor.constraint(equalTo: boks.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: boks.bottomAnchor)
         ])
         h.didMove(toParent: side)
-        h.view.alpha = 0
-        UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
+        boks.endret = { [weak nett] r in nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.stuaTopp(\(Int(r.minY)))", completionHandler: nil) }
+        boks.alpha = 0
+        UIView.animate(withDuration: 0.2) { boks.alpha = 1 }
         return h
     }
     private func fjernOverlegg<V: View>(_ vert: inout UIHostingController<V>?) {
         guard let h = vert else { return }
         vert = nil
-        UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent() }
+        let boks = h.view.superview
+        UIView.animate(withDuration: 0.22, animations: { (boks ?? h.view).alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); boks?.removeFromSuperview(); h.removeFromParent() }
     }
+    private func fram(_ v: UIView?) { if let v = v { v.superview?.bringSubviewToFront(v) } }
 
     // Veddeløpet (VeddelopSkjerm.swift)
     private let vlModell = VlModell()
     private var vlVert: UIHostingController<VeddelopSkjerm>?
     private func visVl(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else {
-            if let h = vlVert {
-                UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent(); if self.vlVert === h { self.vlVert = nil } }
-            }
-            return
-        }
+        guard let d = d else { fjernOverlegg(&vlVert); return }
         vlModell.sett(d)
-        if vlVert == nil {
-            let h = UIHostingController(rootView: VeddelopSkjerm(m: vlModell))
-            side.addChild(h)
-            h.view.translatesAutoresizingMaskIntoConstraints = false
-            side.view.addSubview(h.view)
-            NSLayoutConstraint.activate([
-                h.view.topAnchor.constraint(equalTo: side.view.topAnchor), h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
-                h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
-            ])
-            h.didMove(toParent: side)
-            h.view.alpha = 0
-            vlVert = h
-            UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
-        }
-        side.view.bringSubviewToFront(vlVert!.view)
+        if vlVert == nil { vlVert = leggOverlegg(UIHostingController(rootView: VeddelopSkjerm(m: vlModell)), over: side, nett: vlModell.nett) }
+        fram(vlVert?.view.superview)
     }
 
     // Ring of Fire (RingSkjerm.swift)
     private let rofModell = RofModell()
     private var rofVert: UIHostingController<RingSkjerm>?
     private func visRof(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else {
-            if let h = rofVert {
-                UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent(); if self.rofVert === h { self.rofVert = nil } }
-            }
-            return
-        }
+        guard let d = d else { fjernOverlegg(&rofVert); return }
         rofModell.sett(d)
-        if rofVert == nil {
-            let h = UIHostingController(rootView: RingSkjerm(m: rofModell))
-            side.addChild(h)
-            h.view.translatesAutoresizingMaskIntoConstraints = false
-            side.view.addSubview(h.view)
-            NSLayoutConstraint.activate([
-                h.view.topAnchor.constraint(equalTo: side.view.topAnchor), h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
-                h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
-            ])
-            h.didMove(toParent: side)
-            h.view.alpha = 0
-            rofVert = h
-            UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
-        }
-        side.view.bringSubviewToFront(rofVert!.view)
+        if rofVert == nil { rofVert = leggOverlegg(UIHostingController(rootView: RingSkjerm(m: rofModell)), over: side, nett: rofModell.nett) }
+        fram(rofVert?.view.superview)
     }
 
     // Kortlekene (KortSkjerm.swift): samme overlegg, en annen tegner
     private let kortModell = KortModell()
     private var kortVert: UIHostingController<KortSkjerm>?
     private func visKort(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else {
-            if let h = kortVert {
-                UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent(); if self.kortVert === h { self.kortVert = nil } }
-            }
-            return
-        }
+        guard let d = d else { fjernOverlegg(&kortVert); return }
         kortModell.sett(d)
-        if kortVert == nil {
-            let h = UIHostingController(rootView: KortSkjerm(m: kortModell))
-            side.addChild(h)
-            h.view.translatesAutoresizingMaskIntoConstraints = false
-            side.view.addSubview(h.view)
-            NSLayoutConstraint.activate([
-                h.view.topAnchor.constraint(equalTo: side.view.topAnchor), h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
-                h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
-            ])
-            h.didMove(toParent: side)
-            h.view.alpha = 0
-            kortVert = h
-            UIView.animate(withDuration: 0.2) { h.view.alpha = 1 }
-        }
-        side.view.bringSubviewToFront(kortVert!.view)
+        if kortVert == nil { kortVert = leggOverlegg(UIHostingController(rootView: KortSkjerm(m: kortModell)), over: side, nett: kortModell.nett) }
+        fram(kortVert?.view.superview)
     }
 
     private func visStart(i side: UIViewController, _ vis: Bool) {
@@ -609,7 +565,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
                 h.view.alpha = 0
                 startVert = h
             }
-            side.view.bringSubviewToFront(startVert!.view)
+            fram(startVert?.view.superview)
             UIView.animate(withDuration: 0.18) { self.startVert?.view.alpha = 1 }
         } else if let h = startVert {
             // Rommet er klart: skjermen glir bort og nettvisningen er der under
@@ -688,6 +644,17 @@ final class HullVisning: UIView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if hull.contains(point) { return nil }
         return super.hitTest(point, with: event)
+    }
+}
+
+/// Lekene: hullet ligger nederst, over fanelinja, og nettsiden får vite hvor det er
+final class LekHull: HullVisning {
+    var hullH: CGFloat = 0
+    var endret: ((CGRect) -> Void)?
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let r = CGRect(x: 0, y: bounds.height - safeAreaInsets.bottom - hullH, width: bounds.width, height: hullH + safeAreaInsets.bottom)
+        if r != hull { hull = r; endret?(r) }
     }
 }
 
