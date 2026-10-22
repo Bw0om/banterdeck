@@ -170,6 +170,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   document.addEventListener('mv-ark-aapen', (e) => { if (harSkall) Skall.arkAapen(e.detail || {}).catch(() => {}); });
   // «Si noe» i stua: iOS-dialog med tekstfelt (tastaturet håndteres av iOS)
   document.addEventListener('mv-si', (e) => { if (harSkall) Skall.si(e.detail || {}).catch(() => {}); });
+  document.addEventListener('mv-stua', (e) => { if (harSkall && Skall.stua) Skall.stua(e.detail || {}).catch(() => {}); });
   // «Figuren din» og «Rommet» som native ark (ios/App/App/FigurArk.swift, RomArk.swift)
   document.addEventListener('mv-ark', (e) => { if (harSkall) Skall.ark(e.detail || {}).catch(() => {}); });
   // Inviter: iPhonens eget delingsark, med AirDrop øverst

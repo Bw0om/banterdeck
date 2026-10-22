@@ -432,6 +432,10 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         side.view.bringSubviewToFront(lobbyHull!)
     }
 
+    func settStuaHoyde(_ h: CGFloat) {
+        if h > 40, abs(h - lobbyModell.stuaH) > 1 { lobbyModell.stuaH = h }
+    }
+
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
     func settOverleggSkjult(_ skjult: Bool) {
         let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view]
@@ -666,6 +670,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "ark", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "pluss", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "arkAapen", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "stua", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "si", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logginn", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "skjema", returnType: CAPPluginReturnPromise),
@@ -768,6 +773,15 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         let vc = bridge?.viewController
         DispatchQueue.main.async {
             SkallViewController.delt?.visSi(d, fra: vc)
+            call.resolve()
+        }
+    }
+
+    /// Stua i lobbyen har fått ny høyde (nettsiden måler den): {h} – hullet blir like stort, så hele stua og knappene i den synes
+    @objc func stua(_ call: CAPPluginCall) {
+        let h = call.getDouble("h") ?? 0
+        DispatchQueue.main.async {
+            SkallViewController.delt?.settStuaHoyde(CGFloat(h))
             call.resolve()
         }
     }

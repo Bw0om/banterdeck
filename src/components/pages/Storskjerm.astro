@@ -204,7 +204,7 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var sett = null;
     function hendelser(gml, d) {
       var s = d.spill || {}, b = d.bors || {};
-      if (tvVlMusikk && !(s.type === 'veddelopet' && s.vl && s.vl.fase === 'lop')) tvVlMusikkPaa(false);
+      if (typeof tvKom !== 'undefined' && tvKom && !(s.type === 'veddelopet' && s.vl)) tvKom.stopp();
       var na = {
         slurker: {}, brudd: s.ring && s.brudd ? s.brudd.nr : 0, kortNr: s.type === 'kort' ? (s.ring ? s.nr : s.pos) + ':' + (s.lek || '') : '',
         meldte: (b.meldte || []).map(function (a) { return a.id; }), saker: (b.saker || []).map(function (x) { return x.id + ':' + (x.dom === true ? 'd' : ''); }),
@@ -974,50 +974,124 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     /* ---------- Veddeløpet: travbanen ---------- */
     var tvVlSett = {}, tvVlPos = {};
     /* Veddeløpet: musikk og kommentator på TV-en (public/lyd/veddelop/). Bare etter at noen har trykket start på TV-en (lyd er lov da). */
-    var TVVL_FIL = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' };
-    var tvVlSt = { runde: 0, fase: '', leder: '', jevnt: false, sist: 0, n: 0, pos: null }, tvVlMusikk = null;
-    var TVVL_ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4 };
-    function tvVlVariant(navn) { var n = TVVL_ANT[navn.split('-')[0]] || 1; return navn + '-' + 'abcd'.charAt(Math.floor(Math.random() * n)); }
-    function tvVlMusikkPaa(paa) {
-      if (paa) {
-        if (!tvVlMusikk) { tvVlMusikk = new Audio('/lyd/veddelop/musikk.mp3'); tvVlMusikk.loop = true; }
-        tvVlMusikk.volume = 0.4; var p = tvVlMusikk.play(); if (p && p.catch) p.catch(function () {});
-      } else if (tvVlMusikk && !tvVlMusikk.paused) {
-        var el = tvVlMusikk, fade = setInterval(function () { el.volume = Math.max(0, el.volume - 0.05); if (el.volume <= 0.01) { clearInterval(fade); el.pause(); el.currentTime = 0; } }, 80);
+    /* Kommentatoren i Veddeløpet (samme kode på vertens telefon og på TV-en):
+       – bare én lyd om gangen: en replikk starter aldri oppå en annen, og målgangen spilles i kø (vinner → jubel → seier)
+       – aldri samme replikk to ganger på rad (de siste åtte brukes ikke igjen så lenge det finnes andre)
+       – ikke en replikk på hvert kort: løpet får puste, og samme farge igjen får «Der kommer …» / «Fart i …», ikke «rykker fram»
+       – musikken stoppes på ordentlig: iPhone lar ikke nettsiden skru ned volumet, så stoppen venter ikke på volum 0 */
+    function lagVlKommentator(volum) {
+      var F = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' }, FARGER = ['♥', '♠', '♦', '♣'];
+      var ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4, igjen: 3, ifra: 2, innspurt: 2, henter: 1, side: 1 };
+      var musikk = null, fadeT = null, stemme = null, ko = [], brukt = [], pause = 0, st = null;
+      function nytt(r) { st = { runde: r, fase: '', leder: '', jevnt: false, sistSagt: false, innspurt: {}, ifra: '', n: null, pos: {}, forrigeF: '', rad: 0, taus: 0 }; }
+      nytt(0);
+      function varianter(navn) { var n = ANT[navn.split('-')[0]]; if (!n) return [navn]; var l = []; for (var i = 0; i < n; i++) l.push(navn + '-' + 'abcd'.charAt(i)); return l; }
+      function velg(liste) {
+        var friske = liste.filter(function (x) { return brukt.indexOf(x) < 0; });
+        if (!friske.length) friske = liste.filter(function (x) { return x !== brukt[brukt.length - 1]; });
+        return friske.length ? friske[Math.floor(Math.random() * friske.length)] : '';
       }
-    }
-    function tvVlSi(navn, tving) {
-      var naa = Date.now(); if (!tving && naa - tvVlSt.sist < 2300) return false; tvVlSt.sist = naa;
-      try { var a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = 1; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
-      return true;
-    }
-    function tvVlLyd(v) {
-      if (!startet) return;
-      var r = v.runde || 1, f = v.fase;
-      if (r !== tvVlSt.runde) tvVlSt = { runde: r, fase: '', leder: '', jevnt: false, sist: 0 };
-      if (f === 'lop' && tvVlSt.fase !== 'lop') { tvVlMusikkPaa(true); tvVlSt.sist = 0; tvVlSi(tvVlVariant('start'), true); tvVlSt.pos = Object.assign({}, v.pos || {}); }
-      if (f === 'lop' && v.n !== tvVlSt.n) {
-        tvVlSt.n = v.n;
-        var pos = v.pos || {}, forrige = tvVlSt.pos || {}, best = -1, leder = '', delt = false, tilbake = '';
-        ['♥', '♠', '♦', '♣'].forEach(function (x) { var p = pos[x] || 0; if (p < (forrige[x] || 0)) tilbake = x; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
-        tvVlSt.pos = Object.assign({}, pos);
-        var sist = '', verst = 99; ['♥', '♠', '♦', '♣'].forEach(function (x) { var p = pos[x] || 0; if (p < verst) { verst = p; sist = x; } });
-        var sistAlene = ['♥', '♠', '♦', '♣'].filter(function (x) { return (pos[x] || 0) === verst; }).length === 1 && best - verst >= 3;
-        if (tilbake) tvVlSi(tvVlVariant('tilbake-' + TVVL_FIL[tilbake]));
-        else if (best >= 2 && !delt && leder !== tvVlSt.leder && tvVlSi(tvVlVariant('leder-' + TVVL_FIL[leder]))) tvVlSt.leder = leder;
-        else if (best >= 6 && delt && !tvVlSt.jevnt && tvVlSi(tvVlVariant('jevnt'))) tvVlSt.jevnt = true;
-        else if (sistAlene && !tvVlSt.sistSagt && tvVlSi('sist-' + TVVL_FIL[sist])) tvVlSt.sistSagt = true;
-        else if (best >= 3 && Math.random() < 0.3) tvVlSi(tvVlVariant('fyll'));
-        else if (v.sist && v.sist.f) tvVlSi(tvVlVariant('fram-' + TVVL_FIL[v.sist.f]));
+      function opptatt() { return !!stemme || ko.length > 0 || Date.now() < pause; }
+      function spill(navn) {
+        if (!navn) return;
+        brukt.push(navn); if (brukt.length > 8) brukt.shift();
+        var a; try { a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = volum; } catch (e) { return; }
+        stemme = a;
+        var vakt = null;
+        var ferdig = function () {
+          clearTimeout(vakt);
+          if (stemme !== a) return;
+          stemme = null; pause = Date.now() + 400;
+          if (ko.length) { var neste = ko.shift(); setTimeout(function () { if (!stemme) spill(neste); }, 400); }
+        };
+        // En fil som aldri sier fra at den er ferdig, skal ikke stenge kommentatoren for resten av løpet
+        vakt = setTimeout(ferdig, 12000);
+        a.onloadedmetadata = function () { if (isFinite(a.duration) && a.duration > 0) { clearTimeout(vakt); vakt = setTimeout(ferdig, a.duration * 1000 + 1500); } };
+        a.onended = ferdig; a.onerror = ferdig;
+        try { var p = a.play(); if (p && p.catch) p.catch(ferdig); } catch (e) { ferdig(); }
       }
-      if (f === 'ferdig' && tvVlSt.fase !== 'ferdig') {
-        tvVlMusikkPaa(false);
-        try { var j = new Audio('/lyd/veddelop/jubel.mp3'); j.volume = 0.9; var pj = j.play(); if (pj && pj.catch) pj.catch(function () {}); } catch (e) {}
-        var vinner = v.vinner; setTimeout(function () { tvVlSt.sist = 0; if (vinner) tvVlSi(tvVlVariant('vinner-' + TVVL_FIL[vinner]), true); }, 900);
-        setTimeout(function () { tvVlSt.sist = 0; tvVlSi(tvVlVariant('seier'), true); }, 3800);
+      function si(navn) { if (!navn || opptatt()) return false; spill(navn); return true; }
+      function musikkPaa(paa) {
+        if (paa) {
+          clearInterval(fadeT); fadeT = null;
+          if (!musikk) { musikk = new Audio('/lyd/veddelop/musikk.mp3'); musikk.loop = true; }
+          try { musikk.volume = volum * 0.4; } catch (e) {}
+          if (musikk.paused) { var p = musikk.play(); if (p && p.catch) p.catch(function () {}); }
+          return;
+        }
+        if (fadeT || !musikk || musikk.paused) return;
+        var el = musikk, t0 = Date.now(), v0 = el.volume;
+        fadeT = setInterval(function () {
+          var x = Math.min(1, (Date.now() - t0) / 500);
+          try { el.volume = v0 * (1 - x); } catch (e) {}
+          if (x >= 1) { clearInterval(fadeT); fadeT = null; el.pause(); try { el.currentTime = 0; el.volume = v0; } catch (e) {} }
+        }, 50);
       }
-      tvVlSt.fase = f;
+      /** Alt stille med en gang: leken er avsluttet, lyden skrudd av, eller appen gikk i bakgrunnen */
+      function stopp() {
+        ko = [];
+        clearInterval(fadeT); fadeT = null;
+        if (musikk && !musikk.paused) { try { musikk.pause(); musikk.currentTime = 0; } catch (e) {} }
+        if (stemme) { var a = stemme; stemme = null; try { a.pause(); } catch (e) {} }
+        st.fase = '';
+      }
+      function kort(s) {
+        var pos = s.pos || {}, forrige = st.pos || {}, best = -1, leder = '', delt = false, tilbake = '', verst = 99, sist = '';
+        FARGER.forEach(function (x) {
+          var p = pos[x] || 0;
+          if (p < (forrige[x] || 0)) tilbake = x;
+          if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true;
+          if (p < verst) { verst = p; sist = x; }
+        });
+        st.pos = Object.assign({}, pos);
+        var f = s.sist && s.sist.f, p = f ? pos[f] || 0 : 0;
+        st.rad = f && f === st.forrigeF ? st.rad + 1 : 1; st.forrigeF = f || '';
+        var andre = FARGER.filter(function (x) { return x !== f; });
+        var nest = Math.max.apply(null, andre.map(function (x) { return pos[x] || 0; }));
+        var varSist = !!f && andre.every(function (x) { return (forrige[f] || 0) < (forrige[x] || 0); });
+        var sistAlene = FARGER.filter(function (x) { return (pos[x] || 0) === verst; }).length === 1 && best - verst >= 3;
+        // Det som endrer løpet, sies med en gang (hvis ingen andre snakker): tilbake, ett steg fra mål, ny leder, dødt løp, drar ifra
+        if (tilbake) return si(velg(varianter('tilbake-' + F[tilbake])));
+        if (f && p >= 7 && !st.innspurt[f]) { if (si(velg(varianter('innspurt-' + F[f])))) st.innspurt[f] = true; return; }
+        if (best >= 2 && !delt && leder !== st.leder) { if (si(velg(varianter('leder-' + F[leder])))) st.leder = leder; return; }
+        if (best >= 6 && delt && !st.jevnt) { if (si(velg(varianter('jevnt')))) st.jevnt = true; return; }
+        if (f && f === leder && !delt && p - nest >= 2 && st.ifra !== f) { if (si(velg(varianter('ifra-' + F[f])))) st.ifra = f; return; }
+        if (sistAlene && !st.sistSagt) { if (si('sist-' + F[sist])) st.sistSagt = true; return; }
+        if (!f) return;
+        // Et vanlig steg kommenteres høyst annethvert kort – og med det som passer: henter inn, oppe på siden, igjen, eller fram
+        st.taus++;
+        if (st.taus < 2) return;
+        var linjer;
+        if (varSist && p >= 2) linjer = varianter('henter-' + F[f]);
+        else if (delt && p === best && best >= 2 && best < 6) linjer = varianter('side-' + F[f]);
+        else if (st.rad >= 2) linjer = varianter('igjen-' + F[f]).concat(st.rad >= 3 ? ['fyll-a', 'fyll-b', 'fyll-c'] : []);
+        else linjer = best >= 3 && Math.random() < 0.25 ? varianter('fyll') : varianter('fram-' + F[f]);
+        if (si(velg(linjer))) st.taus = 0;
+      }
+      function maal(vinner) {
+        ko = []; musikkPaa(false);
+        if (stemme) { var a = stemme; stemme = null; try { a.pause(); } catch (e) {} }
+        var rekke = [];
+        if (vinner) rekke.push(velg(varianter('vinner-' + F[vinner])));
+        rekke.push('jubel', velg(varianter('seier')));
+        ko = rekke.slice(1); spill(rekke[0]);
+      }
+      function oppdater(s, aktiv) {
+        var r = s.runde || 1, f = s.fase;
+        if (!aktiv) { if (st.fase || stemme || (musikk && !musikk.paused)) stopp(); return; }
+        if (r !== st.runde) nytt(r);
+        if (f === 'lop') {
+          musikkPaa(true);
+          if (st.fase !== 'lop') { st.pos = Object.assign({}, s.pos || {}); st.n = s.n; si(velg(varianter('start'))); }
+          else if (s.n !== st.n) { st.n = s.n; kort(s); }
+        } else if (f === 'ferdig' && st.fase === 'lop') maal(s.vinner);
+        else musikkPaa(false);
+        st.fase = f;
+      }
+      return { oppdater: oppdater, stopp: stopp, opptatt: opptatt };
     }
+    var tvKom = lagVlKommentator(1);
+    function tvVlLyd(v) { if (!startet) return; tvKom.oppdater(v, true); }
     function vlScene(d, s) {
       var v = s.vl, f = v.fase, r = v.runde || 1, vm = v.veddemaal || {}, alle = d.spillere || [];
       tvVlLyd(v);

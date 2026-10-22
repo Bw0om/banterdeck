@@ -42,7 +42,7 @@ struct LobbySkjerm: View {
 
     var body: some View {
         GeometryReader { g in
-            let hull = m.stuaH > 0 ? m.stuaH + 8 : (g.size.width - 24) * 0.56 + 16
+            let hull = m.stuaH > 0 ? m.stuaH + 8 : (g.size.width - 50) * 0.823 + 72
             ZStack(alignment: .top) {
                 VStack(spacing: 10) {
                     topp.padding(.horizontal, 16).padding(.top, 6).frame(maxWidth: .infinity).background(papir.ignoresSafeArea(edges: [.top, .horizontal]))

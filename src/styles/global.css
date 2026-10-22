@@ -2217,3 +2217,17 @@ html.har-skall.ark-aapen #rom{visibility:hidden}
 html.har-skall .rom-tavle{background:rgba(10,7,4,.45)}
 html.har-skall .rom-tavle-topp{padding-top:22px}
 html.har-skall.lobby-nativ #romStuaPlass .rom-stua{max-width:none!important}
+
+/* Appen: «Stua» under en lek er en hel skjerm, ikke et ark med svart rundt. Rommet fyller skjermen, og én stor knapp tar deg tilbake. */
+html.har-skall .rom-tavle.stua-hel{background:var(--bg);padding:0;align-items:stretch;animation:stua-hel-inn 220ms cubic-bezier(.23,1,.32,1)}
+html.har-skall .stua-hel .rom-tavle-innhold{max-width:none;max-height:none;height:100%;margin:0;border:0;border-radius:0;background:var(--bg);overflow:hidden;
+  display:flex;flex-direction:column;gap:14px;padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 92px)}
+html.har-skall .stua-hel .rom-tavle-topp{padding-top:0}
+html.har-skall .stua-hel .rom-tavle-topp .linkbtn,html.har-skall .stua-hel .ark-hank{display:none}
+html.har-skall .stua-hel .ark-kropp{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center}
+html.har-skall .stua-hel .rom-stua{margin:0}
+html.har-skall .stua-hel .rom-stua svg{max-height:calc(100dvh - 300px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+html.har-skall .stua-hel .stua-tilbake{width:100%;min-height:58px;font-size:18px;flex:none}
+@keyframes stua-hel-inn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){html.har-skall .rom-tavle.stua-hel{animation:stua-hel-fade 160ms ease-out}}
+@keyframes stua-hel-fade{from{opacity:0}to{opacity:1}}

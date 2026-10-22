@@ -10,7 +10,7 @@ struct VlHode: Identifiable { let id: String; let png: String; let oi: Bool }
 struct VlBane: Identifiable { let id: String; let navn: String; let pos: Int; let rod: Bool; let valgt: Bool; let vant: Bool; let hoder: [VlHode] }
 
 struct VlData {
-    let fase: String, runde: Int, naa: Double
+    let fase: String, runde: Int, n: Int, naa: Double
     let tittel: String, chip: String, hjelp: String
     let sider: [VlSide], baner: [VlBane]
     let sats: Int, satsTekst: String, status: String, statusHoder: [VlHode]
@@ -20,7 +20,7 @@ struct VlData {
     let stua: String, mer: String
 
     init(_ d: [String: Any]) {
-        fase = d["fase"] as? String ?? ""; runde = (d["runde"] as? NSNumber)?.intValue ?? 1; naa = (d["naa"] as? NSNumber)?.doubleValue ?? 0
+        fase = d["fase"] as? String ?? ""; runde = (d["runde"] as? NSNumber)?.intValue ?? 1; n = (d["n"] as? NSNumber)?.intValue ?? 0; naa = (d["naa"] as? NSNumber)?.doubleValue ?? 0
         tittel = d["tittel"] as? String ?? ""; chip = d["chip"] as? String ?? ""; hjelp = d["hjelp"] as? String ?? ""
         sider = (d["sider"] as? [[String: Any]] ?? []).enumerated().map { i, s in
             VlSide(id: i, snudd: s["snudd"] as? Bool ?? false, v: s["v"] as? String ?? "", f: s["f"] as? String ?? "", rod: s["rod"] as? Bool ?? false)
@@ -72,6 +72,7 @@ final class VlModell: ObservableObject {
 struct VeddelopSkjerm: View {
     @ObservedObject var m: VlModell
     @Environment(\.colorScheme) private var modus
+    @Environment(\.accessibilityReduceMotion) private var rolig
     private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
     private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
     private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
@@ -202,8 +203,13 @@ struct VeddelopSkjerm: View {
     private func hest(_ b: VlBane, lop: Bool) -> some View {
         TimelineView(.periodic(from: .now, by: 0.05)) { tl in
             let t = tl.date.timeIntervalSince1970
-            let hopp = lop ? CGFloat(abs(sin(t * .pi * 2))) * -4 : 0
-            let vink = lop ? sin(t * .pi * 2 + 0.6) * 5 : 0
+            let i = ["♥": 0, "♠": 1, "♦": 2, "♣": 3][b.id] ?? 0
+            let tempo = [1.0, 1.31, 0.83, 1.17][i], takt = [0.0, 1.9, 3.4, 4.8][i]
+            let sving = [5.0, 3.2, 6.5, 4.2][i], hoyde: CGFloat = [4, 6, 3, 5][i]
+            let x = t * .pi * 2 * tempo + takt
+            let dans = lop && !rolig
+            let hopp = dans ? CGFloat(abs(sin(x))) * -hoyde : 0
+            let vink = dans ? sin(x * (i % 2 == 0 ? 1 : 0.5) + 0.6) * sving : 0
             VStack(spacing: 1) {
                 Text("A").font(.system(size: 13, weight: .black))
                 Text(b.id).font(.system(size: 20, weight: .black))
@@ -267,7 +273,7 @@ struct VeddelopSkjerm: View {
             .background(RoundedRectangle(cornerRadius: 6).fill(Color.white)).overlay(RoundedRectangle(cornerRadius: 6).stroke(morkBlekk, lineWidth: 2.5))
             Text((d.sist["tekst"] as? String ?? "").uppercased()).font(.archivo(20, vekt: 900))
         }
-        .id("\(d.runde)-\(v)\(f)")
+        .id("\(d.runde)-\(d.n)")
         .transition(.move(edge: .leading).combined(with: .opacity))
     }
 
