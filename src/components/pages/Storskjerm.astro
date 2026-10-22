@@ -975,15 +975,21 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
     var tvVlSett = {}, tvVlPos = {};
     /* Veddeløpet: musikk og kommentator på TV-en (public/lyd/veddelop/). Bare etter at noen har trykket start på TV-en (lyd er lov da). */
     /* Kommentatoren i Veddeløpet (samme kode på vertens telefon og på TV-en):
-       – bare én lyd om gangen: en replikk starter aldri oppå en annen, og målgangen spilles i kø (vinner → jubel → seier)
-       – aldri samme replikk to ganger på rad (de siste åtte brukes ikke igjen så lenge det finnes andre)
-       – ikke en replikk på hvert kort: løpet får puste, og samme farge igjen får «Der kommer …» / «Fart i …», ikke «rykker fram»
+       – én lyd om gangen: en replikk starter aldri oppå en annen. Det som virkelig endrer løpet, venter heller et øyeblikk
+         (høyst 2,5 s) enn å bli borte, og målgangen spilles i kø (vinner → jubel → seier)
+       – aldri samme replikk to ganger på rad (de siste ti brukes ikke igjen så lenge det finnes andre)
+       – han følger løpet: sidekortet som sender en hest tilbake (også rett etter at den gikk fram), hesten som reiser seg igjen,
+         lederen som faller, to hester ved mål, hesten som står bom stille, comeback og neselengde – og heier imellom
        – musikken stoppes på ordentlig: iPhone lar ikke nettsiden skru ned volumet, så stoppen venter ikke på volum 0 */
     function lagVlKommentator(volum) {
       var F = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' }, FARGER = ['♥', '♠', '♦', '♣'];
-      var ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4, igjen: 3, ifra: 2, innspurt: 2, henter: 1, side: 1 };
-      var musikk = null, fadeT = null, stemme = null, ko = [], brukt = [], pause = 0, st = null;
-      function nytt(r) { st = { runde: r, fase: '', leder: '', jevnt: false, sistSagt: false, innspurt: {}, ifra: '', n: null, pos: {}, forrigeF: '', rad: 0, taus: 0 }; }
+      var ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4, igjen: 3, ifra: 2, innspurt: 2, henter: 1, side: 1,
+        heia: 4, tomaal: 2, nese: 2, reiser: 2, frati: 2, mister: 1, stille: 1, comeback: 1 };
+      var musikk = null, fadeT = null, stemme = null, ko = [], brukt = [], pause = 0, st = null, viktig = null;
+      function nytt(r) {
+        st = { runde: r, fase: '', leder: '', jevnt: false, sistSagt: false, innspurt: {}, ifra: '', tomaal: false, n: null, pos: {}, forrigeF: '', rad: 0,
+          snudd: 0, falt: '', varSist: {}, stilleSagt: {}, flyttet: {}, kort: 0 };
+      }
       nytt(0);
       function varianter(navn) { var n = ANT[navn.split('-')[0]]; if (!n) return [navn]; var l = []; for (var i = 0; i < n; i++) l.push(navn + '-' + 'abcd'.charAt(i)); return l; }
       function velg(liste) {
@@ -994,15 +1000,17 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       function opptatt() { return !!stemme || ko.length > 0 || Date.now() < pause; }
       function spill(navn) {
         if (!navn) return;
-        brukt.push(navn); if (brukt.length > 8) brukt.shift();
+        brukt.push(navn); if (brukt.length > 10) brukt.shift();
         var a; try { a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = volum; } catch (e) { return; }
         stemme = a;
         var vakt = null;
         var ferdig = function () {
           clearTimeout(vakt);
           if (stemme !== a) return;
-          stemme = null; pause = Date.now() + 400;
-          if (ko.length) { var neste = ko.shift(); setTimeout(function () { if (!stemme) spill(neste); }, 400); }
+          stemme = null; pause = Date.now() + 250;
+          if (ko.length) { var neste = ko.shift(); setTimeout(function () { if (!stemme) spill(neste); }, 250); }
+          else if (viktig && Date.now() - viktig.t < 2500) { var v = viktig.navn; viktig = null; setTimeout(function () { if (!stemme) spill(v); }, 250); }
+          else viktig = null;
         };
         // En fil som aldri sier fra at den er ferdig, skal ikke stenge kommentatoren for resten av løpet
         vakt = setTimeout(ferdig, 12000);
@@ -1011,11 +1019,20 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         try { var p = a.play(); if (p && p.catch) p.catch(ferdig); } catch (e) { ferdig(); }
       }
       function si(navn) { if (!navn || opptatt()) return false; spill(navn); return true; }
+      /** Det som endrer løpet: sies nå, eller rett etter replikken som går (den nyeste vinner, og den blir ikke gammel) */
+      function viktigSi(navn) {
+        if (!navn) return false;
+        if (stemme || ko.length) { viktig = { navn: navn, t: Date.now() }; return true; }
+        setTimeout(function () { if (!stemme) spill(navn); }, Math.max(0, pause - Date.now()));
+        pause = Date.now() + 60000;   // ingen andre replikker før denne har startet (spill() setter stemme med en gang)
+        setTimeout(function () { if (!stemme && pause > Date.now() + 1000) pause = 0; }, 400);
+        return true;
+      }
       function musikkPaa(paa) {
         if (paa) {
           clearInterval(fadeT); fadeT = null;
           if (!musikk) { musikk = new Audio('/lyd/veddelop/musikk.mp3'); musikk.loop = true; }
-          try { musikk.volume = volum * 0.4; } catch (e) {}
+          try { musikk.volume = volum * 0.45; } catch (e) {}
           if (musikk.paused) { var p = musikk.play(); if (p && p.catch) p.catch(function () {}); }
           return;
         }
@@ -1029,51 +1046,77 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
       }
       /** Alt stille med en gang: leken er avsluttet, lyden skrudd av, eller appen gikk i bakgrunnen */
       function stopp() {
-        ko = [];
+        ko = []; viktig = null; pause = 0;
         clearInterval(fadeT); fadeT = null;
         if (musikk && !musikk.paused) { try { musikk.pause(); musikk.currentTime = 0; } catch (e) {} }
         if (stemme) { var a = stemme; stemme = null; try { a.pause(); } catch (e) {} }
         st.fase = '';
       }
+      function lederAv(pos) {
+        var best = -1, leder = '', delt = false;
+        FARGER.forEach(function (x) { var p = pos[x] || 0; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
+        return { best: best, leder: leder, delt: delt };
+      }
       function kort(s) {
-        var pos = s.pos || {}, forrige = st.pos || {}, best = -1, leder = '', delt = false, tilbake = '', verst = 99, sist = '';
-        FARGER.forEach(function (x) {
-          var p = pos[x] || 0;
-          if (p < (forrige[x] || 0)) tilbake = x;
-          if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true;
-          if (p < verst) { verst = p; sist = x; }
-        });
-        st.pos = Object.assign({}, pos);
+        st.kort++;
+        var pos = s.pos || {}, forrige = st.pos || {}, naa = lederAv(pos), foer = lederAv(forrige), best = naa.best, leder = naa.leder, delt = naa.delt;
         var f = s.sist && s.sist.f, p = f ? pos[f] || 0 : 0;
+        // Sidekortet som ble snudd i dette trekket: den fargen går ett steg tilbake (også om den nettopp gikk fram – da står den der den sto)
+        var ant = (s.snudd || []).filter(Boolean).length, tilbake = '';
+        if (ant > st.snudd) {
+          var k = (s.bane || [])[ant - 1], t = k && k.f;
+          if (t && (pos[t] || 0) < (forrige[t] || 0) + (t === f ? 1 : 0)) tilbake = t;
+        }
+        st.snudd = ant;
+        FARGER.forEach(function (x) { if ((pos[x] || 0) > (forrige[x] || 0)) st.flyttet[x] = st.kort; });
+        st.pos = Object.assign({}, pos);
+        var falt = st.falt; st.falt = tilbake;
         st.rad = f && f === st.forrigeF ? st.rad + 1 : 1; st.forrigeF = f || '';
         var andre = FARGER.filter(function (x) { return x !== f; });
         var nest = Math.max.apply(null, andre.map(function (x) { return pos[x] || 0; }));
         var varSist = !!f && andre.every(function (x) { return (forrige[f] || 0) < (forrige[x] || 0); });
-        var sistAlene = FARGER.filter(function (x) { return (pos[x] || 0) === verst; }).length === 1 && best - verst >= 3;
-        // Det som endrer løpet, sies med en gang (hvis ingen andre snakker): tilbake, ett steg fra mål, ny leder, dødt løp, drar ifra
-        if (tilbake) return si(velg(varianter('tilbake-' + F[tilbake])));
-        if (f && p >= 7 && !st.innspurt[f]) { if (si(velg(varianter('innspurt-' + F[f])))) st.innspurt[f] = true; return; }
-        if (best >= 2 && !delt && leder !== st.leder) { if (si(velg(varianter('leder-' + F[leder])))) st.leder = leder; return; }
-        if (best >= 6 && delt && !st.jevnt) { if (si(velg(varianter('jevnt')))) st.jevnt = true; return; }
+        var verst = Math.min.apply(null, FARGER.map(function (x) { return pos[x] || 0; }));
+        var sisteListe = FARGER.filter(function (x) { return (pos[x] || 0) === verst; }), sist = sisteListe[0];
+        if (best >= 3 && sisteListe.length === 1) st.varSist[sist] = true;
+        var sistAlene = sisteListe.length === 1 && best - verst >= 3;
+        var vedMaal = FARGER.filter(function (x) { return (pos[x] || 0) >= 7; }).length;
+        // 1) Sidekortet: fram og rett tilbake, lederen faller, eller bare tilbake
+        if (tilbake) {
+          if (tilbake === f) return viktigSi(velg(varianter('frati-' + F[f])));
+          if (tilbake === foer.leder && !foer.delt && foer.best >= 2) { st.leder = ''; return viktigSi(velg(varianter('mister-' + F[tilbake]))); }
+          return viktigSi(velg(varianter('tilbake-' + F[tilbake])));
+        }
+        // 2) Hesten som falt tilbake i forrige trekk, går rett videre: «Å nei … men det gjør ingenting!»
+        if (f && falt === f) return viktigSi(velg(varianter('reiser-' + F[f])));
+        if (vedMaal >= 2 && !st.tomaal) { st.tomaal = true; return viktigSi(velg(varianter('tomaal'))); }
+        if (f && p >= 7 && !st.innspurt[f]) { st.innspurt[f] = true; return viktigSi(velg(varianter('innspurt-' + F[f]))); }
+        if (best >= 2 && !delt && leder !== st.leder) { st.leder = leder; return viktigSi(velg(varianter('leder-' + F[leder]))); }
+        if (best >= 6 && delt && !st.jevnt) { st.jevnt = true; return viktigSi(velg(varianter('jevnt'))); }
         if (f && f === leder && !delt && p - nest >= 2 && st.ifra !== f) { if (si(velg(varianter('ifra-' + F[f])))) st.ifra = f; return; }
         if (sistAlene && !st.sistSagt) { if (si('sist-' + F[sist])) st.sistSagt = true; return; }
+        // 3) En hest som ikke har rørt seg på lenge
+        if (st.kort >= 8) {
+          var stille = FARGER.filter(function (x) { return !st.stilleSagt[x] && st.kort - (st.flyttet[x] || 0) >= 7; })[0];
+          if (stille && si('stille-' + F[stille] + '-a')) { st.stilleSagt[stille] = true; return; }
+        }
         if (!f) return;
-        // Et vanlig steg kommenteres høyst annethvert kort – og med det som passer: henter inn, oppe på siden, igjen, eller fram
-        st.taus++;
-        if (st.taus < 2) return;
+        // 4) Et vanlig steg: henter inn, oppe på siden, igjen – eller han heier
         var linjer;
         if (varSist && p >= 2) linjer = varianter('henter-' + F[f]);
         else if (delt && p === best && best >= 2 && best < 6) linjer = varianter('side-' + F[f]);
         else if (st.rad >= 2) linjer = varianter('igjen-' + F[f]).concat(st.rad >= 3 ? ['fyll-a', 'fyll-b', 'fyll-c'] : []);
-        else linjer = best >= 3 && Math.random() < 0.25 ? varianter('fyll') : varianter('fram-' + F[f]);
-        if (si(velg(linjer))) st.taus = 0;
+        else if (best >= 3 && Math.random() < 0.35) linjer = varianter(Math.random() < 0.6 ? 'heia' : 'fyll');
+        else linjer = varianter('fram-' + F[f]);
+        si(velg(linjer));
       }
-      function maal(vinner) {
-        ko = []; musikkPaa(false);
+      function maal(vinner, pos) {
+        ko = []; viktig = null; musikkPaa(false);
         if (stemme) { var a = stemme; stemme = null; try { a.pause(); } catch (e) {} }
+        var nestBest = Math.max.apply(null, FARGER.filter(function (x) { return x !== vinner; }).map(function (x) { return pos[x] || 0; }));
         var rekke = [];
         if (vinner) rekke.push(velg(varianter('vinner-' + F[vinner])));
-        rekke.push('jubel', velg(varianter('seier')));
+        // Til slutt: comeback (vinneren lå sist), neselengde (to ved mål), ellers seiersropet
+        rekke.push('jubel', vinner && st.varSist[vinner] ? 'comeback-' + F[vinner] + '-a' : nestBest >= 7 ? velg(varianter('nese')) : velg(varianter('seier')));
         ko = rekke.slice(1); spill(rekke[0]);
       }
       function oppdater(s, aktiv) {
@@ -1082,9 +1125,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
         if (r !== st.runde) nytt(r);
         if (f === 'lop') {
           musikkPaa(true);
-          if (st.fase !== 'lop') { st.pos = Object.assign({}, s.pos || {}); st.n = s.n; si(velg(varianter('start'))); }
+          if (st.fase !== 'lop') { st.pos = Object.assign({}, s.pos || {}); st.n = s.n; st.snudd = (s.snudd || []).filter(Boolean).length; si(velg(varianter('start'))); }
           else if (s.n !== st.n) { st.n = s.n; kort(s); }
-        } else if (f === 'ferdig' && st.fase === 'lop') maal(s.vinner);
+        } else if (f === 'ferdig' && st.fase === 'lop') maal(s.vinner, s.pos || {});
         else musikkPaa(false);
         st.fase = f;
       }

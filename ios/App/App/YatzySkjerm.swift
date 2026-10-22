@@ -43,11 +43,14 @@ struct YzData {
 
 final class YzModell: ObservableObject {
     @Published var d: YzData? = nil
+    /// Terningene som er i lufta i et nytt kast (settes før de nye tallene vises, så ingen ser dem lande på forhånd)
+    @Published var iLufta: Set<Int> = []
     let blokker = KortModell()
     weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = YzData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
+        if ny.kast > 0, ny.nr != d?.nr { iLufta = Set(ny.terninger.filter { !$0.hold }.map { $0.id }) }
         d = ny
     }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
@@ -60,7 +63,8 @@ final class YzModell: ObservableObject {
 struct YatzySkjerm: View {
     @ObservedObject var m: YzModell
     @Environment(\.colorScheme) private var modus
-    @State private var rist = 0
+    @Environment(\.accessibilityReduceMotion) private var rolig
+    @State private var ristP: CGFloat = 1
     private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
     private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
     private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
@@ -79,13 +83,16 @@ struct YatzySkjerm: View {
         ZStack {
             papir.ignoresSafeArea()
             if let d = m.d {
-                VStack(spacing: 0) {
-                    topp(d)
-                    VStack(alignment: .leading, spacing: 10) {
+                GeometryReader { g in
+                    // Brettet krymper litt på små telefoner, så hele blokka får plass uten å bla
+                    let brettH = min(232, max(176, g.size.height * 0.3))
+                    VStack(spacing: 0) {
+                        topp(d)
+                        VStack(alignment: .leading, spacing: 8) {
                             if d.ferdig {
                                 slutt(d)
                             } else {
-                                brett(d)
+                                brett(d, h: brettH)
                                 if !d.lapp.isEmpty { lapp(d.lapp, d.lappStil) }
                             }
                             blokk(d)
@@ -96,13 +103,26 @@ struct YatzySkjerm: View {
                                 }.buttonStyle(.plain)
                             }
                             if d.ferdig { BlokkListe(m: m.blokker) }
-                            Spacer(minLength: 0)
-                        }.padding(.horizontal, 16).padding(.bottom, 12)
+                        }.padding(.horizontal, 16).padding(.bottom, 10)
+                    }
                 }
             }
         }
         .foregroundColor(blekk)
-        .onChange(of: m.d?.nr) { _ in withAnimation(.spring(response: 0.42, dampingFraction: 0.5)) { rist += 1 } }
+        .onChange(of: m.d?.nr) { _ in kast() }
+    }
+
+    /// Et nytt kast: begeret ristes, og terningene trilles ut av det én og én – som på nettet
+    private func kast() {
+        guard let d = m.d, d.kast > 0 else { m.iLufta = []; return }
+        var stille = Transaction(); stille.disablesAnimations = true
+        withTransaction(stille) { ristP = 0 }
+        withAnimation(.linear(duration: rolig ? 0.01 : 0.42)) { ristP = 1 }
+        for (k, i) in m.iLufta.sorted().enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (rolig ? 0 : 0.26 + Double(k) * 0.045)) {
+                withAnimation(rolig ? .easeOut(duration: 0.2) : .spring(response: 0.5, dampingFraction: 0.7)) { _ = m.iLufta.remove(i) }
+            }
+        }
     }
 
     private func topp(_ d: YzData) -> some View {
@@ -127,7 +147,7 @@ struct YatzySkjerm: View {
     }
 
     // MARK: Brettet – filt, holdt-kant øverst, terningene, begeret til høyre
-    private func brett(_ d: YzData) -> some View {
+    private func brett(_ d: YzData, h: CGFloat) -> some View {
         GeometryReader { g in
             let w = g.size.width
             ZStack(alignment: .topLeading) {
@@ -141,16 +161,19 @@ struct YatzySkjerm: View {
                 // kast 1 · 2 · 3
                 HStack(spacing: 5) { ForEach(0..<3, id: \.self) { i in Circle().fill(i < d.kast ? gul : lys.opacity(0.25)).frame(width: 8, height: 8) } }
                     .padding(.leading, 12).padding(.top, 50)
-                // terningene
+                // terningene: i lufta ligger de i begeret, snudd og usynlige – så triller de ut til plassen sin
                 ForEach(d.terninger) { t in
-                    let p = plass(t, w)
+                    let p = plass(t, w, h, d.nr)
+                    let fly = m.iLufta.contains(t.id)
                     terning(t, kanHolde: d.kanHolde, borte: d.kast == 0)
-                        .rotationEffect(.degrees(p.r))
-                        .position(x: p.x, y: p.y)
+                        .rotationEffect(.degrees(fly ? p.r + 220 : p.r))
+                        .scaleEffect(fly ? 0.9 : 1)
+                        .opacity(fly ? 0 : 1)
+                        .position(x: fly ? w - 52 : p.x, y: fly ? h * 0.62 : p.y)
                         .animation(.spring(response: 0.45, dampingFraction: 0.65), value: t.hold)
                 }
                 // begeret
-                HStack { Spacer(); beger(d).padding(.trailing, 14) }.padding(.top, 70)
+                HStack { Spacer(); beger(d).padding(.trailing, 14) }.padding(.top, h * 0.3)
                 if d.yatzy {
                     Text("YATZY!").font(.system(size: 50, weight: .heavy, design: .serif)).italic().foregroundColor(lys)
                         .shadow(color: morkBlekk, radius: 0, x: 3, y: 3).rotationEffect(.degrees(-6))
@@ -158,15 +181,17 @@ struct YatzySkjerm: View {
                 }
             }
         }
-        .frame(height: 232)
+        .frame(height: h)
     }
 
-    /// Hvor terningen ligger: holdt → på kanten øverst, ellers i rulleområdet
-    private func plass(_ t: YzTerning, _ w: CGFloat) -> (x: CGFloat, y: CGFloat, r: Double) {
+    /// Hvor terningen ligger: holdt → på kanten øverst, ellers i rulleområdet – litt ulikt for hvert kast, så de aldri lander helt likt
+    private func plass(_ t: YzTerning, _ w: CGFloat, _ h: CGFloat, _ nr: Int) -> (x: CGFloat, y: CGFloat, r: Double) {
         let hvile: [(CGFloat, CGFloat, Double)] = [(0.08, 110, -10), (0.3, 170, 12), (0.5, 105, -5), (0.68, 165, 16), (0.1, 190, 8)]
         if t.hold { return (24 + CGFloat(t.id) * 52, 34, 0) }
-        let h = hvile[t.id % hvile.count]
-        return (24 + h.0 * (w - 120), h.1, h.2)
+        let b = hvile[t.id % hvile.count]
+        let fro = abs((nr &* 7919 &+ t.id &* 104729) % 65536)
+        let jx = CGFloat(fro % 21 - 10) / 10 * 0.035, jy = CGFloat((fro / 21) % 17 - 8), jr = Double((fro / 357) % 31 - 15)
+        return (24 + (b.0 + jx) * (w - 120), (b.1 + jy) * h / 232, b.2 + jr)
     }
 
     private func terning(_ t: YzTerning, kanHolde: Bool, borte: Bool) -> some View {
@@ -180,7 +205,6 @@ struct YatzySkjerm: View {
             .frame(width: 40, height: 40)
             .shadow(color: morkBlekk.opacity(0.5), radius: 0, x: 2, y: 2)
             .opacity(borte ? 0 : 1)
-            .rotation3DEffect(.degrees(Double(rist % 2) * 360), axis: (x: 1, y: 1, z: 0))
         }.buttonStyle(.plain).disabled(!kanHolde || borte)
     }
 
@@ -208,7 +232,7 @@ struct YatzySkjerm: View {
                     Path { p in p.move(to: CGPoint(x: 12, y: 26)); p.addLine(to: CGPoint(x: 66, y: 26)); p.move(to: CGPoint(x: 14, y: 72)); p.addLine(to: CGPoint(x: 64, y: 72)) }.stroke(messing, lineWidth: 4)
                 }
                 .frame(width: 78, height: 96)
-                .rotationEffect(.degrees(rist % 2 == 0 ? 0 : -12), anchor: .bottom)
+                .modifier(Rist(p: ristP))
                 .opacity(d.kanKaste ? 1 : 0.55)
                 if d.kanKaste && d.kast == 0 { Text(d.beger.uppercased()).font(.archivo(10, vekt: 900)).foregroundColor(lys).multilineTextAlignment(.center).frame(width: 90) }
             }
@@ -227,42 +251,45 @@ struct YatzySkjerm: View {
 
     // MARK: Blokka – navnene øverst, feltene, summer; mulige felt kan trykkes
     private func blokk(_ d: YzData) -> some View {
-        let kol = max(1, d.hode.count)
-        return ScrollView([.horizontal, .vertical], showsIndicators: false) {
+        let kol = max(1, d.hode.count), n = d.rader.count + 1
+        return GeometryReader { g in
+            let rh = max(16, min(30, floor((g.size.height - 8) / CGFloat(n))))
+            let navnB = min(96, g.size.width * 0.27)
+            let cw = max(28, floor((g.size.width - navnB - 18) / CGFloat(kol)))
             VStack(spacing: 0) {
-                rad(navn: "Yatzy", stil: "hode", celler: d.hode.enumerated().map { i, n in YzCelle(tekst: n, mulig: "", aktiv: i == d.aktivKol, skriv: false, f: "") }, kol: kol)
-                ForEach(d.rader) { r in rad(navn: r.navn, stil: r.stil, celler: r.celler, kol: kol) }
+                rad(navn: "Yatzy", stil: "hode", celler: d.hode.enumerated().map { i, n in YzCelle(tekst: n, mulig: "", aktiv: i == d.aktivKol, skriv: false, f: "") }, rh: rh, navnB: navnB, cw: cw)
+                ForEach(d.rader) { r in rad(navn: r.navn, stil: r.stil, celler: r.celler, rh: rh, navnB: navnB, cw: cw) }
             }
             .background(Color(red: 0.984, green: 0.98, blue: 0.957))
             .overlay(RoundedRectangle(cornerRadius: 4).stroke(morkBlekk, lineWidth: 3))
             .background(RoundedRectangle(cornerRadius: 4).fill(morkBlekk).offset(x: 4, y: 4))
-            .padding(.trailing, 6).padding(.bottom, 6)
         }
         .frame(maxHeight: .infinity)
     }
 
-    private func rad(navn: String, stil: String, celler: [YzCelle], kol: Int) -> some View {
+    private func rad(navn: String, stil: String, celler: [YzCelle], rh: CGFloat, navnB: CGFloat, cw: CGFloat) -> some View {
         let sum = stil == "sum" || stil == "bonus" || stil == "total" || stil == "hode"
-        let cw: CGFloat = kol <= 3 ? 64 : kol <= 5 ? 50 : 42
+        let fs = min(13, rh * 0.52)
         return HStack(spacing: 0) {
-            Text(navn).font(.archivo(12, vekt: sum ? 900 : 700)).foregroundColor(morkBlekk).lineLimit(1).minimumScaleFactor(0.7)
-                .frame(width: 96, alignment: .leading).padding(.leading, 8)
+            Text(navn).font(.archivo(fs - 1, vekt: sum ? 900 : 700)).foregroundColor(morkBlekk).lineLimit(1).minimumScaleFactor(0.7)
+                .frame(width: navnB, alignment: .leading).padding(.leading, 8)
             ForEach(Array(celler.enumerated()), id: \.offset) { _, c in
                 Group {
                     if !c.mulig.isEmpty {
                         Button(action: { m.trykk("yz-felt", ["f": c.f]) }) {
-                            Text(c.mulig).font(.archivo(14, vekt: 900)).foregroundColor(morkBlekk).frame(width: cw - 6, height: 28)
+                            Text(c.mulig).font(.archivo(fs + 1, vekt: 900)).foregroundColor(morkBlekk).frame(width: cw - 6, height: rh - 5)
                                 .background(RoundedRectangle(cornerRadius: 6).fill(gul)).overlay(RoundedRectangle(cornerRadius: 6).stroke(morkBlekk, lineWidth: 2))
                         }.buttonStyle(.plain)
                     } else {
-                        Text(c.tekst).font(.archivo(stil == "total" ? 15 : 13, vekt: sum ? 900 : 700)).foregroundColor(c.skriv ? rust : morkBlekk)
+                        Text(c.tekst).font(.archivo(stil == "total" ? fs + 2 : fs, vekt: sum ? 900 : 700)).foregroundColor(c.skriv ? rust : morkBlekk)
+                            .lineLimit(1).minimumScaleFactor(0.6)
                     }
                 }
-                .frame(width: cw, height: 34)
+                .frame(width: cw, height: rh)
                 .background(c.aktiv ? gul.opacity(0.22) : .clear)
             }
         }
-        .frame(height: 34)
+        .frame(height: rh)
         .background(stil == "hode" ? gul.opacity(0.5) : stil == "total" ? Color(red: 0.95, green: 0.93, blue: 0.86) : .clear)
         .overlay(Rectangle().fill(morkBlekk.opacity(stil == "hode" || sum ? 0.6 : 0.18)).frame(height: 1), alignment: .bottom)
     }
@@ -278,5 +305,18 @@ struct YatzySkjerm: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(morkBlekk, lineWidth: 3))
         .background(RoundedRectangle(cornerRadius: 14).fill(morkBlekk).offset(x: 4, y: 4))
         if !d.taper.isEmpty { lapp(d.taper, "rod") }
+    }
+}
+
+/// Begeret som ristes: noen raske vipp rundt bunnen som dør ut (p går 0 → 1)
+private struct Rist: GeometryEffect {
+    var p: CGFloat
+    var animatableData: CGFloat { get { p } set { p = newValue } }
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let d = 1 - p, b = sin(p * .pi * 6)
+        let t = CGAffineTransform(translationX: size.width / 2, y: size.height - abs(b) * 4 * d)
+            .rotated(by: b * 0.16 * d)
+            .translatedBy(x: -size.width / 2, y: -size.height)
+        return ProjectionTransform(t)
     }
 }

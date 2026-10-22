@@ -235,9 +235,17 @@ export function startRom(LEKNAVN, LANG) {
   /** Vibrasjon: i appen går mønsteret til iOS-haptikk (app.js lytter på mv-vibrer – iPhone har ikke navigator.vibrate), ellers rett til telefonen. */
   /** Appen: stua i lobbyen ligger i et hull i den native skjermen. Hullet må være like høyt som stua – ellers kuttes den,
       og knappene nederst i stua (Rommet, Figuren din, Si noe) havner under lista og kan ikke trykkes. Høyden meldes hver gang den endrer seg. */
-  var stuaMaaler = null, stuaMaaltH = 0;
+  var stuaMaaler = null, stuaMaaltH = 0, stuaMaalY = null;
+  /** Står stua likevel et annet sted enn hullet (siden var rullet, eller noe over den er forskjøvet)? Flytt den så toppen treffer. */
+  function rettStua() {
+    var rot = document.documentElement, st = document.querySelector('#romStuaPlass .rom-stua');
+    if (stuaMaalY === null || !st || !rot.classList.contains('lobby-nativ')) return;
+    var naa = parseFloat(rot.style.getPropertyValue('--mv-stua-topp')) || stuaMaalY, avvik = stuaMaalY - st.getBoundingClientRect().top;
+    if (Math.abs(avvik) > 1) rot.style.setProperty('--mv-stua-topp', Math.round(naa + avvik) + 'px');
+  }
   function meldStuaH() {
     if (!document.documentElement.classList.contains('lobby-nativ')) return;
+    rettStua();
     var st = document.querySelector('#romStuaPlass .rom-stua'); if (!st) return;
     var h = Math.round(st.getBoundingClientRect().height);
     if (h > 40 && Math.abs(h - stuaMaaltH) > 1) { stuaMaaltH = h; try { document.dispatchEvent(new CustomEvent('mv-stua', { detail: { h: h } })); } catch (e) {} }
@@ -2021,7 +2029,9 @@ export function startRom(LEKNAVN, LANG) {
     },
     // Lobbyen native: stua vises gjennom et hull i skjermen – skallet sier hvor hullet er
     stuaTopp: function (px) {
-      try { document.documentElement.style.setProperty('--mv-stua-topp', Math.round(px) + 'px'); } catch (e) {}
+      stuaMaalY = Math.round(px);
+      try { document.documentElement.style.setProperty('--mv-stua-topp', stuaMaalY + 'px'); } catch (e) {}
+      rettStua();
       var st = document.querySelector('#romStuaPlass .rom-stua');
       return st ? Math.round(st.getBoundingClientRect().height) : 0;
     },
@@ -2995,15 +3005,21 @@ export function startRom(LEKNAVN, LANG) {
   /* Veddeløpet har musikk og kommentator (public/lyd/veddelop/, laget med ElevenLabs). Vertens telefon spiller dem –
      men ikke når en TV er koblet til, for da er det TV-en som er høyttaleren. Bare når lyden er på. */
   /* Kommentatoren i Veddeløpet (samme kode på vertens telefon og på TV-en):
-     – bare én lyd om gangen: en replikk starter aldri oppå en annen, og målgangen spilles i kø (vinner → jubel → seier)
-     – aldri samme replikk to ganger på rad (de siste åtte brukes ikke igjen så lenge det finnes andre)
-     – ikke en replikk på hvert kort: løpet får puste, og samme farge igjen får «Der kommer …» / «Fart i …», ikke «rykker fram»
+     – én lyd om gangen: en replikk starter aldri oppå en annen. Det som virkelig endrer løpet, venter heller et øyeblikk
+       (høyst 2,5 s) enn å bli borte, og målgangen spilles i kø (vinner → jubel → seier)
+     – aldri samme replikk to ganger på rad (de siste ti brukes ikke igjen så lenge det finnes andre)
+     – han følger løpet: sidekortet som sender en hest tilbake (også rett etter at den gikk fram), hesten som reiser seg igjen,
+       lederen som faller, to hester ved mål, hesten som står bom stille, comeback og neselengde – og heier imellom
      – musikken stoppes på ordentlig: iPhone lar ikke nettsiden skru ned volumet, så stoppen venter ikke på volum 0 */
   function lagVlKommentator(volum) {
     var F = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' }, FARGER = ['♥', '♠', '♦', '♣'];
-    var ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4, igjen: 3, ifra: 2, innspurt: 2, henter: 1, side: 1 };
-    var musikk = null, fadeT = null, stemme = null, ko = [], brukt = [], pause = 0, st = null;
-    function nytt(r) { st = { runde: r, fase: '', leder: '', jevnt: false, sistSagt: false, innspurt: {}, ifra: '', n: null, pos: {}, forrigeF: '', rad: 0, taus: 0 }; }
+    var ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4, igjen: 3, ifra: 2, innspurt: 2, henter: 1, side: 1,
+      heia: 4, tomaal: 2, nese: 2, reiser: 2, frati: 2, mister: 1, stille: 1, comeback: 1 };
+    var musikk = null, fadeT = null, stemme = null, ko = [], brukt = [], pause = 0, st = null, viktig = null;
+    function nytt(r) {
+      st = { runde: r, fase: '', leder: '', jevnt: false, sistSagt: false, innspurt: {}, ifra: '', tomaal: false, n: null, pos: {}, forrigeF: '', rad: 0,
+        snudd: 0, falt: '', varSist: {}, stilleSagt: {}, flyttet: {}, kort: 0 };
+    }
     nytt(0);
     function varianter(navn) { var n = ANT[navn.split('-')[0]]; if (!n) return [navn]; var l = []; for (var i = 0; i < n; i++) l.push(navn + '-' + 'abcd'.charAt(i)); return l; }
     function velg(liste) {
@@ -3014,15 +3030,17 @@ export function startRom(LEKNAVN, LANG) {
     function opptatt() { return !!stemme || ko.length > 0 || Date.now() < pause; }
     function spill(navn) {
       if (!navn) return;
-      brukt.push(navn); if (brukt.length > 8) brukt.shift();
+      brukt.push(navn); if (brukt.length > 10) brukt.shift();
       var a; try { a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = volum; } catch (e) { return; }
       stemme = a;
       var vakt = null;
       var ferdig = function () {
         clearTimeout(vakt);
         if (stemme !== a) return;
-        stemme = null; pause = Date.now() + 400;
-        if (ko.length) { var neste = ko.shift(); setTimeout(function () { if (!stemme) spill(neste); }, 400); }
+        stemme = null; pause = Date.now() + 250;
+        if (ko.length) { var neste = ko.shift(); setTimeout(function () { if (!stemme) spill(neste); }, 250); }
+        else if (viktig && Date.now() - viktig.t < 2500) { var v = viktig.navn; viktig = null; setTimeout(function () { if (!stemme) spill(v); }, 250); }
+        else viktig = null;
       };
       // En fil som aldri sier fra at den er ferdig, skal ikke stenge kommentatoren for resten av løpet
       vakt = setTimeout(ferdig, 12000);
@@ -3031,11 +3049,20 @@ export function startRom(LEKNAVN, LANG) {
       try { var p = a.play(); if (p && p.catch) p.catch(ferdig); } catch (e) { ferdig(); }
     }
     function si(navn) { if (!navn || opptatt()) return false; spill(navn); return true; }
+    /** Det som endrer løpet: sies nå, eller rett etter replikken som går (den nyeste vinner, og den blir ikke gammel) */
+    function viktigSi(navn) {
+      if (!navn) return false;
+      if (stemme || ko.length) { viktig = { navn: navn, t: Date.now() }; return true; }
+      setTimeout(function () { if (!stemme) spill(navn); }, Math.max(0, pause - Date.now()));
+      pause = Date.now() + 60000;   // ingen andre replikker før denne har startet (spill() setter stemme med en gang)
+      setTimeout(function () { if (!stemme && pause > Date.now() + 1000) pause = 0; }, 400);
+      return true;
+    }
     function musikkPaa(paa) {
       if (paa) {
         clearInterval(fadeT); fadeT = null;
         if (!musikk) { musikk = new Audio('/lyd/veddelop/musikk.mp3'); musikk.loop = true; }
-        try { musikk.volume = volum * 0.4; } catch (e) {}
+        try { musikk.volume = volum * 0.45; } catch (e) {}
         if (musikk.paused) { var p = musikk.play(); if (p && p.catch) p.catch(function () {}); }
         return;
       }
@@ -3049,51 +3076,77 @@ export function startRom(LEKNAVN, LANG) {
     }
     /** Alt stille med en gang: leken er avsluttet, lyden skrudd av, eller appen gikk i bakgrunnen */
     function stopp() {
-      ko = [];
+      ko = []; viktig = null; pause = 0;
       clearInterval(fadeT); fadeT = null;
       if (musikk && !musikk.paused) { try { musikk.pause(); musikk.currentTime = 0; } catch (e) {} }
       if (stemme) { var a = stemme; stemme = null; try { a.pause(); } catch (e) {} }
       st.fase = '';
     }
+    function lederAv(pos) {
+      var best = -1, leder = '', delt = false;
+      FARGER.forEach(function (x) { var p = pos[x] || 0; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
+      return { best: best, leder: leder, delt: delt };
+    }
     function kort(s) {
-      var pos = s.pos || {}, forrige = st.pos || {}, best = -1, leder = '', delt = false, tilbake = '', verst = 99, sist = '';
-      FARGER.forEach(function (x) {
-        var p = pos[x] || 0;
-        if (p < (forrige[x] || 0)) tilbake = x;
-        if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true;
-        if (p < verst) { verst = p; sist = x; }
-      });
-      st.pos = Object.assign({}, pos);
+      st.kort++;
+      var pos = s.pos || {}, forrige = st.pos || {}, naa = lederAv(pos), foer = lederAv(forrige), best = naa.best, leder = naa.leder, delt = naa.delt;
       var f = s.sist && s.sist.f, p = f ? pos[f] || 0 : 0;
+      // Sidekortet som ble snudd i dette trekket: den fargen går ett steg tilbake (også om den nettopp gikk fram – da står den der den sto)
+      var ant = (s.snudd || []).filter(Boolean).length, tilbake = '';
+      if (ant > st.snudd) {
+        var k = (s.bane || [])[ant - 1], t = k && k.f;
+        if (t && (pos[t] || 0) < (forrige[t] || 0) + (t === f ? 1 : 0)) tilbake = t;
+      }
+      st.snudd = ant;
+      FARGER.forEach(function (x) { if ((pos[x] || 0) > (forrige[x] || 0)) st.flyttet[x] = st.kort; });
+      st.pos = Object.assign({}, pos);
+      var falt = st.falt; st.falt = tilbake;
       st.rad = f && f === st.forrigeF ? st.rad + 1 : 1; st.forrigeF = f || '';
       var andre = FARGER.filter(function (x) { return x !== f; });
       var nest = Math.max.apply(null, andre.map(function (x) { return pos[x] || 0; }));
       var varSist = !!f && andre.every(function (x) { return (forrige[f] || 0) < (forrige[x] || 0); });
-      var sistAlene = FARGER.filter(function (x) { return (pos[x] || 0) === verst; }).length === 1 && best - verst >= 3;
-      // Det som endrer løpet, sies med en gang (hvis ingen andre snakker): tilbake, ett steg fra mål, ny leder, dødt løp, drar ifra
-      if (tilbake) return si(velg(varianter('tilbake-' + F[tilbake])));
-      if (f && p >= 7 && !st.innspurt[f]) { if (si(velg(varianter('innspurt-' + F[f])))) st.innspurt[f] = true; return; }
-      if (best >= 2 && !delt && leder !== st.leder) { if (si(velg(varianter('leder-' + F[leder])))) st.leder = leder; return; }
-      if (best >= 6 && delt && !st.jevnt) { if (si(velg(varianter('jevnt')))) st.jevnt = true; return; }
+      var verst = Math.min.apply(null, FARGER.map(function (x) { return pos[x] || 0; }));
+      var sisteListe = FARGER.filter(function (x) { return (pos[x] || 0) === verst; }), sist = sisteListe[0];
+      if (best >= 3 && sisteListe.length === 1) st.varSist[sist] = true;
+      var sistAlene = sisteListe.length === 1 && best - verst >= 3;
+      var vedMaal = FARGER.filter(function (x) { return (pos[x] || 0) >= 7; }).length;
+      // 1) Sidekortet: fram og rett tilbake, lederen faller, eller bare tilbake
+      if (tilbake) {
+        if (tilbake === f) return viktigSi(velg(varianter('frati-' + F[f])));
+        if (tilbake === foer.leder && !foer.delt && foer.best >= 2) { st.leder = ''; return viktigSi(velg(varianter('mister-' + F[tilbake]))); }
+        return viktigSi(velg(varianter('tilbake-' + F[tilbake])));
+      }
+      // 2) Hesten som falt tilbake i forrige trekk, går rett videre: «Å nei … men det gjør ingenting!»
+      if (f && falt === f) return viktigSi(velg(varianter('reiser-' + F[f])));
+      if (vedMaal >= 2 && !st.tomaal) { st.tomaal = true; return viktigSi(velg(varianter('tomaal'))); }
+      if (f && p >= 7 && !st.innspurt[f]) { st.innspurt[f] = true; return viktigSi(velg(varianter('innspurt-' + F[f]))); }
+      if (best >= 2 && !delt && leder !== st.leder) { st.leder = leder; return viktigSi(velg(varianter('leder-' + F[leder]))); }
+      if (best >= 6 && delt && !st.jevnt) { st.jevnt = true; return viktigSi(velg(varianter('jevnt'))); }
       if (f && f === leder && !delt && p - nest >= 2 && st.ifra !== f) { if (si(velg(varianter('ifra-' + F[f])))) st.ifra = f; return; }
       if (sistAlene && !st.sistSagt) { if (si('sist-' + F[sist])) st.sistSagt = true; return; }
+      // 3) En hest som ikke har rørt seg på lenge
+      if (st.kort >= 8) {
+        var stille = FARGER.filter(function (x) { return !st.stilleSagt[x] && st.kort - (st.flyttet[x] || 0) >= 7; })[0];
+        if (stille && si('stille-' + F[stille] + '-a')) { st.stilleSagt[stille] = true; return; }
+      }
       if (!f) return;
-      // Et vanlig steg kommenteres høyst annethvert kort – og med det som passer: henter inn, oppe på siden, igjen, eller fram
-      st.taus++;
-      if (st.taus < 2) return;
+      // 4) Et vanlig steg: henter inn, oppe på siden, igjen – eller han heier
       var linjer;
       if (varSist && p >= 2) linjer = varianter('henter-' + F[f]);
       else if (delt && p === best && best >= 2 && best < 6) linjer = varianter('side-' + F[f]);
       else if (st.rad >= 2) linjer = varianter('igjen-' + F[f]).concat(st.rad >= 3 ? ['fyll-a', 'fyll-b', 'fyll-c'] : []);
-      else linjer = best >= 3 && Math.random() < 0.25 ? varianter('fyll') : varianter('fram-' + F[f]);
-      if (si(velg(linjer))) st.taus = 0;
+      else if (best >= 3 && Math.random() < 0.35) linjer = varianter(Math.random() < 0.6 ? 'heia' : 'fyll');
+      else linjer = varianter('fram-' + F[f]);
+      si(velg(linjer));
     }
-    function maal(vinner) {
-      ko = []; musikkPaa(false);
+    function maal(vinner, pos) {
+      ko = []; viktig = null; musikkPaa(false);
       if (stemme) { var a = stemme; stemme = null; try { a.pause(); } catch (e) {} }
+      var nestBest = Math.max.apply(null, FARGER.filter(function (x) { return x !== vinner; }).map(function (x) { return pos[x] || 0; }));
       var rekke = [];
       if (vinner) rekke.push(velg(varianter('vinner-' + F[vinner])));
-      rekke.push('jubel', velg(varianter('seier')));
+      // Til slutt: comeback (vinneren lå sist), neselengde (to ved mål), ellers seiersropet
+      rekke.push('jubel', vinner && st.varSist[vinner] ? 'comeback-' + F[vinner] + '-a' : nestBest >= 7 ? velg(varianter('nese')) : velg(varianter('seier')));
       ko = rekke.slice(1); spill(rekke[0]);
     }
     function oppdater(s, aktiv) {
@@ -3102,9 +3155,9 @@ export function startRom(LEKNAVN, LANG) {
       if (r !== st.runde) nytt(r);
       if (f === 'lop') {
         musikkPaa(true);
-        if (st.fase !== 'lop') { st.pos = Object.assign({}, s.pos || {}); st.n = s.n; si(velg(varianter('start'))); }
+        if (st.fase !== 'lop') { st.pos = Object.assign({}, s.pos || {}); st.n = s.n; st.snudd = (s.snudd || []).filter(Boolean).length; si(velg(varianter('start'))); }
         else if (s.n !== st.n) { st.n = s.n; kort(s); }
-      } else if (f === 'ferdig' && st.fase === 'lop') maal(s.vinner);
+      } else if (f === 'ferdig' && st.fase === 'lop') maal(s.vinner, s.pos || {});
       else musikkPaa(false);
       st.fase = f;
     }
@@ -3123,19 +3176,27 @@ export function startRom(LEKNAVN, LANG) {
     (function vent() { if (vlKom && vlKom.opptatt() && Date.now() - t0 < 15000) return setTimeout(vent, 300); fn(); })();
   }
   document.addEventListener('visibilitychange', function () { if (document.hidden && vlKom) vlKom.stopp(); });
-  /** Teksten under det siste kortet: hva trekket betyr for løpet, ikke «X rykker fram» hver gang */
-  var vlTrukket = {};
+  /** Teksten under det siste kortet: hva trekket betyr for løpet – og stemningen (opp, leder, ned, mål), som farger raden */
+  var vlTrukket = {}, vlAntSnudd = {}, vlFaltPaa = {}, vlStemning = '';
   function vlSistTekst(s) {
     var f = s.sist.f, pos = s.pos || {}, p = Math.min(8, pos[f] || 0), n = vlNavn(f), r = s.runde || 1, lite = n.toLowerCase();
-    vlTrukket[r + ':' + s.n] = f;
+    var nok = r + ':' + s.n, forr = r + ':' + (s.n - 1);
+    var ant = (s.snudd || []).filter(Boolean).length, k = ant ? (s.bane || [])[ant - 1] : null;
+    vlTrukket[nok] = f; vlAntSnudd[nok] = ant;
+    if (!(nok in vlFaltPaa)) vlFaltPaa[nok] = vlAntSnudd[forr] !== undefined && ant > vlAntSnudd[forr] && k ? k.f : '';
+    var falt = vlFaltPaa[nok];
     var andre = VL_F.filter(function (x) { return x !== f; }).map(function (x) { return pos[x] || 0; });
     var maks = Math.max.apply(null, andre), min = Math.min.apply(null, andre);
-    if (s.fase === 'ferdig' && s.vinner === f) return n + T(' i mål!', ' crosses the line!');
-    if (p === 7) return n + T(' er ett steg fra mål!', ' is one step from the finish!');
-    if (p === maks + 1) return n + T(' tar ledelsen!', ' takes the lead!');
-    if (p - maks >= 2) return n + T(' drar ifra!', ' pulls away!');
-    if (vlTrukket[r + ':' + (s.n - 1)] === f) return [n + T(' igjen!', ' again!'), T('Og igjen ', 'And again, ') + lite + '!', n + T(' vil ikke stoppe!', ' won’t stop!')][s.n % 3];
-    if (p - 1 < min) return n + T(' henter inn!', ' is catching up!');
+    vlStemning = 'fram';
+    if (s.fase === 'ferdig' && s.vinner === f) { vlStemning = 'maal'; return n + T(' i mål!', ' crosses the line!'); }
+    if (falt === f) { vlStemning = 'ned'; return n + T(' fram – og rett tilbake!', ' up – and straight back!'); }
+    if (falt) { vlStemning = 'ned'; return n + T(' fram – ', ' up – ') + vlNavn(falt).toLowerCase() + T(' faller tilbake!', ' falls back!'); }
+    if (vlFaltPaa[forr] === f) { vlStemning = 'opp'; return n + T(' reiser seg igjen!', ' bounces back!'); }
+    if (p === 7) { vlStemning = 'opp'; return n + T(' er ett steg fra mål!', ' is one step from the finish!'); }
+    if (p === maks + 1) { vlStemning = 'leder'; return n + T(' tar ledelsen!', ' takes the lead!'); }
+    if (p - maks >= 2) { vlStemning = 'leder'; return n + T(' drar ifra!', ' pulls away!'); }
+    if (vlTrukket[forr] === f) { vlStemning = 'opp'; return [n + T(' igjen!', ' again!'), T('Og igjen ', 'And again, ') + lite + '!', n + T(' vil ikke stoppe!', ' won’t stop!')][s.n % 3]; }
+    if (p - 1 < min) { vlStemning = 'opp'; return n + T(' henter inn!', ' is catching up!'); }
     if (p === maks) return n + T(' er oppe på siden!', ' draws level!');
     return [n + T(' rykker fram', ' moves up'), T('Fart i ' + lite, n + ' speeds up'), n + T(' tar et steg', ' takes a step'), T('Der kommer ', 'Here comes ') + lite + '!'][s.n % 4];
   }
@@ -3166,7 +3227,7 @@ export function startRom(LEKNAVN, LANG) {
       statusHoder: f === 'vedd' ? Object.keys(vm).map(function (id) { return hode(id, false); }) : [],
       frist: f === 'vedd' && tilstand.spill && tilstand.spill.frist ? tilstand.spill.frist : 0, fristTekst: T('sekunder til løpet starter', 'seconds until the race starts'),
       start: f === 'vedd' && vert && antVeddet && antVeddet < alle ? T('Start løpet nå', 'Start the race now') : '',
-      sist: s.sist && f !== 'vedd' ? { v: vn(s.sist.v), f: s.sist.f, rod: s.sist.f === '♥' || s.sist.f === '♦', tekst: vlSistTekst(s) } : null,
+      sist: s.sist && f !== 'vedd' ? { v: vn(s.sist.v), f: s.sist.f, rod: s.sist.f === '♥' || s.sist.f === '♦', tekst: vlSistTekst(s), stemning: vlStemning } : null,
       dom: f === 'ferdig' && mv ? { rett: s.vinner === mv.farge, tekst: s.vinner === mv.farge ? T('Du vant! Del ut ', 'You won! Hand out ') + mv.slurker * 2 : T('Du tapte – drikk ', 'You lost – drink ') + mv.slurker } : null,
       slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
     };
@@ -5992,7 +6053,7 @@ export function startRom(LEKNAVN, LANG) {
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
-    if (nativ === 'lobby' && !varLobby) { stuaMaaltH = 0; maalStua(); requestAnimationFrame(meldStuaH); }
+    if (nativ === 'lobby' && !varLobby) { try { window.scrollTo(0, 0); } catch (e) {} stuaMaaltH = 0; maalStua(); requestAnimationFrame(meldStuaH); }
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
     else if (nativ === 'lobby') { var nL = (tilstand.spillere || []).length; skjermBlokker(innhold).then(function (b) { if (tilstand && !tilstand.spill) meldSkjerm('lobby', { kode: kode, n: nL, erVert: erVert(), vert: navn(tilstand.vert), blokker: b, naa: Date.now() + klokkeAvvik,
       tekst: { inviter: T('Inviter', 'Invite'), iRommet: nL === 1 ? T('Bare du så langt', 'Just you so far') : nL + T(' i rommet', ' in the room'), kode: T('Romkode', 'Room code'), venter: navn(tilstand.vert) + (tilstand.plan && tilstand.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) } }); }); }
