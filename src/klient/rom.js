@@ -233,6 +233,22 @@ export function startRom(LEKNAVN, LANG) {
   }
   if (lyd.paa) setTimeout(function () { Object.keys(LYDFIL).forEach(function (k) { lydFil(LYDFIL[k]); }); }, 1500);   // last dem i bakgrunnen
   /** Vibrasjon: i appen går mønsteret til iOS-haptikk (app.js lytter på mv-vibrer – iPhone har ikke navigator.vibrate), ellers rett til telefonen. */
+  /** Appen: stua i lobbyen ligger i et hull i den native skjermen. Hullet må være like høyt som stua – ellers kuttes den,
+      og knappene nederst i stua (Rommet, Figuren din, Si noe) havner under lista og kan ikke trykkes. Høyden meldes hver gang den endrer seg. */
+  var stuaMaaler = null, stuaMaaltH = 0;
+  function meldStuaH() {
+    if (!document.documentElement.classList.contains('lobby-nativ')) return;
+    var st = document.querySelector('#romStuaPlass .rom-stua'); if (!st) return;
+    var h = Math.round(st.getBoundingClientRect().height);
+    if (h > 40 && Math.abs(h - stuaMaaltH) > 1) { stuaMaaltH = h; try { document.dispatchEvent(new CustomEvent('mv-stua', { detail: { h: h } })); } catch (e) {} }
+  }
+  function maalStua() {
+    if (!window.ResizeObserver) return;
+    var st = document.querySelector('#romStuaPlass .rom-stua');
+    if (!st || (stuaMaaler && stuaMaaler.el === st)) return;
+    if (stuaMaaler) stuaMaaler.ro.disconnect();
+    var ro = new ResizeObserver(meldStuaH); ro.observe(st); stuaMaaler = { el: st, ro: ro };
+  }
   function vibrer(m) {
     try { if (document.documentElement.classList.contains('is-app')) { document.dispatchEvent(new CustomEvent('mv-vibrer', { detail: m })); return; } } catch (e) {}
     try { navigator.vibrate && navigator.vibrate(m); } catch (e) {}
@@ -306,7 +322,7 @@ export function startRom(LEKNAVN, LANG) {
     var fra = nye.filter(function (u) { return (u.liste || []).some(function (x) { return x.id === ny.meg; }); }).map(function (u) { return navn(u.fra); });
     if (diff > 0 && diff < 60 && Date.now() - egenSlurkT > 2500) {   // ikke når du fører dine egne slurker
       var vent = vlUtsettTil - Date.now();
-      if (vent > 0) setTimeout(function () { drikkAlarm(diff, fra); }, vent); else drikkAlarm(diff, fra);
+      setTimeout(function () { etterKommentator(function () { drikkAlarm(diff, fra); }); }, Math.max(0, vent));
     }
   }
   /** Vannrunde: et rolig blått varsel på alle telefonene – ingen straff, bare et glass vann. */
@@ -348,7 +364,7 @@ export function startRom(LEKNAVN, LANG) {
     if (meldtSett && Object.keys(ider).some(function (id) { return !meldtSett[id]; })) spillLyd('dundun');
     meldtSett = ider;
     var v = (d.kveld && d.kveld.vinner) || (b && b.slutt && b.slutt.konge) || '';
-    if (vinnerSett !== null && v && v !== vinnerSett) spillLyd('fanfare');
+    if (vinnerSett !== null && v && v !== vinnerSett) etterKommentator(function () { spillLyd('fanfare'); });
     vinnerSett = v;
   }
   /** Tikk som går saktere og saktere mens hjulet spinner, og et pling når det stopper. */
@@ -2978,52 +2994,142 @@ export function startRom(LEKNAVN, LANG) {
   var VL_F = ['♥', '♠', '♦', '♣'], vlSats = 2, vlTimer = null, vlSett = {}, vlPos = {};
   /* Veddeløpet har musikk og kommentator (public/lyd/veddelop/, laget med ElevenLabs). Vertens telefon spiller dem –
      men ikke når en TV er koblet til, for da er det TV-en som er høyttaleren. Bare når lyden er på. */
-  var VL_FIL = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' };
-  var vlLydSt = { runde: 0, fase: '', leder: '', jevnt: false, sist: 0, n: 0, pos: null }, vlMusikkEl = null, vlUtsettTil = 0;
-  var VL_ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4 };   // antall varianter per replikk
-  function vlVariant(navn) { var n = VL_ANT[navn.split('-')[0]] || 1; return navn + '-' + 'abcd'.charAt(Math.floor(Math.random() * n)); }
-  function vlMusikk(paa) {
-    if (paa) {
-      if (!vlMusikkEl) { vlMusikkEl = new Audio('/lyd/veddelop/musikk.mp3'); vlMusikkEl.loop = true; }
-      vlMusikkEl.volume = 0.35; var p = vlMusikkEl.play(); if (p && p.catch) p.catch(function () {});
-    } else if (vlMusikkEl && !vlMusikkEl.paused) {
-      var el = vlMusikkEl, fade = setInterval(function () { el.volume = Math.max(0, el.volume - 0.05); if (el.volume <= 0.01) { clearInterval(fade); el.pause(); el.currentTime = 0; } }, 80);
+  /* Kommentatoren i Veddeløpet (samme kode på vertens telefon og på TV-en):
+     – bare én lyd om gangen: en replikk starter aldri oppå en annen, og målgangen spilles i kø (vinner → jubel → seier)
+     – aldri samme replikk to ganger på rad (de siste åtte brukes ikke igjen så lenge det finnes andre)
+     – ikke en replikk på hvert kort: løpet får puste, og samme farge igjen får «Der kommer …» / «Fart i …», ikke «rykker fram»
+     – musikken stoppes på ordentlig: iPhone lar ikke nettsiden skru ned volumet, så stoppen venter ikke på volum 0 */
+  function lagVlKommentator(volum) {
+    var F = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' }, FARGER = ['♥', '♠', '♦', '♣'];
+    var ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4 };
+    var musikk = null, fadeT = null, stemme = null, ko = [], brukt = [], pause = 0, st = null;
+    function nytt(r) { st = { runde: r, fase: '', leder: '', jevnt: false, sistSagt: false, innspurt: false, n: null, pos: {}, forrigeF: '', rad: 0, taus: 0 }; }
+    nytt(0);
+    function varianter(navn) { var n = ANT[navn.split('-')[0]]; if (!n) return [navn]; var l = []; for (var i = 0; i < n; i++) l.push(navn + '-' + 'abcd'.charAt(i)); return l; }
+    function velg(liste) {
+      var friske = liste.filter(function (x) { return brukt.indexOf(x) < 0; });
+      if (!friske.length) friske = liste.filter(function (x) { return x !== brukt[brukt.length - 1]; });
+      return friske.length ? friske[Math.floor(Math.random() * friske.length)] : '';
     }
+    function opptatt() { return !!stemme || ko.length > 0 || Date.now() < pause; }
+    function spill(navn) {
+      if (!navn) return;
+      brukt.push(navn); if (brukt.length > 8) brukt.shift();
+      var a; try { a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = volum; } catch (e) { return; }
+      stemme = a;
+      var vakt = null;
+      var ferdig = function () {
+        clearTimeout(vakt);
+        if (stemme !== a) return;
+        stemme = null; pause = Date.now() + 400;
+        if (ko.length) { var neste = ko.shift(); setTimeout(function () { if (!stemme) spill(neste); }, 400); }
+      };
+      // En fil som aldri sier fra at den er ferdig, skal ikke stenge kommentatoren for resten av løpet
+      vakt = setTimeout(ferdig, 12000);
+      a.onloadedmetadata = function () { if (isFinite(a.duration) && a.duration > 0) { clearTimeout(vakt); vakt = setTimeout(ferdig, a.duration * 1000 + 1500); } };
+      a.onended = ferdig; a.onerror = ferdig;
+      try { var p = a.play(); if (p && p.catch) p.catch(ferdig); } catch (e) { ferdig(); }
+    }
+    function si(navn) { if (!navn || opptatt()) return false; spill(navn); return true; }
+    function musikkPaa(paa) {
+      if (paa) {
+        clearInterval(fadeT); fadeT = null;
+        if (!musikk) { musikk = new Audio('/lyd/veddelop/musikk.mp3'); musikk.loop = true; }
+        try { musikk.volume = volum * 0.4; } catch (e) {}
+        if (musikk.paused) { var p = musikk.play(); if (p && p.catch) p.catch(function () {}); }
+        return;
+      }
+      if (fadeT || !musikk || musikk.paused) return;
+      var el = musikk, t0 = Date.now(), v0 = el.volume;
+      fadeT = setInterval(function () {
+        var x = Math.min(1, (Date.now() - t0) / 500);
+        try { el.volume = v0 * (1 - x); } catch (e) {}
+        if (x >= 1) { clearInterval(fadeT); fadeT = null; el.pause(); try { el.currentTime = 0; el.volume = v0; } catch (e) {} }
+      }, 50);
+    }
+    /** Alt stille med en gang: leken er avsluttet, lyden skrudd av, eller appen gikk i bakgrunnen */
+    function stopp() {
+      ko = [];
+      clearInterval(fadeT); fadeT = null;
+      if (musikk && !musikk.paused) { try { musikk.pause(); musikk.currentTime = 0; } catch (e) {} }
+      if (stemme) { var a = stemme; stemme = null; try { a.pause(); } catch (e) {} }
+      st.fase = '';
+    }
+    function kort(s) {
+      var pos = s.pos || {}, forrige = st.pos || {}, best = -1, leder = '', delt = false, tilbake = '', verst = 99, sist = '';
+      FARGER.forEach(function (x) {
+        var p = pos[x] || 0;
+        if (p < (forrige[x] || 0)) tilbake = x;
+        if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true;
+        if (p < verst) { verst = p; sist = x; }
+      });
+      st.pos = Object.assign({}, pos);
+      var f = s.sist && s.sist.f;
+      st.rad = f && f === st.forrigeF ? st.rad + 1 : 1; st.forrigeF = f || '';
+      var sistAlene = FARGER.filter(function (x) { return (pos[x] || 0) === verst; }).length === 1 && best - verst >= 3;
+      if (tilbake) return si(velg(varianter('tilbake-' + F[tilbake])));
+      if (best >= 2 && !delt && leder !== st.leder) { if (si(velg(varianter('leder-' + F[leder])))) st.leder = leder; return; }
+      if (best >= 6 && delt && !st.jevnt) { if (si(velg(varianter('jevnt')))) st.jevnt = true; return; }
+      if (best >= 7 && !delt && !st.innspurt) { if (si(velg(['fyll-d', 'jevnt-b', 'fyll-c']))) st.innspurt = true; return; }
+      if (sistAlene && !st.sistSagt) { if (si('sist-' + F[sist])) st.sistSagt = true; return; }
+      if (!f) return;
+      // Løpet får puste: et vanlig steg kommenteres høyst annethvert kort
+      st.taus++;
+      if (st.taus < 2) return;
+      var linjer = st.rad >= 3 ? ['fyll-a', 'fyll-b', 'fyll-c'] : st.rad === 2 ? varianter('fram-' + F[f]).slice(1) : varianter('fram-' + F[f]);
+      if (best >= 3 && st.rad < 2 && Math.random() < 0.25) linjer = varianter('fyll');
+      if (si(velg(linjer))) st.taus = 0;
+    }
+    function maal(vinner) {
+      ko = []; musikkPaa(false);
+      if (stemme) { var a = stemme; stemme = null; try { a.pause(); } catch (e) {} }
+      var rekke = [];
+      if (vinner) rekke.push(velg(varianter('vinner-' + F[vinner])));
+      rekke.push('jubel', velg(varianter('seier')));
+      ko = rekke.slice(1); spill(rekke[0]);
+    }
+    function oppdater(s, aktiv) {
+      var r = s.runde || 1, f = s.fase;
+      if (!aktiv) { if (st.fase || stemme || (musikk && !musikk.paused)) stopp(); return; }
+      if (r !== st.runde) nytt(r);
+      if (f === 'lop') {
+        musikkPaa(true);
+        if (st.fase !== 'lop') { st.pos = Object.assign({}, s.pos || {}); st.n = s.n; si(velg(varianter('start'))); }
+        else if (s.n !== st.n) { st.n = s.n; kort(s); }
+      } else if (f === 'ferdig' && st.fase === 'lop') maal(s.vinner);
+      else musikkPaa(false);
+      st.fase = f;
+    }
+    return { oppdater: oppdater, stopp: stopp, opptatt: opptatt };
   }
-  function vlSi(navn, tving) {
-    var naa = Date.now(); if (!tving && naa - vlLydSt.sist < 2300) return false; vlLydSt.sist = naa;
-    try { var a = new Audio('/lyd/veddelop/' + navn + '.mp3'); a.volume = 0.9; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
-    return true;
-  }
+  var vlKom = lagVlKommentator(0.9), vlUtsettTil = 0, vlFaseSist = '';
   function vlLyd(s) {
-    var r = s.runde || 1, f = s.fase;
-    if (f === 'ferdig' && vlLydSt.fase !== 'ferdig') vlUtsettTil = Date.now() + 5500;   // alle venter med slurkene til jubelen er over
-    if (!lyd.paa || !erVert() || tilstand.skjermPin) { vlMusikk(false); vlLydSt.fase = f; return; }
-    if (r !== vlLydSt.runde) vlLydSt = { runde: r, fase: '', leder: '', jevnt: false, sist: 0 };
-    if (f === 'lop' && vlLydSt.fase !== 'lop') { vlMusikk(true); vlLydSt.sist = 0; vlSi(vlVariant('start'), true); vlLydSt.pos = Object.assign({}, s.pos || {}); }
-    if (f === 'lop' && s.n !== vlLydSt.n) {
-      // Nytt kort: hva skjedde? Tilbake-rykk først, så lederskifte, så jevnt, ellers «rykker fram»
-      vlLydSt.n = s.n;
-      var pos = s.pos || {}, forrige = vlLydSt.pos || {}, best = -1, leder = '', delt = false, tilbake = '';
-      VL_F.forEach(function (x) { var p = pos[x] || 0; if (p < (forrige[x] || 0)) tilbake = x; if (p > best) { best = p; leder = x; delt = false; } else if (p === best) delt = true; });
-      vlLydSt.pos = Object.assign({}, pos);
-      var sist = '', verst = 99; VL_F.forEach(function (x) { var p = pos[x] || 0; if (p < verst) { verst = p; sist = x; } });
-      var sistAlene = VL_F.filter(function (x) { return (pos[x] || 0) === verst; }).length === 1 && best - verst >= 3;
-      if (tilbake) vlSi(vlVariant('tilbake-' + VL_FIL[tilbake]));
-      else if (best >= 2 && !delt && leder !== vlLydSt.leder && vlSi(vlVariant('leder-' + VL_FIL[leder]))) vlLydSt.leder = leder;
-      else if (best >= 6 && delt && !vlLydSt.jevnt && vlSi(vlVariant('jevnt'))) vlLydSt.jevnt = true;
-      else if (sistAlene && !vlLydSt.sistSagt && vlSi('sist-' + VL_FIL[sist])) vlLydSt.sistSagt = true;
-      else if (best >= 3 && Math.random() < 0.3) vlSi(vlVariant('fyll'));
-      else if (s.sist && s.sist.f) vlSi(vlVariant('fram-' + VL_FIL[s.sist.f]));
-    }
-    if (f === 'ferdig' && vlLydSt.fase !== 'ferdig') {
-      // I mål: jubel og «X VINNER!» først. Slurkene kommer etterpå (drikk-varselet venter).
-      vlMusikk(false); vlUtsettTil = Date.now() + 5500;
-      try { var j = new Audio('/lyd/veddelop/jubel.mp3'); j.volume = 0.8; var pj = j.play(); if (pj && pj.catch) pj.catch(function () {}); } catch (e) {}
-      var v = s.vinner; setTimeout(function () { vlLydSt.sist = 0; if (v) vlSi(vlVariant('vinner-' + VL_FIL[v]), true); }, 900);
-      setTimeout(function () { vlLydSt.sist = 0; vlSi(vlVariant('seier'), true); }, 3800);
-    }
-    vlLydSt.fase = f;
+    if (s.fase === 'ferdig' && vlFaseSist !== 'ferdig') vlUtsettTil = Date.now() + 5500;   // alle venter med slurkene til jubelen er over
+    vlFaseSist = s.fase;
+    // Vertens telefon er høyttaleren – men ikke når en TV er koblet til, for da er det TV-en. Bare når lyden er på.
+    vlKom.oppdater(s, lyd.paa && erVert() && !tilstand.skjermPin);
+  }
+  /** Venter til kommentatoren er ferdig (høyst 15 s): drikkevarsler og fanfarer skal ikke snakke i munnen på ham */
+  function etterKommentator(fn) {
+    var t0 = Date.now();
+    (function vent() { if (vlKom && vlKom.opptatt() && Date.now() - t0 < 15000) return setTimeout(vent, 300); fn(); })();
+  }
+  document.addEventListener('visibilitychange', function () { if (document.hidden && vlKom) vlKom.stopp(); });
+  /** Teksten under det siste kortet: hva trekket betyr for løpet, ikke «X rykker fram» hver gang */
+  var vlTrukket = {};
+  function vlSistTekst(s) {
+    var f = s.sist.f, pos = s.pos || {}, p = Math.min(8, pos[f] || 0), n = vlNavn(f), r = s.runde || 1, lite = n.toLowerCase();
+    vlTrukket[r + ':' + s.n] = f;
+    var andre = VL_F.filter(function (x) { return x !== f; }).map(function (x) { return pos[x] || 0; });
+    var maks = Math.max.apply(null, andre), min = Math.min.apply(null, andre);
+    if (s.fase === 'ferdig' && s.vinner === f) return n + T(' i mål!', ' crosses the line!');
+    if (p === 7) return n + T(' er ett steg fra mål!', ' is one step from the finish!');
+    if (p === maks + 1) return n + T(' tar ledelsen!', ' takes the lead!');
+    if (p - maks >= 2) return n + T(' drar ifra!', ' pulls away!');
+    if (vlTrukket[r + ':' + (s.n - 1)] === f) return [n + T(' igjen!', ' again!'), T('Og igjen ', 'And again, ') + lite + '!', n + T(' vil ikke stoppe!', ' won’t stop!')][s.n % 3];
+    if (p - 1 < min) return n + T(' henter inn!', ' is catching up!');
+    if (p === maks) return n + T(' er oppe på siden!', ' draws level!');
+    return [n + T(' rykker fram', ' moves up'), T('Fart i ' + lite, n + ' speeds up'), n + T(' tar et steg', ' takes a step'), T('Der kommer ', 'Here comes ') + lite + '!'][s.n % 4];
   }
   var vlPng = {};
   function vlHodePng(id, uttrykk) {
@@ -3052,7 +3158,7 @@ export function startRom(LEKNAVN, LANG) {
       statusHoder: f === 'vedd' ? Object.keys(vm).map(function (id) { return hode(id, false); }) : [],
       frist: f === 'vedd' && tilstand.spill && tilstand.spill.frist ? tilstand.spill.frist : 0, fristTekst: T('sekunder til løpet starter', 'seconds until the race starts'),
       start: f === 'vedd' && vert && antVeddet && antVeddet < alle ? T('Start løpet nå', 'Start the race now') : '',
-      sist: s.sist && f !== 'vedd' ? { v: vn(s.sist.v), f: s.sist.f, rod: s.sist.f === '♥' || s.sist.f === '♦', tekst: vlNavn(s.sist.f) + T(' rykker fram', ' moves up') } : null,
+      sist: s.sist && f !== 'vedd' ? { v: vn(s.sist.v), f: s.sist.f, rod: s.sist.f === '♥' || s.sist.f === '♦', tekst: vlSistTekst(s) } : null,
       dom: f === 'ferdig' && mv ? { rett: s.vinner === mv.farge, tekst: s.vinner === mv.farge ? T('Du vant! Del ut ', 'You won! Hand out ') + mv.slurker * 2 : T('Du tapte – drikk ', 'You lost – drink ') + mv.slurker } : null,
       slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
     };
@@ -5374,6 +5480,13 @@ export function startRom(LEKNAVN, LANG) {
   function stuaArk() {
     lukkArk();
     var m = lagArk('stua-ark', T('Stua', 'The living room'));
+    if (harSkall()) {
+      m.classList.add('stua-hel');
+      var tilbake = document.createElement('button');
+      tilbake.type = 'button'; tilbake.className = 'btn gold stua-tilbake'; tilbake.setAttribute('data-u', 'lukk');
+      tilbake.textContent = T('Tilbake til leken', 'Back to the game');
+      m.querySelector('.rom-tavle-innhold').appendChild(tilbake);
+    }
     aapentArk = { el: m, stua: true, oppdater: function () {} };
     tegnStua(tilstand.spill);
   }
@@ -5869,7 +5982,9 @@ export function startRom(LEKNAVN, LANG) {
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
     var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
+    var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
+    if (nativ === 'lobby' && !varLobby) { stuaMaaltH = 0; maalStua(); requestAnimationFrame(meldStuaH); }
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
     else if (nativ === 'lobby') { var nL = (tilstand.spillere || []).length; skjermBlokker(innhold).then(function (b) { if (tilstand && !tilstand.spill) meldSkjerm('lobby', { kode: kode, n: nL, erVert: erVert(), vert: navn(tilstand.vert), blokker: b, naa: Date.now() + klokkeAvvik,
       tekst: { inviter: T('Inviter', 'Invite'), iRommet: nL === 1 ? T('Bare du så langt', 'Just you so far') : nL + T(' i rommet', ' in the room'), kode: T('Romkode', 'Room code'), venter: navn(tilstand.vert) + (tilstand.plan && tilstand.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) } }); }); }
@@ -5886,7 +6001,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først
     rotEl.classList.toggle('app-gjest', erApp && !s && !erVert() && !tilstand.valgt);   // gjestens venterom i appen: stua og én linje, ingenting å bla i
     rotEl.classList.toggle('i-spill', !!s);
-    if (vlMusikkEl && !(s && s.type === 'veddelopet' && s.fase === 'lop')) vlMusikk(false);
+    if (vlKom && !(s && s.type === 'veddelopet')) vlKom.stopp();   // ute av Veddeløpet: musikk og kommentator stopper med en gang
     rotEl.classList.toggle('min-tur', !!turTekst);
     rotEl.classList.toggle('hemmelig', !!root.querySelector('[data-hemmelig]'));
     // Nytt skjermbilde (lobby, ny lek, oppsummering): start øverst. Ellers: behold plassen.
