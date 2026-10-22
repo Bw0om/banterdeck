@@ -2212,3 +2212,8 @@ html.har-skall.lobby-nativ #romStuaPlass .rom-stua{margin:0!important;max-width:
 
 /* Et nettark (Mer, Stua, regler …) er oppe over en native skjerm: nettsiden under skjules helt */
 html.har-skall.ark-aapen #rom{visibility:hidden}
+
+/* Nettark over en native skjerm i appen: lysere bakteppe (det er ingenting under å dempe), og hanken over tittelen, ikke oppå den */
+html.har-skall .rom-tavle{background:rgba(10,7,4,.45)}
+html.har-skall .rom-tavle-topp{padding-top:22px}
+html.har-skall.lobby-nativ #romStuaPlass .rom-stua{max-width:none!important}

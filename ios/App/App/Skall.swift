@@ -423,7 +423,9 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             lobbyModell.hullEndret = { [weak self, weak hull] r in
                 hull?.hull = r
                 // Nettsiden legger stua akkurat der hullet er (CSS-px = punkter)
-                self?.lobbyModell.nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.stuaTopp(\(Int(r.minY)))", completionHandler: nil)
+                self?.lobbyModell.nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.stuaTopp(\(Int(r.minY)))") { svar, _ in
+                    if let h = (svar as? NSNumber)?.doubleValue, h > 40, abs(CGFloat(h) - (self?.lobbyModell.stuaH ?? 0)) > 2 { self?.lobbyModell.stuaH = CGFloat(h) }
+                }
             }
             UIView.animate(withDuration: 0.2) { hull.alpha = 1 }
         }
