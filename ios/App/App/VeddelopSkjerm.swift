@@ -263,6 +263,9 @@ struct VeddelopSkjerm: View {
     // MARK: Siste trekk – kortet og «Hjerter rykker fram»
     private func sist(_ d: VlData) -> some View {
         let v = d.sist["v"] as? String ?? "", f = d.sist["f"] as? String ?? "", rod = d.sist["rod"] as? Bool ?? false
+        // Stemningen farger raden: gul når noen tar ledelsen eller reiser seg, rosa når noen faller tilbake, mint i mål
+        let stemning = d.sist["stemning"] as? String ?? ""
+        let farge: Color? = stemning == "leder" || stemning == "opp" ? gul : stemning == "ned" ? Color(red: 1, green: 0.82, blue: 0.78) : stemning == "maal" ? mint : nil
         return HStack(spacing: 14) {
             VStack(spacing: 0) {
                 Text(v).font(.system(size: 14, weight: .black)).frame(maxWidth: .infinity, alignment: .leading)
@@ -271,10 +274,16 @@ struct VeddelopSkjerm: View {
             }
             .padding(5).frame(width: 44, height: 60).foregroundColor(rod ? kortRod : morkBlekk)
             .background(RoundedRectangle(cornerRadius: 6).fill(Color.white)).overlay(RoundedRectangle(cornerRadius: 6).stroke(morkBlekk, lineWidth: 2.5))
-            Text((d.sist["tekst"] as? String ?? "").uppercased()).font(.archivo(20, vekt: 900))
+            Text((d.sist["tekst"] as? String ?? "").uppercased()).font(.archivo(20, vekt: 900)).lineLimit(2).minimumScaleFactor(0.7)
+                .foregroundColor(farge == nil ? blekk : morkBlekk)
+            Spacer(minLength: 0)
         }
+        .padding(8)
+        .background(RoundedRectangle(cornerRadius: 12).fill(farge ?? Color.clear))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(farge == nil ? Color.clear : morkBlekk, lineWidth: 2.5))
         .id("\(d.runde)-\(d.n)")
-        .transition(.move(edge: .leading).combined(with: .opacity))
+        .transition(rolig ? .opacity : .asymmetric(insertion: .scale(scale: 0.9, anchor: .leading).combined(with: .opacity), removal: .opacity))
+        .animation(.spring(response: 0.32, dampingFraction: 0.62), value: d.n)
     }
 
     // MARK: Mål – dommen (vant/tapte) og hva nå

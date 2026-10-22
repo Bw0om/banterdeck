@@ -421,10 +421,15 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             hull.alpha = 0
             lobbyVert = h; lobbyHull = hull
             lobbyModell.hullEndret = { [weak self, weak hull] r in
-                hull?.hull = r
-                // Nettsiden legger stua akkurat der hullet er (CSS-px = punkter)
-                self?.lobbyModell.nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.stuaTopp(\(Int(r.minY)))") { svar, _ in
-                    if let h = (svar as? NSNumber)?.doubleValue, h > 40, abs(CGFloat(h) - (self?.lobbyModell.stuaH ?? 0)) > 2 { self?.lobbyModell.stuaH = CGFloat(h) }
+                guard let self = self, let hull = hull else { return }
+                // Hullet i skjermkoordinater → i overlegget (for trykkene) og i nettvisningen (der stua skal ligge)
+                let iHull = hull.window == nil ? r : hull.convert(r, from: nil)
+                hull.hull = iHull
+                guard let nett = self.lobbyModell.nett else { return }
+                // CSS-px = punkter; 12 pt luft over stua, så den aldri havner under romkoden og «Inviter»
+                let y = hull.convert(iHull, to: nett).minY - nett.scrollView.adjustedContentInset.top + 12
+                nett.evaluateJavaScript("window.__mvLek && window.__mvLek.stuaTopp(\(Int(y.rounded())))") { [weak self] svar, _ in
+                    if let h = (svar as? NSNumber)?.doubleValue { self?.settStuaHoyde(CGFloat(h)) }
                 }
             }
             UIView.animate(withDuration: 0.2) { hull.alpha = 1 }
