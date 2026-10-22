@@ -981,9 +981,9 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
        – musikken stoppes på ordentlig: iPhone lar ikke nettsiden skru ned volumet, så stoppen venter ikke på volum 0 */
     function lagVlKommentator(volum) {
       var F = { '♥': 'hjerter', '♠': 'spar', '♦': 'ruter', '♣': 'klover' }, FARGER = ['♥', '♠', '♦', '♣'];
-      var ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4 };
+      var ANT = { start: 4, fram: 4, tilbake: 2, leder: 3, jevnt: 3, vinner: 2, seier: 3, fyll: 4, igjen: 3, ifra: 2, innspurt: 2, henter: 1, side: 1 };
       var musikk = null, fadeT = null, stemme = null, ko = [], brukt = [], pause = 0, st = null;
-      function nytt(r) { st = { runde: r, fase: '', leder: '', jevnt: false, sistSagt: false, innspurt: false, n: null, pos: {}, forrigeF: '', rad: 0, taus: 0 }; }
+      function nytt(r) { st = { runde: r, fase: '', leder: '', jevnt: false, sistSagt: false, innspurt: {}, ifra: '', n: null, pos: {}, forrigeF: '', rad: 0, taus: 0 }; }
       nytt(0);
       function varianter(navn) { var n = ANT[navn.split('-')[0]]; if (!n) return [navn]; var l = []; for (var i = 0; i < n; i++) l.push(navn + '-' + 'abcd'.charAt(i)); return l; }
       function velg(liste) {
@@ -1044,20 +1044,28 @@ const SB = { url: supabaseUrl().replace(/\/$/, ''), anon: supabaseAnonKey() };
           if (p < verst) { verst = p; sist = x; }
         });
         st.pos = Object.assign({}, pos);
-        var f = s.sist && s.sist.f;
+        var f = s.sist && s.sist.f, p = f ? pos[f] || 0 : 0;
         st.rad = f && f === st.forrigeF ? st.rad + 1 : 1; st.forrigeF = f || '';
+        var andre = FARGER.filter(function (x) { return x !== f; });
+        var nest = Math.max.apply(null, andre.map(function (x) { return pos[x] || 0; }));
+        var varSist = !!f && andre.every(function (x) { return (forrige[f] || 0) < (forrige[x] || 0); });
         var sistAlene = FARGER.filter(function (x) { return (pos[x] || 0) === verst; }).length === 1 && best - verst >= 3;
+        // Det som endrer løpet, sies med en gang (hvis ingen andre snakker): tilbake, ett steg fra mål, ny leder, dødt løp, drar ifra
         if (tilbake) return si(velg(varianter('tilbake-' + F[tilbake])));
+        if (f && p >= 7 && !st.innspurt[f]) { if (si(velg(varianter('innspurt-' + F[f])))) st.innspurt[f] = true; return; }
         if (best >= 2 && !delt && leder !== st.leder) { if (si(velg(varianter('leder-' + F[leder])))) st.leder = leder; return; }
         if (best >= 6 && delt && !st.jevnt) { if (si(velg(varianter('jevnt')))) st.jevnt = true; return; }
-        if (best >= 7 && !delt && !st.innspurt) { if (si(velg(['fyll-d', 'jevnt-b', 'fyll-c']))) st.innspurt = true; return; }
+        if (f && f === leder && !delt && p - nest >= 2 && st.ifra !== f) { if (si(velg(varianter('ifra-' + F[f])))) st.ifra = f; return; }
         if (sistAlene && !st.sistSagt) { if (si('sist-' + F[sist])) st.sistSagt = true; return; }
         if (!f) return;
-        // Løpet får puste: et vanlig steg kommenteres høyst annethvert kort
+        // Et vanlig steg kommenteres høyst annethvert kort – og med det som passer: henter inn, oppe på siden, igjen, eller fram
         st.taus++;
         if (st.taus < 2) return;
-        var linjer = st.rad >= 3 ? ['fyll-a', 'fyll-b', 'fyll-c'] : st.rad === 2 ? varianter('fram-' + F[f]).slice(1) : varianter('fram-' + F[f]);
-        if (best >= 3 && st.rad < 2 && Math.random() < 0.25) linjer = varianter('fyll');
+        var linjer;
+        if (varSist && p >= 2) linjer = varianter('henter-' + F[f]);
+        else if (delt && p === best && best >= 2 && best < 6) linjer = varianter('side-' + F[f]);
+        else if (st.rad >= 2) linjer = varianter('igjen-' + F[f]).concat(st.rad >= 3 ? ['fyll-a', 'fyll-b', 'fyll-c'] : []);
+        else linjer = best >= 3 && Math.random() < 0.25 ? varianter('fyll') : varianter('fram-' + F[f]);
         if (si(velg(linjer))) st.taus = 0;
       }
       function maal(vinner) {
