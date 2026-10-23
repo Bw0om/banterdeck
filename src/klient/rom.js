@@ -235,7 +235,7 @@ export function startRom(LEKNAVN, LANG) {
   /** Vibrasjon: i appen går mønsteret til iOS-haptikk (app.js lytter på mv-vibrer – iPhone har ikke navigator.vibrate), ellers rett til telefonen. */
   /** Appen: stua i lobbyen ligger i et hull i den native skjermen. Hullet må være like høyt som stua – ellers kuttes den,
       og knappene nederst i stua (Rommet, Figuren din, Si noe) havner under lista og kan ikke trykkes. Høyden meldes hver gang den endrer seg. */
-  var stuaMaaler = null, stuaMaaltH = 0, stuaMaalY = null;
+  var stuaMaaler = null, stuaMaalt = '', stuaMaalY = null;
   /** Står stua likevel et annet sted enn hullet (siden var rullet, eller noe over den er forskjøvet)? Flytt den så toppen treffer. */
   function rettStua() {
     var rot = document.documentElement, st = document.querySelector('#romStuaPlass .rom-stua');
@@ -247,8 +247,10 @@ export function startRom(LEKNAVN, LANG) {
     if (!document.documentElement.classList.contains('lobby-nativ')) return;
     rettStua();
     var st = document.querySelector('#romStuaPlass .rom-stua'); if (!st) return;
-    var h = Math.round(st.getBoundingClientRect().height);
-    if (h > 40 && Math.abs(h - stuaMaaltH) > 1) { stuaMaaltH = h; try { document.dispatchEvent(new CustomEvent('mv-stua', { detail: { h: h } })); } catch (e) {} }
+    // Hele ruta (CSS-px fra toppen av nettvisningen): skallet legger hullet for trykkene akkurat her, og lista under begynner under stua
+    var r = st.getBoundingClientRect(), d = { top: Math.round(r.top), left: Math.round(r.left), w: Math.round(r.width), h: Math.round(r.height) };
+    var n = [d.top, d.left, d.w, d.h].join(',');
+    if (d.h > 40 && n !== stuaMaalt) { stuaMaalt = n; try { document.dispatchEvent(new CustomEvent('mv-stua', { detail: d })); } catch (e) {} }
   }
   function maalStua() {
     if (!window.ResizeObserver) return;
@@ -6064,7 +6066,7 @@ export function startRom(LEKNAVN, LANG) {
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
-    if (nativ === 'lobby' && !varLobby) { try { window.scrollTo(0, 0); } catch (e) {} stuaMaaltH = 0; maalStua(); requestAnimationFrame(meldStuaH); }
+    if (nativ === 'lobby') { if (!varLobby) { try { window.scrollTo(0, 0); } catch (e) {} stuaMaalt = ''; } maalStua(); requestAnimationFrame(meldStuaH); }
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
     else if (nativ === 'lobby') { var nL = (tilstand.spillere || []).length; skjermBlokker(innhold).then(function (b) { if (tilstand && !tilstand.spill) meldSkjerm('lobby', { kode: kode, n: nL, erVert: erVert(), vert: navn(tilstand.vert), blokker: b, naa: Date.now() + klokkeAvvik,
       tekst: { inviter: T('Inviter', 'Invite'), iRommet: nL === 1 ? T('Bare du så langt', 'Just you so far') : nL + T(' i rommet', ' in the room'), kode: T('Romkode', 'Room code'), venter: navn(tilstand.vert) + (tilstand.plan && tilstand.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) } }); }); }
