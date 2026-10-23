@@ -2207,7 +2207,8 @@ html.har-skall .stua-si:active{transform:translate(2px,2px);box-shadow:1px 1px 0
 /* Lobbyen native i appen (LobbySkjerm.swift): bare stua vises, gjennom et hull i den native skjermen, der skallet sier den skal stå */
 html.har-skall.lobby-nativ #rom > *:not(#romStuaPlass){display:none!important}
 html.har-skall.lobby-nativ body{overflow:hidden}
-html.har-skall.lobby-nativ #romStuaPlass{position:fixed;top:var(--mv-stua-topp,120px);left:0;right:0;z-index:5;padding:0 12px}
+/* Stua ligger fast under romkoden i det native laget: 96 pt romkode + 12 pt luft (LobbySkjerm.toppH). Skallet måler ingenting – nettsiden melder hvor stua er. */
+html.har-skall.lobby-nativ #romStuaPlass{position:fixed;top:var(--mv-stua-topp,calc(env(safe-area-inset-top) + 108px));left:0;right:0;z-index:5;padding:0 12px}
 html.har-skall.lobby-nativ #romStuaPlass .rom-stua{margin:0!important;max-width:none}
 
 /* Et nettark (Mer, Stua, regler …) er oppe over en native skjerm: nettsiden under skjules helt */
