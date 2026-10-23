@@ -257,6 +257,11 @@ export function startRom(LEKNAVN, LANG) {
     if (stuaMaaler) stuaMaaler.ro.disconnect();
     var ro = new ResizeObserver(meldStuaH); ro.observe(st); stuaMaaler = { el: st, ro: ro };
   }
+  // Rulles siden, eller flytter tastaturet på visningen, står stua igjen et annet sted enn hullet – rett den opp igjen
+  try {
+    window.addEventListener('scroll', rettStua, { passive: true });
+    if (window.visualViewport) { window.visualViewport.addEventListener('resize', rettStua); window.visualViewport.addEventListener('scroll', rettStua); }
+  } catch (e) {}
   function vibrer(m) {
     try { if (document.documentElement.classList.contains('is-app')) { document.dispatchEvent(new CustomEvent('mv-vibrer', { detail: m })); return; } } catch (e) {}
     try { navigator.vibrate && navigator.vibrate(m); } catch (e) {}
@@ -1115,6 +1120,10 @@ export function startRom(LEKNAVN, LANG) {
   /* ---------- Swift-skallet: «Figuren din» og «Rommet» som native ark ----------
      Bildene av hvert valg lages her (SVG → PNG) og sendes til arket; valgene gjøres og lagres her, så alt virker som i nettutgaven. */
   var pngCache = {};
+  /* Figuren har alle uttrykk og bevegelser liggende i SVG-en (vinnerkrona, hendene for øynene, hornene, hjertene …), og på siden
+     er det CSS-en som skjuler dem. Bildene til arket lages uten siden, så de samme lagene må skjules her – ellers får alle
+     frisyrene krone og solbriller og ser helt like ut. */
+  var FIGUR_RO = '<style>.arm-h,.arm-v,.hender,.dekk,.horn,.gitar,.tlf,.zzz,.stjerner,.hjerter,.krone-v,.skum,.oyne-g,.oyne-h,.oyne-s,.munn-o,.munn-b,.munn-sur,.munn-kinn,.rodme,.svette,.gronn{display:none}</style>';
   function svgTilPng(svg, viewBox, px) {
     return new Promise(function (res) {
       var n = viewBox + '|' + px + '|' + svg; if (pngCache[n]) return res(pngCache[n]);
@@ -1154,8 +1163,8 @@ export function startRom(LEKNAVN, LANG) {
         jobber.push(svgTilPng(svg, FV_BOKS[x.slot], 120).then(function (b) { t.png = b; }));
         return t;
       });
-      var frisyrer = FRISYRER.map(function (f) { var t = { id: f, navn: (FV_FRISYRENAVN[f] || [f, f])[L], png: '' }; jobber.push(svgTilPng(figurHtml(Object.assign({}, p, { haar: f }), {}), '-24 -84 48 44', 120).then(function (b) { t.png = b; })); return t; });
-      var skjegg = SKJEGG.map(function (k) { var t = { id: k, navn: FV_SKJEGGNAVN[k][L], png: '' }; jobber.push(svgTilPng(figurHtml(Object.assign({}, p, { skjegg: k === 'ingen' ? null : k }), {}), '-24 -84 48 50', 120).then(function (b) { t.png = b; })); return t; });
+      var frisyrer = FRISYRER.map(function (f) { var t = { id: f, navn: (FV_FRISYRENAVN[f] || [f, f])[L], png: '' }; jobber.push(svgTilPng(FIGUR_RO + figurHtml(Object.assign({}, p, { haar: f }), {}), '-24 -84 48 44', 120).then(function (b) { t.png = b; })); return t; });
+      var skjegg = SKJEGG.map(function (k) { var t = { id: k, navn: FV_SKJEGGNAVN[k][L], png: '' }; jobber.push(svgTilPng(FIGUR_RO + figurHtml(Object.assign({}, p, { skjegg: k === 'ingen' ? null : k }), {}), '-24 -84 48 50', 120).then(function (b) { t.png = b; })); return t; });
       return Promise.all(jobber).then(function () {
         var fn = {}; Object.keys(FV_FARGENAVN).forEach(function (k) { fn[k] = FV_FARGENAVN[k][L]; });
         var valgt = {}; Object.keys(st.valgt).forEach(function (k) { if (st.valgt[k] != null && typeof st.valgt[k] !== 'object') valgt[k] = String(st.valgt[k]); });
@@ -1163,6 +1172,8 @@ export function startRom(LEKNAVN, LANG) {
           slots: ['hode', 'deg', 'ansikt', 'bryst', 'venn', 'beveg'].map(function (s) { return { id: s, navn: FV_NAVN[EN ? 'en' : 'no'][s] }; }),
           ting: ting, frisyrer: frisyrer, skjegg: skjegg, farger: FARGER, fargenavn: fn, fargbar: FARGBAR, konto: RUTE.konto + '#signin',
           tekst: { tittel: T('Figuren din', 'Your figure'), ingenting: T('Ingenting', 'Nothing'), frisyre: T('Frisyre', 'Hairstyle'), skjegg: T('Skjegg', 'Beard'), av: T('av', 'of'), laastOpp: T('låst opp', 'unlocked'),
+            laasOpp: T('Lås opp', 'Unlock'), laasOppTekst: T('Alt er gratis. Spill kvelder, vinn kåringer og ta det på her.', 'Everything is free. Play nights, win awards and wear it here.'),
+            altLaastOpp: T('Du har låst opp alt. Imponerende.', 'You’ve unlocked everything. Impressive.'), seLaas: T('Se hva du kan låse opp', 'See what you can unlock'),
             kveld: T('kveld spilt', 'night played'), kvelder: T('kvelder spilt', 'nights played'), laast: T('låst', 'locked'), loggInn: T('Logg inn', 'Sign in'), nyKonto: T('Ny konto', 'New account'),
             beveg: T('Trykk på deg selv i stua, så gjør figuren bevegelsen – hos alle.', 'Tap yourself in the living room and your figure does the move – for everyone.'),
             gjest: T('Logg inn for å låse opp og ta på ting.', 'Sign in to unlock and wear things.') } };
@@ -1912,7 +1923,7 @@ export function startRom(LEKNAVN, LANG) {
       var r = pk.resultat || {}, navnene = (r.topp || []).map(function (id) { return id === tilstand.meg ? T('Du', 'You') : navn(id); }).join(T(' og ', ' and '));
       if (pk.fase === 'forsvar') {
         var igjen = Math.max(0, 15 - Math.floor((Date.now() + klokkeAvvik - (pk.forsvarFra || Date.now())) / 1000));
-        d.forsvar = { tittel: navnene + T(' – forsvar deg!', ' – defend yourself!'), tekst: T('15 sekunder. Får du én til å snu, slipper du ', '15 seconds. Turn one person and you skip ') + r.slurker + T(' slurker.', ' sips.'), igjen: igjen, kan: kan,
+        d.forsvar = { tittel: navnene + T(' – forsvar deg!', ' – defend yourself!'), tekst: T('15 sekunder. Får du én til å snu, slipper du ', '15 seconds. Turn one person and you skip ') + r.slurker + T(' slurker.', ' sips.'), igjen: igjen, fra: pk.forsvarFra || 0, kan: kan,
           slapp: T('Slapp unna', 'Got away'), drikk: T('Drikk', 'Drink'), topp: r.topp || [] };
       } else {
         var ford = r.fordeling || {}, maksN = Math.max(1, r.maks || 0), nesteL = pkNesteLeser(pk);

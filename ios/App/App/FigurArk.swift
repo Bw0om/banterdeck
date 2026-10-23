@@ -105,10 +105,11 @@ struct FigurArk: View {
         VStack(spacing: 0) {
             Capsule().fill(blekk.opacity(0.25)).frame(width: 36, height: 5).padding(.top, 8)
             if let d = m.d {
-                HStack {
+                HStack(spacing: 10) {
                     Text(d.t("tittel")).font(.archivo(22, vekt: 900))
-                    Spacer()
                     if m.travel { ProgressView().scaleEffect(0.8) }
+                    Spacer()
+                    laasKnapp(d)
                 }.padding(.horizontal, 20).padding(.top, 10)
                 deler(d)
                 ScrollView {
@@ -153,8 +154,26 @@ struct FigurArk: View {
         }
     }
 
+    /// «Lås opp»: det som ennå ikke er låst opp, samlet på ett sted – fanene viser bare det du har
+    private func laasKnapp(_ d: FigurData) -> some View {
+        let paa = m.slot == "laas", n = d.ting.filter { !$0.har }.count
+        return Button(action: { m.slot = "laas"; m.lapp = nil; UISelectionFeedbackGenerator().selectionChanged() }) {
+            HStack(spacing: 5) {
+                Image(systemName: paa ? "lock.open.fill" : "lock.fill").font(.system(size: 12, weight: .bold))
+                Text(d.t("laasOpp")).font(.archivo(14, vekt: 800))
+                if n > 0 && d.inne { Text("\(n)").font(.archivo(12, vekt: 900)).padding(.horizontal, 6).padding(.vertical, 1).background(Capsule().fill(paa ? morkBlekk : gul)).foregroundColor(paa ? gul : morkBlekk) }
+            }
+            .padding(.horizontal, 12).frame(height: 34)
+            .background(Capsule().fill(paa ? gul : kort))
+            .overlay(Capsule().stroke(blekk, lineWidth: paa ? 2.5 : 1.5))
+            .foregroundColor(paa ? morkBlekk : blekk)
+        }.buttonStyle(.plain)
+    }
+
     @ViewBuilder private func innhold(_ d: FigurData) -> some View {
-        if m.slot == "deg" {
+        if m.slot == "laas" {
+            laasOpp(d)
+        } else if m.slot == "deg" {
             etikett(d.t("frisyre"))
             LazyVGrid(columns: kolonner, spacing: 10) {
                 ForEach(d.frisyrer) { f in rute(bilde: f.bilde, navn: nil, paa: d.naa["haar"] == f.id, laast: false) { m.velg(["haar": f.id]) } }
@@ -171,7 +190,8 @@ struct FigurArk: View {
                 if m.slot != "beveg" {
                     rute(bilde: nil, navn: d.t("ingenting"), paa: d.valgt[m.slot] == nil, laast: false) { m.velg(["slot": m.slot, "id": ""]) }
                 }
-                ForEach(d.ting.filter { $0.slot == m.slot }) { x in
+                // Bare det du har låst opp (det utenfor sesong vises med lås). Resten ligger under «Lås opp».
+                ForEach(d.ting.filter { $0.slot == m.slot && $0.har }) { x in
                     rute(bilde: x.bilde, navn: m.slot == "beveg" ? x.navn : nil, paa: d.valgt[m.slot] == x.id, laast: !x.kan) {
                         if !x.kan {
                             if !d.inne { m.loggInn?(d.konto) } else { m.visLapp(x.navn + ": " + x.laas) }
@@ -186,6 +206,40 @@ struct FigurArk: View {
     }
 
     private func etikett(_ t: String) -> some View { Text(t).font(.archivo(13, vekt: 800)).opacity(0.7) }
+
+    /// Det som gjenstår å låse opp, del for del, med hva som skal til. Ingenting her selges – alt kommer av å spille.
+    @ViewBuilder private func laasOpp(_ d: FigurData) -> some View {
+        let laast = d.ting.filter { !$0.har }
+        Text(d.t("laasOppTekst")).font(.archivo(14, vekt: 500)).opacity(0.75).fixedSize(horizontal: false, vertical: true)
+        if laast.isEmpty {
+            Text(d.t("altLaastOpp")).font(.archivo(16, vekt: 800)).padding(14).frame(maxWidth: .infinity, alignment: .leading)
+                .background(RoundedRectangle(cornerRadius: 12).fill(gul)).foregroundColor(morkBlekk)
+        }
+        ForEach(d.slots.filter { $0.id != "deg" }, id: \.id) { s in
+            let liste = laast.filter { $0.slot == s.id }
+            if !liste.isEmpty {
+                etikett(s.navn).padding(.top, 4)
+                VStack(spacing: 8) { ForEach(liste) { x in laasRad(x) } }
+            }
+        }
+    }
+
+    private func laasRad(_ x: FigurTing) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12).fill(kort)
+                RoundedRectangle(cornerRadius: 12).stroke(blekk.opacity(0.25), lineWidth: 1.5)
+                if let b = x.bilde { Image(uiImage: b).resizable().aspectRatio(contentMode: .fit).padding(7).opacity(0.55) }
+                Image(systemName: "lock.fill").font(.system(size: 11, weight: .bold)).padding(4).background(Circle().fill(gul)).foregroundColor(morkBlekk)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing).padding(3)
+            }.frame(width: 58, height: 58)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(x.navn).font(.archivo(15, vekt: 900))
+                Text(x.laas).font(.archivo(13, vekt: 500)).opacity(0.75).fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+    }
 
     /// En rute i rutenettet: bilde (eller navn), gul ramme når den er på, hengelås når den er låst
     private func rute(bilde: UIImage?, navn: String?, paa: Bool, laast: Bool, action: @escaping () -> Void) -> some View {
@@ -232,11 +286,20 @@ struct FigurArk: View {
                     Button(action: { m.loggInn?(d.konto) }) { Text(d.t("nyKonto").uppercased()).font(.archivo(14, vekt: 900)).padding(.horizontal, 16).padding(.vertical, 10).overlay(RoundedRectangle(cornerRadius: 10).stroke(blekk, lineWidth: 2.5)) }.buttonStyle(.plain)
                 }
             }.padding(.top, 6)
+        } else if m.slot == "laas" {
+            Text("\(d.kvelder) \(d.kvelder == 1 ? d.t("kveld") : d.t("kvelder"))").font(.archivo(13, vekt: 500)).opacity(0.7)
         } else if m.slot == "beveg" {
             Text(d.t("beveg")).font(.archivo(13, vekt: 500)).opacity(0.7)
         } else if m.slot != "deg" {
             let alle = d.ting.filter { $0.slot == m.slot }, har = alle.filter { $0.har }.count
-            Text("\(har) \(d.t("av")) \(alle.count) \(d.t("laastOpp")) · \(d.kvelder) \(d.kvelder == 1 ? d.t("kveld") : d.t("kvelder"))").font(.archivo(13, vekt: 500)).opacity(0.7)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("\(har) \(d.t("av")) \(alle.count) \(d.t("laastOpp")) · \(d.kvelder) \(d.kvelder == 1 ? d.t("kveld") : d.t("kvelder"))").font(.archivo(13, vekt: 500)).opacity(0.7)
+                if har < alle.count {
+                    Button(action: { m.slot = "laas"; UISelectionFeedbackGenerator().selectionChanged() }) {
+                        Text(d.t("seLaas") + " →").font(.archivo(14, vekt: 800)).foregroundColor(modus == .dark ? gul : rust)
+                    }.buttonStyle(.plain)
+                }
+            }
         }
     }
 }
