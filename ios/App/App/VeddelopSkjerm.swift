@@ -199,25 +199,29 @@ struct VeddelopSkjerm: View {
         .frame(width: 24, height: 26).opacity(h.oi ? 0.8 : 1)
     }
 
-    /// Hesten: et ess i fargen, galopperer under løpet
-    private func hest(_ b: VlBane, lop: Bool) -> some View {
-        TimelineView(.periodic(from: .now, by: 0.05)) { tl in
-            let t = tl.date.timeIntervalSince1970
-            let i = ["♥": 0, "♠": 1, "♦": 2, "♣": 3][b.id] ?? 0
-            let tempo = [1.0, 1.31, 0.83, 1.17][i], takt = [0.0, 1.9, 3.4, 4.8][i]
-            let sving = [5.0, 3.2, 6.5, 4.2][i], hoyde: CGFloat = [4, 6, 3, 5][i]
-            let x = t * .pi * 2 * tempo + takt
-            let dans = lop && !rolig
-            let hopp = dans ? CGFloat(abs(sin(x))) * -hoyde : 0
-            let vink = dans ? sin(x * (i % 2 == 0 ? 1 : 0.5) + 0.6) * sving : 0
-            VStack(spacing: 1) {
-                Text("A").font(.system(size: 13, weight: .black))
-                Text(b.id).font(.system(size: 20, weight: .black))
-            }
-            .frame(width: 32, height: 44).foregroundColor(b.rod ? kortRod : morkBlekk)
-            .background(RoundedRectangle(cornerRadius: 5).fill(Color.white)).overlay(RoundedRectangle(cornerRadius: 5).stroke(morkBlekk, lineWidth: 2.5))
-            .rotationEffect(.degrees(vink)).offset(y: hopp)
+    /// Hesten: et ess i fargen, galopperer under løpet. Klokka (20 bilder i sekundet) går bare mens løpet pågår –
+    /// før og etter står essene stille, så telefonen ikke tegner fire baner om igjen hele kvelden.
+    @ViewBuilder private func hest(_ b: VlBane, lop: Bool) -> some View {
+        if lop && !rolig {
+            TimelineView(.periodic(from: .now, by: 0.05)) { tl in ess(b, t: tl.date.timeIntervalSince1970) }
+        } else {
+            ess(b, t: nil)
         }
+    }
+    private func ess(_ b: VlBane, t: Double?) -> some View {
+        let i = ["♥": 0, "♠": 1, "♦": 2, "♣": 3][b.id] ?? 0
+        let tempo = [1.0, 1.31, 0.83, 1.17][i], takt = [0.0, 1.9, 3.4, 4.8][i]
+        let sving = [5.0, 3.2, 6.5, 4.2][i], hoyde: CGFloat = [4, 6, 3, 5][i]
+        let x = (t ?? 0) * .pi * 2 * tempo + takt
+        let hopp = t != nil ? CGFloat(abs(sin(x))) * -hoyde : 0
+        let vink = t != nil ? sin(x * (i % 2 == 0 ? 1 : 0.5) + 0.6) * sving : 0
+        return VStack(spacing: 1) {
+            Text("A").font(.system(size: 13, weight: .black))
+            Text(b.id).font(.system(size: 20, weight: .black))
+        }
+        .frame(width: 32, height: 44).foregroundColor(b.rod ? kortRod : morkBlekk)
+        .background(RoundedRectangle(cornerRadius: 5).fill(Color.white)).overlay(RoundedRectangle(cornerRadius: 5).stroke(morkBlekk, lineWidth: 2.5))
+        .rotationEffect(.degrees(vink)).offset(y: hopp)
     }
 
     // MARK: Vedding – innsats, hvem har veddet, frist, vertens «Start løpet nå»

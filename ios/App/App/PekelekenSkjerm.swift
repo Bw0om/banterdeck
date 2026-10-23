@@ -43,7 +43,8 @@ final class PekModell: ObservableObject {
         d = ny
     }
     /// Millisekunder siden nedtellingen startet (servertid)
-    func tid() -> Double { (Date().timeIntervalSince1970 * 1000 + avvik) - (d?.start ?? 0) }
+    func tid() -> Double { naaMs() - (d?.start ?? 0) }
+    func naaMs() -> Double { Date().timeIntervalSince1970 * 1000 + avvik }
 
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -160,7 +161,7 @@ struct PekelekenSkjerm: View {
     // «Hvor mange pekte på deg?»
     @ViewBuilder private func fingre(_ d: PekData) -> some View {
         let f = d.fingre
-        let maks = f["maks"] as? Int ?? 1, mine = f["mine"] as? Int ?? -1, pluss = f["pluss"] as? Bool ?? false
+        let maks = max(0, f["maks"] as? Int ?? 1), mine = f["mine"] as? Int ?? -1, pluss = f["pluss"] as? Bool ?? false
         VStack(alignment: .leading, spacing: 12) {
             Text(f["sporsmal"] as? String ?? "").font(.archivo(20, vekt: 900))
             HStack(spacing: 8) {
@@ -188,15 +189,16 @@ struct PekelekenSkjerm: View {
         }
     }
 
-    // Forsvarstalen: 15 sekunder
+    // Forsvarstalen: 15 sekunder fra serveren sa «forsvar» (ikke fra skjermen ble tegnet – den tegnes på nytt for hver melding)
     @ViewBuilder private func forsvar(_ d: PekData) -> some View {
         let f = d.forsvar
+        let fra = (f["fra"] as? NSNumber)?.doubleValue ?? 0
         VStack(alignment: .leading, spacing: 10) {
             piller(d, f["topp"] as? [String] ?? [])
             Text(f["tittel"] as? String ?? "").font(.archivo(22, vekt: 900))
             Text(f["tekst"] as? String ?? "").font(.archivo(15, vekt: 500)).opacity(0.8)
-            TimelineView(.periodic(from: .now, by: 1)) { _ in
-                let igjen = max(0, (f["igjen"] as? Int ?? 15) - Int(Date().timeIntervalSince(startet)))
+            TimelineView(.periodic(from: .now, by: 0.5)) { _ in
+                let igjen = fra > 0 ? max(0, 15 - Int((m.naaMs() - fra) / 1000)) : max(0, f["igjen"] as? Int ?? 15)
                 HStack(spacing: 10) {
                     GeometryReader { g in
                         ZStack(alignment: .leading) {
@@ -216,7 +218,6 @@ struct PekelekenSkjerm: View {
         }
         .padding(16).background(RoundedRectangle(cornerRadius: 16).fill(kort)).overlay(RoundedRectangle(cornerRadius: 16).stroke(blekk, lineWidth: 2.5))
     }
-    private let startet = Date()
 
     // Resultatet: hvem som fikk flest fingre, søylene, og «Neste kort»
     @ViewBuilder private func resultat(_ d: PekData) -> some View {

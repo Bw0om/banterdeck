@@ -394,6 +394,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     private let lobbyModell = LobbyModell()
     private var lobbyVert: UIHostingController<LobbySkjerm>?
     private var lobbyHull: HullVisning?
+    private var lobbyHullRekt: CGRect = .zero   // hullet sist det ble målt (skjermkoordinater)
     private func visLobby(_ d: [String: Any]?, over side: UIViewController) {
         guard let d = d else {
             if let h = lobbyVert, let hull = lobbyHull {
@@ -402,6 +403,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             return
         }
         lobbyModell.sett(d)
+        // Siden kan ha tegnet stua på nytt (ny tilstand, siden lastet igjen) uten at hullet flyttet seg – si hvor hullet er hver gang
+        if lobbyVert != nil, lobbyHullRekt != .zero { lobbyModell.hullEndret?(lobbyHullRekt) }
         if lobbyVert == nil {
             let h = UIHostingController(rootView: LobbySkjerm(m: lobbyModell))
             let hull = HullVisning()
@@ -422,6 +425,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             lobbyVert = h; lobbyHull = hull
             lobbyModell.hullEndret = { [weak self, weak hull] r in
                 guard let self = self, let hull = hull else { return }
+                self.lobbyHullRekt = r
                 // Hullet i skjermkoordinater → i overlegget (for trykkene) og i nettvisningen (der stua skal ligge)
                 let iHull = hull.window == nil ? r : hull.convert(r, from: nil)
                 hull.hull = iHull

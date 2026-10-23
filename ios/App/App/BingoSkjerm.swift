@@ -27,12 +27,16 @@ struct BgData {
 final class BgModell: ObservableObject {
     @Published var d: BgData? = nil
     let blokker = KortModell()
+    private(set) var avvik: Double = 0
     weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = BgData(dict)
+        if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
         d = ny
     }
+    /// Millisekunder siden meldingen fra nettsiden kom (servertid)
+    func siden(_ d: BgData) -> Double { d.naa > 0 ? Date().timeIntervalSince1970 * 1000 + avvik - d.naa : 0 }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
@@ -78,7 +82,12 @@ struct BingoSkjerm: View {
                     topp(d)
                     VStack(alignment: .leading, spacing: 12) {
                             brett(d)
-                            if !d.ferdig && d.rekkeSiden < 4000 { rekkeLapp(d) }
+                            // «Rekke!» i fire sekunder – og den går bort av seg selv, ikke først når neste melding kommer
+                            if !d.ferdig && d.rekkeSiden < 4000 {
+                                TimelineView(.periodic(from: .now, by: 0.5)) { _ in
+                                    if d.rekkeSiden + m.siden(d) < 4000 { rekkeLapp(d) }
+                                }
+                            }
                             if d.ferdig {
                                 dom(d)
                                 BlokkListe(m: m.blokker)

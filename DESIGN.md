@@ -357,6 +357,8 @@ A sixth part on the figure, «Deg» (a face icon, pink so it stands apart): a ro
 
 The palettes are the app's own colours plus natural hair and skin tones, never a free colour wheel, so every figure still belongs in the room. Choices are stored with the gear (`haar`, `fh`, `fhud`, `ftopp`, `fhode`), validated against the palettes on the server, and applied everywhere a figure or head is drawn – room, TV, profile, game heads – through `utseende(id, pynt)`. A hat clips the hair at its brim; whatever hangs below (long hair, ponytail, curls at the ears) stays.
 
+**In the iPhone app** (`FigurArk.swift`) the part tabs show only what you own; what is still locked lives behind one «Lås opp» pill next to the title, with a count. That view lists the locked things part by part – picture, name and what it takes – and a line with nights played; a tab with nothing unlocked yet links there. It is never called a shop: nothing is sold. The thumbnails are rendered by the page (`svgTilPng` in `rom.js`) and must carry `FIGUR_RO`, the style that hides the figure's expression and move layers, or every head gets the winner's crown.
+
 ## Buttons, not explanations (room flow)
 
 The room is the product, and it is operated with buttons alone. A button that says what it does needs no sentence under it.
