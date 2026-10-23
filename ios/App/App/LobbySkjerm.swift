@@ -12,7 +12,6 @@ final class LobbyModell: ObservableObject {
     /// Høyden stua faktisk har i nettsiden (målt der), så hullet er like stort som stua
     @Published var stuaH: CGFloat = 0
     let blokker = KortModell()
-    var hullEndret: ((CGRect) -> Void)?
     weak var nett: WKWebView? { didSet { blokker.nett = nett } }
 
     func sett(_ d: [String: Any]) {
@@ -25,11 +24,6 @@ final class LobbyModell: ObservableObject {
     func t(_ k: String) -> String { tekst[k] ?? k }
 }
 
-private struct HullKey: PreferenceKey {
-    static var defaultValue: CGRect = .zero
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) { value = nextValue() }
-}
-
 struct LobbySkjerm: View {
     @ObservedObject var m: LobbyModell
     @Environment(\.colorScheme) private var modus
@@ -40,16 +34,19 @@ struct LobbySkjerm: View {
     private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
     private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
 
+    /// Romkoden og «Inviter» er alltid like høye (80 + 6 pt luft + 10 pt mellomrom = 96 pt under safe area), og nettsiden legger stua
+    /// 108 px under sin safe area (global.css, lobby-nativ). Da står stua 12 pt under romkoden uten at noen måler noe.
+    static let toppH: CGFloat = 80
+
     var body: some View {
         GeometryReader { g in
             // stua + 12 pt luft over og under
-            let hull = m.stuaH > 0 ? m.stuaH + 24 : (g.size.width - 50) * 0.823 + 84
+            let hull = m.stuaH > 0 ? m.stuaH + 24 : (g.size.width - 24) * 0.823 + 84
             ZStack(alignment: .top) {
                 VStack(spacing: 10) {
-                    topp.padding(.horizontal, 16).padding(.top, 6).frame(maxWidth: .infinity).background(papir.ignoresSafeArea(edges: [.top, .horizontal]))
-                    // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den. Står fast – bare lista under blar.
+                    topp.frame(height: LobbySkjerm.toppH).padding(.horizontal, 16).padding(.top, 6).frame(maxWidth: .infinity).background(papir.ignoresSafeArea(edges: [.top, .horizontal]))
+                    // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den (Skall.settStua). Står fast – bare lista under blar.
                     Color.clear.frame(height: hull)
-                        .background(GeometryReader { h in Color.clear.preference(key: HullKey.self, value: h.frame(in: .global)) })
                     ScrollView {
                         VStack(alignment: .leading, spacing: 12) {
                             if m.erVert {
@@ -66,8 +63,6 @@ struct LobbySkjerm: View {
                     .background(papir.ignoresSafeArea(edges: [.bottom, .horizontal]))
                 }
             }
-            .coordinateSpace(name: "lobby")
-            .onPreferenceChange(HullKey.self) { r in m.hullEndret?(r) }
         }
         .foregroundColor(blekk)
     }

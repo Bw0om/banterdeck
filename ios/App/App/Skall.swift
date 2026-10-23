@@ -394,17 +394,17 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     private let lobbyModell = LobbyModell()
     private var lobbyVert: UIHostingController<LobbySkjerm>?
     private var lobbyHull: HullVisning?
-    private var lobbyHullRekt: CGRect = .zero   // hullet sist det ble målt (skjermkoordinater)
+    /// Hvor stua ligger, meldt av nettsiden (Skall.stua) – i nettvisningens punkter. Det er dette som åpner hullet for trykkene.
+    private var stuaRekt: CGRect = .zero
     private func visLobby(_ d: [String: Any]?, over side: UIViewController) {
         guard let d = d else {
             if let h = lobbyVert, let hull = lobbyHull {
                 UIView.animate(withDuration: 0.22, animations: { hull.alpha = 0 }) { _ in h.willMove(toParent: nil); hull.removeFromSuperview(); h.removeFromParent(); if self.lobbyVert === h { self.lobbyVert = nil; self.lobbyHull = nil } }
             }
+            stuaRekt = .zero
             return
         }
         lobbyModell.sett(d)
-        // Siden kan ha tegnet stua på nytt (ny tilstand, siden lastet igjen) uten at hullet flyttet seg – si hvor hullet er hver gang
-        if lobbyVert != nil, lobbyHullRekt != .zero { lobbyModell.hullEndret?(lobbyHullRekt) }
         if lobbyVert == nil {
             let h = UIHostingController(rootView: LobbySkjerm(m: lobbyModell))
             let hull = HullVisning()
@@ -423,26 +423,27 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             h.didMove(toParent: side)
             hull.alpha = 0
             lobbyVert = h; lobbyHull = hull
-            lobbyModell.hullEndret = { [weak self, weak hull] r in
-                guard let self = self, let hull = hull else { return }
-                self.lobbyHullRekt = r
-                // Hullet i skjermkoordinater → i overlegget (for trykkene) og i nettvisningen (der stua skal ligge)
-                let iHull = hull.window == nil ? r : hull.convert(r, from: nil)
-                hull.hull = iHull
-                guard let nett = self.lobbyModell.nett else { return }
-                // CSS-px = punkter; 12 pt luft over stua, så den aldri havner under romkoden og «Inviter»
-                let y = hull.convert(iHull, to: nett).minY - nett.scrollView.adjustedContentInset.top + 12
-                nett.evaluateJavaScript("window.__mvLek && window.__mvLek.stuaTopp(\(Int(y.rounded())))") { [weak self] svar, _ in
-                    if let h = (svar as? NSNumber)?.doubleValue { self?.settStuaHoyde(CGFloat(h)) }
-                }
-            }
             UIView.animate(withDuration: 0.2) { hull.alpha = 1 }
         }
         side.view.bringSubviewToFront(lobbyHull!)
+        aapneHull()
     }
 
-    func settStuaHoyde(_ h: CGFloat) {
-        if h > 40, abs(h - lobbyModell.stuaH) > 1 { lobbyModell.stuaH = h }
+    /// Nettsiden sier hvor stua ligger ({top, left, w, h} i CSS-px = punkter i nettvisningen). Stua ligger fast under romkoden
+    /// (global.css: safe-area + 108 px, like mye som romkoden og lufta tar i LobbySkjerm), så ingenting regnes fram og tilbake:
+    /// hullet i det native laget legges akkurat der stua er, og lista under begynner under den.
+    func settStua(_ d: [String: Any]) {
+        let h = (d["h"] as? NSNumber)?.doubleValue ?? 0
+        guard h > 40 else { return }
+        stuaRekt = CGRect(x: (d["left"] as? NSNumber)?.doubleValue ?? 0, y: (d["top"] as? NSNumber)?.doubleValue ?? 0, width: (d["w"] as? NSNumber)?.doubleValue ?? 0, height: h)
+        if abs(CGFloat(h) - lobbyModell.stuaH) > 1 { lobbyModell.stuaH = CGFloat(h) }
+        aapneHull()
+    }
+
+    /// Hullet for trykkene: stuas rute, fra nettvisningens koordinater til overleggets (UIKit, ingen SwiftUI-måling)
+    private func aapneHull() {
+        guard let hull = lobbyHull, let nett = lobbyModell.nett, stuaRekt.height > 0 else { return }
+        hull.hull = nett.convert(stuaRekt, to: hull)
     }
 
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
@@ -786,11 +787,11 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /// Stua i lobbyen har fått ny høyde (nettsiden måler den): {h} – hullet blir like stort, så hele stua og knappene i den synes
+    /// Stua i lobbyen ligger her (nettsiden måler den): {top, left, w, h} – hullet legges der, og lista under begynner under stua
     @objc func stua(_ call: CAPPluginCall) {
-        let h = call.getDouble("h") ?? 0
+        let d: [String: Any] = ["top": call.getDouble("top") ?? 0, "left": call.getDouble("left") ?? 0, "w": call.getDouble("w") ?? 0, "h": call.getDouble("h") ?? 0]
         DispatchQueue.main.async {
-            SkallViewController.delt?.settStuaHoyde(CGFloat(h))
+            SkallViewController.delt?.settStua(d)
             call.resolve()
         }
     }
