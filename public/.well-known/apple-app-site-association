@@ -2,7 +2,27 @@
   "applinks": {
     "apps": [],
     "details": [
-      { "appID": "685JC7R3PQ.no.mittvors.app", "paths": ["/no/rom*", "/en/room*", "/no/*", "/en/*", "/"] }
+      {
+        "appID": "685JC7R3PQ.no.mittvors.app",
+        "components": [
+          { "/": "/crew", "exclude": true },
+          { "/": "/deck", "exclude": true },
+          { "/": "/plan", "exclude": true },
+          { "/": "/plus", "exclude": true },
+          { "/": "/home", "exclude": true },
+          { "/": "/null", "exclude": true },
+          { "/": "/api/*", "exclude": true },
+          { "/": "/????" },
+          { "/": "/????/" },
+          { "/": "/" },
+          { "/": "/no/*" },
+          { "/": "/en/*" },
+          { "/": "/room*" },
+          { "/": "/drinking-games*" },
+          { "/": "/account*" }
+        ],
+        "paths": ["NOT /crew", "NOT /deck", "NOT /plan", "NOT /plus", "NOT /home", "NOT /null", "NOT /api/*", "/????", "/no/*", "/en/*", "/room*", "/drinking-games*", "/account*", "/"]
+      }
     ]
   },
   "webcredentials": { "apps": ["685JC7R3PQ.no.mittvors.app"] }

@@ -286,7 +286,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         guard let host = u.host, host == "mittvors.no" || host.hasSuffix(".mittvors.no") else { return false }
         var sti = u.path
         // mittvors.no/ABCD (QR-koden) er en omdirigering på serveren – i appen går vi rett til rommet
-        if let m = sti.range(of: #"^/([A-Za-z0-9]{4,6})/?$"#, options: .regularExpression) {
+        if sti.range(of: #"^/(room|crew|plan|deck|plus|home|null)/?$"#, options: [.regularExpression, .caseInsensitive]) == nil,
+           let m = sti.range(of: #"^/([A-Za-z0-9]{4,6})/?$"#, options: .regularExpression) {
             let kode = String(sti[m]).trimmingCharacters(in: CharacterSet(charactersIn: "/")).uppercased()
             sti = (spraak == "en" ? "/room?k=" : "/no/rom?k=") + kode
         } else if sti == "/" || sti.isEmpty {
