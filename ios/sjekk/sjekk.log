@@ -1,14 +1,14 @@
-18:39:17 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:39:23 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:39:23 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-18:40:15 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:40:22 side /drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
-18:40:28 skjermer: leker=meldt n=51 png=31 klasser=is-mobile is-ios is-app is-standalone har-skall
-18:40:28 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
-18:40:53 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:40:54 side /account klasser=is-mobile is-ios is-app is-standalone har-skall
-18:41:00 skjermer: hendelse:deg deg>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
-18:41:00 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
-18:42:02 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:42:08 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:42:08 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+18:52:17 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:52:23 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:52:23 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+18:53:46 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:53:49 side /drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
+18:53:55 skjermer: leker>ok leker=meldt n=51 png=31 klasser=is-mobile is-ios is-app is-standalone har-skall
+18:53:55 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
+18:54:13 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:54:14 side /account klasser=is-mobile is-ios is-app is-standalone har-skall
+18:54:20 skjermer: hendelse:deg deg>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
+18:54:20 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+18:54:55 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:55:01 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:55:01 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
