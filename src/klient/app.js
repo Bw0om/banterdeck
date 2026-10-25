@@ -111,7 +111,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     Skall.aapne({ navn: f, url: u.pathname + u.search }).catch(() => { location.href = u.href; });
   }, true);
   // Siden sier hvilken skjerm den viser (rom.js meldSkjerm): på startskjermen legger skallet sin egen native startskjerm oppå
-  let sistSkjerm = null;
+  let sistSkjerm = window.__mvSisteSkjerm || null;   // en side kan ha meldt skjermen sin før dette skriptet lyttet (lekelista)
   let skjermLogg = '';   // simulator-sjekken: hva som ble sendt til skallet
   const sendSkjerm = () => { if (harSkall && sistSkjerm) { skjermLogg += ' ' + sistSkjerm.skjerm + '>'; Skall.skjerm(sistSkjerm).then(() => { skjermLogg += 'ok'; }).catch((x) => { skjermLogg += 'FEIL(' + (x && x.message || x) + ')'; }); } };
   document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; skjermLogg += ' hendelse:' + sistSkjerm.skjerm + (harSkall ? '' : '(venter)'); sendSkjerm(); });

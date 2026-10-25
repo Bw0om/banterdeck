@@ -185,6 +185,8 @@ const romSti = no ? '/no/rom' : '/room';
       function meld() {
         var d = { skjerm: 'leker', alder: alderOk(), alkfri: egenAlkfri(), tekst: LEKER_TEKST,
           leker: liste.map(function (l) { return { href: l.href, navn: l.navn, niva: l.niva, min: l.min, maks: l.maks, pl: l.pl, gruppe: l.gruppe, utstyr: l.utstyr, q: l.q, pluss: l.pluss, png: l.png }; }) };
+        // app.js lytter kanskje ikke ennå (det lastes etter siden): meldingen ligger også her, og app.js henter den når det starter
+        window.__mvSisteSkjerm = d;
         try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: d })); window.__mvLekerStatus = 'meldt n=' + d.leker.length + ' png=' + d.leker.filter(function (l) { return l.png; }).length; } catch (e) { window.__mvLekerStatus = 'feil ' + e; }
       }
       meld();
