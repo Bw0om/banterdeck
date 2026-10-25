@@ -17,13 +17,29 @@ final class StartModell: ObservableObject {
     /// Høyden stua har i nettsiden (meldt derfra), så hullet er like stort som stua
     @Published var stuaH: CGFloat = 0
     @Published var harNett = true
+    /// Tastaturets høyde (0 når det er nede) – skjermen skyver seg opp så kodefeltet ikke havner under det
+    @Published var tastaturH: CGFloat = 0
     weak var nett: WKWebView?
     private let nettVakt = NWPathMonitor()
+    private var sistPlass = ""
 
     init() {
         // Rommet bor på serveren: uten nett får du en kort beskjed i stedet for en nettfeil
         nettVakt.pathUpdateHandler = { [weak self] sti in DispatchQueue.main.async { self?.harNett = sti.status == .satisfied } }
         nettVakt.start(queue: DispatchQueue(label: "no.mittvors.nett"))
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillChangeFrameNotification, object: nil, queue: .main) { [weak self] n in
+            guard let r = (n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
+            let h = max(0, UIScreen.main.bounds.height - r.minY)
+            if abs(h - (self?.tastaturH ?? 0)) > 1 { self?.tastaturH = h }
+        }
+    }
+
+    /// Hvor stua skal stå i nettsiden (toppen i nettvisningens punkter, og bredden): nettsiden flytter den dit og melder ruta tilbake (hullet)
+    func plass(topp: CGFloat, bredde: CGFloat) {
+        let n = "\(Int(topp.rounded()))|\(Int(bredde.rounded()))"
+        guard n != sistPlass, let w = nett else { return }
+        sistPlass = n
+        w.evaluateJavaScript("window.__mvStart && window.__mvStart.plass && window.__mvStart.plass(\(Int(topp.rounded())), \(Int(bredde.rounded())))", completionHandler: nil)
     }
 
     func T(_ no: String, _ en: String) -> String { engelsk ? en : no }
@@ -94,123 +110,150 @@ struct StartSkjerm: View {
     private let blekk = Color(red: 0.086, green: 0.071, blue: 0.059) // #16120F
     private let papir = Color(red: 1, green: 0.973, blue: 0.933)     // #FFF8EE
 
-    /// Tittelen er alltid like høy (to linjer à 48 pt + 8 pt luft over og under = 112 pt under safe area), og nettsiden legger stua
-    /// 124 px under sin safe area (global.css, start-nativ). Da står stua 12 pt under tittelen uten at noen måler noe.
-    static let toppH: CGFloat = 112
-
+    /// Alt står fast – ingen blaing. Tittelen er to linjer (112 pt) på vanlige iPhoner og én linje (60 pt) på korte skjermer,
+    /// og stua får den plassen som er igjen når knappene nederst har fått sin. Nettsiden flytter stua dit (plass) og melder ruta (hullet).
     var body: some View {
         GeometryReader { g in
-            // stua + 12 pt luft over og under
-            let hull = m.stuaH > 0 ? m.stuaH + 24 : (g.size.width - 24) * 0.823 + 24
+            let W = g.size.width, H = g.size.height
+            let kortSkjerm = H < 720
+            let toppH: CGFloat = kortSkjerm ? 60 : 112
+            let alderH: CGFloat = kortSkjerm ? 0 : 44
+            let bunnH: CGFloat = (m.fortsett.isEmpty ? 0 : 86) + (m.navn.isEmpty ? 84 : 0) + 60 + 14 + 80 + alderH + 16
+            let ledig = max(160, H - toppH - bunnH - 24)
+            let stuaW = min(W - 24, ledig / 0.823)
+            let hull = (m.stuaH > 0 ? m.stuaH : stuaW * 0.823) + 24
+            // Tastaturet: skyv alt opp akkurat så mye at kodepanelet står over det
+            let bunnY = g.safeAreaInsets.top + toppH + hull + bunnH - alderH
+            let skjermH = H + g.safeAreaInsets.top + g.safeAreaInsets.bottom
+            let skyv = m.tastaturH > 0 ? max(0, bunnY + 12 - (skjermH - m.tastaturH)) : 0
+            let stuaTopp = g.safeAreaInsets.top + toppH + 12 - skyv
             VStack(spacing: 0) {
-                tittel.frame(height: StartSkjerm.toppH).padding(.horizontal, 20).frame(maxWidth: .infinity, alignment: .leading)
-                    .background(oransje.ignoresSafeArea(edges: [.top, .horizontal]))
+                tittel(kortSkjerm).frame(height: toppH).padding(.horizontal, 20).frame(maxWidth: .infinity, alignment: .leading)
                 // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den (Skall.settStua)
                 Color.clear.frame(height: hull)
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
-                        if !m.fortsett.isEmpty {
-                            Button(action: m.fortsettRom) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(m.T("Du er i rom ", "You’re in room ") + m.fortsett).font(.archivo(17, vekt: 800))
-                                        Text(m.T("Trykk for å gå tilbake til rommet", "Tap to go back to the room")).font(.archivo(14, vekt: 500)).opacity(0.75)
-                                    }
-                                    Spacer()
-                                    Text("→").font(.archivo(22, vekt: 800))
+                VStack(alignment: .leading, spacing: 14) {
+                    if !m.fortsett.isEmpty {
+                        Button(action: m.fortsettRom) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(m.T("Du er i rom ", "You’re in room ") + m.fortsett).font(.archivo(17, vekt: 800))
+                                    Text(m.T("Trykk for å gå tilbake til rommet", "Tap to go back to the room")).font(.archivo(14, vekt: 500)).opacity(0.75)
                                 }
-                                .padding(14).foregroundColor(blekk)
+                                Spacer()
+                                Text("→").font(.archivo(22, vekt: 800))
+                            }
+                            .padding(14).frame(height: 72).foregroundColor(blekk)
+                            .background(RoundedRectangle(cornerRadius: 14).fill(papir))
+                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
+                        }
+                        .buttonStyle(TrykkStil())
+                    }
+
+                    // Navnet huskes (endres under Deg) – feltet vises bare til vi har et
+                    if m.navn.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(m.T("Navnet ditt", "Your name")).font(.archivo(14, vekt: 800))
+                            TextField(m.T("F.eks. Maria", "E.g. Sam"), text: $m.navn)
+                                .textContentType(.nickname).disableAutocorrection(true)
+                                .submitLabel(.go).focused($fokus, equals: .navn)
+                                .onSubmit { if m.kode.isEmpty { m.lagRom() } else { m.bliMed() } }
+                                .font(.archivo(20, vekt: 600))
+                                .padding(.horizontal, 14).frame(height: 56)
                                 .background(RoundedRectangle(cornerRadius: 14).fill(papir))
                                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
-                            }
                         }
+                    }
 
-                        // Navnet huskes (endres under Deg) – feltet vises bare til vi har et
-                        if m.navn.isEmpty {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(m.T("Navnet ditt", "Your name")).font(.archivo(14, vekt: 800))
-                                TextField(m.T("F.eks. Maria", "E.g. Sam"), text: $m.navn)
-                                    .textContentType(.nickname).disableAutocorrection(true)
-                                    .submitLabel(.go).focused($fokus, equals: .navn)
-                                    .onSubmit { if m.kode.isEmpty { m.lagRom() } else { m.bliMed() } }
-                                    .font(.archivo(20, vekt: 600))
-                                    .padding(.horizontal, 14).frame(height: 56)
-                                    .background(RoundedRectangle(cornerRadius: 14).fill(papir))
-                                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
+                    knapp(m.T("Lag rom", "Create room") + "  →", travel: m.travel == "lag", action: m.lagRom)
+
+                    // Koden fra verten: mørkt panel med feltet og «Bli med», som på nettet
+                    HStack(spacing: 10) {
+                        TextField("ABCD", text: $m.kode)
+                            .font(.archivo(28, vekt: 900))
+                            .foregroundColor(papir)
+                            .textInputAutocapitalization(.characters).disableAutocorrection(true)
+                            .submitLabel(.go).focused($fokus, equals: .kode)
+                            .onChange(of: m.kode) { v in
+                                let r = String(v.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(6))
+                                if r != v { m.kode = r; return }
+                                m.stuaKode(r, nyGjest: r.count > forrigeKode.count)
+                                forrigeKode = r
+                                if r.count == 4 && m.navn.isEmpty { fokus = .navn }
                             }
-                        }
-
-                        knapp(m.T("Lag rom", "Create room") + "  →", travel: m.travel == "lag", action: m.lagRom)
-
-                        // Koden fra verten: mørkt panel med feltet og «Bli med», som på nettet
-                        HStack(spacing: 10) {
-                            TextField("ABCD", text: $m.kode)
-                                .font(.archivo(28, vekt: 900))
-                                .foregroundColor(papir)
-                                .textInputAutocapitalization(.characters).disableAutocorrection(true)
-                                .submitLabel(.go).focused($fokus, equals: .kode)
-                                .onChange(of: m.kode) { v in
-                                    let r = String(v.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(6))
-                                    if r != v { m.kode = r; return }
-                                    m.stuaKode(r, nyGjest: r.count > forrigeKode.count)
-                                    forrigeKode = r
-                                    if r.count == 4 && m.navn.isEmpty { fokus = .navn }
-                                }
-                                .onSubmit { m.bliMed() }
-                                .padding(.horizontal, 12).frame(height: 56)
-                                .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
-                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(papir.opacity(0.25), lineWidth: 2))
-                            Button(action: m.bliMed) {
+                            .onSubmit { m.bliMed() }
+                            .padding(.horizontal, 12).frame(height: 56)
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(papir.opacity(0.25), lineWidth: 2))
+                        Button(action: m.bliMed) {
+                            ZStack {
+                                Text(m.T("Bli med", "Join").uppercased()).font(.archivo(18, vekt: 900)).opacity(m.travel == "bli" ? 0 : 1)
+                                if m.travel == "bli" { ProgressView().progressViewStyle(.circular).tint(blekk) }
+                            }
+                            .padding(.horizontal, 18).frame(height: 56).foregroundColor(blekk)
+                            .background(
                                 ZStack {
-                                    Text(m.T("Bli med", "Join").uppercased()).font(.archivo(18, vekt: 900)).opacity(m.travel == "bli" ? 0 : 1)
-                                    if m.travel == "bli" { ProgressView().progressViewStyle(.circular).tint(blekk) }
+                                    RoundedRectangle(cornerRadius: 10).fill(blekk).offset(x: 3, y: 3)
+                                    RoundedRectangle(cornerRadius: 10).fill(papir)
+                                    RoundedRectangle(cornerRadius: 10).stroke(blekk, lineWidth: 3)
                                 }
-                                .padding(.horizontal, 18).frame(height: 56).foregroundColor(blekk)
-                                .background(
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 10).fill(blekk).offset(x: 3, y: 3)
-                                        RoundedRectangle(cornerRadius: 10).fill(papir)
-                                        RoundedRectangle(cornerRadius: 10).stroke(blekk, lineWidth: 3)
-                                    }
-                                )
-                            }
-                            .buttonStyle(TrykkStil()).disabled(m.travel != nil)
+                            )
                         }
-                        .padding(12)
-                        .background(RoundedRectangle(cornerRadius: 14).fill(blekk))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
-                        .background(RoundedRectangle(cornerRadius: 14).fill(blekk).offset(x: 4, y: 4))
+                        .buttonStyle(TrykkStil()).disabled(m.travel != nil)
+                    }
+                    .padding(12)
+                    .background(RoundedRectangle(cornerRadius: 14).fill(blekk))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
+                    .background(RoundedRectangle(cornerRadius: 14).fill(blekk).offset(x: 4, y: 4))
 
-                        if !m.feil.isEmpty {
-                            Text(m.feil).font(.archivo(15, vekt: 800)).foregroundColor(blekk)
-                                .padding(.horizontal, 12).padding(.vertical, 8)
-                                .background(RoundedRectangle(cornerRadius: 10).fill(papir))
-                                .transition(.opacity)
-                        }
+                    if !m.feil.isEmpty {
+                        Text(m.feil).font(.archivo(15, vekt: 800)).foregroundColor(blekk)
+                            .padding(.horizontal, 12).padding(.vertical, 8).frame(maxWidth: .infinity, alignment: .leading)
+                            .background(RoundedRectangle(cornerRadius: 10).fill(papir))
+                            .transition(.opacity)
+                    }
 
+                    if !kortSkjerm {
                         Text(m.T("Ved å lage eller bli med i et rom bekrefter du at du er over 18. Drikk med vett – og aldri kjør etterpå.",
                                  "By creating or joining a room you confirm you’re over 18. Drink responsibly – and never drive afterwards."))
-                            .font(.archivo(13, vekt: 600)).opacity(0.8).padding(.top, 4)
+                            .font(.archivo(13, vekt: 600)).opacity(0.8).padding(.top, 2)
                     }
-                    .padding(.horizontal, 20).padding(.top, 4).padding(.bottom, 110)   // plass til fanelinja
                 }
-                .scrollDismissesKeyboardIfAvailable()
-                .background(oransje.ignoresSafeArea(edges: [.bottom, .horizontal]))
+                .padding(.horizontal, 20).padding(.top, 4)
+                Spacer(minLength: 0)
             }
+            .offset(y: -skyv)
+            .frame(width: W, height: H, alignment: .top)
+            .background(oransje.ignoresSafeArea())
+            .animation(.spring(response: 0.35, dampingFraction: 0.86), value: skyv)
+            .onAppear { m.plass(topp: stuaTopp, bredde: stuaW) }
+            .onChange(of: stuaTopp) { t in m.plass(topp: t, bredde: stuaW) }
+            .onChange(of: stuaW) { w in m.plass(topp: stuaTopp, bredde: w) }
         }
+        .ignoresSafeArea(.keyboard)
         .foregroundColor(blekk)
         .animation(.easeOut(duration: 0.18), value: m.feil)
     }
 
     @State private var forrigeKode = ""
 
-    /// «KLAR FOR» og «VORS?» i en svart boks, som på nettsiden
-    private var tittel: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(m.T("Klar for", "Ready to").uppercased()).font(.archivo(44, vekt: 900)).tracking(-1.5)
-            Text(m.T("vors?", "pre-game?").uppercased()).font(.archivo(44, vekt: 900)).tracking(-1.5)
-                .foregroundColor(oransje).padding(.horizontal, 8)
-                .background(Rectangle().fill(blekk).rotationEffect(.degrees(-1.5)))
+    /// «KLAR FOR» og «VORS?» i en svart boks, som på nettsiden – på korte skjermer på én linje
+    private func tittel(_ kort: Bool) -> some View {
+        Group {
+            if kort {
+                HStack(spacing: 10) {
+                    Text(m.T("Klar for", "Ready to").uppercased()).font(.archivo(32, vekt: 900)).tracking(-1)
+                    Text(m.T("vors?", "pre-game?").uppercased()).font(.archivo(32, vekt: 900)).tracking(-1)
+                        .foregroundColor(oransje).padding(.horizontal, 6)
+                        .background(Rectangle().fill(blekk).rotationEffect(.degrees(-1.5)))
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(m.T("Klar for", "Ready to").uppercased()).font(.archivo(44, vekt: 900)).tracking(-1.5)
+                    Text(m.T("vors?", "pre-game?").uppercased()).font(.archivo(44, vekt: 900)).tracking(-1.5)
+                        .foregroundColor(oransje).padding(.horizontal, 8)
+                        .background(Rectangle().fill(blekk).rotationEffect(.degrees(-1.5)))
+                }
+            }
         }
         .lineLimit(1).minimumScaleFactor(0.7)
         .padding(.vertical, 8)
@@ -242,7 +285,7 @@ private struct TrykkStil: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .offset(x: configuration.isPressed ? 3 : 0, y: configuration.isPressed ? 3 : 0)
-            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+            .animation(.spring(response: 0.18, dampingFraction: 0.9), value: configuration.isPressed)
     }
 }
 

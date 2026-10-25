@@ -79,6 +79,9 @@ struct LekerSkjerm: View {
     @ObservedObject var m: LekerModell
     @Environment(\.colorScheme) private var modus
     @FocusState private var sokFokus: Bool
+    /// Kortene glir inn med fjær første gang lista vises (30 ms mellom hvert, de første tolv)
+    @State private var inne = false
+    private let fjaer = Animation.spring(response: 0.42, dampingFraction: 0.86)
 
     private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
     private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
@@ -130,7 +133,12 @@ struct LekerSkjerm: View {
                 if !rom.isEmpty {
                     seksjon(m.t("romH2"), m.t("romP"))
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                        ForEach(rom) { l in Button(action: { m.aapne(l) }) { stortKort(l) }.buttonStyle(TrykkStil3()) }
+                        ForEach(Array(rom.enumerated()), id: \.element.id) { i, l in
+                            Button(action: { m.aapne(l) }) { stortKort(l) }.buttonStyle(TrykkStil3())
+                                .opacity(inne ? 1 : 0).offset(y: inne ? 0 : 12)
+                                .animation(fjaer.delay(Double(min(i, 11)) * 0.03), value: inne)
+                                .transition(.opacity.combined(with: .scale(scale: 0.97)))
+                        }
                     }
                     .padding(.horizontal, 16)
                 }
@@ -138,7 +146,7 @@ struct LekerSkjerm: View {
                 if !app.isEmpty {
                     seksjon(m.t("appH2"), m.t("appP"))
                     VStack(spacing: 10) {
-                        ForEach(app) { l in Button(action: { m.aapne(l) }) { rad(l) }.buttonStyle(TrykkStil3()) }
+                        ForEach(app) { l in Button(action: { m.aapne(l) }) { rad(l) }.buttonStyle(TrykkStil3()).transition(.opacity.combined(with: .scale(scale: 0.97))) }
                     }
                     .padding(.horizontal, 16)
                 }
@@ -172,6 +180,10 @@ struct LekerSkjerm: View {
         .background(papir.ignoresSafeArea())
         .foregroundColor(blekk)
         .scrollDismissesKeyboardIfAvailable()
+        // Filtrene: kortene som forsvinner og kommer, glir med fjær – ikke hopper
+        .animation(fjaer, value: m.niva).animation(fjaer, value: m.pl).animation(fjaer, value: m.bareGratis).animation(fjaer, value: m.sok)
+        .onChange(of: m.leker.isEmpty) { tom in if !tom && !inne { DispatchQueue.main.async { inne = true } } }
+        .onAppear { if !m.leker.isEmpty { inne = true } }
         .alert(m.t("alderTittel"), isPresented: Binding(get: { !m.alderOk }, set: { _ in })) {
             Button(m.t("alderJa"), action: m.alderJa)
             Button(m.t("alderNei"), role: .cancel) { m.handling?("tilbake") }
@@ -187,8 +199,9 @@ struct LekerSkjerm: View {
                 .foregroundColor(paa ? morkBlekk : blekk)
                 .background(Capsule().fill(paa ? gul : kort))
                 .overlay(Capsule().stroke(paa ? morkBlekk : blekk.opacity(0.35), lineWidth: 2))
+                .animation(.spring(response: 0.25, dampingFraction: 0.85), value: paa)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(TrykkStil3())
     }
 
     private func seksjon(_ h2: String, _ p: String) -> some View {
@@ -261,7 +274,7 @@ private struct TrykkStil3: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .offset(x: configuration.isPressed ? 3 : 0, y: configuration.isPressed ? 3 : 0)
-            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+            .animation(.spring(response: 0.18, dampingFraction: 0.9), value: configuration.isPressed)
     }
 }
 
