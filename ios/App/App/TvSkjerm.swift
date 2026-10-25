@@ -125,6 +125,8 @@ struct MittvorsRuter: Router {
 /// (f.eks. «no/rom» for Spill-fanen) – uten den starter den på forsiden, som velger språk selv.
 class MittvorsViewController: CAPBridgeViewController {
     var startSti: String?
+    /// Dra fra venstre kant for å gå tilbake til forrige side (av i Spill-fanen, så ingen drar seg ut av et rom ved et uhell)
+    var tilbakeSveip = false
 
     convenience init(startSti: String?) {
         self.init(nibName: nil, bundle: nil)
@@ -145,5 +147,6 @@ class MittvorsViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(SkallPlugin())
         // Hold-trykk på en lenke skal ikke vise forhåndsvisning med nettadressen – det er en app, ikke en nettside
         webView?.allowsLinkPreview = false
+        webView?.allowsBackForwardNavigationGestures = tilbakeSveip
     }
 }
