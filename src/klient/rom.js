@@ -624,6 +624,7 @@ export function startRom(LEKNAVN, LANG) {
     if (startSvg) {
       startStua = lagStua(startSvg, { demo: true, lang: EN ? 'en' : 'no' });
       document.documentElement.classList.add('start-nativ');
+      stuaMaalY = null;   // skallet sier hvor stua skal stå (plass) – ikke en gammel måling fra en lek
       stuaMaalt = ''; maalStua(); requestAnimationFrame(meldStuaH);
     }
     // Appen: navnet huskes (endres under Deg), så feltet er borte. «Lag rom» og «Bli med» er da ett trykk.
@@ -695,6 +696,14 @@ export function startRom(LEKNAVN, LANG) {
       bliMed: function (k, n) { return startBliMed(k, n, true); },
       fortsett: function () { var k = sistRom(); if (k) location.href = location.pathname + '?k=' + k; return { ok: !!k }; },
       /** Koden som skrives i den native skjermen: TV-en i stua viser den, og en ny gjest går inn døra for hver bokstav */
+      /** Skallet sier hvor stua skal stå (toppen i px fra toppen av nettvisningen, og bredden) – på korte skjermer krymper den */
+      plass: function (topp, bredde) {
+        var rot = document.documentElement;
+        rot.style.setProperty('--mv-stua-topp', Math.round(topp) + 'px');
+        rot.style.setProperty('--mv-stua-bredde', Math.round(bredde) + 'px');
+        stuaMaalY = Math.round(topp); stuaMaalt = '';
+        requestAnimationFrame(meldStuaH);
+      },
       kode: function (v, nyGjest) { if (!startStua) return; v = String(v || ''); if (nyGjest) startStua.nyGjest(); startStua.kode((v + '····').slice(0, Math.max(4, v.length))); }
     };
     meldSkjerm(autoLag ? 'laster' : 'start', { navn: navn, kode: medKode ? kode : '', fortsett: sistRom() || '', melding: melding || '' });

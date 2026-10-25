@@ -162,7 +162,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   // Deg-siden: «Logg inn» / «Ny konto» åpner arket i stedet for skjemaet under
   document.addEventListener('click', (e) => {
     if (!harSkall || !e.target.closest) return;
-    const a = e.target.closest('[data-vis]'); if (!a) return;
+    const a = e.target.closest('[data-vis="inn"], [data-vis="ny"]')   // bare disse to – tilbakepila på kontosiden heter data-vis="profil"; if (!a) return;
     e.preventDefault(); e.stopImmediatePropagation();
     Skall.logginn({ del: a.dataset.vis === 'ny' ? 'ny' : 'inn' }).catch(() => {});
   }, true);

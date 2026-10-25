@@ -253,7 +253,7 @@ private struct TrykkStil2: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .offset(x: configuration.isPressed ? 2 : 0, y: configuration.isPressed ? 2 : 0)
-            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+            .animation(.spring(response: 0.18, dampingFraction: 0.9), value: configuration.isPressed)
     }
 }
 

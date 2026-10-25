@@ -855,6 +855,8 @@ const T = no ? {
         /* ---------- Appen med Swift-skall: Deg-fanen er native (ios/App/App/DegSkjerm.swift). Siden sier fra hva den vet
            (mv-skjerm «deg»: navn, konto, Pluss, tallene, figuren som PNG), og gjør jobben via window.__mvDeg. ---------- */
         var degPluss = null, degMeldT = null, degPng = '', degPngFor = '', degArkOppe = false;
+        // Bildet av figuren huskes på telefonen, så den native skjermen har det med en gang neste gang
+        try { var degHusk = JSON.parse(localStorage.getItem('mv_deg_png') || 'null'); if (degHusk && degHusk.png) { degPng = degHusk.png; degPngFor = degHusk.svg || ''; } } catch (e) {}
         var FIGUR_RO = '<style>.arm-h,.arm-v,.hender,.dekk,.horn,.gitar,.tlf,.zzz,.stjerner,.hjerter,.krone-v,.skum,.oyne-g,.oyne-h,.oyne-s,.munn-o,.munn-b,.munn-sur,.munn-kinn,.rodme,.svette,.gronn{display:none}</style>';
         function harSkall() { return document.documentElement.classList.contains('har-skall'); }
         function mittNavn() { try { return JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (e) { return ''; } }
@@ -879,14 +881,16 @@ const T = no ? {
           clearTimeout(degMeldT);
           degMeldT = setTimeout(function () {
             var svg = degSvg();
+            // Før serveren har svart: kontoen slik telefonen husker den, så skjermen ikke blinker «Logg inn» for en som er inne
+            var b = bruker || (K.brukerKjent && K.brukerKjent()) || null;
             var send = function () {
-              var d = { skjerm: 'deg', visning: bruker ? visningNaa() : 'profil', innlogget: !!bruker, navn: mittNavn(), brukernavn: bruker && bruker.brukernavn || '', epost: bruker && bruker.email || '',
+              var d = { skjerm: 'deg', visning: bruker ? visningNaa() : 'profil', innlogget: !!b, navn: mittNavn(), brukernavn: b && b.brukernavn || '', epost: b && b.email || '',
                 gjeng: ($('gjengTall') || {}).textContent || '', stokker: ($('stokkTall') || {}).textContent || '', replikker: ($('replikkTall') || {}).textContent || '',
                 stat: !!$('statLenke') && !$('statLenke').hidden, moerk: document.documentElement.dataset.theme === 'dark', png: degPng };
               if (degPluss) d.pluss = degPluss;
               try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: d })); } catch (e) {}
             };
-            if (svg && svg !== degPngFor) { degPngFor = svg; degPngLag(svg).then(function (b) { degPng = b; send(); }); } else send();
+            if (svg && svg !== degPngFor) { if (degPng) send(); degPngFor = svg; degPngLag(svg).then(function (b) { degPng = b; try { localStorage.setItem('mv_deg_png', JSON.stringify({ svg: svg, png: b })); } catch (e) {} send(); }); } else send();
           }, 60);
         }
         if (harSkall()) {
@@ -900,6 +904,7 @@ const T = no ? {
             }).observe(document.body, { childList: true });
           } catch (e) {}
           document.addEventListener('mv-figur-klar', meldDeg);
+          meldDeg();   // med en gang: det telefonen husker (bildet, navnet, kontoen) – resten kommer når serveren har svart
           window.__mvDeg = {
             navn: function (n) { n = String(n || '').trim(); try { if (n) localStorage.setItem('bd_mittnavn', JSON.stringify(n)); else localStorage.removeItem('bd_mittnavn'); } catch (e) {} var f = $('appNavn'); if (f) f.value = n; degPngFor = ''; meldDeg(); },
             tema: function (moerk) { var er = document.documentElement.dataset.theme === 'dark'; if (!!moerk !== er && window.BDTema) window.BDTema.bytt(); meldDeg(); },

@@ -2215,7 +2215,7 @@ html.har-skall.lobby-nativ #romStuaPlass .rom-stua{margin:0!important;max-width:
    safe area (112 pt tittel + 12 pt luft). Utenfor den native forsiden (f.eks. mens rommet lages) er demo-stua borte. */
 html.har-skall.start-nativ #rom > *:not(#romStartStua){display:none!important}
 html.har-skall.start-nativ body{overflow:hidden}
-html.har-skall.start-nativ #romStartStua{position:fixed;top:var(--mv-stua-topp,calc(env(safe-area-inset-top) + 124px));left:0;right:0;z-index:5;padding:0 12px}
+html.har-skall.start-nativ #romStartStua{position:fixed;top:var(--mv-stua-topp,calc(env(safe-area-inset-top) + 124px));left:50%;transform:translateX(-50%);width:var(--mv-stua-bredde,calc(100% - 24px));padding:0;z-index:5}
 html.har-skall.start-nativ #romStartStua .rom-stua{margin:0!important;max-width:none!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important}
 /* Hullet viser nettsiden: den skal være like oransje som forsiden rundt, og alderssjekken (nettark) skal ikke skinne gjennom – knappene i den native forsiden bekrefter alderen */
 html.har-skall.start-nativ,html.har-skall.start-nativ body{background:#FF5B1F!important}
