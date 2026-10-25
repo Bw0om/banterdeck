@@ -84,7 +84,8 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   // Finnes det, gjemmer nettsiden sin egen linje (html.har-skall), åpner lenker til andre faner i riktig fane,
   // og ber linja gjemme seg under en lek.
   const Skall = registerPlugin('Skall');
-  const FANER = { hjem: ['/no/', '/'], spill: ['/no/rom', '/room'], leker: ['/no/drinking-games', '/drinking-games'], deg: ['/no/account', '/account'] };
+  // Forsiden på nettet (/ og /no/) er Spill-fanens startskjerm i appen – skallet bytter adressen (Skall.swift, aapne)
+  const FANER = { spill: ['/no/rom', '/room', '/no/', '/'], leker: ['/no/drinking-games', '/drinking-games'], deg: ['/no/account', '/account'] };
   const engelsk = () => !location.pathname.startsWith('/no');
   const norm = (p) => p.replace(/\/$/, '') || '/';
   window.__mvFane = (id) => { const r = FANER[id]; if (!r) return; const maal = engelsk() ? r[1] : r[0]; if (norm(location.pathname) !== norm(maal)) location.href = maal; };
@@ -99,7 +100,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     const skjul = h.classList.contains('i-spill') || h.classList.contains('bli-med');
     if (skjul !== sistSkjult) { sistSkjult = skjul; Skall.skjul({ skjult: skjul }).catch(() => {}); }
   };
-  // Lenker til en annen fane (f.eks. «Lag rom» fra Hjem) åpnes i den fanen – denne skjermen blir stående
+  // Lenker til en annen fane (f.eks. «Spill i rommet» fra en lekeside) åpnes i den fanen – denne skjermen blir stående
   document.addEventListener('click', (e) => {
     if (!harSkall || !e.target.closest) return;
     const a = e.target.closest('a[href]'); if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
@@ -175,7 +176,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   document.addEventListener('mv-ark', (e) => { if (harSkall) Skall.ark(e.detail || {}).catch(() => {}); });
   // Inviter: iPhonens eget delingsark, med AirDrop øverst
   document.addEventListener('mv-del', (e) => { if (harSkall) Skall.del(e.detail || {}).catch(() => {}); });
-  Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' }, lang: engelsk() ? 'en' : 'no' })
+  Skall.klar({ titler: engelsk() ? { spill: 'Play', leker: 'Games', deg: 'You' } : { spill: 'Spill', leker: 'Leker', deg: 'Deg' }, lang: engelsk() ? 'en' : 'no' })
     .then((r) => {
       harSkall = true; minFane = (r && r.fane) || fanenNaa(); h.classList.add('har-skall');
       if (r && r.gaaTil) { location.replace(r.gaaTil); return; }   // skjermen ble åpnet for en bestemt adresse

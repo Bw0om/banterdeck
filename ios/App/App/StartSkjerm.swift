@@ -1,10 +1,12 @@
 import SwiftUI
 import UIKit
 import WebKit
+import Network
 
-/// Den native startskjermen i Spill-fanen: navnet ditt, «Lag rom», og kode + «Bli med». Ligger over nettvisningen
+/// Forsiden i appen (Spill-fanen): «Klar for vors?», stua, «Lag rom» og koden med «Bli med». Ligger over nettvisningen
 /// når siden står på sin startskjerm, og bruker nettkoden (window.__mvStart) til selve jobben – så innlogging,
-/// lekevalg fra lenker og alt annet virker som før. Når rommet er klart, sier siden fra og skjermen glir bort.
+/// lekevalg fra lenker og alt annet virker som før. Stua er nettsidens demo-stue, vist gjennom et hull i skjermen
+/// (gjestene går inn døra for hver bokstav du skriver, og folka kan dras). Når rommet er klart, sier siden fra og skjermen glir bort.
 final class StartModell: ObservableObject {
     @Published var navn = ""
     @Published var kode = ""
@@ -12,19 +14,36 @@ final class StartModell: ObservableObject {
     @Published var feil = ""
     @Published var travel: String? = nil   // «lag» eller «bli» mens vi venter på serveren
     @Published var engelsk = false
+    /// Høyden stua har i nettsiden (meldt derfra), så hullet er like stort som stua
+    @Published var stuaH: CGFloat = 0
+    @Published var harNett = true
     weak var nett: WKWebView?
+    private let nettVakt = NWPathMonitor()
+
+    init() {
+        // Rommet bor på serveren: uten nett får du en kort beskjed i stedet for en nettfeil
+        nettVakt.pathUpdateHandler = { [weak self] sti in DispatchQueue.main.async { self?.harNett = sti.status == .satisfied } }
+        nettVakt.start(queue: DispatchQueue(label: "no.mittvors.nett"))
+    }
 
     func T(_ no: String, _ en: String) -> String { engelsk ? en : no }
 
+    private var utenNett: Bool {
+        guard !harNett else { return false }
+        feil = T("Ingen nett. Telefonene snakker sammen via nettet, så rommet trenger dekning.", "No internet. The phones talk through the server, so the room needs a connection.")
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        return true
+    }
+
     func lagRom() {
-        guard travel == nil else { return }
+        guard travel == nil, !utenNett else { return }
         let n = navn.trimmingCharacters(in: .whitespacesAndNewlines)
         if n.isEmpty { feil = T("Skriv inn navnet ditt.", "Enter your name."); UINotificationFeedbackGenerator().notificationOccurred(.warning); return }
         kjor("lag", "return await window.__mvStart.lag(navn)", ["navn": n])
     }
 
     func bliMed() {
-        guard travel == nil else { return }
+        guard travel == nil, !utenNett else { return }
         let k = kode.uppercased().filter { $0.isLetter || $0.isNumber }, n = navn.trimmingCharacters(in: .whitespacesAndNewlines)
         if k.count < 4 { feil = T("Skriv inn koden fra verten.", "Enter the code from the host."); UINotificationFeedbackGenerator().notificationOccurred(.warning); return }
         if n.isEmpty { feil = T("Skriv inn navnet ditt.", "Enter your name."); UINotificationFeedbackGenerator().notificationOccurred(.warning); return }
@@ -36,6 +55,12 @@ final class StartModell: ObservableObject {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         travel = "fortsett"
         w.evaluateJavaScript("window.__mvStart && window.__mvStart.fortsett()", completionHandler: nil)
+    }
+
+    /// Koden speiles til stua: TV-en viser den, og en ny gjest går inn døra for hver bokstav
+    func stuaKode(_ k: String, nyGjest: Bool) {
+        guard let w = nett, let data = try? JSONSerialization.data(withJSONObject: [k, nyGjest]), let json = String(data: data, encoding: .utf8) else { return }
+        w.evaluateJavaScript("window.__mvStart && window.__mvStart.kode && window.__mvStart.kode.apply(null, \(json))", completionHandler: nil)
     }
 
     private func kjor(_ hva: String, _ js: String, _ arg: [String: Any]) {
@@ -60,93 +85,135 @@ final class StartModell: ObservableObject {
 
 struct StartSkjerm: View {
     @ObservedObject var m: StartModell
-    @Environment(\.colorScheme) private var modus
     @FocusState private var fokus: Felt?
     enum Felt { case navn, kode }
 
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }   // #1C1B1F / #FFF8EE
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }   // tekst og streker
+    // Forsiden er oransje i begge moduser, som på nettet
+    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)   // #FF5B1F
     private let gul = Color(red: 1, green: 0.824, blue: 0.247)      // #FFD23F
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)   // tekst på gult er alltid blekk
+    private let blekk = Color(red: 0.086, green: 0.071, blue: 0.059) // #16120F
+    private let papir = Color(red: 1, green: 0.973, blue: 0.933)     // #FFF8EE
+
+    /// Tittelen er alltid like høy (to linjer à 48 pt + 8 pt luft over og under = 112 pt under safe area), og nettsiden legger stua
+    /// 124 px under sin safe area (global.css, start-nativ). Da står stua 12 pt under tittelen uten at noen måler noe.
+    static let toppH: CGFloat = 112
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                Text(m.T("Spill sammen", "Play together").uppercased())
-                    .font(.archivo(40, vekt: 900)).tracking(-1)
-                    .padding(.top, 8)
-
-                if !m.fortsett.isEmpty {
-                    Button(action: m.fortsettRom) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(m.T("Du er i rom ", "You’re in room ") + m.fortsett).font(.archivo(17, vekt: 800))
-                                Text(m.T("Trykk for å gå tilbake til rommet", "Tap to go back to the room")).font(.archivo(14, vekt: 500)).opacity(0.75)
+        GeometryReader { g in
+            // stua + 12 pt luft over og under
+            let hull = m.stuaH > 0 ? m.stuaH + 24 : (g.size.width - 24) * 0.823 + 24
+            VStack(spacing: 0) {
+                tittel.frame(height: StartSkjerm.toppH).padding(.horizontal, 20).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(oransje.ignoresSafeArea(edges: [.top, .horizontal]))
+                // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den (Skall.settStua)
+                Color.clear.frame(height: hull)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        if !m.fortsett.isEmpty {
+                            Button(action: m.fortsettRom) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(m.T("Du er i rom ", "You’re in room ") + m.fortsett).font(.archivo(17, vekt: 800))
+                                        Text(m.T("Trykk for å gå tilbake til rommet", "Tap to go back to the room")).font(.archivo(14, vekt: 500)).opacity(0.75)
+                                    }
+                                    Spacer()
+                                    Text("→").font(.archivo(22, vekt: 800))
+                                }
+                                .padding(14).foregroundColor(blekk)
+                                .background(RoundedRectangle(cornerRadius: 14).fill(papir))
+                                .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
                             }
-                            Spacer()
-                            Text("→").font(.archivo(22, vekt: 800))
                         }
-                        .padding(14).foregroundColor(morkBlekk)
-                        .background(RoundedRectangle(cornerRadius: 14).fill(gul))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(morkBlekk, lineWidth: 3))
+
+                        // Navnet huskes (endres under Deg) – feltet vises bare til vi har et
+                        if m.navn.isEmpty {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(m.T("Navnet ditt", "Your name")).font(.archivo(14, vekt: 800))
+                                TextField(m.T("F.eks. Maria", "E.g. Sam"), text: $m.navn)
+                                    .textContentType(.nickname).disableAutocorrection(true)
+                                    .submitLabel(.go).focused($fokus, equals: .navn)
+                                    .onSubmit { if m.kode.isEmpty { m.lagRom() } else { m.bliMed() } }
+                                    .font(.archivo(20, vekt: 600))
+                                    .padding(.horizontal, 14).frame(height: 56)
+                                    .background(RoundedRectangle(cornerRadius: 14).fill(papir))
+                                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
+                            }
+                        }
+
+                        knapp(m.T("Lag rom", "Create room") + "  →", travel: m.travel == "lag", action: m.lagRom)
+
+                        // Koden fra verten: mørkt panel med feltet og «Bli med», som på nettet
+                        HStack(spacing: 10) {
+                            TextField("ABCD", text: $m.kode)
+                                .font(.archivo(28, vekt: 900))
+                                .foregroundColor(papir)
+                                .textInputAutocapitalization(.characters).disableAutocorrection(true)
+                                .submitLabel(.go).focused($fokus, equals: .kode)
+                                .onChange(of: m.kode) { v in
+                                    let r = String(v.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(6))
+                                    if r != v { m.kode = r; return }
+                                    m.stuaKode(r, nyGjest: r.count > forrigeKode.count)
+                                    forrigeKode = r
+                                    if r.count == 4 && m.navn.isEmpty { fokus = .navn }
+                                }
+                                .onSubmit { m.bliMed() }
+                                .padding(.horizontal, 12).frame(height: 56)
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.08)))
+                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(papir.opacity(0.25), lineWidth: 2))
+                            Button(action: m.bliMed) {
+                                ZStack {
+                                    Text(m.T("Bli med", "Join").uppercased()).font(.archivo(18, vekt: 900)).opacity(m.travel == "bli" ? 0 : 1)
+                                    if m.travel == "bli" { ProgressView().progressViewStyle(.circular).tint(blekk) }
+                                }
+                                .padding(.horizontal, 18).frame(height: 56).foregroundColor(blekk)
+                                .background(
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 10).fill(blekk).offset(x: 3, y: 3)
+                                        RoundedRectangle(cornerRadius: 10).fill(papir)
+                                        RoundedRectangle(cornerRadius: 10).stroke(blekk, lineWidth: 3)
+                                    }
+                                )
+                            }
+                            .buttonStyle(TrykkStil()).disabled(m.travel != nil)
+                        }
+                        .padding(12)
+                        .background(RoundedRectangle(cornerRadius: 14).fill(blekk))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
+                        .background(RoundedRectangle(cornerRadius: 14).fill(blekk).offset(x: 4, y: 4))
+
+                        if !m.feil.isEmpty {
+                            Text(m.feil).font(.archivo(15, vekt: 800)).foregroundColor(blekk)
+                                .padding(.horizontal, 12).padding(.vertical, 8)
+                                .background(RoundedRectangle(cornerRadius: 10).fill(papir))
+                                .transition(.opacity)
+                        }
+
+                        Text(m.T("Ved å lage eller bli med i et rom bekrefter du at du er over 18. Drikk med vett – og aldri kjør etterpå.",
+                                 "By creating or joining a room you confirm you’re over 18. Drink responsibly – and never drive afterwards."))
+                            .font(.archivo(13, vekt: 600)).opacity(0.8).padding(.top, 4)
                     }
+                    .padding(.horizontal, 20).padding(.top, 4).padding(.bottom, 32)
                 }
-
-                felt(m.T("Navnet ditt", "Your name")) {
-                    TextField(m.T("F.eks. Maria", "E.g. Sam"), text: $m.navn)
-                        .textContentType(.nickname).disableAutocorrection(true)
-                        .submitLabel(.go).focused($fokus, equals: .navn)
-                        .onSubmit { if m.kode.isEmpty { m.lagRom() } else { m.bliMed() } }
-                }
-
-                knapp(m.T("Lag rom", "Create room"), travel: m.travel == "lag", action: m.lagRom)
-
-                HStack { linje; Text(m.T("eller", "or")).font(.archivo(14, vekt: 700)).opacity(0.6); linje }
-
-                felt(m.T("Kode fra verten", "Code from the host")) {
-                    TextField("ABCD", text: $m.kode)
-                        .font(.archivo(26, vekt: 900))
-                        .textInputAutocapitalization(.characters).disableAutocorrection(true)
-                        .submitLabel(.go).focused($fokus, equals: .kode)
-                        .onChange(of: m.kode) { v in
-                            let r = String(v.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(6))
-                            if r != v { m.kode = r }
-                            if r.count == 4 && m.navn.isEmpty { fokus = .navn }
-                        }
-                        .onSubmit { m.bliMed() }
-                }
-
-                knapp(m.T("Bli med", "Join"), travel: m.travel == "bli", action: m.bliMed)
-
-                if !m.feil.isEmpty {
-                    Text(m.feil).font(.archivo(15, vekt: 700)).foregroundColor(rust)
-                        .transition(.opacity)
-                }
-
-                Text(m.T("Ved å lage eller bli med i et rom bekrefter du at du er over 18. Drikk med vett – og aldri kjør etterpå.",
-                         "By creating or joining a room you confirm you’re over 18. Drink responsibly – and never drive afterwards."))
-                    .font(.archivo(13, vekt: 500)).opacity(0.7).padding(.top, 6)
+                .scrollDismissesKeyboardIfAvailable()
+                .background(oransje.ignoresSafeArea(edges: [.bottom, .horizontal]))
             }
-            .padding(.horizontal, 20).padding(.bottom, 32)
         }
-        .scrollDismissesKeyboardIfAvailable()
-        .background(papir.ignoresSafeArea())
         .foregroundColor(blekk)
         .animation(.easeOut(duration: 0.18), value: m.feil)
     }
 
-    private var linje: some View { Rectangle().fill(blekk.opacity(0.25)).frame(height: 2) }
+    @State private var forrigeKode = ""
 
-    private func felt<V: View>(_ etikett: String, @ViewBuilder _ inn: () -> V) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(etikett).font(.archivo(14, vekt: 800))
-            inn()
-                .font(.archivo(20, vekt: 600))
-                .padding(.horizontal, 14).frame(height: 56)
-                .background(RoundedRectangle(cornerRadius: 14).fill(modus == .dark ? Color.white.opacity(0.06) : Color.white))
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
+    /// «KLAR FOR» og «VORS?» i en svart boks, som på nettsiden
+    private var tittel: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(m.T("Klar for", "Ready to").uppercased()).font(.archivo(44, vekt: 900)).tracking(-1.5)
+            Text(m.T("vors?", "pre-game?").uppercased()).font(.archivo(44, vekt: 900)).tracking(-1.5)
+                .foregroundColor(oransje).padding(.horizontal, 8)
+                .background(Rectangle().fill(blekk).rotationEffect(.degrees(-1.5)))
         }
+        .lineLimit(1).minimumScaleFactor(0.7)
+        .padding(.vertical, 8)
     }
 
     /// Den gule knappen med hard skygge – som på nettsiden
@@ -154,14 +221,14 @@ struct StartSkjerm: View {
         Button(action: action) {
             ZStack {
                 Text(tekst.uppercased()).font(.archivo(20, vekt: 900)).tracking(0.5).opacity(travel ? 0 : 1)
-                if travel { ProgressView().progressViewStyle(.circular).tint(morkBlekk) }
+                if travel { ProgressView().progressViewStyle(.circular).tint(blekk) }
             }
-            .frame(maxWidth: .infinity).frame(height: 60).foregroundColor(morkBlekk)
+            .frame(maxWidth: .infinity).frame(height: 60).foregroundColor(blekk)
             .background(
                 ZStack {
-                    RoundedRectangle(cornerRadius: 14).fill(morkBlekk).offset(x: 4, y: 4)
+                    RoundedRectangle(cornerRadius: 14).fill(blekk).offset(x: 4, y: 4)
                     RoundedRectangle(cornerRadius: 14).fill(gul)
-                    RoundedRectangle(cornerRadius: 14).stroke(morkBlekk, lineWidth: 3)
+                    RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3)
                 }
             )
         }

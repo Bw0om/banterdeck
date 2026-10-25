@@ -2211,6 +2211,16 @@ html.har-skall.lobby-nativ body{overflow:hidden}
 html.har-skall.lobby-nativ #romStuaPlass{position:fixed;top:var(--mv-stua-topp,calc(env(safe-area-inset-top) + 108px));left:0;right:0;z-index:5;padding:0 12px}
 html.har-skall.lobby-nativ #romStuaPlass .rom-stua{margin:0!important;max-width:none}
 
+/* Forsiden native i appen (StartSkjerm.swift): «Klar for vors?» er native, og nettsidens demo-stue vises gjennom et hull 124 px under
+   safe area (112 pt tittel + 12 pt luft). Utenfor den native forsiden (f.eks. mens rommet lages) er demo-stua borte. */
+html.har-skall.start-nativ #rom > *:not(#romStartStua){display:none!important}
+html.har-skall.start-nativ body{overflow:hidden}
+html.har-skall.start-nativ #romStartStua{position:fixed;top:var(--mv-stua-topp,calc(env(safe-area-inset-top) + 124px));left:0;right:0;z-index:5;padding:0 12px}
+html.har-skall.start-nativ #romStartStua .rom-stua{margin:0!important;max-width:none!important}
+html.har-skall:not(.start-nativ) #romStartStua{display:none}
+#romStartStua .rom-stua-hint{position:absolute;right:2px;top:4px;font-family:var(--display);font-stretch:80%;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;
+  background:var(--papir);color:var(--blekk);border:2.5px solid var(--blekk);padding:3px 8px;box-shadow:3px 3px 0 var(--blekk);transform:rotate(2deg)}
+
 /* Et nettark (Mer, Stua, regler …) er oppe over en native skjerm: nettsiden under skjules helt */
 html.har-skall.ark-aapen #rom{visibility:hidden}
 

@@ -274,8 +274,8 @@ const isCurrent = (href: string) => {
       if (app) h.classList.add('is-app', 'is-standalone');
       // iPhonens egen fanelinje (ios/App/App/Skall.swift) finnes: nettsidens egen skal ikke vises i det hele tatt
       try { if (app && c && c.isPluginAvailable && c.isPluginAvailable('Skall')) h.classList.add('har-skall'); } catch (e) {}
-      /* Appen er norsk: roten i app-pakken (index.html = engelsk forside) sender rett til Hjem */
-      if (app && /^\/(en\/?)?$/.test(location.pathname)) location.replace('/no/');
+      /* Appen er norsk: roten i app-pakken (index.html = engelsk forside) sender rett til forsiden i appen (Spill-fanen) */
+      if (app && /^\/(en\/?)?$/.test(location.pathname)) location.replace('/no/rom');
     })();
   </script>
   <ClientRouter />

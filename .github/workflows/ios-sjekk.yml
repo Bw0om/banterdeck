@@ -67,9 +67,9 @@ jobs:
           mkdir -p skjermbilder
           SIMCTL_CHILD_MV_SJEKK=1 xcrun simctl launch "$UDID" no.mittvors.app
           sleep 12
-          xcrun simctl io "$UDID" screenshot skjermbilder/01-hjem.png
+          xcrun simctl io "$UDID" screenshot skjermbilder/01-spill.png
           # Én start per fane: appen leser MV_FANE og velger fanen selv (Skall.swift)
-          for f in spill leker deg; do
+          for f in leker deg; do
             xcrun simctl terminate "$UDID" no.mittvors.app || true
             SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_FANE=$f xcrun simctl launch "$UDID" no.mittvors.app
             sleep 12
@@ -82,7 +82,7 @@ jobs:
           xcrun simctl terminate "$UDID" no.mittvors.app || true
           SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_MORK=1 xcrun simctl launch "$UDID" no.mittvors.app
           sleep 12
-          xcrun simctl io "$UDID" screenshot skjermbilder/04-hjem-mork.png
+          xcrun simctl io "$UDID" screenshot skjermbilder/04-spill-mork.png
           # Loggen nettsiden skrev (JavaScript-feil og tilstand) ligger i appens Documents
           DATA=$(xcrun simctl get_app_container "$UDID" no.mittvors.app data 2>/dev/null || true)
           [ -n "$DATA" ] && cp "$DATA/Documents/sjekk.log" skjermbilder/sjekk.log 2>/dev/null || echo "(ingen sjekk.log)" > skjermbilder/sjekk.log

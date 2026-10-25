@@ -237,16 +237,18 @@ export function startRom(LEKNAVN, LANG) {
       og knappene nederst i stua (Rommet, Figuren din, Si noe) havner under lista og kan ikke trykkes. Høyden meldes hver gang den endrer seg. */
   var stuaMaaler = null, stuaMaalt = '', stuaMaalY = null;
   /** Står stua likevel et annet sted enn hullet (siden var rullet, eller noe over den er forskjøvet)? Flytt den så toppen treffer. */
+  var STUA_SEL = '#romStuaPlass .rom-stua, #romStartStua .rom-stua';
+  function stuaNativ() { var c = document.documentElement.classList; return c.contains('lobby-nativ') || c.contains('start-nativ'); }
   function rettStua() {
-    var rot = document.documentElement, st = document.querySelector('#romStuaPlass .rom-stua');
-    if (stuaMaalY === null || !st || !rot.classList.contains('lobby-nativ')) return;
+    var rot = document.documentElement, st = document.querySelector(STUA_SEL);
+    if (stuaMaalY === null || !st || !stuaNativ()) return;
     var naa = parseFloat(rot.style.getPropertyValue('--mv-stua-topp')) || stuaMaalY, avvik = stuaMaalY - st.getBoundingClientRect().top;
     if (Math.abs(avvik) > 1) rot.style.setProperty('--mv-stua-topp', Math.round(naa + avvik) + 'px');
   }
   function meldStuaH() {
-    if (!document.documentElement.classList.contains('lobby-nativ')) return;
+    if (!stuaNativ()) return;
     rettStua();
-    var st = document.querySelector('#romStuaPlass .rom-stua'); if (!st) return;
+    var st = document.querySelector(STUA_SEL); if (!st) return;
     // Hele ruta (CSS-px fra toppen av nettvisningen): skallet legger hullet for trykkene akkurat her, og lista under begynner under stua
     var r = st.getBoundingClientRect(), d = { top: Math.round(r.top), left: Math.round(r.left), w: Math.round(r.width), h: Math.round(r.height) };
     var n = [d.top, d.left, d.w, d.h].join(',');
@@ -254,7 +256,7 @@ export function startRom(LEKNAVN, LANG) {
   }
   function maalStua() {
     if (!window.ResizeObserver) return;
-    var st = document.querySelector('#romStuaPlass .rom-stua');
+    var st = document.querySelector(STUA_SEL);
     if (!st || (stuaMaaler && stuaMaaler.el === st)) return;
     if (stuaMaaler) stuaMaaler.ro.disconnect();
     var ro = new ResizeObserver(meldStuaH); ro.observe(st); stuaMaaler = { el: st, ro: ro };
@@ -615,7 +617,15 @@ export function startRom(LEKNAVN, LANG) {
           (medKode ? '<p class="rom-alder">' + T('Ved å lage et rom bekrefter du at du er over 18.', 'By creating a room you confirm you’re over 18.') + '</p>' : '') +
         '</form>' +
       '</div>' +
-      '';
+      // Swift-skallet: forsiden er native (StartSkjerm.swift) med nettsidens demo-stue i et hull – gjestene går inn døra for hver bokstav
+      (harSkall() ? '<div class="rom-stua-plass start-stua" id="romStartStua"><div class="rom-stua"><svg role="img" aria-hidden="true"></svg>' +
+        '<span class="rom-stua-hint" aria-hidden="true">' + T('Dra i folka', 'Drag the people') + '</span></div></div>' : '');
+    var startStua = null, startSvg = root.querySelector('#romStartStua svg');
+    if (startSvg) {
+      startStua = lagStua(startSvg, { demo: true, lang: EN ? 'en' : 'no' });
+      document.documentElement.classList.add('start-nativ');
+      stuaMaalt = ''; maalStua(); requestAnimationFrame(meldStuaH);
+    }
     // Appen: navnet huskes (endres under Deg), så feltet er borte. «Lag rom» og «Bli med» er da ett trykk.
     if (erApp && navn) {
       ['romNavn1', 'romNavn2'].forEach(function (id) {
@@ -683,7 +693,9 @@ export function startRom(LEKNAVN, LANG) {
       navn: function () { return navn; },
       lag: function (n) { return startLag(n, true); },
       bliMed: function (k, n) { return startBliMed(k, n, true); },
-      fortsett: function () { var k = sistRom(); if (k) location.href = location.pathname + '?k=' + k; return { ok: !!k }; }
+      fortsett: function () { var k = sistRom(); if (k) location.href = location.pathname + '?k=' + k; return { ok: !!k }; },
+      /** Koden som skrives i den native skjermen: TV-en i stua viser den, og en ny gjest går inn døra for hver bokstav */
+      kode: function (v, nyGjest) { if (!startStua) return; v = String(v || ''); if (nyGjest) startStua.nyGjest(); startStua.kode((v + '····').slice(0, Math.max(4, v.length))); }
     };
     meldSkjerm(autoLag ? 'laster' : 'start', { navn: navn, kode: medKode ? kode : '', fortsett: sistRom() || '', melding: melding || '' });
   }
@@ -691,6 +703,8 @@ export function startRom(LEKNAVN, LANG) {
   var sistSkjerm = '', autoLagBrukt = false;
   function meldSkjerm(skjerm, ekstra) {
     ekstra = ekstra || {};
+    // Den native forsiden med stua i hull gjelder bare startskjermen – alt annet tegnes uten den
+    document.documentElement.classList.toggle('start-nativ', harSkall() && skjerm === 'start' && !!document.getElementById('romStartStua'));
     var sp = tilstand && tilstand.spill;
     if (sp && ['rom', 'lobby', 'start', 'laster'].indexOf(skjerm) === -1) {
       var lekInfo = (tilstand.leker || []).find(function (l) { return l.id === (sp.lek || sp.type); });
