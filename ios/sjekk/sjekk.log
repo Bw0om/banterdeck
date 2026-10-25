@@ -1,11 +1,14 @@
-19:18:24 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-19:18:30 skjermer: leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-19:18:30 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-19:19:55 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-19:20:01 side /drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
-19:20:07 skjermer: leker>ok leker=meldt n=51 png=31 klasser=is-mobile is-ios is-app is-standalone har-skall
-19:20:07 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
-19:21:16 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-19:21:17 side /account klasser=is-mobile is-ios is-app is-standalone har-skall
-19:21:23 skjermer: hendelse:deg deg>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
-19:21:23 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+20:04:09 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+20:04:15 skjermer: leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+20:04:15 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+20:04:40 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+20:04:43 side /drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
+20:04:49 skjermer: leker>ok leker=meldt n=51 png=31 klasser=is-mobile is-ios is-app is-standalone har-skall
+20:04:49 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
+20:05:36 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+20:05:43 side /account klasser=is-mobile is-ios is-app is-standalone har-skall
+20:05:49 skjermer: hendelse:deg deg>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
+20:05:49 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+20:07:17 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+20:07:23 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+20:07:23 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]

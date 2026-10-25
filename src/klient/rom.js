@@ -1970,7 +1970,10 @@ export function startRom(LEKNAVN, LANG) {
   }
   /* Kortlekene som native skjerm: nettsidens ferdige HTML oversettes til enkle blokker (topp, kort, knapper, benk, søyler …)
      som Swift tegner. Logikk, tekster, lyd og vibrasjon bor fortsatt her – skjermen er bare en annen penn. */
+  // Pluss-kortstokkene (pakke-…) og Tanken bak sangen er vanlige kortstokker og går samme vei (se `nativ` i tegn)
   var NATIVE_LEKER = ['jeg-har-aldri', 'nodt-eller-sannhet', 'enten-eller', 'rygg-mot-rygg', 'kategorier'];
+  // Skrivelekene: skriving går via iPhonens dialog (skjema-blokk), hodene er knapper, «hold for å se» og hold-for-sikker er egne blokker
+  var NATIVE_TYPER = ['hvemskrev', 'bloff', 'samme', 'spion', 'forraeder'];
   var hodePng = {};
   function skjermBlokker(html) {
     var tmp = document.createElement('div'); tmp.innerHTML = html; var ut = [], jobber = [];
@@ -1995,7 +1998,72 @@ export function startRom(LEKNAVN, LANG) {
     function gaa(el) {
       Array.prototype.forEach.call(el.children, function (e) {
         var c = typeof e.className === 'string' ? e.className : '';
-        if (/\brom-spillnavn\b/.test(c)) return;
+        if (e.hidden || /\brom-spillnavn\b|\bfrist-lunte\b|\bsk-frist\b/.test(c)) return;
+        /* ---- Skrivelekene (Ukjent avsender, Skrøna, Saueflokken, Muldvarpen, Løgnhalsen) ---- */
+        if (/\bnr-kort\b/.test(c)) { ut.push({ type: 'kort', pre: '', tekst: tekstAv(e.querySelector('p')) || tekstAv(e), tag: tekstAv(e.querySelector('.nr-type, .lh-merke')), under: '', stil: '', liten: /\bliten\b/.test(c) }); return; }
+        if (e.tagName === 'FORM' && e.id) {
+          // Skriving: én knapp som åpner iPhonens dialog (window.__mvLek.skjema → focusin → Skall.skjema)
+          var inp = e.querySelector('input:not([type=radio]):not([type=checkbox]), textarea'), lab = e.querySelector('label:not(.ts-stempelvalg)'), kn = e.querySelector('button[type=submit], button:not([type])');
+          ut.push({ type: 'skjema', id: e.id, tekst: tekstAv(lab) || (inp && inp.placeholder) || '', knapp: tekstAv(kn) || T('Skriv', 'Write'), liten: /\bsm-skjema\b/.test(c) && !/\bstor\b/.test(c) }); return;
+        }
+        if (/\b(hs-sendt|sm-sendt)\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e.querySelector('p')), stil: 'dom' }); var kn2 = e.querySelector('button'); if (kn2) ut.push(knapp(kn2, 'link')); return; }
+        if (/\bbf-linje\b/.test(c)) { if (tekstAv(e)) ut.push({ type: 'tekst', tekst: tekstAv(e), stil: 'dom' }); return; }
+        if (/\bbf-penn\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e), stil: 'merk' }); return; }
+        if (/\b(hs-valg|mv-stem|mv-valg)\b/.test(c)) {
+          var hb = { type: 'hoder', fasit: /\bfasit\b/.test(c), knapper: Array.prototype.map.call(e.children, function (b) {
+            var k = b.tagName === 'BUTTON' ? knapp(b) : { type: 'knapp', g: '', attrs: {}, tekst: '', under: '', paa: false, av: true, stil: '' };
+            k.tekst = tekstAv(b.querySelector('b')) || tekstAv(b.querySelector('span')) || k.tekst; k.under = tekstAv(b.querySelector('small')); k.png = ''; k.merk = /\bmuldvarp\b/.test(b.className || '');
+            jobber.push(hode(b.querySelector('.nr-h svg'), 'h' + (b.dataset.paa || k.tekst), 96).then(function (p) { k.png = p; }));
+            return k; }) };
+          ut.push(hb); return;
+        }
+        if (/\b(hs-dom|bf-dom)\b/.test(c)) { ut.push({ type: 'dom', stil: /\bfeil\b/.test(c) || e.querySelector('.feil') ? 'feig' : /\bgul\b/.test(c) || e.querySelector('.gul') ? 'tom' : 'enige', over: '', tittel: tekstAv(e), under: '' }); return; }
+        if (/\blh-avslor\b/.test(c)) { ut.push({ type: 'dom', stil: /\blogn\b/.test(c) ? 'feig' : 'enige', over: tekstAv(e.querySelector('span')), tittel: tekstAv(e.querySelector('em')), under: '' }); return; }
+        if (/\bmv-fasit\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e), stil: 'dom' }); return; }
+        if (/\b(hs-gjett|hs-alle|bf-best|ts-pall|sm-stilling|lh-utfall)\b/.test(c)) {
+          var gjett = /\bhs-gjett\b/.test(c);
+          var li = { type: 'liste', rader: Array.prototype.map.call(e.querySelectorAll('li, .sm-rad, .ts-pallplass'), function (r) {
+            var sp = r.querySelector('span:not(.nr-h)'), x = gjett ? { navn: tekstAv(sp), mellom: tekstAv(r.querySelector('small')), tekst: tekstAv(r.querySelector('b')) }
+              : { navn: tekstAv(r.querySelector('b')), mellom: '', tekst: tekstAv(sp) };
+            x.rett = /\brett\b|\bvant\b/.test(r.className || ''); x.feil = /\bfeil\b/.test(r.className || ''); x.png = '';
+            jobber.push(hode(r.querySelector('.nr-h svg'), 'r' + x.navn + x.tekst, 72).then(function (p) { x.png = p; }));
+            return x; }) };
+          ut.push(li); return;
+        }
+        if (/\bsm-flokker\b/.test(c)) {
+          var fl = { type: 'flokker', kort: Array.prototype.map.call(e.children, function (k) {
+            var x = { tekst: tekstAv(k.querySelector('.sm-topp b')), under: tekstAv(k.querySelector('.sm-topp small')), alene: /\balene\b/.test(k.className), stor: /\bstor\b/.test(k.className),
+              valgt: k.getAttribute('aria-pressed') === 'true', g: k.dataset.g || '', attrs: {}, stempel: tekstAv(k.querySelector('.sm-stempel')), hoder: [] };
+            Object.keys(k.dataset).forEach(function (a) { if (a !== 'g') x.attrs[a] = k.dataset[a]; });
+            Array.prototype.forEach.call(k.querySelectorAll('.sm-hoder .nr-h svg'), function (sv, i) { x.hoder.push(''); jobber.push(hode(sv, 'f' + i + x.tekst, 64).then(function (p) { x.hoder[i] = p; })); });
+            return x; }) };
+          ut.push(fl); return;
+        }
+        if (/\b(lh-kikk|mv-kikk)\b/.test(c)) {
+          var fs2 = e.querySelector('.lh-forside, .mv-innhold');
+          ut.push({ type: 'hold', dekk: tekstAv(e.querySelector('.lh-bak b, .mv-dekk b')) || tekstAv(e), tittel: tekstAv(fs2 && fs2.querySelector('b')), under: tekstAv(fs2 && fs2.querySelector('small')),
+            stil: fs2 && /\blogn\b/.test(fs2.className) ? 'logn' : fs2 && /\bsant\b/.test(fs2.className) ? 'sant' : '' }); return;
+        }
+        if (/\blh-stem\b/.test(c)) { ut.push({ type: 'holdstem', knapper: Array.prototype.map.call(e.querySelectorAll('.lh-stemknapp'), function (b) { return { paa: b.dataset.paa || '', tekst: tekstAv(b.querySelector('b')), valgt: b.getAttribute('aria-pressed') === 'true', x2: !!b.querySelector('.lh-x2'), logn: /\blogn\b/.test(b.className) }; }) }); return; }
+        if (/\blh-grill\b/.test(c)) { var kg = knapp(e, 'kort'); kg.tekst = tekstAv(e.querySelector('b')); kg.under = tekstAv(e.querySelector('small')); ut.push(kg); return; }
+        if (/\b(lh-hjelp|sm-vert)\b/.test(c)) { ut.push({ type: 'rad', knapper: Array.prototype.map.call(e.querySelectorAll('button'), function (b) { return knapp(b, /\brom-stor-knapp\b/.test(b.className) ? 'stor' : 'kort'); }) }); return; }
+        if (/\bhs-melding\b/.test(c)) { var hm = { type: 'melding', navn: tekstAv(e.querySelector('.hs-hvem b')), under: tekstAv(e.querySelector('.hs-kontakt small')), tekst: tekstAv(e.querySelector('.hs-boble')), ukjent: !!e.querySelector('.hs-ukjent'), png: '' }; jobber.push(hode(e.querySelector('.hs-avatar svg'), 'hs' + hm.navn, 72).then(function (p) { hm.png = p; })); ut.push(hm); return; }
+        if (/\bbf-side\b/.test(c)) {
+          ut.push({ type: 'kort', pre: tekstAv(e.querySelector('.bf-margtekst')), tekst: tekstAv(e.querySelector('.bf-ord')), tag: '', under: tekstAv(e.querySelector('.bf-hint')), stil: '', liten: false });
+          var ol = e.querySelector('.bf-liste');
+          if (ol) Array.prototype.forEach.call(ol.querySelectorAll('li'), function (li2) {
+            var bt = li2.querySelector('button');
+            if (bt) { var kb = knapp(bt, 'kort'); kb.tekst = tekstAv(bt); ut.push(kb); return; }
+            ut.push({ type: 'knapp', g: '', attrs: {}, tekst: tekstAv(li2.querySelector('.bf-tekst')), under: tekstAv(li2.querySelector('.bf-penn')), paa: false, av: true, stil: li2.querySelector('.bf-ring') ? 'ja' : '' });
+          });
+          var st2 = e.querySelector('.bf-status'); if (st2) ut.push({ type: 'tekst', tekst: tekstAv(st2), stil: 'vent' });
+          var fa = e.querySelector('.bf-fakta'); if (fa) ut.push({ type: 'tekst', tekst: tekstAv(fa), stil: 'merk' });
+          var rest = Array.prototype.filter.call(e.children, function (x) { return /\bbf-linje\b|\bbf-penn\b/.test(x.className || '') || x.tagName === 'FORM'; });
+          if (rest.length) gaa({ children: rest });
+          return;
+        }
+        if (/\brom-frist\b/.test(c)) { var fe = e.querySelector('[data-frist]'); ut.push({ type: 'frist', frist: fe ? Number(fe.dataset.frist) || 0 : 0, tekst: tekstAv(e).replace(/^\d+\s*/, '') }); return; }
+        if (/\b(ts-status|hs-status|mv-hjelp|lh-maske|hs-info|bf-neste)\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e), stil: /lh-maske/.test(c) ? 'stor' : 'vent' }); return; }
         if (/\bnr-topp\b/.test(c)) { var sp = e.querySelector('.nr-topp-tekst span'), bt = e.querySelector('.nr-topp-tekst b'), kl = e.querySelector('.nr-klokke span'); ut.push({ type: 'topp', tekst: tekstAv(sp), chip: tekstAv(bt), gul: !!(bt && bt.classList.contains('gul')), frist: kl ? Number(kl.dataset.frist) || 0 : 0 }); return; }
         if (/\bpk-kort\b/.test(c)) { ut.push({ type: 'kort', pre: tekstAv(e.querySelector('.pk-pre')), tekst: tekstAv(e.querySelector('p')) || tekstAv(e), tag: tekstAv(e.querySelector('.ja-tag, .pk-vri, .nr-type')), under: tekstAv(e.querySelector('small')), stil: /\bnodt\b/.test(c) ? 'nodt' : /\bsannhet\b/.test(c) ? 'sannhet' : '', liten: /\bliten\b/.test(c) }); return; }
         if (/\bee-sider\b/.test(c)) {
@@ -2054,6 +2122,10 @@ export function startRom(LEKNAVN, LANG) {
   });
   // Den native skjermen trykker på de samme knappene som nettsiden har (data-g + data-*), så all logikk bor ett sted
   window.__mvLek = {
+    // Den native skjermen ber om skrivedialogen for et skjema: feltet får fokus, og focusin-lytteren over beskriver skjemaet for skallet
+    skjema: function (formId) { var f = document.getElementById(formId), inp = f && f.querySelector('input:not([type=radio]):not([type=checkbox]), textarea'); if (inp) inp.focus(); },
+    // Løgnhalsen: trykk = stemme, hold = helt sikker
+    stem: function (paa, sikker) { gjorAlltid({ handling: 'stem', paa: String(paa || ''), sikker: !!sikker }); },
     // Svar fra den native skrivedialogen: fyll feltene og send skjemaet
     skriv: function (formId, verdier) {
       var f = document.getElementById(formId); if (!f) return;
@@ -6085,7 +6157,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (NATIVE_LEKER.indexOf(s.lek) !== -1 && (s.type === 'kort' || s.lek !== 'kategorier')) ? 'kort' : '')
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (s.type === 'kort' && (NATIVE_LEKER.indexOf(s.lek) !== -1 || /^pakke-/.test(String(s.lek)) || s.lek === 'tanken-bak-sangen')) || (NATIVE_LEKER.indexOf(s.lek) !== -1 && s.lek !== 'kategorier') || NATIVE_TYPER.indexOf(s.type) !== -1 ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');

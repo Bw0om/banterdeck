@@ -32,14 +32,28 @@ final class KortModell: ObservableObject {
         return img
     }
 
+    var skjemaId = ""
     func trykk(_ k: [String: Any]) {
         guard let g = k["g"] as? String, !g.isEmpty else { return }
+        if g == "__skjema" { skjema(skjemaId); return }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         let attrs = k["attrs"] as? [String: String] ?? [:]
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
     }
     func trykk(_ g: String) { trykk(["g": g]) }
+    /// Skriving (Ukjent avsender, Skrøna …): nettsidens skjema åpnes som iPhone-dialog
+    func skjema(_ id: String) {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        guard let data = try? JSONSerialization.data(withJSONObject: [id]), let json = String(data: data, encoding: .utf8) else { return }
+        nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.skjema(\(json)[0])", completionHandler: nil)
+    }
+    /// Løgnhalsen: trykk = stemme, hold = helt sikker
+    func stem(_ paa: String, sikker: Bool) {
+        UIImpactFeedbackGenerator(style: sikker ? .heavy : .light).impactOccurred()
+        guard let data = try? JSONSerialization.data(withJSONObject: [paa, sikker]), let json = String(data: data, encoding: .utf8) else { return }
+        nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.stem.apply(null, \(json))", completionHandler: nil)
+    }
 }
 
 struct KortSkjerm: View {
@@ -95,6 +109,13 @@ struct BlokkListe: View {
         case "liste": liste(b)
         case "ulv": ulv(b)
         case "vinner": vinner(b)
+        case "skjema": skjema(b)
+        case "hoder": hoder(b)
+        case "flokker": flokker(b)
+        case "hold": HoldKort(m: m, b: b)
+        case "holdstem": holdstem(b)
+        case "melding": melding(b)
+        case "frist": frist(b)
         default: tekst(b)
         }
     }
@@ -264,12 +285,16 @@ struct BlokkListe: View {
         let rader = b["rader"] as? [[String: Any]] ?? []
         return VStack(spacing: 6) {
             ForEach(Array(rader.enumerated()), id: \.offset) { _, x in
-                HStack {
-                    Text(s(x, "navn")).font(.archivo(15, vekt: 800))
+                HStack(spacing: 8) {
+                    if let img = m.bilde(s(x, "png")) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit).frame(width: 30, height: 34) }
+                    Text(s(x, "navn")).font(.archivo(15, vekt: 800)).lineLimit(2)
                     if !s(x, "mellom").isEmpty { Text(s(x, "mellom")).font(.archivo(13, vekt: 500)).opacity(0.7).lineLimit(1) }
                     Spacer()
-                    Text(s(x, "tekst")).font(.archivo(13, vekt: 800)).padding(.horizontal, 9).padding(.vertical, 4)
-                        .background(Capsule().fill(x["rett"] as? Bool == true ? mint : oransje)).foregroundColor(morkBlekk)
+                    if !s(x, "tekst").isEmpty {
+                        let rett = x["rett"] as? Bool == true, feil = x["feil"] as? Bool == true
+                        Text(s(x, "tekst")).font(.archivo(13, vekt: 800)).padding(.horizontal, 9).padding(.vertical, 4).multilineTextAlignment(.trailing)
+                            .background(Capsule().fill(rett ? mint : feil ? oransje : gul.opacity(0.6))).foregroundColor(morkBlekk)
+                    }
                 }
                 .padding(.horizontal, 12).padding(.vertical, 8)
                 .background(RoundedRectangle(cornerRadius: 12).fill(kort)).overlay(RoundedRectangle(cornerRadius: 12).stroke(blekk.opacity(0.25), lineWidth: 1.5))
@@ -301,6 +326,118 @@ struct BlokkListe: View {
         .padding(14).background(RoundedRectangle(cornerRadius: 16).fill(kort)).overlay(RoundedRectangle(cornerRadius: 16).stroke(blekk, lineWidth: 2.5))
     }
 
+    /// Skriving: én knapp som åpner iPhonens dialog med skjemaets felter
+    private func skjema(_ b: [String: Any]) -> some View {
+        let liten = b["liten"] as? Bool ?? false, id = s(b, "id")
+        m.skjemaId = id
+        return Group {
+            if liten {
+                Button(action: { m.skjema(id) }) { Text(s(b, "knapp").isEmpty ? s(b, "tekst") : s(b, "knapp")).font(.archivo(14, vekt: 700)).underline().opacity(0.8).padding(.vertical, 4) }.buttonStyle(.plain)
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    if !s(b, "tekst").isEmpty { Text(s(b, "tekst")).font(.archivo(15, vekt: 600)).opacity(0.8) }
+                    knapp(["tekst": s(b, "knapp"), "stil": "stor", "g": "__skjema"], bred: true)
+                }
+            }
+        }
+    }
+
+    /// Hodene som knapper (hvem sendte den? hvem er muldvarpen?)
+    private func hoder(_ b: [String: Any]) -> some View {
+        let kn = b["knapper"] as? [[String: Any]] ?? []
+        return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+            ForEach(Array(kn.enumerated()), id: \.offset) { _, k in
+                let paa = k["paa"] as? Bool ?? false, av = k["av"] as? Bool ?? false, merk = k["merk"] as? Bool ?? false, harG = !s(k, "g").isEmpty
+                Button(action: { if harG { m.trykk(k) } }) {
+                    VStack(spacing: 4) {
+                        if let img = m.bilde(s(k, "png")) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit).frame(height: 70) }
+                        Text(s(k, "tekst")).font(.archivo(15, vekt: 900)).lineLimit(1).minimumScaleFactor(0.7)
+                        if !s(k, "under").isEmpty { Text(s(k, "under")).font(.archivo(12, vekt: 600)).opacity(0.75).lineLimit(2).multilineTextAlignment(.center) }
+                    }
+                    .padding(10).frame(maxWidth: .infinity).frame(minHeight: 60)
+                    .foregroundColor(paa || merk ? morkBlekk : blekk)
+                    .background(ZStack {
+                        RoundedRectangle(cornerRadius: 14).fill(morkBlekk).offset(x: paa ? 1 : 3, y: paa ? 1 : 3)
+                        RoundedRectangle(cornerRadius: 14).fill(paa ? gul : merk ? oransje : kort).opacity(av && harG ? 0.5 : 1)
+                        RoundedRectangle(cornerRadius: 14).stroke(morkBlekk, lineWidth: paa ? 3.5 : 2.5)
+                    })
+                    .offset(x: paa ? 2 : 0, y: paa ? 2 : 0)
+                }
+                .buttonStyle(.plain).disabled(av && harG || !harG)
+            }
+        }
+    }
+
+    /// Saueflokken: flokkene som kort med hodene i
+    private func flokker(_ b: [String: Any]) -> some View {
+        let kort = b["kort"] as? [[String: Any]] ?? []
+        return VStack(spacing: 10) {
+            ForEach(Array(kort.enumerated()), id: \.offset) { _, k in
+                let alene = k["alene"] as? Bool ?? false, stor = k["stor"] as? Bool ?? false, valgt = k["valgt"] as? Bool ?? false, harG = !s(k, "g").isEmpty
+                let hoder = k["hoder"] as? [String] ?? []
+                Button(action: { if harG { m.trykk(k) } }) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(s(k, "tekst")).font(.archivo(20, vekt: 900)).fixedSize(horizontal: false, vertical: true)
+                                Text(s(k, "under")).font(.archivo(12, vekt: 700)).opacity(0.75)
+                            }
+                            Spacer(minLength: 6)
+                            if !s(k, "stempel").isEmpty { Text(s(k, "stempel").uppercased()).font(.archivo(11, vekt: 900)).padding(.horizontal, 8).padding(.vertical, 4).background(Capsule().fill(gul)).overlay(Capsule().stroke(morkBlekk, lineWidth: 2)).rotationEffect(.degrees(-4)) }
+                        }
+                        HStack(spacing: -8) {
+                            ForEach(Array(hoder.enumerated()), id: \.offset) { _, p in
+                                if let img = m.bilde(p) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit).frame(width: 40, height: 44) }
+                            }
+                        }
+                    }
+                    .padding(12).frame(maxWidth: .infinity, alignment: .leading).foregroundColor(morkBlekk)
+                    .background(RoundedRectangle(cornerRadius: 14).fill(alene ? rosa : stor ? gul : lys))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(morkBlekk, lineWidth: valgt ? 4 : 2.5))
+                }
+                .buttonStyle(.plain).disabled(!harG)
+            }
+        }
+    }
+
+    /// Løgnhalsen: Sant / Løgn – trykk stemmer, hold i 0,7 s er «helt sikker»
+    private func holdstem(_ b: [String: Any]) -> some View {
+        let kn = b["knapper"] as? [[String: Any]] ?? []
+        return VStack(spacing: 10) {
+            ForEach(Array(kn.enumerated()), id: \.offset) { _, k in HoldStem(m: m, paa: s(k, "paa"), tekst: s(k, "tekst"), valgt: k["valgt"] as? Bool ?? false, x2: k["x2"] as? Bool ?? false, logn: k["logn"] as? Bool ?? false) }
+        }
+    }
+
+    /// Ukjent avsender: meldinga som en boble, med avsenderen (eller «?») over
+    private func melding(_ b: [String: Any]) -> some View {
+        let ukjent = b["ukjent"] as? Bool ?? false
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                if !ukjent, let img = m.bilde(s(b, "png")) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit).frame(width: 34, height: 38) }
+                else { Text("?").font(.archivo(18, vekt: 900)).frame(width: 34, height: 34).background(Circle().fill(gul)).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk) }
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(s(b, "navn")).font(.archivo(14, vekt: 900))
+                    Text(s(b, "under")).font(.archivo(11, vekt: 600)).opacity(0.65)
+                }
+            }
+            Text(s(b, "tekst")).font(.archivo(19, vekt: 700)).lineSpacing(2).fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 14).padding(.vertical, 12).foregroundColor(morkBlekk)
+                .background(RoundedRectangle(cornerRadius: 16).fill(mint.opacity(0.45))).overlay(RoundedRectangle(cornerRadius: 16).stroke(morkBlekk, lineWidth: 2.5))
+        }
+    }
+
+    /// Klokka: «12 sekunder igjen», tikkende
+    private func frist(_ b: [String: Any]) -> some View {
+        let f = (b["frist"] as? NSNumber)?.doubleValue ?? 0
+        return TimelineView(.periodic(from: .now, by: 1)) { _ in
+            let n = m.igjen(f)
+            HStack(spacing: 8) {
+                Capsule().fill(n <= 5 ? oransje : gul).frame(width: 10, height: 10)
+                Text("\(n) " + s(b, "tekst")).font(.archivo(14, vekt: 700)).opacity(0.8)
+            }
+        }
+    }
+
     private func tekst(_ b: [String: Any]) -> some View {
         let stil = s(b, "stil")
         return Text(s(b, "tekst"))
@@ -308,6 +445,65 @@ struct BlokkListe: View {
             .foregroundColor(stil == "merk" ? rust : blekk)
             .opacity(stil == "vent" ? 0.75 : stil == "etikett" ? 0.65 : 1)
             .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// Løgnhalsen og Muldvarpen: rollen/ordet vises bare mens fingeren ligger på kortet
+struct HoldKort: View {
+    @ObservedObject var m: KortModell
+    let b: [String: Any]
+    @State private var vis = false
+    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
+    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
+    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
+    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private func s(_ k: String) -> String { b[k] as? String ?? "" }
+    var body: some View {
+        let stil = s("stil")
+        ZStack {
+            VStack(spacing: 4) {
+                Text(s("tittel")).font(.archivo(34, vekt: 900)).lineLimit(2).minimumScaleFactor(0.6)
+                if !s("under").isEmpty { Text(s("under")).font(.archivo(14, vekt: 600)).opacity(0.85).multilineTextAlignment(.center) }
+            }
+            .opacity(vis ? 1 : 0)
+            VStack(spacing: 6) {
+                Image(systemName: "hand.tap.fill").font(.system(size: 26, weight: .bold))
+                Text(s("dekk")).font(.archivo(16, vekt: 900))
+            }
+            .opacity(vis ? 0 : 1)
+        }
+        .frame(maxWidth: .infinity).frame(minHeight: 150).padding(16).foregroundColor(morkBlekk)
+        .background(RoundedRectangle(cornerRadius: 16).fill(vis ? (stil == "logn" ? rosa : stil == "sant" ? mint : gul) : gul.opacity(0.5)))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(morkBlekk, lineWidth: 3))
+        .animation(.spring(response: 0.25, dampingFraction: 0.85), value: vis)
+        .onLongPressGesture(minimumDuration: 60, maximumDistance: 60, pressing: { p in if p != vis { vis = p; if p { UIImpactFeedbackGenerator(style: .light).impactOccurred() } } }, perform: {})
+    }
+}
+
+/// Løgnhalsen: Sant / Løgn – trykk = stemme, hold i 0,7 s = helt sikker (×2)
+struct HoldStem: View {
+    @ObservedObject var m: KortModell
+    let paa: String, tekst: String, valgt: Bool, x2: Bool, logn: Bool
+    @State private var holder = false
+    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
+    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
+    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    var body: some View {
+        ZStack {
+            Text(tekst.uppercased()).font(.archivo(22, vekt: 900))
+            if x2 { Text("×2").font(.archivo(14, vekt: 900)).padding(.horizontal, 8).padding(.vertical, 3).background(Capsule().fill(.white)).overlay(Capsule().stroke(morkBlekk, lineWidth: 2)).frame(maxWidth: .infinity, alignment: .trailing).padding(.trailing, 12) }
+        }
+        .frame(maxWidth: .infinity).frame(height: 64).foregroundColor(morkBlekk)
+        .background(ZStack {
+            RoundedRectangle(cornerRadius: 14).fill(morkBlekk).offset(x: valgt || holder ? 1 : 4, y: valgt || holder ? 1 : 4)
+            RoundedRectangle(cornerRadius: 14).fill(logn ? rosa : mint)
+            RoundedRectangle(cornerRadius: 14).stroke(morkBlekk, lineWidth: valgt ? 4 : 3)
+        })
+        .offset(x: valgt || holder ? 3 : 0, y: valgt || holder ? 3 : 0)
+        .scaleEffect(holder ? 0.98 : 1)
+        .animation(.spring(response: 0.2, dampingFraction: 0.85), value: holder)
+        .onTapGesture { m.stem(paa, sikker: false) }
+        .onLongPressGesture(minimumDuration: 0.7, maximumDistance: 40, pressing: { p in holder = p }, perform: { m.stem(paa, sikker: true) })
     }
 }
 
