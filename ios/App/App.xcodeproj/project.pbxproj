@@ -39,6 +39,7 @@
 		A1B2C3D4E5F60718293A4B95 /* GrisSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B94 /* GrisSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B97 /* BingoSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B96 /* BingoSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B99 /* ReglerArk.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B98 /* ReglerArk.swift */; };
+		A1B2C3D4E5F60718293A4B9D /* DegSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B9C /* DegSkjerm.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,6 +76,7 @@
 		A1B2C3D4E5F60718293A4B94 /* GrisSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrisSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B96 /* BingoSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BingoSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B98 /* ReglerArk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReglerArk.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B9C /* DegSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegSkjerm.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -132,6 +134,7 @@
 				A1B2C3D4E5F60718293A4B94 /* GrisSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B96 /* BingoSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B98 /* ReglerArk.swift */,
+				A1B2C3D4E5F60718293A4B9C /* DegSkjerm.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -252,6 +255,7 @@
 				A1B2C3D4E5F60718293A4B95 /* GrisSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B97 /* BingoSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B99 /* ReglerArk.swift in Sources */,
+				A1B2C3D4E5F60718293A4B9D /* DegSkjerm.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
