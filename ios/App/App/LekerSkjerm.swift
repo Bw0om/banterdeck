@@ -5,7 +5,7 @@ import WebKit
 /// Leker-fanen native: alle drikkelekene med søk og filter. Lista kommer fra nettsiden (mv-skjerm «leker», med bildene som PNG),
 /// og et trykk på en lek åpner lekesiden (nettsiden) i samme fane – pila tilbake eller et drag fra venstre kant henter lista igjen.
 /// Alderssjekken er en iPhone-dialog her, én gang; svaret huskes der nettsiden leser det (la_age_ok).
-struct Lek: Identifiable {
+struct LekeKort: Identifiable {
     let id: String        // adressen til lekesiden
     let navn: String, niva: String, pl: String, gruppe: String, utstyr: String, q: String
     let fra: Int, til: Int   // antall spillere (ikke «min»/«maks» – de navnene kolliderer med Swift sine)
@@ -24,7 +24,7 @@ struct Lek: Identifiable {
 }
 
 final class LekerModell: ObservableObject {
-    @Published var leker: [Lek] = []
+    @Published var leker: [LekeKort] = []
     @Published var sok = ""
     @Published var niva = ""        // «», rom, app, regler
     @Published var pl = 0           // 0, 2, 4, 6
@@ -42,7 +42,7 @@ final class LekerModell: ObservableObject {
         tekst = d["tekst"] as? [String: String] ?? tekst
         alderOk = d["alder"] as? Bool ?? alderOk
         alkfri = d["alkfri"] as? Bool ?? alkfri
-        let nye = (d["leker"] as? [[String: Any]] ?? []).compactMap(Lek.init)
+        let nye = (d["leker"] as? [[String: Any]] ?? []).compactMap(LekeKort.init)
         if !nye.isEmpty {
             // Bildene kommer gjerne i en melding etter lista: behold de vi har til de nye er på plass
             let gamle = Dictionary(leker.map { ($0.id, $0.bilde) }, uniquingKeysWith: { a, _ in a })
@@ -50,7 +50,7 @@ final class LekerModell: ObservableObject {
         }
     }
 
-    func passer(_ l: Lek) -> Bool {
+    func passer(_ l: LekeKort) -> Bool {
         let q = sok.trimmingCharacters(in: .whitespaces).lowercased()
         if !q.isEmpty && !l.q.contains(q) { return false }
         if !niva.isEmpty && l.niva != niva { return false }
@@ -63,14 +63,14 @@ final class LekerModell: ObservableObject {
         }
         return true
     }
-    func liste(_ n: String) -> [Lek] { leker.filter { $0.niva == n && passer($0) } }
+    func liste(_ n: String) -> [LekeKort] { leker.filter { $0.niva == n && passer($0) } }
 
     private func js(_ kall: String, _ arg: Any? = nil) {
         var json = ""
         if let a = arg, let data = try? JSONSerialization.data(withJSONObject: [a]), let s = String(data: data, encoding: .utf8) { json = s + "[0]" }
         nett?.evaluateJavaScript("window.__mvLeker && window.__mvLeker.\(kall)(\(json))", completionHandler: nil)
     }
-    func aapne(_ l: Lek) { UISelectionFeedbackGenerator().selectionChanged(); js("gaa", l.id) }
+    func aapne(_ l: LekeKort) { UISelectionFeedbackGenerator().selectionChanged(); js("gaa", l.id) }
     func settAlkfri(_ v: Bool) { UISelectionFeedbackGenerator().selectionChanged(); js("alkfri", v) }
     func alderJa() { alderOk = true; js("alder") }
 }
@@ -200,7 +200,7 @@ struct LekerSkjerm: View {
     }
 
     /// Kortene i «Spill fra hver sin telefon»: bildet, navnet, antall og Pluss/Gratis
-    private func stortKort(_ l: Lek) -> some View {
+    private func stortKort(_ l: LekeKort) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack {
                 mint.opacity(0.35)
@@ -224,7 +224,7 @@ struct LekerSkjerm: View {
     }
 
     /// Radene i «Telefonen er kortstokken»: lite bilde, navn, antall og gruppa
-    private func rad(_ l: Lek) -> some View {
+    private func rad(_ l: LekeKort) -> some View {
         HStack(spacing: 12) {
             ZStack {
                 mint.opacity(0.35)
