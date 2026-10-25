@@ -136,6 +136,71 @@ const romSti = no ? '/no/rom' : '/room';
     </p>
   )}
 
+  <script is:inline define:vars={{ LEKER_TEKST: {
+    tittel: L.gamesTitle, sok: searchPh, alle: no ? 'Alle' : 'All', rom: no ? 'I appen' : 'In the app', app: no ? 'Telefonen hjelper' : 'Phone helps', regler: no ? 'Bare regler' : 'Just rules',
+    forTo: no ? 'For to' : 'For two', seks: no ? '6 eller flere' : '6 or more', bareGratis: no ? 'Bare gratis' : 'Free only', alkfri: no ? 'Alkoholfri' : 'Alcohol-free',
+    romH2: no ? 'Spill fra hver sin telefon' : 'Play from your own phones', romP: no ? 'Én lager et rom, resten blir med på koden.' : 'One person creates a room, everyone else joins with the code.',
+    appH2: no ? 'Telefonen er kortstokken' : 'The phone is the deck', appP: no ? 'Én telefon på bordet – dere trenger ikke noe annet.' : 'One phone on the table – you don’t need anything else.',
+    reglerH2: no ? 'Klassikere – bare regler' : 'Classics – just the rules', reglerP: no ? 'Kopper, baller og konkurranseinstinkt.' : 'Cups, balls and competitive spirit.',
+    ingen: L.noResults, pluss: 'Pluss', gratis: no ? 'Gratis' : 'Free', alderTittel: L.gateTitle, alderTekst: L.gateBody, alderJa: L.gateYes, alderNei: L.gateNo } }}>
+    /* Appen med Swift-skall: lista er native (ios/App/App/LekerSkjerm.swift). Siden gir lista og bildene (PNG) dit, og åpner lekesiden når du trykker. */
+    (function start() {
+      window.__mvLekerStatus = 'start ' + document.readyState;
+      // app.js (som sender meldingen videre til skallet) er et modulskript og lytter først når siden er ferdig lest: vent til da
+      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', start); return; }
+      // Skallet melder seg (html.har-skall) litt etter at siden er tegnet: vent på det
+      var h = document.documentElement;
+      if (!h.classList.contains('har-skall')) {
+        window.__mvLekerStatus = 'venter-skall cap=' + !!window.Capacitor;
+        if (!window.Capacitor) return;
+        new MutationObserver(function (_, obs) { if (h.classList.contains('har-skall')) { obs.disconnect(); start(); } }).observe(h, { attributes: true, attributeFilter: ['class'] });
+        return;
+      }
+      var pngFor = {};
+      function png(svg) {
+        return new Promise(function (res) {
+          if (!svg) return res('');
+          var vb = (svg.getAttribute('viewBox') || '0 0 240 126').split(/[\s,]+/).map(Number), w = 480, h = Math.round(w * (vb[3] || 126) / (vb[2] || 240));
+          // Fila har xmlns, width og height fra før: kopier og sett størrelsen, så blir det ikke doble attributter (som gjør bildet tomt)
+          var k = svg.cloneNode(true); k.setAttribute('width', String(w)); k.setAttribute('height', String(h)); k.removeAttribute('class');
+          var s = new XMLSerializer().serializeToString(k);
+          if (pngFor[s]) return res(pngFor[s]);
+          var img = new Image();
+          img.onload = function () { try { var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); pngFor[s] = c.toDataURL('image/png').split(',')[1] || ''; res(pngFor[s]); } catch (e) { res(''); } };
+          img.onerror = function () { res(''); };
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+        });
+      }
+      function alderOk() { try { return localStorage.getItem('la_age_ok') === '1'; } catch (e) { return false; } }
+      function egenAlkfri() { try { return localStorage.getItem('bd_alkoholfri') === '1'; } catch (e) { return false; } }
+      var liste = [];
+      document.querySelectorAll('[data-seksjon] [data-q]').forEach(function (el) {
+        var b = el.querySelector('b'), pl = el.querySelector('.lk-pl'), meta = el.querySelector('.lk-meta'), liten = el.classList.contains('lk-liten');
+        var gruppe = '', utstyr = '', plTekst = pl ? pl.textContent.trim() : '';
+        if (liten) { var sp = el.querySelector('span'); var deler = sp ? sp.textContent.split('·') : []; utstyr = (deler[0] || '').trim(); plTekst = (deler[1] || '').trim(); }
+        else if (meta) { var gr = meta.querySelector('span:not(.lk-pl)'); gruppe = gr ? gr.textContent.trim() : ''; }
+        liste.push({ href: el.getAttribute('href'), navn: b ? b.textContent.trim() : '', niva: el.dataset.niva, min: Number(el.dataset.min) || 2, maks: Number(el.dataset.maks) || 99,
+          pl: plTekst, gruppe: gruppe, utstyr: utstyr, q: el.getAttribute('data-q') || '', pluss: el.dataset.pluss === '1', png: '', svg: el.querySelector('svg.lekebilde') });
+      });
+      function meld() {
+        var d = { skjerm: 'leker', alder: alderOk(), alkfri: egenAlkfri(), tekst: LEKER_TEKST,
+          leker: liste.map(function (l) { return { href: l.href, navn: l.navn, niva: l.niva, min: l.min, maks: l.maks, pl: l.pl, gruppe: l.gruppe, utstyr: l.utstyr, q: l.q, pluss: l.pluss, png: l.png }; }) };
+        // app.js lytter kanskje ikke ennå (det lastes etter siden): meldingen ligger også her, og app.js henter den når det starter
+        window.__mvSisteSkjerm = d;
+        try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: d })); window.__mvLekerStatus = 'meldt n=' + d.leker.length + ' png=' + d.leker.filter(function (l) { return l.png; }).length; } catch (e) { window.__mvLekerStatus = 'feil ' + e; }
+      }
+      meld();
+      // Bildene tar et øyeblikk: lista kommer først, bildene i neste melding
+      Promise.all(liste.map(function (l) { return png(l.svg).then(function (b) { l.png = b; }); })).then(meld);
+      window.__mvLeker = {
+        gaa: function (u) { if (/^\/[a-z0-9/?=&%#-]*$/i.test(String(u || ''))) location.href = u; },
+        alder: function () { try { localStorage.setItem('la_age_ok', '1'); } catch (e) {} var g = document.getElementById('gate'); if (g) g.hidden = true; document.body.classList.remove('gated'); meld(); },
+        alkfri: function (v) { if (window.BDTorr) window.BDTorr.sett(!!v); meld(); }
+      };
+      // Kom man tilbake hit fra en lekeside (hurtigminnet), sendes lista på nytt av app.js (pageshow)
+    })();
+  </script>
+
   <script is:inline>
     (function () {
       function init() {

@@ -4,18 +4,19 @@ import SwiftUI
 import WebKit
 import Capacitor
 
-/// Skallet: iPhonens egen fanelinje nederst (Hjem, Spill, Leker, Deg). Hver fane har sin egen skjerm (nettvisning)
+/// Skallet: iPhonens egen fanelinje nederst (Spill, Leker, Deg). Hver fane har sin egen skjerm (nettvisning)
 /// som lever videre når du bytter fane – rommet fortsetter i Spill mens du kikker i Leker, og et fanetrykk er
 /// øyeblikkelig, uten ny sidelasting. Skjermene lages først når fanen åpnes. Linja er iPhonens egen
 /// (UITabBarController): på iOS 26 krymper den til en liten knapp når du blar nedover.
-final class SkallViewController: UITabBarController, UITabBarControllerDelegate {
+final class SkallViewController: UITabBarController, UITabBarControllerDelegate, UIAdaptivePresentationControllerDelegate {
     static weak var delt: SkallViewController?
 
-    let faner = ["hjem", "spill", "leker", "deg"]
-    /// Startsiden for hver fane, per språk (stier i app-pakken, slik Astro bygger dem)
+    let faner = ["spill", "leker", "deg"]
+    /// Startsiden for hver fane, per språk (stier i app-pakken, slik Astro bygger dem). Spill er forsiden: «Klar for vors?» med stua,
+    /// og rommet når du er i et.
     private let ruter: [String: [String]] = [
-        "no": ["no", "no/rom", "no/drinking-games", "no/account"],
-        "en": ["", "room", "drinking-games", "account"]
+        "no": ["no/rom", "no/drinking-games", "no/account"],
+        "en": ["room", "drinking-games", "account"]
     ]
     private var visninger: [Int: MittvorsViewController] = [:]
     private var skjultPer: [Int: Bool] = [:]
@@ -40,9 +41,9 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         view.backgroundColor = UIColor(red: 1, green: 0.973, blue: 0.933, alpha: 1)   // #FFF8EE
         tabBar.tintColor = UIColor(red: 0.776, green: 0.235, blue: 0.067, alpha: 1)   // rust, som den aktive fanen på nettsiden
 
-        // Fire sider i fanelinja. Skjermen til hver fane legges inn i sin side når fanen åpnes første gang.
-        let symboler: [(String, String)] = [("house", "house.fill"), ("die.face.5", "die.face.5.fill"), ("wineglass", "wineglass.fill"), ("person", "person.fill")]
-        let navn = ["Hjem", "Spill", "Leker", "Deg"]
+        // Tre sider i fanelinja. Skjermen til hver fane legges inn i sin side når fanen åpnes første gang.
+        let symboler: [(String, String)] = [("die.face.5", "die.face.5.fill"), ("wineglass", "wineglass.fill"), ("person", "person.fill")]
+        let navn = ["Spill", "Leker", "Deg"]
         viewControllers = zip(symboler, navn).enumerated().map { (i, p) in
             let vc = UIViewController()
             vc.view.backgroundColor = view.backgroundColor
@@ -99,9 +100,11 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         setNeedsStatusBarAppearanceUpdate()
     }
 
-    /// Åpne en adresse i fanen den hører til (f.eks. «Lag rom» fra Hjem → Spill-fanen). Skjermen som ba om det, blir der den er.
+    /// Åpne en adresse i fanen den hører til (f.eks. «Spill i rommet» fra en lekeside → Spill-fanen). Skjermen som ba om det, blir der den er.
     func aapne(fane: String, url: String) {
         guard let i = faner.firstIndex(of: fane) else { return }
+        // Forsiden på nettet (/ og /no/) er Spill-fanens startskjerm i appen
+        let url = fane == "spill" && url.range(of: #"^/(no|en)?/?(\?.*)?$"#, options: .regularExpression) != nil ? "/" + (ruter[spraak] ?? ruter["no"]!)[i] : url
         let fantes = visninger[i] != nil
         velg(fane: fane)
         if fantes { gaa(visninger[i], til: url) } else { ventende[i] = url }   // ny skjerm: siden sier fra når den er klar (Skall.klar) og får adressen da
@@ -128,8 +131,9 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         present(h, animated: true)
     }
 
-    func visArk(_ d: [String: Any], fra: UIViewController?) {
-        guard let i = fane(for: fra), let v = visninger[i] else { return }
+    @discardableResult
+    func visArk(_ d: [String: Any], fra: UIViewController?) -> UIViewController? {
+        guard let i = fane(for: fra), let v = visninger[i] else { return nil }
         let type = d["type"] as? String ?? ""
         if type == "figur" {
             let m = FigurModell()
@@ -137,13 +141,16 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
             let h = UIHostingController(rootView: FigurArk(m: m))
             m.loggInn = { [weak self, weak h] _ in h?.dismiss(animated: true) { self?.visLoggInn([:], fra: nil) } }
             visArkHalvt(h)
+            return h
         } else if type == "rom" {
             let m = RomModell(d["data"] as? [String: Any] ?? [:])
             m.nett = v.webView
             let h = UIHostingController(rootView: RomArk(m: m))
             m.pluss = { [weak h, weak v] in h?.dismiss(animated: true) { v?.webView?.evaluateJavaScript("window.__mvRom && window.__mvRom.pluss()", completionHandler: nil) } }
             visArkHalvt(h)
+            return h
         }
+        return nil
     }
 
     // MARK: Kontoen – logg inn / ny konto / lenke som ark (LoggInnArk.swift)
@@ -259,10 +266,11 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         plussModell = m
         let h = UIHostingController(rootView: PlussArk(m: m))
         m.loggInn = { [weak self, weak h] in h?.dismiss(animated: true) { self?.visLoggInn([:], fra: nil) } }
+        let fraDeg = faner[i] == "deg"
         m.ferdig = { [weak h, weak v] in
-            // Pluss er på plass: siden får beskjed (rommet skrur på Pluss), og arket går bort etter et øyeblikk
+            // Pluss er på plass: siden får beskjed (rommet skrur på Pluss), og arket går bort etter et øyeblikk. Deg-siden tegnes på nytt.
             v?.webView?.evaluateJavaScript("window.__mvPluss && window.__mvPluss.ferdig()", completionHandler: nil)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { h?.dismiss(animated: true) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { h?.dismiss(animated: true) { if fraDeg { v?.webView?.reload() } } }
         }
         if let ark = h.sheetPresentationController { ark.detents = [.large()]; ark.prefersGrabberVisible = false }
         UISelectionFeedbackGenerator().selectionChanged()
@@ -295,7 +303,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         } else {
             sti += (u.query.map { "?" + $0 } ?? "")
         }
-        let fane = sti.hasPrefix("/no/rom") || sti.hasPrefix("/room") ? "spill" : sti.hasPrefix("/no/drinking-games") || sti.hasPrefix("/drinking-games") ? "leker" : sti.hasPrefix("/no/account") || sti.hasPrefix("/account") ? "deg" : "hjem"
+        let fane = sti.hasPrefix("/no/rom") || sti.hasPrefix("/room") ? "spill" : sti.hasPrefix("/no/account") || sti.hasPrefix("/account") ? "deg" : "leker"
         aapne(fane: fane, url: sti)
         return true
     }
@@ -323,11 +331,21 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
     // MARK: Den native startskjermen (Spill-fanen)
     private let startModell = StartModell()
     private var startVert: UIHostingController<StartSkjerm>?
+    private var startHull: HullVisning?
 
     /// Siden i en skjerm sier hvilken skjerm den viser: «start» → vis den native startskjermen over Spill-fanen, ellers ta den bort
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
-        guard let i = fane(for: fra), faner[i] == "spill", let v = visninger[i], let side = viewControllers?[i] else { return }
+        guard let i = fane(for: fra), let v = visninger[i], let side = viewControllers?[i] else { return }
         let hva = d["skjerm"] as? String ?? ""
+        // Deg-fanen: den native skjermen ligger over kontosiden så lenge den står på forsiden sin (profil); dypere sider er nettsiden
+        if faner[i] == "deg" {
+            let vis = hva == "deg" && (d["visning"] as? String ?? "profil") == "profil"
+            visDeg(vis ? d : nil, over: side, nett: v.webView)
+            return
+        }
+        // Leker-fanen: lista er native; lekesidene er nettsiden
+        if faner[i] == "leker" { visLeker(hva == "leker" ? d : nil, over: side, nett: v.webView); return }
+        guard faner[i] == "spill" else { return }
         if ["rom", "lobby", "start", "laster"].contains(hva) { sisteRegler = "" }
         else if let r = d["regler"] as? [String], !r.isEmpty, let n = d["lekNokkel"] as? String, n != sisteRegler { sisteRegler = n; visRegler(d, r) }
         // Alt som ikke er denne skjermen, tas bort først – også lobbyen, så den ikke ligger igjen under en lek
@@ -439,7 +457,9 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         guard h > 40 else { return }
         stuaRekt = CGRect(x: (d["left"] as? NSNumber)?.doubleValue ?? 0, y: (d["top"] as? NSNumber)?.doubleValue ?? 0, width: (d["w"] as? NSNumber)?.doubleValue ?? 0, height: h)
         if abs(CGFloat(h) - lobbyModell.stuaH) > 1 { lobbyModell.stuaH = CGFloat(h) }
+        if abs(CGFloat(h) - startModell.stuaH) > 1 { startModell.stuaH = CGFloat(h) }
         aapneHull()
+        aapneStartHull()
     }
 
     /// Hullet for trykkene: stuas rute, fra nettvisningens koordinater til overleggets (UIKit, ingen SwiftUI-måling)
@@ -448,11 +468,58 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         hull.hull = nett.convert(stuaRekt, to: hull)
     }
 
+    // MARK: Deg (DegSkjerm.swift) – native skjerm over kontosiden. Figurarket bruker Spill-fanens side (der bor window.__mvFigur).
+    private let degModell = DegModell()
+    private var degVert: UIHostingController<DegSkjerm>?
+    private weak var degFigurArk: UIViewController?
+    private func visDeg(_ d: [String: Any]?, over side: UIViewController, nett: WKWebView?) {
+        guard let d = d else { skjulDeg(); return }
+        degModell.nett = nett
+        degModell.engelsk = spraak == "en"
+        degModell.sett(d)
+        if degVert == nil {
+            degModell.handling = { [weak self] h in self?.degHandling(h) }
+            degVert = leggOverlegg(UIHostingController(rootView: DegSkjerm(m: degModell)), over: side, nett: nett)
+        }
+        fram(degVert?.view.superview)
+    }
+    /// Siden i Deg-fanen byttet (gjengene, statistikken …): nettsiden tar over til kontosiden sier «deg» igjen
+    func skjulDeg() { fjernOverlegg(&degVert) }
+
+    // MARK: Leker (LekerSkjerm.swift) – native liste over lekesiden
+    private let lekerModell = LekerModell()
+    private var lekerVert: UIHostingController<LekerSkjerm>?
+    private func visLeker(_ d: [String: Any]?, over side: UIViewController, nett: WKWebView?) {
+        guard let d = d else { skjulLeker(); return }
+        lekerModell.nett = nett
+        lekerModell.engelsk = spraak == "en"
+        lekerModell.sett(d)
+        if lekerVert == nil {
+            lekerModell.handling = { [weak self] h in if h == "tilbake" { self?.velg(fane: "spill") } }
+            lekerVert = leggOverlegg(UIHostingController(rootView: LekerSkjerm(m: lekerModell)), over: side, nett: nett)
+        }
+        fram(lekerVert?.view.superview)
+    }
+    func skjulLeker() { fjernOverlegg(&lekerVert) }
+    private func degHandling(_ h: String) {
+        switch h {
+        case "inn", "ny":
+            visLoggInn(["del": h], fra: nil)
+        case "figur":
+            guard let i = faner.firstIndex(of: "spill"), let v = visninger[i] else { return }
+            if let ark = visArk(["type": "figur"], fra: v) { degFigurArk = ark; ark.presentationController?.delegate = self }
+        case "pluss":
+            guard let j = faner.firstIndex(of: "deg"), let v = visninger[j] else { return }
+            visPluss([:], fra: v)
+        default: break
+        }
+    }
+
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
     func settOverleggSkjult(_ skjult: Bool) {
-        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view]
+        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, degVert?.view, lekerVert?.view]
         for v in hoster { ((v?.superview as? HullVisning) ?? v)?.isHidden = skjult }
-        lobbyHull?.isHidden = skjult; startVert?.view.isHidden = skjult
+        lobbyHull?.isHidden = skjult; startHull?.isHidden = skjult
     }
 
     // Gris (GrisSkjerm.swift) og Bingo (BingoSkjerm.swift)
@@ -565,33 +632,30 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         fram(kortVert?.view.superview)
     }
 
+    /// Forsiden: «Klar for vors?» med nettsidens demo-stue i et hull (gjestene går inn døra for hver bokstav i koden), Lag rom og Bli med
     private func visStart(i side: UIViewController, _ vis: Bool) {
         if vis {
             if startVert == nil {
                 let h = UIHostingController(rootView: StartSkjerm(m: startModell))
                 h.view.backgroundColor = .clear
-                side.addChild(h)
-                h.view.translatesAutoresizingMaskIntoConstraints = false
-                side.view.addSubview(h.view)
-                NSLayoutConstraint.activate([
-                    h.view.topAnchor.constraint(equalTo: side.view.topAnchor),
-                    h.view.leadingAnchor.constraint(equalTo: side.view.leadingAnchor),
-                    h.view.trailingAnchor.constraint(equalTo: side.view.trailingAnchor),
-                    h.view.bottomAnchor.constraint(equalTo: side.view.bottomAnchor)
-                ])
-                h.didMove(toParent: side)
-                h.view.alpha = 0
-                startVert = h
+                startVert = leggOverlegg(h, over: side, nett: startModell.nett)
+                startHull = h.view.superview as? HullVisning
             }
             fram(startVert?.view.superview)
-            UIView.animate(withDuration: 0.18) { self.startVert?.view.alpha = 1 }
+            aapneStartHull()
         } else if let h = startVert {
             // Rommet er klart: skjermen glir bort og nettvisningen er der under
-            UIView.animate(withDuration: 0.22, animations: { h.view.alpha = 0; h.view.transform = CGAffineTransform(translationX: 0, y: 24) }) { _ in
-                h.willMove(toParent: nil); h.view.removeFromSuperview(); h.removeFromParent()
-                if self.startVert === h { self.startVert = nil }
+            startVert = nil; startHull = nil
+            let boks = h.view.superview
+            UIView.animate(withDuration: 0.22, animations: { (boks ?? h.view).alpha = 0; h.view.transform = CGAffineTransform(translationX: 0, y: 24) }) { _ in
+                h.willMove(toParent: nil); h.view.removeFromSuperview(); boks?.removeFromSuperview(); h.removeFromParent()
             }
         }
+    }
+
+    private func aapneStartHull() {
+        guard let hull = startHull, let nett = startModell.nett, stuaRekt.height > 0 else { return }
+        hull.hull = nett.convert(stuaRekt, to: hull)
     }
 
     private func gaa(_ v: MittvorsViewController?, til url: String) {
@@ -651,6 +715,12 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         } else {
             gaa(v, til: "/" + start)
         }
+    }
+
+    // MARK: UIAdaptivePresentationControllerDelegate – figurarket åpnet fra Deg er lukket: kontosiden viser den nye figuren
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        guard presentationController.presentedViewController === degFigurArk, let j = faner.firstIndex(of: "deg") else { return }
+        visninger[j]?.webView?.reload()
     }
 
     // MARK: UITabBarControllerDelegate
@@ -735,6 +805,8 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
             }
             if let l = call.getString("lang"), l == "no" || l == "en" { s.spraak = l }
             let i = s.fane(for: vc)
+            if let i = i, s.faner[i] == "deg" { s.skjulDeg() }   // ny side i Deg-fanen: kontosiden sier «deg» igjen når den er tilbake
+            if let i = i, s.faner[i] == "leker" { s.skjulLeker() }   // en lekeside: lista sier «leker» igjen når du er tilbake
             // rull: simulator-sjekken ber nettsiden bla nedover, så bildet viser linja i krympet stand
             let env = ProcessInfo.processInfo.environment
             var svar: [String: Any] = ["ok": true, "fane": i.map { s.faner[$0] } ?? s.valgtFane, "flere": true,

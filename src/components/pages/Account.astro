@@ -759,6 +759,7 @@ const T = no ? {
         /* ---------- Figuren din: pynt du har låst opp, og hva du har på deg ---------- */
         var figur = { laast: [], valgt: {}, kvelder: 0, sesong: null }, figurTimer = null, velger = null;
         function tegnFigur() {
+          meldDeg();
           if (!window.mvFigur || !bruker) return;
           $('figurNavn').textContent = bruker.brukernavn || (EN ? 'You' : 'Du');
           var n = figur.laast.length;
@@ -793,6 +794,7 @@ const T = no ? {
           $('merArk').hidden = true;
           try { history.replaceState(null, '', navn === 'profil' ? location.pathname : '#' + navn); } catch (e) {}
           if (navn !== 'profil') window.scrollTo({ top: 0 });
+          meldDeg();
         }
         var figurKlar = false;
         $('merBtn').addEventListener('click', function () { $('merArk').hidden = false; });
@@ -805,10 +807,10 @@ const T = no ? {
           mine = loadLocal();
           K.bruker(true).then(function (u) {
             bruker = u;
-            if (!u) { render(); return; }
+            if (!u) { render(); meldDeg(); return; }
             $('signin').hidden = true; $('dash').hidden = false; var kh = $('kontoHode'); if (kh) kh.hidden = true; visning(location.hash.replace('#', ''));
             var af = $('appFigur'); if (af) af.hidden = true; var ai = document.querySelector('.app-innstillinger'); if (ai) $('dash').after(ai);   // appen: figuren først, innstillingene under
-            visHvem();
+            visHvem(); meldDeg();
             $('navnForm').hidden = !!u.brukernavn;
             if (erGjenoppretting) { $('pwForm').hidden = false; $('pwTittel').textContent = T.choosePw; $('pwLead').hidden = true; $('pwNy').focus(); }
             else if (!u.brukernavn) $('pwForm').hidden = false;
@@ -817,6 +819,7 @@ const T = no ? {
             K.api('/api/pluss/status', EN_HODE).then(function (r) { return r.json(); }).then(function (d) {
               var el = $('plussLinje'); el.hidden = false;
               var kode = null; try { kode = localStorage.getItem('bd_gavekode'); } catch (x) {}
+              degPluss = { aktiv: !!d.aktiv, til: d.til || '', gratisBrukt: !!d.gratisBrukt, gave: !!kode }; meldDeg();
               if (EN) {
                 if (kode) { el.innerHTML = '🎁 You have a gift code waiting – <a href="/plus">activate it now</a>'; return; }
                 el.innerHTML = d.aktiv
@@ -849,6 +852,65 @@ const T = no ? {
             });
           });
         }
+        /* ---------- Appen med Swift-skall: Deg-fanen er native (ios/App/App/DegSkjerm.swift). Siden sier fra hva den vet
+           (mv-skjerm «deg»: navn, konto, Pluss, tallene, figuren som PNG), og gjør jobben via window.__mvDeg. ---------- */
+        var degPluss = null, degMeldT = null, degPng = '', degPngFor = '', degArkOppe = false;
+        var FIGUR_RO = '<style>.arm-h,.arm-v,.hender,.dekk,.horn,.gitar,.tlf,.zzz,.stjerner,.hjerter,.krone-v,.skum,.oyne-g,.oyne-h,.oyne-s,.munn-o,.munn-b,.munn-sur,.munn-kinn,.rodme,.svette,.gronn{display:none}</style>';
+        function harSkall() { return document.documentElement.classList.contains('har-skall'); }
+        function mittNavn() { try { return JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (e) { return ''; } }
+        function degSvg() {
+          if (!window.mvFigur || !window.mvUtseende) return '';
+          if (bruker && typeof figur !== 'undefined' && figur) return window.mvFigur(window.mvUtseende(window.mvFigurNokkel(bruker.id), figur.valgt || {}), figur.valgt || {});
+          return window.mvFigur(window.mvUtseende(mittNavn() || 'deg'), {});
+        }
+        /** Figuren som PNG (base64) til den native skjermen – som i rommet (rom.js svgTilPng) */
+        function degPngLag(svg) {
+          return new Promise(function (res) {
+            var s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-48 -100 96 106" width="192" height="212">' + FIGUR_RO + svg + '</svg>';
+            var img = new Image();
+            img.onload = function () { try { var c = document.createElement('canvas'); c.width = 192; c.height = 212; c.getContext('2d').drawImage(img, 0, 0, 192, 212); res(c.toDataURL('image/png').split(',')[1] || ''); } catch (e) { res(''); } };
+            img.onerror = function () { res(''); };
+            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+          });
+        }
+        function visningNaa() { var el = document.querySelector('#dash [data-visning]:not([hidden]):not(#figurBoks)'); return el ? el.dataset.visning : 'profil'; }
+        function meldDeg() {
+          if (!harSkall()) return;
+          clearTimeout(degMeldT);
+          degMeldT = setTimeout(function () {
+            var svg = degSvg();
+            var send = function () {
+              var d = { skjerm: 'deg', visning: bruker ? visningNaa() : 'profil', innlogget: !!bruker, navn: mittNavn(), brukernavn: bruker && bruker.brukernavn || '', epost: bruker && bruker.email || '',
+                gjeng: ($('gjengTall') || {}).textContent || '', stokker: ($('stokkTall') || {}).textContent || '', replikker: ($('replikkTall') || {}).textContent || '',
+                stat: !!$('statLenke') && !$('statLenke').hidden, moerk: document.documentElement.dataset.theme === 'dark', png: degPng };
+              if (degPluss) d.pluss = degPluss;
+              try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: d })); } catch (e) {}
+            };
+            if (svg && svg !== degPngFor) { degPngFor = svg; degPngLag(svg).then(function (b) { degPng = b; send(); }); } else send();
+          }, 60);
+        }
+        if (harSkall()) {
+          // Tallene (gjenger, kortstokker, replikker) og statistikk-lenka kommer etter hvert: meld på nytt når de endrer seg
+          try { new MutationObserver(meldDeg).observe($('dash'), { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['hidden'] }); } catch (e) {}
+          // «Noe galt? Si fra» åpner et nettark (FeilRapport.astro) under den native skjermen: den trekker seg til side så lenge arket er oppe
+          try {
+            new MutationObserver(function () {
+              var oppe = !!document.querySelector('body > .rom-tavle');
+              if (oppe !== degArkOppe) { degArkOppe = oppe; document.dispatchEvent(new CustomEvent('mv-ark-aapen', { detail: { aapen: oppe } })); }
+            }).observe(document.body, { childList: true });
+          } catch (e) {}
+          document.addEventListener('mv-figur-klar', meldDeg);
+          window.__mvDeg = {
+            navn: function (n) { n = String(n || '').trim(); try { if (n) localStorage.setItem('bd_mittnavn', JSON.stringify(n)); else localStorage.removeItem('bd_mittnavn'); } catch (e) {} var f = $('appNavn'); if (f) f.value = n; degPngFor = ''; meldDeg(); },
+            tema: function (moerk) { var er = document.documentElement.dataset.theme === 'dark'; if (!!moerk !== er && window.BDTema) window.BDTema.bytt(); meldDeg(); },
+            feil: function () { var b = document.querySelector('[data-feil]'); if (b) b.click(); },
+            sprak: function () { location.href = EN ? '/no/rom' : '/room'; },
+            visning: function (n) { if (bruker) visning(n); },
+            gaa: function (u) { if (/^\/[a-z0-9/?=&%#-]*$/i.test(String(u || ''))) location.href = u; },
+            loggUt: function () { K.loggUt(); location.reload(); }
+          };
+        }
+
         $('outBtn').addEventListener('click', function () { K.loggUt(); location.reload(); });
         // Appen: vent til innloggingen er lest fra telefonens lager. Fikk brukernavnet seg en endring i bakgrunnen, tegn på nytt.
         K.naarKlar(start);

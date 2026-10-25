@@ -84,7 +84,8 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   // Finnes det, gjemmer nettsiden sin egen linje (html.har-skall), åpner lenker til andre faner i riktig fane,
   // og ber linja gjemme seg under en lek.
   const Skall = registerPlugin('Skall');
-  const FANER = { hjem: ['/no/', '/'], spill: ['/no/rom', '/room'], leker: ['/no/drinking-games', '/drinking-games'], deg: ['/no/account', '/account'] };
+  // Forsiden på nettet (/ og /no/) er Spill-fanens startskjerm i appen – skallet bytter adressen (Skall.swift, aapne)
+  const FANER = { spill: ['/no/rom', '/room', '/no/', '/'], leker: ['/no/drinking-games', '/drinking-games'], deg: ['/no/account', '/account'] };
   const engelsk = () => !location.pathname.startsWith('/no');
   const norm = (p) => p.replace(/\/$/, '') || '/';
   window.__mvFane = (id) => { const r = FANER[id]; if (!r) return; const maal = engelsk() ? r[1] : r[0]; if (norm(location.pathname) !== norm(maal)) location.href = maal; };
@@ -99,7 +100,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     const skjul = h.classList.contains('i-spill') || h.classList.contains('bli-med');
     if (skjul !== sistSkjult) { sistSkjult = skjul; Skall.skjul({ skjult: skjul }).catch(() => {}); }
   };
-  // Lenker til en annen fane (f.eks. «Lag rom» fra Hjem) åpnes i den fanen – denne skjermen blir stående
+  // Lenker til en annen fane (f.eks. «Spill i rommet» fra en lekeside) åpnes i den fanen – denne skjermen blir stående
   document.addEventListener('click', (e) => {
     if (!harSkall || !e.target.closest) return;
     const a = e.target.closest('a[href]'); if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
@@ -110,9 +111,10 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     Skall.aapne({ navn: f, url: u.pathname + u.search }).catch(() => { location.href = u.href; });
   }, true);
   // Siden sier hvilken skjerm den viser (rom.js meldSkjerm): på startskjermen legger skallet sin egen native startskjerm oppå
-  let sistSkjerm = null;
-  const sendSkjerm = () => { if (harSkall && sistSkjerm) Skall.skjerm(sistSkjerm).catch(() => {}); };
-  document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; sendSkjerm(); });
+  let sistSkjerm = window.__mvSisteSkjerm || null;   // en side kan ha meldt skjermen sin før dette skriptet lyttet (lekelista)
+  let skjermLogg = '';   // simulator-sjekken: hva som ble sendt til skallet
+  const sendSkjerm = () => { if (harSkall && sistSkjerm) { skjermLogg += ' ' + sistSkjerm.skjerm + '>'; Skall.skjerm(sistSkjerm).then(() => { skjermLogg += 'ok'; }).catch((x) => { skjermLogg += 'FEIL(' + (x && x.message || x) + ')'; }); } };
+  document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; skjermLogg += ' hendelse:' + sistSkjerm.skjerm + (harSkall ? '' : '(venter)'); sendSkjerm(); });
   // Lobbyen: «Alle lekene» åpner det native lekvelger-arket (ios/App/App/VelgerArk.swift)
   document.addEventListener('mv-velger', (e) => { if (harSkall) Skall.velger(e.detail || {}).catch(() => {}); });
   // Pluss i appen: kjøp med App Store (StoreKit) – serveren sjekker Apples kvittering og gir Pluss på kontoen
@@ -175,7 +177,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   document.addEventListener('mv-ark', (e) => { if (harSkall) Skall.ark(e.detail || {}).catch(() => {}); });
   // Inviter: iPhonens eget delingsark, med AirDrop øverst
   document.addEventListener('mv-del', (e) => { if (harSkall) Skall.del(e.detail || {}).catch(() => {}); });
-  Skall.klar({ titler: engelsk() ? { hjem: 'Home', spill: 'Play', leker: 'Games', deg: 'You' } : { hjem: 'Hjem', spill: 'Spill', leker: 'Leker', deg: 'Deg' }, lang: engelsk() ? 'en' : 'no' })
+  Skall.klar({ titler: engelsk() ? { spill: 'Play', leker: 'Games', deg: 'You' } : { spill: 'Spill', leker: 'Leker', deg: 'Deg' }, lang: engelsk() ? 'en' : 'no' })
     .then((r) => {
       harSkall = true; minFane = (r && r.fane) || fanenNaa(); h.classList.add('har-skall');
       if (r && r.gaaTil) { location.replace(r.gaaTil); return; }   // skjermen ble åpnet for en bestemt adresse
@@ -191,11 +193,14 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
         setTimeout(() => {
           const stue = document.querySelector('.st-stue svg');
           const res = performance.getEntriesByType('resource').filter((x) => x.responseStatus >= 400 || (x.transferSize === 0 && x.decodedBodySize === 0 && !/^data:/.test(x.name))).map((x) => x.name.replace(/^.*\/\/[^/]+/, '')).slice(0, 15);
+          logg('skjermer:' + skjermLogg + ' leker=' + (window.__mvLekerStatus || '-') + ' klasser=' + h.className);
           logg('etter 6s: stue-svg=' + (stue ? stue.children.length + ' barn, ' + Math.round(stue.getBoundingClientRect().height) + 'px' : 'mangler') + ' main-topp=' + Math.round((document.querySelector('.main') || document.body).getBoundingClientRect().top) + ' safe-top=' + getComputedStyle(h).getPropertyValue('--sat') + ' main-padding=' + getComputedStyle(document.querySelector('.main') || document.body).paddingTop + ' helt-topp=' + (document.querySelector('.st-helt') ? Math.round(document.querySelector('.st-helt').getBoundingClientRect().top) : '-') + ' body-bg=' + getComputedStyle(document.body).backgroundColor + ' html-bg=' + getComputedStyle(h).backgroundColor + ' vw=' + innerWidth + 'x' + innerHeight + ' ressurser-feilet=' + JSON.stringify(res));
         }, 6000);
       }
     }).catch(() => {});
   document.addEventListener('astro:page-load', synkSkall);
+  // Tilbake fra en dypere side (drag fra venstre kant): siden kommer fra hurtigminnet uten å laste på nytt – si fra om skjermen igjen
+  window.addEventListener('pageshow', (e) => { if (e.persisted && harSkall) { synkSkall(); sendSkjerm(); } });
   new MutationObserver(synkSkall).observe(h, { attributes: true, attributeFilter: ['class'] });
 
   // TV-en via AirPlay: appen viser storskjermen på TV-en (ios/App/App/TvSkjerm.swift). Rommet sier hvilken lenke.
