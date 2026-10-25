@@ -1,10 +1,10 @@
-18:08:09 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:08:15 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-18:11:03 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:11:05 side /drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
-18:11:11 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
-18:11:29 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:11:30 side /account klasser=is-mobile is-ios is-app is-standalone har-skall
-18:11:36 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
-18:12:13 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-18:12:19 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+18:24:49 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:24:55 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+18:25:35 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:25:37 side /drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
+18:25:43 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
+18:26:05 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:26:06 side /account klasser=is-mobile is-ios is-app is-standalone har-skall
+18:26:12 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+18:26:46 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+18:26:52 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
