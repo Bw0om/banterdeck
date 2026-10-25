@@ -65,6 +65,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         if let v = visninger[i] { return v }
         let sti = (ruter[spraak] ?? ruter["no"]!)[i]
         let v = MittvorsViewController(startSti: sti.isEmpty ? nil : sti)
+        v.tilbakeSveip = faner[i] != "spill"
         visninger[i] = v
         if let side = viewControllers?[i] {
             side.addChild(v)
@@ -285,7 +286,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         guard let host = u.host, host == "mittvors.no" || host.hasSuffix(".mittvors.no") else { return false }
         var sti = u.path
         // mittvors.no/ABCD (QR-koden) er en omdirigering på serveren – i appen går vi rett til rommet
-        if let m = sti.range(of: #"^/([A-Za-z0-9]{4,6})/?$"#, options: .regularExpression) {
+        if sti.range(of: #"^/(room|crew|plan|deck|plus|home|null)/?$"#, options: [.regularExpression, .caseInsensitive]) == nil,
+           let m = sti.range(of: #"^/([A-Za-z0-9]{4,6})/?$"#, options: .regularExpression) {
             let kode = String(sti[m]).trimmingCharacters(in: CharacterSet(charactersIn: "/")).uppercased()
             sti = (spraak == "en" ? "/room?k=" : "/no/rom?k=") + kode
         } else if sti == "/" || sti.isEmpty {
@@ -637,9 +639,24 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate 
         velg(fane: f)
     }
 
+    /// Trykk på fanen du allerede står i: tilbake til fanens startside, eller til toppen om du er der (som i iPhonens egne apper).
+    /// Ikke i Spill-fanen – der er du i et rom, og et feiltrykk skal ikke ta deg ut av det.
+    private func tilStart(_ i: Int) {
+        guard faner[i] != "spill", let v = visninger[i], let w = v.webView, let start = (ruter[spraak] ?? ruter["no"]!)[safe: i] else { return }
+        var sti = w.url?.path ?? ""
+        if sti.hasSuffix("index.html") { sti.removeLast("index.html".count) }
+        while sti.hasSuffix("/") { sti.removeLast() }
+        if sti == "/" + start || (start.isEmpty && sti.isEmpty) {
+            w.evaluateJavaScript("window.scrollTo({ top: 0, behavior: 'smooth' })", completionHandler: nil)
+        } else {
+            gaa(v, til: "/" + start)
+        }
+    }
+
     // MARK: UITabBarControllerDelegate
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         UISelectionFeedbackGenerator().selectionChanged()
+        if viewController === selectedViewController { tilStart(viewController.tabBarItem.tag) }
         visning(viewController.tabBarItem.tag)
         return true
     }
