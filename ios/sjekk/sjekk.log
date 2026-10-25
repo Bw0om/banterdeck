@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 18:52:17 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
 18:52:23 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
 18:52:23 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
@@ -12,3 +13,19 @@
 18:54:55 side /room klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
 18:55:01 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
 18:55:01 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+=======
+16:25:53 side /no/ klasser=is-mobile is-ios is-app is-standalone har-skall
+16:25:59 etter 6s: stue-svg=3 barn, 301px main-topp=0 safe-top= main-padding=76px helt-topp=0 body-bg=rgb(255, 91, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+16:29:02 side /no klasser=is-mobile is-ios is-app is-standalone har-skall
+16:29:04 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
+16:29:10 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+16:29:11 etter 6s: stue-svg=3 barn, 301px main-topp=0 safe-top= main-padding=76px helt-topp=0 body-bg=rgb(255, 91, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+16:29:26 side /no klasser=is-mobile is-ios is-app is-standalone har-skall
+16:29:27 side /no/drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
+16:29:33 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
+16:29:50 side /no klasser=is-mobile is-ios is-app is-standalone har-skall
+16:29:51 side /no/account klasser=is-mobile is-ios is-app is-standalone har-skall
+16:29:57 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+16:30:35 side /no klasser=is-mobile is-ios is-app is-standalone har-skall
+16:30:41 etter 6s: stue-svg=3 barn, 301px main-topp=0 safe-top= main-padding=76px helt-topp=0 body-bg=rgb(255, 91, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+>>>>>>> origin/main
