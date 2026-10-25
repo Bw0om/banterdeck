@@ -144,8 +144,14 @@ const romSti = no ? '/no/rom' : '/room';
     reglerH2: no ? 'Klassikere – bare regler' : 'Classics – just the rules', reglerP: no ? 'Kopper, baller og konkurranseinstinkt.' : 'Cups, balls and competitive spirit.',
     ingen: L.noResults, pluss: 'Pluss', gratis: no ? 'Gratis' : 'Free', alderTittel: L.gateTitle, alderTekst: L.gateBody, alderJa: L.gateYes, alderNei: L.gateNo } }}>
     /* Appen med Swift-skall: lista er native (ios/App/App/LekerSkjerm.swift). Siden gir lista og bildene (PNG) dit, og åpner lekesiden når du trykker. */
-    (function () {
-      if (!document.documentElement.classList.contains('har-skall')) return;
+    (function start() {
+      // Skallet melder seg (html.har-skall) litt etter at siden er tegnet: vent på det
+      var h = document.documentElement;
+      if (!h.classList.contains('har-skall')) {
+        if (!window.Capacitor) return;
+        new MutationObserver(function (_, obs) { if (h.classList.contains('har-skall')) { obs.disconnect(); start(); } }).observe(h, { attributes: true, attributeFilter: ['class'] });
+        return;
+      }
       var pngFor = {};
       function png(svg) {
         return new Promise(function (res) {

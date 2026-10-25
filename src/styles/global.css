@@ -2216,7 +2216,11 @@ html.har-skall.lobby-nativ #romStuaPlass .rom-stua{margin:0!important;max-width:
 html.har-skall.start-nativ #rom > *:not(#romStartStua){display:none!important}
 html.har-skall.start-nativ body{overflow:hidden}
 html.har-skall.start-nativ #romStartStua{position:fixed;top:var(--mv-stua-topp,calc(env(safe-area-inset-top) + 124px));left:0;right:0;z-index:5;padding:0 12px}
-html.har-skall.start-nativ #romStartStua .rom-stua{margin:0!important;max-width:none!important}
+html.har-skall.start-nativ #romStartStua .rom-stua{margin:0!important;max-width:none!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important}
+/* Hullet viser nettsiden: den skal være like oransje som forsiden rundt, og alderssjekken (nettark) skal ikke skinne gjennom – knappene i den native forsiden bekrefter alderen */
+html.har-skall.start-nativ,html.har-skall.start-nativ body{background:#FF5B1F!important}
+html.har-skall.start-nativ #gate{display:none!important}
+html.har-skall.start-nativ body.gated{overflow:hidden}
 html.har-skall:not(.start-nativ) #romStartStua{display:none}
 #romStartStua .rom-stua-hint{position:absolute;right:2px;top:4px;font-family:var(--display);font-stretch:80%;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;
   background:var(--papir);color:var(--blekk);border:2.5px solid var(--blekk);padding:3px 8px;box-shadow:3px 3px 0 var(--blekk);transform:rotate(2deg)}
