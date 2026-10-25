@@ -167,7 +167,7 @@ struct LekerSkjerm: View {
                     .padding(.horizontal, 16)
                 }
             }
-            .padding(.bottom, 40)
+            .padding(.bottom, 110)   // plass til fanelinja
         }
         .background(papir.ignoresSafeArea())
         .foregroundColor(blekk)

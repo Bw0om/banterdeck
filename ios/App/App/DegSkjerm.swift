@@ -157,7 +157,7 @@ struct DegSkjerm: View {
 
                 Text(versjon).font(.archivo(12, vekt: 600)).opacity(0.5).frame(maxWidth: .infinity).padding(.top, 6)
             }
-            .padding(.horizontal, 16).padding(.bottom, 40)
+            .padding(.horizontal, 16).padding(.bottom, 110)   // plass til fanelinja
         }
         .background(papir.ignoresSafeArea())
         .foregroundColor(blekk)

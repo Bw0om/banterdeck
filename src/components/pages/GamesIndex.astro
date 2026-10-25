@@ -145,6 +145,8 @@ const romSti = no ? '/no/rom' : '/room';
     ingen: L.noResults, pluss: 'Pluss', gratis: no ? 'Gratis' : 'Free', alderTittel: L.gateTitle, alderTekst: L.gateBody, alderJa: L.gateYes, alderNei: L.gateNo } }}>
     /* Appen med Swift-skall: lista er native (ios/App/App/LekerSkjerm.swift). Siden gir lista og bildene (PNG) dit, og åpner lekesiden når du trykker. */
     (function start() {
+      // app.js (som sender meldingen videre til skallet) er et modulskript og lytter først når siden er ferdig lest: vent til da
+      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', start); return; }
       // Skallet melder seg (html.har-skall) litt etter at siden er tegnet: vent på det
       var h = document.documentElement;
       if (!h.classList.contains('har-skall')) {

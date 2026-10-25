@@ -192,7 +192,7 @@ struct StartSkjerm: View {
                                  "By creating or joining a room you confirm you’re over 18. Drink responsibly – and never drive afterwards."))
                             .font(.archivo(13, vekt: 600)).opacity(0.8).padding(.top, 4)
                     }
-                    .padding(.horizontal, 20).padding(.top, 4).padding(.bottom, 32)
+                    .padding(.horizontal, 20).padding(.top, 4).padding(.bottom, 110)   // plass til fanelinja
                 }
                 .scrollDismissesKeyboardIfAvailable()
                 .background(oransje.ignoresSafeArea(edges: [.bottom, .horizontal]))
