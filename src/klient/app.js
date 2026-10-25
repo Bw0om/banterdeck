@@ -112,8 +112,9 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   }, true);
   // Siden sier hvilken skjerm den viser (rom.js meldSkjerm): på startskjermen legger skallet sin egen native startskjerm oppå
   let sistSkjerm = null;
-  const sendSkjerm = () => { if (harSkall && sistSkjerm) Skall.skjerm(sistSkjerm).catch(() => {}); };
-  document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; sendSkjerm(); });
+  let skjermLogg = '';   // simulator-sjekken: hva som ble sendt til skallet
+  const sendSkjerm = () => { if (harSkall && sistSkjerm) { skjermLogg += ' ' + sistSkjerm.skjerm + '>'; Skall.skjerm(sistSkjerm).then(() => { skjermLogg += 'ok'; }).catch((x) => { skjermLogg += 'FEIL(' + (x && x.message || x) + ')'; }); } };
+  document.addEventListener('mv-skjerm', (e) => { sistSkjerm = e.detail || {}; skjermLogg += ' hendelse:' + sistSkjerm.skjerm + (harSkall ? '' : '(venter)'); sendSkjerm(); });
   // Lobbyen: «Alle lekene» åpner det native lekvelger-arket (ios/App/App/VelgerArk.swift)
   document.addEventListener('mv-velger', (e) => { if (harSkall) Skall.velger(e.detail || {}).catch(() => {}); });
   // Pluss i appen: kjøp med App Store (StoreKit) – serveren sjekker Apples kvittering og gir Pluss på kontoen
@@ -192,6 +193,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
         setTimeout(() => {
           const stue = document.querySelector('.st-stue svg');
           const res = performance.getEntriesByType('resource').filter((x) => x.responseStatus >= 400 || (x.transferSize === 0 && x.decodedBodySize === 0 && !/^data:/.test(x.name))).map((x) => x.name.replace(/^.*\/\/[^/]+/, '')).slice(0, 15);
+          logg('skjermer:' + skjermLogg + ' leker=' + (window.__mvLekerStatus || '-') + ' klasser=' + h.className);
           logg('etter 6s: stue-svg=' + (stue ? stue.children.length + ' barn, ' + Math.round(stue.getBoundingClientRect().height) + 'px' : 'mangler') + ' main-topp=' + Math.round((document.querySelector('.main') || document.body).getBoundingClientRect().top) + ' safe-top=' + getComputedStyle(h).getPropertyValue('--sat') + ' main-padding=' + getComputedStyle(document.querySelector('.main') || document.body).paddingTop + ' helt-topp=' + (document.querySelector('.st-helt') ? Math.round(document.querySelector('.st-helt').getBoundingClientRect().top) : '-') + ' body-bg=' + getComputedStyle(document.body).backgroundColor + ' html-bg=' + getComputedStyle(h).backgroundColor + ' vw=' + innerWidth + 'x' + innerHeight + ' ressurser-feilet=' + JSON.stringify(res));
         }, 6000);
       }
