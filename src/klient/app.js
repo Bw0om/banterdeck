@@ -197,6 +197,8 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
       }
     }).catch(() => {});
   document.addEventListener('astro:page-load', synkSkall);
+  // Tilbake fra en dypere side (drag fra venstre kant): siden kommer fra hurtigminnet uten å laste på nytt – si fra om skjermen igjen
+  window.addEventListener('pageshow', (e) => { if (e.persisted && harSkall) { synkSkall(); sendSkjerm(); } });
   new MutationObserver(synkSkall).observe(h, { attributes: true, attributeFilter: ['class'] });
 
   // TV-en via AirPlay: appen viser storskjermen på TV-en (ios/App/App/TvSkjerm.swift). Rommet sier hvilken lenke.

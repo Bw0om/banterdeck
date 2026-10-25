@@ -343,6 +343,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             visDeg(vis ? d : nil, over: side, nett: v.webView)
             return
         }
+        // Leker-fanen: lista er native; lekesidene er nettsiden
+        if faner[i] == "leker" { visLeker(hva == "leker" ? d : nil, over: side, nett: v.webView); return }
         guard faner[i] == "spill" else { return }
         if ["rom", "lobby", "start", "laster"].contains(hva) { sisteRegler = "" }
         else if let r = d["regler"] as? [String], !r.isEmpty, let n = d["lekNokkel"] as? String, n != sisteRegler { sisteRegler = n; visRegler(d, r) }
@@ -483,6 +485,22 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     }
     /// Siden i Deg-fanen byttet (gjengene, statistikken …): nettsiden tar over til kontosiden sier «deg» igjen
     func skjulDeg() { fjernOverlegg(&degVert) }
+
+    // MARK: Leker (LekerSkjerm.swift) – native liste over lekesiden
+    private let lekerModell = LekerModell()
+    private var lekerVert: UIHostingController<LekerSkjerm>?
+    private func visLeker(_ d: [String: Any]?, over side: UIViewController, nett: WKWebView?) {
+        guard let d = d else { skjulLeker(); return }
+        lekerModell.nett = nett
+        lekerModell.engelsk = spraak == "en"
+        lekerModell.sett(d)
+        if lekerVert == nil {
+            lekerModell.handling = { [weak self] h in if h == "tilbake" { self?.velg(fane: "spill") } }
+            lekerVert = leggOverlegg(UIHostingController(rootView: LekerSkjerm(m: lekerModell)), over: side, nett: nett)
+        }
+        fram(lekerVert?.view.superview)
+    }
+    func skjulLeker() { fjernOverlegg(&lekerVert) }
     private func degHandling(_ h: String) {
         switch h {
         case "inn", "ny":
@@ -499,7 +517,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
     func settOverleggSkjult(_ skjult: Bool) {
-        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, degVert?.view]
+        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, degVert?.view, lekerVert?.view]
         for v in hoster { ((v?.superview as? HullVisning) ?? v)?.isHidden = skjult }
         lobbyHull?.isHidden = skjult; startHull?.isHidden = skjult
     }
@@ -788,6 +806,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
             if let l = call.getString("lang"), l == "no" || l == "en" { s.spraak = l }
             let i = s.fane(for: vc)
             if let i = i, s.faner[i] == "deg" { s.skjulDeg() }   // ny side i Deg-fanen: kontosiden sier «deg» igjen når den er tilbake
+            if let i = i, s.faner[i] == "leker" { s.skjulLeker() }   // en lekeside: lista sier «leker» igjen når du er tilbake
             // rull: simulator-sjekken ber nettsiden bla nedover, så bildet viser linja i krympet stand
             let env = ProcessInfo.processInfo.environment
             var svar: [String: Any] = ["ok": true, "fane": i.map { s.faner[$0] } ?? s.valgtFane, "flere": true,
