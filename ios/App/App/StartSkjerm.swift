@@ -49,8 +49,10 @@ final class StartModell: ObservableObject {
     }
     /// Siden svarer true når stua er flyttet. Er ikke nettkoden klar ennå (window.__mvStart mangler), prøves det igjen litt senere –
     /// alltid med den siste ønskede plasseringen, så et gammelt forsøk aldri overskriver en nyere (det la stua oppå tittelen)
+    /// Forsiden vises (ikke på vei ut): bare da plasseres stua
+    var aktiv = true
     private func sendPlass(forsok: Int) {
-        guard let w = nett, let o = onsket else { return }
+        guard aktiv, let w = nett, let o = onsket else { return }
         if forsok == 0 { SjekkLogg.skriv("plass: topp=\(o.topp) bredde=\(o.bredde)") }
         w.evaluateJavaScript("!!(window.__mvStart && window.__mvStart.plass && (window.__mvStart.plass(\(o.topp), \(o.bredde)), true))") { [weak self] v, _ in
             guard (v as? Bool) != true, forsok < 20 else { return }

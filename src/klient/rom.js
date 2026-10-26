@@ -699,6 +699,8 @@ export function startRom(LEKNAVN, LANG) {
       /** Skallet sier hvor stua skal stå (toppen i px fra toppen av nettvisningen, og bredden) – på korte skjermer krymper den */
       plass: function (topp, bredde) {
         var rot = document.documentElement;
+        // Bare mens forsiden vises: skjermen som glir bort (rommet ble laget mens tastaturet var oppe) skal ikke flytte lobbyens stue
+        if (!rot.classList.contains('start-nativ')) return false;
         rot.style.setProperty('--mv-stua-topp', Math.round(topp) + 'px');
         rot.style.setProperty('--mv-stua-bredde', Math.round(bredde) + 'px');
         stuaMaalY = Math.round(topp); stuaMaalt = '';

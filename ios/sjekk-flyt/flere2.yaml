@@ -7,8 +7,14 @@ appId: no.mittvors.app
       text: "(?is)vi er klare.*"
     timeout: 40000
 - takeScreenshot: 42-slik-spiller-dere
+- waitForAnimationToEnd
 - tapOn:
     text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+# Kom trykket midt i animasjonen, står arket fortsatt: prøv igjen
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
 - extendedWaitUntil:
     visible:
       text: "(?is)send anonymt.*"

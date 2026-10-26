@@ -645,6 +645,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     /// Forsiden: «Klar for vors?» med nettsidens demo-stue i et hull (gjestene går inn døra for hver bokstav i koden), Lag rom og Bli med
     private func visStart(i side: UIViewController, _ vis: Bool) {
+        startModell.aktiv = vis   // på vei ut (rommet er klart) skal skjermen ikke lenger flytte stua
         if vis {
             if startVert == nil {
                 let h = UIHostingController(rootView: StartSkjerm(m: startModell))
