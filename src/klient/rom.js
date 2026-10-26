@@ -6165,7 +6165,15 @@ export function startRom(LEKNAVN, LANG) {
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
-    if (nativ === 'lobby') { if (!varLobby) { try { window.scrollTo(0, 0); } catch (e) {} stuaMaalt = ''; } maalStua(); requestAnimationFrame(meldStuaH); }
+    if (nativ === 'lobby') {
+      if (!varLobby) {
+        try { window.scrollTo(0, 0); } catch (e) {}
+        // Forsidens plassering av stua (plass, også den skjøvne under tastaturet) skal ikke arves: lobbyen bruker CSS-ens faste plass
+        stuaMaalY = null; stuaMaalt = '';
+        try { rotEl.style.removeProperty('--mv-stua-topp'); rotEl.style.removeProperty('--mv-stua-bredde'); } catch (e) {}
+      }
+      maalStua(); requestAnimationFrame(meldStuaH);
+    }
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
     else if (nativ === 'lobby') { var nL = (tilstand.spillere || []).length; skjermBlokker(innhold).then(function (b) { if (tilstand && !tilstand.spill) meldSkjerm('lobby', { kode: kode, n: nL, erVert: erVert(), vert: navn(tilstand.vert), blokker: b, naa: Date.now() + klokkeAvvik,
       tekst: { inviter: T('Inviter', 'Invite'), iRommet: nL === 1 ? T('Bare du så langt', 'Just you so far') : nL + T(' i rommet', ' in the room'), kode: T('Romkode', 'Room code'), venter: navn(tilstand.vert) + (tilstand.plan && tilstand.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) } }); }); }

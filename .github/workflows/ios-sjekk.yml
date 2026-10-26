@@ -77,7 +77,7 @@ jobs:
           mkdir -p skjermbilder
           # Flytene i ios/sjekk-flyt/ trykker på knappene og tar bilder underveis (Maestro). Feiler en flyt, går sjekken videre –
           # bildene fram til feilen og loggen (maestro.txt) ligger i ios/sjekk/.
-          export MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 MAESTRO_CLI_NO_ANALYTICS=1
+          export MAESTRO_DRIVER_STARTUP_TIMEOUT=600000 MAESTRO_CLI_NO_ANALYTICS=1
           BILDER="$PWD/skjermbilder"
           # Bildene i flytene heter ../../skjermbilder/… – det treffer uansett om Maestro regner fra flytfila eller fra mappa vi står i
           flyt() { echo "===== $1 =====" >> skjermbilder/maestro.txt; (cd ios/sjekk-flyt && maestro --udid "$UDID" test ${2:+-e "$3"} "$1.yaml" --debug-output "$BILDER/maestro-logg/$1" 2>&1 | tee -a "$BILDER/maestro.txt") || echo "FLYT $1 FEILET" >> skjermbilder/maestro.txt; }
@@ -86,6 +86,7 @@ jobs:
           xcrun simctl io "$UDID" screenshot skjermbilder/01-spill.png
           # Første Maestro-kjøring bygger og installerer testdriveren (tar et par minutter): varm opp med en tom flyt først
           flyt varm
+          flyt varm   # en gang til om driveren ikke rakk å starte første gang (rask når den er oppe)
           flyt spill
           # Én start per fane: appen leser MV_FANE og velger fanen selv (Skall.swift)
           for f in leker deg; do

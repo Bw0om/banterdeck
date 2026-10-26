@@ -1,6 +1,12 @@
 # Simulator-sjekken: Leker-fanen – alderssjekken, lista, filtrene, en lekeside og tilbake.
 appId: no.mittvors.app
 ---
+# Alderssjekken (iPhone-dialog) kommer et øyeblikk etter lista
+- extendedWaitUntil:
+    visible:
+      text: "(?is)ja, jeg er over 18.*"
+    timeout: 8000
+    optional: true
 - tapOn:
     text: "(?is)ja, jeg er over 18.*"
     optional: true
