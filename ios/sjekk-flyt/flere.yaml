@@ -1,13 +1,14 @@
 # Simulator-sjekken: appen blir med i et rom som jobben har laget rett mot API-et (koden kommer som KODE).
 appId: no.mittvors.app
 ---
-- tapOn:
-    id: "start-kode"
-- inputText: ${KODE}
+# Navnet først (ingen skyving av skjermen ennå), så koden
 - tapOn:
     id: "start-navn"
     optional: true
 - inputText: "Sjekk"
+- tapOn:
+    id: "start-kode"
+- inputText: ${KODE}
 - takeScreenshot: 40-bli-med
 - tapOn:
     text: "(?is)bli med.*"

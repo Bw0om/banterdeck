@@ -651,6 +651,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
                 h.view.backgroundColor = .clear
                 startVert = leggOverlegg(h, over: side, nett: startModell.nett)
                 startHull = h.view.superview as? HullVisning
+                startModell.tastaturEndret = { [weak self] in self?.aapneStartHull() }
             }
             fram(startVert?.view.superview)
             aapneStartHull()
@@ -666,7 +667,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     private func aapneStartHull() {
         guard let hull = startHull, let nett = startModell.nett, stuaRekt.height > 0 else { return }
-        hull.hull = nett.convert(stuaRekt, to: hull)
+        // Tastaturet oppe: skjermen er skjøvet opp, og navnefeltet kan ligge der stua var – trykkene skal da til feltene, ikke gjennom
+        hull.hull = startModell.tastaturH > 0 ? .zero : nett.convert(stuaRekt, to: hull)
     }
 
     private func gaa(_ v: MittvorsViewController?, til url: String) {

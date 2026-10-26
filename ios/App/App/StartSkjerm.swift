@@ -20,8 +20,10 @@ final class StartModell: ObservableObject {
     /// Høyden stua har i nettsiden (meldt derfra), så hullet er like stort som stua
     @Published var stuaH: CGFloat = 0
     @Published var harNett = true
-    /// Tastaturets høyde (0 når det er nede) – skjermen skyver seg opp så kodefeltet ikke havner under det
-    @Published var tastaturH: CGFloat = 0
+    /// Tastaturets høyde (0 når det er nede) – skjermen skyver seg opp så kodefeltet ikke havner under det. Skallet lukker
+    /// hullet til stua så lenge tastaturet er oppe: skjermen er skjøvet, og feltene kan ligge der hullet var
+    @Published var tastaturH: CGFloat = 0 { didSet { tastaturEndret?() } }
+    var tastaturEndret: (() -> Void)?
     weak var nett: WKWebView?
     private let nettVakt = NWPathMonitor()
     private var sistPlass = ""

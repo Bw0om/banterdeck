@@ -28,8 +28,10 @@ appId: no.mittvors.app
     start: 50%, 30%
     end: 50%, 95%
 - waitForAnimationToEnd
+- takeScreenshot: 13b-lobby-igjen
+# Lobbyens «Mer»-knapp (teksten under: TV, QR, bare min telefon …)
 - tapOn:
-    text: "Mer"
+    text: "(?is)mer.*tv.*qr.*"
 - extendedWaitUntil:
     visible:
       text: "Lukk"
