@@ -385,7 +385,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
-            if let n = d["navn"] as? String, !n.isEmpty { startModell.navn = n }
+            if let n = d["navn"] as? String, !n.isEmpty { startModell.navn = n; startModell.navnKjent = true }
             if let k = d["kode"] as? String, !k.isEmpty { startModell.kode = k }
             startModell.fortsett = d["fortsett"] as? String ?? ""
             startModell.feil = d["melding"] as? String ?? ""

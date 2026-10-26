@@ -20,6 +20,9 @@ const L = ui(lang);
     if (ok) return;
     // Romlenke med kode: gjesten bekrefter alderen med selve «Bli med»-knappen (se rom.js), ingen ekstra stopp
     if (/^\/(no\/rom|room)\/?$/.test(location.pathname) && /[?&]k=[A-Za-z0-9]{4}/.test(location.search)) return;
+    // iPhone-appen: forsiden er native, og «Lag rom»/«Bli med» der bekrefter alderen (rom.js startLag/startBliMed) – porten her
+    // ville ellers tittet fram gjennom hullet der stua vises i lobbyen
+    if (window.Capacitor && /^\/(no\/rom|room)\/?$/.test(location.pathname)) return;
     var g = document.getElementById('gate');
     g.hidden = false;
     document.body.classList.add('gated');

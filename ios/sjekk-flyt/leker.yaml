@@ -14,7 +14,7 @@ appId: no.mittvors.app
     text: "Alle"
 - waitForAnimationToEnd
 - tapOn:
-    text: "(?is)jeg har aldri.*"
+    text: "(?is)muldvarpen.*"
 - extendedWaitUntil:
     notVisible:
       text: "(?is)spill fra hver sin telefon.*"

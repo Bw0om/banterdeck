@@ -1,10 +1,18 @@
 # Simulator-sjekken: verten (jobben) har startet Ukjent avsender med tre spillere – skriveknappen, iPhone-dialogen og «Mer» i leken.
 appId: no.mittvors.app
 ---
+# «Slik spiller dere»-arket kommer først når leken starter
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- takeScreenshot: 42-slik-spiller-dere
+- tapOn:
+    text: "(?is)vi er klare.*"
 - extendedWaitUntil:
     visible:
       text: "(?is)send anonymt.*"
-    timeout: 40000
+    timeout: 15000
 - takeScreenshot: 42-ukjent-avsender
 - tapOn:
     text: "(?is)send anonymt.*"

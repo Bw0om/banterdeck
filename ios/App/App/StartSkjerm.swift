@@ -9,6 +9,9 @@ import Network
 /// (gjestene går inn døra for hver bokstav du skriver, og folka kan dras). Når rommet er klart, sier siden fra og skjermen glir bort.
 final class StartModell: ObservableObject {
     @Published var navn = ""
+    /// Navnet er kjent fra før (huskes på telefonen, endres under Deg) – da vises ikke feltet. Ikke «navnet er tomt»: da forsvant
+    /// feltet idet du skrev den første bokstaven
+    @Published var navnKjent = false
     @Published var kode = ""
     @Published var fortsett = ""          // rommet du var i sist (kode), om noe
     @Published var feil = ""
@@ -46,6 +49,7 @@ final class StartModell: ObservableObject {
     /// alltid med den siste ønskede plasseringen, så et gammelt forsøk aldri overskriver en nyere (det la stua oppå tittelen)
     private func sendPlass(forsok: Int) {
         guard let w = nett, let o = onsket else { return }
+        if forsok == 0 { SjekkLogg.skriv("plass: topp=\(o.topp) bredde=\(o.bredde)") }
         w.evaluateJavaScript("!!(window.__mvStart && window.__mvStart.plass && (window.__mvStart.plass(\(o.topp), \(o.bredde)), true))") { [weak self] v, _ in
             guard (v as? Bool) != true, forsok < 20 else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self?.sendPlass(forsok: forsok + 1) }
@@ -128,7 +132,7 @@ struct StartSkjerm: View {
             let kortSkjerm = H < 720
             let toppH: CGFloat = kortSkjerm ? 60 : 112
             let alderH: CGFloat = kortSkjerm ? 0 : 44
-            let bunnH: CGFloat = (m.fortsett.isEmpty ? 0 : 86) + (m.navn.isEmpty ? 84 : 0) + 60 + 14 + 80 + alderH + 16
+            let bunnH: CGFloat = (m.fortsett.isEmpty ? 0 : 86) + (m.navnKjent ? 0 : 84) + 60 + 14 + 80 + alderH + 16
             let ledig = max(160, H - toppH - bunnH - 24)
             let stuaW = min(W - 24, ledig / 0.823)
             let hull = (m.stuaH > 0 ? m.stuaH : stuaW * 0.823) + 24
@@ -139,8 +143,16 @@ struct StartSkjerm: View {
             let stuaTopp = g.safeAreaInsets.top + toppH + 12 - skyv
             VStack(spacing: 0) {
                 tittel(kortSkjerm).frame(height: toppH).padding(.horizontal, 20).frame(maxWidth: .infinity, alignment: .leading)
-                // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den (Skall.settStua)
+                // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den (Skall.settStua). Hvor hullet faktisk
+                // havnet måles her, etter utlegget, og sendes til siden – som flytter stua dit (12 pt luft øverst i hullet)
                 Color.clear.frame(height: hull)
+                    .background(GeometryReader { hg in
+                        let r = hg.frame(in: .global)
+                        Color.clear
+                            .onAppear { m.plass(topp: r.minY + 12, bredde: stuaW) }
+                            .onChange(of: r.minY) { y in m.plass(topp: y + 12, bredde: stuaW) }
+                            .onChange(of: stuaW) { w in m.plass(topp: r.minY + 12, bredde: w) }
+                    })
                 VStack(alignment: .leading, spacing: 14) {
                     if !m.fortsett.isEmpty {
                         Button(action: m.fortsettRom) {
@@ -160,7 +172,7 @@ struct StartSkjerm: View {
                     }
 
                     // Navnet huskes (endres under Deg) – feltet vises bare til vi har et
-                    if m.navn.isEmpty {
+                    if !m.navnKjent {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(m.T("Navnet ditt", "Your name")).font(.archivo(14, vekt: 800))
                             TextField(m.T("F.eks. Maria", "E.g. Sam"), text: $m.navn)
@@ -190,7 +202,7 @@ struct StartSkjerm: View {
                                 if r != v { m.kode = r; return }
                                 m.stuaKode(r, nyGjest: r.count > forrigeKode.count)
                                 forrigeKode = r
-                                if r.count == 4 && m.navn.isEmpty { fokus = .navn }
+                                if r.count == 4 && !m.navnKjent && m.navn.isEmpty { fokus = .navn }
                             }
                             .onSubmit { m.bliMed() }
                             .padding(.horizontal, 12).frame(height: 56)
@@ -238,9 +250,7 @@ struct StartSkjerm: View {
             // Ingen bakgrunn her: nettsiden under er oransje (global.css, start-nativ) og viser stua i hullet – en oransje flate
             // her ville dekket stua helt
             .animation(.spring(response: 0.35, dampingFraction: 0.86), value: skyv)
-            .onAppear { m.plass(topp: stuaTopp, bredde: stuaW); SjekkLogg.skriv("startskjerm: W=\(Int(W)) H=\(Int(H)) safe=\(Int(g.safeAreaInsets.top))/\(Int(g.safeAreaInsets.bottom)) global=\(Int(g.frame(in: .global).minY)) stuaTopp=\(Int(stuaTopp)) stuaW=\(Int(stuaW)) kort=\(kortSkjerm)") }
-            .onChange(of: stuaTopp) { t in m.plass(topp: t, bredde: stuaW) }
-            .onChange(of: stuaW) { w in m.plass(topp: stuaTopp, bredde: w) }
+            .onAppear { SjekkLogg.skriv("startskjerm: W=\(Int(W)) H=\(Int(H)) safe=\(Int(g.safeAreaInsets.top))/\(Int(g.safeAreaInsets.bottom)) global=\(Int(g.frame(in: .global).minY)) stuaTopp=\(Int(stuaTopp)) stuaW=\(Int(stuaW)) kort=\(kortSkjerm)") }
         }
         .ignoresSafeArea(.keyboard)
         .foregroundColor(blekk)
