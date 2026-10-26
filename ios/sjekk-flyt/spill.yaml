@@ -9,8 +9,10 @@ appId: no.mittvors.app
 - inputText: "Sjekk"
 - hideKeyboard
 - takeScreenshot: 11-start-navn
+# Enter i navnefeltet lager rommet – står knappen der fortsatt, trykkes den
 - tapOn:
     text: "(?is)lag rom.*"
+    optional: true
 - extendedWaitUntil:
     visible:
       text: "(?is)alle lekene.*"
