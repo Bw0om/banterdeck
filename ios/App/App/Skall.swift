@@ -759,8 +759,13 @@ private extension Array {
 class HullVisning: UIView {
     var hull: CGRect = .zero
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        if hull.contains(point) { return nil }
-        return super.hitTest(point, with: event)
+        let v = super.hitTest(point, with: event)
+        if hull.contains(point) {
+            // Et ekte tekstfelt (navnet, koden) som ligger innenfor hullet beholder trykket – ellers går det gjennom til nettsiden
+            if let v = v, v is UITextField || v is UITextView || v.superview is UITextField { return v }
+            return nil
+        }
+        return v
     }
 }
 

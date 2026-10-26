@@ -151,6 +151,10 @@ struct StartSkjerm: View {
                         Color.clear
                             .onAppear { hullPlass(r) }
                             .onChange(of: n) { _ in hullPlass(r) }
+                            // Første utlegg gir gjerne 0 i størrelse, og endringen like etter kommer ikke alltid som onChange:
+                            // be om en ny runde til hullet har fått mål (maks ti ganger)
+                            .onChange(of: tikk) { _ in hullPlass(r) }
+                            .onAppear { if r.width == 0 { nyRunde() } }
                     })
                 VStack(alignment: .leading, spacing: 14) {
                     if !m.fortsett.isEmpty {
@@ -257,9 +261,12 @@ struct StartSkjerm: View {
 
     @State private var forrigeKode = ""
 
+    @State private var tikk = 0
+    private func nyRunde() { if tikk < 10 { DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { tikk += 1 } } }
+
     /// Hullets rute (vinduets koordinater = nettvisningens): stua får 12 pt luft over og under, og bredden hullet gir plass til
     private func hullPlass(_ r: CGRect) {
-        guard r.width > 0, r.height > 0 else { return }
+        guard r.width > 0, r.height > 0 else { nyRunde(); return }
         let bredde = min(r.width - 24, max(140, (r.height - 24) / 0.823))
         m.plass(topp: r.minY + 12, bredde: bredde)
     }
