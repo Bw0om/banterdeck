@@ -1,44 +1,40 @@
-20:43:05 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
-20:43:06 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
-20:43:11 skjermer: hendelse:start start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-20:43:11 startstua: 186,12 378x311 pos=fixed topp-var= bredde-var= __mvStart=true sat=
-20:43:11 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-20:43:19 etter 14s: skjermer: hendelse:start start>ok leker=-
-21:03:35 swift plass: topp=186 bredde=364
-21:04:04 swift plass: topp=-14 bredde=364
-21:04:05 swift plass: topp=-14 bredde=378
-21:06:08 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
-21:06:11 side /no/drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
-21:06:35 skjermer: hendelse:rom(venter) rom>ok hendelse:lobby lobby> hendelse:lobby lobby>okok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom lobby-nativ alene
-21:06:35 startstua: mangler __mvStart=false sat=
-21:06:17 startstua: mangler __mvStart=false sat=
-21:06:17 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
-21:06:25 etter 14s: skjermer: leker> leker=meldt n=64 png=40
-21:06:35 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/7RKB?v=0"]
-21:06:40 etter 14s: skjermer: hendelse:rom(venter) rom>ok hendelse:lobby lobby> hendelse:lobby lobby>okok leker=-
-21:08:31 side /no/drinking-games/spionen klasser=is-mobile is-ios is-app is-standalone har-skall
-21:08:37 skjermer: leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
-21:08:37 startstua: mangler __mvStart=false sat=
-21:08:37 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/spilt"]
-21:08:45 etter 14s: skjermer: leker=-
-21:10:15 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
-21:10:16 side /no/account klasser=is-mobile is-ios is-app is-standalone har-skall
-21:10:22 skjermer: hendelse:deg deg>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
-21:10:22 startstua: mangler __mvStart=false sat=
-21:10:22 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
-21:10:30 etter 14s: skjermer: hendelse:deg deg>ok leker=-
+21:27:04 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+21:27:05 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
+21:27:10 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+21:27:10 startstua: 186,12 378x311 pos=fixed topp-var= bredde-var= __mvStart=true sat=
+21:27:10 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+21:27:18 etter 14s: skjermer: hendelse:start(venter) start>ok leker=-
+21:46:38 swift plass: topp=186 bredde=364
+21:48:36 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+21:48:36 swift startskjerm: W=0 H=0 safe=0/0 global=0 kort=true
+21:48:39 side /no/drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
+21:48:45 skjermer: hendelse:leker(venter) leker>ok leker=meldt n=64 png=40 klasser=is-mobile is-ios is-app is-standalone har-skall
+21:48:45 startstua: mangler __mvStart=false sat=
+21:48:45 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
+21:48:53 etter 14s: skjermer: hendelse:leker(venter) leker>ok leker=meldt n=64 png=40
+21:49:57 side /no/drinking-games/spionen klasser=is-mobile is-ios is-app is-standalone har-skall
+21:50:03 skjermer: leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
+21:50:03 startstua: mangler __mvStart=false sat=
+21:50:03 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/spilt"]
+21:50:11 etter 14s: skjermer: leker=-
+21:50:31 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+21:50:32 swift startskjerm: W=0 H=0 safe=0/0 global=0 kort=true
+21:50:33 side /no/account klasser=is-mobile is-ios is-app is-standalone har-skall
+21:50:39 skjermer: deg>ok hendelse:deg deg>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
+21:50:39 startstua: mangler __mvStart=false sat=
+21:50:39 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+21:50:39 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+21:50:46 startstua: 186,12 378x311 pos=fixed topp-var= bredde-var= __mvStart=true sat=
+21:50:46 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+21:50:46 etter 14s: skjermer: hendelse:start(venter) start>ok leker=-
+21:50:47 etter 14s: skjermer: deg>ok hendelse:deg deg>ok leker=-
 ----- etter ny installasjon -----
-21:12:18 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-21:12:19 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
-21:12:24 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-21:12:24 startstua: 186,12 378x311 pos=fixed topp-var= bredde-var= __mvStart=true sat=
-21:12:24 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-21:12:32 etter 14s: skjermer: hendelse:start(venter) start>ok leker=-
-21:15:15 swift plass: topp=186 bredde=364
-21:16:00 swift plass: topp=-14 bredde=364
-21:16:01 swift plass: topp=-14 bredde=378
-21:18:55 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
-21:18:55 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
-21:19:01 skjermer: hendelse:rom(venter) rom>ok hendelse:kort kort>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
-21:19:01 startstua: mangler __mvStart=false sat=
-21:19:01 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(28, 27, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/9227?v=0"]
+21:51:59 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+21:51:59 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
+21:52:05 skjermer: start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+21:52:05 startstua: 186,12 378x311 pos=fixed topp-var= bredde-var= __mvStart=true sat=
+21:52:05 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+21:52:13 etter 14s: skjermer: start>ok leker=-
+21:55:20 swift plass: topp=186 bredde=364
+22:00:48 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
+22:00:50 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
