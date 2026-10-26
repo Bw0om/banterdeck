@@ -162,7 +162,10 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   // Deg-siden: «Logg inn» / «Ny konto» åpner arket i stedet for skjemaet under
   document.addEventListener('click', (e) => {
     if (!harSkall || !e.target.closest) return;
-    const a = e.target.closest('[data-vis="inn"], [data-vis="ny"]')   // bare disse to – tilbakepila på kontosiden heter data-vis="profil"; if (!a) return;
+    // Bare disse to – tilbakepila på kontosiden heter data-vis="profil". (Sjekken under lå en gang inne i kommentaren: da stoppet
+    // denne lytteren HVERT trykk på nettsiden i appen – Alle lekene, Mer og alle knappene i lekene var døde.)
+    const a = e.target.closest('[data-vis="inn"], [data-vis="ny"]');
+    if (!a) return;
     e.preventDefault(); e.stopImmediatePropagation();
     Skall.logginn({ del: a.dataset.vis === 'ny' ? 'ny' : 'inn' }).catch(() => {});
   }, true);

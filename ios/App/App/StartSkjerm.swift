@@ -132,26 +132,21 @@ struct StartSkjerm: View {
             let kortSkjerm = H < 720
             let toppH: CGFloat = kortSkjerm ? 60 : 112
             let alderH: CGFloat = kortSkjerm ? 0 : 44
-            let bunnH: CGFloat = (m.fortsett.isEmpty ? 0 : 86) + (m.navnKjent ? 0 : 84) + 60 + 14 + 80 + alderH + 16
-            let ledig = max(160, H - toppH - bunnH - 24)
-            let stuaW = min(W - 24, ledig / 0.823)
-            let hull = (m.stuaH > 0 ? m.stuaH : stuaW * 0.823) + 24
-            // Tastaturet: skyv alt opp akkurat så mye at kodepanelet står over det
-            let bunnY = g.safeAreaInsets.top + toppH + hull + bunnH - alderH
-            let skjermH = H + g.safeAreaInsets.top + g.safeAreaInsets.bottom
-            let skyv = m.tastaturH > 0 ? max(0, bunnY + 12 - (skjermH - m.tastaturH)) : 0
-            let stuaTopp = g.safeAreaInsets.top + toppH + 12 - skyv
+            // Tastaturet: skyv alt opp så kodepanelet (nederst, over aldersteksten) står over det
+            let skyv = m.tastaturH > 0 ? max(0, m.tastaturH - g.safeAreaInsets.bottom - alderH - 8) : 0
             VStack(spacing: 0) {
                 tittel(kortSkjerm).frame(height: toppH).padding(.horizontal, 20).frame(maxWidth: .infinity, alignment: .leading)
-                // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den (Skall.settStua). Hvor hullet faktisk
-                // havnet måles her, etter utlegget, og sendes til siden – som flytter stua dit (12 pt luft øverst i hullet)
-                Color.clear.frame(height: hull)
+                // Hullet: her ligger nettsidens stue, og fingeren går rett gjennom til den (Skall.settStua). Hullet tar plassen som er
+                // igjen mellom tittelen og knappene; hvor det faktisk havnet måles etter utlegget og sendes til siden, som legger stua
+                // der (12 pt luft øverst, så bred som hullet tillater – stua er 0,823 ganger så høy som bred). Ett nøkkelord for både
+                // plass og størrelse, så et gammelt tall aldri sendes sammen med et nytt
+                Color.clear.frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity)
                     .background(GeometryReader { hg in
                         let r = hg.frame(in: .global)
+                        let n = "\(Int(r.minY))|\(Int(r.height))|\(Int(r.width))"
                         Color.clear
-                            .onAppear { m.plass(topp: r.minY + 12, bredde: stuaW) }
-                            .onChange(of: r.minY) { y in m.plass(topp: y + 12, bredde: stuaW) }
-                            .onChange(of: stuaW) { w in m.plass(topp: r.minY + 12, bredde: w) }
+                            .onAppear { hullPlass(r) }
+                            .onChange(of: n) { _ in hullPlass(r) }
                     })
                 VStack(alignment: .leading, spacing: 14) {
                     if !m.fortsett.isEmpty {
@@ -243,14 +238,13 @@ struct StartSkjerm: View {
                     }
                 }
                 .padding(.horizontal, 20).padding(.top, 4)
-                Spacer(minLength: 0)
             }
             .offset(y: -skyv)
             .frame(width: W, height: H, alignment: .top)
             // Ingen bakgrunn her: nettsiden under er oransje (global.css, start-nativ) og viser stua i hullet – en oransje flate
             // her ville dekket stua helt
             .animation(.spring(response: 0.35, dampingFraction: 0.86), value: skyv)
-            .onAppear { SjekkLogg.skriv("startskjerm: W=\(Int(W)) H=\(Int(H)) safe=\(Int(g.safeAreaInsets.top))/\(Int(g.safeAreaInsets.bottom)) global=\(Int(g.frame(in: .global).minY)) stuaTopp=\(Int(stuaTopp)) stuaW=\(Int(stuaW)) kort=\(kortSkjerm)") }
+            .onAppear { SjekkLogg.skriv("startskjerm: W=\(Int(W)) H=\(Int(H)) safe=\(Int(g.safeAreaInsets.top))/\(Int(g.safeAreaInsets.bottom)) global=\(Int(g.frame(in: .global).minY)) kort=\(kortSkjerm)") }
         }
         .ignoresSafeArea(.keyboard)
         .foregroundColor(blekk)
@@ -258,6 +252,13 @@ struct StartSkjerm: View {
     }
 
     @State private var forrigeKode = ""
+
+    /// Hullets rute (vinduets koordinater = nettvisningens): stua får 12 pt luft over og under, og bredden hullet gir plass til
+    private func hullPlass(_ r: CGRect) {
+        guard r.width > 0, r.height > 0 else { return }
+        let bredde = min(r.width - 24, max(140, (r.height - 24) / 0.823))
+        m.plass(topp: r.minY + 12, bredde: bredde)
+    }
 
     /// «KLAR FOR» og «VORS?» i en svart boks, som på nettsiden – på korte skjermer på én linje
     private func tittel(_ kort: Bool) -> some View {
