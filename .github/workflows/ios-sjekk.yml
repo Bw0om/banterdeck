@@ -102,8 +102,10 @@ jobs:
           echo "rom for flere: $KODE" >> skjermbilder/maestro.txt
           if [ -n "$KODE" ]; then
             curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d '{"handling":"bli-med","navn":"Gjest","lang":"no"}' > /dev/null || true
-            # Appen installeres på nytt, så den står på forsiden (ikke i rommet fra Spill-flyten)
+            # Appen installeres på nytt, så den står på forsiden (ikke i rommet fra Spill-flyten). Loggen så langt tas vare på først.
             xcrun simctl terminate "$UDID" no.mittvors.app || true
+            DATA=$(xcrun simctl get_app_container "$UDID" no.mittvors.app data 2>/dev/null || true)
+            [ -n "$DATA" ] && cat "$DATA/Documents/sjekk.log" >> skjermbilder/sjekk-1.log 2>/dev/null || true
             xcrun simctl uninstall "$UDID" no.mittvors.app || true
             xcrun simctl install "$UDID" "$APP"
             SIMCTL_CHILD_MV_SJEKK=1 xcrun simctl launch "$UDID" no.mittvors.app
@@ -119,10 +121,12 @@ jobs:
           xcrun simctl io "$UDID" screenshot skjermbilder/04-spill-mork.png
           # Loggen nettsiden skrev (JavaScript-feil og tilstand) ligger i appens Documents
           DATA=$(xcrun simctl get_app_container "$UDID" no.mittvors.app data 2>/dev/null || true)
-          [ -n "$DATA" ] && cp "$DATA/Documents/sjekk.log" skjermbilder/sjekk.log 2>/dev/null || echo "(ingen sjekk.log)" > skjermbilder/sjekk.log
+          { cat skjermbilder/sjekk-1.log 2>/dev/null; echo "----- etter ny installasjon -----"; [ -n "$DATA" ] && cat "$DATA/Documents/sjekk.log" 2>/dev/null; } > skjermbilder/sjekk.log
           xcrun simctl spawn "$UDID" log show --predicate 'process == "App"' --last 2m --style compact > skjermbilder/app-logg.txt 2>/dev/null || true
-          # Maestro tar selv et bilde når et steg feiler: ta dem med, navngitt etter flyten
-          for f in skjermbilder/maestro-logg/*/; do n=$(basename "$f"); i=0; find "$f" -name "*.png" | sort | while read -r b; do i=$((i+1)); cp "$b" "skjermbilder/feil-$n-$i.png"; done; done
+          # Flytenes egne bilder (NN-navn.png) ligger der Maestro la dem (ved flytfila eller i loggmappa); Maestro tar dessuten
+          # selv et bilde når et steg feiler – de tas med som feil-<flyt>-N.png
+          find ios/sjekk-flyt -maxdepth 1 -name "[0-9][0-9]-*.png" -exec mv {} skjermbilder/ \; 2>/dev/null || true
+          for f in skjermbilder/maestro-logg/*/; do n=$(basename "$f"); i=0; find "$f" -name "*.png" | sort | while read -r b; do case "$(basename "$b")" in [0-9][0-9]-*) cp "$b" skjermbilder/;; *) i=$((i+1)); cp "$b" "skjermbilder/feil-$n-$i.png";; esac; done; done
       - uses: actions/upload-artifact@v4
         if: always()
         with:

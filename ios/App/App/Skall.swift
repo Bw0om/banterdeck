@@ -796,12 +796,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
 
     /// Simulator-sjekken: nettsiden sender feil og en kort tilstand hit, og det havner i Documents/sjekk.log
     @objc func logg(_ call: CAPPluginCall) {
-        let tekst = (call.getString("tekst") ?? "") + "\n"
-        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fil = dir.appendingPathComponent("sjekk.log")
-            if let h = try? FileHandle(forWritingTo: fil) { h.seekToEndOfFile(); h.write(tekst.data(using: .utf8)!); try? h.close() }
-            else { try? tekst.write(to: fil, atomically: true, encoding: .utf8) }
-        }
+        SjekkLogg.skriv(call.getString("tekst") ?? "", stempel: false)
         call.resolve()
     }
 
@@ -951,5 +946,18 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
             SkallViewController.delt?.skjul(skal, fra: vc)
             call.resolve()
         }
+    }
+}
+
+/// Simulator-sjekken (MV_SJEKK=1): linjer fra nettsiden og fra Swift havner i Documents/sjekk.log, som jobben henter ut
+enum SjekkLogg {
+    static let paa = ProcessInfo.processInfo.environment["MV_SJEKK"] == "1"
+    static func skriv(_ t: String, stempel: Bool = true) {
+        guard paa, let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        let f = DateFormatter(); f.dateFormat = "HH:mm:ss"
+        let tekst = (stempel ? f.string(from: Date()) + " swift " : "") + t + "\n"
+        let fil = dir.appendingPathComponent("sjekk.log")
+        if let h = try? FileHandle(forWritingTo: fil) { h.seekToEndOfFile(); h.write(tekst.data(using: .utf8)!); try? h.close() }
+        else { try? tekst.write(to: fil, atomically: true, encoding: .utf8) }
     }
 }

@@ -5,13 +5,13 @@ appId: no.mittvors.app
     visible:
       text: "(?is)send anonymt.*"
     timeout: 40000
-- takeScreenshot: ../../skjermbilder/42-ukjent-avsender
+- takeScreenshot: 42-ukjent-avsender
 - tapOn:
     text: "(?is)send anonymt.*"
 - waitForAnimationToEnd
-- takeScreenshot: ../../skjermbilder/43-skrivedialog
+- takeScreenshot: 43-skrivedialog
 - inputText: "Et svar fra sjekken"
-- takeScreenshot: ../../skjermbilder/44-skrivedialog-fylt
+- takeScreenshot: 44-skrivedialog-fylt
 # Dialogens knapp heter det samme som knappen under: ta den som ligger til høyre for (eller over) «Avbryt»
 - tapOn:
     text: "(?is)send anonymt.*"
@@ -24,15 +24,15 @@ appId: no.mittvors.app
       text: "Avbryt"
     optional: true
 - waitForAnimationToEnd
-- takeScreenshot: ../../skjermbilder/45-sendt
+- takeScreenshot: 45-sendt
 - tapOn:
     text: "Mer"
 - extendedWaitUntil:
     visible:
       text: "Lukk"
     timeout: 10000
-- takeScreenshot: ../../skjermbilder/46-mer-i-leken
+- takeScreenshot: 46-mer-i-leken
 - tapOn:
     text: "Lukk"
 - waitForAnimationToEnd
-- takeScreenshot: ../../skjermbilder/47-tilbake-i-leken
+- takeScreenshot: 47-tilbake-i-leken

@@ -198,6 +198,7 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
           logg('startstua: ' + (ss ? Math.round(sr.top) + ',' + Math.round(sr.left) + ' ' + Math.round(sr.width) + 'x' + Math.round(sr.height) + ' pos=' + getComputedStyle(ss).position + ' topp-var=' + h.style.getPropertyValue('--mv-stua-topp') + ' bredde-var=' + h.style.getPropertyValue('--mv-stua-bredde') : 'mangler') + ' __mvStart=' + !!window.__mvStart + ' sat=' + hs.getPropertyValue('--sat'));
           logg('etter 6s: stue-svg=' + (stue ? stue.children.length + ' barn, ' + Math.round(stue.getBoundingClientRect().height) + 'px' : 'mangler') + ' main-topp=' + Math.round((document.querySelector('.main') || document.body).getBoundingClientRect().top) + ' safe-top=' + getComputedStyle(h).getPropertyValue('--sat') + ' main-padding=' + getComputedStyle(document.querySelector('.main') || document.body).paddingTop + ' helt-topp=' + (document.querySelector('.st-helt') ? Math.round(document.querySelector('.st-helt').getBoundingClientRect().top) : '-') + ' body-bg=' + getComputedStyle(document.body).backgroundColor + ' html-bg=' + getComputedStyle(h).backgroundColor + ' vw=' + innerWidth + 'x' + innerHeight + ' ressurser-feilet=' + JSON.stringify(res));
         }, 6000);
+        setTimeout(() => logg('etter 14s: skjermer:' + skjermLogg + ' leker=' + (window.__mvLekerStatus || '-')), 14000);
       }
     }).catch(() => {});
   document.addEventListener('astro:page-load', synkSkall);

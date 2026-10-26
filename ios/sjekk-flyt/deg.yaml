@@ -1,8 +1,8 @@
 # Simulator-sjekken: Deg-fanen – «Logg inn»-arket.
 appId: no.mittvors.app
 ---
-- takeScreenshot: ../../skjermbilder/30-deg
+- takeScreenshot: 30-deg
 - tapOn:
     text: "(?is)logg inn.*"
 - waitForAnimationToEnd
-- takeScreenshot: ../../skjermbilder/31-logg-inn
+- takeScreenshot: 31-logg-inn

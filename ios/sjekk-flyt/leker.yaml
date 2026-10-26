@@ -5,11 +5,11 @@ appId: no.mittvors.app
     text: "(?is)ja, jeg er over 18.*"
     optional: true
 - waitForAnimationToEnd
-- takeScreenshot: ../../skjermbilder/20-leker
+- takeScreenshot: 20-leker
 - tapOn:
     text: "I appen"
 - waitForAnimationToEnd
-- takeScreenshot: ../../skjermbilder/21-leker-i-appen
+- takeScreenshot: 21-leker-i-appen
 - tapOn:
     text: "Alle"
 - waitForAnimationToEnd
@@ -21,9 +21,9 @@ appId: no.mittvors.app
     timeout: 15000
     optional: true
 - waitForAnimationToEnd
-- takeScreenshot: ../../skjermbilder/22-lekeside
+- takeScreenshot: 22-lekeside
 - swipe:
     start: 1%, 50%
     end: 70%, 50%
 - waitForAnimationToEnd
-- takeScreenshot: ../../skjermbilder/23-leker-tilbake
+- takeScreenshot: 23-leker-tilbake

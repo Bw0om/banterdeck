@@ -35,15 +35,20 @@ final class StartModell: ObservableObject {
     }
 
     /// Hvor stua skal stå i nettsiden (toppen i nettvisningens punkter, og bredden): nettsiden flytter den dit og melder ruta tilbake (hullet)
-    func plass(topp: CGFloat, bredde: CGFloat, forsok: Int = 0) {
-        let n = "\(Int(topp.rounded()))|\(Int(bredde.rounded()))"
-        guard forsok > 0 || n != sistPlass, let w = nett else { return }
-        sistPlass = n
-        // Siden svarer true når stua er flyttet. Er ikke nettkoden klar ennå (window.__mvStart mangler), prøves det igjen litt senere –
-        // ellers blir stua stående der CSS-en la den, oppå tittelen
-        w.evaluateJavaScript("!!(window.__mvStart && window.__mvStart.plass && (window.__mvStart.plass(\(Int(topp.rounded())), \(Int(bredde.rounded()))), true))") { [weak self] v, _ in
+    private var onsket: (topp: Int, bredde: Int)? = nil
+    func plass(topp: CGFloat, bredde: CGFloat) {
+        let n = (Int(topp.rounded()), Int(bredde.rounded()))
+        guard n != (onsket?.topp ?? -1, onsket?.bredde ?? -1) else { return }
+        onsket = n
+        sendPlass(forsok: 0)
+    }
+    /// Siden svarer true når stua er flyttet. Er ikke nettkoden klar ennå (window.__mvStart mangler), prøves det igjen litt senere –
+    /// alltid med den siste ønskede plasseringen, så et gammelt forsøk aldri overskriver en nyere (det la stua oppå tittelen)
+    private func sendPlass(forsok: Int) {
+        guard let w = nett, let o = onsket else { return }
+        w.evaluateJavaScript("!!(window.__mvStart && window.__mvStart.plass && (window.__mvStart.plass(\(o.topp), \(o.bredde)), true))") { [weak self] v, _ in
             guard (v as? Bool) != true, forsok < 20 else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self?.plass(topp: topp, bredde: bredde, forsok: forsok + 1) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self?.sendPlass(forsok: forsok + 1) }
         }
     }
 
@@ -233,7 +238,7 @@ struct StartSkjerm: View {
             // Ingen bakgrunn her: nettsiden under er oransje (global.css, start-nativ) og viser stua i hullet – en oransje flate
             // her ville dekket stua helt
             .animation(.spring(response: 0.35, dampingFraction: 0.86), value: skyv)
-            .onAppear { m.plass(topp: stuaTopp, bredde: stuaW) }
+            .onAppear { m.plass(topp: stuaTopp, bredde: stuaW); SjekkLogg.skriv("startskjerm: W=\(Int(W)) H=\(Int(H)) safe=\(Int(g.safeAreaInsets.top))/\(Int(g.safeAreaInsets.bottom)) global=\(Int(g.frame(in: .global).minY)) stuaTopp=\(Int(stuaTopp)) stuaW=\(Int(stuaW)) kort=\(kortSkjerm)") }
             .onChange(of: stuaTopp) { t in m.plass(topp: t, bredde: stuaW) }
             .onChange(of: stuaW) { w in m.plass(topp: stuaTopp, bredde: w) }
         }
