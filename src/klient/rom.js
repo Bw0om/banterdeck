@@ -721,7 +721,11 @@ export function startRom(LEKNAVN, LANG) {
       ekstra.regler = reglerListe(sp); ekstra.reglerTittel = T('Slik spiller dere', 'How to play'); ekstra.reglerKnapp = T('Vi er klare', 'We’re ready');
     }
     var n = skjerm + '|' + JSON.stringify(ekstra); if (n === sistSkjerm) return; sistSkjerm = n;
-    try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: Object.assign({ skjerm: skjerm }, ekstra || {}) })); } catch (e) {}
+    var detalj = Object.assign({ skjerm: skjerm }, ekstra || {});
+    // app.js (som sender meldingen til skallet) lastes etter denne fila og lytter kanskje ikke ennå: meldingen ligger også her,
+    // og app.js henter den når det starter – ellers blir forsiden/lobbyen stående uten den native skjermen (den første gangen)
+    window.__mvSisteSkjerm = detalj;
+    try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: detalj })); } catch (e) {}
   }
 
   /* ---------- gjengkveld: venterommet ---------- */

@@ -38,6 +38,10 @@ jobs:
           npm run build:app
       - name: Kopierer sidene inn i iOS-prosjektet
         run: npx cap sync ios
+      - name: Maestro (trykker på knappene i simulatoren)
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
       - name: Velger en iPhone i simulatoren
         id: sim
         run: |
@@ -62,23 +66,30 @@ jobs:
           UDID=${{ steps.sim.outputs.udid }}
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
+          # Norsk, som på eierens telefon (språket leses når appen starter – telefonen må startes på nytt etter byttet)
+          xcrun simctl spawn "$UDID" defaults write "Apple Global Domain" AppleLanguages -array nb-NO
+          xcrun simctl spawn "$UDID" defaults write "Apple Global Domain" AppleLocale -string nb_NO
+          xcrun simctl shutdown "$UDID" || true
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
           APP=$(find build/sim/Build/Products -name "App.app" -path "*iphonesimulator*" | head -1)
           xcrun simctl install "$UDID" "$APP"
           mkdir -p skjermbilder
+          # Flytene i ios/sjekk-flyt/ trykker på knappene og tar bilder underveis (Maestro). Feiler en flyt, går sjekken videre –
+          # bildene fram til feilen og loggen (maestro.txt) ligger i ios/sjekk/.
+          flyt() { echo "===== $1 =====" >> skjermbilder/maestro.txt; (cd skjermbilder && maestro --udid "$UDID" test "../ios/sjekk-flyt/$1.yaml" --debug-output "maestro-logg/$1" 2>&1 | tee -a maestro.txt) || echo "FLYT $1 FEILET" >> skjermbilder/maestro.txt; }
           SIMCTL_CHILD_MV_SJEKK=1 xcrun simctl launch "$UDID" no.mittvors.app
           sleep 12
           xcrun simctl io "$UDID" screenshot skjermbilder/01-spill.png
+          flyt spill
           # Én start per fane: appen leser MV_FANE og velger fanen selv (Skall.swift)
           for f in leker deg; do
             xcrun simctl terminate "$UDID" no.mittvors.app || true
             SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_FANE=$f xcrun simctl launch "$UDID" no.mittvors.app
             sleep 12
             xcrun simctl io "$UDID" screenshot "skjermbilder/02-$f.png"
+            flyt $f
           done
-          xcrun simctl terminate "$UDID" no.mittvors.app || true
-          SIMCTL_CHILD_MV_FANE=leker SIMCTL_CHILD_MV_RULL=1 xcrun simctl launch "$UDID" no.mittvors.app
-          sleep 15
-          xcrun simctl io "$UDID" screenshot skjermbilder/03-leker-blatt.png
           xcrun simctl terminate "$UDID" no.mittvors.app || true
           SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_MORK=1 xcrun simctl launch "$UDID" no.mittvors.app
           sleep 12
@@ -99,7 +110,7 @@ jobs:
         if: always() && github.event_name == 'push'
         run: |
           mkdir -p ios/sjekk && rm -f ios/sjekk/*
-          cp skjermbilder/*.png skjermbilder/sjekk.log ios/sjekk/ 2>/dev/null || true
+          cp skjermbilder/*.png skjermbilder/sjekk.log skjermbilder/maestro.txt ios/sjekk/ 2>/dev/null || true
           { grep -E "error:|BUILD (SUCCEEDED|FAILED)" build/xcodebuild.log; echo "----- siste linjer -----"; grep -vE "^\s+(cd |builtin-|/Applications)" build/xcodebuild.log | tail -15; echo "----- skjemaer -----"; xcodebuild -list -project ios/App/App.xcodeproj 2>&1 | tail -20; } > ios/sjekk/bygg.txt 2>/dev/null || true
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ios/sjekk && (git diff --cached --quiet || git commit -m "Simulator-sjekk: skjermbilder og byggresultat [skip ci]") && git push || true

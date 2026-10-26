@@ -333,6 +333,14 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private var startVert: UIHostingController<StartSkjerm>?
     private var startHull: HullVisning?
 
+    /// En native skjerm dekker hele nettsiden i fanen: da skal ikke nettsidens egne knapper nås gjennom den (VoiceOver –
+    /// og simulator-sjekken, som trykker på det den finner). Et nettark oppe (Mer, Stua …) gir nettsiden ordet igjen.
+    private var dekket: [Int: Bool] = [:]
+    private var arkOppe = false
+    private func settDekket(_ i: Int, _ d: Bool) { dekket[i] = d; oppdaterDekket() }
+    private func oppdaterDekket() { for (i, v) in visninger { v.webView?.accessibilityElementsHidden = (dekket[i] ?? false) && !arkOppe } }
+    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg"]
+
     /// Siden i en skjerm sier hvilken skjerm den viser: «start» → vis den native startskjermen over Spill-fanen, ellers ta den bort
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
         guard let i = fane(for: fra), let v = visninger[i], let side = viewControllers?[i] else { return }
@@ -340,12 +348,14 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         // Deg-fanen: den native skjermen ligger over kontosiden så lenge den står på forsiden sin (profil); dypere sider er nettsiden
         if faner[i] == "deg" {
             let vis = hva == "deg" && (d["visning"] as? String ?? "profil") == "profil"
+            settDekket(i, vis)
             visDeg(vis ? d : nil, over: side, nett: v.webView)
             return
         }
         // Leker-fanen: lista er native; lekesidene er nettsiden
-        if faner[i] == "leker" { visLeker(hva == "leker" ? d : nil, over: side, nett: v.webView); return }
+        if faner[i] == "leker" { settDekket(i, hva == "leker"); visLeker(hva == "leker" ? d : nil, over: side, nett: v.webView); return }
         guard faner[i] == "spill" else { return }
+        settDekket(i, SkallViewController.heleSkjermer.contains(hva))
         if ["rom", "lobby", "start", "laster"].contains(hva) { sisteRegler = "" }
         else if let r = d["regler"] as? [String], !r.isEmpty, let n = d["lekNokkel"] as? String, n != sisteRegler { sisteRegler = n; visRegler(d, r) }
         // Alt som ikke er denne skjermen, tas bort først – også lobbyen, så den ikke ligger igjen under en lek
@@ -484,7 +494,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         fram(degVert?.view.superview)
     }
     /// Siden i Deg-fanen byttet (gjengene, statistikken …): nettsiden tar over til kontosiden sier «deg» igjen
-    func skjulDeg() { fjernOverlegg(&degVert) }
+    func skjulDeg() { fjernOverlegg(&degVert); if let j = faner.firstIndex(of: "deg") { settDekket(j, false) } }
 
     // MARK: Leker (LekerSkjerm.swift) – native liste over lekesiden
     private let lekerModell = LekerModell()
@@ -500,7 +510,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         }
         fram(lekerVert?.view.superview)
     }
-    func skjulLeker() { fjernOverlegg(&lekerVert) }
+    func skjulLeker() { fjernOverlegg(&lekerVert); if let j = faner.firstIndex(of: "leker") { settDekket(j, false) } }
     private func degHandling(_ h: String) {
         switch h {
         case "inn", "ny":
@@ -517,6 +527,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
     func settOverleggSkjult(_ skjult: Bool) {
+        arkOppe = skjult; oppdaterDekket()
         let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, degVert?.view, lekerVert?.view]
         for v in hoster { ((v?.superview as? HullVisning) ?? v)?.isHidden = skjult }
         lobbyHull?.isHidden = skjult; startHull?.isHidden = skjult

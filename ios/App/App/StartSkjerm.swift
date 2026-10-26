@@ -154,6 +154,7 @@ struct StartSkjerm: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(m.T("Navnet ditt", "Your name")).font(.archivo(14, vekt: 800))
                             TextField(m.T("F.eks. Maria", "E.g. Sam"), text: $m.navn)
+                                .accessibilityIdentifier("start-navn")
                                 .textContentType(.nickname).disableAutocorrection(true)
                                 .submitLabel(.go).focused($fokus, equals: .navn)
                                 .onSubmit { if m.kode.isEmpty { m.lagRom() } else { m.bliMed() } }
@@ -169,6 +170,7 @@ struct StartSkjerm: View {
                     // Koden fra verten: mørkt panel med feltet og «Bli med», som på nettet
                     HStack(spacing: 10) {
                         TextField("ABCD", text: $m.kode)
+                            .accessibilityIdentifier("start-kode")
                             .font(.archivo(28, vekt: 900))
                             .foregroundColor(papir)
                             .textInputAutocapitalization(.characters).disableAutocorrection(true)
