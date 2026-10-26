@@ -225,7 +225,8 @@ struct StartSkjerm: View {
             }
             .offset(y: -skyv)
             .frame(width: W, height: H, alignment: .top)
-            .background(oransje.ignoresSafeArea())
+            // Ingen bakgrunn her: nettsiden under er oransje (global.css, start-nativ) og viser stua i hullet – en oransje flate
+            // her ville dekket stua helt
             .animation(.spring(response: 0.35, dampingFraction: 0.86), value: skyv)
             .onAppear { m.plass(topp: stuaTopp, bredde: stuaW) }
             .onChange(of: stuaTopp) { t in m.plass(topp: t, bredde: stuaW) }

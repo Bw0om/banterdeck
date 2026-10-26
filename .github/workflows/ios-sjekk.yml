@@ -77,10 +77,14 @@ jobs:
           mkdir -p skjermbilder
           # Flytene i ios/sjekk-flyt/ trykker på knappene og tar bilder underveis (Maestro). Feiler en flyt, går sjekken videre –
           # bildene fram til feilen og loggen (maestro.txt) ligger i ios/sjekk/.
-          flyt() { echo "===== $1 =====" >> skjermbilder/maestro.txt; (cd skjermbilder && maestro --udid "$UDID" test "../ios/sjekk-flyt/$1.yaml" --debug-output "maestro-logg/$1" 2>&1 | tee -a maestro.txt) || echo "FLYT $1 FEILET" >> skjermbilder/maestro.txt; }
+          export MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 MAESTRO_CLI_NO_ANALYTICS=1
+          BILDER="$PWD/skjermbilder"
+          flyt() { echo "===== $1 =====" >> skjermbilder/maestro.txt; (maestro --udid "$UDID" test -e BILDER="$BILDER" ${2:+-e "$3"} "ios/sjekk-flyt/$1.yaml" --debug-output "skjermbilder/maestro-logg/$1" 2>&1 | tee -a skjermbilder/maestro.txt) || echo "FLYT $1 FEILET" >> skjermbilder/maestro.txt; }
           SIMCTL_CHILD_MV_SJEKK=1 xcrun simctl launch "$UDID" no.mittvors.app
           sleep 12
           xcrun simctl io "$UDID" screenshot skjermbilder/01-spill.png
+          # Første Maestro-kjøring bygger og installerer testdriveren (tar et par minutter): varm opp med en tom flyt først
+          flyt varm
           flyt spill
           # Én start per fane: appen leser MV_FANE og velger fanen selv (Skall.swift)
           for f in leker deg; do
@@ -90,6 +94,21 @@ jobs:
             xcrun simctl io "$UDID" screenshot "skjermbilder/02-$f.png"
             flyt $f
           done
+          # Tre spillere: verten og en gjest lages rett mot API-et, appen blir med på koden, og verten starter Ukjent avsender
+          API=https://www.mittvors.no/api/rom
+          R=$(curl -fsS -X POST "$API" -H 'content-type: application/json' -d '{"navn":"Vert","lang":"no"}' || echo '{}')
+          KODE=$(node -pe 'JSON.parse(process.argv[1]).kode || ""' "$R"); VID=$(node -pe 'JSON.parse(process.argv[1]).id || ""' "$R"); VPOL=$(node -pe 'JSON.parse(process.argv[1]).pollett || ""' "$R")
+          echo "rom for flere: $KODE" >> skjermbilder/maestro.txt
+          if [ -n "$KODE" ]; then
+            curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d '{"handling":"bli-med","navn":"Gjest","lang":"no"}' > /dev/null || true
+            xcrun simctl terminate "$UDID" no.mittvors.app || true
+            SIMCTL_CHILD_MV_SJEKK=1 xcrun simctl launch "$UDID" no.mittvors.app
+            sleep 12
+            echo "===== flere =====" >> skjermbilder/maestro.txt
+            flyt flere -e KODE="$KODE"
+            curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d "{\"handling\":\"start\",\"lek\":\"hvemskrev\",\"modus\":\"*\",\"id\":\"$VID\",\"pollett\":\"$VPOL\"}" > /dev/null || echo "fikk ikke startet Ukjent avsender" >> skjermbilder/maestro.txt
+            flyt flere2
+          fi
           xcrun simctl terminate "$UDID" no.mittvors.app || true
           SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_MORK=1 xcrun simctl launch "$UDID" no.mittvors.app
           sleep 12
