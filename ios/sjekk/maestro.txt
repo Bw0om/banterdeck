@@ -14,26 +14,25 @@ Tap on (Optional) id: start-navn... COMPLETED
 Input text Sjekk... COMPLETED
 Hide Keyboard... COMPLETED
 Take screenshot 11-start-navn... COMPLETED
-Tap on "(?is)lag rom.*"... COMPLETED
-Assert that "(?is)alle lekene.*" is visible... FAILED
+Tap on "(?is)lag rom.*"... FAILED
 
-Assertion is false: "(?is)alle lekene.*" is visible
+Element not found: Text matching regex: (?is)lag rom.*
 
-Assertion '"(?is)alle lekene.*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+Element with Text matching regex: (?is)lag rom.* not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
 
 Possible causes:
 - Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
-- Element may be temporarily unavailable due to loading state
-- This could be a real regression that needs to be addressed
+- Element may be temporarily unavailable due to loading state.
+- This could be a real regression that needs to be addressed.
 
 ==== Debug output (logs & screenshots) ====
 
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/spill/.maestro/tests/2026-10-26_214310
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/spill/.maestro/tests/2026-10-26_223117
 ===== leker =====
 Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow leker
-Assert that (Optional) "(?is)ja, jeg er over 18.*" is visible... COMPLETED
-Tap on (Optional) "(?is)ja, jeg er over 18.*"... COMPLETED
+Assert that (Optional) "(?is)ja, jeg er over 18.*" is visible... WARNED
+Tap on (Optional) "(?is)ja, jeg er over 18.*"... WARNED
 Wait for animation to end... COMPLETED
 Take screenshot 20-leker... COMPLETED
 Tap on "I appen"... COMPLETED
@@ -55,7 +54,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: B9WE
+rom for flere: 7STM
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
@@ -76,7 +75,7 @@ Take screenshot 42-slik-spiller-dere... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is)send anonymt.*" is visible... COMPLETED
 Take screenshot 42-ukjent-avsender... COMPLETED
 Tap on "(?is)send anonymt.*"... COMPLETED
