@@ -1,19 +1,17 @@
 # Simulator-sjekken: verten (jobben) har startet Ukjent avsender med tre spillere – skriveknappen, iPhone-dialogen og «Mer» i leken.
 appId: no.mittvors.app
-env:
-  BILDER: "skjermbilder"
 ---
 - extendedWaitUntil:
     visible:
       text: "(?is)send anonymt.*"
     timeout: 40000
-- takeScreenshot: ${BILDER}/42-ukjent-avsender
+- takeScreenshot: ../../skjermbilder/42-ukjent-avsender
 - tapOn:
     text: "(?is)send anonymt.*"
 - waitForAnimationToEnd
-- takeScreenshot: ${BILDER}/43-skrivedialog
+- takeScreenshot: ../../skjermbilder/43-skrivedialog
 - inputText: "Et svar fra sjekken"
-- takeScreenshot: ${BILDER}/44-skrivedialog-fylt
+- takeScreenshot: ../../skjermbilder/44-skrivedialog-fylt
 # Dialogens knapp heter det samme som knappen under: ta den som ligger til høyre for (eller over) «Avbryt»
 - tapOn:
     text: "(?is)send anonymt.*"
@@ -26,15 +24,15 @@ env:
       text: "Avbryt"
     optional: true
 - waitForAnimationToEnd
-- takeScreenshot: ${BILDER}/45-sendt
+- takeScreenshot: ../../skjermbilder/45-sendt
 - tapOn:
     text: "Mer"
 - extendedWaitUntil:
     visible:
       text: "Lukk"
     timeout: 10000
-- takeScreenshot: ${BILDER}/46-mer-i-leken
+- takeScreenshot: ../../skjermbilder/46-mer-i-leken
 - tapOn:
     text: "Lukk"
 - waitForAnimationToEnd
-- takeScreenshot: ${BILDER}/47-tilbake-i-leken
+- takeScreenshot: ../../skjermbilder/47-tilbake-i-leken

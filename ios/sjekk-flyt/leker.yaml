@@ -1,17 +1,15 @@
 # Simulator-sjekken: Leker-fanen – alderssjekken, lista, filtrene, en lekeside og tilbake.
 appId: no.mittvors.app
-env:
-  BILDER: "skjermbilder"
 ---
 - tapOn:
     text: "(?is)ja, jeg er over 18.*"
     optional: true
 - waitForAnimationToEnd
-- takeScreenshot: ${BILDER}/20-leker
+- takeScreenshot: ../../skjermbilder/20-leker
 - tapOn:
     text: "I appen"
 - waitForAnimationToEnd
-- takeScreenshot: ${BILDER}/21-leker-i-appen
+- takeScreenshot: ../../skjermbilder/21-leker-i-appen
 - tapOn:
     text: "Alle"
 - waitForAnimationToEnd
@@ -23,9 +21,9 @@ env:
     timeout: 15000
     optional: true
 - waitForAnimationToEnd
-- takeScreenshot: ${BILDER}/22-lekeside
+- takeScreenshot: ../../skjermbilder/22-lekeside
 - swipe:
     start: 1%, 50%
     end: 70%, 50%
 - waitForAnimationToEnd
-- takeScreenshot: ${BILDER}/23-leker-tilbake
+- takeScreenshot: ../../skjermbilder/23-leker-tilbake

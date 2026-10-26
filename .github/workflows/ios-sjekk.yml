@@ -13,7 +13,7 @@ on:
 jobs:
   sjekk:
     runs-on: macos-26
-    timeout-minutes: 40
+    timeout-minutes: 75
     permissions:
       contents: write
     steps:
@@ -79,7 +79,8 @@ jobs:
           # bildene fram til feilen og loggen (maestro.txt) ligger i ios/sjekk/.
           export MAESTRO_DRIVER_STARTUP_TIMEOUT=300000 MAESTRO_CLI_NO_ANALYTICS=1
           BILDER="$PWD/skjermbilder"
-          flyt() { echo "===== $1 =====" >> skjermbilder/maestro.txt; (maestro --udid "$UDID" test -e BILDER="$BILDER" ${2:+-e "$3"} "ios/sjekk-flyt/$1.yaml" --debug-output "skjermbilder/maestro-logg/$1" 2>&1 | tee -a skjermbilder/maestro.txt) || echo "FLYT $1 FEILET" >> skjermbilder/maestro.txt; }
+          # Bildene i flytene heter ../../skjermbilder/… – det treffer uansett om Maestro regner fra flytfila eller fra mappa vi står i
+          flyt() { echo "===== $1 =====" >> skjermbilder/maestro.txt; (cd ios/sjekk-flyt && maestro --udid "$UDID" test ${2:+-e "$3"} "$1.yaml" --debug-output "$BILDER/maestro-logg/$1" 2>&1 | tee -a "$BILDER/maestro.txt") || echo "FLYT $1 FEILET" >> skjermbilder/maestro.txt; }
           SIMCTL_CHILD_MV_SJEKK=1 xcrun simctl launch "$UDID" no.mittvors.app
           sleep 12
           xcrun simctl io "$UDID" screenshot skjermbilder/01-spill.png
@@ -101,7 +102,10 @@ jobs:
           echo "rom for flere: $KODE" >> skjermbilder/maestro.txt
           if [ -n "$KODE" ]; then
             curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d '{"handling":"bli-med","navn":"Gjest","lang":"no"}' > /dev/null || true
+            # Appen installeres på nytt, så den står på forsiden (ikke i rommet fra Spill-flyten)
             xcrun simctl terminate "$UDID" no.mittvors.app || true
+            xcrun simctl uninstall "$UDID" no.mittvors.app || true
+            xcrun simctl install "$UDID" "$APP"
             SIMCTL_CHILD_MV_SJEKK=1 xcrun simctl launch "$UDID" no.mittvors.app
             sleep 12
             echo "===== flere =====" >> skjermbilder/maestro.txt
@@ -117,6 +121,8 @@ jobs:
           DATA=$(xcrun simctl get_app_container "$UDID" no.mittvors.app data 2>/dev/null || true)
           [ -n "$DATA" ] && cp "$DATA/Documents/sjekk.log" skjermbilder/sjekk.log 2>/dev/null || echo "(ingen sjekk.log)" > skjermbilder/sjekk.log
           xcrun simctl spawn "$UDID" log show --predicate 'process == "App"' --last 2m --style compact > skjermbilder/app-logg.txt 2>/dev/null || true
+          # Maestro tar selv et bilde når et steg feiler: ta dem med, navngitt etter flyten
+          for f in skjermbilder/maestro-logg/*/; do n=$(basename "$f"); i=0; find "$f" -name "*.png" | sort | while read -r b; do i=$((i+1)); cp "$b" "skjermbilder/feil-$n-$i.png"; done; done
       - uses: actions/upload-artifact@v4
         if: always()
         with:

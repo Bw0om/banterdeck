@@ -35,11 +35,16 @@ final class StartModell: ObservableObject {
     }
 
     /// Hvor stua skal stå i nettsiden (toppen i nettvisningens punkter, og bredden): nettsiden flytter den dit og melder ruta tilbake (hullet)
-    func plass(topp: CGFloat, bredde: CGFloat) {
+    func plass(topp: CGFloat, bredde: CGFloat, forsok: Int = 0) {
         let n = "\(Int(topp.rounded()))|\(Int(bredde.rounded()))"
-        guard n != sistPlass, let w = nett else { return }
+        guard forsok > 0 || n != sistPlass, let w = nett else { return }
         sistPlass = n
-        w.evaluateJavaScript("window.__mvStart && window.__mvStart.plass && window.__mvStart.plass(\(Int(topp.rounded())), \(Int(bredde.rounded())))", completionHandler: nil)
+        // Siden svarer true når stua er flyttet. Er ikke nettkoden klar ennå (window.__mvStart mangler), prøves det igjen litt senere –
+        // ellers blir stua stående der CSS-en la den, oppå tittelen
+        w.evaluateJavaScript("!!(window.__mvStart && window.__mvStart.plass && (window.__mvStart.plass(\(Int(topp.rounded())), \(Int(bredde.rounded()))), true))") { [weak self] v, _ in
+            guard (v as? Bool) != true, forsok < 20 else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self?.plass(topp: topp, bredde: bredde, forsok: forsok + 1) }
+        }
     }
 
     func T(_ no: String, _ en: String) -> String { engelsk ? en : no }

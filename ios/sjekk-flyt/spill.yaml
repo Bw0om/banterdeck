@@ -1,55 +1,41 @@
 # Simulator-sjekken (ios-sjekk.yml): Spill-fanen – lag et rom, åpne «Alle lekene», start Jeg har aldri, «Mer» og «Stua».
 # Appen er allerede startet (simctl, på norsk). Hvert bilde havner i ios/sjekk/.
 appId: no.mittvors.app
-env:
-  BILDER: "skjermbilder"
 ---
-- takeScreenshot: ${BILDER}/10-start
+- takeScreenshot: ../../skjermbilder/10-start
 - tapOn:
     id: "start-navn"
     optional: true
 - inputText: "Sjekk"
 - hideKeyboard
-- takeScreenshot: ${BILDER}/11-start-navn
+- takeScreenshot: ../../skjermbilder/11-start-navn
 - tapOn:
     text: "(?is)lag rom.*"
 - extendedWaitUntil:
     visible:
       text: "(?is)alle lekene.*"
     timeout: 30000
-- takeScreenshot: ${BILDER}/12-lobby
+- takeScreenshot: ../../skjermbilder/12-lobby
 - tapOn:
     text: "(?is)alle lekene.*"
 - extendedWaitUntil:
     visible:
-      text: "(?is)jeg har aldri.*"
+      text: "Velg lek"
     timeout: 10000
-- takeScreenshot: ${BILDER}/13-velger
-- tapOn:
-    text: "(?is)jeg har aldri.*"
-- extendedWaitUntil:
-    visible:
-      text: "Mer"
-    timeout: 25000
-- takeScreenshot: ${BILDER}/14-jeg-har-aldri
+- takeScreenshot: ../../skjermbilder/13-velger
+# Arket ned igjen, så «Mer» i lobbyen
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+- waitForAnimationToEnd
 - tapOn:
     text: "Mer"
 - extendedWaitUntil:
     visible:
       text: "Lukk"
     timeout: 10000
-- takeScreenshot: ${BILDER}/15-mer
+- takeScreenshot: ../../skjermbilder/14-lobby-mer
 - tapOn:
     text: "Lukk"
 - waitForAnimationToEnd
-- tapOn:
-    text: "Stua"
-- extendedWaitUntil:
-    visible:
-      text: "(?is)tilbake til leken.*"
-    timeout: 10000
-- takeScreenshot: ${BILDER}/16-stua
-- tapOn:
-    text: "(?is)tilbake til leken.*"
-- waitForAnimationToEnd
-- takeScreenshot: ${BILDER}/17-tilbake-i-leken
+- takeScreenshot: ../../skjermbilder/15-lobby-igjen

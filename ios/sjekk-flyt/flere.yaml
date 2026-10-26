@@ -1,7 +1,6 @@
 # Simulator-sjekken: appen blir med i et rom som jobben har laget rett mot API-et (koden kommer som KODE).
 appId: no.mittvors.app
 env:
-  BILDER: "skjermbilder"
   KODE: "ABCD"
 ---
 - tapOn:
@@ -13,11 +12,11 @@ env:
     optional: true
 - inputText: "Sjekk"
 - hideKeyboard
-- takeScreenshot: ${BILDER}/40-bli-med
+- takeScreenshot: ../../skjermbilder/40-bli-med
 - tapOn:
     text: "(?is)bli med.*"
 - extendedWaitUntil:
     visible:
       text: "(?is).*(velger lek|starter kvelden).*"
     timeout: 30000
-- takeScreenshot: ${BILDER}/41-gjest-lobby
+- takeScreenshot: ../../skjermbilder/41-gjest-lobby
