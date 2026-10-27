@@ -162,7 +162,10 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   // Deg-siden: «Logg inn» / «Ny konto» åpner arket i stedet for skjemaet under
   document.addEventListener('click', (e) => {
     if (!harSkall || !e.target.closest) return;
-    const a = e.target.closest('[data-vis="inn"], [data-vis="ny"]')   // bare disse to – tilbakepila på kontosiden heter data-vis="profil"; if (!a) return;
+    // Bare disse to – tilbakepila på kontosiden heter data-vis="profil". (Sjekken under lå en gang inne i kommentaren: da stoppet
+    // denne lytteren HVERT trykk på nettsiden i appen – Alle lekene, Mer og alle knappene i lekene var døde.)
+    const a = e.target.closest('[data-vis="inn"], [data-vis="ny"]');
+    if (!a) return;
     e.preventDefault(); e.stopImmediatePropagation();
     Skall.logginn({ del: a.dataset.vis === 'ny' ? 'ny' : 'inn' }).catch(() => {});
   }, true);
@@ -194,8 +197,11 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
           const stue = document.querySelector('.st-stue svg');
           const res = performance.getEntriesByType('resource').filter((x) => x.responseStatus >= 400 || (x.transferSize === 0 && x.decodedBodySize === 0 && !/^data:/.test(x.name))).map((x) => x.name.replace(/^.*\/\/[^/]+/, '')).slice(0, 15);
           logg('skjermer:' + skjermLogg + ' leker=' + (window.__mvLekerStatus || '-') + ' klasser=' + h.className);
+          const ss = document.getElementById('romStartStua'), sr = ss && ss.getBoundingClientRect(), hs = getComputedStyle(h);
+          logg('startstua: ' + (ss ? Math.round(sr.top) + ',' + Math.round(sr.left) + ' ' + Math.round(sr.width) + 'x' + Math.round(sr.height) + ' pos=' + getComputedStyle(ss).position + ' topp-var=' + h.style.getPropertyValue('--mv-stua-topp') + ' bredde-var=' + h.style.getPropertyValue('--mv-stua-bredde') : 'mangler') + ' __mvStart=' + !!window.__mvStart + ' sat=' + hs.getPropertyValue('--sat'));
           logg('etter 6s: stue-svg=' + (stue ? stue.children.length + ' barn, ' + Math.round(stue.getBoundingClientRect().height) + 'px' : 'mangler') + ' main-topp=' + Math.round((document.querySelector('.main') || document.body).getBoundingClientRect().top) + ' safe-top=' + getComputedStyle(h).getPropertyValue('--sat') + ' main-padding=' + getComputedStyle(document.querySelector('.main') || document.body).paddingTop + ' helt-topp=' + (document.querySelector('.st-helt') ? Math.round(document.querySelector('.st-helt').getBoundingClientRect().top) : '-') + ' body-bg=' + getComputedStyle(document.body).backgroundColor + ' html-bg=' + getComputedStyle(h).backgroundColor + ' vw=' + innerWidth + 'x' + innerHeight + ' ressurser-feilet=' + JSON.stringify(res));
         }, 6000);
+        setTimeout(() => logg('etter 14s: skjermer:' + skjermLogg + ' leker=' + (window.__mvLekerStatus || '-')), 14000);
       }
     }).catch(() => {});
   document.addEventListener('astro:page-load', synkSkall);

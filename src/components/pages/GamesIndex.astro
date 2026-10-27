@@ -160,6 +160,14 @@ const romSti = no ? '/no/rom' : '/room';
       function png(svg) {
         return new Promise(function (res) {
           if (!svg) return res('');
+          // Bildet er en <img> (fila fantes ikke som SVG ved bygging): tegn den som den er
+          if (svg.tagName === 'IMG') {
+            var im = new Image();
+            im.onload = function () { try { var c = document.createElement('canvas'); c.width = 480; c.height = Math.round(480 * (im.naturalHeight || 126) / (im.naturalWidth || 240)); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/png').split(',')[1] || ''); } catch (e) { res(''); } };
+            im.onerror = function () { res(''); };
+            im.src = svg.currentSrc || svg.src;
+            return;
+          }
           var vb = (svg.getAttribute('viewBox') || '0 0 240 126').split(/[\s,]+/).map(Number), w = 480, h = Math.round(w * (vb[3] || 126) / (vb[2] || 240));
           // Fila har xmlns, width og height fra før: kopier og sett størrelsen, så blir det ikke doble attributter (som gjør bildet tomt)
           var k = svg.cloneNode(true); k.setAttribute('width', String(w)); k.setAttribute('height', String(h)); k.removeAttribute('class');
@@ -180,7 +188,7 @@ const romSti = no ? '/no/rom' : '/room';
         if (liten) { var sp = el.querySelector('span'); var deler = sp ? sp.textContent.split('·') : []; utstyr = (deler[0] || '').trim(); plTekst = (deler[1] || '').trim(); }
         else if (meta) { var gr = meta.querySelector('span:not(.lk-pl)'); gruppe = gr ? gr.textContent.trim() : ''; }
         liste.push({ href: el.getAttribute('href'), navn: b ? b.textContent.trim() : '', niva: el.dataset.niva, min: Number(el.dataset.min) || 2, maks: Number(el.dataset.maks) || 99,
-          pl: plTekst, gruppe: gruppe, utstyr: utstyr, q: el.getAttribute('data-q') || '', pluss: el.dataset.pluss === '1', png: '', svg: el.querySelector('svg.lekebilde') });
+          pl: plTekst, gruppe: gruppe, utstyr: utstyr, q: el.getAttribute('data-q') || '', pluss: el.dataset.pluss === '1', png: '', svg: el.querySelector('svg.lekebilde, img.lekebilde') });
       });
       function meld() {
         var d = { skjerm: 'leker', alder: alderOk(), alkfri: egenAlkfri(), tekst: LEKER_TEKST,

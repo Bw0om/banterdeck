@@ -699,6 +699,8 @@ export function startRom(LEKNAVN, LANG) {
       /** Skallet sier hvor stua skal stå (toppen i px fra toppen av nettvisningen, og bredden) – på korte skjermer krymper den */
       plass: function (topp, bredde) {
         var rot = document.documentElement;
+        // Bare mens forsiden vises: skjermen som glir bort (rommet ble laget mens tastaturet var oppe) skal ikke flytte lobbyens stue
+        if (!rot.classList.contains('start-nativ')) return false;
         rot.style.setProperty('--mv-stua-topp', Math.round(topp) + 'px');
         rot.style.setProperty('--mv-stua-bredde', Math.round(bredde) + 'px');
         stuaMaalY = Math.round(topp); stuaMaalt = '';
@@ -721,7 +723,11 @@ export function startRom(LEKNAVN, LANG) {
       ekstra.regler = reglerListe(sp); ekstra.reglerTittel = T('Slik spiller dere', 'How to play'); ekstra.reglerKnapp = T('Vi er klare', 'We’re ready');
     }
     var n = skjerm + '|' + JSON.stringify(ekstra); if (n === sistSkjerm) return; sistSkjerm = n;
-    try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: Object.assign({ skjerm: skjerm }, ekstra || {}) })); } catch (e) {}
+    var detalj = Object.assign({ skjerm: skjerm }, ekstra || {});
+    // app.js (som sender meldingen til skallet) lastes etter denne fila og lytter kanskje ikke ennå: meldingen ligger også her,
+    // og app.js henter den når det starter – ellers blir forsiden/lobbyen stående uten den native skjermen (den første gangen)
+    window.__mvSisteSkjerm = detalj;
+    try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: detalj })); } catch (e) {}
   }
 
   /* ---------- gjengkveld: venterommet ---------- */
@@ -6161,7 +6167,15 @@ export function startRom(LEKNAVN, LANG) {
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
-    if (nativ === 'lobby') { if (!varLobby) { try { window.scrollTo(0, 0); } catch (e) {} stuaMaalt = ''; } maalStua(); requestAnimationFrame(meldStuaH); }
+    if (nativ === 'lobby') {
+      if (!varLobby) {
+        try { window.scrollTo(0, 0); } catch (e) {}
+        // Forsidens plassering av stua (plass, også den skjøvne under tastaturet) skal ikke arves: lobbyen bruker CSS-ens faste plass
+        stuaMaalY = null; stuaMaalt = '';
+        try { rotEl.style.removeProperty('--mv-stua-topp'); rotEl.style.removeProperty('--mv-stua-bredde'); } catch (e) {}
+      }
+      maalStua(); requestAnimationFrame(meldStuaH);
+    }
     if (nativ === 'pek') meldSkjerm('lek', pkData(s));
     else if (nativ === 'lobby') { var nL = (tilstand.spillere || []).length; skjermBlokker(innhold).then(function (b) { if (tilstand && !tilstand.spill) meldSkjerm('lobby', { kode: kode, n: nL, erVert: erVert(), vert: navn(tilstand.vert), blokker: b, naa: Date.now() + klokkeAvvik,
       tekst: { inviter: T('Inviter', 'Invite'), iRommet: nL === 1 ? T('Bare du så langt', 'Just you so far') : nL + T(' i rommet', ' in the room'), kode: T('Romkode', 'Room code'), venter: navn(tilstand.vert) + (tilstand.plan && tilstand.plan.length ? T(' starter kvelden', ' is starting the night') : T(' velger lek', ' is picking a game')) } }); }); }

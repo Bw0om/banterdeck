@@ -33,6 +33,8 @@ final class LekerModell: ObservableObject {
     @Published var alderOk = true
     @Published var tekst: [String: String] = [:]
     @Published var engelsk = false
+    /// Kortene glir inn første gang lista er på plass (settes her, i modellen – ikke i visningens onAppear, som kunne komme før lista)
+    @Published var inne = false
     weak var nett: WKWebView?
     var handling: ((String) -> Void)?
 
@@ -47,6 +49,7 @@ final class LekerModell: ObservableObject {
             // Bildene kommer gjerne i en melding etter lista: behold de vi har til de nye er på plass
             let gamle = Dictionary(leker.map { ($0.id, $0.bilde) }, uniquingKeysWith: { a, _ in a })
             leker = nye.map { l in var x = l; if x.bilde == nil { x.bilde = gamle[l.id] ?? nil }; return x }
+            if !inne { DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in self?.inne = true } }
         }
     }
 
@@ -79,8 +82,7 @@ struct LekerSkjerm: View {
     @ObservedObject var m: LekerModell
     @Environment(\.colorScheme) private var modus
     @FocusState private var sokFokus: Bool
-    /// Kortene glir inn med fjær første gang lista vises (30 ms mellom hvert, de første tolv)
-    @State private var inne = false
+    /// Kortene glir inn med fjær første gang lista vises (30 ms mellom hvert, de første tolv) – m.inne
     private let fjaer = Animation.spring(response: 0.42, dampingFraction: 0.86)
 
     private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
@@ -135,8 +137,8 @@ struct LekerSkjerm: View {
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                         ForEach(Array(rom.enumerated()), id: \.element.id) { i, l in
                             Button(action: { m.aapne(l) }) { stortKort(l) }.buttonStyle(TrykkStil3())
-                                .opacity(inne ? 1 : 0).offset(y: inne ? 0 : 12)
-                                .animation(fjaer.delay(Double(min(i, 11)) * 0.03), value: inne)
+                                .opacity(m.inne ? 1 : 0).offset(y: m.inne ? 0 : 12)
+                                .animation(fjaer.delay(Double(min(i, 11)) * 0.03), value: m.inne)
                                 .transition(.opacity.combined(with: .scale(scale: 0.97)))
                         }
                     }
@@ -182,8 +184,6 @@ struct LekerSkjerm: View {
         .scrollDismissesKeyboardIfAvailable()
         // Filtrene: kortene som forsvinner og kommer, glir med fjær – ikke hopper
         .animation(fjaer, value: m.niva).animation(fjaer, value: m.pl).animation(fjaer, value: m.bareGratis).animation(fjaer, value: m.sok)
-        .onChange(of: m.leker.isEmpty) { tom in if !tom && !inne { DispatchQueue.main.async { inne = true } } }
-        .onAppear { if !m.leker.isEmpty { inne = true } }
         .alert(m.t("alderTittel"), isPresented: Binding(get: { !m.alderOk }, set: { _ in })) {
             Button(m.t("alderJa"), action: m.alderJa)
             Button(m.t("alderNei"), role: .cancel) { m.handling?("tilbake") }

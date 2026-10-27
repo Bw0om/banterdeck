@@ -1,0 +1,45 @@
+# Simulator-sjekken (ios-sjekk.yml): Spill-fanen – lag et rom, åpne «Alle lekene», start Jeg har aldri, «Mer» og «Stua».
+# Appen er allerede startet (simctl, på norsk). Hvert bilde havner i ios/sjekk/.
+appId: no.mittvors.app
+---
+- takeScreenshot: 10-start
+- tapOn:
+    id: "start-navn"
+    optional: true
+- inputText: "Sjekk"
+- hideKeyboard
+- takeScreenshot: 11-start-navn
+# Enter i navnefeltet lager rommet – står knappen der fortsatt, trykkes den
+- tapOn:
+    text: "(?is)lag rom.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is)alle lekene.*"
+    timeout: 30000
+- takeScreenshot: 12-lobby
+- tapOn:
+    text: "(?is)alle lekene.*"
+- extendedWaitUntil:
+    visible:
+      text: "Velg lek"
+    timeout: 10000
+- takeScreenshot: 13-velger
+# Arket ned igjen, så «Mer» i lobbyen
+- swipe:
+    start: 50%, 30%
+    end: 50%, 95%
+- waitForAnimationToEnd
+- takeScreenshot: 13b-lobby-igjen
+# Lobbyens «Mer»-knapp (teksten under: TV, QR, bare min telefon …)
+- tapOn:
+    text: "(?is)mer.*tv.*qr.*"
+- extendedWaitUntil:
+    visible:
+      text: "Lukk"
+    timeout: 10000
+- takeScreenshot: 14-lobby-mer
+- tapOn:
+    text: "Lukk"
+- waitForAnimationToEnd
+- takeScreenshot: 15-lobby-igjen

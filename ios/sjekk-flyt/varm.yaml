@@ -1,0 +1,6 @@
+# Simulator-sjekken: tom flyt som bare starter Maestro-driveren (første start tar et par minutter)
+appId: no.mittvors.app
+---
+- waitForAnimationToEnd
+
+# (kjørt på nytt 26. okt – GitHub fikk ikke tak i en maskin)

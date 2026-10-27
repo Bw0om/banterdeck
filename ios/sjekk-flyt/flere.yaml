@@ -1,0 +1,19 @@
+# Simulator-sjekken: appen blir med i et rom som jobben har laget rett mot API-et (koden kommer som KODE).
+appId: no.mittvors.app
+---
+# Navnet først (ingen skyving av skjermen ennå), så koden
+- tapOn:
+    id: "start-navn"
+    optional: true
+- inputText: "Sjekk"
+- tapOn:
+    id: "start-kode"
+- inputText: ${KODE}
+- takeScreenshot: 40-bli-med
+- tapOn:
+    text: "(?is)bli med.*"
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(velger lek|starter kvelden).*"
+    timeout: 30000
+- takeScreenshot: 41-gjest-lobby

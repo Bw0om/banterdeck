@@ -1,0 +1,52 @@
+# Simulator-sjekken: verten (jobben) har startet Ukjent avsender med tre spillere – skriveknappen, iPhone-dialogen og «Mer» i leken.
+appId: no.mittvors.app
+---
+# «Slik spiller dere»-arket kommer først når leken starter
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- takeScreenshot: 42-slik-spiller-dere
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+# Kom trykket midt i animasjonen, står arket fortsatt: prøv igjen
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is)send anonymt.*"
+    timeout: 15000
+- takeScreenshot: 42-ukjent-avsender
+- tapOn:
+    text: "(?is)send anonymt.*"
+- waitForAnimationToEnd
+- takeScreenshot: 43-skrivedialog
+- inputText: "Et svar fra sjekken"
+- takeScreenshot: 44-skrivedialog-fylt
+# Dialogens knapp heter det samme som knappen under: ta den som ligger til høyre for (eller over) «Avbryt»
+- tapOn:
+    text: "(?is)send anonymt.*"
+    rightOf:
+      text: "Avbryt"
+    optional: true
+- tapOn:
+    text: "(?is)send anonymt.*"
+    above:
+      text: "Avbryt"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 45-sendt
+- tapOn:
+    text: "Mer"
+- extendedWaitUntil:
+    visible:
+      text: "Lukk"
+    timeout: 10000
+- takeScreenshot: 46-mer-i-leken
+- tapOn:
+    text: "Lukk"
+- waitForAnimationToEnd
+- takeScreenshot: 47-tilbake-i-leken

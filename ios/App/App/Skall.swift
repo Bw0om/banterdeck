@@ -333,6 +333,14 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private var startVert: UIHostingController<StartSkjerm>?
     private var startHull: HullVisning?
 
+    /// En native skjerm dekker hele nettsiden i fanen: da skal ikke nettsidens egne knapper nås gjennom den (VoiceOver –
+    /// og simulator-sjekken, som trykker på det den finner). Et nettark oppe (Mer, Stua …) gir nettsiden ordet igjen.
+    private var dekket: [Int: Bool] = [:]
+    private var arkOppe = false
+    private func settDekket(_ i: Int, _ d: Bool) { dekket[i] = d; oppdaterDekket() }
+    private func oppdaterDekket() { for (i, v) in visninger { v.webView?.accessibilityElementsHidden = (dekket[i] ?? false) && !arkOppe } }
+    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg"]
+
     /// Siden i en skjerm sier hvilken skjerm den viser: «start» → vis den native startskjermen over Spill-fanen, ellers ta den bort
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
         guard let i = fane(for: fra), let v = visninger[i], let side = viewControllers?[i] else { return }
@@ -340,12 +348,14 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         // Deg-fanen: den native skjermen ligger over kontosiden så lenge den står på forsiden sin (profil); dypere sider er nettsiden
         if faner[i] == "deg" {
             let vis = hva == "deg" && (d["visning"] as? String ?? "profil") == "profil"
+            settDekket(i, vis)
             visDeg(vis ? d : nil, over: side, nett: v.webView)
             return
         }
         // Leker-fanen: lista er native; lekesidene er nettsiden
-        if faner[i] == "leker" { visLeker(hva == "leker" ? d : nil, over: side, nett: v.webView); return }
+        if faner[i] == "leker" { settDekket(i, hva == "leker"); visLeker(hva == "leker" ? d : nil, over: side, nett: v.webView); return }
         guard faner[i] == "spill" else { return }
+        settDekket(i, SkallViewController.heleSkjermer.contains(hva))
         if ["rom", "lobby", "start", "laster"].contains(hva) { sisteRegler = "" }
         else if let r = d["regler"] as? [String], !r.isEmpty, let n = d["lekNokkel"] as? String, n != sisteRegler { sisteRegler = n; visRegler(d, r) }
         // Alt som ikke er denne skjermen, tas bort først – også lobbyen, så den ikke ligger igjen under en lek
@@ -375,7 +385,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
-            if let n = d["navn"] as? String, !n.isEmpty { startModell.navn = n }
+            if let n = d["navn"] as? String, !n.isEmpty { startModell.navn = n; startModell.navnKjent = true }
             if let k = d["kode"] as? String, !k.isEmpty { startModell.kode = k }
             startModell.fortsett = d["fortsett"] as? String ?? ""
             startModell.feil = d["melding"] as? String ?? ""
@@ -484,7 +494,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         fram(degVert?.view.superview)
     }
     /// Siden i Deg-fanen byttet (gjengene, statistikken …): nettsiden tar over til kontosiden sier «deg» igjen
-    func skjulDeg() { fjernOverlegg(&degVert) }
+    func skjulDeg() { fjernOverlegg(&degVert); if let j = faner.firstIndex(of: "deg") { settDekket(j, false) } }
 
     // MARK: Leker (LekerSkjerm.swift) – native liste over lekesiden
     private let lekerModell = LekerModell()
@@ -500,7 +510,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         }
         fram(lekerVert?.view.superview)
     }
-    func skjulLeker() { fjernOverlegg(&lekerVert) }
+    func skjulLeker() { fjernOverlegg(&lekerVert); if let j = faner.firstIndex(of: "leker") { settDekket(j, false) } }
     private func degHandling(_ h: String) {
         switch h {
         case "inn", "ny":
@@ -517,6 +527,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
     func settOverleggSkjult(_ skjult: Bool) {
+        arkOppe = skjult; oppdaterDekket()
         let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, degVert?.view, lekerVert?.view]
         for v in hoster { ((v?.superview as? HullVisning) ?? v)?.isHidden = skjult }
         lobbyHull?.isHidden = skjult; startHull?.isHidden = skjult
@@ -634,12 +645,14 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     /// Forsiden: «Klar for vors?» med nettsidens demo-stue i et hull (gjestene går inn døra for hver bokstav i koden), Lag rom og Bli med
     private func visStart(i side: UIViewController, _ vis: Bool) {
+        startModell.aktiv = vis   // på vei ut (rommet er klart) skal skjermen ikke lenger flytte stua
         if vis {
             if startVert == nil {
                 let h = UIHostingController(rootView: StartSkjerm(m: startModell))
                 h.view.backgroundColor = .clear
                 startVert = leggOverlegg(h, over: side, nett: startModell.nett)
                 startHull = h.view.superview as? HullVisning
+                startModell.tastaturEndret = { [weak self] in self?.aapneStartHull() }
             }
             fram(startVert?.view.superview)
             aapneStartHull()
@@ -655,7 +668,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     private func aapneStartHull() {
         guard let hull = startHull, let nett = startModell.nett, stuaRekt.height > 0 else { return }
-        hull.hull = nett.convert(stuaRekt, to: hull)
+        // Tastaturet oppe: skjermen er skjøvet opp, og navnefeltet kan ligge der stua var – trykkene skal da til feltene, ikke gjennom
+        hull.hull = startModell.tastaturH > 0 ? .zero : nett.convert(stuaRekt, to: hull)
     }
 
     private func gaa(_ v: MittvorsViewController?, til url: String) {
@@ -745,8 +759,13 @@ private extension Array {
 class HullVisning: UIView {
     var hull: CGRect = .zero
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        if hull.contains(point) { return nil }
-        return super.hitTest(point, with: event)
+        let v = super.hitTest(point, with: event)
+        if hull.contains(point) {
+            // Et ekte tekstfelt (navnet, koden) som ligger innenfor hullet beholder trykket – ellers går det gjennom til nettsiden
+            if let v = v, v is UITextField || v is UITextView || v.superview is UITextField { return v }
+            return nil
+        }
+        return v
     }
 }
 
@@ -785,12 +804,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
 
     /// Simulator-sjekken: nettsiden sender feil og en kort tilstand hit, og det havner i Documents/sjekk.log
     @objc func logg(_ call: CAPPluginCall) {
-        let tekst = (call.getString("tekst") ?? "") + "\n"
-        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fil = dir.appendingPathComponent("sjekk.log")
-            if let h = try? FileHandle(forWritingTo: fil) { h.seekToEndOfFile(); h.write(tekst.data(using: .utf8)!); try? h.close() }
-            else { try? tekst.write(to: fil, atomically: true, encoding: .utf8) }
-        }
+        SjekkLogg.skriv(call.getString("tekst") ?? "", stempel: false)
         call.resolve()
     }
 
@@ -940,5 +954,18 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
             SkallViewController.delt?.skjul(skal, fra: vc)
             call.resolve()
         }
+    }
+}
+
+/// Simulator-sjekken (MV_SJEKK=1): linjer fra nettsiden og fra Swift havner i Documents/sjekk.log, som jobben henter ut
+enum SjekkLogg {
+    static let paa = ProcessInfo.processInfo.environment["MV_SJEKK"] == "1"
+    static func skriv(_ t: String, stempel: Bool = true) {
+        guard paa, let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        let f = DateFormatter(); f.dateFormat = "HH:mm:ss"
+        let tekst = (stempel ? f.string(from: Date()) + " swift " : "") + t + "\n"
+        let fil = dir.appendingPathComponent("sjekk.log")
+        if let h = try? FileHandle(forWritingTo: fil) { h.seekToEndOfFile(); h.write(tekst.data(using: .utf8)!); try? h.close() }
+        else { try? tekst.write(to: fil, atomically: true, encoding: .utf8) }
     }
 }

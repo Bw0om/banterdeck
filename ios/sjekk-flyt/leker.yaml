@@ -1,0 +1,35 @@
+# Simulator-sjekken: Leker-fanen – alderssjekken, lista, filtrene, en lekeside og tilbake.
+appId: no.mittvors.app
+---
+# Alderssjekken (iPhone-dialog) kommer et øyeblikk etter lista
+- extendedWaitUntil:
+    visible:
+      text: "(?is)ja, jeg er over 18.*"
+    timeout: 8000
+    optional: true
+- tapOn:
+    text: "(?is)ja, jeg er over 18.*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 20-leker
+- tapOn:
+    text: "I appen"
+- waitForAnimationToEnd
+- takeScreenshot: 21-leker-i-appen
+- tapOn:
+    text: "Alle"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)muldvarpen.*"
+- extendedWaitUntil:
+    notVisible:
+      text: "(?is)spill fra hver sin telefon.*"
+    timeout: 15000
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 22-lekeside
+- swipe:
+    start: 1%, 50%
+    end: 70%, 50%
+- waitForAnimationToEnd
+- takeScreenshot: 23-leker-tilbake
