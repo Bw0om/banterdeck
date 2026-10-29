@@ -173,6 +173,8 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
   document.addEventListener('mv-skjema', (e) => { if (harSkall) Skall.skjema(e.detail || {}).catch(() => {}); });
   // Et nettark (Mer, Stua, uke, regler …) er oppe: den native skjermen trekker seg til side så lenge
   document.addEventListener('mv-ark-aapen', (e) => { if (harSkall) Skall.arkAapen(e.detail || {}).catch(() => {}); });
+  // Beskjeder (toast) vises også native – nettsidens ligger ofte under en native skjerm
+  document.addEventListener('mv-toast', (e) => { if (harSkall && Skall.toast) Skall.toast(e.detail || {}).catch(() => {}); });
   // «Si noe» i stua: iOS-dialog med tekstfelt (tastaturet håndteres av iOS)
   document.addEventListener('mv-si', (e) => { if (harSkall) Skall.si(e.detail || {}).catch(() => {}); });
   document.addEventListener('mv-stua', (e) => { if (harSkall && Skall.stua) Skall.stua(e.detail || {}).catch(() => {}); });

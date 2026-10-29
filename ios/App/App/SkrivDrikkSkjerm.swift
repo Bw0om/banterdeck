@@ -12,7 +12,7 @@ struct SdKast { let tittel: String, tekst: String, kanStemme: Bool, mitt: String
 
 struct SdData {
     let fase: String, naa: Double, frist: Double, egen: Bool, pos: Int, sek: Double, tittel: String, chip: String, gul: Bool
-    let intro: String, folk: [SdHode], med: String, start: String, vent: String
+    let intro: String, folk: [SdHode], med: String, start: String, vent: String, taMed: String, mineMed: String, lagre: String
     let til: [SdTil], tilValgt: String, tilEtikett: String, skriv: String, plass: String, startere: [String], skjemaId: String
     let bunke: [String], mine: Int, mineTekst: String, totaltTekst: String, stokk: String, stokkLink: String, tidUte: String
     let kortet: String, kortUnder: String, mottakere: [SdHode], tilAlle: String, tilDeg: String, tilMeg: Bool, trekkNr: String, kast: SdKast?
@@ -27,7 +27,7 @@ struct SdData {
         func n(_ k: String) -> Double { (d[k] as? NSNumber)?.doubleValue ?? 0 }
         func i(_ k: String) -> Int { (d[k] as? NSNumber)?.intValue ?? 0 }
         fase = s("fase"); naa = n("naa"); frist = n("frist"); egen = b("egen"); pos = i("pos"); sek = n("sek"); tittel = s("tittel"); chip = s("chip"); gul = b("gul")
-        intro = s("intro"); folk = (d["folk"] as? [[String: Any]] ?? []).map { SdData.hode($0) }; med = s("med"); start = s("start"); vent = s("vent")
+        intro = s("intro"); folk = (d["folk"] as? [[String: Any]] ?? []).map { SdData.hode($0) }; med = s("med"); start = s("start"); vent = s("vent"); taMed = s("taMed"); mineMed = s("mineMed"); lagre = s("lagre")
         til = (d["til"] as? [[String: Any]] ?? []).map { SdTil(v: $0["v"] as? String ?? "", tekst: $0["tekst"] as? String ?? "", farge: $0["farge"] as? String ?? "") }
         tilValgt = s("tilValgt"); tilEtikett = s("tilEtikett"); skriv = s("skriv"); plass = s("plass"); startere = d["startere"] as? [String] ?? []
         skjemaId = s("skjemaId").isEmpty ? "rfSkjema" : s("skjemaId")
@@ -196,6 +196,17 @@ struct SkrivDrikkSkjerm: View {
         }
         if !d.start.isEmpty { storKnapp(d.start) { m.trykk("startklokke") } }
         if !d.vent.isEmpty { Text(d.vent).font(.archivo(15, vekt: 600)).opacity(0.7) }
+        taMed(d)
+    }
+
+    /// Kort fra kortstokkene dine: nettsidens velger åpnes som ark over denne skjermen
+    @ViewBuilder private func taMed(_ d: SdData) -> some View {
+        if !d.taMed.isEmpty {
+            HStack(spacing: 6) {
+                lenke(d.taMed) { m.trykk("rf-velg") }
+                if !d.mineMed.isEmpty { Text("· " + d.mineMed).font(.archivo(13, vekt: 800)).opacity(0.7) }
+            }.frame(maxWidth: .infinity)
+        }
     }
 
     // MARK: Skriv – til hvem, kortet (dialogen), forslag, og bunken din
@@ -248,6 +259,7 @@ struct SkrivDrikkSkjerm: View {
                 bunken(d)
                 if n <= 0 { storKnapp(d.stokk) { m.trykk("stokk") } }
                 else if !d.stokkLink.isEmpty { lenke(d.stokkLink) { m.trykk("stokk") }.frame(maxWidth: .infinity) }
+                if n > 0 { taMed(d) }
             }
         }
     }
@@ -316,6 +328,7 @@ struct SkrivDrikkSkjerm: View {
         if !d.neste.isEmpty { storKnapp(d.neste) { m.trykk("neste", ["pos": String(d.pos)]) } }
         if !d.nesteVent.isEmpty { Text(d.nesteVent).font(.archivo(15, vekt: 600)).opacity(0.7).frame(maxWidth: .infinity) }
         if !d.kastLink.isEmpty { lenke(d.kastLink) { m.trykk("rf-kast") }.frame(maxWidth: .infinity) }
+        if !d.lagre.isEmpty { lenke(d.lagre) { m.trykk("lagrestokk") }.frame(maxWidth: .infinity) }
     }
 
     /// Selve kortet: hvem det er til øverst, teksten stor, og hvor det kom fra

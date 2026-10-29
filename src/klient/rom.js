@@ -58,6 +58,8 @@ export function startRom(LEKNAVN, LANG) {
     // Lang nok til å rekke å lese den etter et par glass: minst 3 sekunder, lengre for lange beskjeder
     var ms = Math.min(7000, Math.max(3000, String(t).length * 75));
     clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, ms);
+    // I appen ligger ofte en native skjerm over nettsiden: skallet viser den samme beskjeden
+    if (harSkall()) { try { document.dispatchEvent(new CustomEvent('mv-toast', { detail: { tekst: String(t) } })); } catch (x) {} }
   }
   function settAdresse(k) {
     var u = location.pathname + (k ? '?k=' + k : '');
@@ -3874,7 +3876,7 @@ export function startRom(LEKNAVN, LANG) {
     var hode = function (id) { var h = { id: id, navn: id === meg ? T('Deg', 'You') : navn(id), farge: nrFarge(id), png: '' }; jobber.push(vlHodePng(id, '').then(function (b) { h.png = b; })); return h; };
     var d = { fase: s.fase, naa: Date.now() + klokkeAvvik, frist: s.fase === 'skriv' && s.frist ? s.frist : 0, egen: !!s.egen, pos: s.pos || 0, sek: Number(s.sek) || 0,
       tittel: T('Skriv og drikk', 'Write & Drink') + (s.fase === 'trekk' ? ' · ' + (s.pos + 1) + T(' av ', ' of ') + s.totalt : ''), chip: '', gul: false,
-      intro: '', folk: [], med: '', start: '', vent: '',
+      intro: '', folk: [], med: '', start: '', vent: '', taMed: '', mineMed: '', lagre: '',
       til: [], tilValgt: '', tilEtikett: T('Til', 'To'), skriv: '', plass: '', startere: [], skjemaId: 'rfSkjema', bunke: [], mine: 0, mineTekst: '', totaltTekst: '', stokk: '', stokkLink: '', tidUte: '',
       kortet: '', kortUnder: '', mottakere: [], tilAlle: '', tilDeg: '', tilMeg: false, trekkNr: '', kast: null, neste: '', nesteVent: '', kastLink: '',
       stempel: '', skamIntro: '', skam: [], straff: '', videre: '',
@@ -3884,7 +3886,9 @@ export function startRom(LEKNAVN, LANG) {
       d.intro = T('Alle skriver drikkekort i ', 'Everyone writes drinking cards for ') + s.sek + T(' sekunder. Så stokkes de og trekkes – og noen er til deg.', ' seconds. Then they are shuffled and drawn – and some are for you.');
       d.folk = alle.map(function (p) { return hode(p.id); }); d.med = alle.length + T(' med', ' in');
       if (vert) d.start = T('Start klokka', 'Start the clock'); else d.vent = T('Venter på at ', 'Waiting for ') + navn(tilstand.vert) + T(' starter klokka …', ' to start the clock …');
+      d.taMed = T('Ta med kort fra kortstokkene dine', 'Bring cards from your decks'); if (s.mineMed) d.mineMed = s.mineMed + T(' tatt med', ' brought');
     } else if (s.fase === 'skriv') {
+      d.taMed = T('Ta med kort fra kortstokkene dine', 'Bring cards from your decks'); if (s.mineMed) d.mineMed = s.mineMed + T(' tatt med', ' brought');
       var n = rfIgjen(s), mine = s.mineKort || [];
       if (!sdStartere) sdNyeStartere();
       var valg = [['alle', T('Alle', 'Everyone')], ['trekker', T('Den som trekker', 'Whoever draws')]].concat(alle.filter(function (p) { return p.id !== meg; }).map(function (p) { return [p.id, p.navn]; })).concat([['to', T('To tilfeldige', 'Two at random')]]);
@@ -3915,6 +3919,7 @@ export function startRom(LEKNAVN, LANG) {
       if (!s.videre || s.videre.indexOf(meg) !== -1) d.neste = T('Trekk neste', 'Draw next');
       else d.nesteVent = s.videre.filter(function (id, i, a) { return a.indexOf(id) === i; }).map(function (id) { return navn(id); }).join(T(' eller ', ' or ')) + T(' går videre.', ' moves on.');
       if (vert && !s.egen && !kk) d.kastLink = T('Kast i Skammekroken', 'Bin to the corner of shame');
+      if (!s.egen && s.alleKort) d.lagre = T('Lagre kortene', 'Save the cards');
     }
     var slutt = s.fase === 'ferdig' ? skjermBlokker(lekSlutt([!s.egen ? ['nytt', T('Ny skriverunde', 'New writing round'), T('Alle skriver nye kort', 'Everyone writes new cards')] : null,
       ['rf-igjen', T('Samme bunke igjen', 'Same pile again'), T('Stokk de samme kortene', 'Shuffle the same cards')]])).then(function (b) { d.slutt = b; }) : Promise.resolve();
@@ -6673,7 +6678,11 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'rf-igjen') return gjor({ handling: 'rf-igjen' });
     if (g === 'rf-velg') {
       if (!window.BDVelgKort) return;
+      // I appen ligger den native skjermen over nettsiden: den trekker seg til side mens velgeren er oppe (som arkene)
+      var velgerISkall = harSkall();
+      if (velgerISkall) { document.documentElement.classList.add('ark-aapen'); try { document.dispatchEvent(new CustomEvent('mv-ark-aapen', { detail: { aapen: true } })); } catch (x) {} }
       return window.BDVelgKort({ maks: 60 }).then(function (kort) {
+        if (velgerISkall && !aapentArk) { document.documentElement.classList.remove('ark-aapen'); try { document.dispatchEvent(new CustomEvent('mv-ark-aapen', { detail: { aapen: false } })); } catch (x) {} }
         if (kort.length) { gjorAlltid({ handling: 'rf-legg-til', kort: kort }); toast(kort.length + T(' kort er lagt i bunken din', ' cards added to your pile')); }
       });
     }
