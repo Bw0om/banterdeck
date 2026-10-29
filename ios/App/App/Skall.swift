@@ -339,7 +339,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private var arkOppe = false
     private func settDekket(_ i: Int, _ d: Bool) { dekket[i] = d; oppdaterDekket() }
     private func oppdaterDekket() { for (i, v) in visninger { v.webView?.accessibilityElementsHidden = (dekket[i] ?? false) && !arkOppe } }
-    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg"]
+    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg", "ts", "sd"]
 
     /// Siden i en skjerm sier hvilken skjerm den viser: «start» → vis den native startskjermen over Spill-fanen, ellers ta den bort
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
@@ -370,6 +370,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva != "pr" { visPr(nil, over: side) }
         if hva != "gr" { visGr(nil, over: side) }
         if hva != "bg" { visBg(nil, over: side) }
+        if hva != "ts" { visTs(nil, over: side) }
+        if hva != "sd" { visSd(nil, over: side) }
         // Lekene som tegnes native (Pekeleken): skjermen ligger over nettsiden så lenge leken pågår
         if hva == "lek" { visStart(i: side, false); visKort(nil, over: side); visLek(d, over: side, nett: v.webView); return } else { visLek(nil, over: side, nett: nil) }
         if hva == "kort" { visStart(i: side, false); visRof(nil, over: side); kortModell.nett = v.webView; visKort(d, over: side); return } else { visKort(nil, over: side) }
@@ -382,6 +384,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva == "pr" { visStart(i: side, false); prModell.nett = v.webView; visPr(d, over: side); return } else { visPr(nil, over: side) }
         if hva == "gr" { visStart(i: side, false); grModell.nett = v.webView; visGr(d, over: side); return } else { visGr(nil, over: side) }
         if hva == "bg" { visStart(i: side, false); bgModell.nett = v.webView; visBg(d, over: side); return } else { visBg(nil, over: side) }
+        if hva == "ts" { visStart(i: side, false); tsModell.nett = v.webView; visTs(d, over: side); return } else { visTs(nil, over: side) }
+        if hva == "sd" { visStart(i: side, false); sdModell.nett = v.webView; visSd(d, over: side); return } else { visSd(nil, over: side) }
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
@@ -526,9 +530,44 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     }
 
     // MARK: Nettark oppe (Mer, Stua, uke, regler …): de native skjermene trekker seg til side
+    // MARK: Toast – en kort beskjed nederst, over alt
+    private var toastVisning: UIView?
+    private var toastArbeid: DispatchWorkItem?
+    func visToast(_ tekst: String) {
+        toastVisning?.removeFromSuperview(); toastArbeid?.cancel()
+        let boks = UIView()
+        boks.backgroundColor = UIColor(red: 0.086, green: 0.071, blue: 0.059, alpha: 1)
+        boks.layer.cornerRadius = 14
+        boks.translatesAutoresizingMaskIntoConstraints = false
+        boks.isUserInteractionEnabled = false
+        let l = UILabel()
+        l.text = tekst; l.numberOfLines = 3; l.textAlignment = .center
+        l.textColor = UIColor(red: 1, green: 0.973, blue: 0.933, alpha: 1)
+        l.font = UIFont(name: "Archivo-SemiBold", size: 15) ?? UIFont.systemFont(ofSize: 15, weight: .semibold)
+        l.translatesAutoresizingMaskIntoConstraints = false
+        boks.addSubview(l)
+        view.addSubview(boks)
+        NSLayoutConstraint.activate([
+            l.topAnchor.constraint(equalTo: boks.topAnchor, constant: 10), l.bottomAnchor.constraint(equalTo: boks.bottomAnchor, constant: -10),
+            l.leadingAnchor.constraint(equalTo: boks.leadingAnchor, constant: 14), l.trailingAnchor.constraint(equalTo: boks.trailingAnchor, constant: -14),
+            boks.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            boks.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 16),
+            boks.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -(tabBar.isHidden ? 16 : tabBar.bounds.height + 10))
+        ])
+        boks.alpha = 0; boks.transform = CGAffineTransform(translationX: 0, y: 12)
+        UIView.animate(withDuration: 0.22) { boks.alpha = 1; boks.transform = .identity }
+        toastVisning = boks
+        let ms = min(7000, max(3000, tekst.count * 75))
+        let arbeid = DispatchWorkItem { [weak self, weak boks] in
+            UIView.animate(withDuration: 0.25, animations: { boks?.alpha = 0 }) { _ in boks?.removeFromSuperview(); if self?.toastVisning === boks { self?.toastVisning = nil } }
+        }
+        toastArbeid = arbeid
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(ms), execute: arbeid)
+    }
+
     func settOverleggSkjult(_ skjult: Bool) {
         arkOppe = skjult; oppdaterDekket()
-        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, degVert?.view, lekerVert?.view]
+        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, tsVert?.view, sdVert?.view, degVert?.view, lekerVert?.view]
         for v in hoster { ((v?.superview as? HullVisning) ?? v)?.isHidden = skjult }
         lobbyHull?.isHidden = skjult; startHull?.isHidden = skjult
     }
@@ -549,6 +588,24 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         bgModell.sett(d)
         if bgVert == nil { bgVert = leggOverlegg(UIHostingController(rootView: BingoSkjerm(m: bgModell)), over: side, nett: bgModell.nett) }
         fram(bgVert?.view.superview)
+    }
+
+    // To sannheter og en løgn (TosannheterSkjerm.swift) og Skriv og drikk (SkrivDrikkSkjerm.swift)
+    private let tsModell = TsModell()
+    private var tsVert: UIHostingController<TosannheterSkjerm>?
+    private func visTs(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&tsVert); return }
+        tsModell.sett(d)
+        if tsVert == nil { tsVert = leggOverlegg(UIHostingController(rootView: TosannheterSkjerm(m: tsModell)), over: side, nett: tsModell.nett) }
+        fram(tsVert?.view.superview)
+    }
+    private let sdModell = SdModell()
+    private var sdVert: UIHostingController<SkrivDrikkSkjerm>?
+    private func visSd(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&sdVert); return }
+        sdModell.sett(d)
+        if sdVert == nil { sdVert = leggOverlegg(UIHostingController(rootView: SkrivDrikkSkjerm(m: sdModell)), over: side, nett: sdModell.nett) }
+        fram(sdVert?.view.superview)
     }
 
     // Bussruta (BussrutaSkjerm.swift) og President (PresidentSkjerm.swift)
@@ -786,6 +843,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "ark", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "pluss", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "arkAapen", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "toast", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stua", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "si", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "logginn", returnType: CAPPluginReturnPromise),
@@ -900,6 +958,15 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     /// Et nettark er oppe/lukket: {aapen}
+    /// En kort beskjed nederst (nettsidens toast), siden en native skjerm ofte dekker nettsidens egen
+    @objc func toast(_ call: CAPPluginCall) {
+        let tekst = call.getString("tekst") ?? ""
+        DispatchQueue.main.async {
+            if !tekst.isEmpty { SkallViewController.delt?.visToast(tekst) }
+            call.resolve()
+        }
+    }
+
     @objc func arkAapen(_ call: CAPPluginCall) {
         let aapen = call.getBool("aapen") ?? false
         DispatchQueue.main.async {

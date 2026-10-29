@@ -55,7 +55,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: 4XRK
+rom for flere: SMJB
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
@@ -94,3 +94,43 @@ Take screenshot 46-mer-i-leken... COMPLETED
 Tap on "Lukk"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 47-tilbake-i-leken... COMPLETED
+===== tosannheter =====
+Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+ > Flow tosannheter
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Take screenshot 50-to-sannheter-regler... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*i stolen.*" is visible... COMPLETED
+Take screenshot 51-to-sannheter-venter... COMPLETED
+Assert that "(?is).*trykk på løgnen.*" is visible... COMPLETED
+Take screenshot 52-to-sannheter-stem... COMPLETED
+Tap on "(?is).*jeg kan jonglere.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 53-to-sannheter-stemt... COMPLETED
+===== skriv =====
+Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+ > Flow skriv
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*skriv et kort.*" is visible... COMPLETED
+Take screenshot 54-skriv-og-drikk... COMPLETED
+Tap on "(?is).*skriv et kort.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 55-skriv-dialog... COMPLETED
+Input text Alle drikker to... COMPLETED
+Tap on "(?is).*legg i bunken.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Assert that "(?is).*kort fra deg.*" is visible... COMPLETED
+Take screenshot 56-kort-i-bunken... COMPLETED
+===== skriv2 =====
+Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+ > Flow skriv2
+Assert that "(?is).*(trekk neste|går videre).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 57-skriv-og-drikk-trekk... COMPLETED

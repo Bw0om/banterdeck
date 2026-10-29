@@ -1,0 +1,32 @@
+# Simulator-sjekken: verten (jobben) har startet Skriv og drikk og klokka – appen skriver et kort via iPhonens dialog (SkrivDrikkSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*skriv et kort.*"
+    timeout: 90000
+- takeScreenshot: 54-skriv-og-drikk
+- tapOn:
+    text: "(?is).*skriv et kort.*"
+- waitForAnimationToEnd
+- takeScreenshot: 55-skriv-dialog
+- inputText: "Alle drikker to"
+- tapOn:
+    text: "(?is).*legg i bunken.*"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*kort fra deg.*"
+    timeout: 15000
+- takeScreenshot: 56-kort-i-bunken

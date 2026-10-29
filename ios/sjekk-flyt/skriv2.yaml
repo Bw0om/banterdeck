@@ -1,0 +1,9 @@
+# Simulator-sjekken: verten (jobben) har stokket bunken i Skriv og drikk – appen ser kortet som ble trukket.
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(trekk neste|går videre).*"
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: 57-skriv-og-drikk-trekk

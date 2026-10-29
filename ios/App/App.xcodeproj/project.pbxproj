@@ -37,6 +37,8 @@
 		A1B2C3D4E5F60718293A4B91 /* BussrutaSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B90 /* BussrutaSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B93 /* PresidentSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B92 /* PresidentSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B95 /* GrisSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B94 /* GrisSkjerm.swift */; };
+		A1B2C3D4E5F60718293A4BA1 /* TosannheterSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BA0 /* TosannheterSkjerm.swift */; };
+		A1B2C3D4E5F60718293A4BA3 /* SkrivDrikkSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BA2 /* SkrivDrikkSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B97 /* BingoSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B96 /* BingoSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B99 /* ReglerArk.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B98 /* ReglerArk.swift */; };
 		A1B2C3D4E5F60718293A4B9D /* DegSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B9C /* DegSkjerm.swift */; };
@@ -75,6 +77,8 @@
 		A1B2C3D4E5F60718293A4B90 /* BussrutaSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BussrutaSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B92 /* PresidentSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresidentSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B94 /* GrisSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrisSkjerm.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4BA0 /* TosannheterSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TosannheterSkjerm.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4BA2 /* SkrivDrikkSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkrivDrikkSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B96 /* BingoSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BingoSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B98 /* ReglerArk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReglerArk.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B9C /* DegSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegSkjerm.swift; sourceTree = "<group>"; };
@@ -134,6 +138,8 @@
 				A1B2C3D4E5F60718293A4B90 /* BussrutaSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B92 /* PresidentSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B94 /* GrisSkjerm.swift */,
+				A1B2C3D4E5F60718293A4BA0 /* TosannheterSkjerm.swift */,
+				A1B2C3D4E5F60718293A4BA2 /* SkrivDrikkSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B96 /* BingoSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B98 /* ReglerArk.swift */,
 				A1B2C3D4E5F60718293A4B9C /* DegSkjerm.swift */,
@@ -256,6 +262,8 @@
 				A1B2C3D4E5F60718293A4B91 /* BussrutaSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B93 /* PresidentSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B95 /* GrisSkjerm.swift in Sources */,
+				A1B2C3D4E5F60718293A4BA1 /* TosannheterSkjerm.swift in Sources */,
+				A1B2C3D4E5F60718293A4BA3 /* SkrivDrikkSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B97 /* BingoSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B99 /* ReglerArk.swift in Sources */,
 				A1B2C3D4E5F60718293A4B9D /* DegSkjerm.swift in Sources */,
