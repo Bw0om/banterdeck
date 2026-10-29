@@ -3587,6 +3587,56 @@ export function startRom(LEKNAVN, LANG) {
     }
     return ut + '</div>';
   }
+  /** Fuck the Dealer til den native skjermen (DealerSkjerm.swift): kortet (bare dealeren), tastene, hintet, avgjørelsen og tellebrettet. */
+  function ftdData(s) {
+    var meg = tilstand.meg, vert = erVert(), jeg = s.dealer === meg, styrer = jeg || vert, k = s.kort, r = s.res, jobber = [];
+    var andre = s.fase === 'andre', nv = function (id) { return id === meg ? T('Du', 'You') : navn(id); };
+    var hode = function (id) { var h = { id: id, navn: nv(id), png: '' }; jobber.push(vlHodePng(id, '').then(function (b) { h.png = b; })); return h; };
+    var kort = function (x) { return x ? { v: ftdVn(x.v), f: x.f, rod: x.f === '♥' || x.f === '♦' } : null; };
+    var brett = []; for (var v = 1; v <= 13; v++) brett.push({ v: ftdVn(v), n: s.brukt[v] || 0, ute: (s.brukt[v] || 0) >= 4 });
+    var d = { fase: s.fase, jeg: jeg, styrer: styrer, pos: s.pos, n: s.n || 0, runde: s.runde || 1, naa: Date.now() + klokkeAvvik,
+      tittel: 'Fuck the Dealer · ' + (s.pos + (s.fase === 'ferdig' ? 0 : 1)) + ' / 52',
+      chip: s.fase === 'ferdig' ? T('Stokken er tom', 'The deck is empty') : jeg ? T('Du deler', 'You deal') : navn(s.dealer) + T(' deler', ' deals'),
+      bom: s.fase === 'ferdig' ? -1 : s.bom || 0, bomTekst: (s.bom || 0) + T(' av 3 bom', ' of 3 misses'),
+      brett: brett, brettTittel: T('Tellebrettet', 'The tally board'),
+      bytt: s.bytt && s.fase !== 'ferdig' ? (s.bytt.fra === meg ? T('Tre bom på rad – stokken gikk til ', 'Three misses in a row – the deck went to ') + navn(s.bytt.til) + '.' : jeg ? T('Tre bom på rad hos ', 'Three misses in a row for ') + navn(s.bytt.fra) + T(' – du deler nå!', ' – you deal now!') : T('Stokken gikk til ', 'The deck went to ') + navn(s.bytt.til) + '.') : '',
+      kort: null, taster: [], slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    if (s.fase === 'ferdig') {
+      var dr = s.drukket || {}, dt = s.dealt || {}, rekke = (s.ider || []).slice().sort(function (a, b) { return (dr[b] || 0) - (dr[a] || 0); }), topp1 = rekke[0];
+      d.ferdig = { etikett: T('Kveldens dealer', 'Dealer of the night'), navn: topp1 ? nv(topp1) : '–', under: topp1 ? T('Drakk ', 'Drank ') + (dr[topp1] || 0) + T(' slurker bak stokken.', ' sips behind the deck.') : '',
+        listeTittel: T('Slurker som dealer', 'Sips as dealer'), rader: rekke.map(function (id, i) { return Object.assign(hode(id), { plass: i + 1, delt: (dt[id] || 0) + T(' kort delt', ' cards dealt'), n: dr[id] || 0 }); }) };
+      jobber.push(skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny stokk – nestemann deler', 'New deck – next one deals')]])).then(function (b) { d.slutt = b; }));
+      return Promise.all(jobber).then(function () { return d; });
+    }
+    if (s.fase === 'res' && r) {
+      var treff = r.type !== 'bom';
+      d.res = { treff: treff, nr: r.nr, kort: kort(r.kort), n: r.n,
+        over: treff ? (r.type === 'treff1' ? T('Treff på første · dealeren drikker kortet', 'First-try hit · the dealer drinks the card') : T('Treff på andre · dealeren drikker halve', 'Second-try hit · the dealer drinks half')) : T('Avstanden ', 'The distance ') + ftdVn(r.g) + '–' + ftdVn(r.kort.v) + T(' · gjetteren drikker', ' · the guesser drinks'),
+        under: treff ? (jeg ? T('Fuck the dealer 🍻', 'Fuck the dealer 🍻') : navn(s.dealer) + T(' drikker', ' drinks')) : '',
+        gjettet: treff ? '' : T('Gjettet', 'Guessed'), g1: treff ? '' : ftdVn(r.g1), g: treff ? '' : ftdVn(r.g) };
+      d.videre = s.bom >= 3 ? T('Tre bom på rad – stokken går videre.', 'Three misses in a row – the deck moves on.') : '';
+      d.neste = styrer ? T('Neste kort →', 'Next card →') : ''; d.vent = styrer ? '' : navn(s.dealer) + T(' trykker neste.', ' taps next.');
+      return Promise.all(jobber).then(function () { return d; });
+    }
+    if (!styrer) {
+      d.ventTittel = andre ? T('Ett forsøk til', 'One more try') : T('Noen gjetter', 'Someone guesses');
+      d.vent = andre ? navn(s.dealer) + T(' sa «', ' said “') + (s.hint === 'hoy' ? T('høyere', 'higher') : T('lavere', 'lower')) + T('» enn ', '” than ') + ftdVn(s.g1) : T('Si en verdi høyt – ', 'Call a value out loud – ') + navn(s.dealer) + T(' trykker den.', ' taps it.');
+      return Promise.all(jobber).then(function () { return d; });
+    }
+    d.kort = kort(k);
+    d.bare = jeg ? T('Bare du', 'Only you') : T('Du trykker for ', 'You tap for ') + navn(s.dealer);
+    d.gjetterTittel = andre ? '' : T('Noen gjetter', 'Someone guesses'); d.gjetterUnder = andre ? '' : T('Trykk det som sies ↓', 'Tap what they say ↓');
+    d.hint = andre ? { opp: s.hint === 'hoy', over: jeg ? T('Si høyt', 'Say it out loud') : navn(s.dealer) + T(' sier', ' says'), ord: s.hint === 'hoy' ? T('«Høyere»', '“Higher”') : T('«Lavere»', '“Lower”'), enn: T(' enn ', ' than ') + ftdVn(s.g1) } : null;
+    d.etikettAndre = andre ? T('Ett forsøk til – trykk det som sies ↓', 'One more try – tap what they say ↓') : '';
+    for (var t = 1; t <= 13; t++) {
+      var ute = (s.brukt[t] || 0) >= 4, feilSide = andre && ((s.hint === 'hoy' && t <= s.g1) || (s.hint === 'lav' && t >= s.g1));
+      d.taster.push({ v: t, tekst: ftdVn(t), ute: ute || feilSide, mulig: andre && !ute && !feilSide, streket: andre && t === s.g1 });
+    }
+    var treffN = andre ? Math.ceil(k.v / 2) : k.v;
+    d.infoTreff = { n: String(treffN), tekst: andre ? T('treff – du drikker halve', 'hit – you drink half') : T('treff – du drikker kortet', 'hit – you drink the card') };
+    d.infoBom = andre ? { n: '|' + ftdVn(k.v) + '–?|', tekst: T('bom – gjetteren drikker', 'miss – the guesser drinks') } : { n: '', tekst: T('bom – si høyere/lavere', 'miss – say higher/lower') };
+    return Promise.all(jobber).then(function () { return d; });
+  }
   function dealerSpill(s) {
     var meg = tilstand.meg, vert = erVert(), jeg = s.dealer === meg, styrer = jeg || vert, k = s.kort, r = s.res;
     if (s.runde && ftdSett.runde !== s.runde) ftdSett = { runde: s.runde };
@@ -4458,6 +4508,85 @@ export function startRom(LEKNAVN, LANG) {
       : k === 0 ? T('Midt på treet – ingenting', 'Somewhere in between – nothing') : !mitt ? T('Ingen svar – drikk én', 'No answer – drink one') : tall ? T('Lengst unna – drikk én', 'Furthest off – drink one') : T('Feil – drikk én', 'Wrong – drink one');
     return '<div class="nr-resultat ' + (k > 0 ? 'rett' : k === 0 ? 'null' : 'feil') + (nrVist !== s.rid + ':' + s.i ? ' inn' : '') + '"><b>' + tittel + '</b>' +
       (s.info ? '<span>' + esc(s.info) + (s.url ? ' <a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + T('Les saken hos ', 'Read it at ') + esc(s.kilde) + '</a>' : '') + '</span>' : '') + '</div>';
+  }
+  /** Nyhetsrunden til den native skjermen (NyhetsrundenSkjerm.swift): avishodet, spørsmålet, svarmåten (A–D, talltastatur eller
+      skrivedialog), avsløringen med hoder og tallinje, lista, og pallen. Nettsiden holder tilstanden og klokka. */
+  function nrData(s) {
+    var vert = erVert(), alle = tilstand.spillere || [], meg = tilstand.meg, jobber = [];
+    var hode = function (id, uttrykk) { var h = { id: id, navn: id === meg ? T('Du', 'You') : navn(id), png: '' }; jobber.push(vlHodePng(id, uttrykk || '').then(function (b) { h.png = b; })); return h; };
+    var lengder = function (g) { var valg = [10, 15, 30].filter(function (n) { return n < s.totalt; }).concat([s.totalt]).filter(function (n, i, a) { return a.indexOf(n) === i; });
+      return valg.map(function (n) { return { n: n, g: g, tekst: n === s.totalt ? T('Hele', 'All') : n <= 10 ? T('Kort', 'Short') : T('Vanlig', 'Usual'), valgt: g === 'nr-lengde' && s.lengde === n }; }); };
+    var d = { fase: s.fase, i: s.i || 0, antall: s.antall || 0, uke: String(s.uke || ''), vert: vert, naa: Date.now() + klokkeAvvik, frist: 0, lokale: EN ? 'en-GB' : 'nb-NO',
+      tittel: 'Nyhetsrunden', under: T('Uke ', 'Week ') + s.uke + ' · ' + (s.fase === 'klar' ? s.lengde + T(' spørsmål', ' questions') : s.fase === 'ferdig' ? s.antall + T(' spørsmål', ' questions') : T('Spørsmål ', 'Question ') + (s.i + 1) + T(' av ', ' of ') + s.antall),
+      slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    if (s.fase === 'klar') {
+      d.klar = { forside: T('Uke ', 'Week ') + s.uke + '.', under: T('Hva fikk dere med dere?', 'Were you paying attention?'), hoder: alle.map(function (p) { return hode(p.id); }),
+        lengder: vert ? lengder('nr-lengde') : [], start: vert ? T('Første spørsmål', 'First question') : '', vent: vert ? '' : T('Venter på at ', 'Waiting for ') + navn(s.vert) + T(' starter …', ' to start …') };
+      return Promise.all(jobber).then(function () { return d; });
+    }
+    if (s.fase === 'ferdig') {
+      var l = s.tavle || [], k = s.kaaringer || {};
+      var delt = l.filter(function (x) { return l[0] && x.riktige === l[0].riktige; });
+      var kaar = [];
+      if (k.tall) kaar.push({ tittel: T('Tallgeni:', 'Number genius:'), tekst: navn(k.tall.id) + T(' var nærmest på ', ' was closest on ') + k.tall.n + T(' av ', ' of ') + k.tallAntall + T(' tallspørsmål', ' number questions') });
+      if (k.lurt) kaar.push({ tittel: T('Lurt av tull:', 'Fooled by nonsense:'), tekst: navn(k.lurt.id) + T(' trodde på ', ' believed ') + k.lurt.n + T(' av ', ' of ') + k.tullAntall + T(' tullesaker', ' made-up stories') });
+      if (k.ingen) kaar.push({ tittel: T('Ingen fikk:', 'Nobody got:'), tekst: '«' + String(k.ingen.q).slice(0, 90) + (String(k.ingen.q).length > 90 ? '…' : '') + '» (' + k.ingen.svar + ')' });
+      d.ferdig = { tittel: !l[0] || !l[0].riktige ? T('Ingen fikk noe riktig', 'Nobody got anything right') : delt.length > 1 ? T('Delt seier: ', 'Shared win: ') + delt.map(function (x) { return x.navn; }).join(T(' og ', ' and ')) : T('Ukens nyhetsnerd: ', 'News nerd of the week: ') + l[0].navn,
+        pall: l.slice(0, 3).map(function (x, i) { return Object.assign(hode(x.id), { navn: x.navn, n: x.riktige, plass: i + 1 }); }),
+        kaaringer: kaar, rest: l.slice(3).map(function (x, i) { return Object.assign(hode(x.id), { navn: x.navn, n: x.riktige, plass: i + 4 }); }),
+        nyEtikett: vert ? T('Ny runde fra uke ', 'New round from week ') + s.uke : '', lengder: vert ? lengder('nr-nytt') : [], smaa: vert ? T('Kort og vanlig tar spørsmål dere ikke har hatt ennå.', 'Short and usual pick questions you have not had yet.') : '' };
+      if (s.rid) { var sp = nrSpilt(); if (sp.indexOf(s.rid) === -1) { sp.push(s.rid); skriv('bd_nr_spilt', sp.slice(-300)); } }
+      return Promise.all(jobber).then(function () { return d; });
+    }
+    var spm = s.fase === 'spm', har = s.harSvart || [], mitt = s.mittSvar;
+    d.frist = spm ? s.frist || 0 : 0;
+    d.sporsmal = { type: TYPER[s.qtype] || '', les: vert && spm ? T('Les det høyt', 'Read it out loud') : '', q: String(s.q || '') };
+    if (spm) {
+      d.spm = { qtype: s.qtype, mitt: mitt || '', mangler: alle.length - har.length,
+        alt: s.alt ? s.alt.map(function (a, i) { return { bokstav: 'ABCD'.charAt(i), tekst: a, valgt: mitt === a }; }) : [],
+        tall: s.qtype === 'tall' && !s.alt ? { etikett: T('Gjetningen din', 'Your guess'), taster: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', '⌫'], mitt: mitt ? String(mitt).replace(/\D/g, '') : '', las: T('Lås inn ', 'Lock in '), bytt: T('Bytt til ', 'Change to '), last: T('Låst inn: ', 'Locked in: ') } : null,
+        fritt: !s.alt && s.qtype !== 'tall' ? { skjemaId: 'nrSkjema', knapp: mitt ? T('Endre svaret', 'Change the answer') : T('Skriv svaret ditt', 'Type your answer'), svart: mitt ? T('Du svarte: ', 'You answered: ') + mitt : '' } : null,
+        vis: vert ? (alle.length - har.length > 0 ? T('Vis svaret nå', 'Show the answer now') + ' (' + (alle.length - har.length) + T(' mangler', ' missing') + ')' : T('Vis svaret', 'Show the answer')) : '',
+        vent: vert ? '' : mitt ? T('Låst inn.', 'Locked in.') : '',
+        folk: alle.map(function (p) { return Object.assign(hode(p.id), { oppe: har.indexOf(p.id) !== -1 }); }), status: har.length + T(' av ', ' of ') + alle.length + T(' har svart', ' answered') };
+      return Promise.all(jobber).then(function () { return d; });
+    }
+    // Svaret er vist
+    var res = s.resultat || {}, sv = s.svarene || {}, tall = s.qtype === 'tall', k2 = res[meg];
+    var sv2 = { fasitEtikett: T('Svaret', 'The answer'), fasit: String(s.fasit == null ? '' : s.fasit), alt: [], tallinje: null, liste: [],
+      neste: vert ? (s.i + 1 < s.antall ? T('Neste spørsmål', 'Next question') : T('Se hvem som vant', 'See who won')) : '', vent: vert ? '' : navn(s.vert) + T(' tar neste spørsmål.', ' moves on to the next question.') };
+    if (s.alt) sv2.alt = s.alt.map(function (a, i) {
+      var rett = a === s.fasit, minn = mitt === a, hvem = alle.filter(function (p) { return sv[p.id] === a; });
+      return { bokstav: 'ABCD'.charAt(i), tekst: a, rett: rett, feil: !rett && minn, hoder: hvem.map(function (p) { return hode(p.id, rett ? '' : 'flat'); }), stempel: rett ? T('Riktig', 'Right') : minn ? T('Feil', 'Wrong') : '' };
+    });
+    if (tall && s.tall) {
+      var t = s.tall, pos;
+      if (t.fasit > 0 && t.gjett.every(function (g) { return g.v > 0; })) {
+        var rr = t.gjett.map(function (g) { return Math.abs(Math.log(g.v / t.fasit)); }), maks = Math.max.apply(null, [0.05].concat(rr));
+        pos = function (v) { return 50 + 44 * Math.log(v / t.fasit) / maks; };
+      } else {
+        var alleV = t.gjett.map(function (g) { return g.v; }).concat([t.fasit]);
+        var lo = Math.min.apply(null, alleV), hi = Math.max.apply(null, alleV); if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
+        var pad = (hi - lo) * 0.08; pos = function (v) { return (v - lo + pad) / (hi - lo + 2 * pad) * 100; };
+      }
+      var sortert = t.gjett.slice().sort(function (a, b) { return a.v - b.v; }), rader = [];
+      sv2.tallinje = { fasitX: pos(t.fasit), fasitTekst: nrFormat(t.fasit), pinner: sortert.map(function (g) {
+        var x = pos(g.v), rad = 0; while (rader[rad] != null && x - rader[rad] < 17) rad++; rader[rad] = x;
+        return Object.assign(hode(g.id, res[g.id] < 0 ? 'flat' : ''), { x: x, rad: rad, tekst: nrFormat(g.v), beste: res[g.id] === 2, flat: res[g.id] < 0 });
+      }), rader: rader.length };
+    }
+    if (!s.alt) sv2.liste = alle.slice().sort(function (a, b) { return (res[b.id] || -1) - (res[a.id] || -1); }).map(function (p) {
+      var kk = res[p.id], merke = kk === 2 ? T('Nærmest', 'Closest') : kk === 1 ? (tall ? T('Innen 10 %', 'Within 10%') : T('Riktig', 'Right')) : kk === 0 ? '–' : T('Drikk', 'Drink');
+      return Object.assign(hode(p.id, kk < 0 ? 'flat' : ''), { navn: p.navn, hva: sv[p.id] ? (tall && /^\d+$/.test(sv[p.id]) ? nrFormat(sv[p.id]) : sv[p.id]) : T('ingen svar', 'no answer'), tomt: !sv[p.id], merke: merke, klasse: kk > 0 ? 'rett' : kk === 0 ? 'null' : 'feil', kanFlippe: vert });
+    });
+    if (alle.some(function (p) { return p.id === meg; })) {
+      sv2.resultat = { klasse: k2 > 0 ? 'rett' : k2 === 0 ? 'null' : 'feil',
+        tittel: k2 === 2 ? T('Nærmest – del ut to', 'Closest – hand out two') : k2 === 1 ? (tall ? T('Innen 10 % – del ut én', 'Within 10% – hand out one') : T('Riktig – del ut én', 'Right – hand out one'))
+          : k2 === 0 ? T('Midt på treet – ingenting', 'Somewhere in between – nothing') : !mitt ? T('Ingen svar – drikk én', 'No answer – drink one') : tall ? T('Lengst unna – drikk én', 'Furthest off – drink one') : T('Feil – drikk én', 'Wrong – drink one'),
+        info: s.info || '', kilde: s.kilde ? T('Les saken hos ', 'Read it at ') + s.kilde : '', url: s.url || '' };
+    }
+    d.svar = sv2;
+    return Promise.all(jobber).then(function () { return d; });
   }
   function nyhetsrundenSpill(s) {
     var vert = erVert(), alle = tilstand.spillere || [];
@@ -6304,7 +6433,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.type === 'tosannheter' ? 'ts' : s.type === 'regelfabrikken' ? 'sd' : s.type === 'overunder' ? 'ou' : s.type === 'opus' ? 'op' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (s.type === 'kort' && (NATIVE_LEKER.indexOf(s.lek) !== -1 || /^pakke-/.test(String(s.lek)) || s.lek === 'tanken-bak-sangen')) || (NATIVE_LEKER.indexOf(s.lek) !== -1 && s.lek !== 'kategorier') || NATIVE_TYPER.indexOf(s.type) !== -1 ? 'kort' : '')
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.type === 'tosannheter' ? 'ts' : s.type === 'regelfabrikken' ? 'sd' : s.type === 'overunder' ? 'ou' : s.type === 'opus' ? 'op' : s.type === 'dealer' ? 'ftd' : s.type === 'nyhetsrunden' ? 'nr' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (s.type === 'kort' && (NATIVE_LEKER.indexOf(s.lek) !== -1 || /^pakke-/.test(String(s.lek)) || s.lek === 'tanken-bak-sangen')) || (NATIVE_LEKER.indexOf(s.lek) !== -1 && s.lek !== 'kategorier') || NATIVE_TYPER.indexOf(s.type) !== -1 ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
@@ -6330,6 +6459,8 @@ export function startRom(LEKNAVN, LANG) {
     else if (nativ === 'ts') { var nTs = [s.fase, s.aktiv, (s.harStemt || []).length, s.minStemme, s.forrige && s.forrige.n, s.runde, s.frist].join('|'); tsData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'tosannheter' && [sp.fase, sp.aktiv, (sp.harStemt || []).length, sp.minStemme, sp.forrige && sp.forrige.n, sp.runde, sp.frist].join('|') === nTs) meldSkjerm('ts', d); }); }
     else if (nativ === 'sd') { var nSd = [s.fase, s.pos, (s.mineKort || []).length, s.totalt, s.kast ? s.kast.ja + '/' + s.kast.nei + '/' + s.kast.mitt : '', s.trekker, s.frist, (s.skam || []).length].join('|'); sdData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'regelfabrikken' && [sp.fase, sp.pos, (sp.mineKort || []).length, sp.totalt, sp.kast ? sp.kast.ja + '/' + sp.kast.nei + '/' + sp.kast.mitt : '', sp.trekker, sp.frist, (sp.skam || []).length].join('|') === nSd) meldSkjerm('sd', d); }); }
     else if (nativ === 'ou') { var nOu = [s.runde, s.n, s.tur, !!s.ferdig].join('|'); ouData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'overunder' && [sp.runde, sp.n, sp.tur, !!sp.ferdig].join('|') === nOu) meldSkjerm('ou', d); }); }
+    else if (nativ === 'ftd') { var nF = [s.fase, s.pos, s.dealer, s.g1, s.bom, s.res && s.res.nr, s.runde].join('|'); ftdData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'dealer' && [sp.fase, sp.pos, sp.dealer, sp.g1, sp.bom, sp.res && sp.res.nr, sp.runde].join('|') === nF) meldSkjerm('ftd', d); }); }
+    else if (nativ === 'nr') { var nN = [s.fase, s.i, s.rid, s.lengde, (s.harSvart || []).length, s.mittSvar, s.frist, JSON.stringify(s.resultat || null)].join('|'); nrData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'nyhetsrunden' && [sp.fase, sp.i, sp.rid, sp.lengde, (sp.harSvart || []).length, sp.mittSvar, sp.frist, JSON.stringify(sp.resultat || null)].join('|') === nN) meldSkjerm('nr', d); }); }
     else if (nativ === 'op') { opData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'opus') meldSkjerm('op', d); }); }
     else if (nativ === 'vl') { var rVl = s.runde, nVl = s.n, fVl = s.fase; vlData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'veddelopet' && sp.runde === rVl && sp.n === nVl && sp.fase === fVl) meldSkjerm('vl', d); }); }
     else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }

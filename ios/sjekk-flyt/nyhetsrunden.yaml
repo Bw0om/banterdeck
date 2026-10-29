@@ -1,0 +1,32 @@
+# Simulator-sjekken: verten (jobben) starter Nyhetsrunden og tar første spørsmål via API-et – appen ser forsiden, spørsmålet
+# og svaret når verten viser det (NyhetsrundenSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(venter på at|hva fikk dere).*"
+    timeout: 30000
+- takeScreenshot: 72-nyhetsrunden-forside
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*"
+    timeout: 90000
+- waitForAnimationToEnd
+- takeScreenshot: 73-nyhetsrunden-sporsmal
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(del ut|drikk én|ingenting|tar neste).*"
+    timeout: 90000
+- waitForAnimationToEnd
+- takeScreenshot: 74-nyhetsrunden-svar
