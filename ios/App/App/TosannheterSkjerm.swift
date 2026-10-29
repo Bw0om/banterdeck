@@ -313,7 +313,7 @@ struct TosannheterSkjerm: View {
 
 /// Tekststørrelse som på nettsiden: lange ord og lange kort får mindre skrift
 func tsStorrelse(_ t: String) -> CGFloat {
-    let lengste = t.split(whereSeparator: { $0.isWhitespace }).map { $0.count }.max() ?? 1
+    let lengste = t.components(separatedBy: " ").map { $0.count }.max() ?? 1
     let a = floor(210 / (Double(max(lengste, 1)) * 0.56)), b = floor(420 / (Double(max(t.count, 1)) * 0.5))
     return CGFloat(max(14, min(21, min(a, b))))
 }

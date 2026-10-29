@@ -14,19 +14,19 @@ appId: no.mittvors.app
     optional: true
 - extendedWaitUntil:
     visible:
-      text: "(?is)skriv et kort.*"
+      text: "(?is).*skriv et kort.*"
     timeout: 20000
 - takeScreenshot: 53-skriv-og-drikk
 - tapOn:
-    text: "(?is)skriv et kort.*"
+    text: "(?is).*skriv et kort.*"
 - waitForAnimationToEnd
 - takeScreenshot: 54-skriv-dialog
 - inputText: "Alle som har på seg svart drikker to"
 - tapOn:
-    text: "(?is)legg i bunken.*"
+    text: "(?is).*legg i bunken.*"
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
-      text: "(?is)kort fra deg.*"
+      text: "(?is).*kort fra deg.*"
     timeout: 15000
 - takeScreenshot: 55-kort-i-bunken

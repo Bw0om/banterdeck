@@ -17,10 +17,10 @@ appId: no.mittvors.app
     optional: true
 - extendedWaitUntil:
     visible:
-      text: "(?is)trykk på løgnen.*"
+      text: "(?is).*trykk på løgnen.*"
     timeout: 20000
 - takeScreenshot: 51-to-sannheter
 - tapOn:
-    text: "(?is)jeg kan jonglere.*"
+    text: "(?is).*jeg kan jonglere.*"
 - waitForAnimationToEnd
 - takeScreenshot: 52-to-sannheter-stemt
