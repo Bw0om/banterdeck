@@ -43,6 +43,8 @@
 		A1B2C3D4E5F60718293A4BA7 /* OpusSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BA6 /* OpusSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4BA9 /* DealerSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BA8 /* DealerSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4BAB /* NyhetsrundenSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BAA /* NyhetsrundenSkjerm.swift */; };
+		A1B2C3D4E5F60718293A4BAD /* PannekortSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BAC /* PannekortSkjerm.swift */; };
+		A1B2C3D4E5F60718293A4BAF /* SkalSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BAE /* SkalSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B97 /* BingoSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B96 /* BingoSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4B99 /* ReglerArk.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B98 /* ReglerArk.swift */; };
 		A1B2C3D4E5F60718293A4B9D /* DegSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B9C /* DegSkjerm.swift */; };
@@ -87,6 +89,8 @@
 		A1B2C3D4E5F60718293A4BA6 /* OpusSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpusSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4BA8 /* DealerSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DealerSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4BAA /* NyhetsrundenSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NyhetsrundenSkjerm.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4BAC /* PannekortSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PannekortSkjerm.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4BAE /* SkalSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkalSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B96 /* BingoSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BingoSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B98 /* ReglerArk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReglerArk.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B9C /* DegSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegSkjerm.swift; sourceTree = "<group>"; };
@@ -152,6 +156,8 @@
 				A1B2C3D4E5F60718293A4BA6 /* OpusSkjerm.swift */,
 				A1B2C3D4E5F60718293A4BA8 /* DealerSkjerm.swift */,
 				A1B2C3D4E5F60718293A4BAA /* NyhetsrundenSkjerm.swift */,
+				A1B2C3D4E5F60718293A4BAC /* PannekortSkjerm.swift */,
+				A1B2C3D4E5F60718293A4BAE /* SkalSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B96 /* BingoSkjerm.swift */,
 				A1B2C3D4E5F60718293A4B98 /* ReglerArk.swift */,
 				A1B2C3D4E5F60718293A4B9C /* DegSkjerm.swift */,
@@ -280,6 +286,8 @@
 				A1B2C3D4E5F60718293A4BA7 /* OpusSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4BA9 /* DealerSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4BAB /* NyhetsrundenSkjerm.swift in Sources */,
+				A1B2C3D4E5F60718293A4BAD /* PannekortSkjerm.swift in Sources */,
+				A1B2C3D4E5F60718293A4BAF /* SkalSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B97 /* BingoSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4B99 /* ReglerArk.swift in Sources */,
 				A1B2C3D4E5F60718293A4B9D /* DegSkjerm.swift in Sources */,

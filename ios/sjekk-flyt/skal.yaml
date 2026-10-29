@@ -1,0 +1,33 @@
+# Simulator-sjekken: verten (jobben) starter Skålsprinten – appen ser glasset, trykker når det står SKÅL, og ser lista
+# etter den første skålen (SkalSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(vent|skål).*"
+    timeout: 30000
+- takeScreenshot: 80-skaal-vent
+- extendedWaitUntil:
+    visible:
+      text: "SKÅL!"
+    timeout: 20000
+- tapOn:
+    text: "SKÅL!"
+- takeScreenshot: 81-skaal-trykket
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(treigest|raskest).*"
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 82-skaal-liste

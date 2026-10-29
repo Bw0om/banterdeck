@@ -1,0 +1,33 @@
+# Simulator-sjekken: verten (jobben) starter Hvem er jeg? – appen ser hvem den skal skrive en lapp til, skriver lappen i
+# dialogen, og ser den klasket på (PannekortSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*klask den på.*"
+    timeout: 30000
+- takeScreenshot: 76-hvem-er-jeg
+- tapOn:
+    text: "(?is).*klask den på.*"
+- waitForAnimationToEnd
+- takeScreenshot: 77-hvem-er-jeg-dialog
+- inputText: "Elvis"
+- tapOn:
+    text: "(?is).*klask den på.*"
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(den sitter|hvem er du).*"
+    timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: 78-hvem-er-jeg-skrevet
