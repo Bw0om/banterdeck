@@ -52,8 +52,9 @@ struct NrData {
         if let x = d["svar"] as? [String: Any] {
             var linje: NrTallinje? = nil, res: NrResultat? = nil
             if let t = x["tallinje"] as? [String: Any] {
-                linje = NrTallinje(fasitX: (t["fasitX"] as? NSNumber)?.doubleValue ?? 50, fasitTekst: t["fasitTekst"] as? String ?? "", rader: (t["rader"] as? NSNumber)?.intValue ?? 1,
-                                   pinner: (t["pinner"] as? [[String: Any]] ?? []).map { p in NrPinne(id: p["id"] as? String ?? "", png: p["png"] as? String ?? "", x: (p["x"] as? NSNumber)?.doubleValue ?? 50, rad: (p["rad"] as? NSNumber)?.intValue ?? 0, tekst: p["tekst"] as? String ?? "", beste: p["beste"] as? Bool ?? false, flat: p["flat"] as? Bool ?? false) })
+                linje = NrTallinje(fasitX: (t["fasitX"] as? NSNumber)?.doubleValue ?? 50, fasitTekst: t["fasitTekst"] as? String ?? "",
+                                   pinner: (t["pinner"] as? [[String: Any]] ?? []).map { p in NrPinne(id: p["id"] as? String ?? "", png: p["png"] as? String ?? "", x: (p["x"] as? NSNumber)?.doubleValue ?? 50, rad: (p["rad"] as? NSNumber)?.intValue ?? 0, tekst: p["tekst"] as? String ?? "", beste: p["beste"] as? Bool ?? false, flat: p["flat"] as? Bool ?? false) },
+                                   rader: (t["rader"] as? NSNumber)?.intValue ?? 1)
             }
             if let r = x["resultat"] as? [String: Any] { res = NrResultat(klasse: r["klasse"] as? String ?? "", tittel: r["tittel"] as? String ?? "", info: r["info"] as? String ?? "", kilde: r["kilde"] as? String ?? "", url: r["url"] as? String ?? "") }
             svar = NrSvar(fasitEtikett: x["fasitEtikett"] as? String ?? "", fasit: x["fasit"] as? String ?? "", alt: NrData.alt(x["alt"]), tallinje: linje,
