@@ -1981,7 +1981,7 @@ export function startRom(LEKNAVN, LANG) {
   // Pluss-kortstokkene (pakke-…) og Tanken bak sangen er vanlige kortstokker og går samme vei (se `nativ` i tegn)
   var NATIVE_LEKER = ['jeg-har-aldri', 'nodt-eller-sannhet', 'enten-eller', 'rygg-mot-rygg', 'kategorier'];
   // Skrivelekene: skriving går via iPhonens dialog (skjema-blokk), hodene er knapper, «hold for å se» og hold-for-sikker er egne blokker
-  var NATIVE_TYPER = ['hvemskrev', 'bloff', 'samme', 'spion', 'forraeder'];
+  var NATIVE_TYPER = ['hvemskrev', 'bloff', 'samme', 'spion', 'forraeder', 'mest'];
   var hodePng = {};
   function skjermBlokker(html) {
     var tmp = document.createElement('div'); tmp.innerHTML = html; var ut = [], jobber = [];
@@ -2017,11 +2017,11 @@ export function startRom(LEKNAVN, LANG) {
         if (/\b(hs-sendt|sm-sendt)\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e.querySelector('p')), stil: 'dom' }); var kn2 = e.querySelector('button'); if (kn2) ut.push(knapp(kn2, 'link')); return; }
         if (/\bbf-linje\b/.test(c)) { if (tekstAv(e)) ut.push({ type: 'tekst', tekst: tekstAv(e), stil: 'dom' }); return; }
         if (/\bbf-penn\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e), stil: 'merk' }); return; }
-        if (/\b(hs-valg|mv-stem|mv-valg)\b/.test(c)) {
+        if (/\b(hs-valg|mv-stem|mv-valg|ms-valg)\b/.test(c)) {
           var hb = { type: 'hoder', fasit: /\bfasit\b/.test(c), knapper: Array.prototype.map.call(e.children, function (b) {
             var k = b.tagName === 'BUTTON' ? knapp(b) : { type: 'knapp', g: '', attrs: {}, tekst: '', under: '', paa: false, av: true, stil: '' };
             k.tekst = tekstAv(b.querySelector('b')) || tekstAv(b.querySelector('span')) || k.tekst; k.under = tekstAv(b.querySelector('small')); k.png = ''; k.merk = /\bmuldvarp\b/.test(b.className || '');
-            jobber.push(hode(b.querySelector('.nr-h svg'), 'h' + (b.dataset.paa || k.tekst), 96).then(function (p) { k.png = p; }));
+            jobber.push(hode(b.querySelector('.nr-h svg, svg.mv-hode'), 'h' + (b.dataset.paa || k.tekst), 96).then(function (p) { k.png = p; }));
             return k; }) };
           ut.push(hb); return;
         }
@@ -3067,6 +3067,18 @@ export function startRom(LEKNAVN, LANG) {
   function terning(n) { var s = '<span class="dice" data-n="' + n + '">'; for (var i = 1; i <= 9; i++) s += '<i' + (PRIKKER[n].indexOf(i) !== -1 ? ' class="p"' : '') + '></i>'; return s + '</span>'; }
   var sisteKastNr = 0, presValg = [];
 
+  /** Opus til den native skjermen (OpusSkjerm.swift): hvem som har terningen, siste kast og knappene. */
+  function opData(s) {
+    var jeg = s.holder === tilstand.meg;
+    var d = { holder: navn(s.holder), jeg: jeg, kast: s.kast || 0, nr: s.nr || 0, antall: s.antall || 0, naa: Date.now() + klokkeAvvik,
+      tittel: 'Opus', chip: jeg ? T('Du har terningen', 'You have the die') : navn(s.holder) + T(' har terningen', ' has the die'),
+      spotify: T('«Opus» i Spotify', '“Opus” on Spotify'), spotifyUrl: 'https://open.spotify.com/search/Opus%20Eric%20Prydz',
+      etikett: T('Terningen er hos', 'The die is with'), holderTekst: navn(s.holder) + (jeg ? T(' (deg!)', ' (you!)') : ''),
+      melding: s.kast === 6 && s.fra ? T('SEKSER! ', 'SIX! ') + navn(s.fra) + T(' sendte videre.', ' passed it on.') : s.kast ? s.kast + (jeg ? T(' – trill igjen!', ' – roll again!') : '') : T('Start sangen og trill!', 'Start the song and roll!'),
+      trill: jeg ? T('Trill', 'Roll') : '', vent: jeg ? '' : T('Vent til terningen kommer til deg.', 'Wait until the die comes to you.'),
+      kastTekst: (s.antall || 0) + T(' kast', ' rolls'), drop: erVert() ? T('Droppet kom!', 'The drop hit!') : '', stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    return Promise.resolve(d);
+  }
   function opusSpill(s) {
     var jeg = s.holder === tilstand.meg;
     var ny = s.nr !== sisteKastNr; sisteKastNr = s.nr;
@@ -3085,6 +3097,25 @@ export function startRom(LEKNAVN, LANG) {
   function ouKort(k, kl) {
     var rod = k && (k.f === '♥' || k.f === '♦');
     return '<div class="ou-kort' + (rod ? ' rod' : '') + (kl ? ' ' + kl : '') + '"><b>' + (k ? vn(k.v) : '') + '</b><span>' + (k ? k.f : '') + '</span><b>' + (k ? vn(k.v) : '') + '</b></div>';
+  }
+  /** Over eller under til den native skjermen (OverUnderSkjerm.swift): folket, kortet, potten, sjansen og knappene. */
+  function ouData(s) {
+    var meg = tilstand.meg, vert = erVert(), jeg = s.tur === meg, si = s.sist, r = s.runde || 1, jobber = [];
+    var bom = si && !si.riktig, ider = s.ider || (tilstand.spillere || []).map(function (p) { return p.id; });
+    var nv = function (id) { return id === meg ? T('Du', 'You') : navn(id); };
+    var tot = (s.over || 0) + (s.under || 0);
+    var d = { runde: r, n: s.n || 0, ferdig: !!s.ferdig, jeg: jeg, vert: vert, naa: Date.now() + klokkeAvvik,
+      tittel: T('Over eller under', 'Higher or lower'), chip: s.ferdig ? T('Stokken er tom', 'Deck’s empty') : jeg ? T('Din tur', 'Your turn') : navn(s.tur) + T(' gjetter', ' is guessing'), gul: jeg && !s.ferdig,
+      folk: ider.map(function (id) { var h = { id: id, navn: nv(id), png: '', tur: id === s.tur && !s.ferdig, drukket: (s.drukket || {})[id] || 0, oi: !!(bom && si.hvem === id) };
+        jobber.push(vlHodePng(id, h.oi ? 'oi' : '').then(function (b) { h.png = b; })); return h; }),
+      kort: s.kort ? { v: vn(s.kort.v), f: s.kort.f, rod: s.kort.f === '♥' || s.kort.f === '♦' } : null, bunke: s.bunke || 1, pottTekst: T('I potten', 'In the pot'),
+      lagFor: bom ? si.bunke : 0, over: s.over || 0, under: s.under || 0, andel: tot ? s.over / tot : 0.5, overTekst: (s.over || 0) + T(' høyere igjen', ' higher left'), underTekst: (s.under || 0) + T(' lavere igjen', ' lower left'),
+      svar: si ? { riktig: !!si.riktig, tittel: si.riktig ? T('Riktig!', 'Right!') : nv(si.hvem) + T(' bommet', ' missed'), tekst: si.riktig ? T('Potten vokser.', 'The pot grows.') : T('Drikker ', 'Drinks ') + si.bunke + T('. Potten starter på nytt.', '. The pot starts over.') } : null,
+      overKnapp: T('Over', 'Higher'), underKnapp: T('Under', 'Lower'), kan: !s.ferdig && (jeg || vert), svarerFor: !s.ferdig && !jeg && vert ? T('Svarer for ', 'Answering for ') + navn(s.tur) : '',
+      hopp: !s.ferdig && !jeg && vert ? T('Hopp over ', 'Skip ') + navn(s.tur) : '', vent: !s.ferdig && !jeg && !vert ? navn(s.tur) + T(' svarer – rop det høyt, så kan ', ' answers – shout it out and ') + navn(tilstand.vert) + T(' trykke.', ' can tap it.') : '',
+      storst: s.ferdig && s.storst ? T('Største pott drukket: ', 'Biggest pot drunk: ') + nv(s.storst.id) + ' – ' + s.storst.n : '', slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    var slutt = s.ferdig ? skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny stokk – teller i kvelden', 'New deck – counts tonight')]])).then(function (b) { d.slutt = b; }) : Promise.resolve();
+    return Promise.all(jobber.concat([slutt])).then(function () { return d; });
   }
   function overunderSpill(s) {
     var meg = tilstand.meg, vert = erVert(), jeg = s.tur === meg, si = s.sist, r = s.runde || 1;
@@ -6271,7 +6302,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.type === 'tosannheter' ? 'ts' : s.type === 'regelfabrikken' ? 'sd' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (s.type === 'kort' && (NATIVE_LEKER.indexOf(s.lek) !== -1 || /^pakke-/.test(String(s.lek)) || s.lek === 'tanken-bak-sangen')) || (NATIVE_LEKER.indexOf(s.lek) !== -1 && s.lek !== 'kategorier') || NATIVE_TYPER.indexOf(s.type) !== -1 ? 'kort' : '')
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.type === 'tosannheter' ? 'ts' : s.type === 'regelfabrikken' ? 'sd' : s.type === 'overunder' ? 'ou' : s.type === 'opus' ? 'op' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (s.type === 'kort' && (NATIVE_LEKER.indexOf(s.lek) !== -1 || /^pakke-/.test(String(s.lek)) || s.lek === 'tanken-bak-sangen')) || (NATIVE_LEKER.indexOf(s.lek) !== -1 && s.lek !== 'kategorier') || NATIVE_TYPER.indexOf(s.type) !== -1 ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
@@ -6296,6 +6327,8 @@ export function startRom(LEKNAVN, LANG) {
     else if (nativ === 'bg') { var nBg = [s.runde, !!s.ferdig, (s.mineMerker || []).map(Number).join('')].join('|'); bgData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'bingo' && [sp.runde, !!sp.ferdig, (sp.mineMerker || []).map(Number).join('')].join('|') === nBg) meldSkjerm('bg', d); }); }
     else if (nativ === 'ts') { var nTs = [s.fase, s.aktiv, (s.harStemt || []).length, s.minStemme, s.forrige && s.forrige.n, s.runde, s.frist].join('|'); tsData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'tosannheter' && [sp.fase, sp.aktiv, (sp.harStemt || []).length, sp.minStemme, sp.forrige && sp.forrige.n, sp.runde, sp.frist].join('|') === nTs) meldSkjerm('ts', d); }); }
     else if (nativ === 'sd') { var nSd = [s.fase, s.pos, (s.mineKort || []).length, s.totalt, s.kast ? s.kast.ja + '/' + s.kast.nei + '/' + s.kast.mitt : '', s.trekker, s.frist, (s.skam || []).length].join('|'); sdData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'regelfabrikken' && [sp.fase, sp.pos, (sp.mineKort || []).length, sp.totalt, sp.kast ? sp.kast.ja + '/' + sp.kast.nei + '/' + sp.kast.mitt : '', sp.trekker, sp.frist, (sp.skam || []).length].join('|') === nSd) meldSkjerm('sd', d); }); }
+    else if (nativ === 'ou') { var nOu = [s.runde, s.n, s.tur, !!s.ferdig].join('|'); ouData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'overunder' && [sp.runde, sp.n, sp.tur, !!sp.ferdig].join('|') === nOu) meldSkjerm('ou', d); }); }
+    else if (nativ === 'op') { opData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'opus') meldSkjerm('op', d); }); }
     else if (nativ === 'vl') { var rVl = s.runde, nVl = s.n, fVl = s.fase; vlData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'veddelopet' && sp.runde === rVl && sp.n === nVl && sp.fase === fVl) meldSkjerm('vl', d); }); }
     else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
     else meldSkjerm('rom');
