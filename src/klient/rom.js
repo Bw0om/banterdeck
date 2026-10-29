@@ -6391,7 +6391,9 @@ export function startRom(LEKNAVN, LANG) {
     if (sk) sk.addEventListener('submit', function (e) {
       e.preventDefault();
       var i = document.getElementById('rfInput'), t = i.value.trim(); if (!t) return;
-      i.value = ''; i.focus({ preventScroll: true });
+      i.value = '';
+      // I appen skrives kortet i iPhonens dialog: fokus tilbake i feltet ville åpnet dialogen på nytt
+      if (!harSkall()) i.focus({ preventScroll: true });
       sdNyeStartere();
       gjorAlltid({ handling: 'skriv', tekst: t, til: sdTil });
     });
