@@ -1,21 +1,20 @@
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/NyhetsrundenSkjerm.swift:56:36: error: argument 'pinner' must precede argument 'rader'
-** BUILD FAILED **
+** BUILD SUCCEEDED **
 ----- siste linjer -----
-SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/LoggInnArk.swift (in target 'App' from project 'App')
-    
 
-SwiftDriverJobDiscovery normal arm64 Emitting module for App (in target 'App' from project 'App')
+AppIntentsSSUTraining (in target 'App' from project 'App')
+2026-10-29 22:16:54.828 appintentsnltrainingprocessor[4963:19018] Parsing options for appintentsnltrainingprocessor
+2026-10-29 22:16:54.828 appintentsnltrainingprocessor[4963:19018] Starting AppIntents SSU YAML Generation
+2026-10-29 22:16:54.833 appintentsnltrainingprocessor[4963:19018] No AppShortcuts found - Skipping.
 
-SwiftDriver\ Compilation\ Requirements App normal arm64 com.apple.xcode.tools.swift.compiler (in target 'App' from project 'App')
+RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
-** BUILD FAILED **
+Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
+Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
 
-The following build commands failed:
-	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/NyhetsrundenSkjerm.swift (in target 'App' from project 'App')
-	SwiftCompile normal arm64 Compiling\ SkrivDrikkSkjerm.swift,\ OverUnderSkjerm.swift,\ OpusSkjerm.swift,\ DealerSkjerm.swift,\ NyhetsrundenSkjerm.swift,\ BingoSkjerm.swift,\ ReglerArk.swift,\ DegSkjerm.swift,\ LekerSkjerm.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkrivDrikkSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OverUnderSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OpusSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DealerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/NyhetsrundenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/BingoSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/ReglerArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LekerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
-	Building project App with scheme App and configuration Debug
-(3 failures)
+** BUILD SUCCEEDED **
+
 ----- skjemaer -----
     Targets:
         App
