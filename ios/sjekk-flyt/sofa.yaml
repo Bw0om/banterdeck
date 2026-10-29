@@ -1,0 +1,57 @@
+# Simulator-sjekken: verten (appen, i sitt eget rom etter spill-flyten) går til «Mer → Bare min telefon», setter en i sofaen,
+# starter Jeg har aldri og teller ned (SofaSkjerm.swift). Stegene etter sofa-lobbyen er valgfrie: bildene viser hvor langt den kom.
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)mer.*tv.*qr.*"
+    timeout: 20000
+- tapOn:
+    text: "(?is)mer.*tv.*qr.*"
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*bare min telefon.*"
+    timeout: 15000
+- tapOn:
+    text: "(?is).*bare min telefon.*"
+- waitForAnimationToEnd
+- takeScreenshot: 84-sofa-lobby
+- tapOn:
+    text: "(?is).*navn på en.*"
+    optional: true
+- inputText: "Kari"
+- tapOn:
+    text: "+"
+    optional: true
+- tapOn:
+    text: "(?is).*sett i sofaen.*"
+    optional: true
+- hideKeyboard
+- waitForAnimationToEnd
+- takeScreenshot: 85-sofa-folk
+- tapOn:
+    text: "(?is).*verten leser.*"
+    optional: true
+- tapOn:
+    text: "(?is)jeg har aldri.*"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 86-sofa-kort
+- tapOn:
+    text: "(?is).*les høyt.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is)drikk!.*"
+    timeout: 8000
+    optional: true
+- takeScreenshot: 87-sofa-tellt
+- tapOn:
+    text: "(?is).*neste kort.*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 88-sofa-neste

@@ -88,6 +88,7 @@ jobs:
           flyt varm
           flyt varm   # en gang til om driveren ikke rakk å starte første gang (rask når den er oppe)
           flyt spill
+          flyt sofa
           # Én start per fane: appen leser MV_FANE og velger fanen selv (Skall.swift)
           for f in leker deg; do
             xcrun simctl terminate "$UDID" no.mittvors.app || true

@@ -977,6 +977,49 @@ export function startRom(LEKNAVN, LANG) {
     }, 80);
     tegn();
   }
+  /** Sofa-lekene (én telefon) til den native skjermen (SofaSkjerm.swift): kortet som leses, nedtellingen 3–2–1 (nettsiden teller,
+      enTell), bomba i Kategorier (nettsiden holder klokka, enBombe) og kortet i Ring of Fire. Trykkene går til nettsidens knapper. */
+  function enData(s) {
+    var nk = (s.runde || 1) + ':' + s.pos;
+    var lek = EN_LEKER.find(function (l) { return l[0] === s.lek; }) || [s.lek, 'leser', s.navn];
+    var rundt = lek[1] === 'rundt', k = s.kort || {}, t = String(k.t || ''), neste = enNavn(s.neste);
+    var d = { lek: s.lek, pos: s.pos, runde: s.runde || 1, ferdig: !!s.ferdig, naa: Date.now() + klokkeAvvik, rundt: rundt,
+      tittel: lek[2] + T(' · én telefon', ' · one phone'),
+      chip: s.ferdig ? T('Bunken er tom', 'Deck done') : rundt ? enNavn(s.leser).replace(/^./, function (c) { return c.toUpperCase(); }) + T(' har telefonen', ' has the phone') : navn(s.leser) + T(' leser', ' reads'),
+      gul: !s.ferdig, slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    if (s.ferdig) {
+      d.regel = s.lek === 'ring-of-fire' && s.konger >= 4 ? T('Fjerde konge er trukket – leken er over.', 'The fourth king is drawn – the game is over.') : '';
+      return skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny bunke – teller i kvelden', 'New deck – counts tonight')]])).then(function (b) { d.slutt = b; return d; });
+    }
+    if (s.lek === 'kategorier') {
+      var folk = enFolk(s), h = folk[enBombe.holder % folk.length], hn = folk[(enBombe.holder + 1) % folk.length], gaar = enBombe.fase === 'gaar', bom = enBombe.fase === 'bom';
+      d.chip = gaar ? navn(h) + T(' har bomba', ' has the bomb') : bom ? T('Bomba smalt!', 'The bomb went off!') : T('Les kategorien høyt', 'Read the category out');
+      d.kat = { etikett: T('Kategori', 'Category'), tekst: t };
+      d.bombe = { fase: enBombe.k === nk ? enBombe.fase : 'klar', start: enBombe.k === nk ? enBombe.start : 0, lengde: enBombe.k === nk ? enBombe.lengde : 0, holder: h, paa: h,
+        tittel: bom ? T('BOM!', 'BOOM!') : gaar ? navn(h) + T(' har bomba', ' has the bomb') : T('Klar?', 'Ready?'),
+        tekst: bom ? navn(h) + T(' drikker 2', ' drinks 2') : gaar ? T('Si et ord som passer, og gi telefonen videre. Ingen vet når den smeller.', 'Say a word that fits and pass the phone on. Nobody knows when it blows.') : T('Les kategorien høyt, trykk start og gi telefonen til ', 'Read the category out, tap start and pass the phone to ') + navn(h) + '.',
+        knapp: bom ? T('Ny kategori', 'New category') : gaar ? T('Sagt! Gi til ', 'Said it! Pass to ') + navn(hn) + ' →' : T('Start bomba', 'Start the bomb'),
+        g: bom ? 'en-bom-neste' : gaar ? 'en-bombe-send' : 'en-bombe-start' };
+      return Promise.resolve(d);
+    }
+    if (s.lek === 'ring-of-fire') {
+      var siste = k.konge && s.konger >= 4;
+      d.kopp = { etikett: T('Kongekoppen', 'King’s cup'), konger: s.konger || 0, tekst: s.konger + T(' av 4 konger', ' of 4 kings') };
+      d.rof = { v: k.v || '', s: k.s || '', rod: !!k.rod, regel: siste ? T('Fjerde konge!', 'Fourth king!') : k.regel || '',
+        tekst: siste ? enNavn(s.leser).replace(/^./, function (c) { return c.toUpperCase(); }) + T(' drikker opp koppen.', ' finishes the cup.') : k.tekst || '',
+        em: siste ? T('Trykk for å avslutte', 'Tap to finish') : T('Les regelen høyt – gi telefonen til ', 'Read the rule out – pass the phone to ') + neste + T(', som trykker for neste kort', ', who taps for the next card') };
+      return Promise.resolve(d);
+    }
+    // Lese-lekene: kortet, så 3 – 2 – 1
+    if (s.lek === 'enten-eller' && s.a) d.ee = { enten: T('Enten', 'Either'), a: s.a, eller: T('Eller', 'Or'), b: s.b };
+    else d.lest = { k: k.k ? k.k : s.lek === 'samme' ? T('Tenk som flokken', 'Think like the herd') : '', t: t };
+    var tell = EN_TELL[s.lek], tf = enTell.k === nk ? enTell.fase : 'klar';
+    if (tell) d.tell = { fase: tf, tall: enTell.k === nk ? enTell.tall : 3, knapp: T('Les høyt, så tell ned', 'Read it out, then count down'), si: tell[0], regel: tell[1] };
+    else d.regel = s.lek === 'nodt-eller-sannhet' ? T('Den i stolen velger, og gjør det – eller drikker.', 'Whoever is in the chair picks, and does it – or drinks.') : T('Les høyt.', 'Read it out.');
+    d.klar = !tell || tf === 'sagt';
+    d.neste = T('Neste kort – ', 'Next card – ') + navn(s.neste) + T(' leser', ' reads');
+    return Promise.resolve(d);
+  }
   function enSpill(s) { return '<div class="en-flate">' + enSpillInnhold(s) + '</div>'; }
   function enSpillInnhold(s) {
     var nk = (s.runde || 1) + ':' + s.pos, ny = !enSett[nk]; enSett[nk] = 1;
@@ -6504,7 +6547,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.add('i-rom');   // i rommet: menyen nederst på mobil skjules, så ingen trykker seg ut ved et uhell (natt.css)
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
-    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.type === 'tosannheter' ? 'ts' : s.type === 'regelfabrikken' ? 'sd' : s.type === 'overunder' ? 'ou' : s.type === 'opus' ? 'op' : s.type === 'dealer' ? 'ftd' : s.type === 'nyhetsrunden' ? 'nr' : s.type === 'pannekort' ? 'pk2' : s.type === 'skal' ? 'sk' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (s.type === 'kort' && (NATIVE_LEKER.indexOf(s.lek) !== -1 || /^pakke-/.test(String(s.lek)) || s.lek === 'tanken-bak-sangen')) || (NATIVE_LEKER.indexOf(s.lek) !== -1 && s.lek !== 'kategorier') || NATIVE_TYPER.indexOf(s.type) !== -1 ? 'kort' : '')
+    var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.type === 'tosannheter' ? 'ts' : s.type === 'regelfabrikken' ? 'sd' : s.type === 'overunder' ? 'ou' : s.type === 'opus' ? 'op' : s.type === 'dealer' ? 'ftd' : s.type === 'nyhetsrunden' ? 'nr' : s.type === 'pannekort' ? 'pk2' : s.type === 'skal' ? 'sk' : s.type === 'en' ? 'en' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (s.type === 'kort' && (NATIVE_LEKER.indexOf(s.lek) !== -1 || /^pakke-/.test(String(s.lek)) || s.lek === 'tanken-bak-sangen')) || (NATIVE_LEKER.indexOf(s.lek) !== -1 && s.lek !== 'kategorier') || NATIVE_TYPER.indexOf(s.type) !== -1 ? 'kort' : '')
       : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
@@ -6534,6 +6577,7 @@ export function startRom(LEKNAVN, LANG) {
     else if (nativ === 'nr') { var nN = [s.fase, s.i, s.rid, s.lengde, (s.harSvart || []).length, s.mittSvar, s.frist, JSON.stringify(s.resultat || null)].join('|'); nrData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'nyhetsrunden' && [sp.fase, sp.i, sp.rid, sp.lengde, (sp.harSvart || []).length, sp.mittSvar, sp.frist, JSON.stringify(sp.resultat || null)].join('|') === nN) meldSkjerm('nr', d); }); }
     else if (nativ === 'pk2') { var nP = [s.fase, s.runde, (s.harSkrevet || []).length, (s.gjettet || []).join(','), s.mitMaal && s.ord[s.mitMaal] && s.ord[s.mitMaal].t, pkForslag && pkForslag.map(function (f) { return f.t; }).join(','), s.frist, Object.keys(pkSett).filter(function (k) { return Date.now() - pkSett[k] < 5000; }).length].join('|'); pkNativData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'pannekort' && [sp.fase, sp.runde, (sp.harSkrevet || []).length, (sp.gjettet || []).join(','), sp.mitMaal && sp.ord[sp.mitMaal] && sp.ord[sp.mitMaal].t, pkForslag && pkForslag.map(function (f) { return f.t; }).join(','), sp.frist, Object.keys(pkSett).filter(function (k) { return Date.now() - pkSett[k] < 5000; }).length].join('|') === nP) meldSkjerm('pk2', d); }); }
     else if (nativ === 'sk') { var nS = [s.fase, s.tid, s.nr, (s.harTrykket || []).length, s.runde].join('|'); skData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'skal' && [sp.fase, sp.tid, sp.nr, (sp.harTrykket || []).length, sp.runde].join('|') === nS) meldSkjerm('sk', d); }); }
+    else if (nativ === 'en') { var nE = [s.runde, s.pos, !!s.ferdig, enTell.k, enTell.fase, enTell.tall, enBombe.k, enBombe.fase, enBombe.holder].join('|'); enData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'en' && [sp.runde, sp.pos, !!sp.ferdig, enTell.k, enTell.fase, enTell.tall, enBombe.k, enBombe.fase, enBombe.holder].join('|') === nE) meldSkjerm('en', d); }); }
     else if (nativ === 'op') { opData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'opus') meldSkjerm('op', d); }); }
     else if (nativ === 'vl') { var rVl = s.runde, nVl = s.n, fVl = s.fase; vlData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'veddelopet' && sp.runde === rVl && sp.n === nVl && sp.fase === fVl) meldSkjerm('vl', d); }); }
     else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
