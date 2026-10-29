@@ -13,7 +13,7 @@ on:
 jobs:
   sjekk:
     runs-on: macos-26
-    timeout-minutes: 75
+    timeout-minutes: 120
     permissions:
       contents: write
     steps:
@@ -121,7 +121,7 @@ jobs:
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"tosannheter\",\"modus\":\"*\",$V}"
             # Maestro bruker rundt et minutt på å starte flyten: kortene legges på bordet i bakgrunnen når arket er lukket
-            (sleep 70; vert "{\"handling\":\"pastander\",\"p\":[\"Jeg har vært i Japan\",\"Jeg kan jonglere\",\"Jeg har møtt kongen\"],\"logn\":1,$V}") &
+            (sleep 85; vert "{\"handling\":\"pastander\",\"p\":[\"Jeg har vært i Japan\",\"Jeg kan jonglere\",\"Jeg har møtt kongen\"],\"logn\":1,$V}") &
             flyt tosannheter
             wait
             # Skriv og drikk: verten starter leken og klokka – appen skriver et kort i dialogen, så stokker verten og kortet trekkes
@@ -133,6 +133,25 @@ jobs:
             wait
             vert "{\"handling\":\"stokk\",$V}"
             flyt skriv2
+            # Over eller under: verten gjetter først (appen ser kortet, potten og at verten svarer), så gjetter verten via API-et
+            vert "{\"handling\":\"avslutt\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"overunder\",\"modus\":\"*\",$V}"
+            (sleep 60; vert "{\"handling\":\"gjett\",\"paa\":\"over\",$V}") &
+            flyt overunder
+            wait
+            # Opus: verten har terningen og triller via API-et – appen ser terningen lande
+            vert "{\"handling\":\"avslutt\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"opus\",\"modus\":\"*\",$V}"
+            (sleep 60; vert "{\"handling\":\"kast\",$V}") &
+            flyt opus
+            wait
+            # Pekeleken på mobilen: alle stemmer på en – appen trykker på et hode
+            vert "{\"handling\":\"avslutt\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"mest\",\"modus\":\"*\",$V}"
+            # Runden varer 30 sekunder og Maestro bruker rundt et minutt på å starte: verten går til neste runde når flyten er i gang
+            (sleep 75; vert "{\"handling\":\"runde\",$V}") &
+            flyt mest
+            wait
           fi
           xcrun simctl terminate "$UDID" no.mittvors.app || true
           SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_MORK=1 xcrun simctl launch "$UDID" no.mittvors.app

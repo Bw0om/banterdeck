@@ -1,0 +1,23 @@
+# Simulator-sjekken: verten (jobben) har startet Pekeleken på mobilen – appen ser kortet og hodene, og stemmer på Gjest (blokkoversetteren, KortSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*trykk på én.*"
+    timeout: 90000
+- takeScreenshot: 64-pekeleken-mobil
+- tapOn:
+    text: "(?is).*gjest.*"
+- waitForAnimationToEnd
+- takeScreenshot: 65-pekeleken-stemt

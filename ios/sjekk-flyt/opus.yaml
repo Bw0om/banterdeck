@@ -1,0 +1,25 @@
+# Simulator-sjekken: verten (jobben) har startet Opus og har terningen – appen ser terningen, og at den lander når verten triller (OpusSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*terningen er hos.*"
+    timeout: 30000
+- takeScreenshot: 62-opus
+- extendedWaitUntil:
+    visible:
+      text: "(?is)(.*trill igjen.*|.*sendte videre.*|[1-6])"
+    timeout: 90000
+- waitForAnimationToEnd
+- takeScreenshot: 63-opus-kast

@@ -339,7 +339,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private var arkOppe = false
     private func settDekket(_ i: Int, _ d: Bool) { dekket[i] = d; oppdaterDekket() }
     private func oppdaterDekket() { for (i, v) in visninger { v.webView?.accessibilityElementsHidden = (dekket[i] ?? false) && !arkOppe } }
-    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg", "ts", "sd"]
+    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg", "ts", "sd", "ou", "op"]
 
     /// Siden i en skjerm sier hvilken skjerm den viser: «start» → vis den native startskjermen over Spill-fanen, ellers ta den bort
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
@@ -372,6 +372,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva != "bg" { visBg(nil, over: side) }
         if hva != "ts" { visTs(nil, over: side) }
         if hva != "sd" { visSd(nil, over: side) }
+        if hva != "ou" { visOu(nil, over: side) }
+        if hva != "op" { visOp(nil, over: side) }
         // Lekene som tegnes native (Pekeleken): skjermen ligger over nettsiden så lenge leken pågår
         if hva == "lek" { visStart(i: side, false); visKort(nil, over: side); visLek(d, over: side, nett: v.webView); return } else { visLek(nil, over: side, nett: nil) }
         if hva == "kort" { visStart(i: side, false); visRof(nil, over: side); kortModell.nett = v.webView; visKort(d, over: side); return } else { visKort(nil, over: side) }
@@ -386,6 +388,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva == "bg" { visStart(i: side, false); bgModell.nett = v.webView; visBg(d, over: side); return } else { visBg(nil, over: side) }
         if hva == "ts" { visStart(i: side, false); tsModell.nett = v.webView; visTs(d, over: side); return } else { visTs(nil, over: side) }
         if hva == "sd" { visStart(i: side, false); sdModell.nett = v.webView; visSd(d, over: side); return } else { visSd(nil, over: side) }
+        if hva == "ou" { visStart(i: side, false); ouModell.nett = v.webView; visOu(d, over: side); return } else { visOu(nil, over: side) }
+        if hva == "op" { visStart(i: side, false); opModell.nett = v.webView; visOp(d, over: side); return } else { visOp(nil, over: side) }
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
@@ -567,7 +571,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     func settOverleggSkjult(_ skjult: Bool) {
         arkOppe = skjult; oppdaterDekket()
-        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, tsVert?.view, sdVert?.view, degVert?.view, lekerVert?.view]
+        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, tsVert?.view, sdVert?.view, ouVert?.view, opVert?.view, degVert?.view, lekerVert?.view]
         for v in hoster { ((v?.superview as? HullVisning) ?? v)?.isHidden = skjult }
         lobbyHull?.isHidden = skjult; startHull?.isHidden = skjult
     }
@@ -606,6 +610,24 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         sdModell.sett(d)
         if sdVert == nil { sdVert = leggOverlegg(UIHostingController(rootView: SkrivDrikkSkjerm(m: sdModell)), over: side, nett: sdModell.nett) }
         fram(sdVert?.view.superview)
+    }
+
+    // Over eller under (OverUnderSkjerm.swift) og Opus (OpusSkjerm.swift)
+    private let ouModell = OuModell()
+    private var ouVert: UIHostingController<OverUnderSkjerm>?
+    private func visOu(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&ouVert); return }
+        ouModell.sett(d)
+        if ouVert == nil { ouVert = leggOverlegg(UIHostingController(rootView: OverUnderSkjerm(m: ouModell)), over: side, nett: ouModell.nett) }
+        fram(ouVert?.view.superview)
+    }
+    private let opModell = OpModell()
+    private var opVert: UIHostingController<OpusSkjerm>?
+    private func visOp(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&opVert); return }
+        opModell.sett(d)
+        if opVert == nil { opVert = leggOverlegg(UIHostingController(rootView: OpusSkjerm(m: opModell)), over: side, nett: opModell.nett) }
+        fram(opVert?.view.superview)
     }
 
     // Bussruta (BussrutaSkjerm.swift) og President (PresidentSkjerm.swift)

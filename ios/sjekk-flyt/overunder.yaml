@@ -1,0 +1,26 @@
+# Simulator-sjekken: verten (jobben) har startet Over eller under – appen ser kortet, potten og at verten gjetter; så kommer
+# svaret når verten gjetter via API-et (OverUnderSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*i potten.*"
+    timeout: 30000
+- takeScreenshot: 60-over-under
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(riktig|bommet).*"
+    timeout: 90000
+- waitForAnimationToEnd
+- takeScreenshot: 61-over-under-svar
