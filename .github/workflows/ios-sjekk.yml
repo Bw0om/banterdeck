@@ -148,7 +148,10 @@ jobs:
             # Pekeleken på mobilen: alle stemmer på en – appen trykker på et hode
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"mest\",\"modus\":\"*\",$V}"
+            # Runden varer 30 sekunder og Maestro bruker rundt et minutt på å starte: verten går til neste runde når flyten er i gang
+            (sleep 75; vert "{\"handling\":\"runde\",$V}") &
             flyt mest
+            wait
           fi
           xcrun simctl terminate "$UDID" no.mittvors.app || true
           SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_MORK=1 xcrun simctl launch "$UDID" no.mittvors.app

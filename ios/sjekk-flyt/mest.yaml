@@ -15,7 +15,7 @@ appId: no.mittvors.app
 - extendedWaitUntil:
     visible:
       text: "(?is).*trykk på én.*"
-    timeout: 30000
+    timeout: 90000
 - takeScreenshot: 64-pekeleken-mobil
 - tapOn:
     text: "(?is).*gjest.*"
