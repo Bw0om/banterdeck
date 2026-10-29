@@ -137,7 +137,7 @@ struct PannekortSkjerm: View {
     /// Lappen i panna: gul post-it med litt skjevhet, teksten krymper så den får plass
     private func lapp(_ tekst: String, bredde: CGFloat, maks: CGFloat, tom: Bool = false, meg: Bool = false) -> some View {
         Text(tekst).font(.archivo(maks, vekt: 900)).foregroundColor(morkBlekk).multilineTextAlignment(.center).lineLimit(3).minimumScaleFactor(0.4)
-            .padding(.horizontal, 6).padding(.vertical, 6).frame(width: bredde, minHeight: bredde * 0.55)
+            .padding(.horizontal, 6).padding(.vertical, 6).frame(width: bredde).frame(minHeight: bredde * 0.55)
             .background(RoundedRectangle(cornerRadius: 4).fill(meg ? rosa : gul))
             .overlay(RoundedRectangle(cornerRadius: 4).stroke(morkBlekk, style: StrokeStyle(lineWidth: 2, dash: tom ? [5, 4] : [])))
             .background(RoundedRectangle(cornerRadius: 4).fill(morkBlekk).offset(x: 2, y: 3))
