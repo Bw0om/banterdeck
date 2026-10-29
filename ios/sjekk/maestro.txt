@@ -14,26 +14,26 @@ Tap on (Optional) id: start-navn... COMPLETED
 Input text Sjekk... COMPLETED
 Hide Keyboard... COMPLETED
 Take screenshot 11-start-navn... COMPLETED
-Tap on (Optional) "(?is)lag rom.*"... WARNED
-Assert that "(?is)alle lekene.*" is visible... COMPLETED
-Take screenshot 12-lobby... COMPLETED
-Tap on "(?is)alle lekene.*"... COMPLETED
-Assert that "Velg lek" is visible... COMPLETED
-Take screenshot 13-velger... COMPLETED
-Swipe from (50%, 30%) to (50%, 95%) in 400 ms... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 13b-lobby-igjen... COMPLETED
-Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
-Assert that "Lukk" is visible... COMPLETED
-Take screenshot 14-lobby-mer... COMPLETED
-Tap on "Lukk"... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 15-lobby-igjen... COMPLETED
+Tap on (Optional) "(?is)lag rom.*"... COMPLETED
+Assert that "(?is)alle lekene.*" is visible... FAILED
+
+Assertion is false: "(?is)alle lekene.*" is visible
+
+Assertion '"(?is)alle lekene.*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/spill/.maestro/tests/2026-10-29_112007
 ===== leker =====
 Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow leker
-Assert that (Optional) "(?is)ja, jeg er over 18.*" is visible... WARNED
-Tap on (Optional) "(?is)ja, jeg er over 18.*"... WARNED
+Assert that (Optional) "(?is)ja, jeg er over 18.*" is visible... COMPLETED
+Tap on (Optional) "(?is)ja, jeg er over 18.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 20-leker... COMPLETED
 Tap on "I appen"... COMPLETED
@@ -55,7 +55,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: 2MYR
+rom for flere: SGHB
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
@@ -103,6 +103,11 @@ Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*i stolen.*" is visible... COMPLETED
+Take screenshot 51-to-sannheter-venter... COMPLETED
+===== tosannheter2 =====
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
+ > Flow tosannheter2
 Assert that "(?is).*trykk på løgnen.*" is visible... FAILED
 
 Assertion is false: "(?is).*trykk på løgnen.*" is visible
@@ -116,7 +121,7 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/tosannheter/.maestro/tests/2026-10-29_104605
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/tosannheter2/.maestro/tests/2026-10-29_114730
 ===== skriv =====
 Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow skriv
@@ -126,16 +131,16 @@ Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*skriv et kort.*" is visible... COMPLETED
-Take screenshot 53-skriv-og-drikk... COMPLETED
+Take screenshot 54-skriv-og-drikk... COMPLETED
 Tap on "(?is).*skriv et kort.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Take screenshot 54-skriv-dialog... COMPLETED
+Take screenshot 55-skriv-dialog... COMPLETED
 Input text Alle som har på seg svart drikker to... COMPLETED
 Tap on "(?is).*legg i bunken.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Assert that "(?is).*kort fra deg.*" is visible... COMPLETED
-Take screenshot 55-kort-i-bunken... COMPLETED
-verten fikk ikke gjort: {"handling":"stokk","id":"adb2711136bb","pollett":"460acb11dda8496790d41ff9ef58443986b5"}
+Take screenshot 56-kort-i-bunken... COMPLETED
+verten fikk ikke gjort: {"handling":"stokk","id":"e4882505abc3","pollett":"879f3478ad5c25a3c4454925331da17796e0"}
 ===== skriv2 =====
 Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow skriv2
@@ -152,4 +157,4 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/skriv2/.maestro/tests/2026-10-29_104943
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/skriv2/.maestro/tests/2026-10-29_115107
