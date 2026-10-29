@@ -115,6 +115,22 @@ jobs:
             flyt flere -e KODE="$KODE"
             curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d "{\"handling\":\"start\",\"lek\":\"hvemskrev\",\"modus\":\"*\",\"id\":\"$VID\",\"pollett\":\"$VPOL\"}" > /dev/null || echo "fikk ikke startet Ukjent avsender" >> skjermbilder/maestro.txt
             flyt flere2
+            # To sannheter og en løgn: verten avslutter, starter leken og legger tre kort på bordet (verten sitter først i stolen) – appen stemmer
+            V="\"id\":\"$VID\",\"pollett\":\"$VPOL\""
+            vert() { curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d "$1" > /dev/null || echo "verten fikk ikke gjort: $1" >> skjermbilder/maestro.txt; }
+            vert "{\"handling\":\"avslutt\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"tosannheter\",\"modus\":\"*\",$V}"
+            sleep 2
+            vert "{\"handling\":\"pastander\",\"p\":[\"Jeg har vært i Japan\",\"Jeg kan jonglere\",\"Jeg har møtt kongen\"],\"logn\":1,$V}"
+            flyt tosannheter
+            # Skriv og drikk: verten starter leken og klokka – appen skriver et kort i dialogen, så stokker verten og kortet trekkes
+            vert "{\"handling\":\"avslutt\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"regelfabrikken\",\"modus\":\"45\",$V}"
+            sleep 2
+            vert "{\"handling\":\"startklokke\",$V}"
+            flyt skriv
+            vert "{\"handling\":\"stokk\",$V}"
+            flyt skriv2
           fi
           xcrun simctl terminate "$UDID" no.mittvors.app || true
           SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_MORK=1 xcrun simctl launch "$UDID" no.mittvors.app
