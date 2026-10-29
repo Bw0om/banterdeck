@@ -1,0 +1,12 @@
+# Simulator-sjekken: verten har lagt tre kort på bordet – appen stemmer på ett av dem.
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*trykk på løgnen.*"
+    timeout: 20000
+- takeScreenshot: 52-to-sannheter-stem
+- tapOn:
+    text: "(?is).*jeg kan jonglere.*"
+- waitForAnimationToEnd
+- takeScreenshot: 53-to-sannheter-stemt

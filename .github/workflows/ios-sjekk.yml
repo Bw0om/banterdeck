@@ -120,12 +120,12 @@ jobs:
             vert() { curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d "$1" > /dev/null || echo "verten fikk ikke gjort: $1" >> skjermbilder/maestro.txt; }
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"tosannheter\",\"modus\":\"*\",$V}"
-            sleep 2
-            vert "{\"handling\":\"pastander\",\"p\":[\"Jeg har vært i Japan\",\"Jeg kan jonglere\",\"Jeg har møtt kongen\"],\"logn\":1,$V}"
             flyt tosannheter
+            vert "{\"handling\":\"pastander\",\"p\":[\"Jeg har vært i Japan\",\"Jeg kan jonglere\",\"Jeg har møtt kongen\"],\"logn\":1,$V}"
+            flyt tosannheter2
             # Skriv og drikk: verten starter leken og klokka – appen skriver et kort i dialogen, så stokker verten og kortet trekkes
             vert "{\"handling\":\"avslutt\",$V}"
-            vert "{\"handling\":\"start\",\"lek\":\"regelfabrikken\",\"modus\":\"45\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"regelfabrikken\",\"modus\":\"90\",$V}"
             sleep 2
             vert "{\"handling\":\"startklokke\",$V}"
             flyt skriv

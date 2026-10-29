@@ -6,4 +6,4 @@ appId: no.mittvors.app
       text: "(?is).*(trekk neste|går videre).*"
     timeout: 20000
 - waitForAnimationToEnd
-- takeScreenshot: 56-skriv-og-drikk-trekk
+- takeScreenshot: 57-skriv-og-drikk-trekk

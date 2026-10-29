@@ -1,8 +1,7 @@
-# Simulator-sjekken: verten (jobben) har startet To sannheter og en løgn og lagt tre kort på bordet – appen (gjesten) ser stolen,
-# kortene og stemmer på ett av dem (TosannheterSkjerm.swift).
+# Simulator-sjekken: verten (jobben) har startet To sannheter og en løgn – appen (gjesten) ser stolen mens verten skriver
+# (TosannheterSkjerm.swift). Kortene legges på bordet etterpå, så fristen ikke går ut før appen rekker å stemme (tosannheter2).
 appId: no.mittvors.app
 ---
-# «Slik spiller dere»-arket kommer når leken starter
 - extendedWaitUntil:
     visible:
       text: "(?is)vi er klare.*"
@@ -17,10 +16,6 @@ appId: no.mittvors.app
     optional: true
 - extendedWaitUntil:
     visible:
-      text: "(?is).*trykk på løgnen.*"
+      text: "(?is).*i stolen.*"
     timeout: 20000
-- takeScreenshot: 51-to-sannheter
-- tapOn:
-    text: "(?is).*jeg kan jonglere.*"
-- waitForAnimationToEnd
-- takeScreenshot: 52-to-sannheter-stemt
+- takeScreenshot: 51-to-sannheter-venter
