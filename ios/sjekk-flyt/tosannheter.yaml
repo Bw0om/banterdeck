@@ -1,5 +1,5 @@
-# Simulator-sjekken: verten (jobben) har startet To sannheter og en løgn – appen (gjesten) ser stolen mens verten skriver
-# (TosannheterSkjerm.swift). Kortene legges på bordet etterpå, så fristen ikke går ut før appen rekker å stemme (tosannheter2).
+# Simulator-sjekken: verten (jobben) har startet To sannheter og en løgn – appen (gjesten) ser stolen mens verten skriver,
+# og stemmer når kortene kommer (verten legger dem på bordet med forsinkelse, så fristen ikke går ut mens Maestro starter).
 appId: no.mittvors.app
 ---
 - extendedWaitUntil:
@@ -19,3 +19,12 @@ appId: no.mittvors.app
       text: "(?is).*i stolen.*"
     timeout: 20000
 - takeScreenshot: 51-to-sannheter-venter
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*trykk på løgnen.*"
+    timeout: 90000
+- takeScreenshot: 52-to-sannheter-stem
+- tapOn:
+    text: "(?is).*jeg kan jonglere.*"
+- waitForAnimationToEnd
+- takeScreenshot: 53-to-sannheter-stemt
