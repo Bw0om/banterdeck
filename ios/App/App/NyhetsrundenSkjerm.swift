@@ -160,8 +160,8 @@ struct NyhetsrundenSkjerm: View {
     private func topp(_ d: NrData) -> some View {
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 0) {
-                Text(d.tittel.uppercased()).font(.archivo(17, vekt: 900)).tracking(-0.3).lineLimit(1)
-                Text(d.under).font(.archivo(12, vekt: 700)).opacity(0.65).lineLimit(1)
+                Text(d.tittel.uppercased()).font(.archivo(17, vekt: 900)).tracking(-0.3).lineLimit(1).minimumScaleFactor(0.7)
+                Text(d.under).font(.archivo(12, vekt: 700)).opacity(0.65).lineLimit(1).minimumScaleFactor(0.7)
             }
             Spacer()
             if d.frist > 0 {
