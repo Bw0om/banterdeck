@@ -1,20 +1,21 @@
-** BUILD SUCCEEDED **
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/TosannheterSkjerm.swift:316:21: error: ambiguous use of 'split(maxSplits:omittingEmptySubsequences:whereSeparator:)'
+** BUILD FAILED **
 ----- siste linjer -----
 
-AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-10-26 22:53:13.515 appintentsnltrainingprocessor[2891:12567] Parsing options for appintentsnltrainingprocessor
-2026-10-26 22:53:13.516 appintentsnltrainingprocessor[2891:12567] Starting AppIntents SSU YAML Generation
-2026-10-26 22:53:13.520 appintentsnltrainingprocessor[2891:12567] No AppShortcuts found - Skipping.
+SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/LekerSkjerm.swift (in target 'App' from project 'App')
+    
 
-RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
+    
 
-Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+** BUILD FAILED **
 
-Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
-    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
 
-** BUILD SUCCEEDED **
-
+The following build commands failed:
+	SwiftCompile normal arm64 Compiling\ PresidentSkjerm.swift,\ GrisSkjerm.swift,\ TosannheterSkjerm.swift,\ SkrivDrikkSkjerm.swift,\ BingoSkjerm.swift,\ ReglerArk.swift,\ DegSkjerm.swift,\ LekerSkjerm.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PresidentSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/GrisSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/TosannheterSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkrivDrikkSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/BingoSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/ReglerArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LekerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
+	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/TosannheterSkjerm.swift (in target 'App' from project 'App')
+	Building project App with scheme App and configuration Debug
+(3 failures)
 ----- skjemaer -----
     Targets:
         App
