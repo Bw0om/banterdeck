@@ -1,5 +1,8 @@
-** BUILD SUCCEEDED **
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/PannekortSkjerm.swift:140:99: error: extra argument 'minHeight' in call
+** BUILD FAILED **
 ----- siste linjer -----
+SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkrivDrikkSkjerm.swift (in target 'App' from project 'App')
+    
 
 AppIntentsSSUTraining (in target 'App' from project 'App')
 2026-10-30 01:39:36.475 appintentsnltrainingprocessor[11243:37687] Parsing options for appintentsnltrainingprocessor
@@ -15,6 +18,11 @@ Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-ip
 
 ** BUILD SUCCEEDED **
 
+The following build commands failed:
+	SwiftCompile normal arm64 Compiling\ OverUnderSkjerm.swift,\ OpusSkjerm.swift,\ DealerSkjerm.swift,\ NyhetsrundenSkjerm.swift,\ PannekortSkjerm.swift,\ SkalSkjerm.swift,\ BingoSkjerm.swift,\ ReglerArk.swift,\ DegSkjerm.swift,\ LekerSkjerm.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OverUnderSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OpusSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DealerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/NyhetsrundenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PannekortSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkalSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/BingoSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/ReglerArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LekerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
+	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/PannekortSkjerm.swift (in target 'App' from project 'App')
+	Building project App with scheme App and configuration Debug
+(3 failures)
 ----- skjemaer -----
     Targets:
         App
