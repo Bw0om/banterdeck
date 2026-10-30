@@ -31,10 +31,23 @@ appId: no.mittvors.app
     optional: true
 - waitForAnimationToEnd
 - takeScreenshot: 85-sofa-folk
+# Lekelista ligger under kanten: rull ned til den før fanen og leken trykkes
+- scrollUntilVisible:
+    element:
+      text: "(?is).*verten leser.*"
+    direction: DOWN
+    timeout: 10000
+    optional: true
 - tapOn:
     text: "(?is).*verten leser.*"
     optional: true
 - waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "(?is)jeg har aldri.*"
+    direction: DOWN
+    timeout: 10000
+    optional: true
 - tapOn:
     text: "(?is)jeg har aldri.*"
     optional: true
@@ -58,4 +71,3 @@ appId: no.mittvors.app
     optional: true
 - waitForAnimationToEnd
 - takeScreenshot: 88-sofa-neste
-# (sjekken kjører bare når ios/** eller src/** endres – denne linja utløser en ny kjøring)
