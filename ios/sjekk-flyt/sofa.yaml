@@ -8,6 +8,17 @@ appId: no.mittvors.app
     timeout: 20000
 - tapOn:
     text: "(?is)mer.*tv.*qr.*"
+- waitForAnimationToEnd
+# Arket kom ikke alltid på første trykk (flyten før hadde nettopp lukket det): da trykkes Mer én gang til
+- runFlow:
+    when:
+      notVisible:
+        text: "(?is).{0,4}bare min telefon"
+    commands:
+      - tapOn:
+          text: "(?is)mer.*tv.*qr.*"
+          optional: true
+      - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
       text: "(?is).{0,4}bare min telefon"
