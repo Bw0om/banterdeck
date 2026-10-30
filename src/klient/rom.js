@@ -2030,6 +2030,8 @@ export function startRom(LEKNAVN, LANG) {
   function skjermBlokker(html) {
     var tmp = document.createElement('div'); tmp.innerHTML = html; var ut = [], jobber = [];
     function tekstAv(el) { return el && el.textContent ? el.textContent.replace(/\s+/g, ' ').trim() : ''; }
+    /** Knappetekst til den native skjermen: et enslig tegn («+») byttes med aria-label («Sett i sofaen») */
+    function knappTekst(b) { var t = tekstAv(b); return b && t.length < 2 && b.getAttribute('aria-label') ? b.getAttribute('aria-label') : t; }
     function knapp(b, stil) {
       var k = { type: 'knapp', g: b.dataset.g || '', attrs: {}, tekst: '', under: '', paa: b.getAttribute('aria-pressed') === 'true', av: !!b.disabled, stil: stil || '' };
       Object.keys(b.dataset).forEach(function (x) { if (x !== 'g') k.attrs[x] = b.dataset[x]; });
@@ -2056,7 +2058,7 @@ export function startRom(LEKNAVN, LANG) {
         if (e.tagName === 'FORM' && e.id) {
           // Skriving: én knapp som åpner iPhonens dialog (window.__mvLek.skjema → focusin → Skall.skjema)
           var inp = e.querySelector('input:not([type=radio]):not([type=checkbox]), textarea'), lab = e.querySelector('label:not(.ts-stempelvalg)'), kn = e.querySelector('button[type=submit], button:not([type])');
-          ut.push({ type: 'skjema', id: e.id, tekst: tekstAv(lab) || (inp && inp.placeholder) || '', knapp: tekstAv(kn) || T('Skriv', 'Write'), liten: /\bsm-skjema\b/.test(c) && !/\bstor\b/.test(c) }); return;
+          ut.push({ type: 'skjema', id: e.id, tekst: tekstAv(lab) || (inp && inp.placeholder) || '', knapp: knappTekst(kn) || T('Skriv', 'Write'), liten: /\bsm-skjema\b/.test(c) && !/\bstor\b/.test(c) }); return;
         }
         if (/\b(hs-sendt|sm-sendt)\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e.querySelector('p')), stil: 'dom' }); var kn2 = e.querySelector('button'); if (kn2) ut.push(knapp(kn2, 'link')); return; }
         if (/\bbf-linje\b/.test(c)) { if (tekstAv(e)) ut.push({ type: 'tekst', tekst: tekstAv(e), stil: 'dom' }); return; }
@@ -2171,7 +2173,7 @@ export function startRom(LEKNAVN, LANG) {
     var kn = f.querySelector('button[type=submit], button:not([type])');
     var fs = f.previousElementSibling, tittel = (fs && /(ts-hjelp|sm-oppgave|hs-oppgave|nr-vent|pk-spm)/.test(fs.className || '') ? fs : null) || (felter.length === 1 ? f.querySelector('label, p') : null);
     inp.blur();
-    try { document.dispatchEvent(new CustomEvent('mv-skjema', { detail: { id: f.id, tittel: tittel ? tittel.textContent.replace(/\s+/g, ' ').trim().slice(0, 80) : '', felter: felter, radio: radio, knapp: kn ? kn.textContent.trim() : T('Send', 'Send'), avbryt: T('Avbryt', 'Cancel') } })); } catch (x) {}
+    try { document.dispatchEvent(new CustomEvent('mv-skjema', { detail: { id: f.id, tittel: tittel ? tittel.textContent.replace(/\s+/g, ' ').trim().slice(0, 80) : '', felter: felter, radio: radio, knapp: kn ? (kn.textContent.trim().length < 2 && kn.getAttribute('aria-label') ? kn.getAttribute('aria-label') : kn.textContent.trim()) : T('Send', 'Send'), avbryt: T('Avbryt', 'Cancel') } })); } catch (x) {}
   });
   // Den native skjermen trykker på de samme knappene som nettsiden har (data-g + data-*), så all logikk bor ett sted
   window.__mvLek = {
@@ -6660,7 +6662,7 @@ export function startRom(LEKNAVN, LANG) {
       var inp = document.getElementById('sofaNavn'), v = inp ? inp.value.trim() : '';
       if (!v) return;
       inp.value = ''; gjorAlltid({ handling: 'sofa-ny', navn: v });
-      setTimeout(function () { var i2 = document.getElementById('sofaNavn'); if (i2) i2.focus({ preventScroll: true }); }, 60);
+      if (!harSkall()) setTimeout(function () { var i2 = document.getElementById('sofaNavn'); if (i2) i2.focus({ preventScroll: true }); }, 60);   // i appen ville fokus åpne dialogen på nytt
     });
     var ts = document.getElementById('tsSkjema');
     if (ts) ts.addEventListener('submit', function (e) {

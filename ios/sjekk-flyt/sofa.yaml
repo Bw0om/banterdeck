@@ -1,5 +1,5 @@
-# Simulator-sjekken: verten (appen, i sitt eget rom etter spill-flyten) går til «Mer → Bare min telefon», setter en i sofaen,
-# starter Jeg har aldri og teller ned (SofaSkjerm.swift). Stegene etter sofa-lobbyen er valgfrie: bildene viser hvor langt den kom.
+# Simulator-sjekken: verten (appen, i sitt eget rom etter spill-flyten) går til «Mer → Bare min telefon», setter en i sofaen
+# via dialogen, starter Jeg har aldri og teller ned (SofaSkjerm.swift). Stegene etter sofa-lobbyen er valgfrie: bildene viser hvor langt den kom.
 appId: no.mittvors.app
 ---
 - extendedWaitUntil:
@@ -21,21 +21,20 @@ appId: no.mittvors.app
 - waitForAnimationToEnd
 - takeScreenshot: 84-sofa-lobby
 - tapOn:
-    text: "(?is).*navn på en.*"
+    text: "(?is).*sett i sofaen.*"
     optional: true
+- waitForAnimationToEnd
 - inputText: "Kari"
-- tapOn:
-    text: "+"
-    optional: true
+- takeScreenshot: 85-sofa-dialog
 - tapOn:
     text: "(?is).*sett i sofaen.*"
     optional: true
-- hideKeyboard
 - waitForAnimationToEnd
 - takeScreenshot: 85-sofa-folk
 - tapOn:
     text: "(?is).*verten leser.*"
     optional: true
+- waitForAnimationToEnd
 - tapOn:
     text: "(?is)jeg har aldri.*"
     optional: true
