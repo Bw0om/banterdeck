@@ -10,10 +10,11 @@ appId: no.mittvors.app
     text: "(?is)mer.*tv.*qr.*"
 - extendedWaitUntil:
     visible:
-      text: "(?is).*bare min telefon.*"
+      text: "(?is).{0,4}bare min telefon"
     timeout: 15000
+# Knappen i arket («🛋️ Bare min telefon») – ikke Mer-kortet i lobbyen, som også nevner «bare min telefon»
 - tapOn:
-    text: "(?is).*bare min telefon.*"
+    text: "(?is).{0,4}bare min telefon"
 - waitForAnimationToEnd
 - tapOn:
     text: "Lukk"

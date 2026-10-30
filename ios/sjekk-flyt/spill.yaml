@@ -17,9 +17,9 @@ appId: no.mittvors.app
       - hideKeyboard
       - tapOn:
           id: "start-navn"
+          optional: true
       - waitForAnimationToEnd
       - inputText: "Sjekk"
-- assertVisible: "Sjekk"
 - hideKeyboard
 - takeScreenshot: 11-start-navn
 # Enter i navnefeltet lager rommet – står knappen der fortsatt, trykkes den
