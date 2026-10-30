@@ -15,6 +15,10 @@ appId: no.mittvors.app
 - tapOn:
     text: "(?is).*bare min telefon.*"
 - waitForAnimationToEnd
+- tapOn:
+    text: "Lukk"
+    optional: true
+- waitForAnimationToEnd
 - takeScreenshot: 84-sofa-lobby
 - tapOn:
     text: "(?is).*navn på en.*"

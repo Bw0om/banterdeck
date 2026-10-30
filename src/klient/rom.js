@@ -7060,7 +7060,7 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'lh-ide') { var ide = document.getElementById('lhIde'); if (ide) { ide.textContent = lhIde(); ide.hidden = false; ide.classList.remove('inn'); void ide.offsetWidth; ide.classList.add('inn'); } return; }
     if (g === 'merk') return gjor({ handling: 'merk', i: Number(b.dataset.i) });
     if (g === 'bg-nytt') return gjor({ handling: 'nytt-brett' });
-    if (g === 'sofa-start') { try { localStorage.setItem(sofaNokkel(), '1'); } catch (e) {} return tegn(); }
+    if (g === 'sofa-start') { try { localStorage.setItem(sofaNokkel(), '1'); } catch (e) {} if (harSkall()) lukkArk(); return tegn(); }   // appen: Mer-arket lukkes, så sofa-lobbyen kommer fram
     if (g === 'sofa-vent') { aleneLukket = Infinity; try { sessionStorage.setItem('bd_alene_vent_' + kode, '1'); } catch (e) {} return tegn(); }
     if (g === 'sofa-av') { try { localStorage.removeItem(sofaNokkel()); } catch (e) {} aleneFra = Date.now(); return tegn(); }
     if (g === 'sofa-fane') { sofaFane = b.dataset.v === 'leser' ? 'leser' : 'rundt'; return tegn(); }
