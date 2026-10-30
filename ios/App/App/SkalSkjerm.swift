@@ -192,7 +192,7 @@ struct SkalSkjerm: View {
             .padding(.horizontal, 16).padding(.bottom, 20)
         }
         .buttonStyle(.plain)
-        .disabled(mitt != nil)
+        // ikke .disabled: SwiftUI gråner hele flaten – skaal() avviser selv trykk nummer to
         .accessibilityLabel(skal ? v.skal : v.tekst)
     }
 
