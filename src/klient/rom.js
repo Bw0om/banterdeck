@@ -2161,11 +2161,12 @@ export function startRom(LEKNAVN, LANG) {
   root.addEventListener('focusin', function (e) { beskrivSkjema(e.target); });
   /** Beskriver skjemaet feltet står i for skallet (mv-skjema), så iPhonens dialog kan åpnes. Kalles fra focusin – og direkte fra __mvLek.skjema
       når skjemaet er skjult under en native skjerm (da gir focus() ingen focusin). */
+  var skjemaBeskrevet = '';   // id-en til skjemaet som sist ble beskrevet (så __mvLek.skjema ikke beskriver det to ganger)
   function beskrivSkjema(inp) {
     if (!harSkall()) return;
     if (!inp || !inp.form || !inp.form.id || inp.type === 'radio' || inp.type === 'checkbox') return;
     if (/^(blimedSkjema|lagSkjema|siSkjema)$/.test(inp.form.id)) return;   // disse har egne native skjermer
-    var f = inp.form;
+    var f = inp.form; skjemaBeskrevet = f.id;
     var felter = Array.prototype.filter.call(f.querySelectorAll('input, textarea'), function (x) { return x.type !== 'radio' && x.type !== 'checkbox' && x.type !== 'submit' && x.type !== 'hidden' && !x.hidden; }).map(function (x) {
       var lab = x.id ? f.querySelector('label[for="' + x.id + '"] , label[for="' + x.id + '"] span') : null, lb = x.closest('label');
       var etikett = lab ? lab.textContent : lb && lb.querySelector('span') ? lb.querySelector('span').textContent : x.getAttribute('aria-label') || '';
@@ -2181,7 +2182,7 @@ export function startRom(LEKNAVN, LANG) {
   // Den native skjermen trykker på de samme knappene som nettsiden har (data-g + data-*), så all logikk bor ett sted
   window.__mvLek = {
     // Den native skjermen ber om skrivedialogen for et skjema: feltet får fokus, og focusin-lytteren over beskriver skjemaet for skallet
-    skjema: function (formId) { var f = document.getElementById(formId), inp = f && f.querySelector('input:not([type=radio]):not([type=checkbox]), textarea'); if (!inp) return; inp.focus(); if (document.activeElement !== inp) beskrivSkjema(inp); },
+    skjema: function (formId) { var f = document.getElementById(formId), inp = f && f.querySelector('input:not([type=radio]):not([type=checkbox]), textarea'); if (!inp) return; skjemaBeskrevet = ''; inp.focus(); if (skjemaBeskrevet !== formId) beskrivSkjema(inp); },   // focusin blurrer feltet selv, så activeElement duger ikke som test
     // Løgnhalsen: trykk = stemme, hold = helt sikker
     stem: function (paa, sikker) { gjorAlltid({ handling: 'stem', paa: String(paa || ''), sikker: !!sikker }); },
     // Svar fra den native skrivedialogen: fyll feltene og send skjemaet
