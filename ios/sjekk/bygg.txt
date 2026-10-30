@@ -1,13 +1,10 @@
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/PannekortSkjerm.swift:140:99: error: extra argument 'minHeight' in call
-** BUILD FAILED **
+** BUILD SUCCEEDED **
 ----- siste linjer -----
-SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkrivDrikkSkjerm.swift (in target 'App' from project 'App')
-    
 
 AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-10-29 23:17:10.010 appintentsnltrainingprocessor[7972:28086] Parsing options for appintentsnltrainingprocessor
-2026-10-29 23:17:10.012 appintentsnltrainingprocessor[7972:28086] Starting AppIntents SSU YAML Generation
-2026-10-29 23:17:10.026 appintentsnltrainingprocessor[7972:28086] No AppShortcuts found - Skipping.
+2026-10-29 23:18:24.672 appintentsnltrainingprocessor[9734:33810] Parsing options for appintentsnltrainingprocessor
+2026-10-29 23:18:24.673 appintentsnltrainingprocessor[9734:33810] Starting AppIntents SSU YAML Generation
+2026-10-29 23:18:24.679 appintentsnltrainingprocessor[9734:33810] No AppShortcuts found - Skipping.
 
 RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
@@ -18,11 +15,6 @@ Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-ip
 
 ** BUILD SUCCEEDED **
 
-The following build commands failed:
-	SwiftCompile normal arm64 Compiling\ OverUnderSkjerm.swift,\ OpusSkjerm.swift,\ DealerSkjerm.swift,\ NyhetsrundenSkjerm.swift,\ PannekortSkjerm.swift,\ SkalSkjerm.swift,\ BingoSkjerm.swift,\ ReglerArk.swift,\ DegSkjerm.swift,\ LekerSkjerm.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OverUnderSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OpusSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DealerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/NyhetsrundenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PannekortSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkalSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/BingoSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/ReglerArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LekerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
-	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/PannekortSkjerm.swift (in target 'App' from project 'App')
-	Building project App with scheme App and configuration Debug
-(3 failures)
 ----- skjemaer -----
     Targets:
         App
