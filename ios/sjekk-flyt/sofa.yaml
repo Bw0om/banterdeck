@@ -58,3 +58,4 @@ appId: no.mittvors.app
     optional: true
 - waitForAnimationToEnd
 - takeScreenshot: 88-sofa-neste
+# (sjekken kjører bare når ios/** eller src/** endres – denne linja utløser en ny kjøring)
