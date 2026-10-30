@@ -2158,9 +2158,12 @@ export function startRom(LEKNAVN, LANG) {
   }
   /* Skrivefeltene i lekene (skrøne, låt, ord, påstander …) bruker iPhonens egen dialog i appen: tastaturet dekker aldri feltet.
      Når et felt får fokus, beskrives skjemaet for skallet; svaret fylles inn her og skjemaet sendes som om du trykket selv. */
-  root.addEventListener('focusin', function (e) {
+  root.addEventListener('focusin', function (e) { beskrivSkjema(e.target); });
+  /** Beskriver skjemaet feltet står i for skallet (mv-skjema), så iPhonens dialog kan åpnes. Kalles fra focusin – og direkte fra __mvLek.skjema
+      når skjemaet er skjult under en native skjerm (da gir focus() ingen focusin). */
+  function beskrivSkjema(inp) {
     if (!harSkall()) return;
-    var inp = e.target; if (!inp || !inp.form || !inp.form.id || inp.type === 'radio' || inp.type === 'checkbox') return;
+    if (!inp || !inp.form || !inp.form.id || inp.type === 'radio' || inp.type === 'checkbox') return;
     if (/^(blimedSkjema|lagSkjema|siSkjema)$/.test(inp.form.id)) return;   // disse har egne native skjermer
     var f = inp.form;
     var felter = Array.prototype.filter.call(f.querySelectorAll('input, textarea'), function (x) { return x.type !== 'radio' && x.type !== 'checkbox' && x.type !== 'submit' && x.type !== 'hidden' && !x.hidden; }).map(function (x) {
@@ -2174,11 +2177,11 @@ export function startRom(LEKNAVN, LANG) {
     var fs = f.previousElementSibling, tittel = (fs && /(ts-hjelp|sm-oppgave|hs-oppgave|nr-vent|pk-spm)/.test(fs.className || '') ? fs : null) || (felter.length === 1 ? f.querySelector('label, p') : null);
     inp.blur();
     try { document.dispatchEvent(new CustomEvent('mv-skjema', { detail: { id: f.id, tittel: tittel ? tittel.textContent.replace(/\s+/g, ' ').trim().slice(0, 80) : '', felter: felter, radio: radio, knapp: kn ? (kn.textContent.trim().length < 2 && kn.getAttribute('aria-label') ? kn.getAttribute('aria-label') : kn.textContent.trim()) : T('Send', 'Send'), avbryt: T('Avbryt', 'Cancel') } })); } catch (x) {}
-  });
+  }
   // Den native skjermen trykker på de samme knappene som nettsiden har (data-g + data-*), så all logikk bor ett sted
   window.__mvLek = {
     // Den native skjermen ber om skrivedialogen for et skjema: feltet får fokus, og focusin-lytteren over beskriver skjemaet for skallet
-    skjema: function (formId) { var f = document.getElementById(formId), inp = f && f.querySelector('input:not([type=radio]):not([type=checkbox]), textarea'); if (inp) inp.focus(); },
+    skjema: function (formId) { var f = document.getElementById(formId), inp = f && f.querySelector('input:not([type=radio]):not([type=checkbox]), textarea'); if (!inp) return; inp.focus(); if (document.activeElement !== inp) beskrivSkjema(inp); },
     // Løgnhalsen: trykk = stemme, hold = helt sikker
     stem: function (paa, sikker) { gjorAlltid({ handling: 'stem', paa: String(paa || ''), sikker: !!sikker }); },
     // Svar fra den native skrivedialogen: fyll feltene og send skjemaet
