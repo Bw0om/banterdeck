@@ -21,7 +21,7 @@ appId: no.mittvors.app
 - extendedWaitUntil:
     visible:
       text: "SKÅL!"
-    timeout: 20000
+    timeout: 45000
 - tapOn:
     text: "SKÅL!"
 - takeScreenshot: 81-skaal-trykket

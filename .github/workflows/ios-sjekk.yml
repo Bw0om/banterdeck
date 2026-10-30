@@ -172,7 +172,7 @@ jobs:
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"skal\",\"modus\":\"*\",$V}"
             # Sprinten går av seg selv (fem skåler på drøyt minuttet) og er over før Maestro er i gang: verten starter en ny når flyten kjører
-            (sleep 75; vert "{\"handling\":\"runde\",$V}") &
+            (for i in 1 2 3 4 5 6 7 8; do sleep 30; vert "{\"handling\":\"runde\",$V}"; done) &
             flyt skal
             wait
           fi
