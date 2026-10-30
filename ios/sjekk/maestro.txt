@@ -1,39 +1,39 @@
 ===== varm =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow varm
 Wait for animation to end... COMPLETED
 ===== varm =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow varm
 Wait for animation to end... COMPLETED
 ===== spill =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow spill
 Take screenshot 10-start... COMPLETED
 Tap on (Optional) id: start-navn... COMPLETED
 Input text Sjekk... COMPLETED
 Hide Keyboard... COMPLETED
 Take screenshot 11-start-navn... COMPLETED
-Tap on (Optional) "(?is)lag rom.*"... WARNED
-Assert that "(?is)alle lekene.*" is visible... COMPLETED
-Take screenshot 12-lobby... COMPLETED
-Tap on "(?is)alle lekene.*"... COMPLETED
-Assert that "Velg lek" is visible... COMPLETED
-Take screenshot 13-velger... COMPLETED
-Swipe from (50%, 30%) to (50%, 95%) in 400 ms... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 13b-lobby-igjen... COMPLETED
-Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
-Assert that "Lukk" is visible... COMPLETED
-Take screenshot 14-lobby-mer... COMPLETED
-Tap on "Lukk"... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 15-lobby-igjen... COMPLETED
+Tap on (Optional) "(?is)lag rom.*"... COMPLETED
+Assert that "(?is)alle lekene.*" is visible... FAILED
+
+Assertion is false: "(?is)alle lekene.*" is visible
+
+Assertion '"(?is)alle lekene.*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/spill/.maestro/tests/2026-10-30_005134
 ===== leker =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow leker
-Assert that (Optional) "(?is)ja, jeg er over 18.*" is visible... WARNED
-Tap on (Optional) "(?is)ja, jeg er over 18.*"... WARNED
+Assert that (Optional) "(?is)ja, jeg er over 18.*" is visible... COMPLETED
+Tap on (Optional) "(?is)ja, jeg er over 18.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 20-leker... COMPLETED
 Tap on "I appen"... COMPLETED
@@ -49,16 +49,16 @@ Swipe from (1%, 50%) to (70%, 50%) in 400 ms... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 23-leker-tilbake... COMPLETED
 ===== deg =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow deg
 Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: UVC2
+rom for flere: BDFL
 ===== flere =====
 ===== flere =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow flere
 Tap on (Optional) id: start-navn... COMPLETED
 Input text Sjekk... COMPLETED
@@ -69,7 +69,7 @@ Tap on "(?is)bli med.*"... COMPLETED
 Assert that "(?is).*(velger lek|starter kvelden).*" is visible... COMPLETED
 Take screenshot 41-gjest-lobby... COMPLETED
 ===== flere2 =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow flere2
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Take screenshot 42-slik-spiller-dere... COMPLETED
@@ -95,7 +95,7 @@ Tap on "Lukk"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 47-tilbake-i-leken... COMPLETED
 ===== tosannheter =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow tosannheter
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Take screenshot 50-to-sannheter-regler... COMPLETED
@@ -118,9 +118,9 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/tosannheter/.maestro/tests/2026-10-29_235937
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/tosannheter/.maestro/tests/2026-10-30_010820
 ===== skriv =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow skriv
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
@@ -138,26 +138,26 @@ Wait for animation to end... COMPLETED
 Assert that "(?is).*kort fra deg.*" is visible... COMPLETED
 Take screenshot 56-kort-i-bunken... COMPLETED
 ===== skriv2 =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow skriv2
 Assert that "(?is).*(trekk neste|går videre).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 57-skriv-og-drikk-trekk... COMPLETED
 ===== overunder =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow overunder
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*i potten.*" is visible... COMPLETED
 Take screenshot 60-over-under... COMPLETED
 Assert that "(?is).*(riktig|bommet).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 61-over-under-svar... COMPLETED
 ===== opus =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow opus
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
@@ -170,7 +170,7 @@ Assert that "(?is)(.*trill igjen.*|.*sendte videre.*|[1-6])" is visible... COMPL
 Wait for animation to end... COMPLETED
 Take screenshot 63-opus-kast... COMPLETED
 ===== mest =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow mest
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
@@ -183,7 +183,7 @@ Tap on "(?is).*gjest.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 65-pekeleken-stemt... COMPLETED
 ===== dealer =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow dealer
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
@@ -196,7 +196,7 @@ Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste
 Wait for animation to end... COMPLETED
 Take screenshot 71-dealer-kortet... COMPLETED
 ===== nyhetsrunden =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow nyhetsrunden
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
@@ -208,34 +208,32 @@ Take screenshot 72-nyhetsrunden-forside... COMPLETED
 Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
-Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"a53fa393e145","pollett":"e1fffa39b279aa85e4739e3b70dd7ed77557"}
+Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"da36430e5fba","pollett":"3285743601f08a3c7dd1a3f06459d673ee24"}
  COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 74-nyhetsrunden-svar... COMPLETED
 ===== pannekort =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow pannekort
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
-Assert that "(?is).*klask den på.*" is visible... FAILED
-
-Assertion is false: "(?is).*klask den på.*" is visible
-
-Assertion '"(?is).*klask den på.*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
-
-Possible causes:
-- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
-- Element may be temporarily unavailable due to loading state
-- This could be a real regression that needs to be addressed
-
-==== Debug output (logs & screenshots) ====
-
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/pannekort/.maestro/tests/2026-10-30_001903
+Assert that "(?is).*(klask den på|hvem er du).*" is visible... COMPLETED
+Take screenshot 76-hvem-er-jeg... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Wait for animation to end... COMPLETED
+Take screenshot 77-hvem-er-jeg-dialog... COMPLETED
+Input text Elvis... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Hide Keyboard... COMPLETED
+Tap on (Optional) "(?is)gjettet!.*"... COMPLETED
+Assert that "(?is).*(den sitter|angre|først|hvem er du).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 78-hvem-er-jeg-videre... COMPLETED
 ===== skal =====
-Running on iPhone 17 - iOS 26.4 - 6B80BA67-C6C4-428C-B622-38D6EED67050
+Running on iPhone 17 - iOS 26.4 - 420363C1-8FA8-4D3E-B731-CD3EDE262E4F
  > Flow skal
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
@@ -244,9 +242,17 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(vent|skål).*" is visible... COMPLETED
 Take screenshot 80-skaal-vent... COMPLETED
-Assert that "SKÅL!" is visible... COMPLETED
-Tap on "SKÅL!"... COMPLETED
-Take screenshot 81-skaal-trykket... COMPLETED
-Assert that "(?is).*(treigest|raskest).*" is visible... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 82-skaal-liste... COMPLETED
+Assert that "SKÅL!" is visible... FAILED
+
+Assertion is false: "SKÅL!" is visible
+
+Assertion '"SKÅL!" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/skal/.maestro/tests/2026-10-30_013004
