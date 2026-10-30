@@ -62,6 +62,11 @@ appId: no.mittvors.app
     text: "(?is)jeg har aldri.*"
     optional: true
 - waitForAnimationToEnd
+# Jeg har aldri-kortet kan ligge bak stua-bildet etter sveipet – da startes Nødt eller sannhet, som står synlig nederst (samme native skjerm)
+- tapOn:
+    text: "(?is)nødt eller sannhet.*"
+    optional: true
+- waitForAnimationToEnd
 - tapOn:
     text: "(?is)vi er klare.*"
     optional: true
