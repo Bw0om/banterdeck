@@ -6,7 +6,20 @@ appId: no.mittvors.app
 - tapOn:
     id: "start-navn"
     optional: true
+- waitForAnimationToEnd
 - inputText: "Sjekk"
+# Tastaturet rekker ikke alltid fram før teksten skrives (navnet ble borte to ganger på rad): da prøves det én gang til
+- runFlow:
+    when:
+      notVisible:
+        text: "Sjekk"
+    commands:
+      - hideKeyboard
+      - tapOn:
+          id: "start-navn"
+          optional: true
+      - waitForAnimationToEnd
+      - inputText: "Sjekk"
 - hideKeyboard
 - takeScreenshot: 11-start-navn
 # Enter i navnefeltet lager rommet – står knappen der fortsatt, trykkes den
