@@ -20,6 +20,7 @@ import { kveld, lekStartet, lekFerdig, velgVinner, kaarVinner, kveldVisning } fr
 import { MAKS_REGEL } from './lovbok';
 import { borsHandling, borsVisning, borsTilGjeng, settStart, nySpillerIBors, borsTilPluss, BUTIKK } from './bors';
 import { publiserteRunder, rundeId } from './nyhetsrunden';
+import { KATEGORIER, kategori } from './quiz';
 
 const D: any = DECKS;
 const B: any = BINGO;
@@ -269,6 +270,12 @@ function offentligTekst(s: any, data: any) {
     if (s.type === 'tosannheter') return { tekst: null, hvem: s.aktiv || null, valg: s.pastander || null };
     if (s.type === 'regelfabrikken') return s.fase === 'trekk' && s.rekke[s.pos] ? { tekst: rfKortObj(s.rekke[s.pos]).t } : null;
     if (s.type === 'en') { const v = enVisning(s, data, 'no'); return v.kort ? { tekst: v.kort.t, hvem: v.leser } : null; }
+    if (s.type === 'quiz') {
+      const k = s.kat ? kategori(s.kat) : null, q = s.spm, aapen = s.fase === 'svar';
+      if (s.fase === 'trekk') return { tekst: `${navnPaa(data, s.trekker)} trekker kategori …`, nr: s.i + 1, antall: s.lengde };
+      if (!q || !(s.fase === 'spm' || aapen)) return null;
+      return { tekst: (k ? k.navn + ': ' : '') + q.q, valg: q.alt, fasit: aapen ? q.rett : null, nr: s.i + 1, antall: s.lengde, svart: Object.keys(s.svar || {}).length };
+    }
     if (s.type === 'nyhetsrunden') { const q = s.sporsmal[s.i]; const aapen = s.fase === 'svar' || s.fase === 'ferdig'; return { tekst: q ? q.q : null, fasit: aapen && q ? q.svar : null, nr: s.i + 1, antall: s.sporsmal.length }; }
   } catch { /* ufullstendig runde: vis ingenting */ }
   return null;
@@ -302,6 +309,7 @@ export function skjermVisning(data: any, versjon: number, sprak: Lang | string =
     if (s.type === 'en') spill.en = enVisning(s, data, lang);
     if (s.type === 'veddelopet') spill.vl = ekstraVisning(s, null, data);
     if (s.type === 'nyhetsrunden') spill.nr = nyeVisning(s, null, data);
+    if (s.type === 'quiz') spill.qz = quizVisning(s, null, data);
     if (s.type === 'regelfabrikken') spill.rf = ekstraVisning(s, null, data);
   }
   // Børsen: bare det som er offentlig – tavla, meldte og avgjorte aksjer og sakene. Aldri hendene til folk.
@@ -409,7 +417,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
 /* ---------- svarfrister: runden går ikke videre før alle har svart eller tiden er ute ---------- */
 /** Stua: så mange ganger kan du flytte på de andre i løpet av et minutt før du må ta en slurk. */
 const STUA_PLAG = 6;
-const FRIST = { mest: 30, forraeder: 30, tosannheter: 45, veddelopet: 45, nrKort: 40, nrLang: 60, aldri: 30 };
+const FRIST = { mest: 30, forraeder: 30, tosannheter: 45, veddelopet: 45, nrKort: 40, nrLang: 60, aldri: 30, quiz: 20, quizDroy: 25, quizTrekk: 25 };
 
 /* ---------- alle svarer: kortleker der hver telefon svarer i hemmelighet, og svarene vises samtidig ----------
    Først Jeg har aldri: «Jeg har» eller «Aldri». Når alle har svart (eller tiden er ute) vises hvem som har,
@@ -1346,6 +1354,7 @@ function handlingInne(data: any, meg: any, h: any) {
         if (s.type === 'opus' && s.holder === hvem) s.holder = forste;
         if (s.type === 'tosannheter' && s.aktiv === hvem && s.fase !== 'ferdig') Object.assign(s, { aktiv: data.spillere.map((p: any) => p.id).find((id: string) => !(s.sittet || []).includes(id)) || forste, fase: 'skriv', pastander: [], stemmer: {}, logn: -1, frist: null });
         if (s.type === 'forraeder' && s.aktiv === hvem) nyForraederRunde(s, data);
+        if (s.type === 'quiz' && s.trekker === hvem && s.fase === 'trekk') { s.trekker = forste; }
         if (typeof s.tur === 'number' && Array.isArray(s.ider)) {
           const i = s.ider.indexOf(hvem);
           if (i !== -1 && s.type !== 'yatzy' && s.type !== 'bussruta') { s.ider.splice(i, 1); if (s.tur > i) s.tur--; }
@@ -2153,7 +2162,7 @@ function rfMottakere(data: any, k: any, trekker: string | null): string[] {
 }
 const PY_VINDU = 10000;
 function pyRad(pos: number) { return pos < 5 ? 1 : pos < 9 ? 2 : pos < 12 ? 3 : pos < 14 ? 4 : 5; }
-export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', 'dealer', ...SOS];
+export const EKSTRA = ['opus', 'overunder', 'veddelopet', 'pyramiden', 'gris', 'president', 'regelfabrikken', 'tosannheter', 'bussruta', 'yatzy', 'nyhetsrunden', 'dealer', 'quiz', ...SOS];
 export const REAKSJONER = ['🍻', '😂', '🔥', '😱', '👏', '😍', '🤢', '🥴', '🙈', '🤘', '🫡'];
 /** Noe skjedde i rommet som figurene reagerer på (drikk, bom, pekt, vinner). Siste gjelder; telefonene spiller den av én gang. */
 function stuaHendelse(data: any, type: string, ider: string[]) {
@@ -2163,6 +2172,7 @@ function stuaHendelse(data: any, type: string, ider: string[]) {
 }
 type EkstraInfo = [id: string, navnNo: string, navnEn: string, omNo: string, omEn: string];
 const EKSTRA_INFO: EkstraInfo[] = [
+  ['quiz', 'Kategorikongen', 'Category King', 'Trekk en kategori, alle svarer på sin telefon. Feil drikker. Sats på at noen bommer – og bli konge av kategorien din.', 'Draw a category, everyone answers on their phone. Wrong drinks. Bet on someone missing – and become king of your category.'],
   ['hvemskrev', 'Ukjent avsender', 'Unknown sender', 'Alle svarer anonymt på samme spørsmål. Så gjetter dere hvem som skrev hva.', 'Everyone answers the same question anonymously. Then you guess who wrote what.'],
   ['bloff', 'Skrøna', 'Tall tales', 'Finn på et troverdig feil svar. Lur de andre – og finn det ekte.', 'Make up a believable wrong answer. Fool the others – and spot the real one.'],
   ['samme', 'Saueflokken', 'The herd', 'Alle skriver ett ord i hemmelighet. Unike svar drikker.', 'Everyone secretly writes one word. Unique answers drink.'],
@@ -2195,6 +2205,7 @@ export function ekstraLeker(lang: Lang | string = 'no') {
   return [
     ...(nr.length ? [{ id: 'nyhetsrunden', navn: tr(EKSTRA_NAVN.nyhetsrunden, en ? 'en' : 'no'), type: 'nyhetsrunden', moduser: nr,
       om: en ? "The host reads out this week's questions and everyone answers on their own phone – then you see who missed. The questions are in Norwegian." : 'Verten leser opp ukas spørsmål. Alle svarer på sin egen telefon – så ser dere hvem som bommet.' }] : []),
+    info('quiz', [{ v: '6', t: en ? '6 questions' : '6 spørsmål' }, { v: '10', t: en ? '10 questions' : '10 spørsmål' }, { v: '15', t: en ? '15 questions' : '15 spørsmål' }]),
     info('hvemskrev'), info('bloff'), info('samme'), info('spion', [{ v: 'alle', t: en ? 'All themes' : 'Alle temaer' }].concat((MULDVARP as any).temaer.map((t: any) => ({ v: t.id, t: en ? t.en : t.navn })))), info('pannekort'), info('skal'), info('bussruta'), info('yatzy'), info('tosannheter'),
     info('regelfabrikken', [{ v: '45', t: '45 ' + sek }, { v: '60', t: '60 ' + sek }, { v: '90', t: '90 ' + sek }]),
     info('overunder'), info('veddelopet'), info('pyramiden'), info('gris'), info('president'), info('dealer'),
@@ -2216,6 +2227,7 @@ export function startEkstra(data: any, lek: string, modus = ''): any {
   const n = data.spillere.length, ider = aktiveIder(data, true);
   if (lek === 'bussruta' || lek === 'yatzy' || lek === 'nyhetsrunden') return startNye(data, lek, modus, ider);
   if (SOS.includes(lek)) return startSos(data, lek, ider, modus);
+  if (lek === 'quiz') return startQuiz(data, modus, ider);
   if (lek === 'tosannheter') {
     if (n < 2) return feilL('for-faa', 'Trenger minst to spillere.', 'Needs at least two players.');
     data.spill = { type: 'tosannheter', lek, navn: EKSTRA_NAVN.tosannheter, aktiv: ider[0], fase: 'skriv', pastander: [], logn: -1, stemmer: {}, runde: 1, sittet: [], lurt: {}, forrige: null };
@@ -2320,6 +2332,7 @@ export function ekstraHandling(data: any, meg: any, h: any): any {
   const s = data.spill; if (!s || !EKSTRA.includes(s.type)) return null;
   if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeHandling(data, meg, h);
   if (SOS.includes(s.type)) return sosHandling(data, meg, h);
+  if (s.type === 'quiz') return quizHandling(data, meg, h);
   const ider = aktiveIder(data);
   const min = ider.indexOf(meg.id);
   switch (s.type) {
@@ -2766,6 +2779,7 @@ function avgjorTo(data: any) {
 export function ekstraVisning(s: any, meg: any, data: any) {
   if (s.type === 'bussruta' || s.type === 'yatzy' || s.type === 'nyhetsrunden') return nyeVisning(s, meg, data);
   if (SOS.includes(s.type)) return sosVisning(s, meg, data);
+  if (s.type === 'quiz') return quizVisning(s, meg, data);
   const ider = aktiveIder(data);
   if (s.type === 'tosannheter') return { aktiv: s.aktiv, fase: s.fase, pastander: s.pastander, harStemt: Object.keys(s.stemmer),
     minStemme: meg ? (s.stemmer[meg.id] ?? null) : null, logn: meg && meg.id === s.aktiv && s.fase === 'stem' ? s.logn : null,
@@ -3169,6 +3183,186 @@ function nyeVisning(s: any, meg: any, data: any) {
     };
   }
   return {};
+}
+
+
+/* =====================================================================
+   Kategorikongen: quiz med kategorikort, satsing og kroner.
+   Den som har tur trekker ett av fem kategorikort. Alle svarer på sin telefon før klokka går ut; feil svar drikker én
+   (drøy kategori: to). Før svaret vises kan du satse på at én annen bommer: treff, hen drikker to – bom, du drikker to.
+   Den som har flest riktige i en kategori i kveld er kongen av den: bommer noen der, drikker de én ekstra for kongen.
+   ===================================================================== */
+const QZ_LENGDE = 10, QZ_HAND = 5;
+function qzNavn(id: string) { const k = kategori(id); return k ? k.navn : id; }
+/** Fem kategorier til hånda: de med flest ubrukte spørsmål først, minst én drøy om den finnes, aldri samme som forrige. */
+function qzHand(data: any): string[] {
+  const s = data.spill, brukt = data.qzBrukt || {};
+  const igjen = (k: any) => k.sporsmal.length - (brukt[k.id] || []).length;
+  const alle = KATEGORIER.filter((k) => k.sporsmal.length).filter((k) => k.id !== s.kat || KATEGORIER.length <= QZ_HAND);
+  const vektet = stokk(alle.slice()).sort((a: any, b: any) => igjen(b) - igjen(a));
+  const hand = vektet.slice(0, QZ_HAND).map((k: any) => k.id);
+  const droy = vektet.find((k: any) => k.droy && !hand.includes(k.id));
+  if (droy && !hand.some((id: string) => kategori(id)?.droy)) hand[hand.length - 1] = droy.id;
+  return stokk(hand);
+}
+function qzNyTrekk(data: any) {
+  const s = data.spill, ider = aktiveIder(data);
+  if (!ider.length) return;
+  const forrige = ider.indexOf(s.trekker);
+  s.trekker = ider[(forrige + 1) % ider.length];
+  s.hand = qzHand(data); s.kat = null; s.spm = null; s.svar = {}; s.sats = {}; s.resultat = {}; s.satsRes = {};
+  s.fase = 'trekk'; settFrist(s, FRIST.quizTrekk);
+}
+/** Et spørsmål rommet ikke har hatt ennå fra kategorien; er alle brukt, begynner den på nytt. */
+function qzNyttSpm(data: any, katId: string) {
+  const s = data.spill, k = kategori(katId); if (!k) return false;
+  data.qzBrukt = data.qzBrukt || {};
+  let brukt: number[] = data.qzBrukt[katId] || (data.qzBrukt[katId] = []);
+  if (brukt.length >= k.sporsmal.length) { brukt.length = 0; }
+  const ledige = k.sporsmal.map((_: any, i: number) => i).filter((i: number) => !brukt.includes(i));
+  const idx = ledige[tilfeldig(ledige.length)], q = k.sporsmal[idx];
+  brukt.push(idx);
+  s.kat = katId; s.hand = []; s.fase = 'spm'; s.svar = {}; s.sats = {}; s.resultat = {}; s.satsRes = {};
+  s.spm = { q: q.q, alt: stokk(q.alt.slice()), rett: q.alt[q.svar], info: q.info || '', droy: !!k.droy, niva: q.niva || 2 };
+  settFrist(s, k.droy ? FRIST.quizDroy : FRIST.quiz);
+  return true;
+}
+function qzKonge(s: any, katId: string): string | null {
+  const pk = (s.perKat || {})[katId] || {}; let best: string | null = null, n = 0, delt = false;
+  Object.keys(pk).forEach((id) => { if (pk[id] > n) { n = pk[id]; best = id; delt = false; } else if (pk[id] === n) delt = true; });
+  const naa = s.konger[katId];
+  // Kongen beholder krona til noen har flere riktige enn hen (delt topp holder ikke)
+  if (naa && pk[naa] === n) return naa;
+  return delt ? naa || null : best;
+}
+function qzAvslor(data: any) {
+  const s = data.spill, q = s.spm; if (!q) return;
+  const kat = s.kat, droy = !!q.droy, st = s.stat || (s.stat = { satsTreff: {}, satsBom: {}, droyRett: {} });
+  s.fase = 'svar'; s.frist = null; s.resultat = {}; s.satsRes = {};
+  s.perKat = s.perKat || {}; const pk = s.perKat[kat] || (s.perKat[kat] = {});
+  const kongeFor = s.konger[kat] && data.spillere.some((p: any) => p.id === s.konger[kat]) ? s.konger[kat] : null;
+  const drakk: string[] = [];
+  data.spillere.forEach((p: any) => {
+    const rett = s.svar[p.id] != null && s.svar[p.id] === q.rett;
+    if (rett) {
+      s.resultat[p.id] = 1; s.riktige[p.id] = (s.riktige[p.id] || 0) + 1; pk[p.id] = (pk[p.id] || 0) + 1; p.quiz = (p.quiz || 0) + 1;
+      giUtdeling(data, p.id, 1); if (droy) st.droyRett[p.id] = (st.droyRett[p.id] || 0) + 1;
+    } else {
+      // Feil eller ikke svart: én slurk (drøy: to), og én ekstra for kongen av kategorien
+      const n = (droy ? 2 : 1) + (kongeFor && kongeFor !== p.id ? 1 : 0);
+      s.resultat[p.id] = -n; giSlurker(data, p.id, n); drakk.push(p.id);
+    }
+  });
+  // Satsingene: «hen bommer» – treff gir to slurker til den du satset på, bom gir deg to
+  Object.keys(s.sats || {}).forEach((fra) => {
+    const paa = s.sats[fra]; if (!data.spillere.some((p: any) => p.id === fra) || !data.spillere.some((p: any) => p.id === paa)) return;
+    if (s.resultat[paa] < 0) { s.satsRes[fra] = 'treff'; giSlurker(data, paa, 2); st.satsTreff[fra] = (st.satsTreff[fra] || 0) + 1; if (!drakk.includes(paa)) drakk.push(paa); }
+    else { s.satsRes[fra] = 'bom'; giSlurker(data, fra, 2); st.satsBom[fra] = (st.satsBom[fra] || 0) + 1; if (!drakk.includes(fra)) drakk.push(fra); }
+  });
+  const nyKonge = qzKonge(s, kat);
+  s.nyKonge = nyKonge && nyKonge !== kongeFor ? nyKonge : null;
+  if (nyKonge) s.konger[kat] = nyKonge;
+  const antall = Object.values(s.resultat).filter((k: any) => k > 0).length;
+  melde(data, `Svaret er «${q.rett}» – ${antall} av ${data.spillere.length} hadde rett` + (s.nyKonge ? `. ${navnPaa(data, s.nyKonge)} er konge av ${qzNavn(kat)}!` : ''),
+    `The answer is “${q.rett}” – ${antall} of ${data.spillere.length} got it right` + (s.nyKonge ? `. ${navnPaa(data, s.nyKonge)} is king of ${qzNavn(kat)}!` : ''));
+}
+function startQuiz(data: any, modus: string, ider: string[]): any {
+  if (ider.length < 2) return feilL('for-faa', 'Kategorikongen trenger minst to spillere.', 'Category King needs at least two players.');
+  if (!KATEGORIER.length) return feilL('tom', 'Ingen spørsmål er lagt inn ennå.', 'No questions have been added yet.');
+  const lengde = Math.max(3, Math.min(30, Number(modus) || QZ_LENGDE));
+  const forrige = data.spill && data.spill.type === 'quiz' ? data.spill : null;
+  data.spill = { type: 'quiz', lek: 'quiz', navn: EKSTRA_NAVN.quiz, modus: L(lengde + ' spørsmål', lengde + ' questions'), fase: 'klar', lengde, i: 0,
+    trekker: forrige ? forrige.trekker : ider[ider.length - 1], hand: [], kat: null, spm: null, svar: {}, sats: {}, resultat: {}, satsRes: {}, riktige: {},
+    perKat: forrige ? forrige.perKat || {} : {}, konger: forrige ? forrige.konger || {} : {}, nyKonge: null, stat: { satsTreff: {}, satsBom: {}, droyRett: {} },
+    runde: forrige ? (forrige.runde || 1) + 1 : 1, frist: null };
+  melde(data, `Nytt spill: Kategorikongen – ${lengde} spørsmål`, `New game: Category King – ${lengde} questions`);
+  return { ok: true };
+}
+function quizHandling(data: any, meg: any, h: any): any {
+  const s = data.spill, erVert = meg.id === data.vert, ider = aktiveIder(data);
+  if (h.handling === 'qz-lengde') {
+    if (!erVert) return feilL('bare-vert', 'Verten styrer runden.', 'The host runs the round.');
+    if (s.fase === 'klar') { s.lengde = Math.max(3, Math.min(30, Number(h.antall) || QZ_LENGDE)); s.modus = L(s.lengde + ' spørsmål', s.lengde + ' questions'); }
+    return { ok: true };
+  }
+  if (h.handling === 'qz-start') {
+    if (!erVert) return feilL('bare-vert', 'Verten styrer runden.', 'The host runs the round.');
+    if (s.fase === 'klar') { qzNyTrekk(data); melde(data, `${navnPaa(data, s.trekker)} trekker den første kategorien`, `${navnPaa(data, s.trekker)} draws the first category`); }
+    return { ok: true };
+  }
+  if (h.handling === 'qz-trekk') {
+    if (s.fase !== 'trekk') return { ok: true };
+    if (meg.id !== s.trekker && !erVert) return feilL('ikke-din-tur', `${navnPaa(data, s.trekker)} trekker.`, `${navnPaa(data, s.trekker)} draws.`);
+    let kat = String(h.kat || '');
+    if (!s.hand.includes(kat)) { if (!erVert && meg.id !== s.trekker) return { feil: 'ukjent' }; kat = s.hand[tilfeldig(s.hand.length)]; }
+    if (!qzNyttSpm(data, kat)) return { feil: 'ukjent' };
+    melde(data, `${qzNavn(kat)}! Svar på telefonen`, `${qzNavn(kat)}! Answer on your phone`);
+    return { ok: true };
+  }
+  if (h.handling === 'qz-svar') {
+    if (s.fase !== 'spm') return feilL('for-sent', 'Svaret er allerede vist.', 'The answer has already been revealed.');
+    const v = rens(h.v, 120); if (!s.spm.alt.includes(v)) return { feil: 'ukjent' };
+    s.svar[meg.id] = v;
+    // Alle har svart: svaret vises etter et lite pust (satsingen kan fortsatt legges til da)
+    if (data.spillere.every((p: any) => s.svar[p.id] != null)) sosPust(s);
+    return { ok: true };
+  }
+  if (h.handling === 'qz-sats') {
+    if (s.fase !== 'spm') return feilL('for-sent', 'Svaret er allerede vist.', 'The answer has already been revealed.');
+    const paa = String(h.paa || '');
+    if (!paa || paa === s.sats[meg.id]) { delete s.sats[meg.id]; return { ok: true }; }
+    if (paa === meg.id || !data.spillere.some((p: any) => p.id === paa)) return { feil: 'ukjent' };
+    s.sats[meg.id] = paa; return { ok: true };
+  }
+  if (h.handling === 'tid-ute') {
+    if (s.fase === 'trekk' && fristUte(s)) { const kat = s.hand[tilfeldig(s.hand.length)]; if (qzNyttSpm(data, kat)) melde(data, `Tida gikk – ${qzNavn(kat)} ble trukket`, `Time's up – ${qzNavn(kat)} was drawn`); }
+    else if (s.fase === 'spm' && fristUte(s)) qzAvslor(data);
+    return { ok: true };
+  }
+  if (h.handling === 'qz-vis') {
+    if (!erVert) return feilL('bare-vert', 'Verten styrer runden.', 'The host runs the round.');
+    if (s.fase !== 'spm') return { ok: true };
+    const mangler = data.spillere.filter((p: any) => s.svar[p.id] == null).length;
+    if (mangler > 0 && !fristUte(s)) return venter(s, mangler);
+    qzAvslor(data); return { ok: true };
+  }
+  if (h.handling === 'qz-neste') {
+    // Alle svarer på telefonen, så alle kan gå videre
+    if (s.fase !== 'svar') return { ok: true };
+    s.i++;
+    if (s.i >= s.lengde) {
+      s.fase = 'ferdig'; s.frist = null;
+      const liste = data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, riktige: s.riktige[p.id] || 0 })).sort((a: any, b: any) => b.riktige - a.riktige);
+      if (liste[0] && liste[0].riktige) melde(data, `${liste[0].navn} vant Kategorikongen med ${liste[0].riktige} riktige!`, `${liste[0].navn} won Category King with ${liste[0].riktige} correct!`);
+      return { ok: true };
+    }
+    qzNyTrekk(data); return { ok: true };
+  }
+  if (h.handling === 'runde') {
+    if (s.fase !== 'ferdig') return { ok: true };
+    if (!erVert) return feilL('bare-vert', 'Verten bestemmer hva som skjer nå.', 'The host decides what happens next.');
+    // Spill igjen går rett på første trekk – lengden er allerede valgt
+    const r = startQuiz(data, String(s.lengde), ider); if (r && r.ok) qzNyTrekk(data); return r;
+  }
+  return null;
+}
+function quizVisning(s: any, meg: any, data: any) {
+  const aapen = s.fase === 'svar' || s.fase === 'ferdig', q = s.spm, kat = s.kat ? kategori(s.kat) : null;
+  const konger = Object.keys(s.konger || {}).filter((k) => data.spillere.some((p: any) => p.id === s.konger[k])).map((k) => ({ kat: k, navn: qzNavn(k), id: s.konger[k], n: ((s.perKat || {})[k] || {})[s.konger[k]] || 0 }));
+  const topp = (o: any) => { let id: any = null, n = 0; Object.keys(o || {}).forEach((k) => { if (o[k] > n) { n = o[k]; id = k; } }); return id ? { id, n } : null; };
+  const st = s.stat || {};
+  return {
+    fase: s.fase, i: s.i, lengde: s.lengde, runde: s.runde || 1, vert: data.vert, frist: s.frist, naa: Date.now(), trekker: s.trekker || null,
+    hand: s.fase === 'trekk' ? (s.hand || []).map((id: string) => { const k = kategori(id); return { id, navn: k ? k.navn : id, droy: !!(k && k.droy) }; }) : null,
+    kat: kat ? { id: kat.id, navn: kat.navn, droy: kat.droy, konge: s.konger[kat.id] && data.spillere.some((p: any) => p.id === s.konger[kat.id]) ? s.konger[kat.id] : null } : null,
+    q: q && (s.fase === 'spm' || aapen) ? q.q : null, alt: q && (s.fase === 'spm' || aapen) ? q.alt : null, droy: !!(q && q.droy),
+    harSvart: Object.keys(s.svar || {}), mittSvar: meg ? s.svar[meg.id] ?? null : null,
+    minSats: meg ? s.sats[meg.id] ?? null : null, satset: Object.keys(s.sats || {}),
+    fasit: aapen && q ? q.rett : null, info: aapen && q ? q.info : null,
+    svarene: aapen ? s.svar : null, resultat: aapen ? s.resultat : null, sats: aapen ? s.sats : null, satsRes: aapen ? s.satsRes : null, nyKonge: aapen ? s.nyKonge || null : null,
+    konger, tavle: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn, riktige: s.riktige[p.id] || 0 })).sort((a: any, b: any) => b.riktige - a.riktige),
+    kaaringer: s.fase === 'ferdig' ? { sats: topp(st.satsTreff), bom: topp(st.satsBom), droy: topp(st.droyRett) } : null,
+  };
 }
 
 

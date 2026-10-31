@@ -1,0 +1,343 @@
+{
+ "id": "sport",
+ "navn": "Sport",
+ "droy": false,
+ "sporsmal": [
+  {
+   "q": "Hvilket land vant fotball-VM for herrer i 2018?",
+   "alt": [
+    "Tyskland",
+    "Kroatia",
+    "Brasil",
+    "Frankrike"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Frankrike slo Kroatia 4–2 i finalen i Moskva."
+  },
+  {
+   "q": "Hvilket land ble det første til å vinne fotball-VM for herrer fem ganger?",
+   "alt": [
+    "Tyskland",
+    "Italia",
+    "Argentina",
+    "Brasil"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Det femte kom i 2002, da Brasil slo Tyskland 2–0 med to Ronaldo-mål."
+  },
+  {
+   "q": "Hvilket år vant Norges kvinnelandslag fotball-VM?",
+   "alt": [
+    "1991",
+    "1995",
+    "1999",
+    "2003"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Norge slo Tyskland 2–0 i finalen i Sverige."
+  },
+  {
+   "q": "Hvem satte straffesparket som ga Norge 2–1 over Brasil i VM 1998?",
+   "alt": [
+    "Tore André Flo",
+    "Øyvind Leonhardsen",
+    "Kjetil Rekdal",
+    "Erik Mykland"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Flo scoret det første målet, og Rekdal avgjorde på straffe i 89. minutt i Marseille."
+  },
+  {
+   "q": "Hvilken nordmann vant OL-gull i normalbakken i skihopp på Lillehammer i 1994?",
+   "alt": [
+    "Lasse Ottesen",
+    "Espen Bredesen",
+    "Roar Ljøkelsøy",
+    "Bjørn Einar Romøren"
+   ],
+   "svar": 1,
+   "niva": 3,
+   "info": "Han tok også sølv i storbakken samme OL."
+  },
+  {
+   "q": "Hvilket år vant Norges håndballkvinner OL-gull for første gang?",
+   "alt": [
+    "2000",
+    "2004",
+    "2008",
+    "2012"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Norge slo Russland 34–27 i finalen i Beijing."
+  },
+  {
+   "q": "Hvem var landslagstrener for Norges håndballkvinner da de tok OL-gull i 2008?",
+   "alt": [
+    "Thorir Hergeirsson",
+    "Sven-Tore Jacobsen",
+    "Christian Berge",
+    "Marit Breivik"
+   ],
+   "svar": 3,
+   "niva": 3,
+   "info": "Breivik ledet laget fra 1994 til 2009, før Thorir Hergeirsson tok over."
+  },
+  {
+   "q": "Hvilken klubb spilte Ole Gunnar Solskjær for i elleve sesonger?",
+   "alt": [
+    "Liverpool",
+    "Arsenal",
+    "Manchester United",
+    "Chelsea"
+   ],
+   "svar": 2,
+   "niva": 1,
+   "info": "Han ble udødelig i 1999 med seiersmålet i Champions League-finalen mot Bayern."
+  },
+  {
+   "q": "Hvilket land sjokkerte alle og vant fotball-EM i 2004?",
+   "alt": [
+    "Hellas",
+    "Portugal",
+    "Danmark",
+    "Tsjekkia"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "Hellas slo vertsnasjonen Portugal 1–0 i finalen med en heading av Charisteas."
+  },
+  {
+   "q": "Hvor mange spillere har et lag på banen samtidig i håndball?",
+   "alt": [
+    "5",
+    "6",
+    "7",
+    "8"
+   ],
+   "svar": 2,
+   "niva": 1,
+   "info": "Seks utespillere og én keeper – med mindre noen sitter på to-minutteren."
+  },
+  {
+   "q": "Hvem vant 50-kilometeren i Holmenkollen under ski-VM i Oslo i 2011?",
+   "alt": [
+    "Martin Johnsrud Sundby",
+    "Eldar Rønning",
+    "Petter Northug",
+    "Tord Asle Gjerdalen"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Det var hjemme-VM, og Holmenkollen var stappfull av nordmenn hele uka."
+  },
+  {
+   "q": "Hvor mange OL-gull vant både Bjørn Dæhlie og Marit Bjørgen hver i løpet av karrieren?",
+   "alt": [
+    "6",
+    "8",
+    "10",
+    "12"
+   ],
+   "svar": 1,
+   "niva": 2,
+   "info": "Bjørgen tok totalt 15 OL-medaljer, Dæhlie 12."
+  },
+  {
+   "q": "Hvor lang er en maraton?",
+   "alt": [
+    "40,195 km",
+    "42,195 km",
+    "44,195 km",
+    "46,195 km"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Den rare distansen stammer fra OL i London i 1908, da løypa ble lagt via kongefamilien."
+  },
+  {
+   "q": "Hvilket år startet Rosenborgs rekke på 13 strake seriegull?",
+   "alt": [
+    "1988",
+    "1992",
+    "1995",
+    "1998"
+   ],
+   "svar": 1,
+   "niva": 3,
+   "info": "Rekka varte fra 1992 til 2004, det meste med Nils Arne Eggen som trener."
+  },
+  {
+   "q": "Hvilken nordmann vant den aller første Gullballen for kvinner i 2018?",
+   "alt": [
+    "Caroline Graham Hansen",
+    "Maren Mjelde",
+    "Guro Reiten",
+    "Ada Hegerberg"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Prisutdelingen ble mest husket for at verten spurte om hun kunne twerke."
+  },
+  {
+   "q": "Hvem vant 100 meter i OL i Beijing 2008 med ny verdensrekord?",
+   "alt": [
+    "Tyson Gay",
+    "Asafa Powell",
+    "Usain Bolt",
+    "Justin Gatlin"
+   ],
+   "svar": 2,
+   "niva": 1,
+   "info": "Han løp på 9,69 med skolissa løs og slakket av før mål."
+  },
+  {
+   "q": "Hvilken nordmann vant OL-gull på 400 meter hekk i Tokyo i 2021?",
+   "alt": [
+    "Jakob Ingebrigtsen",
+    "Henrik Ingebrigtsen",
+    "Sondre Guttormsen",
+    "Karsten Warholm"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Tiden 45,94 var verdensrekord, og han rev opp singleten av glede."
+  },
+  {
+   "q": "Mellom hvilke steder går Birkebeinerrennet, det klassiske turrennet på ski?",
+   "alt": [
+    "Rena–Lillehammer",
+    "Oslo–Drammen",
+    "Geilo–Finse",
+    "Trondheim–Røros"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "Rennet er 54 km, og deltakerne bærer en sekk på 3,5 kilo som symbol på kongsbarnet."
+  },
+  {
+   "q": "Hvem var landslagstrener for Norge under fotball-VM i 1994 og 1998?",
+   "alt": [
+    "Nils Johan Semb",
+    "Åge Hareide",
+    "Nils Arne Eggen",
+    "Egil «Drillo» Olsen"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Drillo var kjent for gummistøvler, lange baller og et uslåelig humør på pressekonferanser."
+  },
+  {
+   "q": "Hvilken norsk skiskytter vant fire OL-gull i Salt Lake City i 2002?",
+   "alt": [
+    "Ole Einar Bjørndalen",
+    "Emil Hegle Svendsen",
+    "Johannes Thingnes Bø",
+    "Tarjei Bø"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "Han vant alle fire øvelsene han stilte i, og fikk tilnavnet «Kongen av skiskyting»."
+  },
+  {
+   "q": "Hvem ble den første nordmannen som ble toppscorer i Premier League?",
+   "alt": [
+    "Erling Braut Haaland",
+    "Ole Gunnar Solskjær",
+    "John Carew",
+    "Tore André Flo"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "Han scoret 36 mål for Manchester City i 2022/23, rekord for en sesong på 38 kamper."
+  },
+  {
+   "q": "Hvor mange poeng gir en touchdown i amerikansk fotball?",
+   "alt": [
+    "3",
+    "6",
+    "7",
+    "10"
+   ],
+   "svar": 1,
+   "niva": 2,
+   "info": "Ekstrapoenget etterpå gir ett poeng til, derfor er sju så vanlig på tavla."
+  },
+  {
+   "q": "Hvilken nordmann ble verdensmester i sjakk for første gang i 2013?",
+   "alt": [
+    "Magnus Carlsen",
+    "Simen Agdestein",
+    "Jon Ludvig Hammer",
+    "Aryan Tari"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Han slo Viswanathan Anand i Chennai og var da 22 år gammel."
+  },
+  {
+   "q": "Hvem hoppet 253,5 meter i Vikersund i 2017, da det var ny verdensrekord?",
+   "alt": [
+    "Robert Johansson",
+    "Kamil Stoch",
+    "Stefan Kraft",
+    "Daniel-André Tande"
+   ],
+   "svar": 2,
+   "niva": 3,
+   "info": "Robert Johansson hadde satt rekord på 252 meter bare noen minutter tidligere samme dag."
+  },
+  {
+   "q": "Hva heter Norges nasjonalstadion i fotball?",
+   "alt": [
+    "Ullevaal stadion",
+    "Lerkendal stadion",
+    "Brann stadion",
+    "Intility Arena"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Stadion åpnet i 1926 og er også hjemmebanen for cupfinalen."
+  },
+  {
+   "q": "Hvilket år deltok Norges herrelandslag i fotball-EM for første gang?",
+   "alt": [
+    "1992",
+    "1996",
+    "2000",
+    "2004"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Norge slo Spania 1–0 i åpningskampen med mål av Steffen Iversen."
+  },
+  {
+   "q": "Hvilken norsk alpinist tok åtte OL-medaljer i karrieren, flest av alle alpinister?",
+   "alt": [
+    "Kjetil André Aamodt",
+    "Lasse Kjus",
+    "Aksel Lund Svindal",
+    "Kjetil Jansrud"
+   ],
+   "svar": 0,
+   "niva": 3,
+   "info": "Fire av dem var gull, og det siste kom i super-G i Torino i 2006."
+  },
+  {
+   "q": "Hvem scoret det beryktede «Guds hånd»-målet mot England i VM 1986?",
+   "alt": [
+    "Pelé",
+    "Zico",
+    "Michel Platini",
+    "Diego Maradona"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "I samme kamp scoret han også «århundrets mål» etter en solotur fra egen banehalvdel."
+  }
+ ]
+}

@@ -1,0 +1,343 @@
+{
+ "id": "norge",
+ "navn": "Norge",
+ "droy": false,
+ "sporsmal": [
+  {
+   "q": "Hvilken by har tilnavnet «Nordens Paris»?",
+   "alt": [
+    "Bergen",
+    "Trondheim",
+    "Tromsø",
+    "Bodø"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Tilnavnet kom på 1800-tallet fordi folk i byen var uventet velkledde og verdensvante."
+  },
+  {
+   "q": "Hvilken by regnes som Norges oljehovedstad?",
+   "alt": [
+    "Bergen",
+    "Stavanger",
+    "Haugesund",
+    "Kristiansund"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Equinor har hovedkontor der, og Norsk Oljemuseum ser ut som en plattform."
+  },
+  {
+   "q": "Hvor ble Grunnloven undertegnet i 1814?",
+   "alt": [
+    "Eidsvoll",
+    "Christiania",
+    "Trondheim",
+    "Bergen"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Mennene som skrev den kalles Eidsvollsmennene, og 17. mai var datoen de var ferdige."
+  },
+  {
+   "q": "Hva er Norges høyeste fjell?",
+   "alt": [
+    "Glittertind",
+    "Snøhetta",
+    "Store Skagastølstind",
+    "Galdhøpiggen"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Glittertind var lenge regnet som høyere, men brefonna på toppen har smeltet."
+  },
+  {
+   "q": "Hva er Norges lengste elv?",
+   "alt": [
+    "Glomma",
+    "Tana",
+    "Numedalslågen",
+    "Drammenselva"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "Glomma er rundt 620 kilometer lang og renner ut i havet ved Fredrikstad."
+  },
+  {
+   "q": "Hvor mange representanter sitter på Stortinget?",
+   "alt": [
+    "150",
+    "165",
+    "175",
+    "169"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Tallet ble økt fra 165 til 169 ved valget i 2005."
+  },
+  {
+   "q": "Hvem ble Norges første kvinnelige statsminister i 1981?",
+   "alt": [
+    "Anne Enger",
+    "Gro Harlem Brundtland",
+    "Siv Jensen",
+    "Kristin Halvorsen"
+   ],
+   "svar": 1,
+   "niva": 2,
+   "info": "Hun fikk tilnavnet «landsmoderen» og satte verdensrekord med åtte kvinner i regjeringen i 1986."
+  },
+  {
+   "q": "Hva het det første store oljefeltet som ble funnet på norsk sokkel i 1969?",
+   "alt": [
+    "Statfjord",
+    "Troll",
+    "Ekofisk",
+    "Gullfaks"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Funnet ble meldt lille julaften 1969 – Norges dyreste julegave noensinne."
+  },
+  {
+   "q": "Hvilken fjord stuper Preikestolen ned mot?",
+   "alt": [
+    "Hardangerfjorden",
+    "Sognefjorden",
+    "Geirangerfjorden",
+    "Lysefjorden"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Platået henger 604 meter over fjorden, og Tom Cruise hang fra kanten i «Mission: Impossible»."
+  },
+  {
+   "q": "I hvilken by kalles en ung gutt gjerne en «kjuagutt»?",
+   "alt": [
+    "Stavanger",
+    "Bergen",
+    "Ålesund",
+    "Kristiansand"
+   ],
+   "svar": 1,
+   "niva": 2,
+   "info": "Ordet stammer trolig fra «kjue», et gammelt ord for liten og rask."
+  },
+  {
+   "q": "Hvilken fisk lages lutefisk av?",
+   "alt": [
+    "Torsk",
+    "Sei",
+    "Hyse",
+    "Sild"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Tørrfisken legges i lut, så i vann, og serveres med bacon, ertestuing og helst akevitt."
+  },
+  {
+   "q": "Hvem regnes som oppfinneren av brunosten?",
+   "alt": [
+    "Hanna Winsnes",
+    "Ingrid Espelid Hovig",
+    "Anne Hov",
+    "Berit Nordstrand"
+   ],
+   "svar": 2,
+   "niva": 3,
+   "info": "Budeia fra Gudbrandsdalen tilsatte fløte i mysen i 1863 og fikk Kongens fortjenstmedalje for det."
+  },
+  {
+   "q": "I hvilket fylke ligger Lofoten?",
+   "alt": [
+    "Troms",
+    "Finnmark",
+    "Trøndelag",
+    "Nordland"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Øygruppa har eget fotballag i Henningsvær med banen omgitt av hav på nesten alle kanter."
+  },
+  {
+   "q": "På hvilken øy ligger Nordkapp?",
+   "alt": [
+    "Sørøya",
+    "Magerøya",
+    "Senja",
+    "Kvaløya"
+   ],
+   "svar": 1,
+   "niva": 3,
+   "info": "Nabopunktet Knivskjellodden stikker faktisk litt lenger nord, men har ikke like kul platå."
+  },
+  {
+   "q": "Hva heter hovedstedet på Svalbard?",
+   "alt": [
+    "Longyearbyen",
+    "Barentsburg",
+    "Ny-Ålesund",
+    "Sveagruva"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Det er påbudt å ha med rifle utenfor bebyggelsen på grunn av isbjørn."
+  },
+  {
+   "q": "Hvilke tre land grenser Norge til på land?",
+   "alt": [
+    "Sverige, Finland og Danmark",
+    "Sverige, Russland og Estland",
+    "Sverige, Finland og Russland",
+    "Sverige, Finland og Island"
+   ],
+   "svar": 2,
+   "niva": 1,
+   "info": "Grensen mot Russland er bare 198 kilometer, mot Sverige over 1 600."
+  },
+  {
+   "q": "Hvilken vikingkonge regnes for å ha samlet Norge til ett rike?",
+   "alt": [
+    "Harald Hårfagre",
+    "Olav Tryggvason",
+    "Harald Hardråde",
+    "Håkon den gode"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Ifølge sagaen nektet han å klippe håret før landet var samlet – derav navnet."
+  },
+  {
+   "q": "Hvilket år ble det første Holmenkollrennet arrangert?",
+   "alt": [
+    "1872",
+    "1912",
+    "1892",
+    "1924"
+   ],
+   "svar": 2,
+   "niva": 3,
+   "info": "Lengste hopp det første året var 21,5 meter."
+  },
+  {
+   "q": "Hvilket år ble vinter-OL arrangert på Lillehammer?",
+   "alt": [
+    "1992",
+    "1994",
+    "1996",
+    "1998"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Maskotene Kristin og Håkon var de første OL-maskotene som var mennesker."
+  },
+  {
+   "q": "I hvilket fylke ligger Atlanterhavsveien?",
+   "alt": [
+    "Vestland",
+    "Nordland",
+    "Trøndelag",
+    "Møre og Romsdal"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Storseisundbrua ser ut som den ender i havet, og veien er brukt i flere bilreklamer."
+  },
+  {
+   "q": "Hva er Norges lengste fjord?",
+   "alt": [
+    "Sognefjorden",
+    "Hardangerfjorden",
+    "Trondheimsfjorden",
+    "Porsangerfjorden"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Fjorden går over 200 kilometer inn i landet og er over 1 300 meter dyp."
+  },
+  {
+   "q": "Hvem skrev «Folk og røvere i Kardemomme by»?",
+   "alt": [
+    "Alf Prøysen",
+    "Anne-Cath. Vestly",
+    "Thorbjørn Egner",
+    "Inger Hagerup"
+   ],
+   "svar": 2,
+   "niva": 1,
+   "info": "Kardemommeloven sier at man skal være grei og snill – og ellers kan man gjøre som man vil."
+  },
+  {
+   "q": "Hvilken by var dramatikeren Henrik Ibsen fra?",
+   "alt": [
+    "Grimstad",
+    "Skien",
+    "Bergen",
+    "Porsgrunn"
+   ],
+   "svar": 1,
+   "niva": 2,
+   "info": "Han bodde 27 år i utlandet og er verdens mest spilte dramatiker etter Shakespeare."
+  },
+  {
+   "q": "Hvor ligger Sametinget?",
+   "alt": [
+    "Kautokeino",
+    "Alta",
+    "Tromsø",
+    "Karasjok"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Bygningen er formet som en lavvo og ble åpnet av kong Harald i 2000."
+  },
+  {
+   "q": "Hvilket år ble Kvikk Lunsj lansert?",
+   "alt": [
+    "1927",
+    "1937",
+    "1947",
+    "1957"
+   ],
+   "svar": 1,
+   "niva": 3,
+   "info": "Sjokoladen ble markedsført som tursjokolade fra starten, og påsken står for en stor del av salget."
+  },
+  {
+   "q": "Hvilket område i Norge er mest kjent for rakfisk?",
+   "alt": [
+    "Setesdal",
+    "Østerdalen",
+    "Valdres",
+    "Hallingdal"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Fisken fermenteres i flere måneder, og Fagernes arrangerer egen rakfiskfestival hver høst."
+  },
+  {
+   "q": "I hvilken by ligger Dyreparken med Kaptein Sabeltann?",
+   "alt": [
+    "Kristiansand",
+    "Arendal",
+    "Grimstad",
+    "Mandal"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Terje Formoe har spilt Kaptein Sabeltann i Kjuttaviga siden 1990."
+  },
+  {
+   "q": "Hvilket tysk krigsskip ble senket fra Oscarsborg festning 9. april 1940?",
+   "alt": [
+    "«Bismarck»",
+    "«Tirpitz»",
+    "«Lützow»",
+    "«Blücher»"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Senkingen ga kongen og regjeringen tid til å flykte fra Oslo før tyskerne kom."
+  }
+ ]
+}

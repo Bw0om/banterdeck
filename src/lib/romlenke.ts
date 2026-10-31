@@ -1,7 +1,7 @@
 // Hvilken lek i rommet hører til hvilken lekeside. Brukes til «Spill fra hver sin telefon»-knappene,
 // så rommet lages med riktig lek valgt på forhånd.
 export const ROMLEK: Record<string, string> = {
-  'nyhetsrunden': 'nyhetsrunden', 'bussruta': 'bussruta', 'drikke-yatzy': 'yatzy', 'over-eller-under': 'overunder',
+  'kategorikongen': 'quiz', 'nyhetsrunden': 'nyhetsrunden', 'bussruta': 'bussruta', 'drikke-yatzy': 'yatzy', 'over-eller-under': 'overunder',
   'veddelopet': 'veddelopet', 'pyramiden': 'pyramiden', 'president': 'president', 'gris': 'gris', 'fuck-the-dealer': 'dealer',
   'to-sannheter-og-en-logn': 'tosannheter', 'regelfabrikken': 'regelfabrikken', 'forraeder': 'forraeder',
   'drikke-bingo': 'bingo', 'ring-of-fire': 'ring-of-fire', 'pekeleken': 'pekeleken', 'jeg-har-aldri': 'jeg-har-aldri',

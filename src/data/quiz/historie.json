@@ -1,0 +1,343 @@
+{
+ "id": "historie",
+ "navn": "Historie",
+ "droy": false,
+ "sporsmal": [
+  {
+   "q": "Hvem ble Norges første konge etter unionsoppløsningen i 1905?",
+   "alt": [
+    "Olav V",
+    "Haakon VII",
+    "Oscar II",
+    "Karl Johan"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Han var født som prins Carl av Danmark og valgte selv navnet Haakon."
+  },
+  {
+   "q": "Hvilket år falt Berlinmuren, så Øst- og Vest-Berlin kunne feste sammen igjen?",
+   "alt": [
+    "1985",
+    "1987",
+    "1991",
+    "1989"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Muren hadde delt byen siden 1961, og falt natt til 10. november."
+  },
+  {
+   "q": "Hvilket år ble Norges grunnlov undertegnet på Eidsvoll?",
+   "alt": [
+    "1814",
+    "1821",
+    "1884",
+    "1905"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Den ble vedtatt 16. mai og signert 17. mai – derav nasjonaldagen."
+  },
+  {
+   "q": "Hvem var den første keiseren i Romerriket?",
+   "alt": [
+    "Julius Cæsar",
+    "Nero",
+    "Augustus",
+    "Caligula"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Julius Cæsar var diktator, men ble aldri keiser – det ble adoptivsønnen hans."
+  },
+  {
+   "q": "Hvilket år brøt den franske revolusjonen ut?",
+   "alt": [
+    "1776",
+    "1789",
+    "1799",
+    "1804"
+   ],
+   "svar": 1,
+   "niva": 2,
+   "info": "Bastillen ble stormet 14. juli 1789, som fortsatt er Frankrikes nasjonaldag."
+  },
+  {
+   "q": "Hvem oppdaget penicillin i 1928, nesten ved en tilfeldighet?",
+   "alt": [
+    "Louis Pasteur",
+    "Marie Curie",
+    "Alexander Fleming",
+    "Robert Koch"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Han glemte en petriskål på labben, og muggsoppen gjorde resten av jobben."
+  },
+  {
+   "q": "I hvilken by ble erkehertug Franz Ferdinand skutt i 1914, skuddet som utløste første verdenskrig?",
+   "alt": [
+    "Beograd",
+    "Wien",
+    "Sarajevo",
+    "Budapest"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Attentatmannen Gavrilo Princip var bare 19 år gammel."
+  },
+  {
+   "q": "I hvilket slag falt Olav den hellige i 1030?",
+   "alt": [
+    "Hafrsfjord",
+    "Stiklestad",
+    "Svolder",
+    "Fimreite"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Olav ble helgen etter sin død, og Nidarosdomen ble reist over graven hans."
+  },
+  {
+   "q": "Hvilken konge regnes tradisjonelt for å ha samlet Norge til ett rike etter slaget i Hafrsfjord?",
+   "alt": [
+    "Harald Hårfagre",
+    "Olav Tryggvason",
+    "Håkon den gode",
+    "Magnus den gode"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Ifølge sagaen nektet han å klippe håret før Norge var samlet – derav navnet."
+  },
+  {
+   "q": "Hvem ledet Sovjetunionen under Cubakrisen i 1962?",
+   "alt": [
+    "Stalin",
+    "Bresjnev",
+    "Gorbatsjov",
+    "Khrusjtsjov"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Verden sto på randen av atomkrig i 13 dager før rakettene ble trukket tilbake."
+  },
+  {
+   "q": "Hvem var USAs første president?",
+   "alt": [
+    "Thomas Jefferson",
+    "John Adams",
+    "Abraham Lincoln",
+    "George Washington"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Han ble innsatt i 1789 og nektet å sitte mer enn to perioder."
+  },
+  {
+   "q": "Hvilket år ble Norge okkupert av Tyskland?",
+   "alt": [
+    "1939",
+    "1940",
+    "1941",
+    "1942"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Angrepet kom 9. april, og kongen og regjeringen flyktet til slutt til London."
+  },
+  {
+   "q": "Hvem skrev «Det kommunistiske manifest» sammen med Friedrich Engels i 1848?",
+   "alt": [
+    "Lenin",
+    "Trotskij",
+    "Stalin",
+    "Karl Marx"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Marx bodde store deler av livet i London, ofte blakk og finansiert av Engels."
+  },
+  {
+   "q": "Hvilket år seilte Columbus over Atlanteren og kom til Amerika?",
+   "alt": [
+    "1492",
+    "1500",
+    "1485",
+    "1498"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Han trodde hele livet at han hadde funnet en sjøvei til Asia."
+  },
+  {
+   "q": "Hvilken by var hovedstad i Det bysantinske riket?",
+   "alt": [
+    "Roma",
+    "Aten",
+    "Alexandria",
+    "Konstantinopel"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Byen falt til osmanerne i 1453 og heter i dag Istanbul."
+  },
+  {
+   "q": "Hvem oppfant boktrykkerkunsten med løse typer i Europa rundt 1450?",
+   "alt": [
+    "Johann Gutenberg",
+    "Leonardo da Vinci",
+    "Galileo Galilei",
+    "Nikolaus Kopernikus"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "Gutenberg-bibelen fra rundt 1455 er en av verdens mest verdifulle bøker."
+  },
+  {
+   "q": "Hvilket land var Norge i union med fra 1814 til 1905?",
+   "alt": [
+    "Danmark",
+    "Sverige",
+    "Finland",
+    "Russland"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Før det hadde Norge vært i union med Danmark i over 400 år."
+  },
+  {
+   "q": "Hvilket år stemte Norge nei til EF for første gang?",
+   "alt": [
+    "1972",
+    "1979",
+    "1986",
+    "1994"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "53,5 prosent sa nei, og i 1994 sa folket nei igjen – til EU denne gangen."
+  },
+  {
+   "q": "Hvem var Norges første kvinnelige statsminister?",
+   "alt": [
+    "Gro Harlem Brundtland",
+    "Erna Solberg",
+    "Anne Enger",
+    "Åse Kleveland"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Hun ble statsminister første gang i 1981 og fikk tilnavnet «landsmoderen»."
+  },
+  {
+   "q": "Hvor lenge varte egentlig Hundreårskrigen mellom England og Frankrike?",
+   "alt": [
+    "100 år",
+    "116 år",
+    "87 år",
+    "130 år"
+   ],
+   "svar": 1,
+   "niva": 3,
+   "info": "Krigen varte fra 1337 til 1453, så navnet er en grov avrunding."
+  },
+  {
+   "q": "Hvilken farao fikk bygd den store pyramiden i Giza?",
+   "alt": [
+    "Tutankhamon",
+    "Ramses II",
+    "Khufu",
+    "Kleopatra"
+   ],
+   "svar": 2,
+   "niva": 3,
+   "info": "Pyramiden var verdens høyeste byggverk i nesten 4000 år."
+  },
+  {
+   "q": "Hvilket år ble Mahatma Gandhi drept?",
+   "alt": [
+    "1945",
+    "1948",
+    "1950",
+    "1947"
+   ],
+   "svar": 1,
+   "niva": 3,
+   "info": "Han ble skutt i New Delhi bare måneder etter at India ble uavhengig."
+  },
+  {
+   "q": "Hva het operasjonen der norske sabotører sprengte tungtvannsanlegget på Vemork i 1943?",
+   "alt": [
+    "Operasjon Gunnerside",
+    "Operasjon Grouse",
+    "Operasjon Freshman",
+    "Operasjon Weserübung"
+   ],
+   "svar": 0,
+   "niva": 3,
+   "info": "Sabotørene kom seg unna uten at et eneste skudd ble løsnet."
+  },
+  {
+   "q": "Hva het slaget der Napoleon tapte for siste gang i 1815?",
+   "alt": [
+    "Austerlitz",
+    "Leipzig",
+    "Waterloo",
+    "Trafalgar"
+   ],
+   "svar": 2,
+   "niva": 1,
+   "info": "Etter tapet ble han sendt i eksil til øya St. Helena, der han døde i 1821."
+  },
+  {
+   "q": "Hvilken romersk by ble begravd av Vesuvs utbrudd i år 79?",
+   "alt": [
+    "Napoli",
+    "Roma",
+    "Kartago",
+    "Pompeii"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Asken bevarte byen så godt at man fortsatt finner brød og graffiti der."
+  },
+  {
+   "q": "Hvilket år åpnet Norges første jernbane, Hovedbanen mellom Christiania og Eidsvoll?",
+   "alt": [
+    "1834",
+    "1874",
+    "1894",
+    "1854"
+   ],
+   "svar": 3,
+   "niva": 3,
+   "info": "Strekningen var 68 kilometer lang og ble bygd med britisk hjelp."
+  },
+  {
+   "q": "Hvilket år ble Nelson Mandela løslatt fra fengsel?",
+   "alt": [
+    "1986",
+    "1988",
+    "1994",
+    "1990"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Han hadde sittet inne i 27 år og ble Sør-Afrikas president fire år senere."
+  },
+  {
+   "q": "Hvilket år fikk Kristiania tilbake navnet Oslo?",
+   "alt": [
+    "1905",
+    "1914",
+    "1925",
+    "1945"
+   ],
+   "svar": 2,
+   "niva": 3,
+   "info": "Byen het Christiania/Kristiania i over 300 år etter kong Christian IV."
+  }
+ ]
+}

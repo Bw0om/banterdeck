@@ -61,7 +61,7 @@ const LEK = {
   'to-sannheter-og-en-logn': 'bobler', 'pekeleken': 'peke', 'jeg-har-aldri': 'aldri', 'enten-eller': 'enten',
   'ring-of-fire': 'ring', 'kategorier': 'liste', 'rygg-mot-rygg': 'rygg', 'drikke-yatzy': 'terning',
   // Rommets egne id-er (de er ikke alltid like lekens slug)
-  'mest': 'peke', 'hvemskrev': 'brev', 'samme': 'sau', 'spion': 'muldvarp', 'pannekort': 'lapp', 'tosannheter': 'bobler',
+  'quiz': 'krone', 'kategorikongen': 'krone', 'mest': 'peke', 'hvemskrev': 'brev', 'samme': 'sau', 'spion': 'muldvarp', 'pannekort': 'lapp', 'tosannheter': 'bobler',
   'overunder': 'pil', 'skal': 'lyn', 'bloff': 'fisk', 'yatzy': 'terning', '50-50': 'enten', 'sannhet-eller-drikk': 'bobler',
   'nodt-eller-sannhet': 'flamme', 'duoleken': 'hjerte', 'skaal': 'lyn',
   'pakke-julebord': 'gnist', 'pakke-vill': 'flamme', 'pakke-bli-kjent': 'bobler', 'pakke-hyttetur': 'mane', 'pakke-bursdag': 'pokal',
