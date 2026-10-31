@@ -1,0 +1,26 @@
+# Simulator-sjekken: verten (jobben) deler i Fuck the Dealer – appen ser hvem som deler og tellebrettet, og at kortet snus
+# når verten trykker en verdi via API-et (DealerSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(noen gjetter|ett forsøk til|deler).*"
+    timeout: 30000
+- takeScreenshot: 70-dealer
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*"
+    timeout: 90000
+- waitForAnimationToEnd
+- takeScreenshot: 71-dealer-kortet

@@ -149,8 +149,20 @@ jobs:
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"mest\",\"modus\":\"*\",$V}"
             # Runden varer 30 sekunder og Maestro bruker rundt et minutt på å starte: verten går til neste runde når flyten er i gang
-            (sleep 75; vert "{\"handling\":\"runde\",$V}") &
+            (for i in 1 2 3 4 5 6 7; do sleep 25; vert "{\"handling\":\"runde\",$V}"; done) &
             flyt mest
+            wait
+            # Fuck the Dealer: verten deler og trykker en verdi via API-et – appen ser avgjørelsen
+            vert "{\"handling\":\"avslutt\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"dealer\",\"modus\":\"*\",$V}"
+            (sleep 75; vert "{\"handling\":\"ftd-gjett\",\"v\":7,$V}"; sleep 15; vert "{\"handling\":\"ftd-gjett\",\"v\":10,$V}"; vert "{\"handling\":\"ftd-gjett\",\"v\":3,$V}") &
+            flyt dealer
+            wait
+            # Nyhetsrunden: verten starter, tar første spørsmål og viser svaret via API-et
+            vert "{\"handling\":\"avslutt\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"nyhetsrunden\",\"modus\":\"*\",$V}"
+            (sleep 75; vert "{\"handling\":\"nr-start\",$V}"; sleep 25; vert "{\"handling\":\"nr-vis\",$V}"; sleep 50; vert "{\"handling\":\"nr-vis\",$V}") &
+            flyt nyhetsrunden
             wait
           fi
           xcrun simctl terminate "$UDID" no.mittvors.app || true
