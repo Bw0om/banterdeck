@@ -2638,3 +2638,43 @@ button.vl-bane:active{transform:translate(2px,2px)}
 .fv-etikett{margin:6px 0 -6px;font-family:var(--display);font-stretch:70%;font-weight:900;text-transform:uppercase;font-size:12px;color:var(--muted)}
 .fv-skjegg svg{width:62px;height:62px}
 .fv-fot .btn + .btn{margin-left:6px}
+
+/* ---------- Kategorikongen (quiz): kategorikort i vifte, kategorichip, satsing og kroner ---------- */
+.qz-trekk-tekst{margin:0 0 6px;font-size:15px;font-weight:700;text-align:center}
+.qz-hand{position:relative;display:flex;justify-content:center;align-items:flex-end;height:190px;margin:4px 0 14px;padding:0 8px}
+.qz-kort{position:relative;flex:none;width:92px;height:150px;margin:0 -14px;padding:10px 8px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;text-align:left;color:var(--blekk);background:var(--card);border:var(--strek) solid var(--blekk);border-radius:8px;box-shadow:var(--skygge-liten);cursor:pointer;transform-origin:50% 100%;transform:rotate(var(--v)) translateY(calc(var(--i) * 0px));transition:transform 160ms var(--ease-out),box-shadow 160ms var(--ease-out);font:900 15px/1.05 var(--display);font-stretch:75%;text-transform:uppercase}
+.qz-kort::before{content:"";position:absolute;inset:6px;border:2px dashed rgb(22 18 15 / .25);border-radius:5px;pointer-events:none}
+.qz-kort.droy{background:var(--oransje)}
+.qz-kort.rygg{background:var(--tavle,#1C1B1F);color:#FFF8EE;cursor:default}
+.qz-kort.rygg::before{border-color:rgb(255 248 238 / .3)}
+.qz-kort-logo{font-size:48px;line-height:1;text-align:center;align-self:center;margin-bottom:28px;opacity:.9}
+.qz-kort-navn{word-break:break-word;hyphens:auto}
+.qz-kort-tag{align-self:flex-start;font-size:10px;letter-spacing:.08em;padding:2px 6px;border:2px solid var(--blekk);border-radius:4px;background:var(--gul)}
+.qz-hand.min .qz-kort:hover,.qz-hand.min .qz-kort:focus-visible{transform:rotate(var(--v)) translateY(-14px);box-shadow:var(--skygge);z-index:2}
+.qz-hand.min .qz-kort:active{transform:rotate(var(--v)) translateY(-6px) scale(.98)}
+.qz-hand .qz-kort{animation:qzKort 520ms var(--fjaer) both;animation-delay:calc(var(--i) * 60ms)}
+@keyframes qzKort{from{transform:rotate(0deg) translateY(40px);opacity:0}to{transform:rotate(var(--v)) translateY(0);opacity:1}}
+.qz-kat{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 10px}
+.qz-kat b{font-family:var(--display);font-stretch:75%;font-weight:900;text-transform:uppercase;font-size:15px;padding:4px 9px;background:var(--gul);color:var(--blekk);border:2.5px solid var(--blekk);border-radius:4px;box-shadow:3px 3px 0 var(--hard)}
+.qz-kat.droy b{background:var(--oransje)}
+.qz-kat i{font-style:normal;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.qz-krone{margin-left:auto;font-size:12px;font-weight:800}
+.qz-sats{margin:4px 0 12px;padding:10px 12px;border:2.5px dashed var(--blekk);border-radius:8px}
+.qz-sats .nr-etikett{margin:0 0 8px}
+.qz-sats-folk{display:flex;flex-wrap:wrap;gap:8px}
+.qz-sats-folk button{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;font:800 13px/1 var(--sans);color:var(--ink);background:var(--card);border:2.5px solid var(--blekk);border-radius:999px;box-shadow:3px 3px 0 var(--hard);cursor:pointer;transition:transform 90ms ease-out,box-shadow 90ms ease-out,background-color .15s}
+.qz-sats-folk button .nr-p,.qz-sats-folk button svg{width:28px;height:28px}
+.qz-sats-folk button[aria-pressed="true"]{background:var(--oransje);color:var(--blekk);transform:translate(2px,2px);box-shadow:1px 1px 0 var(--hard)}
+.qz-sats-folk button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--hard)}
+.qz-sats .nr-vent{margin-top:8px;color:var(--muted)}
+.qz-info{margin:-4px 0 12px;font-size:14px;line-height:1.35;color:var(--muted)}
+.qz-nykonge{margin:0 0 12px;padding:12px 14px;font-size:16px;font-weight:700;background:var(--gul);color:var(--blekk);border:var(--strek) solid var(--blekk);border-radius:8px;box-shadow:var(--skygge-liten);text-align:center}
+.qz-nykonge.inn{animation:qzInn 520ms var(--fjaer) both}
+@keyframes qzInn{from{transform:translateY(10px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.qz-satsliste li b{font-size:13px}
+.qz-konger{margin:14px 0 0}
+.qz-konger ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.qz-konger li{display:flex;align-items:baseline;gap:6px;font-size:14px}
+.qz-konger li span{color:var(--muted);font-size:13px}
+.qz-kaaringer{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:14px}
+@media (prefers-reduced-motion: reduce){.qz-hand .qz-kort,.qz-nykonge.inn{animation:none}}

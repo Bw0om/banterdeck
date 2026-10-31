@@ -1,0 +1,343 @@
+{
+ "id": "mennesket",
+ "navn": "Mennesket",
+ "droy": false,
+ "sporsmal": [
+  {
+   "q": "Hvilket organ bryter ned det meste av alkoholen du drikker på vorset?",
+   "alt": [
+    "Nyrene",
+    "Magen",
+    "Bukspyttkjertelen",
+    "Leveren"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Leveren tar rundt 90 prosent av jobben, resten forsvinner via pust, svette og urin."
+  },
+  {
+   "q": "Hvor mange knokler har en voksen person?",
+   "alt": [
+    "186",
+    "206",
+    "226",
+    "246"
+   ],
+   "svar": 1,
+   "niva": 2,
+   "info": "Nyfødte har rundt 300, men mange vokser sammen etter hvert."
+  },
+  {
+   "q": "Hvilket stoff dannes når leveren bryter ned alkohol, og får mye av skylda for bakrusen?",
+   "alt": [
+    "Acetaldehyd",
+    "Metanol",
+    "Glukose",
+    "Laktat"
+   ],
+   "svar": 0,
+   "niva": 3,
+   "info": "Stoffet er giftigere enn alkoholen selv, og kroppen jobber hardt for å bli kvitt det."
+  },
+  {
+   "q": "Hvor mange kromosomer har et menneske normalt?",
+   "alt": [
+    "23",
+    "44",
+    "46",
+    "48"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "De kommer i 23 par – halvparten fra mor og halvparten fra far."
+  },
+  {
+   "q": "Omtrent hvor mange liter blod har en voksen person?",
+   "alt": [
+    "2–3 liter",
+    "4–6 liter",
+    "8–10 liter",
+    "12–14 liter"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Blodet utgjør rundt sju–åtte prosent av kroppsvekten."
+  },
+  {
+   "q": "Hvilken del av hjernen styrer balanse og koordinasjon – og gjør deg sjanglete når du er full?",
+   "alt": [
+    "Hjernestammen",
+    "Hippocampus",
+    "Frontallappen",
+    "Lillehjernen"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Lillehjernen er liten, men inneholder over halvparten av hjernens nerveceller."
+  },
+  {
+   "q": "Hva heter søvnfasen der vi drømmer mest?",
+   "alt": [
+    "Dypsøvn",
+    "REM-søvn",
+    "Lett søvn",
+    "Innsovning"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "REM står for «rapid eye movement», og øynene flakker under lokkene mens du drømmer."
+  },
+  {
+   "q": "Hvilket hormon kalles ofte «søvnhormonet»?",
+   "alt": [
+    "Kortisol",
+    "Insulin",
+    "Melatonin",
+    "Adrenalin"
+   ],
+   "svar": 2,
+   "niva": 1,
+   "info": "Lys fra mobilskjermen bremser produksjonen, så du blir mindre trøtt."
+  },
+  {
+   "q": "Hva er det hardeste stoffet i menneskekroppen?",
+   "alt": [
+    "Tannemaljen",
+    "Lårbeinet",
+    "Hodeskallen",
+    "Neglene"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "Emaljen kan dessverre ikke vokse tilbake når den først er slitt bort."
+  },
+  {
+   "q": "Hvilken blodtype kalles «universalgiver» for røde blodceller?",
+   "alt": [
+    "AB+",
+    "A−",
+    "0−",
+    "B+"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "AB+ er det motsatte: universalmottaker som kan få blod fra alle."
+  },
+  {
+   "q": "Omtrent hvor lang er tynntarmen hos en voksen?",
+   "alt": [
+    "1–2 meter",
+    "3–4 meter",
+    "6–7 meter",
+    "12–15 meter"
+   ],
+   "svar": 2,
+   "niva": 3,
+   "info": "Den kalles tynn fordi den er smal, ikke fordi den er kort."
+  },
+  {
+   "q": "Hvilken muskel er den største i kroppen?",
+   "alt": [
+    "Hjertemuskelen",
+    "Tungemuskelen",
+    "Kjevemuskelen",
+    "Setemuskelen"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Gluteus maximus holder deg oppreist – og gjør det mulig å gå i trapper."
+  },
+  {
+   "q": "Hvilket hormon hemmer alkohol, slik at du må tisse oftere på fest?",
+   "alt": [
+    "Insulin",
+    "Vasopressin",
+    "Testosteron",
+    "Østrogen"
+   ],
+   "svar": 1,
+   "niva": 3,
+   "info": "Hormonet ber normalt nyrene spare vann – alkohol slår det av, og du blir dehydrert."
+  },
+  {
+   "q": "Hvor mange ribbein har et menneske vanligvis?",
+   "alt": [
+    "20",
+    "22",
+    "24",
+    "26"
+   ],
+   "svar": 2,
+   "niva": 2,
+   "info": "Tolv par, og de nederste to parene er «frie» og ikke festet til brystbeinet."
+  },
+  {
+   "q": "Hvilket vitamin produserer kroppen når huden får sol?",
+   "alt": [
+    "A",
+    "C",
+    "K",
+    "D"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Derfor sliter mange nordmenn med lave nivåer gjennom den mørke vinteren."
+  },
+  {
+   "q": "Hvilken del av øyet gir øyet farge?",
+   "alt": [
+    "Pupillen",
+    "Iris",
+    "Netthinnen",
+    "Hornhinnen"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Brune øyne er klart vanligst i verden, blå er mest utbredt i Norden."
+  },
+  {
+   "q": "Hvilket organ produserer insulin?",
+   "alt": [
+    "Bukspyttkjertelen",
+    "Leveren",
+    "Nyrene",
+    "Milten"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "Slutter cellene der å lage insulin, får man diabetes type 1."
+  },
+  {
+   "q": "Omtrent hvor stor del av en voksen kropp består av vann?",
+   "alt": [
+    "Ca. 30 %",
+    "Ca. 45 %",
+    "Ca. 60 %",
+    "Ca. 85 %"
+   ],
+   "svar": 2,
+   "niva": 1,
+   "info": "Hjernen består av rundt 75 prosent vann, så drikk vann mellom ølene."
+  },
+  {
+   "q": "Hva er den minste knokkelen i kroppen?",
+   "alt": [
+    "Stigbøylen",
+    "Halebeinet",
+    "Kneskålen",
+    "Ankelbeinet"
+   ],
+   "svar": 0,
+   "niva": 3,
+   "info": "Den sitter i mellomøret og er bare rundt tre millimeter lang."
+  },
+  {
+   "q": "Hva heter den femte grunnsmaken, ved siden av søtt, salt, surt og bittert?",
+   "alt": [
+    "Fett",
+    "Krydret",
+    "Metallisk",
+    "Umami"
+   ],
+   "svar": 3,
+   "niva": 2,
+   "info": "Umami ble beskrevet av japaneren Kikunae Ikeda i 1908 og betyr omtrent «deilig smak»."
+  },
+  {
+   "q": "Hva heter den lille lappen som henger ned bakerst i munnen?",
+   "alt": [
+    "Drøvelen",
+    "Mandelen",
+    "Strupehodet",
+    "Tungebåndet"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Den hjelper til med å stenge nesegangen når du svelger, så maten går riktig vei."
+  },
+  {
+   "q": "Hvilket organ renser blodet og lager urin?",
+   "alt": [
+    "Leveren",
+    "Milten",
+    "Lungene",
+    "Nyrene"
+   ],
+   "svar": 3,
+   "niva": 1,
+   "info": "Nyrene filtrerer rundt 180 liter væske i døgnet, men du tisser bare ut 1–2 liter."
+  },
+  {
+   "q": "Omtrent hvor mange slag i minuttet slår et voksent hjerte i hvile?",
+   "alt": [
+    "30–40",
+    "60–100",
+    "120–140",
+    "160–180"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Godt trente utholdenhetsutøvere kan ligge under 40 i hvile."
+  },
+  {
+   "q": "Hva kalles frykten for trange, lukkede rom?",
+   "alt": [
+    "Klaustrofobi",
+    "Agorafobi",
+    "Araknofobi",
+    "Akrofobi"
+   ],
+   "svar": 0,
+   "niva": 1,
+   "info": "Agorafobi er omtrent det motsatte – frykt for åpne plasser og folkemengder."
+  },
+  {
+   "q": "Hva kalles det når en pille uten virkestoff likevel gjør deg bedre fordi du tror på den?",
+   "alt": [
+    "Nocebo",
+    "Placebo",
+    "Haloeffekt",
+    "Priming"
+   ],
+   "svar": 1,
+   "niva": 1,
+   "info": "Det motsatte heter nocebo: du blir dårligere fordi du forventer det."
+  },
+  {
+   "q": "Omtrent hvor lenge lever en rød blodcelle før den skiftes ut?",
+   "alt": [
+    "Ca. 10 dager",
+    "Ca. 120 dager",
+    "Ca. 1 år",
+    "Ca. 5 år"
+   ],
+   "svar": 1,
+   "niva": 3,
+   "info": "Beinmargen lager rundt to millioner nye røde blodceller i sekundet."
+  },
+  {
+   "q": "Hva heter kroppens lengste og tykkeste nerve?",
+   "alt": [
+    "Isjiasnerven",
+    "Vagusnerven",
+    "Synsnerven",
+    "Ansiktsnerven"
+   ],
+   "svar": 0,
+   "niva": 3,
+   "info": "Den går fra korsryggen og ned i beinet, og er omtrent så tykk som en finger."
+  },
+  {
+   "q": "Hva går Dunning-Kruger-effekten ut på?",
+   "alt": [
+    "Folk med lite kunnskap overvurderer seg selv",
+    "Folk husker starten av en liste best",
+    "Folk gjør som flertallet gjør",
+    "Folk hater å tape mer enn de liker å vinne"
+   ],
+   "svar": 0,
+   "niva": 2,
+   "info": "Effekten ble beskrevet av to psykologer i 1999 – og forklarer mange vorsdiskusjoner."
+  }
+ ]
+}
