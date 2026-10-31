@@ -1,0 +1,42 @@
+# Simulator-sjekken: verten (jobben) starter Ring of Fire «enkel» – en kortstokk uten egen variant. Appen skal se kortet
+# (regel + tekst), telleren og Stua/Mer-knappene øverst (KortSkjerm.swift via medTopp i rom.js), og Mer-arket med «Bytt lek».
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*kort igjen.*"
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 90-ring-enkel
+- assertVisible:
+    text: "(?is)1 / 52"
+- assertVisible:
+    text: "Stua"
+- tapOn:
+    text: "Mer"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(bytt lek|forlat rommet).*"
+    timeout: 15000
+- takeScreenshot: 91-ring-mer
+- tapOn:
+    text: "Lukk"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)neste kort.*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 92-ring-neste

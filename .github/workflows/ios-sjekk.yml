@@ -175,6 +175,10 @@ jobs:
             # Sprinten går av seg selv (fem skåler på drøyt minuttet) og er over før Maestro er i gang: verten starter en ny når flyten kjører
             (for i in 1 2 3 4 5 6 7 8; do sleep 30; vert "{\"handling\":\"runde\",$V}"; done) &
             flyt skal
+            # Ring of Fire enkel: en kortstokk uten egen variant – kortet, telleren og Stua/Mer øverst tegnes native (medTopp)
+            vert "{\"handling\":\"avslutt\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"ring-of-fire\",\"modus\":\"enkel\",$V}"
+            flyt kort
             wait
           fi
           xcrun simctl terminate "$UDID" no.mittvors.app || true
