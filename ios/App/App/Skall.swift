@@ -339,7 +339,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private var arkOppe = false
     private func settDekket(_ i: Int, _ d: Bool) { dekket[i] = d; oppdaterDekket() }
     private func oppdaterDekket() { for (i, v) in visninger { v.webView?.accessibilityElementsHidden = (dekket[i] ?? false) && !arkOppe } }
-    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg", "ts", "sd", "ou", "op", "ftd", "nr", "pk2", "sk", "en"]
+    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg", "ts", "sd", "ou", "op", "ftd", "nr", "qz", "pk2", "sk", "en"]
 
     /// Siden i en skjerm sier hvilken skjerm den viser: «start» → vis den native startskjermen over Spill-fanen, ellers ta den bort
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
@@ -376,6 +376,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva != "op" { visOp(nil, over: side) }
         if hva != "ftd" { visFtd(nil, over: side) }
         if hva != "nr" { visNr(nil, over: side) }
+        if hva != "qz" { visQz(nil, over: side) }
         if hva != "pk2" { visPk2(nil, over: side) }
         if hva != "sk" { visSk(nil, over: side) }
         if hva != "en" { visEn(nil, over: side) }
@@ -397,6 +398,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva == "op" { visStart(i: side, false); opModell.nett = v.webView; visOp(d, over: side); return } else { visOp(nil, over: side) }
         if hva == "ftd" { visStart(i: side, false); ftdModell.nett = v.webView; visFtd(d, over: side); return } else { visFtd(nil, over: side) }
         if hva == "nr" { visStart(i: side, false); nrModell.nett = v.webView; visNr(d, over: side); return } else { visNr(nil, over: side) }
+        if hva == "qz" { visStart(i: side, false); qzModell.nett = v.webView; visQz(d, over: side); return } else { visQz(nil, over: side) }
         if hva == "pk2" { visStart(i: side, false); pk2Modell.nett = v.webView; visPk2(d, over: side); return } else { visPk2(nil, over: side) }
         if hva == "sk" { visStart(i: side, false); skModell.nett = v.webView; visSk(d, over: side); return } else { visSk(nil, over: side) }
         if hva == "en" { visStart(i: side, false); enModell.nett = v.webView; visEn(d, over: side); return } else { visEn(nil, over: side) }
@@ -656,6 +658,15 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         nrModell.sett(d)
         if nrVert == nil { nrVert = leggOverlegg(UIHostingController(rootView: NyhetsrundenSkjerm(m: nrModell)), over: side, nett: nrModell.nett) }
         fram(nrVert?.view.superview)
+    }
+    // Kategorikongen (QuizSkjerm.swift)
+    private let qzModell = QzModell()
+    private var qzVert: UIHostingController<QuizSkjerm>?
+    private func visQz(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&qzVert); return }
+        qzModell.sett(d)
+        if qzVert == nil { qzVert = leggOverlegg(UIHostingController(rootView: QuizSkjerm(m: qzModell)), over: side, nett: qzModell.nett) }
+        fram(qzVert?.view.superview)
     }
 
     // Hvem er jeg? (PannekortSkjerm.swift) og Skålsprinten (SkalSkjerm.swift)
