@@ -149,7 +149,7 @@ struct BlokkListe: View {
 
     private func kortet(_ b: [String: Any]) -> some View {
         let stil = s(b, "stil"), liten = b["liten"] as? Bool ?? false, tekst = s(b, "tekst")
-        let bg: Color = stil == "nodt" ? oransje : stil == "sannhet" ? mint : kort
+        let bg: Color = stil == "nodt" ? oransje : stil == "sannhet" ? mint : stil == "rod" ? rosa : kort
         return VStack(alignment: .leading, spacing: 8) {
             if !s(b, "tag").isEmpty {
                 Text(s(b, "tag").uppercased()).font(.archivo(11, vekt: 900)).padding(.horizontal, 9).padding(.vertical, 4)

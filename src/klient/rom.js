@@ -2120,6 +2120,13 @@ export function startRom(LEKNAVN, LANG) {
         if (/\brom-frist\b/.test(c)) { var fe = e.querySelector('[data-frist]'); ut.push({ type: 'frist', frist: fe ? Number(fe.dataset.frist) || 0 : 0, tekst: tekstAv(e).replace(/^\d+\s*/, '') }); return; }
         if (/\b(ts-status|hs-status|mv-hjelp|lh-maske|hs-info|bf-neste)\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e), stil: /lh-maske/.test(c) ? 'stor' : 'vent' }); return; }
         if (/\bnr-topp\b/.test(c)) { var sp = e.querySelector('.nr-topp-tekst span'), bt = e.querySelector('.nr-topp-tekst b'), kl = e.querySelector('.nr-klokke span'); ut.push({ type: 'topp', tekst: tekstAv(sp), chip: tekstAv(bt), gul: !!(bt && bt.classList.contains('gul')), frist: kl ? Number(kl.dataset.frist) || 0 : 0 }); return; }
+        /* ---- Kortstokkene uten egen variant (Pluss-pakkene, hendelseskort, alene i rommet) og Ring of Fire enkel ---- */
+        if (/\brom-kort\b/.test(c)) { ut.push({ type: 'kort', pre: '', tekst: tekstAv(e.querySelector('p')) || tekstAv(e), tag: tekstAv(e.querySelector('.sw-tag')), under: '', stil: '', liten: false }); return; }   // telleren står i toppen (medTopp)
+        if (/\brof-kort\b/.test(c)) { var hj = e.querySelector('.rof-hj'); ut.push({ type: 'kort', pre: (tekstAv(hj && hj.querySelector('b')) + ' ' + tekstAv(hj && hj.querySelector('span'))).trim(), tekst: tekstAv(e.querySelector('.rof-regel')), tag: '', under: tekstAv(e.querySelector('.rof-tekst')), stil: /\brod\b/.test(c) ? 'rod' : '', liten: false }); return; }
+        if (/\brof-tur\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e.querySelector('span')) + ': ' + tekstAv(e.querySelector('b')), stil: 'etikett' }); return; }
+        if (/\b(rom-status|rof-makkere)\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e), stil: 'vent' }); return; }
+        if (/\brof-makker-valg\b/.test(c)) { ut.push({ type: 'tekst', tekst: tekstAv(e.querySelector('.rom-etikett')), stil: 'etikett' }); gaa(e); return; }
+        if (/\blunte\b/.test(c)) return;   // lunta (hvor mye av bunken som er igjen) sies med telleren i toppen
         if (/\bpk-kort\b/.test(c)) { ut.push({ type: 'kort', pre: tekstAv(e.querySelector('.pk-pre')), tekst: tekstAv(e.querySelector('p')) || tekstAv(e), tag: tekstAv(e.querySelector('.ja-tag, .pk-vri, .nr-type')), under: tekstAv(e.querySelector('small')), stil: /\bnodt\b/.test(c) ? 'nodt' : /\bsannhet\b/.test(c) ? 'sannhet' : '', liten: /\bliten\b/.test(c) }); return; }
         if (/\bee-sider\b/.test(c)) {
           var side = function (sel) { var el2 = e.querySelector(sel); if (!el2) return null; return { tekst: tekstAv(el2.querySelector('span')), valg: tekstAv(el2.querySelector('b')), folk: Array.prototype.map.call(el2.querySelectorAll('.nr-p'), function (p) { var f = (p.getAttribute('style') || '').match(/--f:(#[0-9A-Fa-f]{6})/); return { init: tekstAv(p), farge: f ? f[1] : '#FFD23F', meg: /\bmeg\b/.test(p.className) }; }) }; };
@@ -2155,6 +2162,11 @@ export function startRom(LEKNAVN, LANG) {
     }
     gaa(tmp);
     return Promise.all(jobber).then(function () { return ut; });
+  }
+  /** Kortstokkene uten egen topp (Pluss-pakkene, Ring of Fire enkel, alene i rommet): lekens navn og telleren øverst – der Stua- og Mer-knappene står */
+  function medTopp(b, s) {
+    if (!s || b.some(function (x) { return x.type === 'topp'; })) return b;
+    return [{ type: 'topp', tekst: s.navn || '', chip: s.antall ? (s.pos + 1) + ' / ' + s.antall : '', gul: false, frist: 0 }].concat(b);
   }
   /* Skrivefeltene i lekene (skrøne, låt, ord, påstander …) bruker iPhonens egen dialog i appen: tastaturet dekker aldri feltet.
      Når et felt får fokus, beskrives skjemaet for skallet; svaret fylles inn her og skjemaet sendes som om du trykket selv. */
@@ -6586,7 +6598,7 @@ export function startRom(LEKNAVN, LANG) {
     else if (nativ === 'en') { var nE = [s.runde, s.pos, !!s.ferdig, enTell.k, enTell.fase, enTell.tall, enBombe.k, enBombe.fase, enBombe.holder].join('|'); enData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'en' && [sp.runde, sp.pos, !!sp.ferdig, enTell.k, enTell.fase, enTell.tall, enBombe.k, enBombe.fase, enBombe.holder].join('|') === nE) meldSkjerm('en', d); }); }
     else if (nativ === 'op') { opData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'opus') meldSkjerm('op', d); }); }
     else if (nativ === 'vl') { var rVl = s.runde, nVl = s.n, fVl = s.fase; vlData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'veddelopet' && sp.runde === rVl && sp.n === nVl && sp.fase === fVl) meldSkjerm('vl', d); }); }
-    else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: b, stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
+    else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: medTopp(b, sp), stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
     else meldSkjerm('rom');
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først
     rotEl.classList.toggle('app-gjest', erApp && !s && !erVert() && !tilstand.valgt);   // gjestens venterom i appen: stua og én linje, ingenting å bla i
