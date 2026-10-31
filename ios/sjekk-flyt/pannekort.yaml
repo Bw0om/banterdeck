@@ -1,0 +1,39 @@
+# Simulator-sjekken: verten (jobben) starter Hvem er jeg? – appen ser skrivefasen (lappen til den du fikk) eller, om skrivetiden
+# gikk ut før Maestro kom i gang, spillet med lappene i panna; da trykker den «Gjettet!» på den første (PannekortSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(klask den på|hvem er du).*"
+    timeout: 30000
+- takeScreenshot: 76-hvem-er-jeg
+- tapOn:
+    text: "(?is).*klask den på.*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 77-hvem-er-jeg-dialog
+- inputText: "Elvis"
+- tapOn:
+    text: "(?is).*klask den på.*"
+    optional: true
+- hideKeyboard
+- tapOn:
+    text: "(?is)gjettet!.*"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(den sitter|angre|først|hvem er du).*"
+    timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: 78-hvem-er-jeg-videre
