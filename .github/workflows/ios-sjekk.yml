@@ -179,6 +179,11 @@ jobs:
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"ring-of-fire\",\"modus\":\"enkel\",$V}"
             flyt kort
+            # Kategorikongen: verten starter, trekker kategorier og viser svar i bakgrunnen mens appen svarer og satser
+            vert "{\"handling\":\"avslutt\",$V}"
+            vert "{\"handling\":\"start\",\"lek\":\"quiz\",\"modus\":\"6\",$V}"
+            (sleep 40; vert "{\"handling\":\"qz-start\",$V}"; for i in 1 2 3 4 5 6; do sleep 8; vert "{\"handling\":\"qz-trekk\",\"kat\":\"\",$V}"; sleep 28; vert "{\"handling\":\"qz-vis\",$V}"; sleep 10; vert "{\"handling\":\"qz-neste\",$V}"; done) &
+            flyt quiz
             wait
           fi
           xcrun simctl terminate "$UDID" no.mittvors.app || true

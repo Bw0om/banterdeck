@@ -1,0 +1,51 @@
+# Simulator-sjekken: verten (jobben) starter Kategorikongen og trekker kategorier for appen. Appen (gjest) skal se
+# kategorikortene, svare A–D, satse på at verten bommer, og se svaret med stemplene (QuizSkjerm.swift).
+appId: no.mittvors.app
+---
+- extendedWaitUntil:
+    visible:
+      text: "(?is)vi er klare.*"
+    timeout: 40000
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: "(?is)vi er klare.*"
+    optional: true
+# Verten (jobben) starter runden og trekker den første kategorien i bakgrunnen – appen ser trekket eller spørsmålet
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(trekker|velger kategori|svar!|svart).*"
+    timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: 93-quiz-trekk
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(svar!|svart).*"
+    timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: 94-quiz-sporsmal
+# Svarer A (første alternativ), og satser på at Vert bommer
+- tapOn:
+    text: "A"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "Vert"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 95-quiz-svart
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(riktig|feil|ikke svart).*"
+    timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: 96-quiz-svaret
+- assertVisible:
+    text: "(?is).*(neste kategori|se hvem som vant).*"
+- tapOn:
+    text: "(?is).*(neste kategori|se hvem som vant).*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 97-quiz-videre
