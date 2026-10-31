@@ -219,7 +219,8 @@ export function startRom(LEKNAVN, LANG) {
      ringen røk og drikk. Lydene som ikke har en fil ennå (nedtelling, lunte, bombe), lages fortsatt som toner under. */
   var LYDFIL = { tikk: 'hjul', grip: 'trykk', pek: 'trykk', tur: 'tur', pop: 'kort', svar: 'kort', ding: 'kort', knus: 'knus', bom: 'bombe', slurk: 'slurk',
     naa: 'naa', fanfare: 'fanfare', womp: 'womp', lunte: 'lunte', vann: 'vann', skaal: 'skaal', forsent: 'forsent', terning: 'terning', kortsnu: 'kortsnu', kortlegg: 'kortlegg',
-    dundun: 'dundun', bytt: 'bytt', kaching: 'kaching', mynt: 'mynt' };
+    dundun: 'dundun', bytt: 'bytt', kaching: 'kaching', mynt: 'mynt',
+    qzTrekk: 'qz-trekk', qzSats: 'qz-sats', qzAvslor: 'qz-avslor', qzKonge: 'qz-konge' };   // Kategorikongen (ElevenLabs, .design/sound-mittvors/lytt-quiz.html)
   var lydFiler = {}, lydSist = {}, lunteStopp = null;
   function lydFil(navn) {
     if (!lydFiler[navn]) { var a = new Audio('/lyd/' + navn + '.mp3'); a.preload = 'auto'; a.volume = navn === 'hjul' || navn === 'trykk' ? 0.45 : 0.6; lydFiler[navn] = a; }
@@ -455,7 +456,7 @@ export function startRom(LEKNAVN, LANG) {
     if (varVenter && d.meg) { toast(T('Du er sluppet inn! 🎉', 'You’re in! 🎉')); spillLyd('tur'); }
     var naaTur = erMinTur(d); if (naaTur && !varMinTur && tilstand) spillLyd('tur'); varMinTur = naaTur;
     var fase = d.spill ? d.spill.type + ':' + (d.spill.fase || '') + ':' + (d.spill.i || 0) : '';
-    if (tilstand && d.spill && /nyhetsrunden:svar|quiz:svar|mest:resultat|forraeder:avslort|tosannheter:avslort/.test(fase) && fase !== sisteFase) spillLyd(d.spill.type === 'quiz' && d.spill.nyKonge ? 'fanfare' : 'svar');
+    if (tilstand && d.spill && /nyhetsrunden:svar|quiz:svar|mest:resultat|forraeder:avslort|tosannheter:avslort/.test(fase) && fase !== sisteFase) spillLyd(d.spill.type === 'quiz' ? (d.spill.nyKonge ? 'qzKonge' : 'qzAvslor') : 'svar');
     sisteFase = fase;
     if (d.versjon) versjon = d.versjon;
     // Lekelista sendes bare når telefonen ikke har den (første gang, eller nytt språk)
@@ -7199,8 +7200,8 @@ export function startRom(LEKNAVN, LANG) {
       return setTimeout(function () { gjor({ handling: 'py-legg', i: pyI }); }, 420);
     }
     if (g === 'qz-svar') return gjorAlltid({ handling: 'qz-svar', v: b.dataset.v });
-    if (g === 'qz-sats') return gjor({ handling: 'qz-sats', paa: b.dataset.paa });
-    if (g === 'qz-trekk') { spillLyd('kortsnu'); return gjor({ handling: 'qz-trekk', kat: b.dataset.kat || '' }); }
+    if (g === 'qz-sats') { spillLyd('qzSats'); return gjor({ handling: 'qz-sats', paa: b.dataset.paa }); }
+    if (g === 'qz-trekk') { spillLyd('qzTrekk'); return gjor({ handling: 'qz-trekk', kat: b.dataset.kat || '' }); }
     if (g === 'qz-lengde') return gjor({ handling: 'qz-lengde', antall: Number(b.dataset.n) });
     if (g === 'qz-start' || g === 'qz-vis' || g === 'qz-neste') return gjor({ handling: g });
     if (g === 'nr-svar') return gjorAlltid({ handling: 'nr-svar', v: b.dataset.v });
