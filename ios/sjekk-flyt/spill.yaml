@@ -14,13 +14,17 @@ appId: no.mittvors.app
       notVisible:
         text: "Sjekk"
     commands:
-      - hideKeyboard
+      # hideKeyboard feiler på iOS 26-simulatoren: trykk på ledeteksten i stedet, så feltet igjen
+      - tapOn:
+          text: "Navnet ditt"
+          optional: true
+      - waitForAnimationToEnd
       - tapOn:
           id: "start-navn"
           optional: true
       - waitForAnimationToEnd
       - inputText: "Sjekk"
-- hideKeyboard
+# Tastaturet får stå: «Lag rom»-knappen ligger over det
 - takeScreenshot: 11-start-navn
 # Enter i navnefeltet lager rommet – står knappen der fortsatt, trykkes den
 - tapOn:
