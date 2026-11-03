@@ -14,12 +14,7 @@ Tap on (Optional) id: start-navn... COMPLETED
 Wait for animation to end... COMPLETED
 Input text Sjekk... COMPLETED
 Run flow when "Sjekk" is not visible...
-  Tap on (Optional) "Navnet ditt"... COMPLETED
-  Wait for animation to end... COMPLETED
-  Tap on (Optional) id: start-navn... COMPLETED
-  Wait for animation to end... COMPLETED
-  Input text Sjekk... COMPLETED
-Run flow when "Sjekk" is not visible... COMPLETED
+Run flow when "Sjekk" is not visible... SKIPPED
 Take screenshot 11-start-navn... COMPLETED
 Tap on (Optional) "(?is)lag rom.*"... COMPLETED
 Assert that "(?is)alle lekene.*" is visible... COMPLETED
@@ -131,11 +126,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-<<<<<<< HEAD
-rom for flere: CQVC
-=======
-rom for flere: LVTP
->>>>>>> origin/main
+rom for flere: ZMCZ
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
@@ -185,11 +176,20 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*i stolen.*" is visible... COMPLETED
 Take screenshot 51-to-sannheter-venter... COMPLETED
-Assert that "(?is).*trykk på løgnen.*" is visible... COMPLETED
-Take screenshot 52-to-sannheter-stem... COMPLETED
-Tap on "(?is).*jeg kan jonglere.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 53-to-sannheter-stemt... COMPLETED
+Assert that "(?is).*trykk på løgnen.*" is visible... FAILED
+
+Assertion is false: "(?is).*trykk på løgnen.*" is visible
+
+Assertion '"(?is).*trykk på løgnen.*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/tosannheter/.maestro/tests/2026-11-03_221056
 ===== skriv =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow skriv
@@ -263,8 +263,7 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(noen gjetter|ett forsøk til|deler).*" is visible... COMPLETED
 Take screenshot 70-dealer... COMPLETED
-Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible...verten fikk ikke gjort: {"handling":"ftd-gjett","v":10,"id":"e58b9b049c97","pollett":"f8ad35e55cff0e2be77038fcb364e2d7fc1d"}
- COMPLETED
+Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 71-dealer-kortet... COMPLETED
 ===== nyhetsrunden =====
@@ -280,11 +279,7 @@ Take screenshot 72-nyhetsrunden-forside... COMPLETED
 Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
-<<<<<<< HEAD
-Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"c72a71285128","pollett":"0df76419422797b7b874016cca45adb1d46a"}
-=======
-Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"e58b9b049c97","pollett":"f8ad35e55cff0e2be77038fcb364e2d7fc1d"}
->>>>>>> origin/main
+Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"2dd9e91b71c2","pollett":"0c4f9e2478e0f383131d3a119c57c05d88f7"}
  COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 74-nyhetsrunden-svar... COMPLETED
@@ -295,14 +290,14 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*(klask den på|hvem er du).*" is visible... COMPLETED
 Take screenshot 76-hvem-er-jeg... COMPLETED
 Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 77-hvem-er-jeg-dialog... COMPLETED
 Input text Elvis... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
 Hide Keyboard... COMPLETED
 Tap on (Optional) "(?is)gjettet!.*"... COMPLETED
 Assert that "(?is).*(den sitter|angre|først|hvem er du).*" is visible... COMPLETED
@@ -315,7 +310,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*(vent|skål).*" is visible... COMPLETED
 Take screenshot 80-skaal-vent... COMPLETED
 Assert that "SKÅL!" is visible... COMPLETED
@@ -331,7 +326,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*kort igjen.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 90-ring-enkel... COMPLETED
@@ -360,7 +355,7 @@ Take screenshot 93-quiz-trekk... COMPLETED
 Assert that "(?is).*(svar!|svart).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 94-quiz-sporsmal... COMPLETED
-Tap on (Optional) "A"... WARNED
+Tap on (Optional) "A"... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on (Optional) "Vert"... COMPLETED
 Wait for animation to end... COMPLETED
