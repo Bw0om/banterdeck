@@ -1,20 +1,21 @@
-** BUILD SUCCEEDED **
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift:701:41: error: the compiler is unable to type-check this expression in reasonable time; try breaking up the expression into distinct sub-expressions
+** BUILD FAILED **
 ----- siste linjer -----
 
-AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-11-03 10:51:07.773 appintentsnltrainingprocessor[3722:14779] Parsing options for appintentsnltrainingprocessor
-2026-11-03 10:51:07.775 appintentsnltrainingprocessor[3722:14779] Starting AppIntents SSU YAML Generation
-2026-11-03 10:51:07.782 appintentsnltrainingprocessor[3722:14779] No AppShortcuts found - Skipping.
+Copy /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/Objects-normal/arm64/App.swiftsourceinfo (in target 'App' from project 'App')
 
-RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+ProcessInfoPlistFile /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app/Info.plist /Users/runner/work/banterdeck/banterdeck/ios/App/App/Info.plist (in target 'App' from project 'App')
 
-Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+SwiftDriverJobDiscovery normal arm64 Compiling RingSkjerm.swift, LobbySkjerm.swift, VeddelopSkjerm.swift, YatzySkjerm.swift, PyramidenSkjerm.swift, BussrutaSkjerm.swift, PresidentSkjerm.swift, GrisSkjerm.swift, TosannheterSkjerm.swift, SkrivDrikkSkjerm.swift, OverUnderSkjerm.swift, OpusSkjerm.swift (in target 'App' from project 'App')
 
-Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
-    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
+** BUILD FAILED **
 
-** BUILD SUCCEEDED **
 
+The following build commands failed:
+	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift (in target 'App' from project 'App')
+	SwiftCompile normal arm64 Compiling\ DealerSkjerm.swift,\ NyhetsrundenSkjerm.swift,\ QuizSkjerm.swift,\ LekesideSkjerm.swift,\ PannekortSkjerm.swift,\ SkalSkjerm.swift,\ SofaSkjerm.swift,\ BingoSkjerm.swift,\ ReglerArk.swift,\ DegSkjerm.swift,\ LekerSkjerm.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DealerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/NyhetsrundenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/QuizSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LekesideSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PannekortSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkalSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SofaSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/BingoSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/ReglerArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LekerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
+	Building project App with scheme App and configuration Debug
+(3 failures)
 ----- skjemaer -----
     Targets:
         App
