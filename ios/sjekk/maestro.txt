@@ -43,7 +43,9 @@ Assert that "(?is)mer.*tv.*qr.*" is visible... COMPLETED
 Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Run flow when "(?is).{0,4}bare min telefon" is not visible...
-Run flow when "(?is).{0,4}bare min telefon" is not visible... SKIPPED
+  Tap on (Optional) "(?is)mer.*tv.*qr.*"... COMPLETED
+  Wait for animation to end... COMPLETED
+Run flow when "(?is).{0,4}bare min telefon" is not visible... COMPLETED
 Assert that "(?is).{0,4}bare min telefon" is visible... COMPLETED
 Tap on "(?is).{0,4}bare min telefon"... COMPLETED
 Wait for animation to end... COMPLETED
@@ -129,7 +131,11 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
+<<<<<<< HEAD
 rom for flere: CQVC
+=======
+rom for flere: LVTP
+>>>>>>> origin/main
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
@@ -257,7 +263,8 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(noen gjetter|ett forsøk til|deler).*" is visible... COMPLETED
 Take screenshot 70-dealer... COMPLETED
-Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible... COMPLETED
+Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible...verten fikk ikke gjort: {"handling":"ftd-gjett","v":10,"id":"e58b9b049c97","pollett":"f8ad35e55cff0e2be77038fcb364e2d7fc1d"}
+ COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 71-dealer-kortet... COMPLETED
 ===== nyhetsrunden =====
@@ -273,7 +280,11 @@ Take screenshot 72-nyhetsrunden-forside... COMPLETED
 Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
+<<<<<<< HEAD
 Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"c72a71285128","pollett":"0df76419422797b7b874016cca45adb1d46a"}
+=======
+Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"e58b9b049c97","pollett":"f8ad35e55cff0e2be77038fcb364e2d7fc1d"}
+>>>>>>> origin/main
  COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 74-nyhetsrunden-svar... COMPLETED
@@ -320,7 +331,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*kort igjen.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 90-ring-enkel... COMPLETED
