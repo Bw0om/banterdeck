@@ -1,20 +1,21 @@
-** BUILD SUCCEEDED **
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/FigurArk.swift:309:5: error: invalid redeclaration of 'init(hex:)'
+** BUILD FAILED **
 ----- siste linjer -----
+    
 
-AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-10-30 16:17:19.320 appintentsnltrainingprocessor[3237:13652] Parsing options for appintentsnltrainingprocessor
-2026-10-30 16:17:19.320 appintentsnltrainingprocessor[3237:13652] Starting AppIntents SSU YAML Generation
-2026-10-30 16:17:19.326 appintentsnltrainingprocessor[3237:13652] No AppShortcuts found - Skipping.
+SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
+    
 
-RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+SwiftCompile normal arm64 Compiling\ RingSkjerm.swift,\ LobbySkjerm.swift,\ VeddelopSkjerm.swift,\ YatzySkjerm.swift,\ PyramidenSkjerm.swift,\ BussrutaSkjerm.swift,\ PresidentSkjerm.swift,\ GrisSkjerm.swift,\ TosannheterSkjerm.swift,\ SkrivDrikkSkjerm.swift,\ OverUnderSkjerm.swift,\ OpusSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LobbySkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/VeddelopSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/YatzySkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PyramidenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/BussrutaSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PresidentSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/GrisSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/TosannheterSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkrivDrikkSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OverUnderSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OpusSkjerm.swift (in target 'App' from project 'App')
 
-Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+** BUILD FAILED **
 
-Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
-    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
 
-** BUILD SUCCEEDED **
-
+The following build commands failed:
+	SwiftEmitModule normal arm64 Emitting\ module\ for\ App (in target 'App' from project 'App')
+	EmitSwiftModule normal arm64 (in target 'App' from project 'App')
+	Building project App with scheme App and configuration Debug
+(3 failures)
 ----- skjemaer -----
     Targets:
         App
