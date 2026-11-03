@@ -121,7 +121,7 @@ struct LekesideSkjerm: View {
                     }
                     .frame(minHeight: 44).padding(.trailing, 12).contentShape(Rectangle())
                 }
-                .buttonStyle(.plain).accessibilityLabel(m.t("tilbake"))
+                .buttonStyle(.plain).accessibilityLabel(m.t("tilbake")).accessibilityIdentifier("lekeside-tilbake")
                 .padding(.horizontal, 16).padding(.top, 4)
 
                 // Bildet stort på et farget felt, med strek og hard skygge
@@ -168,7 +168,7 @@ struct LekesideSkjerm: View {
                 // Knappene: rommet først (gul), kortbunken stille under
                 if m.iRom || m.harVerktoy {
                     VStack(spacing: 10) {
-                        if m.iRom { Button(action: m.rom) { storKnapp(m.t("rom"), gul: true) }.buttonStyle(TrykkStilLs()) }
+                        if m.iRom { Button(action: m.rom) { storKnapp(m.t("rom"), gul: true) }.buttonStyle(TrykkStilLs()).accessibilityIdentifier("lekeside-rom") }
                         if m.harVerktoy {
                             Button(action: m.verktoy) {
                                 HStack(spacing: 8) {
@@ -182,6 +182,7 @@ struct LekesideSkjerm: View {
                                 .background(RoundedRectangle(cornerRadius: 14).fill(morkBlekk).offset(x: m.iRom ? 0 : 4, y: m.iRom ? 0 : 4))
                             }
                             .buttonStyle(m.iRom ? TrykkStilLs(flytt: 1) : TrykkStilLs())
+                            .accessibilityIdentifier("lekeside-verktoy")
                         }
                     }
                     .padding(.horizontal, 16).padding(.top, 14).padding(.trailing, 4)
@@ -227,7 +228,7 @@ struct LekesideSkjerm: View {
                             .padding(.horizontal, 14).frame(height: 44).foregroundColor(blekk)
                             .background(RoundedRectangle(cornerRadius: 10).fill(kort)).overlay(RoundedRectangle(cornerRadius: 10).stroke(blekk.opacity(0.3), lineWidth: 1.5))
                     }
-                    .buttonStyle(TrykkStilLs(flytt: 1))
+                    .buttonStyle(TrykkStilLs(flytt: 1)).accessibilityIdentifier("lekeside-kopier")
                     Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 16).padding(.top, 18)
