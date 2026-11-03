@@ -820,11 +820,12 @@ export function startRom(LEKNAVN, LANG) {
   }
   /** Ferdige oppsett for kvelden: velg én stemning, så er lekene valgt i rekkefølge – «Start kvelden» og «Neste i planen» tar resten.
       Lista med leker er den samme planen som en gjengkveld bruker (tilstand.plan), satt av verten med handlingen «plan». */
+  // Pluss-leker ligger sist i lista: de faller bort uten Pluss (kveldLeker), så alle får minst fire.
   var KVELDER = [
     { id: 'blikjent', navn: ['Bli kjent', 'Get to know'], om: ['Nye folk i rommet', 'New faces in the room'], leker: ['tosannheter', 'hvemskrev', 'mest', 'spion'] },
     { id: 'vors', navn: ['Vors', 'Pre-drinks'], om: ['Klassikerne, lett å komme i gang', 'The classics, easy to get going'], leker: ['ring-of-fire', 'samme', 'skal', 'overunder'] },
-    { id: 'kaos', navn: ['Kaos', 'Chaos'], om: ['Sent på kvelden', 'Late in the night'], leker: ['regelfabrikken', 'bussruta', 'pyramiden', 'skal'] },
-    { id: 'quiz', navn: ['Quizkveld', 'Quiz night'], om: ['Hodet med, glasset i hånda', 'Brains on, glass in hand'], leker: ['quiz', 'bloff', 'nyhetsrunden', 'hvemskrev'] },
+    { id: 'kaos', navn: ['Kaos', 'Chaos'], om: ['Sent på kvelden', 'Late in the night'], leker: ['regelfabrikken', 'skal', 'nodt-eller-sannhet', 'bingo', 'bussruta', 'pyramiden'] },
+    { id: 'quiz', navn: ['Quizkveld', 'Quiz night'], om: ['Hodet med, glasset i hånda', 'Brains on, glass in hand'], leker: ['quiz', 'nyhetsrunden', 'hvemskrev', 'kategorier', 'bloff'] },
     { id: 'rolig', navn: ['Rolig', 'Chill'], om: ['Snakk mer, drikk mindre', 'More talk, less drink'], leker: ['enten-eller', 'jeg-har-aldri', 'tosannheter', 'rygg-mot-rygg'] },
   ];
   function kveldFor(id) { return KVELDER.find(function (k) { return k.id === id; }) || null; }

@@ -30,11 +30,26 @@ appId: no.mittvors.app
 - tapOn:
     text: "(?is)lag rom.*"
     optional: true
+# Lobbyen: oppsettene (Bli kjent, Vors …) ligger øverst, «Alle lekene» under kanten – sveip opp (scrollUntilVisible biter ikke på den native lobbyen)
+- extendedWaitUntil:
+    visible:
+      text: "(?is)bli kjent.*"
+    timeout: 30000
+- takeScreenshot: 12-lobby
+- runFlow:
+    when:
+      notVisible:
+        text: "(?is)alle lekene.*"
+    commands:
+      - swipe:
+          start: 50%, 85%
+          end: 50%, 25%
+          duration: 600
+      - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
       text: "(?is)alle lekene.*"
-    timeout: 30000
-- takeScreenshot: 12-lobby
+    timeout: 10000
 - tapOn:
     text: "(?is)alle lekene.*"
 - extendedWaitUntil:
@@ -48,7 +63,17 @@ appId: no.mittvors.app
     end: 50%, 95%
 - waitForAnimationToEnd
 - takeScreenshot: 13b-lobby-igjen
-# Lobbyens «Mer»-knapp (teksten under: TV, QR, bare min telefon …)
+# Lobbyens «Mer»-knapp (teksten under: TV, QR, bare min telefon …) – ligger den under kanten, sveipes det opp først
+- runFlow:
+    when:
+      notVisible:
+        text: "(?is)mer.*tv.*qr.*"
+    commands:
+      - swipe:
+          start: 50%, 85%
+          end: 50%, 25%
+          duration: 600
+      - waitForAnimationToEnd
 - tapOn:
     text: "(?is)mer.*tv.*qr.*"
 - extendedWaitUntil:
