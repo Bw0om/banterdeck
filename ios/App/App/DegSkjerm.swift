@@ -685,6 +685,13 @@ struct StokkerVisning: View {
         .background(s.papir.ignoresSafeArea())
     }
 
+    // Delt opp for at kompilatoren skal rekke å typesjekke (tall + ord i én Text)
+    private func utkastTekst(_ u: (n: Int, navn: String)) -> Text {
+        let tall: Text = Text(String(u.n) + " ").font(.archivo(16, vekt: 900))
+        let ord: Text = Text(m.t("utkast")).font(.archivo(14, vekt: 600))
+        return tall + ord
+    }
+
     private var liste: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -692,7 +699,7 @@ struct StokkerVisning: View {
 
                 if let u = m.utkast {
                     HStack(spacing: 12) {
-                        (Text("\(u.n) ").font(.archivo(16, vekt: 900)) + Text(m.t("utkast")).font(.archivo(14, vekt: 600))).fixedSize(horizontal: false, vertical: true)
+                        utkastTekst(u).fixedSize(horizontal: false, vertical: true)
                         Spacer(minLength: 8)
                         Button(action: { m.kall("utkastLagre") { m.svar($0) } }) {
                             Text(m.t("utkastLagre").uppercased()).font(.archivo(12, vekt: 900)).padding(.horizontal, 12).frame(height: 34).foregroundColor(s.morkBlekk)
