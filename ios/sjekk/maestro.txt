@@ -15,9 +15,8 @@ Wait for animation to end... COMPLETED
 Input text Sjekk... COMPLETED
 Run flow when "Sjekk" is not visible...
 Run flow when "Sjekk" is not visible... SKIPPED
-Hide Keyboard... COMPLETED
 Take screenshot 11-start-navn... COMPLETED
-Tap on (Optional) "(?is)lag rom.*"... WARNED
+Tap on (Optional) "(?is)lag rom.*"... COMPLETED
 Assert that "(?is)alle lekene.*" is visible... COMPLETED
 Take screenshot 12-lobby... COMPLETED
 Tap on "(?is)alle lekene.*"... COMPLETED
@@ -39,9 +38,7 @@ Assert that "(?is)mer.*tv.*qr.*" is visible... COMPLETED
 Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Run flow when "(?is).{0,4}bare min telefon" is not visible...
-  Tap on (Optional) "(?is)mer.*tv.*qr.*"... COMPLETED
-  Wait for animation to end... COMPLETED
-Run flow when "(?is).{0,4}bare min telefon" is not visible... COMPLETED
+Run flow when "(?is).{0,4}bare min telefon" is not visible... SKIPPED
 Assert that "(?is).{0,4}bare min telefon" is visible... COMPLETED
 Tap on "(?is).{0,4}bare min telefon"... COMPLETED
 Wait for animation to end... COMPLETED
@@ -105,20 +102,26 @@ Tap on "Tilbake"... COMPLETED
 Assert that "(?is)spill fra hver sin telefon" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 23-leker-tilbake... COMPLETED
-Tap on "(?is)over eller under.*"... FAILED
+Tap on "(?is)søk etter lek.*"... COMPLETED
+Input text over eller... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)over eller under.*"... COMPLETED
+Assert that "Slik spiller dere" is visible... COMPLETED
+Tap on "(?is)(bare én telefon|start leken).*"... COMPLETED
+Assert that "(?is)reglene" is visible... FAILED
 
-Element not found: Text matching regex: (?is)over eller under.*
+Assertion is false: "(?is)reglene" is visible
 
-Element with Text matching regex: (?is)over eller under.* not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
+Assertion '"(?is)reglene" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
 
 Possible causes:
 - Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
-- Element may be temporarily unavailable due to loading state.
-- This could be a real regression that needs to be addressed.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
 
 ==== Debug output (logs & screenshots) ====
 
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/leker/.maestro/tests/2026-11-03_150701
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/leker/.maestro/tests/2026-11-03_163255
 ===== deg =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow deg
@@ -126,7 +129,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: ABCJ
+rom for flere: Y993
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
@@ -173,14 +176,23 @@ Take screenshot 50-to-sannheter-regler... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*i stolen.*" is visible... COMPLETED
 Take screenshot 51-to-sannheter-venter... COMPLETED
-Assert that "(?is).*trykk på løgnen.*" is visible... COMPLETED
-Take screenshot 52-to-sannheter-stem... COMPLETED
-Tap on "(?is).*jeg kan jonglere.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 53-to-sannheter-stemt... COMPLETED
+Assert that "(?is).*trykk på løgnen.*" is visible... FAILED
+
+Assertion is false: "(?is).*trykk på løgnen.*" is visible
+
+Assertion '"(?is).*trykk på løgnen.*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/tosannheter/.maestro/tests/2026-11-03_164650
 ===== skriv =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow skriv
@@ -188,7 +200,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*skriv et kort.*" is visible... COMPLETED
 Take screenshot 54-skriv-og-drikk... COMPLETED
 Tap on "(?is).*skriv et kort.*"... COMPLETED
@@ -247,11 +259,12 @@ Take screenshot 65-pekeleken-stemt... COMPLETED
 ===== dealer =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow dealer
+verten fikk ikke gjort: {"handling":"ftd-gjett","v":10,"id":"7193d7e5c062","pollett":"06b5fbee93cbb35633ea0b112953cdfdce7d"}
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*(noen gjetter|ett forsøk til|deler).*" is visible... COMPLETED
 Take screenshot 70-dealer... COMPLETED
 Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible... COMPLETED
@@ -265,15 +278,21 @@ Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
-Assert that "(?is).*(venter på at|hva fikk dere).*" is visible... COMPLETED
-Take screenshot 72-nyhetsrunden-forside... COMPLETED
-Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
-Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"7bcd12252d64","pollett":"502099622268caa5aa82ede6a3aac7c344a5"}
- COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 74-nyhetsrunden-svar... COMPLETED
+Assert that "(?is).*(venter på at|hva fikk dere).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"7193d7e5c062","pollett":"06b5fbee93cbb35633ea0b112953cdfdce7d"}
+ FAILED
+
+Assertion is false: "(?is).*(venter på at|hva fikk dere).*" is visible
+
+Assertion '"(?is).*(venter på at|hva fikk dere).*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/nyhetsrunden/.maestro/tests/2026-11-03_170526
 ===== pannekort =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow pannekort
@@ -284,11 +303,11 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(klask den på|hvem er du).*" is visible... COMPLETED
 Take screenshot 76-hvem-er-jeg... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
 Wait for animation to end... COMPLETED
 Take screenshot 77-hvem-er-jeg-dialog... COMPLETED
 Input text Elvis... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
 Hide Keyboard... COMPLETED
 Tap on (Optional) "(?is)gjettet!.*"... COMPLETED
 Assert that "(?is).*(den sitter|angre|først|hvem er du).*" is visible... COMPLETED
@@ -367,4 +386,4 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/quiz/.maestro/tests/2026-11-03_153548
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/quiz/.maestro/tests/2026-11-03_171417
