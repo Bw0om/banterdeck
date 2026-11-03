@@ -345,9 +345,10 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
         guard let i = fane(for: fra), let v = visninger[i], let side = viewControllers?[i] else { return }
         let hva = d["skjerm"] as? String ?? ""
-        // Deg-fanen: den native skjermen ligger over kontosiden så lenge den står på forsiden sin (profil); dypere sider er nettsiden
+        // Deg-fanen: den native skjermen ligger over kontosiden, også undersidene (innstillinger, verv, replikker, stokker);
+        // andre sider i fanen (gjengene, statistikken, Pluss-siden) er nettsiden
         if faner[i] == "deg" {
-            let vis = hva == "deg" && (d["visning"] as? String ?? "profil") == "profil"
+            let vis = hva == "deg"
             settDekket(i, vis)
             visDeg(vis ? d : nil, over: side, nett: v.webView)
             return
