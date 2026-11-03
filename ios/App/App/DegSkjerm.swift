@@ -465,16 +465,6 @@ enum DegDialog {
     }
 }
 
-extension Color {
-    /// «#FFD23F» → farge (nettsidens stokkfarger)
-    init(hex: String) {
-        var h = hex.trimmingCharacters(in: .whitespaces); if h.hasPrefix("#") { h.removeFirst() }
-        var v: UInt64 = 0; Scanner(string: h).scanHexInt64(&v)
-        if h.count == 6 { self.init(red: Double((v >> 16) & 0xFF) / 255, green: Double((v >> 8) & 0xFF) / 255, blue: Double(v & 0xFF) / 255) }
-        else { self.init(red: 1, green: 0.824, blue: 0.247) }
-    }
-}
-
 // MARK: - Innstillinger: brukernavn, passord, e-post, logg ut, slett
 
 struct InnstillingerVisning: View {
