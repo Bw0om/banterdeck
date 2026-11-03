@@ -43,7 +43,7 @@ appId: no.mittvors.app
     duration: 600
 - waitForAnimationToEnd
 - tapOn:
-    text: "(?is)kopier reglene"
+    id: "lekeside-kopier"
 - waitForAnimationToEnd
 # Tilbake-knappen rullet ut av bildet: sveip ned igjen
 - swipe:
@@ -57,7 +57,7 @@ appId: no.mittvors.app
     duration: 600
 - waitForAnimationToEnd
 - tapOn:
-    text: "Tilbake"
+    id: "lekeside-tilbake"
 # Lista kommer tilbake fra hurtigminnet
 - extendedWaitUntil:
     visible:
@@ -76,9 +76,9 @@ appId: no.mittvors.app
     visible:
       text: "Slik spiller dere"
     timeout: 20000
-# «Bare én telefon» når rommet finnes, ellers «Start leken»
+# «Bare én telefon» / «Start leken» – trykkes på id, så ikke nettsidens skjulte tekst treffes
 - tapOn:
-    text: "(?is)(bare én telefon|start leken).*"
+    id: "lekeside-verktoy"
 # Nettsidens kortbunke tar over, med raden «Reglene» øverst
 - extendedWaitUntil:
     visible:
@@ -95,5 +95,5 @@ appId: no.mittvors.app
 - waitForAnimationToEnd
 - takeScreenshot: 25-lekeside-igjen
 - tapOn:
-    text: "Tilbake"
+    id: "lekeside-tilbake"
 - waitForAnimationToEnd

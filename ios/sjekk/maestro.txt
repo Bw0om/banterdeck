@@ -121,7 +121,11 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
+<<<<<<< HEAD
 /Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/leker/.maestro/tests/2026-11-03_163333
+=======
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/leker/.maestro/tests/2026-11-03_163255
+>>>>>>> swift/lekeside
 ===== deg =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow deg
@@ -129,7 +133,11 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
+<<<<<<< HEAD
 rom for flere: 8SZQ
+=======
+rom for flere: Y993
+>>>>>>> swift/lekeside
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
@@ -176,14 +184,23 @@ Take screenshot 50-to-sannheter-regler... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*i stolen.*" is visible... COMPLETED
 Take screenshot 51-to-sannheter-venter... COMPLETED
-Assert that "(?is).*trykk på løgnen.*" is visible... COMPLETED
-Take screenshot 52-to-sannheter-stem... COMPLETED
-Tap on "(?is).*jeg kan jonglere.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 53-to-sannheter-stemt... COMPLETED
+Assert that "(?is).*trykk på løgnen.*" is visible... FAILED
+
+Assertion is false: "(?is).*trykk på løgnen.*" is visible
+
+Assertion '"(?is).*trykk på løgnen.*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/tosannheter/.maestro/tests/2026-11-03_164650
 ===== skriv =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow skriv
@@ -191,7 +208,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*skriv et kort.*" is visible... COMPLETED
 Take screenshot 54-skriv-og-drikk... COMPLETED
 Tap on "(?is).*skriv et kort.*"... COMPLETED
@@ -250,11 +267,12 @@ Take screenshot 65-pekeleken-stemt... COMPLETED
 ===== dealer =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow dealer
+verten fikk ikke gjort: {"handling":"ftd-gjett","v":10,"id":"7193d7e5c062","pollett":"06b5fbee93cbb35633ea0b112953cdfdce7d"}
 Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*(noen gjetter|ett forsøk til|deler).*" is visible... COMPLETED
 Take screenshot 70-dealer... COMPLETED
 Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible... COMPLETED
@@ -268,8 +286,13 @@ Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
+<<<<<<< HEAD
 Assert that "(?is).*(venter på at|hva fikk dere).*" is visible... FAILED
 verten fikk ikke gjort: {"handling":"nr-vis","id":"e827fea01f37","pollett":"6c55fe1a40da1fdb7ec1a27700d94513ad7a"}
+=======
+Assert that "(?is).*(venter på at|hva fikk dere).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"7193d7e5c062","pollett":"06b5fbee93cbb35633ea0b112953cdfdce7d"}
+ FAILED
+>>>>>>> swift/lekeside
 
 Assertion is false: "(?is).*(venter på at|hva fikk dere).*" is visible
 
@@ -282,7 +305,11 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
+<<<<<<< HEAD
 /Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/nyhetsrunden/.maestro/tests/2026-11-03_165925
+=======
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/nyhetsrunden/.maestro/tests/2026-11-03_170526
+>>>>>>> swift/lekeside
 ===== pannekort =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow pannekort
@@ -293,11 +320,11 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(klask den på|hvem er du).*" is visible... COMPLETED
 Take screenshot 76-hvem-er-jeg... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
 Wait for animation to end... COMPLETED
 Take screenshot 77-hvem-er-jeg-dialog... COMPLETED
 Input text Elvis... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
 Hide Keyboard... COMPLETED
 Tap on (Optional) "(?is)gjettet!.*"... COMPLETED
 Assert that "(?is).*(den sitter|angre|først|hvem er du).*" is visible... COMPLETED
@@ -363,7 +390,24 @@ Take screenshot 95-quiz-svart... COMPLETED
 Assert that "(?is).*(riktig|feil|ikke svart).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 96-quiz-svaret... COMPLETED
+<<<<<<< HEAD
 Assert that "(?is).*(neste kategori|se hvem som vant).*" is visible... COMPLETED
 Tap on (Optional) "(?is).*(neste kategori|se hvem som vant).*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 97-quiz-videre... COMPLETED
+=======
+Assert that "(?is).*(neste kategori|se hvem som vant).*" is visible... FAILED
+
+Assertion is false: "(?is).*(neste kategori|se hvem som vant).*" is visible
+
+Assertion '"(?is).*(neste kategori|se hvem som vant).*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/quiz/.maestro/tests/2026-11-03_171417
+>>>>>>> swift/lekeside
