@@ -692,25 +692,38 @@ struct StokkerVisning: View {
         return tall + ord
     }
 
+    // Utkast-banneret som egen visning – alt i én kjede fikk kompilatoren til å gi opp
+    private func utkastBoks(_ u: (n: Int, navn: String)) -> some View {
+        let gjennomsiktig: Double = modus == .dark ? 0.3 : 0.4
+        let bakgrunn: Color = s.rosa.opacity(gjennomsiktig)
+        return HStack(spacing: 12) {
+            utkastTekst(u).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
+            Button(action: { m.kall("utkastLagre") { m.svar($0) } }) { utkastKnapp }
+                .buttonStyle(TrykkStilDeg(flytt: 1))
+        }
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 14).fill(bakgrunn))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(s.blekk, lineWidth: 2))
+    }
+
+    private var utkastKnapp: some View {
+        let tekst: String = m.t("utkastLagre").uppercased()
+        return Text(tekst)
+            .font(.archivo(12, vekt: 900))
+            .padding(.horizontal, 12)
+            .frame(height: 34)
+            .foregroundColor(s.morkBlekk)
+            .background(Capsule().fill(s.gul))
+            .overlay(Capsule().stroke(s.morkBlekk, lineWidth: 2))
+    }
+
     private var liste: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 DegTopp(tittel: m.t("stokker"), tilbake: m.T("Tilbake", "Back")) { m.visning("profil") }
 
-                if let u = m.utkast {
-                    HStack(spacing: 12) {
-                        utkastTekst(u).fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 8)
-                        Button(action: { m.kall("utkastLagre") { m.svar($0) } }) {
-                            Text(m.t("utkastLagre").uppercased()).font(.archivo(12, vekt: 900)).padding(.horizontal, 12).frame(height: 34).foregroundColor(s.morkBlekk)
-                                .background(Capsule().fill(s.gul)).overlay(Capsule().stroke(s.morkBlekk, lineWidth: 2))
-                        }
-                        .buttonStyle(TrykkStilDeg(flytt: 1))
-                    }
-                    .padding(14)
-                    .background(RoundedRectangle(cornerRadius: 14).fill(s.rosa.opacity(modus == .dark ? 0.3 : 0.4)))
-                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(s.blekk, lineWidth: 2))
-                }
+                if let u = m.utkast { utkastBoks(u) }
 
                 if m.stokkListe.isEmpty {
                     Text(m.t("stokkTom")).font(.archivo(15, vekt: 600)).opacity(0.7).fixedSize(horizontal: false, vertical: true)
