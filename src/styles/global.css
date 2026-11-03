@@ -2114,6 +2114,15 @@ html.is-app .startrow .romlenke{order:-1;background:var(--gold);color:var(--ink2
   transition:transform .14s var(--ease-out),box-shadow .14s var(--ease-out)}
 html.is-app .startrow .romlenke:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink2)}
 html.is-app .startrow[data-irom] .btn.start{background:transparent;color:var(--ink);border:1px solid var(--border2);box-shadow:none;font-size:15px;padding:11px 16px;justify-content:center}
+/* Lekesiden i appen er native (LekesideSkjerm.swift). Trykker du «Bare én telefon», trekker den seg til side og kortbunken får hele siden:
+   bare raden «‹ Reglene» og #lekverktoy står igjen. */
+.lv-topp{display:none}
+html.lek-verktoy .main>:not(#lekverktoy):not(.lv-topp){display:none!important}
+html.lek-verktoy .lv-topp{display:flex;align-items:center;gap:12px;min-height:48px;margin:4px 0 10px}
+.lv-topp b{font-family:var(--display);font-stretch:75%;font-weight:900;text-transform:uppercase;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv-tilbake{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 12px 0 6px;border:2.5px solid var(--ink2);border-radius:10px;background:var(--gold);color:var(--ink2);font:900 14px/1 var(--display);text-transform:uppercase;box-shadow:3px 3px 0 var(--ink2);
+  transition:transform .14s var(--ease-out),box-shadow .14s var(--ease-out)}
+.lv-tilbake:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink2)}
 /* Tekstlenker uten understrek – stille knapper, ikke nettlenker */
 html.is-app .linkbtn,html.is-app .feilknapp{text-decoration:none;font-weight:700;color:var(--ink)}
 /* Gjestens venterom i appen: ingenting å bla i. Koden øverst, stua stor i midten, «verten velger lek» under. */

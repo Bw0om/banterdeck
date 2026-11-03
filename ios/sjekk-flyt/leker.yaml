@@ -1,4 +1,5 @@
-# Simulator-sjekken: Leker-fanen – alderssjekken, lista, filtrene, en lekeside og tilbake.
+# Simulator-sjekken: Leker-fanen – alderssjekken, lista, filtrene, den native lekesiden (regler, kopier, tilbake),
+# og en lekeside med kortbunke («Bare én telefon» → nettsiden → «Reglene» tilbake).
 appId: no.mittvors.app
 ---
 # Alderssjekken (iPhone-dialog) kommer et øyeblikk etter lista
@@ -21,15 +22,51 @@ appId: no.mittvors.app
 - waitForAnimationToEnd
 - tapOn:
     text: "(?is)muldvarpen.*"
+# Lekesiden er native: reglene står på skjermen
 - extendedWaitUntil:
-    notVisible:
-      text: "(?is)spill fra hver sin telefon.*"
-    timeout: 15000
-    optional: true
+    visible:
+      text: "Slik spiller dere"
+    timeout: 20000
 - waitForAnimationToEnd
 - takeScreenshot: 22-lekeside
-- swipe:
-    start: 1%, 50%
-    end: 70%, 50%
+- assertVisible:
+    text: "(?is)spill i rommet"
+- tapOn:
+    text: "(?is)kopier reglene"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Tilbake"
+# Lista kommer tilbake fra hurtigminnet
+- extendedWaitUntil:
+    visible:
+      text: "(?is)spill fra hver sin telefon"
+    timeout: 15000
 - waitForAnimationToEnd
 - takeScreenshot: 23-leker-tilbake
+# En lek med kortbunke på én telefon: Over eller under
+- tapOn:
+    text: "(?is)over eller under.*"
+- extendedWaitUntil:
+    visible:
+      text: "Slik spiller dere"
+    timeout: 20000
+- tapOn:
+    text: "(?is)bare én telefon.*"
+# Nettsidens kortbunke tar over, med raden «Reglene» øverst
+- extendedWaitUntil:
+    visible:
+      text: "(?is)reglene"
+    timeout: 15000
+- waitForAnimationToEnd
+- takeScreenshot: 24-lekeside-kortbunke
+- tapOn:
+    text: "(?is)reglene"
+- extendedWaitUntil:
+    visible:
+      text: "Slik spiller dere"
+    timeout: 15000
+- waitForAnimationToEnd
+- takeScreenshot: 25-lekeside-igjen
+- tapOn:
+    text: "Tilbake"
+- waitForAnimationToEnd

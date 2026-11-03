@@ -106,6 +106,8 @@ const jsonLd = JSON.stringify([{
     </aside>
   )}
 
+  <!-- Appen: når den native lekesiden har trukket seg til side for kortbunken, er dette raden øverst – tilbake til reglene -->
+  <div class="lv-topp"><button type="button" class="lv-tilbake" data-lv-tilbake><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>{lang === 'en' ? 'The rules' : 'Reglene'}</button><b>{name}</b></div>
   <div id="lekverktoy" class:list={[plussLek && 'pluss-laast']} data-pluss={plussLek ? '1' : undefined}>
     {plussLek && lang !== 'en' && (
       <div class="pluss-laas" id="plussLaas">
@@ -151,6 +153,93 @@ const jsonLd = JSON.stringify([{
     </script>
   )}
   <span hidden data-spilt={`lek:${game.slug}`}></span>
+
+  <script is:inline define:vars={{ LEKESIDE: {
+    skjerm: 'lekeside', slug: game.slug, navn: name, fra: game.fra || '', niva: lekNiva, nivaTekst: NIVA_TEKST[lekNiva][lang === 'en' ? 1 : 0],
+    pl: `${game.pl} ${lang === 'no' ? 'spillere' : 'players'}`, utstyr: t(game.gear, lang), gruppe: t(game.group.title, lang),
+    iRom: iRom, romHref: iRom ? romLenke(game.slug, '', lang) : '', harVerktoy: harVerktoy, pluss: plussLek,
+    link: game.link ? { href: game.link.href, label: game.link.label } : null, kopier: copyText,
+    regler: blocks, forslag: forslag.map((x: any) => ({ href: gameHref(x, (p) => path(lang, p), lang), navn: t(x.name, lang), hook: HOOK[x.slug] ? HOOK[x.slug][lang === 'en' ? 1 : 0] : '' })),
+    flere: others.map((x) => ({ href: gameHref(x, (p) => path(lang, p), lang), navn: t(x.name, lang), pl: `${x.pl} ${lang === 'no' ? 'spillere' : 'players'}` })),
+    tekst: lang === 'en' ? {
+      tilbake: 'Back', sendtInn: 'Submitted by', alkfri: 'Alcohol-free mode', rom: 'Play in the room', enTelefon: 'Just one phone', start: 'Start the game',
+      slik: 'How to play', kopier: L.copyRules, kopiert: L.copied, likerDere: 'Like this game?', provEn: 'Try one you play from your own phones', lagRom: 'Create a room – it’s free',
+      flere: `${L.moreGames}: ${t(game.group.title, lang).toLowerCase()}`, alle: L.allGames, pluss: 'Pluss', plussTekst: `Play ${name} on your phone with mittvors pluss. The rules are free.`,
+    } : {
+      tilbake: 'Tilbake', sendtInn: 'Sendt inn av', alkfri: 'Alkoholfri modus', rom: 'Spill i rommet', enTelefon: 'Bare én telefon', start: 'Start leken',
+      slik: 'Slik spiller dere', kopier: L.copyRules, kopiert: L.copied, likerDere: 'Liker dere denne?', provEn: 'Prøv en dere spiller fra hver deres telefon', lagRom: 'Lag et rom – det er gratis',
+      flere: `${L.moreGames}: ${t(game.group.title, lang).toLowerCase()}`, alle: L.allGames, pluss: 'Pluss', plussTekst: `Spill ${name} på mobilen med mittvors pluss. Reglene er gratis.`,
+    } }, ROM_FANE: lang === 'en' ? '/room' : '/no/rom', LEKER_SIDE: path(lang, '/drinking-games') }}>
+    /* Appen med Swift-skall: lekesiden er native (ios/App/App/LekesideSkjerm.swift). Siden gir innholdet dit (reglene, knappene, bildene som PNG),
+       og gjør jobben når du trykker: rommet, kortbunken, alkoholfri, kopier. Samme mønster som lekelista (GamesIndex.astro). */
+    (function start() {
+      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', start); return; }
+      var h = document.documentElement;
+      if (!h.classList.contains('har-skall')) {
+        if (!window.Capacitor) return;
+        new MutationObserver(function (_, obs) { if (h.classList.contains('har-skall')) { obs.disconnect(); start(); } }).observe(h, { attributes: true, attributeFilter: ['class'] });
+        return;
+      }
+      /** Et bilde på siden (inline SVG eller <img>) som PNG (base64) – den native skjermen tegner ikke SVG */
+      function png(el, bredde) {
+        return new Promise(function (res) {
+          if (!el) return res('');
+          var w = bredde || 480;
+          function tegn(img, nw, nh) { try { var c = document.createElement('canvas'); c.width = w; c.height = Math.round(w * (nh || 126) / (nw || 240)); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/png').split(',')[1] || ''); } catch (e) { res(''); } }
+          var img = new Image();
+          img.onerror = function () { res(''); };
+          if (el.tagName === 'IMG') { img.onload = function () { tegn(img, img.naturalWidth, img.naturalHeight); }; img.src = el.currentSrc || el.src; return; }
+          var vb = (el.getAttribute('viewBox') || '0 0 240 126').split(/[\s,]+/).map(Number);
+          var k = el.cloneNode(true); k.setAttribute('width', String(w)); k.setAttribute('height', String(Math.round(w * (vb[3] || 126) / (vb[2] || 240)))); k.removeAttribute('class');
+          img.onload = function () { tegn(img, vb[2], vb[3]); };
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(k));
+        });
+      }
+      function egenAlkfri() { try { return localStorage.getItem('bd_alkoholfri') === '1'; } catch (e) { return false; } }
+      var d = LEKESIDE, bilder = { banner: '' };
+      // Bildene til «Flere leker» og forslagene ligger alt på siden – i samme rekkefølge som listene
+      var flereBilder = Array.prototype.slice.call(document.querySelectorAll('.lek-flere-rad .lekebilde'));
+      var forslagBilder = Array.prototype.slice.call(document.querySelectorAll('.prov-appen-leker .lekebilde'));
+      function meld() {
+        d.alkfri = egenAlkfri();
+        d.png = bilder.banner;
+        d.flere.forEach(function (x, i) { x.png = bilder['f' + i] || ''; });
+        d.forslag.forEach(function (x, i) { x.png = bilder['p' + i] || ''; });
+        window.__mvSisteSkjerm = d;   // app.js lytter kanskje ikke ennå (det lastes etter siden): det henter meldingen her når det starter
+        try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: d })); } catch (e) {}
+      }
+      function visVerktoy(paa) {
+        h.classList.toggle('lek-verktoy', paa);
+        if (paa) {
+          // Den native skjermen går til side, kortbunken får hele siden
+          window.__mvSisteSkjerm = { skjerm: 'verktoy' };
+          try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: { skjerm: 'verktoy' } })); } catch (e) {}
+          window.scrollTo(0, 0);
+        } else { window.scrollTo(0, 0); meld(); }
+      }
+      meld();
+      // Bildene tar et øyeblikk: innholdet kommer først, bildene i neste melding
+      Promise.all([png(document.querySelector('.lek-banner .lekebilde'), 720).then(function (b) { bilder.banner = b; })]
+        .concat(flereBilder.map(function (el, i) { return png(el).then(function (b) { bilder['f' + i] = b; }); }))
+        .concat(forslagBilder.map(function (el, i) { return png(el).then(function (b) { bilder['p' + i] = b; }); }))).then(meld);
+      var tilbakeKnapp = document.querySelector('[data-lv-tilbake]');
+      if (tilbakeKnapp) tilbakeKnapp.addEventListener('click', function () { visVerktoy(false); });
+      window.__mvLekeside = {
+        gaa: function (u) { if (/^\/[a-z0-9/?=&%#-]*$/i.test(String(u || ''))) location.href = u; },
+        // Tilbake til lista: historikken om vi kom derfra, ellers lista direkte (lenke rett inn i appen)
+        tilbake: function () { if (history.length > 1) history.back(); else location.href = LEKER_SIDE; },
+        // Rommet ligger i Spill-fanen: et lenketrykk, så app.js åpner den i riktig fane
+        rom: function () { var a = document.querySelector('.startrow .romlenke'); if (a) { a.click(); return; } var b = document.createElement('a'); b.href = d.romHref || ROM_FANE; document.body.appendChild(b); b.click(); b.remove(); },
+        verktoy: function () { visVerktoy(true); },
+        alkfri: function (v) { if (window.BDTorr) window.BDTorr.sett(!!v); meld(); },
+        kopier: function () {
+          var ferdig = function () { try { document.dispatchEvent(new CustomEvent('mv-toast', { detail: { tekst: d.tekst.kopiert } })); } catch (e) {} };
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(d.kopier).then(ferdig, ferdig); else ferdig();
+        },
+        lenke: function () { if (d.link && d.link.href) window.open(d.link.href, '_blank', 'noopener'); }
+      };
+    })();
+  </script>
 
   <AdSlot />
 

@@ -352,8 +352,13 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             visDeg(vis ? d : nil, over: side, nett: v.webView)
             return
         }
-        // Leker-fanen: lista er native; lekesidene er nettsiden
-        if faner[i] == "leker" { settDekket(i, hva == "leker"); visLeker(hva == "leker" ? d : nil, over: side, nett: v.webView); return }
+        // Leker-fanen: lista og lekesidene er native; kortbunken på en lekeside («verktoy») er nettsiden
+        if faner[i] == "leker" {
+            settDekket(i, hva == "leker" || hva == "lekeside")
+            visLeker(hva == "leker" ? d : nil, over: side, nett: v.webView)
+            visLekeside(hva == "lekeside" ? d : nil, over: side, nett: v.webView)
+            return
+        }
         guard faner[i] == "spill" else { return }
         settDekket(i, SkallViewController.heleSkjermer.contains(hva))
         if ["rom", "lobby", "start", "laster"].contains(hva) { sisteRegler = "" }
@@ -530,7 +535,21 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         }
         fram(lekerVert?.view.superview)
     }
-    func skjulLeker() { fjernOverlegg(&lekerVert); if let j = faner.firstIndex(of: "leker") { settDekket(j, false) } }
+    func skjulLeker() { fjernOverlegg(&lekerVert); fjernOverlegg(&lekesideVert, glid: true); if let j = faner.firstIndex(of: "leker") { settDekket(j, false) } }
+
+    // MARK: Lekesiden (LekesideSkjerm.swift) – native side over nettsidens lekeside; glir inn fra høyre som en skjerm i en stabel
+    private let lekesideModell = LekesideModell()
+    private var lekesideVert: UIHostingController<LekesideSkjerm>?
+    private func visLekeside(_ d: [String: Any]?, over side: UIViewController, nett: WKWebView?) {
+        guard let d = d else { fjernOverlegg(&lekesideVert, glid: true); return }
+        lekesideModell.nett = nett
+        lekesideModell.engelsk = spraak == "en"
+        lekesideModell.sett(d)
+        if lekesideVert == nil {
+            lekesideVert = leggOverlegg(UIHostingController(rootView: LekesideSkjerm(m: lekesideModell)), over: side, nett: nett, glid: true)
+        }
+        fram(lekesideVert?.view.superview)
+    }
     private func degHandling(_ h: String) {
         switch h {
         case "inn", "ny":
@@ -733,7 +752,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         fram(pyVert?.view.superview)
     }
     /// Et native overlegg over nettsiden i fanen: leken er hele skjermen. Stua hentes med «Stua»-knappen (nettark).
-    private func leggOverlegg<V: View>(_ h: UIHostingController<V>, over side: UIViewController, nett: WKWebView?) -> UIHostingController<V> {
+    /// `glid`: skjermen glir inn fra høyre (og ut igjen) som en side i en stabel – lekesiden over lista – i stedet for å tone inn
+    private func leggOverlegg<V: View>(_ h: UIHostingController<V>, over side: UIViewController, nett: WKWebView?, glid: Bool = false) -> UIHostingController<V> {
         let boks = HullVisning()
         side.addChild(h)
         boks.translatesAutoresizingMaskIntoConstraints = false
@@ -747,15 +767,26 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             h.view.trailingAnchor.constraint(equalTo: boks.trailingAnchor), h.view.bottomAnchor.constraint(equalTo: boks.bottomAnchor)
         ])
         h.didMove(toParent: side)
-        boks.alpha = 0
-        UIView.animate(withDuration: 0.2) { boks.alpha = 1 }
+        if glid {
+            boks.transform = CGAffineTransform(translationX: side.view.bounds.width, y: 0)
+            UIView.animate(withDuration: 0.42, delay: 0, usingSpringWithDamping: 0.88, initialSpringVelocity: 0.4, options: [.allowUserInteraction]) { boks.transform = .identity }
+        } else {
+            boks.alpha = 0
+            UIView.animate(withDuration: 0.2) { boks.alpha = 1 }
+        }
         return h
     }
-    private func fjernOverlegg<V: View>(_ vert: inout UIHostingController<V>?) {
+    private func fjernOverlegg<V: View>(_ vert: inout UIHostingController<V>?, glid: Bool = false) {
         guard let h = vert else { return }
         vert = nil
         let boks = h.view.superview
-        UIView.animate(withDuration: 0.22, animations: { (boks ?? h.view).alpha = 0 }) { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); boks?.removeFromSuperview(); h.removeFromParent() }
+        let v: UIView = boks ?? h.view
+        let ferdig: (Bool) -> Void = { _ in h.willMove(toParent: nil); h.view.removeFromSuperview(); boks?.removeFromSuperview(); h.removeFromParent() }
+        if glid {
+            UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseOut], animations: { v.transform = CGAffineTransform(translationX: v.bounds.width, y: 0); v.alpha = 0.6 }, completion: ferdig)
+        } else {
+            UIView.animate(withDuration: 0.22, animations: { v.alpha = 0 }, completion: ferdig)
+        }
     }
     private func fram(_ v: UIView?) { if let v = v { v.superview?.bringSubviewToFront(v) } }
 
