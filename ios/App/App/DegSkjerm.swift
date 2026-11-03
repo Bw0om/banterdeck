@@ -731,7 +731,7 @@ struct StokkerVisning: View {
 
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 18) {
                     ForEach(m.stokkListe) { st in bunke(st) }
-                    Button(action: { UISelectionFeedbackGenerator().selectionChanged(); redigerer = StokkUtkast(id: nil, navn: "", kort: [], farge: StokkUtkast.farger[m.stokkListe.count % StokkUtkast.farger.count]) }) {
+                    Button(action: { UISelectionFeedbackGenerator().selectionChanged(); redigerer = StokkUtkast(id: nil, navn: "", kort: [], farge: Color(hex: StokkUtkast.farger[m.stokkListe.count % StokkUtkast.farger.count])) }) {
                         VStack(spacing: 6) {
                             Image(systemName: "plus").font(.system(size: 26, weight: .black))
                             Text(m.t("stokkNy").uppercased()).font(.archivo(14, vekt: 900))

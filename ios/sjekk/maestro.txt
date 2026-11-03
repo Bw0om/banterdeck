@@ -1,0 +1,362 @@
+===== varm =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow varm
+Wait for animation to end... COMPLETED
+===== varm =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow varm
+Wait for animation to end... COMPLETED
+===== spill =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow spill
+Take screenshot 10-start... COMPLETED
+Tap on (Optional) id: start-navn... COMPLETED
+Wait for animation to end... COMPLETED
+Input text Sjekk... COMPLETED
+Run flow when "Sjekk" is not visible...
+  Hide Keyboard... COMPLETED
+  Tap on (Optional) id: start-navn... COMPLETED
+  Wait for animation to end... COMPLETED
+  Input text Sjekk... COMPLETED
+Run flow when "Sjekk" is not visible... COMPLETED
+Hide Keyboard... COMPLETED
+Take screenshot 11-start-navn... COMPLETED
+Tap on (Optional) "(?is)lag rom.*"... WARNED
+Assert that "(?is)alle lekene.*" is visible... COMPLETED
+Take screenshot 12-lobby... COMPLETED
+Tap on "(?is)alle lekene.*"... COMPLETED
+Assert that "Velg lek" is visible... COMPLETED
+Take screenshot 13-velger... COMPLETED
+Swipe from (50%, 30%) to (50%, 95%) in 400 ms... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 13b-lobby-igjen... COMPLETED
+Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
+Assert that "Lukk" is visible... COMPLETED
+Take screenshot 14-lobby-mer... COMPLETED
+Tap on "Lukk"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 15-lobby-igjen... COMPLETED
+===== sofa =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow sofa
+Assert that "(?is)mer.*tv.*qr.*" is visible... COMPLETED
+Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Run flow when "(?is).{0,4}bare min telefon" is not visible...
+  Tap on (Optional) "(?is)mer.*tv.*qr.*"... COMPLETED
+  Wait for animation to end... COMPLETED
+Run flow when "(?is).{0,4}bare min telefon" is not visible... COMPLETED
+Assert that "(?is).{0,4}bare min telefon" is visible... COMPLETED
+Tap on "(?is).{0,4}bare min telefon"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "Lukk"... WARNED
+Wait for animation to end... COMPLETED
+Take screenshot 84-sofa-lobby... COMPLETED
+Tap on (Optional) "(?is).*sett i sofaen.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Input text Kari... COMPLETED
+Take screenshot 85-sofa-dialog... COMPLETED
+Tap on (Optional) "(?is).*sett i sofaen.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 85-sofa-folk... COMPLETED
+Swipe from (50%, 85%) to (50%, 25%) in 600 ms... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is).*verten leser.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Swipe from (50%, 85%) to (50%, 25%) in 600 ms... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)jeg har aldri.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)nødt eller sannhet.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Wait for animation to end... COMPLETED
+Take screenshot 86-sofa-kort... COMPLETED
+Tap on (Optional) "(?is).*les høyt.*"... WARNED
+Assert that (Optional) "(?is)drikk!.*" is visible... WARNED
+Take screenshot 87-sofa-tellt... COMPLETED
+Tap on (Optional) "(?is).*neste kort.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 88-sofa-neste... COMPLETED
+===== leker =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow leker
+Assert that (Optional) "(?is)ja, jeg er over 18.*" is visible... WARNED
+Tap on (Optional) "(?is)ja, jeg er over 18.*"... WARNED
+Wait for animation to end... COMPLETED
+Take screenshot 20-leker... COMPLETED
+Tap on "I appen"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 21-leker-i-appen... COMPLETED
+Tap on "Alle"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)muldvarpen.*"... COMPLETED
+Assert that "Slik spiller dere" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 22-lekeside... COMPLETED
+Assert that "(?is)spill i rommet" is visible... COMPLETED
+Swipe from (50%, 85%) to (50%, 25%) in 600 ms... COMPLETED
+Wait for animation to end... COMPLETED
+Swipe from (50%, 85%) to (50%, 25%) in 600 ms... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)kopier reglene"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "Tilbake"... FAILED
+
+Element not found: Text matching regex: Tilbake
+
+Element with Text matching regex: Tilbake not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state.
+- This could be a real regression that needs to be addressed.
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/leker/.maestro/tests/2026-11-03_132526
+===== deg =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow deg
+Take screenshot 30-deg... COMPLETED
+Tap on "(?is)logg inn.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 31-logg-inn... COMPLETED
+rom for flere: DC2D
+===== flere =====
+===== flere =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow flere
+Tap on (Optional) id: start-navn... COMPLETED
+Input text Sjekk... COMPLETED
+Tap on id: start-kode... COMPLETED
+Input text ${KODE}... COMPLETED
+Take screenshot 40-bli-med... COMPLETED
+Tap on "(?is)bli med.*"... COMPLETED
+Assert that "(?is).*(velger lek|starter kvelden).*" is visible... COMPLETED
+Take screenshot 41-gjest-lobby... COMPLETED
+===== flere2 =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow flere2
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Take screenshot 42-slik-spiller-dere... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is)send anonymt.*" is visible... COMPLETED
+Take screenshot 42-ukjent-avsender... COMPLETED
+Tap on "(?is)send anonymt.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 43-skrivedialog... COMPLETED
+Input text Et svar fra sjekken... COMPLETED
+Take screenshot 44-skrivedialog-fylt... COMPLETED
+Tap on (Optional) "(?is)send anonymt.*", Right of "Avbryt"... COMPLETED
+Tap on (Optional) "(?is)send anonymt.*", Above "Avbryt"... WARNED
+Wait for animation to end... COMPLETED
+Take screenshot 45-sendt... COMPLETED
+Tap on "Mer"... COMPLETED
+Assert that "Lukk" is visible... COMPLETED
+Take screenshot 46-mer-i-leken... COMPLETED
+Tap on "Lukk"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 47-tilbake-i-leken... COMPLETED
+===== tosannheter =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow tosannheter
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Take screenshot 50-to-sannheter-regler... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*i stolen.*" is visible... COMPLETED
+Take screenshot 51-to-sannheter-venter... COMPLETED
+Assert that "(?is).*trykk på løgnen.*" is visible... COMPLETED
+Take screenshot 52-to-sannheter-stem... COMPLETED
+Tap on "(?is).*jeg kan jonglere.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 53-to-sannheter-stemt... COMPLETED
+===== skriv =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow skriv
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*skriv et kort.*" is visible... COMPLETED
+Take screenshot 54-skriv-og-drikk... COMPLETED
+Tap on "(?is).*skriv et kort.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 55-skriv-dialog... COMPLETED
+Input text Alle drikker to... COMPLETED
+Tap on "(?is).*legg i bunken.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Assert that "(?is).*kort fra deg.*" is visible... COMPLETED
+Take screenshot 56-kort-i-bunken... COMPLETED
+===== skriv2 =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow skriv2
+Assert that "(?is).*(trekk neste|går videre).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 57-skriv-og-drikk-trekk... COMPLETED
+===== overunder =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow overunder
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*i potten.*" is visible... COMPLETED
+Take screenshot 60-over-under... COMPLETED
+Assert that "(?is).*(riktig|bommet).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 61-over-under-svar... COMPLETED
+===== opus =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow opus
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*terningen er hos.*" is visible... COMPLETED
+Take screenshot 62-opus... COMPLETED
+Assert that "(?is)(.*trill igjen.*|.*sendte videre.*|[1-6])" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 63-opus-kast... COMPLETED
+===== mest =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow mest
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*trykk på én.*" is visible... COMPLETED
+Take screenshot 64-pekeleken-mobil... COMPLETED
+Tap on "(?is).*gjest.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 65-pekeleken-stemt... COMPLETED
+===== dealer =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow dealer
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*(noen gjetter|ett forsøk til|deler).*" is visible... COMPLETED
+Take screenshot 70-dealer... COMPLETED
+Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 71-dealer-kortet... COMPLETED
+===== nyhetsrunden =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow nyhetsrunden
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*(venter på at|hva fikk dere).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"6a5dff2faeae","pollett":"cd59ac3e8842a63b912508c5566e41fdfbea"}
+ FAILED
+
+Assertion is false: "(?is).*(venter på at|hva fikk dere).*" is visible
+
+Assertion '"(?is).*(venter på at|hva fikk dere).*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/nyhetsrunden/.maestro/tests/2026-11-03_135027
+===== pannekort =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow pannekort
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*(klask den på|hvem er du).*" is visible... COMPLETED
+Take screenshot 76-hvem-er-jeg... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Wait for animation to end... COMPLETED
+Take screenshot 77-hvem-er-jeg-dialog... COMPLETED
+Input text Elvis... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Hide Keyboard... COMPLETED
+Tap on (Optional) "(?is)gjettet!.*"... COMPLETED
+Assert that "(?is).*(den sitter|angre|først|hvem er du).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 78-hvem-er-jeg-videre... COMPLETED
+===== skal =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow skal
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*(vent|skål).*" is visible... COMPLETED
+Take screenshot 80-skaal-vent... COMPLETED
+Assert that "SKÅL!" is visible... COMPLETED
+Tap on "SKÅL!"... COMPLETED
+Take screenshot 81-skaal-trykket... COMPLETED
+Assert that "(?is).*(treigest|raskest).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 82-skaal-liste... COMPLETED
+===== kort =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow kort
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*kort igjen.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 90-ring-enkel... COMPLETED
+Assert that "(?is)1 / 52" is visible... COMPLETED
+Assert that "Stua" is visible... COMPLETED
+Tap on "Mer"... COMPLETED
+Wait for animation to end... COMPLETED
+Assert that "(?is).*(bytt lek|forlat rommet).*" is visible... COMPLETED
+Take screenshot 91-ring-mer... COMPLETED
+Tap on (Optional) "Lukk"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)neste kort.*"... WARNED
+Wait for animation to end... COMPLETED
+Take screenshot 92-ring-neste... COMPLETED
+===== quiz =====
+Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
+ > Flow quiz
+Assert that "(?is)vi er klare.*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "(?is)vi er klare.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Assert that "(?is).*(trekker|velger kategori|svar!|svart).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 93-quiz-trekk... COMPLETED
+Assert that "(?is).*(svar!|svart).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 94-quiz-sporsmal... COMPLETED
+Tap on (Optional) "A"... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on (Optional) "Vert"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 95-quiz-svart... COMPLETED
+Assert that "(?is).*(riktig|feil|ikke svart).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 96-quiz-svaret... COMPLETED
+Assert that "(?is).*(neste kategori|se hvem som vant).*" is visible... COMPLETED
+Tap on (Optional) "(?is).*(neste kategori|se hvem som vant).*"... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 97-quiz-videre... COMPLETED
