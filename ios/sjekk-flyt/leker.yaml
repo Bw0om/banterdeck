@@ -65,7 +65,11 @@ appId: no.mittvors.app
     timeout: 15000
 - waitForAnimationToEnd
 - takeScreenshot: 23-leker-tilbake
-# En lek med kortbunke på én telefon: Over eller under
+# En lek med kortbunke på én telefon: Over eller under – ligger langt nede i lista, så søk den fram
+- tapOn:
+    text: "(?is)søk etter lek.*"
+- inputText: "over eller"
+- waitForAnimationToEnd
 - tapOn:
     text: "(?is)over eller under.*"
 - extendedWaitUntil:
