@@ -45,6 +45,17 @@ appId: no.mittvors.app
 - tapOn:
     text: "(?is)kopier reglene"
 - waitForAnimationToEnd
+# Tilbake-knappen rullet ut av bildet: sveip ned igjen
+- swipe:
+    start: 50%, 25%
+    end: 50%, 85%
+    duration: 600
+- waitForAnimationToEnd
+- swipe:
+    start: 50%, 25%
+    end: 50%, 85%
+    duration: 600
+- waitForAnimationToEnd
 - tapOn:
     text: "Tilbake"
 # Lista kommer tilbake fra hurtigminnet
