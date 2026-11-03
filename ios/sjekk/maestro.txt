@@ -14,75 +14,41 @@ Tap on (Optional) id: start-navn... COMPLETED
 Wait for animation to end... COMPLETED
 Input text Sjekk... COMPLETED
 Run flow when "Sjekk" is not visible...
-  Hide Keyboard... COMPLETED
-  Tap on (Optional) id: start-navn... COMPLETED
-  Wait for animation to end... COMPLETED
-  Input text Sjekk... COMPLETED
-Run flow when "Sjekk" is not visible... COMPLETED
-Hide Keyboard... COMPLETED
-Take screenshot 11-start-navn... COMPLETED
-Tap on (Optional) "(?is)lag rom.*"... WARNED
-Assert that "(?is)alle lekene.*" is visible... COMPLETED
-Take screenshot 12-lobby... COMPLETED
-Tap on "(?is)alle lekene.*"... COMPLETED
-Assert that "Velg lek" is visible... COMPLETED
-Take screenshot 13-velger... COMPLETED
-Swipe from (50%, 30%) to (50%, 95%) in 400 ms... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 13b-lobby-igjen... COMPLETED
-Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
-Assert that "Lukk" is visible... COMPLETED
-Take screenshot 14-lobby-mer... COMPLETED
-Tap on "Lukk"... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 15-lobby-igjen... COMPLETED
+  Hide Keyboard... FAILED
+Run flow when "Sjekk" is not visible... FAILED
+
+Couldn't hide the keyboard. This can happen if the app uses a custom input or doesn't expose a standard dismiss action.
+
+Instead of hideKeyboard, try tapping on non-interactive element to hide keyboard. Example:
+
+- tapOn: 
+    text: 'Static Text on your screen'
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/spill/.maestro/tests/2026-11-03_144209
 ===== sofa =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow sofa
-Assert that "(?is)mer.*tv.*qr.*" is visible... COMPLETED
-Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Run flow when "(?is).{0,4}bare min telefon" is not visible...
-  Tap on (Optional) "(?is)mer.*tv.*qr.*"... COMPLETED
-  Wait for animation to end... COMPLETED
-Run flow when "(?is).{0,4}bare min telefon" is not visible... COMPLETED
-Assert that "(?is).{0,4}bare min telefon" is visible... COMPLETED
-Tap on "(?is).{0,4}bare min telefon"... COMPLETED
-Wait for animation to end... COMPLETED
-Tap on (Optional) "Lukk"... WARNED
-Wait for animation to end... COMPLETED
-Take screenshot 84-sofa-lobby... COMPLETED
-Tap on (Optional) "(?is).*sett i sofaen.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Input text Kari... COMPLETED
-Take screenshot 85-sofa-dialog... COMPLETED
-Tap on (Optional) "(?is).*sett i sofaen.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 85-sofa-folk... COMPLETED
-Swipe from (50%, 85%) to (50%, 25%) in 600 ms... COMPLETED
-Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is).*verten leser.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Swipe from (50%, 85%) to (50%, 25%) in 600 ms... COMPLETED
-Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)jeg har aldri.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)nødt eller sannhet.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
-Wait for animation to end... COMPLETED
-Take screenshot 86-sofa-kort... COMPLETED
-Tap on (Optional) "(?is).*les høyt.*"... WARNED
-Assert that (Optional) "(?is)drikk!.*" is visible... WARNED
-Take screenshot 87-sofa-tellt... COMPLETED
-Tap on (Optional) "(?is).*neste kort.*"... COMPLETED
-Wait for animation to end... COMPLETED
-Take screenshot 88-sofa-neste... COMPLETED
+Assert that "(?is)mer.*tv.*qr.*" is visible... FAILED
+
+Assertion is false: "(?is)mer.*tv.*qr.*" is visible
+
+Assertion '"(?is)mer.*tv.*qr.*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/sofa/.maestro/tests/2026-11-03_144813
 ===== leker =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow leker
-Assert that (Optional) "(?is)ja, jeg er over 18.*" is visible... WARNED
-Tap on (Optional) "(?is)ja, jeg er over 18.*"... WARNED
+Assert that (Optional) "(?is)ja, jeg er over 18.*" is visible... COMPLETED
+Tap on (Optional) "(?is)ja, jeg er over 18.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 20-leker... COMPLETED
 Tap on "I appen"... COMPLETED
@@ -101,11 +67,19 @@ Swipe from (50%, 85%) to (50%, 25%) in 600 ms... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)kopier reglene"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on "Tilbake"... FAILED
+Swipe from (50%, 25%) to (50%, 85%) in 600 ms... COMPLETED
+Wait for animation to end... COMPLETED
+Swipe from (50%, 25%) to (50%, 85%) in 600 ms... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "Tilbake"... COMPLETED
+Assert that "(?is)spill fra hver sin telefon" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 23-leker-tilbake... COMPLETED
+Tap on "(?is)over eller under.*"... FAILED
 
-Element not found: Text matching regex: Tilbake
+Element not found: Text matching regex: (?is)over eller under.*
 
-Element with Text matching regex: Tilbake not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
+Element with Text matching regex: (?is)over eller under.* not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
 
 Possible causes:
 - Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
@@ -114,7 +88,7 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/leker/.maestro/tests/2026-11-03_132526
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/leker/.maestro/tests/2026-11-03_145153
 ===== deg =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow deg
@@ -122,7 +96,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: DC2D
+rom for flere: 9A2Y
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
@@ -169,7 +143,7 @@ Take screenshot 50-to-sannheter-regler... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*i stolen.*" is visible... COMPLETED
 Take screenshot 51-to-sannheter-venter... COMPLETED
 Assert that "(?is).*trykk på løgnen.*" is visible... COMPLETED
@@ -261,21 +235,15 @@ Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
-Assert that "(?is).*(venter på at|hva fikk dere).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"6a5dff2faeae","pollett":"cd59ac3e8842a63b912508c5566e41fdfbea"}
- FAILED
-
-Assertion is false: "(?is).*(venter på at|hva fikk dere).*" is visible
-
-Assertion '"(?is).*(venter på at|hva fikk dere).*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
-
-Possible causes:
-- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
-- Element may be temporarily unavailable due to loading state
-- This could be a real regression that needs to be addressed
-
-==== Debug output (logs & screenshots) ====
-
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/nyhetsrunden/.maestro/tests/2026-11-03_135027
+Assert that "(?is).*(venter på at|hva fikk dere).*" is visible... COMPLETED
+Take screenshot 72-nyhetsrunden-forside... COMPLETED
+Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
+Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"bdf0633578ea","pollett":"b92c669746eb22aa3ac0b370426c467eda98"}
+ COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 74-nyhetsrunden-svar... COMPLETED
 ===== pannekort =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow pannekort
