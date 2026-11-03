@@ -401,7 +401,7 @@ export function visning(data: any, versjon: number, meg: any, sprak: Lang | stri
     stua: stuaVisning(data, meg), tvEkstra: null, nyPynt: meg && data.nyPynt ? data.nyPynt[meg.id] || null : null,
     hjulListe: data.hjulListe || (lang === 'en' ? HJUL_STANDARD_EN : HJUL_STANDARD), oppdrag: lok(oppdragVisning(data, meg), lang), bors: lok(borsVisning(data, meg), lang), pluss: data.pluss && data.pluss.til > Date.now() ? { til: data.pluss.til } : null, gratisPlasser: GRATIS_PLASSER, fullForsok: data.fullForsok || null, laget: data.laget, ferdig: data.ferdig || null, historikk: lok(data.historikk || [], lang),
     alkoholfri: !!data.alkoholfri, gjeng: data.gjeng ? { navn: data.gjeng.navn, kode: data.gjeng.kode, kveld: !!data.gjengKveld, regler: data.gjeng.regler || [] } : null,
-    kveld: lok(kveldVisning(data), lang), plan: data.plan || null,
+    kveld: lok(kveldVisning(data), lang), plan: data.plan || null, planNavn: data.planNavn || null,
     kaaringer: data.ferdig ? lok(kaaringer(data), lang) : null,
     rofRegler: data.rofRegler || null,
     mester: data.mester ? { id: data.mester.id, til: data.mester.til } : null,
@@ -1230,7 +1230,7 @@ function handlingInne(data: any, meg: any, h: any) {
     const l = (Array.isArray(h.liste) ? h.liste : []).map((x: any) => String(x || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 60)).filter(Boolean).slice(0, 12);
     data.hjulListe = l.length >= 2 ? l : null; return { ok: true };
   }
-  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut', 'stua-flytt', 'stua-tema', 'stua-ekstra', 'stua-stil', 'stua-ut', 'min-pynt', 'sofa-ny', 'sofa-fjern', 'en-start', 'en-neste'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
+  const ekstra = ['start', 'avslutt', 'fjern', 'nullstill', 'slurk', 'reager', 'send', 'velg-annen', 'avslutt-kvelden', 'fortsett-kvelden', 'plan', 'pluss-aktiver', 'alkoholfri', 'gjeng', 'gjeng-meg', 'kv-vinner', 'lov-valg', 'slipp-inn', 'avvis-inn', 'del-ut', 'stua-flytt', 'stua-tema', 'stua-ekstra', 'stua-stil', 'stua-ut', 'min-pynt', 'sofa-ny', 'sofa-fjern', 'en-start', 'en-neste'].includes(h.handling) ? null : ekstraHandling(data, meg, h);
   if (ekstra) return ekstra;
   switch (h.handling) {
     case 'start': {
@@ -1260,6 +1260,16 @@ function handlingInne(data: any, meg: any, h: any) {
       const vinner = kaarVinner(data);
       if (vinner) melde(data, `🏆 ${navnPaa(data, vinner)} vant kvelden!` + (data.gjeng ? ' Nå får hen velge en regel til lovboka.' : ''), `🏆 ${navnPaa(data, vinner)} won the night!` + (data.gjeng ? ' Now they get to pick a rule for the law book.' : ''));
       else melde(data, 'Kvelden er over – her er oppsummeringen!', "The night is over – here's the recap!");
+      return { ok: true };
+    }
+    case 'plan': {
+      // Kveldens plan fra lobbyen (de ferdige oppsettene «Bli kjent», «Vors» …): verten setter lista, tom liste fjerner den.
+      // Samme form som planen fra en gjengkveld, så «Start kvelden» / «Neste i planen» virker likt.
+      if (!erVert) return { feil: 'bare-vert' };
+      const lov = new Set(lekeliste('no').map((x: any) => x.id).concat(['bors']));
+      const leker = (Array.isArray(h.plan) ? h.plan : []).map(String).filter((x: string) => lov.has(x)).slice(0, 12);
+      data.plan = leker.length ? leker : null;
+      data.planNavn = leker.length && typeof h.navn === 'string' ? h.navn.replace(/[ -<>]/g, '').trim().slice(0, 40) : null;
       return { ok: true };
     }
     case 'fortsett-kvelden': {
