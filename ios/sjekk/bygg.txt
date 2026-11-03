@@ -1,19 +1,19 @@
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/FigurArk.swift:309:5: error: invalid redeclaration of 'init(hex:)'
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift:698:29: error: the compiler is unable to type-check this expression in reasonable time; try breaking up the expression into distinct sub-expressions
 ** BUILD FAILED **
 ----- siste linjer -----
+SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/KortSkjerm.swift (in target 'App' from project 'App')
     
 
-SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
-    
+SwiftDriverJobDiscovery normal arm64 Compiling AppDelegate.swift, SceneDelegate.swift, TvSkjerm.swift, Skall.swift, StartSkjerm.swift, VelgerArk.swift, FigurArk.swift, RomArk.swift, Pluss.swift, PlussArk.swift, LoggInnArk.swift, PekelekenSkjerm.swift, KortSkjerm.swift (in target 'App' from project 'App')
 
-SwiftCompile normal arm64 Compiling\ RingSkjerm.swift,\ LobbySkjerm.swift,\ VeddelopSkjerm.swift,\ YatzySkjerm.swift,\ PyramidenSkjerm.swift,\ BussrutaSkjerm.swift,\ PresidentSkjerm.swift,\ GrisSkjerm.swift,\ TosannheterSkjerm.swift,\ SkrivDrikkSkjerm.swift,\ OverUnderSkjerm.swift,\ OpusSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LobbySkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/VeddelopSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/YatzySkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PyramidenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/BussrutaSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PresidentSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/GrisSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/TosannheterSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkrivDrikkSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OverUnderSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OpusSkjerm.swift (in target 'App' from project 'App')
+SwiftDriverJobDiscovery normal arm64 Compiling RingSkjerm.swift, LobbySkjerm.swift, VeddelopSkjerm.swift, YatzySkjerm.swift, PyramidenSkjerm.swift, BussrutaSkjerm.swift, PresidentSkjerm.swift, GrisSkjerm.swift, TosannheterSkjerm.swift, SkrivDrikkSkjerm.swift, OverUnderSkjerm.swift, OpusSkjerm.swift, DealerSkjerm.swift (in target 'App' from project 'App')
 
 ** BUILD FAILED **
 
 
 The following build commands failed:
-	SwiftEmitModule normal arm64 Emitting\ module\ for\ App (in target 'App' from project 'App')
-	EmitSwiftModule normal arm64 (in target 'App' from project 'App')
+	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift (in target 'App' from project 'App')
+	SwiftCompile normal arm64 Compiling\ NyhetsrundenSkjerm.swift,\ QuizSkjerm.swift,\ LekesideSkjerm.swift,\ GjengSkjerm.swift,\ PannekortSkjerm.swift,\ SkalSkjerm.swift,\ SofaSkjerm.swift,\ BingoSkjerm.swift,\ ReglerArk.swift,\ DegSkjerm.swift,\ LekerSkjerm.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/NyhetsrundenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/QuizSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LekesideSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/GjengSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PannekortSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkalSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SofaSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/BingoSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/ReglerArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/DegSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LekerSkjerm.swift /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'App' from project 'App')
 	Building project App with scheme App and configuration Debug
 (3 failures)
 ----- skjemaer -----
