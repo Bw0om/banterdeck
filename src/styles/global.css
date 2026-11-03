@@ -1743,6 +1743,12 @@ body:not(.humor) .tool.dice{display:none}
 .gj-start input#gjKveldNavn,.gj-kveld input#gjKveldNavn{box-sizing:border-box;padding:11px 14px;border-radius:12px;background:var(--bg2);color:var(--ink);border:1px solid var(--border2);font:inherit;font-size:16px}
 .gk-planstart{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;margin:6px 0 10px}
 .gk-planstart small{font-size:14px;font-weight:600;opacity:.8}
+/* Ferdige oppsett for kvelden i lobbyen (rom.js kvelderBoks) */
+.rom-kvelder{margin:8px 0 14px}
+.kvelder-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;max-width:420px}
+.kveld-knapp{display:grid;gap:2px;text-align:left;padding:10px 12px;min-height:64px;border-radius:18px;border:1px solid var(--border2);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.kveld-knapp b{font-family:var(--display);font-size:17px}
+.kveld-knapp small{font-weight:600;font-size:12.5px;line-height:1.3;opacity:.75}
 .bs-kurs small{display:block;font-size:11px;font-weight:600;color:var(--muted);line-height:1.1}
 .bs-selg[disabled]{opacity:.55;cursor:not-allowed}
 .bs-vare{display:grid;gap:6px;margin:10px 0;padding:14px;border-radius:16px;background:rgb(var(--ink-rgb) / .05);border:1px solid var(--border)}
@@ -2255,9 +2261,3 @@ html.har-skall .stua-hel .stua-tilbake{width:100%;min-height:58px;font-size:18px
 @keyframes stua-hel-inn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){html.har-skall .rom-tavle.stua-hel{animation:stua-hel-fade 160ms ease-out}}
 @keyframes stua-hel-fade{from{opacity:0}to{opacity:1}}
-/* Ferdige oppsett for kvelden i lobbyen (rom.js kvelderBoks) */
-.rom-kvelder{margin:8px 0 14px}
-.kvelder-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;max-width:420px}
-.kveld-knapp{display:grid;gap:2px;text-align:left;padding:10px 12px;min-height:64px;border-radius:18px;border:1px solid var(--border2);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
-.kveld-knapp b{font-family:var(--display);font-size:17px}
-.kveld-knapp small{font-weight:600;font-size:12.5px;line-height:1.3;opacity:.75}
