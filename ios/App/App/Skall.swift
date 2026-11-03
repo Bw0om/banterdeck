@@ -339,17 +339,19 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private var arkOppe = false
     private func settDekket(_ i: Int, _ d: Bool) { dekket[i] = d; oppdaterDekket() }
     private func oppdaterDekket() { for (i, v) in visninger { v.webView?.accessibilityElementsHidden = (dekket[i] ?? false) && !arkOppe } }
-    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg", "ts", "sd", "ou", "op", "ftd", "nr", "qz", "pk2", "sk", "en"]
+    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg", "ts", "sd", "ou", "op", "ftd", "nr", "qz", "pk2", "sk", "en", "gjeng"]
 
     /// Siden i en skjerm sier hvilken skjerm den viser: «start» → vis den native startskjermen over Spill-fanen, ellers ta den bort
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
         guard let i = fane(for: fra), let v = visninger[i], let side = viewControllers?[i] else { return }
         let hva = d["skjerm"] as? String ?? ""
+        // Gjengene (GjengSkjerm.swift) kan ligge i Deg-fanen (fra kontosiden) eller Spill-fanen (en gjenglenke)
+        visGjeng(hva == "gjeng" ? d : nil, fane: i, over: side, nett: v.webView)
         // Deg-fanen: den native skjermen ligger over kontosiden, også undersidene (innstillinger, verv, replikker, stokker);
-        // andre sider i fanen (gjengene, statistikken, Pluss-siden) er nettsiden
+        // andre sider i fanen (statistikken, Pluss-siden) er nettsiden
         if faner[i] == "deg" {
             let vis = hva == "deg"
-            settDekket(i, vis)
+            settDekket(i, vis || hva == "gjeng")
             visDeg(vis ? d : nil, over: side, nett: v.webView)
             return
         }
@@ -520,7 +522,28 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         fram(degVert?.view.superview)
     }
     /// Siden i Deg-fanen byttet (gjengene, statistikken …): nettsiden tar over til kontosiden sier «deg» igjen
-    func skjulDeg() { fjernOverlegg(&degVert); if let j = faner.firstIndex(of: "deg") { settDekket(j, false) } }
+    func skjulDeg() { fjernOverlegg(&degVert); if let j = faner.firstIndex(of: "deg") { settDekket(j, false); skjulGjeng(j) } }
+
+    // MARK: Gjengene (GjengSkjerm.swift) – én native skjerm per fane den kan ligge i
+    private var gjengModeller: [Int: GjengModell] = [:]
+    private var gjengVerter: [Int: UIHostingController<GjengSkjerm>] = [:]
+    private func visGjeng(_ d: [String: Any]?, fane i: Int, over side: UIViewController, nett: WKWebView?) {
+        guard let d = d else { skjulGjeng(i); return }
+        let m = gjengModeller[i] ?? GjengModell()
+        gjengModeller[i] = m
+        m.nett = nett
+        m.engelsk = spraak == "en"
+        m.sett(d)
+        if gjengVerter[i] == nil {
+            gjengVerter[i] = leggOverlegg(UIHostingController(rootView: GjengSkjerm(m: m)), over: side, nett: nett, glid: true)
+        }
+        fram(gjengVerter[i]?.view.superview)
+    }
+    func skjulGjeng(_ i: Int) {
+        guard var v = gjengVerter[i] as UIHostingController<GjengSkjerm>? else { return }
+        gjengVerter[i] = nil
+        fjernOverlegg(&v, glid: true)
+    }
 
     // MARK: Leker (LekerSkjerm.swift) – native liste over lekesiden
     private let lekerModell = LekerModell()
@@ -1000,6 +1023,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
             let i = s.fane(for: vc)
             if let i = i, s.faner[i] == "deg" { s.skjulDeg() }   // ny side i Deg-fanen: kontosiden sier «deg» igjen når den er tilbake
             if let i = i, s.faner[i] == "leker" { s.skjulLeker() }   // en lekeside: lista sier «leker» igjen når du er tilbake
+            if let i = i { s.skjulGjeng(i) }   // ny side i fanen: gjengskjermen hører til den forrige
             // rull: simulator-sjekken ber nettsiden bla nedover, så bildet viser linja i krympet stand
             let env = ProcessInfo.processInfo.environment
             var svar: [String: Any] = ["ok": true, "fane": i.map { s.faner[$0] } ?? s.valgtFane, "flere": true,

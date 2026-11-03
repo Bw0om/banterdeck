@@ -55,14 +55,17 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
       var farge = function (k) { var h = 0; String(k).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return GF[h % GF.length]; };
       if (!innlogget()) {
         root.innerHTML = '<h1 class="gj-h1">' + (EN ? 'Crews' : 'Gjengene') + '</h1>' +
-          '<div class="gj-ut"><b>' + (EN ? 'Keep score from night to night' : 'Samle poengene fra kveld til kveld') + '</b><a class="gj-ut-knapp" href="' + KONTO + '">' + (EN ? 'Make a crew' : 'Lag gjeng') + '</a></div>';
+          '<div class="gj-ut"><b>' + (EN ? 'Keep score from night to night' : 'Samle poengene fra kveld til kveld') + '</b><a class="gj-ut-knapp" href="' + KONTO + '">' + (EN ? 'Make a crew' : 'Lag gjeng') + '</a></div>'
+        gjMine = null; meldGjeng();;
         return;
       }
       var tittel = EN ? 'Crews' : 'Gjengene';
       root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1><p class="small">' + (EN ? 'Loading …' : 'Henter …') + '</p>';
+      gjMine = null; gjFeil = ''; meldGjeng();
       kall('/api/gjeng').then(function (d) {
-        if (!d._ok) { root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1>' + feil(d.melding || (EN ? 'Couldn’t load your crews.' : 'Fikk ikke hentet gjengene.')); return; }
+        if (!d._ok) { root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1>' + feil(d.melding || (EN ? 'Couldn’t load your crews.' : 'Fikk ikke hentet gjengene.')); gjFeil = d.melding || (EN ? 'Couldn’t load your crews.' : 'Fikk ikke hentet gjengene.'); meldGjeng(); return; }
         var l = d.gjenger || [];
+        gjMine = l; gjFeil = ''; meldGjeng();
         root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1>' +
           '<div class="gj-kort-liste">' + l.map(function (g, i) {
             return '<div class="gj-kort" style="--f:' + farge(g.kode) + ';--i:' + i + '"><a class="gj-kort-lenke" href="' + SIDE + '?k=' + g.kode + '">' +
@@ -276,6 +279,7 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
           (G.eier ? '<button class="linkbtn" data-g="endre" type="button">' + (EN ? 'Rename' : 'Endre navn') + '</button> · <button class="linkbtn" data-g="slett" type="button">' + (EN ? 'Delete the crew' : 'Slett gjengen') + '</button>'
                   : G.medlem ? '<button class="linkbtn" data-g="forlat" type="button">' + (EN ? 'Leave the crew' : 'Forlat gjengen') + '</button>' : '') +
           '<span class="small">' + (EN ? 'Crew code: ' : 'Gjengkode: ') + '<b>' + esc(G.kode) + '</b></span></div><p id="gjMld"></p>';
+      meldGjeng();
     }
     function formPil(f) {
       if (!f || f.length < 2) return '';
@@ -284,19 +288,150 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
       if (siste < snitt * 0.7 && snitt - siste >= 2) return ' <span class="gj-form ned" title="' + (EN ? 'Less than usual last time' : 'Mindre enn vanlig sist') + '">▼</span>';
       return '';
     }
+    /* ---------- Appen med Swift-skall: gjengsiden er native (ios/App/App/GjengSkjerm.swift). Siden regner ut alt (tabellen, kåringene,
+       lovboka) og sender det ferdig; trykkene kommer tilbake gjennom window.__mvGjeng og svarer {ok, melding}. ---------- */
+    function harSkall() { return document.documentElement.classList.contains('har-skall'); }
+    var GJ_TEKST = EN ? {
+      gjengene: 'Crews', henter: 'Loading …', tilbake: 'Back', dine: 'Your crews', kveld: 'Night', din: 'yours', startKveld: 'Start night', nyGjeng: 'New crew', navnPaa: 'Crew name', navnEks: 'E.g. The Usual Suspects', lag: 'Create',
+      harKode: 'Got a crew code?', kode: 'Crew code', tegn: '8 characters', bliMed: 'Join', loggInn: 'Log in to join', bliMedGjeng: 'Join the crew', inviter: 'Invite the crew',
+      utLead: 'Keep score from night to night', lagGjeng: 'Make a crew', slik1: 'Create the crew and share the link with your friends.', slik2: 'Start the night from the crew page and pick the games – everyone gets a notification and joins without a code.', slik3: 'The winner of the night writes a rule in the crew’s law book – and the season table keeps score.',
+      nyKlar: 'The crew is ready! 🎉', nyLead: 'Share the link with the crew. When you play: tap “Start the night” here – everyone gets a notification and joins without a code.',
+      paagaar: 'Happening now', harStartet: 'has started the night', iRommet: 'in the room', navnIKveld: 'Your name tonight', tilbakeKveld: 'Back to the night', bliKveld: 'Join the night',
+      startKvelden: 'Start the night', startLead: 'Pick the games. The crew gets a notification and joins straight from here – no code needed. Guests can join with the link and are let in by you or another member.', leker: 'Games', startVarsle: 'Start and notify the crew',
+      tilAvgj: 'Awaiting votes', tilAvgjLead: 'Reported during the night, but too few voted. Did it happen? Settled when two more have voted – or after 48 hours.', melder: 'says', igjen: 'h left', aksjonaerer: 'shareholders', detSkjedde: '✅ It happened', ikkeSkjedde: '❌ It didn’t',
+      degIGjengen: 'You in the crew', iLommeboka: 'in your wallet', denneSesongen: 'this season', navnIGjengen: 'Your name in the crew', lagre: 'Save', formueLead: 'Your Exchange fortune follows you from night to night, and you get 200 🪙 in wages every night you join. Everyone starts over on 1 January.',
+      formuen: 'The crew’s fortune', aarskonger: 'Market Kings of the year: ',
+      lovbok: '⚖️ The Crew’s Law', lovLead: 'The winner of each night introduces a rule – or repeals one. A rule applies until a later winner repeals it, or a majority of the crew votes it out.', duVant: '🏆 You won the last night! Pick your rule', nyRegel: 'The new rule …', innfor: 'Introduce', ellerOpphev: '… or repeal one:', venterPaa: 'won the last night and hasn’t picked a rule yet.',
+      gjelder: 'Rules in force', ingenRegler: 'No rules yet. Start a night – the winner writes the first one.', stemFjern: 'Vote to remove', stemt: '✓ Voted to remove', rekorder: 'Records', opphevede: 'Repealed rules', historikk: 'History', opphevSikker: 'Repeal this rule?',
+      sesong: 'Season', alle: 'All', ingenKvelder: 'No nights in {s} yet. Start a room, pick the crew in the lobby and tap “End the night” when you’re done.', tabellen: 'the table',
+      kvelder: 'nights', kveldEn: 'night', slurkerTot: 'sips in total', medITabellen: 'in the table', mestSpilt: 'most played', kaaringer: 'Awards', sesongtabell: 'Season table', navn: 'Name', slurker: 'Sips', snitt: 'Avg', quiz: 'Quiz',
+      tabellLead: '🏆 = number of nights as the thirstiest of the night. Names are merged regardless of upper and lower case – use the same name every time.', kveldene: 'The nights', med: 'players', lekerN: 'games', alkfri: '🥤 alcohol-free', fjernKveld: 'Remove from the table', fjernKveldSikker: 'Remove this night from the table?',
+      endreNavn: 'Rename', nyttNavn: 'New name for the crew', slettGjeng: 'Delete the crew', slettSikker: 'Delete {n} and the whole season table? This can’t be undone.', forlat: 'Leave the crew', forlatSikker: 'Leave {n}? The table stays for everyone else.', gjengkode: 'Crew code', avbryt: 'Cancel',
+      ikke: 'That didn’t work.', skrivNavn: 'Enter your name.', velgLek: 'Pick at least one game.', fantIkke: 'Couldn’t find that crew.', tilGjengene: 'To your crews', opp: 'More than usual last time', ned: 'Less than usual last time',
+    } : {
+      gjengene: 'Gjengene', henter: 'Henter …', tilbake: 'Tilbake', dine: 'Gjengene dine', kveld: 'Kveld', din: 'din', startKveld: 'Start kveld', nyGjeng: 'Ny gjeng', navnPaa: 'Navn på gjengen', navnEks: 'F.eks. Gutta på tur', lag: 'Lag',
+      harKode: 'Har du en gjengkode?', kode: 'Gjengkode', tegn: '8 tegn', bliMed: 'Bli med', loggInn: 'Logg inn for å bli med', bliMedGjeng: 'Bli med i gjengen', inviter: 'Inviter gjengen',
+      utLead: 'Samle poengene fra kveld til kveld', lagGjeng: 'Lag gjeng', slik1: 'Lag gjengen og del lenken med vennene dine.', slik2: 'Start kvelden fra gjengsiden og velg lekene – alle får varsel og blir med uten kode.', slik3: 'Kveldens vinner skriver en regel i gjengens lovbok – og sesongtabellen fører regnskap.',
+      nyKlar: 'Gjengen er klar! 🎉', nyLead: 'Del lenken med gjengen. Når dere skal spille: trykk «Start kvelden» her – alle får varsel og blir med uten kode.',
+      paagaar: 'Pågår nå', harStartet: 'har startet kvelden', iRommet: 'med i rommet', navnIKveld: 'Navnet ditt i kveld', tilbakeKveld: 'Tilbake til kvelden', bliKveld: 'Bli med i kvelden',
+      startKvelden: 'Start kvelden', startLead: 'Velg lekene. Gjengen får varsel og blir med rett herfra – uten kode. Gjester kan bli med på lenken og slippes inn av deg eller et annet medlem.', leker: 'Leker', startVarsle: 'Start og varsle gjengen',
+      tilAvgj: 'Til avgjørelse', tilAvgjLead: 'Meldt i løpet av kvelden, men for få rakk å stemme. Skjedde det? Avgjøres når to til har stemt – eller etter 48 timer.', melder: 'melder', igjen: 't igjen', aksjonaerer: 'aksjonærer', detSkjedde: '✅ Det skjedde', ikkeSkjedde: '❌ Skjedde ikke',
+      degIGjengen: 'Deg i gjengen', iLommeboka: 'i lommeboka', denneSesongen: 'denne sesongen', navnIGjengen: 'Navnet ditt i gjengen', lagre: 'Lagre', formueLead: 'Formuen din i Vorsbørsen følger med fra kveld til kveld, og du får 200 kr i lønn hver kveld du er med. Alle starter likt igjen 1. januar.',
+      formuen: 'Formuen i gjengen', aarskonger: 'Årets Børskonger: ',
+      lovbok: '⚖️ Gjengens lov', lovLead: 'Kveldens vinner innfører en regel – eller opphever en. Regelen gjelder til en senere vinner opphever den, eller et flertall i gjengen stemmer den bort.', duVant: '🏆 Du vant forrige kveld! Velg regelen din', nyRegel: 'Den nye regelen …', innfor: 'Innfør', ellerOpphev: '… eller opphev en:', venterPaa: 'vant forrige kveld og har ikke valgt regel ennå.',
+      gjelder: 'Reglene som gjelder', ingenRegler: 'Ingen regler ennå. Start en kveld – vinneren skriver den første.', stemFjern: 'Stem for å fjerne', stemt: '✓ Stemt for å fjerne', rekorder: 'Rekorder', opphevede: 'Opphevede regler', historikk: 'Historikken', opphevSikker: 'Oppheve denne regelen?',
+      sesong: 'Sesong', alle: 'Alle', ingenKvelder: 'Ingen kvelder i {s} ennå. Start et rom, velg gjengen i lobbyen og trykk «Avslutt kvelden» når dere er ferdige.', tabellen: 'tabellen',
+      kvelder: 'kvelder', kveldEn: 'kveld', slurkerTot: 'slurker til sammen', medITabellen: 'med i tabellen', mestSpilt: 'mest spilt', kaaringer: 'Kåringer', sesongtabell: 'Sesongtabellen', navn: 'Navn', slurker: 'Slurker', snitt: 'Snitt', quiz: 'Quiz',
+      tabellLead: '🏆 = antall kvelder som kveldens tørstigste. Navn slås sammen uansett store og små bokstaver – bruk samme navn hver gang.', kveldene: 'Kveldene', med: 'med', lekerN: 'leker', alkfri: '🥤 alkoholfri', fjernKveld: 'Fjern fra tabellen', fjernKveldSikker: 'Fjerne denne kvelden fra tabellen?',
+      endreNavn: 'Endre navn', nyttNavn: 'Nytt navn på gjengen', slettGjeng: 'Slett gjengen', slettSikker: 'Slette {n} og hele sesongtabellen? Dette kan ikke angres.', forlat: 'Forlat gjengen', forlatSikker: 'Forlate {n}? Tabellen blir liggende for de andre.', gjengkode: 'Gjengkode', avbryt: 'Avbryt',
+      ikke: 'Det gikk ikke.', skrivNavn: 'Skriv inn navnet ditt.', velgLek: 'Velg minst én lek.', fantIkke: 'Fant ikke gjengen.', tilGjengene: 'Til gjengene dine', opp: 'Mer enn vanlig sist', ned: 'Mindre enn vanlig sist',
+    };
+    var gjMine = null, gjFeil = '';
+    function formTekst(f) {
+      if (!f || f.length < 2) return '';
+      var siste = f[f.length - 1], snitt = f.slice(0, -1).reduce(function (a, b) { return a + b; }, 0) / (f.length - 1);
+      if (siste > snitt * 1.3 && siste - snitt >= 2) return 'opp';
+      if (siste < snitt * 0.7 && snitt - siste >= 2) return 'ned';
+      return '';
+    }
+    function meldGjeng() {
+      if (!harSkall()) return;
+      var d = { skjerm: 'gjeng', modus: gjFeil ? 'feil' : G ? 'en' : gjMine ? 'mine' : innlogget() || kode ? 'henter' : 'ut', innlogget: innlogget(), feil: gjFeil, tekst: GJ_TEKST, mittNavn: mittNavn(), leker: LEKER, standard: STANDARD };
+      if (gjMine) d.mine = gjMine.map(function (g) { return { kode: g.kode, navn: g.navn, kvelder: g.kvelder || 0, eier: !!g.eier }; });
+      if (G) {
+        var aar = {}; (G.kvelder || []).forEach(function (k) { aar[new Date(k.dato).getFullYear()] = 1; }); aar[new Date().getFullYear()] = 1;
+        var kv = kvelderI(sesong), l = tabell(kv);
+        var sortFn = { slurker: function (a, b) { return b.slurker - a.slurker; }, snitt: function (a, b) { return b.snitt - a.snitt; }, seire: function (a, b) { return b.seire - a.seire || b.slurker - a.slurker; }, quiz: function (a, b) { return b.quiz - a.quiz; }, kvelder: function (a, b) { return b.kvelder - a.kvelder; } }[sorter];
+        l.sort(sortFn);
+        var leker = {}; kv.forEach(function (k) { ((k.data && k.data.leker) || []).forEach(function (x) { leker[x] = (leker[x] || 0) + 1; }); });
+        var favoritt = Object.keys(leker).sort(function (a, b) { return leker[b] - leker[a]; })[0] || '';
+        var L = G.lovbok, r = (L && L.rekorder) || {};
+        var rekord = function (ikon, tittel, liste, enhet) {
+          if (!liste || !liste.length) return null;
+          return { ikon: ikon, tittel: tittel, navn: liste[0].navn, n: liste[0].n, enhet: Array.isArray(enhet) ? enhet[liste[0].n === 1 ? 0 : 1] : enhet, flere: liste.slice(1, 3).map(function (x) { return x.navn + ' ' + x.n; }).join(', ') };
+        };
+        var k = G.kveld;
+        d.gjeng = {
+          id: G.id, kode: G.kode, navn: G.navn, eier: !!G.eier, medlem: !!G.medlem, ny: /[?&]ny=1/.test(location.search),
+          kveld: k ? { vert: k.vert, antall: k.antall, plan: (k.plan || []).map(function (id) { var x = LEKER.find(function (y) { return y.id === id; }); return x ? x.navn : id; }).join(', '), erMed: !!k.erMed } : null,
+          utsatte: L ? (L.utsatte || []).filter(function (u) { return u.status === 'venter'; }).map(function (u) { return { id: u.id, q: u.q, melderNavn: u.melderNavn, utfallNavn: u.utfallNavn, ja: u.ja, nei: u.nei, timer: Math.max(0, Math.round((u.frist - Date.now()) / 3600000)), aksjonaerer: u.aksjonaerer, kanStemme: !!u.kanStemme, minStemme: u.minStemme || '' }; }) : [],
+          meg: L && G.medlem && L.meg ? { saldo: kr(L.meg.saldo), kvelder: L.meg.kvelder, navn: L.meg.navn || mittNavn() } : null,
+          formue: L ? (L.formue || []).map(function (x) { return { navn: x.navn, saldo: kr(x.saldo), meg: !!x.meg }; }) : [],
+          sesongAar: L ? String(L.sesong || '') : '', aarskonger: L && (L.aarskonger || []).length ? L.aarskonger.map(function (x) { return x.aar + ' ' + x.navn; }).join(' · ') : '',
+          lovbok: L ? {
+            kvelder: L.kvelder || 0, ventende: L.ventende ? { minTur: !!L.ventende.minTur, navn: L.ventende.navn || '' } : null,
+            aktive: (L.aktive || []).map(function (x) { return { id: String(x.id), tekst: x.tekst, av: x.av + (x.kveld ? ' · ' + GJ_TEKST.kveldEn + ' ' + x.kveld : ''), harStemt: !!x.harStemt, stemmer: x.stemmer || 0, trengs: x.trengs || 0 }; }),
+            fjernet: (L.fjernet || []).map(function (x) { return { id: String(x.id), tekst: x.tekst, av: x.av + (x.kveld ? ' · ' + GJ_TEKST.kveldEn + ' ' + x.kveld : '') + ' · ' + (x.hvordan === 'flertall' ? (EN ? 'voted out by the crew' : 'stemt bort av gjengen') : x.fjernetAv ? (EN ? 'repealed by ' : 'opphevet av ') + x.fjernetAv : (EN ? 'repealed' : 'opphevet')) }; }),
+            rekorder: [rekord('🏆', EN ? 'Most nights won' : 'Flest kveldsseiere', r.seire, EN ? ['win', 'wins'] : ['seier', 'seire']), rekord('👑', EN ? 'Market King most often' : 'Børskonge flest ganger', r.borskonge, '×'), rekord('📜', EN ? 'Most rules in force' : 'Flest regler som gjelder', r.regler, EN ? ['rule', 'rules'] : ['regel', 'regler'])].filter(Boolean),
+            logg: (L.logg || []).map(function (x) { return { dato: dato(x.dato), tekst: x.tekst }; }),
+          } : null,
+          sesonger: Object.keys(aar).sort().reverse(), sesong: sesong, sorter: sorter,
+          tall: kv.length ? [{ b: String(kv.length), s: kv.length === 1 ? GJ_TEKST.kveldEn : GJ_TEKST.kvelder }, { b: String(l.reduce(function (n, p) { return n + p.slurker; }, 0)), s: GJ_TEKST.slurkerTot }, { b: String(l.length), s: GJ_TEKST.medITabellen }].concat(favoritt ? [{ b: favoritt, s: GJ_TEKST.mestSpilt }] : []) : [],
+          kaaringer: kv.length ? kaaringer(l, kv) : [],
+          tabell: l.map(function (p) { return { navn: p.navn, form: formTekst(p.form), kvelder: p.kvelder, slurker: p.slurker, snitt: desimal(p.snitt), seire: p.seire, quiz: p.quiz }; }),
+          kvelder: kv.map(function (x) {
+            var sp = ((x.data && x.data.spillere) || []).slice().sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0); });
+            return { id: x.id, dato: dato(x.dato), info: sp.length + ' ' + GJ_TEKST.med + ' · ' + ((x.data && x.data.leker) || []).length + ' ' + GJ_TEKST.lekerN + (x.data && x.data.alkoholfri ? ' · ' + GJ_TEKST.alkfri : ''),
+              topp: sp[0] && sp[0].slurker ? '🏆 ' + sp[0].navn + ' (' + sp[0].slurker + ')' : '', resten: sp.slice(1, 6).map(function (p) { return p.navn + ' ' + (p.slurker || 0); }).join(', ') };
+          }),
+        };
+      }
+      window.__mvSisteSkjerm = d;
+      try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: d })); } catch (e) {}
+    }
+    function gjSvar(p) { return Promise.resolve(p).then(function (d) { if (d && typeof d === 'object' && '_ok' in d) return { ok: !!d._ok, melding: d._ok ? '' : (d.melding || GJ_TEKST.ikke) }; return d && typeof d === 'object' && 'ok' in d ? d : { ok: true }; }).catch(function (e) { return { ok: false, melding: (e && e.message) || GJ_TEKST.ikke }; }); }
+    function gjOk(p) { return gjSvar(p).then(function (r) { if (r.ok) hent(); return r; }); }
+    window.__mvGjeng = {
+      gaa: function (k, ny) { location.href = SIDE + '?k=' + encodeURIComponent(String(k || '').toUpperCase()) + (ny ? '&ny=1' : ''); },
+      tilbake: function () { location.href = SIDE; },
+      // Ut av gjengene: dit du kom fra (Deg), ellers kontosiden
+      ut: function () { if (history.length > 1) history.back(); else location.href = KONTO; },
+      konto: function () { location.href = KONTO; },
+      lag: function (navn) { return gjSvar(kall('/api/gjeng', { handling: 'lag', navn: String(navn || '').trim() }).then(function (d) { if (!d._ok) return d; location.href = SIDE + '?k=' + d.gjeng.kode + '&ny=1'; return { ok: true }; })); },
+      bliMed: function (k) { return gjSvar(kall('/api/gjeng', { handling: 'bli-med', kode: String(k || '').replace(/\s/g, '').toUpperCase() }).then(function (d) { if (!d._ok) return { ok: false, melding: d.melding || GJ_TEKST.fantIkke }; location.href = SIDE + '?k=' + d.gjeng.kode; return { ok: true }; })); },
+      inviter: function () { if (G) inviter(G); },
+      bliMedGjeng: function () {
+        if (!G) return gjSvar({ ok: false });
+        if (!G.innlogget) { try { sessionStorage.setItem('bd_etter_innlogging', location.pathname + location.search); } catch (x) {} location.href = KONTO; return gjSvar({ ok: true }); }
+        return gjOk(kall('/api/gjeng', { handling: 'bli-med', kode: G.kode }));
+      },
+      endre: function (n) { n = String(n || '').trim(); if (!G || !n) return gjSvar({ ok: false }); return gjOk(kall('/api/gjeng', { handling: 'endre', id: G.id, navn: n })); },
+      slett: function () { if (!G) return gjSvar({ ok: false }); return gjSvar(kall('/api/gjeng', { handling: 'slett', id: G.id }).then(function (d) { if (!d._ok) return d; location.href = SIDE; return { ok: true }; })); },
+      forlat: function () { if (!G) return gjSvar({ ok: false }); return gjSvar(kall('/api/gjeng', { handling: 'forlat', id: G.id }).then(function () { location.href = SIDE; return { ok: true }; })); },
+      kveld: function (handling, navn, leker) {
+        navn = String(navn || '').trim(); if (!G) return gjSvar({ ok: false });
+        if (!navn) return gjSvar({ ok: false, melding: GJ_TEKST.skrivNavn });
+        try { localStorage.setItem('bd_mittnavn', JSON.stringify(navn)); } catch (x) {}
+        leker = Array.isArray(leker) ? leker : [];
+        if (handling === 'start-kveld' && !leker.length) return gjSvar({ ok: false, melding: GJ_TEKST.velgLek });
+        return gjSvar(kall('/api/gjeng', { handling: handling === 'start-kveld' ? 'start-kveld' : 'bli-kveld', id: G.id, navn: navn, leker: leker }).then(function (d) { if (!d._ok) return d; gaaTilRom(d); return { ok: true }; }));
+      },
+      utsattStem: function (id, v) { if (!G) return gjSvar({ ok: false }); return gjOk(kall('/api/gjeng', { handling: 'utsatt-stem', id: G.id, aksje: id, v: v })); },
+      lovStem: function (regel) { if (!G) return gjSvar({ ok: false }); return gjOk(kall('/api/gjeng', { handling: 'lov-stem', id: G.id, regel: regel })); },
+      lovOpphev: function (regel) { if (!G || !G.lovbok || !G.lovbok.ventende) return gjSvar({ ok: false }); return gjOk(kall('/api/gjeng', { handling: 'lov-valg', id: G.id, kveld: G.lovbok.ventende.kveldId, type: 'opphev', regel: regel })); },
+      lovNy: function (tekst) { tekst = String(tekst || '').trim(); if (!G || !G.lovbok || !G.lovbok.ventende || tekst.length < 4) return gjSvar({ ok: false, melding: GJ_TEKST.ikke }); return gjOk(kall('/api/gjeng', { handling: 'lov-valg', id: G.id, kveld: G.lovbok.ventende.kveldId, type: 'ny', tekst: tekst })); },
+      profil: function (n) { n = String(n || '').trim(); if (!G || !n) return gjSvar({ ok: false }); try { localStorage.setItem('bd_mittnavn', JSON.stringify(n)); } catch (x) {} return gjOk(kall('/api/gjeng', { handling: 'profil', id: G.id, navn: n })); },
+      slettKveld: function (id) { if (!G) return gjSvar({ ok: false }); return gjOk(kall('/api/gjeng', { handling: 'slett-kveld', id: G.id, kveld: Number(id) })); },
+      sesong: function (s) { sesong = String(s); if (G) vis(); },
+      sort: function (k) { if (['slurker', 'snitt', 'seire', 'quiz', 'kvelder'].indexOf(k) !== -1) { sorter = k; if (G) vis(); } },
+    };
+    // Skallet melder seg (html.har-skall) litt etter at siden er tegnet: send det vi har når det kommer
+    if (window.Capacitor && !harSkall()) { try { new MutationObserver(function (_, obs) { if (harSkall()) { obs.disconnect(); meldGjeng(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] }); } catch (e) {} }
+
     function hent() {
       root.innerHTML = '<p class="small">' + (EN ? 'Loading the crew …' : 'Henter gjengen …') + '</p>';
+      gjFeil = ''; meldGjeng();
       var sti = '/api/gjeng/vis?k=' + encodeURIComponent(kode), o = EN ? { headers: hode() } : undefined;
       (innlogget() ? K.api(sti, o) : fetch(sti, o)).then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (d) {
           if (!r.ok) { root.innerHTML = EN
             ? '<h1>The crew</h1>' + feil(d.melding || 'Couldn’t find that crew.') + '<p><a href="' + SIDE + '">To your crews</a></p>'
-            : '<h1>Gjengen</h1>' + feil(d.melding || 'Fant ikke gjengen.') + '<p><a href="/no/gjeng">Til gjengene dine</a></p>'; return; }
+            : '<h1>Gjengen</h1>' + feil(d.melding || 'Fant ikke gjengen.') + '<p><a href="/no/gjeng">Til gjengene dine</a></p>'; gjFeil = d.melding || GJ_TEKST.fantIkke; meldGjeng(); return; }
           G = d;
           if (!G.kvelder.some(function (k) { return String(new Date(k.dato).getFullYear()) === sesong; }) && G.kvelder.length) sesong = String(new Date(G.kvelder[0].dato).getFullYear());
           vis();
         });
-      }).catch(function () { root.innerHTML = feil(EN ? 'Couldn’t connect. Try again.' : 'Fikk ikke kontakt. Prøv igjen.'); });
+      }).catch(function () { root.innerHTML = feil(EN ? 'Couldn’t connect. Try again.' : 'Fikk ikke kontakt. Prøv igjen.'); gjFeil = EN ? 'Couldn’t connect. Try again.' : 'Fikk ikke kontakt. Prøv igjen.'; meldGjeng(); });
     }
     root.addEventListener('click', function (e) {
       var b = e.target.closest('[data-g],[data-sesong],[data-sort]'); if (!b || !G) return;
