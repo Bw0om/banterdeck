@@ -158,6 +158,35 @@ if (Capacitor.isNativePlatform() && !window.__mvApp) {
     glemt: (epost) => { const K = window.BDKonto; if (!K || !K.sb) return Promise.resolve({ feil: 'ikke-klar' }); return K.sb('/auth/v1/recover?redirect_to=' + encodeURIComponent(tilbake()), { method: 'POST', body: JSON.stringify({ email: epost }) })
       .then((r) => r.ok ? { ok: true, sendt: true, melding: engelsk() ? 'We’ve sent a link to set a new password.' : 'Vi har sendt en lenke for å sette nytt passord.' } : kontoFeil(r)).catch(() => ({ feil: 'nett' })); },
     innlogget: () => { const K = window.BDKonto; return !!(K && K.les && K.les()); },
+    // Logg inn med Apple (ios/App/App/LoggInnArk.swift): iOS gir oss Apples id-token, Supabase bytter den i en innlogging.
+    // Første gang finnes ingen konto – da lages den av Supabase, og arket spør om brukernavn etterpå (brukernavn: '').
+    apple: (idToken, nonce) => {
+      const K = window.BDKonto; if (!K || !K.cfg || !K.cfg.url) return Promise.resolve({ feil: 'ikke-klar' });
+      const kropp = { provider: 'apple', id_token: idToken }; if (nonce) kropp.nonce = nonce;
+      return fetch(K.cfg.url + '/auth/v1/token?grant_type=id_token', { method: 'POST', headers: { apikey: K.cfg.anon, 'Content-Type': 'application/json' }, body: JSON.stringify(kropp) })
+        .then((r) => r.json().catch(() => ({})).then((d) => {
+          if (!r.ok || !d.access_token) {
+            const m = String(d.error_description || d.msg || d.error || '');
+            return { feil: 'apple', melding: /provider|not enabled|disabled/i.test(m)
+              ? (engelsk() ? 'Sign in with Apple isn’t switched on yet.' : 'Logg inn med Apple er ikke slått på ennå.')
+              : (engelsk() ? 'Apple sign-in didn’t go through. Try again.' : 'Apple-innloggingen gikk ikke gjennom. Prøv igjen.') };
+          }
+          loggInnMed(d);
+          const id = d.user && d.user.id;
+          if (!id) return { ok: true, brukernavn: '' };
+          return K.sb('/rest/v1/profiler?select=brukernavn&user_id=eq.' + encodeURIComponent(id))
+            .then((p) => p.ok ? p.json() : []).catch(() => [])
+            .then((rader) => ({ ok: true, brukernavn: (rader[0] && rader[0].brukernavn) || '' }));
+        }))
+        .catch(() => ({ feil: 'nett', melding: engelsk() ? 'No connection. Try again.' : 'Ingen kontakt. Prøv igjen.' }));
+    },
+    // Velg brukernavn (etter Apple-innlogging første gang) – serveren sjekker at det er ledig
+    brukernavn: (navn) => {
+      const K = window.BDKonto; if (!K || !K.api) return Promise.resolve({ feil: 'ikke-klar' });
+      return K.api('/api/konto/brukernavn', { method: 'POST', body: JSON.stringify({ brukernavn: navn }) })
+        .then((r) => r.ok ? r.json().then((d) => { try { document.dispatchEvent(new CustomEvent('bd:bruker-endret')); } catch (e) {} return { ok: true, brukernavn: d.brukernavn }; }) : kontoFeil(r))
+        .catch(() => ({ feil: 'nett', melding: engelsk() ? 'No connection. Try again.' : 'Ingen kontakt. Prøv igjen.' }));
+    },
   };
   // Deg-siden: «Logg inn» / «Ny konto» åpner arket i stedet for skjemaet under
   document.addEventListener('click', (e) => {

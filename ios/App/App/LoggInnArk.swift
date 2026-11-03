@@ -1,12 +1,16 @@
 import SwiftUI
 import UIKit
 import WebKit
+import AuthenticationServices
+import CryptoKit
 
 /// Logg inn / ny konto / lenke på e-post som et iOS-ark. Selve innloggingen gjøres av nettsiden (window.__mvKonto),
 /// så kontoen, øktene og e-postene virker nøyaktig som på nett – dette er bare skjemaet, med iPhonens tastatur og felt.
+/// Øverst: Logg inn med Apple – iOS gir id-tokenet, nettsiden bytter det i en innlogging hos Supabase. Første gang
+/// finnes det ikke noe brukernavn, så arket spør om det før det lukker seg.
 @MainActor
 final class KontoModell: ObservableObject {
-    enum Del: String, CaseIterable { case inn, ny, lenke, glemt }
+    enum Del: String, CaseIterable { case inn, ny, lenke, glemt, navn }
     @Published var del: Del = .inn
     @Published var navn = ""        // brukernavn eller e-post ved innlogging
     @Published var epost = ""
@@ -18,6 +22,8 @@ final class KontoModell: ObservableObject {
     @Published var engelsk = false
     weak var nett: WKWebView?
     var ferdig: (() -> Void)?
+    /// Tilfeldig nonce for Apple-innloggingen: Apple får SHA-256 av den, Supabase får den rå
+    private var appleNonce = ""
 
     func T(_ no: String, _ en: String) -> String { engelsk ? en : no }
 
@@ -38,7 +44,83 @@ final class KontoModell: ObservableObject {
         case .glemt:
             guard !epost.isEmpty else { return si(T("Skriv inn e-posten din.", "Enter your email."), true) }
             kjor("return await window.__mvKonto.glemt(epost)", ["epost": epost.trimmingCharacters(in: .whitespaces)], innlogget: false)
+        case .navn:
+            lagreBrukernavn()
         }
+    }
+
+    // MARK: Logg inn med Apple
+    /// Settes på forespørselen til Apple: fullt navn (bare til forslag på brukernavn) og en hashet nonce
+    func appleForespoersel(_ r: ASAuthorizationAppleIDRequest) {
+        appleNonce = Self.tilfeldigNonce()
+        r.requestedScopes = [.fullName]
+        r.nonce = Self.sha256(appleNonce)
+    }
+    func appleSvar(_ res: Result<ASAuthorization, Error>) {
+        switch res {
+        case .failure(let e):
+            // Lukket arket selv: ingen feilmelding
+            if let a = e as? ASAuthorizationError, a.code == .canceled { return }
+            si(T("Apple-innloggingen gikk ikke gjennom. Prøv igjen.", "Apple sign-in didn’t go through. Try again."), true)
+        case .success(let a):
+            guard let c = a.credential as? ASAuthorizationAppleIDCredential,
+                  let data = c.identityToken, let token = String(data: data, encoding: .utf8), !token.isEmpty else {
+                return si(T("Fikk ikke noe svar fra Apple. Prøv igjen.", "Got no answer from Apple. Try again."), true)
+            }
+            let fornavn = c.fullName?.givenName ?? ""
+            feil = false; melding = ""
+            kjorRaa("return await window.__mvKonto.apple(token, nonce)", ["token": token, "nonce": appleNonce]) { [weak self] d in
+                guard let self = self else { return }
+                if let f = d["feil"] as? String, !f.isEmpty { return self.si(d["melding"] as? String ?? self.T("Noe gikk galt. Prøv igjen.", "Something went wrong. Try again."), true) }
+                guard d["ok"] as? Bool == true else { return self.si(self.T("Noe gikk galt. Prøv igjen.", "Something went wrong. Try again."), true) }
+                let navn = d["brukernavn"] as? String ?? ""
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                if navn.isEmpty {
+                    // Ny konto: velg brukernavn før arket lukkes. Forslag fra fornavnet, om Apple ga oss det.
+                    self.brukernavn = Self.forslag(fornavn)
+                    self.del = .navn
+                } else {
+                    self.si(self.T("Du er logget inn!", "You’re signed in!"), false)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { self.ferdig?() }
+                }
+            }
+        }
+    }
+    private func lagreBrukernavn() {
+        let n = brukernavn.trimmingCharacters(in: .whitespaces)
+        guard Self.gyldigBrukernavn(n) else {
+            return si(T("3–20 tegn: bokstaver, tall, punktum, strek.", "3–20 characters: letters, digits, dot, dash."), true)
+        }
+        kjorRaa("return await window.__mvKonto.brukernavn(navn)", ["navn": n]) { [weak self] d in
+            guard let self = self else { return }
+            if let f = d["feil"] as? String, !f.isEmpty { return self.si(d["melding"] as? String ?? self.T("Noe gikk galt. Prøv igjen.", "Something went wrong. Try again."), true) }
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            self.si(self.T("Du er logget inn!", "You’re signed in!"), false)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { self.ferdig?() }
+        }
+    }
+    /// «Velg senere»: kontoen er laget, brukernavnet kan velges under Innstillinger
+    func hoppOverNavn() { ferdig?() }
+
+    static func gyldigBrukernavn(_ s: String) -> Bool {
+        s.count >= 3 && s.count <= 20 && s.unicodeScalars.allSatisfy { CharacterSet.alphanumerics.contains($0) && $0.isASCII || $0 == "_" || $0 == "." || $0 == "-" }
+    }
+    /// Et forslag til brukernavn fra fornavnet: «Ola» → «ola», «Åse Marie» → «asemarie»
+    static func forslag(_ fornavn: String) -> String {
+        let flat = fornavn.lowercased().folding(options: .diacriticInsensitive, locale: nil)
+            .replacingOccurrences(of: "ø", with: "o").replacingOccurrences(of: "æ", with: "ae")
+        let bare = flat.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) && $0.isASCII }
+        let s = String(String.UnicodeScalarView(bare))
+        return s.count >= 3 ? String(s.prefix(20)) : ""
+    }
+    private static func tilfeldigNonce() -> String {
+        let tegn = Array("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        var ut = ""
+        for _ in 0..<32 { ut.append(tegn[Int.random(in: 0..<tegn.count)]) }
+        return ut
+    }
+    private static func sha256(_ s: String) -> String {
+        SHA256.hash(data: Data(s.utf8)).map { String(format: "%02x", $0) }.joined()
     }
 
     private func si(_ t: String, _ erFeil: Bool) {
@@ -47,6 +129,20 @@ final class KontoModell: ObservableObject {
     }
 
     private func kjor(_ js: String, _ arg: [String: Any], innlogget: Bool) {
+        kjorRaa(js, arg) { [weak self] d in
+            guard let self = self else { return }
+            if let f = d["feil"] as? String, !f.isEmpty { return self.si(d["melding"] as? String ?? self.T("Noe gikk galt. Prøv igjen.", "Something went wrong. Try again."), true) }
+            if d["ok"] as? Bool == true && innlogget && d["sendt"] as? Bool != true {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                self.si(self.T("Du er logget inn!", "You’re signed in!"), false)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { self.ferdig?() }
+            } else {
+                self.si(d["melding"] as? String ?? self.T("Sjekk e-posten din.", "Check your email."), false)
+            }
+        }
+    }
+    /// Kjører et kall mot nettsiden og gir svaret (en ordbok) tilbake på hovedtråden. Feil blir en melding i arket.
+    private func kjorRaa(_ js: String, _ arg: [String: Any], _ svar: @escaping ([String: Any]) -> Void) {
         guard let w = nett else { return si(T("Siden er ikke klar ennå.", "The page isn’t ready yet."), true) }
         travel = true
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -55,14 +151,7 @@ final class KontoModell: ObservableObject {
                 guard let self = self else { return }
                 self.travel = false
                 guard case .success(let v) = res, let d = v as? [String: Any] else { return self.si(self.T("Noe gikk galt. Prøv igjen.", "Something went wrong. Try again."), true) }
-                if let f = d["feil"] as? String, !f.isEmpty { return self.si(d["melding"] as? String ?? self.T("Noe gikk galt. Prøv igjen.", "Something went wrong. Try again."), true) }
-                if d["ok"] as? Bool == true && innlogget && d["sendt"] as? Bool != true {
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    self.si(self.T("Du er logget inn!", "You’re signed in!"), false)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { self.ferdig?() }
-                } else {
-                    self.si(d["melding"] as? String ?? self.T("Sjekk e-posten din.", "Check your email."), false)
-                }
+                svar(d)
             }
         }
     }
@@ -84,40 +173,25 @@ struct LoggInnArk: View {
             Capsule().fill(blekk.opacity(0.25)).frame(width: 36, height: 5).padding(.top, 8)
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    Text(m.T("Kontoen din", "Your account")).font(.archivo(26, vekt: 900)).padding(.top, 10)
-                    Text(m.T("Med konto huskes figuren din, tingene du låser opp, og Pluss – på alle telefonene dine.",
-                             "With an account your figure, the things you unlock and Plus follow you on every phone."))
-                        .font(.archivo(15, vekt: 500)).opacity(0.8)
+                    if m.del == .navn {
+                        navnSteg
+                    } else {
+                        Text(m.T("Kontoen din", "Your account")).font(.archivo(26, vekt: 900)).padding(.top, 10)
+                        Text(m.T("Med konto huskes figuren din, tingene du låser opp, og Pluss – på alle telefonene dine.",
+                                 "With an account your figure, the things you unlock and Plus follow you on every phone."))
+                            .font(.archivo(15, vekt: 500)).opacity(0.8)
 
-                    if m.del != .glemt {
-                        HStack(spacing: 8) {
-                            fane(.inn, m.T("Logg inn", "Sign in")); fane(.ny, m.T("Ny konto", "New account")); fane(.lenke, m.T("Lenke på e-post", "Email link"))
+                        if m.del == .inn || m.del == .ny {
+                            appleKnapp
+                            skille
                         }
-                    }
 
-                    switch m.del {
-                    case .inn:
-                        felt(m.T("Brukernavn eller e-post", "Username or email"), tekst: $m.navn, id: "navn", type: .username, tastatur: .emailAddress)
-                        passordFelt()
-                        knapp(m.T("Logg inn", "Sign in"))
-                        Button(action: { m.del = .glemt; m.melding = "" }) { Text(m.T("Glemt passordet?", "Forgot your password?")).font(.archivo(14, vekt: 700)).underline() }.buttonStyle(.plain).opacity(0.75)
-                    case .ny:
-                        felt(m.T("E-post", "Email"), tekst: $m.epost, id: "epost", type: .emailAddress, tastatur: .emailAddress)
-                        felt(m.T("Brukernavn", "Username"), tekst: $m.brukernavn, id: "brukernavn", type: .username, tastatur: .asciiCapable)
-                        Text(m.T("3–20 tegn: bokstaver, tall, punktum, strek.", "3–20 characters: letters, digits, dot, dash.")).font(.archivo(12, vekt: 500)).opacity(0.6)
-                        passordFelt(ny: true)
-                        knapp(m.T("Opprett konto", "Create account"))
-                    case .lenke:
-                        Text(m.T("Vi sender deg en lenke – trykk på den, så er du inne. Ingen passord.", "We’ll email you a link – tap it and you’re in. No password."))
-                            .font(.archivo(14, vekt: 500)).opacity(0.75)
-                        felt(m.T("E-post", "Email"), tekst: $m.epost, id: "epost", type: .emailAddress, tastatur: .emailAddress)
-                        knapp(m.T("Send lenke", "Send link"))
-                    case .glemt:
-                        Text(m.T("Skriv inn e-posten din, så sender vi en lenke for å sette nytt passord.", "Enter your email and we’ll send a link to set a new password."))
-                            .font(.archivo(14, vekt: 500)).opacity(0.75)
-                        felt(m.T("E-post", "Email"), tekst: $m.epost, id: "epost", type: .emailAddress, tastatur: .emailAddress)
-                        knapp(m.T("Send lenke", "Send link"))
-                        Button(action: { m.del = .inn; m.melding = "" }) { Text(m.T("Tilbake", "Back")).font(.archivo(14, vekt: 700)).underline() }.buttonStyle(.plain).opacity(0.75)
+                        if m.del != .glemt {
+                            HStack(spacing: 8) {
+                                fane(.inn, m.T("Logg inn", "Sign in")); fane(.ny, m.T("Ny konto", "New account")); fane(.lenke, m.T("Lenke på e-post", "Email link"))
+                            }
+                        }
+                        skjema
                     }
 
                     if !m.melding.isEmpty {
@@ -133,6 +207,71 @@ struct LoggInnArk: View {
         .foregroundColor(blekk)
         .animation(.easeOut(duration: 0.18), value: m.melding)
         .animation(.easeOut(duration: 0.18), value: m.del)
+    }
+
+    // MARK: Logg inn med Apple – Apples egen knapp (kravet deres), i samme form som våre
+    private var appleKnapp: some View {
+        let stil: SignInWithAppleButton.Style = modus == .dark ? .white : .black
+        return SignInWithAppleButton(.continue, onRequest: { m.appleForespoersel($0) }, onCompletion: { m.appleSvar($0) })
+            .signInWithAppleButtonStyle(stil)
+            .frame(height: 56)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
+            .opacity(m.travel ? 0.5 : 1)
+            .disabled(m.travel)
+            .padding(.top, 4)
+            .accessibilityIdentifier("konto-apple")
+    }
+    private var skille: some View {
+        HStack(spacing: 10) {
+            Rectangle().fill(blekk.opacity(0.2)).frame(height: 1.5)
+            Text(m.T("eller med e-post", "or with email")).font(.archivo(13, vekt: 700)).opacity(0.6).fixedSize()
+            Rectangle().fill(blekk.opacity(0.2)).frame(height: 1.5)
+        }
+        .padding(.vertical, 2)
+    }
+
+    @ViewBuilder private var skjema: some View {
+        switch m.del {
+        case .inn:
+            felt(m.T("Brukernavn eller e-post", "Username or email"), tekst: $m.navn, id: "navn", type: .username, tastatur: .emailAddress)
+            passordFelt()
+            knapp(m.T("Logg inn", "Sign in"))
+            Button(action: { m.del = .glemt; m.melding = "" }) { Text(m.T("Glemt passordet?", "Forgot your password?")).font(.archivo(14, vekt: 700)).underline() }.buttonStyle(.plain).opacity(0.75)
+        case .ny:
+            felt(m.T("E-post", "Email"), tekst: $m.epost, id: "epost", type: .emailAddress, tastatur: .emailAddress)
+            felt(m.T("Brukernavn", "Username"), tekst: $m.brukernavn, id: "brukernavn", type: .username, tastatur: .asciiCapable)
+            Text(m.T("3–20 tegn: bokstaver, tall, punktum, strek.", "3–20 characters: letters, digits, dot, dash.")).font(.archivo(12, vekt: 500)).opacity(0.6)
+            passordFelt(ny: true)
+            knapp(m.T("Opprett konto", "Create account"))
+        case .lenke:
+            Text(m.T("Vi sender deg en lenke – trykk på den, så er du inne. Ingen passord.", "We’ll email you a link – tap it and you’re in. No password."))
+                .font(.archivo(14, vekt: 500)).opacity(0.75)
+            felt(m.T("E-post", "Email"), tekst: $m.epost, id: "epost", type: .emailAddress, tastatur: .emailAddress)
+            knapp(m.T("Send lenke", "Send link"))
+        case .glemt:
+            Text(m.T("Skriv inn e-posten din, så sender vi en lenke for å sette nytt passord.", "Enter your email and we’ll send a link to set a new password."))
+                .font(.archivo(14, vekt: 500)).opacity(0.75)
+            felt(m.T("E-post", "Email"), tekst: $m.epost, id: "epost", type: .emailAddress, tastatur: .emailAddress)
+            knapp(m.T("Send lenke", "Send link"))
+            Button(action: { m.del = .inn; m.melding = "" }) { Text(m.T("Tilbake", "Back")).font(.archivo(14, vekt: 700)).underline() }.buttonStyle(.plain).opacity(0.75)
+        case .navn:
+            EmptyView()
+        }
+    }
+
+    // MARK: Første gang med Apple: velg brukernavn (det andre ser i rommet og på tavla)
+    @ViewBuilder private var navnSteg: some View {
+        Text(m.T("Du er inne!", "You’re in!")).font(.archivo(26, vekt: 900)).padding(.top, 10)
+        Text(m.T("Velg et brukernavn – det er det de andre ser. Du kan endre det senere under Innstillinger.",
+                 "Pick a username – that’s what the others see. You can change it later under Settings."))
+            .font(.archivo(15, vekt: 500)).opacity(0.8)
+        felt(m.T("Brukernavn", "Username"), tekst: $m.brukernavn, id: "brukernavn", type: .username, tastatur: .asciiCapable)
+            .onAppear { fokus = "brukernavn" }
+        Text(m.T("3–20 tegn: bokstaver, tall, punktum, strek.", "3–20 characters: letters, digits, dot, dash.")).font(.archivo(12, vekt: 500)).opacity(0.6)
+        knapp(m.T("Lagre", "Save"))
+        Button(action: m.hoppOverNavn) { Text(m.T("Velg senere", "Choose later")).font(.archivo(14, vekt: 700)).underline() }
+            .buttonStyle(.plain).opacity(0.75).disabled(m.travel)
     }
 
     private func fane(_ d: KontoModell.Del, _ t: String) -> some View {
@@ -151,6 +290,7 @@ struct LoggInnArk: View {
             TextField("", text: tekst)
                 .textContentType(type).keyboardType(tastatur).textInputAutocapitalization(.never).disableAutocorrection(true)
                 .submitLabel(.next).focused($fokus, equals: id)
+                .onSubmit { if m.del == .navn { m.send() } }
                 .font(.archivo(18, vekt: 600))
                 .padding(.horizontal, 14).frame(height: 52)
                 .background(RoundedRectangle(cornerRadius: 12).fill(kort))
