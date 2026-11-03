@@ -540,7 +540,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         fram(gjengVerter[i]?.view.superview)
     }
     func skjulGjeng(_ i: Int) {
-        guard var v = gjengVerter[i] as UIHostingController<GjengSkjerm>? else { return }
+        var v: UIHostingController<GjengSkjerm>? = gjengVerter[i]
+        guard v != nil else { return }
         gjengVerter[i] = nil
         fjernOverlegg(&v, glid: true)
     }
