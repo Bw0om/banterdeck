@@ -131,7 +131,11 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
+<<<<<<< HEAD
+rom for flere: CQVC
+=======
 rom for flere: LVTP
+>>>>>>> origin/main
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
@@ -276,7 +280,11 @@ Take screenshot 72-nyhetsrunden-forside... COMPLETED
 Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
+<<<<<<< HEAD
+Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"c72a71285128","pollett":"0df76419422797b7b874016cca45adb1d46a"}
+=======
 Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"e58b9b049c97","pollett":"f8ad35e55cff0e2be77038fcb364e2d7fc1d"}
+>>>>>>> origin/main
  COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 74-nyhetsrunden-svar... COMPLETED
@@ -290,7 +298,7 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(klask den på|hvem er du).*" is visible... COMPLETED
 Take screenshot 76-hvem-er-jeg... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 77-hvem-er-jeg-dialog... COMPLETED
 Input text Elvis... COMPLETED
@@ -352,7 +360,7 @@ Take screenshot 93-quiz-trekk... COMPLETED
 Assert that "(?is).*(svar!|svart).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 94-quiz-sporsmal... COMPLETED
-Tap on (Optional) "A"... COMPLETED
+Tap on (Optional) "A"... WARNED
 Wait for animation to end... COMPLETED
 Tap on (Optional) "Vert"... COMPLETED
 Wait for animation to end... COMPLETED

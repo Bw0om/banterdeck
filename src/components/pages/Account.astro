@@ -855,6 +855,29 @@ const T = no ? {
         /* ---------- Appen med Swift-skall: Deg-fanen er native (ios/App/App/DegSkjerm.swift). Siden sier fra hva den vet
            (mv-skjerm «deg»: navn, konto, Pluss, tallene, figuren som PNG), og gjør jobben via window.__mvDeg. ---------- */
         var degPluss = null, degMeldT = null, degPng = '', degPngFor = '', degArkOppe = false;
+        var DEG_TEKST = EN ? {
+          innstillinger: 'Settings', brukernavn: 'Username', passord: 'Password', epost: 'Email', statistikk: T.stats, loggUt: 'Sign out', slett: T.deleteBtn, slettLead: T.deleteLead, slettSkriv: T.deleteType, slettOrd: 'DELETE',
+          endreBrukernavn: T.changeUser, velgBrukernavn: T.setUser, brukernavnLead: T.changeUserLead, nyttPassord: T.choosePw, passordLead: 'At least 8 characters. Other devices are signed out.',
+          lagre: T.save, avbryt: T.cancel, lagret: T.saved, pwKort: T.pwShort,
+          verv: 'Refer a friend', vervLead: 'You each get a free night pass once your friend has played their first room.', vervDel: 'Share your referral link', vervBruk: 'Use a night pass', vervHenter: 'Fetching your link …',
+          replikker: 'Lines', replikkNy: 'New line', replikkLinje: 'Write the line', replikkNaar: 'When do you say it? (optional)', replikkLegg: 'Add', replikkTom: 'No lines yet. Write the ones you always reach for.', kopiert: 'Copied',
+          stokker: 'Decks', stokkNy: 'New deck', stokkTom: T.noDecks, kort: T.cards, delt: T.shared, spill: T.play, spillHer: 'Play on this phone', spillRom: 'Play in a room', del: T.share, endre: T.edit, slettStokk: T.del,
+          slettSikker: 'Delete the deck?', utkast: T.draft, utkastLagre: T.saveDraft, stokkNavn: 'Name your deck', stokkSkriv: 'Write a card …', leggIBunken: 'Add to the pile', lagreKortet: 'Save the card',
+          iBunken: 'in the pile', kortNr: 'Card', limInn: 'Paste a list', limInnLead: 'One card per line', leggAlle: 'Add them all', spillNaa: 'Play now', ferdig: 'Done', neste: T.next, lukk: T.close, av: T.of,
+          ideer: [['Everyone who ', ' drinks 2', 'Everyone who … drinks'], ['Point at whoever ', '', 'Point at whoever …'], ['Never have I ever ', '', 'Never have I ever …'], ['Hand out 2 if ', '', 'Hand out 2 if …'], ['Whoever ', ' drinks 3', 'Whoever … drinks 3']],
+        } : {
+          innstillinger: 'Innstillinger', brukernavn: 'Brukernavn', passord: 'Passord', epost: 'E-post', statistikk: T.stats, loggUt: 'Logg ut', slett: T.deleteBtn, slettLead: T.deleteLead, slettSkriv: T.deleteType, slettOrd: 'SLETT',
+          endreBrukernavn: T.changeUser, velgBrukernavn: T.setUser, brukernavnLead: T.changeUserLead, nyttPassord: T.choosePw, passordLead: 'Minst 8 tegn. Andre enheter logges ut.',
+          lagre: T.save, avbryt: T.cancel, lagret: T.saved, pwKort: T.pwShort,
+          verv: 'Verv en venn', vervLead: 'Dere får et gratis kveldspass hver når vennen har spilt sitt første rom.', vervDel: 'Del vervelenken', vervBruk: 'Bruk et kveldspass', vervHenter: 'Henter lenken din …',
+          replikker: 'Replikkene', replikkNy: 'Ny replikk', replikkLinje: 'Skriv replikken', replikkNaar: 'Når sier man den? (valgfritt)', replikkLegg: 'Legg til', replikkTom: 'Ingen replikker ennå. Skriv dem du alltid griper til.', kopiert: 'Kopiert',
+          stokker: 'Kortstokkene', stokkNy: 'Ny stokk', stokkTom: T.noDecks, kort: T.cards, delt: T.shared, spill: T.play, spillHer: 'Spill på denne telefonen', spillRom: 'Spill i et rom', del: T.share, endre: T.edit, slettStokk: T.del,
+          slettSikker: 'Slette stokken?', utkast: T.draft, utkastLagre: T.saveDraft, stokkNavn: 'Gi stokken et navn', stokkSkriv: 'Skriv et kort …', leggIBunken: 'Legg i bunken', lagreKortet: 'Lagre kortet',
+          iBunken: 'i bunken', kortNr: 'Kort', limInn: 'Lim inn liste', limInnLead: 'Ett kort per linje', leggAlle: 'Legg til alle', spillNaa: 'Spill nå', ferdig: 'Ferdig', neste: T.next, lukk: T.close, av: T.of,
+          ideer: [['Alle som ', ', drikker 2', 'Alle som … drikker'], ['Pek på den som ', '', 'Pek på den som …'], ['Jeg har aldri ', '', 'Jeg har aldri …'], ['Del ut 2 hvis ', '', 'Del ut 2 hvis …'], ['Den som ', ', drikker 3', 'Den som … drikker 3']],
+        };
+        /** Svaret til den native skjermen: {ok, melding} – aldri et kast */
+        function degSvar(p) { return Promise.resolve(p).then(function (x) { return x && typeof x === 'object' && 'ok' in x ? x : { ok: true }; }).catch(function (e) { return { ok: false, melding: (e && e.message) || T.generic }; }); }
         // Bildet av figuren huskes på telefonen, så den native skjermen har det med en gang neste gang
         try { var degHusk = JSON.parse(localStorage.getItem('mv_deg_png') || 'null'); if (degHusk && degHusk.png) { degPng = degHusk.png; degPngFor = degHusk.svg || ''; } } catch (e) {}
         var FIGUR_RO = '<style>.arm-h,.arm-v,.hender,.dekk,.horn,.gitar,.tlf,.zzz,.stjerner,.hjerter,.krone-v,.skum,.oyne-g,.oyne-h,.oyne-s,.munn-o,.munn-b,.munn-sur,.munn-kinn,.rodme,.svette,.gronn{display:none}</style>';
@@ -884,9 +907,15 @@ const T = no ? {
             // Før serveren har svart: kontoen slik telefonen husker den, så skjermen ikke blinker «Logg inn» for en som er inne
             var b = bruker || (K.brukerKjent && K.brukerKjent()) || null;
             var send = function () {
+              var utkast = lesLS(UTKAST, null);
               var d = { skjerm: 'deg', visning: bruker ? visningNaa() : 'profil', innlogget: !!b, navn: mittNavn(), brukernavn: b && b.brukernavn || '', epost: b && b.email || '',
                 gjeng: ($('gjengTall') || {}).textContent || '', stokker: ($('stokkTall') || {}).textContent || '', replikker: ($('replikkTall') || {}).textContent || '',
-                stat: !!$('statLenke') && !$('statLenke').hidden, moerk: document.documentElement.dataset.theme === 'dark', png: degPng };
+                stat: !!$('statLenke') && !$('statLenke').hidden, moerk: document.documentElement.dataset.theme === 'dark', png: degPng, tekst: DEG_TEKST,
+                // Undersidene er native (DegSkjerm.swift): kortstokkene, replikkene, vervingen og utkastet fra Skriv og drikk følger med
+                replikkListe: mine.map(function (r) { return { line: r.line, ctx: r.ctx || '' }; }),
+                stokkListe: stokker.map(function (s) { return { id: s.id, navn: s.navn, kort: s.kort || [], delt: !!s.delt, farge: fargeFor(s) }; }),
+                utkast: utkast && utkast.kort && utkast.kort.length ? { n: utkast.kort.length, navn: utkast.navn || '' } : null,
+                verv: verv ? { kode: verv.kode, antall: verv.antall || 0, kveldspass: verv.kveldspass || 0 } : null };
               if (degPluss) d.pluss = degPluss;
               window.__mvSisteSkjerm = d;   // app.js lytter kanskje ikke ennå (det lastes etter siden): det henter meldingen her når det starter
               try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: d })); } catch (e) {}
@@ -917,7 +946,81 @@ const T = no ? {
             sprak: function () { location.href = EN ? '/no/rom' : '/room'; },
             visning: function (n) { if (bruker) visning(n); },
             gaa: function (u) { if (/^\/[a-z0-9/?=&%#-]*$/i.test(String(u || ''))) location.href = u; },
-            loggUt: function () { K.loggUt(); location.reload(); }
+            loggUt: function () { K.loggUt(); location.reload(); },
+            /* Undersidene (native): svarer med {ok, melding}. Lista i skjermen oppdateres gjennom meldDeg etterpå. */
+            brukernavn: function (n) {
+              n = String(n || '').trim(); if (!bruker || !n) return degSvar({ ok: false, melding: T.fillAll });
+              return degSvar(K.api('/api/konto/brukernavn', { method: 'POST', body: JSON.stringify({ brukernavn: n }) }).then(function (r) {
+                if (!r.ok) return feilFra(r).then(function (m) { return { ok: false, melding: m }; });
+                bruker.brukernavn = n; visHvem(); meldDeg(); return { ok: true, melding: T.saved };
+              }));
+            },
+            passord: function (pw) {
+              pw = String(pw || ''); if (pw.length < 8) return degSvar({ ok: false, melding: T.pwShort });
+              return degSvar(K.sb('/auth/v1/user', { method: 'PUT', body: JSON.stringify({ password: pw }) }).then(function (r) {
+                if (!r.ok) return { ok: false, melding: T.generic };
+                K.sb('/auth/v1/logout?scope=others', { method: 'POST' }).catch(function () {});
+                return { ok: true, melding: T.pwSaved };
+              }));
+            },
+            slett: function () {
+              return degSvar(K.api('/api/konto/slett', { method: 'POST', body: JSON.stringify({ bekreft: true }) }).then(function (r) {
+                if (!r.ok) return feilFra(r).then(function (m) { return { ok: false, melding: m }; });
+                try { localStorage.removeItem(LOCAL); localStorage.removeItem(UTKAST); localStorage.removeItem('bd_stokk_rom'); } catch (x) {}
+                K.lagre(null); setTimeout(function () { location.reload(); }, 300);
+                return { ok: true, melding: T.deleted };
+              }));
+            },
+            vervDel: function () {
+              if (!verv) return degSvar({ ok: false, melding: T.generic });
+              var url = (window.__MV_ORIGIN || location.origin) + (EN ? '/en?v=' : '/no/?v=') + verv.kode;
+              var tekst = EN ? 'Join me on mittvors – drinking games where everyone plays from their own phone. Use my link and we both get a free night of Pluss 🎁'
+                : 'Bli med på mittvors – drikkeleker der alle spiller fra sin egen telefon. Bruk lenken min, så får vi begge en gratis kveld med Pluss 🎁';
+              try { document.dispatchEvent(new CustomEvent('mv-del', { detail: { tekst: tekst, url: url } })); } catch (e) {}
+              return degSvar({ ok: true });
+            },
+            vervBruk: function () {
+              return degSvar(K.api('/api/verv', Object.assign({ method: 'POST' }, EN_HODE || {})).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (x) {
+                if (!x.ok) return { ok: false, melding: x.d.melding || (EN ? 'That didn’t work.' : 'Det gikk ikke.') };
+                setTimeout(function () { location.reload(); }, 900);
+                return { ok: true, melding: EN ? '✨ Pluss is on for 24 hours. Have a great night!' : '✨ Pluss er på i 24 timer. God kveld!' };
+              }));
+            },
+            replikkNy: function (line, ctx) {
+              line = String(line || '').trim(); if (!line) return degSvar({ ok: false, melding: T.fillAll });
+              var entry = { line: line }; ctx = String(ctx || '').trim(); if (ctx) entry.ctx = ctx;
+              mine.push(entry); saveLocal(); render(); push(); meldDeg();
+              return degSvar({ ok: true });
+            },
+            replikkSlett: function (i) { i = +i; if (!(i >= 0 && i < mine.length)) return degSvar({ ok: false }); mine.splice(i, 1); saveLocal(); render(); push(); meldDeg(); return degSvar({ ok: true }); },
+            stokkLagre: function (s) {
+              s = s || {};
+              var kort = (s.kort || []).map(function (t) { return String(t).replace(/\s+/g, ' ').trim(); }).filter(Boolean);
+              if (!kort.length) return degSvar({ ok: false, melding: EN ? 'Write at least one card.' : 'Skriv minst ett kort.' });
+              return degSvar(K.stokker.lagre({ id: s.id || null, navn: String(s.navn || '').trim() || T.newDeck, kort: kort }).then(function (rad) {
+                if (rad && rad.id && s.farge) settFarge(rad.id, s.farge);
+                return hentStokker().then(function () { meldDeg(); return { ok: true, id: rad && rad.id || s.id || null, melding: T.saved }; });
+              }));
+            },
+            stokkSlett: function (id) { if (!id) return degSvar({ ok: false }); return degSvar(K.stokker.slett(id).then(hentStokker).then(function () { meldDeg(); return { ok: true }; })); },
+            stokkDel: function (id) {
+              var s = stokker.filter(function (x) { return x.id === id; })[0]; if (!s) return degSvar({ ok: false });
+              var lenke = (window.__MV_ORIGIN || location.origin) + (LANG === 'no' ? '/no/kortstokk?s=' : '/deck?s=') + s.id;
+              var dele = function () { try { document.dispatchEvent(new CustomEvent('mv-del', { detail: { tekst: LANG === 'no' ? 'Spill kortstokken «' + s.navn + '» på mittvors' : 'Play the deck “' + s.navn + '” on mittvors', url: lenke } })); } catch (e) {} return { ok: true }; };
+              if (s.delt) return degSvar(dele());
+              return degSvar(K.stokker.del(s.id, true).then(function () { s.delt = true; tegnStokker(); meldDeg(); return dele(); }));
+            },
+            // Rommet ligger i Spill-fanen: stokken huskes, og lenka åpnes der (app.js flytter den til riktig fane)
+            stokkRom: function (id) {
+              var s = stokker.filter(function (x) { return x.id === id; })[0]; if (!s) return degSvar({ ok: false });
+              skrivLS('bd_stokk_rom', { id: s.id, navn: s.navn, kort: s.kort });
+              var a = document.createElement('a'); a.href = LANG === 'no' ? '/no/rom' : '/room'; document.body.appendChild(a); a.click(); a.remove();
+              return degSvar({ ok: true });
+            },
+            utkastLagre: function () {
+              var u = lesLS(UTKAST, null); if (!u || !u.kort || !u.kort.length) return degSvar({ ok: false });
+              return degSvar(K.stokker.lagre({ navn: u.navn || 'Skriv og drikk', kort: u.kort }).then(function () { skrivLS(UTKAST, null); return hentStokker(); }).then(function () { meldDeg(); return { ok: true, melding: T.saved }; }));
+            }
           };
         }
         degStart();
