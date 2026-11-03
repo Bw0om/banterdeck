@@ -14,11 +14,7 @@ Tap on (Optional) id: start-navn... COMPLETED
 Wait for animation to end... COMPLETED
 Input text Sjekk... COMPLETED
 Run flow when "Sjekk" is not visible...
-  Hide Keyboard... COMPLETED
-  Tap on (Optional) id: start-navn... COMPLETED
-  Wait for animation to end... COMPLETED
-  Input text Sjekk... COMPLETED
-Run flow when "Sjekk" is not visible... COMPLETED
+Run flow when "Sjekk" is not visible... SKIPPED
 Hide Keyboard... COMPLETED
 Take screenshot 11-start-navn... COMPLETED
 Tap on (Optional) "(?is)lag rom.*"... WARNED
@@ -43,9 +39,7 @@ Assert that "(?is)mer.*tv.*qr.*" is visible... COMPLETED
 Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Run flow when "(?is).{0,4}bare min telefon" is not visible...
-  Tap on (Optional) "(?is)mer.*tv.*qr.*"... COMPLETED
-  Wait for animation to end... COMPLETED
-Run flow when "(?is).{0,4}bare min telefon" is not visible... COMPLETED
+Run flow when "(?is).{0,4}bare min telefon" is not visible... SKIPPED
 Assert that "(?is).{0,4}bare min telefon" is visible... COMPLETED
 Tap on "(?is).{0,4}bare min telefon"... COMPLETED
 Wait for animation to end... COMPLETED
@@ -101,11 +95,19 @@ Swipe from (50%, 85%) to (50%, 25%) in 600 ms... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)kopier reglene"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on "Tilbake"... FAILED
+Swipe from (50%, 25%) to (50%, 85%) in 600 ms... COMPLETED
+Wait for animation to end... COMPLETED
+Swipe from (50%, 25%) to (50%, 85%) in 600 ms... COMPLETED
+Wait for animation to end... COMPLETED
+Tap on "Tilbake"... COMPLETED
+Assert that "(?is)spill fra hver sin telefon" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 23-leker-tilbake... COMPLETED
+Tap on "(?is)over eller under.*"... FAILED
 
-Element not found: Text matching regex: Tilbake
+Element not found: Text matching regex: (?is)over eller under.*
 
-Element with Text matching regex: Tilbake not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
+Element with Text matching regex: (?is)over eller under.* not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
 
 Possible causes:
 - Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
@@ -114,7 +116,7 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/leker/.maestro/tests/2026-11-03_132526
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/leker/.maestro/tests/2026-11-03_150338
 ===== deg =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow deg
@@ -122,7 +124,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: DC2D
+rom for flere: A4JD
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
@@ -260,9 +262,9 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
-Assert that "(?is).*(venter på at|hva fikk dere).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"6a5dff2faeae","pollett":"cd59ac3e8842a63b912508c5566e41fdfbea"}
- FAILED
+Tap on (Optional) "(?is)vi er klare.*"...verten fikk ikke gjort: {"handling":"nr-vis","id":"2248d1d530f5","pollett":"479f690d1a18cc0c6de4a62feaacd4092f40"}
+ WARNED
+Assert that "(?is).*(venter på at|hva fikk dere).*" is visible... FAILED
 
 Assertion is false: "(?is).*(venter på at|hva fikk dere).*" is visible
 
@@ -275,7 +277,7 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/nyhetsrunden/.maestro/tests/2026-11-03_135027
+/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/nyhetsrunden/.maestro/tests/2026-11-03_152904
 ===== pannekort =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow pannekort
@@ -341,7 +343,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*(trekker|velger kategori|svar!|svart).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 93-quiz-trekk... COMPLETED
