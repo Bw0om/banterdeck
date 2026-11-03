@@ -1,8 +1,19 @@
-# Simulator-sjekken: Deg-fanen – «Logg inn»-arket.
+# Simulator-sjekken: Deg-fanen – «Logg inn»-arket (Apple-knappen øverst, så e-post).
 appId: no.mittvors.app
 ---
 - takeScreenshot: 30-deg
+# Knappen har egen id: teksten «Logg inn» finnes også i avsnittet over, og trykket traff det før
 - tapOn:
-    text: "(?is)logg inn.*"
+    id: "deg-logg-inn"
 - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "konto-apple"
+    timeout: 10000
 - takeScreenshot: 31-logg-inn
+# E-postfeltet: tastaturet skal ikke dekke knappene
+- tapOn:
+    text: "(?is)e-post.*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 32-logg-inn-tastatur
