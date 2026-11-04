@@ -36,21 +36,25 @@ appId: no.mittvors.app
       text: "(?is)bli kjent.*"
     timeout: 30000
 - takeScreenshot: 12-lobby
-# Et oppsett: ett trykk setter kveldens plan («Start kvelden»), «Bytt oppsett» tar oppsettene tilbake
+# Et oppsett: ett trykk setter kveldens plan («Start kvelden»), «Bytt oppsett» tar oppsettene tilbake.
+# Appen bygger nettklienten selv, men snakker med produksjons-API-et: før grenen er deployet avviser serveren
+# handlingen «plan», og da vises ingen plan. Steget er derfor valgfritt – bildet 12b finnes bare når det virket.
 - tapOn:
     text: "(?is)bli kjent.*"
-- extendedWaitUntil:
-    visible:
-      text: "(?is)start kvelden.*"
-    timeout: 15000
-- takeScreenshot: 12b-oppsett-valgt
-- tapOn:
-    text: "(?is)bytt oppsett.*"
-- extendedWaitUntil:
-    visible:
-      text: "(?is)bli kjent.*"
-    timeout: 15000
-- takeScreenshot: 12c-oppsett-tilbake
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      visible:
+        text: "(?is)start kvelden.*"
+    commands:
+      - takeScreenshot: 12b-oppsett-valgt
+      - tapOn:
+          text: "(?is)bytt oppsett.*"
+      - extendedWaitUntil:
+          visible:
+            text: "(?is)bli kjent.*"
+          timeout: 15000
+      - takeScreenshot: 12c-oppsett-tilbake
 - runFlow:
     when:
       notVisible:
