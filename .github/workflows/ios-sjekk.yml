@@ -149,8 +149,11 @@ jobs:
             # Pekeleken på mobilen: alle stemmer på en – appen trykker på et hode
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"mest\",\"modus\":\"*\",$V}"
-            # Runden varer 30 sekunder og Maestro bruker rundt et minutt på å starte: verten går til neste runde når flyten er i gang
-            (for i in 1 2 3 4 5 6 7; do sleep 25; vert "{\"handling\":\"runde\",$V}"; done) &
+            # Runden varer 30 sekunder og Maestro bruker rundt et minutt på å starte. Verten leser fasen og går bare videre
+            # når runden er avgjort (resultat) eller leken er ferdig (da starter den på nytt) – blinde «runde» sju ganger
+            # rakk å avslutte leken før flyten kom i gang, og appen så bare kåringen. Står runden på «stem» med utgått klokke,
+            # sier verten fra (tid): serveren sjekker selv om klokka faktisk er ute.
+            (for i in $(seq 1 11); do sleep 20; F=$(curl -fsS "$API/$KODE" -H "x-spiller: $VID" -H "x-pollett: $VPOL" | node -pe 'try{(JSON.parse(require("fs").readFileSync(0,"utf8")).spill||{}).fase||""}catch(e){""}' 2>/dev/null || true); case "$F" in stem) vert "{\"handling\":\"tid-ute\",$V}";; resultat|ferdig) vert "{\"handling\":\"runde\",$V}";; esac; done) &
             flyt mest
             wait
             # Fuck the Dealer: verten deler og trykker en verdi via API-et – appen ser avgjørelsen
