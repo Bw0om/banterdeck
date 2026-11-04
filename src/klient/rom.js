@@ -808,14 +808,46 @@ export function startRom(LEKNAVN, LANG) {
   function planBoks() {
     var t = tilstand; if (!erVert() || !t.plan || !t.plan.length) return '';
     var spilt = (t.historikk || []).map(String), neste = nestePlan(), forste = !spilt.length && !t.bors;
-    return '<div class="gk-plan"><p class="rom-etikett">' + T('Kveldens plan', 'Tonight’s plan') + '</p>' +
+    return '<div class="gk-plan"><p class="rom-etikett">' + (t.planNavn ? esc(t.planNavn) : T('Kveldens plan', 'Tonight’s plan')) + '</p>' +
       '<button class="rom-stor-knapp gk-planstart" data-g="plan-start" type="button">' + (forste ? '▶ ' + T('Start kvelden', 'Start the night') : '⏭ ' + T('Neste lek', 'Next game')) +
         (neste ? '<small>' + esc(neste.navn) + (forste && t.plan.indexOf('bors') !== -1 ? T(' + Vorsbørsen i bakgrunnen', ' + the Exchange in the background') : '') + '</small>' : (t.plan.indexOf('bors') !== -1 ? '<small>' + T('Vorsbørsen', 'The Exchange') + '</small>' : '')) + '</button>' +
       '<p class="small">' + T('Eller velg fritt fra planen:', 'Or pick freely from the plan:') + '</p><div class="rom-valg">' + t.plan.map(function (id) {
         if (id === 'bors') return t.bors ? '' : '<button type="button" data-g="bs-start">📈 ' + T('Vorsbørsen', 'The Exchange') + '</button>';
         var l = planLek(id); if (!l) return '';
         return '<button type="button" data-g="start" data-lek="' + esc(l.id) + '" data-modus="' + esc(l.modus) + '">' + (spilt.indexOf(l.navn) !== -1 ? '✓ ' : '') + esc(l.navn) + '</button>';
-      }).join('') + '</div></div>';
+      }).join('') + '</div>' +
+      (t.planNavn && !t.gjeng ? '<p class="small"><button type="button" class="linkbtn" data-g="plan-fjern">' + T('Bytt oppsett', 'Change the setup') + '</button></p>' : '') + '</div>';
+  }
+  /** Ferdige oppsett for kvelden: velg én stemning, så er lekene valgt i rekkefølge – «Start kvelden» og «Neste i planen» tar resten.
+      Lista med leker er den samme planen som en gjengkveld bruker (tilstand.plan), satt av verten med handlingen «plan». */
+  // Pluss-leker ligger sist i lista: de faller bort uten Pluss (kveldLeker), så alle får minst fire.
+  var KVELDER = [
+    { id: 'blikjent', navn: ['Bli kjent', 'Get to know'], om: ['Nye folk i rommet', 'New faces in the room'], leker: ['tosannheter', 'hvemskrev', 'mest', 'spion'] },
+    { id: 'vors', navn: ['Vors', 'Pre-drinks'], om: ['Klassikerne, lett å komme i gang', 'The classics, easy to get going'], leker: ['ring-of-fire', 'samme', 'skal', 'overunder'] },
+    { id: 'kaos', navn: ['Kaos', 'Chaos'], om: ['Sent på kvelden', 'Late in the night'], leker: ['regelfabrikken', 'skal', 'nodt-eller-sannhet', 'bingo', 'bussruta', 'pyramiden'] },
+    { id: 'quiz', navn: ['Quizkveld', 'Quiz night'], om: ['Hodet med, glasset i hånda', 'Brains on, glass in hand'], leker: ['quiz', 'nyhetsrunden', 'hvemskrev', 'kategorier', 'bloff'] },
+    { id: 'rolig', navn: ['Rolig', 'Chill'], om: ['Snakk mer, drikk mindre', 'More talk, less drink'], leker: ['enten-eller', 'jeg-har-aldri', 'tosannheter', 'rygg-mot-rygg'] },
+  ];
+  function kveldFor(id) { return KVELDER.find(function (k) { return k.id === id; }) || null; }
+  /** Lekene i et oppsett som finnes i dette rommet (og ikke krever Pluss dere ikke har). */
+  function kveldLeker(k) {
+    var t = tilstand;
+    return k.leker.map(function (id) { return (t.leker || []).find(function (x) { return x.id === id; }); }).filter(function (l) { return l && !(l.pluss && !t.pluss); });
+  }
+  function kvelderBoks() {
+    var t = tilstand; if (!erVert() || (t.plan && t.plan.length) || t.gjeng) return '';
+    var valg = KVELDER.map(function (k) {
+      var leker = kveldLeker(k); if (leker.length < 2) return '';
+      return '<button type="button" class="kveld-knapp" data-g="kveld-velg" data-kveld="' + k.id + '"><b>' + esc(T(k.navn[0], k.navn[1])) + '</b><small>' + esc(leker.map(function (l) { return l.navn; }).join(' · ')) + '</small></button>';
+    }).join('');
+    if (!valg) return '';
+    return '<div class="rom-kvelder"><p class="rom-etikett">' + T('Slipp å velge – ta et oppsett', 'Skip the choosing – pick a setup') + '</p><div class="kvelder-liste">' + valg + '</div></div>';
+  }
+  function velgKveld(id) {
+    var k = kveldFor(id); if (!k) return;
+    var leker = kveldLeker(k).map(function (l) { return l.id; });
+    if (!leker.length) return;
+    gjor({ handling: 'plan', plan: leker, navn: T(k.navn[0], k.navn[1]) });
   }
   /** Slutten av kvelden: kveldens vinner – og i en gjeng: vinneren velger regel. */
   function kveldVinnerBoks() {
@@ -1087,7 +1119,7 @@ export function startRom(LEKNAVN, LANG) {
     if (sofaModus()) return sofaLobby();
     if (erApp && !appMer) return appLobby();
     var borsFull = t.bors && t.bors.paa && !t.bors.fokus ? '<p><button class="btn ghost" data-g="bs-fokus" type="button">' + T('📈 Gjør Vorsbørsen til hovedspill', '📈 Make the Exchange the main game') + '</button></p>' : '';
-    return (erApp ? '<p class="app-tilbake"><button type="button" class="linkbtn" data-g="app-tilbake">← ' + T('Tilbake til lekene', 'Back to the games') + '</button></p>' : '') + plassInfo() + planBoks() +
+    return (erApp ? '<p class="app-tilbake"><button type="button" class="linkbtn" data-g="app-tilbake">← ' + T('Tilbake til lekene', 'Back to the games') + '</button></p>' : '') + plassInfo() + planBoks() + kvelderBoks() +
       (t.spillere.length > 1 ? '' : qrBoks()) +
       '<div class="rom-knapperad">' + (visSkjerm ? '' : '<button type="button" class="rom-knapp-stor" data-g="skjerm">📺 ' + T('Vis på TV', 'Show on TV') + '</button>') +
         '<button type="button" class="rom-knapp-stor" data-g="sofa-start">🛋️ ' + T('Bare min telefon', 'Just my phone') + '</button></div>' +
@@ -1153,7 +1185,7 @@ export function startRom(LEKNAVN, LANG) {
       flere = '<details class="app-flere" data-gruppe="app-flere"' + (erApen('app-flere', false) ? ' open' : '') + '><summary>' + senere.length + T(' leker til når dere er flere', ' more games once more of you are in') + '</summary>' + senere.map(senereRad).join('') + '</details>';
     }
     // Alene: først og fremst få folk inn. Med gjester: koden som en stille rad, lekene i fokus.
-    return plassInfo() + planBoks() + appTopp(n) +
+    return plassInfo() + planBoks() + kvelderBoks() + appTopp(n) +
       '<h2 class="rom-h2">' + T('Start en lek', 'Start a game') + '</h2>' + kveldKort() + reglerKort() + anbefalteLeker() +
       (harSkall() ? '<button type="button" class="btn gold rom-knapp app-velger" data-g="velger">' + T('Alle lekene', 'All the games') + ' <i aria-hidden="true">›</i></button><div class="app-leker">' + egneStokker() + '</div>'
         : '<div class="app-leker">' + grupper + egneStokker() + flere + '</div>') +
@@ -7099,6 +7131,8 @@ export function startRom(LEKNAVN, LANG) {
     if (g === 'lov-opphev') return gjor({ handling: 'lov-valg', type: 'opphev', regel: b.dataset.id });
     if (g === 'lov-ingen') return gjor({ handling: 'lov-valg', type: 'ingen' });
     if (g === 'plan-start') return startPlan();
+    if (g === 'kveld-velg') return velgKveld(b.dataset.kveld);
+    if (g === 'plan-fjern') return gjor({ handling: 'plan', plan: [] });
     if (g === 'kv-vinner') return gjor({ handling: 'kv-vinner', hvem: b.dataset.id || null });
     if (g === 'slipp-inn' || g === 'avvis-inn') return gjor({ handling: g, hvem: b.dataset.id, som: b.dataset.som || 'gjest' });
     if (g === 'lov-bli') { gjengSjekket = true; return api('POST', '/api/rom/' + kode, { handling: 'gjeng-meg', bli: true, id: meg.id, pollett: meg.pollett }).then(function (d) { gjengSjekk = ''; ta(d); toast(T('Velkommen i gjengen! 🤝', 'Welcome to the crew! 🤝')); }).catch(function (e) { toast(e.message); }); }

@@ -2,6 +2,17 @@
 # via dialogen, starter Jeg har aldri og teller ned (SofaSkjerm.swift). Stegene etter sofa-lobbyen er valgfrie: bildene viser hvor langt den kom.
 appId: no.mittvors.app
 ---
+# Oppsettene øverst i lobbyen dytter «Mer» under kanten: sveip opp om den ikke synes
+- runFlow:
+    when:
+      notVisible:
+        text: "(?is)mer.*tv.*qr.*"
+    commands:
+      - swipe:
+          start: 50%, 85%
+          end: 50%, 25%
+          duration: 600
+      - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
       text: "(?is)mer.*tv.*qr.*"

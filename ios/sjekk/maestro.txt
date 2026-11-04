@@ -14,22 +14,28 @@ Tap on (Optional) id: start-navn... COMPLETED
 Wait for animation to end... COMPLETED
 Input text Sjekk... COMPLETED
 Run flow when "Sjekk" is not visible...
-  Tap on (Optional) "Navnet ditt"... COMPLETED
-  Wait for animation to end... COMPLETED
-  Tap on (Optional) id: start-navn... COMPLETED
-  Wait for animation to end... COMPLETED
-  Input text Sjekk... COMPLETED
-Run flow when "Sjekk" is not visible... COMPLETED
+Run flow when "Sjekk" is not visible... SKIPPED
 Take screenshot 11-start-navn... COMPLETED
 Tap on (Optional) "(?is)lag rom.*"... COMPLETED
-Assert that "(?is)alle lekene.*" is visible... COMPLETED
+Assert that "(?is)bli kjent.*" is visible... COMPLETED
 Take screenshot 12-lobby... COMPLETED
+Tap on "(?is)bli kjent.*"... COMPLETED
+Wait for animation to end... COMPLETED
+Run flow when "(?is)start kvelden.*" is visible...
+Run flow when "(?is)start kvelden.*" is visible... SKIPPED
+Run flow when "(?is)alle lekene.*" is not visible...
+  Swipe from (50%, 85%) to (50%, 25%) in 600 ms... COMPLETED
+  Wait for animation to end... COMPLETED
+Run flow when "(?is)alle lekene.*" is not visible... COMPLETED
+Assert that "(?is)alle lekene.*" is visible... COMPLETED
 Tap on "(?is)alle lekene.*"... COMPLETED
 Assert that "Velg lek" is visible... COMPLETED
 Take screenshot 13-velger... COMPLETED
 Swipe from (50%, 30%) to (50%, 95%) in 400 ms... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 13b-lobby-igjen... COMPLETED
+Run flow when "(?is)mer.*tv.*qr.*" is not visible...
+Run flow when "(?is)mer.*tv.*qr.*" is not visible... SKIPPED
 Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
 Assert that "Lukk" is visible... COMPLETED
 Take screenshot 14-lobby-mer... COMPLETED
@@ -39,6 +45,8 @@ Take screenshot 15-lobby-igjen... COMPLETED
 ===== sofa =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow sofa
+Run flow when "(?is)mer.*tv.*qr.*" is not visible...
+Run flow when "(?is)mer.*tv.*qr.*" is not visible... SKIPPED
 Assert that "(?is)mer.*tv.*qr.*" is visible... COMPLETED
 Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
 Wait for animation to end... COMPLETED
@@ -128,10 +136,14 @@ Wait for animation to end... COMPLETED
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
  > Flow deg
 Take screenshot 30-deg... COMPLETED
-Tap on "(?is)logg inn.*"... COMPLETED
+Tap on id: deg-logg-inn... COMPLETED
 Wait for animation to end... COMPLETED
+Assert that id: konto-apple is visible... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: LVTP
+Tap on (Optional) "(?is)e-post.*"... WARNED
+Wait for animation to end... COMPLETED
+Take screenshot 32-logg-inn-tastatur... COMPLETED
+rom for flere: FQYE
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
@@ -259,8 +271,7 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(noen gjetter|ett forsøk til|deler).*" is visible... COMPLETED
 Take screenshot 70-dealer... COMPLETED
-Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible...verten fikk ikke gjort: {"handling":"ftd-gjett","v":10,"id":"e58b9b049c97","pollett":"f8ad35e55cff0e2be77038fcb364e2d7fc1d"}
- COMPLETED
+Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 71-dealer-kortet... COMPLETED
 ===== nyhetsrunden =====
@@ -276,7 +287,7 @@ Take screenshot 72-nyhetsrunden-forside... COMPLETED
 Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
-Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"e58b9b049c97","pollett":"f8ad35e55cff0e2be77038fcb364e2d7fc1d"}
+Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"6704c915b18e","pollett":"2f70c2d2186b7171780c47520b581481d69d"}
  COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 74-nyhetsrunden-svar... COMPLETED
@@ -290,11 +301,11 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(klask den på|hvem er du).*" is visible... COMPLETED
 Take screenshot 76-hvem-er-jeg... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 77-hvem-er-jeg-dialog... COMPLETED
 Input text Elvis... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
 Hide Keyboard... COMPLETED
 Tap on (Optional) "(?is)gjettet!.*"... COMPLETED
 Assert that "(?is).*(den sitter|angre|først|hvem er du).*" is visible... COMPLETED
@@ -323,7 +334,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*kort igjen.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 90-ring-enkel... COMPLETED
@@ -354,7 +365,7 @@ Wait for animation to end... COMPLETED
 Take screenshot 94-quiz-sporsmal... COMPLETED
 Tap on (Optional) "A"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "Vert"... COMPLETED
+Tap on (Optional) "Vert"... WARNED
 Wait for animation to end... COMPLETED
 Take screenshot 95-quiz-svart... COMPLETED
 Assert that "(?is).*(riktig|feil|ikke svart).*" is visible... COMPLETED

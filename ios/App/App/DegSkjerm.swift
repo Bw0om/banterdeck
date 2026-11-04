@@ -188,8 +188,8 @@ struct DegSkjerm: View {
                     Text(m.T("Logg inn, så blir figuren din – og alt du låser opp følger med.", "Sign in and the figure is yours – everything you unlock comes along."))
                         .font(.archivo(13, vekt: 600)).opacity(0.75)
                     HStack(spacing: 8) {
-                        Button(action: { m.handling?("inn") }) { knappTekst(m.T("Logg inn", "Sign in"), gul: true) }.buttonStyle(TrykkStil2())
-                        Button(action: { m.handling?("ny") }) { knappTekst(m.T("Ny konto", "New account"), gul: false) }.buttonStyle(TrykkStil2())
+                        Button(action: { m.handling?("inn") }) { knappTekst(m.T("Logg inn", "Sign in"), gul: true) }.buttonStyle(TrykkStil2()).accessibilityIdentifier("deg-logg-inn")
+                        Button(action: { m.handling?("ny") }) { knappTekst(m.T("Ny konto", "New account"), gul: false) }.buttonStyle(TrykkStil2()).accessibilityIdentifier("deg-ny-konto")
                     }
                 }
             }
