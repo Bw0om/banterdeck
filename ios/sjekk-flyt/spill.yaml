@@ -36,6 +36,21 @@ appId: no.mittvors.app
       text: "(?is)bli kjent.*"
     timeout: 30000
 - takeScreenshot: 12-lobby
+# Et oppsett: ett trykk setter kveldens plan («Start kvelden»), «Bytt oppsett» tar oppsettene tilbake
+- tapOn:
+    text: "(?is)bli kjent.*"
+- extendedWaitUntil:
+    visible:
+      text: "(?is)start kvelden.*"
+    timeout: 15000
+- takeScreenshot: 12b-oppsett-valgt
+- tapOn:
+    text: "(?is)bytt oppsett.*"
+- extendedWaitUntil:
+    visible:
+      text: "(?is)bli kjent.*"
+    timeout: 15000
+- takeScreenshot: 12c-oppsett-tilbake
 - runFlow:
     when:
       notVisible:
