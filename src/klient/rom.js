@@ -586,7 +586,43 @@ export function startRom(LEKNAVN, LANG) {
           '<p class="lead">' + hvem + (d.spill && d.spill.navn ? ' ' + T('Nå spilles ', 'Now playing ') + '<b>' + esc(d.spill.navn) + '</b>.' : '') + '</p>';
       }).catch(function () {});
   }
+  /** Gjengene dine på startskjermen: «Start kveld med Hytta» – eller «Bli med» når noen alt har startet. Hentes én gang per visning. */
+  var mineGjengerStart = null, gjengHentet = false, autoGjengBrukt = false;
+  function gjengStartBoks() {
+    var g = mineGjengerStart; if (!g || !g.length || kode) return '';
+    return '<div class="rom-gjenger">' + g.slice(0, 3).map(function (x) {
+      var k = x.kveld;
+      return '<button type="button" class="rom-gjeng-start" data-g="gjeng-start" data-id="' + esc(x.id) + '"><span><b>' + esc(x.navn) + '</b><small>' +
+        (k ? esc(k.vert) + T(' har startet · ', ' has started · ') + k.antall + T(' inne', ' in') : (x.antall ? x.antall + T(' i gjengen', ' in the crew') : T('Gjengen din', 'Your crew'))) + '</small></span>' +
+        '<em>' + (k ? (k.erMed ? T('Tilbake', 'Back') : T('Bli med', 'Join')) : T('Start kveld', 'Start night')) + '</em></button>';
+    }).join('') + '</div>';
+  }
+  function hentGjengerStart() {
+    if (gjengHentet || !(window.BDKonto && window.BDKonto.les())) return;
+    gjengHentet = true;
+    kontoApi('/api/gjeng').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      mineGjengerStart = (d && d.gjenger) || [];
+      // Står siden fortsatt på start? Da tegnes gjengene inn, og appen får dem til startskjermen sin
+      if (!kode && !meg && document.getElementById('blimedSkjema')) tegnStart();
+    }).catch(function () {});
+  }
+  /** Gjengkveld med ett trykk: serveren lager rommet (eller blir med i kvelden som pågår), varsler gjengen, og vi går rett inn. */
+  function startGjeng(id, n) {
+    n = String(n || les('bd_mittnavn') || '').trim();
+    if (!n) return Promise.resolve({ feil: T('Skriv inn navnet ditt.', 'Enter your name.'), kode: 'navn' });
+    if (!(window.BDKonto && window.BDKonto.les())) return Promise.resolve({ feil: T('Logg inn for å spille med gjengen.', 'Log in to play with your crew.'), kode: 'logg-inn' });
+    skriv('bd_mittnavn', n);
+    return kontoApi('/api/gjeng', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ handling: 'start-kveld', id: id, navn: n, rask: true, leker: [] }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+      .then(function (d) {
+        if (!d._ok) return { feil: d.melding || T('Det gikk ikke. Prøv igjen.', 'That didn’t work. Try again.'), kode: d.feil || '' };
+        kode = d.kode; meg = { id: d.id, pollett: d.pollett }; skriv('bd_rom_' + kode, meg); settAdresse(kode);
+        versjon = 0; hent();
+        return { ok: true, kode: d.kode };
+      }, function () { return { feil: T('Fikk ikke kontakt. Prøv igjen.', 'Couldn’t connect. Try again.') }; });
+  }
   function tegnStart(melding) {
+    lukkArk();   // «Mer»-arket fra rommet skal ikke ligge igjen over startskjermen
     document.documentElement.classList.remove('i-spill', 'min-tur', 'hemmelig', 'i-rom');
     var navn = les('bd_mittnavn') || '';
     var ln = onsketLek ? LEKNAVN[onsketLek] : '';
@@ -599,7 +635,7 @@ export function startRom(LEKNAVN, LANG) {
         : '') +
       (erApp ? '' : '<p class="small">' + sprakLenke() + '</p>') +   // i appen byttes språk under Deg
       (melding ? '<p class="rom-feil" role="alert">' + esc(melding) + '</p>' : '') +
-      fortsettBanner() +
+      fortsettBanner() + gjengStartBoks() +
       '<div class="rom-start' + (kode ? ' med-kode' : ' uten-kode') + '">' +
         '<form class="rom-boks" id="blimedSkjema">' +
           '<div class="rom-koderad" id="kodeRad"' + (medKode ? ' hidden' : '') + '><label for="romKode">' + T('Kode fra verten', 'Code from the host') + '</label>' +
@@ -668,6 +704,10 @@ export function startRom(LEKNAVN, LANG) {
         return { ok: true, kode: d.kode };
       }, function (err) { return { feil: err.message }; });
     }
+    // Gjengkortene (nettet): romKlikk slipper ikke trykk gjennom før det finnes et rom, så de har sin egen lytter
+    root.querySelectorAll('.rom-gjeng-start').forEach(function (b) {
+      b.addEventListener('click', function () { b.disabled = true; startGjeng(b.dataset.id).then(function (r) { if (r.feil) { b.disabled = false; tegnStart(r.feil); } }); });
+    });
     document.getElementById('blimedSkjema').addEventListener('submit', function (e) {
       e.preventDefault();
       var k = document.getElementById('romKode').value;
@@ -687,6 +727,13 @@ export function startRom(LEKNAVN, LANG) {
     var autoLag = erApp && (qs.get('lag') === '1' || onsketLek) && navn && !kode && !melding && !autoLagBrukt;
     if (autoLag) autoLagBrukt = true;
     if (autoLag) setTimeout(function () { var f = document.getElementById('lagSkjema'); if (f) f.requestSubmit(); }, 0);
+    // «Start kvelden» på gjengsiden og pushvarselet «kvelden starter» peker hit med ?gjeng=ID: kvelden startes (eller du blir med) med en gang
+    var autoGjeng = qs.get('gjeng') && !kode && !melding && !autoGjengBrukt;
+    if (autoGjeng) {
+      autoGjengBrukt = true; autoLag = true;
+      setTimeout(function () { startGjeng(qs.get('gjeng'), navn).then(function (r) { if (r.feil) tegnStart(r.feil); }); }, 0);
+    }
+    hentGjengerStart();
     document.getElementById('lagSkjema').addEventListener('submit', function (e) {
       e.preventDefault();
       startLag(document.getElementById('romNavn2').value, medKode).then(function (r) { if (r.feil) { if (/^(Skriv inn|Enter)/.test(r.feil)) toast(r.feil); else tegnStart(r.feil); } });
@@ -697,6 +744,8 @@ export function startRom(LEKNAVN, LANG) {
       lag: function (n) { return startLag(n, true); },
       bliMed: function (k, n) { return startBliMed(k, n, true); },
       fortsett: function () { var k = sistRom(); if (k) location.href = location.pathname + '?k=' + k; return { ok: !!k }; },
+      /** Gjengkortet på den native startskjermen: start kvelden med gjengen (eller bli med i den som pågår) */
+      gjeng: function (id, n) { return startGjeng(id, n); },
       /** Koden som skrives i den native skjermen: TV-en i stua viser den, og en ny gjest går inn døra for hver bokstav */
       /** Skallet sier hvor stua skal stå (toppen i px fra toppen av nettvisningen, og bredden) – på korte skjermer krymper den */
       plass: function (topp, bredde) {
@@ -710,7 +759,8 @@ export function startRom(LEKNAVN, LANG) {
       },
       kode: function (v, nyGjest) { if (!startStua) return; v = String(v || ''); if (nyGjest) startStua.nyGjest(); startStua.kode((v + '····').slice(0, Math.max(4, v.length))); }
     };
-    meldSkjerm(autoLag ? 'laster' : 'start', { navn: navn, kode: medKode ? kode : '', fortsett: sistRom() || '', melding: melding || '' });
+    meldSkjerm(autoLag ? 'laster' : 'start', { navn: navn, kode: medKode ? kode : '', fortsett: sistRom() || '', melding: melding || '',
+      gjenger: (mineGjengerStart || []).slice(0, 3).map(function (x) { return { id: x.id, navn: x.navn, antall: x.antall || 0, kveld: x.kveld || null }; }) });
   }
   /** Sier fra til app-skallet hvilken skjerm siden viser (start / laster / rom), så den native startskjermen kan vises eller gå bort */
   var sistSkjerm = '', autoLagBrukt = false;
@@ -7108,7 +7158,7 @@ export function startRom(LEKNAVN, LANG) {
       m.addEventListener('click', function () { m.remove(); });
       document.body.appendChild(m); return;
     }
-    if (g === 'forlat') { glemRom(); settAdresse(''); kode = ''; tegnStart(); return; }
+    if (g === 'forlat') { lukkArk(); glemRom(); settAdresse(''); kode = ''; tegnStart(); return; }
     if (g === 'app-mer') { if (harSkall()) return lobbyMerArk(); appMer = true; tegn(); window.scrollTo({ top: 0 }); return; }
     if (g === 'app-tilbake') { appMer = false; tegn(); window.scrollTo({ top: 0 }); return; }
     if (g === 'start') {

@@ -303,7 +303,9 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         } else {
             sti += (u.query.map { "?" + $0 } ?? "")
         }
-        let fane = sti.hasPrefix("/no/rom") || sti.hasPrefix("/room") ? "spill" : sti.hasPrefix("/no/account") || sti.hasPrefix("/account") ? "deg" : "leker"
+        // Rommet (også «kvelden starter»-varselet, /no/rom?gjeng=…) → Spill; kontoen og gjengene → Deg; resten er lekesider
+        let fane = sti.hasPrefix("/no/rom") || sti.hasPrefix("/room") ? "spill"
+            : sti.hasPrefix("/no/account") || sti.hasPrefix("/account") || sti.hasPrefix("/no/gjeng") || sti.hasPrefix("/crew") ? "deg" : "leker"
         aapne(fane: fane, url: sti)
         return true
     }
@@ -362,6 +364,11 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         guard faner[i] == "spill" else { return }
         settDekket(i, SkallViewController.heleSkjermer.contains(hva))
         if ["rom", "lobby", "start", "laster"].contains(hva) { sisteRegler = "" }
+        // Ut av rommet (start) eller inn i et nytt (laster): et ark som sto oppe – Pluss, regler, lekvelgeren – skal ikke ligge igjen
+        if hva != sisteSpillSkjerm {
+            if hva == "start" || hva == "laster", let p = presentedViewController, !(p is UIAlertController) { p.dismiss(animated: true) }
+            sisteSpillSkjerm = hva
+        }
         else if let r = d["regler"] as? [String], !r.isEmpty, let n = d["lekNokkel"] as? String, n != sisteRegler { sisteRegler = n; visRegler(d, r) }
         // Alt som ikke er denne skjermen, tas bort først – også lobbyen, så den ikke ligger igjen under en lek
         if hva != "lek" { visLek(nil, over: side, nett: nil) }
@@ -412,6 +419,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             startModell.engelsk = spraak == "en"
             if let n = d["navn"] as? String, !n.isEmpty { startModell.navn = n; startModell.navnKjent = true }
             if let k = d["kode"] as? String, !k.isEmpty { startModell.kode = k }
+            let gjenger = (d["gjenger"] as? [[String: Any]] ?? []).compactMap(StartGjeng.init)
+            if gjenger != startModell.gjenger { startModell.gjenger = gjenger }
             startModell.fortsett = d["fortsett"] as? String ?? ""
             startModell.feil = d["melding"] as? String ?? ""
             startModell.travel = nil
@@ -424,6 +433,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     // MARK: «Slik spiller dere» – et ark når en lek starter, så verten rekker å forklare (ReglerArk.swift)
     private var sisteRegler = ""
+    /// Skjermen Spill-fanen sto på sist (start, laster, lobby, lek …) – for å rydde når den bytter
+    private var sisteSpillSkjerm = ""
     private func visRegler(_ d: [String: Any], _ regler: [String]) {
         guard presentedViewController == nil else { return }
         var h: UIHostingController<ReglerArk>?

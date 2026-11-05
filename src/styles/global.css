@@ -1484,6 +1484,13 @@ html[data-laast] .utvikling{display:flex;position:fixed;inset:0;z-index:300;alig
 .rom-fortsett b{display:block;font-family:var(--display);font-size:18px}
 .rom-fortsett small{font-size:13.5px}
 .rom-fortsett > span:last-child{font-size:24px;font-weight:800}
+.rom-gjenger{display:grid;gap:10px;margin:12px 0 4px}
+.rom-gjeng-start{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:12px 14px;border:var(--strek,3px) solid var(--blekk,#16120F);border-radius:14px;background:var(--papir,#FFF8EE);color:var(--blekk,#16120F);box-shadow:4px 4px 0 var(--blekk,#16120F);text-align:left;font:inherit;cursor:pointer}
+.rom-gjeng-start:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--blekk,#16120F)}
+.rom-gjeng-start:disabled{opacity:.6;cursor:default}
+.rom-gjeng-start b{display:block;font-family:var(--display);font-size:18px;line-height:1.1}
+.rom-gjeng-start small{display:block;font-size:13.5px;opacity:.8;margin-top:2px}
+.rom-gjeng-start em{flex:none;font-style:normal;font-family:var(--display);font-size:14px;text-transform:uppercase;padding:8px 12px;border:2.5px solid var(--blekk,#16120F);border-radius:8px;background:var(--gul,#FFD23F)}
 .rom-fjern{min-width:32px;min-height:32px}
 .rom-forlat .linkbtn,.rom-forlat .feilknapp{padding:10px 6px}
 body:has(#rom) .toast{top:calc(env(safe-area-inset-top) + 70px);bottom:auto}

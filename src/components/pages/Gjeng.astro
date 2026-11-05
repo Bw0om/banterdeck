@@ -178,7 +178,6 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
         '</section>';
     }
     /* ---------- kvelden: start, bli med, varsler ---------- */
-    var STANDARD = ['spion', 'hvemskrev', 'bloff', 'bors'];
     function mittNavn() {
       if (G && G.lovbok && G.lovbok.meg && G.lovbok.meg.navn) return G.lovbok.meg.navn;
       try { return JSON.parse(localStorage.getItem('bd_mittnavn') || '""') || ''; } catch (x) { return ''; }
@@ -207,26 +206,19 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
     }
     function kveldBoks() {
       if (!G.medlem) return '';
-      var k = G.kveld;
+      var k = G.kveld, lenke = ROM + '?gjeng=' + encodeURIComponent(G.id);
+      // Lenken går til rom-siden, som starter kvelden (eller blir med) selv. I appen åpnes den i Spill-fanen – denne siden blir stående.
       if (k) return '<div class="gj-kveld"><p class="rom-etikett">' + (EN ? 'Happening now' : 'Pågår nå') + '</p><h2>🎉 ' + (EN ? esc(k.vert) + ' has started the night' : esc(k.vert) + ' har startet kvelden') + '</h2>' +
         '<p class="small">' + k.antall + (EN ? ' in the room' : ' med i rommet') + (k.plan && k.plan.length ? ' · ' + k.plan.map(function (id) { var l = LEKER.find(function (x) { return x.id === id; }); return esc(l ? l.navn : id); }).join(', ') : '') + '</p>' +
-        (k.erMed ? '' : '<label class="lab" for="gjKveldNavn">' + (EN ? 'Your name tonight' : 'Navnet ditt i kveld') + '</label><input id="gjKveldNavn" maxlength="20" value="' + esc(mittNavn()) + '">') +
-        '<p><button class="btn gold" data-g="bli-kveld" type="button">' + (k.erMed ? (EN ? 'Back to the night' : 'Tilbake til kvelden') : (EN ? 'Join the night' : 'Bli med i kvelden')) + '</button></p></div>';
-      return '<details class="gj-start"' + (/[?&]ny=1/.test(location.search) ? ' open' : '') + '><summary class="btn gold">' + (EN ? '🎲 Start the night' : '🎲 Start kvelden') + '</summary>' +
-        '<p class="small">' + (EN ? 'Pick the games. The crew gets a notification and joins straight from here – no code needed. Guests can join with the link and are let in by you or another member.' : 'Velg lekene. Gjengen får varsel og blir med rett herfra – uten kode. Gjester kan bli med på lenken og slippes inn av deg eller et annet medlem.') + '</p>' +
-        '<label class="lab" for="gjKveldNavn">' + (EN ? 'Your name tonight' : 'Navnet ditt i kveld') + '</label><input id="gjKveldNavn" maxlength="20" value="' + esc(mittNavn()) + '">' +
-        '<p class="lab">' + (EN ? 'Games' : 'Leker') + '</p><div>' + LEKER.map(function (l) { return '<label class="gj-lek"><input type="checkbox" name="gjLek" value="' + esc(l.id) + '"' + (STANDARD.indexOf(l.id) !== -1 ? ' checked' : '') + '> ' + esc(l.navn) + '</label>'; }).join('') + '</div>' +
-        '<p><button class="btn gold" data-g="start-kveld" type="button">' + (EN ? 'Start and notify the crew' : 'Start og varsle gjengen') + '</button></p></details>';
+        '<p><a class="btn gold" href="' + lenke + '">' + (k.erMed ? (EN ? 'Back to the night' : 'Tilbake til kvelden') : (EN ? 'Join the night' : 'Bli med i kvelden')) + '</a></p></div>';
+      return '<div class="gj-start"><p><a class="btn gold" href="' + lenke + '">' + (EN ? '🎲 Start the night' : '🎲 Start kvelden') + '</a></p>' +
+        '<p class="small">' + (EN ? 'The crew gets a notification and joins without a code. You pick the games in the room.' : 'Gjengen får varsel og blir med uten kode. Lekene velger du i rommet.') + '</p></div>';
     }
     function varselBoks() {
       if (!G.medlem || !('serviceWorker' in navigator) || !('PushManager' in window)) return '';
       return '<p class="small gj-varsel"><button class="linkbtn" data-g="varsel" type="button">' + (localStorage.getItem('bd_gjvarsel_' + G.id) ? (EN ? '🔔 Notifications on – turn off' : '🔔 Varsler er på – skru av') : (EN ? '🔔 Notify me when the crew starts a night' : '🔔 Varsle meg når gjengen starter kveld')) + '</button></p>';
     }
     function tilNokkel(b64) { var p = '='.repeat((4 - b64.length % 4) % 4), r = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/')), a = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) a[i] = r.charCodeAt(i); return a; }
-    function gaaTilRom(d) {
-      try { localStorage.setItem('bd_rom_' + d.kode, JSON.stringify({ id: d.id, pollett: d.pollett })); localStorage.setItem('bd_sist_rom', JSON.stringify({ k: d.kode, t: Date.now() })); } catch (x) {}
-      location.href = ROM + '?k=' + d.kode;
-    }
     function vis() {
       var aar = {}; (G.kvelder || []).forEach(function (k) { aar[new Date(k.dato).getFullYear()] = 1; });
       aar[new Date().getFullYear()] = 1;
@@ -242,8 +234,8 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
         '<p class="crumb"><a href="' + SIDE + '">' + (EN ? 'Your crews' : 'Gjengene dine') + '</a> › ' + esc(G.navn) + '</p>' +
         '<h1 class="gj-tittel">' + esc(G.navn) + '</h1>' +
         (ny ? (EN
-          ? '<div class="gj-ny"><b>The crew is ready! 🎉</b><p>Share the link with the crew. When you play: tap “Start the night” here – everyone gets a notification and joins without a code.</p></div>'
-          : '<div class="gj-ny"><b>Gjengen er klar! 🎉</b><p>Del lenken med gjengen. Når dere skal spille: trykk «Start kvelden» her – alle får varsel og blir med uten kode.</p></div>') : '') +
+          ? '<div class="gj-ny"><b>The crew is ready! 🎉</b><p>Share the link with the crew. When you play: tap “Start the night” – everyone gets a notification and joins without a code.</p></div>'
+          : '<div class="gj-ny"><b>Gjengen er klar! 🎉</b><p>Del lenken med gjengen. Når dere skal spille: trykk «Start kvelden» – alle får varsel og blir med uten kode.</p></div>') : '') +
         '<div class="gj-knapper"><button class="btn gold" data-g="inviter" type="button">' + (EN ? 'Invite the crew' : 'Inviter gjengen') + '</button>' +
 
           (!G.medlem ? '<button class="btn ghost" data-g="bli-med" type="button">' + (G.innlogget ? (EN ? 'Join the crew' : 'Bli med i gjengen') : (EN ? 'Log in to join' : 'Logg inn for å bli med')) + '</button>' : '') + '</div>' +
@@ -320,15 +312,6 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
       if (g === 'forlat') {
         if (!confirm(EN ? 'Leave ' + G.navn + '? The table stays for everyone else.' : 'Forlate ' + G.navn + '? Tabellen blir liggende for de andre.')) return;
         return kall('/api/gjeng', { handling: 'forlat', id: G.id }).then(function () { location.href = SIDE; });
-      }
-      if (g === 'start-kveld' || g === 'bli-kveld') {
-        var nf = root.querySelector('#gjKveldNavn'), nv = nf ? nf.value.trim() : mittNavn();
-        if (!nv) { if (nf) nf.focus(); return mld(EN ? 'Enter your name.' : 'Skriv inn navnet ditt.'); }
-        try { localStorage.setItem('bd_mittnavn', JSON.stringify(nv)); } catch (x) {}
-        var leker = Array.prototype.map.call(root.querySelectorAll('input[name=gjLek]:checked'), function (x) { return x.value; });
-        if (g === 'start-kveld' && !leker.length) return mld(EN ? 'Pick at least one game.' : 'Velg minst én lek.');
-        b.disabled = true;
-        return kall('/api/gjeng', { handling: g, id: G.id, navn: nv, leker: leker }).then(function (d) { b.disabled = false; if (!d._ok) return mld(d.melding || ikke); gaaTilRom(d); });
       }
       if (g === 'utsatt-stem') return kall('/api/gjeng', { handling: 'utsatt-stem', id: G.id, aksje: b.dataset.id, v: b.dataset.v }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
       if (g === 'lov-stem') return kall('/api/gjeng', { handling: 'lov-stem', id: G.id, regel: b.dataset.regel }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
