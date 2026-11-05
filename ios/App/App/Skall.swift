@@ -369,7 +369,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             if hva == "start" || hva == "laster", let p = presentedViewController, !(p is UIAlertController) { p.dismiss(animated: true) }
             sisteSpillSkjerm = hva
         }
-        else if let r = d["regler"] as? [String], !r.isEmpty, let n = d["lekNokkel"] as? String, n != sisteRegler { sisteRegler = n; visRegler(d, r) }
+        if let r = d["regler"] as? [String], !r.isEmpty, let n = d["lekNokkel"] as? String, n != sisteRegler { sisteRegler = n; visRegler(d, r) }
         // Alt som ikke er denne skjermen, tas bort først – også lobbyen, så den ikke ligger igjen under en lek
         if hva != "lek" { visLek(nil, over: side, nett: nil) }
         if hva != "kort" { visKort(nil, over: side) }
