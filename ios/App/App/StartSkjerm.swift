@@ -331,11 +331,20 @@ struct StartSkjerm: View {
 
     /// Gjengkortet: navnet og hvem som er med til venstre, det ene valget som gul lapp til høyre
     private func gjengKort(_ g: StartGjeng) -> some View {
-        let venter = m.travel == "gjeng:" + g.id
-        let under: String = g.kveld
-            ? g.kveldVert + m.T(" har startet · ", " has started · ") + String(g.kveldAntall) + m.T(" inne", " in")
-            : g.antall > 0 ? String(g.antall) + m.T(" i gjengen", " in the crew") : m.T("Gjengen din", "Your crew")
-        let valg: String = g.kveld ? (g.kveldErMed ? m.T("Tilbake", "Back") : m.T("Bli med", "Join")) : m.T("Start kveld", "Start night")
+        let venter: Bool = m.travel == "gjeng:" + g.id
+        // Korte, typede biter – lange uttrykk i en Button-label får kompilatoren til å gi opp
+        var under: String
+        var valg: String
+        if g.kveld {
+            let inne: String = String(g.kveldAntall)
+            under = g.kveldVert + m.T(" har startet · ", " has started · ") + inne + m.T(" inne", " in")
+            valg = g.kveldErMed ? m.T("Tilbake", "Back") : m.T("Bli med", "Join")
+        } else {
+            let tall: String = String(g.antall)
+            under = g.antall > 0 ? tall + m.T(" i gjengen", " in the crew") : m.T("Gjengen din", "Your crew")
+            valg = m.T("Start kveld", "Start night")
+        }
+        let lapp: String = valg.uppercased()
         return Button(action: { m.startGjeng(g) }) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
@@ -344,7 +353,7 @@ struct StartSkjerm: View {
                 }
                 Spacer(minLength: 8)
                 ZStack {
-                    Text(valg.uppercased()).font(.archivo(14, vekt: 900)).opacity(venter ? 0 : 1)
+                    Text(lapp).font(.archivo(14, vekt: 900)).opacity(venter ? 0 : 1)
                     if venter { ProgressView().progressViewStyle(.circular).tint(blekk) }
                 }
                 .padding(.horizontal, 12).frame(height: 36)
