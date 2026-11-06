@@ -7,8 +7,23 @@ import Network
 /// når siden står på sin startskjerm, og bruker nettkoden (window.__mvStart) til selve jobben – så innlogging,
 /// lekevalg fra lenker og alt annet virker som før. Stua er nettsidens demo-stue, vist gjennom et hull i skjermen
 /// (gjestene går inn døra for hver bokstav du skriver, og folka kan dras). Når rommet er klart, sier siden fra og skjermen glir bort.
+/// En av gjengene dine, slik forsiden viser den: navnet, hvor mange som er med – og kvelden som pågår, om noen har startet
+struct StartGjeng: Identifiable, Equatable {
+    let id: String, navn: String, antall: Int
+    let kveldVert: String, kveldAntall: Int, kveldErMed: Bool
+    var kveld: Bool { kveldAntall > 0 }
+    init?(_ d: [String: Any]) {
+        guard let id = d["id"] as? String, let navn = d["navn"] as? String, !id.isEmpty, !navn.isEmpty else { return nil }
+        self.id = id; self.navn = navn; antall = d["antall"] as? Int ?? 0
+        let k = d["kveld"] as? [String: Any]
+        kveldVert = k?["vert"] as? String ?? ""; kveldAntall = k?["antall"] as? Int ?? 0; kveldErMed = k?["erMed"] as? Bool ?? false
+    }
+}
+
 final class StartModell: ObservableObject {
     @Published var navn = ""
+    /// Gjengene dine (tom til siden har hentet dem, og alltid tom uten konto): ett kort per gjeng under stua
+    @Published var gjenger: [StartGjeng] = []
     /// Navnet er kjent fra før (huskes på telefonen, endres under Deg) – da vises ikke feltet. Ikke «navnet er tomt»: da forsvant
     /// feltet idet du skrev den første bokstaven
     @Published var navnKjent = false
@@ -84,6 +99,14 @@ final class StartModell: ObservableObject {
         kjor("bli", "return await window.__mvStart.bliMed(kode, navn)", ["kode": k, "navn": n])
     }
 
+    /// Gjengkortet: kvelden starter med ett trykk (eller du blir med i den som pågår). Navnet må være kjent – ellers kommer feltet fram.
+    func startGjeng(_ g: StartGjeng) {
+        guard travel == nil, !utenNett else { return }
+        let n = navn.trimmingCharacters(in: .whitespacesAndNewlines)
+        if n.isEmpty { navnKjent = false; feil = T("Skriv inn navnet ditt først.", "Enter your name first."); UINotificationFeedbackGenerator().notificationOccurred(.warning); return }
+        kjor("gjeng:" + g.id, "return await window.__mvStart.gjeng(id, navn)", ["id": g.id, "navn": n])
+    }
+
     func fortsettRom() {
         guard travel == nil, let w = nett else { return }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -107,7 +130,10 @@ final class StartModell: ObservableObject {
                 switch res {
                 case .success(let v):
                     let d = v as? [String: Any] ?? [:]
-                    if let f = d["feil"] as? String, !f.isEmpty { self.feil = f; self.travel = nil; UINotificationFeedbackGenerator().notificationOccurred(.error) }
+                    if let f = d["feil"] as? String, !f.isEmpty {
+                        self.feil = f; self.travel = nil; UINotificationFeedbackGenerator().notificationOccurred(.error)
+                        if d["kode"] as? String == "navn" { self.navnKjent = false }   // navnet mangler: feltet kommer fram
+                    }
                     else { UINotificationFeedbackGenerator().notificationOccurred(.success) }   // siden melder «rom», og skjermen går bort
                 case .failure:
                     self.feil = self.T("Fikk ikke kontakt. Prøv igjen.", "Couldn’t connect. Try again."); self.travel = nil
@@ -172,6 +198,13 @@ struct StartSkjerm: View {
                             .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
                         }
                         .buttonStyle(TrykkStil())
+                    }
+
+                    // Gjengene dine: ett kort per gjeng – «Start kveld», eller «Bli med» når noen alt har startet. Ingen gjeng, ingen kort.
+                    // Plassen er fast (ingen blaing), så korte skjermer får ett kort og vanlige to.
+                    ForEach(m.gjenger.prefix(kortSkjerm ? 1 : 2)) { g in
+                        gjengKort(g)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
 
                     // Navnet huskes (endres under Deg) – feltet vises bare til vi har et
@@ -252,6 +285,8 @@ struct StartSkjerm: View {
             // Ingen bakgrunn her: nettsiden under er oransje (global.css, start-nativ) og viser stua i hullet – en oransje flate
             // her ville dekket stua helt
             .animation(.spring(response: 0.35, dampingFraction: 0.86), value: skyv)
+            // Gjengene kommer litt etter siden (hentes fra kontoen): kortene fjærer inn én gang, ingenting annet flytter seg av seg selv
+            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: m.gjenger)
             .onAppear { SjekkLogg.skriv("startskjerm: W=\(Int(W)) H=\(Int(H)) safe=\(Int(g.safeAreaInsets.top))/\(Int(g.safeAreaInsets.bottom)) global=\(Int(g.frame(in: .global).minY)) kort=\(kortSkjerm)") }
         }
         .ignoresSafeArea(.keyboard)
@@ -292,6 +327,47 @@ struct StartSkjerm: View {
         }
         .lineLimit(1).minimumScaleFactor(0.7)
         .padding(.vertical, 8)
+    }
+
+    /// Gjengkortet: navnet og hvem som er med til venstre, det ene valget som gul lapp til høyre
+    private func gjengKort(_ g: StartGjeng) -> some View {
+        let venter: Bool = m.travel == "gjeng:" + g.id
+        // Korte, typede biter – lange uttrykk i en Button-label får kompilatoren til å gi opp
+        var under: String
+        var valg: String
+        if g.kveld {
+            let inne: String = String(g.kveldAntall)
+            under = g.kveldVert + m.T(" har startet · ", " has started · ") + inne + m.T(" inne", " in")
+            valg = g.kveldErMed ? m.T("Tilbake", "Back") : m.T("Bli med", "Join")
+        } else {
+            let tall: String = String(g.antall)
+            under = g.antall > 0 ? tall + m.T(" i gjengen", " in the crew") : m.T("Gjengen din", "Your crew")
+            valg = m.T("Start kveld", "Start night")
+        }
+        let lapp: String = valg.uppercased()
+        return Button(action: { m.startGjeng(g) }) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(g.navn).font(.archivo(18, vekt: 900)).lineLimit(1)
+                    Text(under).font(.archivo(14, vekt: 500)).opacity(0.75).lineLimit(1)
+                }
+                Spacer(minLength: 8)
+                ZStack {
+                    Text(lapp).font(.archivo(14, vekt: 900)).opacity(venter ? 0 : 1)
+                    if venter { ProgressView().progressViewStyle(.circular).tint(blekk) }
+                }
+                .padding(.horizontal, 12).frame(height: 36)
+                .background(RoundedRectangle(cornerRadius: 8).fill(gul))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(blekk, lineWidth: 2.5))
+            }
+            .padding(.horizontal, 14).frame(height: 72).foregroundColor(blekk)
+            .background(RoundedRectangle(cornerRadius: 14).fill(blekk).offset(x: 4, y: 4))
+            .background(RoundedRectangle(cornerRadius: 14).fill(papir))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(blekk, lineWidth: 3))
+        }
+        .buttonStyle(TrykkStil())
+        .disabled(m.travel != nil)
+        .accessibilityIdentifier("start-gjeng")
     }
 
     /// Den gule knappen med hard skygge – som på nettsiden

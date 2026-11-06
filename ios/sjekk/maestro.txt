@@ -14,12 +14,7 @@ Tap on (Optional) id: start-navn... COMPLETED
 Wait for animation to end... COMPLETED
 Input text Sjekk... COMPLETED
 Run flow when "Sjekk" is not visible...
-  Tap on (Optional) "Navnet ditt"... COMPLETED
-  Wait for animation to end... COMPLETED
-  Tap on (Optional) id: start-navn... COMPLETED
-  Wait for animation to end... COMPLETED
-  Input text Sjekk... COMPLETED
-Run flow when "Sjekk" is not visible... COMPLETED
+Run flow when "Sjekk" is not visible... SKIPPED
 Take screenshot 11-start-navn... COMPLETED
 Tap on (Optional) "(?is)lag rom.*"... COMPLETED
 Assert that "(?is)alle lekene.*" is visible... COMPLETED
@@ -43,9 +38,7 @@ Assert that "(?is)mer.*tv.*qr.*" is visible... COMPLETED
 Tap on "(?is)mer.*tv.*qr.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Run flow when "(?is).{0,4}bare min telefon" is not visible...
-  Tap on (Optional) "(?is)mer.*tv.*qr.*"... COMPLETED
-  Wait for animation to end... COMPLETED
-Run flow when "(?is).{0,4}bare min telefon" is not visible... COMPLETED
+Run flow when "(?is).{0,4}bare min telefon" is not visible... SKIPPED
 Assert that "(?is).{0,4}bare min telefon" is visible... COMPLETED
 Tap on "(?is).{0,4}bare min telefon"... COMPLETED
 Wait for animation to end... COMPLETED
@@ -131,7 +124,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: LVTP
+rom for flere: DV3C
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - EC7C4F25-3F36-44A2-8CC3-9CE1CD34AFD3
@@ -259,8 +252,7 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(noen gjetter|ett forsøk til|deler).*" is visible... COMPLETED
 Take screenshot 70-dealer... COMPLETED
-Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible...verten fikk ikke gjort: {"handling":"ftd-gjett","v":10,"id":"e58b9b049c97","pollett":"f8ad35e55cff0e2be77038fcb364e2d7fc1d"}
- COMPLETED
+Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 71-dealer-kortet... COMPLETED
 ===== nyhetsrunden =====
@@ -276,7 +268,7 @@ Take screenshot 72-nyhetsrunden-forside... COMPLETED
 Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
-Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"e58b9b049c97","pollett":"f8ad35e55cff0e2be77038fcb364e2d7fc1d"}
+Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"4f277717a447","pollett":"bb4b0ef810cd1ddd7435748b508a93833eb5"}
  COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 74-nyhetsrunden-svar... COMPLETED
@@ -323,7 +315,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*kort igjen.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 90-ring-enkel... COMPLETED

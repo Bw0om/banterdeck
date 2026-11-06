@@ -14,7 +14,20 @@ export const GET: APIRoute = async ({ request }) => {
   try {
     const u = await innloggetBruker(request);
     if (!u) return json({ feil: 'logg-inn', melding: 'Logg inn for å se gjengene dine.' }, 401);
-    return json({ gjenger: (await rpc('gjeng_mine', { p_user: u.id })) || [] });
+    const gjenger: any[] = (await rpc('gjeng_mine', { p_user: u.id })) || [];
+    // Forsiden i appen viser gjengene som kort: hvor mange som er med, og kvelden som pågår (så knappen heter «Bli med»)
+    await Promise.all(gjenger.slice(0, 5).map(async (g: any) => {
+      try { g.antall = Number(await rpc('gjeng_antall', { p_gjeng: g.id })) || 0; } catch { /* ikke satt opp */ }
+      try {
+        const kode = await aktivKveld(g.id);
+        const rom = kode ? await hentRom(kode) : null;
+        if (kode && rom) {
+          const vert = rom.data.spillere.find((p: any) => p.id === rom.data.vert);
+          g.kveld = { kode, vert: vert ? vert.navn : '', antall: rom.data.spillere.length, erMed: rom.data.spillere.some((p: any) => p.konto === u.id) };
+        }
+      } catch { /* ingen kveld */ }
+    }));
+    return json({ gjenger });
   } catch (e) {
     console.warn('Gjenger feilet:', (e as Error).message);
     return json({ feil: 'server', melding: 'Fikk ikke hentet gjengene akkurat nå.' }, 503);
@@ -87,7 +100,8 @@ export const POST: APIRoute = async ({ request }) => {
         const hva = liste ? ` – ${liste}` : '';
         try {
           await Promise.race([
-            sendTilGjeng(id, u.id, { tittel: `${g.navn}: kvelden starter! 🎉`, tekst: `${navn} har startet kveld${hva}. Trykk for å bli med.`, url: '/no/gjeng?k=' + g.kode }),
+            // Lenken går rett til rommet: rom-siden (og appens Spill-fane) blir med i kvelden selv
+            sendTilGjeng(id, u.id, { tittel: `${g.navn}: kvelden starter! 🎉`, tekst: `${navn} har startet kveld${hva}. Trykk for å bli med.`, url: '/no/rom?gjeng=' + g.id }),
             new Promise((ok) => setTimeout(ok, 4000)),
           ]);
         } catch (e) { console.warn('Gjengvarsel feilet:', (e as Error).message); }
