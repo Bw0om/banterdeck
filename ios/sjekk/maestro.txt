@@ -14,7 +14,12 @@ Tap on (Optional) id: start-navn... COMPLETED
 Wait for animation to end... COMPLETED
 Input text Sjekk... COMPLETED
 Run flow when "Sjekk" is not visible...
-Run flow when "Sjekk" is not visible... SKIPPED
+  Tap on (Optional) "Navnet ditt"... COMPLETED
+  Wait for animation to end... COMPLETED
+  Tap on (Optional) id: start-navn... COMPLETED
+  Wait for animation to end... COMPLETED
+  Input text Sjekk... COMPLETED
+Run flow when "Sjekk" is not visible... COMPLETED
 Take screenshot 11-start-navn... COMPLETED
 Tap on (Optional) "(?is)lag rom.*"... COMPLETED
 Assert that "(?is)alle lekene.*" is visible... COMPLETED
@@ -124,7 +129,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: 3Z6Q
+rom for flere: R6UF
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - DB19B152-E2EF-4A9D-878E-4818336329BF
@@ -252,7 +257,8 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(noen gjetter|ett forsøk til|deler).*" is visible... COMPLETED
 Take screenshot 70-dealer... COMPLETED
-Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible... COMPLETED
+Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible...verten fikk ikke gjort: {"handling":"ftd-gjett","v":10,"id":"9686385b24cc","pollett":"207d528bc149a79f44b768ec15d0cf3718cf"}
+ COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 71-dealer-kortet... COMPLETED
 ===== nyhetsrunden =====
@@ -263,21 +269,15 @@ Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
-Assert that "(?is).*(venter på at|hva fikk dere).*" is visible... FAILED
-verten fikk ikke gjort: {"handling":"nr-vis","id":"f8253188189d","pollett":"3c1c81c38075821d0790795d28170714bb06"}
-
-Assertion is false: "(?is).*(venter på at|hva fikk dere).*" is visible
-
-Assertion '"(?is).*(venter på at|hva fikk dere).*" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
-
-Possible causes:
-- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
-- Element may be temporarily unavailable due to loading state
-- This could be a real regression that needs to be addressed
-
-==== Debug output (logs & screenshots) ====
-
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/nyhetsrunden/.maestro/tests/2026-11-07_183707
+Assert that "(?is).*(venter på at|hva fikk dere).*" is visible... COMPLETED
+Take screenshot 72-nyhetsrunden-forside... COMPLETED
+Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
+Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"9686385b24cc","pollett":"207d528bc149a79f44b768ec15d0cf3718cf"}
+ COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 74-nyhetsrunden-svar... COMPLETED
 ===== pannekort =====
 Running on iPhone 17 - iOS 26.4 - DB19B152-E2EF-4A9D-878E-4818336329BF
  > Flow pannekort
@@ -288,11 +288,11 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(klask den på|hvem er du).*" is visible... COMPLETED
 Take screenshot 76-hvem-er-jeg... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 77-hvem-er-jeg-dialog... COMPLETED
 Input text Elvis... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... WARNED
+Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
 Hide Keyboard... COMPLETED
 Tap on (Optional) "(?is)gjettet!.*"... COMPLETED
 Assert that "(?is).*(den sitter|angre|først|hvem er du).*" is visible... COMPLETED
@@ -305,24 +305,15 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(vent|skål).*" is visible... COMPLETED
 Take screenshot 80-skaal-vent... COMPLETED
 Assert that "SKÅL!" is visible... COMPLETED
-Tap on "SKÅL!"... FAILED
-
-Element not found: Text matching regex: SKÅL!
-
-Element with Text matching regex: SKÅL! not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
-
-Possible causes:
-- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
-- Element may be temporarily unavailable due to loading state.
-- This could be a real regression that needs to be addressed.
-
-==== Debug output (logs & screenshots) ====
-
-/Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/skal/.maestro/tests/2026-11-07_184254
+Tap on "SKÅL!"... COMPLETED
+Take screenshot 81-skaal-trykket... COMPLETED
+Assert that "(?is).*(treigest|raskest).*" is visible... COMPLETED
+Wait for animation to end... COMPLETED
+Take screenshot 82-skaal-liste... COMPLETED
 ===== kort =====
 Running on iPhone 17 - iOS 26.4 - DB19B152-E2EF-4A9D-878E-4818336329BF
  > Flow kort
@@ -352,7 +343,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
+Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(trekker|velger kategori|svar!|svart).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 93-quiz-trekk... COMPLETED
