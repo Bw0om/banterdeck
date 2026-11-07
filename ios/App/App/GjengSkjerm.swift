@@ -380,9 +380,12 @@ struct GjengSkjerm: View {
                     Text("#").font(.archivo(12, vekt: 700)).opacity(0.5).frame(width: 22, alignment: .leading)
                     Text(m.T("Navn", "Name")).font(.archivo(12, vekt: 700)).opacity(0.6).frame(maxWidth: .infinity, alignment: .leading)
                     ForEach(Array(kolonner.enumerated()), id: \.offset) { _, k in
+                        let valgt = m.s("sorter") == k.0
+                        let tx = Text(kolonneNavn(k.0)).font(.archivo(12, vekt: 800))
                         Button(action: { m.sorter(k.0) }) {
-                            Text(kolonneNavn(k.0)).font(.archivo(12, vekt: 800)).lineLimit(1).minimumScaleFactor(0.7)
-                                .foregroundColor(m.s("sorter") == k.0 ? rust : blekk.opacity(0.6)).underline(m.s("sorter") == k.0)
+                            // underline(Bool) finnes bare fra iOS 16 – velg varianten uten argument
+                            (valgt ? tx.underline() : tx).lineLimit(1).minimumScaleFactor(0.7)
+                                .foregroundColor(valgt ? rust : blekk.opacity(0.6))
                                 .frame(width: k.1, alignment: .trailing)
                         }.buttonStyle(.plain)
                     }

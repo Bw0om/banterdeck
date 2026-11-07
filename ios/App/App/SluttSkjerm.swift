@@ -109,7 +109,9 @@ struct SluttSkjerm: View {
             Text(l["etikett"] as? String ?? "").font(.archivo(12, vekt: 900)).opacity(0.7).padding(.top, 6)
             let t = l["tekst"] as? String ?? ""
             if !t.isEmpty {
-                Text(t).font(.archivo(22, vekt: 800)).multilineTextAlignment(.center).strikethrough(l["strek"] as? Bool == true).fixedSize(horizontal: false, vertical: true)
+                // strikethrough(Bool) finnes bare fra iOS 16 – velg varianten uten argument
+                let tx = Text(t).font(.archivo(22, vekt: 800))
+                (l["strek"] as? Bool == true ? tx.strikethrough() : tx).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             }
             Text(l["under"] as? String ?? "").font(.archivo(12, vekt: 600)).opacity(0.7).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             let del = l["del"] as? String ?? ""
