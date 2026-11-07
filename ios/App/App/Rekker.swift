@@ -27,7 +27,8 @@ struct Hodestabel<Hode: View>: View {
     }
 }
 
-/// Benken og andre rekker med hode + navn: kolonner med fast bredde som bryter linje når det blir mange.
+/// Benken og andre rekker med hode + navn: så mange kolonner som får plass på én linje, resten bryter til neste.
+/// (`.fixed` gir bare ÉN kolonne – da sto hodene under hverandre; `.adaptive` fyller linja først.)
 func benkKolonner(_ bredde: CGFloat, avstand: CGFloat = 6) -> [GridItem] {
-    [GridItem(.fixed(bredde), spacing: avstand)]
+    [GridItem(.adaptive(minimum: bredde, maximum: bredde), spacing: avstand)]
 }
