@@ -41,6 +41,7 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
     function feil(t) { return '<p class="rom-feil">' + esc(t) + '</p>'; }
     function lenke(g) { return (window.__MV_ORIGIN || location.origin) + SIDE + '?k=' + g.kode; }
     function inviter(g) {
+      if (harSkall()) { try { document.dispatchEvent(new CustomEvent('mv-del', { detail: { url: lenke(g), tekst: EN ? 'Join the crew ' + g.navn + ' on mittvors – here’s our season table 🏆' : 'Bli med i gjengen ' + g.navn + ' på mittvors – her er sesongtabellen vår 🏆' } })); } catch (e) {} return; }
       if (EN) return window.BDDel.lenke(lenke(g), 'Join the crew ' + g.navn + ' on mittvors – here’s our season table 🏆', {
         tittel: 'Invite to ' + g.navn, ingress: 'Anyone with the link can see the table. Those who create an account and join can also start rooms for the crew.',
       });
@@ -56,12 +57,13 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
       if (!innlogget()) {
         root.innerHTML = '<h1 class="gj-h1">' + (EN ? 'Crews' : 'Gjengene') + '</h1>' +
           '<div class="gj-ut"><b>' + (EN ? 'Keep score from night to night' : 'Samle poengene fra kveld til kveld') + '</b><a class="gj-ut-knapp" href="' + KONTO + '">' + (EN ? 'Make a crew' : 'Lag gjeng') + '</a></div>';
+        meldSkjerm({ visning: 'mine', innlogget: false, gjenger: [] });
         return;
       }
       var tittel = EN ? 'Crews' : 'Gjengene';
       root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1><p class="small">' + (EN ? 'Loading …' : 'Henter …') + '</p>';
       kall('/api/gjeng').then(function (d) {
-        if (!d._ok) { root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1>' + feil(d.melding || (EN ? 'Couldn’t load your crews.' : 'Fikk ikke hentet gjengene.')); return; }
+        if (!d._ok) { root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1>' + feil(d.melding || (EN ? 'Couldn’t load your crews.' : 'Fikk ikke hentet gjengene.')); meldSkjerm({ visning: 'mine', innlogget: true, gjenger: [], feil: d.melding || (EN ? 'Couldn’t load your crews.' : 'Fikk ikke hentet gjengene.') }); return; }
         var l = d.gjenger || [];
         root.innerHTML = '<h1 class="gj-h1">' + tittel + '</h1>' +
           '<div class="gj-kort-liste">' + l.map(function (g, i) {
@@ -79,6 +81,7 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
         var vis = function (knapp, skjema, felt) { root.querySelector(knapp).addEventListener('click', function () { var f = root.querySelector(skjema), aapen = f.hidden; f.hidden = !aapen; this.setAttribute('aria-expanded', String(aapen)); if (aapen) root.querySelector(felt).focus(); }); };
         vis('#gjNyKnapp', '#gjLag', '#gjNavn'); vis('#gjKodeKnapp', '#gjBli', '#gjKode');
         if (!l.length) { root.querySelector('#gjLag').hidden = false; root.querySelector('#gjNyKnapp').setAttribute('aria-expanded', 'true'); }
+        meldSkjerm({ visning: 'mine', innlogget: true, gjenger: l.map(function (g) { return { kode: g.kode, navn: g.navn, under: (EN ? 'Night ' : 'Kveld ') + (g.kvelder || 0) + (g.eier ? (EN ? ' · yours' : ' · din') : ''), lenke: SIDE + '?k=' + g.kode, start: SIDE + '?k=' + g.kode + '&ny=1' }; }) });
         root.querySelector('#gjLag').addEventListener('submit', function (e) {
           e.preventDefault();
           kall('/api/gjeng', { handling: 'lag', navn: root.querySelector('#gjNavn').value }).then(function (d) {
@@ -277,6 +280,7 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
           (G.eier ? '<button class="linkbtn" data-g="endre" type="button">' + (EN ? 'Rename' : 'Endre navn') + '</button> · <button class="linkbtn" data-g="slett" type="button">' + (EN ? 'Delete the crew' : 'Slett gjengen') + '</button>'
                   : G.medlem ? '<button class="linkbtn" data-g="forlat" type="button">' + (EN ? 'Leave the crew' : 'Forlat gjengen') + '</button>' : '') +
           '<span class="small">' + (EN ? 'Crew code: ' : 'Gjengkode: ') + '<b>' + esc(G.kode) + '</b></span></div><p id="gjMld"></p>';
+      meldGjeng(kv, l, favoritt, sumSlurker, aarListe, ny);
     }
     function formPil(f) {
       if (!f || f.length < 2) return '';
@@ -292,13 +296,76 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
         return r.json().catch(function () { return {}; }).then(function (d) {
           if (!r.ok) { root.innerHTML = EN
             ? '<h1>The crew</h1>' + feil(d.melding || 'Couldn’t find that crew.') + '<p><a href="' + SIDE + '">To your crews</a></p>'
-            : '<h1>Gjengen</h1>' + feil(d.melding || 'Fant ikke gjengen.') + '<p><a href="/no/gjeng">Til gjengene dine</a></p>'; return; }
+            : '<h1>Gjengen</h1>' + feil(d.melding || 'Fant ikke gjengen.') + '<p><a href="/no/gjeng">Til gjengene dine</a></p>'; meldSkjerm({ visning: 'nett' }); return; }
           G = d;
           if (!G.kvelder.some(function (k) { return String(new Date(k.dato).getFullYear()) === sesong; }) && G.kvelder.length) sesong = String(new Date(G.kvelder[0].dato).getFullYear());
           vis();
         });
       }).catch(function () { root.innerHTML = feil(EN ? 'Couldn’t connect. Try again.' : 'Fikk ikke kontakt. Prøv igjen.'); });
     }
+    /* ---------- Appen med Swift-skall: gjengsiden er native (ios/App/App/GjengSkjerm.swift). Siden sier fra hva den vet
+       (mv-skjerm «gjeng»), og gjør jobben selv når skjermen trykker (window.__mvGjeng) – all logikk bor her. ---------- */
+    function harSkall() { return document.documentElement.classList.contains('har-skall'); }
+    function meldSkjerm(d) {
+      d.skjerm = 'gjeng'; d.en = EN; d.side = SIDE; d.konto = KONTO;
+      window.__mvSisteSkjerm = d;   // app.js lastes etter siden: det henter meldingen her når det starter
+      try { document.dispatchEvent(new CustomEvent('mv-skjerm', { detail: d })); } catch (e) {}
+    }
+    function meldGjeng(kv, l, favoritt, sumSlurker, aarListe, ny) {
+      var L = G.lovbok || null, k = G.kveld, gm = G.gammel, lenkeRom = ROM + '?gjeng=' + encodeURIComponent(G.id);
+      var lekNavn = function (id) { var x = LEKER.find(function (y) { return y.id === id; }); return x ? x.navn : id; };
+      var d = { visning: 'en', id: G.id, navn: G.navn, kode: G.kode, medlem: !!G.medlem, eier: !!G.eier, innlogget: !!G.innlogget, ny: !!ny, startLenke: lenkeRom,
+        kveld: k ? { vert: k.vert, under: k.antall + (EN ? ' in the room' : ' med i rommet') + (k.plan && k.plan.length ? ' · ' + k.plan.map(lekNavn).join(', ') : ''), erMed: !!k.erMed } : null,
+        gammel: gm ? { dato: gm.laget ? new Date(gm.laget).toLocaleDateString(EN ? 'en-GB' : 'nb-NO', { weekday: 'long', day: 'numeric', month: 'long' }) : '', erVert: !!gm.erVert, vert: gm.vert || '' } : null,
+        ventende: [], meg: null, formue: [], formueSesong: '', aarskonger: '', lovbok: null,
+        sesonger: aarListe.concat(['alle']), sesong: sesong, sorter: sorter,
+        tom: kv.length ? '' : (sesong === 'alle' ? (EN ? 'the table' : 'tabellen') : sesong),
+        stat: kv.length ? [{ tall: String(kv.length), tekst: EN ? (kv.length === 1 ? 'night' : 'nights') : (kv.length === 1 ? 'kveld' : 'kvelder') }, { tall: String(sumSlurker), tekst: EN ? 'sips in total' : 'slurker til sammen' },
+          { tall: String(l.length), tekst: EN ? 'in the table' : 'med i tabellen' }].concat(favoritt ? [{ tall: favoritt, tekst: EN ? 'most played' : 'mest spilt' }] : []) : [],
+        kaaringer: kv.length ? kaaringer(l, kv).map(function (x) { return { ikon: x.i, tittel: x.t, navn: x.n, tall: x.v }; }) : [],
+        tabell: l.map(function (p) { var f = p.form, pil = ''; if (f && f.length >= 2) { var siste = f[f.length - 1], snitt = f.slice(0, -1).reduce(function (a, b) { return a + b; }, 0) / (f.length - 1); pil = siste > snitt * 1.3 && siste - snitt >= 2 ? 'opp' : siste < snitt * 0.7 && snitt - siste >= 2 ? 'ned' : ''; }
+          return { navn: p.navn, kvelder: p.kvelder, slurker: p.slurker, snitt: desimal(p.snitt), seire: p.seire, quiz: p.quiz, form: pil }; }),
+        kvelder: kv.map(function (x) {
+          var sp = ((x.data && x.data.spillere) || []).slice().sort(function (a, b) { return (b.slurker || 0) - (a.slurker || 0); });
+          return { id: x.id, dato: dato(x.dato), under: sp.length + (EN ? ' players · ' : ' med · ') + ((x.data && x.data.leker) || []).length + (EN ? ' games' : ' leker') + (x.data && x.data.alkoholfri ? (EN ? ' · 🥤 alcohol-free' : ' · 🥤 alkoholfri') : ''),
+            linje: (sp[0] && sp[0].slurker ? '🏆 ' + sp[0].navn + ' (' + sp[0].slurker + ')' : '') + (sp.length ? ' · ' + sp.slice(1, 6).map(function (p) { return p.navn + ' ' + (p.slurker || 0); }).join(', ') : '') };
+        }) };
+      if (L) {
+        d.ventende = (L.utsatte || []).filter(function (u) { return u.status === 'venter'; }).map(function (u) {
+          var t = Math.max(0, Math.round((u.frist - Date.now()) / 3600000));
+          return { id: u.id, q: u.q, under: u.melderNavn + (EN ? ' says: ' : ' melder: ') + u.utfallNavn + ' · ' + u.ja + '–' + u.nei + ' · ' + (EN ? t + ' h left' : t + ' t igjen') + ' · ' + u.aksjonaerer + (EN ? ' shareholders' : ' aksjonærer'), kanStemme: !!u.kanStemme, minStemme: u.minStemme || '' };
+        });
+        if (G.medlem && L.meg) d.meg = { saldo: kr(L.meg.saldo), under: L.meg.kvelder + (EN ? (L.meg.kvelder === 1 ? ' night' : ' nights') : (L.meg.kvelder === 1 ? ' kveld' : ' kvelder')) + (EN ? ' this season' : ' denne sesongen'), navn: L.meg.navn || mittNavn(), lonn: kr(200) };
+        d.formue = (L.formue || []).map(function (x, i) { return { navn: (i === 0 ? '👑 ' : (i + 1) + '. ') + x.navn, saldo: kr(x.saldo), meg: !!x.meg }; });
+        d.formueSesong = String(L.sesong || '');
+        d.aarskonger = (L.aarskonger || []).length ? (EN ? 'Market Kings of the year: ' : 'Årets Børskonger: ') + L.aarskonger.map(function (x) { return x.aar + ' ' + x.navn; }).join(' · ') : '';
+        var v = L.ventende, r = L.rekorder || {};
+        var rekord = function (ikon, tittel, liste, enhet) {
+          if (!liste || !liste.length) return null;
+          return { ikon: ikon, tittel: tittel, tekst: liste[0].navn + ' · ' + liste[0].n + ' ' + (Array.isArray(enhet) ? enhet[liste[0].n === 1 ? 0 : 1] : enhet), under: liste.length > 1 ? liste.slice(1, 3).map(function (x) { return x.navn + ' ' + x.n; }).join(', ') : '' };
+        };
+        d.lovbok = { kvelder: L.kvelder + (EN ? (L.kvelder === 1 ? ' night' : ' nights') : (L.kvelder === 1 ? ' kveld' : ' kvelder')),
+          valg: v ? (v.minTur ? { minTur: true, aktive: L.aktive.map(function (x) { return { id: x.id, tekst: x.tekst }; }) } : { minTur: false, venter: '⏳ ' + v.navn + (EN ? ' won the last night and hasn’t picked a rule yet.' : ' vant forrige kveld og har ikke valgt regel ennå.') }) : null,
+          aktive: L.aktive.map(function (x) { return { id: x.id, tekst: '«' + x.tekst + '»', under: x.av + (x.kveld ? (EN ? ' · night ' : ' · kveld ') + x.kveld : ''), harStemt: !!x.harStemt,
+            stem: G.medlem ? (x.harStemt ? (EN ? '✓ Voted to remove' : '✓ Stemt for å fjerne') : (EN ? 'Vote to remove' : 'Stem for å fjerne')) + (x.stemmer ? ' (' + x.stemmer + '/' + x.trengs + ')' : '') : '' }; }),
+          rekorder: [rekord('🏆', EN ? 'Most nights won' : 'Flest kveldsseiere', r.seire, EN ? ['win', 'wins'] : ['seier', 'seire']), rekord('👑', EN ? 'Market King most often' : 'Børskonge flest ganger', r.borskonge, '×'), rekord('📜', EN ? 'Most rules in force' : 'Flest regler som gjelder', r.regler, EN ? ['rule', 'rules'] : ['regel', 'regler'])].filter(Boolean),
+          fjernet: (L.fjernet || []).map(function (x) { return { tekst: '«' + x.tekst + '»', under: x.av + (x.kveld ? (EN ? ' · night ' : ' · kveld ') + x.kveld : '') + ' · ' + (x.hvordan === 'flertall' ? (EN ? 'voted out by the crew' : 'stemt bort av gjengen') : x.fjernetAv ? (EN ? 'repealed by ' : 'opphevet av ') + x.fjernetAv : (EN ? 'repealed' : 'opphevet')) }; }),
+          logg: (L.logg || []).map(function (x) { return { dato: dato(x.dato), tekst: x.tekst }; }) };
+      }
+      meldSkjerm(d);
+    }
+    window.__mvGjeng = {
+      // Den native skjermen trykker på de samme knappene som nettsiden har (data-g + data-*)
+      trykk: function (g, attrs) { var b = document.createElement('button'); b.type = 'button'; b.hidden = true; b.dataset.g = g; Object.keys(attrs || {}).forEach(function (k) { b.dataset[k] = String(attrs[k]); }); root.appendChild(b); b.click(); b.remove(); },
+      sesong: function (s) { sesong = String(s); if (G) vis(); },
+      sort: function (k) { sorter = String(k); if (G) vis(); },
+      // Skjemaene (ny gjeng, gjengkode, navnet ditt, regelen): feltet fylles og skjemaet sendes som om du trykket selv
+      skriv: function (formId, feltId, verdi) { var f = document.getElementById(formId), i = document.getElementById(feltId); if (!f || !i) return; f.hidden = false; i.value = String(verdi || ''); if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); },
+      // Lenker: klikkes på nettsiden, så app.js åpner rommet i Spill-fanen og resten her
+      lenke: function (href) { var a = root.querySelector('a[href="' + href + '"]'); if (a) a.click(); else location.href = href; },
+      gaa: function (u) { if (/^\/[a-z0-9/?=&%#-]*$/i.test(String(u || ''))) location.href = u; },
+      hent: function () { if (kode) hent(); else mine(); }
+    };
     root.addEventListener('click', function (e) {
       var b = e.target.closest('[data-g],[data-sesong],[data-sort]'); if (!b || !G) return;
       if (b.dataset.sesong) { sesong = b.dataset.sesong; return vis(); }
