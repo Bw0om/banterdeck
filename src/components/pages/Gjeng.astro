@@ -211,7 +211,16 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
       if (k) return '<div class="gj-kveld"><p class="rom-etikett">' + (EN ? 'Happening now' : 'Pågår nå') + '</p><h2>🎉 ' + (EN ? esc(k.vert) + ' has started the night' : esc(k.vert) + ' har startet kvelden') + '</h2>' +
         '<p class="small">' + k.antall + (EN ? ' in the room' : ' med i rommet') + (k.plan && k.plan.length ? ' · ' + k.plan.map(function (id) { var l = LEKER.find(function (x) { return x.id === id; }); return esc(l ? l.navn : id); }).join(', ') : '') + '</p>' +
         '<p><a class="btn gold" href="' + lenke + '">' + (k.erMed ? (EN ? 'Back to the night' : 'Tilbake til kvelden') : (EN ? 'Join the night' : 'Bli med i kvelden')) + '</a></p></div>';
-      return '<div class="gj-start"><p><a class="btn gold" href="' + lenke + '">' + (EN ? '🎲 Start the night' : '🎲 Start kvelden') + '</a></p>' +
+      // En kveld som aldri ble avsluttet: verten avslutter den her (tabellen og lovboka oppdateres), de andre ser hvem som må
+      var gm = G.gammel, gmBoks = '';
+      if (gm) {
+        var dato = gm.laget ? new Date(gm.laget).toLocaleDateString(EN ? 'en-GB' : 'nb-NO', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+        gmBoks = '<div class="gj-gammel"><p class="rom-etikett">' + (EN ? 'Not ended yet' : 'Ikke avsluttet') + '</p><h2>🏁 ' + (EN ? 'The night from ' : 'Kvelden fra ') + esc(dato) + '</h2>' +
+          (gm.erVert
+            ? '<p class="small">' + (EN ? 'Ending it saves it to the table and lets the winner pick a rule.' : 'Avslutter du den, lagres den i tabellen og vinneren får velge regel.') + '</p><p><button type="button" class="btn gold" data-g="avslutt-kveld">' + (EN ? 'End the night' : 'Avslutt kvelden') + '</button></p>'
+            : '<p class="small">' + (EN ? esc(gm.vert) + ' hosted it and can end it. Starting a new night ends it too.' : esc(gm.vert) + ' var vert og kan avslutte den. Starter noen en ny kveld, avsluttes den også.') + '</p>') + '</div>';
+      }
+      return gmBoks + '<div class="gj-start"><p><a class="btn gold" href="' + lenke + '">' + (EN ? '🎲 Start the night' : '🎲 Start kvelden') + '</a></p>' +
         '<p class="small">' + (EN ? 'The crew gets a notification and joins without a code. You pick the games in the room.' : 'Gjengen får varsel og blir med uten kode. Lekene velger du i rommet.') + '</p></div>';
     }
     function varselBoks() {
@@ -312,6 +321,10 @@ const LEKER = [{ id: 'bors', navn: no ? '📈 Vorsbørsen (hele kvelden)' : '�
       if (g === 'forlat') {
         if (!confirm(EN ? 'Leave ' + G.navn + '? The table stays for everyone else.' : 'Forlate ' + G.navn + '? Tabellen blir liggende for de andre.')) return;
         return kall('/api/gjeng', { handling: 'forlat', id: G.id }).then(function () { location.href = SIDE; });
+      }
+      if (g === 'avslutt-kveld') {
+        b.disabled = true;
+        return kall('/api/gjeng', { handling: 'avslutt-kveld', id: G.id }).then(function (d) { if (!d._ok) { b.disabled = false; return mld(d.melding || ikke); } hent(); });
       }
       if (g === 'utsatt-stem') return kall('/api/gjeng', { handling: 'utsatt-stem', id: G.id, aksje: b.dataset.id, v: b.dataset.v }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });
       if (g === 'lov-stem') return kall('/api/gjeng', { handling: 'lov-stem', id: G.id, regel: b.dataset.regel }).then(function (d) { if (!d._ok) return mld(d.melding || ikke); hent(); });

@@ -1,33 +1,15 @@
 // Ett rom: hente tilstanden (GET) eller gjøre noe i det (POST).
 // Telefonen identifiserer seg med spiller-id og pollett i egne felt, aldri i adressen.
 import type { APIRoute } from 'astro';
-import { kobleTv, kaaringer, hentRom, endreRom, visning, skjermVisning, skjermPinOk, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, kveldForGjeng, rensLang } from '../../../lib/rom';
+import { kobleTv, hentRom, endreRom, visning, skjermVisning, skjermPinOk, handling, blimed, startSaldoFor, venteInn, finnVenter, finnSpiller, gyldigKode, rensNavn, lekeliste, varsle, loggRom, erPlussLek, rensLang } from '../../../lib/rom';
 import { rpc } from '../../../lib/spilt';
 import { etterpaa } from '../../../lib/etterpaa';
 import { innloggetBruker, laastFor } from '../../../lib/konto';
 import { plussStatus } from '../../../lib/pluss';
-import { rensPynt, laasOppForKveld } from '../../../lib/pynt.js';
+import { rensPynt } from '../../../lib/pynt.js';
 import { kveldInn, vinnerValg, reglerForRom, startSaldo } from '../../../lib/lovbok';
+import { etterAvslutt, endreBok, kveldData, kveldId } from '../../../lib/kveldslutt';
 export const prerender = false;
-
-/** Etter kvelden: tell kvelden på hver konto, og lås opp pynt etter kåringene. Det nye vises i oppsummeringen. */
-async function delUtPynt(kode: string, data: any) {
-  try {
-    const med = data.spillere.filter((p: any) => p.konto || p.bruker).map((p: any) => ({ id: p.id, konto: p.konto || p.bruker }));
-    const kvelder: Record<string, number> = {};
-    for (const p of med) { try { kvelder[p.konto] = Number(await rpc('kveld_tell', { p_user: p.konto })) || 0; } catch { kvelder[p.konto] = 0; } }
-    const ka = kaaringer(data).filter((k: any) => k.kode && k.id).map((k: any) => ({ kode: k.kode, id: k.id }));
-    const nye = laasOppForKveld({ kaaringer: ka, spillere: med, kvelder, gjengKveld: !!data.gjengKveld, naa: Date.now() });
-    const nyPynt: Record<string, string[]> = {};
-    for (const p of med) {
-      const ider = nye[p.konto] || []; if (!ider.length) continue;
-      const fikk: any = await rpc('pynt_laas_opp', { p_user: p.konto, p_ider: ider });
-      if (Array.isArray(fikk) && fikk.length) nyPynt[p.id] = fikk;
-    }
-    const r: any = await endreRom(kode, (d) => { d.pyntDelt = true; if (Object.keys(nyPynt).length) d.nyPynt = nyPynt; return { ok: true }; });
-    if (!r.feil && Object.keys(nyPynt).length) await varsle(kode, r.versjon);
-  } catch (e) { console.warn('Pynt ble ikke delt ut:', (e as Error).message); }
-}
 
 const json = (d: any, status = 200) =>
   new Response(JSON.stringify(d), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -218,15 +200,8 @@ export const POST: APIRoute = async ({ params, request }) => {
     if ((d.handling === 'bli-med' || d.handling === 'start') && res.data.spillere.length >= 2 && request.headers.get('authorization')) {
       etterpaa(innloggetBruker(request).then((u) => (u ? rpc('konto_rom_spilt', { p_user: u.id }) : null)));
     }
-    // Kvelden er over: lagre den i sesongtabellen til gjengen
-    if (d.handling === 'avslutt-kvelden' && res.data.gjeng && res.data.spillere.length >= 2 && (res.data.historikk || []).length) {
-      try { await rpc('gjeng_kveld_lagre', { p_gjeng: res.data.gjeng.id, p_rom: kode + '-' + res.data.laget, p_data: kveldForGjeng(res.data) }); }
-      catch (e) { console.warn('Gjengkvelden ble ikke lagret:', (e as Error).message); }
-    }
-    // Gjengkveld over: tell kvelden i lovboka (kveldens vinner får velge regel) og frigjør gjengen
-    if (d.handling === 'avslutt-kvelden' && res.data.gjeng) await gjengKveldSlutt(res.data, kode);
-    // Kvelden er over: del ut pynt til kontoene som var med (krone til vinneren, kveldstelling osv.)
-    if (d.handling === 'avslutt-kvelden' && !res.data.pyntDelt && res.data.spillere.some((p: any) => p.konto || p.bruker)) etterpaa(delUtPynt(kode, res.data));
+    // Kvelden er over: sesongtabellen, lovboka, gjengen frigjøres og pynt deles ut (lib/kveldslutt.ts)
+    if (d.handling === 'avslutt-kvelden') await etterAvslutt(kode, res.data);
     // Kveldens vinner har valgt regel: skriv den inn i lovboka
     if (d.handling === 'lov-valg' && res.data.gjeng && res.data.kveld && res.data.kveld.lovValg && !res.data.kveld.lovValg.lagret) {
       const ok = await lagreLovValg(res.data, kode);
@@ -255,50 +230,6 @@ function venterSvar(data: any, versjon: number, v: any, kode: string) {
   return { venter: true, versjon, meg: v.id, id: v.id, pollett: v.pollett, navn: v.navn, kode, lang: rensLang(v.lang), naa: Date.now(),
     gjeng: data.gjeng ? { navn: data.gjeng.navn } : null, vertNavn: vert ? vert.navn : '', spillere: data.spillere.map((p: any) => ({ id: p.id, navn: p.navn })) };
 }
-const kveldId = (data: any, kode: string) => kode + '-' + data.laget;
-
-/** Leser og lagrer lovboka med versjonssjekk, så to telefoner ikke overskriver hverandre. */
-async function endreBok(gjengId: string, endring: (bok: any) => any) {
-  for (let i = 0; i < 4; i++) {
-    const cur = await rpc('gjeng_lov_hent', { p_gjeng: gjengId });
-    if (!cur) return null;
-    const ny = endring(cur.lov);
-    if (!ny) return null;
-    const v = await rpc('gjeng_lov_lagre', { p_gjeng: gjengId, p_lov: ny, p_versjon: cur.versjon });
-    if (v !== null && v !== undefined) return ny;
-  }
-  return null;
-}
-
-/** Alt kvelden skal skrive i lovboka: vinner, Børskonge, formuen til medlemmene og aksjer som venter på stemmer. */
-function kveldData(data: any, kode: string, p: any, bk: any) {
-  const e = (data.kveld && data.kveld.eksport) || null;
-  const sp = (id: string) => data.spillere.find((x: any) => x.id === id);
-  const tekst = (q: any, l: 'no' | 'en') => (q && typeof q === 'object' ? q[l] || q.no : String(q || ''));
-  return {
-    vinner: p ? { navn: p.navn, konto: p.konto || null } : null, borskonge: bk ? { navn: bk.navn, konto: bk.konto || null } : null,
-    lommer: data.spillere.filter((x: any) => x.konto).map((x: any) => ({ konto: x.konto, navn: x.navn, saldo: e && e.saldoer && e.saldoer[x.id] != null ? e.saldoer[x.id] : null })),
-    utsatte: e ? e.utsatte.map((u: any) => {
-      const melder = sp(u.melder), subjekt = u.subjekt ? sp(u.subjekt) : null, stemmer: any = {};
-      Object.entries(u.stemmer || {}).forEach(([id, v]) => { const x = sp(id); if (x && x.konto) stemmer[x.konto] = v; });
-      return { id: kveldId(data, kode) + '-' + u.id, q: tekst(u.q, 'no'), qEn: tekst(u.q, 'en'), type: u.type,
-        utfallNavn: u.type === 'hvem' ? (subjekt ? subjekt.navn : '?') : 'Ja',
-        melderNavn: melder ? melder.navn : '?', melderKonto: melder && melder.konto ? melder.konto : null,
-        subjektKonto: subjekt && subjekt.konto ? subjekt.konto : null, subjektNavn: subjekt ? subjekt.navn : null, stemmer,
-        holdere: u.holdere.map((h: any) => { const x = sp(h.id); return x && x.konto ? { konto: x.konto, navn: x.navn, n: h.n } : null; }).filter(Boolean) };
-    }) : [],
-  };
-}
-async function gjengKveldSlutt(data: any, kode: string) {
-  const k = data.kveld || {};
-  const p = k.vinner ? data.spillere.find((x: any) => x.id === k.vinner) : null;
-  const bk = data.bors && data.bors.slutt && data.bors.slutt.konge ? data.spillere.find((x: any) => x.id === data.bors.slutt.konge) : null;
-  try {
-    await endreBok(data.gjeng.id, (bok) => kveldInn(bok, kveldId(data, kode), kveldData(data, kode, p, bk)));
-  } catch (e) { console.warn('Lovboka ble ikke oppdatert:', (e as Error).message); }
-  try { if (data.gjengKveld) await rpc('gjeng_kveld_aktiv_sett', { p_gjeng: data.gjeng.id, p_rom: null }); } catch { /* ikke satt opp */ }
-}
-
 /** Skriver vinnerens valg inn i lovboka. Gir de nye reglene for rommet, eller null. */
 async function lagreLovValg(data: any, kode: string) {
   const k = data.kveld, v = k.lovValg, p = data.spillere.find((x: any) => x.id === k.vinner);
