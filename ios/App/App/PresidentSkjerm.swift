@@ -155,7 +155,7 @@ struct PresidentSkjerm: View {
 
     /// Folket: hodene med navn, tur-ringen som renner ut, og hvor mange kort de har
     private func folk(_ d: PrData) -> some View {
-        HStack(alignment: .top, spacing: 4) {
+        LazyVGrid(columns: benkKolonner(54, avstand: 4), alignment: .leading, spacing: 8) {   // bryter linje med mange spillere
             ForEach(d.folk) { f in
                 VStack(spacing: 2) {
                     ZStack {
@@ -169,7 +169,7 @@ struct PresidentSkjerm: View {
                     }.frame(width: 46, height: 46)
                     Text(f.navn).font(.archivo(11, vekt: f.tur ? 900 : 700)).lineLimit(1).minimumScaleFactor(0.7)
                     Text(f.tekst).font(.archivo(10, vekt: 600)).opacity(0.65).lineLimit(1).minimumScaleFactor(0.7)
-                }.frame(maxWidth: .infinity)
+                }.frame(width: 54)
             }
         }
     }

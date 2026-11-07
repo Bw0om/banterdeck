@@ -136,7 +136,7 @@ struct OverUnderSkjerm: View {
 
     /// Folket: den som har tur løftes opp med gul ring, slurkene drukket som rosa pille
     private func folk(_ d: OuData) -> some View {
-        HStack(alignment: .top, spacing: 6) {
+        LazyVGrid(columns: benkKolonner(64), alignment: .leading, spacing: 10) {   // bryter linje med mange spillere
             ForEach(d.folk) { f in
                 VStack(spacing: 4) {
                     hode(f.png, 48)
@@ -147,7 +147,7 @@ struct OverUnderSkjerm: View {
                         Text("−\(f.drukket)").font(.archivo(13, vekt: 900)).foregroundColor(morkBlekk).padding(.horizontal, 8).padding(.vertical, 1)
                             .background(Capsule().fill(rosa)).overlay(Capsule().stroke(morkBlekk, lineWidth: 2.5))
                     }
-                }.frame(maxWidth: .infinity)
+                }.frame(width: 64)
             }
         }
         .padding(.top, 8)

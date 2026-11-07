@@ -223,7 +223,7 @@ struct NyhetsrundenSkjerm: View {
                 Text(k.forside).font(.archivo(40, vekt: 900)).tracking(-1)
                 Text(k.under).font(.archivo(22, vekt: 800)).opacity(0.8)
             }.padding(.top, 8)
-            HStack(spacing: -10) { ForEach(k.hoder) { h in hode(h.png, 56) } }
+            Hodestabel(antall: k.hoder.count, maks: 6, storrelse: 56) { i in hode(k.hoder[i].png, 56) }
             if !k.lengder.isEmpty { lengder(k.lengder) }
             if !k.start.isEmpty { storKnapp(k.start) { m.trykk("nr-start") } }
             if !k.vent.isEmpty { vent(k.vent) }
@@ -273,7 +273,7 @@ struct NyhetsrundenSkjerm: View {
                         Text(a.tekst).font(.archivo(16, vekt: 800)).foregroundColor(apne && !a.valgt ? blekk : morkBlekk).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
                         Spacer(minLength: 4)
                         if !apne && !a.hoder.isEmpty {
-                            HStack(spacing: -8) { ForEach(a.hoder) { h in hode(h.png, 32, flat: !a.rett) } }
+                            Hodestabel(antall: a.hoder.count, maks: 4, storrelse: 32, avstand: -8) { i in hode(a.hoder[i].png, 32, flat: !a.rett) }
                                 .transition(.scale(scale: 0.6).combined(with: .opacity))
                         }
                         if !a.stempel.isEmpty {
@@ -316,16 +316,16 @@ struct NyhetsrundenSkjerm: View {
     private func benk(_ folk: [NrHode], _ status: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(status).font(.archivo(12, vekt: 800)).opacity(0.65)
-            HStack(alignment: .bottom, spacing: 6) {
+            // Rutenett som bryter linje – én rekke vokste ut av skjermen med store gjenger (Rekker.swift)
+            LazyVGrid(columns: benkKolonner(58), alignment: .leading, spacing: 10) {
                 ForEach(folk) { h in
                     VStack(spacing: 2) {
                         hode(h.png, 44).offset(y: h.oppe ? -6 : 0).opacity(h.oppe ? 1 : 0.5)
                             .animation(roligere ? nil : .spring(response: 0.4, dampingFraction: 0.65), value: h.oppe)
-                        Text(h.navn).font(.archivo(10, vekt: h.oppe ? 900 : 600)).lineLimit(1)
-                    }.frame(maxWidth: 64)
+                        Text(h.navn).font(.archivo(10, vekt: h.oppe ? 900 : 600)).lineLimit(1).minimumScaleFactor(0.8)
+                    }.frame(width: 58)
                 }
-                Spacer(minLength: 0)
-            }
+            }.padding(.top, 6)
         }.padding(.top, 4)
     }
 
