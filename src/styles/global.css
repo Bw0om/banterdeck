@@ -1388,6 +1388,8 @@ body.stokk-aapen{overflow:hidden}
 .gj-form{font-size:11px}
 .gj-form.opp{color:var(--accent-t)}
 .gj-form.ned{color:var(--gold-t)}
+.gj-gammel{background:var(--card);border:2px dashed var(--border);border-radius:16px;padding:14px 16px;margin:0 0 14px}
+.gj-gammel h2{margin:4px 0 6px;font-size:1.15rem}
 .gj-kvelder{list-style:none;padding:0;margin:0;display:grid;gap:8px}
 .gj-kvelder li{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 14px}
 .gj-kvelder li > div{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}

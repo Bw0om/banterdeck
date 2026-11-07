@@ -4,6 +4,7 @@ import { rpc } from '../../../lib/spilt';
 import { json, innloggetBruker } from '../../../lib/konto';
 import { visBok, ryddUtsatte } from '../../../lib/lovbok';
 import { hentRom } from '../../../lib/rom';
+import { gammelKveld } from '../../../lib/kveldslutt';
 export const prerender = false;
 export const GET: APIRoute = async ({ request }) => {
   const kode = String(new URL(request.url).searchParams.get('k') || '').trim().toUpperCase();
@@ -30,7 +31,7 @@ export const GET: APIRoute = async ({ request }) => {
       if (l) lovbok = visBok(l.lov, medlem && u ? u.id : null, lang, antall);
     } catch { /* ikke satt opp */ }
     // Kvelden som pågår: bare medlemmer får vite om den (og blir med uten kode)
-    let kveld = null;
+    let kveld = null, gammel = null;
     if (medlem) {
       try {
         const rk = await rpc('gjeng_kveld_aktiv', { p_gjeng: g.id });
@@ -39,10 +40,14 @@ export const GET: APIRoute = async ({ request }) => {
           const vert = rom.data.spillere.find((p: any) => p.id === rom.data.vert);
           kveld = { kode: rk, vert: vert ? vert.navn : '', antall: rom.data.spillere.length, plan: rom.data.plan || [], laget: rom.data.laget,
             erMed: !!(u && rom.data.spillere.some((p: any) => p.konto === u.id)) };
+        } else {
+          // Kvelden ble aldri avsluttet: verten får avslutte den herfra, de andre ser hvem som må gjøre det
+          const gm = await gammelKveld(g.id);
+          if (gm) { const vert = gm.data.spillere.find((p: any) => p.id === gm.data.vert); gammel = { kode: gm.kode, vert: vert ? vert.navn : '', laget: gm.data.laget, erVert: !!(u && vert && vert.konto === u.id) }; }
         }
       } catch { /* ikke satt opp */ }
     }
-    return json({ id: g.id, navn: g.navn, kode: g.kode, kvelder: g.kvelder || [], eier, medlem, innlogget: !!u, lovbok, kveld, antall });
+    return json({ id: g.id, navn: g.navn, kode: g.kode, kvelder: g.kvelder || [], eier, medlem, innlogget: !!u, lovbok, kveld, gammel, antall });
   } catch (e) {
     console.warn('Gjeng kunne ikke hentes:', (e as Error).message);
     return json({ feil: 'server', melding: 'Fikk ikke hentet gjengen akkurat nå.' }, 503);

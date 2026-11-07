@@ -5,6 +5,7 @@ import { json, innloggetBruker } from '../../../lib/konto';
 import { stemBort, vinnerValg, reglerForRom, startSaldo, settNavn, profilNavn, stemUtsatt } from '../../../lib/lovbok';
 import { lagRom, hentRom, endreRom, blimed, startSaldoFor, rensNavn as romNavn, lekeliste, varsle, loggRom } from '../../../lib/rom';
 import { sendTilGjeng, gyldigAbonnement } from '../../../lib/push';
+import { gammelKveld, avsluttKveldForGjeng } from '../../../lib/kveldslutt';
 export const prerender = false;
 
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -24,6 +25,10 @@ export const GET: APIRoute = async ({ request }) => {
         if (kode && rom) {
           const vert = rom.data.spillere.find((p: any) => p.id === rom.data.vert);
           g.kveld = { kode, vert: vert ? vert.navn : '', antall: rom.data.spillere.length, erMed: rom.data.spillere.some((p: any) => p.konto === u.id) };
+        } else {
+          // En kveld som aldri ble avsluttet (eldre enn 20 timer): kortet sier fra, og verten kan avslutte den fra gjengsiden
+          const gm = await gammelKveld(g.id);
+          if (gm) { const vert = gm.data.spillere.find((p: any) => p.id === gm.data.vert); g.gammel = { kode: gm.kode, vert: vert ? vert.navn : '', laget: gm.data.laget, erVert: !!(vert && vert.konto === u.id) }; }
         }
       } catch { /* ingen kveld */ }
     }));
@@ -81,6 +86,9 @@ export const POST: APIRoute = async ({ request }) => {
         // Er det allerede en kveld i gang? Da blir du med i den i stedet.
         const aktiv = await aktivKveld(id);
         if (aktiv) return json(await inn(aktiv, u.id, navn, lang));
+        // Gårsdagens kveld ble aldri avsluttet: den avsluttes (og lagres i sesongen) før den nye starter
+        const gm = await gammelKveld(id);
+        if (gm) await avsluttKveldForGjeng(gm.kode);
         const alle = lekeliste(lang), lov = new Set(alle.map((x: any) => x.id).concat(['bors']));
         const leker = (Array.isArray(d.leker) ? d.leker : []).map(String).filter((x: string) => lov.has(x)).slice(0, 12);
         // Hurtigstart fra forsiden: ingen plan – verten velger lekene i rommet
@@ -106,6 +114,17 @@ export const POST: APIRoute = async ({ request }) => {
           ]);
         } catch (e) { console.warn('Gjengvarsel feilet:', (e as Error).message); }
         return json({ ok: true, kode, id: spiller.id, pollett: spiller.pollett });
+      }
+      case 'avslutt-kveld': {
+        // Gjengsiden: verten avslutter en kveld som ble liggende (samme som «Avslutt kvelden» i rommet)
+        if (!UUID.test(id)) return json({ feil: 'ugyldig' }, 400);
+        if (!(await rpc('gjeng_tilgang', { p_user: u.id, p_id: id }))) return json({ feil: 'medlem' }, 403);
+        const gm = await gammelKveld(id);
+        if (!gm) return json({ feil: 'ingen', melding: en ? 'There’s no night left to end.' : 'Det er ingen kveld å avslutte.' }, 404);
+        const vert = gm.data.spillere.find((p: any) => p.id === gm.data.vert);
+        if (!vert || vert.konto !== u.id) return json({ feil: 'bare-vert', melding: en ? 'Only the host can end the night.' : 'Bare verten kan avslutte kvelden.' }, 403);
+        const ok = await avsluttKveldForGjeng(gm.kode);
+        return ok ? json({ ok: true }) : json({ feil: 'server', melding: en ? 'Couldn’t end the night. Try again.' : 'Fikk ikke avsluttet kvelden. Prøv igjen.' }, 503);
       }
       case 'bli-kveld': {
         if (!UUID.test(id)) return json({ feil: 'ugyldig' }, 400);
