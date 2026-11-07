@@ -236,11 +236,9 @@ struct BlokkListe: View {
                         Text(s(sd, "tekst").uppercased()).font(.archivo(11, vekt: 900)).opacity(0.7)
                         Text(s(sd, "valg")).font(.archivo(16, vekt: 900)).fixedSize(horizontal: false, vertical: true)
                         let folk = sd["folk"] as? [[String: Any]] ?? []
-                        HStack(spacing: -6) {
-                            ForEach(Array(folk.enumerated()), id: \.offset) { _, p in
-                                Text(s(p, "init")).font(.archivo(11, vekt: 900)).frame(width: 30, height: 30)
-                                    .background(Circle().fill(Color(hex: s(p, "farge")))).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
-                            }
+                        Hodestabel(antall: folk.count, maks: 8, storrelse: 30, avstand: -6) { i in
+                            Text(s(folk[i], "init")).font(.archivo(11, vekt: 900)).frame(width: 30, height: 30)
+                                .background(Circle().fill(Color(hex: s(folk[i], "farge")))).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
                         }.frame(minHeight: 30)
                     }
                     .padding(12).frame(maxWidth: .infinity, alignment: .leading)
@@ -385,10 +383,8 @@ struct BlokkListe: View {
                             Spacer(minLength: 6)
                             if !s(k, "stempel").isEmpty { Text(s(k, "stempel").uppercased()).font(.archivo(11, vekt: 900)).padding(.horizontal, 8).padding(.vertical, 4).background(Capsule().fill(gul)).overlay(Capsule().stroke(morkBlekk, lineWidth: 2)).rotationEffect(.degrees(-4)) }
                         }
-                        HStack(spacing: -8) {
-                            ForEach(Array(hoder.enumerated()), id: \.offset) { _, p in
-                                if let img = m.bilde(p) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit).frame(width: 40, height: 44) }
-                            }
+                        Hodestabel(antall: hoder.count, maks: 6, storrelse: 40, avstand: -8) { i in
+                            if let img = m.bilde(hoder[i]) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit).frame(width: 40, height: 44) }
                         }
                     }
                     .padding(12).frame(maxWidth: .infinity, alignment: .leading).foregroundColor(morkBlekk)

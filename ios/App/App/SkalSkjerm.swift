@@ -181,7 +181,7 @@ struct SkalSkjerm: View {
                 Text(v.hint).font(.archivo(13, vekt: 700)).foregroundColor(morkBlekk).opacity(0.7).multilineTextAlignment(.center).padding(.horizontal, 24)
                 Spacer(minLength: 0)
                 HStack(spacing: 6) {
-                    HStack(spacing: -8) { ForEach(v.folk) { h in hode(h.png, 30) } }
+                    Hodestabel(antall: v.folk.count, maks: 6, storrelse: 30, avstand: -8) { i in hode(v.folk[i].png, 30) }
                     Text(v.status).font(.archivo(12, vekt: 800)).foregroundColor(morkBlekk).opacity(0.8)
                 }.padding(.bottom, 14)
             }

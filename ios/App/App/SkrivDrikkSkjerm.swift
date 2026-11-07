@@ -191,7 +191,7 @@ struct SkrivDrikkSkjerm: View {
             .background(RoundedRectangle(cornerRadius: 10).fill(kortFarge)).overlay(RoundedRectangle(cornerRadius: 10).stroke(blekk, lineWidth: 3))
             .background(RoundedRectangle(cornerRadius: 10).fill(blekk).offset(x: 4, y: 4))
         HStack(spacing: 8) {
-            HStack(spacing: -10) { ForEach(d.folk) { h in hode(h.png, 36) } }
+            Hodestabel(antall: d.folk.count, maks: 7, storrelse: 36) { i in hode(d.folk[i].png, 36) }
             Text(d.med).font(.archivo(13, vekt: 800)).opacity(0.7)
         }
         if !d.start.isEmpty { storKnapp(d.start) { m.trykk("startklokke") } }

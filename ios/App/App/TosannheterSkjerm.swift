@@ -258,8 +258,8 @@ struct TosannheterSkjerm: View {
                 .background(Circle().fill(lys)).overlay(Circle().stroke(morkBlekk, lineWidth: 3))
             Text(k.tekst).font(.archivo(tsStorrelse(k.tekst), vekt: 850)).lineSpacing(1).multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
-            HStack(spacing: -12) {
-                ForEach(k.hoder) { h in hode(h.png, 34).transition(.asymmetric(insertion: .offset(y: -34).combined(with: .opacity), removal: .opacity)) }
+            Hodestabel(antall: k.hoder.count, maks: 5, storrelse: 34, avstand: -12) { i in
+                hode(k.hoder[i].png, 34).transition(.asymmetric(insertion: .offset(y: -34).combined(with: .opacity), removal: .opacity))
             }
             .frame(minWidth: 34, alignment: .trailing)
         }
@@ -355,12 +355,10 @@ struct FasitVisning: View {
                             .background(Circle().fill(lys)).overlay(Circle().stroke(morkBlekk, lineWidth: 3))
                         Text(k.tekst).font(.archivo(tsStorrelse(k.tekst), vekt: 850)).multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
-                        HStack(spacing: -12) {
-                            ForEach(Array(k.hoder.enumerated()), id: \.offset) { j, h in
-                                hode(h.png, 34)
-                                    .offset(y: inn ? 0 : -34).opacity(inn ? 1 : 0)
-                                    .animation(.spring(response: 0.5, dampingFraction: 0.72).delay(forsink + 0.2 + Double(j) * 0.07), value: inn)
-                            }
+                        Hodestabel(antall: k.hoder.count, maks: 5, storrelse: 34, avstand: -12) { j in
+                            hode(k.hoder[j].png, 34)
+                                .offset(y: inn ? 0 : -34).opacity(inn ? 1 : 0)
+                                .animation(.spring(response: 0.5, dampingFraction: 0.72).delay(forsink + 0.2 + Double(j) * 0.07), value: inn)
                         }.frame(minWidth: 34, alignment: .trailing)
                     }
                     .padding(12).frame(minHeight: 92).foregroundColor(inn ? morkBlekk : blekk)

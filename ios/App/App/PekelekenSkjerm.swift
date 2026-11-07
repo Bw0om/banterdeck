@@ -258,7 +258,7 @@ struct PekelekenSkjerm: View {
 
     // Spillerne som små fargede merker (den som er pekt på får en ring)
     private func piller(_ d: PekData, _ ider: [String]) -> some View {
-        HStack(spacing: 6) {
+        LazyVGrid(columns: benkKolonner(34), alignment: .leading, spacing: 6) {   // bryter linje med mange spillere
             ForEach(d.spillere.filter { ider.contains($0.id) }) { p in
                 Text(p.init_).font(.archivo(13, vekt: 900)).frame(width: 34, height: 34)
                     .background(Circle().fill(Color(hex: p.farge))).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
