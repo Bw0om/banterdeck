@@ -121,14 +121,9 @@ struct GjengSkjerm: View {
                 Button(action: { m.trykk("bli-med") }) { knapp(m.b("innlogget") ? m.T("Bli med i gjengen", "Join the crew") : m.T("Logg inn for å bli med", "Log in to join"), gul: false) }.buttonStyle(TrykkStilSlutt())
             }
         }
-        kvelden
-        ventende
-        lomme
-        lovbok
-        sesonger
-        tabellen
-        kveldene
-        eier
+        // Grupper: en ViewBuilder tar høyst ti barn
+        Group { kvelden; ventende; lomme; lovbok }
+        Group { sesonger; tabellen; kveldene; eier }
     }
 
     // MARK: Kvelden: pågår, ikke avsluttet, start
