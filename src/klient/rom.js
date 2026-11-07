@@ -2269,8 +2269,12 @@ export function startRom(LEKNAVN, LANG) {
       var b = document.createElement('button'); b.type = 'button'; b.hidden = true; b.dataset.g = g;
       Object.keys(attrs || {}).forEach(function (k) { b.dataset[k] = String(attrs[k]); });
       root.appendChild(b); b.click(); b.remove();
-    }
+    },
+    // En lenke på nettsiden (gjengsiden, kontoen): klikkes der, så app.js åpner den i riktig fane
+    lenke: function (href) { var a = root.querySelector('a[href="' + href + '"]'); if (a) a.click(); else location.href = href; }
   };
+  // Delingsarket (BDDel) og andre ark som ikke går via lagArk: de native skjermene trekker seg til side mens arket er oppe
+  if (harSkall()) { try { var delArkOppe = false; new MutationObserver(function () { var oppe = !!document.querySelector('body > .del-ark'); if (oppe !== delArkOppe) { delArkOppe = oppe; document.dispatchEvent(new CustomEvent('mv-ark-aapen', { detail: { aapen: oppe } })); } }).observe(document.body, { childList: true }); } catch (e) {} }
   function pkTid(pk) { return Date.now() + klokkeAvvik - (pk.start || 0); }
   function pkTrinn(pk) { var t = pkTid(pk); return t < 0 ? 3 : t < 800 ? 3 : t < 1600 ? 2 : t < pk.tell ? 1 : 0; }
   function pkTikk() {
@@ -6489,6 +6493,49 @@ export function startRom(LEKNAVN, LANG) {
       '<div class="dl-knapper"><button class="btn gold" data-g="del-kveld" type="button">' + T('Del på Snap, Insta eller Messenger', 'Share on Snap, Insta or Messenger') + '</button>' +
       (erVert() ? '<button class="btn ghost" data-g="fortsett-kvelden" type="button">' + T('Fortsett kvelden', 'Keep the night going') + '</button>' : '') + '</div></div>';
   }
+  /** Oppsummeringen til den native skjermen i appen (ios/App/App/SluttSkjerm.swift): tallene, kåringene, vinneren og lovboka,
+      slurketavla med hodene. Knappene trykker på nettsidens egne (window.__mvLek.trykk), regelen skrives via __mvLek.skriv. */
+  function sluttData() {
+    var t = kveldsTall(), k = tilstand.kveld || {}, v = k.vinner, g = tilstand.gjeng, meg = tilstand.meg, jobber = [];
+    var png = function (id, inn) { jobber.push(vlHodePng(id, '').then(function (b) { inn.png = b; })); return inn; };
+    var dag = new Date(tilstand.ferdig || Date.now()).toLocaleDateString(LOKALE, { weekday: 'long', day: 'numeric', month: 'long' });
+    var tid = t.minutter >= 60 ? Math.floor(t.minutter / 60) + T('t ', 'h ') + (t.minutter % 60) + 'm' : t.minutter + ' min';
+    var d = { etikett: T('Kvelden er over', 'The night is over'), tittel: T('Kveldens oppsummering', 'Tonight\'s recap'), dato: dag.charAt(0).toUpperCase() + dag.slice(1),
+      gjengNavn: g ? g.navn : '', erVert: erVert(), naa: Date.now() + klokkeAvvik,
+      tall: [{ tall: String(t.sumSlurker), tekst: T('slurker til sammen', 'sips in total') }, { tall: String(t.leker.length), tekst: T('leker spilt', 'games played') },
+        { tall: String(t.sumSendt), tekst: T('🍺 sendt', '🍺 sent') }, { tall: tid, tekst: T('i rommet', 'in the room') }],
+      kaaring: t.kaaring.map(function (x) { return { ikon: x.ikon, tittel: x.tittel, navn: x.navn, tall: x.tall }; }),
+      lekerTekst: t.leker.length ? T('Dere spilte: ', 'You played: ') + t.leker.join(', ') : '',
+      tavleTittel: T('Slurketavla', 'Sip board'),
+      rangert: t.rangert.map(function (p) { return png(p.id, { id: p.id, navn: p.navn, slurker: p.slurker || 0, meg: p.id === meg, png: '' }); }),
+      vinner: null, ingenPoeng: '', lov: null, lovVenter: '', skrivRegel: null,
+      pynt: '', pyntKnapp: '', pyntDytt: '', pyntLenkeTekst: '', pyntLenke: '',
+      gjengTekst: '', gjengLenke: '', lagGjeng: null,
+      del: T('Del på Snap, Insta eller Messenger', 'Share on Snap, Insta or Messenger'), fortsett: erVert() ? T('Fortsett kvelden', 'Keep the night going') : '',
+      forlat: T('Forlat rommet', 'Leave the room') };
+    if (v) {
+      var poeng = ((k.stilling || []).find(function (x) { return x.id === v; }) || {}).p || 0;
+      d.vinner = png(v, { navn: navn(v), tittel: navn(v) + T(' vant kvelden!', ' won the night!'), under: poeng + T(' kveldspoeng', ' night points'), meg: v === meg, png: '' });
+      if (g) {
+        var lv = k.lovValg;
+        if (lv) d.lov = { type: lv.type, etikett: lv.type === 'ny' ? T('📜 Ny regel i lovboka', '📜 New rule in the law book') : lv.type === 'opphev' ? T('🗑️ Opphevet', '🗑️ Repealed') : T('Lovboka står som den er.', 'The law book stays as it is.'),
+          tekst: lv.type === 'ingen' ? '' : '«' + lv.tekst + '»', strek: lv.type === 'opphev',
+          under: lv.lagret ? T('Lagret i lovboka til ' + g.navn + '. Gjelder fra neste kveld – til noen opphever den.', 'Saved in ' + g.navn + '’s law book. Applies from the next night – until someone repeals it.') : T('Lagrer …', 'Saving …'),
+          del: lv.type !== 'ingen' ? T('Del regelen', 'Share the rule') : '' };
+        else if (v !== meg) d.lovVenter = navn(v) + T(' velger en regel til lovboka …', ' is picking a rule for the law book …');
+        else d.skrivRegel = { etikett: T('Du vant! Skriv en ny regel', 'You won! Write a new rule'),
+          under: T('Regelen gjelder hver gang gjengen spiller – til en senere vinner opphever den, eller flertallet stemmer den bort.', 'The rule applies every time the crew plays – until a later winner repeals it, or the majority votes it out.'),
+          knapp: T('Skriv regelen', 'Write the rule'), plass: T('F.eks. «Alle skåler på norsk dialekt»', 'E.g. “Every toast is in a pirate voice”'), send: T('Innfør', 'Introduce'), avbryt: T('Avbryt', 'Cancel'),
+          opphevEtikett: T('… eller opphev en regel', '… or repeal a rule'), regler: (g.regler || []).map(function (x) { return { id: x.id, tekst: x.tekst }; }), ingen: T('La lovboka være som den er', 'Leave the law book as it is') };
+      }
+    } else if (tilstand.kveld) d.ingenPoeng = T('Ingen fikk kveldspoeng i kveld.', 'Nobody got night points tonight.');
+    var meg2 = (tilstand.spillere || []).find(function (p) { return p.id === meg; });
+    if (tilstand.nyPynt && tilstand.nyPynt.length) { d.pynt = T('Nytt i garderoben: ', 'New in your wardrobe: ') + tilstand.nyPynt.map(function (id) { return pyntNavn(id, EN ? 'en' : 'no'); }).join(', '); d.pyntKnapp = T('Ta det på nå', 'Put it on now'); }
+    else if (meg2 && !meg2.bruker) { d.pyntDytt = T('Med en bruker låser du opp luer, briller og kjæledyr til figuren din når du spiller. Alt er gratis.', 'With an account you unlock hats, glasses and pets for your figure as you play. All free.'); d.pyntLenkeTekst = T('Lag bruker', 'Create an account'); d.pyntLenke = RUTE.konto; }
+    if (g) { d.gjengTekst = T('🏆 Kvelden er lagret i sesongtabellen til ', '🏆 Tonight is saved in the season table for ') + g.navn + '.'; d.gjengLenke = RUTE.gjeng + '?k=' + g.kode; }
+    else if (erVert()) d.lagGjeng = { tekst: T('Spiller dere ofte sammen? Lag en fast gjeng, så samles poengene fra kveld til kveld.', 'Play together often? Make a crew and your points add up night after night.'), knapp: T('Lag en fast gjeng', 'Make a crew'), lenke: RUTE.gjeng };
+    return Promise.all(jobber).then(function () { return d; });
+  }
   /** Tekst på delingsbilder følger alkoholfri modus. */
   function torr(x) { return window.BDTorr ? window.BDTorr.tekst(String(x)) : String(x); }
   function medT(g) { var ft = g.fillText.bind(g); g.fillText = function (x, a, b2, c) { return c ? ft(torr(x), a, b2, c) : ft(torr(x), a, b2); }; return g; }
@@ -6619,6 +6666,14 @@ export function startRom(LEKNAVN, LANG) {
     var url = tilstand.gjeng ? (window.__MV_ORIGIN || location.origin) + RUTE.gjeng + '?k=' + tilstand.gjeng.kode : (window.__MV_ORIGIN || location.origin) + RUTE.hjem + (vervKode ? '?v=' + vervKode : '');
     var t = kveldsTall();
     var tekst = torr(t.kaaring[0] ? t.kaaring[0].tittel + ': ' + t.kaaring[0].navn + ' 🏆 ' : '') + T('Kveldens oppsummering fra mittvors –', 'Tonight\'s recap from mittvors –');
+    if (harSkall()) {
+      // Swift-skallet: iPhonens eget delingsark med story-bildet (Snap, Insta, AirDrop, Meldinger …)
+      return storyBilde().then(function (fil) {
+        var send = function (png) { try { document.dispatchEvent(new CustomEvent('mv-del', { detail: { tekst: tekst, url: url, png: png || '' } })); } catch (x) {} };
+        if (!fil) return send('');
+        var fr = new FileReader(); fr.onload = function () { send(String(fr.result || '').split(',')[1] || ''); }; fr.onerror = function () { send(''); }; fr.readAsDataURL(fil);
+      });
+    }
     if (!window.BDDel) {
       // Uten delingsarket: del bildet direkte, eller last det ned
       return storyBilde().then(function (fil) {
@@ -6765,7 +6820,7 @@ export function startRom(LEKNAVN, LANG) {
     rotEl.classList.remove('bli-med');   // «bli med»-skjermen er forbi
     // Swift-skallet: noen leker tegnes native oppå nettsiden (nettsiden holder tilstanden, lyden og vibrasjonen)
     var nativ = harSkall() && s ? (s.pek && s.type === 'kort' ? 'pek' : s.type === 'veddelopet' ? 'vl' : s.type === 'yatzy' ? 'yz' : s.type === 'pyramiden' ? 'py' : s.type === 'bussruta' ? 'br' : s.type === 'president' ? 'pr' : s.type === 'gris' ? 'gr' : s.type === 'bingo' ? 'bg' : s.type === 'tosannheter' ? 'ts' : s.type === 'regelfabrikken' ? 'sd' : s.type === 'overunder' ? 'ou' : s.type === 'opus' ? 'op' : s.type === 'dealer' ? 'ftd' : s.type === 'quiz' ? 'qz' : s.type === 'nyhetsrunden' ? 'nr' : s.type === 'pannekort' ? 'pk2' : s.type === 'skal' ? 'sk' : s.type === 'en' ? 'en' : s.ring && !(s.ferdig && rofSkjult === s.nr) ? 'rof' : s.ring || (s.type === 'kort' && (NATIVE_LEKER.indexOf(s.lek) !== -1 || /^pakke-/.test(String(s.lek)) || s.lek === 'tanken-bak-sangen' || s.lek === 'ring-of-fire')) || (NATIVE_LEKER.indexOf(s.lek) !== -1 && s.lek !== 'kategorier') || NATIVE_TYPER.indexOf(s.type) !== -1 ? 'kort' : '')
-      : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
+      : harSkall() && !s && tilstand.ferdig ? 'slutt' : harSkall() && !s && !tilstand.ferdig && tilstand.venter !== true && !(tilstand.bors && tilstand.bors.fokus && (tilstand.bors.paa || tilstand.bors.slutt)) ? 'lobby' : '';
     var varLobby = rotEl.classList.contains('lobby-nativ');
     rotEl.classList.toggle('lobby-nativ', nativ === 'lobby');
     if (nativ === 'lobby') {
@@ -6799,6 +6854,7 @@ export function startRom(LEKNAVN, LANG) {
     else if (nativ === 'op') { opData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'opus') meldSkjerm('op', d); }); }
     else if (nativ === 'vl') { var rVl = s.runde, nVl = s.n, fVl = s.fase; vlData(s).then(function (d) { var sp = tilstand && tilstand.spill; if (sp && sp.type === 'veddelopet' && sp.runde === rVl && sp.n === nVl && sp.fase === fVl) meldSkjerm('vl', d); }); }
     else if (nativ === 'kort') { var lekNaa = s.lek, posNaa = s.pos; skjermBlokker(innhold).then(function (b) { var sp = tilstand && tilstand.spill; if (sp && sp.lek === lekNaa && sp.pos === posNaa) meldSkjerm('kort', { lek: lekNaa, naa: Date.now() + klokkeAvvik, blokker: medTopp(b, sp), stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') }); }); }
+    else if (nativ === 'slutt') { var fS = tilstand.ferdig; sluttData().then(function (d) { if (tilstand && tilstand.ferdig === fS && !tilstand.spill) meldSkjerm('slutt', d); }); }
     else meldSkjerm('rom');
     rotEl.classList.toggle('alene', erApp && !s && erVert() && (tilstand.spillere || []).length <= 1);   // app-lobby uten gjester: invitasjonen først
     rotEl.classList.toggle('app-gjest', erApp && !s && !erVert() && !tilstand.valgt);   // gjestens venterom i appen: stua og én linje, ingenting å bla i
