@@ -39,6 +39,8 @@
 		A1B2C3D4E5F60718293A4B95 /* GrisSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B94 /* GrisSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4BA1 /* TosannheterSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BA0 /* TosannheterSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4BA3 /* SkrivDrikkSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BA2 /* SkrivDrikkSkjerm.swift */; };
+		A1B2C3D4E5F60718293A4D0D /* SluttSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4D0C /* SluttSkjerm.swift */; };
+		A1B2C3D4E5F60718293A4D0F /* GjengSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4D0E /* GjengSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4BA5 /* OverUnderSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BA4 /* OverUnderSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4BA7 /* OpusSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BA6 /* OpusSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4BA9 /* DealerSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BA8 /* DealerSkjerm.swift */; };
@@ -89,6 +91,8 @@
 		A1B2C3D4E5F60718293A4B94 /* GrisSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrisSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4BA0 /* TosannheterSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TosannheterSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4BA2 /* SkrivDrikkSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkrivDrikkSkjerm.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4D0C /* SluttSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SluttSkjerm.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4D0E /* GjengSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GjengSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4BA4 /* OverUnderSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverUnderSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4BA6 /* OpusSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpusSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4BA8 /* DealerSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DealerSkjerm.swift; sourceTree = "<group>"; };
@@ -160,6 +164,8 @@
 				A1B2C3D4E5F60718293A4B94 /* GrisSkjerm.swift */,
 				A1B2C3D4E5F60718293A4BA0 /* TosannheterSkjerm.swift */,
 				A1B2C3D4E5F60718293A4BA2 /* SkrivDrikkSkjerm.swift */,
+				A1B2C3D4E5F60718293A4D0C /* SluttSkjerm.swift */,
+				A1B2C3D4E5F60718293A4D0E /* GjengSkjerm.swift */,
 				A1B2C3D4E5F60718293A4BA4 /* OverUnderSkjerm.swift */,
 				A1B2C3D4E5F60718293A4BA6 /* OpusSkjerm.swift */,
 				A1B2C3D4E5F60718293A4BA8 /* DealerSkjerm.swift */,
@@ -294,6 +300,8 @@
 				A1B2C3D4E5F60718293A4B95 /* GrisSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4BA1 /* TosannheterSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4BA3 /* SkrivDrikkSkjerm.swift in Sources */,
+				A1B2C3D4E5F60718293A4D0D /* SluttSkjerm.swift in Sources */,
+				A1B2C3D4E5F60718293A4D0F /* GjengSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4BA5 /* OverUnderSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4BA7 /* OpusSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4BA9 /* DealerSkjerm.swift in Sources */,
