@@ -1,22 +1,20 @@
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/SluttSkjerm.swift:112:87: error: 'strikethrough(_:pattern:color:)' is only available in iOS 16.0 or newer
-/Users/runner/work/banterdeck/banterdeck/ios/App/App/GjengSkjerm.swift:385:100: error: 'underline(_:pattern:color:)' is only available in iOS 16.0 or newer
-** BUILD FAILED **
+** BUILD SUCCEEDED **
 ----- siste linjer -----
-    
 
-SwiftDriverJobDiscovery normal arm64 Emitting module for App (in target 'App' from project 'App')
+AppIntentsSSUTraining (in target 'App' from project 'App')
+2026-11-07 22:52:20.339 appintentsnltrainingprocessor[4668:17245] Parsing options for appintentsnltrainingprocessor
+2026-11-07 22:52:20.341 appintentsnltrainingprocessor[4668:17245] Starting AppIntents SSU YAML Generation
+2026-11-07 22:52:20.345 appintentsnltrainingprocessor[4668:17245] No AppShortcuts found - Skipping.
 
-SwiftDriver\ Compilation\ Requirements App normal arm64 com.apple.xcode.tools.swift.compiler (in target 'App' from project 'App')
+RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
-** BUILD FAILED **
+Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
 
+Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
 
-The following build commands failed:
-	SwiftCompile normal arm64 Compiling\ LobbySkjerm.swift,\ VeddelopSkjerm.swift,\ YatzySkjerm.swift,\ PyramidenSkjerm.swift,\ BussrutaSkjerm.swift,\ PresidentSkjerm.swift,\ GrisSkjerm.swift,\ TosannheterSkjerm.swift,\ SkrivDrikkSkjerm.swift,\ SluttSkjerm.swift,\ GjengSkjerm.swift,\ OverUnderSkjerm.swift,\ OpusSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LobbySkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/VeddelopSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/YatzySkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PyramidenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/BussrutaSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PresidentSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/GrisSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/TosannheterSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SkrivDrikkSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SluttSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/GjengSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OverUnderSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/OpusSkjerm.swift (in target 'App' from project 'App')
-	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/SluttSkjerm.swift (in target 'App' from project 'App')
-	SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/GjengSkjerm.swift (in target 'App' from project 'App')
-	Building project App with scheme App and configuration Debug
-(4 failures)
+** BUILD SUCCEEDED **
+
 ----- skjemaer -----
     Targets:
         App
