@@ -1,54 +1,53 @@
-19:01:57 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-19:01:58 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
-19:01:58 swift plass: topp=186 bredde=364
-19:02:03 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-19:02:03 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
-19:02:03 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-19:02:11 etter 14s: skjermer: hendelse:start(venter) start>ok leker=-
-19:42:15 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
-19:42:15 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
-19:42:18 side /no/drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
-19:42:24 skjermer: leker>ok leker=meldt n=64 png=40 klasser=is-mobile is-ios is-app is-standalone har-skall
-19:42:24 startstua: mangler __mvStart=false sat=
-19:42:24 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
-19:42:32 etter 14s: skjermer: leker>ok leker=meldt n=64 png=40
-19:43:35 side /no/drinking-games/spionen klasser=is-mobile is-ios is-app is-standalone har-skall
-19:43:41 skjermer: lekeside>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
-19:43:41 startstua: mangler __mvStart=false sat=
-19:43:41 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/spilt"]
-19:43:49 etter 14s: skjermer: lekeside>ok leker=-
-19:44:12 AVVIST Skipping view transition because skipTransition() was called.
-19:44:20 skjermer: hendelse:rom(venter) rom>ok hendelse:en en>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
-19:44:20 startstua: mangler __mvStart=false sat=
-19:44:20 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x539 ressurser-feilet=["/api/rom/UKYA?v=0"]
-19:44:20 etter 14s: skjermer: hendelse:rom(venter) rom>ok hendelse:en en>ok leker=-
-19:44:34 side /no/drinking-games/over-eller-under klasser=is-mobile is-ios is-app is-standalone har-skall
-19:44:40 skjermer: lekeside>ok hendelse:verktoy verktoy>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall lek-verktoy
-19:44:40 startstua: mangler __mvStart=false sat=
-19:44:40 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/spilt"]
-19:44:48 etter 14s: skjermer: lekeside>ok hendelse:verktoy verktoy>ok hendelse:lekeside lekeside>ok leker=-
-19:44:50 AVVIST Skipping view transition because skipTransition() was called.
-19:45:15 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
-19:45:16 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
-19:45:16 side /no/account klasser=is-mobile is-ios is-app is-standalone har-skall
-19:45:22 skjermer: hendelse:deg deg>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
-19:45:22 startstua: mangler __mvStart=false sat=
-19:45:22 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
-19:45:25 skjermer: hendelse:rom rom>ok hendelse:en en>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
-19:45:25 startstua: mangler __mvStart=false sat=
-19:45:25 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/UKYA?v=0"]
-19:45:30 etter 14s: skjermer: hendelse:rom rom>ok hendelse:en en>ok leker=-
-19:45:30 etter 14s: skjermer: hendelse:deg deg>ok leker=-
+22:58:29 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+22:58:29 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
+22:58:30 swift plass: topp=186 bredde=364
+22:58:35 skjermer: start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+22:58:35 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
+22:58:35 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+22:58:43 etter 14s: skjermer: start>ok leker=-
+23:35:34 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
+23:35:34 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
+23:35:38 side /no/drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
+23:35:44 skjermer: leker>ok leker=meldt n=64 png=40 klasser=is-mobile is-ios is-app is-standalone har-skall
+23:35:44 startstua: mangler __mvStart=false sat=
+23:35:44 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
+23:35:52 etter 14s: skjermer: leker>ok leker=meldt n=64 png=40
+23:36:50 side /no/drinking-games/spionen klasser=is-mobile is-ios is-app is-standalone har-skall
+23:36:56 skjermer: lekeside>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
+23:36:56 startstua: mangler __mvStart=false sat=
+23:36:56 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/spilt"]
+23:37:04 etter 14s: skjermer: lekeside>ok leker=-
+23:37:15 AVVIST Skipping view transition because skipTransition() was called.
+23:37:20 skjermer: hendelse:rom(venter) rom>ok hendelse:en en>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
+23:37:20 startstua: mangler __mvStart=false sat=
+23:37:20 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/PZJJ?v=0"]
+23:37:21 etter 14s: skjermer: hendelse:rom(venter) rom>ok hendelse:en en>ok leker=-
+23:37:31 side /no/drinking-games/over-eller-under klasser=is-mobile is-ios is-app is-standalone har-skall
+23:37:37 skjermer: lekeside>ok hendelse:verktoy verktoy>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall lek-verktoy
+23:37:37 startstua: mangler __mvStart=false sat=
+23:37:37 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/spilt"]
+23:37:43 AVVIST Skipping view transition because skipTransition() was called.
+23:38:01 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
+23:38:02 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
+23:38:02 side /no/account klasser=is-mobile is-ios is-app is-standalone har-skall
+23:38:08 skjermer: hendelse:rom(venter) rom>ok hendelse:en en>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
+23:38:08 startstua: mangler __mvStart=false sat=
+23:38:08 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/PZJJ?v=0"]
+23:38:08 skjermer: hendelse:deg deg>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
+23:38:08 startstua: mangler __mvStart=false sat=
+23:38:08 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+23:38:16 etter 14s: skjermer: hendelse:rom(venter) rom>ok hendelse:en en>ok leker=-
+23:38:16 etter 14s: skjermer: hendelse:deg deg>ok leker=-
 ----- etter ny installasjon -----
-19:46:34 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-19:46:34 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
-19:46:34 swift plass: topp=186 bredde=364
-19:46:40 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-19:46:40 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
-19:46:40 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-19:46:48 etter 14s: skjermer: hendelse:start(venter) start>ok leker=-
-20:19:08 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
-20:19:09 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
-20:19:15 skjermer: hendelse:rom(venter) rom>ok hendelse:qz qz>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
-20:19:15 startstua: mangler __mvStart=false sat=
-20:19:15 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(28, 27, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/R6UF?v=0"]
+23:38:51 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+23:38:51 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
+23:38:51 swift plass: topp=186 bredde=364
+23:38:57 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+23:38:57 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
+23:38:57 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+23:39:05 etter 14s: skjermer: hendelse:start(venter) start>ok leker=-
+00:11:14 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
+00:11:15 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
+00:11:21 skjermer: hendelse:rom(venter) rom>ok hendelse:qz qz>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
+00:11:21 startstua: mangler __mvStart=false sat=
+00:11:21 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(28, 27, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/RNTL?v=0"]

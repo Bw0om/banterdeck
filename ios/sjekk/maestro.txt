@@ -14,12 +14,7 @@ Tap on (Optional) id: start-navn... COMPLETED
 Wait for animation to end... COMPLETED
 Input text Sjekk... COMPLETED
 Run flow when "Sjekk" is not visible...
-  Tap on (Optional) "Navnet ditt"... COMPLETED
-  Wait for animation to end... COMPLETED
-  Tap on (Optional) id: start-navn... COMPLETED
-  Wait for animation to end... COMPLETED
-  Input text Sjekk... COMPLETED
-Run flow when "Sjekk" is not visible... COMPLETED
+Run flow when "Sjekk" is not visible... SKIPPED
 Take screenshot 11-start-navn... COMPLETED
 Tap on (Optional) "(?is)lag rom.*"... COMPLETED
 Assert that "(?is)alle lekene.*" is visible... COMPLETED
@@ -129,7 +124,7 @@ Take screenshot 30-deg... COMPLETED
 Tap on "(?is)logg inn.*"... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 31-logg-inn... COMPLETED
-rom for flere: R6UF
+rom for flere: RNTL
 ===== flere =====
 ===== flere =====
 Running on iPhone 17 - iOS 26.4 - DB19B152-E2EF-4A9D-878E-4818336329BF
@@ -257,7 +252,7 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(noen gjetter|ett forsøk til|deler).*" is visible... COMPLETED
 Take screenshot 70-dealer... COMPLETED
-Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible...verten fikk ikke gjort: {"handling":"ftd-gjett","v":10,"id":"9686385b24cc","pollett":"207d528bc149a79f44b768ec15d0cf3718cf"}
+Assert that "(?is).*(dealeren drikker|gjetteren drikker|neste kort|trykker neste).*" is visible...verten fikk ikke gjort: {"handling":"ftd-gjett","v":10,"id":"fa4610d53d31","pollett":"9b7de4b639a46636de40ec073b68000df298"}
  COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 71-dealer-kortet... COMPLETED
@@ -274,7 +269,7 @@ Take screenshot 72-nyhetsrunden-forside... COMPLETED
 Assert that "(?is).*(velg riktig|sant eller tull|hvilket tall|svar fritt).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 73-nyhetsrunden-sporsmal... COMPLETED
-Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"9686385b24cc","pollett":"207d528bc149a79f44b768ec15d0cf3718cf"}
+Assert that "(?is).*(del ut|drikk én|ingenting|tar neste).*" is visible...verten fikk ikke gjort: {"handling":"nr-vis","id":"fa4610d53d31","pollett":"9b7de4b639a46636de40ec073b68000df298"}
  COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 74-nyhetsrunden-svar... COMPLETED
@@ -288,11 +283,11 @@ Wait for animation to end... COMPLETED
 Tap on (Optional) "(?is)vi er klare.*"... WARNED
 Assert that "(?is).*(klask den på|hvem er du).*" is visible... COMPLETED
 Take screenshot 76-hvem-er-jeg... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
 Wait for animation to end... COMPLETED
 Take screenshot 77-hvem-er-jeg-dialog... COMPLETED
 Input text Elvis... COMPLETED
-Tap on (Optional) "(?is).*klask den på.*"... COMPLETED
+Tap on (Optional) "(?is).*klask den på.*"... WARNED
 Hide Keyboard... COMPLETED
 Tap on (Optional) "(?is)gjettet!.*"... COMPLETED
 Assert that "(?is).*(den sitter|angre|først|hvem er du).*" is visible... COMPLETED
@@ -343,7 +338,7 @@ Assert that "(?is)vi er klare.*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Tap on "(?is)vi er klare.*"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "(?is)vi er klare.*"... WARNED
+Tap on (Optional) "(?is)vi er klare.*"... COMPLETED
 Assert that "(?is).*(trekker|velger kategori|svar!|svart).*" is visible... COMPLETED
 Wait for animation to end... COMPLETED
 Take screenshot 93-quiz-trekk... COMPLETED
@@ -352,7 +347,7 @@ Wait for animation to end... COMPLETED
 Take screenshot 94-quiz-sporsmal... COMPLETED
 Tap on (Optional) "A"... COMPLETED
 Wait for animation to end... COMPLETED
-Tap on (Optional) "Vert"... COMPLETED
+Tap on (Optional) "Vert"... WARNED
 Wait for animation to end... COMPLETED
 Take screenshot 95-quiz-svart... COMPLETED
 Assert that "(?is).*(riktig|feil|ikke svart).*" is visible... COMPLETED

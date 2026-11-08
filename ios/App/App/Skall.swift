@@ -278,9 +278,11 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     }
 
     // MARK: Inviter – iPhonens eget delingsark (AirDrop, Meldinger, Snap …)
-    func del(tekst: String, url: String) {
+    func del(tekst: String, url: String, png: String = "") {
         var ting: [Any] = [tekst]
         if let u = URL(string: url) { ting.append(u) }
+        // Kveldens oppsummering: story-bildet (PNG) deles med – Snap, Insta, AirDrop, Meldinger
+        if !png.isEmpty, let data = Data(base64Encoded: png), let bilde = UIImage(data: data) { ting.insert(bilde, at: 0) }
         let ark = UIActivityViewController(activityItems: ting, applicationActivities: nil)
         ark.excludedActivityTypes = [.addToReadingList, .assignToContact, .print, .saveToCameraRoll]
         ark.popoverPresentationController?.sourceView = view
@@ -341,7 +343,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private var arkOppe = false
     private func settDekket(_ i: Int, _ d: Bool) { dekket[i] = d; oppdaterDekket() }
     private func oppdaterDekket() { for (i, v) in visninger { v.webView?.accessibilityElementsHidden = (dekket[i] ?? false) && !arkOppe } }
-    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg", "ts", "sd", "ou", "op", "ftd", "nr", "qz", "pk2", "sk", "en"]
+    private static let heleSkjermer = ["lek", "kort", "rof", "vl", "yz", "py", "br", "pr", "gr", "bg", "ts", "sd", "ou", "op", "ftd", "nr", "qz", "pk2", "sk", "en", "slutt"]
 
     /// Siden i en skjerm sier hvilken skjerm den viser: «start» → vis den native startskjermen over Spill-fanen, ellers ta den bort
     func skjerm(_ d: [String: Any], fra: UIViewController?) {
@@ -350,8 +352,11 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         // Deg-fanen: den native skjermen ligger over kontosiden så lenge den står på forsiden sin (profil); dypere sider er nettsiden
         if faner[i] == "deg" {
             let vis = hva == "deg" && (d["visning"] as? String ?? "profil") == "profil"
-            settDekket(i, vis)
+            // Gjengsiden (/no/gjeng) er native (GjengSkjerm.swift); «nett» = siden fant ikke gjengen, da vises nettsiden
+            let visG = hva == "gjeng" && (d["visning"] as? String ?? "") != "nett"
+            settDekket(i, vis || visG)
             visDeg(vis ? d : nil, over: side, nett: v.webView)
+            visGjeng(visG ? d : nil, over: side, nett: v.webView)
             return
         }
         // Leker-fanen: lista og lekesidene er native; kortbunken på en lekeside («verktoy») er nettsiden
@@ -392,6 +397,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva != "pk2" { visPk2(nil, over: side) }
         if hva != "sk" { visSk(nil, over: side) }
         if hva != "en" { visEn(nil, over: side) }
+        if hva != "slutt" { visSlutt(nil, over: side) }
         // Lekene som tegnes native (Pekeleken): skjermen ligger over nettsiden så lenge leken pågår
         if hva == "lek" { visStart(i: side, false); visKort(nil, over: side); visLek(d, over: side, nett: v.webView); return } else { visLek(nil, over: side, nett: nil) }
         if hva == "kort" { visStart(i: side, false); visRof(nil, over: side); kortModell.nett = v.webView; visKort(d, over: side); return } else { visKort(nil, over: side) }
@@ -414,6 +420,8 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         if hva == "pk2" { visStart(i: side, false); pk2Modell.nett = v.webView; visPk2(d, over: side); return } else { visPk2(nil, over: side) }
         if hva == "sk" { visStart(i: side, false); skModell.nett = v.webView; visSk(d, over: side); return } else { visSk(nil, over: side) }
         if hva == "en" { visStart(i: side, false); enModell.nett = v.webView; visEn(d, over: side); return } else { visEn(nil, over: side) }
+        // Kvelden er over: oppsummeringen native (SluttSkjerm.swift)
+        if hva == "slutt" { visStart(i: side, false); sluttModell.nett = v.webView; visSlutt(d, over: side); return } else { visSlutt(nil, over: side) }
         if hva == "start" {
             startModell.nett = v.webView
             startModell.engelsk = spraak == "en"
@@ -532,6 +540,45 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     /// Siden i Deg-fanen byttet (gjengene, statistikken …): nettsiden tar over til kontosiden sier «deg» igjen
     func skjulDeg() { fjernOverlegg(&degVert); if let j = faner.firstIndex(of: "deg") { settDekket(j, false) } }
 
+    // MARK: Gjengsiden (GjengSkjerm.swift) – native over nettsiden /no/gjeng i Deg-fanen
+    private let gjengModell = GjengModell()
+    private var gjengVert: UIHostingController<GjengSkjerm>?
+    private func visGjeng(_ d: [String: Any]?, over side: UIViewController, nett: WKWebView?) {
+        guard let d = d else { skjulGjeng(); return }
+        gjengModell.nett = nett
+        gjengModell.sett(d)
+        if gjengVert == nil {
+            gjengModell.dialog = { [weak self] t, p, v, k, a, f in self?.spoerTekst(tittel: t, plass: p, verdi: v, knapp: k, avbryt: a, ferdig: f) }
+            gjengVert = leggOverlegg(UIHostingController(rootView: GjengSkjerm(m: gjengModell)), over: side, nett: nett)
+        }
+        fram(gjengVert?.view.superview)
+    }
+    func skjulGjeng() { fjernOverlegg(&gjengVert) }
+
+    // MARK: Kveldens oppsummering (SluttSkjerm.swift) – native når rommet er ferdig
+    private let sluttModell = SluttModell()
+    private var sluttVert: UIHostingController<SluttSkjerm>?
+    private func visSlutt(_ d: [String: Any]?, over side: UIViewController) {
+        guard let d = d else { fjernOverlegg(&sluttVert); return }
+        sluttModell.sett(d)
+        if sluttVert == nil {
+            sluttModell.dialog = { [weak self] t, p, v, k, a, f in self?.spoerTekst(tittel: t, plass: p, verdi: v, knapp: k, avbryt: a, ferdig: f) }
+            sluttVert = leggOverlegg(UIHostingController(rootView: SluttSkjerm(m: sluttModell)), over: side, nett: sluttModell.nett)
+        }
+        fram(sluttVert?.view.superview)
+    }
+    /// En dialog med ett tekstfelt (regelen til lovboka, navnet på gjengen, gjengkoden …): svaret går til nettsidens skjema
+    private func spoerTekst(tittel: String, plass: String, verdi: String, knapp: String, avbryt: String, ferdig: @escaping (String) -> Void) {
+        let a = UIAlertController(title: tittel, message: nil, preferredStyle: .alert)
+        a.addTextField { t in t.placeholder = plass; t.text = verdi; t.autocapitalizationType = .sentences; t.returnKeyType = .done }
+        a.addAction(UIAlertAction(title: avbryt, style: .cancel))
+        a.addAction(UIAlertAction(title: knapp, style: .default) { [weak a] _ in
+            let t = (a?.textFields?.first?.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            if !t.isEmpty { ferdig(t) }
+        })
+        (presentedViewController ?? self).present(a, animated: true)
+    }
+
     // MARK: Leker (LekerSkjerm.swift) – native liste over lekesiden
     private let lekerModell = LekerModell()
     private var lekerVert: UIHostingController<LekerSkjerm>?
@@ -613,7 +660,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     func settOverleggSkjult(_ skjult: Bool) {
         arkOppe = skjult; oppdaterDekket()
-        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, tsVert?.view, sdVert?.view, ouVert?.view, opVert?.view, ftdVert?.view, nrVert?.view, pk2Vert?.view, skVert?.view, enVert?.view, degVert?.view, lekerVert?.view]
+        let hoster: [UIView?] = [lekVert?.view, kortVert?.view, rofVert?.view, vlVert?.view, yzVert?.view, pyVert?.view, brVert?.view, prVert?.view, grVert?.view, bgVert?.view, tsVert?.view, sdVert?.view, ouVert?.view, opVert?.view, ftdVert?.view, nrVert?.view, pk2Vert?.view, skVert?.view, enVert?.view, sluttVert?.view, degVert?.view, gjengVert?.view, lekerVert?.view]
         for v in hoster { ((v?.superview as? HullVisning) ?? v)?.isHidden = skjult }
         lobbyHull?.isHidden = skjult; startHull?.isHidden = skjult
     }
@@ -1008,7 +1055,7 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
             }
             if let l = call.getString("lang"), l == "no" || l == "en" { s.spraak = l }
             let i = s.fane(for: vc)
-            if let i = i, s.faner[i] == "deg" { s.skjulDeg() }   // ny side i Deg-fanen: kontosiden sier «deg» igjen når den er tilbake
+            if let i = i, s.faner[i] == "deg" { s.skjulDeg(); s.skjulGjeng() }   // ny side i Deg-fanen: kontosiden sier «deg» igjen når den er tilbake
             if let i = i, s.faner[i] == "leker" { s.skjulLeker() }   // en lekeside: lista sier «leker» igjen når du er tilbake
             // rull: simulator-sjekken ber nettsiden bla nedover, så bildet viser linja i krympet stand
             let env = ProcessInfo.processInfo.environment
@@ -1128,9 +1175,9 @@ public class SkallPlugin: CAPPlugin, CAPBridgedPlugin {
 
     /// Inviter: delingsarket med tekst og lenke
     @objc func del(_ call: CAPPluginCall) {
-        let tekst = call.getString("tekst") ?? "", url = call.getString("url") ?? ""
+        let tekst = call.getString("tekst") ?? "", url = call.getString("url") ?? "", png = call.getString("png") ?? ""
         DispatchQueue.main.async {
-            SkallViewController.delt?.del(tekst: tekst, url: url)
+            SkallViewController.delt?.del(tekst: tekst, url: url, png: png)
             call.resolve()
         }
     }
