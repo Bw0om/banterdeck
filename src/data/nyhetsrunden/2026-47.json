@@ -1,0 +1,327 @@
+{
+ "aar": 2026,
+ "uke": 47,
+ "publisert": "2026-11-19",
+ "tittel": "Nyhetsrunden · uke 47",
+ "ingress": "Trøsterabatt for danske fotballfans, en elefantsel med eget varemerke og 83 dollar for en bit av Claude.",
+ "sporsmal": [
+  {
+   "type": "valg",
+   "q": "Hvilken utstyrsprodusent ga danske fans 20 prosent avslag på landslagsdrakta dagen etter tapet mot Norge?",
+   "alt": [
+    "Adidas",
+    "Hummel",
+    "Puma",
+    "Nike"
+   ],
+   "svar": "Hummel",
+   "info": "Selskapet beklaget etterpå og fjernet rabattkoden.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/sport/ga-dommerens-skyld-rabatt-etter-norge-tapet/1737502"
+  },
+  {
+   "type": "fritt",
+   "q": "Hvem scoret på straffe på overtid og sikret Norge 3–2 over Danmark i Nations League?",
+   "svar": "Erling Braut Haaland",
+   "info": "Seieren sendte Norge videre til kvartfinale i mars.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/sport/ga-dommerens-skyld-rabatt-etter-norge-tapet/1737502"
+  },
+  {
+   "type": "tall",
+   "q": "Til hvilken pris per aksje skal Anthropic ha priset børsnoteringen sin, ifølge flere medier (i dollar)?",
+   "svar": "83",
+   "info": "Selskapet hadde først varslet et prisspenn på 70 til 78 dollar. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "E24",
+   "url": "https://e24.no/boers-og-finans/i/xJPedp/anthropic-gjoer-tidenes-stoerste-boersnotering-aksjen-prises-til-83-dollar-melder-flere-medier"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Elon Musk sier han føler seg «ganske dum» etter å ha brukt nærmere en halv milliard dollar på mellomvalget i USA.",
+   "svar": "Sant",
+   "info": "Han sa også at han nok ville brukt mindre penger om han kunne skru tiden tilbake.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/4EqXja/elon-musk-angrer-paa-pengebruken-etter-valgnederlaget"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilket selskap går Anthropic forbi når det gjelder tidenes største børsnotering?",
+   "alt": [
+    "Saudi Aramco",
+    "Alibaba",
+    "SpaceX",
+    "OpenAI"
+   ],
+   "svar": "SpaceX",
+   "info": "Romfartsselskapet til Elon Musk satte rekorden tidligere i år.",
+   "kilde": "E24",
+   "url": "https://e24.no/boers-og-finans/i/xJPedp/anthropic-gjoer-tidenes-stoerste-boersnotering-aksjen-prises-til-83-dollar-melder-flere-medier"
+  },
+  {
+   "type": "tall",
+   "q": "Hvor mange meter unna elefantselen «Neil the seal» må fansen nå holde seg på Tasmania?",
+   "svar": "30",
+   "info": "Brudd på regelen kan ende med bot. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/qOLe00/naa-maa-fansen-holde-seg-30-meter-unna-neil-the-seal"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Det danske fotballforbundet godkjente rabattkampanjen på forhånd.",
+   "svar": "Tull",
+   "info": "DBU sier e-posten ble sendt uten at de visste om den eller hadde godkjent den.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/sport/ga-dommerens-skyld-rabatt-etter-norge-tapet/1737502"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilket land er størst favoritt til å vinne Nations League, ifølge tallknuserne i Football Meets Data?",
+   "alt": [
+    "England",
+    "Frankrike",
+    "Portugal",
+    "Spania"
+   ],
+   "svar": "Spania",
+   "info": "Spania har 38,3 prosent vinnersjanse, mens Norge ligger på 3,3.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/sport/i/7P04LV/norge-i-nations-league-spania-og-england-stoerste-favoritter"
+  },
+  {
+   "type": "tall",
+   "q": "Hvor mange av Oslos 101 T-banestasjoner stenger fra torsdag til søndag denne uka?",
+   "svar": "63",
+   "info": "T-banen skal være i gang igjen tidlig mandag morgen. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/oslo/i/2vGow4/stengt-t-bane-1922-november-slik-klarer-du-deg-uten-t-banen"
+  },
+  {
+   "type": "valg",
+   "q": "Hvorfor stenger Ruter store deler av T-banen i Oslo denne helga?",
+   "alt": [
+    "Streik blant førerne",
+    "Test av et nytt signalsystem",
+    "Utskifting av skinner i sentrum",
+    "Sikkerhetsøvelse med Forsvaret"
+   ],
+   "svar": "Test av et nytt signalsystem",
+   "info": "Det er en av tidenes største T-banestengninger i hovedstaden.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/oslo/i/2vGow4/stengt-t-bane-1922-november-slik-klarer-du-deg-uten-t-banen"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilket elsparkesykkelselskap opplyser at prisen kan øke når etterspørselen blir høy under T-banestengingen?",
+   "alt": [
+    "Voi",
+    "Ryde",
+    "Bolt",
+    "Tier"
+   ],
+   "svar": "Bolt",
+   "info": "Bolt bruker dynamisk prising, mens Ryde sier de ikke hever prisene.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/nyheter/elsparkesykkelselskaper-setter-inn-ekstra-mannskap-nar-t-banen-stenger/10640920"
+  },
+  {
+   "type": "tall",
+   "q": "Hvilken snittkarakter av 100 fikk GTA VI på Metacritic før lansering?",
+   "svar": "99",
+   "info": "Det gjør spillet til tidenes mest kritikerroste. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10641011"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: GTA VI kommer ti år etter forrige hovedutgave, GTA V.",
+   "svar": "Tull",
+   "info": "Det har gått 13 år siden GTA V ble lansert.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/kultur/i/kMJePB/playstation-troebbel-rett-foer-gta-6-lansering"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Over 17 millioner mennesker hadde kjøpt GTA VI før det ble sluppet.",
+   "svar": "Sant",
+   "info": "Rett før lansering meldte flere om trøbbel med PlayStation Network.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/kultur/i/kMJePB/playstation-troebbel-rett-foer-gta-6-lansering"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Forrige GTA har solgt over 230 millioner eksemplarer.",
+   "svar": "Sant",
+   "info": "Utviklingen av GTA VI skal ha kostet nesten ti milliarder kroner.",
+   "kilde": "E24",
+   "url": "https://e24.no/internasjonal-oekonomi/i/wdPKPn/tidenes-dyreste-biltyveri"
+  },
+  {
+   "type": "fritt",
+   "q": "Hvilken ticker skal Anthropic-aksjen handles under på Nasdaq?",
+   "svar": "ANT",
+   "info": "Selskapet bak Claude ble stiftet i 2021.",
+   "kilde": "E24",
+   "url": "https://e24.no/boers-og-finans/i/xJPedp/anthropic-gjoer-tidenes-stoerste-boersnotering-aksjen-prises-til-83-dollar-melder-flere-medier"
+  },
+  {
+   "type": "valg",
+   "q": "I hvilken by ble Norge kåret til dagens fossilversting under klimatoppmøtet?",
+   "alt": [
+    "Baku",
+    "Antalya",
+    "Belém",
+    "Dubai"
+   ],
+   "svar": "Antalya",
+   "info": "Klimatoppmøtet pågår i Tyrkia.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/norge-karet-til-dagens-fossilversting-pa-klimatoppmotet/1737778"
+  },
+  {
+   "type": "valg",
+   "q": "Hvem deler ut den daglige prisen «Fossil of the Day» på klimatoppmøtet?",
+   "alt": [
+    "Greenpeace",
+    "FNs klimapanel",
+    "WWF",
+    "Climate Action Network"
+   ],
+   "svar": "Climate Action Network",
+   "info": "Frp kalte kåringen «det dummeste jeg har hørt på lenge», mens miljøorganisasjoner mente den var fortjent.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/norge-karet-til-dagens-fossilversting-pa-klimatoppmotet/1737778"
+  },
+  {
+   "type": "tall",
+   "q": "Hvor mange milligram nikotin per gram snus vil regjeringen sette som maksgrense?",
+   "svar": "12",
+   "info": "En vanlig snus har i dag 12–16 milligram. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/nyheter/venstre-mener-forslag-om-snusinnstramming-ma-avvises/10640884"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Rødt og MDG er blant partiene som vil avvise snusgrensen.",
+   "svar": "Tull",
+   "info": "Rødt og MDG er positive, mens Venstre, Høyre og Frp vil avvise forslaget.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/nyheter/venstre-mener-forslag-om-snusinnstramming-ma-avvises/10640884"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilket auksjonshus solgte Van Gogh-maleriet «Châtaigniers en fleurs» for 1,8 milliarder kroner?",
+   "alt": [
+    "Christie's",
+    "Sotheby's",
+    "Bonhams",
+    "Phillips"
+   ],
+   "svar": "Sotheby's",
+   "info": "Det er ny auksjonsrekord for Van Gogh.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/Qro3RR/van-gogh-maleri-solgt-for-1-8-milliarder-kroner"
+  },
+  {
+   "type": "fritt",
+   "q": "På hvilken australsk øy er elefantselen Neil blitt en superstjerne?",
+   "svar": "Tasmania",
+   "info": "Myndighetene vil også registrere «Neil the Seal» som varemerke.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/qOLe00/naa-maa-fansen-holde-seg-30-meter-unna-neil-the-seal"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Trumps planlagte triumfbue i Washington er inspirert av Brandenburger Tor i Berlin.",
+   "svar": "Tull",
+   "info": "Den 76 meter høye buen er inspirert av triumfbuen i Paris, og en dommer har forlenget byggestoppen.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/vkQ8o4/donald-trumps-plan-om-gigantisk-triumfbue-i-washington-dc-stoppet"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilket Formel 1-lag bekreftet at Valtteri Bottas fortsetter i 2027?",
+   "alt": [
+    "Cadillac",
+    "Williams",
+    "Sauber",
+    "Haas"
+   ],
+   "svar": "Cadillac",
+   "info": "Bottas svarte ryktene med «til den det måtte angå, jeg blir».",
+   "kilde": "VG",
+   "url": "https://www.vg.no/sport/i/bk5eVk/bekrefter-etter-rykteflom-formel-1-profil-fortsetter"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilken plass har Therese Johaug nå fra halvmaraton-VM i København, etter at en kenyansk løper ble strøket for doping?",
+   "alt": [
+    "17.",
+    "18.",
+    "19.",
+    "20."
+   ],
+   "svar": "18.",
+   "info": "Hun gikk i mål som nummer 19 og som Europas beste kvinne.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/sport/i/2vGXwq/kenyanske-loepere-straffes-regjerende-vm-vinner-i-maraton-og-johaug-rival-utestengt-i-flere-aar"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilke to norske varer sikret næringsminister Cecilie Myrseth eksportavtaler for under Kina-besøket?",
+   "alt": [
+    "Laks og akevitt",
+    "Brunost og sjømat",
+    "Kvikk Lunsj og tørrfisk",
+    "Jarlsberg og hvalkjøtt"
+   ],
+   "svar": "Brunost og sjømat",
+   "info": "Hun delte også ut brunost og vafler på en næringsmesse i Shanghai.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/nyheter/vil-selge-mer-til-kina-starter-med-brunost/10630095"
+  },
+  {
+   "type": "fritt",
+   "q": "Hvor ble det målt 24,6 minusgrader, høstens laveste temperatur i landet så langt?",
+   "svar": "Grotli i Skjåk",
+   "info": "Folldal lå like bak med minus 22,1 samme natt.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10639322"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilken plass fikk Oslo lufthavn i Time Magazines kåring av verdens beste store flyplasser?",
+   "alt": [
+    "Tredjeplass",
+    "Sjetteplass",
+    "Niendeplass",
+    "Tolvteplass"
+   ],
+   "svar": "Sjetteplass",
+   "info": "Oslo lufthavn ble den høyest rangerte europeiske flyplassen i sin kategori.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10641126"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Imelda Marcos, som Trump møtte i Manila og kalte en «gammel venn», er 87 år.",
+   "svar": "Tull",
+   "info": "Hun er 97 år, og er kjent for en skosamling på flere tusen par.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10639917"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilke to NRK-programmer svarer kringkastingssjef Vibeke Fürst Haugen på kritikk mot?",
+   "alt": [
+    "«Bløff» og «Yachten»",
+    "«Exit» og «Skam»",
+    "«Maskorama» og «Farmen»",
+    "«Kongen befaler» og «Helt perfekt»"
+   ],
+   "svar": "«Bløff» og «Yachten»",
+   "info": "Statskanalen er blitt refset for «løgn og reality».",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/trender/i/kMa9GB/nrk-sjef-vibeke-furst-haugen-svarer-paa-reality-kritikken"
+  }
+ ]
+}
