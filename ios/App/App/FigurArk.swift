@@ -71,7 +71,7 @@ final class FigurModell: ObservableObject {
 
     func last() { kall("return await window.__mvFigur.data()", [:]) }
     func velg(_ e: [String: Any]) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         kall("return await window.__mvFigur.velg(e)", ["e": e])
     }
     func visLapp(_ t: String) {
@@ -93,12 +93,7 @@ final class FigurModell: ObservableObject {
 struct FigurArk: View {
     @ObservedObject var m: FigurModell
     @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private var kort: Color { Tema.kort }
     private let kolonner = [GridItem(.adaptive(minimum: 72), spacing: 10)]
 
     var body: some View {
@@ -142,7 +137,7 @@ struct FigurArk: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(d.slots, id: \.id) { s in
-                    Button(action: { m.slot = s.id; m.lapp = nil; UISelectionFeedbackGenerator().selectionChanged() }) {
+                    Button(action: { m.slot = s.id; m.lapp = nil; Haptikk.valg() }) {
                         Text(s.navn).font(.archivo(15, vekt: 800))
                             .padding(.horizontal, 14).padding(.vertical, 8)
                             .background(Capsule().fill(m.slot == s.id ? gul : kort))
@@ -157,7 +152,7 @@ struct FigurArk: View {
     /// «Lås opp»: det som ennå ikke er låst opp, samlet på ett sted – fanene viser bare det du har
     private func laasKnapp(_ d: FigurData) -> some View {
         let paa = m.slot == "laas", n = d.ting.filter { !$0.har }.count
-        return Button(action: { m.slot = "laas"; m.lapp = nil; UISelectionFeedbackGenerator().selectionChanged() }) {
+        return Button(action: { m.slot = "laas"; m.lapp = nil; Haptikk.valg() }) {
             HStack(spacing: 5) {
                 Image(systemName: paa ? "lock.open.fill" : "lock.fill").font(.system(size: 12, weight: .bold))
                 Text(d.t("laasOpp")).font(.archivo(14, vekt: 800))
@@ -295,7 +290,7 @@ struct FigurArk: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("\(har) \(d.t("av")) \(alle.count) \(d.t("laastOpp")) · \(d.kvelder) \(d.kvelder == 1 ? d.t("kveld") : d.t("kvelder"))").font(.archivo(13, vekt: 500)).opacity(0.7)
                 if har < alle.count {
-                    Button(action: { m.slot = "laas"; UISelectionFeedbackGenerator().selectionChanged() }) {
+                    Button(action: { m.slot = "laas"; Haptikk.valg() }) {
                         Text(d.t("seLaas") + " →").font(.archivo(14, vekt: 800)).foregroundColor(modus == .dark ? gul : rust)
                     }.buttonStyle(.plain)
                 }

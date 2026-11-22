@@ -5,36 +5,27 @@ import WebKit
 /// Kveldens oppsummering native: vinneren og lovboka, tallene, kåringene, slurketavla med hodene – og knappene for å dele,
 /// fortsette eller gå ut. Nettsiden (rom.js sluttData) sender alt ferdig oversatt; trykkene går tilbake til nettsidens egne
 /// knapper (window.__mvLek.trykk), lenkene til dens <a> (__mvLek.lenke), og regelen skrives i iPhonens dialog (__mvLek.skriv).
-final class SluttModell: ObservableObject {
+final class SluttModell: ObservableObject, HarFigurer {
     @Published var d: [String: Any] = [:]
     weak var nett: WKWebView?
     /// Skallet viser dialogen med tekstfelt (tittel, plass, verdi, knapp, avbryt, ferdig)
     var dialog: ((String, String, String, String, String, @escaping (String) -> Void) -> Void)?
-    private var bilder: [String: UIImage] = [:]
 
     func sett(_ d: [String: Any]) { self.d = d }
     func s(_ k: String) -> String { d[k] as? String ?? "" }
     func liste(_ k: String) -> [[String: Any]] { d[k] as? [[String: Any]] ?? [] }
     func obj(_ k: String) -> [String: Any]? { d[k] as? [String: Any] }
 
-    func bilde(_ b64: String) -> UIImage? {
-        if b64.isEmpty { return nil }
-        if let b = bilder[b64] { return b }
-        guard let data = Data(base64Encoded: b64), let img = UIImage(data: data, scale: 2) else { return nil }
-        if bilder.count > 40 { bilder.removeAll() }
-        bilder[b64] = img
-        return img
-    }
 
     private func js(_ kode: String) { nett?.evaluateJavaScript(kode, completionHandler: nil) }
     private func json(_ x: Any) -> String? { (try? JSONSerialization.data(withJSONObject: x)).flatMap { String(data: $0, encoding: .utf8) } }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         guard let j = json([g, attrs]) else { return }
         js("window.__mvLek && window.__mvLek.trykk.apply(null, \(j))")
     }
     func lenke(_ href: String) {
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptikk.valg()
         guard let j = json([href]) else { return }
         js("window.__mvLek && window.__mvLek.lenke(\(j)[0])")
     }
@@ -48,13 +39,7 @@ final class SluttModell: ObservableObject {
 struct SluttSkjerm: View {
     @ObservedObject var m: SluttModell
     @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private var kort: Color { Tema.kort }
 
     var body: some View {
         ZStack {
@@ -109,9 +94,7 @@ struct SluttSkjerm: View {
             Text(l["etikett"] as? String ?? "").font(.archivo(12, vekt: 900)).opacity(0.7).padding(.top, 6)
             let t = l["tekst"] as? String ?? ""
             if !t.isEmpty {
-                // strikethrough(Bool) finnes bare fra iOS 16 – velg varianten uten argument
-                let tx = Text(t).font(.archivo(22, vekt: 800))
-                (l["strek"] as? Bool == true ? tx.strikethrough() : tx).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                Text(t).font(.archivo(22, vekt: 800)).strikethrough(l["strek"] as? Bool == true).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             }
             Text(l["under"] as? String ?? "").font(.archivo(12, vekt: 600)).opacity(0.7).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             let del = l["del"] as? String ?? ""

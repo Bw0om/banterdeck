@@ -80,22 +80,22 @@ final class StartModell: ObservableObject {
     private var utenNett: Bool {
         guard !harNett else { return false }
         feil = T("Ingen nett. Telefonene snakker sammen via nettet, så rommet trenger dekning.", "No internet. The phones talk through the server, so the room needs a connection.")
-        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        Haptikk.melding(.warning)
         return true
     }
 
     func lagRom() {
         guard travel == nil, !utenNett else { return }
         let n = navn.trimmingCharacters(in: .whitespacesAndNewlines)
-        if n.isEmpty { feil = T("Skriv inn navnet ditt.", "Enter your name."); UINotificationFeedbackGenerator().notificationOccurred(.warning); return }
+        if n.isEmpty { feil = T("Skriv inn navnet ditt.", "Enter your name."); Haptikk.melding(.warning); return }
         kjor("lag", "return await window.__mvStart.lag(navn)", ["navn": n])
     }
 
     func bliMed() {
         guard travel == nil, !utenNett else { return }
         let k = kode.uppercased().filter { $0.isLetter || $0.isNumber }, n = navn.trimmingCharacters(in: .whitespacesAndNewlines)
-        if k.count < 4 { feil = T("Skriv inn koden fra verten.", "Enter the code from the host."); UINotificationFeedbackGenerator().notificationOccurred(.warning); return }
-        if n.isEmpty { feil = T("Skriv inn navnet ditt.", "Enter your name."); UINotificationFeedbackGenerator().notificationOccurred(.warning); return }
+        if k.count < 4 { feil = T("Skriv inn koden fra verten.", "Enter the code from the host."); Haptikk.melding(.warning); return }
+        if n.isEmpty { feil = T("Skriv inn navnet ditt.", "Enter your name."); Haptikk.melding(.warning); return }
         kjor("bli", "return await window.__mvStart.bliMed(kode, navn)", ["kode": k, "navn": n])
     }
 
@@ -103,13 +103,13 @@ final class StartModell: ObservableObject {
     func startGjeng(_ g: StartGjeng) {
         guard travel == nil, !utenNett else { return }
         let n = navn.trimmingCharacters(in: .whitespacesAndNewlines)
-        if n.isEmpty { navnKjent = false; feil = T("Skriv inn navnet ditt først.", "Enter your name first."); UINotificationFeedbackGenerator().notificationOccurred(.warning); return }
+        if n.isEmpty { navnKjent = false; feil = T("Skriv inn navnet ditt først.", "Enter your name first."); Haptikk.melding(.warning); return }
         kjor("gjeng:" + g.id, "return await window.__mvStart.gjeng(id, navn)", ["id": g.id, "navn": n])
     }
 
     func fortsettRom() {
         guard travel == nil, let w = nett else { return }
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Haptikk.trykk(.medium)
         travel = "fortsett"
         w.evaluateJavaScript("window.__mvStart && window.__mvStart.fortsett()", completionHandler: nil)
     }
@@ -122,7 +122,7 @@ final class StartModell: ObservableObject {
 
     private func kjor(_ hva: String, _ js: String, _ arg: [String: Any]) {
         guard let w = nett else { feil = T("Siden er ikke klar ennå.", "The page isn’t ready yet."); return }
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Haptikk.trykk(.medium)
         feil = ""; travel = hva
         w.callAsyncJavaScript(js, arguments: arg, in: nil, in: .page) { [weak self] res in
             guard let self = self else { return }
@@ -131,10 +131,10 @@ final class StartModell: ObservableObject {
                 case .success(let v):
                     let d = v as? [String: Any] ?? [:]
                     if let f = d["feil"] as? String, !f.isEmpty {
-                        self.feil = f; self.travel = nil; UINotificationFeedbackGenerator().notificationOccurred(.error)
+                        self.feil = f; self.travel = nil; Haptikk.melding(.error)
                         if d["kode"] as? String == "navn" { self.navnKjent = false }   // navnet mangler: feltet kommer fram
                     }
-                    else { UINotificationFeedbackGenerator().notificationOccurred(.success) }   // siden melder «rom», og skjermen går bort
+                    else { Haptikk.melding(.success) }   // siden melder «rom», og skjermen går bort
                 case .failure:
                     self.feil = self.T("Fikk ikke kontakt. Prøv igjen.", "Couldn’t connect. Try again."); self.travel = nil
                 }
@@ -400,21 +400,3 @@ private struct TrykkStil: ButtonStyle {
     }
 }
 
-extension Font {
-    /// Archivo – samme skrift som på nettsiden (Fonter/Archivo.ttf, variabel). `vekt` 100–900 som i CSS.
-    /// Mangler fonten, brukes systemfonten med tilsvarende vekt.
-    static func archivo(_ size: CGFloat, vekt: CGFloat = 700) -> Font {
-        let wght = 0x77676874   // aksen 'wght'
-        let variasjon = UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String)
-        let d = UIFontDescriptor(fontAttributes: [.name: "Archivo-SemiBold", variasjon: [NSNumber(value: wght): NSNumber(value: Double(vekt))]])
-        let f = UIFont(descriptor: d, size: size)
-        if f.familyName.hasPrefix("Archivo") { return Font(f) }
-        return .system(size: size, weight: vekt >= 850 ? .black : vekt >= 750 ? .heavy : vekt >= 650 ? .bold : .semibold)
-    }
-}
-
-private extension View {
-    @ViewBuilder func scrollDismissesKeyboardIfAvailable() -> some View {
-        if #available(iOS 16.0, *) { self.scrollDismissesKeyboard(.interactively) } else { self }
-    }
-}

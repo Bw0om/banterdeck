@@ -33,12 +33,11 @@ struct PkData {
     }
 }
 
-final class PkModell: ObservableObject {
+final class PkModell: ObservableObject, HarFigurer {
     @Published var d: PkData? = nil
     let blokker = KortModell()
     private(set) var avvik: Double = 0
     weak var nett: WKWebView? { didSet { blokker.nett = nett } }
-    private var bilder: [String: UIImage] = [:]
     func sett(_ dict: [String: Any]) {
         let ny = PkData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -46,21 +45,13 @@ final class PkModell: ObservableObject {
         withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) { d = ny }
     }
     func igjen(_ frist: Double) -> Int { max(0, Int(ceil((frist - 1500 - (Date().timeIntervalSince1970 * 1000 + avvik)) / 1000))) }
-    func bilde(_ b64: String) -> UIImage? {
-        if b64.isEmpty { return nil }
-        if let b = bilder[b64] { return b }
-        guard let data = Data(base64Encoded: b64), let img = UIImage(data: data, scale: 2) else { return nil }
-        if bilder.count > 80 { bilder.removeAll() }
-        bilder[b64] = img
-        return img
-    }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        UIImpactFeedbackGenerator(style: g == "pk-riktig" ? .medium : .light).impactOccurred()
+        Haptikk.trykk(g == "pk-riktig" ? .medium : .light)
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
     }
     func skjema(_ id: String) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         guard let data = try? JSONSerialization.data(withJSONObject: [id]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.skjema(\(json)[0])", completionHandler: nil)
     }
@@ -68,19 +59,9 @@ final class PkModell: ObservableObject {
 
 struct PannekortSkjerm: View {
     @ObservedObject var m: PkModell
-    @Environment(\.colorScheme) private var modus
     @Environment(\.accessibilityReduceMotion) private var roligere
     @State private var klask = false
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private var kortFarge: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
-    private let lys = Color(red: 1, green: 0.973, blue: 0.933)
 
     var body: some View {
         ZStack {
@@ -166,7 +147,7 @@ struct PannekortSkjerm: View {
                             guard sk.skrevet, !roligere else { return }
                             klask = true
                             withAnimation(.spring(response: 0.32, dampingFraction: 0.55)) { klask = false }
-                            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+                            Haptikk.trykk(.heavy)
                         }
                 }
                 Spacer(minLength: 0)

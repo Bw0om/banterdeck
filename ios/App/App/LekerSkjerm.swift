@@ -73,25 +73,18 @@ final class LekerModell: ObservableObject {
         if let a = arg, let data = try? JSONSerialization.data(withJSONObject: [a]), let s = String(data: data, encoding: .utf8) { json = s + "[0]" }
         nett?.evaluateJavaScript("window.__mvLeker && window.__mvLeker.\(kall)(\(json))", completionHandler: nil)
     }
-    func aapne(_ l: LekeKort) { UISelectionFeedbackGenerator().selectionChanged(); js("gaa", l.id) }
-    func settAlkfri(_ v: Bool) { UISelectionFeedbackGenerator().selectionChanged(); js("alkfri", v) }
+    func aapne(_ l: LekeKort) { Haptikk.valg(); js("gaa", l.id) }
+    func settAlkfri(_ v: Bool) { Haptikk.valg(); js("alkfri", v) }
     func alderJa() { alderOk = true; js("alder") }
 }
 
 struct LekerSkjerm: View {
     @ObservedObject var m: LekerModell
-    @Environment(\.colorScheme) private var modus
     @FocusState private var sokFokus: Bool
     /// Kortene glir inn med fjær første gang lista vises (30 ms mellom hvert, de første tolv) – m.inne
     private let fjaer = Animation.spring(response: 0.42, dampingFraction: 0.86)
 
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
+    private var kort: Color { Tema.kort }
 
     var body: some View {
         ScrollView {
@@ -181,7 +174,7 @@ struct LekerSkjerm: View {
         }
         .background(papir.ignoresSafeArea())
         .foregroundColor(blekk)
-        .scrollDismissesKeyboardIfAvailable()
+        .scrollDismissesKeyboard(.interactively)
         // Filtrene: kortene som forsvinner og kommer, glir med fjær – ikke hopper
         .animation(fjaer, value: m.niva).animation(fjaer, value: m.pl).animation(fjaer, value: m.bareGratis).animation(fjaer, value: m.sok)
         .alert(m.t("alderTittel"), isPresented: Binding(get: { !m.alderOk }, set: { _ in })) {
@@ -193,7 +186,7 @@ struct LekerSkjerm: View {
     private var skille: some View { Rectangle().fill(blekk.opacity(0.2)).frame(width: 1.5, height: 22) }
 
     private func chip(_ tekst: String, paa: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: { UISelectionFeedbackGenerator().selectionChanged(); action() }) {
+        Button(action: { Haptikk.valg(); action() }) {
             Text(tekst).font(.archivo(14, vekt: 800))
                 .padding(.horizontal, 12).frame(height: 36)
                 .foregroundColor(paa ? morkBlekk : blekk)
@@ -275,11 +268,5 @@ private struct TrykkStil3: ButtonStyle {
         configuration.label
             .offset(x: configuration.isPressed ? 3 : 0, y: configuration.isPressed ? 3 : 0)
             .animation(.spring(response: 0.18, dampingFraction: 0.9), value: configuration.isPressed)
-    }
-}
-
-private extension View {
-    @ViewBuilder func scrollDismissesKeyboardIfAvailable() -> some View {
-        if #available(iOS 16.0, *) { self.scrollDismissesKeyboard(.interactively) } else { self }
     }
 }

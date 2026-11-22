@@ -80,14 +80,14 @@ final class LekesideModell: ObservableObject {
         if let a = arg, let data = try? JSONSerialization.data(withJSONObject: [a]), let s = String(data: data, encoding: .utf8) { json = s + "[0]" }
         nett?.evaluateJavaScript("window.__mvLekeside && window.__mvLekeside.\(kall)(\(json))", completionHandler: nil)
     }
-    func tilbake() { UISelectionFeedbackGenerator().selectionChanged(); js("tilbake") }
-    func rom() { UIImpactFeedbackGenerator(style: .medium).impactOccurred(); js("rom") }
-    func verktoy() { UIImpactFeedbackGenerator(style: .light).impactOccurred(); js("verktoy") }
-    func settAlkfri(_ v: Bool) { UISelectionFeedbackGenerator().selectionChanged(); js("alkfri", v) }
-    func kopier() { UINotificationFeedbackGenerator().notificationOccurred(.success); js("kopier") }
-    func aapneLenke() { UISelectionFeedbackGenerator().selectionChanged(); js("lenke") }
-    func gaa(_ l: LekesideLek) { UISelectionFeedbackGenerator().selectionChanged(); js("gaa", l.id) }
-    func lagRom() { UIImpactFeedbackGenerator(style: .medium).impactOccurred(); js("gaa", engelsk ? "/room" : "/no/rom") }
+    func tilbake() { Haptikk.valg(); js("tilbake") }
+    func rom() { Haptikk.trykk(.medium); js("rom") }
+    func verktoy() { Haptikk.trykk(); js("verktoy") }
+    func settAlkfri(_ v: Bool) { Haptikk.valg(); js("alkfri", v) }
+    func kopier() { Haptikk.melding(.success); js("kopier") }
+    func aapneLenke() { Haptikk.valg(); js("lenke") }
+    func gaa(_ l: LekesideLek) { Haptikk.valg(); js("gaa", l.id) }
+    func lagRom() { Haptikk.trykk(.medium); js("gaa", engelsk ? "/room" : "/no/rom") }
 }
 
 struct LekesideSkjerm: View {
@@ -96,15 +96,7 @@ struct LekesideSkjerm: View {
     /// Sveip fra venstre kant = tilbake, som i resten av iOS (nettsidens eget sveip når ikke gjennom den native skjermen)
     @State private var kantDrag: CGFloat = 0
 
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private var kort: Color { Tema.kort }
 
     /// Fargen på feltet bak bildet følger nivået: rom = mint, telefonen hjelper = rosa, bare regler = gul
     private var felt: Color { m.niva == "rom" ? mint : m.niva == "app" ? rosa : gul }

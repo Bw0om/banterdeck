@@ -22,27 +22,21 @@ final class GjengModell: ObservableObject {
     private func js(_ kode: String) { nett?.evaluateJavaScript(kode, completionHandler: nil) }
     private func json(_ x: Any) -> String? { (try? JSONSerialization.data(withJSONObject: x)).flatMap { String(data: $0, encoding: .utf8) } }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         guard let j = json([g, attrs]) else { return }
         js("window.__mvGjeng && window.__mvGjeng.trykk.apply(null, \(j))")
     }
-    func sesong(_ s: String) { UISelectionFeedbackGenerator().selectionChanged(); if let j = json([s]) { js("window.__mvGjeng && window.__mvGjeng.sesong(\(j)[0])") } }
-    func sorter(_ k: String) { UISelectionFeedbackGenerator().selectionChanged(); if let j = json([k]) { js("window.__mvGjeng && window.__mvGjeng.sort(\(j)[0])") } }
+    func sesong(_ s: String) { Haptikk.valg(); if let j = json([s]) { js("window.__mvGjeng && window.__mvGjeng.sesong(\(j)[0])") } }
+    func sorter(_ k: String) { Haptikk.valg(); if let j = json([k]) { js("window.__mvGjeng && window.__mvGjeng.sort(\(j)[0])") } }
     func skriv(_ skjema: String, _ felt: String, _ verdi: String) { if let j = json([skjema, felt, verdi]) { js("window.__mvGjeng && window.__mvGjeng.skriv.apply(null, \(j))") } }
-    func lenke(_ href: String) { UISelectionFeedbackGenerator().selectionChanged(); if let j = json([href]) { js("window.__mvGjeng && window.__mvGjeng.lenke(\(j)[0])") } }
-    func gaa(_ url: String) { UISelectionFeedbackGenerator().selectionChanged(); if let j = json([url]) { js("window.__mvGjeng && window.__mvGjeng.gaa(\(j)[0])") } }
+    func lenke(_ href: String) { Haptikk.valg(); if let j = json([href]) { js("window.__mvGjeng && window.__mvGjeng.lenke(\(j)[0])") } }
+    func gaa(_ url: String) { Haptikk.valg(); if let j = json([url]) { js("window.__mvGjeng && window.__mvGjeng.gaa(\(j)[0])") } }
 }
 
 struct GjengSkjerm: View {
     @ObservedObject var m: GjengModell
     @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private var kort: Color { Tema.kort }
     private let gjengFarger: [Color] = [Color(red: 0.388, green: 0.886, blue: 0.659), Color(red: 1, green: 0.612, blue: 0.761), Color(red: 1, green: 0.824, blue: 0.247), Color(red: 0.353, green: 0.553, blue: 0.933), Color(red: 1, green: 0.357, blue: 0.122)]
 
     var body: some View {
@@ -381,10 +375,8 @@ struct GjengSkjerm: View {
                     Text(m.T("Navn", "Name")).font(.archivo(12, vekt: 700)).opacity(0.6).frame(maxWidth: .infinity, alignment: .leading)
                     ForEach(Array(kolonner.enumerated()), id: \.offset) { _, k in
                         let valgt = m.s("sorter") == k.0
-                        let tx = Text(kolonneNavn(k.0)).font(.archivo(12, vekt: 800))
                         Button(action: { m.sorter(k.0) }) {
-                            // underline(Bool) finnes bare fra iOS 16 – velg varianten uten argument
-                            (valgt ? tx.underline() : tx).lineLimit(1).minimumScaleFactor(0.7)
+                            Text(kolonneNavn(k.0)).font(.archivo(12, vekt: 800)).underline(valgt).lineLimit(1).minimumScaleFactor(0.7)
                                 .foregroundColor(valgt ? rust : blekk.opacity(0.6))
                                 .frame(width: k.1, alignment: .trailing)
                         }.buttonStyle(.plain)

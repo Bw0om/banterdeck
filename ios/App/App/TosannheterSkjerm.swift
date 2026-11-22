@@ -51,12 +51,11 @@ struct TsData {
     }
 }
 
-final class TsModell: ObservableObject {
+final class TsModell: ObservableObject, HarFigurer {
     @Published var d: TsData? = nil
     let blokker = KortModell()
     private(set) var avvik: Double = 0
     weak var nett: WKWebView? { didSet { blokker.nett = nett } }
-    private var bilder: [String: UIImage] = [:]
     func sett(_ dict: [String: Any]) {
         let ny = TsData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -65,22 +64,14 @@ final class TsModell: ObservableObject {
     }
     /// Sekunder igjen til fristen (servertid, samme regning som nettsiden)
     func igjen(_ frist: Double) -> Int { max(0, Int(ceil((frist - 1500 - (Date().timeIntervalSince1970 * 1000 + avvik)) / 1000))) }
-    func bilde(_ b64: String) -> UIImage? {
-        if b64.isEmpty { return nil }
-        if let b = bilder[b64] { return b }
-        guard let data = Data(base64Encoded: b64), let img = UIImage(data: data, scale: 2) else { return nil }
-        if bilder.count > 80 { bilder.removeAll() }
-        bilder[b64] = img
-        return img
-    }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
     }
     /// Skrivingen: nettsidens skjema (tre felt + løgnen) åpnes som iPhone-dialog
     func skjema(_ id: String) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         guard let data = try? JSONSerialization.data(withJSONObject: [id]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.skjema(\(json)[0])", completionHandler: nil)
     }
@@ -89,16 +80,7 @@ final class TsModell: ObservableObject {
 struct TosannheterSkjerm: View {
     @ObservedObject var m: TsModell
     @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private var kortFarge: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
-    private let lys = Color(red: 1, green: 0.973, blue: 0.933)
 
     var body: some View {
         ZStack {
@@ -324,14 +306,6 @@ struct FasitVisning: View {
     let f: TsFasit
     let modus: ColorScheme
     @State private var inn = false
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
-    private let lys = Color(red: 1, green: 0.973, blue: 0.933)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
-    private var blekk: Color { modus == .dark ? lys : morkBlekk }
-    private var kortFarge: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -379,7 +353,7 @@ struct FasitVisning: View {
                 }
             }
             if !f.drikker.isEmpty {
-                FlytRad(spacing: 8) {
+                FlytLayout(spacing: 8) {
                     ForEach(Array(f.drikker.enumerated()), id: \.offset) { j, t in
                         Text(t).font(.archivo(17, vekt: 900)).foregroundColor(morkBlekk)
                             .padding(.horizontal, 12).padding(.vertical, 6)
@@ -467,35 +441,3 @@ struct Prikker: View {
     }
 }
 
-/// Enkel flytende rad (som flex-wrap): elementene legges etter hverandre og bryter når raden er full
-struct FlytRad<Innhold: View>: View {
-    var spacing: CGFloat = 8
-    @ViewBuilder let innhold: () -> Innhold
-    var body: some View {
-        if #available(iOS 16.0, *) { FlytLayout(spacing: spacing) { innhold() } }
-        else { VStack(alignment: .leading, spacing: spacing) { innhold() } }
-    }
-}
-@available(iOS 16.0, *)
-struct FlytLayout: Layout {
-    var spacing: CGFloat = 8
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let bredde = proposal.width ?? 360
-        var x: CGFloat = 0, y: CGFloat = 0, radH: CGFloat = 0
-        for v in subviews {
-            let s = v.sizeThatFits(.unspecified)
-            if x > 0 && x + s.width > bredde { x = 0; y += radH + spacing; radH = 0 }
-            x += s.width + spacing; radH = max(radH, s.height)
-        }
-        return CGSize(width: bredde, height: y + radH)
-    }
-    func placeSubviews(in b: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var x: CGFloat = b.minX, y: CGFloat = b.minY, radH: CGFloat = 0
-        for v in subviews {
-            let s = v.sizeThatFits(.unspecified)
-            if x > b.minX && x + s.width > b.maxX { x = b.minX; y += radH + spacing; radH = 0 }
-            v.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(s))
-            x += s.width + spacing; radH = max(radH, s.height)
-        }
-    }
-}

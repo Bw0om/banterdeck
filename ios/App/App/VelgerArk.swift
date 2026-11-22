@@ -48,9 +48,6 @@ struct VelgerArk: View {
     @ObservedObject var m: VelgerModell
     @Environment(\.colorScheme) private var modus
     @State private var detalj: Lek? = nil   // ⓘ: leken som vises med regler
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
 
     var body: some View {
         NavigationView {
@@ -75,7 +72,7 @@ struct VelgerArk: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .bakgrunn(papir)
+            .scrollContentBackground(.hidden).background(papir)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .principal) { Text(m.tittel).font(.archivo(18, vekt: 900)) } }
             // Én skjult lenke for alle ⓘ-ene: trykk på ⓘ setter `detalj`, og lenka åpner seg
@@ -115,7 +112,7 @@ struct VelgerArk: View {
     }
 
     private func trykk(_ l: Lek) {
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Haptikk.trykk(.medium)
         m.velg?(l)
     }
 }
@@ -125,8 +122,6 @@ struct LekDetalj: View {
     @ObservedObject var m: VelgerModell
     let trykk: (Lek) -> Void
     @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
     private let blekk = Color(red: 0.086, green: 0.071, blue: 0.059)
 
     var body: some View {
@@ -165,12 +160,5 @@ struct LekDetalj: View {
         }
         .background(papir.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private extension View {
-    /// Papirfarge bak lista der iOS lar oss (16+); på iOS 15 beholder lista systemfargen
-    @ViewBuilder func bakgrunn(_ c: Color) -> some View {
-        if #available(iOS 16.0, *) { self.scrollContentBackground(.hidden).background(c) } else { self }
     }
 }

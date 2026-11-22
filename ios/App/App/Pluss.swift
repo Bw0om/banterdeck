@@ -44,7 +44,7 @@ final class PlussModell: ObservableObject {
     func kjop(_ produkt: Product) {
         guard travel == nil else { return }
         guard inne else { loggInn?(); return }
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Haptikk.trykk(.medium)
         travel = produkt.id; feil = false; melding = ""
         Task {
             do {
@@ -53,7 +53,7 @@ final class PlussModell: ObservableObject {
                 case .success(let v):
                     let t = try sjekk(v)
                     let ok = await sendTilServer(v.jwsRepresentation)
-                    if ok { await t.finish(); UINotificationFeedbackGenerator().notificationOccurred(.success); ferdig?() }
+                    if ok { await t.finish(); Haptikk.melding(.success); ferdig?() }
                 case .userCancelled:
                     break
                 case .pending:
@@ -93,7 +93,7 @@ final class PlussModell: ObservableObject {
         Task {
             let d = await js("return await window.__mvPluss.gratis()", [:])
             if let f = d["feil"] as? String, !f.isEmpty { feil = true; melding = d["melding"] as? String ?? f }
-            else { await hentStatus(); UINotificationFeedbackGenerator().notificationOccurred(.success); ferdig?() }
+            else { await hentStatus(); Haptikk.melding(.success); ferdig?() }
             travel = nil
         }
     }

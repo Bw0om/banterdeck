@@ -10,8 +10,8 @@ struct Hodestabel<Hode: View>: View {
     var maks: Int = 6
     let storrelse: CGFloat
     var avstand: CGFloat = -10
-    var farge: Color = Color(red: 1, green: 0.824, blue: 0.247)
-    var strek: Color = Color(red: 0.086, green: 0.071, blue: 0.059)
+    var farge: Color = Tema.gul
+    var strek: Color = Tema.morkBlekk
     @ViewBuilder let hode: (Int) -> Hode
 
     var body: some View {
@@ -31,4 +31,28 @@ struct Hodestabel<Hode: View>: View {
 /// (`.fixed` gir bare ÉN kolonne – da sto hodene under hverandre; `.adaptive` fyller linja først.)
 func benkKolonner(_ bredde: CGFloat, avstand: CGFloat = 6) -> [GridItem] {
     [GridItem(.adaptive(minimum: bredde, maximum: bredde), spacing: avstand)]
+}
+
+/// Flytende rad (som flex-wrap): elementene legges etter hverandre og bryter når raden er full.
+struct FlytLayout: Layout {
+    var spacing: CGFloat = 8
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let bredde = proposal.width ?? 360
+        var x: CGFloat = 0, y: CGFloat = 0, radH: CGFloat = 0
+        for v in subviews {
+            let s = v.sizeThatFits(.unspecified)
+            if x > 0 && x + s.width > bredde { x = 0; y += radH + spacing; radH = 0 }
+            x += s.width + spacing; radH = max(radH, s.height)
+        }
+        return CGSize(width: bredde, height: y + radH)
+    }
+    func placeSubviews(in b: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x: CGFloat = b.minX, y: CGFloat = b.minY, radH: CGFloat = 0
+        for v in subviews {
+            let s = v.sizeThatFits(.unspecified)
+            if x > b.minX && x + s.width > b.maxX { x = b.minX; y += radH + spacing; radH = 0 }
+            v.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(s))
+            x += s.width + spacing; radH = max(radH, s.height)
+        }
+    }
 }

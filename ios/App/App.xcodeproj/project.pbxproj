@@ -47,6 +47,7 @@
 		A1B2C3D4E5F60718293A4BAB /* NyhetsrundenSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BAA /* NyhetsrundenSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4C0B /* QuizSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4C0A /* QuizSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4D0B /* Rekker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4D0A /* Rekker.swift */; };
+		A1B2C3D4E5F60718293A4E1B /* Tema.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4E1A /* Tema.swift */; };
 		A1B2C3D4E5F60718293A4C0D /* LekesideSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4C0C /* LekesideSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4BAD /* PannekortSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BAC /* PannekortSkjerm.swift */; };
 		A1B2C3D4E5F60718293A4BAF /* SkalSkjerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4BAE /* SkalSkjerm.swift */; };
@@ -99,6 +100,7 @@
 		A1B2C3D4E5F60718293A4BAA /* NyhetsrundenSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NyhetsrundenSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4C0A /* QuizSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4D0A /* Rekker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rekker.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4E1A /* Tema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tema.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4C0C /* LekesideSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LekesideSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4BAC /* PannekortSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PannekortSkjerm.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4BAE /* SkalSkjerm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkalSkjerm.swift; sourceTree = "<group>"; };
@@ -172,6 +174,7 @@
 				A1B2C3D4E5F60718293A4BAA /* NyhetsrundenSkjerm.swift */,
 				A1B2C3D4E5F60718293A4C0A /* QuizSkjerm.swift */,
 				A1B2C3D4E5F60718293A4D0A /* Rekker.swift */,
+				A1B2C3D4E5F60718293A4E1A /* Tema.swift */,
 				A1B2C3D4E5F60718293A4C0C /* LekesideSkjerm.swift */,
 				A1B2C3D4E5F60718293A4BAC /* PannekortSkjerm.swift */,
 				A1B2C3D4E5F60718293A4BAE /* SkalSkjerm.swift */,
@@ -308,6 +311,7 @@
 				A1B2C3D4E5F60718293A4BAB /* NyhetsrundenSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4C0B /* QuizSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4D0B /* Rekker.swift in Sources */,
+				A1B2C3D4E5F60718293A4E1B /* Tema.swift in Sources */,
 				A1B2C3D4E5F60718293A4C0D /* LekesideSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4BAD /* PannekortSkjerm.swift in Sources */,
 				A1B2C3D4E5F60718293A4BAF /* SkalSkjerm.swift in Sources */,
@@ -390,7 +394,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -441,7 +445,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -460,7 +464,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				DEVELOPMENT_TEAM = 685JC7R3PQ;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -484,7 +488,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				DEVELOPMENT_TEAM = 685JC7R3PQ;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
