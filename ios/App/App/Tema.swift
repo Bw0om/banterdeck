@@ -93,3 +93,81 @@ protocol HarFigurer {}
 extension HarFigurer {
     func bilde(_ b64: String) -> UIImage? { Figurbilder.bilde(b64) }
 }
+
+// MARK: - Felles deler i lekene
+
+extension View {
+    /// Den lille kapselknappen øverst i lekene (Stua, Mer)
+    func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
+                .padding(.horizontal, 11).frame(height: 34)
+                .background(Capsule().fill(Tema.kort)).overlay(Capsule().stroke(Tema.blekk, lineWidth: 2))
+        }.buttonStyle(.plain)
+    }
+}
+
+/// Nedtellingen øverst i en lek: sekundene i en gul sirkel, oransje de siste ti
+struct Nedtelling: View {
+    let igjen: () -> Int
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            let n = igjen()
+            Text("\(n)").font(.archivo(16, vekt: 900)).frame(width: 40, height: 40)
+                .background(Circle().fill(n <= 10 ? Tema.oransje : Tema.gul)).overlay(Circle().stroke(Tema.morkBlekk, lineWidth: 2))
+                .foregroundColor(Tema.morkBlekk)
+        }
+    }
+}
+
+/// Toppen i en lek: lekens navn og hva som skjer nå (rust når det gjelder deg), plass til noe ekstra
+/// (nedtelling, bom-prikker …), og Stua og Mer til høyre. `trykk` får «stua-ark» eller «mer-ark».
+struct Topplinje<Ekstra: View>: View {
+    let tittel: String
+    let chip: String
+    var uthevet = false
+    /// Navnet på én linje (lange lekenavn kuttes heller enn å skyve toppen ned)
+    var enLinje = false
+    let stua: String
+    let mer: String
+    let trykk: (String) -> Void
+    @ViewBuilder var ekstra: () -> Ekstra
+
+    var body: some View {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(tittel).font(.archivo(12, vekt: 700)).opacity(0.65).lineLimit(enLinje ? 1 : nil)
+                Text(chip).font(.archivo(16, vekt: 900)).foregroundColor(uthevet ? Tema.rust : Tema.blekk).lineLimit(2)
+            }
+            Spacer()
+            ekstra()
+            liten(stua, "sofa.fill") { trykk("stua-ark") }
+            liten(mer, "ellipsis") { trykk("mer-ark") }
+        }
+        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
+    }
+}
+
+extension Topplinje where Ekstra == EmptyView {
+    init(tittel: String, chip: String, uthevet: Bool = false, enLinje: Bool = false, stua: String, mer: String, trykk: @escaping (String) -> Void) {
+        self.init(tittel: tittel, chip: chip, uthevet: uthevet, enLinje: enLinje, stua: stua, mer: mer, trykk: trykk, ekstra: { EmptyView() })
+    }
+}
+
+/// En spillerfigur fra base64-PNG, eller en gul sirkel til bildet finnes. Med `px` får den fast størrelse.
+struct Figur: View {
+    let png: String
+    var px: CGFloat? = nil
+    init(_ png: String, _ px: CGFloat? = nil) { self.png = png; self.px = px }
+    var body: some View {
+        if let px {
+            innhold.frame(width: px, height: px)
+        } else {
+            innhold
+        }
+    }
+    @ViewBuilder private var innhold: some View {
+        if let img = Figurbilder.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
+        else { Circle().fill(Tema.gul).overlay(Circle().stroke(Tema.morkBlekk, lineWidth: 2)).padding(px == nil ? 0 : 2) }
+    }
+}

@@ -100,30 +100,17 @@ struct BlokkListe: View {
     }
 
     private func topp(_ b: [String: Any]) -> some View {
+        // Ikke Topplinje: blokklista har allerede luft rundt seg
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 1) {
                 Text(s(b, "tekst")).font(.archivo(12, vekt: 700)).opacity(0.65)
                 Text(s(b, "chip")).font(.archivo(16, vekt: 900)).foregroundColor(b["gul"] as? Bool == true ? rust : blekk)
             }
             Spacer()
-            if let f = (b["frist"] as? NSNumber)?.doubleValue, f > 0 {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    let n = m.igjen(f)
-                    Text("\(n)").font(.archivo(16, vekt: 900)).frame(width: 40, height: 40)
-                        .background(Circle().fill(n <= 10 ? oransje : gul)).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
-                }
-            }
+            if let f = (b["frist"] as? NSNumber)?.doubleValue, f > 0 { Nedtelling { m.igjen(f) } }
             liten(m.stua, "sofa.fill") { m.trykk("stua-ark") }
             liten(m.mer, "ellipsis") { m.trykk("mer-ark") }
         }
-    }
-
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
     }
 
     private func kortet(_ b: [String: Any]) -> some View {

@@ -85,37 +85,11 @@ struct PannekortSkjerm: View {
     }
 
     private func topp(_ d: PkData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.tittel).font(.archivo(12, vekt: 700)).opacity(0.65).lineLimit(1)
-                Text(d.chip).font(.archivo(16, vekt: 900)).foregroundColor(d.gul ? rust : blekk).lineLimit(2)
-            }
-            Spacer()
-            if d.frist > 0 {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    let n = m.igjen(d.frist)
-                    Text("\(n)").font(.archivo(16, vekt: 900)).frame(width: 40, height: 40)
-                        .background(Circle().fill(n <= 10 ? oransje : gul)).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
-                }
-            }
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
+        Topplinje(tittel: d.tittel, chip: d.chip, uthevet: d.gul, enLinje: true, stua: d.stua, mer: d.mer, trykk: { m.trykk($0) }) {
+            if d.frist > 0 { Nedtelling { m.igjen(d.frist) } }
         }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
     }
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kortFarge)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
-    }
-    private func hode(_ png: String, _ px: CGFloat) -> some View {
-        Group {
-            if let img = m.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).padding(2) }
-        }.frame(width: px, height: px)
-    }
+    private func hode(_ png: String, _ px: CGFloat) -> some View { Figur(png, px) }
     /// Lappen i panna: gul post-it med litt skjevhet, teksten krymper så den får plass
     private func lapp(_ tekst: String, bredde: CGFloat, maks: CGFloat, tom: Bool = false, meg: Bool = false) -> some View {
         Text(tekst).font(.archivo(maks, vekt: 900)).foregroundColor(morkBlekk).multilineTextAlignment(.center).lineLimit(3).minimumScaleFactor(0.4)

@@ -118,24 +118,7 @@ struct YatzySkjerm: View {
     }
 
     private func topp(_ d: YzData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.tittel).font(.archivo(12, vekt: 700)).opacity(0.65)
-                Text(d.chip).font(.archivo(16, vekt: 900)).foregroundColor(d.minTur ? rust : blekk).lineLimit(2)
-            }
-            Spacer()
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
-        }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
-    }
-
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
+        Topplinje(tittel: d.tittel, chip: d.chip, uthevet: d.minTur, stua: d.stua, mer: d.mer, trykk: { m.trykk($0) })
     }
 
     // MARK: Brettet – filt, holdt-kant øverst, terningene, begeret til høyre
