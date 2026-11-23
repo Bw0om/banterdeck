@@ -1,20 +1,26 @@
-** BUILD SUCCEEDED **
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:65:37: error: accessor macro 'ObservationIgnored()' can only apply to a single variable
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:65:47: error: accessor macro 'ObservationIgnored()' can only apply to a single variable
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:65:57: error: accessor macro 'ObservationIgnored()' can only apply to a single variable
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:66:37: error: accessor macro 'ObservationIgnored()' can only apply to a single variable
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:66:65: error: accessor macro 'ObservationIgnored()' can only apply to a single variable
+/Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift:66:94: error: accessor macro 'ObservationIgnored()' can only apply to a single variable
+** BUILD FAILED **
 ----- siste linjer -----
+    
 
-AppIntentsSSUTraining (in target 'App' from project 'App')
-2026-11-22 21:27:09.145 appintentsnltrainingprocessor[7625:26297] Parsing options for appintentsnltrainingprocessor
-2026-11-22 21:27:09.147 appintentsnltrainingprocessor[7625:26297] Starting AppIntents SSU YAML Generation
-2026-11-22 21:27:09.155 appintentsnltrainingprocessor[7625:26297] No AppShortcuts found - Skipping.
+SwiftCompile normal arm64 /Users/runner/work/banterdeck/banterdeck/ios/App/App/DealerSkjerm.swift (in target 'App' from project 'App')
+    
 
-RegisterExecutionPolicyException /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+SwiftCompile normal arm64 Compiling\ AppDelegate.swift,\ SceneDelegate.swift,\ TvSkjerm.swift,\ Skall.swift,\ StartSkjerm.swift,\ VelgerArk.swift,\ FigurArk.swift,\ RomArk.swift,\ Pluss.swift,\ PlussArk.swift,\ LoggInnArk.swift,\ PekelekenSkjerm.swift,\ KortSkjerm.swift,\ RingSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/AppDelegate.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/SceneDelegate.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/TvSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/Skall.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/StartSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/VelgerArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/FigurArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/RomArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/Pluss.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PlussArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/LoggInnArk.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/PekelekenSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/KortSkjerm.swift /Users/runner/work/banterdeck/banterdeck/ios/App/App/RingSkjerm.swift (in target 'App' from project 'App')
 
-Validate /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+** BUILD FAILED **
 
-Touch /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
-    /usr/bin/touch -c /Users/runner/work/banterdeck/banterdeck/build/sim/Build/Products/Debug-iphonesimulator/App.app
 
-** BUILD SUCCEEDED **
-
+The following build commands failed:
+	EmitSwiftModule normal arm64 (in target 'App' from project 'App')
+	SwiftEmitModule normal arm64 Emitting\ module\ for\ App (in target 'App' from project 'App')
+	Building project App with scheme App and configuration Debug
+(3 failures)
 ----- skjemaer -----
     Targets:
         App
