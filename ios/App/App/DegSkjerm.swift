@@ -6,29 +6,30 @@ import WebKit
 /// Ligger over kontosiden (nettsiden), som sier fra hva den vet (window.__mvDeg / mv-skjerm «deg») og gjør jobben.
 /// Dypere sider (gjengene, kortstokkene, innstillingene) er fortsatt nettsiden: da går denne skjermen bort, og
 /// pila tilbake på nettsiden (eller et drag fra venstre kant) henter den igjen.
-final class DegModell: ObservableObject {
-    @Published var innlogget = false
-    @Published var navn = ""          // navnet i rommet (huskes på telefonen)
-    @Published var brukernavn = ""
-    @Published var epost = ""
-    @Published var gjeng = ""         // «2 gjenger: Hytta, Kollektivet» – tom til siden har hentet
-    @Published var stokker = ""
-    @Published var replikker = ""
-    @Published var stat = false
-    @Published var moerk = false
-    @Published var plussAktiv = false
-    @Published var plussTil = ""
-    @Published var plussGratisBrukt = false
-    @Published var plussGave = false
-    @Published var plussKjent = false
-    @Published var bilde: UIImage? = nil
-    @Published var engelsk = false
+@Observable
+final class DegModell {
+    var innlogget = false
+    var navn = ""          // navnet i rommet (huskes på telefonen)
+    var brukernavn = ""
+    var epost = ""
+    var gjeng = ""         // «2 gjenger: Hytta, Kollektivet» – tom til siden har hentet
+    var stokker = ""
+    var replikker = ""
+    var stat = false
+    var moerk = false
+    var plussAktiv = false
+    var plussTil = ""
+    var plussGratisBrukt = false
+    var plussGave = false
+    var plussKjent = false
+    var bilde: UIImage? = nil
+    var engelsk = false
     /// Navnefeltet har fokus: siden får ikke skrive over det du holder på å skrive
-    var navnRedigeres = false
-    weak var nett: WKWebView?
+    @ObservationIgnored var navnRedigeres = false
+    @ObservationIgnored weak var nett: WKWebView?
     /// Ting skallet gjør selv: «inn», «ny» (innloggingsarket), «figur» (figurarket), «pluss» (Pluss-arket)
-    var handling: ((String) -> Void)?
-    private var sistPng = ""
+    @ObservationIgnored var handling: ((String) -> Void)?
+    @ObservationIgnored private var sistPng = ""
 
     func T(_ no: String, _ en: String) -> String { engelsk ? en : no }
 
@@ -77,7 +78,7 @@ final class DegModell: ObservableObject {
 }
 
 struct DegSkjerm: View {
-    @ObservedObject var m: DegModell
+    @Bindable var m: DegModell
     @Environment(\.colorScheme) private var modus
     @FocusState private var navnFokus: Bool
     @State private var spoerLoggUt = false

@@ -5,13 +5,14 @@ import WebKit
 /// Kortlekene («Jeg har aldri», «Nødt eller sannhet» …) som native skjerm. Nettsiden oversetter sin egen skjerm til
 /// enkle blokker (rom.js skjermBlokker): topp, kort, knapper, benk med hodene, dom, søyler, tekst – og denne tegner dem
 /// i appens stil. Trykkene går tilbake til nettsidens egne knapper (window.__mvLek.trykk), så all logikk bor ett sted.
-final class KortModell: ObservableObject, HarFigurer {
-    @Published var blokker: [[String: Any]] = []
-    @Published var lek = ""
-    @Published var stua = "Stua"
-    @Published var mer = "Mer"
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView?
+@Observable
+final class KortModell: HarFigurer {
+    var blokker: [[String: Any]] = []
+    var lek = ""
+    var stua = "Stua"
+    var mer = "Mer"
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView?
 
     func sett(_ d: [String: Any]) {
         if let n = (d["naa"] as? NSNumber)?.doubleValue, n > 0 { avvik = n - Date().timeIntervalSince1970 * 1000 }
@@ -23,7 +24,7 @@ final class KortModell: ObservableObject, HarFigurer {
     func igjen(_ frist: Double) -> Int { max(0, Int(ceil((frist - 1500 - (Date().timeIntervalSince1970 * 1000 + avvik)) / 1000))) }
 
 
-    var skjemaId = ""
+    @ObservationIgnored var skjemaId = ""
     func trykk(_ k: [String: Any]) {
         guard let g = k["g"] as? String, !g.isEmpty else { return }
         if g == "__skjema" { skjema(skjemaId); return }
@@ -48,7 +49,7 @@ final class KortModell: ObservableObject, HarFigurer {
 }
 
 struct KortSkjerm: View {
-    @ObservedObject var m: KortModell
+    var m: KortModell
     var body: some View {
         ZStack {
             papir.ignoresSafeArea()
@@ -60,7 +61,7 @@ struct KortSkjerm: View {
 
 /// Blokkene fra nettsiden, tegnet i appens stil. Brukes av kortlekene og lobbyen.
 struct BlokkListe: View {
-    @ObservedObject var m: KortModell
+    var m: KortModell
     private var kort: Color { Tema.kort }
 
     var body: some View {
@@ -99,30 +100,17 @@ struct BlokkListe: View {
     }
 
     private func topp(_ b: [String: Any]) -> some View {
+        // Ikke Topplinje: blokklista har allerede luft rundt seg
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 1) {
                 Text(s(b, "tekst")).font(.archivo(12, vekt: 700)).opacity(0.65)
                 Text(s(b, "chip")).font(.archivo(16, vekt: 900)).foregroundColor(b["gul"] as? Bool == true ? rust : blekk)
             }
             Spacer()
-            if let f = (b["frist"] as? NSNumber)?.doubleValue, f > 0 {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    let n = m.igjen(f)
-                    Text("\(n)").font(.archivo(16, vekt: 900)).frame(width: 40, height: 40)
-                        .background(Circle().fill(n <= 10 ? oransje : gul)).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
-                }
-            }
+            if let f = (b["frist"] as? NSNumber)?.doubleValue, f > 0 { Nedtelling { m.igjen(f) } }
             liten(m.stua, "sofa.fill") { m.trykk("stua-ark") }
             liten(m.mer, "ellipsis") { m.trykk("mer-ark") }
         }
-    }
-
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
     }
 
     private func kortet(_ b: [String: Any]) -> some View {
@@ -424,7 +412,7 @@ struct BlokkListe: View {
 
 /// Løgnhalsen og Muldvarpen: rollen/ordet vises bare mens fingeren ligger på kortet
 struct HoldKort: View {
-    @ObservedObject var m: KortModell
+    var m: KortModell
     let b: [String: Any]
     @State private var vis = false
     private func s(_ k: String) -> String { b[k] as? String ?? "" }
@@ -452,7 +440,7 @@ struct HoldKort: View {
 
 /// Løgnhalsen: Sant / Løgn – trykk = stemme, hold i 0,7 s = helt sikker (×2)
 struct HoldStem: View {
-    @ObservedObject var m: KortModell
+    var m: KortModell
     let paa: String, tekst: String, valgt: Bool, x2: Bool, logn: Bool
     @State private var holder = false
     var body: some View {

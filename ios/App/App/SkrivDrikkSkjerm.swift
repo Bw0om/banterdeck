@@ -47,11 +47,12 @@ struct SdData {
     }
 }
 
-final class SdModell: ObservableObject, HarFigurer {
-    @Published var d: SdData? = nil
+@Observable
+final class SdModell: HarFigurer {
+    var d: SdData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = SdData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -75,7 +76,7 @@ final class SdModell: ObservableObject, HarFigurer {
 }
 
 struct SkrivDrikkSkjerm: View {
-    @ObservedObject var m: SdModell
+    var m: SdModell
     @State private var tilValgt = ""
     @State private var kortInn = false
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
@@ -144,20 +145,7 @@ struct SkrivDrikkSkjerm: View {
         }
     }
 
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kortFarge)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
-    }
-
-    private func hode(_ png: String, _ px: CGFloat) -> some View {
-        Group {
-            if let img = m.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).padding(2) }
-        }.frame(width: px, height: px)
-    }
+    private func hode(_ png: String, _ px: CGFloat) -> some View { Figur(png, px) }
 
     private func farge(_ hex: String) -> Color {
         var h = hex.trimmingCharacters(in: .whitespaces); if h.hasPrefix("#") { h.removeFirst() }

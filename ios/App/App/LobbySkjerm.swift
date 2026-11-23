@@ -4,15 +4,16 @@ import WebKit
 
 /// Lobbyen native: romkoden og «Inviter» øverst, stua i midten (vises gjennom et hull i skjermen – stua er nettsidens,
 /// med figurene, dra-bevegelsene og snakkeboblene), og lekene/planen/stillingen under som blokker fra nettsiden.
-final class LobbyModell: ObservableObject {
-    @Published var kode = ""
-    @Published var n = 0
-    @Published var erVert = false
-    @Published var tekst: [String: String] = [:]
+@Observable
+final class LobbyModell {
+    var kode = ""
+    var n = 0
+    var erVert = false
+    var tekst: [String: String] = [:]
     /// Høyden stua faktisk har i nettsiden (målt der), så hullet er like stort som stua
-    @Published var stuaH: CGFloat = 0
+    var stuaH: CGFloat = 0
     let blokker = KortModell()
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
 
     func sett(_ d: [String: Any]) {
         kode = d["kode"] as? String ?? kode
@@ -25,7 +26,7 @@ final class LobbyModell: ObservableObject {
 }
 
 struct LobbySkjerm: View {
-    @ObservedObject var m: LobbyModell
+    var m: LobbyModell
     private var kort: Color { Tema.kort }
 
     /// Romkoden og «Inviter» er alltid like høye (80 + 6 pt luft + 10 pt mellomrom = 96 pt under safe area), og nettsiden legger stua

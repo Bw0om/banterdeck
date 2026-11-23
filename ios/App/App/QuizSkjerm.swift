@@ -74,11 +74,12 @@ struct QzData {
     }
 }
 
-final class QzModell: ObservableObject, HarFigurer {
-    @Published var d: QzData? = nil
+@Observable
+final class QzModell: HarFigurer {
+    var d: QzData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = QzData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -94,7 +95,7 @@ final class QzModell: ObservableObject, HarFigurer {
 }
 
 struct QuizSkjerm: View {
-    @ObservedObject var m: QzModell
+    var m: QzModell
     @Environment(\.accessibilityReduceMotion) private var roligere
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
     private let blaa = Color(red: 0.486, green: 0.776, blue: 0.996)
@@ -130,25 +131,12 @@ struct QuizSkjerm: View {
                 Text(d.under).font(.archivo(12, vekt: 700)).opacity(0.65).lineLimit(1).minimumScaleFactor(0.7)
             }
             Spacer()
-            if d.frist > 0 {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    let n = m.igjen(d.frist)
-                    Text("\(n)").font(.archivo(16, vekt: 900)).frame(width: 40, height: 40)
-                        .background(Circle().fill(n <= 10 ? oransje : gul)).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
-                }
-            }
+            if d.frist > 0 { Nedtelling { m.igjen(d.frist) } }
             liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
             liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
         }
         .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
         .overlay(Rectangle().fill(blekk).frame(height: 2).padding(.horizontal, 16), alignment: .bottom)
-    }
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kortFarge)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
     }
     /// Den store gule (eller hvite) merkelappen øverst: «Din tur – trekk!», «Svar!», «Svaret»
     private func chipRad(_ t: String, gul erGul: Bool) -> some View {
@@ -157,12 +145,7 @@ struct QuizSkjerm: View {
             .background(RoundedRectangle(cornerRadius: 6).fill(erGul ? gul : kortFarge)).overlay(RoundedRectangle(cornerRadius: 6).stroke(blekk, lineWidth: 2.5))
             .background(RoundedRectangle(cornerRadius: 6).fill(blekk).offset(x: 3, y: 3))
     }
-    private func hode(_ png: String, _ px: CGFloat, flat: Bool = false) -> some View {
-        Group {
-            if let img = m.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).padding(2) }
-        }.frame(width: px, height: px).opacity(flat ? 0.55 : 1)
-    }
+    private func hode(_ png: String, _ px: CGFloat, flat: Bool = false) -> some View { Figur(png, px).opacity(flat ? 0.55 : 1) }
     private func storKnapp(_ t: String, farge: Color? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(t.uppercased()).font(.archivo(19, vekt: 900)).foregroundColor(morkBlekk).multilineTextAlignment(.center)

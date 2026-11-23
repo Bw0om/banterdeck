@@ -52,10 +52,11 @@ struct FtdData {
     }
 }
 
-final class FtdModell: ObservableObject, HarFigurer {
-    @Published var d: FtdData? = nil
+@Observable
+final class FtdModell: HarFigurer {
+    var d: FtdData? = nil
     let blokker = KortModell()
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = FtdData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
@@ -69,7 +70,7 @@ final class FtdModell: ObservableObject, HarFigurer {
 }
 
 struct DealerSkjerm: View {
-    @ObservedObject var m: FtdModell
+    var m: FtdModell
     @Environment(\.accessibilityReduceMotion) private var roligere
     @State private var snudd = 0
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
@@ -99,12 +100,7 @@ struct DealerSkjerm: View {
 
     // MARK: Toppen – tittel, chip, bom-prikkene og Stua/Mer
     private func topp(_ d: FtdData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.tittel).font(.archivo(12, vekt: 700)).opacity(0.65).lineLimit(1)
-                Text(d.chip).font(.archivo(16, vekt: 900)).foregroundColor(d.jeg ? rust : blekk).lineLimit(2)
-            }
-            Spacer()
+        Topplinje(tittel: d.tittel, chip: d.chip, uthevet: d.jeg, enLinje: true, stua: d.stua, mer: d.mer, trykk: { m.trykk($0) }) {
             if d.bom >= 0 {
                 HStack(spacing: 4) {
                     ForEach(0..<3, id: \.self) { j in
@@ -112,17 +108,7 @@ struct DealerSkjerm: View {
                     }
                 }.accessibilityLabel(d.bomTekst)
             }
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
         }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
-    }
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kortFarge)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
     }
     private func merk(_ t: String) -> some View {
         Text(t).font(.archivo(14, vekt: 800)).foregroundColor(morkBlekk).padding(.horizontal, 12).padding(.vertical, 9).frame(maxWidth: .infinity, alignment: .leading)
@@ -133,12 +119,7 @@ struct DealerSkjerm: View {
         Image(systemName: "eyeglasses").font(.system(size: px * 0.5, weight: .bold)).foregroundColor(morkBlekk)
             .frame(width: px, height: px).background(Circle().fill(mint)).overlay(Circle().stroke(morkBlekk, lineWidth: 2.5))
     }
-    private func hode(_ png: String, _ px: CGFloat) -> some View {
-        Group {
-            if let img = m.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).padding(2) }
-        }.frame(width: px, height: px)
-    }
+    private func hode(_ png: String, _ px: CGFloat) -> some View { Figur(png, px) }
 
     // MARK: Kortet – spillkort med verdi og farge (baksiden når det ikke er ditt å se)
     private func spillkort(_ k: FtdKort?, bredde: CGFloat) -> some View {

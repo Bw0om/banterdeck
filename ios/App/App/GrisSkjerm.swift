@@ -30,11 +30,12 @@ struct GrData {
     }
 }
 
-final class GrModell: ObservableObject, HarFigurer {
-    @Published var d: GrData? = nil
+@Observable
+final class GrModell: HarFigurer {
+    var d: GrData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = GrData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -50,7 +51,7 @@ final class GrModell: ObservableObject, HarFigurer {
 }
 
 struct GrisSkjerm: View {
-    @ObservedObject var m: GrModell
+    var m: GrModell
     private var kort: Color { Tema.kort }
     private let halmFarge = Color(red: 0.965, green: 0.906, blue: 0.722)
     private let halmMork = Color(red: 0.698, green: 0.47, blue: 0.157)
@@ -78,32 +79,10 @@ struct GrisSkjerm: View {
     }
 
     private func topp(_ d: GrData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.tittel).font(.archivo(12, vekt: 700)).opacity(0.65)
-                Text(d.chip).font(.archivo(16, vekt: 900)).foregroundColor(d.varsel ? rust : blekk).lineLimit(2)
-            }
-            Spacer()
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
-        }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
+        Topplinje(tittel: d.tittel, chip: d.chip, uthevet: d.varsel, stua: d.stua, mer: d.mer, trykk: { m.trykk($0) })
     }
 
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
-    }
-
-    private func hode(_ png: String) -> some View {
-        Group {
-            if let img = m.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)) }
-        }
-    }
+    private func hode(_ png: String) -> some View { Figur(png) }
 
     // MARK: Fjøset – alt ligger på halmgul bakgrunn
     private func fjos(_ d: GrData) -> some View {

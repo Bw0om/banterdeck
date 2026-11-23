@@ -5,19 +5,20 @@ import WebKit
 /// Logg inn / ny konto / lenke på e-post som et iOS-ark. Selve innloggingen gjøres av nettsiden (window.__mvKonto),
 /// så kontoen, øktene og e-postene virker nøyaktig som på nett – dette er bare skjemaet, med iPhonens tastatur og felt.
 @MainActor
-final class KontoModell: ObservableObject {
+@Observable
+final class KontoModell {
     enum Del: String, CaseIterable { case inn, ny, lenke, glemt }
-    @Published var del: Del = .inn
-    @Published var navn = ""        // brukernavn eller e-post ved innlogging
-    @Published var epost = ""
-    @Published var brukernavn = ""
-    @Published var passord = ""
-    @Published var melding = ""
-    @Published var feil = false
-    @Published var travel = false
-    @Published var engelsk = false
-    weak var nett: WKWebView?
-    var ferdig: (() -> Void)?
+    var del: Del = .inn
+    var navn = ""        // brukernavn eller e-post ved innlogging
+    var epost = ""
+    var brukernavn = ""
+    var passord = ""
+    var melding = ""
+    var feil = false
+    var travel = false
+    var engelsk = false
+    @ObservationIgnored weak var nett: WKWebView?
+    @ObservationIgnored var ferdig: (() -> Void)?
 
     func T(_ no: String, _ en: String) -> String { engelsk ? en : no }
 
@@ -69,7 +70,7 @@ final class KontoModell: ObservableObject {
 }
 
 struct LoggInnArk: View {
-    @ObservedObject var m: KontoModell
+    @Bindable var m: KontoModell
     @FocusState private var fokus: String?
     private var kort: Color { Tema.kort }
 

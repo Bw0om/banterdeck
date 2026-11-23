@@ -31,11 +31,12 @@ struct PekData {
     }
 }
 
-final class PekModell: ObservableObject {
-    @Published var d: PekData? = nil
+@Observable
+final class PekModell {
+    var d: PekData? = nil
     /// Forskjellen mellom telefonens klokke og serverens (fra siste melding), så nedtellingen går i takt på alle telefonene
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView?
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView?
 
     func sett(_ dict: [String: Any]) {
         let ny = PekData(dict)
@@ -54,7 +55,7 @@ final class PekModell: ObservableObject {
 }
 
 struct PekelekenSkjerm: View {
-    @ObservedObject var m: PekModell
+    var m: PekModell
     private var kort: Color { Tema.kort }
 
     var body: some View {
@@ -82,24 +83,7 @@ struct PekelekenSkjerm: View {
 
     // Toppen: kort nr, hvem som leser, og veien til stua og «Mer»
     private func topp(_ d: PekData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.toppKort).font(.archivo(12, vekt: 700)).opacity(0.65)
-                Text(d.toppLeser).font(.archivo(16, vekt: 900)).foregroundColor(d.jegLeser ? rust : blekk)
-            }
-            Spacer()
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
-        }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
-    }
-
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
+        Topplinje(tittel: d.toppKort, chip: d.toppLeser, uthevet: d.jegLeser, stua: d.stua, mer: d.mer, trykk: { m.trykk($0) })
     }
 
     // Kortet: «Hvem er mest sannsynlig til å …» lite, selve setningen stort, vri-merke om det er en vri

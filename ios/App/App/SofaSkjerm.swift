@@ -38,10 +38,11 @@ struct EnData {
     }
 }
 
-final class EnModell: ObservableObject {
-    @Published var d: EnData? = nil
+@Observable
+final class EnModell {
+    var d: EnData? = nil
     let blokker = KortModell()
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = EnData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
@@ -55,7 +56,7 @@ final class EnModell: ObservableObject {
 }
 
 struct SofaSkjerm: View {
-    @ObservedObject var m: EnModell
+    var m: EnModell
     @Environment(\.accessibilityReduceMotion) private var roligere
     @State private var puls = false
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
@@ -83,23 +84,7 @@ struct SofaSkjerm: View {
     }
 
     private func topp(_ d: EnData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.tittel).font(.archivo(12, vekt: 700)).opacity(0.65).lineLimit(1)
-                Text(d.chip).font(.archivo(16, vekt: 900)).foregroundColor(d.gul ? rust : blekk).lineLimit(2)
-            }
-            Spacer()
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
-        }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
-    }
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kortFarge)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
+        Topplinje(tittel: d.tittel, chip: d.chip, uthevet: d.gul, enLinje: true, stua: d.stua, mer: d.mer, trykk: { m.trykk($0) })
     }
     private func storKnapp(_ t: String, farge: Color? = nil, svak: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {

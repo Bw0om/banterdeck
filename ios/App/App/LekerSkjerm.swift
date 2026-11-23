@@ -23,20 +23,21 @@ struct LekeKort: Identifiable {
     }
 }
 
-final class LekerModell: ObservableObject {
-    @Published var leker: [LekeKort] = []
-    @Published var sok = ""
-    @Published var niva = ""        // «», rom, app, regler
-    @Published var pl = 0           // 0, 2, 4, 6
-    @Published var bareGratis = false
-    @Published var alkfri = false
-    @Published var alderOk = true
-    @Published var tekst: [String: String] = [:]
-    @Published var engelsk = false
+@Observable
+final class LekerModell {
+    var leker: [LekeKort] = []
+    var sok = ""
+    var niva = ""        // «», rom, app, regler
+    var pl = 0           // 0, 2, 4, 6
+    var bareGratis = false
+    var alkfri = false
+    var alderOk = true
+    var tekst: [String: String] = [:]
+    var engelsk = false
     /// Kortene glir inn første gang lista er på plass (settes her, i modellen – ikke i visningens onAppear, som kunne komme før lista)
-    @Published var inne = false
-    weak var nett: WKWebView?
-    var handling: ((String) -> Void)?
+    var inne = false
+    @ObservationIgnored weak var nett: WKWebView?
+    @ObservationIgnored var handling: ((String) -> Void)?
 
     func t(_ k: String) -> String { tekst[k] ?? k }
 
@@ -79,7 +80,7 @@ final class LekerModell: ObservableObject {
 }
 
 struct LekerSkjerm: View {
-    @ObservedObject var m: LekerModell
+    @Bindable var m: LekerModell
     @FocusState private var sokFokus: Bool
     /// Kortene glir inn med fjær første gang lista vises (30 ms mellom hvert, de første tolv) – m.inne
     private let fjaer = Animation.spring(response: 0.42, dampingFraction: 0.86)

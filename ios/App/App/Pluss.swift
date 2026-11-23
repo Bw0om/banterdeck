@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import StoreKit
 import WebKit
 import UIKit
@@ -7,23 +8,24 @@ import UIKit
 /// «non-renewing subscriptions» i App Store Connect. Apples signerte transaksjon sendes til serveren vår via nettsiden
 /// (window.__mvPluss.apple), som sjekker signaturen og gir Pluss på kontoen – samme spor som Vipps på nett.
 @MainActor
-final class PlussModell: ObservableObject {
+@Observable
+final class PlussModell {
     static let ider = ["no.mittvors.pluss.kveld", "no.mittvors.pluss.aar"]
 
-    @Published var produkter: [Product] = []
-    @Published var inne = false          // innlogget på mittvors-kontoen
-    @Published var aktiv = false
-    @Published var til: String = ""      // ISO-dato Pluss gjelder til
-    @Published var gratisBrukt = true
-    @Published var kveldspass = 0        // lagrede kveldspass (verving)
-    @Published var travel: String? = nil // produkt-id det jobbes med, «gratis», «gjenopprett»
-    @Published var melding: String = ""
-    @Published var feil = false
-    @Published var engelsk = false
-    @Published var klarTilKjop = true    // StoreKit svarte med produkter
-    weak var nett: WKWebView?
-    var loggInn: (() -> Void)?
-    var ferdig: (() -> Void)?
+    var produkter: [Product] = []
+    var inne = false          // innlogget på mittvors-kontoen
+    var aktiv = false
+    var til: String = ""      // ISO-dato Pluss gjelder til
+    var gratisBrukt = true
+    var kveldspass = 0        // lagrede kveldspass (verving)
+    var travel: String? = nil // produkt-id det jobbes med, «gratis», «gjenopprett»
+    var melding: String = ""
+    var feil = false
+    var engelsk = false
+    var klarTilKjop = true    // StoreKit svarte med produkter
+    @ObservationIgnored weak var nett: WKWebView?
+    @ObservationIgnored var loggInn: (() -> Void)?
+    @ObservationIgnored var ferdig: (() -> Void)?
 
     func T(_ no: String, _ en: String) -> String { engelsk ? en : no }
 

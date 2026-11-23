@@ -4,7 +4,7 @@ import StoreKit
 /// Pluss-tilbudet som et iOS-ark: hva Pluss er, «Prøv gratis i kveld», Kveldspass og Årspass med App Store-pris,
 /// og «Gjenopprett kjøp». Prisene kommer fra App Store (riktig valuta for den som ser på).
 struct PlussArk: View {
-    @ObservedObject var m: PlussModell
+    var m: PlussModell
     private var kort: Color { Tema.kort }
 
     var body: some View {

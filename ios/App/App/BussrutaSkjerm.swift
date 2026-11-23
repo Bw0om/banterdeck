@@ -34,10 +34,11 @@ struct BrData {
     }
 }
 
-final class BrModell: ObservableObject {
-    @Published var d: BrData? = nil
+@Observable
+final class BrModell {
+    var d: BrData? = nil
     let blokker = KortModell()
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = BrData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
@@ -51,7 +52,7 @@ final class BrModell: ObservableObject {
 }
 
 struct BussrutaSkjerm: View {
-    @ObservedObject var m: BrModell
+    var m: BrModell
     private var kort: Color { Tema.kort }
     private let asfalt = Color(red: 0.227, green: 0.224, blue: 0.251)
 
@@ -78,24 +79,7 @@ struct BussrutaSkjerm: View {
     }
 
     private func topp(_ d: BrData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.tittel).font(.archivo(12, vekt: 700)).opacity(0.65)
-                Text(d.chip).font(.archivo(16, vekt: 900)).foregroundColor(d.minTur ? rust : blekk).lineLimit(2)
-            }
-            Spacer()
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
-        }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
-    }
-
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
+        Topplinje(tittel: d.tittel, chip: d.chip, uthevet: d.minTur, stua: d.stua, mer: d.mer, trykk: { m.trykk($0) })
     }
 
     /// Ruta: Billetten → Pyramiden → Bussen

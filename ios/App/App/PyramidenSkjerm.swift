@@ -41,11 +41,12 @@ struct PyData {
     }
 }
 
-final class PyModell: ObservableObject, HarFigurer {
-    @Published var d: PyData? = nil
+@Observable
+final class PyModell: HarFigurer {
+    var d: PyData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = PyData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -61,7 +62,7 @@ final class PyModell: ObservableObject, HarFigurer {
 }
 
 struct PyramidenSkjerm: View {
-    @ObservedObject var m: PyModell
+    var m: PyModell
     @State private var kikk = false
     @State private var velg = false
     private var kort: Color { Tema.kort }
@@ -96,14 +97,6 @@ struct PyramidenSkjerm: View {
             liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
         }
         .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 2)
-    }
-
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
     }
 
     // MARK: Bordet – alt ligger på den mørke filten
@@ -219,12 +212,7 @@ struct PyramidenSkjerm: View {
         }
     }
 
-    private func hode(_ png: String) -> some View {
-        Group {
-            if let img = m.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)) }
-        }
-    }
+    private func hode(_ png: String) -> some View { Figur(png) }
 
     // MARK: Hånda – baksiden opp; hold fingeren på for å kikke, «Legg på et kort» → velg et
     @ViewBuilder private func hand(_ d: PyData) -> some View {

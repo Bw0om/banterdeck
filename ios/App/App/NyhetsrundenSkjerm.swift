@@ -70,14 +70,15 @@ struct NrData {
     }
 }
 
-final class NrModell: ObservableObject, HarFigurer {
-    @Published var d: NrData? = nil
+@Observable
+final class NrModell: HarFigurer {
+    var d: NrData? = nil
     /// Talltastaturet: sifrene du har trykket (per spørsmål)
-    @Published var tall = ""
-    var tallNokkel = ""
+    var tall = ""
+    @ObservationIgnored var tallNokkel = ""
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = NrData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -111,7 +112,7 @@ final class NrModell: ObservableObject, HarFigurer {
 }
 
 struct NyhetsrundenSkjerm: View {
-    @ObservedObject var m: NrModell
+    var m: NrModell
     @Environment(\.accessibilityReduceMotion) private var roligere
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
     private let blaa = Color(red: 0.486, green: 0.776, blue: 0.996)
@@ -145,32 +146,14 @@ struct NyhetsrundenSkjerm: View {
                 Text(d.under).font(.archivo(12, vekt: 700)).opacity(0.65).lineLimit(1).minimumScaleFactor(0.7)
             }
             Spacer()
-            if d.frist > 0 {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    let n = m.igjen(d.frist)
-                    Text("\(n)").font(.archivo(16, vekt: 900)).frame(width: 40, height: 40)
-                        .background(Circle().fill(n <= 10 ? oransje : gul)).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
-                }
-            }
+            if d.frist > 0 { Nedtelling { m.igjen(d.frist) } }
             liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
             liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
         }
         .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
         .overlay(Rectangle().fill(blekk).frame(height: 2).padding(.horizontal, 16), alignment: .bottom)
     }
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kortFarge)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
-    }
-    private func hode(_ png: String, _ px: CGFloat, flat: Bool = false) -> some View {
-        Group {
-            if let img = m.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).padding(2) }
-        }.frame(width: px, height: px).opacity(flat ? 0.55 : 1)
-    }
+    private func hode(_ png: String, _ px: CGFloat, flat: Bool = false) -> some View { Figur(png, px).opacity(flat ? 0.55 : 1) }
     private func storKnapp(_ t: String, farge: Color? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(t.uppercased()).font(.archivo(19, vekt: 900)).foregroundColor(morkBlekk).multilineTextAlignment(.center)

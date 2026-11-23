@@ -51,11 +51,12 @@ struct TsData {
     }
 }
 
-final class TsModell: ObservableObject, HarFigurer {
-    @Published var d: TsData? = nil
+@Observable
+final class TsModell: HarFigurer {
+    var d: TsData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = TsData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -78,7 +79,7 @@ final class TsModell: ObservableObject, HarFigurer {
 }
 
 struct TosannheterSkjerm: View {
-    @ObservedObject var m: TsModell
+    var m: TsModell
     @Environment(\.colorScheme) private var modus
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
 
@@ -104,39 +105,12 @@ struct TosannheterSkjerm: View {
 
     // MARK: Toppen – tittel, chip, klokke og Stua/Mer
     private func topp(_ d: TsData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.tittel).font(.archivo(12, vekt: 700)).opacity(0.65).lineLimit(1)
-                Text(d.chip).font(.archivo(16, vekt: 900)).foregroundColor(d.gul ? rust : blekk).lineLimit(2)
-            }
-            Spacer()
-            if d.frist > 0 {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    let n = m.igjen(d.frist)
-                    Text("\(n)").font(.archivo(16, vekt: 900)).frame(width: 40, height: 40)
-                        .background(Circle().fill(n <= 10 ? oransje : gul)).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
-                }
-            }
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
+        Topplinje(tittel: d.tittel, chip: d.chip, uthevet: d.gul, enLinje: true, stua: d.stua, mer: d.mer, trykk: { m.trykk($0) }) {
+            if d.frist > 0 { Nedtelling { m.igjen(d.frist) } }
         }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
     }
 
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kortFarge)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
-    }
-
-    private func hode(_ png: String, _ px: CGFloat) -> some View {
-        Group {
-            if let img = m.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).padding(2) }
-        }.frame(width: px, height: px)
-    }
+    private func hode(_ png: String, _ px: CGFloat) -> some View { Figur(png, px) }
 
     // MARK: Stolen – den som sitter, med tekst ved siden
     private func stol(_ h: TsHode?, _ tittel: String, _ under: String, skriver: Bool) -> some View {
@@ -302,7 +276,7 @@ func tsStorrelse(_ t: String) -> CGFloat {
 
 /// Avsløringen: kortene farges ett og ett, stemplene klasker på, hodene lander og løgnen rister – bare første gang.
 struct FasitVisning: View {
-    @ObservedObject var m: TsModell
+    var m: TsModell
     let f: TsFasit
     let modus: ColorScheme
     @State private var inn = false
@@ -366,12 +340,7 @@ struct FasitVisning: View {
         }
         .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { inn = true } }
     }
-    private func hode(_ png: String, _ px: CGFloat) -> some View {
-        Group {
-            if let img = m.bilde(png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).padding(2) }
-        }.frame(width: px, height: px)
-    }
+    private func hode(_ png: String, _ px: CGFloat) -> some View { Figur(png, px) }
 }
 
 /// Løgnen rister litt når den er avslørt (én gang)

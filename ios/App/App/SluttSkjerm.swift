@@ -5,11 +5,12 @@ import WebKit
 /// Kveldens oppsummering native: vinneren og lovboka, tallene, kåringene, slurketavla med hodene – og knappene for å dele,
 /// fortsette eller gå ut. Nettsiden (rom.js sluttData) sender alt ferdig oversatt; trykkene går tilbake til nettsidens egne
 /// knapper (window.__mvLek.trykk), lenkene til dens <a> (__mvLek.lenke), og regelen skrives i iPhonens dialog (__mvLek.skriv).
-final class SluttModell: ObservableObject, HarFigurer {
-    @Published var d: [String: Any] = [:]
-    weak var nett: WKWebView?
+@Observable
+final class SluttModell: HarFigurer {
+    var d: [String: Any] = [:]
+    @ObservationIgnored weak var nett: WKWebView?
     /// Skallet viser dialogen med tekstfelt (tittel, plass, verdi, knapp, avbryt, ferdig)
-    var dialog: ((String, String, String, String, String, @escaping (String) -> Void) -> Void)?
+    @ObservationIgnored var dialog: ((String, String, String, String, String, @escaping (String) -> Void) -> Void)?
 
     func sett(_ d: [String: Any]) { self.d = d }
     func s(_ k: String) -> String { d[k] as? String ?? "" }
@@ -37,7 +38,7 @@ final class SluttModell: ObservableObject, HarFigurer {
 }
 
 struct SluttSkjerm: View {
-    @ObservedObject var m: SluttModell
+    var m: SluttModell
     @Environment(\.colorScheme) private var modus
     private var kort: Color { Tema.kort }
 

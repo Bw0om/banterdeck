@@ -46,25 +46,30 @@ enum Rof {
     static func farge(_ sp: Double) -> Color { sp < 0.5 ? Color(hex: "#63E2A8") : sp < 0.8 ? Color(hex: "#FFD23F") : Color(hex: "#FF5B1F") }
 }
 
-final class RofModell: ObservableObject {
-    @Published var d: RofData? = nil
-    @Published var vinkel: Double = 0          // ringens rotasjon (rofA)
-    @Published var valgt: Int = -1             // kortet øverst
-    @Published var drar = false                // holder i kortet
-    @Published var draT: Double = 0
-    @Published var sp: Double = 0
-    @Published var vri: Double = 0
-    @Published var holdt: CGPoint = CGPoint(x: 179, y: 190)
-    @Published var skjelv = false
-    @Published var skjultNr = -1               // kortet lagt bort for dette trekket
-    @Published var rok: String? = nil          // «RINGEN RØK!»-banneret
-    @Published var ute = false                 // kortet er ute (liten pause før serveren svarer)
-    weak var nett: WKWebView?
-    private var modus = ""                     // «dra» | «snurr» | «fri» | ""
-    private var a0 = 0.0, v0 = 0.0, snurrNr = -1
-    private var sistMeld: TimeInterval = 0, sistKnirk: TimeInterval = 0, sistBrudd = -1
-    private var fri: (fra: Double, lengde: Double, t0: TimeInterval, varighet: Double, nr: Int)? = nil
-    private var friTimer: Timer?
+@Observable
+final class RofModell {
+    var d: RofData? = nil
+    var vinkel: Double = 0          // ringens rotasjon (rofA)
+    var valgt: Int = -1             // kortet øverst
+    var drar = false                // holder i kortet
+    var draT: Double = 0
+    var sp: Double = 0
+    var vri: Double = 0
+    var holdt: CGPoint = CGPoint(x: 179, y: 190)
+    var skjelv = false
+    var skjultNr = -1               // kortet lagt bort for dette trekket
+    var rok: String? = nil          // «RINGEN RØK!»-banneret
+    var ute = false                 // kortet er ute (liten pause før serveren svarer)
+    @ObservationIgnored weak var nett: WKWebView?
+    @ObservationIgnored private var modus = ""                     // «dra» | «snurr» | «fri» | ""
+    @ObservationIgnored private var a0 = 0.0
+    @ObservationIgnored private var v0 = 0.0
+    @ObservationIgnored private var snurrNr = -1
+    @ObservationIgnored private var sistMeld: TimeInterval = 0
+    @ObservationIgnored private var sistKnirk: TimeInterval = 0
+    @ObservationIgnored private var sistBrudd = -1
+    @ObservationIgnored private var fri: (fra: Double, lengde: Double, t0: TimeInterval, varighet: Double, nr: Int)? = nil
+    @ObservationIgnored private var friTimer: Timer?
     private let tikk = UISelectionFeedbackGenerator(), slag = UIImpactFeedbackGenerator(style: .medium), tung = UINotificationFeedbackGenerator()
 
     func sett(_ dict: [String: Any]) {
@@ -191,7 +196,7 @@ final class RofModell: ObservableObject {
 }
 
 struct RingSkjerm: View {
-    @ObservedObject var m: RofModell
+    var m: RofModell
     @Environment(\.colorScheme) private var modus
     private var kort: Color { Tema.kort }
     private let gul = Color(hex: "#FFD23F"), oransje = Color(hex: "#FF5B1F"), rosa = Color(hex: "#FF9CC2"), mint = Color(hex: "#63E2A8"), morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)

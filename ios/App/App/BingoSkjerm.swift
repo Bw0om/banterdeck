@@ -24,11 +24,12 @@ struct BgData {
     }
 }
 
-final class BgModell: ObservableObject {
-    @Published var d: BgData? = nil
+@Observable
+final class BgModell {
+    var d: BgData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = BgData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -61,7 +62,7 @@ struct Klatt: Shape {
 }
 
 struct BingoSkjerm: View {
-    @ObservedObject var m: BgModell
+    var m: BgModell
     private var kort: Color { Tema.kort }
     private let tusj = Color(red: 0.55, green: 0.2, blue: 0.75)
 
@@ -97,30 +98,14 @@ struct BingoSkjerm: View {
     }
 
     private func topp(_ d: BgData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.tittel).font(.archivo(12, vekt: 700)).opacity(0.65)
-                Text(d.chip).font(.archivo(16, vekt: 900)).lineLimit(2)
-            }
-            Spacer()
+        Topplinje(tittel: d.tittel, chip: d.chip, stua: d.stua, mer: d.mer, trykk: { m.trykk($0) }) {
             if !d.spotify.isEmpty, let u = URL(string: d.spotify) {
                 Button(action: { UIApplication.shared.open(u) }) {
                     Image(systemName: "music.note.list").font(.system(size: 14, weight: .bold)).frame(width: 34, height: 34)
                         .background(Circle().fill(mint)).overlay(Circle().stroke(morkBlekk, lineWidth: 2)).foregroundColor(morkBlekk)
                 }.buttonStyle(.plain)
             }
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
         }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
-    }
-
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
     }
 
     // MARK: Brettet – 4 × 4 ruter, klatter, streker og Bingo!

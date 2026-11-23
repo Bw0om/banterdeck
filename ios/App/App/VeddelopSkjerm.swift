@@ -39,13 +39,13 @@ struct VlData {
     }
 }
 
-final class VlModell: ObservableObject {
-    @Published var d: VlData? = nil
+@Observable
+final class VlModell: HarFigurer {
+    var d: VlData? = nil
     /// Knappene på slutten (Spill igjen, Velg en annen lek …) kommer som blokker og tegnes av BlokkListe
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
-    private var bilder: [String: UIImage] = [:]
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
 
     func sett(_ dict: [String: Any]) {
         let ny = VlData(dict)
@@ -54,14 +54,6 @@ final class VlModell: ObservableObject {
         d = ny
     }
     func igjen(_ frist: Double) -> Int { max(0, Int(ceil((frist - 1500 - (Date().timeIntervalSince1970 * 1000 + avvik)) / 1000))) }
-    func bilde(_ b64: String) -> UIImage? {
-        if b64.isEmpty { return nil }
-        if let b = bilder[b64] { return b }
-        guard let data = Data(base64Encoded: b64), let img = UIImage(data: data, scale: 2) else { return nil }
-        if bilder.count > 60 { bilder.removeAll() }
-        bilder[b64] = img
-        return img
-    }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
         Haptikk.trykk()
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
@@ -70,7 +62,7 @@ final class VlModell: ObservableObject {
 }
 
 struct VeddelopSkjerm: View {
-    @ObservedObject var m: VlModell
+    var m: VlModell
     @Environment(\.accessibilityReduceMotion) private var rolig
     private var kort: Color { Tema.kort }
     private let gress = Color(red: 0.184, green: 0.42, blue: 0.227)
@@ -97,24 +89,7 @@ struct VeddelopSkjerm: View {
     }
 
     private func topp(_ d: VlData) -> some View {
-        HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(d.tittel).font(.archivo(12, vekt: 700)).opacity(0.65)
-                Text(d.chip).font(.archivo(16, vekt: 900)).foregroundColor(d.fase == "vedd" ? rust : blekk)
-            }
-            Spacer()
-            liten(d.stua, "sofa.fill") { m.trykk("stua-ark") }
-            liten(d.mer, "ellipsis") { m.trykk("mer-ark") }
-        }
-        .padding(.horizontal, 16).padding(.top, 6).padding(.bottom, 8)
-    }
-
-    private func liten(_ t: String, _ sym: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) { Image(systemName: sym).font(.system(size: 13, weight: .bold)); Text(t).font(.archivo(13, vekt: 800)) }
-                .padding(.horizontal, 11).frame(height: 34)
-                .background(Capsule().fill(kort)).overlay(Capsule().stroke(blekk, lineWidth: 2))
-        }.buttonStyle(.plain)
+        Topplinje(tittel: d.tittel, chip: d.chip, uthevet: d.fase == "vedd", stua: d.stua, mer: d.mer, trykk: { m.trykk($0) })
     }
 
     // MARK: Banen – grønt gress, sidekortene øverst, fire baner under
@@ -182,10 +157,7 @@ struct VeddelopSkjerm: View {
     }
 
     private func hode(_ h: VlHode) -> some View {
-        Group {
-            if let img = m.bilde(h.png) { Image(uiImage: img).resizable().aspectRatio(contentMode: .fit) }
-            else { Circle().fill(gul).overlay(Circle().stroke(morkBlekk, lineWidth: 2)) }
-        }
+        Figur(h.png)
         .frame(width: 24, height: 26).opacity(h.oi ? 0.8 : 1)
     }
 
