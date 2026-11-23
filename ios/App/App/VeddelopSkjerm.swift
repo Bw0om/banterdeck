@@ -39,13 +39,14 @@ struct VlData {
     }
 }
 
-final class VlModell: ObservableObject {
-    @Published var d: VlData? = nil
+@Observable
+final class VlModell {
+    var d: VlData? = nil
     /// Knappene på slutten (Spill igjen, Velg en annen lek …) kommer som blokker og tegnes av BlokkListe
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
-    private var bilder: [String: UIImage] = [:]
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private var bilder: [String: UIImage] = [:]
 
     func sett(_ dict: [String: Any]) {
         let ny = VlData(dict)
@@ -70,7 +71,7 @@ final class VlModell: ObservableObject {
 }
 
 struct VeddelopSkjerm: View {
-    @ObservedObject var m: VlModell
+    var m: VlModell
     @Environment(\.accessibilityReduceMotion) private var rolig
     private var kort: Color { Tema.kort }
     private let gress = Color(red: 0.184, green: 0.42, blue: 0.227)

@@ -30,11 +30,12 @@ struct GrData {
     }
 }
 
-final class GrModell: ObservableObject, HarFigurer {
-    @Published var d: GrData? = nil
+@Observable
+final class GrModell: HarFigurer {
+    var d: GrData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = GrData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -50,7 +51,7 @@ final class GrModell: ObservableObject, HarFigurer {
 }
 
 struct GrisSkjerm: View {
-    @ObservedObject var m: GrModell
+    var m: GrModell
     private var kort: Color { Tema.kort }
     private let halmFarge = Color(red: 0.965, green: 0.906, blue: 0.722)
     private let halmMork = Color(red: 0.698, green: 0.47, blue: 0.157)

@@ -23,28 +23,29 @@ struct LekesideLek: Identifiable {
     }
 }
 
-final class LekesideModell: ObservableObject {
-    @Published var slug = ""
-    @Published var navn = ""
-    @Published var fra = ""
-    @Published var niva = "rom"
-    @Published var nivaTekst = ""
-    @Published var pl = ""
-    @Published var utstyr = ""
-    @Published var gruppe = ""
-    @Published var alkfri = false
-    @Published var iRom = false
-    @Published var harVerktoy = false
-    @Published var pluss = false
-    @Published var lenke: (href: String, label: String)? = nil
-    @Published var regler: [LekesideRegel] = []
-    @Published var forslag: [LekesideLek] = []
-    @Published var flere: [LekesideLek] = []
-    @Published var bilde: UIImage? = nil
-    @Published var tekst: [String: String] = [:]
-    @Published var engelsk = false
-    weak var nett: WKWebView?
-    private var sistPng = ""
+@Observable
+final class LekesideModell {
+    var slug = ""
+    var navn = ""
+    var fra = ""
+    var niva = "rom"
+    var nivaTekst = ""
+    var pl = ""
+    var utstyr = ""
+    var gruppe = ""
+    var alkfri = false
+    var iRom = false
+    var harVerktoy = false
+    var pluss = false
+    var lenke: (href: String, label: String)? = nil
+    var regler: [LekesideRegel] = []
+    var forslag: [LekesideLek] = []
+    var flere: [LekesideLek] = []
+    var bilde: UIImage? = nil
+    var tekst: [String: String] = [:]
+    var engelsk = false
+    @ObservationIgnored weak var nett: WKWebView?
+    @ObservationIgnored private var sistPng = ""
 
     func t(_ k: String) -> String { tekst[k] ?? k }
 
@@ -91,7 +92,7 @@ final class LekesideModell: ObservableObject {
 }
 
 struct LekesideSkjerm: View {
-    @ObservedObject var m: LekesideModell
+    var m: LekesideModell
     @Environment(\.colorScheme) private var modus
     /// Sveip fra venstre kant = tilbake, som i resten av iOS (nettsidens eget sveip når ikke gjennom den native skjermen)
     @State private var kantDrag: CGFloat = 0

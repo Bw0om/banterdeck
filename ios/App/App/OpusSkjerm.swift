@@ -17,9 +17,10 @@ struct OpData {
     }
 }
 
-final class OpModell: ObservableObject {
-    @Published var d: OpData? = nil
-    weak var nett: WKWebView?
+@Observable
+final class OpModell {
+    var d: OpData? = nil
+    @ObservationIgnored weak var nett: WKWebView?
     func sett(_ dict: [String: Any]) { withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { d = OpData(dict) } }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
         Haptikk.trykk(g == "kast" ? .medium : .light)
@@ -29,7 +30,7 @@ final class OpModell: ObservableObject {
 }
 
 struct OpusSkjerm: View {
-    @ObservedObject var m: OpModell
+    var m: OpModell
     @State private var landet = 0
     @State private var vri: Double = 0
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)

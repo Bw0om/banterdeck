@@ -20,28 +20,29 @@ struct StartGjeng: Identifiable, Equatable {
     }
 }
 
-final class StartModell: ObservableObject {
-    @Published var navn = ""
+@Observable
+final class StartModell {
+    var navn = ""
     /// Gjengene dine (tom til siden har hentet dem, og alltid tom uten konto): ett kort per gjeng under stua
-    @Published var gjenger: [StartGjeng] = []
+    var gjenger: [StartGjeng] = []
     /// Navnet er kjent fra før (huskes på telefonen, endres under Deg) – da vises ikke feltet. Ikke «navnet er tomt»: da forsvant
     /// feltet idet du skrev den første bokstaven
-    @Published var navnKjent = false
-    @Published var kode = ""
-    @Published var fortsett = ""          // rommet du var i sist (kode), om noe
-    @Published var feil = ""
-    @Published var travel: String? = nil   // «lag» eller «bli» mens vi venter på serveren
-    @Published var engelsk = false
+    var navnKjent = false
+    var kode = ""
+    var fortsett = ""          // rommet du var i sist (kode), om noe
+    var feil = ""
+    var travel: String? = nil   // «lag» eller «bli» mens vi venter på serveren
+    var engelsk = false
     /// Høyden stua har i nettsiden (meldt derfra), så hullet er like stort som stua
-    @Published var stuaH: CGFloat = 0
-    @Published var harNett = true
+    var stuaH: CGFloat = 0
+    var harNett = true
     /// Tastaturets høyde (0 når det er nede) – skjermen skyver seg opp så kodefeltet ikke havner under det. Skallet lukker
     /// hullet til stua så lenge tastaturet er oppe: skjermen er skjøvet, og feltene kan ligge der hullet var
-    @Published var tastaturH: CGFloat = 0 { didSet { tastaturEndret?() } }
-    var tastaturEndret: (() -> Void)?
-    weak var nett: WKWebView?
+    var tastaturH: CGFloat = 0 { didSet { tastaturEndret?() } }
+    @ObservationIgnored var tastaturEndret: (() -> Void)?
+    @ObservationIgnored weak var nett: WKWebView?
     private let nettVakt = NWPathMonitor()
-    private var sistPlass = ""
+    @ObservationIgnored private var sistPlass = ""
 
     init() {
         // Rommet bor på serveren: uten nett får du en kort beskjed i stedet for en nettfeil
@@ -55,7 +56,7 @@ final class StartModell: ObservableObject {
     }
 
     /// Hvor stua skal stå i nettsiden (toppen i nettvisningens punkter, og bredden): nettsiden flytter den dit og melder ruta tilbake (hullet)
-    private var onsket: (topp: Int, bredde: Int)? = nil
+    @ObservationIgnored private var onsket: (topp: Int, bredde: Int)? = nil
     func plass(topp: CGFloat, bredde: CGFloat) {
         let n = (Int(topp.rounded()), Int(bredde.rounded()))
         guard n != (onsket?.topp ?? -1, onsket?.bredde ?? -1) else { return }
@@ -65,7 +66,7 @@ final class StartModell: ObservableObject {
     /// Siden svarer true når stua er flyttet. Er ikke nettkoden klar ennå (window.__mvStart mangler), prøves det igjen litt senere –
     /// alltid med den siste ønskede plasseringen, så et gammelt forsøk aldri overskriver en nyere (det la stua oppå tittelen)
     /// Forsiden vises (ikke på vei ut): bare da plasseres stua
-    var aktiv = true
+    @ObservationIgnored var aktiv = true
     private func sendPlass(forsok: Int) {
         guard aktiv, let w = nett, let o = onsket else { return }
         if forsok == 0 { SjekkLogg.skriv("plass: topp=\(o.topp) bredde=\(o.bredde)") }
@@ -144,7 +145,7 @@ final class StartModell: ObservableObject {
 }
 
 struct StartSkjerm: View {
-    @ObservedObject var m: StartModell
+    @Bindable var m: StartModell
     @FocusState private var fokus: Felt?
     enum Felt { case navn, kode }
 

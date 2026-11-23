@@ -24,11 +24,12 @@ struct BgData {
     }
 }
 
-final class BgModell: ObservableObject {
-    @Published var d: BgData? = nil
+@Observable
+final class BgModell {
+    var d: BgData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = BgData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -61,7 +62,7 @@ struct Klatt: Shape {
 }
 
 struct BingoSkjerm: View {
-    @ObservedObject var m: BgModell
+    var m: BgModell
     private var kort: Color { Tema.kort }
     private let tusj = Color(red: 0.55, green: 0.2, blue: 0.75)
 

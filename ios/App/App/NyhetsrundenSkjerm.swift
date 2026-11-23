@@ -70,14 +70,15 @@ struct NrData {
     }
 }
 
-final class NrModell: ObservableObject, HarFigurer {
-    @Published var d: NrData? = nil
+@Observable
+final class NrModell: HarFigurer {
+    var d: NrData? = nil
     /// Talltastaturet: sifrene du har trykket (per spørsmål)
-    @Published var tall = ""
-    var tallNokkel = ""
+    var tall = ""
+    @ObservationIgnored var tallNokkel = ""
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = NrData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -111,7 +112,7 @@ final class NrModell: ObservableObject, HarFigurer {
 }
 
 struct NyhetsrundenSkjerm: View {
-    @ObservedObject var m: NrModell
+    var m: NrModell
     @Environment(\.accessibilityReduceMotion) private var roligere
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
     private let blaa = Color(red: 0.486, green: 0.776, blue: 0.996)

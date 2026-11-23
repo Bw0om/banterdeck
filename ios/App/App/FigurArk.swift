@@ -60,14 +60,15 @@ struct FigurData {
     func t(_ k: String) -> String { tekst[k] ?? k }
 }
 
-final class FigurModell: ObservableObject {
-    @Published var d: FigurData? = nil
-    @Published var slot = "hode"
-    @Published var lapp: String? = nil
-    @Published var travel = false
-    weak var nett: WKWebView?
-    var loggInn: ((String) -> Void)?
-    private var lappT: Timer?
+@Observable
+final class FigurModell {
+    var d: FigurData? = nil
+    var slot = "hode"
+    var lapp: String? = nil
+    var travel = false
+    @ObservationIgnored weak var nett: WKWebView?
+    @ObservationIgnored var loggInn: ((String) -> Void)?
+    @ObservationIgnored private var lappT: Timer?
 
     func last() { kall("return await window.__mvFigur.data()", [:]) }
     func velg(_ e: [String: Any]) {
@@ -91,7 +92,7 @@ final class FigurModell: ObservableObject {
 }
 
 struct FigurArk: View {
-    @ObservedObject var m: FigurModell
+    var m: FigurModell
     @Environment(\.colorScheme) private var modus
     private var kort: Color { Tema.kort }
     private let kolonner = [GridItem(.adaptive(minimum: 72), spacing: 10)]

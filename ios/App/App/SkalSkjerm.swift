@@ -30,16 +30,17 @@ struct SkData {
     }
 }
 
-final class SkModell: ObservableObject, HarFigurer {
-    @Published var d: SkData? = nil
+@Observable
+final class SkModell: HarFigurer {
+    var d: SkData? = nil
     /// SKÅL er kommet for denne skålen (tid)
-    @Published var naa: Double = 0
+    var naa: Double = 0
     /// Trykket (før nettsiden har sagt fra): tidlig eller ikke
-    @Published var trykket: (tid: Double, tidlig: Bool)? = nil
+    var trykket: (tid: Double, tidlig: Bool)? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    private var timer: Timer?
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored private var timer: Timer?
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = SkData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -78,7 +79,7 @@ final class SkModell: ObservableObject, HarFigurer {
 }
 
 struct SkalSkjerm: View {
-    @ObservedObject var m: SkModell
+    var m: SkModell
     @Environment(\.accessibilityReduceMotion) private var roligere
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
     private let ol = Color(red: 1, green: 0.72, blue: 0.2)

@@ -38,10 +38,11 @@ struct EnData {
     }
 }
 
-final class EnModell: ObservableObject {
-    @Published var d: EnData? = nil
+@Observable
+final class EnModell {
+    var d: EnData? = nil
     let blokker = KortModell()
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = EnData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
@@ -55,7 +56,7 @@ final class EnModell: ObservableObject {
 }
 
 struct SofaSkjerm: View {
-    @ObservedObject var m: EnModell
+    var m: EnModell
     @Environment(\.accessibilityReduceMotion) private var roligere
     @State private var puls = false
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)

@@ -52,10 +52,11 @@ struct FtdData {
     }
 }
 
-final class FtdModell: ObservableObject, HarFigurer {
-    @Published var d: FtdData? = nil
+@Observable
+final class FtdModell: HarFigurer {
+    var d: FtdData? = nil
     let blokker = KortModell()
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = FtdData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
@@ -69,7 +70,7 @@ final class FtdModell: ObservableObject, HarFigurer {
 }
 
 struct DealerSkjerm: View {
-    @ObservedObject var m: FtdModell
+    var m: FtdModell
     @Environment(\.accessibilityReduceMotion) private var roligere
     @State private var snudd = 0
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)

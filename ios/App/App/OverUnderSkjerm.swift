@@ -31,10 +31,11 @@ struct OuData {
     }
 }
 
-final class OuModell: ObservableObject, HarFigurer {
-    @Published var d: OuData? = nil
+@Observable
+final class OuModell: HarFigurer {
+    var d: OuData? = nil
     let blokker = KortModell()
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = OuData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
@@ -48,7 +49,7 @@ final class OuModell: ObservableObject, HarFigurer {
 }
 
 struct OverUnderSkjerm: View {
-    @ObservedObject var m: OuModell
+    var m: OuModell
     @State private var kortInn = false
     @State private var sklir = false
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)

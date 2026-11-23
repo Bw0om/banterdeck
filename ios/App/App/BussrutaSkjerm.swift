@@ -34,10 +34,11 @@ struct BrData {
     }
 }
 
-final class BrModell: ObservableObject {
-    @Published var d: BrData? = nil
+@Observable
+final class BrModell {
+    var d: BrData? = nil
     let blokker = KortModell()
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = BrData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
@@ -51,7 +52,7 @@ final class BrModell: ObservableObject {
 }
 
 struct BussrutaSkjerm: View {
-    @ObservedObject var m: BrModell
+    var m: BrModell
     private var kort: Color { Tema.kort }
     private let asfalt = Color(red: 0.227, green: 0.224, blue: 0.251)
 

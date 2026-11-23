@@ -5,12 +5,13 @@ import WebKit
 /// Gjengsiden native (Deg-fanen): gjengene dine, og én gjeng med kvelden, lommeboka, lovboka, kåringene, sesongtabellen og
 /// kveldene. Nettsiden (Gjeng.astro) henter og regner ut alt og sender det ferdig (mv-skjerm «gjeng»); trykkene går tilbake
 /// til nettsidens egne knapper (window.__mvGjeng.trykk), skjemaene fylles fra iPhonens dialog (__mvGjeng.skriv).
-final class GjengModell: ObservableObject {
-    @Published var d: [String: Any] = [:]
-    @Published var engelsk = false
-    weak var nett: WKWebView?
+@Observable
+final class GjengModell {
+    var d: [String: Any] = [:]
+    var engelsk = false
+    @ObservationIgnored weak var nett: WKWebView?
     /// Skallet viser dialogen med tekstfelt (tittel, plass, verdi, knapp, avbryt, ferdig)
-    var dialog: ((String, String, String, String, String, @escaping (String) -> Void) -> Void)?
+    @ObservationIgnored var dialog: ((String, String, String, String, String, @escaping (String) -> Void) -> Void)?
 
     func sett(_ d: [String: Any]) { self.d = d; engelsk = d["en"] as? Bool ?? engelsk }
     func T(_ no: String, _ en: String) -> String { engelsk ? en : no }
@@ -34,7 +35,7 @@ final class GjengModell: ObservableObject {
 }
 
 struct GjengSkjerm: View {
-    @ObservedObject var m: GjengModell
+    var m: GjengModell
     @Environment(\.colorScheme) private var modus
     private var kort: Color { Tema.kort }
     private let gjengFarger: [Color] = [Color(red: 0.388, green: 0.886, blue: 0.659), Color(red: 1, green: 0.612, blue: 0.761), Color(red: 1, green: 0.824, blue: 0.247), Color(red: 0.353, green: 0.553, blue: 0.933), Color(red: 1, green: 0.357, blue: 0.122)]

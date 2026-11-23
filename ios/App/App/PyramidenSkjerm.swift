@@ -41,11 +41,12 @@ struct PyData {
     }
 }
 
-final class PyModell: ObservableObject, HarFigurer {
-    @Published var d: PyData? = nil
+@Observable
+final class PyModell: HarFigurer {
+    var d: PyData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = PyData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -61,7 +62,7 @@ final class PyModell: ObservableObject, HarFigurer {
 }
 
 struct PyramidenSkjerm: View {
-    @ObservedObject var m: PyModell
+    var m: PyModell
     @State private var kikk = false
     @State private var velg = false
     private var kort: Color { Tema.kort }

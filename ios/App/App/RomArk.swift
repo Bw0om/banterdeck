@@ -23,14 +23,15 @@ struct RomRad: Identifiable {
     }
 }
 
-final class RomModell: ObservableObject {
-    @Published var tittel = "Rommet"
-    @Published var husk = ""
-    @Published var rader: [RomRad] = []
-    @Published var lapp: String? = nil
-    weak var nett: WKWebView?
-    var pluss: (() -> Void)?
-    private var lappT: Timer?
+@Observable
+final class RomModell {
+    var tittel = "Rommet"
+    var husk = ""
+    var rader: [RomRad] = []
+    var lapp: String? = nil
+    @ObservationIgnored weak var nett: WKWebView?
+    @ObservationIgnored var pluss: (() -> Void)?
+    @ObservationIgnored private var lappT: Timer?
 
     init(_ d: [String: Any]) { sett(d) }
 
@@ -60,7 +61,7 @@ final class RomModell: ObservableObject {
 }
 
 struct RomArk: View {
-    @ObservedObject var m: RomModell
+    var m: RomModell
     private var kort: Color { Tema.kort }
     /// SF-symboler for gulv, lys og ting
     private let symbol: [String: String] = ["fliser": "square.grid.3x3", "lampe": "lightbulb", "lys": "sparkles", "diskokule": "circle.hexagongrid.fill", "plante": "leaf", "plakat": "newspaper", "platespiller": "opticaldisc"]

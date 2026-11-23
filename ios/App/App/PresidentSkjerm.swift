@@ -35,11 +35,12 @@ struct PrData {
     }
 }
 
-final class PrModell: ObservableObject, HarFigurer {
-    @Published var d: PrData? = nil
+@Observable
+final class PrModell: HarFigurer {
+    var d: PrData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = PrData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -55,7 +56,7 @@ final class PrModell: ObservableObject, HarFigurer {
 }
 
 struct PresidentSkjerm: View {
-    @ObservedObject var m: PrModell
+    var m: PrModell
     @State private var valgt: Set<Int> = []
     private var kort: Color { Tema.kort }
     private let bordFarge = Color(red: 0.165, green: 0.161, blue: 0.18)

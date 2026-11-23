@@ -51,11 +51,12 @@ struct TsData {
     }
 }
 
-final class TsModell: ObservableObject, HarFigurer {
-    @Published var d: TsData? = nil
+@Observable
+final class TsModell: HarFigurer {
+    var d: TsData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = TsData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -78,7 +79,7 @@ final class TsModell: ObservableObject, HarFigurer {
 }
 
 struct TosannheterSkjerm: View {
-    @ObservedObject var m: TsModell
+    var m: TsModell
     @Environment(\.colorScheme) private var modus
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
 
@@ -302,7 +303,7 @@ func tsStorrelse(_ t: String) -> CGFloat {
 
 /// Avsløringen: kortene farges ett og ett, stemplene klasker på, hodene lander og løgnen rister – bare første gang.
 struct FasitVisning: View {
-    @ObservedObject var m: TsModell
+    var m: TsModell
     let f: TsFasit
     let modus: ColorScheme
     @State private var inn = false

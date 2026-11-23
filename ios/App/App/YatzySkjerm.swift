@@ -41,12 +41,13 @@ struct YzData {
     }
 }
 
-final class YzModell: ObservableObject {
-    @Published var d: YzData? = nil
+@Observable
+final class YzModell {
+    var d: YzData? = nil
     /// Terningene som er i lufta i et nytt kast (settes før de nye tallene vises, så ingen ser dem lande på forhånd)
-    @Published var iLufta: Set<Int> = []
+    var iLufta: Set<Int> = []
     let blokker = KortModell()
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = YzData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
@@ -61,7 +62,7 @@ final class YzModell: ObservableObject {
 }
 
 struct YatzySkjerm: View {
-    @ObservedObject var m: YzModell
+    var m: YzModell
     @Environment(\.accessibilityReduceMotion) private var rolig
     @State private var ristP: CGFloat = 1
     private var kort: Color { Tema.kort }

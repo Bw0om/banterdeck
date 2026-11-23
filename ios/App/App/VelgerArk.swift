@@ -23,10 +23,11 @@ struct LekGruppe: Identifiable {
     let leker: [Lek]
 }
 
-final class VelgerModell: ObservableObject {
+@Observable
+final class VelgerModell {
     let tittel: String, anbefaltNavn: String, senereNavn: String, startOrd: String, minstOrd: String, spillereOrd: String, plussTekst: String
     let anbefalt: [Lek], grupper: [LekGruppe], senere: [Lek]
-    var velg: ((Lek) -> Void)?
+    @ObservationIgnored var velg: ((Lek) -> Void)?
 
     init(_ d: [String: Any]) {
         tittel = d["tittel"] as? String ?? "Velg lek"; anbefaltNavn = d["anbefaltNavn"] as? String ?? "Anbefalt nå"; senereNavn = d["senere"] as? String ?? "Når dere er flere"
@@ -45,7 +46,7 @@ final class VelgerModell: ObservableObject {
 }
 
 struct VelgerArk: View {
-    @ObservedObject var m: VelgerModell
+    var m: VelgerModell
     @Environment(\.colorScheme) private var modus
     @State private var detalj: Lek? = nil   // ⓘ: leken som vises med regler
 
@@ -119,7 +120,7 @@ struct VelgerArk: View {
 
 struct LekDetalj: View {
     let l: Lek
-    @ObservedObject var m: VelgerModell
+    var m: VelgerModell
     let trykk: (Lek) -> Void
     @Environment(\.colorScheme) private var modus
     private let blekk = Color(red: 0.086, green: 0.071, blue: 0.059)

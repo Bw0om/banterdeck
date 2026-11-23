@@ -47,11 +47,12 @@ struct SdData {
     }
 }
 
-final class SdModell: ObservableObject, HarFigurer {
-    @Published var d: SdData? = nil
+@Observable
+final class SdModell: HarFigurer {
+    var d: SdData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = SdData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -75,7 +76,7 @@ final class SdModell: ObservableObject, HarFigurer {
 }
 
 struct SkrivDrikkSkjerm: View {
-    @ObservedObject var m: SdModell
+    var m: SdModell
     @State private var tilValgt = ""
     @State private var kortInn = false
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)

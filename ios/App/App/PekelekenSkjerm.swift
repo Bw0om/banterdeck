@@ -31,11 +31,12 @@ struct PekData {
     }
 }
 
-final class PekModell: ObservableObject {
-    @Published var d: PekData? = nil
+@Observable
+final class PekModell {
+    var d: PekData? = nil
     /// Forskjellen mellom telefonens klokke og serverens (fra siste melding), så nedtellingen går i takt på alle telefonene
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView?
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView?
 
     func sett(_ dict: [String: Any]) {
         let ny = PekData(dict)
@@ -54,7 +55,7 @@ final class PekModell: ObservableObject {
 }
 
 struct PekelekenSkjerm: View {
-    @ObservedObject var m: PekModell
+    var m: PekModell
     private var kort: Color { Tema.kort }
 
     var body: some View {

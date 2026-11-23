@@ -74,11 +74,12 @@ struct QzData {
     }
 }
 
-final class QzModell: ObservableObject, HarFigurer {
-    @Published var d: QzData? = nil
+@Observable
+final class QzModell: HarFigurer {
+    var d: QzData? = nil
     let blokker = KortModell()
-    private(set) var avvik: Double = 0
-    weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private(set) var avvik: Double = 0
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
     func sett(_ dict: [String: Any]) {
         let ny = QzData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -94,7 +95,7 @@ final class QzModell: ObservableObject, HarFigurer {
 }
 
 struct QuizSkjerm: View {
-    @ObservedObject var m: QzModell
+    var m: QzModell
     @Environment(\.accessibilityReduceMotion) private var roligere
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
     private let blaa = Color(red: 0.486, green: 0.776, blue: 0.996)
