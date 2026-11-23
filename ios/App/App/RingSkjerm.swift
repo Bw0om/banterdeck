@@ -62,8 +62,12 @@ final class RofModell {
     var ute = false                 // kortet er ute (liten pause før serveren svarer)
     @ObservationIgnored weak var nett: WKWebView?
     @ObservationIgnored private var modus = ""                     // «dra» | «snurr» | «fri» | ""
-    @ObservationIgnored private var a0 = 0.0, v0 = 0.0, snurrNr = -1
-    @ObservationIgnored private var sistMeld: TimeInterval = 0, sistKnirk: TimeInterval = 0, sistBrudd = -1
+    @ObservationIgnored private var a0 = 0.0
+    @ObservationIgnored private var v0 = 0.0
+    @ObservationIgnored private var snurrNr = -1
+    @ObservationIgnored private var sistMeld: TimeInterval = 0
+    @ObservationIgnored private var sistKnirk: TimeInterval = 0
+    @ObservationIgnored private var sistBrudd = -1
     @ObservationIgnored private var fri: (fra: Double, lengde: Double, t0: TimeInterval, varighet: Double, nr: Int)? = nil
     @ObservationIgnored private var friTimer: Timer?
     private let tikk = UISelectionFeedbackGenerator(), slag = UIImpactFeedbackGenerator(style: .medium), tung = UINotificationFeedbackGenerator()
