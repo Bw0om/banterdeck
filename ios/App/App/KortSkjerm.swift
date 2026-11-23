@@ -5,14 +5,13 @@ import WebKit
 /// Kortlekene («Jeg har aldri», «Nødt eller sannhet» …) som native skjerm. Nettsiden oversetter sin egen skjerm til
 /// enkle blokker (rom.js skjermBlokker): topp, kort, knapper, benk med hodene, dom, søyler, tekst – og denne tegner dem
 /// i appens stil. Trykkene går tilbake til nettsidens egne knapper (window.__mvLek.trykk), så all logikk bor ett sted.
-final class KortModell: ObservableObject {
+final class KortModell: ObservableObject, HarFigurer {
     @Published var blokker: [[String: Any]] = []
     @Published var lek = ""
     @Published var stua = "Stua"
     @Published var mer = "Mer"
     private(set) var avvik: Double = 0
     weak var nett: WKWebView?
-    private var bilder: [String: UIImage] = [:]
 
     func sett(_ d: [String: Any]) {
         if let n = (d["naa"] as? NSNumber)?.doubleValue, n > 0 { avvik = n - Date().timeIntervalSince1970 * 1000 }
@@ -23,20 +22,12 @@ final class KortModell: ObservableObject {
     /// Sekunder igjen til en frist (servertid)
     func igjen(_ frist: Double) -> Int { max(0, Int(ceil((frist - 1500 - (Date().timeIntervalSince1970 * 1000 + avvik)) / 1000))) }
 
-    func bilde(_ b64: String) -> UIImage? {
-        if b64.isEmpty { return nil }
-        if let b = bilder[b64] { return b }
-        guard let data = Data(base64Encoded: b64), let img = UIImage(data: data, scale: 2) else { return nil }
-        if bilder.count > 80 { bilder.removeAll() }
-        bilder[b64] = img
-        return img
-    }
 
     var skjemaId = ""
     func trykk(_ k: [String: Any]) {
         guard let g = k["g"] as? String, !g.isEmpty else { return }
         if g == "__skjema" { skjema(skjemaId); return }
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         let attrs = k["attrs"] as? [String: String] ?? [:]
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
@@ -44,13 +35,13 @@ final class KortModell: ObservableObject {
     func trykk(_ g: String) { trykk(["g": g]) }
     /// Skriving (Ukjent avsender, Skrøna …): nettsidens skjema åpnes som iPhone-dialog
     func skjema(_ id: String) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         guard let data = try? JSONSerialization.data(withJSONObject: [id]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.skjema(\(json)[0])", completionHandler: nil)
     }
     /// Løgnhalsen: trykk = stemme, hold = helt sikker
     func stem(_ paa: String, sikker: Bool) {
-        UIImpactFeedbackGenerator(style: sikker ? .heavy : .light).impactOccurred()
+        Haptikk.trykk(sikker ? .heavy : .light)
         guard let data = try? JSONSerialization.data(withJSONObject: [paa, sikker]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.stem.apply(null, \(json))", completionHandler: nil)
     }
@@ -58,9 +49,6 @@ final class KortModell: ObservableObject {
 
 struct KortSkjerm: View {
     @ObservedObject var m: KortModell
-    @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
     var body: some View {
         ZStack {
             papir.ignoresSafeArea()
@@ -73,17 +61,7 @@ struct KortSkjerm: View {
 /// Blokkene fra nettsiden, tegnet i appens stil. Brukes av kortlekene og lobbyen.
 struct BlokkListe: View {
     @ObservedObject var m: KortModell
-    @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private let lys = Color(red: 1, green: 0.973, blue: 0.933)
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private var kort: Color { Tema.kort }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -449,10 +427,6 @@ struct HoldKort: View {
     @ObservedObject var m: KortModell
     let b: [String: Any]
     @State private var vis = false
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
     private func s(_ k: String) -> String { b[k] as? String ?? "" }
     var body: some View {
         let stil = s("stil")
@@ -472,7 +446,7 @@ struct HoldKort: View {
         .background(RoundedRectangle(cornerRadius: 16).fill(vis ? (stil == "logn" ? rosa : stil == "sant" ? mint : gul) : gul.opacity(0.5)))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(morkBlekk, lineWidth: 3))
         .animation(.spring(response: 0.25, dampingFraction: 0.85), value: vis)
-        .onLongPressGesture(minimumDuration: 60, maximumDistance: 60, pressing: { p in if p != vis { vis = p; if p { UIImpactFeedbackGenerator(style: .light).impactOccurred() } } }, perform: {})
+        .onLongPressGesture(minimumDuration: 60, maximumDistance: 60, pressing: { p in if p != vis { vis = p; if p { Haptikk.trykk() } } }, perform: {})
     }
 }
 
@@ -481,9 +455,6 @@ struct HoldStem: View {
     @ObservedObject var m: KortModell
     let paa: String, tekst: String, valgt: Bool, x2: Bool, logn: Bool
     @State private var holder = false
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
     var body: some View {
         ZStack {
             Text(tekst.uppercased()).font(.archivo(22, vekt: 900))
@@ -510,9 +481,6 @@ struct BombeVisning: View {
     var start: Double
     var smell: Double
     var avvik: Double
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
 
     var body: some View {
         if bom {

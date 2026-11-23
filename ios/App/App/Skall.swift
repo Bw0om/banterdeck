@@ -127,7 +127,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             ark.prefersScrollingExpandsWhenScrolledToEdge = true
             ark.largestUndimmedDetentIdentifier = .medium   // stua bak holdes lys og levende mens arket står halvveis
         }
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptikk.valg()
         present(h, animated: true)
     }
 
@@ -170,7 +170,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             }
         }
         if let ark = h.sheetPresentationController { ark.detents = [.large()]; ark.prefersGrabberVisible = false }
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptikk.valg()
         (presentedViewController ?? self).present(h, animated: true)
     }
 
@@ -217,13 +217,13 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             }
             self.sendSkjema(v, id, verdier)
         })
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptikk.valg()
         (presentedViewController ?? self).present(a, animated: true)
     }
 
     private func sendSkjema(_ v: MittvorsViewController?, _ id: String, _ verdier: [String: String]) {
         guard let data = try? JSONSerialization.data(withJSONObject: [id, verdier]), let json = String(data: data, encoding: .utf8) else { return }
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         v?.webView?.evaluateJavaScript("window.__mvLek && window.__mvLek.skriv.apply(null, \(json))", completionHandler: nil)
     }
 
@@ -246,7 +246,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         a.addAction(UIAlertAction(title: d["send"] as? String ?? "Send", style: .default) { [weak a, weak v] _ in
             let t = (a?.textFields?.first?.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             guard !t.isEmpty, let data = try? JSONSerialization.data(withJSONObject: [t]), let json = String(data: data, encoding: .utf8) else { return }
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            Haptikk.trykk()
             v?.webView?.evaluateJavaScript("window.__mvStua && window.__mvStua.si(\(json)[0])", completionHandler: nil)
         })
         (presentedViewController ?? self).present(a, animated: true)
@@ -273,7 +273,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { h?.dismiss(animated: true) { if fraDeg { v?.webView?.reload() } } }
         }
         if let ark = h.sheetPresentationController { ark.detents = [.large()]; ark.prefersGrabberVisible = false }
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptikk.valg()
         (presentedViewController ?? self).present(h, animated: true)
     }
 
@@ -287,7 +287,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
         ark.excludedActivityTypes = [.addToReadingList, .assignToContact, .print, .saveToCameraRoll]
         ark.popoverPresentationController?.sourceView = view
         ark.popoverPresentationController?.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.maxY - 80, width: 1, height: 1)
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptikk.valg()
         (presentedViewController ?? self).present(ark, animated: true)
     }
 
@@ -328,7 +328,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
             ark.prefersGrabberVisible = true
             ark.prefersScrollingExpandsWhenScrolledToEdge = true
         }
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptikk.valg()
         present(h, animated: true)
     }
 
@@ -974,7 +974,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
 
     // MARK: UITabBarControllerDelegate
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptikk.valg()
         if viewController === selectedViewController { tilStart(viewController.tabBarItem.tag) }
         visning(viewController.tabBarItem.tag)
         return true

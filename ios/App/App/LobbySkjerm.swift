@@ -26,13 +26,7 @@ final class LobbyModell: ObservableObject {
 
 struct LobbySkjerm: View {
     @ObservedObject var m: LobbyModell
-    @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private var kort: Color { Tema.kort }
 
     /// Romkoden og «Inviter» er alltid like høye (80 + 6 pt luft + 10 pt mellomrom = 96 pt under safe area), og nettsiden legger stua
     /// 108 px under sin safe area (global.css, lobby-nativ). Da står stua 12 pt under romkoden uten at noen måler noe.

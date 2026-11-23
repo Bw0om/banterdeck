@@ -44,7 +44,7 @@ final class BrModell: ObservableObject {
         d = ny
     }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
     }
@@ -52,18 +52,7 @@ final class BrModell: ObservableObject {
 
 struct BussrutaSkjerm: View {
     @ObservedObject var m: BrModell
-    @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
-    private let lys = Color(red: 1, green: 0.973, blue: 0.933)
-    private let kortRod = Color(red: 0.843, green: 0.149, blue: 0.239)
+    private var kort: Color { Tema.kort }
     private let asfalt = Color(red: 0.227, green: 0.224, blue: 0.251)
 
     var body: some View {

@@ -52,26 +52,17 @@ struct FtdData {
     }
 }
 
-final class FtdModell: ObservableObject {
+final class FtdModell: ObservableObject, HarFigurer {
     @Published var d: FtdData? = nil
     let blokker = KortModell()
     weak var nett: WKWebView? { didSet { blokker.nett = nett } }
-    private var bilder: [String: UIImage] = [:]
     func sett(_ dict: [String: Any]) {
         let ny = FtdData(dict)
         blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
         withAnimation(.spring(response: 0.42, dampingFraction: 0.8)) { d = ny }
     }
-    func bilde(_ b64: String) -> UIImage? {
-        if b64.isEmpty { return nil }
-        if let b = bilder[b64] { return b }
-        guard let data = Data(base64Encoded: b64), let img = UIImage(data: data, scale: 2) else { return nil }
-        if bilder.count > 80 { bilder.removeAll() }
-        bilder[b64] = img
-        return img
-    }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        UIImpactFeedbackGenerator(style: g == "ftd-gjett" ? .medium : .light).impactOccurred()
+        Haptikk.trykk(g == "ftd-gjett" ? .medium : .light)
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
     }
@@ -79,19 +70,9 @@ final class FtdModell: ObservableObject {
 
 struct DealerSkjerm: View {
     @ObservedObject var m: FtdModell
-    @Environment(\.colorScheme) private var modus
     @Environment(\.accessibilityReduceMotion) private var roligere
     @State private var snudd = 0
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private var kortFarge: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
-    private let lys = Color(red: 1, green: 0.973, blue: 0.933)
     private let kortRod = Color(red: 0.85, green: 0.16, blue: 0.16)
 
     var body: some View {

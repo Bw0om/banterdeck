@@ -22,7 +22,7 @@ final class OpModell: ObservableObject {
     weak var nett: WKWebView?
     func sett(_ dict: [String: Any]) { withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { d = OpData(dict) } }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        UIImpactFeedbackGenerator(style: g == "kast" ? .medium : .light).impactOccurred()
+        Haptikk.trykk(g == "kast" ? .medium : .light)
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
     }
@@ -30,16 +30,9 @@ final class OpModell: ObservableObject {
 
 struct OpusSkjerm: View {
     @ObservedObject var m: OpModell
-    @Environment(\.colorScheme) private var modus
     @State private var landet = 0
     @State private var vri: Double = 0
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private var kortFarge: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
 
     var body: some View {
         ZStack {

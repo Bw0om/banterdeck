@@ -43,13 +43,13 @@ final class KontoModell: ObservableObject {
 
     private func si(_ t: String, _ erFeil: Bool) {
         melding = t; feil = erFeil
-        if erFeil { UINotificationFeedbackGenerator().notificationOccurred(.warning) }
+        if erFeil { Haptikk.melding(.warning) }
     }
 
     private func kjor(_ js: String, _ arg: [String: Any], innlogget: Bool) {
         guard let w = nett else { return si(T("Siden er ikke klar ennå.", "The page isn’t ready yet."), true) }
         travel = true
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        Haptikk.trykk(.medium)
         w.callAsyncJavaScript(js, arguments: arg, in: nil, in: .page) { [weak self] res in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -57,7 +57,7 @@ final class KontoModell: ObservableObject {
                 guard case .success(let v) = res, let d = v as? [String: Any] else { return self.si(self.T("Noe gikk galt. Prøv igjen.", "Something went wrong. Try again."), true) }
                 if let f = d["feil"] as? String, !f.isEmpty { return self.si(d["melding"] as? String ?? self.T("Noe gikk galt. Prøv igjen.", "Something went wrong. Try again."), true) }
                 if d["ok"] as? Bool == true && innlogget && d["sendt"] as? Bool != true {
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    Haptikk.melding(.success)
                     self.si(self.T("Du er logget inn!", "You’re signed in!"), false)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { self.ferdig?() }
                 } else {
@@ -70,14 +70,8 @@ final class KontoModell: ObservableObject {
 
 struct LoggInnArk: View {
     @ObservedObject var m: KontoModell
-    @Environment(\.colorScheme) private var modus
     @FocusState private var fokus: String?
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private var kort: Color { Tema.kort }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -126,7 +120,7 @@ struct LoggInnArk: View {
                 }
                 .padding(.horizontal, 20).padding(.bottom, 30)
             }
-            .scrollDismissesKeyboardIfAvailable()
+            .scrollDismissesKeyboard(.interactively)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(papir.ignoresSafeArea())
@@ -136,7 +130,7 @@ struct LoggInnArk: View {
     }
 
     private func fane(_ d: KontoModell.Del, _ t: String) -> some View {
-        Button(action: { m.del = d; m.melding = ""; UISelectionFeedbackGenerator().selectionChanged() }) {
+        Button(action: { m.del = d; m.melding = ""; Haptikk.valg() }) {
             Text(t).font(.archivo(14, vekt: 800)).lineLimit(1).minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity).frame(height: 38)
                 .background(Capsule().fill(m.del == d ? gul : kort))
@@ -184,11 +178,5 @@ struct LoggInnArk: View {
                 RoundedRectangle(cornerRadius: 14).stroke(morkBlekk, lineWidth: 3)
             })
         }.buttonStyle(.plain).disabled(m.travel).padding(.top, 4)
-    }
-}
-
-private extension View {
-    @ViewBuilder func scrollDismissesKeyboardIfAvailable() -> some View {
-        if #available(iOS 16.0, *) { self.scrollDismissesKeyboard(.interactively) } else { self }
     }
 }

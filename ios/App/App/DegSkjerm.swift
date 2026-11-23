@@ -68,12 +68,12 @@ final class DegModell: ObservableObject {
         nett?.evaluateJavaScript("window.__mvDeg && window.__mvDeg.\(kall)(\(json))", completionHandler: nil)
     }
     func lagreNavn() { js("navn", navn.trimmingCharacters(in: .whitespacesAndNewlines)) }
-    func settMoerk(_ b: Bool) { UISelectionFeedbackGenerator().selectionChanged(); js("tema", b) }
-    func visning(_ n: String) { UISelectionFeedbackGenerator().selectionChanged(); js("visning", n) }
-    func gaa(_ url: String) { UISelectionFeedbackGenerator().selectionChanged(); js("gaa", url) }
+    func settMoerk(_ b: Bool) { Haptikk.valg(); js("tema", b) }
+    func visning(_ n: String) { Haptikk.valg(); js("visning", n) }
+    func gaa(_ url: String) { Haptikk.valg(); js("gaa", url) }
     func siFra() { js("feil") }
     func byttSprak() { js("sprak") }
-    func loggUt() { UINotificationFeedbackGenerator().notificationOccurred(.success); js("loggUt") }
+    func loggUt() { Haptikk.melding(.success); js("loggUt") }
 }
 
 struct DegSkjerm: View {
@@ -82,12 +82,7 @@ struct DegSkjerm: View {
     @FocusState private var navnFokus: Bool
     @State private var spoerLoggUt = false
 
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let rust = Color(red: 0.776, green: 0.235, blue: 0.067)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private var kort: Color { Tema.kort }
 
     private var versjon: String {
         let i = Bundle.main.infoDictionary ?? [:]
@@ -161,7 +156,7 @@ struct DegSkjerm: View {
         }
         .background(papir.ignoresSafeArea())
         .foregroundColor(blekk)
-        .scrollDismissesKeyboardIfAvailable()
+        .scrollDismissesKeyboard(.interactively)
     }
 
     /// Figuren din: bildet, navnet – og Logg inn/Ny konto, eller Figuren din/Pluss når du er inne
@@ -254,11 +249,5 @@ private struct TrykkStil2: ButtonStyle {
         configuration.label
             .offset(x: configuration.isPressed ? 2 : 0, y: configuration.isPressed ? 2 : 0)
             .animation(.spring(response: 0.18, dampingFraction: 0.9), value: configuration.isPressed)
-    }
-}
-
-private extension View {
-    @ViewBuilder func scrollDismissesKeyboardIfAvailable() -> some View {
-        if #available(iOS 16.0, *) { self.scrollDismissesKeyboard(.interactively) } else { self }
     }
 }

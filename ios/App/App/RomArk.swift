@@ -42,7 +42,7 @@ final class RomModell: ObservableObject {
 
     func velg(_ gruppe: String, _ v: String) {
         guard let w = nett else { return }
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         w.callAsyncJavaScript("return window.__mvRom.velg(g, v)", arguments: ["g": gruppe, "v": v], in: nil, in: .page) { [weak self] res in
             DispatchQueue.main.async {
                 guard let self = self, case .success(let r) = res, let d = r as? [String: Any] else { return }
@@ -61,12 +61,7 @@ final class RomModell: ObservableObject {
 
 struct RomArk: View {
     @ObservedObject var m: RomModell
-    @Environment(\.colorScheme) private var modus
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var kort: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
+    private var kort: Color { Tema.kort }
     /// SF-symboler for gulv, lys og ting
     private let symbol: [String: String] = ["fliser": "square.grid.3x3", "lampe": "lightbulb", "lys": "sparkles", "diskokule": "circle.hexagongrid.fill", "plante": "leaf", "plakat": "newspaper", "platespiller": "opticaldisc"]
 

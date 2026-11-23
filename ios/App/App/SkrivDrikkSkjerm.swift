@@ -47,12 +47,11 @@ struct SdData {
     }
 }
 
-final class SdModell: ObservableObject {
+final class SdModell: ObservableObject, HarFigurer {
     @Published var d: SdData? = nil
     let blokker = KortModell()
     private(set) var avvik: Double = 0
     weak var nett: WKWebView? { didSet { blokker.nett = nett } }
-    private var bilder: [String: UIImage] = [:]
     func sett(_ dict: [String: Any]) {
         let ny = SdData(dict)
         if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
@@ -62,22 +61,14 @@ final class SdModell: ObservableObject {
     func naaMs() -> Double { Date().timeIntervalSince1970 * 1000 + avvik }
     /// Sekunder igjen å skrive (samme regning som nettsidens rfIgjen)
     func igjen(_ frist: Double) -> Int { max(0, Int(ceil((frist - 3000 - naaMs()) / 1000))) }
-    func bilde(_ b64: String) -> UIImage? {
-        if b64.isEmpty { return nil }
-        if let b = bilder[b64] { return b }
-        guard let data = Data(base64Encoded: b64), let img = UIImage(data: data, scale: 2) else { return nil }
-        if bilder.count > 80 { bilder.removeAll() }
-        bilder[b64] = img
-        return img
-    }
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
     }
     /// Skrivingen: nettsidens skjema åpnes som iPhone-dialog
     func skjema(_ id: String) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        Haptikk.trykk()
         guard let data = try? JSONSerialization.data(withJSONObject: [id]), let json = String(data: data, encoding: .utf8) else { return }
         nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.skjema(\(json)[0])", completionHandler: nil)
     }
@@ -85,19 +76,9 @@ final class SdModell: ObservableObject {
 
 struct SkrivDrikkSkjerm: View {
     @ObservedObject var m: SdModell
-    @Environment(\.colorScheme) private var modus
     @State private var tilValgt = ""
     @State private var kortInn = false
-    private var papir: Color { modus == .dark ? Color(red: 0.11, green: 0.106, blue: 0.122) : Color(red: 1, green: 0.973, blue: 0.933) }
-    private var blekk: Color { modus == .dark ? Color(red: 1, green: 0.973, blue: 0.933) : Color(red: 0.086, green: 0.071, blue: 0.059) }
-    private var kortFarge: Color { modus == .dark ? Color(red: 0.173, green: 0.169, blue: 0.188) : .white }
-    private let gul = Color(red: 1, green: 0.824, blue: 0.247)
-    private let oransje = Color(red: 1, green: 0.357, blue: 0.122)
     private let rust = Color(red: 0.722, green: 0.22, blue: 0.039)
-    private let mint = Color(red: 0.388, green: 0.886, blue: 0.659)
-    private let rosa = Color(red: 1, green: 0.612, blue: 0.761)
-    private let morkBlekk = Color(red: 0.086, green: 0.071, blue: 0.059)
-    private let lys = Color(red: 1, green: 0.973, blue: 0.933)
 
     var body: some View {
         ZStack {
@@ -216,7 +197,7 @@ struct SkrivDrikkSkjerm: View {
             VStack(alignment: .leading, spacing: 12) {
                 if n > 0 {
                     VStack(alignment: .leading, spacing: 12) {
-                        FlytRad(spacing: 6) {
+                        FlytLayout(spacing: 6) {
                             Text(d.tilEtikett.uppercased()).font(.archivo(11, vekt: 900)).opacity(0.6).padding(.trailing, 2)
                             ForEach(d.til) { t in
                                 let paa = tilValgt == t.v
@@ -334,7 +315,7 @@ struct SkrivDrikkSkjerm: View {
     /// Selve kortet: hvem det er til øverst, teksten stor, og hvor det kom fra
     private func kortet(_ d: SdData) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            FlytRad(spacing: 8) {
+            FlytLayout(spacing: 8) {
                 if d.mottakere.isEmpty {
                     Text(d.tilAlle.uppercased()).font(.archivo(12, vekt: 900)).opacity(0.6)
                 } else {
