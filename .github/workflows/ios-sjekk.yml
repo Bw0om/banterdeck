@@ -140,7 +140,7 @@ jobs:
           export MAESTRO_DRIVER_STARTUP_TIMEOUT=600000 MAESTRO_CLI_NO_ANALYTICS=1
           BILDER="$PWD/skjermbilder"
           # Bildene i flytene heter ../../skjermbilder/… – det treffer uansett om Maestro regner fra flytfila eller fra mappa vi står i
-          flyt() { echo "===== $1 =====" >> skjermbilder/maestro.txt; (cd ios/sjekk-flyt && maestro --udid "$UDID" test ${2:+-e "$3"} "$1.yaml" --debug-output "$BILDER/maestro-logg/$1" 2>&1 | tee -a "$BILDER/maestro.txt") || echo "FLYT $1 FEILET" >> skjermbilder/maestro.txt; }
+          flyt() { echo "===== $1 ===== $(date +%H:%M:%S)" >> skjermbilder/maestro.txt; (cd ios/sjekk-flyt && maestro --udid "$UDID" test ${2:+-e "$3"} "$1.yaml" --debug-output "$BILDER/maestro-logg/$1" 2>&1 | tee -a "$BILDER/maestro.txt") || echo "FLYT $1 FEILET" >> skjermbilder/maestro.txt; }
           # Utvalget (steget «Velger hvilke leker som testes»): «alle» eller en liste med flytnavn
           MED=" ${{ steps.utvalg.outputs.flyter }} "
           med() { [ "$MED" = " alle " ] && return 0; case "$MED" in *" $1 "*) return 0;; esac; return 1; }
@@ -279,6 +279,7 @@ jobs:
             wait
             fi
           fi
+          echo "===== ferdig ===== $(date +%H:%M:%S)" >> skjermbilder/maestro.txt
           xcrun simctl terminate "$UDID" no.mittvors.app || true
           SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_MORK=1 xcrun simctl launch "$UDID" no.mittvors.app
           sleep 12

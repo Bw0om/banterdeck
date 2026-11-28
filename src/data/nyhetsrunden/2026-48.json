@@ -1,0 +1,327 @@
+{
+ "aar": 2026,
+ "uke": 48,
+ "publisert": "2026-11-26",
+ "tittel": "Nyhetsrunden · uke 48",
+ "ingress": "Dieselkutt i budsjettet, pizza på anbud og Gordon Ramsay bak rattet i «Top Gear».",
+ "sporsmal": [
+  {
+   "type": "valg",
+   "q": "Hvilke fire partier ble enige om statsbudsjettet for 2027 rett før fristen?",
+   "alt": [
+    "Ap, SV, Rødt og MDG",
+    "Ap, Sp, SV og Rødt",
+    "Ap, Sp, MDG og KrF",
+    "Ap, Sp, SV og MDG"
+   ],
+   "svar": "Ap, Sp, SV og Rødt",
+   "info": "MDG ble ikke med, så avtalen mangler fortsatt flertall på Stortinget.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/norge/politikk/i/0vn14B/fire-partier-enige-om-statsbudsjettet-kutter-i-drivstoffavgift"
+  },
+  {
+   "type": "tall",
+   "q": "Budsjettavtalen setter en fast pris på månedskort for kollektivtransport. Hvor mange kroner?",
+   "svar": "499 kroner",
+   "info": "Avtalen kutter også dieselavgiften med én krone literen. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/norge/politikk/i/0vn14B/fire-partier-enige-om-statsbudsjettet-kutter-i-drivstoffavgift"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Kriserammede Norse hadde bare to av sine tolv langdistansefly i bruk i november.",
+   "svar": "Tull",
+   "info": "Det var halvparten, altså seks av tolv fly, som var i bruk – samtidig som aksjen stupte 70 prosent onsdag morgen.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/nyheter/kritisk-for-flyselskapet-norse-aksjen-ned-70-prosent/10650736"
+  },
+  {
+   "type": "valg",
+   "q": "Det amerikanske tilsynet FCC har gitt SpaceX lov til å skyte opp datasenter-satellitter. Hvor mange?",
+   "alt": [
+    "100 000",
+    "500 000",
+    "Én million",
+    "Ti millioner"
+   ],
+   "svar": "Én million",
+   "info": "Til sammenligning går det rundt 17 000 satellitter i bane rundt jorda i dag.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/okonomi/i/kMJ75L/musk-faar-loeyve-til-aa-skyte-opp-en-million-datasenter-satellitter"
+  },
+  {
+   "type": "fritt",
+   "q": "Hva heter den franske vingården som Brad Pitt og Angelina Jolie endelig har inngått forlik om?",
+   "svar": "Château Miraval",
+   "info": "Paret giftet seg der i 2014, og striden startet da Jolie solgte sin andel i 2021.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/nLapWL/brad-pitt-og-angelina-jolie-med-forlik-i-bitter-strid-om-fransk-vingaard"
+  },
+  {
+   "type": "tall",
+   "q": "Hva var snittprisen på strøm i NO2 (Sørvest-Norge) så langt i november, målt i øre per kWh?",
+   "svar": "219 øre",
+   "info": "Det er over dobbelt så høyt som i november i fjor. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "E24",
+   "url": "https://e24.no/energi-og-klima/i/bk5xme/aarets-dyreste-stroem-blir-bare-verre"
+  },
+  {
+   "type": "valg",
+   "q": "Staten sender SMS til 3,5 millioner nordmenn om medlemskap i tros- og livssynssamfunn. Hva regnes utsendelsen å koste?",
+   "alt": [
+    "Rundt 200 000 kroner",
+    "Rundt 2 millioner kroner",
+    "Rundt 20 millioner kroner",
+    "Rundt 50 millioner kroner"
+   ],
+   "svar": "Rundt 2 millioner kroner",
+   "info": "Meldingene sendes i puljer fra 30. november så nettsidene til Brønnøysund ikke går ned.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/regjeringen-sender-sms-til-35-millioner-nordmenn/1745068"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Gordon Ramsay er ny hovedprogramleder i BBC-programmet «Top Gear».",
+   "svar": "Sant",
+   "info": "Kokken har vært gjesteprogramleder tre ganger tidligere, og den nye sesongen spilles inn i 2027.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10652409"
+  },
+  {
+   "type": "valg",
+   "q": "Hvor spilles VM-matchen i sjakk mellom Gukesh og Javokhir Sindarov?",
+   "alt": [
+    "Dubai",
+    "London",
+    "Genève",
+    "Chennai"
+   ],
+   "svar": "Genève",
+   "info": "Andre parti endte remis etter bare 20 trekk, og stillingen er 1–1.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/sport/i/8Pmgv1/rask-remis-i-vm-duellen-i-sjakk"
+  },
+  {
+   "type": "fritt",
+   "q": "Hvilken nordmann scoret for Atlético Madrid da Viking tapte 0–2 i Champions League?",
+   "svar": "Alexander Sørloth",
+   "info": "Målet kom i det 19. minutt, før Julián Álvarez satte inn 2–0 på frispark.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/sport/sorloth-scoret-da-viking-fikk-stryk-en-enorm-lettelse/10652474"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Tidal blir den første musikktjenesten som forbyr KI-generert musikk.",
+   "svar": "Sant",
+   "info": "Forbudet gjelder fra 9. desember, og rundt 29 millioner KI-låter ligger på tjenesten i dag.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/kultur/i/vkQqPm/musikktjeneste-forbyr-ki-musikk-29-millioner-laater-fjernes"
+  },
+  {
+   "type": "tall",
+   "q": "Ifølge NRKs gjennomgang av eierregisteret: Hvor mange norske selskaper har eiere i Russland, Kina eller Iran?",
+   "svar": "118",
+   "info": "Hele 96 av dem kontrolleres fra Kina. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/nrk-118-selskaper-i-norge-er-eid-fra-russland-kina-og-iran/1745247"
+  },
+  {
+   "type": "valg",
+   "q": "Hva var historisk med årets Miss Universe, Jennifer Barreto fra Puerto Rico?",
+   "alt": [
+    "Hun er den første vinneren fra Norden",
+    "Hun er den første moren som har vunnet",
+    "Hun er den første vinneren over 40 år",
+    "Hun er den første som har vunnet to ganger"
+   ],
+   "svar": "Hun er den første moren som har vunnet",
+   "info": "Hun er 27 år, gift og mor – og ble kronet i San Juan.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/KL3wXo/historisk-seier-foerste-mor-kaaret-til-miss-universe"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Det er Avinor som ventes å bestille mest overtidspizza av de statlige selskapene i det nye pizza-anbudet.",
+   "svar": "Tull",
+   "info": "Det er Statnett, med rundt én million kroner i året, i et anbud verdt 72 millioner over fire år.",
+   "kilde": "E24",
+   "url": "https://e24.no/naeringsliv/i/Jn1VBJ/overtidspizza-paa-anbud-til-72-millioner-kroner"
+  },
+  {
+   "type": "valg",
+   "q": "Hva vil Frp gjøre med matmomsen i sitt alternative statsbudsjett?",
+   "alt": [
+    "Fjerne den helt",
+    "Halvere den fra 1. april",
+    "Kutte den med to prosentpoeng",
+    "Fjerne den bare på frukt og grønt"
+   ],
+   "svar": "Halvere den fra 1. april",
+   "info": "Totalt foreslår Frp kutt i skatter og avgifter på 63 milliarder kroner.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/nyheter/frp-vil-kutte-63-milliarder-lover-billigere-mat-strom-og-drivstoff/10650348"
+  },
+  {
+   "type": "fritt",
+   "q": "Neste sesong av «Kompani Lauritzen» spilles inn i Bømoen leir. I hvilken kommune ligger den?",
+   "svar": "Voss",
+   "info": "Blant de tolv nye rekruttene er Vegard Ylvisåker, Espen Eckbo og Eli Kari Gjengedal.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/g372wL/12-nye-kjendiser-klare-for-kompani-lauritzen-2027"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Japanske Kozo Tashima, som utfordrer Gianni Infantino i Fifa-valget, lover å sitte i maksimalt to perioder.",
+   "svar": "Tull",
+   "info": "Han lover å sitte kun én periode på fire år, og valget holdes i Marokko i mars.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/sport/infantino-rival-med-lofte-sitter-kun-en-periode/1745256"
+  },
+  {
+   "type": "tall",
+   "q": "Ifølge BBC: Hvor mange privatflyturer tok Fifa-president Gianni Infantino på 115 dager?",
+   "svar": "39",
+   "info": "Det tilsvarer omtrent én tur hver tredje dag. Innenfor 10 prosent regnes som riktig.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/sport/i/vkQJ0V/bbc-fifa-president-gianni-infantino-tok-39-privatflyturer-paa-115-dager"
+  },
+  {
+   "type": "valg",
+   "q": "Oslo kjøper 132 nye T-banevogner. Hvilken farge får dørene, for å være lettere å se?",
+   "alt": [
+    "Knallgule",
+    "Røde",
+    "Lysegrønne",
+    "Knallorange"
+   ],
+   "svar": "Knallorange",
+   "info": "Vognene lages av spanske CAF, og de første passasjerene ventes i 2029.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/oslo-kjoper-132-nye-t-banevogner-slik-blir-de-pa-innsiden/1743578"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: En T-bane måtte evakueres på Eiksmarka etter at noen gutter hadde kastet en sparkesykkel på sporet.",
+   "svar": "Tull",
+   "info": "Det var en vanlig sykkel – toget kjørte over den, og det oppsto en liten brann uten skader.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10651378"
+  },
+  {
+   "type": "valg",
+   "q": "GTA 6 kom endelig ut. Hvilken karakter fikk spillet på Metacritic?",
+   "alt": [
+    "95 av 100",
+    "97 av 100",
+    "99 av 100",
+    "100 av 100"
+   ],
+   "svar": "99 av 100",
+   "info": "Telenor målte 32 prosent mer nettrafikk enn normalt de første timene etter lanseringen.",
+   "kilde": "E24",
+   "url": "https://e24.no/naeringsliv/i/kMJKbv/gta-sprenger-grenser-gaming-feber"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Norsk vegansamfunn har vunnet mot staten i lagmannsretten i saken om å bli godkjent som livssynssamfunn.",
+   "svar": "Sant",
+   "info": "Borgarting lagmannsrett mente statens avslag var ugyldig, etter at vegansamfunnet tapte i tingretten i juli.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/notice/10652327"
+  },
+  {
+   "type": "valg",
+   "q": "Hvilken plass fikk Liv Ullmann på Varietys liste over tidenes 100 største filmstjerner?",
+   "alt": [
+    "18",
+    "49",
+    "81",
+    "99"
+   ],
+   "svar": "81",
+   "info": "Marilyn Monroe topper lista, foran Humphrey Bogart og Charlie Chaplin.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/rampelys/i/r8Ajq8/liv-ullmann-er-en-av-de-100-stoerste-filmstjernene-ifoelge-variety"
+  },
+  {
+   "type": "tall",
+   "q": "Hvor høyt var det samlede sykefraværet i tredje kvartal, ifølge Nav?",
+   "svar": "6,7 prosent",
+   "info": "Nav beskriver nivået som «stabilt høyt». Innenfor 10 prosent regnes som riktig.",
+   "kilde": "ABC Nyheter",
+   "url": "https://www.abcnyheter.no/nyheter/nav-stabilt-hoyt-sykefravaer/1745264"
+  },
+  {
+   "type": "sant",
+   "q": "Sant eller tull: Macaulay Culkin skal ifølge Variety skrive manus til en ny «Hjemme alene»-film sammen med Seth Rogen og Evan Goldberg.",
+   "svar": "Sant",
+   "info": "Disney vil ikke kommentere, og handlingen holdes hemmelig.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/kultur/i/GPGglm/nok-en-hjemme-alene-film-paa-beddingen"
+  },
+  {
+   "type": "valg",
+   "q": "Hvem møter Petter Northug i bokseringen 5. desember?",
+   "alt": [
+    "Calle Halfvarsson",
+    "John Arne Riise",
+    "Martin Johnsrud Sundby",
+    "Aksel Lund Svindal"
+   ],
+   "svar": "John Arne Riise",
+   "info": "Svenske Calle Halfvarsson sier at han gjerne vil møte Northug i ringen senere.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/sport/i/Pv9Vm0/calle-halfvarsson-og-petter-northug-har-utkjempet-mange-slag-i-skisporet-naa-aapner-svensken-for-aa-trekke-paa-seg-boksehanskene-og-moete-erkerivalen-i-ringen"
+  },
+  {
+   "type": "valg",
+   "q": "USA vil øke tollen for en rekke land. Hvilket av disse landene er IKKE med i denne runden?",
+   "alt": [
+    "Japan",
+    "Sveits",
+    "Norge",
+    "Brasil"
+   ],
+   "svar": "Norge",
+   "info": "Samtalene med Norge og Mexico pågår fortsatt.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/nyheter/usa-med-ny-toll-norge-under-vurdering/10652361"
+  },
+  {
+   "type": "fritt",
+   "q": "Hvilken statsråd reagerte på at elever vil bruke fraværsgrensa til «GTA-skulk»?",
+   "svar": "Kari Nessa Nordtun",
+   "info": "Kunnskapsministeren minner om at skolen er elevenes viktigste jobb.",
+   "kilde": "Aftenposten",
+   "url": "https://www.aftenposten.no/kultur/i/2vGz2v/elever-vil-bruke-fravaersgrensa-til-aa-skulke-naa-reagerer-ministeren"
+  },
+  {
+   "type": "valg",
+   "q": "Nye bilder viser resultatet etter at Nasas DART-sonde traff asteroiden Dimorphos med vilje. Hvor fort gikk sonden?",
+   "alt": [
+    "Rundt 2 100 km/t",
+    "Nesten 21 000 km/t",
+    "Rundt 210 000 km/t",
+    "Rundt 2,1 millioner km/t"
+   ],
+   "svar": "Nesten 21 000 km/t",
+   "info": "Krateret er omtrent like stort som et idrettsstadion.",
+   "kilde": "VG",
+   "url": "https://www.vg.no/nyheter/i/vkQalj/nasa-endret-asteroides-bane-kan-bli-viktig-for-aa-unngaa-fremtidige-trusler-mot-jorda"
+  },
+  {
+   "type": "valg",
+   "q": "Hvor mange mål scoret Antonio Nusa da RB Leipzig slo Lens 3–1 i Champions League?",
+   "alt": [
+    "Ett",
+    "To",
+    "Tre",
+    "Fire"
+   ],
+   "svar": "To",
+   "info": "Han ble kåret til banens beste – og Lens er Glimts neste motstander.",
+   "kilde": "Dagsavisen",
+   "url": "https://www.dagsavisen.no/sport/nusa-matchvinner-mot-glimts-neste-cl-motstander-karet-til-banens-beste/10650194"
+  }
+ ]
+}
