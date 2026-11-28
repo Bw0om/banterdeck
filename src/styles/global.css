@@ -612,6 +612,35 @@ body:has(.nr) .tool.dice{display:none}
 .nr-svar{background:var(--bg2);border:1px solid rgb(var(--volt-rgb) / .38);border-radius:10px;padding:12px 14px;margin:14px 0 4px}
 .nr-svar p{margin:0 0 4px}
 .nr-fasit{font-family:var(--display);font-weight:800;font-size:20px;color:var(--gold-t)}
+.nr-alt li.dempet{opacity:.5}
+.nr-alt.bloff li{padding:8px 0;line-height:1.35}
+.nr-alt li b{font-family:var(--display);font-weight:800}
+.nr-vansk{display:inline-flex;gap:3px;margin-left:4px;vertical-align:middle}
+.nr-vansk i{width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;opacity:.45}
+.nr-vansk i.på{background:currentColor;opacity:1}
+.nr-runde-merke{text-transform:uppercase;letter-spacing:.05em}
+.nr-runde-kort{text-align:center;padding:28px 16px 22px;margin:0 0 14px;background:var(--card);border:1px solid var(--border2);border-radius:20px}
+.nr-runde-kort h2{margin:4px 0 8px;font-size:clamp(30px,9vw,44px)}
+.nr-runde-nr{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-t);margin:0}
+.nr-runde-regel{font-family:var(--display);font-weight:800;font-size:19px;margin:0 0 6px}
+.nr-runde-kort.finale{background:var(--accent);border-color:var(--accent);color:var(--ink2)}
+.nr-runde-kort.finale .nr-runde-nr,.nr-runde-kort.finale .small{color:var(--ink2)}
+.nr.nr-finale{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.nr.nr-finale .gt-count{color:var(--accent-t)}
+.nr-finale-regel{display:inline-block;margin:0 0 10px;padding:4px 10px;border-radius:999px;background:var(--accent);color:var(--ink2);font-family:var(--display);font-weight:800;font-size:14px}
+.nr-gjett{display:flex;flex-direction:column;gap:8px;margin:14px 0 4px;max-width:420px}
+.nr-gjett label{display:grid;grid-template-columns:minmax(0,8em) 1fr;gap:10px;align-items:center;font-weight:600}
+.nr-gjett label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nr-gjett-liste{list-style:none;margin:10px 0 4px;max-width:420px;display:flex;flex-direction:column;gap:6px}
+.nr-gjett-liste li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:baseline;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 12px}
+.nr-gjett-liste li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nr-gjett-liste li em{font-style:normal;font-size:13px;font-weight:700}
+.nr-gjett-liste li.rett{border-color:var(--gold-t)}
+.nr-gjett-liste li.rett em{color:var(--gold-t)}
+.nr-gjett-liste li.feil{border-color:var(--accent-t)}
+.nr-gjett-liste li.feil em{color:var(--accent-t)}
+.nr-merk{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.nr-merk [aria-pressed="true"]{background:var(--gold);color:var(--ink2);border-color:var(--gold)}
 .nr-arkiv{list-style:none;max-width:680px}
 .nr-arkiv a{display:flex;flex-direction:column;gap:2px;padding:12px 6px;border-top:1px solid var(--border);color:var(--ink)}
 @media (hover:hover) and (pointer:fine){.nr-arkiv a:hover{text-decoration:none;background:var(--card)}}

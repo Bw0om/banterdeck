@@ -4557,7 +4557,14 @@ export function startRom(LEKNAVN, LANG) {
      Valg og sant/tull: A–D-klistremerker. Tall: eget tastatur (mobiltastaturet dekker ikke spørsmålet),
      og en tallinje når svaret vises – nærmest deler ut to. Fritt: et tekstfelt. Bevegelse bare første gang
      noe vises (stempelet, resultatet, nålene, pallen), så nye tegninger ikke spiller det av igjen. */
-  var TYPER = EN ? { valg: 'Pick the right one', sant: 'True or nonsense?', tall: 'Which number? Closest wins', fritt: 'Free answer' } : { valg: 'Velg riktig', sant: 'Sant eller tull?', tall: 'Hvilket tall? Nærmest vinner', fritt: 'Svar fritt' };
+  var TYPER = EN ? { valg: 'Pick the right one', sant: 'True or nonsense?', tall: 'Which number? Closest wins', fritt: 'Free answer', naermest: 'Closest – furthest off drinks', hvemskalut: 'Odd one out', bloff: 'Bluff – which one is real?' }
+    : { valg: 'Velg riktig', sant: 'Sant eller tull?', tall: 'Hvilket tall? Nærmest vinner', fritt: 'Svar fritt', naermest: 'Nærmest – lengst unna drikker', hvemskalut: 'Hvem skal ut?', bloff: 'Bløff – hvilken er ekte?' };
+  /** Format 2: runden, finalen og vanskelighet (1–3 prikker). Tomt for gamle ukefiler. */
+  function nrRundeMerke(s) {
+    var r = s.runde, prikker = s.vansk ? '<span class="nr-vansk" title="' + T('Vanskelighet ', 'Difficulty ') + s.vansk + '/3" aria-label="' + T('Vanskelighet ', 'Difficulty ') + s.vansk + T(' av 3', ' of 3') + '">' + [1, 2, 3].map(function (n) { return '<i' + (n <= s.vansk ? ' class="på"' : '') + '></i>'; }).join('') + '</span>' : '';
+    if (!r) return prikker;
+    return '<span class="nr-runde' + (r.finale ? ' finale' : '') + '">' + esc(r.navn) + '</span>' + prikker;
+  }
   var NR_FARGER = ['#FF9CC2', '#63E2A8', '#FFD23F', '#7CC6FE', '#FF5B1F', '#C9B3FF', '#FFB38A', '#B8E986'];
   var nrTall = { k: '', v: '' }, nrVist = '';
   function nrFarge(id) { var i = (tilstand.spillere || []).findIndex(function (p) { return p.id === id; }); return NR_FARGER[(i < 0 ? 0 : i) % NR_FARGER.length]; }
@@ -4588,14 +4595,15 @@ export function startRom(LEKNAVN, LANG) {
     return '<div class="nr-topp nr-avis"><div class="nr-avis-tekst"><b>Nyhetsrunden</b><span>' + T('Uke ', 'Week ') + s.uke + ' · ' + tekst + '</span></div>' + (klokke ? nrKlokke() : '') + '</div>';
   }
   function nrSporsmal(s, liten) {
-    return '<div class="nr-kort' + (liten ? ' liten' : '') + '"><span class="nr-type">' + esc(TYPER[s.qtype] || '') + '</span>' + (erVert() && s.fase === 'spm' ? '<span class="nr-les">' + T('Les det høyt', 'Read it out loud') + '</span>' : '') +
-      '<p>' + esc(s.q) + '</p></div>';
+    var r = s.runde, regel = r && s.nyRunde && s.fase === 'spm' && r.regel ? '<p class="nr-regel">' + esc(r.regel) + '</p>' : '';
+    return '<div class="nr-kort' + (liten ? ' liten' : '') + (r && r.finale ? ' finale' : '') + '">' + nrRundeMerke(s) + '<span class="nr-type">' + esc(TYPER[s.type] || TYPER[s.qtype] || '') + '</span>' + (erVert() && s.fase === 'spm' ? '<span class="nr-les">' + T('Les det høyt', 'Read it out loud') + '</span>' : '') +
+      regel + '<p>' + esc(s.q) + '</p></div>';
   }
   function nrTastatur(s) {
     var nokkel = s.rid + ':' + s.i, mitt = s.mittSvar;
     if (nrTall.k !== nokkel) nrTall = { k: nokkel, v: mitt ? String(mitt).replace(/\D/g, '') : '' };
     var taster = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', '⌫'];
-    return '<div class="nr-tall"><label for="nrTallUt">' + T('Gjetningen din', 'Your guess') + '</label><output id="nrTallUt" class="nr-tall-ut">' + (nrFormat(nrTall.v) || '0') + '</output>' +
+    return '<div class="nr-tall"><label for="nrTallUt">' + T('Gjetningen din', 'Your guess') + (s.enhet ? ' (' + esc(s.enhet) + ')' : '') + '</label><output id="nrTallUt" class="nr-tall-ut">' + (nrFormat(nrTall.v) || '0') + '</output>' +
       '<div class="nr-taster">' + taster.map(function (k) { return '<button type="button" data-g="nr-tast" data-k="' + k + '"' + (k === '⌫' ? ' aria-label="' + T('Slett', 'Delete') + '" class="graa"' : k === '000' ? ' class="graa"' : '') + '>' + k + '</button>'; }).join('') + '</div>' +
       '<button type="button" class="nr-las" id="nrLas" data-g="nr-las">' + nrLasTekst(mitt) + '</button></div>';
   }
@@ -4633,6 +4641,7 @@ export function startRom(LEKNAVN, LANG) {
     var tittel = k === 2 ? T('Nærmest – del ut to', 'Closest – hand out two') : k === 1 ? (tall ? T('Innen 10 % – del ut én', 'Within 10% – hand out one') : T('Riktig – del ut én', 'Right – hand out one'))
       : k === 0 ? T('Midt på treet – ingenting', 'Somewhere in between – nothing') : !mitt ? T('Ingen svar – drikk én', 'No answer – drink one') : tall ? T('Lengst unna – drikk én', 'Furthest off – drink one') : T('Feil – drikk én', 'Wrong – drink one');
     return '<div class="nr-resultat ' + (k > 0 ? 'rett' : k === 0 ? 'null' : 'feil') + (nrVist !== s.rid + ':' + s.i ? ' inn' : '') + '"><b>' + tittel + '</b>' +
+      (s.runde && s.runde.finale && k !== 0 ? '<span>' + T('Finale: dobbelt opp.', 'Final: it counts double.') + '</span>' : '') +
       (s.info ? '<span>' + esc(s.info) + (s.url ? ' <a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + T('Les saken hos ', 'Read it at ') + esc(s.kilde) + '</a>' : '') + '</span>' : '') + '</div>';
   }
   /** Nyhetsrunden til den native skjermen (NyhetsrundenSkjerm.swift): avishodet, spørsmålet, svarmåten (A–D, talltastatur eller
@@ -4667,7 +4676,7 @@ export function startRom(LEKNAVN, LANG) {
     }
     var spm = s.fase === 'spm', har = s.harSvart || [], mitt = s.mittSvar;
     d.frist = spm ? s.frist || 0 : 0;
-    d.sporsmal = { type: TYPER[s.qtype] || '', les: vert && spm ? T('Les det høyt', 'Read it out loud') : '', q: String(s.q || '') };
+    d.sporsmal = { type: (s.runde ? s.runde.navn + ' · ' : '') + (TYPER[s.type] || TYPER[s.qtype] || ''), les: vert && spm ? T('Les det høyt', 'Read it out loud') : '', q: String(s.q || '') };
     if (spm) {
       d.spm = { qtype: s.qtype, mitt: mitt || '', mangler: alle.length - har.length,
         alt: s.alt ? s.alt.map(function (a, i) { return { bokstav: 'ABCD'.charAt(i), tekst: a, valgt: mitt === a }; }) : [],
@@ -4900,7 +4909,8 @@ export function startRom(LEKNAVN, LANG) {
       return '<div class="nr-a avslort' + (rett ? ' rett' : minn ? ' feil' : ' dempet') + '"><i>' + 'ABCD'.charAt(i) + '</i><span>' + esc(a) + '</span><span class="nr-hvem">' + hvem.map(function (p, j) { return '<span style="--i:' + (i * 2 + j) + '">' + nrHode(p.id, '', rett ? '' : 'flat') + '</span>'; }).join('') + '</span>' +
         (rett || minn ? '<em class="nr-stempel' + (inn ? ' inn' : '') + '">' + (rett ? T('Riktig', 'Right') : T('Feil', 'Wrong')) + '</em>' : '') + '</div>'; }).join('') + '</div>';
     else if (s.qtype === 'tall' && s.tall) midt = '<div class="nr-fasit-boks"><span>' + T('Svaret', 'The answer') + '</span><b>' + esc(s.fasit) + '</b></div>' + nrTallinje(s);
-    else midt = '<div class="nr-fasit-boks"><span>' + T('Svaret', 'The answer') + '</span><b>' + esc(s.fasit) + '</b></div>';
+    else midt = '<div class="nr-fasit-boks"><span>' + T('Svaret', 'The answer') + '</span><b>' + esc(s.fasit) + '</b></div>' +
+      (s.godtas && s.godtas.length ? '<p class="nr-godtas">' + T('Godtas også: ', 'Also accepted: ') + s.godtas.map(esc).join(', ') + '</p>' : '');
     // Fritt og tall: hva hver enkelt svarte (verten kan rette en vurdering)
     var liste = s.alt ? '' : '<ul class="nr-liste">' + alle.slice().sort(function (a, b) { return (res[b.id] || -1) - (res[a.id] || -1); }).map(function (p) {
       var k = res[p.id], merke = k === 2 ? T('Nærmest', 'Closest') : k === 1 ? (s.qtype === 'tall' ? T('Innen 10 %', 'Within 10%') : T('Riktig', 'Right')) : k === 0 ? '–' : T('Drikk', 'Drink');

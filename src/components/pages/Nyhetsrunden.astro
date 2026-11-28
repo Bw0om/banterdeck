@@ -24,9 +24,18 @@ const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
       var root = document.currentScript.closest('.nr');
       var body = root.querySelector('.gt-body');
       if (root.dataset.bound) return; root.dataset.bound = '1';
-      var TYPER = { valg:'Velg riktig', sant:'Sant eller tull?', tall:'Hvilket tall?', fritt:'Svar fritt' };
-      var nr = 0, S = R.sporsmal, rekkefolge = {}, folk = [], poeng = [], svarLogg = {};
-      // alternativene stokkes, så det riktige svaret ikke alltid står på samme plass
+      var TYPER = { valg:'Velg riktig', sant:'Sant eller tull?', tall:'Hvilket tall?', fritt:'Svar fritt',
+        naermest:'Nærmest – lengst unna drikker', hvemskalut:'Hvem skal ut?', bloff:'Bløff – hvilken er ekte?' };
+      // Format 2: runder med mellomkort og finale. Gamle ukefiler har ingen runder og spilles som før.
+      var S = R.sporsmal, RUNDER = R.format === 2 && R.runder && R.runder.length ? R.runder : null;
+      var nr = 0, rekkefolge = {}, folk = [], poeng = [], gitt = {}, gjett = {}, merket = {};
+      function runde(i){ var q = S[i]; if (!RUNDER || !q || !q.runde) return null;
+        var r = RUNDER.filter(function (x) { return x.nr === q.runde; })[0] || { nr: q.runde, navn: 'Runde ' + q.runde, regel: '' };
+        return { nr: r.nr, navn: r.navn || '', regel: r.regel || '', finale: r.nr === 4 || /finale/i.test(r.navn || '') }; }
+      function nyRunde(i){ return !!runde(i) && (i === 0 || S[i-1].runde !== S[i].runde); }
+      // Alle gjetter eller peker samtidig på disse – ingen tur, bordet dømmer selv
+      function samtidig(s){ return s.type === 'naermest' || s.type === 'bloff'; }
+      // alternativene stokkes, så det riktige svaret ikke alltid står på samme plass (bløff: ny rekkefølge hver gang)
       function alternativer(i){
         if (!rekkefolge[i]){ var a = S[i].alt.slice();
           for (var k=a.length-1;k>0;k--){ var j=Math.floor(Math.random()*(k+1)); var t=a[k]; a[k]=a[j]; a[j]=t; }
@@ -34,39 +43,92 @@ const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
         return rekkefolge[i];
       }
       function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-      function vis(html){
+      function tall(v){ var n = parseFloat(String(v == null ? '' : v).replace(/\s/g,'').replace(',','.')); return isFinite(n) ? n : NaN; }
+      function fmt(n){ return Number(n).toLocaleString('nb-NO', { maximumFractionDigits: 3 }); }
+      function vis(html, finale){
         body.innerHTML = html;
+        root.classList.toggle('nr-finale', !!finale);
         var topp = window.innerWidth < 900 ? 130 : 24, y = root.getBoundingClientRect().top;
         if (y < topp - 40 || y > window.innerHeight * 0.5) window.scrollTo({ top: window.scrollY + y - topp, behavior: 'smooth' });
       }
       function start(){
+        var har = {}; S.forEach(function (s) { har[s.type] = 1; });
         vis('<ul class="nr-regler">' +
           '<li>Telefonen går rundt bordet. Les spørsmålet høyt for den som står for tur.</li>' +
           '<li><b>Riktig:</b> del ut én slurk. <b>Feil:</b> drikk én.</li>' +
           '<li><b>Står du over:</b> drikk én – og bordet kan stjele. Riktig gir to slurker å dele ut, feil gir to å drikke.</li>' +
-          '<li>På tallspørsmål er alt innenfor 10 prosent riktig.</li></ul>' +
+          (har.tall ? '<li>På tallspørsmål er alt innenfor 10 prosent riktig.</li>' : '') +
+          (har.naermest ? '<li><b>Nærmest:</b> alle gjetter samtidig. Den som er lengst unna drikker.</li>' : '') +
+          (har.bloff ? '<li><b>Bløff:</b> bare én av sakene er ekte. Alle peker samtidig, og de som bommer drikker.</li>' : '') +
+          (RUNDER ? '<li><b>' + RUNDER.length + ' runder.</b> ' + RUNDER.filter(function (r) { return r.regel; }).map(function (r) { return esc(r.navn) + ': ' + esc(r.regel); }).join(' ') + '</li>' : '') +
+          '</ul>' +
           '<label class="rof-lab" for="nrFolk">Hvem er med? <span class="small">(valgfritt – da teller siden poengene)</span></label>' +
           '<input class="rof-inp" id="nrFolk" placeholder="Jonas, Maria, Petter" value="' + esc(husk()) + '">' +
           '<button class="btn gold vp-big" data-a="start">Start runden · ' + S.length + ' spørsmål</button>');
       }
       function husk(v){ try { if (v === undefined) return localStorage.getItem('bd_spillere') || ''; localStorage.setItem('bd_spillere', v); } catch (e) { return ''; } }
       function hvem(){ return folk.length ? folk[nr % folk.length] : ''; }
-      function spm(visSvar){
-        var s = S[nr];
-        var alt = s.type === 'valg' ? '<ol class="nr-alt">' + alternativer(nr).map(function(a){
-              return '<li class="' + (visSvar && a === s.svar ? 'rett' : '') + '">' + esc(a) + '</li>'; }).join('') + '</ol>' : '';
-        vis('<p class="gt-count">' + (nr+1) + ' / ' + S.length + ' · ' + TYPER[s.type] + '</p>' +
-          (folk.length ? '<p class="nr-tur">Til <b>' + esc(hvem()) + '</b></p>' : '') +
-          '<p class="gt-text">' + esc(s.q) + '</p>' + alt +
-          (visSvar
-            ? '<div class="nr-svar"><p class="nr-fasit">' + esc(s.svar) + '</p>' + (s.info ? '<p>' + esc(s.info) + '</p>' : '') +
-              (s.url ? '<p class="small"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">Les saken hos ' + esc(s.kilde) + ' ↗</a></p>' : '') + '</div>' +
-              (folk.length
-                ? '<div class="nr-dom"><button class="btn gold" data-a="rett">✓ ' + esc(hvem()) + ' hadde rett</button><button class="btn ghost" data-a="feil">✗ Feil</button></div>'
-                : '<button class="btn gold vp-big" data-a="neste">' + (nr < S.length-1 ? 'Neste person' : 'Avslutt runden') + '</button>')
-            : '<button class="btn gold vp-big" data-a="svar">Vis svar</button>') +
-          '<div class="gt-row"><button class="btn ghost" data-a="tilbake"' + (nr===0 ? ' disabled' : '') + '>Tilbake</button></div>');
+      // Poeng per spørsmål, så Tilbake og nye vurderinger ikke teller dobbelt
+      function settPoeng(i, liste){ (gitt[i] || []).forEach(function (k) { poeng[k]--; }); gitt[i] = liste; liste.forEach(function (k) { poeng[k]++; }); }
+      function mellomkort(){
+        var r = runde(nr), antall = S.filter(function (s) { return s.runde === S[nr].runde; }).length;
+        vis('<div class="nr-runde-kort' + (r.finale ? ' finale' : '') + '"><p class="nr-runde-nr">' + (r.finale ? 'Siste runde' : r.nr + ' av ' + RUNDER.length) + '</p>' +
+          '<h2>' + esc(r.navn) + '</h2>' + (r.regel ? '<p class="nr-runde-regel">' + esc(r.regel) + '</p>' : '') +
+          '<p class="small">' + antall + ' spørsmål</p></div>' +
+          '<button class="btn gold vp-big" data-a="inn">' + (r.finale ? 'Start finalen' : 'Start ' + esc(r.navn.toLowerCase())) + '</button>' +
+          '<div class="gt-row"><button class="btn ghost" data-a="tilbake"' + (nr===0 ? ' disabled' : '') + '>Tilbake</button></div>', r.finale);
       }
+      function prikker(s){ var v = s.vanskelighet; if (!v) return '';
+        return ' <span class="nr-vansk" role="img" aria-label="Vanskelighet ' + v + ' av 3" title="' + ['','Lett','Middels','Vanskelig'][v] + '">' + [1,2,3].map(function (n) { return '<i' + (n <= v ? ' class="på"' : '') + '></i>'; }).join('') + '</span>'; }
+      function lesGjett(){ var g = gjett[nr] || (gjett[nr] = {}); body.querySelectorAll('[data-gjett]').forEach(function (el) { g[el.dataset.gjett] = el.value; }); }
+      function spm(visSvar){
+        var s = S[nr], r = runde(nr), sam = samtidig(s), med = folk.length && !sam, alt = '';
+        if (s.alt && (s.type === 'valg' || s.type === 'hvemskalut' || s.type === 'bloff'))
+          alt = '<ol class="nr-alt' + (s.type === 'bloff' ? ' bloff' : '') + '">' + alternativer(nr).map(function(a){
+              var rett = visSvar && a === s.svar;
+              return '<li class="' + (rett ? 'rett' : visSvar && s.type !== 'valg' ? 'dempet' : '') + '">' + esc(a) + (rett && s.type === 'hvemskalut' ? ' <b>– skal ut</b>' : rett && s.type === 'bloff' ? ' <b>– ekte</b>' : '') + '</li>'; }).join('') + '</ol>';
+        // Nærmest: valgfrie felt for gjetningene, så siden kårer den som er lengst unna
+        var g = gjett[nr] || {}, felt = '', dom = '';
+        if (s.type === 'naermest' && folk.length) {
+          if (!visSvar) felt = '<div class="nr-gjett"><p class="small">Skriv inn gjetningene om dere vil (valgfritt)' + (s.enhet ? ' · ' + esc(s.enhet) : '') + '</p>' +
+            folk.map(function (n, i) { return '<label><span>' + esc(n) + '</span><input class="rof-inp" type="text" inputmode="decimal" autocomplete="off" data-gjett="' + i + '" value="' + esc(g[i] || '') + '"></label>'; }).join('') + '</div>';
+          else {
+            var fasit = typeof s.tall === 'number' ? s.tall : tall(s.svar);
+            var liste = folk.map(function (n, i) { return { i: i, n: n, v: tall(g[i]) }; }).filter(function (x) { return isFinite(x.v); });
+            if (liste.length >= 2 && isFinite(fasit)) {
+              liste.forEach(function (x) { x.d = Math.abs(x.v - fasit); });
+              var maks = Math.max.apply(null, liste.map(function (x) { return x.d; })), min = Math.min.apply(null, liste.map(function (x) { return x.d; })), ulik = maks !== min;
+              liste.sort(function (a, b) { return a.d - b.d; });
+              dom = '<ul class="nr-gjett-liste">' + liste.map(function (x) { var best = ulik && x.d === min, verst = ulik && x.d === maks;
+                return '<li class="' + (best ? 'rett' : verst ? 'feil' : '') + '"><span>' + esc(x.n) + '</span><b>' + fmt(x.v) + '</b><em>' + (verst ? 'Lengst unna – drikk' : best ? 'Nærmest' : '') + '</em></li>'; }).join('') + '</ul>';
+              settPoeng(nr, ulik ? liste.filter(function (x) { return x.d === min; }).map(function (x) { return x.i; }) : []);
+            } else settPoeng(nr, []);
+          }
+        }
+        // Bløff: bordet krysser av for hvem som pekte riktig (valgfritt – bare for poengtavla)
+        if (s.type === 'bloff' && folk.length && visSvar) {
+          var m = merket[nr] || [];
+          dom = '<p class="small">Hvem pekte på den ekte? De andre drikker.</p><div class="nr-merk">' + folk.map(function (n, i) { return '<button class="btn ghost small" data-a="merk" data-i="' + i + '" aria-pressed="' + (m.indexOf(i) !== -1) + '">' + esc(n) + '</button>'; }).join('') + '</div>';
+        }
+        var neste = nr < S.length-1 ? (nyRunde(nr+1) ? 'Videre til ' + esc(runde(nr+1).navn.toLowerCase()) : sam ? 'Neste spørsmål' : 'Neste person') : 'Avslutt runden';
+        vis('<p class="gt-count">' + (r ? '<span class="nr-runde-merke">' + esc(r.navn) + '</span> · ' : '') + (nr+1) + ' / ' + S.length + ' · ' + (TYPER[s.type] || '') + prikker(s) + '</p>' +
+          (r && r.finale && r.regel ? '<p class="nr-finale-regel">' + esc(r.regel) + '</p>' : '') +
+          (med ? '<p class="nr-tur">Til <b>' + esc(hvem()) + '</b></p>' : sam ? '<p class="nr-tur">Alle ' + (s.type === 'bloff' ? 'peker' : 'gjetter') + ' samtidig</p>' : '') +
+          '<p class="gt-text">' + esc(s.q) + '</p>' + alt + felt +
+          (visSvar
+            ? '<div class="nr-svar"><p class="nr-fasit">' + esc(s.svar) + '</p>' +
+              (s.type === 'fritt' && s.godtas && s.godtas.length ? '<p class="small">Godtas også: ' + s.godtas.map(esc).join(', ') + '</p>' : '') +
+              (s.info ? '<p>' + esc(s.info) + '</p>' : '') +
+              (s.url ? '<p class="small"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">Les saken hos ' + esc(s.kilde) + ' ↗</a></p>' : '') + '</div>' + dom +
+              (med
+                ? '<div class="nr-dom"><button class="btn gold" data-a="rett">✓ ' + esc(hvem()) + ' hadde rett</button><button class="btn ghost" data-a="feil">✗ Feil</button></div>'
+                : '<button class="btn gold vp-big" data-a="neste">' + neste + '</button>')
+            : '<button class="btn gold vp-big" data-a="svar">Vis svar</button>') +
+          '<div class="gt-row"><button class="btn ghost" data-a="tilbake"' + (nr===0 && !nyRunde(0) ? ' disabled' : '') + '>Tilbake</button></div>', r && r.finale);
+      }
+      // Til spørsmål i: mellomkort først når en ny runde starter
+      function til(i){ nr = i; if (nyRunde(nr)) mellomkort(); else spm(false); }
+      function videre(){ if (nr < S.length-1) til(nr+1); else slutt(); }
       function slutt(){
         try { var sp = JSON.parse(localStorage.getItem('bd_nr_spilt') || '[]'); var id = root.dataset.runde;
           if (sp.indexOf(id) === -1) { sp.push(id); localStorage.setItem('bd_nr_spilt', JSON.stringify(sp.slice(-300))); } } catch (e) {}
@@ -81,31 +143,38 @@ const andre = publiserteRunder().filter((r) => rundeId(r) !== rundeId(runde));
         vis('<div class="vp-center"><h2>Det var uka.</h2><p>Alle skåler for nyhetsbildet. Ny runde kommer fredag kl. 12.</p></div>' +
           '<button class="btn gold vp-big" data-a="igjen">Ta runden på nytt</button>');
       }
+      function nullstill(){ poeng = folk.map(function () { return 0; }); gitt = {}; gjett = {}; merket = {}; rekkefolge = {}; }
       body.addEventListener('click', function(e){
         var b = e.target.closest('button'); if (!b) return;
         var a = b.dataset.a;
+        if (body.querySelector('[data-gjett]')) lesGjett();
         if (a === 'start'){
           var inp = body.querySelector('#nrFolk'), v = inp ? inp.value : '';
           folk = v.split(',').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 12);
           if (folk.length) husk(v);
-          poeng = folk.map(function () { return 0; }); svarLogg = {};
         }
-        if (a === 'igjen'){ poeng = folk.map(function () { return 0; }); svarLogg = {}; }
-        if (a === 'start' || a === 'igjen'){ nr = 0; rekkefolge = {}; spm(false); }
-        else if (a === 'rett' || a === 'feil'){
-          var i = nr % folk.length;
-          if (svarLogg[nr] === true) poeng[i]--;              // rettet et tidligere svar
-          svarLogg[nr] = a === 'rett'; if (a === 'rett') poeng[i]++;
-          if (nr < S.length-1){ nr++; spm(false); } else slutt();
+        if (a === 'start' || a === 'igjen'){ nullstill(); til(0); }
+        else if (a === 'inn') spm(false);
+        else if (a === 'rett' || a === 'feil'){ settPoeng(nr, a === 'rett' ? [nr % folk.length] : []); videre(); }
+        else if (a === 'merk'){
+          var m = merket[nr] || (merket[nr] = []), i = +b.dataset.i, p = m.indexOf(i);
+          if (p === -1) m.push(i); else m.splice(p, 1);
+          b.setAttribute('aria-pressed', String(p === -1)); settPoeng(nr, m.slice());
         }
         else if (a === 'svar') spm(true);
-        else if (a === 'neste'){ if (nr < S.length-1){ nr++; spm(false); } else slutt(); }
-        else if (a === 'tilbake' && nr > 0){ nr--; spm(false); }
-        if (folk.length && !body.querySelector('.vp-center') && (a === 'svar' || a === 'rett' || a === 'feil' || a === 'tilbake')) {
+        else if (a === 'neste') videre();
+        else if (a === 'tilbake'){
+          // Fra et spørsmål som åpner en runde: tilbake til mellomkortet. Fra mellomkortet: forrige spørsmål.
+          if (body.querySelector('.nr-runde-kort')) { if (nr > 0) { nr--; spm(false); } }
+          else if (nyRunde(nr)) mellomkort();
+          else if (nr > 0) { nr--; spm(false); }
+        }
+        if (folk.length && !body.querySelector('.vp-center') && !body.querySelector('.nr-runde-kort') && a !== 'start' && a !== 'igjen' && a !== 'merk') {
           var t = body.querySelector('.nr-stilling');
           if (!t) { t = document.createElement('p'); t.className = 'nr-stilling small'; body.appendChild(t); }
           t.textContent = folk.map(function (n, i) { return n + ' ' + poeng[i]; }).join(' · ');
         }
+        if (a === 'merk') { var st = body.querySelector('.nr-stilling'); if (st) st.textContent = folk.map(function (n, i) { return n + ' ' + poeng[i]; }).join(' · '); }
       });
       start();
     })();
