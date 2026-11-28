@@ -1,30 +1,30 @@
-07:51:02 swift romklient: laget rom 34YY v1, 1 spiller, vert=true, leker=37
-07:51:02 swift romklient: sanntid koblet
-07:51:03 swift romklient: gjest med, ser 2 spillere
-07:51:03 swift romklient: verten ser 2 spillere, sanntidsvarsler=1 – OK
-07:51:03 swift romklient: ukjent handling ga feil som ventet: ukjent-handling (400): Det gikk ikke.
-07:51:10 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-07:51:10 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
-07:51:10 swift plass: topp=186 bredde=364
-07:51:16 skjermer: start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-07:51:16 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
-07:51:16 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-07:51:24 etter 14s: skjermer: start>ok leker=-
+08:50:21 swift romklient: laget rom 4YDS v1, 1 spiller, vert=true, leker=37
+08:50:23 swift romklient: sanntid koblet
+08:50:24 swift romklient: gjest med, ser 2 spillere
+08:50:24 swift romklient: verten ser 2 spillere, sanntidsvarsler=1 – OK
+08:50:25 swift romklient: ukjent handling ga feil som ventet: ukjent-handling (400): Det gikk ikke.
+08:50:33 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+08:50:33 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
+08:50:33 swift plass: topp=186 bredde=364
+08:50:39 skjermer: start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+08:50:39 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
+08:50:39 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+08:50:47 etter 14s: skjermer: start>ok leker=-
 ----- etter ny installasjon -----
-08:17:35 swift romklient: laget rom ZMGF v1, 1 spiller, vert=true, leker=37
-08:17:35 swift romklient: sanntid koblet
-08:17:35 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-08:17:36 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
-08:17:36 swift romklient: gjest med, ser 2 spillere
-08:17:36 swift plass: topp=186 bredde=364
-08:17:36 swift romklient: verten ser 2 spillere, sanntidsvarsler=1 – OK
-08:17:37 swift romklient: ukjent handling ga feil som ventet: ukjent-handling (400): Det gikk ikke.
-08:17:42 skjermer: start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-08:17:42 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
-08:17:42 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-08:17:49 etter 14s: skjermer: start>ok leker=-
-08:24:56 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
-08:24:56 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
-08:25:02 skjermer: hendelse:rom(venter) rom>ok hendelse:nr nr>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
-08:25:02 startstua: mangler __mvStart=false sat=
-08:25:02 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(28, 27, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/QGTU?v=0"]
+09:15:46 swift romklient: laget rom LY8Y v1, 1 spiller, vert=true, leker=37
+09:15:47 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+09:15:47 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
+09:15:47 swift romklient: sanntid koblet
+09:15:47 swift plass: topp=186 bredde=364
+09:15:48 swift romklient: gjest med, ser 2 spillere
+09:15:48 swift romklient: verten ser 2 spillere, sanntidsvarsler=1 – OK
+09:15:48 swift romklient: ukjent handling ga feil som ventet: ukjent-handling (400): Det gikk ikke.
+09:15:53 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+09:15:53 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
+09:15:53 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+09:16:01 etter 14s: skjermer: hendelse:start(venter) start>ok leker=-
+09:22:33 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
+09:22:34 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
+09:22:40 skjermer: hendelse:rom(venter) rom>ok hendelse:nr nr>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
+09:22:40 startstua: mangler __mvStart=false sat=
+09:22:40 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(28, 27, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/62NG?v=0"]
