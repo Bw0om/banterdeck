@@ -15,7 +15,8 @@ appId: no.mittvors.app
     optional: true
 - extendedWaitUntil:
     visible:
-      text: "(?is).*(venter på at|hva fikk dere).*"
+      # Forsiden – eller første spørsmål, om verten rakk å starte før Maestro var i gang
+      text: "(?is).*(venter på at|hva fikk dere|velg riktig|sant eller tull|hvilket tall|svar fritt).*"
     timeout: 30000
 - takeScreenshot: 72-nyhetsrunden-forside
 - extendedWaitUntil:
