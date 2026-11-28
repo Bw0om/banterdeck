@@ -236,6 +236,21 @@ final class RomKlient {
         return meg != nil
     }
 
+    /// Bruker plassen nettsiden allerede har i rommet. Mens lekene flyttes over én om gangen (fase 3) eier nettsiden
+    /// fortsatt rommet (lobbyen, stua, frister og lyd), og de native lekene leser og handler selv gjennom denne.
+    func bruk(kode ny: String, meg m: Meg, lang l: String) {
+        let k = Self.rensKode(ny)
+        lang = l == "en" ? "en" : "no"
+        guard !k.isEmpty else { return }
+        if k == kode && m == meg && aktiv { return }
+        bytt(til: k, meg: m)
+        start()
+        Task { await hent() }
+    }
+
+    /// Den ene klienten de native lekene deler
+    static let delt = RomKlient()
+
     // MARK: Handlinger
 
     /// Gjør noe i rommet (samme handlinger som nettsiden sender: «start», «slurk», «stem» …). Handlingene sendes én

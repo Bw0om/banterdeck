@@ -5508,6 +5508,15 @@ export function startRom(LEKNAVN, LANG) {
   }
   /** Skålsprinten til den native skjermen (SkalSkjerm.swift): glasset som venter, SKÅL-øyeblikket (skjermen regner det ut selv fra servertiden),
       tiden din, lista etter hver skål og summen til slutt. Trykket går til nettsidens sk-trykk, som måler reaksjonstiden. */
+  /** Nyere app: skjermen leser rommet og sender trykket selv (RomKlient.swift). Den trenger bare plassen i rommet og alles figurer herfra. */
+  function skjermRom(d, jobber) {
+    if (meg) d.rom = { kode: kode, id: meg.id, pollett: meg.pollett, lang: LANG };
+    d.hoder = {};
+    (tilstand.spillere || []).forEach(function (p) {
+      var h = d.hoder[p.id] = { n: '', oi: '' };
+      jobber.push(vlHodePng(p.id, '').then(function (b) { h.n = b; }), vlHodePng(p.id, 'oi').then(function (b) { h.oi = b; }));
+    });
+  }
   function skData(s) {
     var meg = tilstand.meg, jobber = [], nr = s.nr || 0, ant = s.antall || 5;
     var hode = function (id, uttrykk) { var h = { id: id, navn: jaNavn(id), png: '' }; jobber.push(vlHodePng(id, uttrykk || '').then(function (b) { h.png = b; })); return h; };
@@ -5515,6 +5524,7 @@ export function startRom(LEKNAVN, LANG) {
     var d = { fase: s.fase, tid: s.tid || 0, nr: nr, antall: ant, naa: Date.now() + klokkeAvvik, tittel: T('Skålsprinten', 'Cheers sprint'),
       chip: s.fase === 'vent' ? T('Hold fingeren klar', 'Finger ready') : s.fase === 'fasit' ? T('Treigest drikker', 'Slowest drinks') : T('Raskest i stua', 'Fastest in the room'), gul: s.fase !== 'fasit',
       smaa: T('Skål ', 'Cheers ') + Math.min(ant, nr + 1) + T(' av ', ' of ') + ant, slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    skjermRom(d, jobber);
     if (s.fase === 'vent') {
       var mitt = skalMitt[s.tid] || ((s.harTrykket || []).indexOf(meg) !== -1 ? { tidlig: (s.tidlig || []).indexOf(meg) !== -1, ms: (s.trykk || {})[meg] } : null);
       d.vent = { tekst: T('Vent …', 'Wait …'), skal: T('Skål!', 'Cheers!'), mitt: mitt ? { tidlig: !!mitt.tidlig, tekst: mitt.tidlig ? T('Drikk 2', 'Drink 2') : mitt.ms + ' ms' } : null,

@@ -758,7 +758,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private let skModell = SkModell()
     private var skVert: UIHostingController<SkalSkjerm>?
     private func visSk(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else { fjernOverlegg(&skVert); return }
+        guard let d = d else { if skVert != nil { skModell.slipp() }; fjernOverlegg(&skVert); return }
         skModell.sett(d)
         if skVert == nil { skVert = leggOverlegg(UIHostingController(rootView: SkalSkjerm(m: skModell)), over: side, nett: skModell.nett) }
         fram(skVert?.view.superview)
