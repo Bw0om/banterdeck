@@ -42,11 +42,22 @@ appId: no.mittvors.app
       text: "Velg lek"
     timeout: 10000
 - takeScreenshot: 13-velger
-# Arket ned igjen, så «Mer» i lobbyen
+# Arket ned igjen, så «Mer» i lobbyen. Dras fra tittelen på arket (arket starter midt på skjermen, så et drag
+# fra øverst traff bildet av stua og ikke arket); ligger det der fortsatt, dras det fra midten én gang til
 - swipe:
-    start: 50%, 30%
-    end: 50%, 95%
+    from:
+      text: "Velg lek"
+    direction: DOWN
 - waitForAnimationToEnd
+- runFlow:
+    when:
+      visible:
+        text: "Velg lek"
+    commands:
+      - swipe:
+          start: 50%, 50%
+          end: 50%, 98%
+      - waitForAnimationToEnd
 - takeScreenshot: 13b-lobby-igjen
 # Lobbyens «Mer»-knapp (teksten under: TV, QR, bare min telefon …)
 - tapOn:

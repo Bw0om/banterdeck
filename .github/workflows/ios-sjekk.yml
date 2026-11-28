@@ -83,21 +83,6 @@ jobs:
           X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
           [ -n "$X" ] && sudo xcode-select -s "$X"
           xcodebuild -version
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Pakker
-        run: npm install --no-audit --no-fund --no-save
-      - name: Bygger sidene inn i appen
-        run: |
-          for i in $(seq 1 10); do OPPSETT=$(curl -fsS https://www.mittvors.no/api/oppsett) && break; sleep 30; done
-          [ -n "$OPPSETT" ] || { echo "Fikk ikke oppsettet fra mittvors.no"; exit 1; }
-          export PUBLIC_SUPABASE_URL=$(node -pe 'JSON.parse(process.argv[1]).url' "$OPPSETT")
-          export PUBLIC_SUPABASE_ANON_KEY=$(node -pe 'JSON.parse(process.argv[1]).anon' "$OPPSETT")
-          export MV_UTVIKLING=0   # simulatoren har ingen kode til porten før lansering – bygg uten den
-          npm run build:app
-      - name: Kopierer sidene inn i iOS-prosjektet
-        run: npx cap sync ios
       - name: Maestro (trykker på knappene i simulatoren)
         run: |
           curl -fsSL "https://get.maestro.mobile.dev" | bash
@@ -113,6 +98,45 @@ jobs:
             (alle[0] || Object.values(d).flat().find(x => /iPhone/.test(x.name))).udid')
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
           xcrun simctl list devices | grep "$UDID"
+      - name: Starter simulatoren og varmer opp Maestro (i bakgrunnen, mens appen bygges)
+        run: |
+          UDID=${{ steps.sim.outputs.udid }}
+          mkdir -p skjermbilder
+          # Alt her tar flere minutter (særlig første start av Maestro-driveren), så det går i bakgrunnen mens sidene og
+          # appen bygges. Steget «Starter appen» venter på skjermbilder/varm.ferdig.
+          cat > "$RUNNER_TEMP/varm.sh" <<'SKRIPT'
+          set -x
+          UDID="$1"; ROT="$2"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          # Norsk, som på eierens telefon (språket leses når telefonen starter – derfor en omstart)
+          xcrun simctl spawn "$UDID" defaults write "Apple Global Domain" AppleLanguages -array nb-NO
+          xcrun simctl spawn "$UDID" defaults write "Apple Global Domain" AppleLocale -string nb_NO
+          xcrun simctl shutdown "$UDID" || true
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          echo "simulatoren er oppe $(date +%H:%M:%S)"
+          export MAESTRO_DRIVER_STARTUP_TIMEOUT=600000 MAESTRO_CLI_NO_ANALYTICS=1
+          cd "$ROT/ios/sjekk-flyt" && maestro --udid "$UDID" test varm.yaml --debug-output "$ROT/skjermbilder/maestro-logg/varm"
+          echo "$?" > "$ROT/skjermbilder/varm.ferdig"
+          SKRIPT
+          nohup bash "$RUNNER_TEMP/varm.sh" "$UDID" "$PWD" > skjermbilder/varm.txt 2>&1 &
+          echo "oppvarmingen startet $(date +%H:%M:%S)"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pakker
+        run: npm install --no-audit --no-fund --no-save
+      - name: Bygger sidene inn i appen
+        run: |
+          for i in $(seq 1 10); do OPPSETT=$(curl -fsS https://www.mittvors.no/api/oppsett) && break; sleep 30; done
+          [ -n "$OPPSETT" ] || { echo "Fikk ikke oppsettet fra mittvors.no"; exit 1; }
+          export PUBLIC_SUPABASE_URL=$(node -pe 'JSON.parse(process.argv[1]).url' "$OPPSETT")
+          export PUBLIC_SUPABASE_ANON_KEY=$(node -pe 'JSON.parse(process.argv[1]).anon' "$OPPSETT")
+          export MV_UTVIKLING=0   # simulatoren har ingen kode til porten før lansering – bygg uten den
+          npm run build:app
+      - name: Kopierer sidene inn i iOS-prosjektet
+        run: npx cap sync ios
       - name: Kompilerer for simulatoren
         run: |
           set -o pipefail
@@ -124,13 +148,11 @@ jobs:
       - name: Starter appen og tar skjermbilder
         run: |
           UDID=${{ steps.sim.outputs.udid }}
-          xcrun simctl boot "$UDID" || true
-          xcrun simctl bootstatus "$UDID" -b
-          # Norsk, som på eierens telefon (språket leses når appen starter – telefonen må startes på nytt etter byttet)
-          xcrun simctl spawn "$UDID" defaults write "Apple Global Domain" AppleLanguages -array nb-NO
-          xcrun simctl spawn "$UDID" defaults write "Apple Global Domain" AppleLocale -string nb_NO
-          xcrun simctl shutdown "$UDID" || true
-          xcrun simctl boot "$UDID" || true
+          # Oppvarmingen (forrige steg) startet simulatoren på norsk og Maestro-driveren i bakgrunnen: vent til den er ferdig
+          for i in $(seq 1 180); do [ -f skjermbilder/varm.ferdig ] && break; sleep 5; done
+          echo "===== varm (i bakgrunnen) ===== ferdig $(date +%H:%M:%S), kode $(cat skjermbilder/varm.ferdig 2>/dev/null || echo 'ikke ferdig')" >> skjermbilder/maestro.txt
+          grep -E "simulatoren er oppe|COMPLETED|FAILED|Flow" skjermbilder/varm.txt >> skjermbilder/maestro.txt 2>/dev/null || true
+          VARM_OK=$( [ "$(cat skjermbilder/varm.ferdig 2>/dev/null)" = "0" ] && echo 1 || echo "")
           xcrun simctl bootstatus "$UDID" -b
           APP=$(find build/sim/Build/Products -name "App.app" -path "*iphonesimulator*" | head -1)
           xcrun simctl install "$UDID" "$APP"
@@ -149,8 +171,8 @@ jobs:
           sleep 12
           xcrun simctl io "$UDID" screenshot skjermbilder/01-spill.png
           # Første Maestro-kjøring bygger og installerer testdriveren (tar et par minutter): varm opp med en tom flyt først
-          flyt varm
-          flyt varm   # en gang til om driveren ikke rakk å starte første gang (rask når den er oppe)
+          # Gikk oppvarmingen i bakgrunnen galt (eller ble den ikke ferdig), varmes det opp her som før
+          [ -n "$VARM_OK" ] || flyt varm
           flyt spill
           med sofa && flyt sofa
           # Én start per fane: appen leser MV_FANE og velger fanen selv (Skall.swift)
@@ -305,6 +327,7 @@ jobs:
         run: |
           mkdir -p ios/sjekk && rm -f ios/sjekk/*
           cp skjermbilder/*.png skjermbilder/sjekk.log skjermbilder/maestro.txt ios/sjekk/ 2>/dev/null || true
+          { cat skjermbilder/varm.txt 2>/dev/null; echo "----- maestro.log -----"; find skjermbilder/maestro-logg/varm -name "maestro.log" -exec tail -150 {} ; 2>/dev/null; } > ios/sjekk/varm.txt || true
           { grep -E "error:|BUILD (SUCCEEDED|FAILED)" build/xcodebuild.log; echo "----- siste linjer -----"; grep -vE "^\s+(cd |builtin-|/Applications)" build/xcodebuild.log | tail -15; echo "----- skjemaer -----"; xcodebuild -list -project ios/App/App.xcodeproj 2>&1 | tail -20; } > ios/sjekk/bygg.txt 2>/dev/null || true
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ios/sjekk && (git diff --cached --quiet || git commit -m "Simulator-sjekk: skjermbilder og byggresultat [skip ci]") && git push || true
