@@ -1,116 +1,27 @@
-+ UDID=AC5CE080-DB21-4BF7-9D4E-7C217DE28A05
++ UDID=21F13BF5-6982-4D62-8FCC-3133DF4D96E3
 + ROT=/Users/runner/work/banterdeck/banterdeck
-+ xcrun simctl boot AC5CE080-DB21-4BF7-9D4E-7C217DE28A05
-+ xcrun simctl bootstatus AC5CE080-DB21-4BF7-9D4E-7C217DE28A05 -b
-Monitoring boot status for iPhone 17 (AC5CE080-DB21-4BF7-9D4E-7C217DE28A05).
-[2026-11-28 09:35:53 +0000] Status=2, isTerminal=NO, Elapsed=00:57.
-	Waiting on Data Migration
-		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
-		Migration Elapsed:00:50 seconds
++ xcrun simctl boot 21F13BF5-6982-4D62-8FCC-3133DF4D96E3
++ xcrun simctl bootstatus 21F13BF5-6982-4D62-8FCC-3133DF4D96E3 -b
+Monitoring boot status for iPhone 17 (21F13BF5-6982-4D62-8FCC-3133DF4D96E3).
+Device already booted, nothing to do.
 
-[2026-11-28 09:35:59 +0000] Status=2, isTerminal=NO, Elapsed=01:02.
-	Waiting on Data Migration
-		Reason:Running plugin com.apple.securityd.KeychainMigrator (KeychainMigrator.migrator, user-agnostic)
-		Migration Elapsed:00:51 seconds
-
-[2026-11-28 09:36:01 +0000] Status=2, isTerminal=NO, Elapsed=01:04.
-	Waiting on Data Migration
-		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
-		Migration Elapsed:00:55 seconds
-
-[2026-11-28 09:36:02 +0000] Status=2, isTerminal=NO, Elapsed=01:06.
-	Waiting on Data Migration
-		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
-		Migration Elapsed:00:57 seconds
-
-[2026-11-28 09:36:03 +0000] Status=2, isTerminal=NO, Elapsed=01:06.
-	Waiting on Data Migration
-		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
-		Migration Elapsed:00:59 seconds
-
-[2026-11-28 09:36:05 +0000] Status=2, isTerminal=NO, Elapsed=01:09.
-	Waiting on Data Migration
-		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
-		Migration Elapsed:01:00 seconds
-
-[2026-11-28 09:36:08 +0000] Status=2, isTerminal=NO, Elapsed=01:11.
-	Waiting on Data Migration
-		Reason:Running plugin com.apple.MobileSafari.migrator (MobileSafari.migrator)
-		Migration Elapsed:01:02 seconds
-
-[2026-11-28 09:36:09 +0000] Status=2, isTerminal=NO, Elapsed=01:12.
-	Waiting on Data Migration
-		Reason:Running plugin com.apple.PreferencesMigrator (PreferencesMigrator.migrator)
-		Migration Elapsed:01:04 seconds
-
-[2026-11-28 09:36:11 +0000] Status=4, isTerminal=NO, Elapsed=01:14.
-	Waiting on System App
-
-[2026-11-28 09:36:12 +0000] Status=4, isTerminal=NO, Elapsed=01:15.
-	Waiting on System App
-
-[2026-11-28 09:36:14 +0000] Status=4, isTerminal=NO, Elapsed=01:17.
-	Waiting on System App
-
-[2026-11-28 09:36:15 +0000] Status=4, isTerminal=NO, Elapsed=01:19.
-	Waiting on System App
-
-[2026-11-28 09:36:16 +0000] Status=4, isTerminal=NO, Elapsed=01:19.
-	Waiting on System App
-
-[2026-11-28 09:36:16 +0000] Status=4, isTerminal=NO, Elapsed=01:19.
-	Waiting on System App
-
-[2026-11-28 09:36:17 +0000] Status=4, isTerminal=NO, Elapsed=01:21.
-	Waiting on System App
-
-[2026-11-28 09:36:19 +0000] Status=4, isTerminal=NO, Elapsed=01:22.
-	Waiting on System App
-
-[2026-11-28 09:36:20 +0000] Status=4, isTerminal=NO, Elapsed=01:23.
-	Waiting on System App
-
-[2026-11-28 09:36:23 +0000] Status=4, isTerminal=NO, Elapsed=01:26.
-	Waiting on System App
-
-[2026-11-28 09:36:24 +0000] Status=4, isTerminal=NO, Elapsed=01:27.
-	Waiting on System App
-
-[2026-11-28 09:36:28 +0000] Status=4, isTerminal=NO, Elapsed=01:31.
-	Waiting on System App
-
-[2026-11-28 09:36:30 +0000] Status=4, isTerminal=NO, Elapsed=01:33.
-	Waiting on System App
-
-[2026-11-28 09:36:31 +0000] Status=4, isTerminal=NO, Elapsed=01:34.
-	Waiting on System App
-
-[2026-11-28 09:36:32 +0000] Status=4, isTerminal=NO, Elapsed=01:35.
-	Waiting on System App
-
-[2026-11-28 09:36:36 +0000] Status=4, isTerminal=NO, Elapsed=01:39.
-	Waiting on System App
-
-[2026-11-28 09:36:45 +0000] Status=4294967295, isTerminal=YES, Elapsed=01:48.
-	Finished
-
-+ xcrun simctl spawn AC5CE080-DB21-4BF7-9D4E-7C217DE28A05 defaults write 'Apple Global Domain' AppleLanguages -array nb-NO
-+ xcrun simctl spawn AC5CE080-DB21-4BF7-9D4E-7C217DE28A05 defaults write 'Apple Global Domain' AppleLocale -string nb_NO
-+ xcrun simctl shutdown AC5CE080-DB21-4BF7-9D4E-7C217DE28A05
-+ xcrun simctl boot AC5CE080-DB21-4BF7-9D4E-7C217DE28A05
-+ xcrun simctl bootstatus AC5CE080-DB21-4BF7-9D4E-7C217DE28A05 -b
-Monitoring boot status for iPhone 17 (AC5CE080-DB21-4BF7-9D4E-7C217DE28A05).
++ xcrun simctl spawn 21F13BF5-6982-4D62-8FCC-3133DF4D96E3 defaults write 'Apple Global Domain' AppleLanguages -array nb-NO
++ xcrun simctl spawn 21F13BF5-6982-4D62-8FCC-3133DF4D96E3 defaults write 'Apple Global Domain' AppleLocale -string nb_NO
++ xcrun simctl shutdown 21F13BF5-6982-4D62-8FCC-3133DF4D96E3
++ xcrun simctl boot 21F13BF5-6982-4D62-8FCC-3133DF4D96E3
++ xcrun simctl bootstatus 21F13BF5-6982-4D62-8FCC-3133DF4D96E3 -b
+Monitoring boot status for iPhone 17 (21F13BF5-6982-4D62-8FCC-3133DF4D96E3).
 Device already booted, nothing to do.
 
 ++ date +%H:%M:%S
-+ echo 'simulatoren er oppe 09:40:35'
-simulatoren er oppe 09:40:35
++ echo 'simulatoren er oppe 10:16:19'
+simulatoren er oppe 10:16:19
 + export MAESTRO_DRIVER_STARTUP_TIMEOUT=600000 MAESTRO_CLI_NO_ANALYTICS=1
 + MAESTRO_DRIVER_STARTUP_TIMEOUT=600000
 + MAESTRO_CLI_NO_ANALYTICS=1
 + cd /Users/runner/work/banterdeck/banterdeck/ios/sjekk-flyt
-+ maestro --udid AC5CE080-DB21-4BF7-9D4E-7C217DE28A05 test varm.yaml --debug-output /Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/varm
-Running on iPhone 17 - iOS 26.4 - AC5CE080-DB21-4BF7-9D4E-7C217DE28A05
++ maestro --udid 21F13BF5-6982-4D62-8FCC-3133DF4D96E3 test varm.yaml --debug-output /Users/runner/work/banterdeck/banterdeck/skjermbilder/maestro-logg/varm
+Running on iPhone 17 - iOS 26.4 - 21F13BF5-6982-4D62-8FCC-3133DF4D96E3
  > Flow varm
 Wait for animation to end... COMPLETED
 + echo 0

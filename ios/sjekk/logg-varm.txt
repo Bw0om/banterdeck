@@ -1,0 +1,22 @@
+10:17:30.225 [ INFO] maestro.cli.command.TestCommand.runShardSuite: [shard 1] Selected device 21F13BF5-6982-4D62-8FCC-3133DF4D96E3 using port 51726 with execution plan ExecutionPlan(flowsToRun=[/Users/runner/work/banterd
+10:17:31.951 [ INFO] util.CommandLineUtils.runCommand: Running command line operation: [xcodebuild, test-without-building, -xctestrun, /var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/21F13BF5-6982-4D62-8FCC-3133DF4D96E3
+10:20:05.186 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Define variables RUNNING
+10:20:05.224 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Define variables metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(defineVariablesCommand=DefineVariablesComma
+10:20:05.230 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Define variables COMPLETED
+10:20:05.241 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Apply configuration RUNNING
+10:20:05.245 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Apply configuration metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(applyConfigurationCommand=ApplyConfigura
+10:20:05.274 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Apply configuration COMPLETED
+10:20:05.276 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Wait for animation to end RUNNING
+10:20:05.280 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Wait for animation to end metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(waitForAnimationToEndCommand=WaitF
+10:20:05.283 [ INFO] maestro.Maestro.waitForAnimationToEnd$lambda$54: Waiting for animation to end with timeout 15000
+10:20:30.502 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Wait for animation to end COMPLETED
+10:20:05.186 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Define variables RUNNING
+10:20:05.224 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Define variables metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(defineVariablesCommand=DefineVariablesComma
+10:20:05.230 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Define variables COMPLETED
+10:20:05.241 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Apply configuration RUNNING
+10:20:05.245 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Apply configuration metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(applyConfigurationCommand=ApplyConfigura
+10:20:05.274 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Apply configuration COMPLETED
+10:20:05.276 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$0: Wait for animation to end RUNNING
+10:20:05.280 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$11: Wait for animation to end metadata CommandMetadata(numberOfRuns=null, evaluatedCommand=MaestroCommand(waitForAnimationToEndCommand=WaitF
+10:20:05.283 [ INFO] maestro.Maestro.waitForAnimationToEnd$lambda$54: Waiting for animation to end with timeout 15000
+10:20:30.502 [ INFO] maestro.cli.runner.MaestroCommandRunner.runCommands$lambda$2: Wait for animation to end COMPLETED
