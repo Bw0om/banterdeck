@@ -150,12 +150,17 @@ struct NrData {
         let mitt: String? = { let m = som(s["mittSvar"]); return m.isEmpty ? nil : m }()
         let qtype = s["qtype"]?.tekst ?? ""
         let alts: [String]? = s["alt"]?.liste.map { $0.compactMap(\.tekst) }
-        let typer = en ? ["valg": "Pick the right one", "sant": "True or nonsense?", "tall": "Which number? Closest wins", "fritt": "Free answer"]
-                       : ["valg": "Velg riktig", "sant": "Sant eller tull?", "tall": "Hvilket tall? Nærmest vinner", "fritt": "Svar fritt"]
+        let typer = en ? ["valg": "Pick the right one", "sant": "True or nonsense?", "tall": "Which number? Closest wins", "fritt": "Free answer",
+                          "naermest": "Closest – furthest off drinks", "hvemskalut": "Odd one out", "bloff": "Bluff – which one is real?"]
+                       : ["valg": "Velg riktig", "sant": "Sant eller tull?", "tall": "Hvilket tall? Nærmest vinner", "fritt": "Svar fritt",
+                          "naermest": "Nærmest – lengst unna drikker", "hvemskalut": "Hvem skal ut?", "bloff": "Bløff – hvilken er ekte?"]
+        // Format 2 av ukefilene: den egentlige typen, runden (finalen teller dobbelt), enheten på nærmest-spørsmål og «godtas også»
+        let egenType = s["type"]?.tekst ?? qtype, rundeNavn = s["runde"]?["navn"]?.tekst ?? "", finale = s["runde"]?["finale"] == .bool(true)
+        let enhet = s["enhet"]?.tekst ?? "", godtas = tekster(s["godtas"])
         let bokstaver = Array("ABCD")
         func bokstav(_ i: Int) -> String { i < bokstaver.count ? String(bokstaver[i]) : "" }
         frist = spmFase ? (s["frist"]?.tall ?? 0) : 0
-        sporsmalType = typer[qtype] ?? ""
+        sporsmalType = (rundeNavn.isEmpty ? "" : rundeNavn + " · ") + (typer[egenType] ?? typer[qtype] ?? "")
         les = vert && spmFase ? T("Les det høyt", "Read it out loud") : ""
         q = som(s["q"])
 
@@ -163,7 +168,7 @@ struct NrData {
             let mangler = alle.count - har.count
             var tastatur: NrTall? = nil, fritt: NrFritt? = nil
             if qtype == "tall" && alts == nil {
-                tastatur = NrTall(etikett: T("Gjetningen din", "Your guess"), taster: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "000", "0", "⌫"],
+                tastatur = NrTall(etikett: T("Gjetningen din", "Your guess") + (enhet.isEmpty ? "" : " (\(enhet))"), taster: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "000", "0", "⌫"],
                                   mitt: (mitt ?? "").filter(\.isNumber), las: T("Lås inn ", "Lock in "), bytt: T("Bytt til ", "Change to "), last: T("Låst inn: ", "Locked in: "))
             }
             if alts == nil && qtype != "tall" {
@@ -240,7 +245,9 @@ struct NrData {
                 : mitt == nil ? T("Ingen svar – drikk én", "No answer – drink one")
                 : erTall ? T("Lengst unna – drikk én", "Furthest off – drink one") : T("Feil – drikk én", "Wrong – drink one")
             let kilde = s["kilde"]?.tekst ?? ""
-            resultat = NrResultat(klasse: (k2 ?? -1) > 0 ? "rett" : k2 == 0 ? "null" : "feil", tittel: tittel, info: s["info"]?.tekst ?? "",
+            let ekstra = [finale && k2 != 0 ? T("Finale: dobbelt opp.", "Final: it counts double.") : "",
+                          godtas.isEmpty ? "" : T("Godtas også: ", "Also accepted: ") + godtas.joined(separator: ", ")].filter { !$0.isEmpty }
+            resultat = NrResultat(klasse: (k2 ?? -1) > 0 ? "rett" : k2 == 0 ? "null" : "feil", tittel: tittel, info: (ekstra + [s["info"]?.tekst ?? ""]).filter { !$0.isEmpty }.joined(separator: " "),
                                   kilde: kilde.isEmpty ? "" : T("Les saken hos ", "Read it at ") + kilde, url: s["url"]?.tekst ?? "")
         }
         svar = NrSvar(fasitEtikett: T("Svaret", "The answer"), fasit: fasit, alt: alt, tallinje: linje, liste: liste, resultat: resultat,
