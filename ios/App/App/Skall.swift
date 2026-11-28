@@ -713,7 +713,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private let opModell = OpModell()
     private var opVert: UIHostingController<OpusSkjerm>?
     private func visOp(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else { fjernOverlegg(&opVert); return }
+        guard let d = d else { if opVert != nil { opModell.slipp() }; fjernOverlegg(&opVert); return }
         opModell.sett(d)
         if opVert == nil { opVert = leggOverlegg(UIHostingController(rootView: OpusSkjerm(m: opModell)), over: side, nett: opModell.nett) }
         fram(opVert?.view.superview)
@@ -723,7 +723,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private let ftdModell = FtdModell()
     private var ftdVert: UIHostingController<DealerSkjerm>?
     private func visFtd(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else { fjernOverlegg(&ftdVert); return }
+        guard let d = d else { if ftdVert != nil { ftdModell.slipp() }; fjernOverlegg(&ftdVert); return }
         ftdModell.sett(d)
         if ftdVert == nil { ftdVert = leggOverlegg(UIHostingController(rootView: DealerSkjerm(m: ftdModell)), over: side, nett: ftdModell.nett) }
         fram(ftdVert?.view.superview)
