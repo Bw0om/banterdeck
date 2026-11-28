@@ -1,30 +1,66 @@
-07:51:02 swift romklient: laget rom 34YY v1, 1 spiller, vert=true, leker=37
-07:51:02 swift romklient: sanntid koblet
-07:51:03 swift romklient: gjest med, ser 2 spillere
-07:51:03 swift romklient: verten ser 2 spillere, sanntidsvarsler=1 – OK
-07:51:03 swift romklient: ukjent handling ga feil som ventet: ukjent-handling (400): Det gikk ikke.
-07:51:10 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-07:51:10 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
-07:51:10 swift plass: topp=186 bredde=364
-07:51:16 skjermer: start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-07:51:16 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
-07:51:16 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-07:51:24 etter 14s: skjermer: start>ok leker=-
+09:33:58 swift romklient: laget rom 7DGM v1, 1 spiller, vert=true, leker=37
+09:33:59 swift romklient: sanntid koblet
+09:33:59 swift romklient: gjest med, ser 2 spillere
+09:34:00 swift romklient: verten ser 2 spillere, sanntidsvarsler=1 – OK
+09:34:00 swift romklient: ukjent handling ga feil som ventet: ukjent-handling (400): Det gikk ikke.
+09:34:06 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+09:34:06 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
+09:34:06 swift plass: topp=186 bredde=364
+09:34:12 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+09:34:12 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
+09:34:12 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+09:34:20 etter 14s: skjermer: hendelse:start(venter) start>ok leker=-
+10:05:39 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
+10:05:39 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
+10:05:44 side /no/drinking-games klasser=is-mobile is-ios is-app is-standalone har-skall
+10:05:50 skjermer: leker>ok leker=meldt n=64 png=40 klasser=is-mobile is-ios is-app is-standalone har-skall
+10:05:50 startstua: mangler __mvStart=false sat=
+10:05:50 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/populaert"]
+10:05:58 etter 14s: skjermer: leker>ok leker=meldt n=64 png=40
+10:07:40 side /no/drinking-games/spionen klasser=is-mobile is-ios is-app is-standalone har-skall
+10:07:46 skjermer: lekeside>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
+10:07:46 startstua: mangler __mvStart=false sat=
+10:07:46 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/spilt"]
+10:07:54 etter 14s: skjermer: lekeside>ok leker=-
+10:08:25 AVVIST Skipping view transition because skipTransition() was called.
+10:08:31 skjermer: hendelse:rom(venter) rom>ok hendelse:en en>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
+10:08:31 startstua: mangler __mvStart=false sat=
+10:08:31 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/XTRB?v=0"]
+10:08:33 etter 14s: skjermer: hendelse:rom(venter) rom>ok hendelse:en en>ok leker=-
+10:08:49 side /no/drinking-games/over-eller-under klasser=is-mobile is-ios is-app is-standalone har-skall
+10:08:55 skjermer: lekeside>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
+10:08:55 startstua: mangler __mvStart=false sat=
+10:08:55 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/spilt"]
+10:09:03 etter 14s: skjermer: lekeside>ok hendelse:verktoy verktoy>ok hendelse:lekeside lekeside>ok leker=-
+10:09:08 AVVIST Skipping view transition because skipTransition() was called.
+10:09:37 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
+10:09:37 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
+10:09:38 side /no/account klasser=is-mobile is-ios is-app is-standalone har-skall
+10:09:44 skjermer: hendelse:deg deg>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall
+10:09:44 startstua: mangler __mvStart=false sat=
+10:09:44 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=[]
+10:09:52 etter 14s: skjermer: hendelse:deg deg>ok leker=-
+10:10:12 skjermer: hendelse:rom rom>ok hendelse:en en>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
+10:10:12 startstua: mangler __mvStart=false sat=
+10:10:12 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(255, 248, 238) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/XTRB?v=0"]
+10:10:12 etter 14s: skjermer: hendelse:rom rom>ok hendelse:en en>ok leker=-
 ----- etter ny installasjon -----
-08:17:35 swift romklient: laget rom ZMGF v1, 1 spiller, vert=true, leker=37
-08:17:35 swift romklient: sanntid koblet
-08:17:35 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-08:17:36 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
-08:17:36 swift romklient: gjest med, ser 2 spillere
-08:17:36 swift plass: topp=186 bredde=364
-08:17:36 swift romklient: verten ser 2 spillere, sanntidsvarsler=1 – OK
-08:17:37 swift romklient: ukjent handling ga feil som ventet: ukjent-handling (400): Det gikk ikke.
-08:17:42 skjermer: start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
-08:17:42 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
-08:17:42 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
-08:17:49 etter 14s: skjermer: start>ok leker=-
-08:24:56 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
-08:24:56 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
-08:25:02 skjermer: hendelse:rom(venter) rom>ok hendelse:nr nr>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
-08:25:02 startstua: mangler __mvStart=false sat=
-08:25:02 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(28, 27, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/QGTU?v=0"]
+10:11:00 swift romklient: laget rom ASML v1, 1 spiller, vert=true, leker=37
+10:11:01 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+10:11:01 swift startskjerm: W=0 H=0 safe=0/0 global=62 kort=true
+10:11:01 swift romklient: sanntid koblet
+10:11:01 swift plass: topp=186 bredde=364
+10:11:02 swift romklient: gjest med, ser 2 spillere
+10:11:02 swift romklient: verten ser 2 spillere, sanntidsvarsler=1 – OK
+10:11:02 swift romklient: ukjent handling ga feil som ventet: ukjent-handling (400): Det gikk ikke.
+10:11:07 skjermer: hendelse:start(venter) start>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall start-nativ
+10:11:07 startstua: 186,19 364x300 pos=fixed topp-var=186px bredde-var=364px __mvStart=true sat=
+10:11:07 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=76px helt-topp=- body-bg=rgb(255, 91, 31) html-bg=rgb(255, 91, 31) vw=402x874 ressurser-feilet=[]
+10:11:15 etter 14s: skjermer: hendelse:start(venter) start>ok leker=-
+10:22:24 swift ou: gjett sendt fra Swift
+10:39:34 swift skal: trykk sendt fra Swift – 4837 ms
+10:47:50 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall
+10:47:50 side /no/rom klasser=is-mobile is-ios is-app is-standalone har-skall i-rom
+10:47:56 skjermer: hendelse:rom(venter) rom>ok hendelse:qz qz>ok leker=- klasser=is-mobile is-ios is-app is-standalone har-skall i-rom i-spill
+10:47:56 startstua: mangler __mvStart=false sat=
+10:47:56 etter 6s: stue-svg=mangler main-topp=0 safe-top= main-padding=62px helt-topp=- body-bg=rgb(28, 27, 31) html-bg=rgba(0, 0, 0, 0) vw=402x874 ressurser-feilet=["/api/rom/F98L?v=0"]
