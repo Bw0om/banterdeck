@@ -212,7 +212,8 @@ jobs:
             # Over eller under: verten gjetter først (appen ser kortet, potten og at verten svarer), så gjetter verten via API-et
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"overunder\",\"modus\":\"*\",$V}"
-            (sleep 60; vert "{\"handling\":\"gjett\",\"paa\":\"over\",$V}") &
+            # … og hopper over gjesten etterpå, så appen får tur og gjetter selv
+            (sleep 60; vert "{\"handling\":\"gjett\",\"paa\":\"over\",$V}"; sleep 15; vert "{\"handling\":\"ou-hopp\",$V}") &
             flyt overunder
             wait
             fi

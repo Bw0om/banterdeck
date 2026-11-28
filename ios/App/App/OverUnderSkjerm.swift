@@ -3,18 +3,21 @@ import UIKit
 import WebKit
 
 /// Over eller under som native skjerm: folket med hvem som har tur, bunken med kortet som snus inn, potten,
-/// sjansestripa, svaret og OVER/UNDER-knappene. Nettsiden under holder tilstanden (rom.js ouData) – denne tegner,
-/// og trykkene går til nettsidens egne knapper (ou-gjett, ou-hopp). Sluttknappene kommer som blokker.
+/// sjansestripa, svaret og OVER/UNDER-knappene.
+/// Fase 3: skjermen leser rommet selv (LekKobling/RomKlient) og sender gjett og hopp rett til rommet. Nettsiden gir
+/// plassen i rommet, figurene og «Hva nå?»-knappene til slutt. Med eldre rom.js brukes ouData som reserve.
 struct OuFolk: Identifiable { let id: String; let navn: String; let png: String; let tur: Bool; let drukket: Int; let oi: Bool }
 struct OuKort { let v: String, f: String, rod: Bool }
 struct OuSvar { let riktig: Bool, tittel: String, tekst: String }
 
 struct OuData {
-    let runde: Int, n: Int, ferdig: Bool, jeg: Bool, vert: Bool, naa: Double, tittel: String, chip: String, gul: Bool
-    let folk: [OuFolk], kort: OuKort?, bunke: Int, pottTekst: String, lagFor: Int
-    let over: Int, under: Int, andel: Double, overTekst: String, underTekst: String, svar: OuSvar?
-    let overKnapp: String, underKnapp: String, kan: Bool, svarerFor: String, hopp: String, vent: String, storst: String
-    let slutt: [[String: Any]], stua: String, mer: String
+    var runde = 1, n = 0, ferdig = false, jeg = false, vert = false, naa: Double = 0, tittel = "", chip = "", gul = false
+    var folk: [OuFolk] = [], kort: OuKort? = nil, bunke = 1, pottTekst = "", lagFor = 0
+    var over = 0, under = 0, andel = 0.5, overTekst = "", underTekst = "", svar: OuSvar? = nil
+    var overKnapp = "", underKnapp = "", kan = false, svarerFor = "", hopp = "", vent = "", storst = ""
+    var stua = "Stua", mer = "Mer"
+
+    /// Reserven: skjermen slik eldre rom.js lager den (ouData)
     init(_ d: [String: Any]) {
         func s(_ k: String) -> String { d[k] as? String ?? "" }
         func b(_ k: String) -> Bool { d[k] as? Bool ?? false }
@@ -22,29 +25,127 @@ struct OuData {
         runde = i("runde"); n = i("n"); ferdig = b("ferdig"); jeg = b("jeg"); vert = b("vert"); naa = (d["naa"] as? NSNumber)?.doubleValue ?? 0
         tittel = s("tittel"); chip = s("chip"); gul = b("gul")
         folk = (d["folk"] as? [[String: Any]] ?? []).map { f in OuFolk(id: f["id"] as? String ?? "", navn: f["navn"] as? String ?? "", png: f["png"] as? String ?? "", tur: f["tur"] as? Bool ?? false, drukket: (f["drukket"] as? NSNumber)?.intValue ?? 0, oi: f["oi"] as? Bool ?? false) }
-        if let k = d["kort"] as? [String: Any] { kort = OuKort(v: k["v"] as? String ?? "", f: k["f"] as? String ?? "", rod: k["rod"] as? Bool ?? false) } else { kort = nil }
+        if let k = d["kort"] as? [String: Any] { kort = OuKort(v: k["v"] as? String ?? "", f: k["f"] as? String ?? "", rod: k["rod"] as? Bool ?? false) }
         bunke = max(1, i("bunke")); pottTekst = s("pottTekst"); lagFor = i("lagFor")
         over = i("over"); under = i("under"); andel = (d["andel"] as? NSNumber)?.doubleValue ?? 0.5; overTekst = s("overTekst"); underTekst = s("underTekst")
-        if let v = d["svar"] as? [String: Any] { svar = OuSvar(riktig: v["riktig"] as? Bool ?? false, tittel: v["tittel"] as? String ?? "", tekst: v["tekst"] as? String ?? "") } else { svar = nil }
+        if let v = d["svar"] as? [String: Any] { svar = OuSvar(riktig: v["riktig"] as? Bool ?? false, tittel: v["tittel"] as? String ?? "", tekst: v["tekst"] as? String ?? "") }
         overKnapp = s("overKnapp"); underKnapp = s("underKnapp"); kan = b("kan"); svarerFor = s("svarerFor"); hopp = s("hopp"); vent = s("vent"); storst = s("storst")
-        slutt = d["slutt"] as? [[String: Any]] ?? []; stua = s("stua").isEmpty ? "Stua" : s("stua"); mer = s("mer").isEmpty ? "Mer" : s("mer")
+        if !s("stua").isEmpty { stua = s("stua") }
+        if !s("mer").isEmpty { mer = s("mer") }
+    }
+
+    /// Skjermen bygd rett fra rommet: `spill` er serverens visning av Over eller under (ekstraVisning i rom.ts)
+    init(rom t: RomTilstand, hoder: [String: [String: String]]) {
+        let s = t.spill ?? .null
+        let en = t.lang == "en"
+        func T(_ no: String, _ eng: String) -> String { en ? eng : no }
+        let meg = t.meg ?? ""
+        func navn(_ id: String) -> String { t.spiller(id)?.navn ?? "?" }
+        func nv(_ id: String) -> String { id == meg ? T("Du", "You") : navn(id) }
+        func tall(_ v: JSONVerdi?) -> Int { Int(v?.tall ?? 0) }
+
+        let tur = s["tur"]?.tekst ?? ""
+        ferdig = s["ferdig"]?.bool ?? false
+        jeg = tur == meg
+        vert = t.jegErVert
+        runde = max(1, tall(s["runde"])); n = tall(s["n"]); naa = t.naa
+        let si = s["sist"].flatMap { $0 == .null ? nil : $0 }
+        let riktig = si?["riktig"]?.bool ?? false, hvem = si?["hvem"]?.tekst ?? "", siBunke = tall(si?["bunke"])
+        let bom = si != nil && !riktig
+        var ider = (s["ider"]?.liste ?? []).compactMap(\.tekst)
+        if ider.isEmpty { ider = t.spillere.map(\.id) }
+
+        tittel = T("Over eller under", "Higher or lower")
+        chip = ferdig ? T("Stokken er tom", "Deck’s empty") : jeg ? T("Din tur", "Your turn") : navn(tur) + T(" gjetter", " is guessing")
+        gul = jeg && !ferdig
+        let drukket = s["drukket"]?.objekt ?? [:], tomt = ferdig
+        folk = ider.map { id in
+            let oi = bom && hvem == id
+            return OuFolk(id: id, navn: nv(id), png: figurPng(hoder, id, oi: oi), tur: id == tur && !tomt, drukket: tall(drukket[id]), oi: oi)
+        }
+        if let ko = s["kort"], let v = ko["v"]?.tall, let f = ko["f"]?.tekst { kort = OuKort(v: kortVerdi(Int(v), en: en), f: f, rod: rodFarge(f)) }
+        bunke = max(1, tall(s["bunke"])); pottTekst = T("I potten", "In the pot")
+        lagFor = bom ? siBunke : 0
+        over = tall(s["over"]); under = tall(s["under"])
+        andel = over + under > 0 ? Double(over) / Double(over + under) : 0.5
+        overTekst = "\(over)" + T(" høyere igjen", " higher left"); underTekst = "\(under)" + T(" lavere igjen", " lower left")
+        if si != nil {
+            svar = OuSvar(riktig: riktig, tittel: riktig ? T("Riktig!", "Right!") : nv(hvem) + T(" bommet", " missed"),
+                          tekst: riktig ? T("Potten vokser.", "The pot grows.") : T("Drikker ", "Drinks ") + "\(siBunke)" + T(". Potten starter på nytt.", ". The pot starts over."))
+        }
+        overKnapp = T("Over", "Higher"); underKnapp = T("Under", "Lower")
+        kan = !ferdig && (jeg || vert)
+        svarerFor = !ferdig && !jeg && vert ? T("Svarer for ", "Answering for ") + navn(tur) : ""
+        hopp = !ferdig && !jeg && vert ? T("Hopp over ", "Skip ") + navn(tur) : ""
+        vent = !ferdig && !jeg && !vert ? navn(tur) + T(" svarer – rop det høyt, så kan ", " answers – shout it out and ") + navn(t.vert) + T(" trykke.", " can tap it.") : ""
+        if ferdig, let st = s["storst"], let id = st["id"]?.tekst { storst = T("Største pott drukket: ", "Biggest pot drunk: ") + nv(id) + " – " + "\(tall(st["n"]))" }
+        stua = T("Stua", "Lounge"); mer = T("Mer", "More")
     }
 }
 
+@MainActor
 @Observable
 final class OuModell: HarFigurer {
     var d: OuData? = nil
     let blokker = KortModell()
-    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    private let kobling = LekKobling("ou")
+    /// Det nettsiden sendte sist – reserven til rommet er hentet (eller hvis plassen ikke finnes)
+    @ObservationIgnored private var sist: [String: Any] = [:]
+    /// Et gjett er på vei: ett trykk gir ett gjett
+    @ObservationIgnored private var sender = false
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett; kobling.nett = nett } }
+
+    init() { kobling.endret = { [weak self] in self?.bygg() } }
+
     func sett(_ dict: [String: Any]) {
-        let ny = OuData(dict)
-        blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
+        sist = dict
+        blokker.sett(["blokker": dict["slutt"] as? [[String: Any]] ?? [], "naa": dict["naa"] ?? 0])
+        kobling.ta(dict) { d in
+            (d["folk"] as? [[String: Any]] ?? []).map { f in (id: f["id"] as? String ?? "", oi: f["oi"] as? Bool ?? false, png: f["png"] as? String ?? "") }
+        }
+        bygg()
+    }
+
+    /// Leken er over på denne telefonen
+    func slipp() { kobling.slipp(); d = nil; sist = [:]; sender = false }
+
+    /// Rommet når det er hentet og viser Over eller under – ellers skjermen nettsiden sendte
+    private func bygg() {
+        let ny: OuData
+        if let t = kobling.tilstand("overunder") { ny = OuData(rom: t, hoder: kobling.hoder) }
+        else if !sist.isEmpty { ny = OuData(sist) }
+        else { return }
         withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) { d = ny }
     }
+
+    /// OVER eller UNDER – rett til rommet
+    func gjett(_ paa: String) {
+        guard !sender, d?.kan == true else { return }
+        sender = true
+        Haptikk.trykk()
+        Task {
+            let ok = await kobling.gjor(["handling": "gjett", "paa": paa], ellers: "ou-gjett", ["paa": paa])
+            sender = false
+            if !ok { Haptikk.melding(.error) }
+        }
+    }
+
+    /// Verten hopper over den som har tur
+    func hopp() {
+        guard !sender, d?.hopp.isEmpty == false else { return }
+        sender = true
+        Haptikk.trykk()
+        Task {
+            let ok = await kobling.gjor(["handling": "ou-hopp"], ellers: "ou-hopp")
+            sender = false
+            if !ok { Haptikk.melding(.error) }
+        }
+    }
+
+    /// Stua og Mer: nettsidens egne knapper
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
         Haptikk.trykk()
-        guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
-        nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
+        kobling.trykkNett(g, attrs)
     }
 }
 
@@ -76,7 +177,7 @@ struct OverUnderSkjerm: View {
                                 if !d.svarerFor.isEmpty { Text(d.svarerFor.uppercased()).font(.archivo(13, vekt: 900)).opacity(0.6) }
                                 if d.kan { knapper(d) }
                                 if !d.hopp.isEmpty {
-                                    Button(action: { m.trykk("ou-hopp") }) { Text(d.hopp).font(.archivo(14, vekt: 800)).underline().opacity(0.7).padding(.vertical, 8).frame(maxWidth: .infinity) }.buttonStyle(.plain)
+                                    Button(action: { m.hopp() }) { Text(d.hopp).font(.archivo(14, vekt: 800)).underline().opacity(0.7).padding(.vertical, 8).frame(maxWidth: .infinity) }.buttonStyle(.plain)
                                 }
                                 if !d.vent.isEmpty { Text(d.vent).font(.archivo(15, vekt: 600)).opacity(0.7).fixedSize(horizontal: false, vertical: true) }
                             }
@@ -192,8 +293,8 @@ struct OverUnderSkjerm: View {
     /// OVER (mint, pil opp) og UNDER (rosa, pil ned)
     private func knapper(_ d: OuData) -> some View {
         HStack(spacing: 12) {
-            gjettKnapp(d.overKnapp, "arrow.up", mint) { m.trykk("ou-gjett", ["paa": "over"]) }
-            gjettKnapp(d.underKnapp, "arrow.down", rosa) { m.trykk("ou-gjett", ["paa": "under"]) }
+            gjettKnapp(d.overKnapp, "arrow.up", mint) { m.gjett("over") }
+            gjettKnapp(d.underKnapp, "arrow.down", rosa) { m.gjett("under") }
         }
     }
     private func gjettKnapp(_ t: String, _ sym: String, _ farge: Color, action: @escaping () -> Void) -> some View {

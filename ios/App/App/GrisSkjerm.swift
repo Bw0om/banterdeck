@@ -3,19 +3,22 @@ import UIKit
 import WebKit
 
 /// Gris som native skjerm: fjøset med folket og GRIS-bokstavene, halmstrået som brenner ned, kortene dine
-/// (trykk på det du sender til venstre) og trynet du trykker på når noen har fire like. Nettsiden under holder
-/// tilstanden og klokka (rom.js grData) – denne tegner, og trykkene går tilbake til nettsidens egne knapper.
+/// (trykk på det du sender til venstre) og trynet du trykker på når noen har fire like.
+/// Fase 3: skjermen leser rommet selv (LekKobling/RomKlient) og sender kortvalget og nesa rett til rommet. Nettsiden
+/// driver fortsatt klokka (grDriv: bytte, nese, pause) og gir plassen i rommet, figurene og «Hva nå?»-knappene.
+/// Med eldre rom.js brukes grData som reserve.
 struct GrKort: Identifiable { let id: Int; let v: String; let f: String; let rod: Bool }
 struct GrFolk: Identifiable { let id: String; let navn: String; let png: String; let n: Int; let klar: Bool; let status: String; let taper: Bool }
 
 struct GrData {
-    let fase: String, tittel: String, chip: String, varsel: Bool, naa: Double
-    let ord: String, folk: [GrFolk]
-    let halm: Bool, halmLengde: Double, halmVed: Double, nese: Bool
-    let hand: [GrKort]?, handTekst: String, merke: String, mittValg: Int, kanSende: Bool, harFire: Bool, tatt: Bool
-    let tryneTekst: String, tryneHjelp: String, pust: Bool, paa: Bool
-    let gris: String, grisTekst: String, slutt: [[String: Any]], stua: String, mer: String
+    var fase = "", tittel = "", chip = "", varsel = false, naa: Double = 0
+    var ord = "GRIS", folk: [GrFolk] = []
+    var halm = false, halmLengde: Double = 0, halmVed: Double = 0, nese = false
+    var hand: [GrKort]? = nil, handTekst = "", merke = "", mittValg = -1, kanSende = false, harFire = false, tatt = false
+    var tryneTekst = "", tryneHjelp = "", pust = false, paa = false
+    var gris = "", grisTekst = "", stua = "Stua", mer = "Mer"
 
+    /// Reserven: skjermen slik eldre rom.js lager den (grData)
     init(_ d: [String: Any]) {
         func s(_ k: String) -> String { d[k] as? String ?? "" }
         func b(_ k: String) -> Bool { d[k] as? Bool ?? false }
@@ -26,27 +29,150 @@ struct GrData {
         hand = d["hand"] is NSNull || d["hand"] == nil ? nil : (d["hand"] as? [[String: Any]] ?? []).enumerated().map { i, k in GrKort(id: i, v: k["v"] as? String ?? "", f: k["f"] as? String ?? "", rod: k["rod"] as? Bool ?? false) }
         handTekst = s("handTekst"); merke = s("merke"); mittValg = (d["mittValg"] as? NSNumber)?.intValue ?? -1; kanSende = b("kanSende"); harFire = b("harFire"); tatt = b("tatt")
         tryneTekst = s("tryneTekst"); tryneHjelp = s("tryneHjelp"); pust = b("pust"); paa = b("paa")
-        gris = s("gris"); grisTekst = s("grisTekst"); slutt = d["slutt"] as? [[String: Any]] ?? []; stua = d["stua"] as? String ?? "Stua"; mer = d["mer"] as? String ?? "Mer"
+        gris = s("gris"); grisTekst = s("grisTekst"); stua = d["stua"] as? String ?? "Stua"; mer = d["mer"] as? String ?? "Mer"
+    }
+
+    /// Skjermen bygd rett fra rommet: `spill` er serverens visning av Gris (ekstraVisning i rom.ts)
+    init(rom t: RomTilstand, hoder: [String: [String: String]]) {
+        let s = t.spill ?? .null
+        let en = t.lang == "en"
+        func T(_ no: String, _ eng: String) -> String { en ? eng : no }
+        let meg = t.meg ?? ""
+        func jaNavn(_ id: String?) -> String { guard let id else { return "?" }; return id == meg ? T("Du", "You") : (t.spiller(id)?.navn ?? "?") }
+        func ider(_ v: JSONVerdi?) -> [String] { (v?.liste ?? []).compactMap(\.tekst) }
+        let bokstaver = s["bokstaver"]?.objekt ?? [:]
+        func antall(_ id: String) -> Int { min(4, Int(bokstaver[id]?.tall ?? 0)) }
+
+        fase = s["fase"]?.tekst ?? ""
+        naa = t.naa
+        ord = T("GRIS", "PIGS")
+        let ordet = Array(ord)
+        func bokst(_ id: String) -> String { let n = antall(id); return n >= 1 ? String(ordet[n - 1]) : "" }
+        let neser = ider(s["neser"]), harValgt = ider(s["harValgt"])
+        let taperId = s["taper"]?.tekst, grisId = s["gris"]?.tekst
+        let tattNr = neser.firstIndex(of: meg)
+        tatt = tattNr != nil
+        let valg = s["mittValg"]?.tall.map { Int($0) }
+        harFire = s["harFire"]?.bool ?? false
+        let runde = Int(s["runde"]?.tall ?? 1)
+        let send = fase == "send", nesa = fase == "nese", slutt = fase == "slutt", ferdigNa = fase == "ferdig"
+
+        tittel = slutt ? T("Gris", "Pigs") : T("Gris · runde ", "Pigs · round ") + "\(runde)"
+        varsel = nesa && !tatt
+        if slutt { chip = jaNavn(grisId) + T(" er GRIS!", " is the PIG!") }
+        else if send { chip = harFire ? T("Fire like! Trykk på trynet", "Four of a kind! Tap the snout") : valg != nil ? T("Venter på de andre …", "Waiting for the others …") : T("Send et kort til venstre", "Pass a card to the left") }
+        else if nesa { chip = tattNr.map { T("Du var nr ", "You were no. ") + "\($0 + 1)" } ?? T("NESA! Fort!", "NOSE! Quick!") }
+        else { chip = taperId.map { jaNavn($0) + T(" var sist – ", " was last – ") + bokst($0) + "!" } ?? T("Alle rakk nesa", "Everyone made it") }
+
+        folk = ider(s["ider"]).map { id in
+            let klar = send ? harValgt.contains(id) : neser.contains(id)
+            let nr = neser.firstIndex(of: id)
+            let status = send ? (klar ? T("valgt", "picked") : "") : nr.map { T("nr ", "no. ") + "\($0 + 1)" } ?? ((ferdigNa || slutt) && taperId == id ? T("sist!", "last!") : "")
+            return GrFolk(id: id, navn: jaNavn(id), png: figurPng(hoder, id), n: antall(id), klar: klar, status: status, taper: taperId == id && !send)
+        }
+
+        let vinduer = s["vinduer"]
+        halm = send || nesa
+        halmLengde = (nesa ? vinduer?["nese"]?.tall : vinduer?["bytt"]?.tall) ?? 0
+        halmVed = (nesa ? s["neseVed"]?.tall : s["sendVed"]?.tall) ?? 0
+        nese = nesa
+
+        if let h = s["minHand"]?.liste {
+            hand = h.enumerated().map { i, k in
+                let f = k["f"]?.tekst ?? ""
+                return GrKort(id: i, v: kortVerdi(Int(k["v"]?.tall ?? 0), en: en), f: f, rod: rodFarge(f))
+            }
+        }
+        handTekst = T("Du er med fra neste runde.", "You’re in from the next round.")
+        merke = send ? (valg != nil ? T("Sendt!", "Sent!") : T("Trykk på kortet du sender", "Tap the card to pass")) : T("Hånda di", "Your hand")
+        mittValg = valg ?? -1
+        kanSende = send && valg == nil && hand != nil
+        tryneTekst = nesa ? (tatt ? T("Tatt!", "Got it!") : T("NESA!", "NOSE!")) : T("Nesa", "The nose")
+        tryneHjelp = nesa ? (tatt ? T("Vent på de andre – sistemann får en bokstav.", "Wait for the others – the last one gets a letter.") : T("Noen har fire like. Trykk før det er for sent!", "Someone has four of a kind. Tap before it’s too late!"))
+            : ferdigNa ? T("Ny runde kommer straks …", "A new round is coming …") : T("Har du fire like? Trykk. Trykker du for tidlig, får du en bokstav.", "Four of a kind? Tap. Tap too early and you get a letter.")
+        pust = (nesa && !tatt) || (harFire && send)
+        paa = nesa || harFire
+        gris = T("GRIS!", "PIGS!")
+        grisTekst = slutt ? jaNavn(grisId) + T(" tar en shot.", " takes a shot.") : ""
+        stua = T("Stua", "Lounge"); mer = T("Mer", "More")
     }
 }
 
+@MainActor
 @Observable
 final class GrModell: HarFigurer {
     var d: GrData? = nil
     let blokker = KortModell()
+    private let kobling = LekKobling("gris")
     @ObservationIgnored private(set) var avvik: Double = 0
-    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private var avvikFra: Double = 0
+    /// Det nettsiden sendte sist – reserven til rommet er hentet (eller hvis plassen ikke finnes)
+    @ObservationIgnored private var sist: [String: Any] = [:]
+    /// Et trykk er på vei: ett trykk gir én handling
+    @ObservationIgnored private var sender = false
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett; kobling.nett = nett } }
+
+    init() { kobling.endret = { [weak self] in self?.bygg() } }
+
     func sett(_ dict: [String: Any]) {
-        let ny = GrData(dict)
-        if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
-        blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
+        sist = dict
+        blokker.sett(["blokker": dict["slutt"] as? [[String: Any]] ?? [], "naa": dict["naa"] ?? 0])
+        kobling.ta(dict) { d in
+            (d["folk"] as? [[String: Any]] ?? []).map { f in (id: f["id"] as? String ?? "", oi: false, png: f["png"] as? String ?? "") }
+        }
+        bygg()
+    }
+
+    /// Leken er over på denne telefonen
+    func slipp() { kobling.slipp(); d = nil; sist = [:]; sender = false; avvikFra = 0 }
+
+    func naaMs() -> Double { Date().timeIntervalSince1970 * 1000 + avvik }
+
+    /// Rommet når det er hentet og viser Gris – ellers skjermen nettsiden sendte
+    private func bygg() {
+        let ny: GrData
+        if let t = kobling.tilstand("gris") {
+            // Bare et nytt svar sier noe om klokka: et gammelt svar bygd på nytt ville flyttet halmstrået
+            if t.naa > 0 && t.naa != avvikFra { avvikFra = t.naa; avvik = t.naa - Date().timeIntervalSince1970 * 1000 }
+            ny = GrData(rom: t, hoder: kobling.hoder)
+        } else if !sist.isEmpty {
+            ny = GrData(sist)
+            if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
+        } else { return }
         d = ny
     }
-    func naaMs() -> Double { Date().timeIntervalSince1970 * 1000 + avvik }
+
+    /// Kortet du sender til venstre – rett til rommet. Det glir ut med én gang; serveren bekrefter.
+    func velg(_ i: Int) {
+        guard !sender, d?.kanSende == true else { return }
+        sender = true
+        Haptikk.trykk()
+        if kobling.direkte { kobling.lyd("kortlegg") }   // nettsiden spiller lyden selv når den sender
+        d?.mittValg = i
+        d?.kanSende = false
+        Task {
+            let ok = await kobling.gjor(["handling": "velg", "i": i], ellers: "velg", ["i": String(i)])
+            sender = false
+            if !ok { Haptikk.melding(.error); bygg() }
+        }
+    }
+
+    /// Trynet: når noen har fire like (eller for tidlig – da får du en bokstav)
+    func nese() {
+        guard !sender, let d, !(d.tatt && d.fase == "nese"), d.fase == "send" || d.fase == "nese" else { return }
+        sender = true
+        Haptikk.trykk(.heavy)
+        Task {
+            let ok = await kobling.gjor(["handling": "nese"], ellers: "nese")
+            sender = false
+            if !ok { Haptikk.melding(.error) }
+        }
+    }
+
+    /// Stua og Mer: nettsidens egne knapper
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
         Haptikk.trykk()
-        guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
-        nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
+        kobling.trykkNett(g, attrs)
     }
 }
 
@@ -150,7 +276,7 @@ struct GrisSkjerm: View {
             HStack(spacing: 8) {
                 ForEach(h) { k in
                     let ut = d.mittValg == k.id
-                    Button(action: { m.trykk("velg", ["i": String(k.id)]) }) {
+                    Button(action: { m.velg(k.id) }) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 8).fill(Color.white)
                             RoundedRectangle(cornerRadius: 8).stroke(morkBlekk, lineWidth: 2.5)
@@ -174,7 +300,7 @@ struct GrisSkjerm: View {
     /// Trynet: stort og rundt, puster når du bør trykke
     private func tryne(_ d: GrData) -> some View {
         VStack(spacing: 8) {
-            Button(action: { m.trykk("nese") }) {
+            Button(action: { m.nese() }) {
                 ZStack {
                     Circle().fill(d.paa ? rosa : rosa.opacity(0.55))
                     Circle().stroke(morkBlekk, lineWidth: 3)

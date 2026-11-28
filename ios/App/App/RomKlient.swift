@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import WebKit
 
 /// Rommet rett fra Swift, uten nettsiden imellom: lage rom, bli med, hente tilstanden og gjøre handlinger mot
 /// /api/rom, og høre fra Supabase Realtime når noen andre endrer rommet. Samme regler som rom.js:
@@ -525,6 +526,120 @@ final class RomKlient {
         if alle.count > 20 { alle = Dictionary(uniqueKeysWithValues: alle.suffix(20).map { ($0.key, $0.value) }) }
         if let d = try? JSONEncoder().encode(alle) { UserDefaults.standard.set(d, forKey: plassNokkel) }
     }
+}
+
+// MARK: - En native lek som leser rommet selv (fase 3)
+
+/// Det de native lekene i fase 3 deler: plassen i rommet fra nettsiden, figurene, og handlinger som går rett til
+/// rommet. Nettsiden eier fortsatt rommet (lobbyen, stua, frister og lyd) – leken leser og handler gjennom RomKlient.delt.
+/// Nyere rom.js sender `rom` ({kode, id, pollett, lang}) og `hoder` ({id: {n, oi}}) med skjermdataene. Med eldre rom.js
+/// hentes plassen fra nettsidens localStorage, og figurene plukkes fra skjermdataene (`plukk`).
+@MainActor
+final class LekKobling {
+    /// Til loggen i simulator-sjekken («ou: …»)
+    let navn: String
+    /// Klienten følger rommet for denne leken (ikke en gammel plass fra et tidligere rom)
+    private(set) var koblet = false
+    /// Figurene: id → {n: vanlig, oi: «oi»-ansiktet}
+    private(set) var hoder: [String: [String: String]] = [:]
+    /// Kalles når rommet er nytt
+    var endret: @MainActor () -> Void = {}
+    /// Handlingene kan gå rett til rommet (ellers trykkes nettsidens knapper)
+    var direkte: Bool { koblet && rom.meg != nil }
+    weak var nett: WKWebView?
+    private var henterPlass = false
+    var rom: RomKlient { RomKlient.delt }
+
+    /// nonisolated: lekemodellene lager den som standardverdi for en egenskap
+    nonisolated init(_ navn: String) { self.navn = navn }
+
+    /// Fra nettsiden: plassen i rommet og figurene. `plukk` henter figurene fra skjermdataene når `hoder` mangler.
+    func ta(_ dict: [String: Any], plukk: ([String: Any]) -> [(id: String, oi: Bool, png: String)]) {
+        if let h = dict["hoder"] as? [String: [String: String]] { hoder.merge(h) { _, ny in ny } }
+        else { for p in plukk(dict) where !p.png.isEmpty && !p.id.isEmpty { hoder[p.id, default: [:]][p.oi ? "oi" : "n"] = p.png } }
+        if let r = dict["rom"] as? [String: Any], let k = r["kode"] as? String, let id = r["id"] as? String, let p = r["pollett"] as? String {
+            koble(k, RomKlient.Meg(id: id, pollett: p), r["lang"] as? String ?? "no")
+        } else if !koblet {
+            hentPlass()
+        }
+    }
+
+    /// Rommet når det er hentet og viser denne leken (`type` som i rom.ts)
+    func tilstand(_ type: String) -> RomTilstand? {
+        guard koblet, rom.meg != nil, let t = rom.tilstand, t.spill?["type"]?.tekst == type else { return nil }
+        return t
+    }
+
+    /// Leken er over på denne telefonen: slutt å spørre (nettsiden har rommet videre)
+    func slipp() {
+        koblet = false
+        rom.endret = nil
+        rom.stopp()
+    }
+
+    /// Sender handlingen rett til rommet. Uten plass i rommet trykkes nettsidens egen knapp (`ellers`), som før.
+    /// Nei hvis handlingen ikke kom fram.
+    func gjor(_ handling: [String: Any], ellers g: String, _ attrs: [String: String] = [:]) async -> Bool {
+        guard direkte else { trykkNett(g, attrs); return true }
+        SjekkLogg.skriv("\(navn): \(handling["handling"] ?? "?") sendt fra Swift")
+        do { _ = try await rom.gjor(handling); return true }
+        catch { SjekkLogg.skriv("\(navn): \(handling["handling"] ?? "?") kom ikke fram – \(error)"); return false }
+    }
+
+    /// Trykker en av nettsidens egne knapper (stua, mer, sluttknappene – det som hører til rommet, ikke leken)
+    func trykkNett(_ g: String, _ attrs: [String: String] = [:]) {
+        guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
+        nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
+    }
+
+    /// Nettsidens lyd for en egen, åpen handling (eldre rom.js har ikke __mvLek.lyd: da blir det stille)
+    func lyd(_ n: String) {
+        guard let data = try? JSONSerialization.data(withJSONObject: [n]), let json = String(data: data, encoding: .utf8) else { return }
+        nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.lyd && window.__mvLek.lyd.apply(null, \(json))", completionHandler: nil)
+    }
+
+    private func koble(_ kode: String, _ meg: RomKlient.Meg, _ lang: String) {
+        koblet = true
+        rom.endret = { [weak self] _ in MainActor.assumeIsolated { self?.endret() } }
+        rom.bruk(kode: kode, meg: meg, lang: lang)
+    }
+
+    /// Eldre rom.js: plassen ligger i nettsidens localStorage (bd_rom_KODE), rommet i adressen (?k=) eller bd_sist_rom
+    private func hentPlass() {
+        guard !henterPlass, let w = nett else { return }
+        henterPlass = true
+        let js = """
+        var k = new URLSearchParams(location.search).get('k') || '';
+        try { if (!k) k = (JSON.parse(localStorage.getItem('bd_sist_rom') || '{}') || {}).k || ''; } catch (e) {}
+        var m = null; try { m = JSON.parse(localStorage.getItem('bd_rom_' + k) || 'null'); } catch (e) {}
+        return m && m.id && m.pollett && k ? { kode: k, id: m.id, pollett: m.pollett, lang: /^en/.test(document.documentElement.lang || '') ? 'en' : 'no' } : null;
+        """
+        w.callAsyncJavaScript(js, arguments: [:], in: nil, in: .page) { [weak self] res in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.henterPlass = false
+                if case .success(let v) = res, let r = v as? [String: Any], let k = r["kode"] as? String, let id = r["id"] as? String, let p = r["pollett"] as? String {
+                    SjekkLogg.skriv("\(self.navn): plassen fra localStorage (\(k))")
+                    self.koble(k, RomKlient.Meg(id: id, pollett: p), r["lang"] as? String ?? "no")
+                } else {
+                    SjekkLogg.skriv("\(self.navn): fant ikke plassen – nettsiden tegner skjermen")
+                }
+            }
+        }
+    }
+}
+
+/// Kortverdien slik nettsiden skriver den (vn i rom.js): 2–10, så Kn/D/K/A (J/Q/K/A på engelsk)
+func kortVerdi(_ v: Int, en: Bool) -> String {
+    if v <= 10 { return String(v) }
+    return (en ? [11: "J", 12: "Q", 13: "K", 14: "A"] : [11: "Kn", 12: "D", 13: "K", 14: "A"])[v] ?? String(v)
+}
+func rodFarge(_ f: String) -> Bool { f == "♥" || f == "♦" }
+/// Figuren til en spiller fra `hoder` (id → {n, oi}), med «oi»-ansiktet når det finnes og trengs
+func figurPng(_ hoder: [String: [String: String]], _ id: String, oi: Bool = false) -> String {
+    let h = hoder[id] ?? [:]
+    if oi, let o = h["oi"], !o.isEmpty { return o }
+    return h["n"] ?? ""
 }
 
 // MARK: - Selvtest i simulator-sjekken

@@ -24,3 +24,17 @@ appId: no.mittvors.app
     timeout: 90000
 - waitForAnimationToEnd
 - takeScreenshot: 61-over-under-svar
+# Verten hopper over gjesten, så appen har tur: appen gjetter selv (rett til rommet fra Swift) og ser at turen går videre
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*din tur.*"
+    timeout: 45000
+- takeScreenshot: 62-over-under-din-tur
+- tapOn:
+    text: "OVER"
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*vert gjetter.*"
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: 63-over-under-gjettet
