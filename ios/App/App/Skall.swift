@@ -687,7 +687,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private let tsModell = TsModell()
     private var tsVert: UIHostingController<TosannheterSkjerm>?
     private func visTs(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else { fjernOverlegg(&tsVert); return }
+        guard let d = d else { if tsVert != nil { tsModell.slipp() }; fjernOverlegg(&tsVert); return }
         tsModell.sett(d)
         if tsVert == nil { tsVert = leggOverlegg(UIHostingController(rootView: TosannheterSkjerm(m: tsModell)), over: side, nett: tsModell.nett) }
         fram(tsVert?.view.superview)

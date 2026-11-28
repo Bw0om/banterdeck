@@ -3,9 +3,9 @@ import UIKit
 import WebKit
 
 /// To sannheter og en løgn som native skjerm: stolen med den som sitter, de tre kortene du trykker på, hodene som
-/// lander på kortet du stemte på, avsløringen med stempler, og pallen til slutt. Nettsiden under holder tilstanden
-/// og klokka (rom.js tsData) – denne tegner. Skrivingen går via iPhonens dialog (tsSkjema), stemmen til nettsidens
-/// egen «stem»-knapp, og pallen/sluttknappene kommer som blokker (BlokkListe).
+/// lander på kortet du stemte på, avsløringen med stempler, og pallen til slutt.
+/// Fase 3: skjermen leser rommet selv (LekKobling/RomKlient) og sender stemmen rett til rommet. Skrivingen går fortsatt
+/// via nettsidens skjema i iPhonens dialog (tsSkjema), og sluttknappene kommer som blokker. Med eldre rom.js brukes tsData som reserve.
 struct TsHode: Identifiable { let id: String; let navn: String; let png: String }
 struct TsKort: Identifiable { let id: Int; let tekst: String; let logn: Bool; let hoder: [TsHode] }
 struct TsFasit {
@@ -14,13 +14,13 @@ struct TsFasit {
 struct TsPall: Identifiable { let id: String; let navn: String; let png: String; let n: Int; let plass: Int }
 
 struct TsData {
-    let fase: String, jeg: Bool, naa: Double, frist: Double, tittel: String, chip: String, gul: Bool
-    let stol: TsHode?, stolTekst: String, stolUnder: String, skriver: Bool
-    let du: String, hjelp: String, skjema: String, skjemaId: String
-    let kort: [TsKort], kan: Bool, minStemme: Int, dinLogn: Int, dinTekst: String
-    let stemt: [TsHode], status: String, fristTekst: String
-    let forrige: TsFasit?, forrigeEtikett: String, neste: String, nesteNavn: String
-    let pall: [TsPall], pallTittel: String, lurtTekst: String, slutt: [[String: Any]], stua: String, mer: String
+    var fase = "", jeg = false, naa: Double = 0, frist: Double = 0, tittel = "", chip = "", gul = false
+    var stol: TsHode? = nil, stolTekst = "", stolUnder = "", skriver = false
+    var du = "", hjelp = "", skjema = "", skjemaId = "tsSkjema"
+    var kort: [TsKort] = [], kan = false, minStemme = -1, dinLogn = -1, dinTekst = ""
+    var stemt: [TsHode] = [], status = "", fristTekst = ""
+    var forrige: TsFasit? = nil, forrigeEtikett = "", neste = "", nesteNavn = ""
+    var pall: [TsPall] = [], pallTittel = "", lurtTekst = "", stua = "Stua", mer = "Mer"
 
     static func hode(_ h: [String: Any]?) -> TsHode? {
         guard let h = h else { return nil }
@@ -29,6 +29,7 @@ struct TsData {
     static func kort(_ l: [[String: Any]]) -> [TsKort] {
         l.enumerated().map { i, k in TsKort(id: i, tekst: k["tekst"] as? String ?? "", logn: k["logn"] as? Bool ?? false, hoder: (k["hoder"] as? [[String: Any]] ?? []).compactMap { hode($0) }) }
     }
+    /// Reserven: skjermen slik eldre rom.js lager den (tsData)
     init(_ d: [String: Any]) {
         func s(_ k: String) -> String { d[k] as? String ?? "" }
         func b(_ k: String) -> Bool { d[k] as? Bool ?? false }
@@ -46,22 +47,141 @@ struct TsData {
         } else { forrige = nil }
         forrigeEtikett = s("forrigeEtikett"); neste = s("neste"); nesteNavn = s("nesteNavn")
         pall = (d["pall"] as? [[String: Any]] ?? []).map { p in TsPall(id: p["id"] as? String ?? "", navn: p["navn"] as? String ?? "", png: p["png"] as? String ?? "", n: (p["n"] as? NSNumber)?.intValue ?? 0, plass: (p["plass"] as? NSNumber)?.intValue ?? 1) }
-        pallTittel = s("pallTittel"); lurtTekst = s("lurtTekst"); slutt = d["slutt"] as? [[String: Any]] ?? []
-        stua = s("stua").isEmpty ? "Stua" : s("stua"); mer = s("mer").isEmpty ? "Mer" : s("mer")
+        pallTittel = s("pallTittel"); lurtTekst = s("lurtTekst")
+        if !s("stua").isEmpty { stua = s("stua") }
+        if !s("mer").isEmpty { mer = s("mer") }
+    }
+
+    /// Skjermen bygd rett fra rommet: `spill` er serverens visning av To sannheter og en løgn (ekstraVisning i rom.ts)
+    init(rom t: RomTilstand, hoder: [String: [String: String]]) {
+        let s = t.spill ?? .null
+        let en = t.lang == "en"
+        func T(_ no: String, _ eng: String) -> String { en ? eng : no }
+        let meg = t.meg ?? ""
+        let alle = t.spillere.map(\.id)
+        func navn(_ id: String?) -> String { id.flatMap { t.spiller($0)?.navn } ?? "?" }
+        func nv(_ id: String) -> String { id == meg ? T("Du", "You") : navn(id) }
+        func tall(_ v: JSONVerdi?) -> Int { Int(v?.tall ?? 0) }
+        func tekster(_ v: JSONVerdi?) -> [String] { (v?.liste ?? []).compactMap(\.tekst) }
+        func fjes(_ id: String, _ uttrykk: String = "") -> TsHode { TsHode(id: id, navn: nv(id), png: figurPng(hoder, id, uttrykk: uttrykk)) }
+        func stolTekstFor(_ id: String) -> String { id == meg ? T("Du i stolen", "You’re in the chair") : navn(id) + T(" i stolen", " in the chair") }
+
+        let f = s["fase"]?.tekst ?? "", aktiv = s["aktiv"]?.tekst ?? ""
+        let fr = s["forrige"].flatMap { $0 == .null ? nil : $0 }
+        let erJeg = aktiv == meg
+        let logn = s["logn"]?.tall.map { Int($0) }
+        let minSt = s["minStemme"]?.tall.map { Int($0) }
+        fase = f; jeg = erJeg; naa = t.naa
+        frist = f == "stem" ? (s["frist"]?.tall ?? 0) : 0
+        tittel = T("To sannheter og en løgn", "Two truths and a lie")
+        minStemme = minSt ?? -1
+        dinLogn = erJeg && f == "stem" ? (logn ?? -1) : -1
+        dinTekst = T("Din løgn", "Your lie")
+        fristTekst = T("sekunder til avsløringen", "seconds to the reveal")
+        lurtTekst = T("lurt", "fooled")
+        stua = T("Stua", "Lounge"); mer = T("Mer", "More")
+
+        // Forrige runde: kortene snudd, hodene på kortene de stemte på, hvem som drikker
+        if let x = fr {
+            let xAktiv = x["aktiv"]?.tekst ?? "", riktige = tall(x["riktige"]), xLogn = x["logn"]?.tall.map { Int($0) } ?? -1
+            let stemmer = (x["stemmer"]?.objekt ?? [:]).compactMapValues { $0.tall.map { Int($0) } }
+            forrige = TsFasit(n: x["n"]?.tall ?? 0, stol: fjes(xAktiv, riktige > 0 ? "oi" : ""), stolTekst: stolTekstFor(xAktiv),
+                              under: "\(riktige)" + T(" så løgnen", " saw the lie"), logn: xLogn,
+                              kort: tekster(x["pastander"]).enumerated().map { i, tekst in
+                                  TsKort(id: i, tekst: tekst, logn: i == xLogn, hoder: alle.filter { stemmer[$0] == i }.map { fjes($0, i == xLogn ? "" : "oi") })
+                              },
+                              drikker: (x["drikker"]?.liste ?? []).map { y in
+                                  let id = y["id"]?.tekst ?? ""
+                                  return nv(id) + (id == meg ? T(" drikker ", " drink ") : T(" drikker ", " drinks ")) + "\(tall(y["slurker"]))"
+                              },
+                              sann: T("Sann", "True"), logntekst: T("Løgn", "Lie"))
+        }
+
+        if f == "ferdig" {
+            chip = T("Alle har sittet", "Everyone’s had a go")
+            pallTittel = T("Beste løgner", "Best liar")
+            pall = (s["lurt"]?.liste ?? []).prefix(3).enumerated().map { i, x in
+                let id = x["id"]?.tekst ?? ""
+                return TsPall(id: id, navn: nv(id), png: figurPng(hoder, id), n: tall(x["n"]), plass: i + 1)
+            }
+            return
+        }
+        if f == "skriv" {
+            chip = erJeg ? T("Din tur", "Your turn") : navn(aktiv) + T(" skriver", " is writing"); gul = true
+            if erJeg {
+                du = T("Du sitter i stolen", "You’re in the chair"); hjelp = T("Tre ting om deg. Stemple løgnen.", "Three things about you. Stamp the lie.")
+                skjema = T("Skriv de tre kortene", "Write the three cards")
+                if fr != nil { forrigeEtikett = T("Forrige runde", "Last round") }
+            } else if fr != nil {
+                neste = T("Neste i stolen", "Next in the chair"); nesteNavn = navn(aktiv)
+            } else {
+                stol = fjes(aktiv); stolTekst = stolTekstFor(aktiv); stolUnder = T("Gjør deg klar til å avsløre.", "Get ready to call it."); skriver = true
+            }
+            return
+        }
+        let velgere = tekster(s["velgere"]), harStemt = tekster(s["harStemt"])
+        let alleStemt = !velgere.isEmpty && harStemt.count >= velgere.count
+        chip = alleStemt ? T("Alle har stemt", "Everyone voted") : erJeg ? T("Hold pokerfjes", "Poker face") : T("Finn løgnen", "Find the lie"); gul = true
+        stol = fjes(aktiv); stolTekst = stolTekstFor(aktiv); stolUnder = erJeg ? T("Ikke avslør deg.", "Don’t give yourself away.") : T("Trykk på løgnen.", "Tap the lie.")
+        kan = !erJeg
+        kort = tekster(s["pastander"]).enumerated().map { i, tekst in
+            TsKort(id: i, tekst: tekst, logn: false, hoder: !erJeg && minSt == i ? [fjes(meg)] : [])
+        }
+        stemt = harStemt.map { fjes($0) }
+        status = alleStemt ? T("Snur kortene …", "Flipping the cards …") : "\(harStemt.count)" + T(" av ", " of ") + "\(velgere.count)" + T(" har stemt", " have voted")
     }
 }
 
+@MainActor
 @Observable
 final class TsModell: HarFigurer {
     var d: TsData? = nil
     let blokker = KortModell()
+    private let kobling = LekKobling("tosannheter")
     @ObservationIgnored private(set) var avvik: Double = 0
-    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private var avvikFra: Double = 0
+    /// Det nettsiden sendte sist – reserven til rommet er hentet (eller hvis plassen ikke finnes)
+    @ObservationIgnored private var sist: [String: Any] = [:]
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett; kobling.nett = nett } }
+
+    init() { kobling.endret = { [weak self] in self?.bygg() } }
+
     func sett(_ dict: [String: Any]) {
-        let ny = TsData(dict)
-        if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
-        blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
+        sist = dict
+        blokker.sett(["blokker": dict["slutt"] as? [[String: Any]] ?? [], "naa": dict["naa"] ?? 0])
+        kobling.ta(dict) { d in
+            // Eldre rom.js: figurene fra hodene i skjermdataene
+            var ut: [(id: String, oi: Bool, png: String)] = []
+            func ta(_ h: Any?) { if let h = h as? [String: Any] { ut.append((id: h["id"] as? String ?? "", oi: false, png: h["png"] as? String ?? "")) } }
+            ta(d["stol"]); (d["stemt"] as? [[String: Any]] ?? []).forEach { ta($0) }; (d["pall"] as? [[String: Any]] ?? []).forEach { ta($0) }
+            return ut
+        }
+        bygg()
+    }
+
+    /// Leken er over på denne telefonen
+    func slipp() { kobling.slipp(); d = nil; sist = [:]; avvikFra = 0 }
+
+    /// Rommet når det er hentet og viser To sannheter og en løgn – ellers skjermen nettsiden sendte
+    private func bygg() {
+        let ny: TsData
+        if let t = kobling.tilstand("tosannheter") {
+            if t.naa > 0 && t.naa != avvikFra { avvikFra = t.naa; avvik = t.naa - Date().timeIntervalSince1970 * 1000 }
+            ny = TsData(rom: t, hoder: kobling.hoder)
+        } else if !sist.isEmpty {
+            ny = TsData(sist)
+            if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
+        } else { return }
         withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) { d = ny }
+    }
+
+    /// Stemmen på kortet du tror er løgnen (kan byttes til kortene snus) – rett til rommet
+    func stem(_ i: Int) {
+        Haptikk.trykk()
+        Task {
+            let ok = await kobling.gjor(["handling": "stem", "paa": String(i)], ellers: "stem", ["paa": String(i)])
+            if !ok { Haptikk.melding(.error) }
+        }
     }
     /// Sekunder igjen til fristen (servertid, samme regning som nettsiden)
     func igjen(_ frist: Double) -> Int { max(0, Int(ceil((frist - 1500 - (Date().timeIntervalSince1970 * 1000 + avvik)) / 1000))) }
@@ -175,7 +295,7 @@ struct TosannheterSkjerm: View {
         VStack(spacing: 14) {
             ForEach(d.kort) { k in
                 let valgt = d.minStemme == k.id
-                Button(action: { m.trykk("stem", ["paa": String(k.id)]) }) {
+                Button(action: { m.stem(k.id) }) {
                     kortRad(k, bakgrunn: valgt ? gul : lys, nedtrykt: valgt, hodeUttrykk: true)
                 }
                 .buttonStyle(.plain).disabled(!d.kan)

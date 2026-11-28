@@ -4262,6 +4262,7 @@ export function startRom(LEKNAVN, LANG) {
       stemt: [], status: '', fristTekst: T('sekunder til avsløringen', 'seconds to the reveal'),
       forrige: fasit(fr), forrigeEtikett: '', neste: '', nesteNavn: '',
       pall: [], pallTittel: '', lurtTekst: T('lurt', 'fooled'), slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    skjermRom(d, jobber);   // nyere app: leser rommet og sender stemmen selv
     if (f === 'ferdig') {
       d.chip = T('Alle har sittet', 'Everyone’s had a go');
       d.pallTittel = T('Beste løgner', 'Best liar');

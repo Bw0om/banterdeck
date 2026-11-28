@@ -28,3 +28,8 @@ appId: no.mittvors.app
     text: "(?is).*jeg kan jonglere.*"
 - waitForAnimationToEnd
 - takeScreenshot: 53-to-sannheter-stemt
+# Stemmen gikk rett til rommet fra Swift: appen er én av to som har stemt
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*1 av 2 har stemt.*"
+    timeout: 20000
