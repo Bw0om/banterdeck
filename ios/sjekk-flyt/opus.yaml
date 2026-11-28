@@ -23,3 +23,17 @@ appId: no.mittvors.app
     timeout: 90000
 - waitForAnimationToEnd
 - takeScreenshot: 63-opus-kast
+# Verten triller videre til en sekser sender terningen til appen – så triller appen selv (rett til rommet fra Swift)
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*du har terningen.*"
+    timeout: 150000
+- takeScreenshot: 64-opus-din-terning
+- tapOn:
+    text: "TRILL"
+- extendedWaitUntil:
+    visible:
+      text: "(?is).*(trill igjen|sjekk sendte videre).*"
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: 65-opus-du-trillet

@@ -243,7 +243,14 @@ jobs:
             # Opus: verten har terningen og triller via API-et – appen ser terningen lande
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"opus\",\"modus\":\"*\",$V}"
-            (sleep 60; vert "{\"handling\":\"kast\",$V}") &
+            # … og triller videre (verten kan trille for den som har terningen) til en sekser har sendt den til appen («Sjekk»)
+            (sleep 60; vert "{\"handling\":\"kast\",$V}"; sleep 20
+             for i in $(seq 1 120); do
+               R=$(curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d "{\"handling\":\"kast\",$V}" || echo '{}')
+               H=$(node -pe 'const t=JSON.parse(process.argv[1]),s=t.spill||{},p=(t.spillere||[]).find(x=>x.id===s.holder);p?p.navn:""' "$R")
+               [ "$H" = "Sjekk" ] && { echo "opus: terningen er hos appen etter $i kast" >> skjermbilder/maestro.txt; break; }
+               sleep 1
+             done) &
             flyt opus
             wait
             fi

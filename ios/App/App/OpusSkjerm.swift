@@ -2,30 +2,102 @@ import SwiftUI
 import UIKit
 import WebKit
 
-/// Opus som native skjerm: hvem som har terningen, terningen som lander, og «Trill». Nettsiden under holder
-/// tilstanden (rom.js opData) – denne tegner, og trykkene går til nettsidens egne knapper (kast, drop).
+/// Opus som native skjerm: hvem som har terningen, terningen som lander, og «Trill».
+/// Fase 3: skjermen leser rommet selv (LekKobling/RomKlient) og sender trillingen og «Droppet kom!» rett til rommet.
+/// Nettsiden gir plassen i rommet. Med eldre rom.js brukes opData som reserve.
 struct OpData {
-    let holder: String, jeg: Bool, kast: Int, nr: Int, antall: Int, naa: Double, tittel: String, chip: String
-    let spotify: String, spotifyUrl: String, etikett: String, holderTekst: String, melding: String, trill: String, vent: String, kastTekst: String, drop: String, stua: String, mer: String
+    var holder = "", jeg = false, kast = 0, nr = 0, antall = 0, naa: Double = 0, tittel = "Opus", chip = ""
+    var spotify = "", spotifyUrl = "https://open.spotify.com/search/Opus%20Eric%20Prydz", etikett = "", holderTekst = "", melding = "", trill = "", vent = "", kastTekst = "", drop = ""
+    var stua = "Stua", mer = "Mer"
+
+    /// Reserven: skjermen slik eldre rom.js lager den (opData)
     init(_ d: [String: Any]) {
         func s(_ k: String) -> String { d[k] as? String ?? "" }
         func i(_ k: String) -> Int { (d[k] as? NSNumber)?.intValue ?? 0 }
         holder = s("holder"); jeg = d["jeg"] as? Bool ?? false; kast = i("kast"); nr = i("nr"); antall = i("antall"); naa = (d["naa"] as? NSNumber)?.doubleValue ?? 0
         tittel = s("tittel"); chip = s("chip"); spotify = s("spotify"); spotifyUrl = s("spotifyUrl"); etikett = s("etikett"); holderTekst = s("holderTekst")
         melding = s("melding"); trill = s("trill"); vent = s("vent"); kastTekst = s("kastTekst"); drop = s("drop")
-        stua = s("stua").isEmpty ? "Stua" : s("stua"); mer = s("mer").isEmpty ? "Mer" : s("mer")
+        if !s("stua").isEmpty { stua = s("stua") }
+        if !s("mer").isEmpty { mer = s("mer") }
+    }
+
+    /// Skjermen bygd rett fra rommet: `spill` er serverens visning av Opus (ekstraVisning i rom.ts)
+    init(rom t: RomTilstand) {
+        let s = t.spill ?? .null
+        let en = t.lang == "en"
+        func T(_ no: String, _ eng: String) -> String { en ? eng : no }
+        func navn(_ id: String?) -> String { id.flatMap { t.spiller($0)?.navn } ?? "?" }
+        let h = s["holder"]?.tekst
+        jeg = h != nil && h == t.meg
+        holder = navn(h)
+        kast = Int(s["kast"]?.tall ?? 0); nr = Int(s["nr"]?.tall ?? 0); antall = Int(s["antall"]?.tall ?? 0); naa = t.naa
+        let fra = s["fra"]?.tekst
+        chip = jeg ? T("Du har terningen", "You have the die") : holder + T(" har terningen", " has the die")
+        spotify = T("«Opus» i Spotify", "“Opus” on Spotify")
+        etikett = T("Terningen er hos", "The die is with")
+        holderTekst = holder + (jeg ? T(" (deg!)", " (you!)") : "")
+        if kast == 6, let fra { melding = T("SEKSER! ", "SIX! ") + navn(fra) + T(" sendte videre.", " passed it on.") }
+        else if kast > 0 { melding = "\(kast)" + (jeg ? T(" – trill igjen!", " – roll again!") : "") }
+        else { melding = T("Start sangen og trill!", "Start the song and roll!") }
+        trill = jeg ? T("Trill", "Roll") : ""
+        vent = jeg ? "" : T("Vent til terningen kommer til deg.", "Wait until the die comes to you.")
+        kastTekst = "\(antall)" + T(" kast", " rolls")
+        drop = t.jegErVert ? T("Droppet kom!", "The drop hit!") : ""
+        stua = T("Stua", "Lounge"); mer = T("Mer", "More")
     }
 }
 
+@MainActor
 @Observable
 final class OpModell {
     var d: OpData? = nil
-    @ObservationIgnored weak var nett: WKWebView?
-    func sett(_ dict: [String: Any]) { withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { d = OpData(dict) } }
+    private let kobling = LekKobling("opus")
+    /// Det nettsiden sendte sist – reserven til rommet er hentet (eller hvis plassen ikke finnes)
+    @ObservationIgnored private var sist: [String: Any] = [:]
+    /// En trilling er på vei: ett trykk gir ett kast
+    @ObservationIgnored private var sender = false
+    @ObservationIgnored weak var nett: WKWebView? { didSet { kobling.nett = nett } }
+
+    init() { kobling.endret = { [weak self] in self?.bygg() } }
+
+    func sett(_ dict: [String: Any]) {
+        sist = dict
+        kobling.ta(dict) { _ in [] }
+        bygg()
+    }
+
+    /// Leken er over på denne telefonen
+    func slipp() { kobling.slipp(); d = nil; sist = [:]; sender = false }
+
+    /// Rommet når det er hentet og viser Opus – ellers skjermen nettsiden sendte
+    private func bygg() {
+        let ny: OpData
+        if let t = kobling.tilstand("opus") { ny = OpData(rom: t) }
+        else if !sist.isEmpty { ny = OpData(sist) }
+        else { return }
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { d = ny }
+    }
+
+    /// Trill – rett til rommet
+    func trill() { send("kast", .medium) }
+    /// Verten: droppet i sangen kom, den som holder terningen drikker opp
+    func drop() { send("drop", .light) }
+
+    private func send(_ handling: String, _ stil: UIImpactFeedbackGenerator.FeedbackStyle) {
+        guard !sender else { return }
+        sender = true
+        Haptikk.trykk(stil)
+        Task {
+            let ok = await kobling.gjor(["handling": handling], ellers: handling)
+            sender = false
+            if !ok { Haptikk.melding(.error) }
+        }
+    }
+
+    /// Stua og Mer: nettsidens egne knapper
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        Haptikk.trykk(g == "kast" ? .medium : .light)
-        guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
-        nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
+        Haptikk.trykk()
+        kobling.trykkNett(g, attrs)
     }
 }
 
@@ -64,7 +136,7 @@ struct OpusSkjerm: View {
                         Text(d.melding).font(.archivo(22, vekt: 900)).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
                             .foregroundColor(d.kast == 6 ? rust : blekk)
                         if !d.trill.isEmpty {
-                            Button(action: { m.trykk("kast") }) {
+                            Button(action: { m.trill() }) {
                                 Text(d.trill.uppercased()).font(.archivo(22, vekt: 900)).foregroundColor(morkBlekk)
                                     .frame(maxWidth: .infinity).frame(minHeight: 72)
                                     .background(RoundedRectangle(cornerRadius: 14).fill(gul)).overlay(RoundedRectangle(cornerRadius: 14).stroke(morkBlekk, lineWidth: 3))
@@ -75,7 +147,7 @@ struct OpusSkjerm: View {
                         }
                         Text(d.kastTekst).font(.archivo(13, vekt: 800)).opacity(0.6)
                         if !d.drop.isEmpty {
-                            Button(action: { m.trykk("drop") }) {
+                            Button(action: { m.drop() }) {
                                 Text(d.drop).font(.archivo(14, vekt: 800)).padding(.horizontal, 14).frame(height: 40)
                                     .background(Capsule().fill(kortFarge)).overlay(Capsule().stroke(blekk, lineWidth: 2))
                             }.buttonStyle(.plain)

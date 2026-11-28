@@ -3,8 +3,9 @@ import UIKit
 import WebKit
 
 /// Fuck the Dealer som native skjerm: dealeren ser kortet og tastene A–K, de andre ser hvem som deler og tellebrettet,
-/// avgjørelsen snus for alle på et mørkt panel. Nettsiden under holder tilstanden (rom.js ftdData) – denne tegner,
-/// og trykkene går til nettsidens egne knapper (ftd-gjett, ftd-neste, runde).
+/// avgjørelsen snus for alle på et mørkt panel.
+/// Fase 3: skjermen leser rommet selv (LekKobling/RomKlient) og sender verdien og «Neste kort» rett til rommet. Nettsiden
+/// gir plassen i rommet, figurene og «Hva nå?»-knappene til slutt. Med eldre rom.js brukes ftdData som reserve.
 struct FtdKort { let v: String, f: String, rod: Bool }
 struct FtdTast: Identifiable { let id: Int; let tekst: String; let ute: Bool; let mulig: Bool; let streket: Bool }
 struct FtdKolonne: Identifiable { let id: Int; let v: String; let n: Int; let ute: Bool }
@@ -15,16 +16,17 @@ struct FtdInfo { let n: String, tekst: String }
 struct FtdFerdig { let etikett: String, navn: String, under: String, listeTittel: String, rader: [FtdRad] }
 
 struct FtdData {
-    let fase: String, jeg: Bool, styrer: Bool, pos: Int, n: Int, runde: Int, naa: Double
-    let tittel: String, chip: String, bom: Int, bomTekst: String, brett: [FtdKolonne], brettTittel: String, bytt: String
-    let kort: FtdKort?, taster: [FtdTast], bare: String, gjetterTittel: String, gjetterUnder: String, hint: FtdHint?, etikettAndre: String
-    let infoTreff: FtdInfo?, infoBom: FtdInfo?, res: FtdRes?, videre: String, neste: String, vent: String, ventTittel: String
-    let ferdig: FtdFerdig?, slutt: [[String: Any]], stua: String, mer: String
+    var fase = "", jeg = false, styrer = false, pos = 0, n = 0, runde = 1, naa: Double = 0
+    var tittel = "", chip = "", bom = 0, bomTekst = "", brett: [FtdKolonne] = [], brettTittel = "", bytt = ""
+    var kort: FtdKort? = nil, taster: [FtdTast] = [], bare = "", gjetterTittel = "", gjetterUnder = "", hint: FtdHint? = nil, etikettAndre = ""
+    var infoTreff: FtdInfo? = nil, infoBom: FtdInfo? = nil, res: FtdRes? = nil, videre = "", neste = "", vent = "", ventTittel = ""
+    var ferdig: FtdFerdig? = nil, stua = "Stua", mer = "Mer"
 
     static func kort(_ k: [String: Any]?) -> FtdKort? {
         guard let k = k else { return nil }
         return FtdKort(v: k["v"] as? String ?? "", f: k["f"] as? String ?? "", rod: k["rod"] as? Bool ?? false)
     }
+    /// Reserven: skjermen slik eldre rom.js lager den (ftdData)
     init(_ d: [String: Any]) {
         func s(_ k: String) -> String { d[k] as? String ?? "" }
         func b(_ k: String) -> Bool { d[k] as? Bool ?? false }
@@ -47,25 +49,169 @@ struct FtdData {
             ferdig = FtdFerdig(etikett: f["etikett"] as? String ?? "", navn: f["navn"] as? String ?? "", under: f["under"] as? String ?? "", listeTittel: f["listeTittel"] as? String ?? "",
                                rader: (f["rader"] as? [[String: Any]] ?? []).map { x in FtdRad(id: x["id"] as? String ?? "", navn: x["navn"] as? String ?? "", png: x["png"] as? String ?? "", plass: (x["plass"] as? NSNumber)?.intValue ?? 0, delt: x["delt"] as? String ?? "", n: (x["n"] as? NSNumber)?.intValue ?? 0) })
         } else { ferdig = nil }
-        slutt = d["slutt"] as? [[String: Any]] ?? []
-        stua = s("stua").isEmpty ? "Stua" : s("stua"); mer = s("mer").isEmpty ? "Mer" : s("mer")
+        if !s("stua").isEmpty { stua = s("stua") }
+        if !s("mer").isEmpty { mer = s("mer") }
+    }
+
+    /// Skjermen bygd rett fra rommet: `spill` er serverens visning av Fuck the Dealer (ekstraVisning i rom.ts).
+    /// Kortet sender serveren bare til dealeren (og til alle når det er avgjort).
+    init(rom t: RomTilstand, hoder: [String: [String: String]]) {
+        let s = t.spill ?? .null
+        let en = t.lang == "en"
+        func T(_ no: String, _ eng: String) -> String { en ? eng : no }
+        let meg = t.meg ?? ""
+        func navn(_ id: String?) -> String { id.flatMap { t.spiller($0)?.navn } ?? "?" }
+        func nv(_ id: String) -> String { id == meg ? T("Du", "You") : navn(id) }
+        func tall(_ v: JSONVerdi?) -> Int { Int(v?.tall ?? 0) }
+        /// Verdien slik nettsiden skriver den (ftdVn): ess er 1
+        func vn(_ v: Int) -> String { v == 1 ? "A" : v <= 10 ? String(v) : (en ? [11: "J", 12: "Q", 13: "K"] : [11: "Kn", 12: "D", 13: "K"])[v] ?? String(v) }
+        func kortFra(_ k: JSONVerdi?) -> FtdKort? {
+            guard let k, let v = k["v"]?.tall, let f = k["f"]?.tekst else { return nil }
+            return FtdKort(v: vn(Int(v)), f: f, rod: rodFarge(f))
+        }
+
+        let dealer = s["dealer"]?.tekst ?? ""
+        fase = s["fase"]?.tekst ?? ""
+        jeg = dealer == meg
+        styrer = jeg || t.jegErVert
+        pos = tall(s["pos"]); n = tall(s["n"]); runde = max(1, tall(s["runde"])); naa = t.naa
+        let andre = fase == "andre", tomt = fase == "ferdig"
+        let g1 = tall(s["g1"]), retning = s["hint"]?.tekst ?? ""
+        let bomN = tall(s["bom"])
+        tittel = "Fuck the Dealer · \(pos + (tomt ? 0 : 1)) / 52"
+        chip = tomt ? T("Stokken er tom", "The deck is empty") : jeg ? T("Du deler", "You deal") : navn(dealer) + T(" deler", " deals")
+        bom = tomt ? -1 : bomN
+        bomTekst = "\(bomN)" + T(" av 3 bom", " of 3 misses")
+        let brukt = s["brukt"]?.objekt ?? [:]
+        func bruktN(_ v: Int) -> Int { tall(brukt[String(v)]) }
+        brett = (1...13).map { v in FtdKolonne(id: v - 1, v: vn(v), n: bruktN(v), ute: bruktN(v) >= 4) }
+        brettTittel = T("Tellebrettet", "The tally board")
+        if let b = s["bytt"], b != .null, !tomt {
+            let fra = b["fra"]?.tekst ?? "", til = b["til"]?.tekst ?? ""
+            bytt = fra == meg ? T("Tre bom på rad – stokken gikk til ", "Three misses in a row – the deck went to ") + navn(til) + "."
+                : jeg ? T("Tre bom på rad hos ", "Three misses in a row for ") + navn(fra) + T(" – du deler nå!", " – you deal now!")
+                : T("Stokken gikk til ", "The deck went to ") + navn(til) + "."
+        }
+        stua = T("Stua", "Lounge"); mer = T("Mer", "More")
+
+        if tomt {
+            let dr = s["drukket"]?.objekt ?? [:], dt = s["dealt"]?.objekt ?? [:]
+            let ider = (s["ider"]?.liste ?? []).compactMap(\.tekst)
+            // Flest slurker først; like mange beholder rekkefølgen rundt bordet (som sorteringen i nettleseren)
+            let rekke = ider.enumerated().sorted { a, b in
+                let x = tall(dr[a.element]), y = tall(dr[b.element])
+                return x != y ? x > y : a.offset < b.offset
+            }.map(\.element)
+            let topp = rekke.first
+            ferdig = FtdFerdig(etikett: T("Kveldens dealer", "Dealer of the night"), navn: topp.map(nv) ?? "–",
+                               under: topp.map { T("Drakk ", "Drank ") + "\(tall(dr[$0]))" + T(" slurker bak stokken.", " sips behind the deck.") } ?? "",
+                               listeTittel: T("Slurker som dealer", "Sips as dealer"),
+                               rader: rekke.enumerated().map { i, id in
+                                   FtdRad(id: id, navn: nv(id), png: figurPng(hoder, id), plass: i + 1, delt: "\(tall(dt[id]))" + T(" kort delt", " cards dealt"), n: tall(dr[id]))
+                               })
+            return
+        }
+
+        if fase == "res", let r = s["res"], r != .null {
+            let type = r["type"]?.tekst ?? "", treff = type != "bom"
+            res = FtdRes(treff: treff, nr: tall(r["nr"]), kort: kortFra(r["kort"]), n: tall(r["n"]),
+                         over: treff ? (type == "treff1" ? T("Treff på første · dealeren drikker kortet", "First-try hit · the dealer drinks the card") : T("Treff på andre · dealeren drikker halve", "Second-try hit · the dealer drinks half"))
+                            : T("Avstanden ", "The distance ") + vn(tall(r["g"])) + "–" + vn(tall(r["kort"]?["v"])) + T(" · gjetteren drikker", " · the guesser drinks"),
+                         under: treff ? (jeg ? "Fuck the dealer 🍻" : navn(dealer) + T(" drikker", " drinks")) : "",
+                         gjettet: treff ? "" : T("Gjettet", "Guessed"), g1: treff ? "" : vn(tall(r["g1"])), g: treff ? "" : vn(tall(r["g"])))
+            videre = bomN >= 3 ? T("Tre bom på rad – stokken går videre.", "Three misses in a row – the deck moves on.") : ""
+            neste = styrer ? T("Neste kort →", "Next card →") : ""
+            vent = styrer ? "" : navn(dealer) + T(" trykker neste.", " taps next.")
+            return
+        }
+
+        if !styrer {
+            ventTittel = andre ? T("Ett forsøk til", "One more try") : T("Noen gjetter", "Someone guesses")
+            vent = andre ? navn(dealer) + T(" sa «", " said “") + (retning == "hoy" ? T("høyere", "higher") : T("lavere", "lower")) + T("» enn ", "” than ") + vn(g1)
+                : T("Si en verdi høyt – ", "Call a value out loud – ") + navn(dealer) + T(" trykker den.", " taps it.")
+            return
+        }
+
+        kort = kortFra(s["kort"])
+        bare = jeg ? T("Bare du", "Only you") : T("Du trykker for ", "You tap for ") + navn(dealer)
+        gjetterTittel = andre ? "" : T("Noen gjetter", "Someone guesses")
+        gjetterUnder = andre ? "" : T("Trykk det som sies ↓", "Tap what they say ↓")
+        if andre {
+            hint = FtdHint(opp: retning == "hoy", over: jeg ? T("Si høyt", "Say it out loud") : navn(dealer) + T(" sier", " says"),
+                           ord: retning == "hoy" ? T("«Høyere»", "“Higher”") : T("«Lavere»", "“Lower”"), enn: T(" enn ", " than ") + vn(g1))
+        }
+        etikettAndre = andre ? T("Ett forsøk til – trykk det som sies ↓", "One more try – tap what they say ↓") : ""
+        taster = (1...13).map { v in
+            let ute = bruktN(v) >= 4
+            let feilSide = andre && ((retning == "hoy" && v <= g1) || (retning == "lav" && v >= g1))
+            return FtdTast(id: v, tekst: vn(v), ute: ute || feilSide, mulig: andre && !ute && !feilSide, streket: andre && v == g1)
+        }
+        // Kortet: dealeren ser det. Verten som trykker for dealeren, får det ikke fra serveren – da står info-linjene tomme.
+        if let kv = s["kort"]?["v"]?.tall.map({ Int($0) }) {
+            infoTreff = FtdInfo(n: String(andre ? (kv + 1) / 2 : kv), tekst: andre ? T("treff – du drikker halve", "hit – you drink half") : T("treff – du drikker kortet", "hit – you drink the card"))
+            infoBom = andre ? FtdInfo(n: "|" + vn(kv) + "–?|", tekst: T("bom – gjetteren drikker", "miss – the guesser drinks")) : FtdInfo(n: "", tekst: T("bom – si høyere/lavere", "miss – say higher/lower"))
+        }
     }
 }
 
+@MainActor
 @Observable
 final class FtdModell: HarFigurer {
     var d: FtdData? = nil
     let blokker = KortModell()
-    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    private let kobling = LekKobling("dealer")
+    /// Det nettsiden sendte sist – reserven til rommet er hentet (eller hvis plassen ikke finnes)
+    @ObservationIgnored private var sist: [String: Any] = [:]
+    /// Et trykk er på vei: ett trykk gir én handling
+    @ObservationIgnored private var sender = false
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett; kobling.nett = nett } }
+
+    init() { kobling.endret = { [weak self] in self?.bygg() } }
+
     func sett(_ dict: [String: Any]) {
-        let ny = FtdData(dict)
-        blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
+        sist = dict
+        blokker.sett(["blokker": dict["slutt"] as? [[String: Any]] ?? [], "naa": dict["naa"] ?? 0])
+        kobling.ta(dict) { d in
+            ((d["ferdig"] as? [String: Any])?["rader"] as? [[String: Any]] ?? []).map { x in (id: x["id"] as? String ?? "", oi: false, png: x["png"] as? String ?? "") }
+        }
+        bygg()
+    }
+
+    /// Leken er over på denne telefonen
+    func slipp() { kobling.slipp(); d = nil; sist = [:]; sender = false }
+
+    /// Rommet når det er hentet og viser Fuck the Dealer – ellers skjermen nettsiden sendte
+    private func bygg() {
+        let ny: FtdData
+        if let t = kobling.tilstand("dealer") { ny = FtdData(rom: t, hoder: kobling.hoder) }
+        else if !sist.isEmpty { ny = FtdData(sist) }
+        else { return }
         withAnimation(.spring(response: 0.42, dampingFraction: 0.8)) { d = ny }
     }
+
+    /// Verdien som ble sagt høyt (A–K) – rett til rommet
+    func gjett(_ v: Int) {
+        guard d?.styrer == true else { return }
+        send(["handling": "ftd-gjett", "v": v], ellers: "ftd-gjett", ["v": String(v)], .medium)
+    }
+    /// Neste kort etter avgjørelsen
+    func neste() { send(["handling": "ftd-neste"], ellers: "ftd-neste", [:], .light) }
+
+    private func send(_ h: [String: Any], ellers g: String, _ attrs: [String: String], _ stil: UIImpactFeedbackGenerator.FeedbackStyle) {
+        guard !sender else { return }
+        sender = true
+        Haptikk.trykk(stil)
+        Task {
+            let ok = await kobling.gjor(h, ellers: g, attrs)
+            sender = false
+            if !ok { Haptikk.melding(.error) }
+        }
+    }
+
+    /// Stua og Mer: nettsidens egne knapper
     func trykk(_ g: String, _ attrs: [String: String] = [:]) {
-        Haptikk.trykk(g == "ftd-gjett" ? .medium : .light)
-        guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
-        nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
+        Haptikk.trykk()
+        kobling.trykkNett(g, attrs)
     }
 }
 
@@ -201,7 +347,7 @@ struct DealerSkjerm: View {
         }
     }
     private func tast(_ t: FtdTast) -> some View {
-        Button(action: { m.trykk("ftd-gjett", ["v": String(t.id)]) }) {
+        Button(action: { m.gjett(t.id) }) {
             Text(t.tekst).font(.archivo(22, vekt: 900)).strikethrough(t.streket, color: blekk)
                 .foregroundColor(t.ute ? blekk.opacity(0.3) : morkBlekk)
                 .frame(maxWidth: .infinity).frame(height: 58)
@@ -255,7 +401,7 @@ struct DealerSkjerm: View {
             .padding(.vertical, 18).frame(maxWidth: .infinity)
             .background(RoundedRectangle(cornerRadius: 18).fill(morkBlekk)).overlay(RoundedRectangle(cornerRadius: 18).stroke(r.treff ? mint : rosa, lineWidth: 3))
             if !d.videre.isEmpty { merk(d.videre) }
-            if !d.neste.isEmpty { storKnapp(d.neste) { m.trykk("ftd-neste") } }
+            if !d.neste.isEmpty { storKnapp(d.neste) { m.neste() } }
             else if !d.vent.isEmpty { Text(d.vent).font(.archivo(15, vekt: 600)).opacity(0.7).frame(maxWidth: .infinity) }
             brett(d, stor: false)
         }

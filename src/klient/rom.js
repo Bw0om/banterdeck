@@ -3197,7 +3197,9 @@ export function startRom(LEKNAVN, LANG) {
       melding: s.kast === 6 && s.fra ? T('SEKSER! ', 'SIX! ') + navn(s.fra) + T(' sendte videre.', ' passed it on.') : s.kast ? s.kast + (jeg ? T(' – trill igjen!', ' – roll again!') : '') : T('Start sangen og trill!', 'Start the song and roll!'),
       trill: jeg ? T('Trill', 'Roll') : '', vent: jeg ? '' : T('Vent til terningen kommer til deg.', 'Wait until the die comes to you.'),
       kastTekst: (s.antall || 0) + T(' kast', ' rolls'), drop: erVert() ? T('Droppet kom!', 'The drop hit!') : '', stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
-    return Promise.resolve(d);
+    var jobber = [];
+    skjermRom(d, jobber);   // nyere app: leser rommet og triller selv
+    return Promise.all(jobber).then(function () { return d; });
   }
   function opusSpill(s) {
     var jeg = s.holder === tilstand.meg;
@@ -3720,6 +3722,7 @@ export function startRom(LEKNAVN, LANG) {
       brett: brett, brettTittel: T('Tellebrettet', 'The tally board'),
       bytt: s.bytt && s.fase !== 'ferdig' ? (s.bytt.fra === meg ? T('Tre bom på rad – stokken gikk til ', 'Three misses in a row – the deck went to ') + navn(s.bytt.til) + '.' : jeg ? T('Tre bom på rad hos ', 'Three misses in a row for ') + navn(s.bytt.fra) + T(' – du deler nå!', ' – you deal now!') : T('Stokken gikk til ', 'The deck went to ') + navn(s.bytt.til) + '.') : '',
       kort: null, taster: [], slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    skjermRom(d, jobber);   // nyere app: leser rommet og sender verdien og «neste» selv
     if (s.fase === 'ferdig') {
       var dr = s.drukket || {}, dt = s.dealt || {}, rekke = (s.ider || []).slice().sort(function (a, b) { return (dr[b] || 0) - (dr[a] || 0); }), topp1 = rekke[0];
       d.ferdig = { etikett: T('Kveldens dealer', 'Dealer of the night'), navn: topp1 ? nv(topp1) : '–', under: topp1 ? T('Drakk ', 'Drank ') + (dr[topp1] || 0) + T(' slurker bak stokken.', ' sips behind the deck.') : '',
@@ -3751,9 +3754,12 @@ export function startRom(LEKNAVN, LANG) {
       var ute = (s.brukt[t] || 0) >= 4, feilSide = andre && ((s.hint === 'hoy' && t <= s.g1) || (s.hint === 'lav' && t >= s.g1));
       d.taster.push({ v: t, tekst: ftdVn(t), ute: ute || feilSide, mulig: andre && !ute && !feilSide, streket: andre && t === s.g1 });
     }
-    var treffN = andre ? Math.ceil(k.v / 2) : k.v;
-    d.infoTreff = { n: String(treffN), tekst: andre ? T('treff – du drikker halve', 'hit – you drink half') : T('treff – du drikker kortet', 'hit – you drink the card') };
-    d.infoBom = andre ? { n: '|' + ftdVn(k.v) + '–?|', tekst: T('bom – gjetteren drikker', 'miss – the guesser drinks') } : { n: '', tekst: T('bom – si høyere/lavere', 'miss – say higher/lower') };
+    // Kortet får bare dealeren fra serveren: verten som trykker for dealeren, ser ikke info-linjene
+    if (k) {
+      var treffN = andre ? Math.ceil(k.v / 2) : k.v;
+      d.infoTreff = { n: String(treffN), tekst: andre ? T('treff – du drikker halve', 'hit – you drink half') : T('treff – du drikker kortet', 'hit – you drink the card') };
+      d.infoBom = andre ? { n: '|' + ftdVn(k.v) + '–?|', tekst: T('bom – gjetteren drikker', 'miss – the guesser drinks') } : { n: '', tekst: T('bom – si høyere/lavere', 'miss – say higher/lower') };
+    }
     return Promise.all(jobber).then(function () { return d; });
   }
   function dealerSpill(s) {
