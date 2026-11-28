@@ -2,10 +2,18 @@
 # Ingen signering, ingenting til TestFlight – bare et bygg på GitHub sin Mac, så Swift-koden kan
 # skrives og rettes fra en Windows-maskin uten å bruke opp TestFlight-bygg.
 # Kjøres av seg selv på greiner som heter swift/… og ellers når du trykker «Run workflow».
+# Raskere: på en push testes bare lekene greina har endret (pluss grunntesten: start og lobby). Endres noe felles
+# (skallet, RomKlient, Tema, nettsidene utenom rom.js …), testes alt. «[sjekk alle]» i commit-meldingen tvinger alt;
+# «Run workflow» tester alt, eller bare flytene du skriver inn.
 name: iPhone-app sjekk (simulator)
 
 on:
   workflow_dispatch:
+    inputs:
+      flyter:
+        description: 'Bare disse flytene (f.eks. «overunder skal»). Tomt = alle.'
+        required: false
+        default: ''
   push:
     branches: ['swift/**']
     paths: ['ios/**', 'src/**', 'capacitor.config.json', '.github/workflows/ios-sjekk.yml']
@@ -18,6 +26,58 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # hele historikken: utvalget sammenligner greina med main
+      - name: Velger hvilke leker som testes
+        id: utvalg
+        env:
+          INN: ${{ github.event.inputs.flyter }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            F="${INN:-alle}"
+          else
+            BASE=$(git merge-base origin/main HEAD 2>/dev/null || echo "")
+            if [ -z "$BASE" ]; then F=alle; else
+              F=""; ALLE=""; ROMJS=""
+              git log -1 --format=%B | grep -qi '\[sjekk alle\]' && ALLE=1
+              for fil in $(git diff --name-only "$BASE" HEAD); do
+                case "$fil" in
+                  ios/sjekk/*) ;;                                  # skjermbildene fra forrige sjekk
+                  .github/workflows/ios-sjekk.yml) ;;              # selve sjekken: grunntesten viser at den går
+                  ios/sjekk-flyt/*.yaml) F="$F $(basename "$fil" .yaml)";;
+                  ios/App/App/OverUnderSkjerm.swift) F="$F overunder";;
+                  ios/App/App/OpusSkjerm.swift) F="$F opus";;
+                  ios/App/App/TosannheterSkjerm.swift) F="$F tosannheter";;
+                  ios/App/App/SkrivDrikkSkjerm.swift) F="$F skriv skriv2";;
+                  ios/App/App/PekelekenSkjerm.swift) F="$F mest";;
+                  ios/App/App/DealerSkjerm.swift) F="$F dealer";;
+                  ios/App/App/NyhetsrundenSkjerm.swift|src/data/nyhetsrunden/*) F="$F nyhetsrunden";;
+                  ios/App/App/PannekortSkjerm.swift) F="$F pannekort";;
+                  ios/App/App/SkalSkjerm.swift) F="$F skal";;
+                  ios/App/App/QuizSkjerm.swift) F="$F quiz";;
+                  ios/App/App/KortSkjerm.swift) F="$F kort mest flere2";;
+                  ios/App/App/RingSkjerm.swift) F="$F kort";;
+                  ios/App/App/SofaSkjerm.swift) F="$F sofa";;
+                  ios/App/App/LekerSkjerm.swift|ios/App/App/LekesideSkjerm.swift) F="$F leker";;
+                  ios/App/App/DegSkjerm.swift|ios/App/App/GjengSkjerm.swift) F="$F deg";;
+                  ios/App/App/StartSkjerm.swift|ios/App/App/LobbySkjerm.swift) F="$F flere";;
+                  # Leker uten egen flyt (Pluss-leker verten i sjekken ikke kan starte, og TV-en): bare grunntesten
+                  ios/App/App/GrisSkjerm.swift|ios/App/App/BingoSkjerm.swift|ios/App/App/BussrutaSkjerm.swift|ios/App/App/PyramidenSkjerm.swift|ios/App/App/PresidentSkjerm.swift|ios/App/App/YatzySkjerm.swift|ios/App/App/VeddelopSkjerm.swift|ios/App/App/TvSkjerm.swift) ;;
+                  # rom.js endres sammen med lekene i fase 3: lekene greina rører testes (endrer den bare rom.js, testes alt)
+                  src/klient/rom.js) ROMJS=1;;
+                  *) ALLE=1;;
+                esac
+              done
+              [ -n "$ROMJS" ] && [ -z "$F" ] && ALLE=1
+              if [ -n "$ALLE" ]; then F=alle; else
+                # Grunntesten alltid; lekene i rommet trenger at appen har blitt med (flere)
+                for x in $F; do case "$x" in varm|spill|sofa|leker|deg) ;; *) F="$F flere";; esac; done
+                F=$(echo "spill $F" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ')
+              fi
+            fi
+          fi
+          echo "flyter=$F" >> "$GITHUB_OUTPUT"
+          echo "Flytene som kjøres: $F" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Nyeste Xcode 26
         run: |
           X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
@@ -81,6 +141,10 @@ jobs:
           BILDER="$PWD/skjermbilder"
           # Bildene i flytene heter ../../skjermbilder/… – det treffer uansett om Maestro regner fra flytfila eller fra mappa vi står i
           flyt() { echo "===== $1 =====" >> skjermbilder/maestro.txt; (cd ios/sjekk-flyt && maestro --udid "$UDID" test ${2:+-e "$3"} "$1.yaml" --debug-output "$BILDER/maestro-logg/$1" 2>&1 | tee -a "$BILDER/maestro.txt") || echo "FLYT $1 FEILET" >> skjermbilder/maestro.txt; }
+          # Utvalget (steget «Velger hvilke leker som testes»): «alle» eller en liste med flytnavn
+          MED=" ${{ steps.utvalg.outputs.flyter }} "
+          med() { [ "$MED" = " alle " ] && return 0; case "$MED" in *" $1 "*) return 0;; esac; return 1; }
+          echo "utvalg:$MED" >> skjermbilder/maestro.txt
           SIMCTL_CHILD_MV_SJEKK=1 xcrun simctl launch "$UDID" no.mittvors.app
           sleep 12
           xcrun simctl io "$UDID" screenshot skjermbilder/01-spill.png
@@ -88,9 +152,10 @@ jobs:
           flyt varm
           flyt varm   # en gang til om driveren ikke rakk å starte første gang (rask når den er oppe)
           flyt spill
-          flyt sofa
+          med sofa && flyt sofa
           # Én start per fane: appen leser MV_FANE og velger fanen selv (Skall.swift)
           for f in leker deg; do
+            med $f || continue
             xcrun simctl terminate "$UDID" no.mittvors.app || true
             SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_FANE=$f xcrun simctl launch "$UDID" no.mittvors.app
             sleep 12
@@ -99,9 +164,12 @@ jobs:
           done
           # Tre spillere: verten og en gjest lages rett mot API-et, appen blir med på koden, og verten starter Ukjent avsender
           API=https://www.mittvors.no/api/rom
+          KODE=""
+          if med flere; then
           R=$(curl -fsS -X POST "$API" -H 'content-type: application/json' -d '{"navn":"Vert","lang":"no"}' || echo '{}')
           KODE=$(node -pe 'JSON.parse(process.argv[1]).kode || ""' "$R"); VID=$(node -pe 'JSON.parse(process.argv[1]).id || ""' "$R"); VPOL=$(node -pe 'JSON.parse(process.argv[1]).pollett || ""' "$R")
           echo "rom for flere: $KODE" >> skjermbilder/maestro.txt
+          fi
           if [ -n "$KODE" ]; then
             curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d '{"handling":"bli-med","navn":"Gjest","lang":"no"}' > /dev/null || true
             # Appen installeres på nytt, så den står på forsiden (ikke i rommet fra Spill-flyten). Loggen så langt tas vare på først.
@@ -114,17 +182,22 @@ jobs:
             sleep 12
             echo "===== flere =====" >> skjermbilder/maestro.txt
             flyt flere -e KODE="$KODE"
+            if med flere2; then
             curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d "{\"handling\":\"start\",\"lek\":\"hvemskrev\",\"modus\":\"*\",\"id\":\"$VID\",\"pollett\":\"$VPOL\"}" > /dev/null || echo "fikk ikke startet Ukjent avsender" >> skjermbilder/maestro.txt
             flyt flere2
+            fi
             # To sannheter og en løgn: verten avslutter, starter leken og legger tre kort på bordet (verten sitter først i stolen) – appen stemmer
             V="\"id\":\"$VID\",\"pollett\":\"$VPOL\""
             vert() { curl -fsS -X POST "$API/$KODE" -H 'content-type: application/json' -d "$1" > /dev/null || echo "verten fikk ikke gjort: $1" >> skjermbilder/maestro.txt; }
+            if med tosannheter; then
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"tosannheter\",\"modus\":\"*\",$V}"
             # Maestro bruker rundt et minutt på å starte flyten: kortene legges på bordet i bakgrunnen når arket er lukket
             (sleep 85; vert "{\"handling\":\"pastander\",\"p\":[\"Jeg har vært i Japan\",\"Jeg kan jonglere\",\"Jeg har møtt kongen\"],\"logn\":1,$V}") &
             flyt tosannheter
             wait
+            fi
+            if med skriv || med skriv2; then
             # Skriv og drikk: verten starter leken og klokka – appen skriver et kort i dialogen, så stokker verten og kortet trekkes
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"regelfabrikken\",\"modus\":\"90\",$V}"
@@ -134,18 +207,24 @@ jobs:
             wait
             vert "{\"handling\":\"stokk\",$V}"
             flyt skriv2
+            fi
+            if med overunder; then
             # Over eller under: verten gjetter først (appen ser kortet, potten og at verten svarer), så gjetter verten via API-et
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"overunder\",\"modus\":\"*\",$V}"
             (sleep 60; vert "{\"handling\":\"gjett\",\"paa\":\"over\",$V}") &
             flyt overunder
             wait
+            fi
+            if med opus; then
             # Opus: verten har terningen og triller via API-et – appen ser terningen lande
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"opus\",\"modus\":\"*\",$V}"
             (sleep 60; vert "{\"handling\":\"kast\",$V}") &
             flyt opus
             wait
+            fi
+            if med mest; then
             # Pekeleken på mobilen: alle stemmer på en – appen trykker på et hode
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"mest\",\"modus\":\"*\",$V}"
@@ -153,38 +232,51 @@ jobs:
             (for i in 1 2 3 4 5 6 7; do sleep 25; vert "{\"handling\":\"runde\",$V}"; done) &
             flyt mest
             wait
+            fi
+            if med dealer; then
             # Fuck the Dealer: verten deler og trykker en verdi via API-et – appen ser avgjørelsen
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"dealer\",\"modus\":\"*\",$V}"
             (sleep 75; vert "{\"handling\":\"ftd-gjett\",\"v\":7,$V}"; sleep 15; vert "{\"handling\":\"ftd-gjett\",\"v\":10,$V}"; vert "{\"handling\":\"ftd-gjett\",\"v\":3,$V}") &
             flyt dealer
             wait
+            fi
+            if med nyhetsrunden; then
             # Nyhetsrunden: verten starter, tar første spørsmål og viser svaret via API-et
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"nyhetsrunden\",\"modus\":\"*\",$V}"
             (sleep 75; vert "{\"handling\":\"nr-start\",$V}"; sleep 25; vert "{\"handling\":\"nr-vis\",$V}"; sleep 50; vert "{\"handling\":\"nr-vis\",$V}") &
             flyt nyhetsrunden
             wait
+            fi
+            if med pannekort; then
             # Hvem er jeg?: verten starter – appen skriver en lapp i dialogen
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"pannekort\",\"modus\":\"*\",$V}"
             flyt pannekort
+            fi
+            if med skal; then
             # Skålsprinten: appen trykker når det står SKÅL – skålene kommer av seg selv
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"skal\",\"modus\":\"*\",$V}"
             # Sprinten går av seg selv (fem skåler på drøyt minuttet) og er over før Maestro er i gang: verten starter en ny når flyten kjører
             (for i in 1 2 3 4 5 6 7 8; do sleep 30; vert "{\"handling\":\"runde\",$V}"; done) &
             flyt skal
+            fi
+            if med kort; then
             # Ring of Fire enkel: en kortstokk uten egen variant – kortet, telleren og Stua/Mer øverst tegnes native (medTopp)
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"ring-of-fire\",\"modus\":\"enkel\",$V}"
             flyt kort
+            fi
+            if med quiz; then
             # Kategorikongen: verten starter, trekker kategorier og viser svar i bakgrunnen mens appen svarer og satser
             vert "{\"handling\":\"avslutt\",$V}"
             vert "{\"handling\":\"start\",\"lek\":\"quiz\",\"modus\":\"6\",$V}"
             (sleep 40; vert "{\"handling\":\"qz-start\",$V}"; for i in 1 2 3 4 5 6; do sleep 8; vert "{\"handling\":\"qz-trekk\",\"kat\":\"\",$V}"; sleep 28; vert "{\"handling\":\"qz-vis\",$V}"; sleep 10; vert "{\"handling\":\"qz-neste\",$V}"; done) &
             flyt quiz
             wait
+            fi
           fi
           xcrun simctl terminate "$UDID" no.mittvors.app || true
           SIMCTL_CHILD_MV_SJEKK=1 SIMCTL_CHILD_MV_MORK=1 xcrun simctl launch "$UDID" no.mittvors.app
