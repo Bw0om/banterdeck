@@ -731,7 +731,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private let nrModell = NrModell()
     private var nrVert: UIHostingController<NyhetsrundenSkjerm>?
     private func visNr(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else { fjernOverlegg(&nrVert); return }
+        guard let d = d else { if nrVert != nil { nrModell.slipp() }; fjernOverlegg(&nrVert); return }
         nrModell.sett(d)
         if nrVert == nil { nrVert = leggOverlegg(UIHostingController(rootView: NyhetsrundenSkjerm(m: nrModell)), over: side, nett: nrModell.nett) }
         fram(nrVert?.view.superview)
@@ -740,7 +740,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private let qzModell = QzModell()
     private var qzVert: UIHostingController<QuizSkjerm>?
     private func visQz(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else { fjernOverlegg(&qzVert); return }
+        guard let d = d else { if qzVert != nil { qzModell.slipp() }; fjernOverlegg(&qzVert); return }
         qzModell.sett(d)
         if qzVert == nil { qzVert = leggOverlegg(UIHostingController(rootView: QuizSkjerm(m: qzModell)), over: side, nett: qzModell.nett) }
         fram(qzVert?.view.superview)

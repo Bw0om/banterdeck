@@ -555,7 +555,7 @@ final class LekKobling {
 
     /// Fra nettsiden: plassen i rommet og figurene. `plukk` henter figurene fra skjermdataene når `hoder` mangler.
     func ta(_ dict: [String: Any], plukk: ([String: Any]) -> [(id: String, oi: Bool, png: String)]) {
-        if let h = dict["hoder"] as? [String: [String: String]] { hoder.merge(h) { _, ny in ny } }
+        if let h = dict["hoder"] as? [String: [String: String]] { hoder.merge(h) { gammel, ny in gammel.merging(ny) { _, n in n } } }
         else { for p in plukk(dict) where !p.png.isEmpty && !p.id.isEmpty { hoder[p.id, default: [:]][p.oi ? "oi" : "n"] = p.png } }
         if let r = dict["rom"] as? [String: Any], let k = r["kode"] as? String, let id = r["id"] as? String, let p = r["pollett"] as? String {
             koble(k, RomKlient.Meg(id: id, pollett: p), r["lang"] as? String ?? "no")
@@ -637,8 +637,12 @@ func kortVerdi(_ v: Int, en: Bool) -> String {
 func rodFarge(_ f: String) -> Bool { f == "♥" || f == "♦" }
 /// Figuren til en spiller fra `hoder` (id → {n, oi}), med «oi»-ansiktet når det finnes og trengs
 func figurPng(_ hoder: [String: [String: String]], _ id: String, oi: Bool = false) -> String {
+    figurPng(hoder, id, uttrykk: oi ? "oi" : "")
+}
+/// Figuren med et bestemt uttrykk («oi», «flat» …) når nettsiden har sendt det – ellers den vanlige
+func figurPng(_ hoder: [String: [String: String]], _ id: String, uttrykk: String) -> String {
     let h = hoder[id] ?? [:]
-    if oi, let o = h["oi"], !o.isEmpty { return o }
+    if !uttrykk.isEmpty, let o = h[uttrykk], !o.isEmpty { return o }
     return h["n"] ?? ""
 }
 

@@ -3,8 +3,9 @@ import UIKit
 import WebKit
 
 /// Nyhetsrunden som native skjerm: avishodet, spørsmålet, svarmåten (A–D, talltastatur eller skrivedialogen),
-/// avsløringen med hoder på svarene og nåler på tallinja, lista og pallen til slutt. Nettsiden under holder
-/// tilstanden og klokka (rom.js nrData) – denne tegner, og trykkene går til nettsidens egne knapper.
+/// avsløringen med hoder på svarene og nåler på tallinja, lista og pallen til slutt.
+/// Fase 3: skjermen leser rommet selv (LekKobling/RomKlient) og sender svar og vertens knapper rett til rommet. Nettsiden
+/// gir plassen i rommet, figurene, skrivedialogen for fritt svar og «Hva nå?»-knappene. Med eldre rom.js brukes nrData som reserve.
 struct NrHode: Identifiable { let id: String; let navn: String; let png: String; let oppe: Bool }
 struct NrLengde: Identifiable { let id: Int; let g: String; let tekst: String; let valgt: Bool }
 struct NrAlt: Identifiable { let id: Int; let bokstav: String; let tekst: String; let valgt: Bool; let rett: Bool; let feil: Bool; let hoder: [NrHode]; let stempel: String }
@@ -22,9 +23,9 @@ struct NrSvar { let fasitEtikett: String, fasit: String, alt: [NrAlt], tallinje:
 struct NrFerdig { let tittel: String, pall: [NrPall], kaaringer: [NrKaaring], rest: [NrPall], nyEtikett: String, lengder: [NrLengde], smaa: String }
 
 struct NrData {
-    let fase: String, i: Int, antall: Int, uke: String, vert: Bool, naa: Double, frist: Double, lokale: String, tittel: String, under: String
-    let sporsmalType: String, les: String, q: String
-    let klar: NrKlar?, spm: NrSpm?, svar: NrSvar?, ferdig: NrFerdig?, slutt: [[String: Any]], stua: String, mer: String
+    var fase = "", i = 0, antall = 0, uke = "", vert = false, naa: Double = 0, frist: Double = 0, lokale = "nb-NO", tittel = "Nyhetsrunden", under = ""
+    var sporsmalType = "", les = "", q = ""
+    var klar: NrKlar? = nil, spm: NrSpm? = nil, svar: NrSvar? = nil, ferdig: NrFerdig? = nil, stua = "Stua", mer = "Mer"
 
     static func hode(_ h: [String: Any]) -> NrHode { NrHode(id: h["id"] as? String ?? "", navn: h["navn"] as? String ?? "", png: h["png"] as? String ?? "", oppe: h["oppe"] as? Bool ?? false) }
     static func hoder(_ l: Any?) -> [NrHode] { (l as? [[String: Any]] ?? []).map { hode($0) } }
@@ -33,6 +34,7 @@ struct NrData {
         (l as? [[String: Any]] ?? []).enumerated().map { i, a in NrAlt(id: i, bokstav: a["bokstav"] as? String ?? "", tekst: a["tekst"] as? String ?? "", valgt: a["valgt"] as? Bool ?? false, rett: a["rett"] as? Bool ?? false, feil: a["feil"] as? Bool ?? false, hoder: hoder(a["hoder"]), stempel: a["stempel"] as? String ?? "") }
     }
     static func pall(_ l: Any?) -> [NrPall] { (l as? [[String: Any]] ?? []).map { p in NrPall(id: p["id"] as? String ?? "", navn: p["navn"] as? String ?? "", png: p["png"] as? String ?? "", n: (p["n"] as? NSNumber)?.intValue ?? 0, plass: (p["plass"] as? NSNumber)?.intValue ?? 1) } }
+    /// Reserven: skjermen slik eldre rom.js lager den (nrData)
     init(_ d: [String: Any]) {
         func s(_ k: String) -> String { d[k] as? String ?? "" }
         func n(_ k: String) -> Double { (d[k] as? NSNumber)?.doubleValue ?? 0 }
@@ -65,11 +67,189 @@ struct NrData {
             ferdig = NrFerdig(tittel: f["tittel"] as? String ?? "", pall: NrData.pall(f["pall"]), kaaringer: (f["kaaringer"] as? [[String: Any]] ?? []).enumerated().map { i, k in NrKaaring(id: i, tittel: k["tittel"] as? String ?? "", tekst: k["tekst"] as? String ?? "") },
                               rest: NrData.pall(f["rest"]), nyEtikett: f["nyEtikett"] as? String ?? "", lengder: NrData.lengder(f["lengder"]), smaa: f["smaa"] as? String ?? "")
         } else { ferdig = nil }
-        slutt = d["slutt"] as? [[String: Any]] ?? []
-        stua = s("stua").isEmpty ? "Stua" : s("stua"); mer = s("mer").isEmpty ? "Mer" : s("mer")
+        if !s("stua").isEmpty { stua = s("stua") }
+        if !s("mer").isEmpty { mer = s("mer") }
+    }
+
+    /// Skjermen bygd rett fra rommet: `spill` er serverens visning av Nyhetsrunden (nyeVisning i rom.ts)
+    init(rom t: RomTilstand, hoder: [String: [String: String]]) {
+        let s = t.spill ?? .null
+        let en = t.lang == "en"
+        func T(_ no: String, _ eng: String) -> String { en ? eng : no }
+        let meg = t.meg ?? ""
+        let alle = t.spillere
+        func navn(_ id: String?) -> String { id.flatMap { t.spiller($0)?.navn } ?? "?" }
+        func tall(_ v: JSONVerdi?) -> Int { Int(v?.tall ?? 0) }
+        func tekster(_ v: JSONVerdi?) -> [String] { (v?.liste ?? []).compactMap(\.tekst) }
+        /// Som String(x) i nettleseren: tall uten «.0», tekst som den er
+        func som(_ v: JSONVerdi?) -> String {
+            switch v {
+            case .tekst(let x)?: return x
+            case .tall(let n)?: return n == n.rounded() && abs(n) < 1e15 ? String(Int(n)) : String(n)
+            default: return ""
+            }
+        }
+        let lok = en ? "en-GB" : "nb-NO"
+        /// Som nrFormat: tall med skilletegn etter språket, ellers teksten
+        func format(_ x: String) -> String {
+            guard !x.isEmpty, let n = Double(x) else { return x }
+            let f = NumberFormatter(); f.numberStyle = .decimal; f.locale = Locale(identifier: lok); f.maximumFractionDigits = 3
+            return f.string(from: NSNumber(value: n)) ?? x
+        }
+        func fjes(_ id: String, _ uttrykk: String = "", oppe: Bool = false) -> NrHode {
+            NrHode(id: id, navn: id == meg ? T("Du", "You") : navn(id), png: figurPng(hoder, id, uttrykk: uttrykk), oppe: oppe)
+        }
+
+        let f = s["fase"]?.tekst ?? ""
+        fase = f; i = tall(s["i"]); antall = tall(s["antall"]); uke = som(s["uke"]); vert = t.jegErVert; naa = t.naa; lokale = lok
+        let lengde = tall(s["lengde"]), totalt = tall(s["totalt"])
+        let vertId = s["vert"]?.tekst ?? t.vert
+        under = T("Uke ", "Week ") + uke + " · " + (f == "klar" ? "\(lengde)" + T(" spørsmål", " questions") : f == "ferdig" ? "\(antall)" + T(" spørsmål", " questions") : T("Spørsmål ", "Question ") + "\(i + 1)" + T(" av ", " of ") + "\(antall)")
+        stua = T("Stua", "Lounge"); mer = T("Mer", "More")
+        func lengder(_ g: String) -> [NrLengde] {
+            var valg = [10, 15, 30].filter { $0 < totalt }
+            if !valg.contains(totalt) { valg.append(totalt) }
+            return valg.map { n in NrLengde(id: n, g: g, tekst: n == totalt ? T("Hele", "All") : n <= 10 ? T("Kort", "Short") : T("Vanlig", "Usual"), valgt: g == "nr-lengde" && lengde == n) }
+        }
+
+        if f == "klar" {
+            klar = NrKlar(forside: T("Uke ", "Week ") + uke + ".", under: T("Hva fikk dere med dere?", "Were you paying attention?"), hoder: alle.map { fjes($0.id) },
+                          lengder: vert ? lengder("nr-lengde") : [], start: vert ? T("Første spørsmål", "First question") : "",
+                          vent: vert ? "" : T("Venter på at ", "Waiting for ") + navn(vertId) + T(" starter …", " to start …"))
+            return
+        }
+        if f == "ferdig" {
+            let l = (s["tavle"]?.liste ?? []).map { x in (id: x["id"]?.tekst ?? "", navn: x["navn"]?.tekst ?? "", riktige: tall(x["riktige"])) }
+            let k = s["kaaringer"]
+            let delt = l.filter { x in l.first.map { x.riktige == $0.riktige } ?? false }
+            var kaar: [NrKaaring] = []
+            func legg(_ tittel: String, _ tekst: String) { kaar.append(NrKaaring(id: kaar.count, tittel: tittel, tekst: tekst)) }
+            if let x = k?["tall"], let id = x["id"]?.tekst {
+                legg(T("Tallgeni:", "Number genius:"), navn(id) + T(" var nærmest på ", " was closest on ") + "\(tall(x["n"]))" + T(" av ", " of ") + "\(tall(k?["tallAntall"]))" + T(" tallspørsmål", " number questions"))
+            }
+            if let x = k?["lurt"], let id = x["id"]?.tekst {
+                legg(T("Lurt av tull:", "Fooled by nonsense:"), navn(id) + T(" trodde på ", " believed ") + "\(tall(x["n"]))" + T(" av ", " of ") + "\(tall(k?["tullAntall"]))" + T(" tullesaker", " made-up stories"))
+            }
+            if let x = k?["ingen"], x != .null {
+                let q = som(x["q"])
+                legg(T("Ingen fikk:", "Nobody got:"), "«" + String(q.prefix(90)) + (q.count > 90 ? "…" : "") + "» (" + som(x["svar"]) + ")")
+            }
+            let tittel: String
+            if l.first == nil || l[0].riktige == 0 { tittel = T("Ingen fikk noe riktig", "Nobody got anything right") }
+            else if delt.count > 1 { tittel = T("Delt seier: ", "Shared win: ") + delt.map(\.navn).joined(separator: T(" og ", " and ")) }
+            else { tittel = T("Ukens nyhetsnerd: ", "News nerd of the week: ") + l[0].navn }
+            func plass(_ x: (id: String, navn: String, riktige: Int), _ nr: Int) -> NrPall { NrPall(id: x.id, navn: x.navn, png: figurPng(hoder, x.id), n: x.riktige, plass: nr) }
+            ferdig = NrFerdig(tittel: tittel, pall: l.prefix(3).enumerated().map { j, x in plass(x, j + 1) }, kaaringer: kaar,
+                              rest: l.dropFirst(3).enumerated().map { j, x in plass(x, j + 4) },
+                              nyEtikett: vert ? T("Ny runde fra uke ", "New round from week ") + uke : "", lengder: vert ? lengder("nr-nytt") : [],
+                              smaa: vert ? T("Kort og vanlig tar spørsmål dere ikke har hatt ennå.", "Short and usual pick questions you have not had yet.") : "")
+            return
+        }
+
+        let spmFase = f == "spm", har = tekster(s["harSvart"])
+        let mitt: String? = { let m = som(s["mittSvar"]); return m.isEmpty ? nil : m }()
+        let qtype = s["qtype"]?.tekst ?? ""
+        let alts: [String]? = s["alt"]?.liste.map { $0.compactMap(\.tekst) }
+        let typer = en ? ["valg": "Pick the right one", "sant": "True or nonsense?", "tall": "Which number? Closest wins", "fritt": "Free answer"]
+                       : ["valg": "Velg riktig", "sant": "Sant eller tull?", "tall": "Hvilket tall? Nærmest vinner", "fritt": "Svar fritt"]
+        let bokstaver = Array("ABCD")
+        func bokstav(_ i: Int) -> String { i < bokstaver.count ? String(bokstaver[i]) : "" }
+        frist = spmFase ? (s["frist"]?.tall ?? 0) : 0
+        sporsmalType = typer[qtype] ?? ""
+        les = vert && spmFase ? T("Les det høyt", "Read it out loud") : ""
+        q = som(s["q"])
+
+        if spmFase {
+            let mangler = alle.count - har.count
+            var tastatur: NrTall? = nil, fritt: NrFritt? = nil
+            if qtype == "tall" && alts == nil {
+                tastatur = NrTall(etikett: T("Gjetningen din", "Your guess"), taster: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "000", "0", "⌫"],
+                                  mitt: (mitt ?? "").filter(\.isNumber), las: T("Lås inn ", "Lock in "), bytt: T("Bytt til ", "Change to "), last: T("Låst inn: ", "Locked in: "))
+            }
+            if alts == nil && qtype != "tall" {
+                fritt = NrFritt(skjemaId: "nrSkjema", knapp: mitt != nil ? T("Endre svaret", "Change the answer") : T("Skriv svaret ditt", "Type your answer"),
+                                svart: mitt.map { T("Du svarte: ", "You answered: ") + $0 } ?? "")
+            }
+            spm = NrSpm(qtype: qtype, mitt: mitt ?? "",
+                        alt: (alts ?? []).enumerated().map { i, a in NrAlt(id: i, bokstav: bokstav(i), tekst: a, valgt: mitt == a, rett: false, feil: false, hoder: [], stempel: "") },
+                        tall: tastatur, fritt: fritt,
+                        vis: vert ? (mangler > 0 ? T("Vis svaret nå", "Show the answer now") + " (\(mangler)" + T(" mangler", " missing") + ")" : T("Vis svaret", "Show the answer")) : "",
+                        vent: vert ? "" : mitt != nil ? T("Låst inn.", "Locked in.") : "",
+                        folk: alle.map { fjes($0.id, oppe: har.contains($0.id)) }, status: "\(har.count)" + T(" av ", " of ") + "\(alle.count)" + T(" har svart", " answered"))
+            return
+        }
+
+        // Svaret er vist
+        let res = (s["resultat"]?.objekt ?? [:]).compactMapValues(\.tall).mapValues { Int($0) }
+        let sv = (s["svarene"]?.objekt ?? [:]).mapValues { som($0) }.filter { !$0.value.isEmpty }
+        let erTall = qtype == "tall", k2 = res[meg], fasit = som(s["fasit"])
+        var alt: [NrAlt] = [], linje: NrTallinje? = nil, liste: [NrRad] = [], resultat: NrResultat? = nil
+        if let alts {
+            alt = alts.enumerated().map { i, a in
+                let rett = a == fasit, minn = mitt == a
+                return NrAlt(id: i, bokstav: bokstav(i), tekst: a, valgt: false, rett: rett, feil: !rett && minn,
+                             hoder: alle.filter { sv[$0.id] == a }.map { fjes($0.id, rett ? "" : "flat") }, stempel: rett ? T("Riktig", "Right") : minn ? T("Feil", "Wrong") : "")
+            }
+        }
+        if erTall, let tl = s["tall"], tl != .null {
+            // Fasiten i midten, gjetningene etter hvor mange ganger for høyt eller lavt de var (som nrTallinje)
+            let tf = tl["fasit"]?.tall ?? 0
+            let gjett = (tl["gjett"]?.liste ?? []).map { g in (id: g["id"]?.tekst ?? "", v: g["v"]?.tall ?? 0) }
+            let pos: (Double) -> Double
+            if tf > 0 && gjett.allSatisfy({ $0.v > 0 }) {
+                let maks = ([0.05] + gjett.map { abs(log($0.v / tf)) }).max() ?? 0.05
+                pos = { v in 50 + 44 * log(v / tf) / maks }
+            } else {
+                let alleV = gjett.map(\.v) + [tf]
+                var lo = alleV.min() ?? 0, hi = alleV.max() ?? 0
+                if hi - lo < 1e-9 { lo -= 1; hi += 1 }
+                let pad = (hi - lo) * 0.08, lo2 = lo, hi2 = hi
+                pos = { v in (v - lo2 + pad) / (hi2 - lo2 + 2 * pad) * 100 }
+            }
+            var rader: [Double] = []
+            var pinner: [NrPinne] = []
+            let sortert = gjett.enumerated().sorted { a, b in a.element.v != b.element.v ? a.element.v < b.element.v : a.offset < b.offset }.map(\.element)
+            for g in sortert {
+                let x = pos(g.v)
+                var rad = 0
+                while rad < rader.count && x - rader[rad] < 17 { rad += 1 }
+                if rad < rader.count { rader[rad] = x } else { rader.append(x) }
+                let r = res[g.id]
+                pinner.append(NrPinne(id: g.id, png: figurPng(hoder, g.id, uttrykk: (r ?? 0) < 0 ? "flat" : ""), x: x, rad: rad,
+                                      tekst: format(som(.tall(g.v))), beste: r == 2, flat: (r ?? 0) < 0))
+            }
+            linje = NrTallinje(fasitX: pos(tf), fasitTekst: format(som(.tall(tf))), pinner: pinner, rader: rader.count)
+        }
+        if alts == nil {
+            // Som sorteringen i nettleseren, (res || -1): 0 og «ingen» står likt; ellers rekkefølgen rundt bordet
+            func noekkel(_ id: String) -> Int { let r = res[id] ?? 0; return r == 0 ? -1 : r }
+            liste = alle.enumerated().sorted { a, b in
+                noekkel(a.element.id) != noekkel(b.element.id) ? noekkel(a.element.id) > noekkel(b.element.id) : a.offset < b.offset
+            }.map { _, p in
+                let kk = res[p.id], hva = sv[p.id]
+                let merke = kk == 2 ? T("Nærmest", "Closest") : kk == 1 ? (erTall ? T("Innen 10 %", "Within 10%") : T("Riktig", "Right")) : kk == 0 ? "–" : T("Drikk", "Drink")
+                let vis = hva.map { erTall && !$0.isEmpty && $0.allSatisfy(\.isNumber) ? format($0) : $0 } ?? T("ingen svar", "no answer")
+                return NrRad(id: p.id, navn: p.navn, png: figurPng(hoder, p.id, uttrykk: (kk ?? 0) < 0 ? "flat" : ""), hva: vis, tomt: hva == nil, merke: merke,
+                             klasse: (kk ?? -1) > 0 ? "rett" : kk == 0 ? "null" : "feil", kanFlippe: t.jegErVert)
+            }
+        }
+        if alle.contains(where: { $0.id == meg }) {
+            let tittel = k2 == 2 ? T("Nærmest – del ut to", "Closest – hand out two")
+                : k2 == 1 ? (erTall ? T("Innen 10 % – del ut én", "Within 10% – hand out one") : T("Riktig – del ut én", "Right – hand out one"))
+                : k2 == 0 ? T("Midt på treet – ingenting", "Somewhere in between – nothing")
+                : mitt == nil ? T("Ingen svar – drikk én", "No answer – drink one")
+                : erTall ? T("Lengst unna – drikk én", "Furthest off – drink one") : T("Feil – drikk én", "Wrong – drink one")
+            let kilde = s["kilde"]?.tekst ?? ""
+            resultat = NrResultat(klasse: (k2 ?? -1) > 0 ? "rett" : k2 == 0 ? "null" : "feil", tittel: tittel, info: s["info"]?.tekst ?? "",
+                                  kilde: kilde.isEmpty ? "" : T("Les saken hos ", "Read it at ") + kilde, url: s["url"]?.tekst ?? "")
+        }
+        svar = NrSvar(fasitEtikett: T("Svaret", "The answer"), fasit: fasit, alt: alt, tallinje: linje, liste: liste, resultat: resultat,
+                      neste: vert ? (i + 1 < antall ? T("Neste spørsmål", "Next question") : T("Se hvem som vant", "See who won")) : "",
+                      vent: vert ? "" : navn(vertId) + T(" tar neste spørsmål.", " moves on to the next question."))
     }
 }
 
+@MainActor
 @Observable
 final class NrModell: HarFigurer {
     var d: NrData? = nil
@@ -77,15 +257,68 @@ final class NrModell: HarFigurer {
     var tall = ""
     @ObservationIgnored var tallNokkel = ""
     let blokker = KortModell()
+    private let kobling = LekKobling("nyhetsrunden")
     @ObservationIgnored private(set) var avvik: Double = 0
-    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private var avvikFra: Double = 0
+    /// Det nettsiden sendte sist – reserven til rommet er hentet (eller hvis plassen ikke finnes)
+    @ObservationIgnored private var sist: [String: Any] = [:]
+    /// En av vertens knapper (start, vis, neste, ny runde) er på vei: ett trykk gir ett steg
+    @ObservationIgnored private var sender = false
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett; kobling.nett = nett } }
+
+    init() { kobling.endret = { [weak self] in self?.bygg() } }
+
     func sett(_ dict: [String: Any]) {
-        let ny = NrData(dict)
-        if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
+        sist = dict
+        blokker.sett(["blokker": dict["slutt"] as? [[String: Any]] ?? [], "naa": dict["naa"] ?? 0])
+        kobling.ta(dict) { d in
+            // Eldre rom.js: figurene fra hodene i skjermdataene
+            var ut: [(id: String, oi: Bool, png: String)] = []
+            func ta(_ l: Any?) { for h in l as? [[String: Any]] ?? [] { ut.append((id: h["id"] as? String ?? "", oi: false, png: h["png"] as? String ?? "")) } }
+            ta((d["klar"] as? [String: Any])?["hoder"]); ta((d["spm"] as? [String: Any])?["folk"])
+            ta((d["ferdig"] as? [String: Any])?["pall"]); ta((d["ferdig"] as? [String: Any])?["rest"])
+            return ut
+        }
+        bygg()
+    }
+
+    /// Leken er over på denne telefonen
+    func slipp() { kobling.slipp(); d = nil; sist = [:]; sender = false; avvikFra = 0 }
+
+    /// Rommet når det er hentet og viser Nyhetsrunden – ellers skjermen nettsiden sendte
+    private func bygg() {
+        let ny: NrData
+        if let t = kobling.tilstand("nyhetsrunden") {
+            if t.naa > 0 && t.naa != avvikFra { avvikFra = t.naa; avvik = t.naa - Date().timeIntervalSince1970 * 1000 }
+            ny = NrData(rom: t, hoder: kobling.hoder)
+        } else if !sist.isEmpty {
+            ny = NrData(sist)
+            if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
+        } else { return }
         let nokkel = "\(ny.fase):\(ny.i)"
         if nokkel != tallNokkel { tallNokkel = nokkel; tall = ny.spm?.tall?.mitt ?? "" }
-        blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { d = ny }
+    }
+
+    /// Svaret (A–D eller tallet) – rett til rommet
+    func svar(_ v: String) { send(["handling": "nr-svar", "v": v], ellers: "nr-svar", ["v": v], las: false) }
+    /// Verten setter lengden (nr-lengde) eller starter en ny runde (nr-nytt) med så mange spørsmål
+    func lengde(_ g: String, _ n: Int) {
+        send(["handling": g == "nr-nytt" ? "nytt" : "nr-lengde", "antall": n], ellers: g, ["n": String(n)], las: g == "nr-nytt")
+    }
+    /// Verten snur et svar (riktig ↔ feil) for fritt svar
+    func flipp(_ id: String) { send(["handling": "nr-flipp", "hvem": id], ellers: "nr-flipp", ["id": id], las: false) }
+    /// Vertens knapper: nr-start, nr-vis, nr-neste
+    func steg(_ g: String) { send(["handling": g], ellers: g, [:], las: true) }
+
+    private func send(_ h: [String: Any], ellers g: String, _ attrs: [String: String], las: Bool) {
+        if las { guard !sender else { return }; sender = true }
+        Haptikk.trykk()
+        Task {
+            let ok = await kobling.gjor(h, ellers: g, attrs)
+            if las { sender = false }
+            if !ok { Haptikk.melding(.error) }
+        }
     }
     func igjen(_ frist: Double) -> Int { max(0, Int(ceil((frist - 1500 - (Date().timeIntervalSince1970 * 1000 + avvik)) / 1000))) }
     func format(_ sifre: String) -> String {
@@ -168,7 +401,7 @@ struct NyhetsrundenSkjerm: View {
     private func lengder(_ l: [NrLengde]) -> some View {
         HStack(spacing: 8) {
             ForEach(l) { x in
-                Button(action: { m.trykk(x.g, ["n": String(x.id)]) }) {
+                Button(action: { m.lengde(x.g, x.id) }) {
                     VStack(spacing: 0) {
                         Text("\(x.id)").font(.archivo(22, vekt: 900))
                         Text(x.tekst).font(.archivo(11, vekt: 700)).opacity(0.7)
@@ -189,7 +422,7 @@ struct NyhetsrundenSkjerm: View {
             }.padding(.top, 8)
             Hodestabel(antall: k.hoder.count, maks: 6, storrelse: 56) { i in hode(k.hoder[i].png, 56) }
             if !k.lengder.isEmpty { lengder(k.lengder) }
-            if !k.start.isEmpty { storKnapp(k.start) { m.trykk("nr-start") } }
+            if !k.start.isEmpty { storKnapp(k.start) { m.steg("nr-start") } }
             if !k.vent.isEmpty { vent(k.vent) }
         }
     }
@@ -222,7 +455,7 @@ struct NyhetsrundenSkjerm: View {
                 storKnapp(f.knapp, farge: kortFarge) { m.skjema(f.skjemaId) }
                 if !f.svart.isEmpty { Text(f.svart).font(.archivo(14, vekt: 700)).opacity(0.8) }
             }
-            if !sp.vis.isEmpty { storKnapp(sp.vis) { m.trykk("nr-vis") } }
+            if !sp.vis.isEmpty { storKnapp(sp.vis) { m.steg("nr-vis") } }
             else if !sp.vent.isEmpty { vent(sp.vent) }
             benk(sp.folk, sp.status)
         }
@@ -231,7 +464,7 @@ struct NyhetsrundenSkjerm: View {
         VStack(spacing: 8) {
             ForEach(alt) { a in
                 let farge: Color = apne ? (a.valgt ? gul : kortFarge) : a.rett ? mint : a.feil ? rosa : kortFarge
-                Button(action: { if apne { m.trykk("nr-svar", ["v": a.tekst]) } }) {
+                Button(action: { if apne { m.svar(a.tekst) } }) {
                     HStack(alignment: .center, spacing: 10) {
                         Text(a.bokstav).font(.archivo(15, vekt: 900)).foregroundColor(lys).frame(width: 30, height: 30).background(Circle().fill(morkBlekk))
                         Text(a.tekst).font(.archivo(16, vekt: 800)).foregroundColor(apne && !a.valgt ? blekk : morkBlekk).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
@@ -274,7 +507,7 @@ struct NyhetsrundenSkjerm: View {
                     }.buttonStyle(TastTrykk())
                 }
             }
-            storKnapp((last ? t.last : t.mitt.isEmpty ? t.las : t.bytt) + vist, farge: last ? mint : gul) { if !m.tall.isEmpty && !last { m.trykk("nr-svar", ["v": m.tall]) } }
+            storKnapp((last ? t.last : t.mitt.isEmpty ? t.las : t.bytt) + vist, farge: last ? mint : gul) { if !m.tall.isEmpty && !last { m.svar(m.tall) } }
         }
     }
     private func benk(_ folk: [NrHode], _ status: String) -> some View {
@@ -309,7 +542,7 @@ struct NyhetsrundenSkjerm: View {
             }
             if let r = sv.resultat { resultat(r) }
             if !sv.liste.isEmpty { liste(sv.liste) }
-            if !sv.neste.isEmpty { storKnapp(sv.neste) { m.trykk("nr-neste") } }
+            if !sv.neste.isEmpty { storKnapp(sv.neste) { m.steg("nr-neste") } }
             else if !sv.vent.isEmpty { vent(sv.vent) }
         }
     }
@@ -366,7 +599,7 @@ struct NyhetsrundenSkjerm: View {
                     Spacer()
                     let farge: Color = r.klasse == "rett" ? mint : r.klasse == "null" ? kortFarge : rosa
                     if r.kanFlippe {
-                        Button(action: { m.trykk("nr-flipp", ["id": r.id]) }) {
+                        Button(action: { m.flipp(r.id) }) {
                             Text(r.merke).font(.archivo(12, vekt: 900)).foregroundColor(r.klasse == "null" ? blekk : morkBlekk).padding(.horizontal, 10).frame(height: 30)
                                 .background(Capsule().fill(farge)).overlay(Capsule().stroke(blekk, lineWidth: 2))
                         }.buttonStyle(TastTrykk())

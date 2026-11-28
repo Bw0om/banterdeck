@@ -2,9 +2,10 @@ import SwiftUI
 import UIKit
 import WebKit
 
-/// Kategorikongen som native skjerm. Nettsiden (rom.js quizData) sender én ordbok per tegning: fasen (klar / trekk / spm /
-/// svar / ferdig), kategorikortene i hånda, spørsmålet med A–D, satsingen, svaret med hodene på alternativene, kongene og
-/// sluttskjermen. Trykkene går tilbake til nettsidens egne knapper (window.__mvLek.trykk), så all logikk bor ett sted.
+/// Kategorikongen som native skjerm: fasen (klar / trekk / spm / svar / ferdig), kategorikortene i hånda, spørsmålet med
+/// A–D, satsingen, svaret med hodene på alternativene, kongene og sluttskjermen.
+/// Fase 3: skjermen leser rommet selv (LekKobling/RomKlient) og sender trekk, svar, satsing og vertens knapper rett til
+/// rommet. Nettsiden gir plassen i rommet, figurene og «Hva nå?»-knappene til slutt. Med eldre rom.js brukes quizData som reserve.
 struct QzHode: Identifiable { let id: String; let navn: String; let png: String; let oppe: Bool }
 struct QzLengde: Identifiable { let id: Int; let tekst: String; let valgt: Bool }
 struct QzKortet: Identifiable { let id: String; let navn: String; let droy: Bool }
@@ -23,9 +24,9 @@ struct QzSvar { let chip: String, info: String, alt: [QzAlt], mitt: QzMitt?, nyK
 struct QzFerdig { let tittel: String, pall: [QzPall], kaaringer: [QzKaaring], rest: [QzPall] }
 
 struct QzData {
-    let fase: String, i: Int, lengde: Int, vert: Bool, naa: Double, frist: Double, tittel: String, under: String, q: String
-    let kat: QzKat?, klar: QzKlar?, trekk: QzTrekk?, spm: QzSpm?, svar: QzSvar?, ferdig: QzFerdig?
-    let konger: [QzKonge], kongerEtikett: String, slutt: [[String: Any]], stua: String, mer: String
+    var fase = "", i = 0, lengde = 0, vert = false, naa: Double = 0, frist: Double = 0, tittel = "Kategorikongen", under = "", q = ""
+    var kat: QzKat? = nil, klar: QzKlar? = nil, trekk: QzTrekk? = nil, spm: QzSpm? = nil, svar: QzSvar? = nil, ferdig: QzFerdig? = nil
+    var konger: [QzKonge] = [], kongerEtikett = "", stua = "Stua", mer = "Mer"
 
     static func hode(_ h: [String: Any]) -> QzHode { QzHode(id: h["id"] as? String ?? "", navn: h["navn"] as? String ?? "", png: h["png"] as? String ?? "", oppe: h["oppe"] as? Bool ?? false) }
     static func hoder(_ l: Any?) -> [QzHode] { (l as? [[String: Any]] ?? []).map { hode($0) } }
@@ -33,6 +34,7 @@ struct QzData {
         (l as? [[String: Any]] ?? []).enumerated().map { i, a in QzAlt(id: i, bokstav: a["bokstav"] as? String ?? "", tekst: a["tekst"] as? String ?? "", valgt: a["valgt"] as? Bool ?? false, rett: a["rett"] as? Bool ?? false, feil: a["feil"] as? Bool ?? false, hoder: hoder(a["hoder"]), stempel: a["stempel"] as? String ?? "") }
     }
     static func pall(_ l: Any?) -> [QzPall] { (l as? [[String: Any]] ?? []).map { p in QzPall(id: p["id"] as? String ?? "", navn: p["navn"] as? String ?? "", png: p["png"] as? String ?? "", n: (p["n"] as? NSNumber)?.intValue ?? 0, plass: (p["plass"] as? NSNumber)?.intValue ?? 0) } }
+    /// Reserven: skjermen slik eldre rom.js lager den (quizData)
     init(_ d: [String: Any]) {
         func s(_ k: String) -> String { d[k] as? String ?? "" }
         func n(_ k: String) -> Double { (d[k] as? NSNumber)?.doubleValue ?? 0 }
@@ -69,28 +71,200 @@ struct QzData {
         } else { ferdig = nil }
         konger = (d["konger"] as? [[String: Any]] ?? []).map { k in QzKonge(id: (k["id"] as? String ?? "") + "|" + (k["kat"] as? String ?? ""), navn: k["navn"] as? String ?? "", kat: k["kat"] as? String ?? "", n: (k["n"] as? NSNumber)?.intValue ?? 0) }
         kongerEtikett = s("kongerEtikett")
-        slutt = d["slutt"] as? [[String: Any]] ?? []
-        stua = s("stua").isEmpty ? "Stua" : s("stua"); mer = s("mer").isEmpty ? "Mer" : s("mer")
+        if !s("stua").isEmpty { stua = s("stua") }
+        if !s("mer").isEmpty { mer = s("mer") }
+    }
+
+    /// Skjermen bygd rett fra rommet: `spill` er serverens visning av Kategorikongen (quizVisning i rom.ts)
+    init(rom t: RomTilstand, hoder: [String: [String: String]]) {
+        let s = t.spill ?? .null
+        let en = t.lang == "en"
+        func T(_ no: String, _ eng: String) -> String { en ? eng : no }
+        let meg = t.meg ?? ""
+        let alle = t.spillere.map(\.id)
+        func navn(_ id: String?) -> String { id.flatMap { t.spiller($0)?.navn } ?? "?" }
+        func tall(_ v: JSONVerdi?) -> Int { Int(v?.tall ?? 0) }
+        func tekster(_ v: JSONVerdi?) -> [String] { (v?.liste ?? []).compactMap(\.tekst) }
+        func fjes(_ id: String, _ uttrykk: String = "", oppe: Bool = false) -> QzHode {
+            QzHode(id: id, navn: id == meg ? T("Du", "You") : navn(id), png: figurPng(hoder, id, uttrykk: uttrykk), oppe: oppe)
+        }
+        func navnKort(_ id: String) -> String { id == meg ? T("deg", "you") : navn(id) }
+
+        let f = s["fase"]?.tekst ?? ""
+        fase = f
+        i = tall(s["i"]); lengde = tall(s["lengde"]); vert = t.jegErVert; naa = t.naa
+        under = f == "klar" || f == "ferdig" ? "\(lengde)" + T(" spørsmål", " questions") : T("Spørsmål ", "Question ") + "\(i + 1)" + T(" av ", " of ") + "\(lengde)"
+        konger = (s["konger"]?.liste ?? []).map { k in
+            let id = k["id"]?.tekst ?? "", kn = k["navn"]?.tekst ?? ""
+            return QzKonge(id: id + "|" + kn, navn: navn(id), kat: kn, n: tall(k["n"]))
+        }
+        kongerEtikett = T("Kongene i kveld", "Tonight’s kings")
+        stua = T("Stua", "Lounge"); mer = T("Mer", "More")
+        let katV = s["kat"].flatMap { $0 == .null ? nil : $0 }
+        let katKonge = katV?["konge"]?.tekst, katDroy = katV?["droy"]?.bool ?? false, katNavn = katV?["navn"]?.tekst ?? ""
+        if katV != nil { kat = QzKat(navn: katNavn, droy: katDroy, droyTekst: T("Drøy · feil = 2", "Spicy · wrong = 2"), konge: katKonge.map { navn($0) } ?? "") }
+
+        if f == "klar" {
+            let naaLengde = lengde
+            klar = QzKlar(forside: T("Trekk kategori.\nSvar. Sats.\nBli konge.", "Draw a category.\nAnswer. Bet.\nBecome king."), hoder: alle.map { fjes($0) },
+                          lengder: vert ? [6, 10, 15].map { n in QzLengde(id: n, tekst: n <= 6 ? T("Kort", "Short") : n <= 10 ? T("Vanlig", "Usual") : T("Lang", "Long"), valgt: naaLengde == n) } : [],
+                          start: vert ? T("Første kategori", "First category") : "",
+                          vent: vert ? "" : T("Venter på at ", "Waiting for ") + navn(s["vert"]?.tekst) + T(" starter …", " to start …"))
+            return
+        }
+        if f == "ferdig" {
+            let l = (s["tavle"]?.liste ?? []).map { x in (id: x["id"]?.tekst ?? "", navn: x["navn"]?.tekst ?? "", riktige: tall(x["riktige"])) }
+            let k = s["kaaringer"]
+            let delt = l.filter { x in l.first.map { x.riktige == $0.riktige } ?? false }
+            var kaar: [QzKaaring] = []
+            func legg(_ tittel: String, _ tekst: String) { kaar.append(QzKaaring(id: kaar.count, tittel: tittel, tekst: tekst)) }
+            if let x = k?["sats"], let id = x["id"]?.tekst { legg(T("Gambleren:", "The gambler:"), navn(id) + T(" traff ", " hit ") + "\(tall(x["n"]))" + T(" satsinger", " bets")) }
+            if let x = k?["bom"], let id = x["id"]?.tekst { legg(T("Feilsatser:", "Bad bettor:"), navn(id) + T(" bommet på ", " missed ") + "\(tall(x["n"]))" + T(" satsinger", " bets")) }
+            if let x = k?["droy"], let id = x["id"]?.tekst { legg(T("Drøyest:", "Spiciest:"), navn(id) + T(" tok ", " got ") + "\(tall(x["n"]))" + T(" drøye riktige", " spicy ones right")) }
+            let tittel: String
+            if l.first == nil || l[0].riktige == 0 { tittel = T("Ingen fikk noe riktig", "Nobody got anything right") }
+            else if delt.count > 1 { tittel = T("Delt seier: ", "Shared win: ") + delt.map(\.navn).joined(separator: T(" og ", " and ")) }
+            else { tittel = T("Kveldens quizmester: ", "Quiz master of the night: ") + l[0].navn }
+            func plass(_ x: (id: String, navn: String, riktige: Int), _ plass: Int) -> QzPall { QzPall(id: x.id, navn: x.navn, png: figurPng(hoder, x.id), n: x.riktige, plass: plass) }
+            ferdig = QzFerdig(tittel: tittel, pall: l.prefix(3).enumerated().map { j, x in plass(x, j + 1) }, kaaringer: kaar,
+                              rest: l.dropFirst(3).enumerated().map { j, x in plass(x, j + 4) })
+            return
+        }
+        if f == "trekk" {
+            let trekker = s["trekker"]?.tekst
+            let minTur = trekker == meg
+            frist = s["frist"]?.tall ?? 0
+            trekk = QzTrekk(min: minTur, chip: minTur ? T("Din tur – trekk!", "Your turn – draw!") : navn(trekker) + T(" trekker", " draws"),
+                            tekst: minTur ? T("Velg et kort. Ett av dem er drøyt.", "Pick a card. One of them is spicy.") : navn(trekker) + T(" velger kategori …", " is picking a category …"),
+                            hand: (s["hand"]?.liste ?? []).map { k in QzKortet(id: k["id"]?.tekst ?? "", navn: k["navn"]?.tekst ?? "", droy: k["droy"]?.bool ?? false) },
+                            droyTag: T("Drøy", "Spicy"), forAndre: vert && !minTur ? T("Trekk for ", "Draw for ") + navn(trekker) : "")
+            return
+        }
+        let har = tekster(s["harSvart"]), alts = tekster(s["alt"]), mitt = s["mittSvar"]?.tekst
+        q = s["q"]?.tekst ?? ""
+        let bokstaver = Array("ABCD")
+        func bokstav(_ i: Int) -> String { i < bokstaver.count ? String(bokstaver[i]) : "" }
+        if f == "spm" {
+            frist = s["frist"]?.tall ?? 0
+            let mangler = alle.count - har.count
+            spm = QzSpm(chip: mitt != nil ? T("Svart", "Answered") : T("Svar!", "Answer!"), mitt: mitt ?? "",
+                        alt: alts.enumerated().map { i, a in QzAlt(id: i, bokstav: bokstav(i), tekst: a, valgt: mitt == a, rett: false, feil: false, hoder: [], stempel: "") },
+                        sats: QzSats(etikett: T("Sats 2 slurker på at én bommer", "Bet 2 sips that someone misses"), valgt: s["minSats"]?.tekst ?? "",
+                                     hjelp: T("Treff: hen drikker 2. Bom: du drikker 2.", "Hit: they drink 2. Miss: you drink 2."), folk: alle.filter { $0 != meg }.map { fjes($0) }),
+                        vis: vert ? (mangler > 0 ? T("Vis svaret nå", "Show the answer now") + " (\(mangler)" + T(" mangler", " missing") + ")" : T("Vis svaret", "Show the answer")) : "",
+                        folk: alle.map { fjes($0, oppe: har.contains($0)) }, status: "\(har.count)" + T(" av ", " of ") + "\(alle.count)" + T(" har svart", " answered"))
+            return
+        }
+        // Svaret er vist
+        let res = (s["resultat"]?.objekt ?? [:]).compactMapValues(\.tall)
+        let sv = (s["svarene"]?.objekt ?? [:]).compactMapValues(\.tekst)
+        let sats = (s["sats"]?.objekt ?? [:]).compactMapValues(\.tekst)
+        let satsRes = (s["satsRes"]?.objekt ?? [:]).compactMapValues(\.tekst)
+        let fasit = s["fasit"]?.tekst
+        let k2 = res[meg].map { Int($0) }
+        var mittRes: QzMitt? = nil
+        if alle.contains(meg) {
+            let rett = (k2 ?? 0) > 0
+            var underTekst = ""
+            if let k = k2, k < -1, let konge = katKonge, konge != meg { underTekst = (katDroy ? T("Drøy kategori", "Spicy category") + " · " : "") + T("én for kongen ", "one for the king ") + navn(konge) }
+            else if katDroy, let k = k2, k < 0 { underTekst = T("Drøy kategori: dobbelt", "Spicy category: double") }
+            mittRes = QzMitt(rett: rett, over: rett ? T("Riktig", "Right") : sv[meg] != nil ? T("Feil", "Wrong") : T("Ikke svart", "No answer"),
+                             tittel: rett ? T("Du deler ut 1", "You hand out 1") : T("Du drikker ", "You drink ") + "\(abs(k2 == 0 ? 1 : (k2 ?? 1)))", under: underTekst)
+        }
+        let nyKonge = s["nyKonge"]?.tekst
+        svar = QzSvar(chip: T("Svaret", "The answer"), info: s["info"]?.tekst ?? "",
+                      alt: alts.enumerated().map { i, a in
+                          let rett = a == fasit, minn = mitt == a
+                          return QzAlt(id: i, bokstav: bokstav(i), tekst: a, valgt: false, rett: rett, feil: !rett && minn,
+                                       hoder: alle.filter { sv[$0] == a }.map { fjes($0, rett ? "" : "flat") }, stempel: rett ? T("Riktig", "Right") : minn ? T("Feil", "Wrong") : "")
+                      },
+                      mitt: mittRes,
+                      nyKonge: nyKonge.map { "👑 " + navn($0) + T(" er ny konge av ", " is the new king of ") + katNavn } ?? "",
+                      // Satsingene i rekkefølgen rundt bordet
+                      satsinger: alle.filter { satsRes[$0] != nil && sats[$0] != nil }.map { fra in
+                          let treff = satsRes[fra] == "treff", paa = sats[fra] ?? ""
+                          return QzSatsing(id: fra, png: figurPng(hoder, fra), treff: treff, tekst: navn(fra) + T(" satset på ", " bet on ") + navnKort(paa),
+                                           under: treff ? T("Treff – ", "Hit – ") + navnKort(paa) + T(" drikker 2", " drinks 2") : T("Bom – drikker 2 selv", "Miss – drinks 2"))
+                      },
+                      neste: i + 1 < lengde ? T("Neste kategori", "Next category") : T("Se hvem som vant", "See who won"))
     }
 }
 
+@MainActor
 @Observable
 final class QzModell: HarFigurer {
     var d: QzData? = nil
     let blokker = KortModell()
+    private let kobling = LekKobling("quiz")
     @ObservationIgnored private(set) var avvik: Double = 0
-    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett } }
+    @ObservationIgnored private var avvikFra: Double = 0
+    /// Det nettsiden sendte sist – reserven til rommet er hentet (eller hvis plassen ikke finnes)
+    @ObservationIgnored private var sist: [String: Any] = [:]
+    /// En av vertens knapper (start, vis, neste, trekk) er på vei: ett trykk gir ett steg
+    @ObservationIgnored private var sender = false
+    @ObservationIgnored weak var nett: WKWebView? { didSet { blokker.nett = nett; kobling.nett = nett } }
+
+    init() { kobling.endret = { [weak self] in self?.bygg() } }
+
     func sett(_ dict: [String: Any]) {
-        let ny = QzData(dict)
-        if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
-        blokker.sett(["blokker": ny.slutt, "naa": dict["naa"] ?? 0])
+        sist = dict
+        blokker.sett(["blokker": dict["slutt"] as? [[String: Any]] ?? [], "naa": dict["naa"] ?? 0])
+        kobling.ta(dict) { d in
+            // Eldre rom.js: figurene fra hodene i skjermdataene
+            var ut: [(id: String, oi: Bool, png: String)] = []
+            func ta(_ l: Any?) { for h in l as? [[String: Any]] ?? [] { ut.append((id: h["id"] as? String ?? "", oi: false, png: h["png"] as? String ?? "")) } }
+            ta((d["klar"] as? [String: Any])?["hoder"]); ta((d["spm"] as? [String: Any])?["folk"])
+            ta((d["ferdig"] as? [String: Any])?["pall"]); ta((d["ferdig"] as? [String: Any])?["rest"])
+            return ut
+        }
+        bygg()
+    }
+
+    /// Leken er over på denne telefonen
+    func slipp() { kobling.slipp(); d = nil; sist = [:]; sender = false; avvikFra = 0 }
+
+    /// Rommet når det er hentet og viser Kategorikongen – ellers skjermen nettsiden sendte
+    private func bygg() {
+        let ny: QzData
+        if let t = kobling.tilstand("quiz") {
+            if t.naa > 0 && t.naa != avvikFra { avvikFra = t.naa; avvik = t.naa - Date().timeIntervalSince1970 * 1000 }
+            ny = QzData(rom: t, hoder: kobling.hoder)
+        } else if !sist.isEmpty {
+            ny = QzData(sist)
+            if ny.naa > 0 { avvik = ny.naa - Date().timeIntervalSince1970 * 1000 }
+        } else { return }
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { d = ny }
     }
+
     func igjen(_ frist: Double) -> Int { max(0, Int(ceil((frist - 1500 - (Date().timeIntervalSince1970 * 1000 + avvik)) / 1000))) }
+
+    /// Svaret (kan byttes så lenge klokka går) – rett til rommet
+    func svar(_ v: String) { send(["handling": "qz-svar", "v": v], ellers: "qz-svar", ["v": v], tung: false, las: false) }
+    /// Satsingen på en annen spiller (trykk igjen for å angre)
+    func sats(_ paa: String) { send(["handling": "qz-sats", "paa": paa], ellers: "qz-sats", ["paa": paa], tung: true, las: false) }
+    /// Kategorikortet (tom `kat`: verten trekker for den som har tur)
+    func trekk(_ kat: String) {
+        if kobling.direkte { kobling.lyd("kortsnu") }   // nettsiden spiller lyden selv når den sender
+        send(["handling": "qz-trekk", "kat": kat], ellers: "qz-trekk", ["kat": kat], tung: !kat.isEmpty, las: true)
+    }
+    func lengde(_ n: Int) { send(["handling": "qz-lengde", "antall": n], ellers: "qz-lengde", ["n": String(n)], tung: false, las: false) }
+    /// Vertens knapper: qz-start, qz-vis, qz-neste
+    func steg(_ g: String) { send(["handling": g], ellers: g, [:], tung: false, las: true) }
+
+    private func send(_ h: [String: Any], ellers g: String, _ attrs: [String: String], tung: Bool, las: Bool) {
+        if las { guard !sender else { return }; sender = true }
+        Haptikk.trykk(tung ? .medium : .light)
+        Task {
+            let ok = await kobling.gjor(h, ellers: g, attrs)
+            if las { sender = false }
+            if !ok { Haptikk.melding(.error) }
+        }
+    }
+
+    /// Stua og Mer: nettsidens egne knapper
     func trykk(_ g: String, _ attrs: [String: String] = [:], tung: Bool = false) {
         Haptikk.trykk(tung ? .medium : .light)
-        guard let data = try? JSONSerialization.data(withJSONObject: [g, attrs]), let json = String(data: data, encoding: .utf8) else { return }
-        nett?.evaluateJavaScript("window.__mvLek && window.__mvLek.trykk.apply(null, \(json))", completionHandler: nil)
+        kobling.trykkNett(g, attrs)
     }
 }
 
@@ -190,7 +364,7 @@ struct QuizSkjerm: View {
             if !k.lengder.isEmpty {
                 HStack(spacing: 8) {
                     ForEach(k.lengder) { l in
-                        Button(action: { m.trykk("qz-lengde", ["n": String(l.id)]) }) {
+                        Button(action: { m.lengde(l.id) }) {
                             VStack(spacing: 1) { Text("\(l.id)").font(.archivo(22, vekt: 900)); Text(l.tekst.uppercased()).font(.archivo(10, vekt: 800)).opacity(0.7) }
                                 .foregroundColor(l.valgt ? morkBlekk : blekk).frame(maxWidth: .infinity).frame(height: 58)
                                 .background(RoundedRectangle(cornerRadius: 10).fill(l.valgt ? gul : kortFarge)).overlay(RoundedRectangle(cornerRadius: 10).stroke(blekk, lineWidth: 2.5))
@@ -199,7 +373,7 @@ struct QuizSkjerm: View {
                     }
                 }
             }
-            if !k.start.isEmpty { storKnapp(k.start) { m.trykk("qz-start") } }
+            if !k.start.isEmpty { storKnapp(k.start) { m.steg("qz-start") } }
             else if !k.vent.isEmpty { vent(k.vent) }
             konger(d)
         }
@@ -211,7 +385,7 @@ struct QuizSkjerm: View {
             chipRad(t.chip, gul: t.min)
             Text(t.tekst).font(.archivo(15, vekt: 700)).frame(maxWidth: .infinity).multilineTextAlignment(.center)
             vifte(t)
-            if !t.forAndre.isEmpty { lenke(t.forAndre) { m.trykk("qz-trekk", ["kat": ""]) } }
+            if !t.forAndre.isEmpty { lenke(t.forAndre) { m.trekk("") } }
             konger(d)
         }
     }
@@ -220,7 +394,7 @@ struct QuizSkjerm: View {
         return ZStack {
             ForEach(Array(t.hand.enumerated()), id: \.element.id) { i, k in
                 let midt = Double(i) - Double(n - 1) / 2
-                Button(action: { if t.min { m.trykk("qz-trekk", ["kat": k.id], tung: true) } }) {
+                Button(action: { if t.min { m.trekk(k.id) } }) {
                     kortet(k, t)
                 }
                 .buttonStyle(TastTrykk()).disabled(!t.min)
@@ -261,7 +435,7 @@ struct QuizSkjerm: View {
         VStack(alignment: .leading, spacing: 12) {
             alternativer(sp.alt, apne: true)
             satsBoks(sp.sats)
-            if !sp.vis.isEmpty { storKnapp(sp.vis) { m.trykk("qz-vis") } }
+            if !sp.vis.isEmpty { storKnapp(sp.vis) { m.steg("qz-vis") } }
             benk(sp.folk, sp.status)
         }
     }
@@ -269,7 +443,7 @@ struct QuizSkjerm: View {
         VStack(spacing: 8) {
             ForEach(alt) { a in
                 let farge: Color = apne ? (a.valgt ? gul : kortFarge) : a.rett ? mint : a.feil ? oransje : kortFarge
-                Button(action: { if apne { m.trykk("qz-svar", ["v": a.tekst]) } }) {
+                Button(action: { if apne { m.svar(a.tekst) } }) {
                     HStack(alignment: .center, spacing: 10) {
                         Text(a.bokstav).font(.archivo(15, vekt: 900)).foregroundColor(lys).frame(width: 30, height: 30).background(RoundedRectangle(cornerRadius: 5).fill(morkBlekk))
                         Text(a.tekst).font(.archivo(16, vekt: 800)).foregroundColor(apne && !a.valgt ? blekk : morkBlekk).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
@@ -300,7 +474,7 @@ struct QuizSkjerm: View {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 8)], alignment: .leading, spacing: 8) {
                     ForEach(s.folk) { h in
                         let paa = s.valgt == h.id
-                        Button(action: { m.trykk("qz-sats", ["paa": h.id], tung: true) }) {
+                        Button(action: { m.sats(h.id) }) {
                             HStack(spacing: 6) { hode(h.png, 28); Text(h.navn).font(.archivo(13, vekt: 800)).lineLimit(1).minimumScaleFactor(0.8); Spacer(minLength: 0) }
                                 .padding(.leading, 4).padding(.trailing, 8).frame(height: 38)
                                 .foregroundColor(paa ? morkBlekk : blekk)
@@ -370,7 +544,7 @@ struct QuizSkjerm: View {
                     }
                 }
             }
-            storKnapp(sv.neste) { m.trykk("qz-neste") }
+            storKnapp(sv.neste) { m.steg("qz-neste") }
         }
     }
 

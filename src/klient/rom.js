@@ -4639,6 +4639,7 @@ export function startRom(LEKNAVN, LANG) {
     var d = { fase: s.fase, i: s.i || 0, antall: s.antall || 0, uke: String(s.uke || ''), vert: vert, naa: Date.now() + klokkeAvvik, frist: 0, lokale: EN ? 'en-GB' : 'nb-NO',
       tittel: 'Nyhetsrunden', under: T('Uke ', 'Week ') + s.uke + ' · ' + (s.fase === 'klar' ? s.lengde + T(' spørsmål', ' questions') : s.fase === 'ferdig' ? s.antall + T(' spørsmål', ' questions') : T('Spørsmål ', 'Question ') + (s.i + 1) + T(' av ', ' of ') + s.antall),
       slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    skjermRom(d, jobber, ['flat']);   // nyere app: leser rommet og sender svar og vertens knapper selv
     if (s.fase === 'klar') {
       d.klar = { forside: T('Uke ', 'Week ') + s.uke + '.', under: T('Hva fikk dere med dere?', 'Were you paying attention?'), hoder: alle.map(function (p) { return hode(p.id); }),
         lengder: vert ? lengder('nr-lengde') : [], start: vert ? T('Første spørsmål', 'First question') : '', vent: vert ? '' : T('Venter på at ', 'Waiting for ') + navn(s.vert) + T(' starter …', ' to start …') };
@@ -4808,6 +4809,7 @@ export function startRom(LEKNAVN, LANG) {
       tittel: 'Kategorikongen', under: s.fase === 'klar' || s.fase === 'ferdig' ? s.lengde + T(' spørsmål', ' questions') : T('Spørsmål ', 'Question ') + (s.i + 1) + T(' av ', ' of ') + s.lengde,
       konger: (s.konger || []).map(function (k) { return { id: k.id, navn: navn(k.id), kat: k.navn, n: k.n }; }), kongerEtikett: T('Kongene i kveld', 'Tonight’s kings'),
       slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    skjermRom(d, jobber, ['flat']);   // nyere app: leser rommet og sender svar, satsing og trekk selv
     if (s.kat) d.kat = { navn: s.kat.navn, droy: !!s.kat.droy, droyTekst: T('Drøy · feil = 2', 'Spicy · wrong = 2'), konge: s.kat.konge ? navn(s.kat.konge) : '' };
     if (s.fase === 'klar') {
       d.klar = { forside: T('Trekk kategori.\nSvar. Sats.\nBli konge.', 'Draw a category.\nAnswer. Bet.\nBecome king.'), hoder: alle.map(function (p) { return hode(p.id); }),
@@ -5513,12 +5515,14 @@ export function startRom(LEKNAVN, LANG) {
   /** Skålsprinten til den native skjermen (SkalSkjerm.swift): glasset som venter, SKÅL-øyeblikket (skjermen regner det ut selv fra servertiden),
       tiden din, lista etter hver skål og summen til slutt. Trykket går til nettsidens sk-trykk, som måler reaksjonstiden. */
   /** Nyere app: skjermen leser rommet og sender trykket selv (RomKlient.swift). Den trenger bare plassen i rommet og alles figurer herfra. */
-  function skjermRom(d, jobber) {
+  function skjermRom(d, jobber, ekstra) {
     if (meg) d.rom = { kode: kode, id: meg.id, pollett: meg.pollett, lang: LANG };
     d.hoder = {};
+    var uttrykk = ['oi'].concat(ekstra || []);   // f.eks. ['flat'] for dem som svarte feil
     (tilstand.spillere || []).forEach(function (p) {
-      var h = d.hoder[p.id] = { n: '', oi: '' };
-      jobber.push(vlHodePng(p.id, '').then(function (b) { h.n = b; }), vlHodePng(p.id, 'oi').then(function (b) { h.oi = b; }));
+      var h = d.hoder[p.id] = { n: '' };
+      jobber.push(vlHodePng(p.id, '').then(function (b) { h.n = b; }));
+      uttrykk.forEach(function (u) { h[u] = ''; jobber.push(vlHodePng(p.id, u).then(function (b) { h[u] = b; })); });
     });
   }
   function skData(s) {
