@@ -2270,6 +2270,8 @@ export function startRom(LEKNAVN, LANG) {
       Object.keys(attrs || {}).forEach(function (k) { b.dataset[k] = String(attrs[k]); });
       root.appendChild(b); b.click(); b.remove();
     },
+    // Nyere app: leken sender handlingen selv (RomKlient.swift), men lyden for egne, åpne handlinger spilles her som før
+    lyd: function (n) { spillLyd(String(n || '')); },
     // En lenke på nettsiden (gjengsiden, kontoen): klikkes der, så app.js åpner den i riktig fane
     lenke: function (href) { var a = root.querySelector('a[href="' + href + '"]'); if (a) a.click(); else location.href = href; }
   };
@@ -3232,6 +3234,7 @@ export function startRom(LEKNAVN, LANG) {
       overKnapp: T('Over', 'Higher'), underKnapp: T('Under', 'Lower'), kan: !s.ferdig && (jeg || vert), svarerFor: !s.ferdig && !jeg && vert ? T('Svarer for ', 'Answering for ') + navn(s.tur) : '',
       hopp: !s.ferdig && !jeg && vert ? T('Hopp over ', 'Skip ') + navn(s.tur) : '', vent: !s.ferdig && !jeg && !vert ? navn(s.tur) + T(' svarer – rop det høyt, så kan ', ' answers – shout it out and ') + navn(tilstand.vert) + T(' trykke.', ' can tap it.') : '',
       storst: s.ferdig && s.storst ? T('Største pott drukket: ', 'Biggest pot drunk: ') + nv(s.storst.id) + ' – ' + s.storst.n : '', slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More') };
+    skjermRom(d, jobber);   // nyere app: leser rommet og sender gjettet selv
     var slutt = s.ferdig ? skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Ny stokk – teller i kvelden', 'New deck – counts tonight')]])).then(function (b) { d.slutt = b; }) : Promise.resolve();
     return Promise.all(jobber.concat([slutt])).then(function () { return d; });
   }
@@ -3855,6 +3858,7 @@ export function startRom(LEKNAVN, LANG) {
       pust: (s.fase === 'nese' && !tatt) || (!!s.harFire && s.fase === 'send'), paa: s.fase === 'nese' || !!s.harFire,
       gris: T('GRIS!', 'PIGS!'), grisTekst: s.fase === 'slutt' ? jaNavn(s.gris) + T(' tar en shot.', ' takes a shot.') : '', slutt: [], stua: T('Stua', 'Lounge'), mer: T('Mer', 'More')
     };
+    skjermRom(d, jobber);   // nyere app: leser rommet og sender kortvalget og nesa selv
     var slutt = s.fase === 'slutt' ? skjermBlokker(lekSlutt([['runde', T('Spill igjen', 'Play again'), T('Nye brett – teller i kvelden', 'New boards – counts tonight')]])).then(function (b) { d.slutt = b; }) : Promise.resolve();
     return Promise.all(jobber.concat([slutt])).then(function () { return d; });
   }

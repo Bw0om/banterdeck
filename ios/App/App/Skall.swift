@@ -669,7 +669,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private let grModell = GrModell()
     private var grVert: UIHostingController<GrisSkjerm>?
     private func visGr(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else { fjernOverlegg(&grVert); return }
+        guard let d = d else { if grVert != nil { grModell.slipp() }; fjernOverlegg(&grVert); return }
         grModell.sett(d)
         if grVert == nil { grVert = leggOverlegg(UIHostingController(rootView: GrisSkjerm(m: grModell)), over: side, nett: grModell.nett) }
         fram(grVert?.view.superview)
@@ -705,7 +705,7 @@ final class SkallViewController: UITabBarController, UITabBarControllerDelegate,
     private let ouModell = OuModell()
     private var ouVert: UIHostingController<OverUnderSkjerm>?
     private func visOu(_ d: [String: Any]?, over side: UIViewController) {
-        guard let d = d else { fjernOverlegg(&ouVert); return }
+        guard let d = d else { if ouVert != nil { ouModell.slipp() }; fjernOverlegg(&ouVert); return }
         ouModell.sett(d)
         if ouVert == nil { ouVert = leggOverlegg(UIHostingController(rootView: OverUnderSkjerm(m: ouModell)), over: side, nett: ouModell.nett) }
         fram(ouVert?.view.superview)
