@@ -327,6 +327,8 @@ jobs:
         run: |
           mkdir -p ios/sjekk && rm -f ios/sjekk/*
           cp skjermbilder/*.png skjermbilder/sjekk.log skjermbilder/maestro.txt ios/sjekk/ 2>/dev/null || true
+          # Maestros egen logg per flyt (med klokkeslett per steg), så vi ser hvilke steg som tar tid
+          for d in skjermbilder/maestro-logg/*/; do n=$(basename "$d"); find "$d" -name maestro.log -exec cat {} + 2>/dev/null | grep -iE "command|executing|took|hierarchy|animation" | cut -c1-220 | tail -400 > "ios/sjekk/logg-$n.txt" || true; done
           { cat skjermbilder/varm.txt 2>/dev/null; echo "----- maestro.log -----"; find skjermbilder/maestro-logg/varm -name "maestro.log" -exec tail -150 {} ; 2>/dev/null; } > ios/sjekk/varm.txt || true
           { grep -E "error:|BUILD (SUCCEEDED|FAILED)" build/xcodebuild.log; echo "----- siste linjer -----"; grep -vE "^\s+(cd |builtin-|/Applications)" build/xcodebuild.log | tail -15; echo "----- skjemaer -----"; xcodebuild -list -project ios/App/App.xcodeproj 2>&1 | tail -20; } > ios/sjekk/bygg.txt 2>/dev/null || true
           git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
